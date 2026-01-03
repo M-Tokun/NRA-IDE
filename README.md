@@ -1,52 +1,91 @@
+#
 # NRA-IDE: Intensional Dynamics Project
+
 ## Nomological Ring Axioms & Intensional Dynamics Engine
 
 > **System Status**: Reference Implementation v1.0
 > **License**: BSD 3-Clause (Strict Causal Enforcement)
 
 ### 🌌 Project Overview
-This repository is the official archive of the **NRA-IDE Project**, encompassing the theoretical foundation (NRA) and its practical application (IDE).
-本リポジトリは、「律環公理 (NRA)」という新しい物理パラダイムと、それを実装した「内包的力学エンジン (IDE)」を統合するプロジェクトです。
 
-#### 📦 What is included? (収録内容)
-1.  **Theory (NRA)**: 距離ではなく「位相とゆらぎ」を基底とする物理公理の定義。
-2.  **Engine (IDE)**: 整数位相ロックと端数廃棄により、計算誤差を排除する力学コア。
-3.  **Safety (SafeGuard)**: 逆算（Inverse Kinematics）とハルシネーションを物理的に阻止するミドルウェア。
+This repository implements the **NRA-IDE Project**, a framework for "Intensional Dynamics" where causal integrity (truthfulness of logic) precedes spatial accuracy.
+本リポジトリは、空間的正確性よりも因果的整合性（論理の誠実さ）を優先する「内包的力学」を実装した、NRA-IDEプロジェクトの参照実装です。
 
-### 🛑 Critical Warning
-**Do not treat this as a standard physics simulation.**
-This is a **Generative Physics Guard**. It prioritizes causal integrity over spatial accuracy.
-空間的正確性よりも、因果的整合性（嘘をつかないこと）を最優先するシステムです。
+#### 📦 Package Structure / 構成
 
-### 🚀 クイックスタート (Quick Start)
+* **`src/`**: Core engine implementation / エンジン基幹部
+* `ide_core_safe.py`: Phase-lock logic & residual discarding / 位相ロックと端数廃棄
+* `ide_firewall.py`: Spatial-to-Causal translation layer / 空間・因果変換レイヤー
+* `ide_threshold_handler.py`: Safety ratio evaluation / 安全率評価と制御
+
+
+* **`examples/`**: Proof-of-concept demonstrations / 実証デモ
+* `HAN_Micro-POC_01.html`: Visual homeostasis demo / 恒常性維持の視覚デモ
+* `HAN_Deep_Stress_Test.html`: Stress test with thread-blocking / スレッド占有型・極限負荷デモ（解説コメント付）
+
+
+
+---
+
+### 🚀 Quick Start / クイックスタート
+
+#### 1. Experience the Physics (Demos) / 物理制御を体感する
+
+We provide two levels of demonstration to show the "Elasticity" of HAN.
+HANの「弾性」を体感するために、2つの深度のデモを用意しています。
+
+* **[Demo 1: Visual Homeostasis (Standard)](https://www.google.com/search?q=./examples/HAN_Micro-POC_01.html)**
+* *Best for understanding how the system maintains balance under varying loads.*
+* システムが負荷に応じて柔軟にバランスを保つ様子を視覚的に理解できます。
+
+
+* **[Demo 2: Deep Stress Test (Advanced)](https://www.google.com/search?q=./examples/HAN_Deep_Stress_Test.html)**
+* *Simulates heavy CPU-blocking (80ms spikes) to show how HAN creates "breathing space" for the thread. Includes detailed logic comments.*
+* 意図的なスレッド占有（80ms）を行い、HANがどのように「処理の隙間」を作り出すかを実証します。コード内の日本語コメントで論理を解説しています。
+
+
+
+#### 2. Local Setup / ローカルセットアップ
 
 ```bash
-# 1. Clone repository
-git clone [https://github.com/M-Tokun/NRA-IDE.git](https://github.com/M-Tokun/NRA-IDE.git)
+# Clone the repository
+git clone https://github.com/M-Tokun/NRA-IDE.git
 
-# 2. Python Setup
+# Run the threshold evaluation logic
 cd NRA-IDE
 python3 src/ide_threshold_handler.py
-🏗️ アーキテクチャ (Architecture)
-本システムは NRA-Sandwich 構造を採用しています。
 
-Pre-NRA: 制約注入 (Constraint Injection)
+```
 
-Core: 整数位相ロック・端数廃棄 (src/ide_core_safe.py)
+---
 
-Post-NRA: 因果監査・ファイアウォール (src/ide_firewall.py)
+### 🏗️ Core Principles / 基本原則
 
-🤝 Request for Community Guidance (物理学コミュニティの皆様へ)
-[English] I approach this project with great respect for physics, but I must state that I am not a professional physicist by training. My background is in practical business sectors (Agriculture & Management).
+The system enforces the following constraints via `src/ide_core_safe.py`:
+`src/ide_core_safe.py` を通じ、以下の制約を物理的に強制します。
 
-Due to the paradigm shift this engine proposes (Intensional Dynamics), I have found it necessary to use neologisms and re-define certain terms to describe concepts that do not exist in classical mechanics. However, I acknowledge the risk of accurately conveying these ideas due to my limited experience with standard physical terminology. There may be unintended mismatches or inaccuracies.
+1. **CAUSAL DIODE**: No Inverse Kinematics. Distance is read-only.
+* 逆算の禁止。距離は結果であり、入力ではありません。
 
-I do not wish to cause confusion by pretending to be an expert. If you find terminological errors or have suggestions for more accurate descriptions, I humbly ask for your guidance via GitHub Issues. I am eager to learn and correct any inaccuracies to ensure users can understand this system correctly.
 
-[日本語] 私は物理学に対して深い敬意を持っていますが、専門的な物理学の訓練を受けた研究者ではありません（実業的背景を持つ者です）。
+2. **QUANTIZATION**: Discard float residuals to prevent error accumulation.
+* 誤差蓄積を防ぐための端数廃棄。
 
-本エンジンが提唱する「内包的力学」というパラダイムシフトの性質上、既存の力学にはない概念を説明するために、やむを得ず「造語」や「用語の再定義」を行っている箇所があります。 しかし、物理学に接して日が浅いため、既存の用語法とのすり合わせが不十分であり、意図が正確に伝わらないリスクがあることを強く懸念しています。
 
-私は、知ったかぶりをしてコミュニティに混乱を招くことを望みません。 もし用語の使い方に不正確な点や、より適切な表現がある場合は、ぜひ GitHub Issues にてご指導・ご指摘いただければ幸いです。 正確性に問題がある場合は真摯に修正し、ユーザーが正しく理解できるよう努めます。
+3. **LIVENESS**: Homeostasis must be maintained;  is treated as failure.
+* 恒常性維持。停止はシステム不全とみなします。
+
+
+
+---
+
+### 🤝 Request for Community Guidance / 物理学コミュニティの皆様へ
+
+[English] I approach this project with great respect for physics. My background is in practical business (Agriculture & Management). I use neologisms to describe the "Intensional Dynamics" paradigm. If you find terminological inaccuracies, please guide me via GitHub Issues.
+
+[日本語] 私は物理学に深い敬意を持っていますが、専門の研究者ではなく実業の背景を持つ者です。「内包的力学」というパラダイムを説明するため、一部に独自の用語定義を含みます。用語法に不正確な点があれば、ぜひ GitHub Issues にてご指導ください。
 
 (C) 2026 NRA-IDE Project / M-Tokun
+
+
+---
