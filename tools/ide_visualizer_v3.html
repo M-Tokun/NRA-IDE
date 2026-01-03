@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE Visualizer v3.0</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        header {
+            margin-top: 20px;
+            text-align: center;
+            border-bottom: 1px solid #30363d;
+            width: 90%;
+            padding-bottom: 10px;
+        }
+        h1 { margin: 0; font-size: 1.5em; }
+        .subtitle { color: #8b949e; font-size: 0.8em; }
+        
+        #dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            width: 90%;
+        }
+        
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            min-width: 300px;
+        }
+        
+        canvas {
+            background: #000;
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #30363d;
+            padding-bottom: 5px;
+        }
+        
+        .value { color: #fff; font-weight: bold; }
+        .alert { color: #ff4444; }
+        
+        button {
+            background: #238636;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover { background: #2ea043; }
+        button.stop { background: #da3633; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NRA-IDE Visualizer v3.0</h1>
+        <div class="subtitle">Intensional Dynamics Engine / Phase Locking Monitor</div>
+    </header>
+
+    <div id="dashboard">
+        <div class="panel">
+            <h3>👁️ Phase Scope (位相スコープ)</h3>
+            <canvas id="scopeCanvas" width="300" height="300"></canvas>
+            <div style="margin-top:10px; font-size: 0.8em; color: #8b949e;">
+                Green Ring: Quantized Integer Phase<br>
+                Red Dot: Floating-point Noise (Discarded)
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>📊 NRA Core Telemetry</h3>
+            
+            <div class="status-row">
+                <span>System State:</span>
+                <span id="sysState" class="value" style="color:#00ff41;">RUNNING</span>
+            </div>
+            <div class="status-row">
+                <span>Current Phase (φ):</span>
+                <span id="phaseVal" class="value">0.00</span>
+            </div>
+            <div class="status-row">
+                <span>Integer Lock (N):</span>
+                <span id="intLockVal" class="value">0</span>
+            </div>
+            <div class="status-row">
+                <span>Discarded Residual (ε):</span>
+                <span id="residualVal" class="value" style="color:#ff4444;">0.0000</span>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button id="toggleBtn" onclick="toggleSim()">PAUSE SIMULATION</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // NRA-IDE Simplified Logic for Visualization
+        const canvas = document.getElementById('scopeCanvas');
+        const ctx = canvas.getContext('2d');
+        const phaseDisplay = document.getElementById('phaseVal');
+        const lockDisplay = document.getElementById('intLockVal');
+        const residDisplay = document.getElementById('residualVal');
+        
+        let isRunning = true;
+        let phase = 0.0;
+        let speed = 0.01;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = 100;
+
+        function draw() {
+            if (!isRunning) return;
+
+            // 1. Clear Screen with trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Calculate NRA Mechanics
+            phase += speed;
+            let integerPhase = Math.floor(phase);
+            let residual = phase - integerPhase; // 0.0 to 0.999...
+
+            // Update UI
+            phaseDisplay.innerText = phase.toFixed(4);
+            lockDisplay.innerText = integerPhase;
+            residDisplay.innerText = residual.toFixed(4);
+
+            // 3. Draw "Integer Ring" (The Truth)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#003d11';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 4. Draw "Phase Cursor" (The Current State)
+            // Position based on residual (0 to 1) mapping to 0 to 2PI for visualization loop
+            let angle = (residual * Math.PI * 2) - (Math.PI / 2); 
+            
+            let x = centerX + Math.cos(angle) * radius;
+            let y = centerY + Math.sin(angle) * radius;
+
+            // Draw connecting arm
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#00ff41'; // Green (Safe)
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw the point
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+
+            // 5. Visualize "Locking Event" (when residual is near 0)
+            if (residual < 0.1) {
+                // Flash effect
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius + 10, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(0, 255, 65, ${1.0 - residual*10})`;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                
+                // Text
+                ctx.fillStyle = '#00ff41';
+                ctx.font = '12px Courier';
+                ctx.fillText("PHASE LOCKED", centerX - 40, centerY + 130);
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        function toggleSim() {
+            isRunning = !isRunning;
+            const btn = document.getElementById('toggleBtn');
+            const state = document.getElementById('sysState');
+            if(isRunning) {
+                btn.innerText = "PAUSE SIMULATION";
+                btn.classList.remove("stop");
+                state.innerText = "RUNNING";
+                state.style.color = "#00ff41";
+                draw();
+            } else {
+                btn.innerText = "RESUME";
+                btn.classList.add("stop");
+                state.innerText = "PAUSED";
+                state.style.color = "#ffff00";
+            }
+        }
+
+        // Start
+        draw();
+    </script>
+</body>
+</html>

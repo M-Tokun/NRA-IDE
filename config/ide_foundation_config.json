@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "system": "IDE SafeGuard",
+    "version": "1.0.0",
+    "type": "FOUNDATION"
+  },
+  "physics_constants": {
+    "stiffness_k": 1000.0,
+    "fracture_limit_ratio": 1.0
+  },
+  "safety_levels": {
+    "level_1": { "name": "NOMINAL", "ratio_max": 0.40, "action": "CONTINUE" },
+    "level_2": { "name": "WARNING", "ratio_max": 0.70, "action": "LOG_WARN" },
+    "level_3": { "name": "CRITICAL", "ratio_max": 1.00, "action": "EMERGENCY_BRAKE" },
+    "level_4": { "name": "FRACTURE", "ratio_max": null, "action": "SYSTEM_HALT" }
+  }
+}

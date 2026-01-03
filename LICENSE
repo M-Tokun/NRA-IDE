@@ -1,0 +1,75 @@
+NRA-IDE License (Based on BSD 3-Clause License)
+Copyright (c) 2026 M-Tokun (NRA-IDE Project)
+
+===========================================================================
+PART 1: ENGLISH (OFFICIAL LEGAL TEXT)
+このセクションが法的な正式ライセンス条項です。
+===========================================================================
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+---------------------------------------------------------------------------
+[ADDITIONAL SAFETY CLAUSES: NRA COMPLIANCE]
+
+4. THE CAUSAL DIODE CLAUSE:
+   Modifications that enable "Inverse Kinematics" (calculating Force from Distance)
+   or "Causal Reversal" are PROHIBITED to protect the integrity of the physics.
+   The software must maintain the unidirectional flow from Cause to Effect.
+
+5. THE FAIL-CLOSED CLAUSE:
+   Safety mechanisms (Threshold Handlers) must not be bypassed.
+   Systems must halt or alert upon violation, rather than auto-correcting with fake data.
+---------------------------------------------------------------------------
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+===========================================================================
+PART 2: JAPANESE (REFERENCE TRANSLATION)
+以下は参考訳であり、法的な効力は英語版が優先されます。
+===========================================================================
+
+ソースコード形式およびバイナリ形式での再頒布および使用は、変更の有無にかかわらず、以下の条件を満たす場合に限り許可されます。
+
+1. ソースコードを再頒布する場合は、上記の著作権表示、本条件一覧、および下記免責条項を含めなければなりません。
+
+2. バイナリ形式で再頒布する場合は、頒布物に付属するドキュメント等の資料に、上記の著作権表示、本条件一覧、および下記免責条項を含めなければなりません。
+
+3. 書面による事前の許可なく、著作権者またはコントリビューターの名前を、本ソフトウェアから派生した製品の推奨や宣伝に使用してはなりません。
+   （※あなたの名前を勝手に使った権威付け・宣伝行為の禁止）
+
+---------------------------------------------------------------------------
+[追加安全条項: NRA準拠]
+
+4. 因果ダイオード条項:
+   物理的な整合性を保護するため、「逆運動学（距離から力を逆算すること）」や「因果の逆転」を可能にする改変は固く禁じられます。
+   本ソフトウェアは、常に「原因から結果へ」の一方向の流れを維持しなければなりません。
+
+5. フェイルクローズ条項:
+   安全装置（閾値ハンドラー）を迂回・無効化してはなりません。
+   違反や異常が検知された場合、システムは偽のデータで自動補正するのではなく、直ちに停止または警告を発しなければなりません。
+---------------------------------------------------------------------------
+
+本ソフトウェアは、著作権者およびコントリビューターによって「現状のまま」提供されており、明示黙示を問わず、商業的な使用可能性、および特定の目的に対する適合性に関する暗黙の保証を含め、またそれに限定されない、いかなる保証もありません。
+著作権者もコントリビューターも、事由のいかんを問わず、 損害発生の原因いかんを問わず、 かつ責任の根拠が契約であるか厳格責任であるか（過失その他の）不法行為であるかを問わず、 仮にそのような損害が発生する可能性を知らされていたとしても、本ソフトウェアの使用によって発生した（代替品またはサービスの調達、使用の喪失、データの喪失、利益の喪失、業務の中断も含め、またそれに限定されない）直接損害、間接損害、偶発的な損害、特別損害、懲罰的損害、または結果損害について、一切責任を負わないものとします。

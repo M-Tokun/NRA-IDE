@@ -1,0 +1,20 @@
+{
+  "presets": {
+    "SCHOOL": {
+      "description": "Education Mode",
+      "safety_levels": {
+        "level_1": { "ratio_max": 0.60, "action": "CONTINUE" },
+        "level_3": { "ratio_max": 1.20, "action": "GIVE_HINT" },
+        "level_4": { "ratio_max": null, "action": "RESET_SCENARIO" }
+      }
+    },
+    "FACTORY": {
+      "description": "Industrial Mode",
+      "safety_levels": {
+        "level_1": { "ratio_max": 0.20, "action": "CONTINUE" },
+        "level_2": { "ratio_max": 0.40, "action": "ALERT_MAINTENANCE" },
+        "level_4": { "ratio_max": null, "action": "EMERGENCY_STOP" }
+      }
+    }
+  }
+}

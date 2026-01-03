@@ -1,0 +1,9 @@
+## 📄 `.gitignore`
+
+```text
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+.vscode/
+.idea/
