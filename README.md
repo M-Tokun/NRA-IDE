@@ -1,4 +1,5 @@
-#
+#　READ ME
+<p align="center"> <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO"> </p>
 # NRA-IDE: Intensional Dynamics Project
 
 ## Nomological Ring Axioms & Intensional Dynamics Engine
@@ -89,3 +90,4 @@ The system enforces the following constraints via `src/ide_core_safe.py`:
 
 
 ---
+
