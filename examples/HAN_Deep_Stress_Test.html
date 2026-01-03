@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>HAN Logic Comparison</title>
+    <style>
+        body { background: #111; color: #fff; font-family: monospace; padding: 20px; }
+        .log-box { 
+            background: #222; padding: 15px; border-left: 5px solid #555; 
+            margin-bottom: 20px; font-size: 14px; line-height: 1.6;
+        }
+        h2 { border-bottom: 1px solid #444; padding-bottom: 5px; color: cyan; }
+        .highlight { color: #ffcc00; font-weight: bold; }
+        canvas { border: 1px solid #444; background: #000; }
+        button { padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>実験: 80msの重荷を背負わせる</h2>
+<p>上のボタンでモードを切り替え、下のボールの滑らかさと数値を見てください。</p>
+
+<div style="margin-bottom: 15px;">
+    <button onclick="setMode('legacy')" style="background:#ff5555; color:#fff;">Legacy (盲目実行)</button>
+    <button onclick="setMode('han')" style="background:#00ff88; color:#000;">HAN (適応制御)</button>
+    <button onclick="setMode('none')">リセット</button>
+</div>
+
+<canvas id="cvs" width="600" height="100"></canvas>
+
+<div class="log-box">
+    <div>モード: <span id="mode-disp" class="highlight">---</span></div>
+    <div>実際のFPS: <span id="fps-disp" class="highlight">60</span> (60に近いほど滑らか)</div>
+    <div>実行した負荷(Work): <span id="work-disp" class="highlight">0</span> ms (実際に止まった時間)</div>
+    <div style="margin-top:10px; color:#888;">
+        解説: <span id="comment-disp">待機中...</span>
+    </div>
+</div>
+
+<script>
+// ==========================================
+//  設定：人間に例えると「80kgの荷物を持て」という命令
+// ==========================================
+const TARGET_LOAD_MS = 80; 
+
+// 状態変数
+let mode = 'none';
+let currentWork = 0;   // 実際に持つ荷物の重さ
+let lastTime = performance.now();
+let fps = 60;
+
+// HAN用物理変数
+let hanVelocity = 0;   // 調整の勢い
+let tension = 0;       // 苦痛レベル
+
+// ------------------------------------------
+//  メインループ (心臓部)
+// ------------------------------------------
+function loop() {
+    requestAnimationFrame(loop);
+
+    // 1. 現実認識 (Reality Check)
+    const now = performance.now();
+    const delta = now - lastTime; // 前のフレームから何ミリ秒経ったか？
+    lastTime = now;
+
+    // FPS計測 (平滑化)
+    fps = fps * 0.9 + (1000 / Math.max(1, delta)) * 0.1;
+
+    // ==========================================
+    //  ここが「違い」の全てです
+    // ==========================================
+    
+    if (mode === 'legacy') {
+        // 【Legacyの思考回路】
+        // 命令: "80ms待機しろ"
+        // 現実: "FPSがガタガタです！"
+        // 判断: "知ったことか。命令は絶対だ。"
+        // 結果: 常に80msブロックし続ける -> 画面はカクつく
+        
+        currentWork = TARGET_LOAD_MS; 
+        
+        displayComment("命令通り80msを実行中。FPS低下を無視しています。");
+    } 
+    else if (mode === 'han') {
+        // 【HANの思考回路 (律環)】
+        // 1. 予算確認: 1フレームは本来 16ms 以内で終わるべき
+        const budget = 16.6;
+        
+        // 2. 違反検知 (Violation): 前回の処理時間は予算を超えたか？
+        //    deltaが 80ms なら、違反量は 63.4ms
+        const violation = Math.max(0, delta - budget);
+        
+        // 3. テンション発生 (Tension): 違反が大きいほど、強い「反発力」が生まれる
+        //    無理をしている（violation > 0）なら、荷物を減らす力になる
+        const k = 0.5; // バネの強さ
+        tension = violation * k; 
+        
+        // 4. 目標の再設定: 
+        //    「80msやりたい」けど「テンション(苦痛)」があるから引く
+        //    苦痛が大きければ目標はマイナスにすらなる
+        let adaptiveTarget = TARGET_LOAD_MS - (tension * 5); 
+        
+        // 5. 滑らかな調整 (Work Update): いきなり0にせず、物理的にスライドさせる
+        const force = (adaptiveTarget - currentWork) * 0.1;
+        hanVelocity += force;
+        hanVelocity *= 0.8; // 摩擦
+        currentWork += hanVelocity;
+        
+        // 負の値はありえないのでカット
+        if (currentWork < 0) currentWork = 0;
+
+        displayComment(`苦痛(遅延)を検知: ${violation.toFixed(1)}msオーバー。荷物を ${currentWork.toFixed(1)}ms に減らして生存を優先します。`);
+    } else {
+        currentWork = 0;
+        displayComment("負荷なし。快適です！");
+    }
+
+    // ------------------------------------------
+    //  実行フェーズ (The Heavy Lifting)
+    // ------------------------------------------
+    // ここで実際にCPUをブロックする（決定されたWorkを実行）
+    const startBlock = performance.now();
+    while (performance.now() - startBlock < currentWork) {
+        // 指定された時間だけ、ここで完全に止まる
+    }
+
+    // 描画更新
+    draw();
+    updateUI();
+}
+
+// ------------------------------------------
+//  以下、描画・UI系 (ロジックには関係なし)
+// ------------------------------------------
+function draw() {
+    const cvs = document.getElementById('cvs');
+    const ctx = cvs.getContext('2d');
+    const t = performance.now() * 0.005;
+    
+    // 背景クリア (残像)
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fillRect(0,0,600,100);
+    
+    // ボール
+    const x = 300 + Math.sin(t) * 200;
+    ctx.beginPath();
+    ctx.arc(x, 50, 20, 0, Math.PI*2);
+    ctx.fillStyle = mode === 'legacy' ? '#f55' : mode === 'han' ? '#0f8' : '#888';
+    ctx.fill();
+}
+
+function updateUI() {
+    document.getElementById('mode-disp').innerText = mode.toUpperCase();
+    
+    const fpsElem = document.getElementById('fps-disp');
+    fpsElem.innerText = fps.toFixed(1);
+    fpsElem.style.color = fps < 30 ? '#f55' : '#0f8';
+    
+    document.getElementById('work-disp').innerText = currentWork.toFixed(1);
+}
+
+function displayComment(msg) {
+    document.getElementById('comment-disp').innerText = msg;
+}
+
+function setMode(m) {
+    mode = m;
+    hanVelocity = 0; // リセット
+    // 開始時の初期値設定
+    if(m === 'legacy') currentWork = TARGET_LOAD_MS;
+    if(m === 'han') currentWork = 0; 
+}
+
+// スタート
+loop();
+</script>
+</body>
+</html>

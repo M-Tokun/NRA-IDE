@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>HAN Micro-POC 01: Homeostasis</title>
+    <style>
+        body { background: #111; color: #eee; font-family: monospace; overflow: hidden; margin: 0; }
+        #container { display: flex; height: 100vh; }
+        #main { flex: 1; position: relative; }
+        #sidebar { width: 300px; background: #1a1a1a; padding: 20px; border-left: 1px solid #333; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        h1 { font-size: 16px; color: cyan; margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .metric-box { margin-bottom: 20px; padding: 10px; background: #222; border-radius: 4px; }
+        .metric-title { font-size: 11px; color: #888; text-transform: uppercase; }
+        .metric-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
+        .legacy { color: #ff5555; border-left: 3px solid #ff5555; }
+        .han { color: #00ff88; border-left: 3px solid #00ff88; }
+        
+        .legend { font-size: 12px; margin-top: 5px; color: #aaa; }
+        .note { font-size: 10px; color: #666; margin-top: 20px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <div id="main">
+        <canvas id="simCanvas"></canvas>
+    </div>
+    <div id="sidebar">
+        <h1>HAN Utility Proof v0.1</h1>
+        
+        <div class="metric-box legacy">
+            <div class="metric-title">Legacy (Threshold)</div>
+            <div class="metric-value" id="val-legacy">0</div>
+            <div class="legend">Cost: <span id="cost-legacy">0</span></div>
+            <div class="legend">Stability: <span id="stab-legacy">0</span>%</div>
+        </div>
+
+        <div class="metric-box han">
+            <div class="metric-title">HAN (Ritsukan)</div>
+            <div class="metric-value" id="val-han">0</div>
+            <div class="legend">Cost: <span id="cost-han">0</span></div>
+            <div class="legend">Stability: <span id="stab-han">0</span>%</div>
+        </div>
+
+        <div class="note">
+            <strong>実験概要:</strong><br>
+            変動する負荷(白線)に対し、サーバー能力をどう調整するか。<br><br>
+            <strong>Legacy:</strong> 閾値で即反応。過敏になりがち。<br>
+            <strong>HAN:</strong> 違反量(violation)をバネとして吸収。弾性限界内で粘り、無駄な変動を抑制する(省エネ)。
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * 簡易物理コア
+ */
+const CONFIG = {
+    targetLoad: 50,      // 目標負荷レベル
+    elasticity: 0.1,     // HAN: バネ定数 (k)
+    damping: 0.9,        // HAN: 減衰 (friction)
+    thresholdHigh: 70,   // Legacy: 上限閾値
+    thresholdLow: 30,    // Legacy: 下限閾値
+    reactionStep: 2.0    // 1ステップあたりの調整量
+};
+
+// 状態管理
+let time = 0;
+let history = [];
+const MAX_HISTORY = 600;
+
+// シミュレーションオブジェクト
+const sim = {
+    inputLoad: 50, // 外乱（ユーザーアクセス）
+    
+    legacy: {
+        capacity: 50,
+        cost: 0,
+        errorSum: 0
+    },
+    
+    han: {
+        capacity: 50,
+        velocity: 0, // 変化速度 (Work Rate)
+        cost: 0,
+        errorSum: 0
+    }
+};
+
+function update() {
+    time++;
+    
+    // 1. 外乱生成（ランダムウォーク + ノイズ）
+    // 意図的に激しいスパイクを作る
+    const noise = (Math.random() - 0.5) * 5;
+    const trend = Math.sin(time * 0.01) * 20;
+    sim.inputLoad = Math.max(10, Math.min(90, 50 + trend + noise));
+    
+    if(Math.random() < 0.02) sim.inputLoad += 30; // 突発スパイク
+
+    // 2. Legacy Logic (IF-THEN)
+    // 閾値を超えたら直ちに反応
+    let legacyAction = 0;
+    if (sim.inputLoad > sim.legacy.capacity + 10) { // 余裕を持たせる
+        sim.legacy.capacity += CONFIG.reactionStep;
+        legacyAction = 1;
+    } else if (sim.inputLoad < sim.legacy.capacity - 10) {
+        sim.legacy.capacity -= CONFIG.reactionStep;
+        legacyAction = 1;
+    }
+    sim.legacy.cost += legacyAction;
+    sim.legacy.errorSum += Math.abs(sim.inputLoad - sim.legacy.capacity);
+
+    // 3. HAN Logic (Ritsukan / Physics)
+    // Violation = Load - Capacity
+    // Force = Violation * k
+    const violation = sim.inputLoad - sim.han.capacity;
+    const force = violation * CONFIG.elasticity;
+    
+    // 加速と減衰（バネマスダンパ系として振る舞う）
+    sim.han.velocity += force;
+    sim.han.velocity *= CONFIG.damping;
+    
+    // 変化量が小さい場合（不感帯/摩擦）は動かない＝コストゼロ
+    // これが「空転禁止」「閾値維持」に相当
+    if (Math.abs(sim.han.velocity) > 0.1) {
+        sim.han.capacity += sim.han.velocity;
+        sim.han.cost += Math.abs(sim.han.velocity * 0.1); // 仕事量としてコスト計上
+    }
+
+    // 4. 履歴記録
+    history.push({
+        load: sim.inputLoad,
+        legacy: sim.legacy.capacity,
+        han: sim.han.capacity
+    });
+    if (history.length > MAX_HISTORY) history.shift();
+    
+    // DOM更新
+    document.getElementById('val-legacy').textContent = sim.legacy.capacity.toFixed(1);
+    document.getElementById('cost-legacy').textContent = Math.floor(sim.legacy.cost);
+    // 安定度 = 誤差の少なさの逆数的なもの
+    document.getElementById('stab-legacy').textContent = (100 - Math.min(100, sim.legacy.errorSum / time)).toFixed(1);
+
+    document.getElementById('val-han').textContent = sim.han.capacity.toFixed(1);
+    document.getElementById('cost-han').textContent = Math.floor(sim.han.cost);
+    document.getElementById('stab-han').textContent = (100 - Math.min(100, sim.han.errorSum / time)).toFixed(1);
+}
+
+function draw() {
+    const cvs = document.getElementById('simCanvas');
+    const ctx = cvs.getContext('2d');
+    
+    cvs.width = document.getElementById('main').clientWidth;
+    cvs.height = document.getElementById('main').clientHeight;
+    
+    const w = cvs.width;
+    const h = cvs.height;
+    
+    // 背景
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, w, h);
+    
+    // グリッド
+    ctx.strokeStyle = '#222';
+    ctx.beginPath();
+    for(let y=0; y<h; y+=50) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+    ctx.stroke();
+
+    if (history.length < 2) return;
+
+    // 描画関数
+    function drawLine(key, color, width) {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        for (let i = 0; i < history.length; i++) {
+            const x = (i / MAX_HISTORY) * w;
+            // 0-100を画面高さにマッピング
+            const y = h - (history[i][key] / 100) * h; 
+            if (i===0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    // Input (白点線)
+    ctx.setLineDash([2, 2]);
+    drawLine('load', '#666', 1);
+    ctx.setLineDash([]);
+
+    // Legacy (赤)
+    drawLine('legacy', '#ff5555', 2);
+
+    // HAN (緑)
+    drawLine('han', '#00ff88', 3);
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+loop();
+
+</script>
+</body>
+</html>
