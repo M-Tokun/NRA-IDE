@@ -7,7 +7,19 @@ Copyright (c) 2026 M-Tokun (NRA-IDE Project)
 Any use of this software, its underlying theory (Nomological Ring Axioms), 
 or its code for the purpose of generating profit, or in connection with 
 any monetary transactions (including products, services, or consulting), 
-requires EXPLICIT PRIOR WRITTEN CONSENT from the author (M-Tokun).
+requires EXPLICIT PRIOR WRITTEN CONSENT from the author.
+
+Contact for commercial licensing:
+  Email: tototo_san@hotmail.co.jp
+  Subject: "NRA-IDE Commercial License Request"
+
+For clarity, "commercial use" includes but is not limited to:
+- Direct sale or licensing of this software
+- Integration into commercial products or paid services
+- Use in consulting or training services for profit
+
+Non-commercial use (academic research, personal projects, non-profit 
+organizations) does NOT require prior consent.
 
 ===========================================================================
  2. PROHIBITION OF INVERSE DERIVATION (CAUSAL DIODE)
@@ -15,17 +27,33 @@ requires EXPLICIT PRIOR WRITTEN CONSENT from the author (M-Tokun).
 Any logic, algorithm, or modification that derives internal force, 
 potential, or state from external results—including but not limited to 
 Distance, Geometric Radii (e.g., center-to-edge), or Resultant 
-Coordinates—is STRICTLY PROHIBITED. 
+Coordinates—is STRICTLY PROHIBITED.
+
 Distance must remain a "Projection (Log)" and shall not be used as an 
-input or intermediate driver for causal dynamics.
+input or intermediate driver for causal dynamics. This is a non-negotiable 
+constraint of the Nomological Ring Axioms (NRA) framework.
+
+Examples of PROHIBITED implementations:
+  ✗ force = k * (target_distance - current_distance)
+  ✗ potential = function(radius_from_center)
+
+Examples of PERMITTED implementations:
+  ✓ constraint = phase_lock(theta)
+  ✓ tension = spring_constant * deformation
 
 ===========================================================================
  3. GENERAL TERMS (BSD 3-Clause Based)
 ===========================================================================
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
 1. Redistributions of source code must retain the above copyright notice, 
    this list of conditions and the following disclaimer.
+
 2. Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation.
+   this list of conditions and the following disclaimer in the documentation 
+   and/or other materials provided with the distribution.
+
 3. Neither the name of M-Tokun nor the names of its contributors may be 
    used to endorse or promote products derived from this software without 
    specific prior written permission.
@@ -35,4 +63,17 @@ input or intermediate driver for causal dynamics.
 ===========================================================================
 THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
 INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
+THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+===========================================================================
+ 5. VERSIONING
+===========================================================================
+This is NRA-IDE Project License v1.1 (Effective: January 5, 2026)
+For the latest version, see: https://github.com/M-Tokun/NRA-IDE
