@@ -1,93 +1,126 @@
-#　READ ME
-<p align="center"> <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO"> </p>
+
 # NRA-IDE: Intensional Dynamics Project
 
-## Nomological Ring Axioms & Intensional Dynamics Engine
+<p align="center"> <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO"> </p>
 
-> **System Status**: Reference Implementation v1.0
-> **License**: BSD 3-Clause (Strict Causal Enforcement)
+## [English] Project Overview & Terms of Use
 
 ### 🌌 Project Overview
 
-This repository implements the **NRA-IDE Project**, a framework for "Intensional Dynamics" where causal integrity (truthfulness of logic) precedes spatial accuracy.
-本リポジトリは、空間的正確性よりも因果的整合性（論理の誠実さ）を優先する「内包的力学」を実装した、NRA-IDEプロジェクトの参照実装です。
+This repository provides the reference implementation of the **NRA-IDE Project** (Code name: **HAN**). The system prioritizes "Causal Integrity" (truthfulness of logic) over spatial accuracy, implementing the "Intensional Dynamics" paradigm where logic is strictly unidirectional (Cause → Effect). 
 
-#### 📦 Package Structure / 構成
+### ⚠️ IMPORTANT: Licensing & Commercial Use
 
-* **`src/`**: Core engine implementation / エンジン基幹部
-* `ide_core_safe.py`: Phase-lock logic & residual discarding / 位相ロックと端数廃棄
-* `ide_firewall.py`: Spatial-to-Causal translation layer / 空間・因果変換レイヤー
-* `ide_threshold_handler.py`: Safety ratio evaluation / 安全率評価と制御
+**Prevention of Misuse is prioritized over technology diffusion.**
+
+* **Commercial Use Restriction**:
+Any use of this software, its underlying theory (NRA), or its code for the purpose of generating profit, or in connection with any monetary transactions (including products, paid services, or consulting), requires **EXPLICIT PRIOR WRITTEN CONSENT** from the author (M-Tokun).
+* **Retroactive Intention**:
+This restriction applies to all versions of the NRA/IDE logic, including previous repositories or forks, as the author's current "Law (Nomos)."
+* **Prohibition of Unauthorized Diversion**:
+Unauthorized commercial use or redistribution without this license notice is strictly prohibited.
+
+### 📦 Package Structure
+
+* **`src/`**: Core engine implementation
+* `ide_core_safe.py`: Phase-lock logic & residual discarding.
+* `ide_firewall.py`: Spatial-to-Causal translation layer.
+* `ide_threshold_handler.py`: Safety ratio evaluation.
 
 
-* **`examples/`**: Proof-of-concept demonstrations / 実証デモ
-* `HAN_Micro-POC_01.html`: Visual homeostasis demo / 恒常性維持の視覚デモ
-* `HAN_Deep_Stress_Test.html`: Stress test with thread-blocking / スレッド占有型・極限負荷デモ（解説コメント付）
+* **`examples/`**: Proof-of-concept demonstrations
+* `HAN_Micro-POC_01.html`: Visual homeostasis demo.
+* `HAN_Deep_Stress_Test.html`: Stress test with thread-blocking logic.
 
 
 
----
+### 🏗️ Core Principles (NRA Compliance)
 
-### 🚀 Quick Start / クイックスタート
+1. **PROHIBITION OF INVERSE DERIVATION (Strict Causal Diode)**:
+Any logic that derives internal force or state from external results—including but not limited to **Distance, Geometric Radii (e.g., center-to-edge), or Resultant Coordinates**—is STRICTLY PROHIBITED. Distance is a "Projection (Log)" and shall not be used as a driver for dynamics.
+2. **QUANTIZATION**:
+Discard float residuals to prevent error accumulation.
+3. **LIVENESS**:
+Homeostasis must be maintained; stagnation is treated as system failure.
 
-#### 1. Experience the Physics (Demos) / 物理制御を体感する
-
-We provide two levels of demonstration to show the "Elasticity" of HAN.
-HANの「弾性」を体感するために、2つの深度のデモを用意しています。
+### 🚀 Quick Start
 
 * **[Demo 1: Visual Homeostasis (Standard)](https://www.google.com/search?q=./examples/HAN_Micro-POC_01.html)**
-* *Best for understanding how the system maintains balance under varying loads.*
-* システムが負荷に応じて柔軟にバランスを保つ様子を視覚的に理解できます。
-
-
 * **[Demo 2: Deep Stress Test (Advanced)](https://www.google.com/search?q=./examples/HAN_Deep_Stress_Test.html)**
-* *Simulates heavy CPU-blocking (80ms spikes) to show how HAN creates "breathing space" for the thread. Includes detailed logic comments.*
-* 意図的なスレッド占有（80ms）を行い、HANがどのように「処理の隙間」を作り出すかを実証します。コード内の日本語コメントで論理を解説しています。
-
-
-
-#### 2. Local Setup / ローカルセットアップ
-
+* **Local Setup**:
 ```bash
-# Clone the repository
 git clone https://github.com/M-Tokun/NRA-IDE.git
-
-# Run the threshold evaluation logic
 cd NRA-IDE
 python3 src/ide_threshold_handler.py
 
 ```
 
----
-
-### 🏗️ Core Principles / 基本原則
-
-The system enforces the following constraints via `src/ide_core_safe.py`:
-`src/ide_core_safe.py` を通じ、以下の制約を物理的に強制します。
-
-1. **CAUSAL DIODE**: No Inverse Kinematics. Distance is read-only.
-* 逆算の禁止。距離は結果であり、入力ではありません。
 
 
-2. **QUANTIZATION**: Discard float residuals to prevent error accumulation.
-* 誤差蓄積を防ぐための端数廃棄。
+### 🤝 To the Physics & Tech Community
 
-
-3. **LIVENESS**: Homeostasis must be maintained;  is treated as failure.
-* 恒常性維持。停止はシステム不全とみなします。
-
-
+I hold deep respect for physics. My descriptions of "Intensional Dynamics" may include unique terminology. If you find inaccuracies in logic that could be refined, I welcome your guidance via GitHub Issues.
 
 ---
 
-### 🤝 Request for Community Guidance / 物理学コミュニティの皆様へ
+## [日本語] プロジェクト概要および利用規約
 
-[English] I approach this project with great respect for physics. My background is in practical business (Agriculture & Management). I use neologisms to describe the "Intensional Dynamics" paradigm. If you find terminological inaccuracies, please guide me via GitHub Issues.
+### 🌌 プロジェクト概要
 
-[日本語] 私は物理学に深い敬意を持っていますが、専門の研究者ではなく実業の背景を持つ者です。「内包的力学」というパラダイムを説明するため、一部に独自の用語定義を含みます。用語法に不正確な点があれば、ぜひ GitHub Issues にてご指導ください。
+本リポジトリは、**NRA-IDEプロジェクト**（開発コード：**HAN**）の参照実装です。空間的正確性よりも「因果的整合性（論理の誠実さ）」を最優先の変数として扱う「内包的力学（Intensional Dynamics）」を実装しています。 
+
+### ⚠️ 重要：ライセンスおよび商用利用に関する制約
+
+**技術の普及よりも、悪用されないことを最優先事項として定義します。**
+
+* **商用・営利目的利用の制限**:
+本技術を用いて利益を得る、または金銭を伴う活動に利用する場合は、**著作者（M-Tokun）の明示的な事前承諾**が法的に必須となります。
+* **遡及的制約の表明**:
+この制約は、過去のリポジトリや旧バージョンを参照した場合であっても、現在の著作者の「意志（律）」として適用されます。
+
+### 📦 パッケージ構成
+
+* **`src/`**: エンジン基幹部
+* `ide_core_safe.py`: 位相ロックと端数廃棄ロジック。
+* `ide_firewall.py`: 空間・因果変換レイヤー。
+* `ide_threshold_handler.py`: 安全率評価と制御。
+
+
+* **`examples/`**: 実証デモ
+* `HAN_Micro-POC_01.html`: 恒常性維持の視覚デモ。
+* `HAN_Deep_Stress_Test.html`: スレッド占有型・極限負荷デモ（解説コメント付）。
+
+
+
+### 🏗️ 基本原則 (NRA Compliance)
+
+1. **逆導出の禁止（厳格な因果ダイオード）**:
+結果としての「距離」や「中心から外縁までの半径」といった**幾何学的・外延的な数値から、内包的な力や状態を導き出すこと（逆導出）**を厳禁します。距離はあくまで「射影（ログ）」であり、因果を駆動させる要因として計算に用いることはできません。
+2. **量子化**:
+誤差蓄積を防ぐための端数廃棄。
+3. **恒常性維持**:
+動的な平衡を維持し、停止を不全とみなします。
+
+### 🚀 クイックスタート
+
+* **[デモ 1: 視覚的恒常性の確認（標準）](https://www.google.com/search?q=./examples/HAN_Micro-POC_01.html)**
+* **[デモ 2: 極限負荷テスト（詳細解説付）](https://www.google.com/search?q=./examples/HAN_Deep_Stress_Test.html)**
+* **セットアップ**:
+```bash
+git clone https://github.com/M-Tokun/NRA-IDE.git
+cd NRA-IDE
+python3 src/ide_threshold_handler.py
+
+```
+
+
+
+### 🤝 物理学・テックコミュニティの皆様へ
+
+私は物理学に対して深い敬意を抱いていますが、専門の研究者ではなく、実業（農業・経営）の背景を持つ者です。「内包的力学」というパラダイムを説明するため独自の用語定義を用いています。不正確な点があれば GitHub Issues にてご指導ください。
+
+---
 
 (C) 2026 NRA-IDE Project / M-Tokun
 
-
 ---
-
