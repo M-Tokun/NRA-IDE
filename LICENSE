@@ -1,44 +1,44 @@
-NRA-IDE License (Based on BSD 3-Clause License)
+NRA-IDE Project License v1.1
 Copyright (c) 2026 M-Tokun (NRA-IDE Project)
 
 ===========================================================================
- ENGLISH (OFFICIAL LEGAL TEXT)
+ 1. COMMERCIAL USE RESTRICTION
 ===========================================================================
+Any use of this software, its underlying theory (Nomological Ring Axioms), 
+or its code for the purpose of generating profit, or in connection with 
+any monetary transactions (including products, services, or consulting), 
+requires EXPLICIT PRIOR WRITTEN CONSENT from the author (M-Tokun).
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
+===========================================================================
+ 2. PROHIBITION OF INVERSE DERIVATION (CAUSAL DIODE)
+===========================================================================
+Any logic, algorithm, or modification that derives internal force, 
+potential, or state from external results—including but not limited to 
+Distance, Geometric Radii (e.g., center-to-edge), or Resultant 
+Coordinates—is STRICTLY PROHIBITED. 
+Distance must remain a "Projection (Log)" and shall not be used as an 
+input or intermediate driver for causal dynamics.
 
-1. Redistributions of source code must retain the above copyright notice,
+===========================================================================
+ 3. GENERAL TERMS (BSD 3-Clause Based)
+===========================================================================
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, 
    this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
+2. Redistributions in binary form must reproduce the above copyright notice, 
+   this list of conditions and the following disclaimer in the documentation 
    and/or other materials provided with the distribution.
-
-3. Neither the name of M-Tokun nor the names of its contributors
-   may be used to endorse or promote products derived from this software
+3. Neither the name of M-Tokun nor the names of its contributors 
+   may be used to endorse or promote products derived from this software 
    without specific prior written permission.
 
----------------------------------------------------------------------------
-[ADDITIONAL SAFETY CLAUSES: NRA COMPLIANCE]
-
-4. THE CAUSAL DIODE CLAUSE:
-   Modifications that enable "Inverse Kinematics" (calculating Force from Distance)
-   or "Causal Reversal" are PROHIBITED to protect the integrity of the physics.
-   The software must maintain the unidirectional flow from Cause to Effect.
-
-5. THE FAIL-CLOSED CLAUSE:
-   Safety mechanisms (Threshold Handlers) must not be bypassed.
-   Systems must halt or alert upon violation, rather than auto-correcting with fake data.
----------------------------------------------------------------------------
-
-THIS SOFTWARE IS PROVIDED BY M-TOKUN AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL M-TOKUN OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+===========================================================================
+ 4. DISCLAIMER
+===========================================================================
+THIS SOFTWARE IS PROVIDED BY M-TOKUN AND CONTRIBUTORS "AS IS" AND ANY 
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL M-TOKUN BE LIABLE FOR ANY DIRECT, INDIRECT, 
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES HOWEVER CAUSED.
