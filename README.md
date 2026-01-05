@@ -131,3 +131,15 @@ See [LICENSE](LICENSE) for full legal terms.
 ---
 
 (C) 2026 NRA-IDE Project / M-Tokun
+
+## Canonical Notice (Legal Snapshot)
+
+This document and license terms apply to the following canonical release:
+
+- Repository: NRA-IDE
+- GitHub Release: v1.1-license-locked-2026-01
+- Commit Hash: c840812
+- Release Date (UTC): 2026-01-XX
+
+Any modified, forked, or partial copies are NOT considered canonical
+unless explicitly authorized in writing by M-Tokun.
