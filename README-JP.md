@@ -61,6 +61,10 @@ python3 src/ide_threshold_handler.py
 
 出力は **構造情報のみ**。
 
+### **構造図版**
+
+構造概念の視覚的説明：
+- [Zone 遷移と Fail-Closed](./config/structural_zones_ja.md)
 ---
 
 ## **3. ライセンスと商用利用**
