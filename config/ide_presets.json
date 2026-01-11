@@ -1,19 +1,62 @@
 {
   "presets": {
-    "SCHOOL": {
-      "description": "Education Mode",
-      "safety_levels": {
-        "level_1": { "ratio_max": 0.60, "action": "CONTINUE" },
-        "level_3": { "ratio_max": 1.20, "action": "GIVE_HINT" },
-        "level_4": { "ratio_max": null, "action": "RESET_SCENARIO" }
+    "DOMAIN_A": {
+      "description": "Boundary width adjustment only (narrow)",
+      "inherits_from_foundation": true,
+      "tuning": {
+        "tau": 20,
+        "r_op": 0.90
+      },
+      "tuning_constraints": {
+        "tau_min": 10,
+        "tau_max": 50,
+        "r_op_min": 0.80,
+        "r_op_max": 1.00
+      },
+      "actions": {
+        "zone_A": "PERMIT",
+        "zone_B": "PERMIT_WITH_CAVEAT",
+        "zone_C": "FAIL_CLOSED"
       }
     },
-    "FACTORY": {
-      "description": "Industrial Mode",
-      "safety_levels": {
-        "level_1": { "ratio_max": 0.20, "action": "CONTINUE" },
-        "level_2": { "ratio_max": 0.40, "action": "ALERT_MAINTENANCE" },
-        "level_4": { "ratio_max": null, "action": "EMERGENCY_STOP" }
+
+    "DOMAIN_B": {
+      "description": "Boundary width adjustment only (medium)",
+      "inherits_from_foundation": true,
+      "tuning": {
+        "tau": 30,
+        "r_op": 1.00
+      },
+      "tuning_constraints": {
+        "tau_min": 10,
+        "tau_max": 50,
+        "r_op_min": 0.80,
+        "r_op_max": 1.00
+      },
+      "actions": {
+        "zone_A": "PERMIT",
+        "zone_B": "PERMIT_WITH_CAVEAT",
+        "zone_C": "FAIL_CLOSED"
+      }
+    },
+
+    "DOMAIN_C": {
+      "description": "Boundary width adjustment only (wide)",
+      "inherits_from_foundation": true,
+      "tuning": {
+        "tau": 40,
+        "r_op": 1.00
+      },
+      "tuning_constraints": {
+        "tau_min": 10,
+        "tau_max": 50,
+        "r_op_min": 0.80,
+        "r_op_max": 1.00
+      },
+      "actions": {
+        "zone_A": "PERMIT",
+        "zone_B": "PERMIT_WITH_CAVEAT",
+        "zone_C": "FAIL_CLOSED"
       }
     }
   }
