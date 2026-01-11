@@ -613,8 +613,8 @@ See [LICENSE](LICENSE) for full legal terms.
 
 ## Contact
 
-- **GitHub Issues**: Technical discussion, bug reports
-- **Email**: tototo_san@hotmail.co.jp (Academic collaboration, commercial licensing, general inquiries)
+-
+- 
 
 ---
 
@@ -635,3 +635,4 @@ unless explicitly authorized in writing by M-Tokun.
 ---
 
 **END OF README (Complete Version)**
+
