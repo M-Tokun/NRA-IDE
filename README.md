@@ -58,6 +58,10 @@ python3 src/ide_threshold_handler.py
 
 Execution produces **structural outputs only**.
 
+### **Structural Diagrams**
+
+For visual explanations of structural concepts:
+- [Zone Transitions and Fail-Closed](./config/structural_zones.md)
 ---
 
 ## **3. Licensing & Commercial Use**
