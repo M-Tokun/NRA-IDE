@@ -72,16 +72,16 @@ For visual explanations of structural concepts:
 - **Inverse derivation (Π⁻¹) is prohibited**
 - Full terms: **`LICENSE.md`**
 
-### **For Commercial Use Inquiries**
+### **For Commercial Use & General Inquiries**
 
-Commercial applications require prior authorization.
+Commercial applications, structural queries, or feedback must be processed through our official **Structural Gateway**.
 
-To request authorization:
-1. Open a new issue in this repository
-2. Add label: `commercial-license`
-3. Include: organization name, intended use, contact details
+**To request authorization or contact us:**
+1. Open a new issue using the [**Contact Template**](https://github.com/M-Tokun/NRA-IDE/issues/new?template=contact.md).
+2. Categorize your inquiry: `[Commercial]`, `[Question]`, or `[Feedback]`.
+3. Fill in the required structural data fields.
 
-We will respond via the issue thread or arrange separate communication.
+**Safety Note:** This is a public repository. Do not post sensitive personal contact information directly in the issue thread. We will establish a secure communication channel after the initial structural signal is received.
 
 ---
 
