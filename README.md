@@ -262,4 +262,7 @@ To prevent semantic leakage:
 > It does not handle meaning, optimization, or history.  
 > Its behavior is determined entirely by structural invariants.**
 
+
 ---
+[![](https://u8views.com/api/v1/github/users/M-Tokun/views.svg)](https://u8views.com/github/M-Tokun)
+
