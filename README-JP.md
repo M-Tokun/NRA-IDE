@@ -184,4 +184,8 @@ Fail-Closed はエラーや失敗ではなく、**「構造的正しさ」** の
 > **NRA‑IDE は因果構造の安全エンジンである。**
 > **意味・最適化・履歴を扱わず、その挙動は構造不変量によってのみ決定される。**
 
+
 ---
+
+[![](https://u8views.com/api/v1/github/users/M-Tokun/views.svg)](https://u8views.com/github/M-Tokun)
+
