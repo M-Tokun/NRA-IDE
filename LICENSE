@@ -1,125 +1,128 @@
+NRA-IDE Project License v1.4 (Draft, 2026)
+Copyright (c) 2026 M-Tokun
 
-# **NRA‑IDE Project License v1.3（整形案・厳密版）**
+--------------------------------------------------------------------------------
+1. COMMERCIAL USE RESTRICTION
 
-以下は、あなたの条文をそのまま保持しつつ、  
-- 法的文体の統一  
-- 見出し階層の整理  
-- 条項の明確化  
-- 曖昧語の排除  
-- 企業・司法が読む際の誤解防止  
-を目的に整形したもの。
+   Commercial use of this software, its underlying theory (Nomological Ring 
+   Axioms), or any derivative work REQUIRES EXPLICIT PRIOR WRITTEN CONSENT 
+   from the copyright holder.
 
----
+   "Commercial use" includes, but is not limited to:
+     - Sale, licensing, or monetization of this software.
+     - Integration into commercial products or paid services.
+     - Use in consulting, training, or operational systems for profit.
 
-## **NRA‑IDE Project License v1.3（Draft, 2026）**  
-Copyright (c) 2026 M‑Tokun
+   Non-commercial use (academic research, personal projects, non-profit 
+   organizations) does not require prior consent.
 
----
+   Commercial licensing inquiries shall be submitted through the official 
+   NRA-IDE Project contact channel (GitHub Issues).
 
-## **1. Commercial Use Restriction**
+--------------------------------------------------------------------------------
+2. PROHIBITION OF INVERSE DERIVATION (CAUSAL DIODE)
 
-Commercial use of this software, its underlying theory (Nomological Ring Axioms), or any derivative work **requires explicit prior written consent** from the copyright holder.
+   Any logic, algorithm, or modification that derives internal force, potential, 
+   or state from external results is STRICTLY PROHIBITED.
 
-“Commercial use” includes, but is not limited to:  
-- Sale, licensing, or monetization of this software  
-- Integration into commercial products or paid services  
-- Use in consulting, training, or operational systems for profit  
+   The following MUST NOT be used as causal inputs or intermediate drivers:
+     - Distance from a target
+     - Geometric radii
+     - Coordinates (projected space)
+     - Semantic or geometric scores
+     - Any effect-side quantity
 
-Non‑commercial use (academic research, personal projects, non‑profit organizations) **does not require prior consent**.
+   Examples of PROHIBITED implementations:
+     [X] force = k * (target_distance - current_distance)
+     [X] potential = f(radius_from_center)
+     [X] optimization based on semantic scores
 
-Commercial licensing inquiries shall be submitted through the official NRA‑IDE Project contact channel.  
-Contact information will be provided upon request.
+   Examples of PERMITTED implementations:
+     [O] constraint = phase_lock(theta)
+     [O] tension = spring_constant * deformation
 
----
+   Any attempt to reconstruct internal causal structure from external behavior, 
+   outputs, or observed trajectories is considered inverse derivation and is 
+   strictly prohibited.
 
-## **2. Prohibition of Inverse Derivation (Causal Diode)**
+   Violation of this section constitutes a fundamental breach of the 
+   Nomological Ring Axioms and results in immediate license termination.
 
-Any logic, algorithm, or modification that derives internal force, potential, or state from external results is **strictly prohibited**.
+--------------------------------------------------------------------------------
+3. PROHIBITED USES (SAFETY AND ETHICAL RESTRICTIONS)
 
-The following **must not** be used as causal inputs or intermediate drivers:  
-- Distance  
-- Geometric radii  
-- Coordinates  
-- Projected quantities  
-- Semantic or geometric scores  
-- Any effect‑side quantity  
+   This software must NOT be used for:
+     - Weapons, military systems, targeting, guidance, or attack assistance.
+     - Surveillance, repression, or discriminatory control systems.
+     - Criminal activity, fraud, unauthorized access, or harmful automation.
+     - Unsafe control of medical devices, vehicles, aircraft, or machinery.
+     - Any application that may cause physical, psychological, or societal harm.
 
-Examples of prohibited implementations:  
-- force = k * (target_distance − current_distance)  
-- potential = f(radius_from_center)  
-- optimization based on semantic or geometric scores  
+   Uses that are similar to, or carry equivalent levels of risk to, the above 
+   categories are also prohibited. Violation results in immediate and permanent 
+   termination of this license.
 
-Examples of permitted implementations:  
-- constraint = phase_lock(theta)  
-- tension = spring_constant * deformation  
+--------------------------------------------------------------------------------
+4. RESEARCH USE DOES NOT GRANT REUSE RIGHTS
 
-Violation of this section constitutes a breach of the Nomological Ring Axioms and results in immediate license termination.
+   Research use of this software or its outputs DOES NOT GRANT any rights to:
+     - reuse
+     - redistribute
+     - train AI models
+     - incorporate results into derivative systems
 
----
+   Training (machine learning or statistical modeling) on this software, its 
+   outputs, or its internal structures constitutes a form of REPRODUCTION and 
+   therefore requires explicit permission.
 
-## **3. Prohibited Uses (Safety and Ethical Restrictions)**
+   Derived datasets, logs, traces, or behavioral records produced by this 
+   software are considered part of the software itself and are subject to the 
+   same restrictions.
 
-This software must **not** be used for:  
-- Weapons, military systems, targeting, guidance, or attack assistance  
-- Surveillance, repression, or discriminatory control systems  
-- Criminal activity, fraud, unauthorized access, or harmful automation  
-- Unsafe control of medical devices, vehicles, aircraft, or machinery  
-- Any application that may cause physical, psychological, or societal harm  
+--------------------------------------------------------------------------------
+5. CONDITIONAL SOURCE DISCLOSURE REQUIREMENT
 
-Uses that are similar to, or carry equivalent levels of risk to, the above categories are also prohibited.
+   If the copyright holder determines that a user's deployment, modification, 
+   or integration of this software may pose a safety, ethical, or societal risk, 
+   the copyright holder may formally request disclosure of the complete source 
+   code of the derived work.
 
-Violation results in immediate and permanent termination of this license.
+   Upon receiving such a request, the user is obligated to provide the full 
+   source code within a reasonable timeframe. Failure to comply results in 
+   immediate and permanent license termination.
 
----
+   This requirement exists to ensure compliance with the Nomological Ring 
+   Axioms and to prevent the emergence of unsafe derivative causal structures.
 
-## **4. Research Use Does Not Grant Reuse Rights**
+--------------------------------------------------------------------------------
+6. GENERAL TERMS (BSD 3-CLAUSE BASE)
 
-Research use of this software or its outputs **does not grant** any rights to:  
-- reuse  
-- redistribute  
-- train AI models  
-- incorporate results into derivative systems  
+   Redistribution and use in source and binary forms, with or without 
+   modification, are permitted provided that the following conditions are met:
 
-Training (machine learning or statistical modeling) on this software, its outputs, or its internal structures constitutes a form of **reproduction** and therefore requires explicit permission.
+     1. Redistributions of source code must retain the above copyright notice, 
+        this list of conditions and the following disclaimer.
+     2. Redistributions in binary form must reproduce the above copyright 
+        notice, this list of conditions and the following disclaimer in the 
+        documentation and/or other materials provided with the distribution.
+     3. Neither the name of the copyright holder nor the names of its 
+        contributors may be used to endorse or promote products derived from 
+        this software without specific prior written permission.
 
-Unauthorized training or integration results in immediate license termination.
+   In the event of any conflict between Section 6 and Sections 1–5, the 
+   restrictions in Sections 1–5 shall take precedence.
 
----
+--------------------------------------------------------------------------------
+7. DISCLAIMER
 
-## **5. Conditional Source Disclosure Requirement**
+   THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY 
+   AND FITNESS FOR A PARTICULAR PURPOSE.
 
-If the copyright holder determines that a user’s deployment, modification, or integration of this software may pose a safety, ethical, or societal risk, the copyright holder may formally request disclosure of the complete source code of the derived work.
+   IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY 
+   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE.
 
-Upon receiving such a request, the user is obligated to provide the full source code within a reasonable timeframe.
+--------------------------------------------------------------------------------
 
-Failure to comply results in immediate and permanent license termination.
-
-This clause exists to prevent:  
-- weaponization  
-- unsafe or opaque modifications  
-- harmful or deceptive deployments  
-
----
-
-## **6. General Terms (BSD 3‑Clause Base)**
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the copyright notice, this list of conditions, and the following disclaimer.  
-2. Redistributions in binary form must reproduce the copyright notice, this list of conditions, and the disclaimer in the documentation and/or other materials provided with the distribution.  
-3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
----
-
-## **7. Disclaimer**
-
-THIS SOFTWARE IS PROVIDED “AS IS” AND WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE.
-
----
-
-## **8. Versioning**
-
-This is NRA‑IDE Project License v1.3 (Draft, 2026).  
-For the latest version, refer to the official NRA‑IDE Project repository.
+For the latest version, refer to the official NRA-IDE Project repository.
