@@ -2,199 +2,142 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>HAN Micro-POC 01: Homeostasis</title>
+    <title>HAN Micro-POC 02: Stabilized Nonlinear</title>
     <style>
         body { background: #111; color: #eee; font-family: monospace; overflow: hidden; margin: 0; }
-        #container { display: flex; height: 100vh; }
-        #main { flex: 1; position: relative; }
+        #container { display: flex; height: 100vh; min-height: 400px; }
+        #main { flex: 1; position: relative; min-width: 400px; }
         #sidebar { width: 300px; background: #1a1a1a; padding: 20px; border-left: 1px solid #333; }
         canvas { display: block; width: 100%; height: 100%; }
         
-        h1 { font-size: 16px; color: cyan; margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; }
-        .metric-box { margin-bottom: 20px; padding: 10px; background: #222; border-radius: 4px; }
-        .metric-title { font-size: 11px; color: #888; text-transform: uppercase; }
-        .metric-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
+        h1 { font-size: 16px; color: cyan; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .metric-box { margin-bottom: 15px; padding: 12px; background: #222; border-radius: 4px; }
+        .metric-title { font-size: 10px; color: #888; text-transform: uppercase; }
+        .metric-value { font-size: 22px; font-weight: bold; margin-top: 4px; }
         .legacy { color: #ff5555; border-left: 3px solid #ff5555; }
         .han { color: #00ff88; border-left: 3px solid #00ff88; }
-        
-        .legend { font-size: 12px; margin-top: 5px; color: #aaa; }
-        .note { font-size: 10px; color: #666; margin-top: 20px; line-height: 1.4; }
+        .legend { font-size: 11px; margin-top: 5px; color: #aaa; }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <div id="main">
-        <canvas id="simCanvas"></canvas>
-    </div>
+    <div id="main"><canvas id="simCanvas"></canvas></div>
     <div id="sidebar">
-        <h1>HAN Utility Proof v0.1</h1>
-        
+        <h1>HAN POC v0.2s</h1>
         <div class="metric-box legacy">
-            <div class="metric-title">Legacy (Threshold)</div>
+            <div class="metric-title">Legacy</div>
             <div class="metric-value" id="val-legacy">0</div>
-            <div class="legend">Cost: <span id="cost-legacy">0</span></div>
             <div class="legend">Stability: <span id="stab-legacy">0</span>%</div>
         </div>
-
         <div class="metric-box han">
-            <div class="metric-title">HAN (Ritsukan)</div>
+            <div class="metric-title">HAN (Nonlinear)</div>
             <div class="metric-value" id="val-han">0</div>
-            <div class="legend">Cost: <span id="cost-han">0</span></div>
             <div class="legend">Stability: <span id="stab-han">0</span>%</div>
         </div>
-
-        <div class="note">
-            <strong>実験概要:</strong><br>
-            変動する負荷(白線)に対し、サーバー能力をどう調整するか。<br><br>
-            <strong>Legacy:</strong> 閾値で即反応。過敏になりがち。<br>
-            <strong>HAN:</strong> 違反量(violation)をバネとして吸収。弾性限界内で粘り、無駄な変動を抑制する(省エネ)。
+        <div style="font-size: 11px; color: #666; line-height: 1.5;">
+            <strong>解説:</strong><br>
+            緑線(HAN)が白線(負荷)を「絶対に逃さない」挙動に注目。非線形反発により、大きな乖離が発生する前に強力な引き戻しがかかります。
         </div>
     </div>
 </div>
 
 <script>
-/**
- * 簡易物理コア
- */
 const CONFIG = {
-    targetLoad: 50,      // 目標負荷レベル
-    elasticity: 0.1,     // HAN: バネ定数 (k)
-    damping: 0.9,        // HAN: 減衰 (friction)
-    thresholdHigh: 70,   // Legacy: 上限閾値
-    thresholdLow: 30,    // Legacy: 下限閾値
-    reactionStep: 2.0    // 1ステップあたりの調整量
+    han: {
+        k: 0.15,
+        limit: 30.0, // 弾性限界（これ以上離れると反発が急増）
+        damping: 0.8
+    },
+    reactionStep: 2.0
 };
 
-// 状態管理
 let time = 0;
 let history = [];
 const MAX_HISTORY = 600;
 
-// シミュレーションオブジェクト
 const sim = {
-    inputLoad: 50, // 外乱（ユーザーアクセス）
-    
-    legacy: {
-        capacity: 50,
-        cost: 0,
-        errorSum: 0
-    },
-    
-    han: {
-        capacity: 50,
-        velocity: 0, // 変化速度 (Work Rate)
-        cost: 0,
-        errorSum: 0
-    }
+    inputLoad: 50,
+    legacy: { capacity: 50, errorSum: 0 },
+    han: { capacity: 50, velocity: 0, errorSum: 0 }
 };
 
 function update() {
     time++;
     
-    // 1. 外乱生成（ランダムウォーク + ノイズ）
-    // 意図的に激しいスパイクを作る
-    const noise = (Math.random() - 0.5) * 5;
-    const trend = Math.sin(time * 0.01) * 20;
+    // 1. 外乱生成
+    const noise = (Math.random() - 0.5) * 8;
+    const trend = Math.sin(time * 0.02) * 20;
     sim.inputLoad = Math.max(10, Math.min(90, 50 + trend + noise));
-    
-    if(Math.random() < 0.02) sim.inputLoad += 30; // 突発スパイク
+    if(Math.random() < 0.01) sim.inputLoad += (Math.random() > 0.5 ? 25 : -25);
 
-    // 2. Legacy Logic (IF-THEN)
-    // 閾値を超えたら直ちに反応
-    let legacyAction = 0;
-    if (sim.inputLoad > sim.legacy.capacity + 10) { // 余裕を持たせる
-        sim.legacy.capacity += CONFIG.reactionStep;
-        legacyAction = 1;
-    } else if (sim.inputLoad < sim.legacy.capacity - 10) {
-        sim.legacy.capacity -= CONFIG.reactionStep;
-        legacyAction = 1;
+    // 2. Legacy (If-Then)
+    const legacyDiff = sim.inputLoad - sim.legacy.capacity;
+    if (Math.abs(legacyDiff) > 10) {
+        sim.legacy.capacity += Math.sign(legacyDiff) * CONFIG.reactionStep;
     }
-    sim.legacy.cost += legacyAction;
     sim.legacy.errorSum += Math.abs(sim.inputLoad - sim.legacy.capacity);
 
-    // 3. HAN Logic (Ritsukan / Physics)
-    // Violation = Load - Capacity
-    // Force = Violation * k
+    // 3. HAN (Nonlinear Potential Barrier)
     const violation = sim.inputLoad - sim.han.capacity;
-    const force = violation * CONFIG.elasticity;
+    // 非線形反発ロジック：x/L が 1.0 に近づくほど分母が 0 に近づき Force が増大
+    const ratio = Math.min(0.99, Math.abs(violation) / CONFIG.han.limit);
+    let force = (CONFIG.han.k * violation) / (1 - Math.pow(ratio, 2));
     
-    // 加速と減衰（バネマスダンパ系として振る舞う）
-    sim.han.velocity += force;
-    sim.han.velocity *= CONFIG.damping;
-    
-    // 変化量が小さい場合（不感帯/摩擦）は動かない＝コストゼロ
-    // これが「空転禁止」「閾値維持」に相当
-    if (Math.abs(sim.han.velocity) > 0.1) {
-        sim.han.capacity += sim.han.velocity;
-        sim.han.cost += Math.abs(sim.han.velocity * 0.1); // 仕事量としてコスト計上
-    }
+    // 数値的安定性のためのクランプ（発散防止）
+    force = Math.max(-20, Math.min(20, force));
 
-    // 4. 履歴記録
-    history.push({
-        load: sim.inputLoad,
-        legacy: sim.legacy.capacity,
-        han: sim.han.capacity
-    });
+    sim.han.velocity += force;
+    sim.han.velocity *= CONFIG.han.damping;
+    sim.han.capacity += sim.han.velocity;
+    
+    // 表示上のクランプ
+    sim.han.capacity = Math.max(0, Math.min(100, sim.han.capacity));
+    sim.han.errorSum += Math.abs(sim.inputLoad - sim.han.capacity);
+
+    history.push({ load: sim.inputLoad, legacy: sim.legacy.capacity, han: sim.han.capacity });
     if (history.length > MAX_HISTORY) history.shift();
     
-    // DOM更新
     document.getElementById('val-legacy').textContent = sim.legacy.capacity.toFixed(1);
-    document.getElementById('cost-legacy').textContent = Math.floor(sim.legacy.cost);
-    // 安定度 = 誤差の少なさの逆数的なもの
-    document.getElementById('stab-legacy').textContent = (100 - Math.min(100, sim.legacy.errorSum / time)).toFixed(1);
-
     document.getElementById('val-han').textContent = sim.han.capacity.toFixed(1);
-    document.getElementById('cost-han').textContent = Math.floor(sim.han.cost);
-    document.getElementById('stab-han').textContent = (100 - Math.min(100, sim.han.errorSum / time)).toFixed(1);
+    document.getElementById('stab-legacy').textContent = (100 - Math.min(100, sim.legacy.errorSum / time * 3)).toFixed(1);
+    document.getElementById('stab-han').textContent = (100 - Math.min(100, sim.han.errorSum / time * 3)).toFixed(1);
 }
 
 function draw() {
     const cvs = document.getElementById('simCanvas');
+    const main = document.getElementById('main');
+    if (!cvs || !main) return;
     const ctx = cvs.getContext('2d');
     
-    cvs.width = document.getElementById('main').clientWidth;
-    cvs.height = document.getElementById('main').clientHeight;
+    // サイズリセット（描画を維持するため）
+    if(cvs.width !== main.clientWidth) {
+        cvs.width = main.clientWidth;
+        cvs.height = main.clientHeight;
+    }
     
     const w = cvs.width;
     const h = cvs.height;
-    
-    // 背景
     ctx.fillStyle = '#111';
     ctx.fillRect(0, 0, w, h);
-    
-    // グリッド
-    ctx.strokeStyle = '#222';
-    ctx.beginPath();
-    for(let y=0; y<h; y+=50) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
-    ctx.stroke();
 
     if (history.length < 2) return;
 
-    // 描画関数
-    function drawLine(key, color, width) {
+    function drawLine(key, color, width, dash = []) {
         ctx.beginPath();
         ctx.strokeStyle = color;
         ctx.lineWidth = width;
+        ctx.setLineDash(dash);
         for (let i = 0; i < history.length; i++) {
             const x = (i / MAX_HISTORY) * w;
-            // 0-100を画面高さにマッピング
-            const y = h - (history[i][key] / 100) * h; 
-            if (i===0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+            const y = h - (Math.max(0, Math.min(100, history[i][key])) / 100) * h; 
+            if (i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.stroke();
     }
 
-    // Input (白点線)
-    ctx.setLineDash([2, 2]);
-    drawLine('load', '#666', 1);
-    ctx.setLineDash([]);
-
-    // Legacy (赤)
+    drawLine('load', '#444', 1, [2, 2]);
     drawLine('legacy', '#ff5555', 2);
-
-    // HAN (緑)
     drawLine('han', '#00ff88', 3);
 }
 
@@ -203,9 +146,7 @@ function loop() {
     draw();
     requestAnimationFrame(loop);
 }
-
 loop();
-
 </script>
 </body>
 </html>
