@@ -262,9 +262,7 @@ To prevent semantic leakage:
 > It does not handle meaning, optimization, or history.  
 > Its behavior is determined entirely by structural invariants.**
 
-
 ---
-### Hi there 👋
-[![Hits](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
 
+[![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
 
