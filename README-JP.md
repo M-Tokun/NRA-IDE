@@ -22,7 +22,7 @@ NRA‑IDE は **因果構造の安全エンジン** であり、意味エンジ�
 
 ## **1. リポジトリ構成**
 
-- **`src/`** — 構造エンジン本体
+- **`gate/`** — 公理的基盤・制約強制
 - **`docs/`** — 構造ドキュメント
 - **`examples/`** — 構造挙動デモ
 - **`tools/`** — 検証ユーティリティ
@@ -42,13 +42,15 @@ NRA‑IDE は **因果構造の安全エンジン** であり、意味エンジ�
 ```bash
 git clone https://github.com/M-Tokun/NRA-IDE.git
 cd NRA-IDE
-python3 src/ide_threshold_handler.py
+python3 gate/jp/nra_gate_threshold_ja.py
 ```
 出力は **構造情報のみ**。
 
-### **構造図版**
-構造概念の視覚的説明：
-- [Zone 遷移と Fail-Closed](./config/structural_zones_ja.md)
+### **ドキュメントゲートウェイ**
+
+完全な構造ドキュメントとナビゲーション：
+- **[日本語ゲート](./gate/jp/README_ja.md)** — 総合案内ページ
+- **[English Gate](./gate/en/README.md)** — Comprehensive entry point
 
 ---
 
@@ -186,6 +188,11 @@ Fail-Closed はエラーや失敗ではなく、**「構造的正しさ」** の
 
 # このリポジトリ内の記述自体はRCA-IDEを適用したAIアシスタントで記述しています。
 ---
+[![](https://u8views.com/api/v1/github/users/M-Tokun/views.svg)](https://u8views.com/github/M-Tokun)
+
+
+---
+
 ## **ドキュメントゲートウェイ**
 
 ### **Gate: NRA-IDEへの入口**
@@ -198,4 +205,4 @@ Fail-Closed はエラーや失敗ではなく、**「構造的正しさ」** の
 *自然文が下手ですがご理解をお願いします。
 
 ---
-[![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
+[![](https://u8views.com/api/v1/github/users/M-Tokun/views.svg)](https://u8views.com/github/M-Tokun)
