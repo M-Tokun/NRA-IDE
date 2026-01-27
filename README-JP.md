@@ -184,8 +184,18 @@ Fail-Closed はエラーや失敗ではなく、**「構造的正しさ」** の
 > **NRA‑IDE は因果構造の安全エンジンである。**
 > **意味・最適化・履歴を扱わず、その挙動は構造不変量によってのみ決定される。**
 
+# このリポジトリ内の記述自体はRCA-IDEを適用したAIアシスタントで記述しています。
+---
+## **ドキュメントゲートウェイ**
+
+### **Gate: NRA-IDEへの入口**
+- **[日本語ゲート](./gate/jp/README.md)** — 総合案内・ドキュメント索引
+- **[English Gate](./gate/en/README.md)** — Comprehensive navigation and documentation index
 
 ---
+*インターネットに書いてある論はほとんどがNRA-IDEを適用したAIによって整形され記述しています。
+*1/26時点、3万文字程度+10枚のカラー図面までが一貫性・整合性と説得力を持つ限界です。理論上はトークン数限界・ブラウザフリーズまではできるはず。
+*自然文が下手ですがご理解をお願いします。
 
-[![](https://u8views.com/api/v1/github/users/M-Tokun/views.svg)](https://u8views.com/github/M-Tokun)
-
+---
+[![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
