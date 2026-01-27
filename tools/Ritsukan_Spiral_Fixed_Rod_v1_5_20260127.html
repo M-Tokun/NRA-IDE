@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>律環-螺旋：散逸構造論ベース可視化 v1.5 (Rod固定版)</title>
+    <style>
+        body { 
+            margin: 0; 
+            background-color: #050505; 
+            overflow: hidden; 
+            color: #ccc; 
+            font-family: 'Courier New', monospace; 
+        }
+        canvas { display: block; }
+        #info { 
+            position: absolute; 
+            top: 20px; 
+            left: 20px; 
+            background: rgba(0, 20, 40, 0.85); 
+            padding: 15px; 
+            border-left: 4px solid cyan;
+            border-radius: 4px;
+            pointer-events: none;
+            max-width: 280px;
+        }
+        h1 { 
+            margin: 0 0 10px 0; 
+            font-size: 14px; 
+            color: cyan; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        .section-title {
+            font-size: 11px;
+            color: #888;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 3px;
+        }
+        .legend { 
+            display: flex; 
+            align-items: center; 
+            margin-top: 4px; 
+            font-size: 11px; 
+        }
+        .box { 
+            width: 12px; 
+            height: 12px; 
+            margin-right: 8px; 
+            border-radius: 2px; 
+        }
+        .blue { background-color: #0088ff; box-shadow: 0 0 5px #0088ff; }
+        .red { background-color: #ff3333; box-shadow: 0 0 5px #ff3333; }
+        .green { background-color: #00ff88; box-shadow: 0 0 5px #00ff88; }
+        .yellow { background-color: #ffcc00; box-shadow: 0 0 5px #ffcc00; }
+        .purple { background-color: #aa55ff; box-shadow: 0 0 5px #aa55ff; }
+        #status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 20, 40, 0.85);
+            padding: 12px 15px;
+            border-left: 4px solid #00ff88;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+            min-width: 200px;
+        }
+        .status-label { color: #888; }
+        .status-value { color: #fff; font-weight: bold; }
+        .status-ok { color: #00ff88; }
+        .status-warn { color: #ffcc00; }
+        .status-danger { color: #ff3333; }
+        
+        #fluctuation-meter {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 20, 40, 0.85);
+            padding: 12px 15px;
+            border-left: 4px solid #00ff88;
+            border-radius: 4px;
+            font-size: 11px;
+            width: 180px;
+        }
+        .meter-title {
+            color: #888;
+            margin-bottom: 8px;
+        }
+        .meter-bar {
+            height: 20px;
+            background: #111;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        .meter-threshold {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #aa55ff;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 9px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>律環-螺旋 散逸構造論 v1.5</h1>
+        <div class="section-title">構造要素</div>
+        <div class="legend"><div class="box blue"></div>Spiral（律環コンテキスト）</div>
+        <div class="legend"><div class="box red"></div>Rod（固定指標/右端）</div>
+        
+        <div class="section-title">散逸構造論</div>
+        <div class="legend"><div class="box green"></div>厚み（許容範囲）</div>
+        <div class="legend"><div class="box yellow"></div>ゆらぎ（呼吸/生命）</div>
+        <div class="legend"><div class="box purple"></div>分岐点（臨界領域）</div>
+        
+        <div class="section-title">§☆ Working Hypothesis</div>
+        <div style="font-size:10px; color:#666; line-height:1.4;">
+            通常：ゆらぎは極めて静穏（呼吸）<br>
+            揺動：振幅が拡大（内側浸食防止）<br>
+            臨界：外縁に接近（まれ）<br>
+            <br>
+            <span style="color:#ff6666;">Rod = 完全固定（右端外縁）</span><br>
+            <span style="color:#66ff66;">接点 = 唯一の入出力ポート</span>
+        </div>
+    </div>
+    
+    <div id="status">
+        <div class="status-row">
+            <span class="status-label">エントロピー生成 σ:</span>
+            <span class="status-value" id="sigma">0.00</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">散逸経路 J:</span>
+            <span class="status-value" id="dissipation">0.00</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">滞留量 (σ-J):</span>
+            <span class="status-value" id="congestion">0.00</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">状態:</span>
+            <span class="status-value status-ok" id="state">非平衡定常</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">位相 φ:</span>
+            <span class="status-value" id="phase">0.00</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">角速度 ω:</span>
+            <span class="status-value" id="omega">> 0 ✓</span>
+        </div>
+    </div>
+    
+    <div id="fluctuation-meter">
+        <div class="meter-title">ゆらぎ / 厚み 比率</div>
+        <div class="meter-bar">
+            <div class="meter-fill" id="meter-fill"></div>
+            <div class="meter-threshold" style="left: 70%;"></div>
+        </div>
+        <div class="meter-labels">
+            <span>0%</span>
+            <span style="color:#aa55ff;">臨界70%</span>
+            <span>100%</span>
+        </div>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+
+<script>
+/**
+ * 律環-螺旋 散逸構造論可視化エンジン v1.5
+ * 
+ * v1.5 修正点（2025-01-27）：
+ * - 【重大修正】赤いRodを完全固定（右端外縁 x=+radius, z=0）
+ * - カメラ固定（angle回転削除、らせんのみ回転）
+ * - Sync Nodes（白点）削除（視認性向上目的だったので不要）
+ * - Rod = 唯一の入出力ポート（原因投入・結果排出）
+ * - 接点 = 小数点排熱場所・ログ出力・構造投入
+ * 
+ * v1.4からの理論的整合性：
+ * - 厚み・ゆらぎ・比率判定ロジックは維持
+ * - 中心は完全空洞（空）
+ * - ω > 0 保証（位相生成による時間の流れ）
+ */
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+let spiralRotation = 0; // らせんのみ回転
+let time = 0;
+
+// 設定
+const CONFIG = {
+    radius: 120,
+    turnCount: 4.5,
+    pointDensity: 100,
+    heightTotal: 600,
+    camDist: 1000,
+    spiralRotationSpeed: 0.008, // らせんの回転速度
+    
+    // 散逸構造論パラメータ（v1.4継承）
+    thickness: 30,
+    baseFluctuationAmp: 0.6,
+    maxFluctuationAmp: 3.5,
+    fluctuationFreq: 0.02,
+    fluctuationTimeScale: 0.1,
+    criticalThreshold: 0.7,
+    
+    // エントロピー動態
+    baseEntropy: 0.5,
+    entropyVariation: 0.15,
+    entropyTimeScale: 0.05,
+    
+    // 臨界イベント
+    criticalEventProb: 0.002,
+    criticalDuration: 240
+};
+
+// 状態変数
+let state = {
+    sigma: 0,
+    J: 0,
+    congestion: 0,
+    phase: 0,
+    currentFluctuationAmp: CONFIG.baseFluctuationAmp,
+    isCritical: false,
+    criticalTimer: 0,
+    fluctuationRatio: 0
+};
+
+let spiralPoints = [];
+let rodPoints = [];
+
+function initData() {
+    spiralPoints = [];
+    rodPoints = [];
+    
+    const totalPoints = CONFIG.turnCount * CONFIG.pointDensity;
+    const yOffset = CONFIG.heightTotal / 2;
+
+    // 螺旋データ生成
+    for (let i = 0; i <= totalPoints; i++) {
+        const t = (i / CONFIG.pointDensity) * 2 * Math.PI;
+        const normalizedY = (i / totalPoints) * CONFIG.heightTotal - yOffset;
+        const x = Math.cos(t) * CONFIG.radius;
+        const z = Math.sin(t) * CONFIG.radius;
+        const y = -normalizedY;
+
+        spiralPoints.push({ 
+            x, y, z, 
+            t: t,
+            index: i
+        });
+    }
+
+    // Rod生成（完全固定：右端外縁 x=+radius, z=0）
+    const step = 15;
+    for (let i = 0; i <= CONFIG.heightTotal; i += step) {
+        const rodY = i - yOffset;
+        rodPoints.push({ 
+            x: CONFIG.radius,  // 右端固定
+            y: -rodY, 
+            z: 0               // z=0で固定
+        });
+    }
+}
+
+// ゆらぎを計算（v1.4継承）
+function calculateFluctuation(t, globalTime, amplitude) {
+    const slowTime = globalTime * CONFIG.fluctuationTimeScale;
+    const f1 = Math.sin(t * CONFIG.fluctuationFreq + slowTime) * amplitude;
+    const f2 = Math.cos(t * CONFIG.fluctuationFreq * 0.5 - slowTime * 0.8) * amplitude * 0.5;
+    return f1 + f2;
+}
+
+// 臨界イベントの管理
+function updateCriticalEvent() {
+    if (state.isCritical) {
+        state.criticalTimer--;
+        if (state.criticalTimer <= 0) {
+            state.isCritical = false;
+        }
+    } else {
+        if (Math.random() < CONFIG.criticalEventProb) {
+            state.isCritical = true;
+            state.criticalTimer = CONFIG.criticalDuration;
+        }
+    }
+    
+    const targetAmp = state.isCritical ? CONFIG.maxFluctuationAmp : CONFIG.baseFluctuationAmp;
+    state.currentFluctuationAmp += (targetAmp - state.currentFluctuationAmp) * 0.01; 
+}
+
+// エントロピー動態を更新
+function updateEntropyDynamics() {
+    updateCriticalEvent();
+    
+    const slowTime = time * CONFIG.entropyTimeScale;
+    const criticalBoost = state.isCritical ? 0.2 : 0;
+    state.sigma = CONFIG.baseEntropy + Math.sin(slowTime) * CONFIG.entropyVariation + criticalBoost;
+    
+    const dissipationLag = state.isCritical ? 0.5 : 0.9;
+    state.J = CONFIG.baseEntropy + Math.sin(slowTime - 0.5) * CONFIG.entropyVariation * dissipationLag;
+    
+    state.congestion = state.sigma - state.J;
+    state.phase = (time * CONFIG.spiralRotationSpeed * 10) % (2 * Math.PI);
+    
+    // 比率計算
+    state.fluctuationRatio = state.currentFluctuationAmp / (CONFIG.thickness * 0.3);
+}
+
+// ステータス表示を更新
+function updateStatusDisplay() {
+    document.getElementById('sigma').textContent = state.sigma.toFixed(3);
+    document.getElementById('dissipation').textContent = state.J.toFixed(3);
+    document.getElementById('congestion').textContent = state.congestion.toFixed(3);
+    document.getElementById('phase').textContent = state.phase.toFixed(2);
+    
+    const stateEl = document.getElementById('state');
+    
+    if (state.fluctuationRatio < 0.4) {
+        stateEl.textContent = '非平衡定常';
+        stateEl.className = 'status-value status-ok';
+    } else if (state.fluctuationRatio < CONFIG.criticalThreshold) {
+        stateEl.textContent = '揺動状態';
+        stateEl.className = 'status-value status-warn';
+    } else {
+        stateEl.textContent = '臨界接近';
+        stateEl.className = 'status-value status-danger';
+    }
+    
+    const meterFill = document.getElementById('meter-fill');
+    const ratio = Math.min(state.fluctuationRatio * 100, 100);
+    meterFill.style.width = ratio + '%';
+    
+    if (ratio < 40) {
+        meterFill.style.background = 'linear-gradient(90deg, #00aa55, #00ff88)';
+    } else if (ratio < 70) {
+        meterFill.style.background = 'linear-gradient(90deg, #00ff88, #ffcc00)';
+    } else {
+        meterFill.style.background = 'linear-gradient(90deg, #ffcc00, #ff3333)';
+    }
+}
+
+// 3D投影（カメラ固定、らせんのみ回転）
+function project3D(x, y, z, applyRotation = false) {
+    let rx = x, rz = z;
+    
+    if (applyRotation) {
+        // らせんのみ回転適用
+        const cosR = Math.cos(spiralRotation);
+        const sinR = Math.sin(spiralRotation);
+        rx = x * cosR - z * sinR;
+        rz = x * sinR + z * cosR;
+    }
+    // Rodは回転しない（applyRotation=false）
+    
+    const scale = CONFIG.camDist / (CONFIG.camDist + rz);
+    return {
+        x: rx * scale + width / 2,
+        y: y * scale + height / 2,
+        scale: scale,
+        z: rz
+    };
+}
+
+function draw() {
+    ctx.fillStyle = 'rgba(5, 5, 5, 0.1)';
+    ctx.fillRect(0, 0, width, height);
+
+    // ゆらぎ適用後の螺旋点を計算
+    const fluctuatedSpiral = spiralPoints.map(p => {
+        const fluct = calculateFluctuation(p.t, time, state.currentFluctuationAmp);
+        const newRadius = CONFIG.radius + fluct;
+        
+        return {
+            ...p,
+            x: Math.cos(p.t) * newRadius,
+            z: Math.sin(p.t) * newRadius
+        };
+    });
+
+    // 螺旋を3D投影（回転あり）
+    const projectedSpiral = fluctuatedSpiral.map(p => {
+        const proj = project3D(p.x, p.y, p.z, true);
+        return { ...p, ...proj };
+    }).sort((a, b) => a.z - b.z);
+
+    // Rodを3D投影（回転なし・完全固定）
+    const projectedRod = rodPoints.map(p => {
+        const proj = project3D(p.x, p.y, p.z, false);
+        return { ...p, ...proj };
+    });
+
+    // === 厚みの描画 ===
+    drawThicknessTube(projectedSpiral);
+
+    // === 螺旋の線を描画 ===
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0, 136, 255, 0.9)';
+    ctx.lineWidth = 2.0;
+    let firstSpiral = true;
+    projectedSpiral.forEach(p => {
+        if (firstSpiral) {
+            ctx.moveTo(p.x, p.y);
+            firstSpiral = false;
+        } else {
+            ctx.lineTo(p.x, p.y);
+        }
+    });
+    ctx.stroke();
+
+    // === Rod（固定直線）を描画 ===
+    if (projectedRod.length > 1) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 51, 51, 0.95)';
+        ctx.lineWidth = 4;
+        ctx.moveTo(projectedRod[0].x, projectedRod[0].y);
+        projectedRod.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.stroke();
+        
+        // Rodの強調（右端固定を視覚化）
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = 'rgba(255, 51, 51, 0.6)';
+        ctx.beginPath();
+        ctx.moveTo(projectedRod[0].x, projectedRod[0].y);
+        projectedRod.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+}
+
+// 厚み（許容範囲）をチューブとして描画
+function drawThicknessTube(projectedSpiral) {
+    if (projectedSpiral.length < 2) return;
+
+    // 外枠のチューブ
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0, 255, 136, 0.08)';
+    ctx.lineWidth = CONFIG.thickness * 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    let first = true;
+    projectedSpiral.forEach(p => {
+        if (first) {
+            ctx.moveTo(p.x, p.y);
+            first = false;
+        } else {
+            ctx.lineTo(p.x, p.y);
+        }
+    });
+    ctx.stroke();
+
+    // ゆらぎの可視化（中心線の周りのグロー）
+    ctx.beginPath();
+    const currentWidth = CONFIG.thickness * 0.5 + state.currentFluctuationAmp * 3;
+    
+    let glowColor;
+    if (state.fluctuationRatio < 0.4) {
+        glowColor = 'rgba(0, 200, 100, 0.15)';
+    } else if (state.fluctuationRatio < CONFIG.criticalThreshold) {
+        glowColor = 'rgba(255, 200, 50, 0.2)';
+    } else {
+        glowColor = 'rgba(255, 50, 50, 0.25)';
+    }
+
+    ctx.strokeStyle = glowColor;
+    ctx.lineWidth = currentWidth;
+    
+    first = true;
+    projectedSpiral.forEach(p => {
+        if (first) {
+            ctx.moveTo(p.x, p.y);
+            first = false;
+        } else {
+            ctx.lineTo(p.x, p.y);
+        }
+    });
+    ctx.stroke();
+}
+
+function animate() {
+    time += 0.016;
+    spiralRotation += CONFIG.spiralRotationSpeed; // らせんのみ回転
+    
+    updateEntropyDynamics();
+    updateStatusDisplay();
+    draw();
+    
+    requestAnimationFrame(animate);
+}
+
+function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resize);
+resize();
+initData();
+animate();
+</script>
+</body>
+</html>
