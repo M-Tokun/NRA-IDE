@@ -30,7 +30,7 @@ This README is aligned with the internal specification (00–12 chapters + warni
 
 ## **1. Repository Structure**
 
-- **`src/`** — Core structural engine  
+- **`gate/`** — Axiomatic foundation and constraint enforcement  
 - **`docs/`** — Structural documentation  
 - **`examples/`** — Demonstrations (structure‑only behavior)  
 - **`tools/`** — Verification utilities  
@@ -53,15 +53,16 @@ No semantic processing is implemented anywhere.
 ```bash
 git clone https://github.com/M-Tokun/NRA-IDE.git
 cd NRA-IDE
-python3 src/ide_threshold_handler.py
+python3 gate/en/nra_gate_threshold.py
 ```
 
 Execution produces **structural outputs only**.
 
-### **Structural Diagrams**
+### **Documentation Gateway**
 
-For visual explanations of structural concepts:
-- [Zone Transitions and Fail-Closed](./config/structural_zones.md)
+For complete structural documentation and navigation:
+- **[English Gate](./gate/en/README.md)** — Comprehensive entry point
+- **[Japanese Gate (日本語ゲート)](./gate/jp/README_ja.md)** — 総合案内ページ
 ---
 
 ## **3. Licensing & Commercial Use**
@@ -282,5 +283,4 @@ To prevent semantic leakage:
 * Please excuse any awkward natural language expressions.
 
 ---
-
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
