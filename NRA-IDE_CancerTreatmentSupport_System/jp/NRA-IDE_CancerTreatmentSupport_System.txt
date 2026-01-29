@@ -1,0 +1,13 @@
+NRA-IDE_CancerTreatmentSupport_System
+
+NRA-IDE_CancerTreatmentSupport_System/
+├── README.md                                          <-- [1] プロジェクト概要
+├── 00_Documentation/
+│   └── CancerTreatmentSupport_NRA-IDE_Master_Definition_26-0130.md  <-- [2] 正典（仕様書）
+├── 10_Hardware_Design/
+│   ├── src/
+│   │   └── BioCalibrator_Core_Logic_26-0130.v         <-- [3] FPGA回路コード
+│   └── simulation/
+│       └── Testbench_BruteForce_Calibration_26-0130.v <-- [4] 総当たり検証コード
+└── 20_Software_Host/
+    └── Safety_Map_Visualizer_26-0130.py               <-- [5] 適合マップ描画ツール
