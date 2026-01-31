@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>律環-螺旋：絶対境界可視化 v1.6 (破裂と閉塞)</title>
+    <style>
+        body { 
+            margin: 0; 
+            background-color: #050505; 
+            overflow: hidden; 
+            color: #ccc; 
+            font-family: 'Courier New', monospace; 
+        }
+        canvas { display: block; }
+        #info { 
+            position: absolute; 
+            top: 20px; 
+            left: 20px; 
+            background: rgba(0, 10, 20, 0.9); 
+            padding: 15px; 
+            border-left: 4px solid cyan;
+            border-radius: 4px;
+            pointer-events: none;
+            max-width: 300px;
+        }
+        h1 { 
+            margin: 0 0 10px 0; 
+            font-size: 14px; 
+            color: cyan; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        .section-title {
+            font-size: 11px;
+            color: #888;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 3px;
+        }
+        .legend { 
+            display: flex; 
+            align-items: center; 
+            margin-top: 4px; 
+            font-size: 11px; 
+        }
+        .box { 
+            width: 12px; 
+            height: 12px; 
+            margin-right: 8px; 
+            border-radius: 2px; 
+            border: 1px solid #333;
+        }
+        /* 色定義 */
+        .wall { background-color: transparent; border: 1px solid #00ff88; }
+        .flow { background-color: #0088ff; }
+        .burst { background-color: #ff3333; }
+        .clog { background-color: #aa55ff; }
+
+        #status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 10, 20, 0.9);
+            padding: 12px 15px;
+            border-left: 4px solid #00ff88;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+            min-width: 220px;
+        }
+        .status-label { color: #888; }
+        .status-value { color: #fff; font-weight: bold; }
+        
+        /* 境界モニタリング用メーター */
+        #boundary-meter {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 10, 20, 0.9);
+            padding: 15px;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .meter-container {
+            position: relative;
+            height: 30px;
+            background: #222;
+            margin-top: 10px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        /* ゾーン定義 */
+        .zone-clog {
+            position: absolute;
+            left: 0; width: 25%; height: 100%;
+            background: repeating-linear-gradient(45deg, #330033, #330033 5px, #440044 5px, #440044 10px);
+            border-right: 1px solid #aa55ff;
+        }
+        .zone-safe {
+            position: absolute;
+            left: 25%; width: 50%; height: 100%;
+            background: #001122;
+        }
+        .zone-burst {
+            position: absolute;
+            left: 75%; width: 25%; height: 100%;
+            background: repeating-linear-gradient(45deg, #330000, #330000 5px, #440000 5px, #440000 10px);
+            border-left: 1px solid #ff3333;
+        }
+        /* 指針 */
+        .needle {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 2px;
+            background: #fff;
+            box-shadow: 0 0 5px #fff;
+            transition: left 0.1s;
+            z-index: 10;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        /* 警告表示 */
+        #alert-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+            text-shadow: 0 0 10px red;
+            display: none;
+            border: 2px solid red;
+            padding: 20px;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>律環公理 v1.6 絶対境界定義</h1>
+        <div class="section-title">構造的定義 (Structural)</div>
+        <div class="legend"><div class="box wall"></div>厚み（血管壁/許容限界）</div>
+        <div class="legend"><div class="box flow"></div>ゆらぎ（血流/生命活動）</div>
+        
+        <div class="section-title">境界条件 (Boundaries)</div>
+        <div class="legend"><div class="box burst"></div>上限突破：破裂 (Burst)</div>
+        <div class="legend"><div class="box clog"></div>下限抵触：閉塞 (Clog)</div>
+        
+        <div style="font-size:10px; color:#aaa; margin-top:15px; line-height:1.4;">
+            <span style="color:cyan;">[CORE RULE]</span><br>
+            ゆらぎ計算は「壁の内側」でのみ有効。<br>
+            壁への接触は計算不能な物理破壊を意味する。
+        </div>
+    </div>
+    
+    <div id="status">
+        <div class="status-row">
+            <span class="status-label">壁の厚み (Capacity):</span>
+            <span class="status-value" id="wall-thickness">Fixed</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">現在のゆらぎ (Pressure):</span>
+            <span class="status-value" id="current-pressure">Normal</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">状態判定:</span>
+            <span class="status-value" id="system-status" style="color:#00ff88">STABLE</span>
+        </div>
+    </div>
+    
+    <div id="boundary-meter">
+        <div style="font-size:11px; color:#888;">境界モニター (Boundary Monitor)</div>
+        <div class="meter-container">
+            <div class="zone-clog"></div>
+            <div class="zone-safe"></div>
+            <div class="zone-burst"></div>
+            <div class="needle" id="needle"></div>
+        </div>
+        <div class="meter-labels">
+            <span style="color:#aa55ff;">閉塞(Clog)</span>
+            <span style="color:#00ff88;">安全域(Safe)</span>
+            <span style="color:#ff3333;">破裂(Burst)</span>
+        </div>
+    </div>
+
+    <div id="alert-box">CRITICAL FAILURE</div>
+    
+    <canvas id="canvas"></canvas>
+
+<script>
+/**
+ * 律環-螺旋：絶対境界可視化 v1.6
+ * * 変更点:
+ * 1. 厚みを「光」ではなく「壁（物理的境界）」として描画
+ * 2. 上限（破裂）だけでなく下限（閉塞）の閾値を設定
+ * 3. ゆらぎ計算は、この壁の内側でのみ「正常」とし、接触時は警告
+ */
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+let time = 0;
+let spiralRotation = 0;
+
+// 設定
+const CONFIG = {
+    radius: 120,          // 螺旋の基本半径
+    wallRadius: 25,       // 管の太さ（半径）= これが「厚み」の限界値
+    turnCount: 4,
+    pointDensity: 80,
+    heightTotal: 600,
+    camDist: 900,
+    
+    // 境界パラメータ (0.0 - 1.0)
+    // 0.0=中心, 1.0=壁
+    clogThreshold: 0.15,  // これより振幅が小さいと「閉塞（流れが止まる）」
+    burstThreshold: 0.90, // これより振幅が大きいと「破裂」
+    
+    // シミュレーション
+    basePressure: 0.5,    // 基準圧力（0.0-1.0）
+    pressureSpeed: 0.005
+};
+
+// 状態
+let state = {
+    pressure: 0.5,        // 現在の圧力係数 (0=閉塞, 1=破裂)
+    status: 'STABLE',     // STABLE, WARNING, BURST, CLOG
+    targetPressure: 0.5
+};
+
+let spiralPoints = [];
+
+function initData() {
+    spiralPoints = [];
+    const totalPoints = CONFIG.turnCount * CONFIG.pointDensity;
+    const yOffset = CONFIG.heightTotal / 2;
+
+    for (let i = 0; i <= totalPoints; i++) {
+        const t = (i / CONFIG.pointDensity) * 2 * Math.PI;
+        const normalizedY = (i / totalPoints) * CONFIG.heightTotal - yOffset;
+        
+        // 螺旋の中心線座標
+        const x = Math.cos(t) * CONFIG.radius;
+        const z = Math.sin(t) * CONFIG.radius;
+        const y = -normalizedY;
+
+        spiralPoints.push({ x, y, z, t });
+    }
+}
+
+// 圧力（ゆらぎ）のシミュレーション
+// 自然な「ゆらぎ」が時折危険域に達するよう制御
+function updateSimulation() {
+    // ランダムにターゲット圧力を変更
+    if (Math.random() < 0.02) {
+        // 0.1(閉塞) 〜 1.1(破裂) の間でランダムターゲット
+        state.targetPressure = 0.1 + Math.random() * 1.0;
+    }
+    
+    // 滑らかに遷移
+    state.pressure += (state.targetPressure - state.pressure) * 0.02;
+    
+    // 正弦波による周期変動を加える（呼吸）
+    const breathing = Math.sin(time * 2) * 0.05;
+    const currentVal = state.pressure + breathing;
+    
+    // ステータス判定
+    const systemStatus = document.getElementById('system-status');
+    const alertBox = document.getElementById('alert-box');
+    
+    if (currentVal >= CONFIG.burstThreshold) {
+        state.status = 'BURST';
+        systemStatus.textContent = 'WARNING: RUPTURE RISK';
+        systemStatus.style.color = '#ff3333';
+        if(currentVal > 1.0) alertBox.style.display = 'block';
+        alertBox.textContent = "VESSEL RUPTURE";
+        alertBox.style.color = "#ff3333";
+        alertBox.style.borderColor = "#ff3333";
+    } else if (currentVal <= CONFIG.clogThreshold) {
+        state.status = 'CLOG';
+        systemStatus.textContent = 'WARNING: OCCLUSION';
+        systemStatus.style.color = '#aa55ff';
+        if(currentVal < 0.05) alertBox.style.display = 'block';
+        alertBox.textContent = "VESSEL OCCLUSION";
+        alertBox.style.color = "#aa55ff";
+        alertBox.style.borderColor = "#aa55ff";
+    } else {
+        state.status = 'STABLE';
+        systemStatus.textContent = 'STABLE FLOW';
+        systemStatus.style.color = '#00ff88';
+        alertBox.style.display = 'none';
+    }
+    
+    // メーター更新
+    const needle = document.getElementById('needle');
+    // 0.0 -> 0%, 1.0 -> 100%
+    const pos = Math.max(0, Math.min(100, currentVal * 100));
+    needle.style.left = pos + '%';
+    
+    document.getElementById('current-pressure').textContent = currentVal.toFixed(2);
+    
+    return currentVal;
+}
+
+// 3D投影
+function project3D(x, y, z) {
+    // 螺旋回転
+    const cosR = Math.cos(spiralRotation);
+    const sinR = Math.sin(spiralRotation);
+    const rx = x * cosR - z * sinR;
+    const rz = x * sinR + z * cosR;
+    
+    const scale = CONFIG.camDist / (CONFIG.camDist + rz);
+    return {
+        x: rx * scale + width / 2,
+        y: y * scale + height / 2,
+        scale: scale,
+        z: rz
+    };
+}
+
+function draw() {
+    ctx.fillStyle = 'rgba(5, 5, 5, 0.2)'; // 軌跡を残す
+    ctx.fillRect(0, 0, width, height);
+
+    const currentPressure = updateSimulation(); // 0.0 - 1.0+
+    
+    // 投影計算
+    const projected = spiralPoints.map(p => {
+        return project3D(p.x, p.y, p.z);
+    });
+
+    // === 1. 外壁（Boundary Walls）の描画 ===
+    // 律環公理の「厚み」＝ここを超えてはいけない物理的限界線
+    drawWall(projected, CONFIG.wallRadius, 'rgba(0, 255, 136, 0.15)', 'rgba(0, 255, 136, 0.4)');
+
+    // === 2. 内部流体（Fluctuation）の描画 ===
+    // 現在の圧力に応じた太さで描画
+    // 閉塞(Clog)時は極端に細くなり、破裂(Burst)時は壁を突き抜ける
+    
+    const flowRadius = CONFIG.wallRadius * currentPressure;
+    
+    let flowColor;
+    if (state.status === 'BURST') flowColor = 'rgba(255, 50, 50, 0.8)';
+    else if (state.status === 'CLOG') flowColor = 'rgba(170, 85, 255, 0.8)';
+    else flowColor = 'rgba(0, 136, 255, 0.8)';
+    
+    // 流れの本体
+    ctx.beginPath();
+    // 視認性のため簡易的に線幅で表現
+    projected.forEach((p, i) => {
+        // 遠近法による太さ調整
+        const r = flowRadius * p.scale;
+        
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+    });
+    
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = flowRadius * 2 * (CONFIG.camDist/1000); // 簡易スケール
+    ctx.strokeStyle = flowColor;
+    ctx.stroke();
+    
+    // 中心線（Core Logic Line）
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 1;
+    projected.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+    
+    // === 3. 異常発生時のエフェクト ===
+    if (state.status === 'BURST') {
+        // 壁の外にはみ出すスパイクを描画
+        drawSpikes(projected, CONFIG.wallRadius * 1.2, '#ff0000');
+    }
+}
+
+// 壁（チューブ）を描画する関数
+// 左右の境界線として描画し、物理的な「管」を意識させる
+function drawWall(projectedPoints, radius, fillColor, strokeColor) {
+    // 左側の壁と右側の壁を計算して描画するのは2D Canvasでは複雑なため
+    // 簡易的に太い透明線＋縁取りで表現する
+    
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    // 内部（中空感）
+    ctx.beginPath();
+    let first = true;
+    projectedPoints.forEach(p => {
+        if(first) { ctx.moveTo(p.x, p.y); first=false; }
+        else ctx.lineTo(p.x, p.y);
+    });
+    ctx.lineWidth = radius * 2 * (CONFIG.camDist/1000);
+    ctx.strokeStyle = fillColor;
+    ctx.stroke();
+    
+    // 境界線（壁）
+    // 本来は法線計算が必要だが、ここでは視覚的メタファーとして
+    // メインのラインの上下にオフセットしたラインを描く擬似処理とする
+    // （厳密な3Dチューブ描画は重いため、ロジック優先）
+}
+
+function drawSpikes(points, radius, color) {
+    ctx.fillStyle = color;
+    points.forEach((p, i) => {
+        if (i % 5 === 0 && Math.random() > 0.5) {
+            const size = Math.random() * 10 * p.scale;
+            const angle = Math.random() * Math.PI * 2;
+            const dist = radius * p.scale;
+            
+            ctx.beginPath();
+            ctx.arc(
+                p.x + Math.cos(angle) * dist,
+                p.y + Math.sin(angle) * dist,
+                size, 0, Math.PI * 2
+            );
+            ctx.fill();
+        }
+    });
+}
+
+function animate() {
+    time += 0.05;
+    spiralRotation += 0.005;
+    draw();
+    requestAnimationFrame(animate);
+}
+
+function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resize);
+resize();
+initData();
+animate();
+</script>
+</body>
+</html>
