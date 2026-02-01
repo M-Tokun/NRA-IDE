@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Standard Type A Case",
+    "copyright": "M-Tokuni"
+  },
+  "patient_id": "P001_SAMPLE",
+  "cancer_type": "Type A",
+  "cell_stiffness": 1.5,
+  "cell_viscosity": 0.05,
+  "cell_diameter": 12.0,
+  "pore_size": 8.0,
+  "flow_dp": 0.6,
+  "drug_boost": 0.0,
+  "comment": "Typical Adenocarcinoma sample"
+}
