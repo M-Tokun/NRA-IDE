@@ -1,0 +1,25 @@
+══════════════════════════════════════════════════
+NRA-IDE Clinical Report (Bio-Calibrator v1.0)
+══════════════════════════════════════════════════
+Date: 2026-02-01 14:30
+Patient ID: P001_SAMPLE
+
+[Input Parameters]
+  Stiffness (k) : 1.50 kPa
+  Viscosity (η) : 0.05 Pa·s
+  Diameter  (D) : 12.00 μm
+  Pore Size (d) : 8.00 μm
+  Flow Press(ΔP): 0.60 kPa
+
+[Analysis Result]
+  Status: SAFE (Blocked)
+  Code  : 0x00
+
+[Recommendation]
+  Optimal Boost: +3.00 kPa
+  (Drug concentration required for physical jamming)
+
+[Physician's Gate]
+  Warning: This is a computational prediction.
+  Clinical decision requires human oversight.
+══════════════════════════════════════════════════
