@@ -1,0 +1,70 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Project: NRA-IDE Cancer Treatment Support System
+# Phase:   00 (Root)
+# File:    NRA-IDE_Directory_Structure.txt
+# ═══════════════════════════════════════════════════════════════════════
+
+NRA-IDE_CancerTreatmentSupport_System/
+│
+├── README.md                                    # プロジェクト概要
+├── LICENSE.txt                                  # MIT License
+├── NRA-IDE_Directory_Structure.txt              # このファイル
+│
+├── 00_Documentation/                            # 📚 全ドキュメント
+│   ├── Master_Index.md                          # 全Phase目次（地図）
+│   ├── PHASE_1_Philosophy_Protocol.md           # 哲学・理念
+│   ├── PHASE_2_Mesoscale_Physics.md             # 物理モデル定義
+│   ├── PHASE_3_Ritsukan_Axiom.md                # 律環公理・安全機構
+│   ├── PHASE_4_Terminology_Dictionary.md        # 完全用語辞書
+│   ├── PHASE_5_System_Architecture.md           # システム構成図
+│   ├── PHASE_6_FPGA_Spec.md                     # FPGA実装仕様
+│   ├── PHASE_7_Implementation_Code.md           # 実装コード解説
+│   ├── PHASE_8_Technical_Manual.md              # 技術マニュアル
+│   └── PHASE_9_Operational_Guide.md             # 運用ガイド
+│
+├── 10_Hardware_Design/                          # ⚙️ FPGA回路設計
+│   ├── src/
+│   │   ├── Top_Module.v                         # 最上位モジュール
+│   │   ├── Cancer_Treatment_Selector.v          # 治療法セレクタ
+│   │   ├── BioCalibrator_TypeA.v                # Type A (Jamming) コア
+│   │   ├── BioCalibrator_TypeB.v                # Type B (Collective) コア
+│   │   └── UART_Interface.v                     # 通信IF (Binary)
+│   ├── simulation/
+│   │   ├── Testbench_BruteForce.v               # 総当たり検証TB
+│   │   ├── Testbench_TypeA.v                    # Type A 検証TB
+│   │   ├── Testbench_TypeB.v                    # Type B 検証TB
+│   │   └── wave_config.do                       # ModelSim波形設定
+│   └── constraints/
+│       ├── pinout_artix_7.xdc                   # Xilinxピン配置
+│       ├── pinout_cyclone_v.qsf                 # Intelピン配置
+│       └── timing.sdc                           # タイミング制約
+│
+├── 20_Software_Host/                            # 💻 ホストPC側ソフトウェア
+│   ├── main.py                                  # メインプログラム
+│   ├── fpga_interface.py                        # FPGA通信 (Binary)
+│   ├── patient_data_validator.py                # データ検証
+│   ├── clinical_report_generator.py             # レポート生成
+│   ├── safety_map_visualizer.py                 # 可視化
+│   └── requirements.txt                         # 依存ライブラリ
+│
+├── 30_Test_Data/                                # 🧪 テストデータ
+│   ├── README_TestData.md                       # データ説明
+│   ├── sample_patient_data.json                 # サンプルJSON
+│   ├── validation_test_cases.csv                # 検証ケース一覧
+│   └── expected_results.json                    # 期待値
+│
+├── 40_Output_Reports/                           # 📊 出力レポート
+│   ├── README_Reports.md                        # レポート説明
+│   ├── NRA_IDE_Report_Sample.txt                # サンプルレポート
+│   └── SafetyMap_Sample.png                     # サンプル画像
+│
+├── 50_Deployment/                               # 🚀 デプロイメント資料
+│   ├── installation_guide.md                    # インストール手順
+│   ├── deployment_checklist.md                  # 展開チェックリスト
+│   ├── system_requirements.md                   # システム要件
+│   └── bitstreams/
+│       └── README_Bitstreams.md                 # ビットストリーム取扱い
+│
+└── 60_Research/                                 # 🔬 実務リソース
+    ├── PHASE_60_Practical_Resources.md          # 物理定数・運用データ
+    └── references.md                            # 参考文献リスト
