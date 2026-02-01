@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Project: NRA-IDE Cancer Treatment Support System
+# Phase:   00 (Root)
+# File:    NRA-IDE_Directory_Structure.txt
+# Date:    2026-02-01 (Final Fix)
+# Note:    This map defines the Version 1.0 Snapshot structure.
+# ═══════════════════════════════════════════════════════════════════════
+
+NRA-IDE_CancerTreatmentSupport_System/
+│
+├── README.md                                    # プロジェクト概要 & 言語方針
+├── LICENSE.txt                                  # MIT License (利用規約・医療免責)
+├── NRA-IDE_Directory_Structure.txt              # このファイル (全体地図)
+│
+├── 00_Documentation/                            # 📚 Group 00: 全ドキュメント
+│   ├── Master_Index.md                          # 全Phase目次
+│   ├── PHASE_1_Philosophy_Protocol.md           # 哲学・理念
+│   ├── PHASE_2_Mesoscale_Physics.md             # 物理モデル定義
+│   ├── PHASE_3_Ritsukan_Axiom.md                # 律環公理（憲法）
+│   ├── PHASE_4_Terminology_Dictionary.md        # 完全用語辞書
+│   ├── PHASE_5_System_Architecture.md           # システム構成図
+│   ├── PHASE_6_FPGA_Spec.md                     # FPGA実装仕様
+│   ├── PHASE_7_Implementation_Code.md           # 実装コード解説
+│   ├── PHASE_8_Technical_Manual.md              # 技術マニュアル
+│   └── PHASE_9_Operational_Guide.md             # 運用ガイド
+│
+├── 10_Hardware_Design/                          # ⚙️ Group 10: FPGA回路設計
+│   ├── src/                                     # ソースコード
+│   │   ├── Top_Module.v                         # トップモジュール (Binary通信)
+│   │   ├── BioCalibrator_TypeA.v                # Type A (Jamming) コア
+│   │   ├── BioCalibrator_TypeB.v                # Type B (Collective) コア
+│   │   ├── Cancer_Treatment_Selector.v          # 治療法セレクタ
+│   │   └── UART_Interface.v                     # 通信インターフェース
+│   │
+│   ├── simulation/                              # 検証環境
+│   │   ├── Testbench_TypeA.v                    # 単体テストベンチ
+│   │   ├── Testbench_BruteForce.v               # 総当たり探索テスト
+│   │   └── wave_config.do                       # 波形表示設定
+│   │
+│   └── constraints/                             # 物理制約
+│       ├── timing.sdc                           # タイミング制約 (100MHz)
+│       ├── pinout_artix_7.xdc                   # Xilinx Artix-7用ピン配置
+│       └── pinout_cyclone_v.qsf                 # Intel Cyclone V用ピン配置
+│
+├── 20_Software_Host/                            # 💻 Group 20: ホスト制御
+│   ├── main.py                                  # メインプログラム
+│   ├── fpga_interface.py                        # 通信クラス (Binary Protocol)
+│   ├── patient_data_validator.py                # データ検証 (Phase 4準拠)
+│   ├── clinical_report_generator.py             # レポート生成
+│   ├── safety_map_visualizer.py                 # 安全域可視化
+│   └── requirements.txt                         # 依存ライブラリ一覧
+│
+├── 30_Test_Data/                                # 🧪 Group 30: テストデータ
+│   ├── README_TestData.md                       # データ仕様説明
+│   ├── sample_patient_data.json                 # 入力用サンプル (ゴールデンマスター)
+│   ├── validation_test_cases.csv                # 検証ケース一覧
+│   └── expected_results.json                    # 物理的期待値と根拠
+│
+├── 40_Output_Reports/                           # 📊 Group 40: 出力レポート
+│   ├── README_Reports.md                        # レポート仕様説明
+│   ├── NRA_IDE_Report_Template.txt              # 空テンプレート
+│   ├── NRA_IDE_Report_Sample.txt                # 記入済みサンプル
+│   └── SafetyMap_Description.md                 # マップ解説ドキュメント
+│
+├── 50_Deployment/                               # 🚀 Group 50: 導入ガイド
+│   ├── installation_guide.md                    # インストール手順 (No-Repo版)
+│   ├── deployment_checklist.md                  # 展開・運用チェックリスト
+│   ├── PHASE_51_Business_Plan_Draft.md          # ビジネス・プラン
+│   ├── PHASE_52_Regulatory_Reality.md           # 時間と金の壁
+│   └── PHASE_53_Provider_Disclaimer.md          # 提供者の立ち位置
+│
+└── 60_Research/                                 # 🔬 Group 60: 実務リソース
+    ├── PHASE_60_Practical_Resources.md          # 実務用データブック
+    └── references.md                            # 根拠文献リスト
