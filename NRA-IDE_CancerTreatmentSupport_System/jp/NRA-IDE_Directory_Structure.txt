@@ -2,15 +2,17 @@
 # Project: NRA-IDE Cancer Treatment Support System
 # Phase:   00 (Root)
 # File:    NRA-IDE_Directory_Structure.txt
-# Date:    2026-02-01 (Final Fix)
-# Note:    This map defines the Version 1.0 Snapshot structure.
+# Date:    2026-02-02 (Updated - Added validation and disclaimer files)
+# Note:    This map defines the Version 1.0 structure.
 # ═══════════════════════════════════════════════════════════════════════
 
 NRA-IDE_CancerTreatmentSupport_System/
 │
 ├── README.md                                    # プロジェクト概要 & 言語方針
-├── LICENSE.txt                                  # MIT License (利用規約・医療免責)
+├── LICENSE_JP.txt                               # MIT License (利用規約・医療免責)
 ├── NRA-IDE_Directory_Structure.txt              # このファイル (全体地図)
+├── 免責事項_研究用途限定.md                      # ⚠️ 非医療機器宣言・法的免責（日本語のみ）
+├── 検証プロトコル_マイクロ流路試験.md            # 🧪 物理実験による検証手順（日本語のみ）
 │
 ├── 00_Documentation/                            # 📚 Group 00: 全ドキュメント
 │   ├── Master_Index.md                          # 全Phase目次
