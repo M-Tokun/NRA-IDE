@@ -1,70 +1,55 @@
-# ═══════════════════════════════════════════════════════════════════════
-# Project: NRA-IDE Cancer Treatment Support System
-# Phase:   00 (Root)
-# File:    NRA-IDE_Directory_Structure.txt
-# ═══════════════════════════════════════════════════════════════════════
-
 NRA-IDE_CancerTreatmentSupport_System/
 │
-├── README.md                                    # プロジェクト概要
-├── LICENSE.txt                                  # MIT License
-├── NRA-IDE_Directory_Structure.txt              # このファイル
+├── 📜 README.md                     # [DONE] Project Genesis
+├── ⚖️ LICENSE.txt                    # [DONE] MIT License
+└── 🗺️ NRA-IDE_Directory_Structure.txt # [ACTIVE] This File (Structure Audit)
 │
-├── 00_Documentation/                            # 📚 全ドキュメント
-│   ├── Master_Index.md                          # 全Phase目次（地図）
-│   ├── PHASE_1_Philosophy_Protocol.md           # 哲学・理念
-│   ├── PHASE_2_Mesoscale_Physics.md             # 物理モデル定義
-│   ├── PHASE_3_Ritsukan_Axiom.md                # 律環公理・安全機構
-│   ├── PHASE_4_Terminology_Dictionary.md        # 完全用語辞書
-│   ├── PHASE_5_System_Architecture.md           # システム構成図
-│   ├── PHASE_6_FPGA_Spec.md                     # FPGA実装仕様
-│   ├── PHASE_7_Implementation_Code.md           # 実装コード解説
-│   ├── PHASE_8_Technical_Manual.md              # 技術マニュアル
-│   └── PHASE_9_Operational_Guide.md             # 運用ガイド
+├── 📚 00_Documentation/             # [90% DONE] Philosophical Foundations
+│   ├── Master_Index.md              # [DONE] Roadmap
+│   ├── PHASE_1_Philosophy_Protocol  # [DONE] Axioms
+│   ├── PHASE_2_Mesoscale_Physics    # [DONE] Governing Equations
+│   ├── PHASE_3_Ritsukan_Axiom       # [DONE] Safety Rules
+│   ├── PHASE_4_Terminology_Dict     # [DONE] Q8.8 Specs
+│   ├── PHASE_5_System_Architecture  # [DONE] Diagram
+│   ├── PHASE_6_FPGA_Spec            # [DONE] Hardware Specs
+│   ├── PHASE_7_Implementation_Ref   # [DONE] Snippets
+│   ├── PHASE_8_Technical_Manual     # [DONE] Synthesis Guide
+│   └── PHASE_9_Operational_Guide    # [DONE] Workflow
 │
-├── 10_Hardware_Design/                          # ⚙️ FPGA回路設計
+├── ⚙️ 10_Hardware_Design/            # [70% DONE] HDL Core logic
 │   ├── src/
-│   │   ├── Top_Module.v                         # 最上位モジュール
-│   │   ├── Cancer_Treatment_Selector.v          # 治療法セレクタ
-│   │   ├── BioCalibrator_TypeA.v                # Type A (Jamming) コア
-│   │   ├── BioCalibrator_TypeB.v                # Type B (Collective) コア
-│   │   └── UART_Interface.v                     # 通信IF (Binary)
-│   ├── simulation/
-│   │   ├── Testbench_BruteForce.v               # 総当たり検証TB
-│   │   ├── Testbench_TypeA.v                    # Type A 検証TB
-│   │   ├── Testbench_TypeB.v                    # Type B 検証TB
-│   │   └── wave_config.do                       # ModelSim波形設定
-│   └── constraints/
-│       ├── pinout_artix_7.xdc                   # Xilinxピン配置
-│       ├── pinout_cyclone_v.qsf                 # Intelピン配置
-│       └── timing.sdc                           # タイミング制約
+│   │   ├── Top_Module.v             # [FIXED] 3-Byte Response & CS logic
+│   │   ├── Cancer_Selector.v        # [UPDATE REQ] Add UART control for Type Selection
+│   │   ├── BioCalibrator_TypeA.v    # [DONE] Single-Cell Core
+│   │   ├── BioCalibrator_TypeB.v    # [FIXED] Non-Linear LUT implemented
+│   │   └── UART_Interface.v         # [DONE] Binary Link
+│   ├── simulation/                  # [WIP] Need full integration simulation
+│   └── constraints/                 # [DONE] Multi-vendor pinouts & Timing
 │
-├── 20_Software_Host/                            # 💻 ホストPC側ソフトウェア
-│   ├── main.py                                  # メインプログラム
-│   ├── fpga_interface.py                        # FPGA通信 (Binary)
-│   ├── patient_data_validator.py                # データ検証
-│   ├── clinical_report_generator.py             # レポート生成
-│   ├── safety_map_visualizer.py                 # 可視化
-│   └── requirements.txt                         # 依存ライブラリ
+├── 💻 20_Software_Host/              # [40% DONE] Host Intelligence
+│   ├── main.py                      # [WIP] Full integration script needed
+│   ├── fpga_interface.py            # [FIXED] 3-Byte Parity & Retry
+│   ├── data_validator.py            # [DONE] Range Guards
+│   ├── report_generator.py          # [FIXED] Timestamp & Precision
+│   ├── map_visualizer.py            # [DONE] Contour Plot
+│   └── requirements.txt             # [DONE] Dependencies
 │
-├── 30_Test_Data/                                # 🧪 テストデータ
-│   ├── README_TestData.md                       # データ説明
-│   ├── sample_patient_data.json                 # サンプルJSON
-│   ├── validation_test_cases.csv                # 検証ケース一覧
-│   └── expected_results.json                    # 期待値
+├── 🧪 30_Test_Data/                  # [60% DONE] Verification Sets
+│   ├── README_TestData.md           # [DONE] Methodology
+│   ├── sample_patient.json          # [DONE] Ref Case
+│   ├── validation_cases.csv         # [DONE] Suite
+│   └── expected_results.json        # [FIXED] Sync with 3-byte protocol
 │
-├── 40_Output_Reports/                           # 📊 出力レポート
-│   ├── README_Reports.md                        # レポート説明
-│   ├── NRA_IDE_Report_Sample.txt                # サンプルレポート
-│   └── SafetyMap_Sample.png                     # サンプル画像
+├── 📊 40_Output_Reports/             # [60% DONE] Artifact Templates
+│   ├── NRA_Report_Sample.txt        # [DONE] Ver. 1.1 Template
+│   └── SafetyMap_Sample.png         # [DONE] Description
 │
-├── 50_Deployment/                               # 🚀 デプロイメント資料
-│   ├── installation_guide.md                    # インストール手順
-│   ├── deployment_checklist.md                  # 展開チェックリスト
-│   ├── system_requirements.md                   # システム要件
-│   └── bitstreams/
-│       └── README_Bitstreams.md                 # ビットストリーム取扱い
+├── 🚀 50_Deployment/                 # [0% DONE] Placeholder only
+│   ├── install_guide.md             # [EMPTY] Need content for Clinical Setup
+│   ├── deployment_checklist.md      # [EMPTY] Need content for HW validation
+│   ├── system_requirements.md       # [EMPTY] Need content for FPGA/OS specs
+│   └── bitstreams/                  # [EMPTY] Ready for Synthesis result
 │
-└── 60_Research/                                 # 🔬 実務リソース
-    ├── PHASE_60_Practical_Resources.md          # 物理定数・運用データ
-    └── references.md                            # 参考文献リスト
+└── 🔬 60_Research/                   # [100% DONE] Empirical Evidence
+    ├── Practical_Resources.md       # [DONE] Cell constants
+    └── references.md                # [DONE] Literature
