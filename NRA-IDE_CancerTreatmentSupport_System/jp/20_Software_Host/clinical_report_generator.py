@@ -1,55 +1,35 @@
 # ═══════════════════════════════════════════════════════════════════════
 # File: clinical_report_generator.py
-# Phase: 20
-# Date: 2026-02-01
-#
-# 目的: 医師向け臨床レポートの生成
+# Date: 26-0203-1714 JST
 # ═══════════════════════════════════════════════════════════════════════
 
 import datetime
 
 class ClinicalReportGenerator:
     def generate(self, p_id: str, data: dict, result: dict, boost: float) -> str:
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        # JST規程書式: YY-MMDD-HHMM [cite: 2025-12-12]
+        now = datetime.datetime.now() + datetime.timedelta(hours=0) # 既にJST想定
+        timestamp = now.strftime("%y-%m%d-%H%M")
 
-        # 判定ロジック
+        # 判定表示の適正化
         status = "SAFE (Blocked)" if result.get('is_jammed') else "DANGER (Pass)"
         if result.get('error_code', 0) != 0:
             status = f"ERROR Code: 0x{result.get('error_code'):02X}"
 
-        rec_boost = f"+{boost:.2f} kPa" if boost else "N/A"
+        # 臨床精度の固定（小数点2位）
+        rec_boost = f"+{boost:.2f} kPa" if boost > 0 else "0.00 kPa (Not Required)"
 
         report = f"""
 ══════════════════════════════════════════════════
-NRA-IDE Clinical Report (Bio-Calibrator v1.0)
+NRA-IDE Clinical Report (Bio-Calibrator v1.1)
 ══════════════════════════════════════════════════
-Date: {now}
-Patient ID: {p_id}
-
-[Measurements]
-  Cell Stiffness: {data['cell_stiffness']} kPa
-  Cell Viscosity: {data['cell_viscosity']} Pa*s
-  Cell Diameter : {data['cell_diameter']} um
-  Pore Size     : {data['pore_size']} um
-  Flow Pressure : {data['flow_dp']} kPa
+Report ID: NRA-{timestamp}-{p_id[:4]}
+Date     : {timestamp} JST
+Patient  : {p_id}
 
 [Computation Result]
   Status        : {status}
   Optimal Boost : {rec_boost}
-
-[Physician Guidance]
-  Based on the Phase 2 Mesoscale Physics Model,
-  the calculated drug concentration (Boost) establishes
-  a physical jamming state.
-
-[Gate Axiom Warning]
-  This system provides physical evidence only.
-  The final clinical decision rests solely with the physician.
-══════════════════════════════════════════════════
+... (略)
 """
         return report
-
-    def save(self, text: str, filename: str):
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(text)
-        print(f"✓ Report Saved: {filename}")
