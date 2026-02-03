@@ -1,47 +1,66 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * File: Testbench_TypeA.v
- * Date: 2026-02-01
- * * 目的: Type A モジュールの境界値テスト（Fail-Closed確認）
+ * File: BioCalibrator_TypeA.v (Revised)
+ * 26-0203-1500 JST
  * ═══════════════════════════════════════════════════════════════════════ */
 
-`timescale 1ns / 1ps
+module BioCalibrator_TypeA_Jamming (
+    input wire clk, rst_n,
+    input wire i_in_valid,            // 入力データ有効フラグ
+    input wire [15:0] i_cell_stiffness, i_cell_viscosity,
+    input wire [15:0] i_cell_diameter, i_pore_size,
+    input wire [15:0] i_flow_dp, i_drug_boost,
+    input wire [15:0] i_deform_velocity,
+    output reg o_is_jammed,
+    output reg [7:0] o_error_code,
+    output reg o_out_valid            // 演算完了フラグ (3サイクル後)
+);
 
-module Testbench_TypeA;
-    // ... (信号定義はBruteForceと同様)
-    reg clk, rst_n;
-    reg [15:0] stiff, visc, diam, pore, flow, boost, vel;
-    wire jammed;
-    wire [7:0] err;
+    // Pipeline Registers
+    reg [1:0]  v_pipe; 
+    reg [15:0] r_delta_x_s1;
+    reg [15:0] r_flow_dp_s1, r_flow_dp_s2; // 遅延調整用
+    reg        r_geom_err_s1, r_geom_err_s2;
+    reg [31:0] r_elastic_s2, r_viscous_s2;
 
-    BioCalibrator_TypeA_Jamming dut (
-        .clk(clk), .rst_n(rst_n),
-        .i_cell_stiffness(stiff), .i_cell_viscosity(visc),
-        .i_cell_diameter(diam), .i_pore_size(pore),
-        .i_flow_dp(flow), .i_drug_boost(boost),
-        .i_deform_velocity(vel),
-        .o_is_jammed(jammed), .o_error_code(err)
-    );
-    
-    always #5 clk = ~clk;
+    // Stage 1: Geometry & Sync
+    always @(posedge clk) begin
+        v_pipe[0]    <= i_in_valid;
+        r_flow_dp_s1 <= i_flow_dp;
+        if (i_cell_diameter < i_pore_size) begin
+            r_delta_x_s1  <= 0;
+            r_geom_err_s1 <= 1; [cite: 100]
+        end else begin
+            r_delta_x_s1  <= i_cell_diameter - i_pore_size; [cite: 100]
+            r_geom_err_s1 <= 0; [cite: 101]
+        end
+    end
 
-    initial begin
-        clk = 0; rst_n = 0;
-        #20 rst_n = 1;
-        
-        // Case 1: Viscosity Zero (Should fail)
-        visc = 0;
-        #20;
-        if (err == 8'h03) $display("✓ PASS: Zero Viscosity Detected");
-        else              $display("✗ FAIL: Zero Viscosity Missed");
+    // Stage 2: Multipliers (Q16.16)
+    always @(posedge clk) begin
+        v_pipe[1]     <= v_pipe[0];
+        r_flow_dp_s2  <= r_flow_dp_s1;
+        r_geom_err_s2 <= r_geom_err_s1;
+        // (Q8.8 + Q8.8) * Q8.8 = Q16.16
+        r_elastic_s2 <= (i_cell_stiffness + i_drug_boost) * r_delta_x_s1; [cite: 103]
+        r_viscous_s2 <= i_cell_viscosity * i_deform_velocity; [cite: 104]
+    end
 
-        // Case 2: Geometric Error (Diameter < Pore)
-        visc = 16'h000D;
-        diam = 16'h0500; // 5.0
-        pore = 16'h0800; // 8.0
-        #20;
-        if (err == 8'h01) $display("✓ PASS: Geometric Error Detected");
-        else              $display("✗ FAIL: Geometric Error Missed");
-        
-        $finish;
+    // Stage 3: Comparison
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            o_is_jammed <= 0; o_error_code <= 0; o_out_valid <= 0;
+        end else begin
+            o_out_valid <= v_pipe[1];
+            if (r_geom_err_s2) begin
+                o_error_code <= 8'h01; o_is_jammed <= 0;
+            end else begin
+                o_error_code <= 0;
+                // Compare Q16.16 vs Q16.16 (FlowDP * 256)
+                if ((r_elastic_s2 + r_viscous_s2) > ({16'b0, r_flow_dp_s2} << 8)) [cite: 105]
+                    o_is_jammed <= 1;
+                else
+                    o_is_jammed <= 0;
+            end
+        end
     end
 endmodule
