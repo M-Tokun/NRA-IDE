@@ -1,50 +1,73 @@
 # ═══════════════════════════════════════════════════════════════════════
-# File: safety_map_visualizer.py
-# Phase: 20
-# Date: 2026-02-01
-#
-# 目的: 安全域（SAFE Zone）の可視化
-# 依存: matplotlib, numpy
+# File: main.py
+# Phase: 20 (Master Integration)
+# Date: 26-0203-1740 JST
 # ═══════════════════════════════════════════════════════════════════════
 
-import matplotlib.pyplot as plt
-import numpy as np
+import sys
+import json
+import argparse
+from fpga_interface import FPGAInterface
+from patient_data_validator import PatientDataValidator
+from clinical_report_generator import ClinicalReportGenerator
+from safety_map_visualizer import SafetyMapVisualizer
 
-class SafetyMapVisualizer:
-    def generate_map(self, data: dict, filename: str = "SafetyMap.png"):
-        """
-        簡易的な2Dマップ生成:
-        横軸: Boost (0-10)
-        縦軸: Pressure (0-5)
-        """
-        boosts = np.linspace(0, 10, 100)
-        pressures = np.linspace(0, 5, 100)
-        B, P = np.meshgrid(boosts, pressures)
+def run_nra_ide():
+    parser = argparse.ArgumentParser(description="NRA-IDE Master Controller")
+    parser.add_argument("--data", required=True, help="Patient JSON path")
+    args = parser.parse_args()
 
-        # Phase 2 Physics (Simplified for Viz)
-        k = data['cell_stiffness']
-        dx = max(0, data['cell_diameter'] - data['pore_size'])
-        # Viscosity term assumed constant for static map
+    print("--- NRA-IDE Cancer Treatment Support System ---")
 
-        # F_resist = (k + B) * dx
-        # Safe if F_resist > P * Scale
-        F_resist = (k + B) * dx * 0.1 # Scale factor adjust
+    # 1. Load & Validate
+    try:
+        with open(args.data, 'r') as f:
+            patient_data = json.load(f)
+    except Exception as e:
+        print(f"❌ Data Load Error: {e}")
+        return
 
-        Z = F_resist - P
+    is_ok, errs = PatientDataValidator.validate(patient_data)
+    if not is_ok:
+        print("❌ Ritsukan Axiom Violation (Safety Guard Active):")
+        for e in errs: print(f"  - {e}")
+        return
 
-        plt.figure(figsize=(8, 6))
-        plt.contourf(B, P, Z, levels=[-10, 0, 10], colors=['#FFDDDD', '#DDFFDD'])
-        plt.contour(B, P, Z, levels=[0], colors='k', linewidths=2)
+    # 2. FPGA Connection & Computation
+    fpga = FPGAInterface()
 
-        # Plot Current Point
-        plt.plot(0, data['flow_dp'], 'ro', label='Current')
+    # 3. Optimal Boost Search (Causal Diode: Forward Only)
+    print(f"🔍 Analyzing {patient_data['cancer_type']} dynamics...")
+    optimal_boost = 0.0
+    final_result = {'is_jammed': False, 'error_code': 0}
 
-        plt.title(f"NRA-IDE Safety Map (ID: {data.get('patient_id','Unknown')})")
-        plt.xlabel("Drug Boost [kPa]")
-        plt.ylabel("Blood Pressure [kPa]")
-        plt.legend()
-        plt.grid(True, linestyle='--', alpha=0.5)
+    for b in [i * 0.01 for i in range(1001)]: # 0.00 to 10.00 kPa
+        patient_data['drug_boost'] = b
+        res = fpga.send_query(patient_data, patient_data['cancer_type'])
 
-        plt.savefig(filename)
-        plt.close()
-        print(f"✓ Map Saved: {filename}")
+        if res and res['error_code'] == 0 and res['is_jammed']:
+            optimal_boost = b
+            final_result = res
+            print(f"✅ Physical Jamming Achieved at +{optimal_boost:.2f} kPa")
+            break
+
+        if res and res['error_code'] != 0:
+            final_result = res
+            print(f"⚠ Computation Aborted: Error 0x{res['error_code']:02X}")
+            break
+    else:
+        print("⚠ WARNING: Jamming state not found within safety limits.")
+
+    # 4. Generate Clinical Artifacts
+    rep_gen = ClinicalReportGenerator()
+    report_text = rep_gen.generate(patient_data['patient_id'], patient_data, final_result, optimal_boost)
+
+    rep_gen.save(report_text, f"../40_Output_Reports/Report_{patient_data['patient_id']}.txt")
+
+    viz = SafetyMapVisualizer()
+    viz.generate_map(patient_data, f"../40_Output_Reports/SafetyMap_{patient_data['patient_id']}.png")
+
+    print(f"\n✓ Session Completed. Artifacts saved to 40_Output_Reports/.")
+
+if __name__ == "__main__":
+    run_nra_ide()
