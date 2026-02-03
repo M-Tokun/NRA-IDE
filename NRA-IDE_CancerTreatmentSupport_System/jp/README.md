@@ -1,62 +1,50 @@
-# ═══════════════════════════════════════════════════════════════════════
-# Project: NRA-IDE Cancer Treatment Support System (Bio-Calibrator)
-# Type:    Medical Engineering Protocol / Reference Design
-# Phase:   00 (Root)
-# File:    README.md
-# Updated: 2026-02-03 13:40:27 JST
-# Change:  §4 — 「臨床」削除、LICENSE特約事項1・免責事項との整合修正
+
 # ═══════════════════════════════════════════════════════════════════════
 
-# NRA-IDE Protocol: Cancer Metastasis Suppression Framework
+# Project: NRA-IDE Cancer Treatment Support System
 
-**Version:** 1.0 (Final Template / Snapshot)
-**Architect:** M-Tokuni
-**Concept:** "Physics over Statistics"
+# Phase:   Master (Root)
 
-## 1. Project Identity
-本パッケージは、特定のソフトウェア製品ではなく、**癌転移を物理的に阻止するための「設計図（プロトコル）」および「実装テンプレート」**である。
+# File:    README.md (Final Integrated Version)
 
-「医学的な予測不可能性」に対し、構造力学とFPGAを用いた「決定論的エンジニアリング」でアプローチする手法（NRA-IDE）を体系化し、無償のテンプレートとして医療・工学分野へ提供する。
+# ═══════════════════════════════════════════════════════════════════════
 
-## 2. Ritsukan Axiom (The Constitution)
-**律環公理（Ritsukan Axiom）**は、本システムのアルゴリズムではなく、**遵守すべき「物理的・論理的憲法」**である。
-本テンプレートを使用する場合、以下の公理を削除・改変することはできない。
+## 1. プロジェクト概要 (Project Overview)
 
-1.  **因果ダイオード (Causal Diode):**
-    「結果（SAFE）」を得るために「入力（物理パラメータ）」を逆算・操作することを禁ずる。
-2.  **ギアメカニズム (Fail-Closed):**
-    計算プロセスにおける不整合（欠損、ゼロ粘性）は、すべて「DANGER（停止）」として処理しなければならない。
-3.  **ゲート公理 (Gate Axiom):**
-    システムは物理的根拠のみを提示する。最終的な臨床判断と責任は、人間（医師）が保持する。
+**NRA-IDE**（Non-statistical Ritsukan Axiom - Integrated Deterministic Engine）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する次世代のがん治療支援システムです。
 
-## 3. Package Structure
-本パッケージには、プロトコルを構成する9つのフェーズと実装例が含まれている。
+従来の医療AIが数百万人の「統計（平均）」に依存するのに対し、本システムは目の前の患者一人の「物理（実測値）」に依拠します。
+物理法則（構造力学）によって計算される「転移が不可能な条件」を特定し、治療計画を支援します。
 
-* `00_Documentation/`: **[Protocol]** 哲学、物理モデル、公理定義（仕様書の本体）
-* `10_Hardware_Design/`: **[Reference]** FPGA回路の参照実装（Verilog HDL）
-* `20_Software_Host/`: **[Reference]** ホスト制御の参照実装（Python）
-* `30_Test_Data/`: **[Validation]** 物理整合性検証用データセット
-* `40_Output_Reports/`: **[Template]** 臨床レポート様式
-* `50_Deployment/`: **[Guide]** 導入・運用ガイドライン
-* `60_Research/`: **[Resource]** 実務用物理定数データ
+## 2. 核心哲学：律環公理 (The Ritsukan Axiom)
 
-## 4. Usage
-本プロジェクトは**「無償の医療支援テンプレート」**である。
-著作権は保持されるが、研究・教育を目的とした利用において、誰でも自由に利用・改変・再配布が可能である（MIT License準拠）。
+本システムの全ての設計判断は、以下の3つの公理に従っています。
 
-臨床適用には、別途規制当局（PMDA・FDA等）による承認が必要である。
+1. **Physics First (物理第一主義):** 判定の根拠はすべて物理式 
 
-ただし、**「律環公理」を無視した改変を行った場合、それはもはやNRA-IDEではない。**
+ で説明可能であり、ブラックボックスを排除する。
+2. **Fail-Closed (ギアメカニズム):** 通信、計算、入力のいずれかに 1ビットでも不確実性があれば、システムは安全側に倒れ、警告（Error）を発する。
+3. **Gate Axiom (ゲート公理):** システムは計算機に徹する。最終的な「治療の断行」は、倫理的責任を負う医師が決定する。
+
+## 3. 技術アーキテクチャ (Technical Architecture)
+
+本システムは、高い再現性とリアルタイム性を保証するため、ハードウェアとソフトウェアのハイブリッド構成を採用しています。
+
+* **Compute Layer (FPGA):** Intel Cyclone V / Xilinx Artix-7 上で動作する専用演算回路。Q8.8 固定小数点演算により、OSの介入を排した決定論的計算を実行。
+* **Control Layer (Python):** 医師の入力を物理的に検証し、FPGA とバイナリプロトコルで通信。臨床レポートと安全マップ（Safety Map）を生成。
+* **Verification Layer:** 物理シミュレーションに基づく期待値（Oracle）を用いた自動診断機能を備え、稼働前の健全性を証明。
+
+## 4. クイックスタート (Quick Start)
+
+導入と運用の詳細は以下のドキュメントを参照してください。
+
+1. **設置:** `50_Deployment/installation_guide.md` に従い、FPGA と PC を接続。
+2. **起動:** `python main.py --test` を実行し、自己診断をパスすることを確認。
+3. **運用:** `python main.py --data patient.json` を実行し、臨床レポートを出力。
 
 ---
+---
 
-## ⚠️ Version & Language Policy
-
-**Version:**
-This package is a **Fixed Snapshot (v1.0)**.
-本パッケージは、整合性が検証された固定バージョンです。外部リポジトリの更新による影響を受けません。
-
-**Language:**
-The official language of this protocol is **Japanese ONLY**.
-誤訳による医療リスクを回避するため、公式な英語版は提供されません。
-To avoid medical risks caused by mistranslation, an official English version will not be provided.
+**免責事項:** 本システムは「物理的な計算結果」を提示する無償支援テンプレートツールです。
+基本は研究用で臨床用ではありません。
+---
