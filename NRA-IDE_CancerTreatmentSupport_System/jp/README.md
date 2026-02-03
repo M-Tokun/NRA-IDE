@@ -3,6 +3,8 @@
 # Type:    Medical Engineering Protocol / Reference Design
 # Phase:   00 (Root)
 # File:    README.md
+# Updated: 2026-02-03 13:40:27 JST
+# Change:  §4 — 「臨床」削除、LICENSE特約事項1・免責事項との整合修正
 # ═══════════════════════════════════════════════════════════════════════
 
 # NRA-IDE Protocol: Cancer Metastasis Suppression Framework
@@ -40,7 +42,9 @@
 
 ## 4. Usage
 本プロジェクトは**「無償の医療支援テンプレート」**である。
-著作権は保持されるが、人命救助を目的とした利用（研究・商用・臨床）において、誰でも自由に利用・改変・再配布が可能である（MIT License準拠）。
+著作権は保持されるが、研究・教育を目的とした利用において、誰でも自由に利用・改変・再配布が可能である（MIT License準拠）。
+
+臨床適用には、別途規制当局（PMDA・FDA等）による承認が必要である。
 
 ただし、**「律環公理」を無視した改変を行った場合、それはもはやNRA-IDEではない。**
 
