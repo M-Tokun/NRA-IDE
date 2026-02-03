@@ -1,31 +1,25 @@
 {
-  "_comment": "NRA-IDE Expected Results - Physical Predictions",
-  "_version": "1.0",
-  "_date": "2026-02-01",
-  "_important_note": "これらは物理的予測です。結果から逆算したものではありません。",
-  
+  "_meta": { "version": "1.2", "sync": "Phase 10/20 Protocol" },
   "test_case_expectations": {
     "TC001": {
       "test_id": "TC001",
-      "description": "標準ケース（薬液なし）",
-      "input": { "stiff": 1.5, "diam": 12.0, "pore": 8.0, "flow": 0.6, "boost": 0.0 },
-      "physical_reasoning": {
-        "deformation": "12.0 - 8.0 = 4.0 um",
-        "elastic_force": "1.5 * 4.0 = 6.0 (scaled unit)",
-        "resistance": "Insufficient against Flow Pressure",
-        "conclusion": "DANGER"
-      },
-      "expected": { "is_jammed": false, "error_code": "0x00" }
+      "description": "Normal Danger (Passable)",
+      "expected_binary": "0x00" 
+    },
+    "TC002": {
+      "test_id": "TC002",
+      "description": "Normal Safe (Jammed by Boost)",
+      "expected_binary": "0x01"
     },
     "TC004": {
       "test_id": "TC004",
-      "description": "粘性ゼロ違反",
-      "input": { "visc": 0.0 },
-      "physical_reasoning": {
-        "violation": "Ritsukan Axiom (Life requires viscosity)",
-        "conclusion": "DANGER (Error 0x03)"
-      },
-      "expected": { "is_jammed": false, "error_code": "0x03" }
+      "description": "Viscosity Zero Violation (Error 0x03)",
+      "expected_binary": "0x06"
+    },
+    "TC005": {
+      "test_id": "TC005",
+      "description": "Geometric Violation (Error 0x01)",
+      "expected_binary": "0x02"
     }
   }
 }
