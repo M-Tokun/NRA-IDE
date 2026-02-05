@@ -1,6 +1,7 @@
-han-gate-complete/
-├── 日本語総合解説.md
+HAN-Gate_Cascade-Failure-Prevention/  
 ├── README.md
+├── 日本語総合解説.md
+├── LICENSE 
 ├── api/
 │   └── openapi.yaml
 ├── deploy/
@@ -12,18 +13,7 @@ han-gate-complete/
 │   └── RUNBOOK.md
 ├── gate/
 │   └── han_gate_service.py
-└── integrations/
-    ├── envoy_ext_authz.md
-    ├── nginx_auth_request.md
-    ├── app_middleware.md
-    ├── envoy/
-    │   ├── envoy_config.yaml
-    │   ├── telemetry_sidecar.py
-    │   └── k8s_envoy_han.yaml
-    ├── nginx/
-    │   ├── nginx.conf
-    │   └── k8s_nginx_han.yaml
-    └── app_middleware/
-        ├── python_flask_middleware.py
-        ├── nodejs_express_middleware.js
-        └── README.md
+├── integrations/ 
+│   ├── app_middleware/
+│   ├── envoy/
+│   └── nginx/
