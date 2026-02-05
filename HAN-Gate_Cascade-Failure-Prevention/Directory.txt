@@ -1,19 +1,11 @@
-HAN-Gate_Cascade-Failure-Prevention/  
-├── README.md
-├── 日本語総合解説.md
-├── LICENSE 
-├── api/
-│   └── openapi.yaml
-├── deploy/
-│   └── k8s/
-│       └── han-gate.yaml
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── SPEC.md
-│   └── RUNBOOK.md
-├── gate/
-│   └── han_gate_service.py
-├── integrations/ 
-│   ├── app_middleware/
-│   ├── envoy/
-│   └── nginx/
+HAN-Gate_Cascade-Failure-Prevention/
+├── api/                   # OpenAPI 定義 (openapi.yaml)
+├── deploy/                # K8s マニフェスト (han-gate.yaml)
+├── docs/                  # 設計・運用ドキュメント (ARCHITECTURE/SPEC/RUNBOOK.md)
+├── gate/                  # 判定サービス本体 (han_gate_service.py)
+├── integrations/          # 各プロキシ・アプリ向け設定とドキュメント
+├── tools/                 # 検証・テストツール群
+├── Directory.txt          # 本ファイル
+├── LICENSE.txt            # MITライセンス
+├── README.md              # 英語版メインガイド
+└── 日本語総合解説.md      # 日本語版メインガイド
