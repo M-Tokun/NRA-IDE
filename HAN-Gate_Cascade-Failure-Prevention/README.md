@@ -1,82 +1,110 @@
+
 # HAN Gate (NRA/IDE) — Cloud Minimum Module Bundle
 
-**Bundle timestamp (JST): 2026-02-05 22:08:25**
+**Version:** 1.0.0-
 
-This package provides a *minimum* deployable module for cloud platforms that prevents cascade failure by enforcing **Fail-Closed (SILENCE)** at the *ingress boundary* when a **chain reaction** is detected (retry × queue × timeout/dependency amplification).
+**Bundle Timestamp (JST):** 2026-02-05 22:08:25
 
-## What this is (for non-specialists)
-- This is **not** a latency optimizer.
-- This is **not** a routing “best path” engine.
-- This is a **safety gate** that automatically **cuts new traffic** (or returns a safe fixed response) *before* a cascade spreads.
-
-If you can tolerate partial/temporary silence, you can avoid full-system rupture.
-
-## Who should read what
-- **Executives / Product owners**: read *this README* and the “Why SILENCE is acceptable” note below.
-- **SRE / Platform**: see `docs/SPEC.md`, `docs/RUNBOOK.md`, `deploy/k8s/han-gate.yaml`.
-- **Network / Edge**:
-  - Envoy: `integrations/envoy_ext_authz.md` (recommended)
-  - Nginx: `integrations/nginx_auth_request.md`
-- **App teams (last resort only)**: `integrations/app_middleware.md`
-
-## Quick start (Kubernetes)
-1. Deploy the gate:
-   - Apply `deploy/k8s/han-gate.yaml`
-2. Integrate at the edge:
-   - Prefer Envoy ext_authz (recommended)
-   - Or Nginx auth_request
-3. Validate:
-   - Run the curl examples in `docs/RUNBOOK.md`
-4. Tune safely:
-   - Lower `R_OP` to fail-closed earlier (safer)
-   - Increase `TAU_*` for deeper dependencies (safer)
-
-## Operating principle in one line (what operators need to know)
-**When the chain reaction begins, the gate automatically SILENCEs at the ingress. Humans do not “decide the moment.”**
-
-## Why SILENCE is acceptable (business framing)
-During cascade onset, “trying harder” (retries / reconnects / aggressive autoscaling) often increases pressure and spreads failure.
-This gate chooses **bounded silence** over **unbounded rupture**:
-- Bounded silence: some requests are refused/neutralized temporarily
-- Rupture: widespread outage, data corruption risk, long recovery, brand damage
-
-This module is intentionally conservative: **it may stop traffic earlier than a human would.**
-That is the point.
-
-## What you get in this bundle
-- `gate/han_gate_service.py` — minimal gate service (PASS / SILENCE decision API)
-- `api/openapi.yaml` — API contract for the gate
-- `deploy/k8s/han-gate.yaml` — minimal Kubernetes deployment/service/config
-- `docs/ARCHITECTURE.md` — diagrams (text-based) + placement blueprint
-- `docs/SPEC.md` — specification / requirements / acceptance criteria
-- `docs/RUNBOOK.md` — operator manual (what to do, what not to do)
-- `integrations/` — Envoy / Nginx / App integration notes
-
-## Safety notes (must be explicit)
-- This is **Fail-Closed** by design. In doubt, it SILENCEs.
-- Do not add “smart optimization” feedback loops (ML routing, reward tuning) into the gate.
-- Keep the gate logic deterministic and auditable.
+**Author:** M-Tokuni 
 
 ---
 
-## Credits & Contact
+## 📌 概要 (What this is)
 
-**Author**: M-Tokuni 
-**Specialty**: Ritsukan Circular Axiom (NRA) / Intensional Dynamics Engine (IDE)
+本パッケージは、クラウドプラットフォーム向けに設計された**最小構成のデプロイ可能モジュール**です。リトライ、キュー滞留、タイムアウト、依存関係の増幅による「連鎖的崩壊（Cascade Failure）」を検知し、イングレス境界で強制的に **Fail-Closed (SILENCE)** を実行することで、システム全体の破綻を未然に防ぎます。
 
-### Links
-- **GitHub**: https://github.com/M-Tokun/NRA-IDE
-- **Twitter/X**: https://x.com/m_tokuni
+### 💡 非専門家向けガイド
 
-
-### Project Information
-- **Theoretical Foundation**: Ritsukan Circular Axiom (NRA)
-- **Implementation Framework**: Intensional Dynamics Engine (IDE)
-- **Purpose**: Safety assurance for life-critical AI systems (medical, autonomous driving, etc.)
-- **License**: See LICENSE.txt in this bundle
+* **これは「最適化」ツールではありません:** 応答速度を上げたり、最適な経路を探すものではありません。
+* **これは「防波堤」です:** 連鎖反応が広がる前に、新しい通信を自動的に遮断（または安全な固定レスポンスを返却）する安全装置です。
+* **トレードオフの選択:** 「一時的な沈黙（Silence）」を許容することで、「システム全損（Rupture）」という最悪の事態を回避します。
 
 ---
 
-**Documentation**: Claude (NRA/IDE Research Assistant)  
-**Bundle Version**: 2026-02-05_234000_FIXED  
-**Last Updated**: 2026-02-05 23:45:00 JST
+## 📖 対象者別ガイド (Who should read what)
+
+| 対象者 | 推奨ドキュメント |
+| --- | --- |
+| **Executives / PO** | 本README、および「SILENCEの妥当性」セクション |
+| **SRE / Platform** | `docs/SPEC.md`, `docs/RUNBOOK.md`, `deploy/k8s/han-gate.yaml` |
+| **Network / Edge** | `integrations/envoy_ext_authz.md` (推奨) / `nginx_auth_request.md` |
+| **App Teams** | `integrations/app_middleware.md` (最終手段としてのみ) |
+
+---
+
+## 🚀 クイックスタート (Kubernetes)
+
+1. **ゲートのデプロイ:**
+```bash
+kubectl apply -f deploy/k8s/han-gate.yaml
+
+```
+
+
+2. **エッジへの統合:**
+* **Envoy:** `ext_authz` フィルターの使用を推奨。
+* **Nginx:** `auth_request` モジュールを使用。
+
+
+3. **動作検証:**
+`docs/RUNBOOK.md` に記載の `curl` サンプルを実行。
+4. **安全なチューニング:**
+* `R_OP` を下げると、より早期にFail-Closedが発動（安全性向上）。
+* `TAU_*` を上げると、より深い依存関係をカバー（安全性向上）。
+
+
+
+> [!IMPORTANT]
+> **運用上の大原則:** 連鎖反応が始まった際、ゲートは自動的にSILENCEを実行します。人間が「その瞬間を判断」することはありません。
+
+---
+
+## ⚖️ SILENCEの妥当性 (ビジネス上の枠組み)
+
+崩壊の兆候が見られる際、リトライやアグレッシブなオートスケーリングといった「努力」は、かえってシステムへの圧力を高め、失敗を拡散させます。
+
+本ゲートは、**「無制限の破綻（Rupture）」よりも「限定的な沈黙（Bounded Silence）」**を選択します。
+
+* **限定的な沈黙:** 一部のリクエストを一時的に拒否し、被害を局所化する。
+* **無制限の破綻:** 全系停止、データ不整合のリスク、長期にわたる復旧、ブランド毀損。
+
+> 本モジュールは意図的に**コンサバティブ（保守的）**に設計されています。人間が判断するよりも「早く」止まることがありますが、それこそが本製品の目的です。
+
+---
+
+## 📦 同梱物一覧
+
+* `gate/han_gate_service.py`: ゲートサービス本体 (PASS / SILENCE 判定API)
+* `api/openapi.yaml`: APIコントラクト（定義書）
+* `deploy/k8s/han-gate.yaml`: K8s用マニフェスト（Deployment/Service/Config）
+* `docs/ARCHITECTURE.md`: アーキテクチャ図および配置設計図
+* `docs/SPEC.md`: 要件定義および受入基準
+* `docs/RUNBOOK.md`: 運用マニュアル（DOs & DON'Ts）
+* `integrations/`: 各ミドルウェア（Envoy/Nginx等）向け設定ガイド
+
+---
+
+## ⚠️ 安全上の注意 (Safety Notes)
+
+1. **Fail-Closed 設計:** 疑わしい場合は常に SILENCE を選択します。
+2. **ブラックボックス化の禁止:** ゲートロジックにML（機械学習）等による動的な最適化ループを導入しないでください。
+3. **透明性の維持:** 論理は常に決定論的（Deterministic）であり、監査可能でなければなりません。
+
+---
+
+## 🔗 Credits & Contact
+
+* **Author:** M-Tokuni 
+* **Theoretical Foundation:** Ritsukan Circular Axiom (NRA)
+* **Framework:** Intensional Dynamics Engine (IDE)
+* **Links:** * [GitHub](https://github.com/M-Tokun/NRA-IDE) / [X (Twitter)](https://x.com/m_tokuni) / [note](https://note.com/mtokuni)
+
+---
+
+### 🛑 免責事項
+
+本ソフトウェアは、NRA/IDE論理に基づくフェイルクローズ（Fail-Closed）設計を採用しています。システム保護のために通信を遮断・制限する場合があり、これに伴うサービス停止や遅延について、作者は一切の責任を負いません。
+
+医療機器、公的インフラ、自動運転等の生命や財産に重大な影響を及ぼすシステムへの導入は、ユーザー自身の責任において厳格な検証と承認を行うものとします。
+
+作者は、本ソフトウェアの適用による二次的な不具合や、他システムとの相互作用によって生じた損害について、予見の有無に関わらず賠償責任を負わないものとします。
