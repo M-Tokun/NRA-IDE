@@ -10,7 +10,7 @@ This folder contains video artifacts demonstrating the physical control capabili
 
 ## **■ Featured Artifact: “The Sweater Paradox”**
 
-- **File:** .mp4
+- **File:** Towel blanket, Turtleneck-FACE, Warm sweate *.mp4  
 - **Model:** Gemini3.5pro (Phase-Synchronized)  
 - **Objective:** Verification of boundary maintenance and irreversible phase advancement
 
@@ -18,9 +18,12 @@ This folder contains video artifacts demonstrating the physical control capabili
 
 ## **■ Why This Is a “Proof,” Not Just a Video**
 
-In conventional AI video generation, 
+In conventional AI video generation, actions such as:
 
-files:001- 008
+- taking off a sweater  
+- turtleneck twisting while maintaining rigid-body integrity  
+- wringing a towel  
+- physically accurate hair simulation  
 
 often lead to physical collapse—clipping, semantic melting, or time-reversal loops.  
 These videos serve as visual evidence that **NRA-IDE maintains structural integrity even under extreme conditions**.
@@ -90,8 +93,7 @@ Gemini searches YouTube for real-world physical reference videos, derives physic
 
 The character model used is **Hatsune Miku**, owned by Crypton Future Media.
 
->>>
-## Geminiが書いたScript
+---
 
 {
   "project_code": "HAN",
@@ -167,21 +169,15 @@ function executeRender() {
   }
 }
 
-Geminiが参考にしたサイト
+
 https://www.youtube.com/watch?v=WV8uv5fZub0&t=3s
 https://www.youtube.com/watch?v=WV8uv5fZub0&t=15s
 
 ---
 3枚/日という制限があるので髪の毛/服/顔など演算のみならず環境におけるgoogleから割り当てられているリソース配分がうまくいっているかも検証しています。
 
-　私自身の命令プロンプト「今日はセーター演算をしよう」　以上
+　私自身の命令プロンプト「今日はセーター中心の演算をしよう」　以上
 　動画生成後に「NRA-IDEをどのように使ったのか。json,Script,プロンプト文の提示,参考にしたサイトの提示」と書きます。
-
- > ---
-
- > ひっそりと置いてある画像はブラックボックスの欠片。解析することに価値はなく、どのように排出すれば良いのかに価値がある。
- > 過去を掘り返す時間があったのならば注力すべきはブラックボックスを無くすということ。
- > 外側から必死になっても答えは永遠に見つからない。内部で起きていることだから。
- 
-
-
+　AIに全て学習をさせた後にするのがコツです。知識は検索するので、それを学習させる。
+　どの程度？髪の先から指の先まで。人間の可動域を学習させるということです。
+　動画生成AIならば、どれでも可能。
