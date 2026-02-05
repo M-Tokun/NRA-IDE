@@ -1,0 +1,69 @@
+openapi: 3.0.3
+info:
+  title: HAN Gate Decision API
+  version: "0.1.0"
+servers:
+  - url: http://han-gate:8080
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+  /v1/decision:
+    post:
+      summary: Return PASS or SILENCE decision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DecisionRequest"
+      responses:
+        "200":
+          description: Decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DecisionResponse"
+  /v1/nginx_auth:
+    post:
+      summary: Nginx auth_request compatible endpoint
+      responses:
+        "200": { description: PASS }
+        "403": { description: SILENCE }
+components:
+  schemas:
+    Scope:
+      type: object
+      properties:
+        service: { type: string }
+        route: { type: string }
+        cluster: { type: string }
+      required: [service]
+    Telemetry:
+      type: object
+      properties:
+        retry_rate: { type: number }
+        queue_depth: { type: number }
+        dep_timeout_rate: { type: number }
+        error_rate: { type: number }
+      required: [retry_rate, queue_depth, dep_timeout_rate]
+    DecisionRequest:
+      type: object
+      properties:
+        scope: { $ref: "#/components/schemas/Scope" }
+        telemetry: { $ref: "#/components/schemas/Telemetry" }
+      required: [scope, telemetry]
+    DecisionResponse:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum: [PASS, SILENCE]
+        R:
+          type: number
+        reason:
+          type: string
+      required: [decision, R]

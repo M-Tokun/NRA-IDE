@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: han
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: han-gate-config
+  namespace: han
+data:
+  R_OP: "1.0"
+  TAU_DEFAULT: "1.5"
+  HOLD_MS: "2000"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: han-gate
+  namespace: han
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: han-gate
+  template:
+    metadata:
+      labels:
+        app: han-gate
+    spec:
+      containers:
+        - name: han-gate
+          image: python:3.11-slim
+          command: ["bash","-lc"]
+          args:
+            - |
+              pip install --no-cache-dir flask && \
+              python /app/han_gate_service.py
+          envFrom:
+            - configMapRef:
+                name: han-gate-config
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: app
+              mountPath: /app
+      volumes:
+        - name: app
+          configMap:
+            name: han-gate-app
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: han-gate-app
+  namespace: han
+data:
+  han_gate_service.py: |
+    # Filename: han_gate_service_2026-02-05_220825.py
+    from __future__ import annotations
+    from dataclasses import dataclass
+    from typing import Dict, Any, Optional
+    import os
+    import time
+    from flask import Flask, request, jsonify, make_response
+    
+    app = Flask(__name__)
+    
+    # =========================
+    # Config (Fail-Closed)
+    # =========================
+    R_OP = float(os.getenv("R_OP", "1.0"))               # lower => safer (more silence)
+    TAU_DEFAULT = float(os.getenv("TAU_DEFAULT", "1.5")) # higher => thicker => safer
+    HOLD_MS = int(os.getenv("HOLD_MS", "2000"))          # minimum silence hold
+    
+    # Simple in-memory hold per scope
+    _silence_until: Dict[str, float] = {}
+    
+    def _scope_key(scope: Dict[str, Any]) -> str:
+        return f"svc={scope.get('service','')}|route={scope.get('route','')}|cl={scope.get('cluster','')}"
+    
+    def _now() -> float:
+        return time.time()
+    
+    def compute_R(telemetry: Dict[str, float], tau: float) -> float:
+        """Chain-reaction score.
+        Focus on co-occurrence (retry × queue × dependency timeouts).
+        This is intentionally conservative and deterministic.
+        """
+        retry = max(0.0, float(telemetry.get("retry_rate", 0.0)))
+        queue = max(0.0, float(telemetry.get("queue_depth", 0.0)))
+        dep_to = max(0.0, float(telemetry.get("dep_timeout_rate", 0.0)))
+    
+        # Normalize lightly (not an optimizer; just keeps magnitudes reasonable)
+        # The core is multiplicative co-occurrence.
+        r = (retry / 10.0) * (queue / 500.0) * (dep_to / 5.0)
+    
+        # Thickness (tau) increases conservativeness
+        return r * tau
+    
+    def should_silence(scope_key: str, R: float) -> bool:
+        # Hold behavior: once SILENCE triggers, keep it for HOLD_MS
+        until = _silence_until.get(scope_key, 0.0)
+        if _now() < until:
+            return True
+        if R >= R_OP:
+            _silence_until[scope_key] = _now() + (HOLD_MS / 1000.0)
+            return True
+        return False
+    
+    @app.get("/healthz")
+    def healthz():
+        return "OK", 200
+    
+    @app.post("/v1/decision")
+    def decision():
+        data = request.get_json(force=True, silent=True) or {}
+        scope = data.get("scope") or {}
+        telemetry = data.get("telemetry") or {}
+        tau = float((data.get("tau") or TAU_DEFAULT))
+    
+        # Fail-Closed: missing telemetry => SILENCE
+        required = ["retry_rate", "queue_depth", "dep_timeout_rate"]
+        if any(k not in telemetry for k in required):
+            return jsonify({"decision":"SILENCE","R":999.0,"reason":"missing telemetry (fail-closed)"}), 200
+    
+        scope_key = _scope_key(scope)
+        R = compute_R(telemetry, tau)
+        if should_silence(scope_key, R):
+            return jsonify({"decision":"SILENCE","R":R,"reason":"chain reaction detected or hold active"}), 200
+        return jsonify({"decision":"PASS","R":R,"reason":"within safe envelope"}), 200
+    
+    @app.post("/v1/nginx_auth")
+    def nginx_auth():
+        # Minimal compatibility: reads telemetry from headers if present (optional),
+        # but safest is to wire a local sidecar that posts JSON to /v1/decision.
+        # Here we fail-closed if no telemetry headers.
+        try:
+            retry = float(request.headers.get("X-HAN-Retry-Rate", "nan"))
+            queue = float(request.headers.get("X-HAN-Queue-Depth", "nan"))
+            dep_to = float(request.headers.get("X-HAN-Dep-Timeout-Rate", "nan"))
+            if any(map(lambda x: x != x, [retry, queue, dep_to])):  # NaN check
+                raise ValueError("missing")
+            R = compute_R({"retry_rate":retry,"queue_depth":queue,"dep_timeout_rate":dep_to}, TAU_DEFAULT)
+            if should_silence("nginx|default", R):
+                return make_response("SILENCE", 403)
+            return make_response("PASS", 200)
+        except Exception:
+            # Fail-Closed
+            return make_response("SILENCE", 403)
+    
+    if __name__ == "__main__":
+        app.run(host="0.0.0.0", port=8080)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: han-gate
+  namespace: han
+spec:
+  selector:
+    app: han-gate
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
