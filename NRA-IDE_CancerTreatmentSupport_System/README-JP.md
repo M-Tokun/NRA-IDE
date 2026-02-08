@@ -17,7 +17,7 @@ Please see **[README_EN.md](./README_EN.md)** for an overview, then translate de
 
 ## 1. プロジェクト概要 (Project Overview)
 
-**NRA-IDE**（Non-statistical Ritsukan Axiom - Integrated Deterministic Engine）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する次世代のがん治療支援システムです。
+**NRA-IDE**（Nomological Ring Axioms - Integrated Development Environment）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する次世代のがん治療支援システムです。
 
 従来の医療AIが数百万人の「統計（平均）」に依存するのに対し、本システムは目の前の患者一人の「物理（実測値）」に依拠します。
 物理法則（構造力学）によって計算される「転移が不可能な条件」を特定し、治療計画を支援します。
