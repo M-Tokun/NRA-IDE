@@ -8,9 +8,9 @@
 ---
 ## 🌍 For English Speakers
 
-**Please see [README_EN.md](./README_EN.md) for English documentation.**
+**Please see [README.md](./README.md) for English documentation.**
 
-英語話者の方へ：英語版ドキュメントは [README_EN.md](./README_EN.md) をご覧ください。
+英語話者の方へ：英語版ドキュメントは [README.md](./README.md) をご覧ください。
 
 ---
 
@@ -117,3 +117,4 @@ GitHub. https://github.com/M-Tokun/NRA-IDE
 *本リポジトリの全記述は、RCA-IDEフレームワークを実装したAIアシスタントによって生成されました。*
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
+
