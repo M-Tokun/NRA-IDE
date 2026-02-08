@@ -16,7 +16,7 @@
 
 ## 1. Project Overview
 
-**NRA-IDE** (Non-statistical Ritsukan Axiom - Integrated Deterministic Engine) is a next-generation cancer treatment support system that analyzes the physical properties of cancer cells and deterministically evaluates metastasis risk.
+**NRA-IDE** ( Nomological Ring Axioms - Integrated Development Environment) is a next-generation cancer treatment support system that analyzes the physical properties of cancer cells and deterministically evaluates metastasis risk.
 
 ### Key Differences from Traditional Medical AI
 
