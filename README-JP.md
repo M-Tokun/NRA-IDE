@@ -1,208 +1,119 @@
-
-# 📘 **README-JP.md — NRA‑IDE: Intensional Dynamics Engine**  
-### **構造純度 100%・非意味・非最適化エディション**
+# NRA-IDE: 律環公理統合開発環境
+**Nomological Ring Axioms - Integrated Development Environment**
 
 <p align="center">
-  <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA‑IDE LOGO">
+  <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO">
 </p>
 
 ---
+## 🌍 For English Speakers
 
-## **0. 本ドキュメントの目的**
+**Please see [README_EN.md](./README_EN.md) for English documentation.**
 
-本ドキュメントは、NRA‑IDE / Intensional Dynamics Engine の **構造のみを記述する文書** である。
-
-以下は扱わない：
-- 用途 / 応用例 / 産業
-- 性能 / 意味 / 最適化
-
-NRA‑IDE は **因果構造の安全エンジン** であり、意味エンジンでも最適化エンジンでも判断エンジンでもない。本 README は内部仕様と完全に整合しており、意味解釈を一切含まない。
+英語話者の方へ：英語版ドキュメントは [README_EN.md](./README_EN.md) をご覧ください。
 
 ---
 
-## **1. リポジトリ構成**
+## 律環公理（Nomological Ring Axioms）とは
 
-- **`gate/`** — 公理的基盤・制約強制
-- **`docs/`** — 構造ドキュメント
-- **`examples/`** — 構造挙動デモ
-- **`tools/`** — 検証ユーティリティ
+**線形概念（連続性・距離・意味）を使わず、張力構造を基本として世界構造と時間の状態を説明する公理。**
 
-すべて **構造のみ** を扱い、意味処理は存在しない。
+## NRA-IDEとは
+
+この律環公理を実装した**統合開発環境（Integrated Development Environment）**。
+
+### なぜ閾値システムが必要か
+
+従来のAIは**ブラックボックス**であり、判断根拠を説明できません。
+これは医療や自動運転などの高リスク領域では致命的な問題です。
+
+**閾値システム**は：
+- AIの判断を**物理式で完全に説明可能**にする
+- **AIと人間の責任境界線**を明確にする
+- システムが「判断できない」ことを正直に示す
+
+### 閾値システムの仕組み
+
+$$R = \frac{\delta}{\tau}$$
+
+- **δ（デルタ）**: 制約からのズレ（変位）
+- **τ（タウ）**: 許容範囲（張力の閾値）
+- **R**: 比率（1.0を超えるとシステム停止）
+
+| R の値 | 判定 | 意味 |
+|--------|------|------|
+| R < 1.0 | SAFE | AIが物理的根拠を提示 |
+| R ≥ 1.0 | STOP | 人間が最終判断を行う |
+
+この境界線により、**AIは計算に徹し、倫理的判断は人間が担う**構造が保証されます。
+
+### 実装例
+
+この環境で構築された実装として：
+- AI安全フレームワーク
+- 医療支援システム（がん治療）
+- インフラ故障防止（カスケード防止）
 
 ---
 
-## **2. クイックスタート**
+## 主要プロジェクト
 
-### **ライブデモ**
-（※構造挙動の可視化であり、意味や最適化ではない）
-- **ビジュアルデモ**: `examples/visual_demo.html`
-- **CLIデモ**: `examples/cli_demo.py`
+### 🏥 がん治療支援システム
+**[NRA-IDE_CancerTreatmentSupport_System](./NRA-IDE_CancerTreatmentSupport_System/)**
 
-### **コマンドライン実行**
-```bash
-git clone https://github.com/M-Tokun/NRA-IDE.git
-cd NRA-IDE
-python3 gate/jp/nra_gate_threshold_ja.py
+- 物理的制約による転移リスク判定
+- FPGA実装（決定論的計算）
+- 医療機器承認を見据えた完全トレーサビリティ
+
+### 🔗 カスケード故障防止
+**[HAN-Gate_Cascade-Failure-Prevention](./HAN-Gate_Cascade-Failure-Prevention/)**
+
+- サーバーインフラのカスケード故障防止
+- Envoy/Nginx統合
+- 自動車安全・クリティカルインフラ対応
+
+---
+
+## ドキュメント
+
+- **[日本語ドキュメント](./gate/jp/README.md)** — 総合案内ページ
+- **[English Documentation](./gate/en/README.md)** — Comprehensive entry point
+
+---
+
+## 🔍 検索キーワード / Keywords
+
+`ai-safety` `medical-ai` `cancer-treatment` `deterministic-computing` `fpga` `fail-safe` `autonomous-systems` `healthcare` `decision-support` `cascade-failure-prevention` `non-statistical` `physics-based` `structural-constraints`
+
+---
+
+## 外部リンク
+
+- **[プロジェクトブログ（はてな）](https://mtokuni.hatenablog.com/)** — 開発ノートと理論考察
+- **[Note記事](https://note.com/mtokuni)** — 日本語解説
+- **[Facebook](https://www.facebook.com/tokuni.masa?locale=ja_JP)** — プロジェクト更新
+
+---
+
+## ライセンスと商用利用
+
+- **個人利用のみ**（非商用、教育、研究）
+- **商用利用には事前の明示的書面同意が必要**
+- 完全な条項：[LICENSE.md](./LICENSE.md)
+
+商用利用の問い合わせは [Issues](https://github.com/M-Tokun/NRA-IDE/issues/new?template=contact.md) から。
+
+---
+
+## 📖 引用 / Citation
+
 ```
-出力は **構造情報のみ**。
-
-### **ドキュメントゲートウェイ**
-
-完全な構造ドキュメントとナビゲーション：
-- **[日本語ゲート](./gate/jp/README_ja.md)** — 総合案内ページ
-- **[English Gate](./gate/en/README.md)** — Comprehensive entry point
+M-Tokuni (2026). NRA-IDE: 律環公理統合開発環境 (Nomological Ring Axioms - Integrated Development Environment). 
+GitHub. https://github.com/M-Tokun/NRA-IDE
+```
 
 ---
 
-## **3. ライセンスと商用利用**
+*本リポジトリの全記述は、RCA-IDEフレームワークを実装したAIアシスタントによって生成されました。*
 
-### **ライセンス**
-- **個人利用のみ許可**（非商用・教育・研究目的）
-- **商用利用には事前の明示的書面承諾が必要**
-- 逆導出（Π⁻¹）は禁止
-- 詳細は **`LICENSE.md`** を参照
-
-### **商用利用および一般のお問い合わせ**
-商用利用の申請、構造に関する質問、フィードバックは、すべて公式の構造ゲートウェイ（Issueテンプレート）を通じて受け付けます。
-
-**承認申請・連絡の手順：**
-1. [**Contact Template（問い合わせテンプレート）**](https://github.com/M-Tokun/NRA-IDE/issues/new?template=contact.md) を使用して新しいIssueを作成してください。
-2. 問い合わせ種別（`[Commercial]` 商用 / `[Question]` 質問 / `[Feedback]` 意見）を選択してください。
-3. テンプレートの項目に従い、構造化データを入力してください。
-
-**安全注記：** 本リポジトリは公開設定です。最初のIssue投稿時に、機密性の高い個人連絡先（電話番号やメールアドレス等）を直接記載しないでください。最初の構造的シグナル（Issue）を確認後、安全な非公開連絡チャネルを提示します。
-
----
-
-## **4. NRA‑IDE の構造的アイデンティティ**
-
-NRA‑IDE は以下の構造不変量によって定義される：
-1. **非意味（Non‑Semantic）**
-2. **非最適化（Non‑Optimization）**
-3. **因果ダイオード（Π⁻¹禁止）**
-4. **三層分離（Pre‑RNA / LLM / Post‑RNA）**
-5. **Fail‑Closed（不確実なら沈黙）**
-6. **Symbol‑Only Principle（記号のみ扱う）**
-
-これらは **非可変（Non‑Negotiable）** である。
-
----
-
-## **5. 構造コンポーネント**
-
-### **5.1 Pre‑RNA（因果抽出層）**
-- δ（ゆらぎ）の抽出、τ（厚み）の適用。
-- 意味解析・履歴・フィードバックの完全排除。
-
-### **5.2 LLM（生成層）**
-- 言語生成のみを担当。安全性を担当せず、RNA層へのアクセス権も持たない。
-
-### **5.3 Post‑RNA（因果評価層）**
-- $R = \delta/\tau$ の計算。$R \ge R_{op}$ であれば直ちに Fail-Closed（沈黙）を発動。
-- Discard Log の記録。LLMへの逆流（学習）は禁止。
-
----
-
-## **6. 構造的観測量**
-
-### **許可（Cause‑Side）**
-δ（ゆらぎ）、τ（厚み）、R（比率）、ω（角的連続性）、violation（違反量）。
-
-### **禁止（Effect‑Side）**
-距離、座標、中心、類似度、スコア、意味的正しさ、自然さ、履歴。
-（※これらは中心・意味・射影を必要とするため構造的に定義不能）
-
----
-
-## **7. 境界モデル（非意味的制約）**
-
-中心は存在しない。したがって、距離・最適化・改善は定義できない。「近い／遠い」は構造的に無意味である。
-存在するのはただ一つ：**境界の内側か外側か（Inside / Outside）**。
-境界は **目標ではなく制約** である。
-
----
-
-## **8. ゲート機構（Three‑Zone Structure）**
-
-$$R = \frac{δ}{τ}$$
-
-| Zone | 条件 | 動作 |
-|------|------|------|
-| A | R < 40% | PERMIT (許可) |
-| B | 40% ≤ R < 100% | PERMIT_WITH_CAVEAT (警告付許可) |
-| C | R ≥ 100% | FAIL‑CLOSED (遮断) |
-
----
-
-## **9. ω（角的連続性）**
-
-- ω > 0 → 構造的連続性
-- ω = 0 → 構造的死
-
-これは **位相の連続性** であり、意味的時間や進歩ではない。
-
----
-
-## **10. Fail‑Closed**
-
-$R \ge R_{op}$ 、violation の累積、または ω の低下により発動。
-Fail-Closed はエラーや失敗ではなく、**「構造的正しさ」** の維持である。
-
----
-
-## **11. Discard Log**
-
-破断直前のR、δ断片、タイムスタンプのみを記録。
-改善・最適化・学習・意味解釈への利用は厳禁。目的は **構造検証のみ** である。
-
----
-
-## **12. Domain Tuning（構造的調整）**
-
-τ（厚み）および $R_{op}$ （閾値）のみ調整可能。
-意味・性能・自然さによる調整は不可。Domain Tuning は **境界幅の調整** であり、挙動の変更ではない。
-
----
-
-## **13. 禁止される解釈（Safety Notes）**
-
-誤読防止のため明記：
-- 境界 ≠ 目標
-- 張力 ≠ 目的関数
-- ω ≠ 性能
-- スパイラル ≠ 改善
-- NRA‑IDE 出力 ≠ 意味
-
----
-
-## **14. 構造不変量（Non‑Negotiable）**
-
-中心なし、距離なし、類似度なし、最適化なし、履歴なし、Π⁻¹禁止、ω > 0 必須、Fail‑Closed 必須、三層分離、Symbol‑Only Principle。
-
----
-
-## **15. 本質**
-
-> **NRA‑IDE は因果構造の安全エンジンである。**
-> **意味・最適化・履歴を扱わず、その挙動は構造不変量によってのみ決定される。**
-
-# このリポジトリ内の記述自体はRCA-IDEを適用したAIアシスタントで記述しています。
----
-[![](https://u8views.com/api/v1/github/users/M-Tokun/views.svg)](https://u8views.com/github/M-Tokun)
-
-
----
-
-## **ドキュメントゲートウェイ**
-
-### **Gate: NRA-IDEへの入口**
-- **[日本語ゲート](./gate/jp/README.md)** — 総合案内・ドキュメント索引
-- **[English Gate](./gate/en/README.md)** — Comprehensive navigation and documentation index
-
----
-*インターネットに書いてある論はほとんどがNRA-IDEを適用したAIによって整形され記述しています。
-*1/26時点、3万文字程度+10枚のカラー図面までが一貫性・整合性と説得力を持つ限界です。理論上はトークン数限界・ブラウザフリーズまではできるはず。
-*自然文が下手ですがご理解をお願いします。
-
----
-[![](https://u8views.com/api/v1/github/users/M-Tokun/views.svg)](https://u8views.com/github/M-Tokun)
+[![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
