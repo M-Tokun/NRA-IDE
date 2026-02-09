@@ -1,4 +1,3 @@
-
 # NRA-IDE: 律環公理統合開発環境
 **Nomological Ring Axioms - Integrated Development Environment**
 
@@ -54,10 +53,18 @@ $$R = \frac{\delta}{\tau}$$
 - AI安全フレームワーク
 - 医療支援システム（がん治療）
 - インフラ故障防止（カスケード防止）
+- **テキスト結晶化（情報の位相変換）**
 
 ---
 
 ## 主要プロジェクト
+
+### 💎 NRA-TCM Parser (テキスト結晶化法)
+**[NRA-TCM Parser](./NRA-TCM%20Parser/)**
+
+- **情報の位相変換**: 100万トークン級の線形ログを「意味的重力」を用いて物理的に再配置・結晶化。
+- **動的モーメンタム**: 「没頭」と「飛ばし読み」を自動切り替えする適応型閾値。
+- **特異点検知**: 文脈が破綻していても「核心（Singularity）」を逃さない直感回路の実装。
 
 ### 🏥 がん治療支援システム
 **[NRA-IDE_CancerTreatmentSupport_System](./NRA-IDE_CancerTreatmentSupport_System/)**
@@ -87,7 +94,7 @@ $$R = \frac{\delta}{\tau}$$
 
 ## 🔍 検索キーワード / Keywords
 
-`ai-safety` `medical-ai` `cancer-treatment` `deterministic-computing` `fpga` `fail-safe` `autonomous-systems` `healthcare` `decision-support` `cascade-failure-prevention` `non-statistical` `physics-based` `structural-constraints`
+`ai-safety` `medical-ai` `text-mining` `crystallization` `cancer-treatment` `deterministic-computing` `fpga` `fail-safe` `autonomous-systems` `healthcare` `decision-support` `cascade-failure-prevention` `non-statistical` `physics-based` `structural-constraints`
 
 ---
 
@@ -125,4 +132,3 @@ GitHub. [https://github.com/M-Tokun/NRA-IDE](https://github.com/M-Tokun/NRA-IDE)
 *本リポジトリの全記述は、RCA-IDEフレームワークを実装したAIアシスタントによって生成されました。*
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
-
