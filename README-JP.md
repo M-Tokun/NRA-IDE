@@ -1,3 +1,4 @@
+
 # NRA-IDE: 律環公理統合開発環境
 **Nomological Ring Axioms - Integrated Development Environment**
 
@@ -16,7 +17,7 @@
 
 ## 律環公理（Nomological Ring Axioms）とは
 
-**線形概念（連続性・距離・意味）を使わず、張力構造を基本として世界構造と時間の状態を説明する公理。**
+**線形（連続性・距離・意味）を基軸計算に使わず、張力構造を基本として閾値（厚みとゆらぎを持ち）を持つ閉じた世界構造と時間の状態を説明する公理。**
 
 ## NRA-IDEとは
 
@@ -74,10 +75,13 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
-## ドキュメント
+## ドキュメント・サンプル
 
-- **[日本語ドキュメント](./gate/jp/README.md)** — 総合案内ページ
-- **[English Documentation](./gate/en/README.md)** — Comprehensive entry point
+理論的背景や詳細な解説は `examples` ディレクトリを参照してください：
+
+- **[日本語ドキュメント (Examples)](./examples/JP/README_JP.md)**
+    - 収録内容：距離概念の排除、誤差蓄積、HANストレステスト解説など
+- **[English Documentation (Examples)](./examples/EN/README_EN.md)**
 
 ---
 
@@ -95,22 +99,26 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
-## ライセンスと商用利用
+## ライセンス
 
-- **個人利用のみ**（非商用、教育、研究）
-- **商用利用には事前の明示的書面同意が必要**
-- 完全な条項：[LICENSE.md](./LICENSE.md)
+**Copyright (c) 2026 M-Tokuni**
 
-商用利用の問い合わせは [Issues](https://github.com/M-Tokun/NRA-IDE/issues/new?template=contact.md) から。
+### 個人・非商用利用
+* **自由に利用・改変・配布可能**
+* **クレジット表記必須:** 配布資料・コード内に本著作権表示を残してください。
+
+商用利用については、事前の書面による明示的な同意が必要です。
+詳細は **[LICENSE](./LICENSE)** をご確認ください。
 
 ---
 
 ## 📖 引用 / Citation
 
-```
-M-Tokuni (2026). NRA-IDE: 律環公理統合開発環境 (Nomological Ring Axioms - Integrated Development Environment). 
-GitHub. https://github.com/M-Tokun/NRA-IDE
-```
+
+M-Tokuni (2026). NRA-IDE: 律環公理統合開発環境 (Nomological Ring Axioms - Integrated Development Environment).
+GitHub. [https://github.com/M-Tokun/NRA-IDE](https://github.com/M-Tokun/NRA-IDE)
+
+
 
 ---
 
