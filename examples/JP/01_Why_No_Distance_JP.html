@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<!--
+  FILE: 01_Why_No_Distance_JP.html
+  NRA-IDE 実証デモ #01 — なぜ距離・微分積分・浮動小数点を使わないのか
+  (c) 2026 M-Tokuni | Principle: L∧P∧C∧D Verified
+  
+  概要: 4タブ構成で律環公理の基本原理を視覚的に解説
+    Tab1 - 距離を使わない理由（制約ベース判定 vs 距離ベース判定）
+    Tab2 - 微分積分を使わない理由（測定値直接比較 vs PID制御）
+    Tab3 - 浮動小数点を使わない理由（整数位相ロック方式）
+    Tab4 - 応用領域（医療AI・自動運転・インフラ）
+-->
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE #01: なぜ「距離」を使わないのか？</title>
+    <style>
+        /* ========================================
+           基本レイアウト
+           ======================================== */
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        /* ========================================
+           ヘッダー部分
+           ======================================== */
+        header {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #00ff88;
+            font-size: 2em;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        /* ========================================
+           タブナビゲーション
+           ======================================== */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: #2a2a3e;
+            color: #aaa;
+            border: 2px solid #3a3a4e;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: #3a3a4e;
+            color: #fff;
+        }
+        
+        .tab-btn.active {
+            background: #00ff88;
+            color: #000;
+            border-color: #00ff88;
+        }
+        
+        /* ========================================
+           コンテンツエリア
+           ======================================== */
+        .content {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            border-radius: 10px;
+            min-height: 400px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ========================================
+           視覚化キャンバス
+           ======================================== */
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #00ff88;
+            border-radius: 5px;
+            background: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        
+        /* ========================================
+           説明ボックス
+           ======================================== */
+        .explanation {
+            background: #1a1a2e;
+            padding: 20px;
+            border-left: 4px solid #00ff88;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .problem-box {
+            background: #2e1a1a;
+            border-left: 4px solid #ff5555;
+        }
+        
+        .solution-box {
+            background: #1a2e1a;
+            border-left: 4px solid #00ff88;
+        }
+        
+        /* ========================================
+           コード表示
+           ======================================== */
+        .code-block {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        
+        .code-comment {
+            color: #888;
+        }
+        
+        .code-keyword {
+            color: #ff79c6;
+        }
+        
+        .code-number {
+            color: #bd93f9;
+        }
+        
+        .code-string {
+            color: #f1fa8c;
+        }
+        
+        /* ========================================
+           比較テーブル
+           ======================================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #3a3a4e;
+        }
+        
+        th {
+            background: #2a2a3e;
+            color: #00ff88;
+        }
+        
+        tr:hover {
+            background: rgba(0, 255, 136, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================
+         ヘッダーセクション
+         ======================================== -->
+    <header>
+        <h1>🎯 NRA-IDE: なぜ「距離」を使わないのか？</h1>
+        <div class="subtitle">
+            Why Nomological Ring Axioms Don't Use Distance, Calculus, or Floating-Point
+        </div>
+    </header>
+
+    <!-- ========================================
+         タブナビゲーション
+         各タブが1つの概念を説明
+         ======================================== -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="showTab('distance')">❓ なぜ距離を使わない？</button>
+        <button class="tab-btn" onclick="showTab('calculus')">🧮 微分積分を使わない？</button>
+        <button class="tab-btn" onclick="showTab('floating')">🔢 浮動小数点を使わない？</button>
+        <button class="tab-btn" onclick="showTab('usage')">🎯 何に使える？</button>
+    </div>
+
+    <!-- ========================================
+         メインコンテンツエリア
+         ======================================== -->
+    <div class="content">
+        
+        <!-- ============================================================
+             タブ1: なぜ距離を使わないのか？
+             ============================================================ -->
+        <div id="tab-distance" class="tab-content active">
+            <h2>❓ なぜ「距離」を使わないのか？</h2>
+            
+            <!-- 従来手法の問題点 -->
+            <div class="explanation problem-box">
+                <h3>🔴 従来のAI・数学の問題</h3>
+                <p><strong>従来手法は「距離」に依存します：</strong></p>
+                <div class="code-block">
+<span class="code-comment">// 従来のAI判定（例：異常検知）</span>
+<span class="code-keyword">function</span> conventionalAI(input) {
+    <span class="code-comment">// 1. 「正常」の中心点を定義（これが問題！）</span>
+    <span class="code-keyword">const</span> center = calculateCenter(trainingData);
+    
+    <span class="code-comment">// 2. 入力と中心の「距離」を計算</span>
+    <span class="code-keyword">const</span> distance = euclideanDistance(input, center);
+    
+    <span class="code-comment">// 3. 距離が閾値を超えたら異常と判定</span>
+    <span class="code-keyword">if</span> (distance > threshold) {
+        <span class="code-keyword">return</span> <span class="code-string">"異常"</span>;
+    }
+    <span class="code-keyword">return</span> <span class="code-string">"正常"</span>;
+}
+                </div>
+                
+                <p><strong style="color: #ff5555;">なぜこれが問題か？</strong></p>
+                <table>
+                    <tr>
+                        <th>問題</th>
+                        <th>結果</th>
+                    </tr>
+                    <tr>
+                        <td>「中心」の定義が曖昧</td>
+                        <td>平均？中央値？クラスタ中心？</td>
+                    </tr>
+                    <tr>
+                        <td>距離計算がブラックボックス</td>
+                        <td>なぜその距離なのか説明不可能</td>
+                    </tr>
+                    <tr>
+                        <td>原点が必要</td>
+                        <td>座標系の定義が恣意的</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- 律環公理のアプローチ -->
+            <div class="explanation solution-box">
+                <h3>✅ 律環公理のアプローチ</h3>
+                <p><strong>距離を使わず、「制約からのズレ」を測定：</strong></p>
+                <div class="code-block">
+<span class="code-comment">// 律環公理の判定（NRA-IDE）</span>
+<span class="code-keyword">function</span> nraIDE(input, constraints) {
+    <span class="code-comment">// 1. 制約違反を直接測定（距離ではない！）</span>
+    <span class="code-keyword">const</span> delta = measureViolation(input, constraints);
+    
+    <span class="code-comment">// 2. 許容範囲と比較</span>
+    <span class="code-keyword">const</span> tau = allowedTolerance;
+    
+    <span class="code-comment">// 3. 比率を計算（R = δ/τ）</span>
+    <span class="code-keyword">const</span> R = delta / tau;
+    
+    <span class="code-comment">// 4. 閾値判定（1.0以上なら構造破断）</span>
+    <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
+        <span class="code-keyword">return</span> <span class="code-string">"FAIL_CLOSED"</span>; <span class="code-comment">// システム停止</span>
+    }
+    <span class="code-keyword">return</span> <span class="code-string">"SAFE"</span>;
+}
+                </div>
+                
+                <p><strong style="color: #00ff88;">なぜこれが優れているか？</strong></p>
+                <table>
+                    <tr>
+                        <th>特徴</th>
+                        <th>利点</th>
+                    </tr>
+                    <tr>
+                        <td>「中心」不要</td>
+                        <td>制約だけを定義すればよい</td>
+                    </tr>
+                    <tr>
+                        <td>計算が完全に説明可能</td>
+                        <td>δとτは物理的測定値</td>
+                    </tr>
+                    <tr>
+                        <td>原点が存在しない</td>
+                        <td>座標系の恣意性がない</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- 数学と律環公理の違い -->
+            <div class="explanation" style="background: #1a1a2e; border-left: 4px solid #00ff88;">
+                <h3>📐 数学 vs 律環公理</h3>
+                <table>
+                    <tr>
+                        <th>数学</th>
+                        <th>律環公理</th>
+                    </tr>
+                    <tr>
+                        <td><strong>静的要素の計算を得意</strong><br>
+                        人工物、固定された構造、瞬間的な状態</td>
+                        <td><strong>動的状態を得意</strong><br>
+                        時間経過、構造変化、連続的プロセス</td>
+                    </tr>
+                    <tr>
+                        <td>静止状態を基準とする</td>
+                        <td>静止は動的なものの一点切り取り</td>
+                    </tr>
+                    <tr>
+                        <td>例：建築物の強度計算、軌道計算</td>
+                        <td>例：生体の適応、システムの自己調整</td>
+                    </tr>
+                </table>
+                
+                <p style="margin-top: 15px; color: #aaa;">
+                    <strong>重要：</strong>数学と律環公理は対立ではなく、<strong>得意分野が異なる</strong>。<br>
+                    静的計算には数学、動的適応には律環公理が適している。
+                </p>
+            </div>
+            
+            <!-- 視覚化 -->
+            <h3>📊 視覚的比較</h3>
+            <canvas id="distanceCanvas" width="800" height="400"></canvas>
+        </div>
+        
+        <!-- ============================================================
+             タブ2: 微分積分を使わないとは？
+             ============================================================ -->
+        <div id="tab-calculus" class="tab-content">
+            <h2>🧮 微分積分を使わないとは？</h2>
+            
+            <div class="explanation">
+                <h3>従来の数学的アプローチ</h3>
+                <p>従来のシステム制御は微分方程式に依存します：</p>
+                <div class="code-block">
+<span class="code-comment">// 従来の制御理論（PID制御など）</span>
+<span class="code-keyword">function</span> pidControl(error, dt) {
+    <span class="code-comment">// P: 比例項（現在の誤差）</span>
+    <span class="code-keyword">const</span> P = Kp * error;
+    
+    <span class="code-comment">// I: 積分項（誤差の累積）</span>
+    I += Ki * error * dt;
+    
+    <span class="code-comment">// D: 微分項（誤差の変化率）</span>
+    <span class="code-keyword">const</span> D = Kd * (error - prevError) / dt;
+    
+    <span class="code-comment">// 制御出力 = P + I + D</span>
+    <span class="code-keyword">return</span> P + I + D;
+}
+                </div>
+                
+                <p><strong style="color: #ff5555;">問題点：</strong></p>
+                <ul>
+                    <li>dt（時間刻み）が必要 → 連続時間の仮定</li>
+                    <li>微分は数値的に不安定</li>
+                    <li>積分は誤差が累積する</li>
+                </ul>
+            </div>
+            
+            <div class="explanation solution-box">
+                <h3>律環公理のアプローチ</h3>
+                <p>微分積分ではなく、「測定値の直接比較」：</p>
+                <div class="code-block">
+<span class="code-comment">// NRA-IDE: 微分積分を使わない制御</span>
+<span class="code-keyword">function</span> nraControl(input, constraint) {
+    <span class="code-comment">// δ: 制約からのズレ（直接測定）</span>
+    <span class="code-keyword">const</span> delta = input - constraint;  <span class="code-comment">// これは引き算だけ</span>
+    
+    <span class="code-comment">// τ: 許容範囲（設計時に決定済み）</span>
+    <span class="code-keyword">const</span> tau = <span class="code-number">10.0</span>;  <span class="code-comment">// 固定値</span>
+    
+    <span class="code-comment">// R: 比率計算（割り算だけ）</span>
+    <span class="code-keyword">const</span> R = delta / tau;
+    
+    <span class="code-comment">// 判定（if文だけ）</span>
+    <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
+        <span class="code-keyword">return</span> <span class="code-string">"STOP"</span>;  <span class="code-comment">// 構造破断 → 停止</span>
+    }
+    <span class="code-keyword">return</span> <span class="code-string">"CONTINUE"</span>;
+}
+
+<span class="code-comment">// 微分も積分も使っていない！
+// 使っているのは：引き算、割り算、比較、だけ</span>
+                </div>
+                
+                <p><strong style="color: #00ff88;">これの利点：</strong></p>
+                <table>
+                    <tr>
+                        <th>従来手法（微分積分）</th>
+                        <th>律環公理（測定値比較）</th>
+                    </tr>
+                    <tr>
+                        <td>数値的に不安定</td>
+                        <td>安定（四則演算のみ）</td>
+                    </tr>
+                    <tr>
+                        <td>誤差が累積</td>
+                        <td>誤差が累積しない</td>
+                    </tr>
+                    <tr>
+                        <td>計算コストが高い</td>
+                        <td>計算コストが極小</td>
+                    </tr>
+                    <tr>
+                        <td>説明が困難</td>
+                        <td>圧倒的な差</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- 視覚化 -->
+            <h3>📊 計算の複雑さ比較</h3>
+            <canvas id="calculusCanvas" width="800" height="400"></canvas>
+        </div>
+        
+        <!-- ============================================================
+             タブ3: 浮動小数点を使わない？
+             ============================================================ -->
+        <div id="tab-floating" class="tab-content">
+            <h2>🔢 浮動小数点演算を使わないとは？</h2>
+            
+            <div class="explanation problem-box">
+                <h3>浮動小数点の問題</h3>
+                <p>浮動小数点演算には累積誤差があります：</p>
+                <div class="code-block">
+<span class="code-comment">// 浮動小数点の罠</span>
+<span class="code-keyword">let</span> sum = <span class="code-number">0.0</span>;
+<span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i < <span class="code-number">1000000</span>; i++) {
+    sum += <span class="code-number">0.1</span>;  <span class="code-comment">// 0.1を100万回足す</span>
+}
+
+console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
+                   <span class="code-comment">// 実際: 100000.00000123456... (誤差！)</span>
+                </div>
+                
+                <p><strong style="color: #ff5555;">医療・自動運転では致命的：</strong></p>
+                <ul>
+                    <li>誤差が累積 → 判定ミス</li>
+                    <li>再現性がない → デバッグ不可能</li>
+                    <li>環境依存 → CPUによって結果が変わる</li>
+                </ul>
+            </div>
+            
+            <div class="explanation solution-box">
+                <h3>NRA-IDEの解決策：整数位相ロック</h3>
+                <p>浮動小数点を使わず、整数だけで動作：</p>
+                <div class="code-block">
+<span class="code-comment">// NRA-IDE: 整数位相ロック方式</span>
+<span class="code-keyword">let</span> phase = <span class="code-number">0.0</span>;  <span class="code-comment">// 内部では浮動小数点</span>
+
+<span class="code-keyword">function</span> update() {
+    phase += <span class="code-number">0.01</span>;  <span class="code-comment">// 位相が進む</span>
+    
+    <span class="code-comment">// ここが重要：整数部分だけを使う</span>
+    <span class="code-keyword">const</span> integerPhase = Math.floor(phase);
+    
+    <span class="code-comment">// 小数部分は破棄される（Discarded Residual）</span>
+    <span class="code-keyword">const</span> residual = phase - integerPhase;
+    
+    <span class="code-comment">// システムが使うのは integerPhase だけ</span>
+    <span class="code-keyword">return</span> integerPhase;  <span class="code-comment">// 0, 1, 2, 3, ... （整数のみ）</span>
+}
+
+<span class="code-comment">// 利点：
+// - 浮動小数点誤差が累積しない
+// - 完全に決定論的
+// - どんなCPUでも同じ結果</span>
+                </div>
+                
+                <p><strong style="color: #00ff88;">実例：</strong></p>
+                <table>
+                    <tr>
+                        <th>Phase（内部）</th>
+                        <th>Integer Lock</th>
+                        <th>Residual（破棄）</th>
+                    </tr>
+                    <tr>
+                        <td>0.95</td>
+                        <td>0</td>
+                        <td>0.95</td>
+                    </tr>
+                    <tr>
+                        <td>1.23</td>
+                        <td>1</td>
+                        <td>0.23</td>
+                    </tr>
+                    <tr>
+                        <td>2.78</td>
+                        <td>2</td>
+                        <td>0.78</td>
+                    </tr>
+                    <tr>
+                        <td>3.01</td>
+                        <td>3</td>
+                        <td>0.01</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- 視覚化 -->
+            <h3>📊 位相ロックの視覚化</h3>
+            <canvas id="floatingCanvas" width="800" height="400"></canvas>
+            <p style="text-align: center; color: #888; margin-top: 10px;">
+                緑の環：整数位相（システムが使う）<br>
+                赤の点：浮動小数点ノイズ（破棄される）
+            </p>
+        </div>
+        
+        <!-- ============================================================
+             タブ4: 何に使えるのか？
+             ============================================================ -->
+        <div id="tab-usage" class="tab-content">
+            <h2>🎯 何に使えるのか？</h2>
+            
+            <div class="explanation">
+                <h3>🏥 1. 医療AI（がん治療支援）</h3>
+                <p><strong>問題：</strong>従来AIは「薬が効くか」を統計的に予測</p>
+                <p><strong>NRA-IDE：</strong>「薬が物理的に届くか」を判定</p>
+                <div class="code-block">
+<span class="code-comment">// がん治療での応用例</span>
+<span class="code-keyword">function</span> checkDrugPenetration(tumor) {
+    <span class="code-comment">// δ: 腫瘍の抵抗力（物理測定値）</span>
+    <span class="code-keyword">const</span> delta = tumor.stiffness * tumor.thickness;
+    
+    <span class="code-comment">// τ: 投与圧力（設定値）</span>
+    <span class="code-keyword">const</span> tau = drug.pressure * drug.area;
+    
+    <span class="code-comment">// R: 抵抗比率</span>
+    <span class="code-keyword">const</span> R = delta / tau;
+    
+    <span class="code-comment">// 判定</span>
+    <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
+        <span class="code-keyword">return</span> <span class="code-string">"薬剤が物理的に届かない → 投与中止"</span>;
+    }
+    <span class="code-keyword">return</span> <span class="code-string">"薬剤到達可能 → 投与継続"</span>;
+}
+                </div>
+            </div>
+            
+            <div class="explanation">
+                <h3>🚗 2. 自動運転安全</h3>
+                <p><strong>問題：</strong>従来AIは「最適な経路」を探索 → ブラックボックス</p>
+                <p><strong>NRA-IDE：</strong>「構造的に安全な経路」を選択 → 説明可能</p>
+                <div class="code-block">
+<span class="code-comment">// ブレーキ判定の例</span>
+<span class="code-keyword">function</span> brakeSafetyGate(vehicle, obstacle) {
+    <span class="code-comment">// δ: 衝突までの時間的余裕</span>
+    <span class="code-keyword">const</span> delta = (obstacle.distance - vehicle.speed * reactionTime);
+    
+    <span class="code-comment">// τ: 最小安全距離</span>
+    <span class="code-keyword">const</span> tau = vehicle.brakingDistance;
+    
+    <span class="code-comment">// R: 安全マージン</span>
+    <span class="code-keyword">const</span> R = delta / tau;
+    
+    <span class="code-comment">// 判定</span>
+    <span class="code-keyword">if</span> (R < <span class="code-number">1.0</span>) {
+        <span class="code-keyword">return</span> <span class="code-string">"緊急ブレーキ作動"</span>;  <span class="code-comment">// FAIL_CLOSED</span>
+    }
+    <span class="code-keyword">return</span> <span class="code-string">"安全継続"</span>;
+}
+                </div>
+            </div>
+            
+            <div class="explanation">
+                <h3>🖥️ 3. インフラ故障防止</h3>
+                <p><strong>問題：</strong>サーバーのカスケード故障（1台の故障が連鎖）</p>
+                <p><strong>NRA-IDE：</strong>物理的負荷制約による予防</p>
+                <div class="code-block">
+<span class="code-comment">// HAN Gate（カスケード防止）</span>
+<span class="code-keyword">function</span> hanGate(server, incomingLoad) {
+    <span class="code-comment">// δ: 現在の負荷超過量</span>
+    <span class="code-keyword">const</span> delta = incomingLoad - server.capacity;
+    
+    <span class="code-comment">// τ: 許容バッファ</span>
+    <span class="code-keyword">const</span> tau = server.bufferSize;
+    
+    <span class="code-comment">// R: 負荷比率</span>
+    <span class="code-keyword">const</span> R = delta / tau;
+    
+    <span class="code-comment">// 判定</span>
+    <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
+        <span class="code-keyword">return</span> <span class="code-string">"リクエスト拒否"</span>;  <span class="code-comment">// サーバー保護</span>
+    }
+    <span class="code-keyword">return</span> <span class="code-string">"リクエスト受理"</span>;
+}
+                </div>
+            </div>
+            
+            <h3>🎯 共通原則</h3>
+            <table>
+                <tr>
+                    <th>領域</th>
+                    <th>δ（制約からのズレ）</th>
+                    <th>τ（許容範囲）</th>
+                    <th>R ≥ 1.0 の意味</th>
+                </tr>
+                <tr>
+                    <td>医療</td>
+                    <td>腫瘍抵抗力</td>
+                    <td>投与圧力</td>
+                    <td>薬剤が届かない</td>
+                </tr>
+                <tr>
+                    <td>自動運転</td>
+                    <td>障害物までの余裕</td>
+                    <td>制動距離</td>
+                    <td>衝突危険</td>
+                </tr>
+                <tr>
+                    <td>インフラ</td>
+                    <td>負荷超過量</td>
+                    <td>バッファサイズ</td>
+                    <td>サーバー過負荷</td>
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+
+    <!-- ========================================
+         JavaScript: タブ切り替えと視覚化
+         ======================================== -->
+    <script>
+        // ========================================
+        // タブ切り替え機能
+        // ========================================
+        function showTab(tabName) {
+            // 全てのタブコンテンツを非表示
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 全てのタブボタンを非アクティブ化
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // 選択されたタブを表示
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            // 選択されたボタンをアクティブ化
+            event.target.classList.add('active');
+            
+            // タブに応じたアニメーションを開始
+            if (tabName === 'distance') startDistanceViz();
+            if (tabName === 'calculus') startCalculusViz();
+            if (tabName === 'floating') startFloatingViz();
+        }
+        
+        // ========================================
+        // タブ1の視覚化：距離 vs 制約
+        // ========================================
+        function startDistanceViz() {
+            const canvas = document.getElementById('distanceCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let frame = 0;
+            
+            function animate() {
+                frame++;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 左半分：従来手法（距離ベース）
+                ctx.fillStyle = '#ff5555';
+                ctx.font = 'bold 16px Courier';
+                ctx.fillText('従来手法：距離計算', 50, 30);
+                
+                // 中心点（問題の根源）
+                const centerX = 200;
+                const centerY = 200;
+                ctx.fillStyle = '#ff5555';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillText('中心（どう定義？）', centerX + 15, centerY);
+                
+                // データ点
+                const angle = (frame * 0.02) % (Math.PI * 2);
+                const dataX = centerX + Math.cos(angle) * 80;
+                const dataY = centerY + Math.sin(angle) * 80;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(dataX, dataY, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 距離線（ブラックボックス）
+                ctx.strokeStyle = '#ff5555';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(dataX, dataY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // 右半分：律環公理（制約ベース）
+                ctx.fillStyle = '#00ff88';
+                ctx.font = 'bold 16px Courier';
+                ctx.fillText('律環公理：制約検証', 450, 30);
+                
+                // 制約境界（明確）
+                const constraintX = 600;
+                const constraintY = 200;
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.rect(constraintX - 80, constraintY - 80, 160, 160);
+                ctx.stroke();
+                ctx.fillText('制約（明確に定義）', constraintX - 70, constraintY - 90);
+                
+                // データ点
+                const dataX2 = constraintX + Math.cos(angle) * 60;
+                const dataY2 = constraintY + Math.sin(angle) * 60;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(dataX2, dataY2, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 違反測定（透明）
+                if (dataX2 > constraintX + 80) {
+                    ctx.fillStyle = 'rgba(255, 85, 85, 0.3)';
+                    ctx.fillRect(constraintX + 80, dataY2 - 5, dataX2 - (constraintX + 80), 10);
+                    ctx.fillStyle = '#ff5555';
+                    ctx.fillText('δ (violation)', constraintX + 85, dataY2 - 10);
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        // ========================================
+        // タブ2の視覚化：計算の複雑さ
+        // ========================================
+        function startCalculusViz() {
+            const canvas = document.getElementById('calculusCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let t = 0;
+            
+            function animate() {
+                t += 0.05;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 左：従来手法（複雑）
+                ctx.fillStyle = '#ff5555';
+                ctx.font = 'bold 14px Courier';
+                ctx.fillText('従来：微分積分（複雑）', 50, 30);
+                
+                // 複雑な波形（微分積分が必要）
+                ctx.strokeStyle = '#ff5555';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let x = 0; x < 300; x++) {
+                    const y = 200 + Math.sin(x * 0.05 + t) * 50 + Math.cos(x * 0.03 + t * 0.5) * 30;
+                    if (x === 0) ctx.moveTo(50 + x, y);
+                    else ctx.lineTo(50 + x, y);
+                }
+                ctx.stroke();
+                
+                // 右：NRA-IDE（シンプル）
+                ctx.fillStyle = '#00ff88';
+                ctx.fillText('NRA-IDE：測定値比較（シンプル）', 450, 30);
+                
+                // シンプルな閾値判定
+                const value = Math.sin(t) * 80;
+                const threshold = 50;
+                
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(450, 200 - threshold);
+                ctx.lineTo(750, 200 - threshold);
+                ctx.stroke();
+                ctx.fillText('τ (threshold)', 755, 200 - threshold);
+                
+                ctx.fillStyle = value > threshold ? '#ff5555' : '#00ff88';
+                ctx.beginPath();
+                ctx.arc(600, 200 - value, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.fillText('δ (measured)', 610, 200 - value);
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        // ========================================
+        // タブ3の視覚化：整数位相ロック
+        // ========================================
+        function startFloatingViz() {
+            const canvas = document.getElementById('floatingCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let phase = 0.0;
+            
+            function animate() {
+                phase += 0.03;
+                
+                // 残像効果
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = 150;
+                
+                // 整数環（緑）
+                ctx.strokeStyle = '#003d11';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // 整数位相とResidual
+                const integerPhase = Math.floor(phase);
+                const residual = phase - integerPhase;
+                
+                // 位相カーソル
+                const angle = (residual * Math.PI * 2) - (Math.PI / 2);
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                // アーム（緑）
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                
+                // 点（白）
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // ロックイベント
+                if (residual < 0.15) {
+                    ctx.strokeStyle = `rgba(0, 255, 136, ${1.0 - residual * 7})`;
+                    ctx.lineWidth = 6;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius + 20, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                // テキスト表示
+                ctx.fillStyle = '#00ff88';
+                ctx.font = '16px Courier';
+                ctx.fillText(`Integer Lock: ${integerPhase}`, centerX - 60, centerY + radius + 40);
+                ctx.fillStyle = '#ff5555';
+                ctx.fillText(`Residual: ${residual.toFixed(4)} (破棄)`, centerX - 80, centerY + radius + 60);
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        // ========================================
+        // 初期化：ページ読み込み時に最初のタブを表示
+        // ========================================
+        window.addEventListener('load', () => {
+            startDistanceViz();
+        });
+    </script>
+
+</body>
+</html>
