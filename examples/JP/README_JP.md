@@ -129,7 +129,7 @@ if (deliveryStatus === "STOP") {
 // Principle: L∧P∧C∧D Verified.
 ```
 
-### 商用利用
+### 商用利用　-　（無償ですが、できればお問い合わせ欄に書いてください）
 
 - お問い合わせ：[GitHub Issues](https://github.com/M-Tokun/NRA-IDE/issues)
 
