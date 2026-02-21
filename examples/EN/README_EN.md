@@ -133,7 +133,9 @@ Attribution required: The following credit must be retained in all distributed m
 ```
 
 ### Commercial Use
-- **Requires prior explicit written consent.**
+- Commercial use is permitted free of charge.
+- Notification is not required, but the author would appreciate a brief message in the contact section below if possible.
+
 - Inquiries: [GitHub Issues](https://github.com/M-Tokun/NRA-IDE/issues)
 
 ### Prohibitions
@@ -161,7 +163,7 @@ See `LICENSE.txt` for details.
 - **Twitter/X:** https://x.com/m_tokuni
 - **Facebook:** https://www.facebook.com/tokuni.masa
 
-etc :https://note.com/mtokuni   https://mtokuni.blogspot.com/   https://mtokuni.hatenablog.com/
+- etc https://note.com/mtokuni   https://mtokuni.blogspot.com/   https://mtokuni.hatenablog.com/
 ---
 
 ## Citation
