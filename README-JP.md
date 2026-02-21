@@ -63,7 +63,6 @@ R = \frac{\delta}{\tau}
 **AI は計算に徹し、倫理的判断は人間が担う** 構造が保証されます。
 
 ---
-## Core Engine
 
 ## Core Engine
 
@@ -165,4 +164,5 @@ GitHub. https://github.com/M-Tokun/NRA-IDE
   <strong>Status: Lighthouse（灯台）</strong><br>
   発見可能。売り込まない。ただし消えない。
 </p>
+
 
