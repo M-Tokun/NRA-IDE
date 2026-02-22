@@ -1,27 +1,16 @@
 # FILE: nra_ide_foundation_fixed.py
 # Title: NRA-IDE Foundation - DynamicState Core with Extension Reservations [fixed]
 # "Thickness + Fluctuation x2 ver.1.0 Stable Edition"
-# Author: M-Tokuni / KEN - Copyright
-# Date: 2026-02-21 04:52 JST
-#
-# [FIX LOG]
-#   - BoundLaw.correct(): Changed E_stored from normalized value overwrite to differential accumulation
-#   - ObservationLog.record(): Extended violated detection to all violation targets (from only [-1] to any())
-#
-# [Known Constraints / EXT Reservations]
-#   - E_bal (energy balance residual) is tracked only in correction phase, leaving positive values
-#     Complete conservation closure requires integration of E_stored across all phases
-#     → Scheduled for next version as [EXT: full_energy_closure]
-#
-# Design Philosophy:
-#   Fix DynamicState as the "container".
-#   Use the same container regardless of medium or target changes.
-#   Each Law is replaced as a transition function (how to move).
-#
-# About Extension Reservations:
-#   Currently unimplemented dynamic terms are explicitly left as x1 or +0.0.
-#   Attach "[EXT: extension_name]" to comments—the connection point for next implementation.
-#   Do not erase, omit, or average.
+# Author: M-Tokuni /  Copyright
+
+### [FIX LOG]
+###   - BoundLaw.correct(): Changed E_stored from normalized value overwrite to differential accumulation
+###   - ObservationLog.record(): Extended violated detection to all violation targets (from only [-1] to any())
+
+### About Extension Reservations:
+###   Currently unimplemented dynamic terms are explicitly left as x1 or +0.0.
+###   Attach "[EXT: extension_name]" to comments—the connection point for next implementation.
+###   Do not erase, omit, or average.
 
 from __future__ import annotations
 
