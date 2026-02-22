@@ -229,3 +229,11 @@ If you want, I can next:
 - produce a **short abstract** suitable for arXiv or a systems journal.
 
 Just say the direction.
+
+---
+
+
+### My argument is disarmingly simple.
+### Place a cat inside a box; when you open the box, the cat is there. 
+### This is the basic template of Earth’s structural logic and the temporal order that governs it.
+### Why, then, can the gears of a clock measure time with such precision?
