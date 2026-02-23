@@ -1,5 +1,5 @@
-# NRA-IDE: 律環公理統合開発環境
-**Nomological Ring Axioms – Integrated Development Environment**
+# NRA‑IDE: 律環公理 – 内包性動力学エンジン
+**Nomological Ring Axioms – Intensional Dynamics Engine**
 
 <p align="center">
   <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO">
@@ -21,9 +21,13 @@
 
 ---
 
-## NRA-IDEとは
+## NRA‑IDEとは
 
-律環公理を実装した **統合開発環境（Integrated Development Environment）** です。
+**NRA‑IDE は「統合開発環境」ではありません。**  
+**律環公理を実装した「内包性動力学エンジン（Intensional Dynamics Engine）」です。**
+
+線形計算では扱えない張力構造・閾値構造・閉世界制約を  
+物理的に説明可能な形で計算するためのエンジンです。
 
 ---
 
@@ -78,7 +82,7 @@ R = \frac{\delta}{\tau}
 
 # 📂 主要プロジェクト
 
-### 💎 NRA-TCM Parser（テキスト結晶化法）
+### 💎 NRA‑TCM Parser（テキスト結晶化法）
 **[./NRA-TCM Parser/](./NRA-TCM%20Parser/)**
 
 - 情報の位相変換（100万トークン級ログの結晶化）  
@@ -127,13 +131,6 @@ R = \frac{\delta}{\tau}
 
 ---
 
-# 🔗 外部リンク
-
-- **Note 記事**: https://note.com/mtokuni  
-- **Facebook**: https://www.facebook.com/tokuni.masa  
-
----
-
 # 📜 ライセンス
 
 本プロジェクトは **MIT License** の下で提供されています。
@@ -142,6 +139,16 @@ R = \frac{\delta}{\tau}
 - 再配布時には **著作権表示の保持が必要**
 
 詳細は **[LICENSE](./LICENSE)** をご確認ください。
+
+---
+
+## ⚠️ 注意 / Notice  
+**必ず倫理規定（人権・犯罪などの禁止事項）を読んでからご利用ください。**  
+**Please make sure to read the Ethical Guidelines (prohibitions on human‑rights violations, criminal use, etc.) before using this project.**
+
+👉 倫理規定: **[ETHICS.md](./ETHICS.md)**
+
+---
 
 ### 商用利用について
 
@@ -154,15 +161,13 @@ R = \frac{\delta}{\tau}
 # 📖 引用 / Citation
 
 M‑Tokuni (2026).  
-**NRA-IDE: 律環公理統合開発環境  
-(Nomological Ring Axioms – Integrated Development Environment).**  
+**NRA‑IDE: 律環公理 – 内包性動力学エンジン  
+(Nomological Ring Axioms – Intensional Dynamics Engine).**  
 GitHub. https://github.com/M-Tokun/NRA-IDE
 
 ---
 
 <p align="center">
   <strong>Status: Lighthouse（灯台）</strong><br>
-  発見可能。売り込まない。ただし消えない。
+
 </p>
-
-
