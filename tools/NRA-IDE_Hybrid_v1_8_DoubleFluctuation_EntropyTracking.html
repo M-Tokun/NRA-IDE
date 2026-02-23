@@ -1,0 +1,489 @@
+<!-- 
+FILE: NRA-IDE_Hybrid_v1_8_DoubleFluctuation_EntropyTracking.html
+Title: NRA-IDE v1.8: Double Fluctuation + Entropy Dynamics (Hybrid)
+Concept: v1.7（二重ゆらぎ+Rod同期）+ v1.5（エントロピー追跡）の統合
+Date: 26-0223-0115 JST
+整合性: 物理的周波数分離 + 非平衡定常追跡 + 膨張制御 + Rod接点維持
+-->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE v1.8: Hybrid (Double Fluctuation + Entropy)</title>
+    <style>
+        :root {
+            --bg-color: #05070a;
+            --panel-bg: rgba(10, 15, 25, 0.85);
+            --cyan: #00f2ff;
+            --green: #00ff88;
+            --red: #ff3366;
+            --yellow: #ffcc00;
+            --blue: #0088ff;
+            --purple: #aa55ff;
+            --text-dim: #8b949e;
+        }
+        body { 
+            margin: 0; 
+            background-color: var(--bg-color); 
+            overflow: hidden; 
+            color: #c9d1d9; 
+            font-family: 'Segoe UI', 'Ubuntu Mono', monospace; 
+        }
+        canvas { 
+            display: block; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            z-index: -1; 
+            width: 100vw; 
+            height: 100vh;
+        }
+
+        .panel {
+            position: absolute;
+            background: var(--panel-bg);
+            border-left: 3px solid var(--cyan);
+            padding: 15px;
+            border-radius: 0 4px 4px 0;
+            backdrop-filter: blur(8px);
+            font-size: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            pointer-events: none;
+            z-index: 10;
+        }
+        #info-panel { top: 20px; left: 20px; width: 340px; }
+        #entropy-panel { bottom: 20px; left: 20px; width: 340px; border-left-color: var(--yellow); }
+        #state-panel { top: 20px; right: 20px; width: 260px; border-left: none; border-right: 3px solid var(--purple); text-align: right; }
+
+        h1 { margin: 0 0 10px 0; font-size: 14px; color: var(--cyan); letter-spacing: 1px; text-transform: uppercase; }
+        h2 { margin: 8px 0 4px 0; font-size: 11px; color: var(--yellow); border-bottom: 1px solid #333; padding-bottom: 2px; }
+        .label { color: var(--text-dim); font-size: 11px; margin-top: 5px; }
+        .value { font-weight: bold; color: #fff; font-family: 'Consolas', monospace; }
+        
+        .meter-container { width: 100%; height: 6px; background: #1a1f26; border-radius: 3px; margin: 8px 0; overflow: hidden; }
+        .meter-fill { height: 100%; transition: width 0.3s; }
+        .row { display: flex; justify-content: space-between; margin: 4px 0; border-bottom: 1px solid #21262d; padding-bottom: 2px; }
+        .tag { font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-right: 4px; text-transform: uppercase; }
+        .tag-f1 { background: var(--green); color: #000; }
+        .tag-f2 { background: var(--cyan); color: #000; }
+        .tag-entropy { background: var(--yellow); color: #000; }
+        .status-ok { color: var(--green); }
+        .status-warn { color: var(--yellow); }
+        .status-danger { color: var(--red); }
+    </style>
+</head>
+<body>
+
+    <div id="info-panel" class="panel">
+        <h1>NRA-IDE v1.8 Hybrid</h1>
+        <div class="label">Double Fluctuation + Entropy Tracking</div>
+        
+        <h2>Physical Oscillations</h2>
+        <div style="margin-top:6px;">
+            <span class="tag tag-f1">F1: 0.04Hz</span> 呼吸的（生命）<br>
+            <span class="tag tag-f2">F2: 0.7Hz</span> 熱的（散逸）
+        </div>
+
+        <h2>Rod State</h2>
+        <div class="row"><span class="label">接点位置</span><span class="value">t=0° (固定)</span></div>
+        <div class="row"><span class="label">R_rod</span><span id="rod-rad" class="value" style="color:var(--red);">150.0</span></div>
+        <div class="row"><span class="label">状態</span><span id="contact-stat" class="value status-ok">CONTACT ✓</span></div>
+
+        <h2>Structural Stability</h2>
+        <div class="meter-container"><div id="viability-meter" class="meter-fill" style="background: var(--green); width:100%;"></div></div>
+        <div class="row"><span class="label">δ (Core)</span><span id="delta-val" class="value">0.800</span></div>
+        <div class="row"><span class="label">τ (Noise)</span><span id="tau-val" class="value">0.100</span></div>
+        <div class="row"><span class="label">R=δ/τ</span><span id="r-val" class="value" style="color:var(--purple);">8.000</span></div>
+    </div>
+
+    <div id="entropy-panel" class="panel">
+        <h1>Non-Equilibrium Steady State</h1>
+        <span class="tag tag-entropy">ENTROPY DYNAMICS</span>
+        
+        <h2>Generation & Dissipation</h2>
+        <div class="row">
+            <span class="label">σ (Generation)</span>
+            <span id="sigma-val" class="value" style="color:var(--blue);">0.500</span>
+        </div>
+        <div class="row">
+            <span class="label">J (Dissipation)</span>
+            <span id="j-val" class="value" style="color:var(--green);">0.500</span>
+        </div>
+        <div class="meter-container">
+            <div id="entropy-meter" class="meter-fill" style="background: linear-gradient(90deg, #0088ff, #00ff88);"></div>
+        </div>
+
+        <h2>Congestion & Phase</h2>
+        <div class="row">
+            <span class="label">σ-J (Congestion)</span>
+            <span id="cong-val" class="value" style="color:var(--yellow);">0.000</span>
+        </div>
+        <div class="row">
+            <span class="label">Phase φ</span>
+            <span id="phase-val" class="value">0.00</span>
+        </div>
+        <div class="row">
+            <span class="label">Angular ω</span>
+            <span id="omega-val" class="value" style="color:var(--green);">> 0 ✓</span>
+        </div>
+
+        <h2>Critical Status</h2>
+        <div class="row">
+            <span class="label">ゆらぎ比</span>
+            <span id="fluct-ratio" class="value">0.000</span>
+        </div>
+        <div class="row">
+            <span class="label">状態</span>
+            <span id="critical-state" class="value status-ok">非平衡定常</span>
+        </div>
+    </div>
+
+    <div id="state-panel" class="panel">
+        <h1>State Variables</h1>
+        
+        <h2>Dynamics</h2>
+        <div class="label">value (stored)</div>
+        <div id="state-val" class="value" style="font-size:16px;">0.500</div>
+        <div class="meter-container">
+            <div id="state-meter" class="meter-fill" style="background:var(--blue); width:50%;"></div>
+        </div>
+
+        <h2>Expansion</h2>
+        <div class="label">expansion ratio</div>
+        <div id="exp-val" class="value">1.000</div>
+
+        <h2>Correction</h2>
+        <div class="label">buffer (dissipated)</div>
+        <div id="buffer-val" class="value" style="color:var(--cyan);">0.000</div>
+        <div class="meter-container">
+            <div id="buffer-meter" class="meter-fill" style="background:var(--cyan);"></div>
+        </div>
+
+        <h2>Overall Status</h2>
+        <div id="overall-status" class="value status-ok" style="font-size:13px; margin-top:10px;">VIABLE</div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    const CONFIG = {
+        // 3D空間
+        innerRadius: 80,
+        baseOuterRadius: 150,
+        camDist: 1200,
+        spiralRotationSpeed: 0.005,
+        turns: 4.5,
+        pointsPerTurn: 80,
+        heightTotal: 600,
+        
+        // 二重ゆらぎ（物理的周波数）
+        f1_amp: 8.0,
+        f1_freq: 0.04,        // 呼吸的（低周波）
+        f2_amp: 3.0,
+        f2_freq: 0.7,         // 熱的（高周波）
+        
+        // 動力学パラメータ
+        threshold: 0.8,
+        margin: 0.05,
+        baseEntropy: 0.5,
+        entropyVariation: 0.15,
+        entropyTimeScale: 0.05,
+        criticalThreshold: 0.7,
+        criticalEventProb: 0.002,
+        criticalDuration: 240
+    };
+
+    let time = 0;
+    let spiralRotation = 0;
+    
+    let state = {
+        value: 0.5,
+        buffer: 0,
+        tension: 0,
+        expansion: 1.0,
+        // Entropy
+        sigma: 0.5,
+        J: 0.5,
+        congestion: 0,
+        phase: 0,
+        // Critical
+        currentFluctuationAmp: CONFIG.baseEntropy,
+        isCritical: false,
+        criticalTimer: 0,
+        fluctuationRatio: 0
+    };
+
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+    }
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+
+    // 二重ゆらぎ（物理的分離）
+    function getDoubleFluctuation(t, globalTime) {
+        const slowTime = globalTime * 0.5;
+        const fastTime = globalTime * 2.0;
+        const f1 = Math.sin(t * CONFIG.f1_freq + slowTime) * CONFIG.f1_amp;
+        const f2 = Math.cos(t * CONFIG.f2_freq - fastTime) * CONFIG.f2_amp;
+        return f1 + f2;
+    }
+
+    // エントロピー動態（v1.5から）
+    function updateEntropyDynamics() {
+        // 臨界イベント管理
+        if (state.isCritical) {
+            state.criticalTimer--;
+            if (state.criticalTimer <= 0) {
+                state.isCritical = false;
+            }
+        } else {
+            if (Math.random() < CONFIG.criticalEventProb) {
+                state.isCritical = true;
+                state.criticalTimer = CONFIG.criticalDuration;
+            }
+        }
+
+        const slowTime = time * CONFIG.entropyTimeScale;
+        const criticalBoost = state.isCritical ? 0.2 : 0;
+        state.sigma = CONFIG.baseEntropy + 
+                      Math.sin(slowTime) * CONFIG.entropyVariation + 
+                      criticalBoost;
+        
+        const dissipationLag = state.isCritical ? 0.5 : 0.9;
+        state.J = CONFIG.baseEntropy + 
+                  Math.sin(slowTime - 0.5) * CONFIG.entropyVariation * dissipationLag;
+        
+        state.congestion = state.sigma - state.J;
+        state.phase = (time * CONFIG.spiralRotationSpeed * 10) % (2 * Math.PI);
+        
+        // ゆらぎ比
+        state.fluctuationRatio = state.currentFluctuationAmp / (30 * 0.3);
+    }
+
+    // 状態更新（v1.7から）
+    function updateState() {
+        const input = 0.002;
+        state.value += input;
+        let isCorrecting = false;
+
+        if (state.value > CONFIG.threshold) {
+            const excess = state.value - CONFIG.threshold;
+            const target = CONFIG.threshold - CONFIG.margin;
+            state.buffer += (state.value - target);
+            state.value = target;
+            isCorrecting = true;
+        }
+
+        // 膨張制御
+        state.expansion = Math.min(state.value / CONFIG.threshold, 1.15);
+        
+        return isCorrecting;
+    }
+
+    // 3D投影
+    function project3D(x, y, z, applyRotation = false) {
+        let rx = x, rz = z;
+        if (applyRotation) {
+            const cosR = Math.cos(spiralRotation);
+            const sinR = Math.sin(spiralRotation);
+            rx = x * cosR - z * sinR;
+            rz = x * sinR + z * cosR;
+        }
+        const scale = CONFIG.camDist / (CONFIG.camDist + rz);
+        return {
+            x: rx * scale + width / 2,
+            y: y * scale + height / 2,
+            scale: scale,
+            z: rz
+        };
+    }
+
+    function draw() {
+        ctx.fillStyle = '#05070a';
+        ctx.fillRect(0, 0, width, height);
+
+        const isCorrecting = updateState();
+        updateEntropyDynamics();
+        
+        time += 0.016;
+        spiralRotation += CONFIG.spiralRotationSpeed;
+
+        const totalPoints = Math.floor(CONFIG.turns * CONFIG.pointsPerTurn);
+        const yOffset = CONFIG.heightTotal / 2;
+        let segments = [];
+
+        const currentOuterR = CONFIG.baseOuterRadius * state.expansion;
+
+        for (let i = 0; i < totalPoints - 1; i++) {
+            const t1 = (i / CONFIG.pointsPerTurn) * Math.PI * 2;
+            const t2 = ((i + 1) / CONFIG.pointsPerTurn) * Math.PI * 2;
+            
+            const y1 = yOffset - (i / totalPoints) * CONFIG.heightTotal;
+            const y2 = yOffset - ((i + 1) / totalPoints) * CONFIG.heightTotal;
+
+            const f1 = getDoubleFluctuation(t1, time);
+            const f2 = getDoubleFluctuation(t2, time);
+            
+            const outerR1 = currentOuterR + f1;
+            const outerR2 = currentOuterR + f2;
+
+            // Inner
+            const in_x1 = Math.cos(t1) * CONFIG.innerRadius;
+            const in_z1 = Math.sin(t1) * CONFIG.innerRadius;
+            const in_x2 = Math.cos(t2) * CONFIG.innerRadius;
+            const in_z2 = Math.sin(t2) * CONFIG.innerRadius;
+
+            // Outer
+            const out_x1 = Math.cos(t1) * outerR1;
+            const out_z1 = Math.sin(t1) * outerR1;
+            const out_x2 = Math.cos(t2) * outerR2;
+            const out_z2 = Math.sin(t2) * outerR2;
+
+            const p_in1 = project3D(in_x1, y1, in_z1, true);
+            const p_in2 = project3D(in_x2, y2, in_z2, true);
+            const p_out1 = project3D(out_x1, y1, out_z1, true);
+            const p_out2 = project3D(out_x2, y2, out_z2, true);
+
+            const avg_z = (p_in1.z + p_in2.z + p_out1.z + p_out2.z) / 4;
+
+            segments.push({
+                pi1: p_in1, pi2: p_in2, po1: p_out1, po2: p_out2, z: avg_z
+            });
+        }
+
+        const drawSegments = (segs) => {
+            segs.forEach(seg => {
+                ctx.beginPath();
+                ctx.moveTo(seg.pi1.x, seg.pi1.y);
+                ctx.lineTo(seg.po1.x, seg.po1.y);
+                ctx.strokeStyle = `rgba(0, 255, 136, 0.15)`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(seg.pi1.x, seg.pi1.y);
+                ctx.lineTo(seg.pi2.x, seg.pi2.y);
+                ctx.strokeStyle = `rgba(0, 242, 255, 0.8)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(seg.po1.x, seg.po1.y);
+                ctx.lineTo(seg.po2.x, seg.po2.y);
+                ctx.strokeStyle = isCorrecting ? `rgba(255, 51, 102, 0.9)` : `rgba(0, 255, 136, 0.8)`;
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            });
+        };
+
+        const backSegments = segments.filter(s => s.z > 0).sort((a, b) => b.z - a.z);
+        const frontSegments = segments.filter(s => s.z <= 0).sort((a, b) => b.z - a.z);
+
+        drawSegments(backSegments);
+
+        // Rod（固定、外縁に同期）
+        const rodRadius = currentOuterR;
+        const rodX = rodRadius;
+        const rodZ = 0;
+        const rodTop = project3D(rodX, -yOffset, rodZ, false);
+        const rodBot = project3D(rodX, yOffset, rodZ, false);
+
+        ctx.beginPath();
+        ctx.moveTo(rodTop.x, rodTop.y);
+        ctx.lineTo(rodBot.x, rodBot.y);
+        ctx.strokeStyle = 'rgba(255, 51, 102, 1.0)';
+        ctx.lineWidth = 12;
+        ctx.stroke();
+        
+        if (isCorrecting) {
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = '#ff3366';
+            ctx.beginPath();
+            ctx.moveTo(rodTop.x, rodTop.y);
+            ctx.lineTo(rodBot.x, rodBot.y);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        drawSegments(frontSegments);
+
+        updateUI(isCorrecting, currentOuterR);
+        requestAnimationFrame(draw);
+    }
+
+    function updateUI(isCorrecting, rodRadius) {
+        // Rod & Structural
+        document.getElementById('rod-rad').textContent = rodRadius.toFixed(1);
+        document.getElementById('delta-val').textContent = state.value.toFixed(3);
+        const tau = 0.1 + Math.abs(Math.sin(time)) * 0.05;
+        document.getElementById('tau-val').textContent = tau.toFixed(3);
+        document.getElementById('r-val').textContent = (state.value / tau).toFixed(3);
+        
+        // Contact status
+        if (isCorrecting) {
+            document.getElementById('contact-stat').textContent = 'CORRECTING...';
+            document.getElementById('contact-stat').className = 'value status-warn';
+        } else {
+            document.getElementById('contact-stat').textContent = 'CONTACT ✓';
+            document.getElementById('contact-stat').className = 'value status-ok';
+        }
+
+        // Entropy dynamics
+        document.getElementById('sigma-val').textContent = state.sigma.toFixed(3);
+        document.getElementById('j-val').textContent = state.J.toFixed(3);
+        document.getElementById('cong-val').textContent = state.congestion.toFixed(3);
+        document.getElementById('phase-val').textContent = state.phase.toFixed(2);
+        
+        const entropyFill = ((state.sigma + 1) / 2) * 100;
+        document.getElementById('entropy-meter').style.width = Math.min(entropyFill, 100) + '%';
+
+        // State
+        document.getElementById('state-val').textContent = state.value.toFixed(3);
+        document.getElementById('state-meter').style.width = Math.min(state.value * 100, 100) + '%';
+        document.getElementById('exp-val').textContent = state.expansion.toFixed(3);
+        document.getElementById('buffer-val').textContent = state.buffer.toFixed(3);
+        document.getElementById('buffer-meter').style.width = Math.min(state.buffer * 5, 100) + '%';
+
+        // Critical status
+        document.getElementById('fluct-ratio').textContent = state.fluctuationRatio.toFixed(3);
+        
+        const criticalEl = document.getElementById('critical-state');
+        if (state.fluctuationRatio < 0.4) {
+            criticalEl.textContent = '非平衡定常';
+            criticalEl.className = 'value status-ok';
+        } else if (state.fluctuationRatio < CONFIG.criticalThreshold) {
+            criticalEl.textContent = '揺動状態';
+            criticalEl.className = 'value status-warn';
+        } else {
+            criticalEl.textContent = '臨界接近';
+            criticalEl.className = 'value status-danger';
+        }
+
+        // Overall
+        const overallEl = document.getElementById('overall-status');
+        if (isCorrecting) {
+            overallEl.textContent = 'TENSION';
+            overallEl.style.color = 'var(--red)';
+            document.getElementById('viability-meter').style.background = 'var(--red)';
+        } else {
+            overallEl.textContent = 'VIABLE';
+            overallEl.style.color = 'var(--green)';
+            document.getElementById('viability-meter').style.background = 'var(--green)';
+        }
+    }
+
+    init();
+    draw();
+</script>
+</body>
+</html>
