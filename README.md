@@ -1,5 +1,5 @@
-# NRA-IDE: Nomological Ring Axioms – Integrated Development Environment
-**律環公理統合開発環境**
+# NRA‑IDE: 律環公理 – 内包性動力学エンジン
+**Nomological Ring Axioms – Intensional Dynamics Engine**
 
 <p align="center">
   <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO">
@@ -7,64 +7,44 @@
 
 ---
 
-## 🌏 For Japanese Speakers
+## 🌍 For English Speakers
 
-**日本語版ドキュメントは [README_JP.md](./README_JP.md) をご覧ください。**
-
----
-
-## What Are the Nomological Ring Axioms?
-
-**A system of axioms that describes closed world structures and temporal states  
-using tensional structures and threshold dynamics with thickness and fluctuation—  
-without relying on linear concepts such as continuity, distance, or meaning  
-as the computational basis.**
+**Please see [README.md](./README.md) for English documentation.**
 
 ---
 
-## What Is NRA-IDE?
+## 律環公理（Nomological Ring Axioms）とは
 
-An **Integrated Development Environment** that implements the Nomological Ring Axioms.
-
----
-
-## Why a Threshold System Is Necessary
-
-...
-
-| R Value | Judgment | Meaning |
-|---------|----------|---------|
-| R < 1.0 | SAFE     | AI provides physical justification |
-| R ≥ 1.0 | STOP     | Human makes the final decision |
-
-This boundary ensures that AI performs computation, while humans retain ethical judgment.
-
-## Core Engine
-
-The foundational implementation is centralized in `nra-core/`.
-
-- 📄 [nra_ide_foundation_fixed_en.py](./nra-core/nra_ide_foundation_fixed_en.py) – English version  
-- 📄 [nra_ide_foundation_fixed_jp.py](./nra-core/nra_ide_foundation_fixed_jp.py) – Japanese version  
-- 📝 [Annotated Explanation (EN)](./nra-core/Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md)  
-- 📝 [Code Commentary (JP)](./nra-core/律環公理_コード付き解説_二重ゆらぎ安定版.md)  
-- 📊 [Validation Plot](./nra-core/nra_foundation_plot_2026-02-20_2355.png)
-
-## Implementations
-...
-
-Conventional AI systems are **black boxes** whose decision-making cannot be  
-explained physically. This is unacceptable in high‑risk domains such as  
-healthcare or autonomous systems.
-
-The **Threshold System**:
-
-- Makes AI decisions **fully explainable through physical equations**
-- Establishes **clear responsibility boundaries between AI and humans**
-- Allows the system to honestly declare **“I cannot decide”**
+**線形（連続性・距離・意味）を基軸計算に用いず、  
+張力構造と厚み・ゆらぎを持つ閾値によって  
+閉じた世界構造と時間の状態を記述する公理体系です。**
 
 ---
 
-## How the Threshold System Works
+## NRA‑IDEとは
+
+**NRA‑IDE は「統合開発環境」ではありません。**  
+**律環公理を実装した「内包性動力学エンジン（Intensional Dynamics Engine）」です。**
+
+線形計算では扱えない張力構造・閾値構造・閉世界制約を  
+物理的に説明可能な形で計算するためのエンジンです。
+
+---
+
+## なぜ閾値システムが必要か
+
+従来の AI は **ブラックボックス** であり、判断根拠を物理的に説明できません。  
+これは医療・自動運転などの高リスク領域では致命的です。
+
+**閾値システムは：**
+
+- AI の判断を **物理式で完全に説明可能** にする  
+- **AI と人間の責任境界線** を明確にする  
+- システムが「判断できない」ことを **正直に示す**
+
+---
+
+## 閾値システムの仕組み
 
 
 
@@ -74,63 +54,74 @@ R = \frac{\delta}{\tau}
 
 
 
-- **δ (delta)**: Deviation from constraints  
-- **τ (tau)**: Tolerance range (tensional threshold)  
-- **R**: Ratio (AI stops decision-making when R ≥ 1.0)
+- **δ（デルタ）**: 制約からのズレ（変位）  
+- **τ（タウ）**: 許容範囲（張力の閾値）  
+- **R**: 比率（R ≥ 1.0 で AI は判断停止）
 
-| R Value | Judgment | Meaning |
-|--------|----------|---------|
-| R < 1.0 | SAFE | AI provides physical justification |
-| R ≥ 1.0 | STOP | Human makes the final decision |
+| R の値 | 判定 | 意味 |
+|--------|------|------|
+| R < 1.0 | SAFE | AI が物理的根拠を提示 |
+| R ≥ 1.0 | STOP | 人間が最終判断 |
 
-This boundary ensures that  
-**AI performs computation, while humans retain ethical judgment.**
-
+この境界により、  
+**AI は計算に徹し、倫理的判断は人間が担う** 構造が保証されます。
 
 ---
 
-# 📂 Major Projects
+## Core Engine
 
-### 💎 NRA‑TCM Parser (Text Crystallization Method)
+基礎実装は `nra-core/` に集約しています。
+
+- 📄 [nra_ide_foundation_fixed_en.py](./nra-core/nra_ide_foundation_fixed_en.py) – 英語版  
+- 📄 [nra_ide_foundation_fixed_jp.py](./nra-core/nra_ide_foundation_fixed_jp.py) – 日本語版  
+- 📝 [Annotated Explanation (EN)](./nra-core/Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md)  
+- 📝 [コード解説 (JP)](./nra-core/律環公理_コード付き解説_二重ゆらぎ安定版.md)  
+- 📊 [検証プロット](./nra-core/nra_foundation_plot_2026-02-20_2355.png)
+
+---
+
+# 📂 主要プロジェクト
+
+### 💎 NRA‑TCM Parser（テキスト結晶化法）
 **[./NRA-TCM Parser/](./NRA-TCM%20Parser/)**
 
-- Phase transition of information (crystallizing million‑token logs)  
-- Dynamic momentum (adaptive deep‑reading / skimming)  
-- Singularity detection (captures core insights even under broken context)
+- 情報の位相変換（100万トークン級ログの結晶化）  
+- 動的モーメンタム（没頭／飛ばし読みの自動切替）  
+- 特異点検知（文脈破綻下でも核心を逃さない）
 
 ---
 
-### 🏥 Cancer Treatment Support System
+### 🏥 がん治療支援システム
 **[./NRA-IDE_CancerTreatmentSupport_System/](./NRA-IDE_CancerTreatmentSupport_System/)**
 
-- Metastasis risk estimation via physical constraints  
-- FPGA implementation (deterministic computation)  
-- Full traceability for medical device approval  
+- 物理制約による転移リスク判定  
+- FPGA 実装（決定論的計算）  
+- 医療機器承認を見据えた完全トレーサビリティ  
 
 ---
 
-### 🔗 Cascade Failure Prevention
+### 🔗 カスケード故障防止
 **[./HAN-Gate_Cascade-Failure-Prevention/](./HAN-Gate_Cascade-Failure-Prevention/)**
 
-- Prevents cascade failures in server infrastructure  
-- Envoy / Nginx integration  
-- Automotive safety & critical infrastructure  
+- サーバーインフラのカスケード故障防止  
+- Envoy / Nginx 統合  
+- 自動車安全・クリティカルインフラ対応  
 
 ---
 
-# 📄 Documentation & Examples
+# 📄 ドキュメント・サンプル
 
-Detailed explanations and theoretical background are available in the `examples` directory:
-
-- **English Documentation**  
-  → [./examples/EN/README_EN.md](./examples/EN/README_EN.md)
+理論的背景や詳細な解説は `examples` ディレクトリにあります。
 
 - **日本語ドキュメント**  
   → [./examples/JP/README_JP.md](./examples/JP/README_JP.md)
 
+- **English Documentation**  
+  → [./examples/EN/README_EN.md](./examples/EN/README_EN.md)
+
 ---
 
-# 🔍 Keywords / Topics
+# 🔍 検索キーワード / Keywords
 
 `ai-safety` `medical-ai` `text-mining` `crystallization`  
 `cancer-treatment` `deterministic-computing` `fpga`  
@@ -140,40 +131,43 @@ Detailed explanations and theoretical background are available in the `examples`
 
 ---
 
-# 🔗 External Links
+# 📜 ライセンス
 
-- **Note Articles**: https://note.com/mtokuni  
-- **Facebook**: https://www.facebook.com/tokuni.masa  
+本プロジェクトは **MIT License** の下で提供されています。
 
----
+- 研究・個人・商用を含め、**無償で利用・改変・配布可能**  
+- 再配布時には **著作権表示の保持が必要**
 
-# 📜 License
-
-This project is provided under the **MIT License**.
-
-- Free to use, modify, and distribute for research, personal, and commercial purposes  
-- Attribution is required in all redistributed materials  
-
-See **[LICENSE](./LICENSE)** for full terms.
-
-### Commercial Use
-
-Commercial use is permitted under the MIT License.  
-Notification is not required; however, if possible,  
-the author would appreciate a brief message via GitHub Issues.
+詳細は **[LICENSE](./LICENSE)** をご確認ください。
 
 ---
 
-# 📖 Citation
+## ⚠️ 注意 / Notice  
+**必ず倫理規定（人権・犯罪などの禁止事項）を読んでからご利用ください。**  
+**Please make sure to read the Ethical Guidelines (prohibitions on human‑rights violations, criminal use, etc.) before using this project.**
+
+👉 倫理規定: **[ETHICS.md](./ETHICS.md)**
+
+---
+
+### 商用利用について
+
+商用利用は MIT License に基づき許可されています。  
+連絡は必須ではありませんが、可能であれば GitHub Issues にて  
+一言ご連絡いただけると助かります。
+
+---
+
+# 📖 引用 / Citation
 
 M‑Tokuni (2026).  
-**NRA‑IDE: Nomological Ring Axioms – Integrated Development Environment.**  
+**NRA‑IDE: 律環公理 – 内包性動力学エンジン  
+(Nomological Ring Axioms – Intensional Dynamics Engine).**  
 GitHub. https://github.com/M-Tokun/NRA-IDE
 
 ---
 
 <p align="center">
-  <strong>Status: Lighthouse</strong><br>
-  Discoverable. Not marketed. Never disappears.
-</p>
+  <strong>Status: Lighthouse（灯台）</strong><br>
 
+</p>
