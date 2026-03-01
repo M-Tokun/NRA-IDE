@@ -171,3 +171,9 @@ GitHub. https://github.com/M-Tokun/NRA-IDE
   <strong>Status: Lighthouse</strong><br>
 
 </p>
+
+---
+---
+
+
+[![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
