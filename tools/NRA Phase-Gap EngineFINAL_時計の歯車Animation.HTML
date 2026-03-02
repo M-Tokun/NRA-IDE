@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA: Phase-Gap Engine Final</title>
+    <style>
+        :root {
+            --bg: #05070a;
+            --accent-red: #ff3366;
+            --accent-cyan: #00f2ff;
+            --text: #c9d1d9;
+            --text-dim: #8b949e;
+        }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Consolas', 'Yu Gothic', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .container { position: relative; width: 700px; height: 700px; }
+        
+        /* 左上：ステータスパネル */
+        .label-layer { position: absolute; top: 30px; left: 30px; pointer-events: none; z-index: 10; }
+        .title { color: var(--accent-cyan); font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        .status { font-size: 13px; line-height: 1.8; margin-top: 10px; background: rgba(10, 15, 25, 0.8); padding: 12px; border-left: 2px solid var(--accent-cyan); backdrop-filter: blur(4px); }
+        .gauge-container { width: 250px; height: 4px; background: #1a1f26; border-radius: 2px; margin: 10px 0; overflow: hidden; }
+        .gauge-fill { height: 100%; width: 0%; background: var(--accent-red); transition: width 0.05s linear; }
+
+        /* 右下：公理ステートメント (英和併記) */
+        .footer-layer { position: absolute; bottom: 40px; right: 30px; text-align: right; pointer-events: none; z-index: 10; border-right: 2px solid var(--accent-red); padding-right: 15px; background: rgba(10, 15, 25, 0.5); }
+        .statement-en { color: #fff; font-size: 14px; font-weight: 300; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .statement-jp { color: var(--text-dim); font-size: 12px; letter-spacing: 1px; }
+
+        svg { width: 100%; height: 100%; }
+        .discrete-jump { transition: transform 0.08s step-end; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="label-layer">
+        <div class="title">NRA Phase-Gap Axiom Proof</div>
+        <div class="status">
+            Causal Accumulum : <span id="delta-val">0.000</span><br>
+            Gap Thickness (τ): <span id="tau-val">1.000</span>
+            <div class="gauge-container"><div id="gauge" class="gauge-fill"></div></div>
+            Reachability (R) : <span id="r-val" style="color: var(--accent-red);">0.000</span><br>
+            Condition: <span id="state-text" style="color: var(--accent-cyan);">STEADY (Latent Tension)</span>
+        </div>
+    </div>
+
+    <div class="footer-layer">
+        <div class="statement-en">The world is driven by the saturation of Phase-Gaps, not by the passage of time.</div>
+        <div class="statement-jp">世界は時間の経過ではなく、位相のズレの飽和によって駆動する。</div>
+    </div>
+
+    <svg viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="95" fill="none" stroke="#1a1f26" stroke-width="1" />
+        <g id="gear" class="discrete-jump" transform="rotate(0, 100, 100)">
+            <path id="tooth-base" d="M100,20 L110,10 L120,20 L118,35 L82,35 L80,20 L90,10 Z" style="display:none;"/>
+        </g>
+        <g id="pallet" transform="translate(100, 12)">
+            <rect x="-15" y="-4" width="30" height="8" fill="rgba(0, 242, 255, 0.05)" stroke="var(--accent-cyan)" stroke-width="1" />
+            <path d="M-10,4 L-10,18 M10,4 L10,18" stroke="var(--accent-cyan)" stroke-width="2" />
+        </g>
+        <circle id="flash" cx="100" cy="100" r="85" fill="none" stroke="var(--accent-red)" stroke-width="0" opacity="0" />
+    </svg>
+</div>
+
+<script>
+    const gear = document.getElementById('gear');
+    const toothBase = document.getElementById('tooth-base');
+    const deltaDisplay = document.getElementById('delta-val');
+    const rDisplay = document.getElementById('r-val');
+    const gauge = document.getElementById('gauge');
+    const stateText = document.getElementById('state-text');
+    const flash = document.getElementById('flash');
+
+    const palette = [
+        "#00f2ff", "#0088ff", "#0055ff", "#0022ff",
+        "#3300ff", "#6600ff", "#9900ff", "#cc00ff",
+        "#ff00ff", "#ff00cc", "#ff0099", "#ff0066",
+        "#ff3366", "#ff6633", "#ffcc00", "#00ff88"
+    ];
+
+    for (let i = 0; i < 16; i++) {
+        const clone = toothBase.cloneNode(true);
+        clone.style.display = "block";
+        clone.setAttribute('fill', palette[i]);
+        clone.setAttribute('transform', `rotate(${i * 22.5}, 100, 100)`);
+        gear.appendChild(clone);
+    }
+
+    let delta = 0;
+    const tau = 1.0;
+    let rotation = 0;
+
+    function animate() {
+        // 因果潜積の低速蓄積 (標準速度の20%)
+        delta += 0.001 + (Math.random() * 0.0014);
+        
+        if (delta >= tau) {
+            delta = 0;
+            rotation += 22.5; 
+            gear.setAttribute('transform', `rotate(${rotation}, 100, 100)`);
+            
+            stateText.innerText = "PHASE-JUMP (State Updated)";
+            stateText.style.color = "#ff3366";
+            flash.setAttribute('stroke-width', '6');
+            flash.setAttribute('opacity', '0.7');
+            
+            setTimeout(() => {
+                stateText.innerText = "STEADY (Latent Tension)";
+                stateText.style.color = "#00f2ff";
+                flash.setAttribute('stroke-width', '0');
+                flash.setAttribute('opacity', '0');
+            }, 120);
+        }
+
+        deltaDisplay.innerText = delta.toFixed(3);
+        const r = delta / tau;
+        rDisplay.innerText = r.toFixed(3);
+        gauge.style.width = (r * 100) + "%";
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
+</body>
+</html>
