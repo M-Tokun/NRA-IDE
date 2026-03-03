@@ -1,5 +1,5 @@
-# NRA‑IDE: Nomological Ring Axioms – Intensional Dynamics Engine
-**律環公理 – 内包性動力学エンジン**
+# NRA-IDE: Nomological Ring Axioms – Intensional Dynamics Engine
+**律環公理 – 内包性動力**
 
 <p align="center">
   <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO">
@@ -13,63 +13,81 @@
 
 ---
 
-## What Are the Nomological Ring Axioms?
+## About the Naming
 
-**A system of axioms describing closed‑world structures and temporal states  
-using tensional structures and threshold dynamics with thickness and fluctuation—  
-without relying on linear concepts such as continuity, distance, or meaning  
-as computational primitives.**
+**Nomological Ring Axioms** is the formal name of the axiom system.  
+**内包性動力** is the Japanese core designation used in this project.  
+**NRA-IDE** is the current project label integrating both layers.
+
+The English expression **Intensional Dynamics Engine** is retained for continuity with existing articles, implementations, and references.  
+Here, **Engine** does not mean a conventional software IDE, but the established project designation for the overall implementation framework built on the axioms and 内包性動力.
 
 ---
 
-## What Is NRA‑IDE?
+## What Are the Nomological Ring Axioms?
 
-**NRA‑IDE is an Intensional Dynamics Engine that implements the Nomological Ring Axioms.**  
-It is not a conventional “Integrated Development Environment,”  
-but a physical‑explainable computation engine based on tensional structures,  
-threshold dynamics, and closed‑world constraints.
+**A system of axioms describing closed-world structures and temporal states  
+through constraint structures and thresholds with thickness and fluctuation—  
+without relying on linear concepts such as continuity, distance, or meaning  
+as computational primitives.**
+
+Here, **Ring** does not denote the algebraic ring of abstract algebra,  
+but an irreversible closed structural continuity.
+
+---
+
+## What Is NRA-IDE?
+
+**NRA-IDE is an implementation framework based on the Nomological Ring Axioms and 内包性動力.**  
+It is not a conventional “Integrated Development Environment.”
+
+In this project, **内包性動力** is used as a core concept for handling state transitions  
+through constraint structures, thresholds, and closed-world constraints.
+
+Accordingly, NRA-IDE does not refer to a single software product name,  
+but to the **overall body of implementation, description, and verification  
+built on the Nomological Ring Axioms and 内包性動力.**
 
 ---
 
 ## Why a Threshold System Is Necessary
 
-Conventional AI systems are **black boxes** whose decision‑making cannot be  
-explained physically. This is unacceptable in high‑risk domains such as  
-healthcare or autonomous systems.
+Conventional systems often become **black boxes**,  
+making it difficult to explain judgment bases or stopping conditions  
+in physical and structural terms.  
+This is unacceptable in high-risk domains such as healthcare, autonomous mobility,  
+server management, aviation, space systems, and water management.
 
-The **Threshold System**:
+The **Threshold System** serves three purposes:
 
-- Makes AI decisions **fully explainable through physical equations**
-- Establishes **clear responsibility boundaries between AI and humans**
-- Allows the system to honestly declare **“I cannot decide”**
+- Making judgments and state transitions **explainable through physical equations and structural conditions**
+- Establishing **clear boundaries between autonomous systems and final responsible authorities**
+- Allowing the system to honestly declare **“I cannot decide”**
 
 ---
 
-## How the Threshold System Works
-
-
+## Basic Formula of the Threshold System
 
 \[
 R = \frac{\delta}{\tau}
 \]
 
-
-
 - **δ (delta)**: Deviation from constraints  
-- **τ (tau)**: Tolerance range (tensional threshold)  
-- **R**: Ratio (AI stops decision‑making when R ≥ 1.0)
+- **τ (tau)**: Tolerance range, a threshold with thickness  
+- **R**: Ratio (when R ≥ 1.0, autonomous judgment is suspended or transferred)
 
 | R Value | Judgment | Meaning |
 |--------|----------|---------|
-| R < 1.0 | SAFE | AI provides physical justification |
-| R ≥ 1.0 | STOP | Human makes the final decision |
+| R < 1.0 | SAFE | Structural and physical justification can be provided |
+| R ≥ 1.0 | STOP | Final judgment is transferred to an external responsible authority |
 
 This boundary ensures that  
-**AI performs computation, while humans retain ethical judgment.**
+**the system remains responsible for computation, evaluation, and presentation,  
+while ethical judgment and final decision-making remain with an external responsible authority.**
 
 ---
 
-## Core Engine
+## Foundational Implementation
 
 The foundational implementation is centralized in `nra-core/`.
 
@@ -83,12 +101,12 @@ The foundational implementation is centralized in `nra-core/`.
 
 # 📂 Major Projects
 
-### 💎 NRA‑TCM Parser (Text Crystallization Method)
+### 💎 NRA-TCM Parser (Text Crystallization Method)
 **[./NRA-TCM Parser/](./NRA-TCM%20Parser/)**
 
-- Phase transition of information (crystallizing million‑token logs)  
-- Dynamic momentum (adaptive deep‑reading / skimming)  
-- Singularity detection (captures core insights even under broken context)
+- Phase transition of information (crystallizing million-token logs)  
+- Dynamic momentum (adaptive deep-reading / skimming)  
+- Singularity detection (capturing core insights even under broken context)
 
 ---
 
@@ -97,7 +115,7 @@ The foundational implementation is centralized in `nra-core/`.
 
 - Metastasis risk estimation via physical constraints  
 - FPGA implementation (deterministic computation)  
-- Full traceability for medical device approval  
+- Full traceability for medical device approval
 
 ---
 
@@ -106,7 +124,7 @@ The foundational implementation is centralized in `nra-core/`.
 
 - Prevents cascade failures in server infrastructure  
 - Envoy / Nginx integration  
-- Automotive safety & critical infrastructure  
+- Automotive safety and critical infrastructure support
 
 ---
 
@@ -137,14 +155,14 @@ Detailed explanations and theoretical background are available in the `examples`
 This project is provided under the **MIT License**.
 
 - Free to use, modify, and distribute for research, personal, and commercial purposes  
-- Attribution is required in all redistributed materials  
+- Attribution is required in all redistributed materials
 
 See **[LICENSE](./LICENSE)** for full terms.
 
 ---
 
-## ⚠️ Notice / 注意  
-**Please make sure to read the Ethical Guidelines (prohibitions on human‑rights violations, criminal use, etc.) before using this project.**  
+## ⚠️ Notice / 注意
+**Please make sure to read the Ethical Guidelines (prohibitions on human-rights violations, criminal use, etc.) before using this project.**  
 **必ず倫理規定（人権・犯罪などの禁止事項）を読んでからご利用ください。**
 
 👉 Ethical Guidelines: **[ETHICS.md](./ETHICS.md)**
@@ -161,19 +179,18 @@ the author would appreciate a brief message via GitHub Issues.
 
 # 📖 Citation
 
-M‑Tokuni (2026).  
-**NRA‑IDE: Nomological Ring Axioms – Intensional Dynamics Engine.**  
+M-Tokuni (2026).  
+**NRA-IDE: Nomological Ring Axioms – Intensional Dynamics Engine.**  
 GitHub. https://github.com/M-Tokun/NRA-IDE
 
 ---
 
 <p align="center">
   <strong>Status: Lighthouse</strong><br>
-
 </p>
 
 ---
----
 
+---
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
