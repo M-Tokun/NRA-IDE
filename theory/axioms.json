@@ -1,0 +1,71 @@
+{
+  "theory": {
+    "name": "Nomological Ring Axioms",
+    "abbreviation": "NRA",
+    "version": "1.0",
+    "author": "M-Tokuni",
+    "description": "A structural framework describing existence as continuous generation and state transition."
+  },
+
+  "core_axiom": {
+    "jp_original": "存在は生成である",
+    "en_reference": "Existence is Generation",
+    "note": "All structural interpretations in NRA derive from this axiom."
+  },
+
+  "structural_worldview": {
+    "intensional_dynamics": {
+      "description": "The world is interpreted as an intensional dynamic structure driven by internal constraints.",
+      "properties": [
+        "State appears as transition",
+        "Distance is observational result",
+        "Time is ordering of state transition"
+      ]
+    }
+  },
+
+  "structural_ratio": {
+    "formula": "R = δ / τ",
+    "variables": {
+      "delta": {
+        "symbol": "δ",
+        "name": "Accumulated Deviation",
+        "jp": "蓄積ズレ"
+      },
+      "tau": {
+        "symbol": "τ",
+        "name": "Absorption Thickness",
+        "jp": "吸収厚み"
+      },
+      "R": {
+        "name": "Approach Ratio",
+        "jp": "接近比"
+      }
+    },
+    "boundary_condition": {
+      "condition": "R >= 1",
+      "meaning": "Structural limit reached"
+    }
+  },
+
+  "ide_specification": {
+    "name": "Intensional Dynamics Engine",
+    "abbreviation": "IDE",
+    "role": "Operational mechanism that evaluates structural state based on NRA.",
+    "principles": [
+      "IDE evaluates structural state only",
+      "IDE does not generate meaning",
+      "IDE does not make final decisions",
+      "IDE detects structural boundaries"
+    ],
+    "fail_closed_rule": {
+      "description": "When structural limit is reached, system output is restricted and control is transferred to human decision."
+    }
+  },
+
+  "references": {
+    "theory_document": "./THEORY.md",
+    "ethics": "./ETHICS.md",
+    "papers_directory": "./papers/"
+  }
+}
