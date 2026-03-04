@@ -1,5 +1,6 @@
-# NRA-IDE: Nomological Ring Axioms – Intensional Dynamics Engine
-**律環公理 – 内包性動力**
+
+# NRA‑IDE: Nomological Ring Axioms – Intensional Dynamics Engine
+**律環公理 – 内包性動力学エンジン**
 
 <p align="center">
   <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO">
@@ -13,100 +14,103 @@
 
 ---
 
-## About the Naming
+## Core Axiom
 
-**Nomological Ring Axioms** is the formal name of the axiom system.  
-**内包性動力** is the Japanese core designation used in this project.  
-**NRA-IDE** is the current project label integrating both layers.
+## "Existence is Generation."
 
-The English expression **Intensional Dynamics Engine** is retained for continuity with existing articles, implementations, and references.  
-Here, **Engine** does not mean a conventional software IDE, but the established project designation for the overall implementation framework built on the axioms and 内包性動力.
+This framework does not treat existence as a fixed entity.  
+**Existence appears as "state transition."**
 
----
-
-## What Are the Nomological Ring Axioms?
-
-**A system of axioms describing closed-world structures and temporal states  
-through constraint structures and thresholds with thickness and fluctuation—  
-without relying on linear concepts such as continuity, distance, or meaning  
-as computational primitives.**
-
-Here, **Ring** does not denote the algebraic ring of abstract algebra,  
-but an irreversible closed structural continuity.
+Here, "generation" does not imply creation from nothing, but refers to the manifestation of existence through the process of state transition.
 
 ---
 
-## What Is NRA-IDE?
+## Fundamental Structure: Redefining Time and Distance
 
-**NRA-IDE is an implementation framework based on the Nomological Ring Axioms and 内包性動力.**  
-It is not a conventional “Integrated Development Environment.”
+Instead of relying on linear computation (continuity, distance, meaning), this system describes the world through physical and structural constraints.
 
-In this project, **内包性動力** is used as a core concept for handling state transitions  
-through constraint structures, thresholds, and closed-world constraints.
+1.  **Time**
+    *   Time is not treated as an independent "causal variable."
+    *   Time is described as the **ordering of state transitions**.
 
-Accordingly, NRA-IDE does not refer to a single software product name,  
-but to the **overall body of implementation, description, and verification  
-built on the Nomological Ring Axioms and 内包性動力.**
+2.  **Distance**
+    *   Distance is not treated as a "causal driver."
+    *   Distance is recorded as an **observational result** of state change.
 
----
-
-## Why a Threshold System Is Necessary
-
-Conventional systems often become **black boxes**,  
-making it difficult to explain judgment bases or stopping conditions  
-in physical and structural terms.  
-This is unacceptable in high-risk domains such as healthcare, autonomous mobility,  
-server management, aviation, space systems, and water management.
-
-The **Threshold System** serves three purposes:
-
-- Making judgments and state transitions **explainable through physical equations and structural conditions**
-- Establishing **clear boundaries between autonomous systems and final responsible authorities**
-- Allowing the system to honestly declare **“I cannot decide”**
+3.  **Tension**
+    *   Refers to the **restoring tendency** arising from constraint boundaries.
+    *   It is treated as a structural constraint, which may manifest as physical tension.
 
 ---
 
-## Basic Formula of the Threshold System
+## What Is NRA‑IDE?
+
+**NRA‑IDE is NOT an "Integrated Development Environment."**  
+**It is an "Intensional Dynamics Engine" that implements the Nomological Ring Axioms.**
+
+- **No Meaning Generation**: The IDE does not generate "meaning"; it evaluates structural states.
+- **Physical Explainability**: It calculates tension structures, threshold dynamics, and closed-world constraints—concepts that linear computation cannot handle—in a physically explainable manner.
+
+---
+
+## Structural Ratio & Threshold System
+
+Unlike conventional black-box AI, this system uses **Thresholds** to make decision grounds physically explainable. The structural state is evaluated using the following ratio:
 
 \[
 R = \frac{\delta}{\tau}
 \]
 
-- **δ (delta)**: Deviation from constraints  
-- **τ (tau)**: Tolerance range, a threshold with thickness  
-- **R**: Ratio (when R ≥ 1.0, autonomous judgment is suspended or transferred)
+- **δ (delta)**: Deviation from constraints (fluctuation/displacement)
+- **τ (tau)**: Tolerance boundary (thickness of tension)
+- **R**: Structural Ratio
 
-| R Value | Judgment | Meaning |
-|--------|----------|---------|
-| R < 1.0 | SAFE | Structural and physical justification can be provided |
-| R ≥ 1.0 | STOP | Final judgment is transferred to an external responsible authority |
+### Decision Logic
 
-This boundary ensures that  
-**the system remains responsible for computation, evaluation, and presentation,  
-while ethical judgment and final decision-making remain with an external responsible authority.**
+| R Value | Judgment | Action |
+|---------|----------|--------|
+| **R < 1.0** | **SAFE** | System operates based on physical grounds (AI processes data). |
+| **R ≥ 1.0** | **STOP** | Structural limit reached. **AI ceases decision-making and output.** |
+
+### Fail-Closed Principle
+In this system, "Fail-Closed" does not mean a simple system crash.
+It refers to a design that **suppresses output while maintaining structural continuity.**
+When R ≥ 1.0, the system stops generating output, and final ethical or situational judgment is delegated to a human operator.
 
 ---
 
-## Foundational Implementation
+## 📄 Theoretical Background
+
+For the foundational theoretical framework of NRA-IDE, please refer to the following documents:
+
+- **[Foundational Thesis: Nomological Ring Axioms and the Intensional Dynamics Engine](./theory/NRA-IDE_Foundational_Thesis.md)**  
+  *(Japanese/English Bilingual)*  
+  A short thesis discussing the description of state transitions via structural thresholds.
+
+- **[Theory Definition (THEORY.md)](./theory/THEORY.md)**  
+  Detailed definition of the axiomatic system.
+
+---
+
+## Core Engine
 
 The foundational implementation is centralized in `nra-core/`.
 
-- 📄 [nra_ide_foundation_fixed_en.py](./nra-core/nra_ide_foundation_fixed_en.py) – English version  
-- 📄 [nra_ide_foundation_fixed_jp.py](./nra-core/nra_ide_foundation_fixed_jp.py) – Japanese version  
+- 📄 [nra_ide_foundation_fixed_en.py](./nra-core/nra_ide_foundation_fixed_en.py) – English Version  
+- 📄 [nra_ide_foundation_fixed_jp.py](./nra-core/nra_ide_foundation_fixed_jp.py) – Japanese Version  
 - 📝 [Annotated Explanation (EN)](./nra-core/Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md)  
-- 📝 [Code Commentary (JP)](./nra-core/律環公理_コード付き解説_二重ゆらぎ安定版.md)  
 - 📊 [Validation Plot](./nra-core/nra_foundation_plot_2026-02-20_2355.png)
 
 ---
 
 # 📂 Major Projects
 
-### 💎 NRA-TCM Parser (Text Crystallization Method)
+### 💎 NRA‑TCM Parser (Text Crystallization Method)
 **[./NRA-TCM Parser/](./NRA-TCM%20Parser/)**
 
-- Phase transition of information (crystallizing million-token logs)  
-- Dynamic momentum (adaptive deep-reading / skimming)  
-- Singularity detection (capturing core insights even under broken context)
+- Phase transition of information (crystallizing million‑token logs)  
+- Dynamic momentum (adaptive deep‑reading / skimming)  
+- Singularity detection (captures core insights even under broken context)
 
 ---
 
@@ -115,7 +119,7 @@ The foundational implementation is centralized in `nra-core/`.
 
 - Metastasis risk estimation via physical constraints  
 - FPGA implementation (deterministic computation)  
-- Full traceability for medical device approval
+- Full traceability for medical device approval  
 
 ---
 
@@ -124,19 +128,7 @@ The foundational implementation is centralized in `nra-core/`.
 
 - Prevents cascade failures in server infrastructure  
 - Envoy / Nginx integration  
-- Automotive safety and critical infrastructure support
-
----
-
-# 📄 Documentation & Examples
-
-Detailed explanations and theoretical background are available in the `examples` directory:
-
-- **English Documentation**  
-  → [./examples/EN/README_EN.md](./examples/EN/README_EN.md)
-
-- **日本語ドキュメント**  
-  → [./examples/JP/README_JP.md](./examples/JP/README_JP.md)
+- Automotive safety & critical infrastructure  
 
 ---
 
@@ -154,33 +146,31 @@ Detailed explanations and theoretical background are available in the `examples`
 
 This project is provided under the **MIT License**.
 
-- Free to use, modify, and distribute for research, personal, and commercial purposes  
-- Attribution is required in all redistributed materials
+- Free to use, modify, and distribute for research, personal, and commercial purposes.
+- Attribution is required in all redistributed materials.
 
 See **[LICENSE](./LICENSE)** for full terms.
 
 ---
 
-## ⚠️ Notice / 注意
-**Please make sure to read the Ethical Guidelines (prohibitions on human-rights violations, criminal use, etc.) before using this project.**  
-**必ず倫理規定（人権・犯罪などの禁止事項）を読んでからご利用ください。**
+## ⚠️ Notice / Caution
+**Please make sure to read the Ethical Guidelines (prohibitions on human‑rights violations, criminal use, etc.) before using this project.**
 
-👉 Ethical Guidelines: **[ETHICS.md](./ETHICS.md)**
+👉 Ethical Guidelines: **[ETHICS.md](./theory/ETHICS.md)**
 
 ---
 
 ### Commercial Use
 
 Commercial use is permitted under the MIT License.  
-Notification is not required; however, if possible,  
-the author would appreciate a brief message via GitHub Issues.
+Notification is not required; however, if possible, the author would appreciate a brief message via GitHub Issues.
 
 ---
 
 # 📖 Citation
 
-M-Tokuni (2026).  
-**NRA-IDE: Nomological Ring Axioms – Intensional Dynamics Engine.**  
+M‑Tokuni (2026).  
+**NRA‑IDE: Nomological Ring Axioms – Intensional Dynamics Engine.**  
 GitHub. https://github.com/M-Tokun/NRA-IDE
 
 ---
@@ -190,7 +180,6 @@ GitHub. https://github.com/M-Tokun/NRA-IDE
 </p>
 
 ---
-
 ---
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
