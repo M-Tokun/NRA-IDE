@@ -1,0 +1,190 @@
+# FILE: k8s_envoy_han.yaml
+# TITLE: Kubernetes Deployment — Nginx (OpenResty) + HAN Gate (HARDENED)
+# Author: M-Tokuni (https://github.com/M-Tokun/NRA-IDE)
+# Date: 2026-03-06 JST
+#
+# 【修正履歴】
+#   v1.0  2026-02-05: 初版 (k8s_nginx_han_2026-02-05_235000_HARDENED)
+#   v1.1  2026-03-06: インデント破損修正、LF統一
+#                     lua_shared_dict: 1m → 10m (高負荷対応ハードニング)
+#
+# 【構成】
+#   ConfigMap: nginx.conf (OpenResty + Lua テレメトリ収集)
+#   Deployment: nginx-han-gateway (replicas: 2)
+#   Service: LoadBalancer type
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-han-config
+  namespace: default
+data:
+  nginx.conf: |
+    worker_processes auto;
+    error_log /var/log/nginx/error.log warn;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent han_decision=$upstream_http_x_han_decision';
+
+        access_log /var/log/nginx/access.log main;
+
+        sendfile on;
+        keepalive_timeout 65;
+
+        # HARDENED: 高トラフィック対応で 1m → 10m
+        lua_shared_dict han_metrics 10m;
+
+        init_worker_by_lua_block {
+            local metrics = ngx.shared.han_metrics
+            metrics:set("retry_count",   0)
+            metrics:set("timeout_count", 0)
+            metrics:set("queue_depth",   0)
+            metrics:set("last_update",   ngx.now())
+        }
+
+        upstream upstream_backend {
+            server upstream-backend.default.svc.cluster.local:8080;
+            keepalive 32;
+        }
+
+        upstream han_gate {
+            server han-gate.han.svc.cluster.local:8080;
+            keepalive 4;
+        }
+
+        server {
+            listen 80;
+            server_name _;
+
+            location /api/ {
+                auth_request /_han_auth;
+                auth_request_set $han_decision $upstream_http_x_han_decision;
+                add_header X-HAN-Decision $han_decision;
+
+                log_by_lua_block {
+                    local metrics = ngx.shared.han_metrics
+                    local status = tonumber(ngx.var.status)
+                    if status >= 500 or status == 408 or status == 504 then
+                        metrics:incr("retry_count", 1, 0)
+                    end
+                    if status == 504 or status == 408 then
+                        metrics:incr("timeout_count", 1, 0)
+                    end
+                    local active = ngx.var.connections_active or 0
+                    metrics:set("queue_depth", tonumber(active))
+                }
+
+                proxy_pass http://upstream_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_connect_timeout 2s;
+                proxy_send_timeout   10s;
+                proxy_read_timeout   10s;
+            }
+
+            location = /_han_auth {
+                internal;
+
+                set_by_lua_block $retry_rate {
+                    local metrics = ngx.shared.han_metrics
+                    local now  = ngx.now()
+                    local last = metrics:get("last_update") or now
+                    local dt   = math.max(now - last, 1.0)
+                    local retry = metrics:get("retry_count") or 0
+                    local retry_rate = retry / dt
+                    if dt >= 1.0 then
+                        metrics:set("retry_count",  0)
+                        metrics:set("last_update", now)
+                    end
+                    return retry_rate
+                }
+
+                set_by_lua_block $queue_depth {
+                    local metrics = ngx.shared.han_metrics
+                    return metrics:get("queue_depth") or 0
+                }
+
+                set_by_lua_block $timeout_rate {
+                    local metrics = ngx.shared.han_metrics
+                    local now  = ngx.now()
+                    local last = metrics:get("last_update") or now
+                    local dt   = math.max(now - last, 1.0)
+                    local timeout = metrics:get("timeout_count") or 0
+                    return timeout / dt
+                }
+
+                proxy_pass http://han_gate/v1/nginx_auth;
+                proxy_pass_request_body off;
+                proxy_set_header Content-Length "";
+                proxy_set_header X-HAN-Retry-Rate       $retry_rate;
+                proxy_set_header X-HAN-Queue-Depth      $queue_depth;
+                proxy_set_header X-HAN-Dep-Timeout-Rate $timeout_rate;
+                proxy_connect_timeout 100ms;
+                proxy_read_timeout    100ms;
+            }
+
+            location /healthz {
+                return 200 "OK\n";
+                add_header Content-Type text/plain;
+            }
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-han-gateway
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-han-gateway
+  template:
+    metadata:
+      labels:
+        app: nginx-han-gateway
+    spec:
+      containers:
+      - name: nginx
+        image: openresty/openresty:alpine
+        ports:
+        - containerPort: 80
+          name: http
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /usr/local/openresty/nginx/conf/nginx.conf
+          subPath: nginx.conf
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-han-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-han-gateway
+  namespace: default
+spec:
+  selector:
+    app: nginx-han-gateway
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  type: LoadBalancer

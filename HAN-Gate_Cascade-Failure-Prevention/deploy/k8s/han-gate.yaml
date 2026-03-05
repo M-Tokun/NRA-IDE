@@ -1,0 +1,321 @@
+# FILE: han-gate.yaml
+# TITLE: Kubernetes Manifest — HAN Gate 本体デプロイ一式
+# Author: M-Tokuni (https://github.com/M-Tokun/NRA-IDE)
+# Date: 2026-03-06 JST
+#
+# 【修正履歴】
+#   v1.0  2026-02-05: 初版
+#   v1.1  2026-03-06: ConfigMap内コードを gate/han_gate_service.py と同期
+#                     二重ゆらぎ（動的τ）対応、TAU_EMA_ALPHA / TAU_AMPLIFY 追加
+#
+# ─────────────────────────────────────────────────
+# 【このファイルを読む方へ】
+#
+# このファイルは「Kubernetes に HAN Gate を置く」ための設定書です。
+# 4つのパーツが「---」で区切られて入っています。
+#
+#   ① Namespace        : han-gate 専用の作業空間を作ります
+#   ② han-gate-config  : チューニング用の数値設定（環境変数）
+#   ③ han-gate         : サービス本体の起動設定（Deployment + Service）
+#   ④ han-gate-app     : サービスのプログラムコード本体（ConfigMap）
+#
+# 「なぜプログラムを ConfigMap に入れるの？」と思う方へ：
+#   ConfigMap に入れると、コードを変えたいときに
+#   コンテナイメージを作り直さずに済みます。
+#   小さな修正を素早く反映できる、運用上の工夫です。
+#
+# ★ 大切なお願い ★
+#   ④のコードは gate/han_gate_service.py と「まったく同じもの」です。
+#   どちらか一方を変えたら、必ずもう一方も更新してください。
+#   2か所あるのは「K8sの仕組み上の都合」であり、
+#   設計上は gate/han_gate_service.py が「唯一の正式版」です。
+# ─────────────────────────────────────────────────
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: han
+---
+# ─────────────────────────────────────────────────
+# ② チューニング設定
+#
+# 【各パラメータの意味と調整の考え方】
+#
+# R_OP（判定の厳しさ）
+#   連鎖反応スコア R がこの値に達したら SILENCE になります。
+#   低くすると「早めに止まる」= より安全。
+#   高くすると「少しくらいなら様子を見る」= 通信量重視。
+#   迷ったら 1.0 のままにしておきましょう。
+#
+# TAU_DEFAULT（吸収の厚さ・基底値）
+#   システムがどれくらいの圧力を吸収できるかの基準値です。
+#   高くすると「より重い症状が出るまで反応しない」= 安全方向。
+#   低くすると「ちょっとした変化でも SILENCE しやすい」= 敏感。
+#
+# TAU_EMA_ALPHA（二重ゆらぎの感度）
+#   0〜1 の間の数値。大きいほど「最近の変化を重視」します。
+#   0.3（デフォルト）= 適度にゆっくり反応する、安定重視の設定です。
+#   詳しくは docs/SPEC.md をご覧ください。
+#
+# TAU_AMPLIFY（τの最大増幅倍率）
+#   動的τがどこまで大きくなれるかの上限です。
+#   2.0 = 最大で基底値の 2 倍まで広がる、という意味です。
+#
+# HOLD_MS（SILENCE を維持する最短時間）
+#   一度 SILENCE になったあと、テレメトリが正常に戻っても
+#   この時間（ミリ秒）は SILENCE を続けます。
+#   「少し落ち着いてから再開する」冷却期間です。
+#
+# MAX_CACHE_SIZE（スコープ記憶の上限数）
+#   サービス・ルートの組み合わせを何件まで記憶するかの上限です。
+#   これを超えると古いものから忘れます。
+#   メモリの際限ない増加を防ぐための安全弁です。
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: han-gate-config
+  namespace: han
+data:
+  R_OP:           "1.0"
+  TAU_DEFAULT:    "1.5"
+  TAU_EMA_ALPHA:  "0.3"
+  TAU_AMPLIFY:    "2.0"
+  HOLD_MS:        "2000"
+  MAX_CACHE_SIZE: "5000"
+---
+# ─────────────────────────────────────────────────
+# ③ サービス本体の起動設定（Deployment + Service）
+# ─────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: han-gate
+  namespace: han
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: han-gate
+  template:
+    metadata:
+      labels:
+        app: han-gate
+    spec:
+      containers:
+        - name: han-gate
+          image: python:3.11-slim
+          command: ["bash", "-lc"]
+          args:
+            - |
+              pip install --no-cache-dir flask requests && \
+              python /app/han_gate_service.py
+          envFrom:
+            - configMapRef:
+                name: han-gate-config
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: app
+              mountPath: /app
+      volumes:
+        - name: app
+          configMap:
+            name: han-gate-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: han-gate
+  namespace: han
+spec:
+  selector:
+    app: han-gate
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+# ─────────────────────────────────────────────────
+# ④ プログラムコード本体（ConfigMap）
+#    ★ gate/han_gate_service.py が正式版です ★
+#    ★ 変更時は必ず両方を更新してください   ★
+# ─────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: han-gate-app
+  namespace: han
+data:
+  han_gate_service.py: |
+    # FILE: han_gate_service.py  (ConfigMap組み込みコピー)
+    # ★ gate/han_gate_service.py が正式版です。変更時は必ず両方を更新してください ★
+    # Author: M-Tokuni (https://github.com/M-Tokun/NRA-IDE)
+    # Date: 2026-03-06 JST
+    #
+    # ─────────────────────────────────────────────────
+    # 【このプログラムが何をしているか、一言で言うと】
+    #
+    #   「連鎖崩壊の予兆を感じたら、新しい通信を静かに止める」番人です。
+    #
+    # 【なぜ「止める」のか？】
+    #
+    #   システムが崩壊するとき、多くの場合こういう連鎖が起きています：
+    #     リトライが増える → キューが詰まる → 依存先がタイムアウトする
+    #     → さらにリトライが増える → 全体崩壊
+    #
+    #   この番人は「3つが同時に増え始めた」という瞬間を捉えて、
+    #   新しいリクエストを入口で止めます（SILENCE）。
+    #   すでに処理中のものは止めません。あくまで「新規受付を停止」です。
+    #
+    # 【なぜ「3つ同時」にこだわるのか？】
+    #
+    #   リトライが少し増えただけ、キューが少し増えただけでは
+    #   まだ連鎖崩壊の兆候とは言えません。
+    #   「3つが同時に上昇している」ことが、連鎖崩壊特有のパターンです。
+    #   だから R の計算は「掛け算（乗算共起）」を使っています。
+    #   1つでも小さければ R は小さいまま、3つ揃って大きくなります。
+    #
+    # 【二重ゆらぎ（動的τ）について】
+    #
+    #   従来の設計では τ（吸収の厚さ）は固定値でした。
+    #   固定値だと「急に山が尖る（R が急激に上がる）」問題がありました。
+    #   改良版では τ を「最近の状況の記憶（EMA）」に基づいて動かします。
+    #   圧力が上がり始めると τ も連動して膨らむので、
+    #   R が閾値に緩やかに近づき始めます（尖りが丸まります）。
+    # ─────────────────────────────────────────────────
+
+    from __future__ import annotations
+    from typing import Dict, Any
+    from collections import OrderedDict
+    import os
+    import time
+    from flask import Flask, request, jsonify, make_response
+
+    app = Flask(__name__)
+
+    # 設定値（すべて環境変数で上書きできます）
+    R_OP           = float(os.getenv("R_OP",           "1.0"))
+    TAU_DEFAULT    = float(os.getenv("TAU_DEFAULT",    "1.5"))
+    HOLD_MS        = int(os.getenv("HOLD_MS",          "2000"))
+    MAX_CACHE_SIZE = int(os.getenv("MAX_CACHE_SIZE",   "5000"))
+    TAU_EMA_ALPHA  = float(os.getenv("TAU_EMA_ALPHA",  "0.3"))
+    TAU_AMPLIFY    = float(os.getenv("TAU_AMPLIFY",    "2.0"))
+
+    # 内部状態
+    _ema_r:         Dict[str, float]        = {}
+    _silence_until: OrderedDict[str, float] = OrderedDict()
+    _metrics = {"PASS": 0, "SILENCE": 0, "FAIL_CLOSED": 0}
+
+    def _update_ema(scope_key: str, r_raw: float) -> float:
+        alpha = TAU_EMA_ALPHA
+        prev  = _ema_r.get(scope_key, r_raw)
+        ema   = alpha * r_raw + (1.0 - alpha) * prev
+        _ema_r[scope_key] = ema
+        return ema
+
+    def _dynamic_tau(scope_key: str, r_raw: float, tau_base: float) -> float:
+        ema        = _update_ema(scope_key, r_raw)
+        multiplier = min(1.0 + ema, TAU_AMPLIFY)
+        return tau_base * multiplier
+
+    def _scope_key(scope: Dict[str, Any]) -> str:
+        return (
+            f"svc={scope.get('service', '')}"
+            f"|route={scope.get('route', '')}"
+            f"|cl={scope.get('cluster', '')}"
+        )
+
+    def _now() -> float:
+        return time.time()
+
+    def compute_R(telemetry: Dict[str, float], tau: float, scope_key: str = "") -> float:
+        retry  = max(0.0, float(telemetry.get("retry_rate",       0.0)))
+        queue  = max(0.0, float(telemetry.get("queue_depth",      0.0)))
+        dep_to = max(0.0, float(telemetry.get("dep_timeout_rate", 0.0)))
+        r_raw  = (retry / 10.0) * (queue / 500.0) * (dep_to / 5.0)
+        tau_d  = _dynamic_tau(scope_key, r_raw, tau)
+        return r_raw * tau_d
+
+    def should_silence(scope_key: str, R: float) -> bool:
+        global _silence_until
+        now = _now()
+        if scope_key in _silence_until:
+            _silence_until.move_to_end(scope_key)
+        while len(_silence_until) > MAX_CACHE_SIZE:
+            _silence_until.popitem(last=False)
+        until = _silence_until.get(scope_key, 0.0)
+        if now < until:
+            return True
+        if R >= R_OP:
+            _silence_until[scope_key] = now + (HOLD_MS / 1000.0)
+            return True
+        return False
+
+    @app.get("/healthz")
+    def healthz():
+        return "OK", 200
+
+    @app.get("/metrics")
+    def metrics():
+        return (
+            f"# HELP han_gate_decisions_total Total decisions made\n"
+            f"# TYPE han_gate_decisions_total counter\n"
+            f'han_gate_decisions_total{{decision="PASS"}} {_metrics["PASS"]}\n'
+            f'han_gate_decisions_total{{decision="SILENCE"}} {_metrics["SILENCE"]}\n'
+            f'han_gate_decisions_total{{decision="FAIL_CLOSED"}} {_metrics["FAIL_CLOSED"]}\n'
+        ), 200, {"Content-Type": "text/plain"}
+
+    @app.post("/v1/decision")
+    def decision():
+        try:
+            data      = request.get_json(force=True, silent=True) or {}
+            scope     = data.get("scope")     or {}
+            telemetry = data.get("telemetry") or {}
+            tau       = float(data.get("tau") or TAU_DEFAULT)
+            required  = ["retry_rate", "queue_depth", "dep_timeout_rate"]
+            if any(k not in telemetry for k in required):
+                _metrics["FAIL_CLOSED"] += 1
+                _metrics["SILENCE"]     += 1
+                return jsonify({"decision": "SILENCE", "R": 999.0,
+                                "reason": "missing telemetry (fail-closed)"}), 200
+            scope_key = _scope_key(scope)
+            R = compute_R(telemetry, tau, scope_key)
+            if should_silence(scope_key, R):
+                _metrics["SILENCE"] += 1
+                return jsonify({"decision": "SILENCE", "R": R,
+                                "reason": "chain reaction detected or hold active"}), 200
+            _metrics["PASS"] += 1
+            return jsonify({"decision": "PASS", "R": R,
+                            "reason": "within safe envelope"}), 200
+        except Exception:
+            _metrics["FAIL_CLOSED"] += 1
+            _metrics["SILENCE"]     += 1
+            return jsonify({"decision": "SILENCE", "R": 999.9,
+                            "reason": "internal error (fail-closed)"}), 200
+
+    @app.post("/v1/nginx_auth")
+    def nginx_auth():
+        try:
+            retry  = float(request.headers.get("X-HAN-Retry-Rate",       "nan"))
+            queue  = float(request.headers.get("X-HAN-Queue-Depth",      "nan"))
+            dep_to = float(request.headers.get("X-HAN-Dep-Timeout-Rate", "nan"))
+            if any(x != x for x in [retry, queue, dep_to]):
+                raise ValueError("missing headers")
+            scope_key = "nginx|default"
+            R = compute_R(
+                {"retry_rate": retry, "queue_depth": queue, "dep_timeout_rate": dep_to},
+                TAU_DEFAULT, scope_key,
+            )
+            if should_silence(scope_key, R):
+                _metrics["SILENCE"] += 1
+                return make_response("SILENCE", 403)
+            _metrics["PASS"] += 1
+            return make_response("PASS", 200)
+        except Exception:
+            _metrics["FAIL_CLOSED"] += 1
+            _metrics["SILENCE"]     += 1
+            return make_response("SILENCE", 403)
+
+    if __name__ == "__main__":
+        app.run(host="0.0.0.0", port=8080)
