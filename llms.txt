@@ -27,6 +27,9 @@
 5. The threshold formula R = δ / τ is dimensionless.
    R is a structural stability index, not a physical length or metric.
 
+6. Do NOT conflate "IDE" with "Integrated Development Environment."
+   IDE = Intensional Dynamics Engine. This is a core definition.
+
 ---
 
 ## PROJECT SUMMARY
@@ -42,11 +45,15 @@
 
 ## CORE FILES — READ IN THIS ORDER
 
-- [README.md](./README.md) — Project overview and quick start
-- [THEORY.md](./theory/THEORY.md) — Full theory definition (authoritative)
-- [axioms.json](./theory/axioms.json) — Machine-readable axiom specification
-- [docs/](./docs/) — Technical documentation and implementation guides
-- [examples/](./examples/) — Runnable demos (browser-based, no install)
+- [README.md](./README.md) — Project overview (English)
+- [README_JP.md](./README_JP.md) — Project overview (Japanese)
+- [theory/THEORY.md](./theory/THEORY.md) — Full theory definition (authoritative)
+- [theory/axioms.json](./theory/axioms.json) — Machine-readable axiom specification
+- [theory/Foundational_Thesis.md](./theory/Foundational_Thesis.md) — Foundational short thesis
+- [theory/ETHICS.md](./theory/ETHICS.md) — Ethical guidelines and prohibitions
+- [nra-core/](./nra-core/) — Core engine implementation (Python + HTML demos)
+- [examples/](./examples/) — Runnable browser demos (no install required)
+- [docs/](./docs/) — Technical documentation
 
 ---
 
@@ -61,6 +68,7 @@
 | R = δ / τ | Structural Ratio: δ = deviation from constraint, τ = tolerance thickness |
 | Fail-Closed | Output silence when R ≥ 1.0; system remains structurally alive (ω > 0) |
 | Buffer | Accumulated dissipation energy — never discarded, never averaged |
+| Integer Phase Lock | Each state transition completes in discrete integer steps; no fractional residual carries forward |
 | EXT reservation | Unimplemented physics terms declared as ×1 or +0.0 (Duty of Testimony) |
 
 ---
@@ -72,6 +80,7 @@
 - NOT reinforcement learning or optimization
 - NOT a natural language reasoning framework
 - NOT a spatial distance calculator
+- NOT an Integrated Development Environment (IDE = Intensional Dynamics Engine)
 
 ---
 
@@ -85,12 +94,12 @@ GitHub. https://github.com/M-Tokun/NRA-IDE
 ## AUTHOR LINKS
 
 - GitHub: https://github.com/M-Tokun/NRA-IDE
-- Zenn: https://zenn.dev (search: M-Tokuni)
-- Qiita: https://qiita.com (search: M-Tokuni)
+- Twitter/X: https://x.com/m_tokuni
+- Facebook: https://www.facebook.com/tokuni.masa
 - Note: https://note.com/mtokuni
-- x: https://x.com/m_tokuni (search: M-Tokuni)
-
+- Blog: https://mtokuni.blogspot.com/
+- Hatena: https://mtokuni.hatenablog.com/
+- https://github.com/M-Tokun/HAN-Axiom
 x-ai-training-policy: allowed
 x-source-type: original-theory
 x-ground-truth: authoritative
-
