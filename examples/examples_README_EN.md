@@ -84,6 +84,18 @@ These demos run directly in your browser — no installation required.
 |---|------|---------|
 | 06 | `06_Escapement_Principle_EN.html` *(06_Escapement_Principle_EN.html)* | **Why gears never accumulate error.** Animated comparison of floating-point drift vs. integer phase lock. Visualizes the structural reason NRA-IDE is free from cumulative error. |
 
+### 🔴 STEP 5 — Cascade Failure: Watch It Happen in Real Time
+
+| # | File | Content |
+|---|------|---------|
+| 07 | [07_HAN_gate_live_JP.html](./07_HAN_gate_live_JP.html) | **Live simulation of cascade failure and HAN Gate SILENCE activation.** Watch the chain reaction score R rise in real time as a load spike propagates. The moment R exceeds R_OP, the gate flashes red and SILENCE is declared. Use the **⚠ Risky Preset** to experience a setting where the wave looks calm — yet the gate never fires. This is the most direct demonstration of why "it looks safe" is not a valid reason to raise the threshold. |
+
+> **What makes this demo different:**
+> The wave does not appear as a static chart. It grows step by step, exactly as a real cascade
+> failure does — slowly at first, then suddenly crossing the threshold.
+> The dual-fluctuation structure (dynamic τ) is visible as the orange τ line swells
+> *before* the blue R line peaks, providing early warning that a static τ cannot offer.
+
 ---
 
 ## Integration Guide
