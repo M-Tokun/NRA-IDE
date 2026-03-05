@@ -3,7 +3,7 @@
 **Nomological Ring Axioms – Intensional Dynamics Engine**
 
 <p align="center">
-  <img src="./docs/NRA-IDE LOGO.jpg" width="400" alt="NRA-IDE LOGO">
+  <img src="./docs/NRA-IDE_git.jpg" width="400" alt="NRA-IDE LOGO">
 </p>
 
 ---
