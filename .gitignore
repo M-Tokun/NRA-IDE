@@ -1,9 +1,23 @@
-## 📄 `.gitignore`
+# NRA-IDE .gitignore
 
-```text
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Logs
 *.log
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Editors
 .vscode/
 .idea/
+
+# Distribution
+dist/
+build/
+*.egg-info/
