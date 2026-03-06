@@ -1,0 +1,92 @@
+
+# 🌱 **NRA-IDE Multi-Physics Safety Gate Architecture
+Supplementary Notes — Gentle, Conversational English Version**
+
+## ■ First of All: This Is a Story About “Checking the Safety of a House”
+
+This folder contains two demo files that look quite similar.
+However, their roles are completely different.
+
+To put it simply, these are **two different safety checks to protect a house**.
+
+- One device checks **“Is the house dangerous right now?”**
+- The other checks **“Can we trust this safety check in the first place?”**
+
+Both are necessary.
+If either one is missing, the house cannot be protected.
+
+---
+
+## ■ “Safety” and “Trust” Are Not the Same Thing
+
+Imagine you are using a gas stove at home.
+
+- 🔥 **Is the flame too strong and dangerous?**
+　→ This is a *safety* question.
+
+- 🔧 **Is the gas meter itself working correctly?**
+　→ This is a *trust* question.
+
+If the gas meter is broken, even a display that says “Safe” cannot be trusted.
+
+In other words,
+**safety (what is happening now) and trust (whether the judgment is reliable) are different issues.**
+
+---
+
+## ■ The Role of #08: Measuring “How Dangerous the House Is Right Now”
+
+NRA-IDE_#08 looks at the conditions inside the house:
+
+◯ Temperature
+◯ Pressure
+◯ Distortion or strain in the walls
+
+It combines these and calculates **“How dangerous is the situation right now?”**
+
+It turns the state of the house into a single number,
+and if that number exceeds the limit, it **stops immediately**.
+
+This device is meant to answer:
+**“What is happening at this very moment?”**
+
+---
+
+## ■ The Role of IPL: Checking Whether the Calculation Itself Can Be Trusted
+
+NRA-IDE_IPL looks further upstream.
+
+Using the house analogy, it performs three checks:
+
+### 🧱 Layer A: Is the measuring instrument broken?
+If the gas meter is broken, no calculation has meaning.
+
+### 🔍 Layer B: Has the cause of danger already begun?
+If a gas leak has started, there is no time to wait for any calculation.
+
+### 🔥 Layer C: The same “current danger check” as #08
+Only here do we finally calculate what is happening right now.
+
+---
+
+## ■ Why Not Combine All Three Into One Formula?
+
+If everything were combined into a single equation,
+a dangerous situation like this could occur:
+
+- The gas meter is broken and falsely shows “Safe”
+　↓
+- The calculation formula believes that false value
+　↓
+- The system concludes “Safe” even though the situation is dangerous
+
+In other words,
+**a formula cannot judge whether its own input is trustworthy.**
+
+That is why the three layers are independent,
+and why **any one of them detecting danger must trigger an immediate stop.**
+
+Think of it as alarm sirens and emergency lights.
+Even though the mechanism suppresses AI hallucination,
+**fully autonomous AI decision-making is not recommended**,
+because responsibility becomes unclear.

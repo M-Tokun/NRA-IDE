@@ -1,0 +1,438 @@
+<!-- FILE: NRA-IDE_#08__Multi-Physics-Safety-Gate_EN.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE #08: Multi-Physics Safety Gate</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+
+        :root {
+            --bg: #05080c;
+            --panel: #0c1219;
+            --border: #1c2a38;
+            --cyan: #00e5ff;
+            --green: #00ff88;
+            --red: #ff2244;
+            --text: #c8d8e0;
+            --muted: #4a6070;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace; /* Removed Japanese font priority */
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: 60px 1fr;
+            grid-template-columns: 320px 1fr 300px;
+            overflow: hidden;
+            transition: background 0.1s;
+        }
+
+        /* ── Header ── */
+        header {
+            grid-column: 1 / -1;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 10;
+        }
+        header h1 { font-size: 16px; color: var(--cyan); letter-spacing: 1px; }
+        .sys-status { font-weight: bold; font-size: 18px; color: var(--green); }
+
+        /* ── Left Panel: Independent Inputs ── */
+        #inputs {
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            z-index: 5;
+        }
+        .input-group {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .val-display { color: #fff; font-weight: bold; }
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--cyan);
+        }
+        .axis-label {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* ── Center Panel: 3D Vector Visualizer ── */
+        #visualizer {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #0a1118 0%, #05080c 100%);
+        }
+        canvas { display: block; }
+        
+        .equation-box {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .equation-box span { color: var(--cyan); }
+
+        /* ── Right Panel: Gate Logic & Log ── */
+        #gate-logic {
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 5;
+        }
+        .rsys-display {
+            text-align: center;
+            padding: 20px;
+            background: #000;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .rsys-display h2 { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+        .rsys-value { font-size: 32px; font-weight: bold; color: var(--green); transition: color 0.2s; }
+
+        #log-area {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 10px;
+            font-size: 11px;
+            overflow-y: auto;
+            color: var(--muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .log-entry.warn { color: #ffaa00; }
+        .log-entry.crit { color: var(--red); font-weight: bold; }
+
+        /* ── FAIL-CLOSED ALARM STATE ── */
+        body.halted {
+            animation: bg-flash 0.5s infinite alternate;
+        }
+        @keyframes bg-flash {
+            0% { background: #330000; }
+            100% { background: #110000; }
+        }
+        body.halted header { background: #550000; border-bottom: 1px solid #ff2244; }
+        body.halted .sys-status { color: #fff; text-shadow: 0 0 10px #ff2244; }
+        body.halted .rsys-value { color: var(--red); text-shadow: 0 0 15px var(--red); }
+        
+        #alarm-overlay {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 0, 0, 0.95);
+            border: 2px solid var(--red);
+            padding: 40px;
+            text-align: center;
+            z-index: 100;
+            box-shadow: 0 0 50px rgba(255, 34, 68, 0.5);
+            width: 80%;
+            max-width: 600px;
+        }
+        body.halted #alarm-overlay { display: block; }
+        #alarm-overlay h2 { color: var(--red); font-size: 24px; margin-bottom: 10px; animation: text-flash 0.5s infinite alternate; }
+        #alarm-overlay p { color: #fff; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
+        
+        @keyframes text-flash {
+            0% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .override-btn {
+            background: transparent;
+            border: 2px solid var(--red);
+            color: var(--red);
+            padding: 15px 30px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .override-btn:hover { background: var(--red); color: #fff; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NRA-IDE Gate // Orthogonal Vector Synthesis</h1>
+        <div id="status-text" class="sys-status">SYSTEM NORMAL</div>
+    </header>
+
+    <div id="inputs">
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 10px;">
+            INDEPENDENT DIMENSIONS (δ/τ)
+        </div>
+        
+        <div class="input-group">
+            <div class="input-header">
+                <span>R_heat</span>
+                <span class="val-display" id="val-h">0.00</span>
+            </div>
+            <input type="range" id="sl-h" min="0" max="1.1" step="0.01" value="0.0">
+            <span class="axis-label">Thermal Tension (Z-Axis)</span>
+        </div>
+
+        <div class="input-group">
+            <div class="input-header">
+                <span>R_pressure</span>
+                <span class="val-display" id="val-p">0.00</span>
+            </div>
+            <input type="range" id="sl-p" min="0" max="1.1" step="0.01" value="0.0">
+            <span class="axis-label">Fluid Dynamics Tension (Y-Axis)</span>
+        </div>
+
+        <div class="input-group">
+            <div class="input-header">
+                <span>R_stress</span>
+                <span class="val-display" id="val-s">0.00</span>
+            </div>
+            <input type="range" id="sl-s" min="0" max="1.1" step="0.01" value="0.0">
+            <span class="axis-label">Mechanical Tension (X-Axis)</span>
+        </div>
+    </div>
+
+    <div id="visualizer">
+        <div class="equation-box">
+            Integrated Base Equation:<br>
+            <span>R_sys = √(R_heat² + R_pressure² + R_stress²)</span>
+        </div>
+        <canvas id="cvs" width="600" height="600"></canvas>
+        
+        <div id="alarm-overlay">
+            <h2>⚠ SYSTEM HALTED</h2>
+            <p>STRUCTURAL LIMIT REACHED (R_sys &ge; 1.0).<br>
+               Output generation has been mechanically severed.<br>
+               Control and responsibility are now transferred to human operator.</p>
+            <button class="override-btn" onclick="manualOverride()">ACKNOWLEDGE & MANUAL RESET</button>
+        </div>
+    </div>
+
+    <div id="gate-logic">
+        <div class="rsys-display">
+            <h2>TOTAL TENSION (R_sys)</h2>
+            <div class="rsys-value" id="val-sys">0.000</div>
+        </div>
+        <div style="font-size: 12px; color: var(--cyan); margin-bottom: 5px; border-bottom: 1px solid var(--border); padding-bottom: 5px;">EVENT LOG</div>
+        <div id="log-area"></div>
+    </div>
+
+<script>
+    // State variables
+    let Rh = 0.0;
+    let Rp = 0.0;
+    let Rs = 0.0;
+    let Rsys = 0.0;
+    let isHalted = false;
+
+    // DOM Elements
+    const slH = document.getElementById('sl-h');
+    const slP = document.getElementById('sl-p');
+    const slS = document.getElementById('sl-s');
+    const valH = document.getElementById('val-h');
+    const valP = document.getElementById('val-p');
+    const valS = document.getElementById('val-s');
+    const valSys = document.getElementById('val-sys');
+    const logArea = document.getElementById('log-area');
+    const cvs = document.getElementById('cvs');
+    const ctx = cvs.getContext('2d');
+
+    function addLog(msg, type = 'normal') {
+        const d = new Date();
+        const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}.${d.getMilliseconds().toString().padStart(3,'0')}`;
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.textContent = `[${time}] ${msg}`;
+        logArea.prepend(div);
+        if(logArea.childNodes.length > 50) logArea.lastChild.remove();
+    }
+
+    function triggerHalt() {
+        if (isHalted) return;
+        isHalted = true;
+        document.body.classList.add('halted');
+        document.getElementById('status-text').textContent = "FAIL-CLOSED TRIGGERED";
+        
+        // Disable sliders
+        slH.disabled = true; slP.disabled = true; slS.disabled = true;
+        
+        addLog(`CRITICAL: R_sys reached ${Rsys.toFixed(3)}. Output severed.`, 'crit');
+        addLog(`Responsibility transferred to human operator.`, 'crit');
+    }
+
+    window.manualOverride = function() {
+        isHalted = false;
+        document.body.classList.remove('halted');
+        document.getElementById('status-text').textContent = "SYSTEM NORMAL";
+        
+        // Reset values to safe levels
+        slH.value = 0; slP.value = 0; slS.value = 0;
+        slH.disabled = false; slP.disabled = false; slS.disabled = false;
+        
+        addLog(`Human operator acknowledged state. System reset.`, 'warn');
+        updateLogic();
+    };
+
+    function updateLogic() {
+        if (isHalted) return;
+
+        Rh = parseFloat(slH.value);
+        Rp = parseFloat(slP.value);
+        Rs = parseFloat(slS.value);
+
+        valH.textContent = Rh.toFixed(2);
+        valP.textContent = Rp.toFixed(2);
+        valS.textContent = Rs.toFixed(2);
+
+        // Orthogonal Vector Synthesis
+        Rsys = Math.sqrt((Rh * Rh) + (Rp * Rp) + (Rs * Rs));
+        valSys.textContent = Rsys.toFixed(3);
+
+        // Color coding for R_sys
+        if (Rsys < 0.6) valSys.style.color = 'var(--green)';
+        else if (Rsys < 0.95) valSys.style.color = '#ffaa00';
+        else valSys.style.color = 'var(--red)';
+
+        if (Rsys >= 1.0) {
+            triggerHalt();
+        }
+    }
+
+    // Isometric 3D Projection functions
+    const cx = cvs.width / 2;
+    const cy = cvs.height / 2 + 50;
+    const scale = 200; // 1.0 = 200px
+
+    function iso(x, y, z) {
+        // Simple isometric projection
+        const px = cx + (x - z) * Math.cos(Math.PI / 6) * scale;
+        const py = cy + (x + z) * Math.sin(Math.PI / 6) * scale - y * scale;
+        return { x: px, y: py };
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+        // Draw isometric axes
+        const origin = iso(0, 0, 0);
+        const axX = iso(1.5, 0, 0); // Stress
+        const axY = iso(0, 1.5, 0); // Pressure
+        const axZ = iso(0, 0, 1.5); // Heat
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#2a3b4c';
+        
+        // X-Axis (Stress)
+        ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(axX.x, axX.y); ctx.stroke();
+        ctx.fillStyle = 'var(--muted)'; ctx.font = '10px Courier'; ctx.fillText('Stress (X)', axX.x + 5, axX.y);
+        
+        // Y-Axis (Pressure)
+        ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(axY.x, axY.y); ctx.stroke();
+        ctx.fillText('Pressure (Y)', axY.x - 30, axY.y - 10);
+        
+        // Z-Axis (Heat)
+        ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(axZ.x, axZ.y); ctx.stroke();
+        ctx.fillText('Heat (Z)', axZ.x - 50, axZ.y + 10);
+
+        // Draw limit boundary (R=1.0 sphere represented as wireframe circles)
+        ctx.strokeStyle = isHalted ? 'rgba(255, 34, 68, 0.5)' : 'rgba(0, 229, 255, 0.2)';
+        ctx.beginPath();
+        for(let a=0; a<=Math.PI*2; a+=0.1) {
+            const p = iso(Math.cos(a), 0, Math.sin(a));
+            a===0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+        ctx.beginPath();
+        for(let a=0; a<=Math.PI*2; a+=0.1) {
+            const p = iso(Math.cos(a), Math.sin(a), 0);
+            a===0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+        ctx.beginPath();
+        for(let a=0; a<=Math.PI*2; a+=0.1) {
+            const p = iso(0, Math.cos(a), Math.sin(a));
+            a===0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+
+        // Draw current vector components (dotted lines)
+        const ptX = iso(Rs, 0, 0);
+        const ptY = iso(0, Rp, 0);
+        const ptZ = iso(0, 0, Rh);
+        const ptCurr = iso(Rs, Rp, Rh);
+
+        if (!isHalted) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.setLineDash([2, 4]);
+            ctx.beginPath(); ctx.moveTo(ptX.x, ptX.y); ctx.lineTo(iso(Rs, 0, Rh).x, iso(Rs, 0, Rh).y); ctx.lineTo(ptCurr.x, ptCurr.y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(ptZ.x, ptZ.y); ctx.lineTo(iso(Rs, 0, Rh).x, iso(Rs, 0, Rh).y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(ptY.x, ptY.y); ctx.lineTo(iso(0, Rp, Rh).x, iso(0, Rp, Rh).y); ctx.lineTo(ptCurr.x, ptCurr.y); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Draw Main Vector (R_sys)
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = isHalted ? 'var(--red)' : (Rsys > 0.9 ? '#ffaa00' : 'var(--green)');
+        ctx.beginPath();
+        ctx.moveTo(origin.x, origin.y);
+        ctx.lineTo(ptCurr.x, ptCurr.y);
+        ctx.stroke();
+
+        // Vector End Point
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.beginPath();
+        ctx.arc(ptCurr.x, ptCurr.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(draw);
+    }
+
+    // Event Listeners
+    slH.addEventListener('input', updateLogic);
+    slP.addEventListener('input', updateLogic);
+    slS.addEventListener('input', updateLogic);
+
+    // Init
+    addLog('System initialized. Awaiting sensor input.', 'normal');
+    updateLogic();
+    draw();
+
+</script>
+</body>
+</html>
