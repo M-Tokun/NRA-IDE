@@ -3,7 +3,7 @@
 **律環公理 – 内包性動力学エンジン**
 
 <p align="center">
-  <img src="./docs/NRA-IDE_git.jpg" width="600" alt="NRA-IDE LOGO">
+  <img src="./docs/NRA-IDE_git.jpg" width="700" alt="NRA-IDE LOGO">
 </p>
 
 ---
@@ -184,6 +184,7 @@ GitHub. https://github.com/M-Tokun/NRA-IDE
 ---
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
+
 
 
 
