@@ -94,6 +94,26 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
+
+### 🌿 STEP 6 — Band Gate：実世界ドメイン応用
+
+Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群です。
+上限・下限を同時監視し、**非対称EMA感度** によって過負荷（上限超過）と枯渇（下限割れ）を同じ R = δ/τ で検知します。
+
+| # | ファイル | ドメイン | ポイント |
+|---|---------|---------|---------|
+| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | 電気・気温・水圧・脈動（JP） | **非対称ダンパー構造** — 上限側τは拡大（慎重）、下限側τは縮小（敏感）。左のダンパーアニメーションで2つのスプリングが逆方向に動く様子を確認できます。 |
+| 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | 同上 — 英語版 | English labels and explanations. |
+| 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | 温室農業 4指標同時監視（JP） | 灌漑水圧・気温・CO₂・養液ECを同時監視。**🏜 干ばつシミュレーション**で複数指標が同時低下する様子を観察できます。 |
+| 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | 同上 — 英語版 | English labels and explanations. |
+| 10 | [10_Field_DroughtGate_live_JP.html](./10_Field_DroughtGate_live_JP.html) | 屋外畑 干ばつ進行ゲージ（JP） | 土壌水分・地温・日射量・風速を監視。加重複合Rスコアから干ばつレベル **Lv.0〜4** を算出。**⛈ 嵐後急乾燥**シナリオでは、値が閾値を割る前にEMAが「乾き始めの勢い」を先読みする様子が体験できます——これが現在の農業IoT製品にない機能です。 |
+
+> **現行の農業IoTにできないこと：**
+> 市販の土壌センサーシステムのほとんどは、値が固定閾値を下回ったときにアラートを出すだけです。
+> 「境界に向かう勢い」という概念を持ちません。
+> ここで示すEMA先読み検知は、閾値だけの設計には構造的に存在しない機能です。
+> これがNRA-IDEが埋めるギャップです。
+
 ## 組み込み方法
 
 制御対象の「偏差（δ）」と「許容範囲（τ）」を定義するだけで物理制御が開始されます。

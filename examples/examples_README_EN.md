@@ -98,6 +98,27 @@ These demos run directly in your browser — no installation required.
 
 ---
 
+
+### 🌿 STEP 6 — Band Gate: Real-World Domain Applications
+
+These demos apply the Band Gate (R = δ/τ) to physical measurement domains.
+Upper and lower thresholds are monitored simultaneously with **asymmetric EMA sensitivity** —
+the same formula detects both over-range (surge) and under-range (dropout) events.
+
+| # | File | Domain | Key Point |
+|---|------|--------|-----------|
+| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | Electricity / Temperature / Water / Pulse (JP) | **Asymmetric Damper** — upper τ expands (conservative), lower τ shrinks (sensitive). The animated damper on the left visualises how the two springs move in opposite directions. |
+| 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | Same — English edition | English labels and explanations. |
+| 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | Greenhouse Agriculture — 4 sensors (JP) | Irrigation Pressure · Temperature · CO₂ · Nutrient EC monitored simultaneously. Try the **🏜 Drought Simulation** to see multiple sensors fall together. |
+| 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | Same — English edition | English labels and explanations. |
+| 10 | [10_Field_DroughtGate_live_JP.html](./10_Field_DroughtGate_live_JP.html) | Outdoor Field — Drought Level Gauge (JP) | Soil Moisture · Ground Temp · Solar Radiation · Wind Speed. Drought Level **Lv.0–4** is calculated from a weighted composite R score. The **⛈ Storm-after-rain** scenario shows how EMA detects drying momentum *before* the value crosses the threshold — the feature current agricultural IoT systems lack entirely. |
+
+> **Why current agri-IoT products cannot do this:**
+> Most commercial soil-sensor systems alert only when a value crosses a fixed threshold.
+> They have no concept of "momentum toward the boundary."
+> The EMA pre-detection demonstrated here is structurally absent from threshold-only designs.
+> This is the gap NRA-IDE closes.
+
 ## Integration Guide
 
 To integrate the control logic into your own program,

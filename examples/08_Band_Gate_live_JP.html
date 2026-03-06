@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE — Band Gate / 非対称ダンパー Live Demo</title>
+<!--
+  NRA-IDE / Band Gate — 08 (JP)
+  非対称ダンパー構造 Band Gate ライブデモ
+  --------------------------------------------------
+  上限側EMAが蓄積されると τ が拡大 → ピークを丸める（慎重）
+  下限側EMAが蓄積されると τ が縮小 → 検知を早める（敏感）
+  R = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  心臓弁・サスペンション・調圧弁と同じ非対称構造。
+  Powered by NRA-IDE. (c) 2026 M-Tokuni.
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg:      #06080c;
+  --surface: #0a0f18;
+  --panel:   #0d1420;
+  --border:  #162030;
+  --upper:   #ff6b35;
+  --lower:   #00c9ff;
+  --safe:    #00e5a0;
+  --danger:  #ff3d5a;
+  --warn:    #f0c040;
+  --muted:   #7ab0cc;
+  --text:    #b0c8d8;
+  --white:   #e8f0f8;
+  --mono:    'Orbitron', monospace;
+  --sans:    'Noto Sans JP', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 背景: 工業系グリッド */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,201,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,201,255,0.02) 1px, transparent 1px),
+    linear-gradient(rgba(255,107,53,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,53,0.015) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+  pointer-events: none; z-index: 0;
+}
+
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+/* ─── ヘッダー ─── */
+header {
+  margin-bottom: 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.h-left { border-left: 3px solid var(--warn); padding-left: 16px; }
+.h-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--warn);
+  margin-bottom: 8px;
+}
+header h1 {
+  font-family: var(--mono);
+  font-size: clamp(16px, 3vw, 24px);
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 1px;
+  line-height: 1.3;
+}
+header p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.7;
+  max-width: 500px;
+}
+
+/* ライブバッジ */
+.live-row {
+  display: flex; gap: 8px; align-items: center;
+  flex-direction: column; align-items: flex-end;
+}
+.live-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 5px 12px;
+  border: 1px solid rgba(0,229,160,.3);
+  color: var(--safe);
+  background: rgba(0,229,160,.05);
+  border-radius: 2px;
+  display: flex; align-items: center; gap: 7px;
+}
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--safe); animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+/* ─── シナリオ選択タブ ─── */
+.tabs {
+  display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.tab {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.tab:hover { border-color: var(--warn); color: var(--warn); }
+.tab.active { border-color: var(--warn); color: var(--warn); background: rgba(240,192,64,.07); }
+.tab .dot { width:7px; height:7px; border-radius:50%; }
+
+/* ─── メインキャンバス（波形）─── */
+.chart-section { margin-bottom: 16px; position: relative; }
+#waveCanvas {
+  display: block; width: 100%;
+  border: 1px solid var(--border);
+  background: #040608;
+  border-radius: 3px;
+}
+
+/* フラッシュオーバーレイ */
+#flashOverlay {
+  position: absolute; inset: 0;
+  border-radius: 3px;
+  pointer-events: none;
+  transition: background .08s, border-color .08s;
+  border: 2px solid transparent;
+}
+#flashOverlay.upper { background: rgba(255,107,53,.07); border-color: rgba(255,107,53,.5); }
+#flashOverlay.lower { background: rgba(0,201,255,.07);  border-color: rgba(0,201,255,.5); }
+#flashStamp {
+  position: absolute; top:50%; left:50%;
+  transform: translate(-50%,-50%) scale(.8);
+  font-family: var(--mono);
+  font-size: clamp(20px,5vw,44px);
+  font-weight: 900;
+  letter-spacing: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s, transform .12s;
+  white-space: nowrap;
+  text-shadow: 0 0 24px currentColor;
+}
+#flashStamp.active { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+
+/* ─── ダンパー可視化キャンバス ─── */
+.damper-section {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+  align-items: start;
+}
+@media(max-width:640px){ .damper-section{ grid-template-columns:1fr; } }
+
+#damperCanvas {
+  display: block; width: 220px; height: 260px;
+  border: 1px solid var(--border);
+  background: #040608;
+  border-radius: 3px;
+}
+
+/* ─── コントロールパネル ─── */
+.ctrl-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 16px;
+}
+.ctrl-title {
+  font-family: var(--mono);
+  font-size: 8px; letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dual-params {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.param-col-title {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 2px;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  border-radius: 2px;
+}
+.param-col-title.upper { color: var(--upper); background: rgba(255,107,53,.08); border: 1px solid rgba(255,107,53,.2); }
+.param-col-title.lower { color: var(--lower); background: rgba(0,201,255,.08);  border: 1px solid rgba(0,201,255,.2); }
+
+.param-row { margin-bottom: 10px; }
+.param-lbl {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 10px;
+  margin-bottom: 3px;
+}
+.param-name { color: var(--text); }
+.param-val  { color: var(--white); font-weight: bold; }
+input[type=range] {
+  width: 100%; appearance: none;
+  height: 2px; background: var(--border);
+  border-radius: 1px; outline: none; cursor: pointer;
+}
+input[type=range].upper::-webkit-slider-thumb {
+  appearance: none; width:11px; height:11px; border-radius:50%;
+  background: var(--upper); border: 2px solid var(--bg);
+  box-shadow: 0 0 6px rgba(255,107,53,.6);
+}
+input[type=range].lower::-webkit-slider-thumb {
+  appearance: none; width:11px; height:11px; border-radius:50%;
+  background: var(--lower); border: 2px solid var(--bg);
+  box-shadow: 0 0 6px rgba(0,201,255,.6);
+}
+
+/* 共通パラメータ */
+.common-params {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 4px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+
+/* ─── メーターグリッド ─── */
+.meters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+@media(max-width:640px){ .meters{ grid-template-columns:repeat(2,1fr); } }
+
+.meter {
+  background: #040608;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px 12px;
+}
+.m-label { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; }
+.m-val   { font-family: var(--mono); font-size: 20px; font-weight: 700; line-height: 1; transition: color .15s; }
+.m-bar   { height: 2px; background: var(--border); border-radius: 1px; margin-top: 5px; overflow: hidden; }
+.m-fill  { height: 100%; border-radius: 1px; transition: width .1s, background .15s; }
+
+/* ─── ログ ─── */
+.log-wrap { background: #040608; border: 1px solid var(--border); border-radius: 3px; height: 100px; overflow-y: auto; padding: 8px 10px; font-family: var(--mono); font-size: 9px; line-height: 1.8; }
+.log-wrap::-webkit-scrollbar { width: 3px; }
+.log-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+.le { color: var(--muted); }
+.le.upper  { color: var(--upper); }
+.le.lower  { color: var(--lower); }
+.le.safe   { color: var(--safe); }
+.le.warn   { color: var(--warn); }
+
+/* ─── 凡例 ─── */
+.legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  margin-bottom: 8px;
+}
+.li { display: flex; align-items: center; gap: 5px; }
+.ll { width: 18px; height: 2px; border-radius: 1px; }
+
+/* ─── ボタン ─── */
+.btn-row { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+button.ctrl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+  padding: 6px 12px; border: 1px solid var(--border);
+  background: transparent; color: var(--text);
+  cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+button.ctrl:hover { border-color: var(--warn); color: var(--warn); }
+button.ctrl.play  { border-color: var(--safe); color: var(--safe); }
+button.ctrl.paused{ border-color: var(--warn); color: var(--warn); }
+
+/* フッター */
+footer {
+  margin-top: 48px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+}
+footer a { color: var(--lower); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ヘッダー -->
+<header>
+  <div class="h-left">
+    <div class="h-label">NRA-IDE / Band Gate — 08</div>
+    <h1>非対称ダンパー構造<br>上限・下限 Band Gate Live</h1>
+    <p>
+      上限突破（過負荷・過電流・高圧）と下限割れ（漏電・断線・枯渇）を<br>
+      同一の R = δ/τ で検知します。上下のτは逆向きに動きます。
+    </p>
+  </div>
+  <div class="live-row">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="btn-row">
+      <button class="ctrl play" id="btnPlay" onclick="togglePlay()">⏸ PAUSE</button>
+      <button class="ctrl" onclick="resetSim()">↺ RESET</button>
+    </div>
+  </div>
+</header>
+
+<!-- シナリオタブ -->
+<div class="tabs">
+  <button class="tab active" id="tab-elec"  onclick="setScenario('elec')">
+    <span class="dot" style="background:#f0c040"></span>⚡ 電気（電圧・電流）
+  </button>
+  <button class="tab" id="tab-temp"  onclick="setScenario('temp')">
+    <span class="dot" style="background:#ff6b35"></span>🌡 気温・気圧
+  </button>
+  <button class="tab" id="tab-water" onclick="setScenario('water')">
+    <span class="dot" style="background:#00c9ff"></span>💧 水圧・水流
+  </button>
+  <button class="tab" id="tab-pulse" onclick="setScenario('pulse')">
+    <span class="dot" style="background:#ff3d5a"></span>💓 脈動・生体
+  </button>
+</div>
+
+<!-- 波形キャンバス -->
+<div class="legend">
+  <div class="li"><div class="ll" style="background:var(--white)"></div>観測値</div>
+  <div class="li"><div class="ll" style="background:var(--upper)"></div>上限 τ_high + 動的幅</div>
+  <div class="li"><div class="ll" style="background:var(--lower)"></div>下限 τ_low − 動的幅</div>
+  <div class="li"><div class="ll" style="background:rgba(255,107,53,.3);height:8px;border-radius:1px"></div>上限 SILENCE 域</div>
+  <div class="li"><div class="ll" style="background:rgba(0,201,255,.2);height:8px;border-radius:1px"></div>下限 SILENCE 域</div>
+</div>
+
+<div class="chart-section">
+  <canvas id="waveCanvas" height="220"></canvas>
+  <div id="flashOverlay"></div>
+  <div id="flashStamp"></div>
+</div>
+
+<!-- メーター -->
+<div class="meters">
+  <div class="meter">
+    <div class="m-label">OBSERVED VALUE</div>
+    <div class="m-val" id="mv-val" style="color:var(--safe)">—</div>
+    <div class="m-bar"><div class="m-fill" id="mf-val" style="width:50%;background:var(--safe)"></div></div>
+  </div>
+  <div class="meter">
+    <div class="m-label">R (BAND GATE)</div>
+    <div class="m-val" id="mv-r" style="color:var(--safe)">0.000</div>
+    <div class="m-bar"><div class="m-fill" id="mf-r" style="width:0%;background:var(--safe)"></div></div>
+  </div>
+  <div class="meter">
+    <div class="m-label">DECISION</div>
+    <div class="m-val" id="mv-dec" style="color:var(--safe);font-size:14px">PASS</div>
+    <div class="m-bar"><div class="m-fill" id="mf-dec" style="width:0%;background:var(--danger)"></div></div>
+  </div>
+  <div class="meter">
+    <div class="m-label">SILENCE COUNT</div>
+    <div class="m-val" id="mv-cnt" style="color:var(--danger)">0</div>
+    <div class="m-bar"><div class="m-fill" id="mf-cnt" style="width:0%;background:var(--danger)"></div></div>
+  </div>
+</div>
+
+<!-- ダンパー可視化 + コントロール -->
+<div class="damper-section">
+  <!-- 左：ダンパーアニメーション -->
+  <canvas id="damperCanvas"></canvas>
+
+  <!-- 右：パラメータ -->
+  <div class="ctrl-panel">
+    <div class="ctrl-title">非対称ダンパー設定</div>
+
+    <div class="dual-params">
+      <!-- 上限側 -->
+      <div>
+        <div class="param-col-title upper">UPPER SIDE ↑</div>
+        <div class="param-row">
+          <div class="param-lbl">
+            <span class="param-name">τ_high</span>
+            <span class="param-val" id="v-th">—</span>
+          </div>
+          <input type="range" class="upper" id="sl-th" min="0" max="100" step="1" value="70">
+        </div>
+        <div class="param-row">
+          <div class="param-lbl">
+            <span class="param-name">α_upper</span>
+            <span class="param-val" id="v-au">0.30</span>
+          </div>
+          <input type="range" class="upper" id="sl-au" min="0.01" max="0.99" step="0.01" value="0.30">
+        </div>
+        <div class="param-row">
+          <div class="param-lbl">
+            <span class="param-name">AMP_upper</span>
+            <span class="param-val" id="v-amu">2.0</span>
+          </div>
+          <input type="range" class="upper" id="sl-amu" min="1.0" max="4.0" step="0.1" value="2.0">
+        </div>
+      </div>
+
+      <!-- 下限側 -->
+      <div>
+        <div class="param-col-title lower">LOWER SIDE ↓</div>
+        <div class="param-row">
+          <div class="param-lbl">
+            <span class="param-name">τ_low</span>
+            <span class="param-val" id="v-tl">—</span>
+          </div>
+          <input type="range" class="lower" id="sl-tl" min="0" max="100" step="1" value="30">
+        </div>
+        <div class="param-row">
+          <div class="param-lbl">
+            <span class="param-name">α_lower</span>
+            <span class="param-val" id="v-al">0.50</span>
+          </div>
+          <input type="range" class="lower" id="sl-al" min="0.01" max="0.99" step="0.01" value="0.50">
+        </div>
+        <div class="param-row">
+          <div class="param-lbl">
+            <span class="param-name">AMP_lower</span>
+            <span class="param-val" id="v-aml">1.3</span>
+          </div>
+          <input type="range" class="lower" id="sl-aml" min="1.0" max="4.0" step="0.1" value="1.3">
+        </div>
+      </div>
+    </div>
+
+    <div class="common-params">
+      <div class="param-row">
+        <div class="param-lbl">
+          <span class="param-name" style="font-size:9px">速度</span>
+          <span class="param-val" id="v-spd">1×</span>
+        </div>
+        <input type="range" class="upper" id="sl-spd" min="1" max="5" step="1" value="1">
+      </div>
+      <div class="param-row">
+        <div class="param-lbl">
+          <span class="param-name" style="font-size:9px">HOLD (ms)</span>
+          <span class="param-val" id="v-hold">1500</span>
+        </div>
+        <input type="range" class="lower" id="sl-hold" min="200" max="4000" step="100" value="1500">
+      </div>
+    </div>
+
+    <div style="margin-top:12px;padding:10px 12px;background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.15);border-radius:3px">
+      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--warn);margin-bottom:6px">非対称ダンパーの原理</div>
+      <div style="font-size:10px;color:#a0b0c0;line-height:1.7">
+        上限側は τ を<span style="color:var(--upper)">大きく</span>して山を丸める（慎重）。<br>
+        下限側は τ を<span style="color:var(--lower)">小さく</span>して検知を早める（敏感）。<br>
+        心臓弁・サスペンション・調圧弁と同じ構造です。
+      </div>
+    </div>
+
+    <div style="margin-top:10px">
+      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:5px">イベントログ</div>
+      <div class="log-wrap" id="logArea"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>NRA-IDE / Band Gate — Asymmetric Damper Structure</span>
+  <span>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    &nbsp;|&nbsp;
+    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+  </span>
+</footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// シナリオ定義
+// ─────────────────────────────────────────────
+const SCENARIOS = {
+  elec: {
+    label: '電圧 (V)',
+    unit: 'V',
+    nominal: 50,       // 中心値
+    th_default: 70,    // 上限
+    tl_default: 30,    // 下限
+    color: '#f0c040',
+    // スパイクパターン：過電圧(t=80) 漏電降下(t=200)
+    getValue(t) {
+      let v = 50 + Math.sin(t * 0.04) * 4 + Math.random() * 2 - 1;
+      const p = t % 300;
+      if (p >= 80  && p <= 110) v += 28 * Math.sin((p-80)/30 * Math.PI);   // 過電圧
+      if (p >= 200 && p <= 260) v -= 26 * Math.sin((p-200)/60 * Math.PI);  // 漏電降下
+      return v;
+    }
+  },
+  temp: {
+    label: '気温 (°C)',
+    unit: '°C',
+    nominal: 22,
+    th_default: 38,
+    tl_default: 5,
+    color: '#ff6b35',
+    getValue(t) {
+      let v = 22 + Math.sin(t * 0.03) * 5 + Math.random() * 1.5 - 0.75;
+      const p = t % 320;
+      if (p >= 60  && p <= 100) v += 20 * Math.sin((p-60)/40 * Math.PI);   // 熱波
+      if (p >= 220 && p <= 270) v -= 20 * Math.sin((p-220)/50 * Math.PI);  // 急冷
+      return v;
+    }
+  },
+  water: {
+    label: '水圧 (kPa)',
+    unit: 'kPa',
+    nominal: 50,
+    th_default: 72,
+    tl_default: 25,
+    color: '#00c9ff',
+    getValue(t) {
+      let v = 50 + Math.sin(t * 0.05) * 6 + Math.random() * 2 - 1;
+      const p = t % 280;
+      if (p >= 70  && p <= 105) v += 30 * Math.sin((p-70)/35 * Math.PI);   // 水圧急上昇
+      if (p >= 190 && p <= 240) v -= 28 * Math.sin((p-190)/50 * Math.PI);  // 流量消失
+      return v;
+    }
+  },
+  pulse: {
+    label: '心拍 (bpm)',
+    unit: 'bpm',
+    nominal: 70,
+    th_default: 110,
+    tl_default: 45,
+    color: '#ff3d5a',
+    getValue(t) {
+      let v = 70 + Math.sin(t * 0.06) * 8 + Math.random() * 3 - 1.5;
+      const p = t % 350;
+      if (p >= 80  && p <= 120) v += 50 * Math.sin((p-80)/40 * Math.PI);   // 頻脈
+      if (p >= 230 && p <= 290) v -= 35 * Math.sin((p-230)/60 * Math.PI);  // 徐脈
+      return v;
+    }
+  }
+};
+
+let scenario = SCENARIOS.elec;
+
+// ─────────────────────────────────────────────
+// シミュレーター状態
+// ─────────────────────────────────────────────
+const HISTORY = 240;
+let st = {
+  t: 0, playing: true,
+  ema_upper: 0, ema_lower: 0,
+  holdUntil: 0,
+  silenceCount: 0,
+  lastDir: '',
+  hist: [],        // {v, upper_band, lower_band, R, silence, dir}
+  lastFrameTime: 0,
+};
+
+function getP() {
+  return {
+    th:   parseFloat(document.getElementById('sl-th').value),
+    tl:   parseFloat(document.getElementById('sl-tl').value),
+    au:   parseFloat(document.getElementById('sl-au').value),
+    al:   parseFloat(document.getElementById('sl-al').value),
+    amu:  parseFloat(document.getElementById('sl-amu').value),
+    aml:  parseFloat(document.getElementById('sl-aml').value),
+    spd:  parseInt(document.getElementById('sl-spd').value),
+    hold: parseInt(document.getElementById('sl-hold').value),
+  };
+}
+
+function step(p) {
+  st.t++;
+  const v    = scenario.getValue(st.t);
+  const nowMs = st.t * 40;
+
+  const nominal = (p.th + p.tl) / 2;
+  const half    = (p.th - p.tl) / 2;
+
+  // 上限δ・下限δ
+  const d_upper = Math.max(0, v - p.th);
+  const d_lower = Math.max(0, p.tl - v);
+
+  // 上限EMA（蓄積 → τ大きく）
+  st.ema_upper = p.au * d_upper + (1 - p.au) * st.ema_upper;
+  // 下限EMA（蓄積 → τ小さく）
+  st.ema_lower = p.al * d_lower + (1 - p.al) * st.ema_lower;
+
+  const tau_upper_dyn = half * Math.min(1 + st.ema_upper / half, p.amu);
+  const tau_lower_dyn = half * Math.max(1 - st.ema_lower / half, 1 / p.aml);
+
+  const R_upper = d_upper > 0 ? d_upper / tau_upper_dyn : 0;
+  const R_lower = d_lower > 0 ? d_lower / tau_lower_dyn : 0;
+  const R       = Math.max(R_upper, R_lower);
+
+  // HOLDチェック
+  const held    = nowMs < st.holdUntil;
+  let silence   = held;
+  let dir       = held ? st.lastDir : '';
+
+  if (!held && R >= 1.0) {
+    st.holdUntil = nowMs + p.hold;
+    silence = true;
+    dir = R_upper >= R_lower ? 'upper' : 'lower';
+    st.lastDir = dir;
+    st.silenceCount++;
+  }
+
+  // 動的バンド（可視化用）
+  const upper_band = p.th + (tau_upper_dyn - half);
+  const lower_band = p.tl - (half - tau_lower_dyn);
+
+  // 履歴
+  if (st.hist.length >= HISTORY) st.hist.shift();
+  st.hist.push({ v, upper_band, lower_band, R, silence, dir });
+
+  return { v, R, silence, dir, upper_band, lower_band };
+}
+
+// ─────────────────────────────────────────────
+// 波形キャンバス描画
+// ─────────────────────────────────────────────
+const wc  = document.getElementById('waveCanvas');
+const wctx = wc.getContext('2d');
+
+function drawWave(p) {
+  const W = wc.parentElement.clientWidth;
+  const H = 220;
+  wc.width = W; wc.height = H;
+
+  const pad = { t:16, r:50, b:28, l:52 };
+  const pw = W - pad.l - pad.r;
+  const ph = H - pad.t  - pad.b;
+
+  wctx.clearRect(0, 0, W, H);
+
+  const hist = st.hist;
+  const len  = hist.length;
+  if (len < 2) return;
+
+  const allV = hist.map(h=>h.v);
+  const allB = hist.map(h=>Math.max(h.upper_band, Math.abs(h.lower_band)));
+  const minV = Math.min(...allV, p.tl * 0.7);
+  const maxV = Math.max(...allV, p.th * 1.3);
+  const range = maxV - minV || 1;
+
+  function xp(i) { return pad.l + (i / (HISTORY-1)) * pw; }
+  function yp(v) { return pad.t + ph - ((v - minV) / range) * ph; }
+
+  // グリッド
+  wctx.strokeStyle = 'rgba(22,32,48,.8)';
+  wctx.lineWidth = 1;
+  for (let i=0; i<=4; i++) {
+    const y = pad.t + (ph/4)*i;
+    wctx.beginPath(); wctx.moveTo(pad.l, y); wctx.lineTo(pad.l+pw, y); wctx.stroke();
+    const val = (maxV - (range/4)*i).toFixed(1);
+    wctx.fillStyle = 'rgba(48,72,88,.9)';
+    wctx.font = '9px Orbitron';
+    wctx.textAlign = 'right';
+    wctx.fillText(val, pad.l-5, y+3);
+  }
+
+  // SILENCE 塗り
+  for (let i=1; i<len; i++) {
+    if (hist[i].silence) {
+      const col = hist[i].dir === 'upper'
+        ? 'rgba(255,107,53,.08)' : 'rgba(0,201,255,.07)';
+      wctx.fillStyle = col;
+      wctx.fillRect(xp(i-1), pad.t, xp(i)-xp(i-1)+1, ph);
+    }
+  }
+
+  // τ_high 帯（上限バンド）
+  wctx.strokeStyle = 'rgba(255,107,53,.5)';
+  wctx.lineWidth = 1;
+  wctx.setLineDash([4,4]);
+  wctx.beginPath();
+  hist.forEach((h,i) => {
+    const x = xp(i), y = yp(h.upper_band);
+    i===0 ? wctx.moveTo(x,y) : wctx.lineTo(x,y);
+  });
+  wctx.stroke();
+
+  // τ_low 帯（下限バンド）
+  wctx.strokeStyle = 'rgba(0,201,255,.5)';
+  wctx.beginPath();
+  hist.forEach((h,i) => {
+    const x = xp(i), y = yp(h.lower_band);
+    i===0 ? wctx.moveTo(x,y) : wctx.lineTo(x,y);
+  });
+  wctx.stroke();
+  wctx.setLineDash([]);
+
+  // 観測値 — グロー
+  wctx.strokeStyle = 'rgba(232,240,248,.12)';
+  wctx.lineWidth = 6;
+  wctx.beginPath();
+  hist.forEach((h,i) => {
+    const x = xp(i), y = yp(h.v);
+    i===0 ? wctx.moveTo(x,y) : wctx.lineTo(x,y);
+  });
+  wctx.stroke();
+
+  // 観測値
+  wctx.strokeStyle = '#e8f0f8';
+  wctx.lineWidth = 1.8;
+  wctx.beginPath();
+  hist.forEach((h,i) => {
+    const x = xp(i), y = yp(h.v);
+    i===0 ? wctx.moveTo(x,y) : wctx.lineTo(x,y);
+  });
+  wctx.stroke();
+
+  // 最新点
+  const last = hist[len-1];
+  const lx = xp(len-1), ly = yp(last.v);
+  const dotCol = last.silence
+    ? (last.dir==='upper' ? '#ff6b35' : '#00c9ff') : '#e8f0f8';
+  wctx.fillStyle = dotCol;
+  wctx.shadowColor = dotCol;
+  wctx.shadowBlur = 10;
+  wctx.beginPath(); wctx.arc(lx, ly, 4, 0, Math.PI*2); wctx.fill();
+  wctx.shadowBlur = 0;
+
+  // ユニットラベル
+  wctx.fillStyle = 'rgba(48,72,88,.9)';
+  wctx.font = '9px Orbitron';
+  wctx.textAlign = 'left';
+  wctx.fillText(scenario.unit, pad.l+pw+4, pad.t+ph/2);
+}
+
+// ─────────────────────────────────────────────
+// ダンパーCanvasアニメーション
+// ─────────────────────────────────────────────
+const dc   = document.getElementById('damperCanvas');
+const dctx = dc.getContext('2d');
+dc.width = 220; dc.height = 260;
+
+function drawDamper(R, dir, upperEMA, lowerEMA, p) {
+  const W = 220, H = 260;
+  dctx.clearRect(0,0,W,H);
+
+  const cx = W/2;
+  const midY = H/2;
+
+  // 背景
+  dctx.fillStyle = '#040608';
+  dctx.fillRect(0,0,W,H);
+
+  // タイトル
+  dctx.fillStyle = 'rgba(48,72,88,.8)';
+  dctx.font = '8px Orbitron';
+  dctx.textAlign = 'center';
+  dctx.fillText('ASYMMETRIC DAMPER', cx, 16);
+
+  const isSil = R >= 1.0;
+  const baseH = 70;  // ダンパー半高さ
+
+  // 上側スプリング（EMAで縮む・赤）
+  const upperComp = Math.min(upperEMA * 20, baseH * 0.6);
+  const upperY    = midY - baseH + upperComp;
+  const springTop = 30;
+
+  // スプリング描画（上）
+  const springCoils = 7;
+  const springH = upperY - springTop;
+  const coilW   = 18;
+  dctx.strokeStyle = isSil && dir==='upper'
+    ? 'rgba(255,107,53,1)' : 'rgba(255,107,53,.5)';
+  dctx.lineWidth = 1.5;
+  dctx.shadowColor = 'rgba(255,107,53,.4)';
+  dctx.shadowBlur  = isSil && dir==='upper' ? 8 : 0;
+  dctx.beginPath();
+  for (let i=0; i<=springCoils*2; i++) {
+    const sy = springTop + (springH / (springCoils*2)) * i;
+    const sx = cx + (i%2===0 ? coilW : -coilW);
+    i===0 ? dctx.moveTo(cx, springTop) : i===1 ? dctx.lineTo(sx,sy) : dctx.lineTo(sx,sy);
+  }
+  dctx.lineTo(cx, upperY);
+  dctx.stroke();
+  dctx.shadowBlur = 0;
+
+  // 下側スプリング（EMAで縮む・青）
+  const lowerComp = Math.min(lowerEMA * 20, baseH * 0.6);
+  const lowerY    = midY + baseH - lowerComp;
+  const springBot = H - 30;
+
+  dctx.strokeStyle = isSil && dir==='lower'
+    ? 'rgba(0,201,255,1)' : 'rgba(0,201,255,.5)';
+  dctx.shadowColor = 'rgba(0,201,255,.4)';
+  dctx.shadowBlur  = isSil && dir==='lower' ? 8 : 0;
+  dctx.beginPath();
+  dctx.moveTo(cx, lowerY);
+  const lSpringH = springBot - lowerY;
+  for (let i=1; i<=springCoils*2; i++) {
+    const sy = lowerY + (lSpringH / (springCoils*2)) * i;
+    const sx = cx + (i%2===0 ? coilW : -coilW);
+    dctx.lineTo(sx, sy);
+  }
+  dctx.lineTo(cx, springBot);
+  dctx.stroke();
+  dctx.shadowBlur = 0;
+
+  // 中央ピストン
+  const pistonH = lowerY - upperY;
+  const pistonW = 40;
+  const pistonCol = isSil
+    ? (dir==='upper' ? 'rgba(255,107,53,.9)' : 'rgba(0,201,255,.9)')
+    : 'rgba(180,200,220,.5)';
+  dctx.fillStyle = pistonCol;
+  dctx.shadowColor = pistonCol;
+  dctx.shadowBlur  = isSil ? 12 : 0;
+  dctx.fillRect(cx - pistonW/2, upperY, pistonW, pistonH);
+
+  // ピストン外枠
+  dctx.strokeStyle = isSil ? pistonCol : 'rgba(100,140,170,.4)';
+  dctx.lineWidth = 1;
+  dctx.strokeRect(cx - pistonW/2, upperY, pistonW, pistonH);
+  dctx.shadowBlur = 0;
+
+  // 中心線
+  dctx.strokeStyle = 'rgba(48,72,88,.5)';
+  dctx.lineWidth = 1;
+  dctx.setLineDash([3,4]);
+  dctx.beginPath(); dctx.moveTo(cx-30, midY); dctx.lineTo(cx+30, midY); dctx.stroke();
+  dctx.setLineDash([]);
+
+  // R値表示
+  const rCol = isSil
+    ? (dir==='upper' ? '#ff6b35' : '#00c9ff')
+    : R > 0.6 ? '#f0c040' : '#00e5a0';
+  dctx.fillStyle = rCol;
+  dctx.font = 'bold 16px Orbitron';
+  dctx.textAlign = 'center';
+  dctx.fillText('R = ' + R.toFixed(3), cx, H-10);
+
+  // 上下ラベル
+  dctx.fillStyle = 'rgba(255,107,53,.6)';
+  dctx.font = '8px Orbitron';
+  dctx.fillText('UPPER ↑', cx, springTop + 10);
+  dctx.fillStyle = 'rgba(0,201,255,.6)';
+  dctx.fillText('LOWER ↓', cx, springBot - 4);
+}
+
+// ─────────────────────────────────────────────
+// UI更新
+// ─────────────────────────────────────────────
+let flashTimer = null;
+let lastLogDec = 'PASS';
+
+function updateUI(res, p) {
+  const { v, R, silence, dir } = res;
+  const nominal = (p.th + p.tl) / 2;
+  const valPct  = Math.max(0, Math.min((v - p.tl*0.7) / ((p.th*1.3 - p.tl*0.7)), 1));
+  const rPct    = Math.min(R / 1.5, 1);
+
+  const col = silence
+    ? (dir==='upper' ? 'var(--upper)' : 'var(--lower)')
+    : R > 0.7 ? 'var(--warn)' : 'var(--safe)';
+
+  document.getElementById('mv-val').textContent = v.toFixed(1) + scenario.unit;
+  document.getElementById('mv-val').style.color = col;
+  document.getElementById('mf-val').style.width = (valPct*100)+'%';
+  document.getElementById('mf-val').style.background = col;
+
+  document.getElementById('mv-r').textContent = R.toFixed(4);
+  document.getElementById('mv-r').style.color = col;
+  document.getElementById('mf-r').style.width = (rPct*100)+'%';
+  document.getElementById('mf-r').style.background = col;
+
+  document.getElementById('mv-dec').textContent = silence ? 'SILENCE' : 'PASS';
+  document.getElementById('mv-dec').style.color = silence
+    ? (dir==='upper'?'var(--upper)':'var(--lower)') : 'var(--safe)';
+  document.getElementById('mf-dec').style.width = silence ? '100%' : '0%';
+  document.getElementById('mf-dec').style.background = dir==='upper'?'var(--upper)':'var(--lower)';
+
+  document.getElementById('mv-cnt').textContent = st.silenceCount;
+  document.getElementById('mf-cnt').style.width = Math.min(st.silenceCount/20,1)*100+'%';
+
+  // フラッシュ
+  const ov = document.getElementById('flashOverlay');
+  const fs = document.getElementById('flashStamp');
+  if (silence) {
+    ov.className = dir;
+    fs.textContent = dir==='upper' ? '— UPPER SILENCE —' : '— LOWER SILENCE —';
+    fs.style.color = dir==='upper' ? 'var(--upper)' : 'var(--lower)';
+    fs.classList.add('active');
+    if (flashTimer) clearTimeout(flashTimer);
+    flashTimer = setTimeout(()=>{ ov.className=''; fs.classList.remove('active'); }, 700);
+  }
+
+  // ログ
+  if (silence && lastLogDec !== 'SILENCE') {
+    addLog(
+      dir==='upper'
+        ? `UPPER SILENCE  V=${v.toFixed(1)}  R=${R.toFixed(3)} > 1.0`
+        : `LOWER SILENCE  V=${v.toFixed(1)}  R=${R.toFixed(3)} > 1.0`,
+      dir
+    );
+  } else if (!silence && lastLogDec==='SILENCE') {
+    addLog('HOLD END → PASS', 'safe');
+  } else if (R > 0.65 && R < 1.0 && lastLogDec !== 'warn') {
+    addLog(`WARN  R=${R.toFixed(3)} 接近中`, 'warn');
+  }
+  lastLogDec = silence ? 'SILENCE' : (R>0.65?'warn':'PASS');
+}
+
+function addLog(msg, cls) {
+  const a = document.getElementById('logArea');
+  const el = document.createElement('div');
+  el.className = 'le ' + cls;
+  el.textContent = `[${String(st.t).padStart(5,'0')}] ${msg}`;
+  a.appendChild(el);
+  a.scrollTop = a.scrollHeight;
+  while (a.children.length > 60) a.removeChild(a.firstChild);
+}
+
+// ─────────────────────────────────────────────
+// メインループ
+// ─────────────────────────────────────────────
+function tick() {
+  if (!st.playing) { requestAnimationFrame(tick); return; }
+  const now = performance.now();
+  const p   = getP();
+  const interval = Math.max(16, 40 - p.spd * 7);
+  if (now - st.lastFrameTime < interval) { requestAnimationFrame(tick); return; }
+  st.lastFrameTime = now;
+
+  let res;
+  for (let s=0; s<p.spd; s++) res = step(p);
+
+  drawWave(p);
+  drawDamper(res.R, res.dir, st.ema_upper, st.ema_lower, p);
+  updateUI(res, p);
+  requestAnimationFrame(tick);
+}
+
+// ─────────────────────────────────────────────
+// スライダー・コントロール
+// ─────────────────────────────────────────────
+function updateLabels() {
+  const p = getP();
+  document.getElementById('v-th').textContent   = p.th.toFixed(0) + scenario.unit;
+  document.getElementById('v-tl').textContent   = p.tl.toFixed(0) + scenario.unit;
+  document.getElementById('v-au').textContent   = p.au.toFixed(2);
+  document.getElementById('v-al').textContent   = p.al.toFixed(2);
+  document.getElementById('v-amu').textContent  = p.amu.toFixed(1);
+  document.getElementById('v-aml').textContent  = p.aml.toFixed(1);
+  document.getElementById('v-spd').textContent  = p.spd + '×';
+  document.getElementById('v-hold').textContent = p.hold;
+}
+
+['sl-th','sl-tl','sl-au','sl-al','sl-amu','sl-aml','sl-spd','sl-hold'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateLabels);
+});
+
+function setScenario(key) {
+  scenario = SCENARIOS[key];
+  document.getElementById('sl-th').value = scenario.th_default;
+  document.getElementById('sl-tl').value = scenario.tl_default;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+key).classList.add('active');
+  resetSim();
+  updateLabels();
+}
+
+function togglePlay() {
+  st.playing = !st.playing;
+  const btn = document.getElementById('btnPlay');
+  btn.textContent = st.playing ? '⏸ PAUSE' : '▶ PLAY';
+  btn.classList.toggle('play',   st.playing);
+  btn.classList.toggle('paused', !st.playing);
+}
+
+function resetSim() {
+  st.t = 0; st.ema_upper = 0; st.ema_lower = 0;
+  st.holdUntil = 0; st.silenceCount = 0;
+  st.hist = []; st.lastDir = '';
+  lastLogDec = 'PASS';
+  document.getElementById('logArea').innerHTML = '';
+  document.getElementById('flashOverlay').className = '';
+  document.getElementById('flashStamp').classList.remove('active');
+  addLog('シミュレーション開始 — ' + scenario.label, 'safe');
+}
+
+// ─────────────────────────────────────────────
+// 起動
+// ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  const w = wc.parentElement.clientWidth;
+  wc.width = w;
+});
+updateLabels();
+resetSim();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
