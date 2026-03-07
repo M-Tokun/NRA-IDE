@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<!-- FILE: nra_ide_sample_demo_20260307_192203.html / 2026-03-07 19:22:03 JST -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NRA-IDE Sample Demo — State Boundary, Short-Term Logs, and Long-Term Reconstruction</title>
+  <style>
+    :root {
+      --bg: #081018;
+      --panel: #101a24;
+      --panel2: #0c141c;
+      --line: #1d3042;
+      --text: #d8e4ef;
+      --muted: #87a1b7;
+      --safe: #2fd38b;
+      --warn: #ffbf47;
+      --danger: #ff5b6e;
+      --accent: #59b8ff;
+      --violet: #b48cff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans", "Noto Sans JP", system-ui, sans-serif;
+      background: linear-gradient(180deg, #071018 0%, #0b121a 100%);
+      color: var(--text);
+      line-height: 1.65;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px 56px;
+    }
+    header {
+      margin-bottom: 22px;
+      padding: 18px 20px;
+      background: rgba(16,26,36,.9);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+    }
+    .tag {
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 4vw, 38px);
+    }
+    .lead {
+      color: var(--muted);
+      max-width: 900px;
+      margin: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.2);
+    }
+    .panel h2, .panel h3 {
+      margin-top: 0;
+    }
+    .section-label {
+      font-size: 11px;
+      letter-spacing: .18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .metric {
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .metric .name {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .metric .value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+    .safe { color: var(--safe); }
+    .warn { color: var(--warn); }
+    .danger { color: var(--danger); }
+    .accent { color: var(--accent); }
+    .violet { color: var(--violet); }
+    .slider-row { margin-bottom: 14px; }
+    .slider-row label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #59b8ff;
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #142131;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button:hover { filter: brightness(1.08); }
+    button.primary {
+      background: #11314d;
+      border-color: #2a5980;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .status-pass { color: var(--safe); border-color: rgba(47,211,139,.35); background: rgba(47,211,139,.08); }
+    .status-damp { color: var(--warn); border-color: rgba(255,191,71,.35); background: rgba(255,191,71,.08); }
+    .status-silence { color: var(--danger); border-color: rgba(255,91,110,.35); background: rgba(255,91,110,.08); }
+    canvas {
+      width: 100%;
+      display: block;
+      background: #050b11;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--violet);
+      background: rgba(180,140,255,.08);
+      border-radius: 8px;
+      color: #dcccff;
+    }
+    .listish p {
+      margin: 0 0 10px;
+    }
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+      text-align: left;
+    }
+    th { color: var(--accent); font-weight: 700; }
+    .small { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="tag">nra-ide sample / state boundary + short log + long reconstruction</div>
+      <h1>NRA-IDE Sample Demo</h1>
+      <p class="lead">This sample is a template for showing, on a single screen, a flow in which the system does not look only at the instantaneous <strong>R = δ/τ</strong>, but also monitors long-term degradation through short-term log reconstruction, while using a damper structure with upper and lower bounds to suppress both false operation and missed danger. The goal is not to “make AI smarter,” but to “stop AI before it crosses a physical boundary.”</p>
+    </header>
+
+    <div class="grid">
+      <aside class="panel">
+        <div class="section-label">control panel</div>
+        <h2>Monitoring Parameters</h2>
+
+        <div class="slider-row">
+          <label><span>Base thickness τ_base</span><strong id="tauBaseLabel">12.0</strong></label>
+          <input id="tauBase" type="range" min="4" max="24" step="0.5" value="12" />
+        </div>
+
+        <div class="slider-row">
+          <label><span>Upper damper sensitivity α_upper</span><strong id="alphaUpperLabel">0.18</strong></label>
+          <input id="alphaUpper" type="range" min="0.02" max="0.50" step="0.01" value="0.18" />
+        </div>
+
+        <div class="slider-row">
+          <label><span>Lower damper sensitivity α_lower</span><strong id="alphaLowerLabel">0.30</strong></label>
+          <input id="alphaLower" type="range" min="0.02" max="0.50" step="0.01" value="0.30" />
+        </div>
+
+        <div class="slider-row">
+          <label><span>Disturbance intensity</span><strong id="disturbanceLabel">1.10</strong></label>
+          <input id="disturbance" type="range" min="0.2" max="2.0" step="0.05" value="1.10" />
+        </div>
+
+        <div class="slider-row">
+          <label><span>Degradation rate</span><strong id="degradeLabel">0.020</strong></label>
+          <input id="degrade" type="range" min="0.000" max="0.080" step="0.001" value="0.020" />
+        </div>
+
+        <div class="btn-row">
+          <button id="toggleRun" class="primary">Pause</button>
+          <button id="spikeBtn">Disturbance Spike</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+
+        <div style="margin-top:16px">
+          <div class="metric"><div class="name">Current state</div><div class="value"><span id="stateBadge" class="status-badge status-pass">PASS</span></div></div>
+          <div class="metric"><div class="name">Instantaneous R</div><div class="value accent" id="rNow">0.00</div></div>
+          <div class="metric"><div class="name">Short-log reconstruction R_short</div><div class="value warn" id="rShort">0.00</div></div>
+          <div class="metric"><div class="name">Long-term degradation index D_long</div><div class="value violet" id="dLong">0.00</div></div>
+          <div class="metric"><div class="name">Dynamic upper bound τ_dyn_upper</div><div class="value safe" id="tauUpper">12.00</div></div>
+          <div class="metric"><div class="name">Dynamic lower bound τ_dyn_lower</div><div class="value safe" id="tauLower">12.00</div></div>
+        </div>
+
+        <div class="note">The judgment has three stages. First, if the instantaneous R is high, the system stops immediately. Even before it reaches that point, if the reconstructed short-term log value rises, the system enters the damping region. In addition, as the long-term degradation index rises, the same disturbance becomes more likely to push the system toward danger.</div>
+      </aside>
+
+      <main>
+        <section class="panel">
+          <div class="section-label">live state graph</div>
+          <h2>Simultaneous Monitoring of Instant Boundaries and History</h2>
+          <canvas id="waveCanvas" width="780" height="320"></canvas>
+          <div class="small" style="margin-top:8px">The white line is the current value, the green band is the safe region, the yellow line is the short-term reconstruction, and the violet line is the long-term degradation index. A red flash indicates the SILENCE condition.</div>
+        </section>
+
+        <div class="two-col">
+          <section class="panel listish">
+            <div class="section-label">why this layout</div>
+            <h3>Design Principles This Screen Intends to Show</h3>
+            <p>First, the judgment target is not whether the AI is internally right or wrong, but the state immediately before it touches a physical boundary. This is the “frame of the cage.”</p>
+            <p>Second, because instantaneous judgment alone cannot fully capture quiet degradation, the system reconstructs short-term logs and observes trends across dozens of cycles.</p>
+            <p>Third, because service life and degradation should not be fixed by calendar age but updated from actual load, the system keeps a separate long-term index axis.</p>
+            <p>Fourth, because an upper-limit-only threshold tends to oscillate, the system uses asymmetric dampers with both upper and lower bounds, treating the danger side and the depletion side separately.</p>
+          </section>
+
+          <section class="panel">
+            <div class="section-label">decision ladder</div>
+            <h3>Decision Ladder</h3>
+            <table>
+              <thead>
+                <tr><th>Stage</th><th>Condition</th><th>Behavior</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>PASS</td><td>R_now &lt; 0.72 and R_short is low</td><td>Normal passage</td></tr>
+                <tr><td>DAMP</td><td>R_now ≥ 0.72 or R_short is rising</td><td>Damp, become more cautious, shift to the conservative side</td></tr>
+                <tr><td>SILENCE</td><td>R_now ≥ 1.00 or cascading deterioration in D_long</td><td>Refuse output, stop, fail-safe</td></tr>
+              </tbody>
+            </table>
+            <div class="note">What matters here is that SILENCE is not the only goal. By introducing DAMP, the system suppresses back-and-forth oscillation near the boundary.</div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="footer">FILE: nra_ide_sample_demo_20260307_192203.html / 2026-03-07 19:22:03 JST</div>
+  </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const waveCanvas = $('waveCanvas');
+  const ctx = waveCanvas.getContext('2d');
+
+  const sliders = {
+    tauBase: $('tauBase'),
+    alphaUpper: $('alphaUpper'),
+    alphaLower: $('alphaLower'),
+    disturbance: $('disturbance'),
+    degrade: $('degrade'),
+  };
+
+  const labels = {
+    tauBase: $('tauBaseLabel'),
+    alphaUpper: $('alphaUpperLabel'),
+    alphaLower: $('alphaLowerLabel'),
+    disturbance: $('disturbanceLabel'),
+    degrade: $('degradeLabel'),
+  };
+
+  const metrics = {
+    rNow: $('rNow'),
+    rShort: $('rShort'),
+    dLong: $('dLong'),
+    tauUpper: $('tauUpper'),
+    tauLower: $('tauLower'),
+    stateBadge: $('stateBadge'),
+  };
+
+  let running = true;
+  let t = 0;
+  let last = performance.now();
+  let upperEMA = 0;
+  let lowerEMA = 0;
+  let shortWindow = [];
+  let longDamage = 0;
+  let spike = 0;
+  let rawHistory = [];
+  let shortHistory = [];
+  let damageHistory = [];
+  const maxPoints = 220;
+
+  function syncLabels() {
+    labels.tauBase.textContent = Number(sliders.tauBase.value).toFixed(1);
+    labels.alphaUpper.textContent = Number(sliders.alphaUpper.value).toFixed(2);
+    labels.alphaLower.textContent = Number(sliders.alphaLower.value).toFixed(2);
+    labels.disturbance.textContent = Number(sliders.disturbance.value).toFixed(2);
+    labels.degrade.textContent = Number(sliders.degrade.value).toFixed(3);
+  }
+
+  function resetAll() {
+    t = 0;
+    upperEMA = 0;
+    lowerEMA = 0;
+    shortWindow = [];
+    longDamage = 0;
+    spike = 0;
+    rawHistory = [];
+    shortHistory = [];
+    damageHistory = [];
+  }
+
+  function setBadge(state) {
+    metrics.stateBadge.className = 'status-badge';
+    if (state === 'PASS') metrics.stateBadge.classList.add('status-pass');
+    if (state === 'DAMP') metrics.stateBadge.classList.add('status-damp');
+    if (state === 'SILENCE') metrics.stateBadge.classList.add('status-silence');
+    metrics.stateBadge.textContent = state;
+  }
+
+  function push(arr, value) {
+    arr.push(value);
+    if (arr.length > maxPoints) arr.shift();
+  }
+
+  function update(now) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    if (!running) return;
+
+    t += dt;
+    const tauBase = Number(sliders.tauBase.value);
+    const alphaUpper = Number(sliders.alphaUpper.value);
+    const alphaLower = Number(sliders.alphaLower.value);
+    const disturbance = Number(sliders.disturbance.value);
+    const degradeRate = Number(sliders.degrade.value);
+
+    const baseWave = Math.sin(t * 1.5) * 4.5 + Math.sin(t * 0.37) * 2.4;
+    const micro = Math.sin(t * 9.0) * 0.9;
+    const random = (Math.random() - 0.5) * 2.8 * disturbance;
+    const drift = Math.sin(t * 0.08) * 2.0;
+
+    spike *= 0.94;
+    const raw = baseWave + micro + random + drift + spike;
+
+    const upperDev = Math.max(0, raw);
+    const lowerDev = Math.max(0, -raw);
+
+    upperEMA = upperEMA * (1 - alphaUpper) + upperDev * alphaUpper;
+    lowerEMA = lowerEMA * (1 - alphaLower) + lowerDev * alphaLower;
+
+    const tauDynUpper = tauBase + upperEMA * 0.65;
+    const tauDynLower = Math.max(2.0, tauBase - lowerEMA * 0.35);
+
+    const rUpper = upperDev / Math.max(tauDynUpper, 0.001);
+    const rLower = lowerDev / Math.max(tauDynLower, 0.001);
+    const rNow = Math.max(rUpper, rLower);
+
+    shortWindow.push(rNow);
+    if (shortWindow.length > 28) shortWindow.shift();
+    const rShort = shortWindow.reduce((a, b) => a + b, 0) / shortWindow.length;
+
+    const wearInput = Math.max(0, rShort - 0.58) * (0.8 + disturbance * 0.35);
+    longDamage = Math.min(1.8, longDamage * 0.995 + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
+
+    let state = 'PASS';
+    if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE';
+    else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP';
+
+    metrics.rNow.textContent = rNow.toFixed(2);
+    metrics.rShort.textContent = rShort.toFixed(2);
+    metrics.dLong.textContent = longDamage.toFixed(2);
+    metrics.tauUpper.textContent = tauDynUpper.toFixed(2);
+    metrics.tauLower.textContent = tauDynLower.toFixed(2);
+    setBadge(state);
+
+    push(rawHistory, raw / 16);
+    push(shortHistory, rShort);
+    push(damageHistory, longDamage / 1.8);
+
+    draw(state);
+  }
+
+  function draw(state) {
+    const w = waveCanvas.width;
+    const h = waveCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    if (state === 'SILENCE') {
+      ctx.fillStyle = 'rgba(255,91,110,0.08)';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // grid
+    ctx.strokeStyle = 'rgba(120,150,180,0.15)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 8; i++) {
+      const y = (h / 8) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    for (let i = 0; i <= 10; i++) {
+      const x = (w / 10) * i;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+
+    const safeTop = h * 0.28;
+    const safeBottom = h * 0.72;
+    ctx.fillStyle = 'rgba(47,211,139,0.08)';
+    ctx.fillRect(0, safeTop, w, safeBottom - safeTop);
+
+    // zero line
+    ctx.strokeStyle = 'rgba(89,184,255,0.6)';
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+
+    function drawSeries(arr, color, transform) {
+      if (arr.length < 2) return;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      arr.forEach((v, i) => {
+        const x = (i / (maxPoints - 1)) * w;
+        const y = transform(v);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    drawSeries(rawHistory, '#ffffff', (v) => h / 2 - v * 90);
+    drawSeries(shortHistory, '#ffbf47', (v) => h - v * h * 0.78 - 18);
+    drawSeries(damageHistory, '#b48cff', (v) => h - v * h * 0.9 - 12);
+
+    ctx.fillStyle = '#87a1b7';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('white: raw state', 14, 18);
+    ctx.fillText('yellow: short reconstruction', 14, 36);
+    ctx.fillText('violet: long degradation', 14, 54);
+  }
+
+  Object.values(sliders).forEach(el => el.addEventListener('input', syncLabels));
+  $('toggleRun').addEventListener('click', () => {
+    running = !running;
+    $('toggleRun').textContent = running ? 'Pause' : 'Resume';
+  });
+  $('spikeBtn').addEventListener('click', () => {
+    spike += (Math.random() > 0.5 ? 1 : -1) * (8 + Math.random() * 7);
+  });
+  $('resetBtn').addEventListener('click', () => {
+    resetAll();
+    setBadge('PASS');
+  });
+
+  syncLabels();
+  setBadge('PASS');
+
+  function loop(now) {
+    update(now);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

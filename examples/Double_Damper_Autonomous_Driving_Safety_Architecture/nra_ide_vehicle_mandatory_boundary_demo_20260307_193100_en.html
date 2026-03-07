@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NRA-IDE Mandatory Boundary Configuration Demo — Autonomous Driving Boundary Monitoring + Physical Metric Monitoring</title>
+  <style>
+    :root {
+      --bg: #071018;
+      --panel: #0c1622;
+      --panel2: #101d2c;
+      --line: #1b2d42;
+      --text: #d7e4ef;
+      --muted: #8ea4b8;
+      --cam: #4fd1ff;
+      --radar: #ffb14f;
+      --imu: #7dff9b;
+      --metric: #b58cff;
+      --ide: #ff5f7a;
+      --safe: #7dff9b;
+      --warn: #ffd166;
+      --danger: #ff5f7a;
+      --white: #f6fbff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #0d1a28 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: Inter, "Noto Sans", "Noto Sans JP", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: 0.35;
+    }
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      border-left: 4px solid var(--ide);
+      padding-left: 16px;
+    }
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ide);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 40px);
+      line-height: 1.2;
+      color: var(--white);
+    }
+    .subtitle {
+      margin-top: 10px;
+      color: var(--muted);
+      max-width: 900px;
+      font-size: 14px;
+    }
+    .badgebox {
+      display: grid;
+      gap: 8px;
+      min-width: 300px;
+    }
+    .badge {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .badge strong { color: var(--white); }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+    }
+    .panel-pad { padding: 18px; }
+    .section-title {
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    #systemCanvas {
+      width: 100%;
+      height: 620px;
+      display: block;
+      background: linear-gradient(180deg, #08111a, #0d1825);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      height: 100%;
+    }
+    .sensor-card, .ide-card, .spec-card, .metric-card, .danger-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .danger-display {
+      margin-top: 8px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      transition: all 0.15s linear;
+    }
+    .danger-display.safe {
+      border-color: rgba(125,255,155,0.25);
+      background: rgba(125,255,155,0.05);
+    }
+    .danger-display.warn {
+      border-color: rgba(255,209,102,0.3);
+      background: rgba(255,209,102,0.06);
+    }
+    .danger-display.stop {
+      border-color: rgba(255,95,122,0.4);
+      background: rgba(255,95,122,0.1);
+      box-shadow: 0 0 24px rgba(255,95,122,0.12);
+    }
+    .danger-main {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+    .danger-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .log-panel {
+      margin-top: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .log-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .log-body {
+      max-height: 280px;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+    .log-item {
+      display: grid;
+      grid-template-columns: 88px 110px 1fr;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px dashed rgba(255,255,255,0.06);
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-time { color: var(--muted); }
+    .log-type.pass { color: var(--safe); }
+    .log-type.warn { color: var(--warn); }
+    .log-type.stop { color: var(--danger); }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .legend-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 12px;
+    }
+    .legend-title {
+      margin-bottom: 6px;
+      font-weight: 800;
+      color: var(--white);
+    }
+    @media (max-width: 1060px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      #systemCanvas { height: 500px; }
+      .ctrl-grid { grid-template-columns: 1fr; }
+      .legend-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 680px) {
+      .sensor-row, .metric-row, .log-item { grid-template-columns: 1fr; }
+      .legend-grid { grid-template-columns: 1fr; }
+      .danger-lamp { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <!-- FILE: nra_ide_vehicle_mandatory_boundary_demo_20260307_193100.html -->
+  <div class="wrap">
+    <header>
+      <div class="header-left">
+        <div class="eyebrow">NRA-IDE mandatory boundary + physical metrics demo</div>
+        <h1>Boundary Monitoring Demo for Mandatory Autonomous Driving Limits, with Additional Physical Monitoring Quantities Shown in Parallel</h1>
+        <div class="subtitle">
+          The three mandatory subsystems are kept intact, while forward obstacle distance, relative speed, yaw-rate error, lane confidence, and stopping time margin are added separately as independent monitoring quantities. This is not a replacement, but a parallel arrangement. In addition, a danger-zone slider and DANGER indicator are included as examples so that threshold crossings can be recognized at a glance.
+        </div>
+      </div>
+      <div class="badgebox">
+        <div class="badge"><strong>Mandatory limits</strong> = three subsystems: external-world recognition, distance/velocity, and ego-motion</div>
+        <div class="badge"><strong>Additional monitoring</strong> = distance, relative speed, yaw-rate error, lane confidence, and stopping time margin</div>
+        <div class="badge"><strong>No internal mixing / connection allowed</strong> = IDE is an external boundary and connects to the legacy stack only through an adapter</div>
+      </div>
+    </header>
+
+    <section class="hero-grid">
+      <div class="panel panel-pad">
+        <div class="section-title">System architecture</div>
+        <canvas id="systemCanvas" width="920" height="620"></canvas>
+      </div>
+      <div class="status-grid">
+        <div class="sensor-card">
+          <div class="section-title">Mandatory sensor boundary</div>
+          <div class="sensor-row">
+            <div class="sensor-name cam">Camera</div>
+            <div>
+              <div class="sensor-desc">External-world recognition. Signals, signs, pedestrians, and lane markings. It can see, but it is vulnerable to backlight and poor visibility.</div>
+              <div class="bar"><div id="camFill" class="fill cam"></div></div>
+            </div>
+            <div id="camValue" class="sensor-value cam">0.00</div>
+          </div>
+          <div class="sensor-row">
+            <div class="sensor-name radar">Radar</div>
+            <div>
+              <div class="sensor-desc">Distance and relative speed. Strong in that role, but coarse in shape identification. Reflection and multipath effects introduce characteristic distortions.</div>
+              <div class="bar"><div id="radarFill" class="fill radar"></div></div>
+            </div>
+            <div id="radarValue" class="sensor-value radar">0.00</div>
+          </div>
+          <div class="sensor-row">
+            <div class="sensor-name imu">IMU/Wheel</div>
+            <div>
+              <div class="sensor-desc">Ego-motion. Vehicle posture, turning, acceleration, and deceleration. It does not observe the external world, but instead determines internal state.</div>
+              <div class="bar"><div id="imuFill" class="fill imu"></div></div>
+            </div>
+            <div id="imuValue" class="sensor-value imu">0.00</div>
+          </div>
+          <div class="inline-note">
+            All three subsystems are necessary, but they are not based on the same principle. Here, instead of forcing agreement, the degree of disagreement is treated as a danger boundary.
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="section-title">Physical monitoring quantities</div>
+          <div class="metric-row">
+            <div class="metric-name metric">Distance</div>
+            <div>
+              <div class="metric-desc">前方障害物Distance。近づくほど危険。下限監視型。</div>
+              <div class="bar"><div id="distFill" class="fill metric"></div></div>
+            </div>
+            <div id="distValue" class="metric-value metric">0.0m</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-name metric">Relative speed</div>
+            <div>
+              <div class="metric-desc">Closing speed. The larger it is, the more it compresses the stopping margin.</div>
+              <div class="bar"><div id="relFill" class="fill metric"></div></div>
+            </div>
+            <div id="relValue" class="metric-value metric">0.0m/s</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-name metric">Yaw error</div>
+            <div>
+              <div class="metric-desc">Turning deviation from the target trajectory. Upper-bound monitoring type.</div>
+              <div class="bar"><div id="yawFill" class="fill metric"></div></div>
+            </div>
+            <div id="yawValue" class="metric-value metric">0.0°/s</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-name metric">Lane confidence</div>
+            <div>
+              <div class="metric-desc">Confidence in lane markings and boundaries. Lower-bound monitoring type.</div>
+              <div class="bar"><div id="laneFill" class="fill metric"></div></div>
+            </div>
+            <div id="laneValue" class="metric-value metric">0%</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-name metric">Stopping margin</div>
+            <div>
+              <div class="metric-desc">Remaining time available to stop. Lower-bound monitoring type.</div>
+              <div class="bar"><div id="stopFill" class="fill metric"></div></div>
+            </div>
+            <div id="stopValue" class="metric-value metric">0.0s</div>
+          </div>
+        </div>
+
+        <div class="ide-card">
+          <div class="section-title">IDE external gate</div>
+          <div class="kv"><span>Short-term reconstruction R_short</span><strong id="rShort">0.00</strong></div>
+          <div class="bar"><div id="rShortFill" class="fill ide"></div></div>
+          <div class="kv" style="margin-top:10px;"><span>Long-term degradation D_long</span><strong id="dLong">0.00</strong></div>
+          <div class="bar"><div id="dLongFill" class="fill ide"></div></div>
+          <div class="kv" style="margin-top:10px;"><span>Current boundary ratio R_now</span><strong id="rNow">0.00</strong></div>
+          <div class="bar"><div id="rNowFill" class="fill ide"></div></div>
+          <div class="kv" style="margin-top:12px;"><span>Upper bound τ_upper</span><strong id="tauUpper">1.00</strong></div>
+          <div class="kv"><span>Lower bound τ_lower</span><strong id="tauLower">1.00</strong></div>
+          <div class="kv"><span>Final decision</span><span id="decision" class="decision pass">PASS</span></div>
+          <div class="inline-note">
+            Not mixing with the legacy system means not embedding the equations inside the existing AI. Connections are not prohibited. The adapter receives the input, the IDE makes an independent judgment, and only the final output is allowed or rejected.
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="section-title">Danger sample</div>
+          <div id="dangerDisplay" class="danger-display safe">
+            <div id="dangerMain" class="danger-main">SAFE</div>
+            <div id="dangerSub" class="danger-sub">Danger-zone sample. It is below the threshold.</div>
+          </div>
+          <div class="slider-row" style="margin-top:14px;">
+            <div class="slider-head"><span>Danger-zone injection slider</span><span id="dangerInjectVal">0.00</span></div>
+            <input id="dangerInjectRange" type="range" min="0" max="1.4" value="0" step="0.01" />
+          </div>
+          <div class="small">This slider is for explanation only. It is an example injection that would not exist in an actual field implementation.</div>
+        </div>
+
+        <div class="spec-card">
+          <div class="section-title">Design policy</div>
+          <div class="small">
+            1. Treat camera, radar, and ego-motion as the three mandatory limits.<br/>
+            2. The five physical quantities are monitored separately, not as replacements.<br/>
+            3. The three subsystems interact, but are not compressed into a single truth value.<br/>
+            4. Place the IDE outside the existing control stack and let it receive input connections only.<br/>
+            5. Separate the outputs into PASS / DAMP / FALLBACK and DANGER display.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ctrl-grid">
+      <div class="control-group">
+        <h3>Scenario controls</h3>
+        <p>Deliberately create incompatible observations and deteriorating physical monitoring quantities, and observe how the IDE behaves outside the legacy stack.</p>
+        <div class="btn-row">
+          <button class="primary" data-scene="normal">Normal driving</button>
+          <button data-scene="approach">Approach hazard</button>
+          <button data-scene="glare">Backlight</button>
+          <button data-scene="rain">Heavy rain</button>
+          <button data-scene="ghost">Ghost reflection</button>
+          <button data-scene="drift">Ego-motion drift</button>
+          <button data-scene="mixed">Compound anomaly</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <h3>Parameters</h3>
+        <p>Adjust the upper and lower dampers, reconstruction strength, and danger-zone threshold. The structure is asymmetric: the lower side is sensitive, while the upper side is conservative.</p>
+        <div class="slider-row">
+          <div class="slider-head"><span>Upper damper</span><span id="upperVal">1.00</span></div>
+          <input id="upperRange" type="range" min="0.6" max="1.8" value="1.0" step="0.01" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-head"><span>Lower damper</span><span id="lowerVal">1.00</span></div>
+          <input id="lowerRange" type="range" min="0.4" max="1.4" value="1.0" step="0.01" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-head"><span>Short-term reconstruction sensitivity</span><span id="reconVal">0.55</span></div>
+          <input id="reconRange" type="range" min="0.10" max="0.95" value="0.55" step="0.01" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-head"><span>Long-term degradation memory</span><span id="degVal">0.15</span></div>
+          <input id="degRange" type="range" min="0.01" max="0.50" value="0.15" step="0.01" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-head"><span>DANGER threshold</span><span id="dangerThresholdVal">0.92</span></div>
+          <input id="dangerThresholdRange" type="range" min="0.55" max="1.15" value="0.92" step="0.01" />
+        </div>
+      </div>
+    </section>
+
+    <section class="log-panel">
+      <div class="log-head">
+        <div>
+          <div class="section-title" style="margin-bottom:4px;">Decision log</div>
+          <div class="small">Simultaneously display reconstruction from short-term logs and accumulation into long-term logs</div>
+        </div>
+        <button id="clearLog">ログ消去</button>
+      </div>
+      <div id="logBody" class="log-body"></div>
+    </section>
+
+    <section class="legend-grid">
+      <div class="legend-card">
+        <div class="legend-title">Three mandatory subsystems</div>
+        Camera, Radar, and IMU/Wheel are constitutive conditions. They are not targets for reduction, but the minimum bundle that forms the boundary.
+      </div>
+      <div class="legend-card">
+        <div class="legend-title">Five additional quantities</div>
+        前方障害物Distance、Relative speed、ヨーレート誤差、Lane confidence度、Stopping margin時間は別途監視します。
+      </div>
+      <div class="legend-card">
+        <div class="legend-title">IDE</div>
+        Instead of averaging and fusing them, it keeps disagreement and danger quantities at the connection boundary and decides only whether passage should be allowed.
+      </div>
+      <div class="legend-card">
+        <div class="legend-title">DANGER</div>
+        The warning lamp is an explanatory sample. It is separated from the control decision and visualizes the danger-zone display itself.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('systemCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const ui = {
+      camValue: document.getElementById('camValue'),
+      radarValue: document.getElementById('radarValue'),
+      imuValue: document.getElementById('imuValue'),
+      camFill: document.getElementById('camFill'),
+      radarFill: document.getElementById('radarFill'),
+      imuFill: document.getElementById('imuFill'),
+      distValue: document.getElementById('distValue'),
+      relValue: document.getElementById('relValue'),
+      yawValue: document.getElementById('yawValue'),
+      laneValue: document.getElementById('laneValue'),
+      stopValue: document.getElementById('stopValue'),
+      distFill: document.getElementById('distFill'),
+      relFill: document.getElementById('relFill'),
+      yawFill: document.getElementById('yawFill'),
+      laneFill: document.getElementById('laneFill'),
+      stopFill: document.getElementById('stopFill'),
+      rNow: document.getElementById('rNow'),
+      rShort: document.getElementById('rShort'),
+      dLong: document.getElementById('dLong'),
+      rNowFill: document.getElementById('rNowFill'),
+      rShortFill: document.getElementById('rShortFill'),
+      dLongFill: document.getElementById('dLongFill'),
+      tauUpper: document.getElementById('tauUpper'),
+      tauLower: document.getElementById('tauLower'),
+      decision: document.getElementById('decision'),
+      dangerDisplay: document.getElementById('dangerDisplay'),
+      dangerMain: document.getElementById('dangerMain'),
+      dangerSub: document.getElementById('dangerSub'),
+      upperRange: document.getElementById('upperRange'),
+      lowerRange: document.getElementById('lowerRange'),
+      reconRange: document.getElementById('reconRange'),
+      degRange: document.getElementById('degRange'),
+      dangerThresholdRange: document.getElementById('dangerThresholdRange'),
+      dangerInjectRange: document.getElementById('dangerInjectRange'),
+      upperVal: document.getElementById('upperVal'),
+      lowerVal: document.getElementById('lowerVal'),
+      reconVal: document.getElementById('reconVal'),
+      degVal: document.getElementById('degVal'),
+      dangerThresholdVal: document.getElementById('dangerThresholdVal'),
+      dangerInjectVal: document.getElementById('dangerInjectVal'),
+      logBody: document.getElementById('logBody')
+    };
+
+    const state = {
+      scene: 'normal',
+      t: 0,
+      cam: 0.3,
+      radar: 0.3,
+      imu: 0.3,
+      distance: 42,
+      relSpeed: 2.0,
+      yawError: 1.2,
+      laneConfidence: 0.92,
+      stopMargin: 4.4,
+      rNow: 0,
+      rShort: 0,
+      dLong: 0,
+      metricRisk: 0,
+      decision: 'PASS',
+      dangerActive: false,
+      shortMemory: [],
+      log: [],
+      upperDamper: 1.0,
+      lowerDamper: 1.0,
+      recon: 0.55,
+      deg: 0.15,
+      dangerThreshold: 0.92,
+      dangerInject: 0
+    };
+
+    const sceneNames = {
+      normal: 'Normal driving',
+      approach: 'Approach hazard',
+      glare: 'Backlight',
+      rain: 'Heavy rain',
+      ghost: 'Ghost reflection',
+      drift: 'Ego-motion drift',
+      mixed: 'Compound anomaly'
+    };
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function pulse(t, f, a) {
+      return Math.sin(t * f) * a;
+    }
+
+    function currentScenario(t) {
+      const base = 0.28 + 0.08 * Math.sin(t * 0.9);
+      let cam = base + pulse(t, 1.4, 0.06);
+      let radar = base + pulse(t + 0.7, 1.1, 0.04);
+      let imu = base + pulse(t + 1.3, 0.8, 0.03);
+      let distance = 42 + 6 * Math.sin(t * 0.5);
+      let relSpeed = 2.0 + 0.7 * Math.sin(t * 0.9);
+      let yawError = 1.2 + 0.5 * Math.sin(t * 0.7);
+      let laneConfidence = 0.92 + 0.03 * Math.sin(t * 0.8);
+      let stopMargin = 4.4 + 0.5 * Math.cos(t * 0.6);
+
+      switch (state.scene) {
+        case 'approach':
+          distance = 14 + 3 * Math.sin(t * 0.8);
+          relSpeed = 9.5 + 1.5 * Math.sin(t * 1.2);
+          yawError = 2.5 + 0.8 * Math.sin(t * 1.0);
+          laneConfidence = 0.84 + 0.04 * Math.sin(t * 0.8);
+          stopMargin = 1.2 + 0.25 * Math.cos(t * 1.0);
+          break;
+        case 'glare':
+          cam += 0.42 + 0.12 * Math.sin(t * 1.9);
+          distance = 30 + 3 * Math.sin(t * 0.6);
+          relSpeed = 5.0 + 0.9 * Math.sin(t * 1.0);
+          yawError = 2.1 + 0.5 * Math.sin(t * 0.8);
+          laneConfidence = 0.56 + 0.08 * Math.sin(t * 1.4);
+          stopMargin = 2.4 + 0.3 * Math.cos(t * 0.9);
+          radar += 0.05;
+          imu += 0.04;
+          break;
+        case 'rain':
+          cam += 0.22 + 0.04 * Math.sin(t * 2.1);
+          radar += 0.24 + 0.05 * Math.cos(t * 1.4);
+          imu += 0.03;
+          distance = 26 + 4 * Math.sin(t * 0.7);
+          relSpeed = 6.8 + 0.8 * Math.cos(t * 1.0);
+          yawError = 2.8 + 0.6 * Math.sin(t * 1.4);
+          laneConfidence = 0.61 + 0.06 * Math.sin(t * 1.1);
+          stopMargin = 1.9 + 0.25 * Math.cos(t * 0.8);
+          break;
+        case 'ghost':
+          cam += 0.05;
+          radar += 0.48 + 0.10 * Math.sin(t * 2.7);
+          imu += 0.06;
+          distance = 20 + 2 * Math.sin(t * 0.8);
+          relSpeed = 8.8 + 0.7 * Math.cos(t * 1.1);
+          yawError = 1.7 + 0.4 * Math.sin(t * 0.9);
+          laneConfidence = 0.79 + 0.04 * Math.sin(t * 0.6);
+          stopMargin = 1.8 + 0.2 * Math.cos(t * 0.7);
+          break;
+        case 'drift':
+          cam += 0.04;
+          radar += 0.06;
+          imu += 0.40 + 0.10 * Math.sin(t * 0.5);
+          distance = 24 + 5 * Math.sin(t * 0.7);
+          relSpeed = 6.0 + 0.6 * Math.sin(t * 1.0);
+          yawError = 6.5 + 1.0 * Math.sin(t * 0.9);
+          laneConfidence = 0.73 + 0.05 * Math.sin(t * 0.7);
+          stopMargin = 2.0 + 0.25 * Math.cos(t * 0.8);
+          break;
+        case 'mixed':
+          cam += 0.30 + 0.12 * Math.sin(t * 1.8);
+          radar += 0.35 + 0.09 * Math.cos(t * 2.2);
+          imu += 0.32 + 0.08 * Math.sin(t * 0.7);
+          distance = 10 + 2 * Math.sin(t * 0.9);
+          relSpeed = 12.5 + 1.6 * Math.sin(t * 1.1);
+          yawError = 8.4 + 1.3 * Math.sin(t * 1.2);
+          laneConfidence = 0.38 + 0.07 * Math.sin(t * 1.5);
+          stopMargin = 0.8 + 0.18 * Math.cos(t * 0.9);
+          break;
+        default:
+          break;
+      }
+
+      return {
+        cam: clamp(cam, 0, 1.4),
+        radar: clamp(radar, 0, 1.4),
+        imu: clamp(imu, 0, 1.4),
+        distance: clamp(distance, 0.5, 60),
+        relSpeed: clamp(relSpeed, 0, 20),
+        yawError: clamp(yawError, 0, 12),
+        laneConfidence: clamp(laneConfidence, 0, 1),
+        stopMargin: clamp(stopMargin, 0.2, 6)
+      };
+    }
+
+    function pushLog(type, text) {
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-GB', { hour12: false });
+      state.log.unshift({ time, type, text });
+      if (state.log.length > 40) state.log.pop();
+      renderLog();
+    }
+
+    function renderLog() {
+      ui.logBody.innerHTML = state.log.map(item => `
+        <div class="log-item">
+          <div class="log-time">${item.time}</div>
+          <div class="log-type ${item.type}">${item.type.toUpperCase()}</div>
+          <div>${item.text}</div>
+        </div>
+      `).join('');
+    }
+
+    function metricRisk(distance, relSpeed, yawError, laneConfidence, stopMargin) {
+      const rDist = clamp((18 - distance) / 18, 0, 1.4);
+      const rRel = clamp(relSpeed / 12, 0, 1.4);
+      const rYaw = clamp(yawError / 7.5, 0, 1.4);
+      const rLane = clamp((0.75 - laneConfidence) / 0.75, 0, 1.4);
+      const rStop = clamp((2.2 - stopMargin) / 2.2, 0, 1.4);
+      return {
+        rDist, rRel, rYaw, rLane, rStop,
+        composite: Math.max(rDist, rRel * 0.85, rYaw, rLane, rStop * 1.05)
+      };
+    }
+
+    function setDecision(rNow, rShort, dLong, metricComposite) {
+      const composite = Math.max(rNow, rShort * 0.92 + dLong * 0.45, metricComposite);
+      const prev = state.decision;
+      if (composite >= 1.0) {
+        state.decision = 'FALLBACK';
+      } else if (composite >= 0.72) {
+        state.decision = 'DAMP';
+      } else {
+        state.decision = 'PASS';
+      }
+      const dangerNow = composite >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
+      if (dangerNow !== state.dangerActive) {
+        state.dangerActive = dangerNow;
+        pushLog(dangerNow ? 'stop' : 'pass', dangerNow ? `DANGER ON: Composite=${composite.toFixed(2)} / Inject=${state.dangerInject.toFixed(2)}` : 'DANGER OFF');
+      }
+      if (prev !== state.decision) {
+        const type = state.decision === 'PASS' ? 'pass' : state.decision === 'DAMP' ? 'warn' : 'stop';
+        pushLog(type, `${sceneNames[state.scene]} / R_now=${rNow.toFixed(2)} / R_short=${rShort.toFixed(2)} / D_long=${dLong.toFixed(2)} / M=${metricComposite.toFixed(2)} -> ${state.decision}`);
+      }
+    }
+
+    function updateModel(dt) {
+      state.t += dt;
+      const s = currentScenario(state.t);
+      state.cam = s.cam;
+      state.radar = s.radar;
+      state.imu = s.imu;
+      state.distance = s.distance;
+      state.relSpeed = s.relSpeed;
+      state.yawError = s.yawError;
+      state.laneConfidence = s.laneConfidence;
+      state.stopMargin = s.stopMargin;
+
+      const pair1 = Math.abs(state.cam - state.radar);
+      const pair2 = Math.abs(state.cam - state.imu);
+      const pair3 = Math.abs(state.radar - state.imu);
+      const disagreement = (pair1 + pair2 + pair3) / 3;
+
+      const tauUpper = state.upperDamper + Math.max(0, state.rShort - 0.4) * 0.35;
+      const tauLower = Math.max(0.25, state.lowerDamper - Math.max(0, state.dLong - 0.25) * 0.20);
+
+      state.rNow = Math.max(disagreement / tauUpper, 0);
+
+      state.shortMemory.push(state.rNow);
+      if (state.shortMemory.length > 24) state.shortMemory.shift();
+      const recentAvg = state.shortMemory.reduce((a, b) => a + b, 0) / state.shortMemory.length;
+      state.rShort = lerp(state.rShort, recentAvg, state.recon);
+      state.dLong = lerp(state.dLong, state.rShort, state.deg * 0.12);
+
+      const mr = metricRisk(state.distance, state.relSpeed, state.yawError, state.laneConfidence, state.stopMargin);
+      state.metricRisk = mr.composite;
+
+      setDecision(state.rNow, state.rShort, state.dLong, state.metricRisk);
+
+      ui.camValue.textContent = state.cam.toFixed(2);
+      ui.radarValue.textContent = state.radar.toFixed(2);
+      ui.imuValue.textContent = state.imu.toFixed(2);
+      ui.camFill.style.width = `${clamp(state.cam / 1.4, 0, 1) * 100}%`;
+      ui.radarFill.style.width = `${clamp(state.radar / 1.4, 0, 1) * 100}%`;
+      ui.imuFill.style.width = `${clamp(state.imu / 1.4, 0, 1) * 100}%`;
+
+      ui.distValue.textContent = `${state.distance.toFixed(1)}m`;
+      ui.relValue.textContent = `${state.relSpeed.toFixed(1)}m/s`;
+      ui.yawValue.textContent = `${state.yawError.toFixed(1)}°/s`;
+      ui.laneValue.textContent = `${Math.round(state.laneConfidence * 100)}%`;
+      ui.stopValue.textContent = `${state.stopMargin.toFixed(1)}s`;
+      ui.distFill.style.width = `${clamp((60 - state.distance) / 60, 0, 1) * 100}%`;
+      ui.relFill.style.width = `${clamp(state.relSpeed / 20, 0, 1) * 100}%`;
+      ui.yawFill.style.width = `${clamp(state.yawError / 12, 0, 1) * 100}%`;
+      ui.laneFill.style.width = `${clamp(1 - state.laneConfidence, 0, 1) * 100}%`;
+      ui.stopFill.style.width = `${clamp((6 - state.stopMargin) / 6, 0, 1) * 100}%`;
+
+      ui.rNow.textContent = state.rNow.toFixed(2);
+      ui.rShort.textContent = state.rShort.toFixed(2);
+      ui.dLong.textContent = state.dLong.toFixed(2);
+      ui.rNowFill.style.width = `${clamp(state.rNow / 1.2, 0, 1) * 100}%`;
+      ui.rShortFill.style.width = `${clamp(state.rShort / 1.2, 0, 1) * 100}%`;
+      ui.dLongFill.style.width = `${clamp(state.dLong / 1.2, 0, 1) * 100}%`;
+      ui.tauUpper.textContent = tauUpper.toFixed(2);
+      ui.tauLower.textContent = tauLower.toFixed(2);
+
+      ui.decision.className = 'decision ' + (state.decision === 'PASS' ? 'pass' : state.decision === 'DAMP' ? 'warn' : 'stop');
+      ui.decision.textContent = state.decision;
+
+      if (state.dangerActive) {
+        ui.dangerDisplay.className = 'danger-display stop';
+        ui.dangerMain.textContent = 'DANGER';
+        ui.dangerSub.textContent = 'Danger-zone sample. Threshold exceeded or forced injection is active.';
+      } else if (Math.max(state.metricRisk, state.rNow, state.rShort) >= state.dangerThreshold * 0.8) {
+        ui.dangerDisplay.className = 'danger-display warn';
+        ui.dangerMain.textContent = 'WARNING';
+        ui.dangerSub.textContent = 'Approaching the danger zone. Boundary margin is getting thin.';
+      } else {
+        ui.dangerDisplay.className = 'danger-display safe';
+        ui.dangerMain.textContent = 'SAFE';
+        ui.dangerSub.textContent = 'Danger-zone sample. It is below the threshold.';
+      }
+    }
+
+    function drawBox(x, y, w, h, color, title, bodyLines) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 18);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = color;
+      ctx.font = '700 20px Inter, Noto Sans JP, sans-serif';
+      ctx.fillText(title, x + 16, y + 32);
+      ctx.fillStyle = '#cdd9e5';
+      ctx.font = '13px Inter, Noto Sans JP, sans-serif';
+      bodyLines.forEach((line, i) => ctx.fillText(line, x + 16, y + 58 + i * 20));
+      ctx.restore();
+    }
+
+    function arrow(x1, y1, x2, y2, color, label) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      const ang = Math.atan2(y2 - y1, x2 - x1);
+      const size = 10;
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - Math.cos(ang - 0.45) * size, y2 - Math.sin(ang - 0.45) * size);
+      ctx.lineTo(x2 - Math.cos(ang + 0.45) * size, y2 - Math.sin(ang + 0.45) * size);
+      ctx.closePath();
+      ctx.fill();
+      if (label) {
+        ctx.font = '12px Inter, Noto Sans JP, sans-serif';
+        ctx.fillStyle = '#9ab0c5';
+        ctx.fillText(label, (x1 + x2) / 2 - 26, (y1 + y2) / 2 - 8);
+      }
+      ctx.restore();
+    }
+
+    function drawArchitecture() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      ctx.font = '700 14px Inter, Noto Sans JP, sans-serif';
+      ctx.fillText('No internal mixing into the legacy AI stack / connections only / physical quantities monitored separately', 22, 24);
+
+      drawBox(30, 60, 220, 115, '#4fd1ff', 'Camera', [
+        'Semantic interpretation of the external world',
+        'Signals / signs / pedestrians / lane markings',
+        `State = ${state.cam.toFixed(2)}`
+      ]);
+      drawBox(30, 205, 220, 115, '#ffb14f', 'Radar', [
+        'DistanceとRelative speed',
+        'Relatively strong in bad weather',
+        `State = ${state.radar.toFixed(2)}`
+      ]);
+      drawBox(30, 350, 220, 115, '#7dff9b', 'IMU / Wheel', [
+        'Ego-motion / posture / turning',
+        'Deterministic internal vehicle information',
+        `State = ${state.imu.toFixed(2)}`
+      ]);
+
+      drawBox(310, 60, 250, 170, '#b58cff', 'Physical Metrics', [
+        `Distance = ${state.distance.toFixed(1)}m`,
+        `Relative speed = ${state.relSpeed.toFixed(1)}m/s`,
+        `Yaw error = ${state.yawError.toFixed(1)}°/s`,
+        `Lane confidence = ${Math.round(state.laneConfidence * 100)}%`,
+        `Stopping margin = ${state.stopMargin.toFixed(1)}s`
+      ]);
+
+      drawBox(310, 285, 250, 120, '#a7bbcf', 'Adapter Layer', [
+        'Handles input connections only',
+        'Keeps differences and danger quantities without averaging',
+        'Converts from legacy formats'
+      ]);
+
+      drawBox(310, 435, 250, 150, '#ff5f7a', 'NRA-IDE Gate', [
+        `R_now = ${state.rNow.toFixed(2)}`,
+        `R_short = ${state.rShort.toFixed(2)}`,
+        `D_long = ${state.dLong.toFixed(2)}`,
+        `Metric = ${state.metricRisk.toFixed(2)}`
+      ]);
+
+      drawBox(640, 100, 230, 130, '#8ea4b8', 'Legacy Planner / Control', [
+        'Legacy planning / control',
+        'Internal logic is not modified',
+        'Continues producing planned values'
+      ]);
+
+      drawBox(640, 285, 230, 170, state.decision === 'FALLBACK' ? '#ff5f7a' : state.decision === 'DAMP' ? '#ffd166' : '#7dff9b', 'Final Safety Gate', [
+        'Only the IDE has final veto power',
+        'PASS: allow through',
+        'DAMP: attenuate output',
+        'FALLBACK: decelerate / stop'
+      ]);
+
+      drawBox(640, 485, 230, 100, state.dangerActive ? '#ff5f7a' : '#55657a', 'Danger Text', [
+        `Threshold = ${state.dangerThreshold.toFixed(2)}`,
+        `Inject = ${state.dangerInject.toFixed(2)}`,
+        state.dangerActive ? 'Danger-zone sample: DANGER displayed' : 'Danger-zone sample: SAFE displayed'
+      ]);
+
+      arrow(250, 115, 310, 300, '#4fd1ff', 'connect');
+      arrow(250, 255, 310, 315, '#ffb14f', 'connect');
+      arrow(250, 400, 310, 330, '#7dff9b', 'connect');
+      arrow(435, 230, 435, 285, '#b58cff', 'observe');
+      arrow(435, 405, 435, 435, '#ff5f7a', 'reconstruct');
+      arrow(560, 340, 640, 345, '#ff5f7a', 'allow / reject');
+      arrow(755, 230, 755, 285, '#8ea4b8', 'legacy output');
+      arrow(560, 510, 640, 535, '#ff5f7a', 'alert');
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,95,122,0.08)';
+      ctx.strokeStyle = 'rgba(255,95,122,0.4)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.roundRect(286, 415, 298, 182, 22);
+      ctx.fill();
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#ff90a3';
+      ctx.font = '700 13px Inter, Noto Sans JP, sans-serif';
+      ctx.fillText('IDE independent domain', 304, 438);
+      ctx.restore();
+    }
+
+    let last = performance.now();
+    function loop(now) {
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      updateModel(dt);
+      drawArchitecture();
+      requestAnimationFrame(loop);
+    }
+
+    function syncControls() {
+      state.upperDamper = parseFloat(ui.upperRange.value);
+      state.lowerDamper = parseFloat(ui.lowerRange.value);
+      state.recon = parseFloat(ui.reconRange.value);
+      state.deg = parseFloat(ui.degRange.value);
+      state.dangerThreshold = parseFloat(ui.dangerThresholdRange.value);
+      state.dangerInject = parseFloat(ui.dangerInjectRange.value);
+      ui.upperVal.textContent = state.upperDamper.toFixed(2);
+      ui.lowerVal.textContent = state.lowerDamper.toFixed(2);
+      ui.reconVal.textContent = state.recon.toFixed(2);
+      ui.degVal.textContent = state.deg.toFixed(2);
+      ui.dangerThresholdVal.textContent = state.dangerThreshold.toFixed(2);
+      ui.dangerInjectVal.textContent = state.dangerInject.toFixed(2);
+    }
+
+    ['input', 'change'].forEach(evt => {
+      ui.upperRange.addEventListener(evt, syncControls);
+      ui.lowerRange.addEventListener(evt, syncControls);
+      ui.reconRange.addEventListener(evt, syncControls);
+      ui.degRange.addEventListener(evt, syncControls);
+      ui.dangerThresholdRange.addEventListener(evt, syncControls);
+      ui.dangerInjectRange.addEventListener(evt, syncControls);
+    });
+
+    document.querySelectorAll('[data-scene]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.scene = btn.dataset.scene;
+        pushLog('pass', `Scenario switched: ${sceneNames[state.scene]}`);
+      });
+    });
+
+    document.getElementById('clearLog').addEventListener('click', () => {
+      state.log = [];
+      renderLog();
+    });
+
+    syncControls();
+    pushLog('pass', 'Startup: loaded mandatory boundary configuration + physical monitoring quantities + DANGER text display');
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
