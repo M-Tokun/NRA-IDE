@@ -66,6 +66,6 @@
   "references": {
     "theory_document": "./THEORY.md",
     "ethics": "./ETHICS.md",
-    "papers_directory": "./papers/"
+    "_directory": "./figures/TOP_sandwich.png"
   }
 }
