@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 <p align="center">
-  <img src="./docs/NRA-IDE_LOGO.jpg" width="400" alt="NRA-IDE LOGO">
+  <img src="./docs/NRA-IDE_LOGO.jpg" width="700" alt="NRA-IDE LOGO">
 </p>
 
 ---
