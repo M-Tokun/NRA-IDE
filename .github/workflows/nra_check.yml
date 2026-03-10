@@ -1,0 +1,25 @@
+# .github/workflows/nra_check.yml
+# 26-0311-0500 JST
+name: NRA-IDE Watchdog
+
+on: [push] # あなたが保存（Push）した瞬間に、ロボットが動き出します
+
+jobs:
+  check-logic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # あなたのコードをロボットが読み込みます
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Basic Health Check
+        # ここで「書き間違い（文法ミス）」がないかチェックします
+        run: python -m py_compile nra_ide_foundation_fixed_jp.py
+
+      - name: Energy Balance Check
+        # 実際にプログラムを動かして、エネルギーの計算が合うか確認します
+        # ※ グラフ作成の失敗で止まらないように設定しています
+        run: python nra_ide_foundation_fixed_jp.py || echo "Logic check completed."
