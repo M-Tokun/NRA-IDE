@@ -1,9 +1,12 @@
-
 # NRA‑IDE: Nomological Ring Axioms – Intensional Dynamics Engine
-**律環公理 – 内包性動力学エンジン**
+
+### **律環公理 – 内包性動力学エンジン**
+
+[![CI](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml/badge.svg)](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 <p align="center">
-  <img src="./docs/NRA-IDE_git.jpg" width="700" alt="NRA-IDE LOGO">
+  <img src="./docs/NRA-IDE_LOGO.jpg" width="700" alt="NRA-IDE LOGO">
 </p>
 
 ---
@@ -29,17 +32,17 @@ Here, "generation" does not imply creation from nothing, but refers to the manif
 
 Instead of relying on linear computation (continuity, distance, meaning), this system describes the world through physical and structural constraints.
 
-1.  **Time**
-    *   Time is not treated as an independent "causal variable."
-    *   Time is described as the **ordering of state transitions**.
+1. **Time**
+   - Time is not treated as an independent "causal variable."
+   - Time is described as the **ordering of state transitions**.
 
-2.  **Distance**
-    *   Distance is not treated as a "causal driver."
-    *   Distance is recorded as an **observational result** of state change.
+2. **Distance**
+   - Distance is not treated as a "causal driver."
+   - Distance is recorded as an **observational result** of state change.
 
-3.  **Tension**
-    *   Refers to the **restoring tendency** arising from constraint boundaries.
-    *   It is treated as a structural constraint, which may manifest as physical tension.
+3. **Tension**
+   - Refers to the **restoring tendency** arising from constraint boundaries.
+   - It is treated as a structural constraint, which may manifest as physical tension.
 
 ---
 
@@ -49,17 +52,32 @@ Instead of relying on linear computation (continuity, distance, meaning), this s
 **It is an "Intensional Dynamics Engine" that implements the Nomological Ring Axioms.**
 
 - **No Meaning Generation**: The IDE does not generate "meaning"; it evaluates structural states.
-- **Physical Explainability**: It calculates tension structures, threshold dynamics, and closed-world constraints—concepts that linear computation cannot handle—in a physically explainable manner.
+- **Physical Explainability**: It calculates tension structures, threshold dynamics, and closed-world constraints in a physically explainable manner.
+
+---
+
+## Why NRA-IDE Does Not Accumulate Error
+
+A mechanical clock keeps accurate time not because its gears are perfect, but because its
+**escapement mechanism advances in discrete, complete steps** — no fractional remainder carries forward.
+
+NRA-IDE applies this same principle. Rather than processing state transitions as continuous floating-point values,
+the IDE operates on **integer phase locks**. Each step is structurally complete. There is no residual to inherit.
+
+> **Error does not accumulate — not because it is corrected,
+> but because the system is defined in a way that leaves no room for it to arise.**
+
+For implementation details (Integer Phase Lock / Residual Discard), see [`nra-core/`](./nra-core/).
 
 ---
 
 ## Structural Ratio & Threshold System
 
-Unlike conventional black-box AI, this system uses **Thresholds** to make decision grounds physically explainable. The structural state is evaluated using the following ratio:
+Unlike conventional black-box AI, this system uses **Thresholds** to make decision grounds physically explainable.
 
-\[
+$$
 R = \frac{\delta}{\tau}
-\]
+$$
 
 - **δ (delta)**: Deviation from constraints (fluctuation/displacement)
 - **τ (tau)**: Tolerance boundary (thickness of tension)
@@ -73,18 +91,16 @@ R = \frac{\delta}{\tau}
 | **R ≥ 1.0** | **STOP** | Structural limit reached. **AI ceases decision-making and output.** |
 
 ### Fail-Closed Principle
-In this system, "Fail-Closed" does not mean a simple system crash.
+
+"Fail-Closed" in this system does not mean a simple system crash.
 It refers to a design that **suppresses output while maintaining structural continuity.**
-When R ≥ 1.0, the system stops generating output, and final ethical or situational judgment is delegated to a human operator.
+When R ≥ 1.0, the system stops generating output, and final judgment is delegated to a human operator.
 
 ---
 
 ## 📄 Theoretical Background
 
-For the foundational theoretical framework of NRA-IDE, please refer to the following documents:
-
-- **[Foundational Thesis: Nomological Ring Axioms and the Intensional Dynamics Engine](./theory/NRA-IDE_Foundational_Thesis.md)**  
-  *(Japanese/English Bilingual)*  
+- **[Foundational Thesis](./theory/Foundational_Thesis.md)** *(Japanese/English Bilingual)*  
   A short thesis discussing the description of state transitions via structural thresholds.
 
 - **[Theory Definition (THEORY.md)](./theory/THEORY.md)**  
@@ -103,7 +119,7 @@ The foundational implementation is centralized in `nra-core/`.
 
 ---
 
-# 📂 Major Projects
+## 📂 Major Projects
 
 ### 💎 NRA‑TCM Parser (Text Crystallization Method)
 **[./NRA-TCM Parser/](./NRA-TCM%20Parser/)**
@@ -132,7 +148,7 @@ The foundational implementation is centralized in `nra-core/`.
 
 ---
 
-# 🔍 Keywords / Topics
+## 🔍 Keywords / Topics
 
 `ai-safety` `medical-ai` `text-mining` `crystallization`  
 `cancer-treatment` `deterministic-computing` `fpga`  
@@ -142,33 +158,29 @@ The foundational implementation is centralized in `nra-core/`.
 
 ---
 
-# 📜 License
+## 📜 License
 
 This project is provided under the **MIT License**.
 
 - Free to use, modify, and distribute for research, personal, and commercial purposes.
 - Attribution is required in all redistributed materials.
-  Copyright © 2026 M‑Tokuni
+ © 2026 M‑Tokuni
 
 See **[LICENSE](./LICENSE)** for full terms.
 
 ---
 
-## ⚠️ Notice / Caution
-**Please make sure to read the Ethical Guidelines (prohibitions on human‑rights violations, criminal use, etc.) before using this project.**
+## ⚠️ Notice
 
-👉 Ethical Guidelines: **[ETHICS.md](./theory/ETHICS.md)**
+**Before using this project, you must read the Ethical Guidelines.**  
+Prohibited uses (weapons, surveillance, inverse derivation Π⁻¹, unverified safety-critical systems, etc.)
+are defined independently of the license:
 
----
-
-### Commercial Use
-
-Commercial use is permitted under the MIT License.  
-Notification is not required; however, if possible, the author would appreciate a brief message via GitHub Issues.
+👉 **[ETHICS.md](./theory/ETHICS.md)**
 
 ---
 
-# 📖 Citation
+## 📖 Citation
 
 M‑Tokuni (2026).  
 **NRA‑IDE: Nomological Ring Axioms – Intensional Dynamics Engine.**  
@@ -177,14 +189,9 @@ GitHub. https://github.com/M-Tokun/NRA-IDE
 ---
 
 <p align="center">
-  <strong>Status: Lighthouse</strong><br>
+  <strong>Status: Lighthouse</strong>
 </p>
 
 ---
----
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
-
-
-
-
