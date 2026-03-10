@@ -667,7 +667,8 @@ if __name__ == "__main__":
     print(f"Energy Conserved: {token.ledger.is_conserved(tol=1e-4)}")
     obs.print_table()
 
-    PLOT = "nra_foundation_plot.png"
+    # 363行目付近をこのように書き換えます
+    PLOT = "nra_foundation_plot_2026-02-20_2355.png"
     obs.plot(PLOT, threshold=0.8)
     print(f"\n=== Completed [{jst_now()}] ===")
 ```
