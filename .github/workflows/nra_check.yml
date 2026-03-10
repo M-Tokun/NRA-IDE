@@ -1,13 +1,14 @@
 # .github/workflows/nra_check.yml
+# 26-0311-0515 JST
 name: NRA-IDE Watchdog
 
-on: [push]
+on: [push] # 保存した瞬間にロボットが動き出します
 
 jobs:
   check-logic:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # あなたのコードを読み込みます
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -15,9 +16,9 @@ jobs:
           python-version: '3.10'
 
       - name: Install Tools
-        # グラフを描くための道具をロボットに渡します
+        # ここが一番大事！グラフを描くための道具をロボットに渡します
         run: pip install matplotlib
 
       - name: Energy Balance Check
-        # これで「道具がない！」と怒られずに、エネルギー計算まで完遂できます
+        # 計算を実行します。道具が揃ったので、今度は完遂できるはずです
         run: python nra_ide_foundation_fixed_jp.py
