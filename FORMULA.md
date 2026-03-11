@@ -1,25 +1,29 @@
-# NRA-IDE 定義式（基礎式）
+# NRA‑IDE 定義式（基礎式）
 <!-- FORMULA.md | 2026-03-08 00:52 JST -->
 Ver 1.00
+
 ---
 
 ## 定義式 1　基本判定式
 
 $$
-\displaystyle R = \frac{\delta}{\tau}
+\displaystyle
+R = \frac{\delta}{\tau}
 $$
 
 | 記号 | 意味 |
 |------|------|
-| δ（デルタ） | 制約からのズレ |
-| τ（タウ） | 設計時に決めた許容幅 |
-| R | その比率 |
+| δ（デルタ） | 制約からのズレ（偏差） |
+| τ（タウ） | 設計時に決めた許容幅（厚み） |
+| R | 構造比率 |
 
-R が 1.0 を超えた瞬間に構造限界。出力を止める。
+**R が 1.0 を超えた瞬間に構造限界。出力を停止する。**
 
 ---
 
-## 定義式 2　二重ゆらぎ式（動的τ）
+## 定義式 2　二重ゆらぎ式（動的 τ）
+
+### 上側ゆらぎ（拡大方向）
 
 $$
 \displaystyle
@@ -28,12 +32,16 @@ $$
 + (1 - \alpha_u) \cdot \mathrm{EMA}_{\text{upper}}(n-1)
 $$
 
+### 下側ゆらぎ（縮小方向）
+
 $$
 \displaystyle
 \mathrm{EMA}_{\text{lower}}(n)
 = \alpha_l \cdot \delta_l
 + (1 - \alpha_l) \cdot \mathrm{EMA}_{\text{lower}}(n-1)
 $$
+
+### 動的 τ（非対称構造）
 
 $$
 \displaystyle
@@ -49,6 +57,8 @@ $$
 \quad \text{（縮小方向）}
 $$
 
+### 最終判定式（非対称二重比率）
+
 $$
 \displaystyle
 R = \max\!\left(
@@ -57,11 +67,13 @@ R = \max\!\left(
 \right)
 $$
 
-
-上限側のτは拡大し、下限側のτは縮小する。この非対称性が構造の核心。
+**上限側の τ は拡大し、下限側の τ は縮小する。  
+この非対称性こそが NRA‑IDE の構造的核心である。**
 
 ---
 
-*これ以外の前提をこの式は持たない。*
+*これ以外の前提をこの式は持たない。  
+NRA‑IDE の構造比率は、常にこの閉じた世界の中で完結する。*
 
-**Copyright (c) 2026 M-Tokuni — Nomological Ring Axioms / Intensional Dynamics Engine**
+**Copyright (c) 2026  
+M‑Tokuni — Nomological Ring Axioms / Intensional Dynamics Engine**
