@@ -11,6 +11,18 @@
 
 ---
 
+## 📄 ドキュメント
+
+| ファイル | 内容 |
+|---------|------|
+| [FORMULA.md](./FORMULA.md) | 定義式 — R = δ/τ および二重ゆらぎ式 |
+| [THEORY.md](./theory/THEORY.md) | 核公理と構造的世界観 |
+| [Foundational_Thesis.md](./theory/Foundational_Thesis.md) | 理論論文（日本語 + 英訳） |
+| [ETHICS.md](./theory/ETHICS.md) | 倫理声明 |
+| [axioms.json](./theory/axioms.json) | 機械可読な公理定義 |
+
+---
+
 ## 🌍 For English Speakers
 
 **Please see [README.md](./README.md) for English documentation.**
