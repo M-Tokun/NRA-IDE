@@ -10,6 +10,18 @@
 
 ---
 
+## 📄 Documents
+
+| File | Description |
+|------|-------------|
+| [FORMULA.md](./FORMULA.md) | Fundamental equations — R = δ/τ and Dual-Fluctuation Formula |
+| [THEORY.md](./theory/THEORY.md) | Core axiom and structural worldview |
+| [Foundational_Thesis.md](./theory/Foundational_Thesis.md) | Full theoretical paper (JP + EN) |
+| [ETHICS.md](./theory/ETHICS.md) | Ethical statement |
+| [axioms.json](./theory/axioms.json) | Machine-readable axiom definitions |
+
+---
+
 ## 🌏 For Japanese Speakers
 
 **日本語版ドキュメントは [README_JP.md](./README_JP.md) をご覧ください。**
@@ -69,9 +81,13 @@ the IDE operates on **integer phase locks**. Each step is structurally complete.
 
 Unlike conventional black-box AI, this system uses **Thresholds** to make decision grounds physically explainable.
 
+<p align="center">
+
 $$
-R = \frac{\delta}{\tau}
+\displaystyle R = \frac{\delta}{\tau}
 $$
+
+</p>
 
 - **δ (delta)**: Deviation from constraints (fluctuation/displacement)
 - **τ (tau)**: Tolerance boundary (thickness of tension)
@@ -98,4 +114,3 @@ See **[LICENSE](./LICENSE)** for full terms.
 ---
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
-
