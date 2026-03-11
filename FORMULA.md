@@ -1,6 +1,6 @@
 # NRA‑IDE 定義式（基礎式） / NRA‑IDE Fundamental Equations
-<!-- FORMULA.md | 2026-03-08 00:52 JST -->
-Ver 1.00
+Ver 1.00  
+<!-- FORMULA.md | 2026-03-08 -->
 
 ---
 
@@ -12,20 +12,17 @@ $$
 R = \frac{\delta}{\tau}
 $$
 
-| 記号 | 意味 |
-|------|------|
-| δ（デルタ） | 制約からのズレ（偏差） |
-| τ（タウ） | 設計時に決めた許容幅（厚み） |
-| R | 構造比率 |
+### 日本語（Japanese）
+- **δ（デルタ）**：制約からのズレ（偏差）  
+- **τ（タウ）**：設計時に決めた許容幅（厚み）  
+- **R**：構造比率  
+- **R が 1.0 を超えた瞬間に構造限界。出力を停止する。**
 
-| Symbol | Meaning |
-|--------|---------|
-| δ (delta) | Deviation from constraint |
-| τ (tau) | Designed tolerance boundary |
-| R | Structural Ratio |
-
-**R が 1.0 を超えた瞬間に構造限界。出力を停止する。**  
-**When R exceeds 1.0, the structure reaches its limit and output must stop.**
+### English
+- **δ (delta)**: deviation from the constraint  
+- **τ (tau)**: designed tolerance boundary  
+- **R**: structural ratio  
+- **When R exceeds 1.0, the structure reaches its limit and output must stop.**
 
 ---
 
@@ -44,8 +41,11 @@ $$
 + (1 - \alpha_u) \cdot \mathrm{EMA}_{\text{upper}}(n-1)
 $$
 
-**上側 EMA は拡大方向の偏差を平滑化する。**  
-**The upper EMA smooths deviations in the expansion direction.**
+### 日本語  
+上側 EMA は **拡大方向の偏差** を平滑化する。
+
+### English  
+The upper EMA smooths **deviations in the expansion direction**.
 
 ---
 
@@ -59,8 +59,11 @@ $$
 + (1 - \alpha_l) \cdot \mathrm{EMA}_{\text{lower}}(n-1)
 $$
 
-**下側 EMA は縮小方向の偏差を平滑化する。**  
-**The lower EMA smooths deviations in the contraction direction.**
+### 日本語  
+下側 EMA は **縮小方向の偏差** を平滑化する。
+
+### English  
+The lower EMA smooths **deviations in the contraction direction**.
 
 ---
 
@@ -81,11 +84,15 @@ $$
 \quad \text{（縮小方向）}
 $$
 
-**上限側の τ は拡大し、下限側の τ は縮小する。  
-この非対称性こそが NRA‑IDE の構造的核心である。**
+### 日本語  
+- 上限側の τ は **拡大** し、  
+- 下限側の τ は **縮小** する。  
+この非対称性こそが NRA‑IDE の構造的核心である。
 
-**The upper τ expands while the lower τ contracts.  
-This asymmetry is the structural core of NRA‑IDE.**
+### English  
+- The upper τ **expands**,  
+- The lower τ **contracts**.  
+This asymmetry is the structural core of NRA‑IDE.
 
 ---
 
@@ -100,8 +107,11 @@ R = \max\!\left(
 \right)
 $$
 
-**この式は閉じた世界で完結し、他の前提を必要としない。**  
-**This formula is self‑contained and requires no external assumptions.**
+### 日本語  
+この式は **閉じた世界で完結** し、他の前提を必要としない。
+
+### English  
+This formula is **self‑contained** and requires no external assumptions.
 
 ---
 
