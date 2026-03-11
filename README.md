@@ -85,7 +85,7 @@ This project is provided under the **MIT License**.
 
 - Free to use, modify, and distribute for research, personal, and commercial purposes.
 - Attribution is required in all redistributed materials.
- © 2026 M‑Tokuni
+Copyright (c) 2026 M‑Tokuni
 
 See **[LICENSE](./LICENSE)** for full terms.
 
@@ -98,3 +98,4 @@ See **[LICENSE](./LICENSE)** for full terms.
 ---
 
 [![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
+
