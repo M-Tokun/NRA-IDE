@@ -20,6 +20,7 @@
 | [Foundational_Thesis.md](./theory/Foundational_Thesis.md) | 理論論文（日本語 + 英訳） |
 | [ETHICS.md](./theory/ETHICS.md) | 倫理声明 |
 | [axioms.json](./theory/axioms.json) | 機械可読な公理定義 |
+| [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | ボックス・サンドイッチ・アーキテクチャ — LLM統合のための構造分離仕様 |
 
 ---
 
