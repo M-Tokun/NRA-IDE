@@ -22,24 +22,30 @@ R が 1.0 を超えた瞬間に構造限界。出力を止める。
 ## 定義式 2　二重ゆらぎ式（動的τ）
 
 $$
-\displaystyle \mathrm{EMA}_{\text{upper}}(n)
-  = \alpha_u \cdot \delta_u
-  + (1 - \alpha_u) \cdot \mathrm{EMA}_{\text{upper}}(n-1)
+\displaystyle
+\mathrm{EMA}_{\text{upper}}(n)
+= \alpha_u \cdot \delta_u
++ (1 - \alpha_u) \cdot \mathrm{EMA}_{\text{upper}}(n-1)
 $$
 
 $$
-\displaystyle \mathrm{EMA}_{\text{lower}}(n)
-  = \alpha_l \cdot \delta_l
-  + (1 - \alpha_l) \cdot \mathrm{EMA}_{\text{lower}}(n-1)
+\displaystyle
+\mathrm{EMA}_{\text{lower}}(n)
+= \alpha_l \cdot \delta_l
++ (1 - \alpha_l) \cdot \mathrm{EMA}_{\text{lower}}(n-1)
 $$
 
 $$
-\displaystyle \tau_{\text{upper}} = \tau \cdot f\!\bigl(\mathrm{EMA}_{\text{upper}}\bigr)
+\displaystyle
+\tau_{\text{upper}}
+= \tau \cdot f\!\bigl(\mathrm{EMA}_{\text{upper}}\bigr)
 \quad \text{（拡大方向）}
 $$
 
 $$
-\displaystyle \tau_{\text{lower}} = \tau \cdot g\!\bigl(\mathrm{EMA}_{\text{lower}}\bigr)
+\displaystyle
+\tau_{\text{lower}}
+= \tau \cdot g\!\bigl(\mathrm{EMA}_{\text{lower}}\bigr)
 \quad \text{（縮小方向）}
 $$
 
@@ -50,6 +56,7 @@ R = \max\!\left(
   \frac{\delta_{\text{lower}}}{\tau_{\text{lower}}}
 \right)
 $$
+
 
 上限側のτは拡大し、下限側のτは縮小する。この非対称性が構造の核心。
 
