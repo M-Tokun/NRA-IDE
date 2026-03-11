@@ -19,6 +19,7 @@
 | [Foundational_Thesis.md](./theory/Foundational_Thesis.md) | Full theoretical paper (JP + EN) |
 | [ETHICS.md](./theory/ETHICS.md) | Ethical statement |
 | [axioms.json](./theory/axioms.json) | Machine-readable axiom definitions |
+| [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | Box Sandwich Architecture — structural isolation spec for LLM integration |
 
 ---
 
