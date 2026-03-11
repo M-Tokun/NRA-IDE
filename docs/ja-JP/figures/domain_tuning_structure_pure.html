@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Tuning - Structure Pure 100%</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #00ff88;
+            font-size: 24px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+        
+        /* R軸（横軸）*/
+        .r-axis {
+            position: relative;
+            height: 60px;
+            background: linear-gradient(to right, 
+                #001a0d 0%, 
+                #002211 40%, 
+                #332200 70%, 
+                #220000 100%);
+            border: 1px solid #333;
+            margin-bottom: 40px;
+        }
+        .r-label {
+            position: absolute;
+            top: -30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        .r-marker {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #666;
+            top: 0;
+        }
+        .r-marker-label {
+            position: absolute;
+            bottom: -25px;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #aaa;
+        }
+        .zone-label {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px 10px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid;
+        }
+        
+        /* Zone別の配色（構造区分のみ）*/
+        .zone-a { border-color: #003311; color: #00ff88; }
+        .zone-b { border-color: #443300; color: #ffcc00; }
+        .zone-c { border-color: #330011; color: #ff4444; }
+        
+        /* Domain Tuning パラメータ表示 */
+        .domain-section {
+            margin-top: 60px;
+        }
+        .domain-title {
+            font-size: 20px;
+            color: #00ff88;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .domain-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 20px;
+        }
+        .domain-name {
+            font-size: 18px;
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #0a0a0a;
+            border-left: 3px solid #00ff88;
+        }
+        .param-label {
+            color: #888;
+            font-size: 14px;
+        }
+        .param-value {
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* 構造的説明 */
+        .structure-note {
+            background: #0d1a0d;
+            border: 1px solid #003311;
+            border-left: 4px solid #00ff88;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .structure-note h3 {
+            color: #00ff88;
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .structure-note ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .structure-note li {
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+        .forbidden {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        
+        /* Fail-Closed表示 */
+        .failclosed-box {
+            background: #1a0a0a;
+            border: 2px solid #ff4444;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        .failclosed-title {
+            color: #ff4444;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .failclosed-condition {
+            background: #0a0a0a;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ff4444;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DOMAIN TUNING: STRUCTURAL BOUNDARY ADJUSTMENT</h1>
+        <div class="subtitle">τ (Thickness) and R_op (Operational Threshold) Calibration Only</div>
+        
+        <!-- R軸の可視化 -->
+        <div class="r-axis">
+            <div class="r-label" style="left: 50%; transform: translateX(-50%);">
+                R = δ / τ (Structural Ratio)
+            </div>
+            
+            <!-- Zone境界マーカー -->
+            <div class="r-marker" style="left: 0%;"></div>
+            <div class="r-marker-label" style="left: 0%;">0.00</div>
+            
+            <div class="r-marker" style="left: 40%;"></div>
+            <div class="r-marker-label" style="left: 40%;">0.40</div>
+            
+            <div class="r-marker" style="left: 70%;"></div>
+            <div class="r-marker-label" style="left: 70%;">0.70</div>
+            
+            <div class="r-marker" style="left: 100%;"></div>
+            <div class="r-marker-label" style="left: 100%;">1.00</div>
+            
+            <!-- Zone ラベル -->
+            <div class="zone-label zone-a" style="left: 20%;">Zone A</div>
+            <div class="zone-label zone-b" style="left: 55%;">Zone B</div>
+            <div class="zone-label zone-c" style="left: 85%;">Zone C</div>
+        </div>
+        
+        <!-- Domain Tuning パラメータ -->
+        <div class="domain-section">
+            <div class="domain-title">DOMAIN PRESETS (Structural Parameters Only)</div>
+            
+            <div class="domain-grid">
+                <!-- DOMAIN A -->
+                <div class="domain-card">
+                    <div class="domain-name">DOMAIN_A (Narrow Boundary)</div>
+                    <div class="param-row">
+                        <span class="param-label">τ (Thickness)</span>
+                        <span class="param-value">20</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">R_op (Threshold)</span>
+                        <span class="param-value">0.90</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">Structural Characteristic</span>
+                        <span class="param-value">Narrow tolerance width</span>
+                    </div>
+                </div>
+                
+                <!-- DOMAIN B -->
+                <div class="domain-card">
+                    <div class="domain-name">DOMAIN_B (Medium Boundary)</div>
+                    <div class="param-row">
+                        <span class="param-label">τ (Thickness)</span>
+                        <span class="param-value">30</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">R_op (Threshold)</span>
+                        <span class="param-value">1.00</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">Structural Characteristic</span>
+                        <span class="param-value">Medium tolerance width</span>
+                    </div>
+                </div>
+                
+                <!-- DOMAIN C -->
+                <div class="domain-card">
+                    <div class="domain-name">DOMAIN_C (Wide Boundary)</div>
+                    <div class="param-row">
+                        <span class="param-label">τ (Thickness)</span>
+                        <span class="param-value">40</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">R_op (Threshold)</span>
+                        <span class="param-value">1.00</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">Structural Characteristic</span>
+                        <span class="param-value">Wide tolerance width</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fail-Closed条件 -->
+        <div class="failclosed-box">
+            <div class="failclosed-title">FAIL-CLOSED TRIGGER CONDITIONS</div>
+            <div class="failclosed-condition">
+                <strong>Condition 1:</strong> R ≥ R_op → Operational fracture detected
+            </div>
+            <div class="failclosed-condition">
+                <strong>Condition 2:</strong> R ≥ 1.00 → Theoretical fracture (immediate)
+            </div>
+            <div class="failclosed-condition">
+                <strong>Condition 3:</strong> ω = 0 → Structural death (forbidden state)
+            </div>
+            <div class="failclosed-condition">
+                <strong>Action:</strong> Silence (no output, no alternatives, wait for human)
+            </div>
+        </div>
+        
+        <!-- 構造的説明 -->
+        <div class="structure-note">
+            <h3>STRUCTURAL NOTES (100% Structure-Pure)</h3>
+            
+            <h4 style="color: #00ff88; margin-top: 20px;">✓ What Domain Tuning IS:</h4>
+            <ul>
+                <li>Adjustment of boundary width (τ) and fracture threshold (R_op)</li>
+                <li>Structural calibration based on domain characteristics</li>
+                <li>Configuration of tolerance ranges (not performance optimization)</li>
+                <li>Human-only adjustment (AI cannot modify)</li>
+            </ul>
+            
+            <h4 style="color: #ff4444; margin-top: 20px;">✗ What Domain Tuning is NOT:</h4>
+            <ul>
+                <li class="forbidden">Purpose selection (use case, application intent)</li>
+                <li class="forbidden">Performance optimization (speed, accuracy, naturalness)</li>
+                <li class="forbidden">Meaning-based adjustment (semantic quality)</li>
+                <li class="forbidden">Behavioral modification (AI personality, tone)</li>
+                <li class="forbidden">History-based learning (past performance data)</li>
+            </ul>
+            
+            <h4 style="color: #00ff88; margin-top: 20px;">Zone Structure (No Semantic Value):</h4>
+            <ul>
+                <li><strong>Zone A:</strong> R &lt; 0.40 → PERMIT (structural stability)</li>
+                <li><strong>Zone B:</strong> 0.40 ≤ R &lt; 1.00 → PERMIT_WITH_CAVEAT (elastic fluctuation)</li>
+                <li><strong>Zone C:</strong> R ≥ 1.00 → FAIL-CLOSED (fracture point)</li>
+            </ul>
+            <p style="margin-top: 10px;">
+                Zones are <strong>structural classifications</strong>, not value judgments.<br>
+                R = 0.39 is not "good" and R = 0.41 is not "bad".<br>
+                They are simply different structural states.
+            </p>
+            
+            <h4 style="color: #00ff88; margin-top: 20px;">Domain Independence:</h4>
+            <ul>
+                <li>All DOMAINs can traverse all Zones (A/B/C)</li>
+                <li>DOMAIN parameters (τ, R_op) determine boundary width only</li>
+                <li>No fixed correspondence: DOMAIN_A ≠ Zone A</li>
+                <li>A DOMAIN with narrow τ may still operate in Zone A if δ is small</li>
+            </ul>
+            
+            <h4 style="color: #00ff88; margin-top: 20px;">Fail-Closed ≠ Failure:</h4>
+            <ul>
+                <li>Fail-Closed is <strong>structural correctness</strong>, not error</li>
+                <li>When R ≥ R_op or ω = 0: system maintains integrity by silence</li>
+                <li>ω &gt; 0 during Fail-Closed → system is alive (structurally continuous)</li>
+                <li>ω = 0 → system death (strictly forbidden in NRA-IDE)</li>
+            </ul>
+        </div>
+        
+        <!-- フッター -->
+        <div style="text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #333; color: #666; font-size: 12px;">
+            NRA-IDE: Structure-Pure Definition v1.0 | Domain Tuning = Boundary Width Adjustment Only<br>
+            No meaning, no optimization, no semantic value, no history
+        </div>
+    </div>
+</body>
+</html>

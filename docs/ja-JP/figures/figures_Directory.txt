@@ -1,0 +1,18 @@
+## NRA‑IDE 図面一覧（figures/）
+このフォルダには、NRA‑IDE の構造を視覚的に理解するための図面が収められています。
+文章では伝わりにくい概念（因果ダイオード、境界、ゆらぎ、厚み、位相など）を補完します。
+
+---
+
+figures/
+├── fig1_approach_comparison.png       fig_1-4の組み合わせでセット
+├── fig2_causal_diode.png              カジュアルダイオード
+├── fig3_coherence_gate.png　　　　　　　　コヒーレンスゲート
+├── fig4_circle_vs_spiral.png
+├── TOP_sandwich.png
+├── 01_Code_Generated_Image_.jpg
+├── DOMAIN_TUNIING.png 　　　　　　　　　　　ドメインチューニング　図解
+├── nra_dam_degradation.html　　　　　　　 ダム水位管理構造-比較
+├── sandwich_architecture.html 　　　　　　サンドイッチ構造（重要）
+├── domain_tuning_structure_pure.html　　ドメインチューニングHTML
+└── 07_Escapement_ContactPoint_JP.html
