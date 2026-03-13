@@ -7,26 +7,6 @@
 
 ---
 
-## Axiom
-
-Existence is generation.
-Every dynamic system contains a threshold.
-Within the structure of the world, no true static state exists.
-
----
-
-## Architecture
-
-![NRA-IDE Sandwich Architecture](./TOP_sandwich.png)
-
----
-
-## Core Concept
-
-![NRA-IDE Core Formula](./NRA-IDE定義式（基礎式）.jpg)
-
----
-
 ## Project Structure
 
 The documents in this directory explain the structure of NRA-IDE.
@@ -36,6 +16,26 @@ The documents in this directory explain the structure of NRA-IDE.
 - `figures/` : conceptual diagrams and demonstration models
 
 These materials describe the structural principles of NRA-IDE, including causal isolation, threshold dynamics, and fail-closed behavior.
+
+---
+
+## Axiom
+
+Existence is generation.
+Every dynamic system contains a threshold.
+Within the structure of the world, no true static state exists.
+
+---
+
+## Core Concept
+
+![NRA-IDE Core Formula](./NRA-IDE定義式（基礎式）.jpg)
+
+---
+
+## Architecture
+
+![NRA-IDE Sandwich Architecture](./TOP_sandwich.png)
 
 ---
 
