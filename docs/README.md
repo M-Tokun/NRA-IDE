@@ -2,8 +2,7 @@
 
 ## 律環公理 — 内包性動力学エンジン
 
-### Nomological Ring Axioms (NRA)
-### and the Intensional Dynamics Engine (IDE)
+### Nomological Ring Axioms (NRA)- Intensional Dynamics Engine (IDE)
 
 ---
 
