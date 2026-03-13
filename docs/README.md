@@ -17,13 +17,13 @@ Within the structure of the world, no true static state exists.
 
 ## Architecture
 
-![NRA-IDE Sandwich Architecture](../TOP_sandwich.png)
+![NRA-IDE Sandwich Architecture](./TOP_sandwich.png)
 
 ---
 
 ## Core Concept
 
-![NRA-IDE Core Formula](../NRA-IDE定義式（基礎式）.jpg)
+![NRA-IDE Core Formula](./NRA-IDE定義式（基礎式）.jpg)
 
 ---
 
