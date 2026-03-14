@@ -1,8 +1,7 @@
 # NRA-IDE
 
 ## 律環公理 — 内包性動力学エンジン
-
-### Nomological Ring Axioms (NRA)- Intensional Dynamics Engine (IDE)
+### Nomological Ring Axioms (NRA) - Intensional Dynamics Engine (IDE)
 
 ---
 
@@ -23,6 +22,8 @@ These materials describe the structural principles of NRA-IDE, including causal 
 Existence is generation.
 Every dynamic system contains a threshold.
 Within the structure of the world, no true static state exists.
+
+This framework does not reject existing academic disciplines; rather, it presents a new perspective grounded in differences of framing and observational span.
 
 ---
 
