@@ -20,7 +20,7 @@
 | [ETHICS.md](./theory/ETHICS.md) | Ethical statement |
 | [axioms.json](./theory/axioms.json) | Machine-readable axiom definitions |
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | Box Sandwich Architecture — structural isolation spec for LLM integration |
-See [GOVERNANCE.md](./GOVERNANCE.md) for the project's design philosophy and intent regarding derivatives.
+|  [GOVERNANCE.md](./GOVERNANCE.md) the project's design philosophy and intent regarding derivatives.
 ---
 
 ## 🌏 For Japanese Speakers
