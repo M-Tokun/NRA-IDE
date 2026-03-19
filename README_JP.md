@@ -21,7 +21,7 @@
 | [ETHICS.md](./theory/ETHICS.md) | 倫理声明 |
 | [axioms.json](./theory/axioms.json) | 機械可読な公理定義 |
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | ボックス・サンドイッチ・アーキテクチャ — LLM統合のための構造分離仕様 |
-| See [GOVERNANCE.md](./GOVERNANCE.md) | 技術は広く共有して欲しいという願い | 
+| [GOVERNANCE.md](./GOVERNANCE.md) | 技術は広く共有して欲しいという願い | 
 ---
 
 ## 🌍 For English Speakers
