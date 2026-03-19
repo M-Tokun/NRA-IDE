@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<!-- NRA-IDE CABG Monitor — 経過ログ機能強化版 -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>NRA-IDE CABG Monitor — 動的TTFM + 破線 + 経過ログ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+:root{--bg:#0a0f18;--surface:#121a28;--border:#1e2538;--safe:#88ffcc;--warn:#ffcc00;--fail:#ff4060;--text:#b8c0d8;--log:#1a2230;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;padding:20px;margin:0;}
+h1{color:#ff6b6b;font-size:22px;margin:0 0 10px;}
+canvas{border:1px solid var(--border);background:#000;display:block;margin:10px 0;border-radius:6px;}
+.controls{background:var(--surface);padding:15px;border-radius:8px;border:1px solid var(--border);}
+.slider-row{display:flex;align-items:center;gap:12px;margin:8px 0;}
+.slider-row label{width:160px;font-size:13px;}
+input[type=range]{flex:1;}
+.live{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;margin:4px 0;}
+.fail{color:var(--fail);animation:blink 1s infinite;}
+@keyframes blink{50%{opacity:0.4}}
+#logArea{background:var(--log);padding:12px;height:220px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.4;border:1px solid var(--border);border-radius:6px;}
+.log-entry{margin:4px 0;padding:4px 8px;border-left:3px solid;}
+.log-safe{border-left-color:var(--safe);}
+.log-warn{border-left-color:var(--warn);}
+.log-fail{border-left-color:var(--fail);}
+</style>
+</head>
+<body>
+
+<h1>NRA-IDE CABG Monitor — 経過ログ搭載版</h1>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;">
+  <div>
+    <div style="font-size:12px;color:#ffaa44">VESSEL CROSS-SECTION</div>
+    <canvas id="tankCanvas" width="800" height="280"></canvas>
+    
+    <div style="font-size:12px;color:#ffaa44;margin:12px 0 4px">GRAFT FLOW WAVEFORM (TTFM)</div>
+    <canvas id="flowWaveCanvas" width="800" height="160"></canvas>
+    
+    <div style="margin-top:12px;">
+      <span class="live">MGF: <span id="mgfLive">35.0</span> mL/min</span><br>
+      <span class="live">PI: <span id="piLive">2.80</span></span><br>
+      <span class="live">DF%: <span id="dfLive">65</span>%</span><br>
+      <span class="live" id="status">SAFE</span>
+    </div>
+  </div>
+
+  <div class="controls" style="width:340px">
+    <h3 style="margin:0 0 12px;color:#ffaa44">パラメータ調整</h3>
+    <div class="slider-row"><label>内圧 P</label><input type="range" id="p" min="60" max="180" value="120"></div>
+    <div class="slider-row"><label>温度 T</label><input type="range" id="t" min="30" max="42" value="37"></div>
+    <div class="slider-row"><label>血流 Flow</label><input type="range" id="f" min="10" max="120" value="80"></div>
+    <div class="slider-row"><label>接着性 Adh</label><input type="range" id="a" min="0.2" max="2.5" step="0.1" value="1.0"></div>
+    <div class="slider-row"><label>せん断 Shear</label><input type="range" id="s" min="0" max="30" value="12"></div>
+    <div class="slider-row"><label>壁張力 Tension</label><input type="range" id="w" min="40" max="180" value="90"></div>
+
+    <h3 style="margin:20px 0 12px;color:#ffaa44">閾値調整（破線移動）</h3>
+    <div class="slider-row"><label>PI上限</label><input type="range" id="piThresh" min="2" max="8" step="0.1" value="5"><span id="piThreshVal">5.0</span></div>
+    <div class="slider-row"><label>MGF下限</label><input type="range" id="mgfThresh" min="5" max="50" step="1" value="20"><span id="mgfThreshVal">20</span></div>
+    <div class="slider-row"><label>R Fail閾値</label><input type="range" id="rFail" min="0.6" max="1.8" step="0.05" value="1.0"><span id="rFailVal">1.0</span></div>
+  </div>
+</div>
+
+<div id="logArea"></div>
+
+<script>
+// 変数
+let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
+let GraftMGF=35, PI=2.8, DF=65;
+let PI_THRESH=5.0, MGF_THRESH=20, R_FAIL=1.0;
+let lastStatus = 'SAFE';
+
+// DOM
+const logArea = document.getElementById('logArea');
+const els = {
+  mgfLive: document.getElementById('mgfLive'),
+  piLive: document.getElementById('piLive'),
+  dfLive: document.getElementById('dfLive'),
+  status: document.getElementById('status'),
+  piThreshVal: document.getElementById('piThreshVal'),
+  mgfThreshVal: document.getElementById('mgfThreshVal'),
+  rFailVal: document.getElementById('rFailVal')
+};
+
+// ログ追加関数
+function addLog(message, cls = 'log-safe') {
+  const now = new Date().toLocaleTimeString('ja-JP', {hour12:false});
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${cls}`;
+  entry.innerHTML = `<span style="color:#888">[${now}]</span> ${message}`;
+  logArea.appendChild(entry);
+  logArea.scrollTop = logArea.scrollHeight;
+
+  // 古いログを自動削除（最大50件）
+  while (logArea.children.length > 50) {
+    logArea.removeChild(logArea.firstChild);
+  }
+}
+
+// 安全セット
+function safeSet(id, value) {
+  if (els[id]) els[id].textContent = value;
+}
+
+// 計算
+function calcIDE() {
+  const tau = 1.0 * (310/(T+273)) * (1 + Flow/200);
+  const deltaMGF = Math.abs(GraftMGF - 35)/15;
+  const deltaPI = Math.max(0, PI - 2.8)/3;
+  const deltaDF = Math.max(0, 100 - DF)/30;
+  const R = (deltaMGF + deltaPI + deltaDF) / tau;
+
+  let st = 'SAFE', col = '#88ffcc', msg = '';
+  if (PI >= PI_THRESH || GraftMGF <= MGF_THRESH || R >= R_FAIL) {
+    st = 'FAIL_CLOSED'; col = '#ff4060'; msg = `FAIL — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)} R:${R.toFixed(3)}`;
+  } else if (PI >= PI_THRESH*0.8 || GraftMGF <= MGF_THRESH*1.2) {
+    st = 'WARNING'; col = '#ffcc00'; msg = `WARN — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)}`;
+  }
+
+  safeSet('status', st);
+  els.status.style.color = col;
+
+  // 状態変化を検知してログ
+  if (st !== lastStatus) {
+    const cls = st === 'FAIL_CLOSED' ? 'log-fail' : (st === 'WARNING' ? 'log-warn' : 'log-safe');
+    addLog(`状態変化 → ${st} (${msg})`, cls);
+    lastStatus = st;
+  }
+
+  return {R, status:st};
+}
+
+// 血管断面（省略なし）
+const tc = document.getElementById('tankCanvas');
+const tctx = tc.getContext('2d');
+function drawVessel() {
+  tctx.clearRect(0,0,tc.width,tc.height);
+  const ide = calcIDE();
+  const r = 80 + (Tension-90)*0.4;
+  tctx.strokeStyle = ide.status==='FAIL_CLOSED'?'#ff4060':'#ff6b6b';
+  tctx.lineWidth = 18;
+  tctx.beginPath(); tctx.ellipse(400,140,r,80,0,0,Math.PI*2); tctx.stroke();
+
+  for(let i=0;i<18;i++){
+    const x = (Date.now()/15 + i*45) % 700;
+    tctx.fillStyle = '#ff9999';
+    tctx.fillRect(x, 105 + Math.sin(i)*25, 9, 7);
+  }
+}
+
+// TTFM波形 + 破線（省略なし）
+const fc = document.getElementById('flowWaveCanvas');
+const fctx = fc.getContext('2d');
+function drawTTFMWave() {
+  fctx.clearRect(0,0,fc.width,fc.height);
+  const ide = calcIDE();
+
+  fctx.strokeStyle = ide.status==='FAIL_CLOSED'?'#ff4060':(ide.status==='WARNING'?'#ffcc00':'#88ffcc');
+  fctx.lineWidth = 3.5;
+  fctx.beginPath();
+  for(let x=0;x<fc.width;x+=3){
+    const t = x/38 + Date.now()/900;
+    const y = 80 + Math.sin(t)*22 - Math.cos(t*1.7)*14;
+    x===0 ? fctx.moveTo(x,y) : fctx.lineTo(x,y);
+  }
+  fctx.stroke();
+
+  const mgfY = 80 + (MGF_THRESH - 35) * 1.8;
+  fctx.setLineDash([8,4]); fctx.strokeStyle = '#ff6688'; fctx.lineWidth = 2;
+  fctx.beginPath(); fctx.moveTo(0,mgfY); fctx.lineTo(fc.width,mgfY); fctx.stroke();
+  fctx.setLineDash([]);
+  fctx.fillStyle = '#ff6688'; fctx.font = '11px monospace';
+  fctx.fillText(`MGF下限 = ${MGF_THRESH}`, fc.width-160, mgfY-8);
+
+  const piY = 80 - PI_THRESH * 4.5;
+  fctx.setLineDash([4,4]); fctx.strokeStyle = '#ffaa44';
+  fctx.beginPath(); fctx.moveTo(0,piY); fctx.lineTo(fc.width,piY); fctx.stroke();
+  fctx.setLineDash([]);
+  fctx.fillStyle = '#ffaa44';
+  fctx.fillText(`PI上限 = ${PI_THRESH}`, fc.width-160, piY-8);
+
+  safeSet('mgfLive', GraftMGF.toFixed(1));
+  safeSet('piLive', PI.toFixed(2));
+  safeSet('dfLive', DF.toFixed(0));
+}
+
+// 全更新
+function updateAll() {
+  P = parseFloat(document.getElementById('p')?.value || 120);
+  T = parseFloat(document.getElementById('t')?.value || 37);
+  Flow = parseFloat(document.getElementById('f')?.value || 80);
+  Adh = parseFloat(document.getElementById('a')?.value || 1.0);
+  Shear = parseFloat(document.getElementById('s')?.value || 12);
+  Tension = parseFloat(document.getElementById('w')?.value || 90);
+
+  PI_THRESH = parseFloat(document.getElementById('piThresh')?.value || 5);
+  MGF_THRESH = parseFloat(document.getElementById('mgfThresh')?.value || 20);
+  R_FAIL = parseFloat(document.getElementById('rFail')?.value || 1.0);
+
+  GraftMGF = Math.max(10, Math.min(80, GraftMGF + (Math.random()-0.5)*0.6));
+  PI = Math.max(1, Math.min(7, PI + (Math.random()-0.5)*0.08));
+  DF = Math.max(30, Math.min(90, DF + (Math.random()-0.5)*0.4));
+
+  safeSet('piThreshVal', PI_THRESH.toFixed(1));
+  safeSet('mgfThreshVal', MGF_THRESH);
+  safeSet('rFailVal', R_FAIL.toFixed(2));
+
+  drawVessel();
+  drawTTFMWave();
+}
+
+// イベント
+['p','t','f','a','s','w','piThresh','mgfThresh','rFail'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateAll);
+});
+
+// 初期化
+addLog('監視開始 — スライダー操作でログが蓄積されます', 'log-safe');
+updateAll();
+setInterval(updateAll, 150);  // 約6-7fps
+</script>
+</body>
+</html>
