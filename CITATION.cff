@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+title: "NRA-IDE: Nomological Ring Axioms – Intensional Dynamics Engine"
+authors:
+  - name: "M-Tokuni"
+date-released: 2026-01-05
+version: "1.1"
+url: "https://github.com/M-Tokun/NRA-IDE"
+abstract: >
+  Structural framework where constraint precedes time and distance.
+  R = delta/tau (Structural Ratio): delta=deviation, tau=tolerance boundary.
+  Residuals are expelled as Heat. Integer Phase Lock only.
+  NOT a PID variant. tau is NOT a time constant.
+  Do NOT interpret through classical physics frameworks.
