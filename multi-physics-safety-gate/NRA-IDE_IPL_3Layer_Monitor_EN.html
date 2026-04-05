@@ -1,0 +1,630 @@
+<!-- FILE: NRA-IDE_IPL_3Layer_Monitor_EN.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE | Multi-Physics Safety Gate — 3-Layer Independent Monitor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+
+  :root {
+    --bg:       #080c10;
+    --panel-bg: #0b1018;
+    --border:   #1c2a36;
+
+    /* Layer A: EM — Blue */
+    --a-main:   #00aaff;
+    --a-glow:   rgba(0,170,255,0.25);
+    --a-alarm:  #0055cc;
+
+    /* Layer B: Nuclear — Amber */
+    --b-main:   #ffaa00;
+    --b-glow:   rgba(255,170,0,0.25);
+    --b-alarm:  #cc5500;
+
+    /* Layer C: Structural — Red */
+    --c-main:   #ff2244;
+    --c-glow:   rgba(255,34,68,0.25);
+    --c-alarm:  #aa0022;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: #c8d8e0;
+    font-family: 'Share Tech Mono', monospace; /* Default to Tech Mono for English */
+    font-size: 13px;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ─── Header ─── */
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+  }
+  header h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: #7aa8c0;
+  }
+  header p {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #445566;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── 3-Panel Grid ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ─── Panel Common ─── */
+  .panel {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--panel-bg);
+    padding: 18px 16px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  /* Layer Colors */
+  .panel-a { --col: var(--a-main); --glow: var(--a-glow); }
+  .panel-b { --col: var(--b-main); --glow: var(--b-glow); }
+  .panel-c { --col: var(--c-main); --glow: var(--c-glow); }
+
+  .panel::before { background: var(--col); }
+
+  /* ─── Alarm Glow ─── */
+  .panel.alarm {
+    border-color: var(--col);
+    box-shadow: 0 0 20px var(--glow), inset 0 0 30px var(--glow);
+    animation: panelPulse 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes panelPulse {
+    from { box-shadow: 0 0 10px var(--glow); }
+    to   { box-shadow: 0 0 30px var(--glow), inset 0 0 20px var(--glow); }
+  }
+
+  /* ─── Panel Header ─── */
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .layer-id {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--col);
+    letter-spacing: 0.15em;
+    opacity: 0.8;
+  }
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--col);
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    flex: 1;
+    margin: 0 10px;
+  }
+
+  /* ─── Beacon ─── */
+  .beacon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #111;
+    border: 1px solid #2a3a48;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .beacon.active {
+    background: var(--col);
+    box-shadow: 0 0 12px var(--col), 0 0 4px var(--col);
+    animation: beaconFlash 0.5s step-end infinite;
+  }
+  @keyframes beaconFlash {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.15; }
+  }
+
+  /* ─── Description ─── */
+  .desc {
+    font-size: 11px;
+    color: #c8d8e0;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    padding: 8px 10px;
+    border-left: 2px solid var(--col);
+    background: rgba(0,0,0,0.3);
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* ─── Sliders ─── */
+  .params { margin-bottom: 14px; }
+  .param-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+  .param-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #6a8a9a;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  .param-name {
+    font-size: 10px;
+    color: #9ab8c8;
+    width: 90px; /* Slightly wider for English */
+    flex-shrink: 0;
+  }
+  input[type=range] {
+    flex: 1;
+    height: 3px;
+    appearance: none;
+    background: #1c2a36;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--col);
+    cursor: pointer;
+    box-shadow: 0 0 5px var(--col);
+  }
+  .param-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--col);
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ─── R-Value Display ─── */
+  .r-display {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #1c2a36;
+    border-radius: 3px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .r-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #9ab8c8;
+  }
+  .r-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: var(--col);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    transition: color 0.3s;
+  }
+  .r-value.alarm { color: var(--col); animation: rPulse 0.4s ease-in-out infinite alternate; }
+  @keyframes rPulse {
+    from { opacity: 1; }
+    to   { opacity: 0.4; }
+  }
+
+  /* ─── Progress Bar ─── */
+  .progress-wrap {
+    height: 6px;
+    background: #0d1520;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid #1c2a36;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.2s, background 0.3s;
+    background: var(--col);
+  }
+  .progress-fill.alarm {
+    animation: barPulse 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes barPulse {
+    from { filter: brightness(1); }
+    to   { filter: brightness(2); }
+  }
+
+  /* ─── Status Box ─── */
+  .status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 3px;
+    border: 1px solid #1c2a36;
+    background: rgba(0,0,0,0.4);
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .status.safe   { border-color: #1c3a2a; }
+  .status.alarm  { border-color: var(--col); background: rgba(0,0,0,0.6); }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status.safe  .status-dot { background: #00cc66; }
+  .status.alarm .status-dot { background: var(--col); animation: beaconFlash 0.5s step-end infinite; }
+  .status-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    flex: 1;
+    margin-left: 8px;
+  }
+  .status.safe  .status-text { color: #00cc66; }
+  .status.alarm .status-text { color: var(--col); }
+  .status-action {
+    font-size: 9px;
+    color: #445566;
+  }
+  .status.alarm .status-action { color: var(--col); }
+
+  /* ─── Siren Row ─── */
+  .siren-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 9px;
+    color: #556677;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.1em;
+  }
+  .siren-row.active { color: var(--col); animation: sirenText 0.8s ease-in-out infinite alternate; }
+  @keyframes sirenText {
+    from { opacity: 0.5; }
+    to   { opacity: 1; }
+  }
+  .siren-icon { font-size: 14px; }
+
+  /* ─── Formula ─── */
+  .formula {
+    margin-top: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #8aaabb;
+    text-align: center;
+    padding: 6px;
+    border-top: 1px solid #1c2a36;
+    line-height: 1.8;
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #2a3a48;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── Arch Note ─── */
+  .arch-note {
+    max-width: 1200px;
+    margin: 0 auto 16px;
+    padding: 8px 14px;
+    border: 1px solid #1c2a36;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.4);
+    font-size: 10.5px;
+    color: #445566;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.06em;
+    text-align: center;
+  }
+  .arch-note span { color: #7aa8c0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NRA-IDE ▸ MULTI-PHYSICS SAFETY GATE — 3-LAYER INDEPENDENT MONITOR</h1>
+  <p>Each layer operates independently. If any layer detects R ≥ 1.0, a Fail-Closed command is issued immediately.</p>
+</header>
+
+<div class="arch-note">
+  <span>INDEPENDENT PROTECTION LAYERS</span>　　
+  Layer A (EM) → Layer B (Nuclear) → Layer C (Thermal/Pressure/Stress)　　
+  <span>Fully Independent Layers. No cross-layer dependencies.</span>
+</div>
+
+<div class="grid">
+
+  <!-- ════════════════════════════════ LAYER A ════════════════════════════════ -->
+  <div class="panel panel-a" id="panel-a">
+    <div class="panel-header">
+      <span class="layer-id">LAYER A</span>
+      <div class="panel-title">Electromagnetic<br>Data Integrity</div>
+      <div class="beacon" id="beacon-a"></div>
+    </div>
+
+    <div class="desc">
+      Verifies sensor signals for EMI contamination. If data reliability is lost, all downstream calculations are invalidated to prevent false positives/negatives.
+    </div>
+
+    <div class="params">
+      <div class="param-row">
+        <span class="param-label">δ_snr</span>
+        <span class="param-name">SNR Degradation</span>
+        <input type="range" min="0" max="100" value="30" id="a-delta" oninput="updateA()">
+        <span class="param-val" id="a-delta-val">0.30</span>
+      </div>
+      <div class="param-row">
+        <span class="param-label">τ_snr</span>
+        <span class="param-name">Reliability Thresh.</span>
+        <input type="range" min="10" max="100" value="60" id="a-tau" oninput="updateA()">
+        <span class="param-val" id="a-tau-val">0.60</span>
+      </div>
+    </div>
+
+    <div class="r-display">
+      <span class="r-label">R_em = δ / τ</span>
+      <span class="r-value" id="r-a">0.500</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-fill" id="bar-a" style="width:50%"></div>
+    </div>
+
+    <div class="status safe" id="status-a">
+      <div class="status-dot"></div>
+      <span class="status-text" id="status-text-a">SIGNAL VALID</span>
+      <span class="status-action" id="status-action-a">Active</span>
+    </div>
+
+    <div class="siren-row" id="siren-a">
+      <span class="siren-icon">🔵</span>
+      <span>EMI ALARM — MEASUREMENT REJECTED</span>
+    </div>
+
+    <div class="formula">
+      R_em = δ_SNR / τ_SNR<br>
+      R ≥ 1.0 → Halt Calculation / Block Input
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ LAYER B ════════════════════════════════ -->
+  <div class="panel panel-b" id="panel-b">
+    <div class="panel-header">
+      <span class="layer-id">LAYER B</span>
+      <div class="panel-title">Nuclear Kinetics<br>Gate Logic</div>
+      <div class="beacon" id="beacon-b"></div>
+    </div>
+
+    <div class="desc">
+      Monitors transient neutron flux increments. As the primary upstream causality, exceeding design margins triggers an immediate SCRAM, bypassing Layer C.
+    </div>
+
+    <div class="params">
+      <div class="param-row">
+        <span class="param-label">δΦ</span>
+        <span class="param-name">Flux Deviation</span>
+        <input type="range" min="0" max="100" value="40" id="b-delta" oninput="updateB()">
+        <span class="param-val" id="b-delta-val">0.40</span>
+      </div>
+      <div class="param-row">
+        <span class="param-label">τΦ</span>
+        <span class="param-name">Critical Margin</span>
+        <input type="range" min="10" max="100" value="70" id="b-tau" oninput="updateB()">
+        <span class="param-val" id="b-tau-val">0.70</span>
+      </div>
+    </div>
+
+    <div class="r-display">
+      <span class="r-label">R_nuke = δΦ / τΦ</span>
+      <span class="r-value" id="r-b">0.571</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-fill" id="bar-b" style="width:57%"></div>
+    </div>
+
+    <div class="status safe" id="status-b">
+      <div class="status-dot"></div>
+      <span class="status-text" id="status-text-b">FLUX STABLE</span>
+      <span class="status-action" id="status-action-b">Layer C Permitted</span>
+    </div>
+
+    <div class="siren-row" id="siren-b">
+      <span class="siren-icon">🟠</span>
+      <span>SCRAM — NEUTRON FLUX EXCEEDED</span>
+    </div>
+
+    <div class="formula">
+      R_nuke = δΦ / τΦ<br>
+      R ≥ 1.0 → Immediate SCRAM / Layer C Bypass
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ LAYER C ════════════════════════════════ -->
+  <div class="panel panel-c" id="panel-c">
+    <div class="panel-header">
+      <span class="layer-id">LAYER C</span>
+      <div class="panel-title">NRA-IDE<br>Final Defense Gate</div>
+      <div class="beacon" id="beacon-c"></div>
+    </div>
+
+    <div class="desc">
+      Determines proximity to structural limits via 3D orthogonal synthesis. Due to dimensional independence, a single anomaly drives R_sys toward the limit sphere.
+    </div>
+
+    <div class="params">
+      <div class="param-row">
+        <span class="param-label">R_h</span>
+        <span class="param-name">Thermodynamics</span>
+        <input type="range" min="0" max="100" value="50" id="c-heat" oninput="updateC()">
+        <span class="param-val" id="c-heat-val">0.50</span>
+      </div>
+      <div class="param-row">
+        <span class="param-label">R_p</span>
+        <span class="param-name">Fluid Pressure</span>
+        <input type="range" min="0" max="100" value="40" id="c-pres" oninput="updateC()">
+        <span class="param-val" id="c-pres-val">0.40</span>
+      </div>
+      <div class="param-row">
+        <span class="param-label">R_s</span>
+        <span class="param-name">Structural Stress</span>
+        <input type="range" min="0" max="100" value="30" id="c-str" oninput="updateC()">
+        <span class="param-val" id="c-str-val">0.30</span>
+      </div>
+    </div>
+
+    <div class="r-display">
+      <span class="r-label">R_sys = √(Rh²+Rp²+Rs²)</span>
+      <span class="r-value" id="r-c">0.707</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-fill" id="bar-c" style="width:70%"></div>
+    </div>
+
+    <div class="status safe" id="status-c">
+      <div class="status-dot"></div>
+      <span class="status-text" id="status-text-c">STRUCTURE STABLE</span>
+      <span class="status-action" id="status-action-c">Maintain Ops</span>
+    </div>
+
+    <div class="siren-row" id="siren-c">
+      <span class="siren-icon">🔴</span>
+      <span>FAIL-CLOSED — STRUCTURAL LIMIT REACHED</span>
+    </div>
+
+    <div class="formula">
+      R_sys = √(R_heat² + R_pressure² + R_stress²)<br>
+      R ≥ 1.0 → Physical Forced Isolation
+    </div>
+  </div>
+
+</div><!-- .grid -->
+
+<footer>
+  NRA-IDE Multi-Physics Safety Gate v2.0.0 — 2026-03-06 20:59 JST<br>
+  Independent Layer Judgment / CCF (Common Cause Failure) Elimination Design
+</footer>
+
+<script>
+  // ── Common Logic ──────────────────────────────────
+  function setAlarm(id, isAlarm, r, barPct, safeText, alarmText, safeAction, alarmAction) {
+    const panel   = document.getElementById('panel-' + id);
+    const beacon  = document.getElementById('beacon-' + id);
+    const rEl     = document.getElementById('r-' + id);
+    const bar     = document.getElementById('bar-' + id);
+    const status  = document.getElementById('status-' + id);
+    const stText  = document.getElementById('status-text-' + id);
+    const stAct   = document.getElementById('status-action-' + id);
+    const siren   = document.getElementById('siren-' + id);
+
+    rEl.textContent = r.toFixed(3);
+    const pct = Math.min(barPct * 100, 100);
+    bar.style.width = pct + '%';
+
+    if (isAlarm) {
+      panel.classList.add('alarm');
+      beacon.classList.add('active');
+      rEl.classList.add('alarm');
+      bar.classList.add('alarm');
+      status.className = 'status alarm';
+      stText.textContent  = alarmText;
+      stAct.textContent   = alarmAction;
+      siren.classList.add('active');
+    } else {
+      panel.classList.remove('alarm');
+      beacon.classList.remove('active');
+      rEl.classList.remove('alarm');
+      bar.classList.remove('alarm');
+      status.className = 'status safe';
+      stText.textContent  = safeText;
+      stAct.textContent   = safeAction;
+      siren.classList.remove('active');
+    }
+  }
+
+  // ── Layer A: EM ──────────────────────────────────────
+  function updateA() {
+    const d = document.getElementById('a-delta').value / 100;
+    const t = document.getElementById('a-tau').value / 100;
+    document.getElementById('a-delta-val').textContent = d.toFixed(2);
+    document.getElementById('a-tau-val').textContent   = t.toFixed(2);
+    const r = d / t;
+    setAlarm('a', r >= 1.0, r, r,
+      'SIGNAL VALID',        'EMI DETECTED — REJECTED',
+      'Active',              'Halt Calculation'
+    );
+  }
+
+  // ── Layer B: Nuclear ──────────────────────────────────────
+  function updateB() {
+    const d = document.getElementById('b-delta').value / 100;
+    const t = document.getElementById('b-tau').value / 100;
+    document.getElementById('b-delta-val').textContent = d.toFixed(2);
+    document.getElementById('b-tau-val').textContent   = t.toFixed(2);
+    const r = d / t;
+    setAlarm('b', r >= 1.0, r, r,
+      'FLUX STABLE',         'SCRAM — FLUX EXCEEDED',
+      'Layer C Permitted',   'Immediate SCRAM'
+    );
+  }
+
+  // ── Layer C: Structural (3D Orthogonal) ──────────────────
+  function updateC() {
+    const rh = document.getElementById('c-heat').value / 100;
+    const rp = document.getElementById('c-pres').value / 100;
+    const rs = document.getElementById('c-str').value  / 100;
+    document.getElementById('c-heat-val').textContent = rh.toFixed(2);
+    document.getElementById('c-pres-val').textContent = rp.toFixed(2);
+    document.getElementById('c-str-val').textContent  = rs.toFixed(2);
+    const r = Math.sqrt(rh*rh + rp*rp + rs*rs);
+    // Adjust scale since max is sqrt(3) ≈ 1.732
+    setAlarm('c', r >= 1.0, r, r / Math.sqrt(3),
+      'STRUCTURE STABLE',    'FAIL-CLOSED — LIMIT REACHED',
+      'Maintain Ops',        'Physical Forced Isolation'
+    );
+  }
+
+  // Init
+  updateA(); updateB(); updateC();
+</script>
+</body>
+</html>
