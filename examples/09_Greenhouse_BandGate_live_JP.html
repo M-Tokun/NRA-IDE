@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE — 温室農業 4指標 Band Gate Live</title>
+<!--
+  NRA-IDE / Band Gate — 09 (JP)
+  温室農業 4指標同時 Band Gate ライブ監視
+  --------------------------------------------------
+  監視指標: 灌漑水圧 / 気温 / CO₂濃度 / 養液EC
+  各指標に独立した上限EMA・下限EMA・τ_dynamicを持つ。
+  水圧/EC: α_lower 高め → 枯渇・断水の早期検知
+  水圧:    α_upper 低め → 配管衝撃を避ける慎重設定
+  R = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  Powered by NRA-IDE. (c) 2026 M-Tokuni.
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+
+:root {
+  --bg:      #050a06;
+  --surface: #080e09;
+  --panel:   #0b1410;
+  --border:  #142018;
+  --water:   #29d4ff;
+  --temp:    #ff7043;
+  --co2:     #a8e063;
+  --ec:      #ffd740;
+  --safe:    #69f0ae;
+  --danger:  #ff5252;
+  --warn:    #ffca28;
+  --muted:   #6ab87a;
+  --text:    #a8c8a0;
+  --white:   #e0f0e0;
+  --mono:    'Share Tech Mono', monospace;
+  --sans:    'Zen Kaku Gothic New', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* 有機的な背景 */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(41,212,255,.03) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(168,224,99,.04) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 60% 70%, rgba(255,112,67,.02) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 28px 18px 80px; }
+
+/* ヘッダー */
+header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; flex-wrap: wrap;
+  gap: 16px; margin-bottom: 28px;
+}
+.h-left { border-left: 3px solid var(--co2); padding-left: 16px; }
+.h-tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 3px;
+  color: var(--co2); margin-bottom: 8px;
+}
+header h1 {
+  font-size: clamp(18px, 3vw, 26px); font-weight: 700;
+  color: var(--white); line-height: 1.3;
+}
+header p { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.8; max-width: 520px; }
+
+/* ライブバッジ */
+.live-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.live-badge {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+  padding: 5px 12px; border: 1px solid rgba(105,240,174,.3);
+  color: var(--safe); background: rgba(105,240,174,.05); border-radius: 2px;
+  display: flex; align-items: center; gap: 7px;
+}
+.ldot { width:6px; height:6px; border-radius:50%; background:var(--safe); animation:blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+
+/* 4指標グリッド */
+.four-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+@media(max-width:700px){ .four-grid{ grid-template-columns:1fr; } }
+
+/* 各指標カード */
+.sensor-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.sensor-card::before {
+  content: '';
+  position: absolute; top:0; left:0; right:0; height:2px;
+  transition: opacity .2s;
+}
+.sensor-card.water::before  { background: var(--water); }
+.sensor-card.temp::before   { background: var(--temp); }
+.sensor-card.co2::before    { background: var(--co2); }
+.sensor-card.ec::before     { background: var(--ec); }
+.sensor-card.silenced { box-shadow: 0 0 20px -4px currentColor; }
+
+/* カードヘッダー */
+.card-head {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 10px;
+}
+.card-icon-name { display: flex; align-items: center; gap: 8px; }
+.card-icon { font-size: 18px; line-height: 1; }
+.card-name { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; }
+.card-decision {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+  padding: 3px 8px; border-radius: 2px; border: 1px solid;
+  transition: all .15s;
+}
+.card-decision.pass  { border-color: rgba(105,240,174,.3); color:rgba(105,240,174,.7); background:rgba(105,240,174,.04); }
+.card-decision.upper { border-color: var(--danger); color:var(--danger); background:rgba(255,82,82,.1); }
+.card-decision.lower { border-color: var(--water);  color:var(--water);  background:rgba(41,212,255,.08); }
+
+/* 現在値大表示 */
+.card-value-row {
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 10px;
+}
+.card-value {
+  font-family: var(--mono); font-size: 32px; font-weight: bold;
+  line-height: 1; transition: color .15s;
+}
+.card-unit { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* バンド可視化バー */
+.band-bar-wrap { position: relative; height: 28px; margin-bottom: 10px; }
+.band-track {
+  position: absolute; top:50%; transform:translateY(-50%);
+  left:0; right:0; height:6px;
+  background: rgba(255,255,255,.04);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.band-safe {
+  position: absolute; height:100%;
+  background: rgba(105,240,174,.15);
+  border-radius: 3px;
+  transition: left .2s, width .2s;
+}
+.band-needle {
+  position: absolute; top:-5px;
+  width: 3px; height: 16px;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: left .08s;
+  box-shadow: 0 0 6px currentColor;
+}
+.band-label-low {
+  position: absolute; left:0; bottom:-14px;
+  font-family: var(--mono); font-size: 8px; color: var(--muted);
+}
+.band-label-high {
+  position: absolute; right:0; bottom:-14px;
+  font-family: var(--mono); font-size: 8px; color: var(--muted);
+}
+
+/* ミニ波形 */
+.mini-canvas {
+  display: block; width: 100%; height: 60px;
+  border: 1px solid rgba(255,255,255,.05);
+  background: #030704;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+
+/* R値バー */
+.r-bar-row { display: flex; align-items: center; gap: 8px; }
+.r-label { font-family: var(--mono); font-size: 9px; color: var(--muted); white-space: nowrap; }
+.r-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.r-fill { height: 100%; border-radius: 2px; transition: width .1s, background .15s; }
+.r-val  { font-family: var(--mono); font-size: 10px; min-width: 44px; text-align: right; }
+
+/* ─── 下段：パラメータ + ログ ─── */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media(max-width:700px){ .bottom-row{ grid-template-columns:1fr; } }
+
+.param-panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 16px;
+}
+.p-title {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 3px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 14px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+
+/* 4指標 × 2パラメータ */
+.param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+.pg-item { }
+.pg-head { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.pg-name { font-family: var(--mono); font-size: 9px; }
+.pg-val  { font-family: var(--mono); font-size: 9px; color: var(--white); }
+input[type=range] {
+  width: 100%; appearance: none; height: 2px;
+  background: var(--border); border-radius: 1px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  appearance: none; width:10px; height:10px; border-radius:50%;
+  border: 2px solid var(--bg); transition: transform .15s;
+}
+input[type=range]:hover::-webkit-slider-thumb { transform:scale(1.4); }
+input.water::-webkit-slider-thumb { background:var(--water); box-shadow:0 0 5px rgba(41,212,255,.5); }
+input.temp::-webkit-slider-thumb  { background:var(--temp);  box-shadow:0 0 5px rgba(255,112,67,.5); }
+input.co2::-webkit-slider-thumb   { background:var(--co2);   box-shadow:0 0 5px rgba(168,224,99,.5); }
+input.ec::-webkit-slider-thumb    { background:var(--ec);    box-shadow:0 0 5px rgba(255,215,64,.5); }
+
+/* 共通スライダー */
+.common-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* ログパネル */
+.log-panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 16px;
+  display: flex; flex-direction: column;
+}
+.log-area {
+  flex: 1; background: #030704; border: 1px solid var(--border);
+  border-radius: 3px; padding: 8px 10px;
+  font-family: var(--mono); font-size: 9px; line-height: 1.9;
+  overflow-y: auto; height: 220px;
+}
+.log-area::-webkit-scrollbar { width: 3px; }
+.log-area::-webkit-scrollbar-thumb { background: var(--border); }
+.le        { color: var(--muted); }
+.le.water  { color: var(--water); }
+.le.temp   { color: var(--temp); }
+.le.co2    { color: var(--co2); }
+.le.ec     { color: var(--ec); }
+.le.safe   { color: var(--safe); }
+.le.warn   { color: var(--warn); }
+.le.upper  { color: var(--danger); }
+
+/* ボタン */
+.btn-row { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+button.ctrl {
+  font-family:var(--mono); font-size:9px; letter-spacing:1px;
+  padding:6px 14px; border:1px solid var(--border);
+  background:transparent; color:var(--text); cursor:pointer; border-radius:2px; transition:all .15s;
+}
+button.ctrl:hover  { border-color:var(--co2); color:var(--co2); }
+button.ctrl.play   { border-color:var(--safe); color:var(--safe); }
+button.ctrl.paused { border-color:var(--warn); color:var(--warn); }
+
+footer {
+  margin-top:48px; padding-top:16px; border-top:1px solid var(--border);
+  font-family:var(--mono); font-size:9px; color:var(--muted);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
+}
+footer a { color:var(--co2); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-left">
+    <div class="h-tag">NRA-IDE / Band Gate — 09 / AGRICULTURE</div>
+    <h1>温室農業 4指標 同時監視<br>Band Gate ライブデモ</h1>
+    <p>
+      水圧・気温・CO₂濃度・養液ECを Band Gate で同時監視します。<br>
+      「適正範囲を外れる勢い」をEMAで記憶し、上限超過も下限割れも同じ R = δ/τ で検知。<br>
+      スパイクが来る前に予兆を捉えます。
+    </p>
+  </div>
+  <div class="live-wrap">
+    <div class="live-badge"><div class="ldot"></div>GREENHOUSE LIVE</div>
+    <div class="btn-row">
+      <button class="ctrl play" id="btnPlay" onclick="togglePlay()">⏸ PAUSE</button>
+      <button class="ctrl" onclick="resetSim()">↺ RESET</button>
+    </div>
+  </div>
+</header>
+
+<!-- 4指標グリッド -->
+<div class="four-grid">
+
+  <!-- 💧 水圧 -->
+  <div class="sensor-card water" id="card-water">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">💧</span>
+        <span class="card-name" style="color:var(--water)">灌漑水圧</span>
+      </div>
+      <div class="card-decision pass" id="dec-water">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-water" style="color:var(--water)">—</div>
+      <div class="card-unit">kPa</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track">
+        <div class="band-safe" id="safe-water"></div>
+      </div>
+      <div class="band-needle" id="needle-water" style="color:var(--water);background:var(--water)"></div>
+      <div class="band-label-low" id="ll-water"></div>
+      <div class="band-label-high" id="lh-water"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-water" height="60"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-water" style="background:var(--water)"></div></div>
+      <span class="r-val" id="rv-water" style="color:var(--water)">0.000</span>
+    </div>
+  </div>
+
+  <!-- 🌡 気温 -->
+  <div class="sensor-card temp" id="card-temp">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">🌡</span>
+        <span class="card-name" style="color:var(--temp)">温室気温</span>
+      </div>
+      <div class="card-decision pass" id="dec-temp">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-temp" style="color:var(--temp)">—</div>
+      <div class="card-unit">°C</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track">
+        <div class="band-safe" id="safe-temp"></div>
+      </div>
+      <div class="band-needle" id="needle-temp" style="color:var(--temp);background:var(--temp)"></div>
+      <div class="band-label-low" id="ll-temp"></div>
+      <div class="band-label-high" id="lh-temp"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-temp" height="60"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-temp" style="background:var(--temp)"></div></div>
+      <span class="r-val" id="rv-temp" style="color:var(--temp)">0.000</span>
+    </div>
+  </div>
+
+  <!-- 🌿 CO₂ -->
+  <div class="sensor-card co2" id="card-co2">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">🌿</span>
+        <span class="card-name" style="color:var(--co2)">CO₂濃度</span>
+      </div>
+      <div class="card-decision pass" id="dec-co2">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-co2" style="color:var(--co2)">—</div>
+      <div class="card-unit">ppm</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track">
+        <div class="band-safe" id="safe-co2"></div>
+      </div>
+      <div class="band-needle" id="needle-co2" style="color:var(--co2);background:var(--co2)"></div>
+      <div class="band-label-low" id="ll-co2"></div>
+      <div class="band-label-high" id="lh-co2"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-co2" height="60"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-co2" style="background:var(--co2)"></div></div>
+      <span class="r-val" id="rv-co2" style="color:var(--co2)">0.000</span>
+    </div>
+  </div>
+
+  <!-- ⚗ 養液EC -->
+  <div class="sensor-card ec" id="card-ec">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">⚗</span>
+        <span class="card-name" style="color:var(--ec)">養液EC</span>
+      </div>
+      <div class="card-decision pass" id="dec-ec">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-ec" style="color:var(--ec)">—</div>
+      <div class="card-unit">mS/cm</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track">
+        <div class="band-safe" id="safe-ec"></div>
+      </div>
+      <div class="band-needle" id="needle-ec" style="color:var(--ec);background:var(--ec)"></div>
+      <div class="band-label-low" id="ll-ec"></div>
+      <div class="band-label-high" id="lh-ec"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-ec" height="60"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-ec" style="background:var(--ec)"></div></div>
+      <span class="r-val" id="rv-ec" style="color:var(--ec)">0.000</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- 下段：パラメータ + ログ -->
+<div class="bottom-row">
+
+  <div class="param-panel">
+    <div class="p-title">Band Gate パラメータ（各指標）</div>
+    <div class="param-grid">
+
+      <!-- 水圧 -->
+      <div class="pg-item">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--water);margin-bottom:6px;letter-spacing:2px">💧 水圧 τ_high / τ_low</div>
+        <div class="pg-head"><span class="pg-name">τ_high (kPa)</span><span class="pg-val" id="v-wh">70</span></div>
+        <input type="range" class="water" id="sl-wh" min="40" max="120" value="70">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (kPa)</span><span class="pg-val" id="v-wl">30</span></div>
+        <input type="range" class="water" id="sl-wl" min="5" max="60" value="30">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.20/0.50</span></div>
+        <input type="range" class="water" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.20">
+        <input type="range" class="water" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.50" style="margin-top:3px">
+      </div>
+
+      <!-- 気温 -->
+      <div class="pg-item">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--temp);margin-bottom:6px;letter-spacing:2px">🌡 気温 τ_high / τ_low</div>
+        <div class="pg-head"><span class="pg-name">τ_high (°C)</span><span class="pg-val" id="v-th">35</span></div>
+        <input type="range" class="temp" id="sl-th" min="20" max="50" value="35">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (°C)</span><span class="pg-val" id="v-tl">10</span></div>
+        <input type="range" class="temp" id="sl-tl" min="0" max="25" value="10">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ta">0.25/0.45</span></div>
+        <input type="range" class="temp" id="sl-tau" min="0.01" max="0.99" step="0.01" value="0.25">
+        <input type="range" class="temp" id="sl-tal" min="0.01" max="0.99" step="0.01" value="0.45" style="margin-top:3px">
+      </div>
+
+      <!-- CO2 -->
+      <div class="pg-item">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--co2);margin-bottom:6px;letter-spacing:2px">🌿 CO₂ τ_high / τ_low</div>
+        <div class="pg-head"><span class="pg-name">τ_high (ppm)</span><span class="pg-val" id="v-ch">1200</span></div>
+        <input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (ppm)</span><span class="pg-val" id="v-cl">400</span></div>
+        <input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ca">0.30/0.40</span></div>
+        <input type="range" class="co2" id="sl-cau" min="0.01" max="0.99" step="0.01" value="0.30">
+        <input type="range" class="co2" id="sl-cal" min="0.01" max="0.99" step="0.01" value="0.40" style="margin-top:3px">
+      </div>
+
+      <!-- EC -->
+      <div class="pg-item">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ec);margin-bottom:6px;letter-spacing:2px">⚗ 養液EC τ_high / τ_low</div>
+        <div class="pg-head"><span class="pg-name">τ_high (mS/cm)</span><span class="pg-val" id="v-eh">3.5</span></div>
+        <input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div>
+        <input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8">
+        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ea">0.20/0.55</span></div>
+        <input type="range" class="ec" id="sl-eau" min="0.01" max="0.99" step="0.01" value="0.20">
+        <input type="range" class="ec" id="sl-eal" min="0.01" max="0.99" step="0.01" value="0.55" style="margin-top:3px">
+      </div>
+
+    </div>
+
+    <!-- 共通 -->
+    <div class="common-row">
+      <div class="pg-item">
+        <div class="pg-head"><span class="pg-name">速度</span><span class="pg-val" id="v-spd">1×</span></div>
+        <input type="range" class="co2" id="sl-spd" min="1" max="5" value="1">
+      </div>
+      <div class="pg-item">
+        <div class="pg-head"><span class="pg-name">HOLD (ms)</span><span class="pg-val" id="v-hold">1500</span></div>
+        <input type="range" class="water" id="sl-hold" min="200" max="4000" step="100" value="1500">
+      </div>
+    </div>
+
+    <div style="margin-top:12px;padding:10px 12px;background:rgba(168,224,99,.04);border:1px solid rgba(168,224,99,.12);border-radius:3px">
+      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--co2);margin-bottom:5px">α の非対称設定について</div>
+      <div style="font-size:10px;color:var(--muted);line-height:1.7">
+        α_upper を小さく → 過負荷方向はゆっくり反応（配管衝撃を避ける）<br>
+        α_lower を大きく → 枯渇方向は素早く反応（根への水途絶を防ぐ）<br>
+        これが農業に適した非対称ダンパーの設定です。
+      </div>
+    </div>
+  </div>
+
+  <div class="log-panel">
+    <div class="p-title">イベントログ — 全指標統合</div>
+    <div class="log-area" id="logArea"></div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="ctrl" onclick="setStress('drought')">🏜 干ばつシミュレーション</button>
+      <button class="ctrl" onclick="setStress('heat')">🔥 熱波シミュレーション</button>
+      <button class="ctrl" onclick="setStress('normal')">🌱 通常状態に戻す</button>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.7" id="stress-note">
+      通常の温室環境です。定期的にスパイクが来ます。
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>NRA-IDE / Band Gate — Greenhouse 4-Sensor Live Monitoring</span>
+  <span>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    &nbsp;|&nbsp;
+    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+  </span>
+</footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// 4センサー定義
+// ─────────────────────────────────────────────
+const SENSORS = {
+  water: {
+    key:'water', label:'灌漑水圧', unit:'kPa',
+    nominal:50, color:'#29d4ff',
+    hist:[], ema_u:0, ema_l:0, holdUntil:0, silCount:0, lastDec:'PASS',
+  },
+  temp: {
+    key:'temp', label:'温室気温', unit:'°C',
+    nominal:22, color:'#ff7043',
+    hist:[], ema_u:0, ema_l:0, holdUntil:0, silCount:0, lastDec:'PASS',
+  },
+  co2: {
+    key:'co2', label:'CO₂濃度', unit:'ppm',
+    nominal:800, color:'#a8e063',
+    hist:[], ema_u:0, ema_l:0, holdUntil:0, silCount:0, lastDec:'PASS',
+  },
+  ec: {
+    key:'ec', label:'養液EC', unit:'mS/cm',
+    nominal:2.0, color:'#ffd740',
+    hist:[], ema_u:0, ema_l:0, holdUntil:0, silCount:0, lastDec:'PASS',
+  },
+};
+
+const HIST = 160;
+let t = 0;
+let playing = true;
+let stressMode = 'normal';
+let lastFrameTime = 0;
+
+// ─────────────────────────────────────────────
+// テレメトリ生成
+// ─────────────────────────────────────────────
+function getValues(t) {
+  const p = t % 300;
+  const drought = stressMode === 'drought';
+  const heat    = stressMode === 'heat';
+
+  // 水圧
+  let water = 50 + Math.sin(t*0.04)*5 + (Math.random()-.5)*2;
+  if (p>=70 && p<=100) water += 28*Math.sin((p-70)/30*Math.PI);         // 圧力スパイク
+  if (p>=190 && p<=240) water -= 25*Math.sin((p-190)/50*Math.PI);       // 水圧降下
+  if (drought) water -= 18 + Math.sin(t*0.02)*5;
+
+  // 気温
+  let temp = 22 + Math.sin(t*0.03)*4 + (Math.random()-.5)*1.5;
+  if (p>=80 && p<=115) temp += 18*Math.sin((p-80)/35*Math.PI);          // 熱波
+  if (p>=210 && p<=250) temp -= 16*Math.sin((p-210)/40*Math.PI);        // 急冷
+  if (heat) temp += 14 + Math.sin(t*0.025)*4;
+
+  // CO2
+  let co2 = 800 + Math.sin(t*0.05)*120 + (Math.random()-.5)*40;
+  if (p>=60 && p<=90) co2 += 500*Math.sin((p-60)/30*Math.PI);           // CO2急増
+  if (p>=180 && p<=220) co2 -= 450*Math.sin((p-180)/40*Math.PI);        // 換気急落
+  if (drought) co2 -= 200;
+
+  // 養液EC
+  let ec = 2.0 + Math.sin(t*0.04)*0.4 + (Math.random()-.5)*0.15;
+  if (p>=90 && p<=120) ec += 2.2*Math.sin((p-90)/30*Math.PI);           // 塩害スパイク
+  if (p>=200 && p<=245) ec -= 1.6*Math.sin((p-200)/45*Math.PI);         // 養液枯渇
+  if (drought) ec -= 0.6 + Math.sin(t*0.02)*0.2;
+
+  return { water, temp, co2, ec };
+}
+
+// ─────────────────────────────────────────────
+// Band Gate 計算
+// ─────────────────────────────────────────────
+function getParams() {
+  return {
+    water: {
+      th: parseFloat(document.getElementById('sl-wh').value),
+      tl: parseFloat(document.getElementById('sl-wl').value),
+      au: parseFloat(document.getElementById('sl-wau').value),
+      al: parseFloat(document.getElementById('sl-wal').value),
+    },
+    temp: {
+      th: parseFloat(document.getElementById('sl-th').value),
+      tl: parseFloat(document.getElementById('sl-tl').value),
+      au: parseFloat(document.getElementById('sl-tau').value),
+      al: parseFloat(document.getElementById('sl-tal').value),
+    },
+    co2: {
+      th: parseFloat(document.getElementById('sl-ch').value),
+      tl: parseFloat(document.getElementById('sl-cl').value),
+      au: parseFloat(document.getElementById('sl-cau').value),
+      al: parseFloat(document.getElementById('sl-cal').value),
+    },
+    ec: {
+      th: parseFloat(document.getElementById('sl-eh').value),
+      tl: parseFloat(document.getElementById('sl-el').value),
+      au: parseFloat(document.getElementById('sl-eau').value),
+      al: parseFloat(document.getElementById('sl-eal').value),
+    },
+    spd:  parseInt(document.getElementById('sl-spd').value),
+    hold: parseInt(document.getElementById('sl-hold').value),
+  };
+}
+
+function bandGate(sensor, v, p, nowMs) {
+  const half    = (p.th - p.tl) / 2;
+  const d_upper = Math.max(0, v - p.th);
+  const d_lower = Math.max(0, p.tl - v);
+
+  sensor.ema_u = p.au * d_upper + (1 - p.au) * sensor.ema_u;
+  sensor.ema_l = p.al * d_lower + (1 - p.al) * sensor.ema_l;
+
+  const tau_u = half * Math.min(1 + sensor.ema_u / (half+.001), 2.5);
+  const tau_l = half * Math.max(1 - sensor.ema_l / (half+.001), 0.3);
+
+  const R_u = d_upper > 0 ? d_upper / tau_u : 0;
+  const R_l = d_lower > 0 ? d_lower / tau_l : 0;
+  const R   = Math.max(R_u, R_l);
+
+  const held = nowMs < sensor.holdUntil;
+  let silence = held;
+  let dir = held ? (sensor.lastDir||'') : '';
+
+  if (!held && R >= 1.0) {
+    sensor.holdUntil = nowMs + p.hold;
+    sensor.silCount++;
+    silence = true;
+    dir = R_u >= R_l ? 'upper' : 'lower';
+    sensor.lastDir = dir;
+  }
+
+  // 動的バンド
+  const upper_band = p.th + (tau_u - half);
+  const lower_band = p.tl - (half - tau_l);
+
+  return { v, R, silence, dir, upper_band, lower_band };
+}
+
+// ─────────────────────────────────────────────
+// ミニ波形描画
+// ─────────────────────────────────────────────
+function drawMini(canvasId, hist, upper_band, lower_band, color, silence) {
+  const cv  = document.getElementById(canvasId);
+  const ctx = cv.getContext('2d');
+  const W   = cv.parentElement.clientWidth - 28;
+  cv.width  = W; cv.height = 60;
+
+  ctx.clearRect(0,0,W,60);
+  if (hist.length < 2) return;
+
+  const vals = hist.map(h=>h.v);
+  const minV = Math.min(...vals) - 2;
+  const maxV = Math.max(...vals) + 2;
+  const rng  = maxV - minV || 1;
+
+  function xp(i) { return (i/(HIST-1))*W; }
+  function yp(v) { return 58 - ((v-minV)/rng)*54; }
+
+  // SILENCE塗り
+  for (let i=1; i<hist.length; i++) {
+    if (hist[i].silence) {
+      const c = hist[i].dir==='upper'
+        ? 'rgba(255,82,82,.12)' : 'rgba(41,212,255,.1)';
+      ctx.fillStyle = c;
+      ctx.fillRect(xp(i-1),0,xp(i)-xp(i-1)+1,60);
+    }
+  }
+
+  // 上限バンド線
+  ctx.strokeStyle = `${color}55`;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath();
+  hist.forEach((h,i)=>{ i===0?ctx.moveTo(xp(i),yp(h.upper_band)):ctx.lineTo(xp(i),yp(h.upper_band)); });
+  ctx.stroke();
+  // 下限バンド線
+  ctx.beginPath();
+  hist.forEach((h,i)=>{ i===0?ctx.moveTo(xp(i),yp(h.lower_band)):ctx.lineTo(xp(i),yp(h.lower_band)); });
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 観測値
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  ctx.shadowColor = color;
+  ctx.shadowBlur  = silence ? 6 : 0;
+  ctx.beginPath();
+  hist.forEach((h,i)=>{ i===0?ctx.moveTo(xp(i),yp(h.v)):ctx.lineTo(xp(i),yp(h.v)); });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+// ─────────────────────────────────────────────
+// UI更新
+// ─────────────────────────────────────────────
+function updateCard(key, res, p) {
+  const s   = SENSORS[key];
+  const col = s.color;
+  const { v, R, silence, dir, upper_band, lower_band } = res;
+
+  const decEl   = document.getElementById('dec-'+key);
+  const valEl   = document.getElementById('val-'+key);
+  const rfEl    = document.getElementById('rf-'+key);
+  const rvEl    = document.getElementById('rv-'+key);
+  const cardEl  = document.getElementById('card-'+key);
+  const needleEl= document.getElementById('needle-'+key);
+  const safeEl  = document.getElementById('safe-'+key);
+  const llEl    = document.getElementById('ll-'+key);
+  const lhEl    = document.getElementById('lh-'+key);
+
+  // 現在値
+  const dp = key==='ec' ? 2 : key==='co2' ? 0 : 1;
+  valEl.textContent = v.toFixed(dp);
+  valEl.style.color = silence
+    ? (dir==='upper'?'var(--danger)':'var(--water)') : col;
+
+  // 決定バッジ
+  decEl.textContent = silence ? (dir==='upper'?'↑ UPPER':'↓ LOWER') : 'PASS';
+  decEl.className   = 'card-decision ' + (silence ? dir : 'pass');
+
+  // カードグロー
+  cardEl.style.boxShadow = silence
+    ? `0 0 20px -4px ${dir==='upper'?'#ff5252':'#29d4ff'}` : 'none';
+
+  // Rバー
+  rfEl.style.width = Math.min(R/1.5,1)*100+'%';
+  rfEl.style.background = silence ? (dir==='upper'?'#ff5252':'#29d4ff') : R>0.65?'#ffca28':col;
+  rvEl.textContent = R.toFixed(4);
+  rvEl.style.color = rfEl.style.background;
+
+  // バンドバー
+  const full_range = p.th * 1.4 - p.tl * 0.6;
+  const offset     = p.tl * 0.6;
+  const safePct    = (p.tl - offset) / full_range * 100;
+  const safeWidth  = (p.th - p.tl)   / full_range * 100;
+  const needlePct  = Math.max(0, Math.min((v - offset) / full_range * 100, 100));
+
+  safeEl.style.left   = safePct + '%';
+  safeEl.style.width  = safeWidth + '%';
+  needleEl.style.left = needlePct + '%';
+  needleEl.style.background = silence
+    ? (dir==='upper'?'#ff5252':'#29d4ff') : col;
+  needleEl.style.boxShadow  = `0 0 6px ${needleEl.style.background}`;
+
+  llEl.textContent = p.tl.toFixed(key==='ec'?1:0);
+  lhEl.textContent = p.th.toFixed(key==='ec'?1:0);
+
+  // ミニ波形
+  drawMini('cv-'+key, s.hist, upper_band, lower_band, col, silence);
+
+  // ログ
+  if (silence && s.lastDec !== 'SILENCE') {
+    addLog(`[${s.label}] ${dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  V=${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
+  } else if (!silence && s.lastDec === 'SILENCE') {
+    addLog(`[${s.label}] HOLD終了 → PASS`, 'safe');
+  } else if (R > 0.65 && R < 1.0 && s.lastDec !== 'warn') {
+    addLog(`[${s.label}] WARN R=${R.toFixed(3)} 閾値接近中`, 'warn');
+  }
+  s.lastDec = silence ? 'SILENCE' : (R>0.65?'warn':'PASS');
+}
+
+function addLog(msg, cls) {
+  const a = document.getElementById('logArea');
+  const el = document.createElement('div');
+  el.className = 'le '+ cls;
+  el.textContent = `[t=${String(t).padStart(5,'0')}] ${msg}`;
+  a.appendChild(el);
+  a.scrollTop = a.scrollHeight;
+  while (a.children.length > 80) a.removeChild(a.firstChild);
+}
+
+// ─────────────────────────────────────────────
+// メインループ
+// ─────────────────────────────────────────────
+function tick() {
+  if (!playing) { requestAnimationFrame(tick); return; }
+  const now = performance.now();
+  const p   = getParams();
+  const interval = Math.max(16, 40 - p.spd * 7);
+  if (now - lastFrameTime < interval) { requestAnimationFrame(tick); return; }
+  lastFrameTime = now;
+
+  for (let s=0; s<p.spd; s++) {
+    t++;
+    const nowMs = t * 40;
+    const vals  = getValues(t);
+
+    ['water','temp','co2','ec'].forEach(key => {
+      const sensor = SENSORS[key];
+      const v      = vals[key];
+      const pp     = p[key];
+      const res    = bandGate(sensor, v, pp, nowMs);
+
+      if (sensor.hist.length >= HIST) sensor.hist.shift();
+      sensor.hist.push(res);
+
+      if (s === p.spd - 1) updateCard(key, res, pp);
+    });
+  }
+
+  requestAnimationFrame(tick);
+}
+
+// ─────────────────────────────────────────────
+// ストレスモード
+// ─────────────────────────────────────────────
+function setStress(mode) {
+  stressMode = mode;
+  const notes = {
+    drought: '🏜 干ばつシミュレーション中。水圧・EC・CO₂が同時に低下します。',
+    heat:    '🔥 熱波シミュレーション中。気温が持続的に高くなります。',
+    normal:  '🌱 通常の温室環境です。定期的にスパイクが来ます。',
+  };
+  document.getElementById('stress-note').textContent = notes[mode];
+}
+
+// ─────────────────────────────────────────────
+// スライダーラベル更新
+// ─────────────────────────────────────────────
+function updateLabels() {
+  const g = id => parseFloat(document.getElementById(id).value);
+  document.getElementById('v-wh').textContent   = g('sl-wh').toFixed(0);
+  document.getElementById('v-wl').textContent   = g('sl-wl').toFixed(0);
+  document.getElementById('v-wa').textContent   = g('sl-wau').toFixed(2)+'/'+g('sl-wal').toFixed(2);
+  document.getElementById('v-th').textContent   = g('sl-th').toFixed(0);
+  document.getElementById('v-tl').textContent   = g('sl-tl').toFixed(0);
+  document.getElementById('v-ta').textContent   = g('sl-tau').toFixed(2)+'/'+g('sl-tal').toFixed(2);
+  document.getElementById('v-ch').textContent   = g('sl-ch').toFixed(0);
+  document.getElementById('v-cl').textContent   = g('sl-cl').toFixed(0);
+  document.getElementById('v-ca').textContent   = g('sl-cau').toFixed(2)+'/'+g('sl-cal').toFixed(2);
+  document.getElementById('v-eh').textContent   = g('sl-eh').toFixed(1);
+  document.getElementById('v-el').textContent   = g('sl-el').toFixed(1);
+  document.getElementById('v-ea').textContent   = g('sl-eau').toFixed(2)+'/'+g('sl-eal').toFixed(2);
+  document.getElementById('v-spd').textContent  = document.getElementById('sl-spd').value + '×';
+  document.getElementById('v-hold').textContent = document.getElementById('sl-hold').value;
+}
+
+document.querySelectorAll('input[type=range]').forEach(el => {
+  el.addEventListener('input', updateLabels);
+});
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('btnPlay');
+  btn.textContent = playing ? '⏸ PAUSE' : '▶ PLAY';
+  btn.classList.toggle('play',   playing);
+  btn.classList.toggle('paused', !playing);
+}
+
+function resetSim() {
+  t = 0; stressMode = 'normal';
+  Object.values(SENSORS).forEach(s => {
+    s.hist=[]; s.ema_u=0; s.ema_l=0;
+    s.holdUntil=0; s.silCount=0; s.lastDec='PASS';
+  });
+  document.getElementById('logArea').innerHTML = '';
+  document.getElementById('stress-note').textContent = '通常の温室環境です。定期的にスパイクが来ます。';
+  addLog('温室監視システム起動 — 4指標同時監視開始', 'safe');
+}
+
+window.addEventListener('resize', ()=>{
+  Object.keys(SENSORS).forEach(key=>{
+    const cv = document.getElementById('cv-'+key);
+    cv.width = cv.parentElement.clientWidth - 28;
+  });
+});
+
+updateLabels();
+resetSim();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

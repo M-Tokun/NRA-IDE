@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE #04: 80ms Adaptive Stress Test</title>
+    <style>
+        body { background: #111; color: #fff; font-family: 'Courier New', monospace; padding: 20px; }
+        .log-box { 
+            background: #222; padding: 15px; border-left: 5px solid #555; 
+            margin-bottom: 20px; font-size: 14px; line-height: 1.6;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h2 { border-bottom: 1px solid #444; padding-bottom: 5px; color: #00d4ff; text-shadow: 0 0 5px rgba(0,212,255,0.5); }
+        .highlight { color: #ffcc00; font-weight: bold; }
+        canvas { border: 1px solid #444; background: #000; display: block; margin-top: 10px; }
+        button { 
+            padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 10px; 
+            border: none; border-radius: 4px; font-family: inherit; transition: 0.2s;
+        }
+        button:hover { opacity: 0.8; }
+        .info { color: #888; font-size: 0.9em; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<h2>Experiment: The 80ms Heavy Load (5x the 16.6ms Budget)</h2>
+<p class="info">Can the system survive a command that is physically impossible to execute in real-time?</p>
+
+<div style="margin-bottom: 15px; margin-top: 15px;">
+    <button onclick="setMode('legacy')" style="background:#ff5555; color:#fff;">Legacy (Blind Execution)</button>
+    <button onclick="setMode('han')" style="background:#00ff88; color:#000;">HAN (Adaptive Survival)</button>
+    <button onclick="setMode('none')" style="background:#444; color:#fff;">Reset</button>
+</div>
+
+<div class="log-box">
+    <div>Mode: <span id="mode-disp" class="highlight">---</span></div>
+    <div>Real FPS: <span id="fps-disp" class="highlight">60</span> (Higher is smoother)</div>
+    <div>Executed Work: <span id="work-disp" class="highlight">0</span> ms (Actual CPU block time)</div>
+    <div style="margin-top:10px; border-top: 1px solid #444; padding-top: 10px; color:#aaa;">
+        System Status: <span id="comment-disp" style="color: #fff;">Waiting for input...</span>
+    </div>
+</div>
+
+<canvas id="cvs" width="600" height="100"></canvas>
+
+<script>
+// ==========================================
+//  Configuration: "Carry an 80kg Load"
+// ==========================================
+const TARGET_LOAD_MS = 80; 
+
+// State Variables
+let mode = 'none';
+let currentWork = 0;   // The actual load carried
+let lastTime = performance.now();
+let fps = 60;
+
+// HAN Physics Variables
+let hanVelocity = 0;   // Adjustment momentum
+let tension = 0;       // System Pain Level (Latency)
+
+// ------------------------------------------
+//  Main Loop (The Heartbeat)
+// ------------------------------------------
+function loop() {
+    requestAnimationFrame(loop);
+
+    // 1. Reality Check
+    const now = performance.now();
+    const delta = now - lastTime; // How much time actually passed?
+    lastTime = now;
+
+    // FPS Measurement (Smoothed)
+    fps = fps * 0.9 + (1000 / Math.max(1, delta)) * 0.1;
+
+    // ==========================================
+    //  The Core Difference
+    // ==========================================
+    
+    if (mode === 'legacy') {
+        // 【Legacy Logic: Blind Compliance】
+        // Command: "Wait 80ms."
+        // Reality: "Frame budget is only 16ms! System is freezing!"
+        // Decision: "Ignore reality. Execute command."
+        // Result: Total system lag.
+        
+        currentWork = TARGET_LOAD_MS; 
+        
+        displayStatus("Executing 80ms blindly. Ignoring FPS collapse.", "#ff5555");
+    } 
+    else if (mode === 'han') {
+        // 【HAN Logic: Nomological Homeostasis】
+        // 1. Budget Check: 60fps = 16.6ms limit.
+        const budget = 16.6;
+        
+        // 2. Violation Detection: How much did we exceed the budget?
+        //    e.g., delta=80ms -> violation=63.4ms (Structural stress)
+        const violation = Math.max(0, delta - budget);
+        
+        // 3. Tension Generation: Proportional to violation.
+        //    L∧P: Logic converts Physical lag into "Tension".
+        const k = 0.5;
+        tension = violation * k; 
+        
+        // 4. Adaptive Survival: Reduce target load based on tension.
+        //    "If it hurts (lag), drop the luggage to survive."
+        let adaptiveTarget = TARGET_LOAD_MS - (tension * 5); 
+        
+        // 5. Smooth Physics: Slide towards the new target (no snapping).
+        const force = (adaptiveTarget - currentWork) * 0.1;
+        hanVelocity += force;
+        hanVelocity *= 0.8; // Friction (Damping)
+        currentWork += hanVelocity;
+        
+        // Physical constraints (cannot be negative)
+        if (currentWork < 0) currentWork = 0;
+
+        displayStatus(`Pain (Lag) Detected: ${violation.toFixed(1)}ms. Shedding load to ${currentWork.toFixed(1)}ms to survive.`, "#00ff88");
+    } else {
+        currentWork = 0;
+        displayStatus("No Load. System Idle.", "#888");
+    }
+
+    // ------------------------------------------
+    //  Execution Phase (The Heavy Lifting)
+    // ------------------------------------------
+    // This physically blocks the CPU (simulating heavy calculation)
+    const startBlock = performance.now();
+    
+    // Busy wait loop
+    while (performance.now() - startBlock < currentWork) {
+        // CPU is locked here
+    }
+
+    // Render & UI Update
+    draw();
+    updateUI();
+}
+
+// ------------------------------------------
+//  Visualization (UI)
+// ------------------------------------------
+function draw() {
+    const cvs = document.getElementById('cvs');
+    const ctx = cvs.getContext('2d');
+    const t = performance.now() * 0.005;
+    
+    // Clear with trail effect
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fillRect(0,0,600,100);
+    
+    // The Ball (Smoothness Indicator)
+    const x = 300 + Math.sin(t) * 200;
+    ctx.beginPath();
+    ctx.arc(x, 50, 20, 0, Math.PI*2);
+    ctx.fillStyle = mode === 'legacy' ? '#ff5555' : mode === 'han' ? '#00ff88' : '#888';
+    ctx.fill();
+    
+    // Eye candy
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function updateUI() {
+    document.getElementById('mode-disp').innerText = mode.toUpperCase();
+    
+    const fpsElem = document.getElementById('fps-disp');
+    fpsElem.innerText = fps.toFixed(1);
+    fpsElem.style.color = fps < 30 ? '#ff5555' : '#00ff88';
+    
+    document.getElementById('work-disp').innerText = currentWork.toFixed(1);
+}
+
+function displayStatus(msg, color) {
+    const el = document.getElementById('comment-disp');
+    el.innerText = msg;
+    el.style.color = color;
+}
+
+function setMode(m) {
+    mode = m;
+    hanVelocity = 0; // Reset physics
+    // Set initial states
+    if(m === 'legacy') currentWork = TARGET_LOAD_MS;
+    if(m === 'han') currentWork = 0; // Start light, then adapt up
+}
+
+// Ignition
+loop();
+</script>
+</body>
+</html>

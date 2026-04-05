@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NRA: Phase-Gap Engine — TIME-GEAR (EN)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap');
+
+  :root {
+    --bg:       #04060a;
+    --panel:    rgba(6, 12, 20, 0.85);
+    --cyan:     #00e8ff;
+    --red:      #ff2d55;
+    --amber:    #ffaa00;
+    --heat:     #ff6600;
+    --text:     #b8c4ce;
+    --dim:      #556070;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,232,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,232,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .wrapper {
+    position: relative;
+    width: 740px;
+    height: 740px;
+  }
+
+  /* ── SVG canvas ── */
+  #canvas { width: 100%; height: 100%; }
+
+  /* ── Status panel (top-left) ── */
+  .panel-left {
+    position: absolute;
+    top: 24px; left: 24px;
+    width: 230px;
+    background: var(--panel);
+    border-left: 2px solid var(--cyan);
+    padding: 14px 16px;
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+  .panel-title {
+    color: var(--cyan);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(0,232,255,0.2);
+    padding-bottom: 8px;
+  }
+  .row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 12px; }
+  .row .lbl { color: var(--dim); }
+  .row .val { color: var(--cyan); }
+  .row .val.red { color: var(--red); }
+  .row .val.amber { color: var(--amber); }
+
+  /* R gauge */
+  .gauge-wrap {
+    margin: 10px 0 4px;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: visible;
+    position: relative;
+  }
+  .gauge-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--amber), var(--red));
+    transition: width 0.05s linear;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .gauge-label {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--dim); margin-top: 3px;
+  }
+
+  .state-badge {
+    margin-top: 12px;
+    padding: 6px 10px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-align: center;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    background: rgba(0,232,255,0.05);
+    transition: all 0.1s;
+  }
+  .state-badge.jump {
+    border-color: var(--red);
+    color: var(--red);
+    background: rgba(255,45,85,0.1);
+    box-shadow: 0 0 20px rgba(255,45,85,0.3);
+  }
+
+  /* ── Heat dissipation counter (top-right) ── */
+  .panel-right {
+    position: absolute;
+    top: 24px; right: 24px;
+    width: 190px;
+    background: var(--panel);
+    border-right: 2px solid var(--heat);
+    padding: 14px 16px;
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+    text-align: right;
+  }
+  .heat-title {
+    color: var(--heat);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .heat-val {
+    font-size: 28px;
+    color: var(--heat);
+    line-height: 1;
+    text-shadow: 0 0 20px var(--heat);
+  }
+  .heat-sub { font-size: 10px; color: var(--dim); margin-top: 4px; }
+
+  /* ── Tooth count slider (bottom-center) ── */
+  .panel-bottom {
+    position: absolute;
+    bottom: 24px;
+    left: 50%; transform: translateX(-50%);
+    background: var(--panel);
+    border-top: 2px solid var(--dim);
+    padding: 12px 24px;
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; gap: 16px;
+    font-size: 12px;
+  }
+  .panel-bottom label { color: var(--dim); letter-spacing: 1px; }
+  .panel-bottom input[type=range] {
+    -webkit-appearance: none;
+    width: 140px; height: 4px;
+    background: rgba(255,255,255,0.1);
+    outline: none; cursor: pointer;
+  }
+  .panel-bottom input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+  #teeth-val { color: var(--cyan); min-width: 28px; }
+
+  /* ── Axiom statement (bottom-left) ── */
+  .axiom {
+    position: absolute;
+    bottom: 28px; left: 24px;
+    pointer-events: none;
+    border-left: 2px solid var(--red);
+    padding-left: 12px;
+  }
+  .axiom-en { color: rgba(255,255,255,0.7); font-size: 11px; letter-spacing: 0.5px; margin-bottom: 4px; font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 300; }
+  .axiom-sub { color: var(--dim); font-size: 10px; font-family: 'Zen Kaku Gothic New', sans-serif; }
+
+  /* Particle canvas overlay */
+  #particle-canvas {
+    position: absolute; inset: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- Main SVG -->
+  <svg id="canvas" viewBox="0 0 300 300">
+    <defs>
+      <filter id="glow-cyan">
+        <feGaussianBlur stdDeviation="2" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-red">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <radialGradient id="gear-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="#1a2030"/>
+        <stop offset="100%" stop-color="#0a0f18"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Background rings -->
+    <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(0,232,255,0.05)" stroke-width="1"/>
+    <circle cx="150" cy="150" r="100" fill="none" stroke="rgba(0,232,255,0.04)" stroke-width="0.5" stroke-dasharray="4,8"/>
+    <circle cx="150" cy="150" r="80"  fill="none" stroke="rgba(0,232,255,0.03)" stroke-width="0.5"/>
+
+    <!-- Heat-wave flash ring -->
+    <circle id="heat-ring" cx="150" cy="150" r="68"
+            fill="none" stroke="var(--red)" stroke-width="0" opacity="0"/>
+
+    <!-- Gear body -->
+    <g id="gear-group" transform="rotate(0,150,150)">
+      <path id="gear-path" fill="url(#gear-grad)"
+            stroke="var(--cyan)" stroke-width="0.8"
+            filter="url(#glow-cyan)"/>
+      <!-- Center hub -->
+      <circle cx="150" cy="150" r="12" fill="#0d1520"
+              stroke="var(--cyan)" stroke-width="1" filter="url(#glow-cyan)"/>
+      <circle cx="150" cy="150" r="4"  fill="var(--cyan)" opacity="0.6"/>
+      <!-- Spokes -->
+      <line x1="150" y1="138" x2="150" y2="162"
+            stroke="var(--cyan)" stroke-width="0.5" opacity="0.3"/>
+      <line x1="138" y1="150" x2="162" y2="150"
+            stroke="var(--cyan)" stroke-width="0.5" opacity="0.3"/>
+    </g>
+
+    <!-- Escapement anchor (pallet fork) -->
+    <g id="pallet" transform="translate(150,36)">
+      <rect x="-22" y="-5" width="44" height="10"
+            fill="rgba(0,232,255,0.05)" stroke="var(--cyan)"
+            stroke-width="1.2" rx="2"/>
+      <line x1="-14" y1="5" x2="-14" y2="20"
+            stroke="var(--cyan)" stroke-width="2"/>
+      <line x1="14"  y1="5" x2="14"  y2="20"
+            stroke="var(--cyan)" stroke-width="2"/>
+    </g>
+
+    <!-- Contact point indicator (flash) -->
+    <circle id="contact-dot" cx="150" cy="50" r="4"
+            fill="var(--red)" opacity="0" filter="url(#glow-red)"/>
+
+    <!-- Residual discard text (fade-out) -->
+    <text id="discard-text" x="150" y="50"
+          fill="var(--heat)" font-family="'Share Tech Mono',monospace"
+          font-size="10" text-anchor="middle" opacity="0"/>
+  </svg>
+
+  <!-- Particle canvas -->
+  <canvas id="particle-canvas" width="740" height="740"></canvas>
+
+  <!-- Top-left status panel -->
+  <div class="panel-left">
+    <div class="panel-title">Phase-Gap Engine</div>
+    <div class="row"><span class="lbl">δ Accumulum</span><span class="val" id="d-val">0.000</span></div>
+    <div class="row"><span class="lbl">τ Gap Thickness</span><span class="val" id="t-val">1.000</span></div>
+    <div class="row"><span class="lbl">Step (θ)</span><span class="val" id="step-val">22.5°</span></div>
+    <div class="row"><span class="lbl">Jumps</span><span class="val amber" id="jump-val">0</span></div>
+    <div class="gauge-wrap">
+      <div class="gauge-fill" id="gauge"></div>
+    </div>
+    <div class="gauge-label"><span>R=0</span><span>R=1.0 → JUMP</span></div>
+    <div class="row" style="margin-top:4px">
+      <span class="lbl">R = δ/τ</span>
+      <span class="val red" id="r-val">0.000</span>
+    </div>
+    <div class="state-badge" id="state-badge">STEADY — Latent Tension</div>
+  </div>
+
+  <!-- Top-right heat dissipation panel -->
+  <div class="panel-right">
+    <div class="heat-title">Heat Dissipated</div>
+    <div class="heat-val" id="heat-total">0.000</div>
+    <div class="heat-sub">Σ discarded residuals</div>
+    <div style="margin-top:12px; font-size:11px; color:var(--dim);">
+      Last dump:<br>
+      <span id="last-dump" style="color:var(--heat);">—</span>
+    </div>
+  </div>
+
+  <!-- Tooth count slider -->
+  <div class="panel-bottom">
+    <label>TEETH</label>
+    <input type="range" id="teeth-slider" min="8" max="32" value="24" step="4">
+    <span id="teeth-val">24</span>
+  </div>
+
+  <!-- Axiom statement -->
+  <div class="axiom">
+    <div class="axiom-en">Residuals are not corrected — they are expelled as heat.</div>
+    <div class="axiom-sub">NRA-IDE: Phase-Gap Axiom Proof © 2026 M-Tokuni</div>
+  </div>
+
+</div>
+
+<script>
+// ── Gear path generator ───────────────────────────────────
+// Ro = addendum circle (tooth tip), Ri = dedendum circle (tooth root)
+// toothH = half-angle of tooth tip width (rad)
+function buildGearPath(cx, cy, N, Ro, Ri, toothH) {
+  const step = (2 * Math.PI) / N;
+  const half  = toothH;
+  let d = '';
+  for (let i = 0; i < N; i++) {
+    const base = i * step;
+    // root → rise → tip → fall → root
+    const a0 = base;
+    const a1 = base + step * 0.3;
+    const a2 = base + step * 0.3 + half;
+    const a3 = base + step * 0.7 - half;
+    const a4 = base + step * 0.7;
+    const p = (r, a) => [cx + r * Math.cos(a - Math.PI/2), cy + r * Math.sin(a - Math.PI/2)];
+    const pts = [
+      p(Ri, a0), p(Ri, a1), p(Ro, a2), p(Ro, a3), p(Ri, a4)
+    ];
+    d += (i === 0 ? 'M' : 'L') + pts[0].join(',');
+    pts.slice(1).forEach(pt => { d += 'L' + pt.join(','); });
+  }
+  return d + 'Z';
+}
+
+// ── State variables ───────────────────────────────────────
+let N         = 24;
+let delta     = 0;
+const tau     = 1.0;
+let rotation  = 0;
+let jumps     = 0;
+let heatTotal = 0;
+
+const gearPath    = document.getElementById('gear-path');
+const gearGroup   = document.getElementById('gear-group');
+const dVal        = document.getElementById('d-val');
+const tVal        = document.getElementById('t-val');
+const rVal        = document.getElementById('r-val');
+const stepVal     = document.getElementById('step-val');
+const jumpVal     = document.getElementById('jump-val');
+const gauge       = document.getElementById('gauge');
+const stateBadge  = document.getElementById('state-badge');
+const heatTotalEl = document.getElementById('heat-total');
+const lastDumpEl  = document.getElementById('last-dump');
+const heatRing    = document.getElementById('heat-ring');
+const contactDot  = document.getElementById('contact-dot');
+const discardText = document.getElementById('discard-text');
+const pCanvas     = document.getElementById('particle-canvas');
+const pCtx        = pCanvas.getContext('2d');
+
+// Rebuild gear path for current tooth count
+function rebuildGear() {
+  const path = buildGearPath(150, 150, N, 68, 54, 0.18);
+  gearPath.setAttribute('d', path);
+  const stepDeg = (360 / N).toFixed(1);
+  stepVal.textContent = stepDeg + '°';
+}
+rebuildGear();
+
+// ── Particle system ───────────────────────────────────────
+const particles = [];
+
+function spawnHeatParticles(cx, cy, count, residual) {
+  // Color temperature scales with dissipation amount
+  const intensity = Math.min(residual / 0.3, 1);
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.random() * 2 * Math.PI);
+    const speed = 1.5 + Math.random() * 3.5;
+    const r = Math.floor(255);
+    const g = Math.floor(80 + intensity * 80);
+    particles.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1.0,
+      decay: 0.025 + Math.random() * 0.02,
+      size: 1.5 + Math.random() * 2.5,
+      color: `rgb(${r},${g},0)`
+    });
+  }
+}
+
+function updateParticles() {
+  pCtx.clearRect(0, 0, 740, 740);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x  += p.vx;
+    p.y  += p.vy;
+    p.vy += 0.04; // gravity — negate for upward heat-rise effect
+    p.vx *= 0.97;
+    p.vy *= 0.97;
+    p.life -= p.decay;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    pCtx.globalAlpha = p.life * 0.9;
+    pCtx.fillStyle = p.color;
+    pCtx.shadowColor = p.color;
+    pCtx.shadowBlur = 6;
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+    pCtx.fill();
+  }
+  pCtx.globalAlpha = 1;
+  pCtx.shadowBlur = 0;
+}
+
+// ── Heat-wave ring animation ──────────────────────────────
+let heatWave = null;
+
+function triggerHeatWave() {
+  heatWave = { r: 68, maxR: 130, opacity: 0.8 };
+}
+
+function updateHeatWave() {
+  if (!heatWave) return;
+  heatWave.r       += 2.5;
+  heatWave.opacity -= 0.04;
+  if (heatWave.opacity <= 0) { heatWave = null; heatRing.setAttribute('stroke-width','0'); return; }
+  heatRing.setAttribute('r',            heatWave.r.toFixed(1));
+  heatRing.setAttribute('stroke-width', '2');
+  heatRing.setAttribute('opacity',       heatWave.opacity.toFixed(3));
+}
+
+// ── Residual discard text animation ──────────────────────
+let discardAnim = 0;
+function showDiscardText(residual) {
+  discardText.textContent = `−${residual.toFixed(3)} → 💨`;
+  discardText.setAttribute('opacity', '1');
+  discardText.setAttribute('y', '50');
+  discardAnim = 30;
+}
+function updateDiscardText() {
+  if (discardAnim <= 0) { discardText.setAttribute('opacity','0'); return; }
+  discardAnim--;
+  const progress = 1 - discardAnim / 30;
+  discardText.setAttribute('opacity', (1 - progress * 0.9).toFixed(3));
+  const y = 50 - progress * 25;
+  discardText.setAttribute('y', y.toFixed(1));
+}
+
+// ── Single-tooth jump animation ───────────────────────────
+// δ accumulation is suspended during the jump;
+// gear rotation runs on its own independent time axis.
+let jumping       = false;
+let jumpFrom      = 0;   // start angle
+let jumpTo        = 0;   // target angle (+1 tooth)
+let jumpStart     = 0;   // start timestamp (ms)
+const JUMP_DURATION = 160; // ms — shorter = sharper "click" feel
+
+// ease-out-cubic: fast start, abrupt stop — mimics mechanical catch
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+// Trigger gear jump
+function triggerGearJump(residual) {
+  if (jumping) return; // prevent double-fire
+  jumping   = true;
+  jumpFrom  = rotation;
+  jumpTo    = rotation + (360 / N);
+  jumpStart = performance.now();
+
+  // Heat dissipation effects fire simultaneously with jump
+  spawnHeatParticles(370, 370, 24 + Math.floor(residual * 80), residual);
+  triggerHeatWave();
+  showDiscardText(residual);
+  contactDot.setAttribute('opacity', '1');
+  setTimeout(() => contactDot.setAttribute('opacity', '0'), 120);
+}
+
+// ── Main loop ─────────────────────────────────────────────
+function animate(now) {
+  // ── Gear jump processing (independent time axis) ──
+  if (jumping) {
+    const elapsed = now - jumpStart;
+    const t       = Math.min(elapsed / JUMP_DURATION, 1.0);
+    const eased   = easeOutCubic(t);
+    const current = jumpFrom + (jumpTo - jumpFrom) * eased;
+
+    gearGroup.setAttribute('transform', `rotate(${current.toFixed(3)},150,150)`);
+
+    if (t >= 1.0) {
+      // Jump complete — lock to target angle
+      rotation = jumpTo;
+      gearGroup.setAttribute('transform', `rotate(${rotation},150,150)`);
+      jumping  = false;
+
+      stateBadge.textContent = 'STEADY — Latent Tension';
+      stateBadge.classList.remove('jump');
+    }
+  }
+
+  // ── δ accumulation (suspended during jump) ──
+  if (!jumping) {
+    delta += 0.0008 + Math.random() * 0.0012;
+
+    if (delta >= tau) {
+      const residual = delta - tau;
+      heatTotal += residual;
+
+      // Fire jump
+      triggerGearJump(residual);
+
+      // Update UI
+      jumps++;
+      lastDumpEl.textContent  = `−${residual.toFixed(4)}`;
+      heatTotalEl.textContent = heatTotal.toFixed(3);
+      jumpVal.textContent     = jumps;
+
+      stateBadge.textContent = 'PHASE-JUMP  //  HEAT EXPELLED';
+      stateBadge.classList.add('jump');
+
+      delta = 0; // residual discarded — not carried forward
+    }
+  }
+
+  // ── Display update ──
+  const r = delta / tau;
+  dVal.textContent  = delta.toFixed(3);
+  rVal.textContent  = r.toFixed(3);
+  gauge.style.width = (r * 100).toFixed(1) + '%';
+
+  updateParticles();
+  updateHeatWave();
+  updateDiscardText();
+
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+// ── Tooth count slider ────────────────────────────────────
+const slider   = document.getElementById('teeth-slider');
+const teethVal = document.getElementById('teeth-val');
+slider.addEventListener('input', () => {
+  N = parseInt(slider.value);
+  teethVal.textContent = N;
+  rebuildGear();
+});
+</script>
+</body>
+</html>

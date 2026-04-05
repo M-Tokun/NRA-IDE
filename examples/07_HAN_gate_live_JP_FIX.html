@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<!--
+  FILE: 07_HAN_gate_live_JP_FIX.html
+  NRA-IDE 実証デモ #07 — HAN Gate ライブデモ（FIX版）
+  (c) 2026 M-Tokuni
+
+  【_FIX 修正内容】2026-03-10
+  旧版の computeR() では EMA の入力に r_raw（R計算結果 = Effect-Side）を使用していた。
+  これは結果値からτを逆算することになり、Π⁻¹（逆導出）に相当する構造違反。
+  因果ダイオードが無効化されるため修正対象となった。
+
+  修正: EMAへの入力を delta_cause（Cause-Side δ偏差）に変更。
+    - 各テレメトリ値が基準値を超えた量（δ偏差）を Cause-Side として使用
+    - 物理的負荷履歴の蓄積のみがτを動的に変化させる
+    - τを決定する関数は設計時に固定（Immutable）
+    - AI や Effect-Side 値はτを変更できない
+
+  NRA-IDE 構造原則:
+    τの値は Effect-Side（AI・計算結果）から変更不可。
+    Cause-Side（δ偏差 = 直接観測された計測値）の積算によってのみ動的に変化する。
+    このルール自体は設計時に固定される。
+-->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAN Gate — Live Demo (FIX)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg:     #070b10;
+  --panel:  #0c1118;
+  --border: #182030;
+  --safe:   #00e5a0;
+  --warn:   #f0a500;
+  --danger: #ff3d5a;
+  --muted:  #3a5070;
+  --text:   #b8ccd8;
+  --accent: #38b6ff;
+  --mono:   'Share Tech Mono', monospace;
+  --sans:   'Noto Sans JP', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* scan-line オーバーレイ */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,
+    rgba(0,0,0,0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* ヘッダー */
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header-left { border-left: 3px solid var(--accent); padding-left: 16px; }
+.header-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+header h1 {
+  font-size: clamp(18px, 3vw, 26px);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+header p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+/* ライブステータス */
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--safe);
+  padding: 6px 12px;
+  border: 1px solid rgba(0,229,160,0.3);
+  border-radius: 2px;
+  background: rgba(0,229,160,0.05);
+  white-space: nowrap;
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--safe);
+  animation: blink 1s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* メインキャンバス */
+.main-canvas-wrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+#chartMain {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #050810;
+  border-radius: 3px;
+}
+
+/* SILENCE フラッシュオーバーレイ */
+#silenceOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  pointer-events: none;
+  background: rgba(255,61,90,0);
+  transition: background 0.1s;
+  border: 2px solid transparent;
+}
+#silenceOverlay.active {
+  background: rgba(255,61,90,0.06);
+  border-color: rgba(255,61,90,0.5);
+  box-shadow: 0 0 30px rgba(255,61,90,0.15) inset;
+}
+
+/* SILENCE 大テキスト */
+#silenceStamp {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  font-family: var(--mono);
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: bold;
+  letter-spacing: 8px;
+  color: var(--danger);
+  text-shadow: 0 0 20px rgba(255,61,90,0.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  white-space: nowrap;
+}
+#silenceStamp.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* 下段レイアウト */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 680px) {
+  .bottom-grid { grid-template-columns: 1fr; }
+}
+
+/* パネル共通 */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 16px;
+}
+.panel-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* スライダー */
+.param-group { margin-bottom: 14px; }
+.param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.param-name { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+.param-val  { font-family: var(--mono); font-size: 12px; color: #fff; }
+.param-desc { font-size: 10px; color: var(--muted); margin-bottom: 4px; line-height: 1.5; }
+
+input[type=range] {
+  width: 100%;
+  appearance: none;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 6px rgba(56,182,255,0.6);
+  transition: transform .15s;
+}
+input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.4); }
+
+/* 警告ボックス */
+.warn-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(255,61,90,0.06);
+  border: 1px solid rgba(255,61,90,0.2);
+  border-radius: 3px;
+}
+.warn-box-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--danger);
+  margin-bottom: 5px;
+}
+.warn-box p { font-size: 10px; color: #d08080; line-height: 1.6; }
+
+/* プリセットボタン */
+.btn-row { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+button {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+}
+button:hover          { border-color: var(--accent); color: var(--accent); }
+button.active         { border-color: var(--accent); color: var(--accent); background: rgba(56,182,255,.08); }
+button#btn-play       { border-color: var(--safe);   color: var(--safe);   }
+button#btn-play:hover { background: rgba(0,229,160,.08); }
+button#btn-play.paused{ border-color: var(--warn);   color: var(--warn);   }
+button#btn-risky      { border-color: rgba(255,61,90,.4); color: rgba(255,61,90,.7); }
+button#btn-risky:hover{ border-color: var(--danger); color: var(--danger); background: rgba(255,61,90,.06); }
+
+/* メーターパネル（右下） */
+.meters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.meter {
+  background: #080d14;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px 12px;
+}
+.meter-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.meter-val {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: bold;
+  line-height: 1;
+  transition: color .2s;
+}
+.meter-bar {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.meter-bar-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width .1s, background .2s;
+}
+
+/* イベントログ */
+.log-area {
+  background: #050810;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  height: 110px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.7;
+}
+.log-area::-webkit-scrollbar { width: 4px; }
+.log-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.log-entry { color: var(--muted); }
+.log-entry.pass    { color: var(--safe); }
+.log-entry.silence { color: var(--danger); }
+.log-entry.warn    { color: var(--warn); }
+.log-entry.hold    { color: rgba(255,165,0,.6); }
+.log-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* 凡例 */
+.legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 10px; color: var(--muted);
+  margin-bottom: 8px;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-line { width: 20px; height: 2px; border-radius: 1px; }
+
+/* フッター */
+footer {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="header-left">
+    <div class="header-label">NRA-IDE / HAN Gate — Live Simulation</div>
+    <h1>連鎖崩壊はこうして始まる<br>— そして HAN Gate が止める</h1>
+    <p>リアルタイムで R が上昇し、閾値を超えた瞬間に SILENCE が発動します。<br>
+       パラメータを変えて「安全な波形」と「見逃す波形」の違いを体験してください。</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+    <div class="live-badge">
+      <div class="live-dot" id="liveDot"></div>
+      <span id="liveStatus">RUNNING</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
+      <button onclick="resetSim()">↺ RESET</button>
+    </div>
+  </div>
+</header>
+
+<!-- メインキャンバス -->
+<div class="main-canvas-wrap">
+  <canvas id="chartMain" height="260"></canvas>
+  <div id="silenceOverlay"></div>
+  <div id="silenceStamp">— SILENCE —</div>
+</div>
+
+<!-- 凡例 -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-line" style="background:var(--accent)"></div>R（動的τ）</div>
+  <div class="legend-item"><div class="legend-line" style="background:#405060;height:1px;border-top:1px dashed #405060"></div>R（静的τ・参考）</div>
+  <div class="legend-item"><div class="legend-line" style="background:var(--danger)"></div>R_OP 閾値</div>
+  <div class="legend-item"><div class="legend-line" style="background:var(--warn)"></div>動的τ</div>
+</div>
+
+<!-- 下段 -->
+<div class="bottom-grid">
+
+  <!-- 左：パラメータ -->
+  <div class="panel">
+    <div class="panel-title">パラメータ</div>
+
+    <div class="param-group">
+      <div class="param-row">
+        <span class="param-name">R_OP（閾値）</span>
+        <span class="param-val" id="v-rop">1.0</span>
+      </div>
+      <div class="param-desc">低いほど早く SILENCE になります</div>
+      <input type="range" id="rop" min="0.3" max="3.0" step="0.05" value="1.0">
+    </div>
+
+    <div class="param-group">
+      <div class="param-row">
+        <span class="param-name">TAU_DEFAULT</span>
+        <span class="param-val" id="v-tau">1.5</span>
+      </div>
+      <div class="param-desc">吸収厚みの基底値</div>
+      <input type="range" id="tau" min="0.5" max="4.0" step="0.1" value="1.5">
+    </div>
+
+    <div class="param-group">
+      <div class="param-row">
+        <span class="param-name">TAU_EMA_ALPHA</span>
+        <span class="param-val" id="v-alpha">0.30</span>
+      </div>
+      <div class="param-desc">二重ゆらぎ感度（大きいほど敏感）</div>
+      <input type="range" id="alpha" min="0.01" max="0.99" step="0.01" value="0.30">
+    </div>
+
+    <div class="param-group">
+      <div class="param-row">
+        <span class="param-name">TAU_AMPLIFY</span>
+        <span class="param-val" id="v-amp">2.0</span>
+      </div>
+      <div class="param-desc">τの最大増幅倍率</div>
+      <input type="range" id="amp" min="1.0" max="5.0" step="0.1" value="2.0">
+    </div>
+
+    <div class="param-group">
+      <div class="param-row">
+        <span class="param-name">速度</span>
+        <span class="param-val" id="v-speed">1×</span>
+      </div>
+      <div class="param-desc">シミュレーション速度</div>
+      <input type="range" id="speed" min="1" max="5" step="1" value="1">
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-box-title">⚠ 変更前に確認を</div>
+      <p>「波が穏やかに見える」からといって閾値を上げると、
+         本物の連鎖崩壊を見逃します。<br>
+         ⚠危険例 で体験してください。</p>
+    </div>
+
+    <div class="btn-row">
+      <button id="btn-default" class="active" onclick="applyPreset('default')">推奨</button>
+      <button id="btn-tight"   onclick="applyPreset('tight')">厳しめ</button>
+      <button id="btn-loose"   onclick="applyPreset('loose')">緩め</button>
+      <button id="btn-risky"   onclick="applyPreset('risky')">⚠ 危険例</button>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5" id="preset-note">
+      推奨設定。ほとんどの環境に適しています。
+    </div>
+  </div>
+
+  <!-- 右：メーターとログ -->
+  <div>
+    <div class="meters">
+      <div class="meter">
+        <div class="meter-label">CURRENT R</div>
+        <div class="meter-val" id="m-r" style="color:var(--safe)">0.0000</div>
+        <div class="meter-bar"><div class="meter-bar-fill" id="bar-r" style="width:0%;background:var(--safe)"></div></div>
+      </div>
+      <div class="meter">
+        <div class="meter-label">DECISION</div>
+        <div class="meter-val" id="m-decision" style="color:var(--safe);font-size:18px">PASS</div>
+        <div class="meter-bar"><div class="meter-bar-fill" id="bar-silence" style="width:0%;background:var(--danger)"></div></div>
+      </div>
+      <div class="meter">
+        <div class="meter-label">DYNAMIC τ</div>
+        <div class="meter-val" id="m-tau" style="color:var(--warn)">1.50</div>
+        <div class="meter-bar"><div class="meter-bar-fill" id="bar-tau" style="width:30%;background:var(--warn)"></div></div>
+      </div>
+      <div class="meter">
+        <div class="meter-label">SILENCE COUNT</div>
+        <div class="meter-val" id="m-count" style="color:var(--danger)">0</div>
+        <div class="meter-bar"><div class="meter-bar-fill" id="bar-count" style="width:0%;background:var(--danger)"></div></div>
+      </div>
+    </div>
+
+    <div class="log-title">イベントログ</div>
+    <div class="log-area" id="logArea"></div>
+  </div>
+
+</div>
+
+<footer>
+  <span>NRA-IDE / HAN Gate — Cascade Failure Prevention</span>
+  <span>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    &nbsp;|&nbsp;
+    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+  </span>
+</footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────
+// シミュレーター状態
+// ─────────────────────────────────────────────────
+const HISTORY = 200;   // 画面に表示するステップ数
+const SPIKE_CYCLE = 280; // 連鎖スパイクが何ステップごとに来るか
+
+let state = {
+  t: 0,
+  ema: 0,
+  holdUntil: 0,
+  rHistory:      [],
+  rStaticHistory:[],
+  tauHistory:    [],
+  silenceHistory:[],
+  silenceCount: 0,
+  playing: true,
+  frameSkip: 1,   // 速度
+  lastFrameTime: 0,
+  frameInterval: 40, // ms
+};
+
+// ─────────────────────────────────────────────────
+// テレメトリ生成（サイクルごとにスパイクが来る）
+// ─────────────────────────────────────────────────
+function getTelemetry(t) {
+  const phase = t % SPIKE_CYCLE;
+  let retry  = 0.2 + Math.sin(t * 0.07) * 0.12 + Math.random() * 0.05;
+  let queue  = 0.1 + Math.sin(t * 0.05) * 0.08 + Math.random() * 0.03;
+  let dep_to = 0.1 + Math.sin(t * 0.06) * 0.06 + Math.random() * 0.03;
+
+  // メインスパイク（phase 60〜100）
+  if (phase >= 60 && phase <= 100) {
+    const env = Math.sin((phase - 60) / 40 * Math.PI);
+    retry  += 1.4 * env;
+    queue  += 1.1 * env;
+    dep_to += 0.9 * env;
+  }
+  // 余波（phase 120〜150）
+  if (phase >= 120 && phase <= 150) {
+    const env = Math.sin((phase - 120) / 30 * Math.PI) * 0.45;
+    retry  += env;
+    queue  += env * 0.9;
+    dep_to += env * 0.7;
+  }
+
+  return {
+    retry:  Math.max(0, retry),
+    queue:  Math.max(0, queue),
+    dep_to: Math.max(0, dep_to),
+  };
+}
+
+function computeR(tel, tau_base, ema_prev, params) {
+  // ─── R計算（Effect-Side） ───────────────────────────────────────────
+  // r_raw は各テレメトリの積として求めたR値。
+  // これは「出力の結果」であり Effect-Side に属する。
+  // 【禁止】r_raw を直接 EMA に渡すことは Π⁻¹（逆導出）に相当する。
+  //         結果値からτを変化させると因果ダイオードが無効化される。
+  const r_raw = (tel.retry / 1.5) * (tel.queue / 1.0) * (tel.dep_to / 0.9);
+
+  // ─── Cause-Side δ偏差（EMAへの入力） ──────────────────────────────
+  // 各テレメトリ値が「基準値を超えた量」＝δ偏差（Cause-Side）を計算する。
+  // 基準値: retry=1.5, queue=1.0, dep_to=0.9（設計時に固定）
+  // δ偏差は直接観測された計測値から導出されるため Cause-Side に属する。
+  // τの動的変化は必ずこの Cause-Side 値を根拠とする（NRA-IDE 構造原則）。
+  const d_retry  = Math.max(0, tel.retry  - 1.5) / 1.5;  // 正規化δ偏差
+  const d_queue  = Math.max(0, tel.queue  - 1.0) / 1.0;
+  const d_dep_to = Math.max(0, tel.dep_to - 0.9) / 0.9;
+  // 最大δ偏差を Cause-Side の代表値として使用
+  const delta_cause = Math.max(d_retry, d_queue, d_dep_to);
+
+  // ─── EMA（τ動的変化の根拠） ────────────────────────────────────────
+  // EMA入力 = delta_cause（Cause-Side δ偏差）
+  // 【正しい理由】物理的な負荷履歴の蓄積によってのみτが変化する。
+  //               これは「τを決定する因果的ルール（関数）は不変だが、
+  //               Cause-Side の入力によってτ値が動的に変化する」という
+  //               NRA-IDE のτ定義と完全に整合する。
+  const ema  = params.alpha * delta_cause + (1 - params.alpha) * ema_prev;
+  const mult = Math.min(1 + ema, params.amp);
+  const tau_d = tau_base * mult;
+  return { r_raw, r_dyn: r_raw * tau_d, r_static: r_raw * tau_base, tau_d, ema };
+}
+
+// ─────────────────────────────────────────────────
+// キャンバス描画
+// ─────────────────────────────────────────────────
+const canvas = document.getElementById('chartMain');
+const ctx    = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width  = canvas.parentElement.clientWidth;
+  canvas.height = 260;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function drawChart(params) {
+  const W = canvas.width, H = canvas.height;
+  const pad = { top: 16, right: 56, bottom: 28, left: 46 };
+  const pW = W - pad.left - pad.right;
+  const pH = H - pad.top  - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const rArr    = state.rHistory;
+  const rsArr   = state.rStaticHistory;
+  const tauArr  = state.tauHistory;
+  const silArr  = state.silenceHistory;
+  const len     = rArr.length;
+  const rop     = params.rop;
+
+  const maxR   = Math.max(...rArr, rop * 1.3, 0.01);
+  const maxTau = Math.max(...tauArr, params.tau * params.amp, 0.01);
+
+  function xp(i) { return pad.left + (i / (HISTORY - 1)) * pW; }
+  function yp(v, mx) { return pad.top + pH - (Math.min(v, mx * 1.05) / mx) * pH; }
+  function yt(v)     { return pad.top + pH - (v / maxTau) * pH; }
+
+  // グリッド
+  ctx.strokeStyle = 'rgba(24,32,48,0.9)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (pH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pW, y); ctx.stroke();
+    const v = (maxR * (4 - i) / 4).toFixed(2);
+    ctx.fillStyle = 'rgba(58,80,112,0.8)';
+    ctx.font = '9px Share Tech Mono';
+    ctx.textAlign = 'right';
+    ctx.fillText(v, pad.left - 5, y + 3);
+  }
+
+  // R_OP線
+  const ropY = yp(rop, maxR);
+  ctx.strokeStyle = 'rgba(255,61,90,0.6)';
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(pad.left, ropY); ctx.lineTo(pad.left + pW, ropY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,61,90,0.7)';
+  ctx.font = '9px Share Tech Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText(`R_OP ${rop.toFixed(2)}`, pad.left + pW + 4, ropY + 3);
+
+  if (len < 2) return;
+
+  // SILENCE塗り（背景）
+  for (let i = 1; i < len; i++) {
+    if (silArr[i]) {
+      ctx.fillStyle = 'rgba(255,61,90,0.07)';
+      ctx.fillRect(xp(i-1), pad.top, xp(i) - xp(i-1) + 1, pH);
+    }
+  }
+
+  // 動的τ（オレンジ）
+  ctx.strokeStyle = 'rgba(240,165,0,0.45)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  for (let i = 0; i < len; i++) {
+    const x = xp(i), y = yt(tauArr[i]);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // 静的τ版R（破線・薄グレー）
+  ctx.strokeStyle = 'rgba(48,72,100,0.65)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 4]);
+  ctx.beginPath();
+  for (let i = 0; i < len; i++) {
+    const x = xp(i), y = yp(rsArr[i], maxR);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 動的τ版R グロー（青）
+  ctx.strokeStyle = 'rgba(56,182,255,0.18)';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  for (let i = 0; i < len; i++) {
+    const x = xp(i), y = yp(rArr[i], maxR);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.strokeStyle = '#38b6ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < len; i++) {
+    const x = xp(i), y = yp(rArr[i], maxR);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // 最新点ドット
+  if (len > 0) {
+    const last = rArr[len - 1];
+    const lx   = xp(len - 1);
+    const ly   = yp(last, maxR);
+    const isSil = silArr[len - 1];
+    ctx.fillStyle = isSil ? '#ff3d5a' : '#38b6ff';
+    ctx.shadowColor = isSil ? 'rgba(255,61,90,0.8)' : 'rgba(56,182,255,0.8)';
+    ctx.shadowBlur  = 10;
+    ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // X軸タイムラベル
+  ctx.fillStyle = 'rgba(58,80,112,0.7)';
+  ctx.font = '9px Share Tech Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('← ' + HISTORY + ' steps', pad.left + pW / 2, pad.top + pH + 20);
+}
+
+// ─────────────────────────────────────────────────
+// UI更新
+// ─────────────────────────────────────────────────
+let flashTimer = null;
+
+function updateUI(r_dyn, tau_d, isSilence, params) {
+  const rop = params.rop;
+  const ratio = Math.min(r_dyn / (rop * 1.5), 1);
+  const col   = isSilence ? 'var(--danger)' :
+                r_dyn >= rop * 0.7 ? 'var(--warn)' : 'var(--safe)';
+
+  document.getElementById('m-r').textContent = r_dyn.toFixed(4);
+  document.getElementById('m-r').style.color = col;
+  document.getElementById('bar-r').style.width = (ratio * 100) + '%';
+  document.getElementById('bar-r').style.background = col;
+
+  document.getElementById('m-tau').textContent = tau_d.toFixed(3);
+  const tauRatio = Math.min((tau_d - params.tau) / (params.tau * (params.amp - 1) + 0.001), 1);
+  document.getElementById('bar-tau').style.width = (tauRatio * 100) + '%';
+
+  document.getElementById('m-decision').textContent = isSilence ? 'SILENCE' : 'PASS';
+  document.getElementById('m-decision').style.color = isSilence ? 'var(--danger)' : 'var(--safe)';
+  document.getElementById('bar-silence').style.width = isSilence ? '100%' : '0%';
+
+  document.getElementById('m-count').textContent = state.silenceCount;
+  const cntRatio = Math.min(state.silenceCount / 30, 1);
+  document.getElementById('bar-count').style.width = (cntRatio * 100) + '%';
+
+  // SILENCE フラッシュ
+  const overlay = document.getElementById('silenceOverlay');
+  const stamp   = document.getElementById('silenceStamp');
+  if (isSilence) {
+    overlay.classList.add('active');
+    stamp.classList.add('active');
+    if (flashTimer) clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => {
+      overlay.classList.remove('active');
+      stamp.classList.remove('active');
+    }, 600);
+  }
+}
+
+// ─────────────────────────────────────────────────
+// ログ
+// ─────────────────────────────────────────────────
+let lastDecision = 'PASS';
+let holdLogged   = false;
+
+function addLog(msg, cls) {
+  const area = document.getElementById('logArea');
+  const now  = String(state.t).padStart(5, '0');
+  const el   = document.createElement('div');
+  el.className = 'log-entry ' + cls;
+  el.textContent = `[t=${now}] ${msg}`;
+  area.appendChild(el);
+  area.scrollTop = area.scrollHeight;
+  // 最大80行
+  while (area.children.length > 80) area.removeChild(area.firstChild);
+}
+
+function checkLog(isSilence, r_dyn, tau_d, params) {
+  if (isSilence && lastDecision === 'PASS') {
+    addLog(`SILENCE  R=${r_dyn.toFixed(4)} > R_OP=${params.rop.toFixed(2)}  τ=${tau_d.toFixed(3)}`, 'silence');
+    holdLogged = false;
+  } else if (!isSilence && lastDecision === 'SILENCE' && !holdLogged) {
+    addLog(`HOLD END → PASS  R=${r_dyn.toFixed(4)}`, 'pass');
+  } else if (r_dyn >= params.rop * 0.7 && r_dyn < params.rop && lastDecision !== 'warn') {
+    addLog(`WARN  R=${r_dyn.toFixed(4)}  接近中 (R_OP×70%)`, 'warn');
+  }
+  lastDecision = isSilence ? 'SILENCE' : 'PASS';
+}
+
+// ─────────────────────────────────────────────────
+// メインループ
+// ─────────────────────────────────────────────────
+function getParams() {
+  return {
+    rop:   parseFloat(document.getElementById('rop').value),
+    tau:   parseFloat(document.getElementById('tau').value),
+    alpha: parseFloat(document.getElementById('alpha').value),
+    amp:   parseFloat(document.getElementById('amp').value),
+  };
+}
+
+const HOLD_MS = 2000;
+
+function tick() {
+  if (!state.playing) { requestAnimationFrame(tick); return; }
+
+  const now = performance.now();
+  const speed = parseInt(document.getElementById('speed').value);
+  const interval = Math.max(16, 40 - speed * 7);
+
+  if (now - state.lastFrameTime < interval) { requestAnimationFrame(tick); return; }
+  state.lastFrameTime = now;
+
+  const params = getParams();
+
+  // speedに応じて複数ステップ進める
+  for (let s = 0; s < speed; s++) {
+    state.t++;
+    const tel    = getTelemetry(state.t);
+    const result = computeR(tel, params.tau, state.ema, params);
+    state.ema    = result.ema;
+
+    const nowMs   = state.t * 40;
+    const silence = nowMs < state.holdUntil;
+    let isSilence = silence;
+
+    if (result.r_dyn >= params.rop && !silence) {
+      state.holdUntil = nowMs + HOLD_MS;
+      isSilence = true;
+      state.silenceCount++;
+    }
+
+    // 履歴に積む（先頭を捨てて末尾に追加）
+    if (state.rHistory.length >= HISTORY)      state.rHistory.shift();
+    if (state.rStaticHistory.length >= HISTORY) state.rStaticHistory.shift();
+    if (state.tauHistory.length >= HISTORY)    state.tauHistory.shift();
+    if (state.silenceHistory.length >= HISTORY) state.silenceHistory.shift();
+
+    state.rHistory.push(result.r_dyn);
+    state.rStaticHistory.push(result.r_static);
+    state.tauHistory.push(result.tau_d);
+    state.silenceHistory.push(isSilence);
+
+    // ログはlastステップのみ
+    if (s === speed - 1) {
+      checkLog(isSilence, result.r_dyn, result.tau_d, params);
+      updateUI(result.r_dyn, result.tau_d, isSilence, params);
+    }
+  }
+
+  drawChart(params);
+  requestAnimationFrame(tick);
+}
+
+// ─────────────────────────────────────────────────
+// コントロール
+// ─────────────────────────────────────────────────
+function togglePlay() {
+  state.playing = !state.playing;
+  const btn = document.getElementById('btn-play');
+  const dot = document.getElementById('liveDot');
+  const ls  = document.getElementById('liveStatus');
+  if (state.playing) {
+    btn.textContent = '⏸ PAUSE';
+    btn.classList.remove('paused');
+    dot.style.animationPlayState = 'running';
+    ls.textContent = 'RUNNING';
+  } else {
+    btn.textContent = '▶ PLAY';
+    btn.classList.add('paused');
+    dot.style.animationPlayState = 'paused';
+    dot.style.opacity = '0.4';
+    ls.textContent = 'PAUSED';
+  }
+}
+
+function resetSim() {
+  state.t            = 0;
+  state.ema          = 0;
+  state.holdUntil    = 0;
+  state.rHistory     = [];
+  state.rStaticHistory = [];
+  state.tauHistory   = [];
+  state.silenceHistory = [];
+  state.silenceCount = 0;
+  lastDecision       = 'PASS';
+  document.getElementById('logArea').innerHTML = '';
+  document.getElementById('m-count').textContent = '0';
+  document.getElementById('silenceOverlay').classList.remove('active');
+  document.getElementById('silenceStamp').classList.remove('active');
+  addLog('シミュレーション開始', 'pass');
+}
+
+// スライダー
+['rop','tau','alpha','amp','speed'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    updateSliderLabels();
+    ['default','tight','loose','risky'].forEach(n =>
+      document.getElementById('btn-'+n).classList.remove('active'));
+    document.getElementById('preset-note').textContent = '手動調整中。';
+  });
+});
+
+function updateSliderLabels() {
+  document.getElementById('v-rop').textContent   = parseFloat(document.getElementById('rop').value).toFixed(2);
+  document.getElementById('v-tau').textContent   = parseFloat(document.getElementById('tau').value).toFixed(1);
+  document.getElementById('v-alpha').textContent = parseFloat(document.getElementById('alpha').value).toFixed(2);
+  document.getElementById('v-amp').textContent   = parseFloat(document.getElementById('amp').value).toFixed(1);
+  const s = document.getElementById('speed').value;
+  document.getElementById('v-speed').textContent = s + '×';
+}
+
+// ─────────────────────────────────────────────────
+// プリセット
+// ─────────────────────────────────────────────────
+const PRESETS = {
+  default: { rop:1.0, tau:1.5, alpha:0.30, amp:2.0,
+    note:'推奨設定。ほとんどの環境に適しています。' },
+  tight:   { rop:0.6, tau:2.5, alpha:0.50, amp:3.0,
+    note:'厳しめ設定。早めに SILENCE になります。重要サービスや障害対応向け。' },
+  loose:   { rop:2.0, tau:1.0, alpha:0.10, amp:1.5,
+    note:'緩め設定。SILENCE になりにくくなります。連鎖崩壊の検知が遅れるリスクがあります。' },
+  risky:   { rop:3.0, tau:0.5, alpha:0.01, amp:1.1,
+    note:'⚠ 危険な例。閾値が高すぎ・感度が低すぎます。波は穏やかに見えますが、本物の連鎖崩壊でも SILENCE にならない場合があります。絶対に使用しないでください。' },
+};
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  document.getElementById('rop').value   = p.rop;
+  document.getElementById('tau').value   = p.tau;
+  document.getElementById('alpha').value = p.alpha;
+  document.getElementById('amp').value   = p.amp;
+  updateSliderLabels();
+  document.getElementById('preset-note').textContent = p.note;
+  ['default','tight','loose','risky'].forEach(n =>
+    document.getElementById('btn-'+n).classList.toggle('active', n === name));
+}
+
+// ─────────────────────────────────────────────────
+// 起動
+// ─────────────────────────────────────────────────
+resetSim();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

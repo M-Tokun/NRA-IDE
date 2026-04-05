@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+  FILE: 00_Escapement_Foundation_NRA_JP.html
+  TITLE: NRA-IDE 基礎原理 — 脱進機と離散完結
+         Foundational Principle: Escapement & Discrete Completion
+  AUTHOR: M-Tokuni / NRA-IDE Project
+  DATE: 2026-04-05 18:00:00 JST
+  DESC: 連続近似（浮動小数点）vs 離散完結（整数位相ロック）の比較デモ
+        Comparison: Continuous Approximation vs Discrete Completion
+-->
+<title>NRA-IDE 基礎原理：脱進機と離散完結</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+  :root {
+    --bg:       #030508;
+    --panel:    rgba(5,10,18,0.90);
+    --border:   rgba(0,220,255,0.15);
+    --cyan:     #00dcff;
+    --red:      #ff3355;
+    --amber:    #ffaa00;
+    --heat:     #ff6600;
+    --green:    #00ff88;
+    --text:     #a8b8c8;
+    --dim:      #445566;
+    --tick-shadow: 0 0 18px rgba(0,220,255,0.7);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 32px;
+    overflow-x: hidden;
+  }
+
+  /* グリッド背景 */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,220,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,220,255,0.025) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ──────── ヘッダー ──────── */
+  header {
+    position: relative; z-index: 1;
+    text-align: center;
+    margin-bottom: 28px;
+    width: 100%;
+    max-width: 860px;
+  }
+
+  .header-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--cyan);
+    opacity: 0.6;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(14px, 2.5vw, 20px);
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-shadow: var(--tick-shadow);
+    line-height: 1.4;
+  }
+
+  .subtitle {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* ──────── メインレイアウト ──────── */
+  .main-grid {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 860px;
+  }
+
+  /* ──────── 各パネル ──────── */
+  .clock-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .clock-panel.bad { border-color: rgba(255,51,85,0.3); }
+  .clock-panel.good { border-color: rgba(0,220,255,0.35); box-shadow: 0 0 30px rgba(0,220,255,0.06); }
+
+  .panel-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .bad .panel-title  { color: var(--red);  background: rgba(255,51,85,0.08);  border: 1px solid rgba(255,51,85,0.25); }
+  .good .panel-title { color: var(--cyan); background: rgba(0,220,255,0.06); border: 1px solid rgba(0,220,255,0.25); }
+
+  .panel-subtitle {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 11px;
+    color: var(--dim);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* ──────── 時計SVG ──────── */
+  .clock-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+
+  canvas.clock-canvas {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* 熱パーティクルレイヤ */
+  .heat-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+  }
+
+  /* ──────── 誤差メーター ──────── */
+  .error-section {
+    width: 100%;
+  }
+
+  .error-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    margin-bottom: 5px;
+  }
+
+  .error-label .lbl { color: var(--dim); }
+  .error-label .val { }
+  .bad  .error-label .val { color: var(--red); }
+  .good .error-label .val { color: var(--green); }
+
+  .error-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .error-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.2s ease;
+    max-width: 100%;
+  }
+
+  .bad  .error-bar-fill { background: linear-gradient(90deg, #ff3355aa, #ff3355); }
+  .good .error-bar-fill { background: var(--green); width: 0% !important; }
+
+  /* ──────── ステータス表示 ──────── */
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .stat-box {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+
+  .stat-box .s-lbl { color: var(--dim); font-size: 9px; letter-spacing: 1px; display: block; margin-bottom: 3px; }
+  .stat-box .s-val { font-size: 13px; }
+  .bad  .stat-box .s-val { color: var(--red); }
+  .good .stat-box .s-val { color: var(--cyan); }
+
+  /* ──────── 熱排出カウンター（rightのみ） ──────── */
+  .heat-counter {
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+    color: var(--heat);
+    letter-spacing: 2px;
+    padding: 6px;
+    border: 1px solid rgba(255,102,0,0.2);
+    background: rgba(255,102,0,0.04);
+    border-radius: 2px;
+  }
+
+  .heat-counter span {
+    font-size: 18px;
+    display: block;
+    line-height: 1.2;
+    text-shadow: 0 0 12px var(--heat);
+  }
+
+  /* ──────── 中央 VS ──────── */
+  .vs-divider {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 11px;
+    color: var(--dim);
+    pointer-events: none;
+  }
+
+  /* ──────── 底部：原理説明 ──────── */
+  .principle-bar {
+    position: relative; z-index: 1;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 860px;
+    background: rgba(0,220,255,0.04);
+    border: 1px solid rgba(0,220,255,0.2);
+    border-radius: 4px;
+    padding: 16px 20px;
+  }
+
+  .principle-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .principle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .p-item {
+    text-align: center;
+    padding: 10px 8px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 2px;
+    border-top: 2px solid var(--cyan);
+  }
+
+  .p-item .p-icon { font-size: 20px; margin-bottom: 6px; }
+  .p-item .p-head { font-size: 10px; color: var(--cyan); letter-spacing: 1px; margin-bottom: 4px; }
+  .p-item .p-body { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--dim); line-height: 1.5; }
+
+  /* ──────── 底部：NRA接続 ──────── */
+  .nra-link {
+    position: relative; z-index: 1;
+    margin-top: 14px;
+    width: 100%;
+    max-width: 860px;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid rgba(0,220,255,0.15);
+    border-radius: 4px;
+    background: rgba(0,220,255,0.03);
+    font-size: 11px;
+    line-height: 1.8;
+  }
+
+  .nra-link .eq {
+    color: var(--cyan);
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-shadow: var(--tick-shadow);
+  }
+
+  .nra-link .desc {
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--dim);
+    font-size: 10px;
+  }
+
+  /* ──────── コントロール ──────── */
+  .controls {
+    position: relative; z-index: 1;
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 8px 20px;
+    cursor: pointer;
+    text-transform: uppercase;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+  button:hover { background: rgba(0,220,255,0.1); box-shadow: 0 0 12px rgba(0,220,255,0.3); }
+
+  button.speed-btn {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  button.speed-btn:hover { background: rgba(255,170,0,0.1); box-shadow: 0 0 12px rgba(255,170,0,0.3); }
+
+  /* ──────── 時計 tick フラッシュ ──────── */
+  @keyframes tick-flash {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .tick-spark {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: tick-flash 0.6s ease-out forwards;
+  }
+
+  @keyframes drift-warn {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 0.9; }
+  }
+
+  .drift-indicator {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: var(--red);
+    letter-spacing: 2px;
+    white-space: nowrap;
+    animation: drift-warn 1.2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">NRA-IDE — Foundational Principle / 基礎原理</div>
+  <h1>脱進機と離散完結<br>
+    <span style="font-size:0.65em; opacity:0.7">Escapement &amp; Discrete Completion Principle</span>
+  </h1>
+  <div class="subtitle">
+    連続近似（浮動小数点）では誤差が蓄積する ／ 離散完結（整数位相ロック）では残差が熱として排出される
+  </div>
+</header>
+
+<div class="main-grid" style="position:relative;">
+
+  <!-- ─── 左：連続近似（Bad） ─── -->
+  <div class="clock-panel bad" id="panel-bad">
+    <div class="panel-title">× CONTINUOUS — 連続近似</div>
+    <div class="panel-subtitle">浮動小数点による滑らかな回転<br>残差を次ステップへ持ち越す</div>
+
+    <div class="clock-wrap">
+      <canvas id="clock-bad" class="clock-canvas" width="200" height="200"></canvas>
+      <div class="drift-indicator" id="drift-warn" style="opacity:0">▲ DRIFT DETECTED</div>
+    </div>
+
+    <div class="error-section">
+      <div class="error-label">
+        <span class="lbl">累積誤差 Accumulated Error</span>
+        <span class="val" id="err-val">0.000°</span>
+      </div>
+      <div class="error-bar-bg">
+        <div class="error-bar-fill" id="err-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <div class="stat-box">
+        <span class="s-lbl">STEPS</span>
+        <span class="s-val" id="bad-steps">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="s-lbl">RESIDUAL</span>
+        <span class="s-val" id="bad-residual">0.000</span>
+      </div>
+      <div class="stat-box">
+        <span class="s-lbl">STATE</span>
+        <span class="s-val" id="bad-state">RUNNING</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VS -->
+  <div class="vs-divider">VS</div>
+
+  <!-- ─── 右：離散完結（Good） ─── -->
+  <div class="clock-panel good" id="panel-good">
+    <div class="panel-title">✓ DISCRETE — 離散完結</div>
+    <div class="panel-subtitle">整数位相ロック：1ステップごとに完結<br>残差は熱として排出される</div>
+
+    <div class="clock-wrap">
+      <canvas id="clock-good" class="clock-canvas" width="200" height="200"></canvas>
+      <canvas id="heat-canvas" class="heat-layer" width="200" height="200"></canvas>
+    </div>
+
+    <div class="error-section">
+      <div class="error-label">
+        <span class="lbl">累積誤差 Accumulated Error</span>
+        <span class="val" style="color:var(--green)">0.000° — ZERO</span>
+      </div>
+      <div class="error-bar-bg">
+        <div class="error-bar-fill good" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <div class="stat-box">
+        <span class="s-lbl">STEPS</span>
+        <span class="s-val" id="good-steps">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="s-lbl">TICK</span>
+        <span class="s-val" id="good-tick" style="color:var(--green)">LOCKED</span>
+      </div>
+      <div class="stat-box">
+        <span class="s-lbl">STATE</span>
+        <span class="s-val" style="color:var(--green)">STABLE</span>
+      </div>
+    </div>
+
+    <div class="heat-counter">
+      HEAT EMITTED（熱排出）
+      <span id="heat-count">0</span>
+      residuals discarded
+    </div>
+  </div>
+
+</div>
+
+<!-- ──────── 原理説明 ──────── -->
+<div class="principle-bar">
+  <div class="principle-title">Core Principle ／ 根幹原理</div>
+  <div class="principle-grid">
+    <div class="p-item">
+      <div class="p-icon">⚙️</div>
+      <div class="p-head">ESCAPEMENT / 脱進機</div>
+      <div class="p-body">機械式時計が精度を保てるのは歯車が完璧だからではない。脱進機が「完全な一歯分」という離散ステップで進むからだ。</div>
+    </div>
+    <div class="p-item">
+      <div class="p-icon">🔥</div>
+      <div class="p-head">HEAT EMISSION / 熱排出</div>
+      <div class="p-body">各ステップの残差（端数）は次のステップに持ち越されず、熱として排出される。これが誤差累積の構造的防止だ。</div>
+    </div>
+    <div class="p-item">
+      <div class="p-icon">🔒</div>
+      <div class="p-head">INTEGER PHASE LOCK</div>
+      <div class="p-body">NRA-IDEはこの原則を実装する。R = δ/τ の計算において残差キャリーオーバーを禁止し、各状態遷移を完結させる。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────── NRA接続 ──────── -->
+<div class="nra-link">
+  <div class="eq">R = δ / τ</div>
+  <div class="desc" style="margin-top:6px;">
+    この比率計算においても同一の原則が適用される。<br>
+    商の整数部 → 次の状態判定に使用 ／ 残差 ε → 破棄（熱として排出）／ キャリーオーバー → 禁止<br>
+    <span style="color:var(--cyan); font-size:11px;">
+      The same principle applies: integer part used for judgment, residual ε discarded, carry-over forbidden.
+    </span>
+  </div>
+</div>
+
+<!-- ──────── コントロール ──────── -->
+<div class="controls">
+  <button onclick="resetAll()">RESET</button>
+  <button class="speed-btn" onclick="toggleSpeed()">SPEED: <span id="spd-label">1×</span></button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+const TICK_DEG      = 6;          // 1秒 = 6°
+const FRAME_MS      = 16;
+let   speed         = 1;
+let   running       = true;
+let   lastTime      = null;
+
+// Bad clock state
+let   badAngle      = 0;          // 連続角度（ラジアン）
+let   badAccumErr   = 0;          // 累積誤差（度）
+let   badSteps      = 0;
+
+// Good clock state
+let   goodDiscrete  = 0;          // 離散ステップ（整数）
+let   goodSteps     = 0;
+let   goodHeat      = 0;
+let   goodLastSec   = -1;
+let   goodTickFlash = 0;          // tick発光フレーム数
+
+// Bad: 意図的なゆらぎ係数（現実の浮動小数点誤差を誇張）
+function noiseOffset(t) {
+  return Math.sin(t * 0.0007) * 0.031
+       + Math.sin(t * 0.00023) * 0.019
+       + Math.sin(t * 0.0031)  * 0.009;
+}
+
+// ─────────────────────────────────────────────
+//  HEAT PARTICLES
+// ─────────────────────────────────────────────
+let heatParticles = [];
+
+function spawnHeat(cx, cy) {
+  for (let i = 0; i < 8; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const v = 0.6 + Math.random() * 1.4;
+    heatParticles.push({
+      x: cx, y: cy,
+      vx: Math.cos(a) * v,
+      vy: Math.sin(a) * v - 1.2,
+      life: 1.0,
+      size: 2 + Math.random() * 3
+    });
+  }
+}
+
+function updateHeat() {
+  heatParticles = heatParticles.filter(p => p.life > 0);
+  for (const p of heatParticles) {
+    p.x  += p.vx;
+    p.y  += p.vy;
+    p.vy += 0.04;
+    p.life -= 0.04;
+  }
+}
+
+function drawHeat(ctx) {
+  ctx.clearRect(0, 0, 200, 200);
+  for (const p of heatParticles) {
+    const alpha = p.life * 0.85;
+    const r = Math.floor(255);
+    const g = Math.floor(80 + 100 * p.life);
+    const radius = Math.max(0.01, p.size * p.life);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${r},${g},0,${alpha})`;
+    ctx.fill();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CLOCK DRAWING
+// ─────────────────────────────────────────────
+function drawClock(ctx, secondAngleDeg, opts = {}) {
+  const cx = 100, cy = 100, r = 88;
+  const {
+    rimColor    = '#00dcff',
+    handColor   = '#00dcff',
+    tickFlash   = 0,
+    isDrifting  = false
+  } = opts;
+
+  ctx.clearRect(0, 0, 200, 200);
+
+  // 外周リング
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.strokeStyle = rimColor + (isDrifting ? '99' : 'aa');
+  ctx.lineWidth = isDrifting ? 1.5 : 2;
+  if (isDrifting) {
+    ctx.setLineDash([4, 4]);
+  } else {
+    ctx.setLineDash([]);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 内周グロー
+  if (!isDrifting) {
+    const grd = ctx.createRadialGradient(cx, cy, r * 0.7, cx, cy, r);
+    grd.addColorStop(0, 'transparent');
+    grd.addColorStop(1, rimColor + '18');
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+  }
+
+  // 目盛り（12本）
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    const x1 = cx + Math.cos(a) * (r - 10);
+    const y1 = cy + Math.sin(a) * (r - 10);
+    const x2 = cx + Math.cos(a) * (r - 2);
+    const y2 = cy + Math.sin(a) * (r - 2);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = rimColor + '55';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // tick発光（good側）
+  if (tickFlash > 0) {
+    const alpha = tickFlash / 12;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - 4, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(0,255,136,${alpha * 0.6})`;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  // 中心円
+  ctx.beginPath();
+  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+  ctx.fillStyle = handColor;
+  ctx.shadowColor = handColor;
+  ctx.shadowBlur = isDrifting ? 4 : 8;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // 秒針
+  const rad = (secondAngleDeg - 90) * Math.PI / 180;
+  const hx = cx + Math.cos(rad) * (r - 14);
+  const hy = cy + Math.sin(rad) * (r - 14);
+  const bx = cx - Math.cos(rad) * 16;
+  const by = cy - Math.sin(rad) * 16;
+
+  ctx.beginPath();
+  ctx.moveTo(bx, by);
+  ctx.lineTo(hx, hy);
+  ctx.strokeStyle = handColor;
+  ctx.lineWidth = isDrifting ? 1.5 : 2.2;
+  ctx.shadowColor = handColor;
+  ctx.shadowBlur = isDrifting ? 4 : 12;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // ドリフト表示
+  if (isDrifting) {
+    // 基準位置（赤い薄い針）
+    const trueAngle = Math.round(secondAngleDeg / TICK_DEG) * TICK_DEG;
+    const tRad = (trueAngle - 90) * Math.PI / 180;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(tRad) * (r - 20), cy + Math.sin(tRad) * (r - 20));
+    ctx.strokeStyle = 'rgba(255,200,0,0.3)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  UPDATE UI
+// ─────────────────────────────────────────────
+function updateUI() {
+  // Bad
+  const errPct = Math.min(badAccumErr / 18, 1) * 100;
+  document.getElementById('err-val').textContent = badAccumErr.toFixed(3) + '°';
+  document.getElementById('err-bar').style.width  = errPct + '%';
+  document.getElementById('bad-steps').textContent = badSteps;
+  document.getElementById('bad-residual').textContent = (badAccumErr % TICK_DEG).toFixed(3);
+  const drifting = badAccumErr > 0.5;
+  document.getElementById('bad-state').textContent = drifting ? 'DRIFTING' : 'OK';
+  document.getElementById('drift-warn').style.opacity = drifting ? '1' : '0';
+
+  // Good
+  document.getElementById('good-steps').textContent = goodSteps;
+  document.getElementById('good-tick').textContent = goodTickFlash > 0 ? '⚡ TICK' : 'LOCKED';
+  document.getElementById('heat-count').textContent = goodHeat;
+}
+
+// ─────────────────────────────────────────────
+//  ANIMATION LOOP
+// ─────────────────────────────────────────────
+const canvasBad  = document.getElementById('clock-bad');
+const canvasGood = document.getElementById('clock-good');
+const canvasHeat = document.getElementById('heat-canvas');
+const ctxBad     = canvasBad.getContext('2d');
+const ctxGood    = canvasGood.getContext('2d');
+const ctxHeat    = canvasHeat.getContext('2d');
+
+function loop(ts) {
+  if (!running) { requestAnimationFrame(loop); return; }
+  if (!lastTime) lastTime = ts;
+  const dt = Math.min((ts - lastTime) * speed, 100);
+  lastTime = ts;
+
+  const dtSec = dt / 1000;
+
+  // ── Bad clock ──
+  // 意図的な浮動小数点ゆらぎを注入
+  const drift = noiseOffset(ts) * speed;
+  badAngle   += dtSec * 360 * drift;            // ゆらぎ成分
+  const nominalInc = dtSec * 360 / 60 * speed; // 1分で360°
+  badAngle   += nominalInc;
+  const trueAngle = (ts / 1000 * 6 * speed) % 360;  // 理論値
+  badAccumErr = Math.abs(badAngle % 360 - trueAngle % 360);
+  if (badAccumErr > 180) badAccumErr = 360 - badAccumErr;
+  badSteps    = Math.floor(badAngle / TICK_DEG);
+
+  // ── Good clock ──
+  // 1秒ごとに厳密に離散ステップ（整数）
+  const elapsedSec = ts / 1000 * speed;
+  const newSec = Math.floor(elapsedSec);
+  if (newSec !== goodLastSec) {
+    goodDiscrete = (goodDiscrete + 1) % 60;
+    goodSteps++;
+    goodHeat++;
+    goodLastSec = newSec;
+    goodTickFlash = 14;
+    // 熱パーティクル：時計のescapement位置から放出
+    const tickAngle = (goodDiscrete * TICK_DEG - 90) * Math.PI / 180;
+    const px = 100 + Math.cos(tickAngle) * 68;
+    const py = 100 + Math.sin(tickAngle) * 68;
+    spawnHeat(px, py);
+  }
+  if (goodTickFlash > 0) goodTickFlash--;
+
+  // ── Draw ──
+  const badRimColor  = badAccumErr > 2 ? '#ff3355' : badAccumErr > 0.5 ? '#ffaa00' : '#ff3355';
+  drawClock(ctxBad,  badAngle % 360,       { rimColor: badRimColor,  handColor: badRimColor,  isDrifting: badAccumErr > 0.3 });
+  drawClock(ctxGood, goodDiscrete * TICK_DEG, { rimColor: '#00dcff', handColor: '#00ff88', tickFlash: goodTickFlash });
+
+  updateHeat();
+  drawHeat(ctxHeat);
+  updateUI();
+
+  requestAnimationFrame(loop);
+}
+
+// ─────────────────────────────────────────────
+//  CONTROLS
+// ─────────────────────────────────────────────
+function resetAll() {
+  badAngle = 0; badAccumErr = 0; badSteps = 0;
+  goodDiscrete = 0; goodSteps = 0; goodHeat = 0;
+  goodLastSec = -1; goodTickFlash = 0;
+  heatParticles = [];
+  lastTime = null;
+}
+
+function toggleSpeed() {
+  const speeds = [1, 5, 20, 60];
+  const labels = ['1×', '5×', '20×', '60×'];
+  const idx = speeds.indexOf(speed);
+  const next = (idx + 1) % speeds.length;
+  speed = speeds[next];
+  document.getElementById('spd-label').textContent = labels[next];
+  lastTime = null;
+}
+
+// ─────────────────────────────────────────────
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

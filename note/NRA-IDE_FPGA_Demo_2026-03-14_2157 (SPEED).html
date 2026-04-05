@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA-IDE_FPGA_Demo_2026-03-14_2157.html -->
+<!-- NRA-IDE Nomological Ring Axioms — Intensional Dynamics Evaluator -->
+<!-- FPGA Implementation Interactive Demo / github.com/M-Tokun/NRA-IDE -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE FPGA Demo — Nomological Ring Axioms</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0e0f;
+  --bg2:      #111618;
+  --bg3:      #181e20;
+  --border:   #1e2a2d;
+  --dim:      #2a3a3e;
+  --text:     #c8d8dc;
+  --muted:    #5a7880;
+  --teal:     #00c9a0;
+  --teal-dim: #00533f;
+  --amber:    #e8a020;
+  --amber-dim:#5a3a00;
+  --coral:    #e84040;
+  --coral-dim:#5a0808;
+  --blue:     #40a0e8;
+  --blue-dim: #0a2840;
+  --purple:   #a060e8;
+  --green:    #40d860;
+  --mono: 'Share Tech Mono', monospace;
+  --sans: 'Noto Sans JP', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;overflow-x:hidden}
+
+/* Header */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;gap:24px}
+.logo-ring{width:36px;height:36px;border:2px solid var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;animation:ring-pulse 3s ease-in-out infinite}
+@keyframes ring-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,201,160,.3)}50%{box-shadow:0 0 0 8px rgba(0,201,160,0)}}
+.logo-ring svg{width:18px;height:18px}
+.header-title{font-family:var(--mono);font-size:16px;color:var(--teal);letter-spacing:.1em}
+.header-sub{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.header-badge{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--teal);border:1px solid var(--teal-dim);padding:4px 10px;border-radius:4px}
+
+/* Layout */
+.main{display:grid;grid-template-columns:1fr 340px;gap:0;height:calc(100vh - 73px)}
+.left-panel{padding:24px;overflow-y:auto;border-right:1px solid var(--border)}
+.right-panel{padding:20px;overflow-y:auto;background:var(--bg2)}
+
+/* Section labels */
+.section-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* FSM Canvas */
+.fsm-container{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;position:relative}
+.fsm-canvas{width:100%;height:280px}
+
+/* Pipeline viz */
+.pipeline-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px}
+.pipe-stages{display:flex;gap:4px;align-items:stretch;height:72px}
+.pipe-stage{flex:1;border-radius:6px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .3s;position:relative;overflow:hidden}
+.pipe-stage.active{border-color:var(--teal);background:rgba(0,201,160,.08)}
+.pipe-stage.breach{border-color:var(--coral);background:rgba(232,64,64,.08);animation:breach-flash .4s ease-in-out}
+.pipe-stage.confess{border-color:var(--amber);background:rgba(232,160,32,.1);animation:confess-glow 1s ease-in-out infinite}
+@keyframes breach-flash{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes confess-glow{0%,100%{box-shadow:0 0 0 0 rgba(232,160,32,.3)}50%{box-shadow:0 0 12px rgba(232,160,32,.2)}}
+.pipe-name{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.05em}
+.pipe-data{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text)}
+.pipe-arrow{color:var(--dim);font-size:18px;line-height:72px;flex-shrink:0}
+
+/* Data packet animation */
+.packet{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:var(--teal);transform:translateY(-50%);opacity:0;transition:none}
+.packet.moving{animation:packet-move .6s ease-in-out forwards}
+@keyframes packet-move{0%{left:-4px;opacity:1}100%{left:calc(100% + 4px);opacity:0}}
+
+/* Controls */
+.controls{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px}
+.control-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.btn{font-family:var(--mono);font-size:12px;padding:8px 16px;border-radius:4px;border:1px solid var(--dim);background:transparent;color:var(--text);cursor:pointer;transition:all .15s;letter-spacing:.05em}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn.active{background:var(--teal);border-color:var(--teal);color:#000}
+.btn.danger{border-color:var(--coral-dim);color:var(--coral)}
+.btn.danger:hover{background:var(--coral);border-color:var(--coral);color:#fff}
+.btn.warn{border-color:var(--amber-dim);color:var(--amber)}
+.btn.warn:hover{background:var(--amber);border-color:var(--amber);color:#000}
+.btn:disabled{opacity:.3;cursor:default;pointer-events:none}
+
+.slider-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.slider-row label{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:120px}
+.slider-row input[type=range]{flex:1;accent-color:var(--teal)}
+.slider-val{font-family:var(--mono);font-size:12px;color:var(--teal);min-width:60px;text-align:right}
+
+/* Oscilloscope */
+.scope-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px}
+.scope-canvas{width:100%;height:80px;background:#050e0d;border-radius:4px;border:1px solid var(--teal-dim)}
+
+/* Right panel — state info */
+.state-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px}
+.state-name{font-family:var(--mono);font-size:22px;font-weight:500;margin-bottom:6px;transition:color .3s}
+.state-jp{font-size:12px;color:var(--muted);margin-bottom:10px}
+.state-desc{font-size:12px;color:var(--text);line-height:1.7}
+.state-badge{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;margin-right:4px;margin-bottom:6px}
+
+/* Principle cards */
+.principle{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px;border-left:3px solid var(--teal-dim);transition:border-color .3s}
+.principle.active{border-left-color:var(--teal)}
+.principle.breach{border-left-color:var(--coral)}
+.principle-name{font-family:var(--mono);font-size:11px;color:var(--teal);margin-bottom:4px}
+.principle-name.breach{color:var(--coral)}
+.principle-desc{font-size:11px;color:var(--muted);line-height:1.6}
+
+/* Log */
+.log-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px}
+.log-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px}
+.log-entries{height:120px;overflow-y:auto;font-family:var(--mono);font-size:11px;line-height:1.8}
+.log-entry{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.log-entry .ts{color:var(--muted);margin-right:8px}
+.log-entry .ok{color:var(--teal)}
+.log-entry .warn{color:var(--amber)}
+.log-entry .err{color:var(--coral)}
+
+/* Confess overlay */
+.confess-overlay{position:fixed;inset:0;background:rgba(232,64,64,.06);pointer-events:none;opacity:0;transition:opacity .3s;z-index:100;border:3px solid rgba(232,64,64,.4)}
+.confess-overlay.visible{opacity:1}
+.confess-banner{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--coral);color:#fff;font-family:var(--mono);font-size:14px;letter-spacing:.12em;padding:10px 32px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:101;white-space:nowrap}
+.confess-banner.visible{opacity:1}
+
+/* Metrics row */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.metric{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.metric-val{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--teal)}
+.metric-label{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.06em}
+.metric-val.warn{color:var(--amber)}
+.metric-val.err{color:var(--coral)}
+
+/* Auto run indicator */
+.run-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px;transition:background .3s}
+.run-dot.running{background:var(--green);animation:blink .8s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+@media(max-width:900px){
+  .main{grid-template-columns:1fr;height:auto}
+  .right-panel{border-top:1px solid var(--border)}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="confess-overlay" id="confessOverlay"></div>
+<div class="confess-banner" id="confessBanner">◆ CONFESS — 限界告白 / FAIL-CLOSED ◆</div>
+
+<div class="header">
+  <div class="logo-ring">
+    <svg viewBox="0 0 18 18" fill="none">
+      <circle cx="9" cy="9" r="7" stroke="#00c9a0" stroke-width="1.5"/>
+      <circle cx="9" cy="9" r="3" fill="#00c9a0" opacity=".6"/>
+      <line x1="9" y1="2" x2="9" y2="4" stroke="#00c9a0" stroke-width="1.5"/>
+      <line x1="9" y1="14" x2="9" y2="16" stroke="#00c9a0" stroke-width="1.5"/>
+      <line x1="2" y1="9" x2="4" y2="9" stroke="#00c9a0" stroke-width="1.5"/>
+      <line x1="14" y1="9" x2="16" y2="9" stroke="#00c9a0" stroke-width="1.5"/>
+    </svg>
+  </div>
+  <div>
+    <div class="header-title">NRA-IDE FPGA INTERACTIVE DEMO</div>
+    <div class="header-sub">律環公理 / Nomological Ring Axioms — Intensional Dynamics Evaluator &nbsp;|&nbsp; github.com/M-Tokun/NRA-IDE</div>
+  </div>
+  <div class="header-badge">SystemVerilog 2012 &nbsp;|&nbsp; Q16.16</div>
+</div>
+
+<div class="main">
+<div class="left-panel">
+
+  <!-- Metrics -->
+  <div class="metrics">
+    <div class="metric"><div class="metric-val" id="m-cycle">0</div><div class="metric-label">CLOCK CYCLES</div></div>
+    <div class="metric"><div class="metric-val" id="m-emit">0</div><div class="metric-label">EMIT COUNT</div></div>
+    <div class="metric"><div class="metric-val warn" id="m-confess">0</div><div class="metric-label">CONFESS COUNT</div></div>
+    <div class="metric"><div class="metric-val" id="m-rate">100%</div><div class="metric-label">INTEGRITY RATE</div></div>
+  </div>
+
+  <!-- FSM -->
+  <div class="section-label">律環 FSM STATE MACHINE</div>
+  <div class="fsm-container">
+    <canvas class="fsm-canvas" id="fsmCanvas"></canvas>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="section-label">IDE PIPELINE — 処理パイプライン</div>
+  <div class="pipeline-wrap">
+    <div class="pipe-stages" id="pipeStages">
+      <div class="pipe-stage" id="ps-diode">
+        <div class="packet" id="pk-diode"></div>
+        <div class="pipe-name">CAUSAL DIODE</div>
+        <div class="pipe-data" id="pd-diode">0x0000</div>
+        <div class="pipe-name">因果ダイオード</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage" id="ps-pipe">
+        <div class="packet" id="pk-pipe"></div>
+        <div class="pipe-name">IDE PIPELINE</div>
+        <div class="pipe-data" id="pd-pipe">0x0000</div>
+        <div class="pipe-name">4-stage</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage" id="ps-thr">
+        <div class="packet" id="pk-thr"></div>
+        <div class="pipe-name">THRESHOLD</div>
+        <div class="pipe-data" id="pd-thr">IN_ZONE</div>
+        <div class="pipe-name">脱進機</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage" id="ps-fsm">
+        <div class="packet" id="pk-fsm"></div>
+        <div class="pipe-name">NRA FSM</div>
+        <div class="pipe-data" id="pd-fsm">S_IDLE</div>
+        <div class="pipe-name">律環</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage" id="ps-out">
+        <div class="pipe-name">OUTPUT</div>
+        <div class="pipe-data" id="pd-out">0x0000</div>
+        <div class="pipe-name">出力 / 告白</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="section-label">CONTROLS — 制御</div>
+  <div class="controls">
+    <div class="slider-row">
+      <label>CLOCK SPEED / 速度</label>
+      <input type="range" id="clockSpeed" min="1" max="10" value="5" oninput="updateSpeed(this.value)">
+      <span class="slider-val" id="clockSpeedDisplay">5 ─ 標準</span>
+    </div>
+    <div class="slider-row">
+      <label>INPUT VALUE / 入力値</label>
+      <input type="range" id="inputVal" min="0" max="131072" value="65536" oninput="updateInput(this.value)">
+      <span class="slider-val" id="inputValDisplay">1.0000</span>
+    </div>
+    <div class="slider-row">
+      <label>THR_LO / 下限 (Q16.16)</label>
+      <input type="range" id="thrLo" min="0" max="65536" value="32768" oninput="updateThresholds()">
+      <span class="slider-val" id="thrLoDisplay">0.5000</span>
+    </div>
+    <div class="slider-row">
+      <label>THR_HI / 上限 (Q16.16)</label>
+      <input type="range" id="thrHi" min="65536" max="131072" value="98304" oninput="updateThresholds()">
+      <span class="slider-val" id="thrHiDisplay">1.5000</span>
+    </div>
+    <div class="control-row">
+      <button class="btn" id="btnStep" onclick="step()">STEP ▶ 1クロック</button>
+      <button class="btn" id="btnAuto" onclick="toggleAuto()"><span class="run-dot" id="runDot"></span>AUTO RUN</button>
+      <button class="btn danger" onclick="triggerBreach()">BREACH ◆ 閾値違反</button>
+      <button class="btn warn" onclick="triggerConfess()">CONFESS ◆ 限界告白</button>
+      <button class="btn" onclick="resetSim()">RESET</button>
+    </div>
+  </div>
+
+  <!-- Oscilloscope -->
+  <div class="section-label">SIGNAL TRACE — 信号波形</div>
+  <div class="scope-wrap">
+    <canvas class="scope-canvas" id="scopeCanvas"></canvas>
+  </div>
+
+</div><!-- /left-panel -->
+
+<div class="right-panel">
+
+  <!-- Current state -->
+  <div class="section-label">CURRENT STATE</div>
+  <div class="state-card">
+    <div class="state-name" id="stateName" style="color:var(--teal)">S_IDLE</div>
+    <div class="state-jp" id="stateJp">待機状態</div>
+    <div id="stateBadges"></div>
+    <div class="state-desc" id="stateDesc">リセット安全状態。valid_in待機中。律環公理の出発点。</div>
+  </div>
+
+  <!-- Principles -->
+  <div class="section-label">ACTIVE PRINCIPLES — 有効原則</div>
+  <div class="principle" id="pr-diode">
+    <div class="principle-name">因果ダイオード原理</div>
+    <div class="principle-desc">逆方向出力ポート不存在。物理的配線不可。</div>
+  </div>
+  <div class="principle" id="pr-gear">
+    <div class="principle-name">脱進機原理</div>
+    <div class="principle-desc">Q16.16 固定小数点。誤差蓄積ゼロ。</div>
+  </div>
+  <div class="principle" id="pr-ring">
+    <div class="principle-name">律環公理</div>
+    <div class="principle-desc">処理順序厳守: IDLE→OBSERVE→COMPUTE→VALIDATE→EMIT</div>
+  </div>
+  <div class="principle" id="pr-gate">
+    <div class="principle-name">完全境界</div>
+    <div class="principle-desc">絶対閾値。実行時変更禁止。</div>
+  </div>
+  <div class="principle" id="pr-confess">
+    <div class="principle-name">限界告白</div>
+    <div class="principle-desc">不整合を隠蔽しない。confess_flag=1 で停止。</div>
+  </div>
+
+  <!-- Log -->
+  <div class="section-label" style="margin-top:14px">SYSTEM LOG</div>
+  <div class="log-wrap">
+    <div class="log-entries" id="logEntries"></div>
+  </div>
+
+  <!-- Architecture note -->
+  <div style="margin-top:14px;padding:12px;background:var(--bg);border:1px solid var(--teal-dim);border-radius:6px;border-left:3px solid var(--teal)">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:6px;letter-spacing:.08em">BOX SANDWICH ARCHITECTURE</div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.7">
+      RNA INPUT → LLM CORE → RNA OUTPUT<br>
+      LLMを非信頼推論エンジンとして構造的に隔離。<br>
+      Pre/Post-RNAゲートが律環公理を保証する。
+    </div>
+  </div>
+
+</div><!-- /right-panel -->
+</div><!-- /main -->
+
+<script>
+// === State definitions ===
+const STATES = {
+  S_IDLE:     {jp:'待機状態',    color:'#00c9a0', desc:'リセット安全状態。valid_in待機中。律環公理の出発点。',                   badge:[['SAFE','teal']]},
+  S_OBSERVE:  {jp:'入力観測',    color:'#40a0e8', desc:'入力データをキャプチャ。因果ダイオードを通過した値のみ受理。',           badge:[['CAPTURE','blue']]},
+  S_COMPUTE:  {jp:'内包性演算',  color:'#a060e8', desc:'IDEパイプライン4段処理中。Q16.16固定小数点演算。誤差蓄積なし。',        badge:[['PIPE×4','purple']]},
+  S_VALIDATE: {jp:'整合性検証',  color:'#e8a020', desc:'閾値検出器でTHR_LO ≤ value ≤ THR_HIを判定。完全境界チェック。',        badge:[['CHECK','amber']]},
+  S_EMIT:     {jp:'出力',        color:'#40d860', desc:'整合性確認済み。結果を出力。不可逆性：この後S_OBSERVEへは戻らない。',   badge:[['VALID','green']]},
+  S_CONFESS:  {jp:'限界告白',    color:'#e84040', desc:'整合性違反を検出。confess_flag=1。出力強制ゼロ。不整合を隠蔽しない。', badge:[['FAIL-CLOSED','coral'],['confess_flag=1','coral']]}
+};
+const ORDER = ['S_IDLE','S_OBSERVE','S_COMPUTE','S_VALIDATE','S_EMIT','S_CONFESS'];
+
+// === Simulation state ===
+let state       = 'S_IDLE';
+let cycleCount  = 0;
+let emitCount   = 0;
+let confessCount= 0;
+let autoRunning = false;
+let autoTimer   = null;
+let forceBreach = false;
+let inputVal    = 65536;  // Q16.16: 1.0
+let thrLo       = 32768;  // Q16.16: 0.5
+let thrHi       = 98304;  // Q16.16: 1.5
+let scopeData   = [];
+let logCount    = 0;
+
+// === FSM Canvas ===
+const fsmCanvas = document.getElementById('fsmCanvas');
+const fsmCtx    = fsmCanvas.getContext('2d');
+
+const NODE_POSITIONS = {
+  S_IDLE:     [340, 60],
+  S_OBSERVE:  [560, 140],
+  S_COMPUTE:  [500, 260],
+  S_VALIDATE: [200, 260],
+  S_EMIT:     [140, 140],
+  S_CONFESS:  [340, 200]
+};
+
+function resizeFSM() {
+  const dpr = window.devicePixelRatio || 1;
+  const w = fsmCanvas.offsetWidth;
+  const h = fsmCanvas.offsetHeight;
+  fsmCanvas.width  = w * dpr;
+  fsmCanvas.height = h * dpr;
+  fsmCtx.scale(dpr, dpr);
+  drawFSM();
+}
+
+function drawFSM() {
+  const w = fsmCanvas.offsetWidth;
+  const h = fsmCanvas.offsetHeight;
+  fsmCtx.clearRect(0, 0, w, h);
+
+  const scaleX = w / 700;
+  const scaleY = h / 320;
+
+  function pos(name) {
+    const [x, y] = NODE_POSITIONS[name];
+    return [x * scaleX, y * scaleY];
+  }
+
+  // Draw arrows
+  const arrows = [
+    ['S_IDLE','S_OBSERVE','valid_in'],
+    ['S_OBSERVE','S_COMPUTE',''],
+    ['S_COMPUTE','S_VALIDATE',''],
+    ['S_VALIDATE','S_EMIT','in_zone'],
+    ['S_VALIDATE','S_CONFESS','breach'],
+    ['S_EMIT','S_IDLE',''],
+    ['S_CONFESS','S_IDLE','']
+  ];
+
+  arrows.forEach(([from, to, label]) => {
+    const [fx, fy] = pos(from);
+    const [tx, ty] = pos(to);
+    const isActive = (state === from);
+    const col = isActive ? '#00c9a0' : '#2a3a3e';
+    const isBreach = (from === 'S_VALIDATE' && to === 'S_CONFESS');
+
+    fsmCtx.beginPath();
+    fsmCtx.strokeStyle = isBreach ? (isActive ? '#e84040' : '#3a1010') : col;
+    fsmCtx.lineWidth   = isActive ? 2 : 1;
+    fsmCtx.setLineDash(isBreach ? [4,3] : []);
+
+    // Slightly curved
+    const mx = (fx + tx) / 2;
+    const my = (fy + ty) / 2;
+    const dx = tx - fx, dy = ty - fy;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const curve = len * 0.12;
+    const cpx = mx - dy/len * curve;
+    const cpy = my + dx/len * curve;
+
+    fsmCtx.moveTo(fx, fy);
+    fsmCtx.quadraticCurveTo(cpx, cpy, tx, ty);
+    fsmCtx.stroke();
+    fsmCtx.setLineDash([]);
+
+    // Arrowhead
+    const angle = Math.atan2(ty - cpy, tx - cpx);
+    const r = 20 * scaleX;
+    const ax = tx - r * Math.cos(angle);
+    const ay = ty - r * Math.sin(angle);
+    fsmCtx.beginPath();
+    fsmCtx.strokeStyle = isBreach ? (isActive ? '#e84040' : '#3a1010') : col;
+    fsmCtx.lineWidth = isActive ? 1.5 : 0.8;
+    fsmCtx.moveTo(ax + 5*Math.cos(angle + 2.5), ay + 5*Math.sin(angle + 2.5));
+    fsmCtx.lineTo(tx - r*Math.cos(angle), ty - r*Math.sin(angle));
+    fsmCtx.lineTo(ax + 5*Math.cos(angle - 2.5), ay + 5*Math.sin(angle - 2.5));
+    fsmCtx.stroke();
+
+    if (label) {
+      fsmCtx.fillStyle = isActive ? '#00c9a0' : '#3a5a5e';
+      fsmCtx.font = `${11 * Math.min(scaleX, scaleY)}px Share Tech Mono, monospace`;
+      fsmCtx.textAlign = 'center';
+      fsmCtx.fillText(label, cpx, cpy - 4);
+    }
+  });
+
+  // Draw nodes
+  ORDER.forEach(name => {
+    const [x, y] = pos(name);
+    const info   = STATES[name];
+    const isCur  = (name === state);
+    const r      = (name === 'S_CONFESS' ? 30 : 26) * Math.min(scaleX, scaleY);
+
+    fsmCtx.beginPath();
+    fsmCtx.arc(x, y, r, 0, Math.PI * 2);
+    fsmCtx.fillStyle = isCur
+      ? info.color + '22'
+      : (name === 'S_CONFESS' ? '#1a0505' : '#0e1618');
+    fsmCtx.fill();
+    fsmCtx.strokeStyle = isCur ? info.color : (name === 'S_CONFESS' ? '#3a1010' : '#1e2a2d');
+    fsmCtx.lineWidth   = isCur ? 2.5 : 1;
+    fsmCtx.stroke();
+
+    if (isCur) {
+      fsmCtx.beginPath();
+      fsmCtx.arc(x, y, r + 5, 0, Math.PI * 2);
+      fsmCtx.strokeStyle = info.color + '40';
+      fsmCtx.lineWidth = 1;
+      fsmCtx.stroke();
+    }
+
+    fsmCtx.fillStyle = isCur ? info.color : '#4a6a6e';
+    fsmCtx.font = `500 ${12 * Math.min(scaleX, scaleY)}px Share Tech Mono, monospace`;
+    fsmCtx.textAlign = 'center';
+    fsmCtx.textBaseline = 'middle';
+    const shortName = name.replace('S_', '');
+    fsmCtx.fillText(shortName, x, y - 5 * scaleY);
+    fsmCtx.font = `${10 * Math.min(scaleX, scaleY)}px Noto Sans JP, sans-serif`;
+    fsmCtx.fillStyle = isCur ? info.color + 'aa' : '#2a4040';
+    fsmCtx.fillText(info.jp, x, y + 8 * scaleY);
+  });
+}
+
+// === Scope Canvas ===
+const scopeCanvas = document.getElementById('scopeCanvas');
+const scopeCtx    = scopeCanvas.getContext('2d');
+
+function resizeScope() {
+  const dpr = window.devicePixelRatio || 1;
+  scopeCanvas.width  = scopeCanvas.offsetWidth  * dpr;
+  scopeCanvas.height = scopeCanvas.offsetHeight * dpr;
+  scopeCtx.scale(dpr, dpr);
+  drawScope();
+}
+
+function drawScope() {
+  const w = scopeCanvas.offsetWidth;
+  const h = scopeCanvas.offsetHeight;
+  scopeCtx.clearRect(0, 0, w, h);
+
+  // Grid
+  scopeCtx.strokeStyle = '#0a2018';
+  scopeCtx.lineWidth   = 0.5;
+  for (let i = 0; i <= 8; i++) {
+    const x = (w / 8) * i;
+    scopeCtx.beginPath(); scopeCtx.moveTo(x, 0); scopeCtx.lineTo(x, h); scopeCtx.stroke();
+  }
+  for (let i = 0; i <= 4; i++) {
+    const y = (h / 4) * i;
+    scopeCtx.beginPath(); scopeCtx.moveTo(0, y); scopeCtx.lineTo(w, y); scopeCtx.stroke();
+  }
+
+  if (scopeData.length < 2) return;
+  const maxPts = 120;
+  const pts = scopeData.slice(-maxPts);
+  const step = w / maxPts;
+
+  scopeCtx.beginPath();
+  scopeCtx.strokeStyle = '#00c9a0';
+  scopeCtx.lineWidth   = 1.5;
+  pts.forEach((v, i) => {
+    const x = i * step;
+    const y = h - (v / 131072) * (h - 10) - 5;
+    i === 0 ? scopeCtx.moveTo(x, y) : scopeCtx.lineTo(x, y);
+  });
+  scopeCtx.stroke();
+
+  // Threshold lines
+  const yLo = h - (thrLo / 131072) * (h - 10) - 5;
+  const yHi = h - (thrHi / 131072) * (h - 10) - 5;
+  scopeCtx.setLineDash([3, 3]);
+  scopeCtx.strokeStyle = '#e84040';
+  scopeCtx.lineWidth   = 0.8;
+  scopeCtx.beginPath(); scopeCtx.moveTo(0, yLo); scopeCtx.lineTo(w, yLo); scopeCtx.stroke();
+  scopeCtx.beginPath(); scopeCtx.moveTo(0, yHi); scopeCtx.lineTo(w, yHi); scopeCtx.stroke();
+  scopeCtx.setLineDash([]);
+
+  scopeCtx.fillStyle = '#e84040aa';
+  scopeCtx.font      = '9px Share Tech Mono, monospace';
+  scopeCtx.fillText('THR_LO', 4, yLo - 2);
+  scopeCtx.fillText('THR_HI', 4, yHi - 2);
+}
+
+// === FSM transition logic ===
+function nextState() {
+  const breach = forceBreach || (inputVal < thrLo) || (inputVal > thrHi);
+  switch (state) {
+    case 'S_IDLE':     return 'S_OBSERVE';
+    case 'S_OBSERVE':  return 'S_COMPUTE';
+    case 'S_COMPUTE':  return 'S_VALIDATE';
+    case 'S_VALIDATE': return breach ? 'S_CONFESS' : 'S_EMIT';
+    case 'S_EMIT':     forceBreach = false; return 'S_IDLE';
+    case 'S_CONFESS':  forceBreach = false; return 'S_IDLE';
+    default:           return 'S_IDLE';
+  }
+}
+
+function step() {
+  cycleCount++;
+  const prev = state;
+  state = nextState();
+
+  if (state === 'S_EMIT')    emitCount++;
+  if (state === 'S_CONFESS') confessCount++;
+
+  // Update pipeline display
+  const hex = '0x' + inputVal.toString(16).padStart(4,'0').toUpperCase();
+  const q   = (inputVal / 65536).toFixed(4);
+  const breach = (inputVal < thrLo) || (inputVal > thrHi) || forceBreach;
+
+  document.getElementById('pd-diode').textContent = hex;
+  document.getElementById('pd-pipe').textContent  = q;
+  document.getElementById('pd-thr').textContent   = breach ? 'BREACH' : 'IN_ZONE';
+  document.getElementById('pd-fsm').textContent   = state;
+  document.getElementById('pd-out').textContent   = state === 'S_EMIT' ? hex : (state === 'S_CONFESS' ? 'CONFESS' : '─');
+
+  // Stage highlights
+  const stages = {
+    'S_OBSERVE':'ps-diode','S_COMPUTE':'ps-pipe',
+    'S_VALIDATE':'ps-thr','S_EMIT':'ps-fsm','S_CONFESS':'ps-fsm'
+  };
+  ['ps-diode','ps-pipe','ps-thr','ps-fsm','ps-out'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','breach','confess');
+  });
+  if (stages[state]) {
+    const el = document.getElementById(stages[state]);
+    if (state === 'S_CONFESS') el.classList.add('confess');
+    else if (breach && state === 'S_VALIDATE') el.classList.add('breach');
+    else el.classList.add('active');
+  }
+  if (state === 'S_EMIT') document.getElementById('ps-out').classList.add('active');
+
+  // Confess overlay
+  const isConfess = (state === 'S_CONFESS');
+  document.getElementById('confessOverlay').classList.toggle('visible', isConfess);
+  document.getElementById('confessBanner').classList.toggle('visible', isConfess);
+  if (isConfess) setTimeout(() => {
+    document.getElementById('confessOverlay').classList.remove('visible');
+    document.getElementById('confessBanner').classList.remove('visible');
+  }, 1200);
+
+  // Principle highlights
+  document.getElementById('pr-diode').classList.toggle('active', state === 'S_OBSERVE');
+  document.getElementById('pr-gear').classList.toggle('active',  state === 'S_COMPUTE');
+  document.getElementById('pr-ring').classList.toggle('active',  true);
+  document.getElementById('pr-gate').classList.toggle('active',  state === 'S_VALIDATE');
+  document.getElementById('pr-gate').classList.toggle('breach',  breach && state === 'S_VALIDATE');
+  document.getElementById('pr-confess').classList.toggle('breach', state === 'S_CONFESS');
+  document.getElementById('pr-confess').classList.toggle('active', state === 'S_CONFESS');
+  document.querySelectorAll('.principle-name').forEach((el, i) => {
+    el.classList.remove('breach');
+  });
+  if (state === 'S_CONFESS') {
+    document.querySelector('#pr-confess .principle-name').classList.add('breach');
+    document.querySelector('#pr-gate .principle-name').classList.add('breach');
+  }
+
+  // State card
+  const info = STATES[state];
+  const nameEl = document.getElementById('stateName');
+  nameEl.textContent = state;
+  nameEl.style.color = info.color;
+  document.getElementById('stateJp').textContent  = info.jp;
+  document.getElementById('stateDesc').textContent = info.desc;
+  const badges = info.badge.map(([t, c]) =>
+    `<span class="state-badge" style="background:var(--${c}-dim);color:var(--${c})">${t}</span>`
+  ).join('');
+  document.getElementById('stateBadges').innerHTML = badges;
+
+  // Metrics
+  const rate = emitCount + confessCount > 0
+    ? Math.round(emitCount / (emitCount + confessCount) * 100) : 100;
+  document.getElementById('m-cycle').textContent  = cycleCount;
+  document.getElementById('m-emit').textContent   = emitCount;
+  const confEl = document.getElementById('m-confess');
+  confEl.textContent = confessCount;
+  confEl.className   = 'metric-val ' + (confessCount > 0 ? 'err' : 'warn');
+  const rateEl = document.getElementById('m-rate');
+  rateEl.textContent = rate + '%';
+  rateEl.className   = 'metric-val' + (rate < 80 ? ' err' : rate < 95 ? ' warn' : '');
+
+  // Scope
+  scopeData.push(inputVal);
+  if (scopeData.length > 200) scopeData.shift();
+
+  // Log
+  addLog(state, prev, breach);
+
+  drawFSM();
+  drawScope();
+}
+
+// === Log ===
+function addLog(cur, prev, breach) {
+  const ts   = cycleCount.toString().padStart(4, '0');
+  const el   = document.getElementById('logEntries');
+  const div  = document.createElement('div');
+  div.className = 'log-entry';
+
+  let cls = 'ok', msg = `${prev} → ${cur}`;
+  if (cur === 'S_CONFESS') { cls = 'err'; msg = `CONFESS — 限界告白 breach detected`; }
+  else if (breach && cur === 'S_VALIDATE') { cls = 'warn'; msg = `BREACH DETECTED — threshold violated`; }
+  else if (cur === 'S_EMIT') msg = `EMIT — output: 0x${inputVal.toString(16).toUpperCase()} (${(inputVal/65536).toFixed(4)})`;
+
+  div.innerHTML = `<span class="ts">[${ts}]</span><span class="${cls}">${msg}</span>`;
+  el.insertBefore(div, el.firstChild);
+  if (el.children.length > 60) el.removeChild(el.lastChild);
+}
+
+// === Controls ===
+let clockInterval = 560; // ms, default speed=5
+
+function updateSpeed(v) {
+  v = parseInt(v);
+  // 1=最遅(2000ms) 5=標準(560ms) 10=最速(80ms)
+  const ms = Math.round(2000 / (v * v * 0.09 + 0.9));
+  clockInterval = ms;
+  const labels = {1:'1 ─ 最遅',2:'2',3:'3',4:'4',5:'5 ─ 標準',6:'6',7:'7',8:'8',9:'9',10:'10 ─ 最速'};
+  document.getElementById('clockSpeedDisplay').textContent = labels[v] || v;
+  if (autoRunning) {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(step, clockInterval);
+  }
+}
+
+function toggleAuto() {
+  autoRunning = !autoRunning;
+  const dot = document.getElementById('runDot');
+  const btn = document.getElementById('btnAuto');
+  dot.classList.toggle('running', autoRunning);
+  btn.classList.toggle('active', autoRunning);
+  if (autoRunning) {
+    autoTimer = setInterval(step, clockInterval);
+  } else {
+    clearInterval(autoTimer);
+  }
+}
+
+function triggerBreach() {
+  forceBreach = true;
+  addLog('BREACH_SET', state, true);
+}
+
+function triggerConfess() {
+  forceBreach = true;
+  // Fast-track to CONFESS
+  while (state !== 'S_IDLE' && state !== 'S_VALIDATE') step();
+  step();
+}
+
+function resetSim() {
+  clearInterval(autoTimer);
+  autoRunning = false;
+  document.getElementById('runDot').classList.remove('running');
+  document.getElementById('btnAuto').classList.remove('active');
+  state = 'S_IDLE'; cycleCount = 0; emitCount = 0; confessCount = 0; forceBreach = false;
+  scopeData = [];
+  document.getElementById('confessOverlay').classList.remove('visible');
+  document.getElementById('confessBanner').classList.remove('visible');
+  ['ps-diode','ps-pipe','ps-thr','ps-fsm','ps-out'].forEach(id => {
+    document.getElementById(id).classList.remove('active','breach','confess');
+  });
+  ['m-cycle','m-emit','m-confess'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('m-rate').textContent = '100%';
+  document.getElementById('logEntries').innerHTML = '';
+  drawFSM(); drawScope();
+  const info = STATES['S_IDLE'];
+  document.getElementById('stateName').textContent = 'S_IDLE';
+  document.getElementById('stateName').style.color = info.color;
+  document.getElementById('stateJp').textContent   = info.jp;
+  document.getElementById('stateDesc').textContent = info.desc;
+  document.getElementById('stateBadges').innerHTML = `<span class="state-badge" style="background:var(--teal-dim);color:var(--teal)">SAFE</span>`;
+  addLog('RESET', 'SYSTEM', false);
+}
+
+function updateInput(v) {
+  inputVal = parseInt(v);
+  document.getElementById('inputValDisplay').textContent = (inputVal / 65536).toFixed(4);
+  scopeData.push(inputVal);
+  if (scopeData.length > 200) scopeData.shift();
+  drawScope();
+}
+
+function updateThresholds() {
+  thrLo = parseInt(document.getElementById('thrLo').value);
+  thrHi = parseInt(document.getElementById('thrHi').value);
+  document.getElementById('thrLoDisplay').textContent = (thrLo / 65536).toFixed(4);
+  document.getElementById('thrHiDisplay').textContent = (thrHi / 65536).toFixed(4);
+  drawScope();
+}
+
+// === Init ===
+window.addEventListener('load', () => {
+  resizeFSM(); resizeScope();
+  const ro = new ResizeObserver(() => { resizeFSM(); resizeScope(); });
+  ro.observe(fsmCanvas); ro.observe(scopeCanvas);
+  addLog('INIT', 'SYSTEM', false);
+  updateInput(65536);
+});
+</script>
+</body>
+</html>

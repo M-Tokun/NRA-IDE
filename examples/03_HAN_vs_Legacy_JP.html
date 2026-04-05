@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<!--
+  FILE: 03_HAN_vs_Legacy_JP.html
+  NRA-IDE 実証デモ #03 — NRA(律環公理制御) vs Legacy(If-Then固定制御)
+  (c) 2026 M-Tokuni | Principle: L∧P∧C∧D Verified
+  
+  概要: リアルタイム波形でNRAとLegacyの追従性を比較。
+        外乱（ノイズ＋トレンド＋突発スパイク）に対し、
+        Legacy は固定ステップで追従遅れが蓄積。
+        NRA は非線形ポテンシャル障壁により、弾性限界に近づくほど
+        強力な引き戻し力が発生し、大きな乖離を未然に防止。限界を狙えます。
+         
+  注意: 設定閾値(CONFIG.han.limit)は管理者による調整前提。
+        ピーク超えは瞬間的であれば許容が設計意図。
+-->
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE #03: NRA vs Legacy 比較</title>
+    <style>
+        body { background: #111; color: #eee; font-family: monospace; overflow: hidden; margin: 0; }
+        #container { display: flex; height: 100vh; min-height: 400px; }
+        #main { flex: 1; position: relative; min-width: 400px; }
+        #sidebar { width: 300px; background: #1a1a1a; padding: 20px; border-left: 1px solid #333; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        h1 { font-size: 16px; color: cyan; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .metric-box { margin-bottom: 15px; padding: 12px; background: #222; border-radius: 4px; }
+        .metric-title { font-size: 10px; color: #888; text-transform: uppercase; }
+        .metric-value { font-size: 22px; font-weight: bold; margin-top: 4px; }
+        .legacy { color: #ff5555; border-left: 3px solid #ff5555; }
+        .han { color: #00ff88; border-left: 3px solid #00ff88; }
+        .legend { font-size: 11px; margin-top: 5px; color: #aaa; }
+            input[type=range]{ width:100%; }
+        .slider-row{ margin-top:8px; }
+        .slider-value{ font-size:12px; color:#aaa; }
+</style>
+</head>
+<body>
+
+<div id="container">
+    <div id="main"><canvas id="simCanvas"></canvas></div>
+    <div id="sidebar">
+        <h1>NRA vs Legacy 比較 v0.3s</h1>
+        <div class="metric-box legacy">
+            <div class="metric-title">Legacy（If-Then固定制御）</div>
+            <div class="metric-value" id="val-legacy">0</div>
+            <div class="legend">安定度: <span id="stab-legacy">0</span>%</div>
+        </div>
+        <div class="metric-box han">
+            <div class="metric-title">NRA（律環公理制御）</div>
+            <div class="metric-value" id="val-han">0</div>
+            <div class="legend">安定度: <span id="stab-han">0</span>%</div>
+        </div>
+        <div class="metric-box han">
+            <div class="metric-title">NRA 閾値制御（厚み × ゆらぎ）</div>
+            <div class="slider-row">
+                <div class="legend" style="margin-bottom:6px;">基本は <strong>厚み</strong>（基準L）。<strong>ゆらぎ</strong> はその周辺での揺れ幅（瞬間的な許容・呼吸）です。</div>
+                <div style="font-size:11px; color:#aaa; margin-bottom:2px;">厚み（基準 L）</div>
+                <input type="range" id="thicknessSlider" min="5" max="80" step="0.5" value="30">
+                <div class="slider-value">L(base) = <span id="thicknessVal">30.0</span></div>
+
+                <div style="height:10px;"></div>
+                <div style="font-size:11px; color:#aaa; margin-bottom:2px;">ゆらぎ（±割合）</div>
+                <input type="range" id="fluctSlider" min="0" max="0.50" step="0.01" value="0.10">
+                <div class="slider-value">fluct = ±<span id="fluctVal">0.10</span>（実効Lが揺れます）</div>
+
+                <div class="legend">実効L = L(base) × (1 ± fluct)。厚みが調整元で、ゆらぎは「厚みの周辺」にのみ作用します。</div>
+            </div>
+        </div>
+
+        <div style="font-size: 11px; color: #666; line-height: 1.5;">
+            <strong>解説:</strong><br>
+            緑線(NRA)が白線(負荷)を「絶対に逃さない」挙動に注目。非線形反発により、大きな乖離が発生する前に強力な引き戻しがかかります。<br><br>
+            <strong>読み方:</strong><br>
+            ・白破線 = 外部負荷（ノイズ＋トレンド＋突発スパイク）<br>
+            ・赤線 = Legacy の追従（遅延が蓄積）<br>
+            ・緑線 = NRA（律環公理）の追従（閾値で急速補正）
+        </div>
+    </div>
+</div>
+
+<script>
+const CONFIG = {
+    han: {
+        k: 0.15,
+        thickness: 30.0, // 厚み（基準L）
+        fluct: 0.10,     // ゆらぎ（±割合）
+        damping: 0.8
+    },
+    reactionStep: 2.0
+};
+
+let time = 0;
+let history = [];
+const MAX_HISTORY = 600;
+
+const sim = {
+    inputLoad: 50,
+    legacy: { capacity: 50, errorSum: 0 },
+    han: { capacity: 50, velocity: 0, errorSum: 0 }
+};
+
+// NRA 閾値制御（厚み×ゆらぎ）
+function bindNraSliders(){
+    const tSlider = document.getElementById('thicknessSlider');
+    const tLabel  = document.getElementById('thicknessVal');
+    const fSlider = document.getElementById('fluctSlider');
+    const fLabel  = document.getElementById('fluctVal');
+    if(!tSlider || !tLabel || !fSlider || !fLabel) return;
+
+    tSlider.value = String(CONFIG.han.thickness);
+    tLabel.textContent = Number(CONFIG.han.thickness).toFixed(1);
+
+    fSlider.value = String(CONFIG.han.fluct);
+    fLabel.textContent = Number(CONFIG.han.fluct).toFixed(2);
+
+    tSlider.addEventListener('input', () => {
+        const v = Math.max(1, Number(tSlider.value));
+        CONFIG.han.thickness = v;
+        tLabel.textContent = v.toFixed(1);
+    });
+
+    fSlider.addEventListener('input', () => {
+        const v = Math.max(0, Math.min(0.50, Number(fSlider.value)));
+        CONFIG.han.fluct = v;
+        fLabel.textContent = v.toFixed(2);
+    });
+}
+window.addEventListener('DOMContentLoaded', bindNraSliders);
+
+function update() {
+    time++;
+    
+    // 1. 外乱生成
+    const noise = (Math.random() - 0.5) * 8;
+    const trend = Math.sin(time * 0.02) * 20;
+    sim.inputLoad = Math.max(10, Math.min(90, 50 + trend + noise));
+    if(Math.random() < 0.01) sim.inputLoad += (Math.random() > 0.5 ? 25 : -25);
+
+    // 2. Legacy (If-Then固定制御)
+    // 問題: 固定ステップ(2.0)でしか反応できない → 外乱が閾値(10)以内なら無視
+    const legacyDiff = sim.inputLoad - sim.legacy.capacity;
+    if (Math.abs(legacyDiff) > 10) {
+        sim.legacy.capacity += Math.sign(legacyDiff) * CONFIG.reactionStep;
+    }
+    sim.legacy.errorSum += Math.abs(sim.inputLoad - sim.legacy.capacity);
+
+    // 3. HAN (非線形ポテンシャル障壁制御)
+    // 原理: 弾性限界(L)に近づくほど復元力が急増する
+    //   ratio = |violation| / limit が 1.0 に近づくと分母 → 0 で force → ∞
+    //   これにより「絶対に超えさせない」壁が形成される
+    const violation = sim.inputLoad - sim.han.capacity;
+    // 厚み（基準L）を調整元とし、その周辺にゆらぎを付与して実効Lを作る
+    // 実効L = thickness * (1 ± fluct)
+    const sign = (Math.random() < 0.5) ? -1 : 1;
+    const effectiveLimit = Math.max(1, CONFIG.han.thickness * (1 + sign * CONFIG.han.fluct));
+    // 非線形反発: F = k * v / (1 - (|v|/L)²)
+    // ratio → 1.0 で分母 → 0、force → ∞（弾性限界の壁）
+    const ratio = Math.min(0.99, Math.abs(violation) / effectiveLimit);
+    let force = (CONFIG.han.k * violation) / (1 - Math.pow(ratio, 2));
+    
+    // 数値的安定性のためのクランプ（発散防止）
+    force = Math.max(-20, Math.min(20, force));
+
+    sim.han.velocity += force;
+    sim.han.velocity *= CONFIG.han.damping;
+    sim.han.capacity += sim.han.velocity;
+    
+    // 表示上のクランプ
+    sim.han.capacity = Math.max(0, Math.min(100, sim.han.capacity));
+    sim.han.errorSum += Math.abs(sim.inputLoad - sim.han.capacity);
+
+    history.push({ load: sim.inputLoad, legacy: sim.legacy.capacity, han: sim.han.capacity });
+    if (history.length > MAX_HISTORY) history.shift();
+    
+    document.getElementById('val-legacy').textContent = sim.legacy.capacity.toFixed(1);
+    document.getElementById('val-han').textContent = sim.han.capacity.toFixed(1);
+    document.getElementById('stab-legacy').textContent = (100 - Math.min(100, sim.legacy.errorSum / time * 3)).toFixed(1);
+    document.getElementById('stab-han').textContent = (100 - Math.min(100, sim.han.errorSum / time * 3)).toFixed(1);
+}
+
+function draw() {
+    const cvs = document.getElementById('simCanvas');
+    const main = document.getElementById('main');
+    if (!cvs || !main) return;
+    const ctx = cvs.getContext('2d');
+    
+    // サイズリセット（描画を維持するため）
+    if(cvs.width !== main.clientWidth) {
+        cvs.width = main.clientWidth;
+        cvs.height = main.clientHeight;
+    }
+    
+    const w = cvs.width;
+    const h = cvs.height;
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, w, h);
+
+    if (history.length < 2) return;
+
+    function drawLine(key, color, width, dash = []) {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.setLineDash(dash);
+        for (let i = 0; i < history.length; i++) {
+            const x = (i / MAX_HISTORY) * w;
+            const y = h - (Math.max(0, Math.min(100, history[i][key])) / 100) * h; 
+            if (i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    drawLine('load', '#444', 1, [2, 2]);
+    drawLine('legacy', '#ff5555', 2);
+    drawLine('han', '#00ff88', 3);
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

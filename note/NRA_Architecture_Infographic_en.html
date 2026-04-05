@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRA: Ritsukan Axioms & AI Architecture</title>
+    <!-- FILE: NRA_Architecture_Infographic_2026-02-28 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        h1, h2, h3, .mono { font-family: 'Courier New', monospace; }
+        header {
+            background: rgba(15,23,42,0.95);
+            border-bottom: 1px solid rgba(6,182,212,0.3);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .logo { color: #22d3ee; font-weight: bold; letter-spacing: 2px; font-family: monospace; }
+        .date { color: #64748b; font-size: 12px; }
+        main { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+        section { margin-bottom: 96px; }
+
+        /* Hero */
+        .hero { text-align: center; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background: rgba(6,182,212,0.1);
+            color: #22d3ee;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border: 1px solid rgba(6,182,212,0.2);
+            margin-bottom: 16px;
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            background: linear-gradient(90deg, #22d3ee, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+        .hero p { color: #94a3b8; font-size: 1.1rem; max-width: 700px; margin: 0 auto; line-height: 1.7; }
+        .hero p span { color: #e2e8f0; font-weight: 600; }
+
+        /* Two-col grid */
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+        @media(max-width:768px){ .grid2 { grid-template-columns: 1fr; } }
+
+        .accent-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .bar { width: 4px; height: 32px; border-radius: 4px; }
+        .bar-pink { background: #ec4899; }
+        .bar-cyan { background: #06b6d4; }
+        .bar-white { background: #fff; }
+
+        .card-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .card-item {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        .card-item.purple { border-left: 4px solid #8b5cf6; }
+        .card-item.pink { border-left: 4px solid #ec4899; }
+        .card-item strong { display: block; margin-bottom: 4px; font-size: 0.9rem; }
+        .card-item.purple strong { color: #a78bfa; }
+        .card-item.pink strong { color: #f472b6; }
+        .card-item span { color: #94a3b8; font-size: 0.82rem; }
+
+        .chart-box {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #334155;
+        }
+        .chart-title { font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 16px; }
+        .chart-note { font-size: 11px; color: #475569; text-align: center; margin-top: 12px; font-style: italic; }
+        .chart-container { position: relative; width: 100%; height: 280px; }
+
+        /* Math section */
+        .math-section {
+            background: rgba(30,41,59,0.5);
+            border-radius: 16px;
+            padding: 48px;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden;
+        }
+        .formula-box {
+            background: #0f172a;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(6,182,212,0.3);
+            text-align: center;
+        }
+        .formula { font-size: 3rem; font-weight: 900; font-family: monospace; color: #fff; margin-bottom: 16px; }
+        .formula .d { color: #22d3ee; }
+        .formula .t { color: #a78bfa; }
+        .formula-legend { display: flex; justify-content: center; gap: 32px; margin-top: 8px; }
+        .legend-item { text-align: left; }
+        .legend-label { font-weight: bold; font-size: 0.85rem; }
+        .legend-label.cyan { color: #22d3ee; }
+        .legend-label.purple { color: #a78bfa; }
+        .legend-sub { color: #64748b; font-size: 0.75rem; }
+
+        /* Architecture layers */
+        .arch-title { text-align: center; margin-bottom: 32px; }
+        .arch-title h2 { font-size: 1.8rem; font-weight: bold; color: #fff; margin-bottom: 8px; }
+        .arch-title p { color: #94a3b8; max-width: 600px; margin: 0 auto; }
+        .layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        @media(max-width:768px){ .layers { grid-template-columns: 1fr; } }
+        .layer {
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .layer.pre {
+            background: #0f172a;
+            border: 2px solid #06b6d4;
+            box-shadow: 0 0 20px rgba(6,182,212,0.15);
+        }
+        .layer.inf {
+            background: #1e293b;
+            border: 2px dashed rgba(139,92,246,0.5);
+        }
+        .layer.post {
+            background: #0f172a;
+            border: 2px solid #ec4899;
+            box-shadow: 0 0 20px rgba(236,72,153,0.15);
+        }
+        .layer-badge {
+            position: absolute;
+            top: -10px; left: 16px;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .layer.pre .layer-badge { background: #0f172a; color: #22d3ee; border: 1px solid #06b6d4; }
+        .layer.inf .layer-badge { background: #1e293b; color: #a78bfa; border: 1px solid #8b5cf6; }
+        .layer.post .layer-badge { background: #0f172a; color: #f472b6; border: 1px solid #ec4899; }
+        .layer h3 { font-size: 1.2rem; color: #fff; margin-bottom: 4px; }
+        .layer .sub { font-family: monospace; font-size: 0.75rem; margin-bottom: 12px; }
+        .layer.pre .sub { color: #a5f3fc; }
+        .layer.inf .sub { color: #ddd6fe; }
+        .layer.post .sub { color: #fbcfe8; }
+        .layer p { color: #94a3b8; font-size: 0.82rem; flex-grow: 1; line-height: 1.6; }
+        .layer-icon { text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #334155; font-size: 1.5rem; }
+
+        /* Causal / Fail section */
+        .causal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; background: #1e293b; border-radius: 16px; padding: 48px; border: 1px solid #334155; }
+        @media(max-width:768px){ .causal-grid { grid-template-columns: 1fr; } }
+        .flow-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .flow-item { display: flex; align-items: center; padding: 12px; border-radius: 6px; background: rgba(15,23,42,0.5); }
+        .flow-item.ok { border: 1px solid rgba(34,197,94,0.3); }
+        .flow-item.ng { border: 1px solid rgba(239,68,68,0.3); }
+        .flow-status { font-weight: bold; margin-right: 12px; font-size: 0.85rem; min-width: 70px; }
+        .flow-item.ok .flow-status { color: #4ade80; }
+        .flow-item.ng .flow-status { color: #f87171; }
+        .flow-item span { color: #cbd5e1; font-size: 0.82rem; }
+        .quote { color: #64748b; font-size: 0.82rem; font-style: italic; margin-top: 16px; }
+        .terminal { background: #0f172a; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; line-height: 1.8; }
+        .t-cyan { color: #22d3ee; }
+        .t-pink { color: #f472b6; }
+        .t-gray { color: #64748b; }
+        .t-white { color: #fff; }
+        .fail-note { color: #64748b; font-size: 0.75rem; margin-top: 8px; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 48px 0; border-top: 1px solid #1e293b; }
+        .footer h3 { font-size: 1.5rem; color: #fff; margin-bottom: 12px; }
+        .footer p { color: #94a3b8; max-width: 600px; margin: 0 auto 24px; line-height: 1.7; }
+        .footer small { color: #475569; font-family: monospace; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">NRA // RITSUKAN AXIOMS</div>
+    <div class="date">2026-02-28 | M-Tokuni</div>
+</header>
+
+<main>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="badge">SYSTEM ARCHITECTURE PROPOSAL</div>
+        <h1>Structural Shift in<br/>AI Architecture</h1>
+        <p>
+            Moving beyond the "Sandpile Model" of probabilistic optimization.
+            <span>The Ritsukan Axioms (NRA)</span> propose a shift from maximizing scores to controlling boundaries,
+            preventing the inevitable mathematical collapse of modern LLMs.
+        </p>
+    </section>
+
+    <!-- Section 1: Dual Collapse -->
+    <section class="grid2">
+        <div>
+            <div class="accent-bar"><div class="bar bar-pink"></div><h2 style="font-size:1.4rem;color:#fff;">The Inevitability of Collapse</h2></div>
+            <p style="color:#cbd5e1;line-height:1.7;margin-bottom:20px;">
+                Current AI models suffer from a "Dual-Collapse" destiny. By optimizing purely for central tendency
+                (minimizing loss), they create fragile "sandpiles."
+            </p>
+            <ul class="card-list">
+                <li class="card-item purple">
+                    <strong>Linear Decay</strong>
+                    <span>Loss of variance and diversity due to recursive training on self-generated data. The "beige" death.</span>
+                </li>
+                <li class="card-item pink">
+                    <strong>Non-linear Collapse</strong>
+                    <span>The "Cliff Edge." A sandpile reaches criticality where a minor input causes total logical failure.</span>
+                </li>
+            </ul>
+        </div>
+        <div class="chart-box">
+            <div class="chart-title">Model Stability Over Time</div>
+            <div class="chart-container"><canvas id="collapseChart"></canvas></div>
+            <p class="chart-note">Figure 1: Gradual degradation vs. sudden critical failure in optimized systems.</p>
+        </div>
+    </section>
+
+    <!-- Section 2: Math -->
+    <section class="math-section">
+        <div class="grid2">
+            <div class="chart-box" style="order:2;">
+                <div class="chart-title">Structural Stability Index (R)</div>
+                <div class="chart-container"><canvas id="mathChart"></canvas></div>
+            </div>
+            <div style="order:1;">
+                <div class="accent-bar"><div class="bar bar-cyan"></div><h2 style="font-size:1.4rem;color:#fff;">NRA Mathematical Definition</h2></div>
+                <p style="color:#cbd5e1;line-height:1.7;margin-bottom:20px;">
+                    We redefine "success" not as proximity to a center, but as <strong>Structural Stability (R)</strong>.
+                </p>
+                <div class="formula-box">
+                    <div class="formula">R = <span class="d">δ</span> / <span class="t">τ</span></div>
+                    <div class="formula-legend">
+                        <div class="legend-item">
+                            <div class="legend-label cyan">δ (Delta)</div>
+                            <div class="legend-sub">Invariant Constraints</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-label purple">τ (Tau)</div>
+                            <div class="legend-sub">Information Noise / Thickness</div>
+                        </div>
+                    </div>
+                </div>
+                <p style="color:#cbd5e1;font-size:0.85rem;margin-top:16px;line-height:1.7;">
+                    To maximize stability (R), we fix invariants (δ) and minimize noise (τ).
+                    Traditional AI maximizes τ (hallucination) while ignoring δ.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Architecture -->
+    <section>
+        <div class="arch-title">
+            <h2>Physical Implementation: RNA Sandwich</h2>
+            <p>To enforce the axioms, we physically separate constraint from generation.
+            The inference engine is sandwiched between strict regulatory layers.</p>
+        </div>
+        <div class="layers">
+            <div class="layer pre">
+                <div class="layer-badge">LAYER 01</div>
+                <h3>Pre-RNA</h3>
+                <div class="sub">Constraint Fixing (δ)</div>
+                <p>Inputs are analyzed for invariant truths. These become the unshakeable logical bedrock.</p>
+                <div class="layer-icon">🔒</div>
+            </div>
+            <div class="layer inf">
+                <div class="layer-badge">LAYER 02</div>
+                <h3>Inference Engine</h3>
+                <div class="sub">Probabilistic Space</div>
+                <p>The LLM generates content ("The Sandpile"). It is allowed to be chaotic here, but contained.</p>
+                <div class="layer-icon" style="animation:pulse 2s infinite;">🎲</div>
+            </div>
+            <div class="layer post">
+                <div class="layer-badge">LAYER 03</div>
+                <h3>Post-RNA</h3>
+                <div class="sub">Boundary Control (R)</div>
+                <p>Output is measured against Layer 01's δ. If R drops below threshold: <strong>Fail-Closed</strong>.</p>
+                <div class="layer-icon">🛑</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Causal Diode & Fail-Closed -->
+    <section class="causal-grid">
+        <div>
+            <div class="accent-bar"><div class="bar bar-white"></div><h2 style="font-size:1.4rem;color:#fff;">The Causal Diode</h2></div>
+            <p style="color:#cbd5e1;margin-bottom:16px;">
+                A critical component of NRA is the prohibition of "Inverse Derivation" (Π⁻¹).
+            </p>
+            <ul class="flow-list">
+                <li class="flow-item ok">
+                    <span class="flow-status">✓ Allowed</span>
+                    <span>Cause → Result (Natural Flow)</span>
+                </li>
+                <li class="flow-item ng">
+                    <span class="flow-status">✗ Forbidden</span>
+                    <span>Result → Cause (Hallucination)</span>
+                </li>
+            </ul>
+            <p class="quote">"Attempting to derive the cause from the result is an invasion of the non-linear domain."</p>
+        </div>
+        <div>
+            <h3 style="color:#fff;font-size:1.1rem;border-bottom:1px solid #334155;padding-bottom:8px;margin-bottom:16px;">Why "Fail-Closed"?</h3>
+            <p style="color:#cbd5e1;font-size:0.85rem;margin-bottom:16px;line-height:1.7;">
+                When optimization collapses, standard AI smooths over the error — creating plausible lies.
+                NRA dictates <strong>Silence</strong>.
+            </p>
+            <div class="terminal">
+                <div class="t-cyan">> System Status Check...</div>
+                <div class="t-pink">> Viability Kernel Breach Detected.</div>
+                <div class="t-gray">> Initiating Fail-Closed Protocol.</div>
+                <div class="t-white">> Output Suppressed.</div>
+            </div>
+            <p class="fail-note">This silence is not an error. It is the necessary pause for phase transition to a new stable state.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <h3>Conclusion: The Phase Transition</h3>
+        <p>
+            The NRA-IDE framework breaks the illusion of the "Omnipotent AI."
+            By accepting the inevitability of collapse and managing the boundaries,
+            we transform AI from a fragile idol into a robust, physics-compliant tool.
+        </p>
+        <small>Author: M-Tokuni | Framework: 律環公理 (Ritsukan Axioms) | 2026-02-28</small>
+    </footer>
+</main>
+
+<script>
+// FILE: NRA_Architecture_Infographic_2026-02-28
+Chart.defaults.color = '#94a3b8';
+
+// Chart 1: Dual Collapse
+const c1 = document.getElementById('collapseChart').getContext('2d');
+new Chart(c1, {
+    type: 'line',
+    data: {
+        labels: ['Gen1','Gen2','Gen3','Gen4','Gen5','Gen6','Gen7','Gen8'],
+        datasets: [
+            {
+                label: 'Linear Decay',
+                data: [100,95,88,80,72,65,58,50],
+                borderColor: '#a855f7',
+                backgroundColor: 'rgba(168,85,247,0.1)',
+                tension: 0.4, borderWidth: 2, fill: true
+            },
+            {
+                label: 'Non-linear Collapse',
+                data: [100,99,98,98,97,96,20,5],
+                borderColor: '#ec4899',
+                borderDash: [5,5],
+                tension: 0.1, borderWidth: 3, pointRadius: 4
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#cbd5e1' } },
+                   tooltip: { backgroundColor: '#0f172a', titleColor:'#fff', bodyColor:'#cbd5e1', borderColor:'#334155', borderWidth:1 } },
+        scales: {
+            y: { grid:{color:'#334155'}, title:{display:true,text:'System Integrity (%)',color:'#64748b'} },
+            x: { grid:{display:false} }
+        }
+    }
+});
+
+// Chart 2: Stability Index
+const c2 = document.getElementById('mathChart').getContext('2d');
+new Chart(c2, {
+    type: 'bar',
+    data: {
+        labels: ['Standard AI\n(Optimization)', 'NRA Model\n(Boundary Control)'],
+        datasets: [
+            { label: 'δ Invariant Strength', data: [30,90], backgroundColor: '#06b6d4', borderRadius: 4 },
+            { label: 'τ Noise / Hallucination', data: [80,20], backgroundColor: '#8b5cf6', borderRadius: 4 }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend: { labels: { color: '#cbd5e1' } },
+                   tooltip: { backgroundColor: '#0f172a', titleColor:'#fff', bodyColor:'#cbd5e1', borderColor:'#334155', borderWidth:1 } },
+        scales: {
+            x: { grid:{color:'#334155'} },
+            y: { grid:{display:false}, ticks:{color:'#fff', font:{weight:'bold'}} }
+        }
+    }
+});
+</script>
+</body>
+</html>

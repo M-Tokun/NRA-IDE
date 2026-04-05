@@ -1,0 +1,415 @@
+概念を可視化　：
+生存可能領域（Green Zone）：システムが活動できる範囲。
+張力（Red/Tension）：閾値（0.8）を超えた瞬間に発生する「引き戻す力」。
+バッファ（Blue/Buffer）：切り捨てられたエネルギーが消滅せず、「重み」として蓄積される様子。
+律環公理：動的視覚化証明 (Interactive Proof)
+code
+Html
+play_circle
+download
+content_copy
+expand_less
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE Dynamic Proof Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --danger-color: #ff7b72;
+            --safe-color: #3fb950;
+            --buffer-color: #a5d6ff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { margin-bottom: 10px; font-size: 1.5rem; border-bottom: 1px solid #30363d; padding-bottom: 10px; width: 100%; text-align: center; }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        /* Model Visualization */
+        #model-view {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .tank-container {
+            width: 100px;
+            height: 300px;
+            border: 4px solid #555;
+            border-top: none;
+            position: relative;
+            background: #000;
+            margin-bottom: 20px;
+        }
+        .limit-line {
+            position: absolute;
+            bottom: 80%; /* Threshold 0.8 */
+            width: 100%;
+            height: 2px;
+            background-color: var(--danger-color);
+            z-index: 10;
+        }
+        .limit-label {
+            position: absolute;
+            right: -110px;
+            bottom: 80%;
+            color: var(--danger-color);
+            font-size: 0.8rem;
+        }
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background-color: var(--safe-color);
+            transition: height 0.3s ease, background-color 0.3s;
+        }
+        .tension-spring {
+            width: 20px;
+            height: 0px;
+            background: repeating-linear-gradient(45deg, var(--danger-color), var(--danger-color) 5px, #444 5px, #444 10px);
+            position: absolute;
+            top: -20px;
+            left: 40px;
+            transition: height 0.1s;
+        }
+        
+        /* Buffer Tank */
+        .buffer-tank {
+            width: 80px;
+            height: 150px;
+            border: 2px solid #555;
+            position: absolute;
+            right: 20px;
+            bottom: 0;
+            background: #000;
+        }
+        .buffer-liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background-color: var(--buffer-color);
+            transition: height 0.3s ease;
+            opacity: 0.8;
+        }
+        .pipe {
+            position: absolute;
+            width: 40px;
+            height: 10px;
+            background: #333;
+            top: 60px; /* corresponds to 80% approx */
+            left: 100px;
+            transform: rotate(20deg);
+        }
+
+        /* Controls */
+        .controls {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-run { background-color: var(--safe-color); color: white; }
+        .btn-run:hover { background-color: #2ea043; }
+        .btn-disturb { background-color: #d29922; color: #000; }
+        .btn-disturb:hover { background-color: #bb8800; }
+        .btn-reset { background-color: #484f58; color: white; }
+        .btn-reset:hover { background-color: #30363d; }
+
+        /* Chart */
+        #chart-view {
+            flex-grow: 1;
+            min-width: 400px;
+            height: 400px;
+        }
+        
+        .status-box {
+            font-family: monospace;
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>NRA-IDE: Viability Proof Visualization</h1>
+
+    <div class="controls">
+        <button class="btn-run" onclick="step()">Next Cycle (+0.1)</button>
+        <button class="btn-disturb" onclick="injectDisturbance()">Inject Disturbance (+0.5)</button>
+        <button class="btn-reset" onclick="resetSim()">Reset</button>
+        <div style="display:flex; align-items:center; gap:5px;">
+            <input type="checkbox" id="auto-run"> <label for="auto-run">Auto Run</label>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Visual Model -->
+        <div class="panel" id="model-view">
+            <h3>System State (The Container)</h3>
+            <div style="position: relative; width: 100%; height: 320px;">
+                <div class="tension-spring" id="spring"></div>
+                <div class="tank-container">
+                    <div class="limit-line"></div>
+                    <div class="limit-label">Threshold (0.8)</div>
+                    <div class="water" id="main-water"></div>
+                </div>
+                
+                <!-- Pipe visual -->
+                <div class="pipe" id="pipe" style="top: 60px; left: 102px; width: 60px; transform: rotate(15deg);"></div>
+
+                <div class="buffer-tank" style="right: 30px;">
+                    <div class="buffer-liquid" id="buffer-water"></div>
+                    <div style="position:absolute; bottom:-25px; width:100%; text-align:center; font-size:0.8rem;">Buffer<br>(Error Sink)</div>
+                </div>
+            </div>
+            
+            <div class="status-box" id="status-text">
+                Cycle: 0<br>
+                Value: 0.00<br>
+                Tension: 0.00<br>
+                Buffer: 0.00
+            </div>
+        </div>
+
+        <!-- Graph View -->
+        <div class="panel" id="chart-view"></div>
+    </div>
+
+    <script>
+        // --- NRA Logic (JavaScript Implementation) ---
+        const THRESHOLD = 0.8;
+        const MARGIN = 0.05;
+        const BASE_COST = 0.1;
+        
+        let state = {
+            cycle: 0,
+            value: 0.0,
+            rate: 0.0,
+            buffer: 0.0,
+            tension: 0.0
+        };
+
+        let history = {
+            cycle: [],
+            value: [],
+            buffer: [],
+            tension: []
+        };
+
+        // Initialize Plotly
+        function initChart() {
+            Plotly.newPlot('chart-view', [
+                { x: [], y: [], name: 'Value', mode: 'lines+markers', line: {color: '#58a6ff'} },
+                { x: [], y: [], name: 'Threshold', mode: 'lines', line: {color: '#ff7b72', dash: 'dash'} },
+                { x: [], y: [], name: 'Buffer (Accumulated)', mode: 'lines', line: {color: '#a5d6ff'}, fill: 'tozeroy' },
+                { x: [], y: [], name: 'Tension', mode: 'lines', line: {color: '#ff7b72'} }
+            ], {
+                title: 'Dynamics Log',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#c9d1d9' },
+                xaxis: { title: 'Cycle', gridcolor: '#30363d' },
+                yaxis: { title: 'Normalized Level', range: [0, 2.0], gridcolor: '#30363d' },
+                legend: { orientation: 'h', y: -0.2 }
+            });
+        }
+
+        function updateVisuals() {
+            // Update Tank
+            const waterHeight = Math.min(state.value, 1.5) * 100; // Allow visually over 100% momentarily
+            const mainWater = document.getElementById('main-water');
+            mainWater.style.height = `${waterHeight}%`;
+            
+            // Color change on violation
+            if (state.value > THRESHOLD) {
+                mainWater.style.backgroundColor = '#ff7b72'; // Red warning
+            } else {
+                mainWater.style.backgroundColor = '#3fb950'; // Green safe
+            }
+
+            // Update Buffer
+            // Visual scaling: let's say buffer 1.0 fills the tank
+            const bufferHeight = Math.min(state.buffer, 2.0) * 50; 
+            document.getElementById('buffer-water').style.height = `${bufferHeight}%`;
+
+            // Update Spring/Tension
+            const spring = document.getElementById('spring');
+            if (state.tension > 0) {
+                spring.style.height = `${state.tension * 100}px`;
+                spring.style.opacity = 1;
+            } else {
+                spring.style.height = '0px';
+                spring.style.opacity = 0;
+            }
+
+            // Update Text
+            document.getElementById('status-text').innerHTML = 
+                `Cycle: ${state.cycle}<br>` +
+                `Value: ${state.value.toFixed(3)} ${state.value > THRESHOLD ? '⚠️' : '✅'}<br>` +
+                `Tension: ${state.tension.toFixed(3)}<br>` +
+                `Buffer: ${state.buffer.toFixed(3)}`;
+
+            // Update Chart
+            history.cycle.push(state.cycle);
+            history.value.push(state.value);
+            history.buffer.push(state.buffer);
+            history.tension.push(state.tension);
+
+            Plotly.extendTraces('chart-view', {
+                x: [[state.cycle], [state.cycle], [state.cycle], [state.cycle]],
+                y: [[state.value], [THRESHOLD], [state.buffer], [state.tension]]
+            }, [0, 1, 2, 3]);
+        }
+
+        // Logic: Dynamics Node
+        function dynamics(cost) {
+            state.cycle++;
+            state.rate = cost;
+            state.value += cost;
+            // Cap at 1.0 (Critical Limit) theoretically, but for visual we let it go up then clip
+            if (state.value > 1.5) state.value = 1.5; 
+        }
+
+        // Logic: Safety Node (BoundLaw)
+        function safetyCheck() {
+            // Tension Calculation
+            if (state.value > THRESHOLD) {
+                let excess = state.value - THRESHOLD;
+                state.tension = excess; // k=1.0
+
+                // Correction Phase
+                let target = THRESHOLD - MARGIN;
+                
+                // Move excess energy to buffer
+                // Note: In NRA code, we move (value - target) to buffer
+                let dissipated = state.value - target;
+                state.buffer += dissipated;
+                
+                // Apply correction
+                state.value = target;
+            } else {
+                state.tension = 0;
+            }
+        }
+
+        function step() {
+            // 1. Dynamics
+            dynamics(BASE_COST);
+            
+            // 2. Visual Update (Pre-correction: Show the spike)
+            const preCheckValue = state.value;
+            const mainWater = document.getElementById('main-water');
+            mainWater.style.height = `${Math.min(preCheckValue, 1.5) * 100}%`;
+            if(preCheckValue > THRESHOLD) mainWater.style.backgroundColor = '#ff7b72';
+
+            // Wait a bit to show the "Correction" action
+            setTimeout(() => {
+                safetyCheck();
+                updateVisuals();
+            }, 200); // 200ms delay to see the bounce
+        }
+
+        function injectDisturbance() {
+            // Disturbance Node
+            state.cycle++; // Advance time
+            let magnitude = 0.5;
+            state.value += magnitude;
+            state.rate = magnitude;
+
+            // Visual update for spike
+            const mainWater = document.getElementById('main-water');
+            mainWater.style.height = `${Math.min(state.value, 1.5) * 100}%`;
+            mainWater.style.backgroundColor = '#d29922'; // Orange for shock
+
+            setTimeout(() => {
+                safetyCheck();
+                updateVisuals();
+            }, 400);
+        }
+
+        function resetSim() {
+            state = { cycle: 0, value: 0.0, rate: 0.0, buffer: 0.0, tension: 0.0 };
+            history = { cycle: [], value: [], buffer: [], tension: [] };
+            initChart();
+            updateVisuals();
+            document.getElementById('main-water').style.backgroundColor = '#3fb950';
+        }
+
+        // Auto Run
+        let interval = null;
+        document.getElementById('auto-run').addEventListener('change', (e) => {
+            if(e.target.checked) {
+                interval = setInterval(() => {
+                    // Randomly inject disturbance or normal step
+                    if (Math.random() > 0.85 && state.cycle > 3) {
+                        injectDisturbance();
+                    } else {
+                        step();
+                    }
+                    if(state.cycle > 50) e.target.checked = false; // Safety stop
+                }, 800);
+            } else {
+                clearInterval(interval);
+            }
+        });
+
+        // Init
+        initChart();
+        updateVisuals();
+
+    </script>
+</body>
+</html>
+□3つの視覚的証明ポイント□
+このツールを使って、以下の実験を行ってください。◯
+通常運転の安定性◯
+Next Cycle を数回クリックしてください。◯
+証明: 水位（State）は上昇しますが、閾値の赤線（0.8）を超えると、バネ（Tension）が作動し、余分な水が右側のタンク（Buffer）へ排出されます。水位は常に安全圏（0.75付近）に戻されます。◯
+外乱に対する強靭性（Resilience）◯
+Inject Disturbance (+0.5) を押してください。◯
+証明: 一瞬だけ水位が跳ね上がります（線形予測ならここでシステム破壊）。しかし、次の瞬間に強力な補正が働き、バッファが急激に増加する代わりに、システム本体は生存可能な状態に戻ります。「バッファが身代わりになる」様子が見て取れます。◯張力ばね理論◯
+エネルギー保存の痕跡◯
+右側のグラフを見てください。青い面（Buffer）は右肩上がりに増え続けます。◯
+証明: 「誤差を消去しない」というNRAの哲学通り、システムを安定化させるために支払ったコストが、永久に記録され続けていることがわかります。◯
+「反発力」や「エネルギーの移動」が、アニメーションによって直感的に理解できるはずです。by AIStudio

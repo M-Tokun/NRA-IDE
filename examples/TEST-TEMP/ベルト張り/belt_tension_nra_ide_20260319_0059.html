@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<!-- FILE: belt_tension_nra_ide_20260319_0059.html -->
+<!-- TITLE: NRA-IDE ベルト張力管理 インタラクティブ可視化 -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-03-19 00:59 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE Belt Tension Monitor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg:       #0d0f14;
+  --surface:  #141820;
+  --panel:    #1a1f2e;
+  --border:   #252d3d;
+  --safe:     #00e5a0;
+  --warn:     #f0a500;
+  --fail:     #ff3b5c;
+  --text:     #c8d0e0;
+  --muted:    #5a6380;
+  --accent:   #3d7fff;
+  --belt-col: #2a3045;
+  --roller:   #3a4560;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+}
+
+/* ── ヘッダー ── */
+.header {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+.header-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.header-title h1 {
+  font-size: 20px;
+  color: var(--text);
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+}
+.mode-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.mode-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── メインレイアウト ── */
+.main {
+  width: 100%;
+  max-width: 900px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+
+/* ── ベルトビジュアル ── */
+.belt-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.belt-canvas-wrap {
+  position: relative;
+  height: 200px;
+}
+
+canvas#beltCanvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.tension-label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+
+/* ── スライダー制御 ── */
+.control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.slider-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.slider-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  transition: color 0.3s;
+}
+.slider-value span {
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+/* カスタムスライダー */
+.range-wrap {
+  position: relative;
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent);
+  transition: transform 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* 範囲マーカー */
+.range-markers {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── 右パネル（R値・状態） ── */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.r-gauge-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.panel-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  margin-bottom: 16px;
+}
+
+/* R値メーター */
+.r-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.r-arc-wrap {
+  position: relative;
+  width: 180px;
+  height: 100px;
+  overflow: visible;
+}
+
+#rArc {
+  width: 180px;
+  height: 100px;
+  overflow: visible;
+}
+
+.r-value-display {
+  text-align: center;
+}
+.r-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 36px;
+  font-weight: 700;
+  transition: color 0.4s;
+  line-height: 1;
+}
+.r-sublabel {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* 状態バッジ */
+.status-badge {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border: 1px solid;
+  transition: all 0.4s;
+}
+.status-badge.safe    { color: var(--safe); border-color: var(--safe); background: rgba(0,229,160,0.07); }
+.status-badge.warning { color: var(--warn); border-color: var(--warn); background: rgba(240,165,0,0.07); }
+.status-badge.fail    { color: var(--fail); border-color: var(--fail); background: rgba(255,59,92,0.10); animation: pulse-fail 0.8s ease-in-out infinite; }
+
+@keyframes pulse-fail {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,59,92,0.3); }
+  50%      { box-shadow: 0 0 0 6px rgba(255,59,92,0); }
+}
+
+.action-text {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+  padding: 0 4px;
+}
+
+/* ── δ/τ内訳 ── */
+.breakdown-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.breakdown-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.breakdown-key   { color: var(--muted); }
+.breakdown-val   { color: var(--text);  font-weight: 600; }
+.breakdown-bar-bg {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.breakdown-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background 0.3s;
+}
+
+/* ── ログ ── */
+.log-panel {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+.log-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  margin-bottom: 10px;
+}
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+.log-entry {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  display: flex;
+  gap: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.log-time  { color: var(--muted); min-width: 60px; }
+.log-id    { color: var(--accent); min-width: 60px; }
+.log-r     { min-width: 60px; }
+.log-st    { font-weight: 600; }
+.log-st.safe    { color: var(--safe); }
+.log-st.warning { color: var(--warn); }
+.log-st.fail    { color: var(--fail); }
+
+/* ── フッター ── */
+.footer {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="header-title">
+    NRA-IDE / BELT TENSION MONITOR
+    <h1>張力管理システム</h1>
+  </div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('conveyor',this)">コンベアー</button>
+    <button class="mode-btn"        onclick="setMode('vbelt',this)">Vベルト</button>
+  </div>
+</div>
+
+<!-- メイン -->
+<div class="main">
+
+  <!-- 左：ベルトビジュアル＋スライダー -->
+  <div class="belt-panel">
+    <div class="belt-canvas-wrap">
+      <div class="tension-label">BELT VISUALIZATION</div>
+      <canvas id="beltCanvas"></canvas>
+    </div>
+    <div class="control-row">
+      <div class="slider-header">
+        <span class="slider-label">TENSION CONTROL</span>
+        <div class="slider-value" id="tDisplay">500<span>N</span></div>
+      </div>
+      <div class="range-wrap">
+        <input type="range" id="tSlider" min="300" max="800" value="500" oninput="onSlider(this.value)">
+      </div>
+      <div class="range-markers">
+        <span id="minLabel">300 N</span>
+        <span id="optLabel">最適: 500 N</span>
+        <span id="maxLabel">800 N</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右：R値ゲージ＋状態＋内訳 -->
+  <div class="side-panel">
+
+    <div class="r-gauge-panel">
+      <div class="panel-label">APPROACH RATIO  R = δ / τ</div>
+      <div class="r-meter">
+        <div class="r-arc-wrap">
+          <svg id="rArc" viewBox="0 0 180 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- 背景弧 -->
+            <path id="arcBg" d="M 10 90 A 80 80 0 0 1 170 90"
+              fill="none" stroke="#252d3d" stroke-width="14" stroke-linecap="round"/>
+            <!-- 値弧 -->
+            <path id="arcFill" d="M 10 90 A 80 80 0 0 1 170 90"
+              fill="none" stroke="#00e5a0" stroke-width="14" stroke-linecap="round"
+              stroke-dasharray="251.2" stroke-dashoffset="251.2"
+              style="transition: stroke-dashoffset 0.4s ease, stroke 0.4s"/>
+            <!-- 閾値マーカー WARNING 0.75 -->
+            <line id="warnMark" x1="0" y1="0" x2="0" y2="0"
+              stroke="#f0a500" stroke-width="2" stroke-linecap="round"/>
+            <!-- 閾値マーカー FAIL 1.0 -->
+            <line id="failMark" x1="0" y1="0" x2="0" y2="0"
+              stroke="#ff3b5c" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- ラベル -->
+            <text x="10" y="100" fill="#5a6380" font-size="9" font-family="JetBrains Mono">0</text>
+            <text x="155" y="100" fill="#5a6380" font-size="9" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+            <text x="90" y="14" fill="#f0a500" font-size="8" font-family="JetBrains Mono" text-anchor="middle">0.75</text>
+            <text x="152" y="55" fill="#ff3b5c" font-size="8" font-family="JetBrains Mono" text-anchor="middle">1.0</text>
+          </svg>
+        </div>
+        <div class="r-value-display">
+          <div class="r-number" id="rNumber">0.000</div>
+          <div class="r-sublabel">R = δ / τ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-badge safe" id="statusBadge">SAFE</div>
+    <div class="action-text" id="actionText">正常稼働継続</div>
+
+    <div class="breakdown-panel">
+      <div class="panel-label">δ / τ  BREAKDOWN</div>
+      <div class="breakdown-row">
+        <div class="breakdown-header">
+          <span class="breakdown-key">δ  蓄積ズレ</span>
+          <span class="breakdown-val" id="deltaVal">0.0 N</span>
+        </div>
+        <div class="breakdown-bar-bg">
+          <div class="breakdown-bar-fill" id="deltaBar" style="width:0%;background:var(--accent)"></div>
+        </div>
+      </div>
+      <div class="breakdown-row">
+        <div class="breakdown-header">
+          <span class="breakdown-key">τ  吸収厚み</span>
+          <span class="breakdown-val" id="tauVal">150.0 N</span>
+        </div>
+        <div class="breakdown-bar-bg">
+          <div class="breakdown-bar-fill" id="tauBar" style="width:100%;background:var(--safe)"></div>
+        </div>
+      </div>
+      <div class="breakdown-row">
+        <div class="breakdown-header">
+          <span class="breakdown-key">最適値</span>
+          <span class="breakdown-val" id="optVal">500 N</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ログ -->
+<div class="log-panel">
+  <div class="log-title">TRACE LOG</div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<!-- フッター -->
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span id="clockDisp">--:--:--</span>
+  <span>R≥1.0 → FAIL_CLOSED</span>
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// パラメータ定義
+// ────────────────────────────────────────────────
+const MODES = {
+  conveyor: { label:'コンベアー', T_OPT:500, T_MIN:400, T_MAX:650, SLIDER_MIN:280, SLIDER_MAX:750 },
+  vbelt:    { label:'Vベルト',    T_OPT:300, T_MIN:240, T_MAX:380, SLIDER_MIN:170, SLIDER_MAX:450 },
+};
+const R_WARN = 0.75;
+const R_FAIL = 1.0;
+
+let mode      = 'conveyor';
+let T_CURRENT = 500;
+let logTimer  = 0;
+let beltPhase = 0;
+let animId;
+
+// ────────────────────────────────────────────────
+// NRA-IDE コア計算
+// ────────────────────────────────────────────────
+function calcIDE(t, m) {
+  const delta = Math.abs(t - m.T_OPT);
+  const tau   = t >= m.T_OPT ? (m.T_MAX - m.T_OPT) : (m.T_OPT - m.T_MIN);
+  const R     = delta / Math.max(tau, 0.01);
+  const outOfRange = t < m.T_MIN || t > m.T_MAX;
+  let status, action;
+  if (R >= R_FAIL || outOfRange) {
+    status = 'fail';
+    action = '即時停止：テンショナー調整または交換';
+  } else if (R >= R_WARN) {
+    status = 'warning';
+    action = '予兆検出：次回点検を前倒し実施';
+  } else {
+    status = 'safe';
+    action = '正常稼働継続';
+  }
+  return { delta, tau, R, status, action, outOfRange };
+}
+
+// ────────────────────────────────────────────────
+// モード切替
+// ────────────────────────────────────────────────
+function setMode(m, btn) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const pm = MODES[m];
+  const sl = document.getElementById('tSlider');
+  sl.min = pm.SLIDER_MIN;
+  sl.max = pm.SLIDER_MAX;
+  T_CURRENT = pm.T_OPT;
+  sl.value  = T_CURRENT;
+  document.getElementById('minLabel').textContent = pm.SLIDER_MIN + ' N';
+  document.getElementById('optLabel').textContent = '最適: ' + pm.T_OPT + ' N';
+  document.getElementById('maxLabel').textContent = pm.SLIDER_MAX + ' N';
+  document.getElementById('optVal').textContent   = pm.T_OPT + ' N';
+  updateUI();
+}
+
+// ────────────────────────────────────────────────
+// スライダー
+// ────────────────────────────────────────────────
+function onSlider(v) {
+  T_CURRENT = parseFloat(v);
+  updateUI();
+}
+
+// ────────────────────────────────────────────────
+// UI更新
+// ────────────────────────────────────────────────
+function updateUI() {
+  const pm  = MODES[mode];
+  const ide = calcIDE(T_CURRENT, pm);
+
+  // 張力表示
+  document.getElementById('tDisplay').innerHTML = T_CURRENT.toFixed(0) + '<span>N</span>';
+
+  // R値数値
+  const rNum = document.getElementById('rNumber');
+  rNum.textContent = Math.min(ide.R, 9.999).toFixed(3);
+  const colMap = { safe: 'var(--safe)', warning: 'var(--warn)', fail: 'var(--fail)' };
+  rNum.style.color = colMap[ide.status];
+
+  // 弧メーター (0〜1.5 の範囲を 0〜251.2px にマッピング)
+  const arcLen  = 251.2;
+  const ratio   = Math.min(ide.R / 1.5, 1.0);
+  const offset  = arcLen * (1 - ratio);
+  const arcFill = document.getElementById('arcFill');
+  arcFill.style.strokeDashoffset = offset;
+  arcFill.style.stroke = colMap[ide.status];
+
+  // 閾値マーカーを弧上に配置
+  setArcMarker('warnMark', 0.75 / 1.5);
+  setArcMarker('failMark', 1.0  / 1.5);
+
+  // 状態バッジ
+  const badge = document.getElementById('statusBadge');
+  badge.className = 'status-badge ' + ide.status;
+  const stLabel = { safe:'SAFE', warning:'WARNING', fail:'FAIL_CLOSED' };
+  badge.textContent = stLabel[ide.status];
+
+  // アクションテキスト
+  document.getElementById('actionText').textContent = ide.action;
+
+  // δ/τ内訳
+  document.getElementById('deltaVal').textContent = ide.delta.toFixed(1) + ' N';
+  document.getElementById('tauVal').textContent   = ide.tau.toFixed(1)   + ' N';
+  const maxN = pm.T_MAX - pm.T_MIN;
+  document.getElementById('deltaBar').style.width      = Math.min(ide.delta/maxN*100,100).toFixed(1) + '%';
+  document.getElementById('tauBar').style.width        = Math.min(ide.tau/maxN*100,100).toFixed(1) + '%';
+  document.getElementById('deltaBar').style.background = colMap[ide.status];
+
+  // スライダーグラジェント更新
+  updateSliderGradient(pm);
+
+  // 30フレームに1回ログ
+  logTimer++;
+  if (logTimer % 50 === 0) addLog(ide);
+}
+
+// 弧上マーカー座標計算（半径80, 中心90,90, 開始角π, 終了角0）
+function setArcMarker(id, t) {
+  const ang = Math.PI * (1 - t);
+  const cx = 90, cy = 90, r = 80;
+  const x  = cx + r * Math.cos(ang);
+  const y  = cy - r * Math.sin(ang);
+  const nx = Math.cos(ang) * 10;
+  const ny = -Math.sin(ang) * 10;
+  const el = document.getElementById(id);
+  el.setAttribute('x1', (x - nx*0.6).toFixed(1));
+  el.setAttribute('y1', (y - ny*0.6).toFixed(1));
+  el.setAttribute('x2', (x + nx*0.6).toFixed(1));
+  el.setAttribute('y2', (y + ny*0.6).toFixed(1));
+}
+
+// スライダーグラジェント
+function updateSliderGradient(pm) {
+  const sl = document.getElementById('tSlider');
+  const total = pm.SLIDER_MAX - pm.SLIDER_MIN;
+  const pMin  = ((pm.T_MIN - pm.SLIDER_MIN) / total * 100).toFixed(1);
+  const pOpt  = ((pm.T_OPT - pm.SLIDER_MIN) / total * 100).toFixed(1);
+  const pMax  = ((pm.T_MAX - pm.SLIDER_MIN) / total * 100).toFixed(1);
+  const pCur  = ((T_CURRENT - pm.SLIDER_MIN) / total * 100).toFixed(1);
+  sl.style.background = `linear-gradient(to right,
+    #252d3d 0%, #252d3d ${pMin}%,
+    #00e5a040 ${pMin}%, #00e5a040 ${pOpt}%,
+    #00e5a040 ${pOpt}%, #00e5a040 ${pMax}%,
+    #252d3d ${pMax}%, #252d3d 100%)`;
+}
+
+// ────────────────────────────────────────────────
+// ログ追加
+// ────────────────────────────────────────────────
+function addLog(ide) {
+  const now  = new Date();
+  const time = now.toTimeString().slice(0,8);
+  const stLabel = { safe:'SAFE', warning:'WARNING', fail:'FAIL_CLOSED' };
+  const list = document.getElementById('logList');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">${time}</span>
+    <span class="log-id">${mode.toUpperCase()}</span>
+    <span class="log-r">R=${Math.min(ide.R,9.999).toFixed(3)}</span>
+    <span class="log-st ${ide.status}">${stLabel[ide.status]}</span>
+    <span style="color:var(--muted);font-size:10px">T=${T_CURRENT.toFixed(0)}N δ=${ide.delta.toFixed(1)} τ=${ide.tau.toFixed(1)}</span>
+  `;
+  list.insertBefore(entry, list.firstChild);
+  if (list.children.length > 20) list.removeChild(list.lastChild);
+}
+
+// ────────────────────────────────────────────────
+// ベルトアニメーション
+// ────────────────────────────────────────────────
+const canvas = document.getElementById('beltCanvas');
+const ctx    = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+}
+
+function drawConveyor(phase, ide) {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const r    = 28;
+  const lx   = r + 20;
+  const rx   = W - r - 20;
+  const cy   = H / 2;
+  const bh   = 22;
+  const speed = Math.max(0.2, 1 - ide.R * 0.3); // 張力ズレで速度変化演出
+
+  const stateCol = { safe:'#00e5a0', warning:'#f0a500', fail:'#ff3b5c' };
+  const col = stateCol[ide.status];
+
+  // ── 地面 ──
+  ctx.fillStyle = '#1a1f2e';
+  ctx.fillRect(0, cy + r + 10, W, H);
+
+  // ── ローラー ──
+  [lx, rx].forEach(x => {
+    const grad = ctx.createRadialGradient(x-6, cy-6, 4, x, cy, r);
+    grad.addColorStop(0, '#5a6890');
+    grad.addColorStop(1, '#2a3050');
+    ctx.beginPath();
+    ctx.arc(x, cy, r, 0, Math.PI*2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = '#3a4570';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // ローラー中心
+    ctx.beginPath();
+    ctx.arc(x, cy, 5, 0, Math.PI*2);
+    ctx.fillStyle = '#1a1f2e';
+    ctx.fill();
+  });
+
+  // ── ベルト（上部・下部） ──
+  const beltLen = rx - lx;
+
+  // ベルトのストライプ模様（動くパターン）
+  const stripeW = 28;
+  const offset  = (phase * 2) % stripeW;
+
+  // クリップ領域（ベルト上部）
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(lx, cy - bh/2 - r, beltLen, bh);
+  ctx.clip();
+
+  // ベルト背景
+  ctx.fillStyle = '#1e2535';
+  ctx.fillRect(lx, cy - bh/2 - r, beltLen, bh);
+
+  // ストライプ
+  for (let x = lx - stripeW + offset; x < rx + stripeW; x += stripeW) {
+    ctx.beginPath();
+    ctx.moveTo(x, cy - bh/2 - r);
+    ctx.lineTo(x + stripeW*0.4, cy - bh/2 - r);
+    ctx.lineTo(x + stripeW*0.4, cy + bh/2 - r);
+    ctx.lineTo(x, cy + bh/2 - r);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fill();
+  }
+
+  // ベルトエッジ（状態色）
+  ctx.strokeStyle = col;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.7;
+  ctx.strokeRect(lx, cy - bh/2 - r, beltLen, bh);
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // ベルト下部
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(lx, cy + r - bh/2, beltLen, bh);
+  ctx.clip();
+  ctx.fillStyle = '#161b28';
+  ctx.fillRect(lx, cy + r - bh/2, beltLen, bh);
+  ctx.restore();
+
+  // ベルト半円部分
+  ctx.beginPath();
+  ctx.arc(lx, cy, r, Math.PI*0.5, Math.PI*1.5);
+  ctx.strokeStyle = col;
+  ctx.lineWidth = bh;
+  ctx.globalAlpha = 0.15;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.beginPath();
+  ctx.arc(rx, cy, r, -Math.PI*0.5, Math.PI*0.5);
+  ctx.strokeStyle = col;
+  ctx.lineWidth = bh;
+  ctx.globalAlpha = 0.15;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // ── 張力矢印（弛み・張り演出） ──
+  const sag = Math.max(0, (ide.R > 0.5 ? 0 : (0.5 - ide.R) * 30));
+  if (ide.status === 'fail') {
+    // FAIL時：過張力の赤い矢印
+    drawArrow(ctx, lx + beltLen*0.3, cy - r - bh - 8, lx + beltLen*0.3, cy - r - bh - 24, '#ff3b5c');
+    drawArrow(ctx, rx - beltLen*0.3, cy - r - bh - 8, rx - beltLen*0.3, cy - r - bh - 24, '#ff3b5c');
+  }
+
+  // ── R値オーバーレイ ──
+  ctx.font = 'bold 13px JetBrains Mono';
+  ctx.fillStyle = col;
+  ctx.textAlign = 'left';
+  ctx.fillText(`R = ${Math.min(ide.R, 9.99).toFixed(3)}`, 12, 20);
+
+  // 状態テキスト
+  ctx.font = '10px JetBrains Mono';
+  ctx.fillStyle = col;
+  ctx.textAlign = 'right';
+  const stLabel = { safe:'● SAFE', warning:'▲ WARNING', fail:'✕ FAIL_CLOSED' };
+  ctx.fillText(stLabel[ide.status], W - 12, 20);
+}
+
+function drawVBelt(phase, ide) {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const stateCol = { safe:'#00e5a0', warning:'#f0a500', fail:'#ff3b5c' };
+  const col = stateCol[ide.status];
+
+  // 大プーリー（左下）
+  const r1 = 55, cx1 = W*0.28, cy1 = H*0.6;
+  // 小プーリー（右上）
+  const r2 = 30, cx2 = W*0.72, cy2 = H*0.4;
+
+  // プーリー描画
+  [[cx1,cy1,r1],[cx2,cy2,r2]].forEach(([cx,cy,r]) => {
+    const g = ctx.createRadialGradient(cx-r*0.3, cy-r*0.3, r*0.1, cx, cy, r);
+    g.addColorStop(0, '#4a5570');
+    g.addColorStop(1, '#1e2535');
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = '#3a4570';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // 回転マーカー
+    const ang = (phase * 0.03) % (Math.PI*2);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(ang)*r*0.7, cy + Math.sin(ang)*r*0.7);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 6, 0, Math.PI*2);
+    ctx.fillStyle = '#1a1f2e';
+    ctx.fill();
+  });
+
+  // Vベルト描画（外接接線）
+  const dx = cx2 - cx1, dy = cy2 - cy1;
+  const d  = Math.sqrt(dx*dx + dy*dy);
+  const ang = Math.atan2(dy, dx);
+  const da  = Math.asin((r1 - r2) / d);
+
+  const bw = 10; // ベルト幅
+
+  // 上側接線
+  const t1a = ang - Math.PI/2 + da;
+  const t1b = ang - Math.PI/2 + da;
+  const px1 = cx1 + r1*Math.cos(t1a), py1 = cy1 + r1*Math.sin(t1a);
+  const px2 = cx2 + r2*Math.cos(t1b), py2 = cy2 + r2*Math.sin(t1b);
+
+  // 下側接線
+  const t2a = ang + Math.PI/2 - da;
+  const t2b = ang + Math.PI/2 - da;
+  const px3 = cx1 + r1*Math.cos(t2a), py3 = cy1 + r1*Math.sin(t2a);
+  const px4 = cx2 + r2*Math.cos(t2b), py4 = cy2 + r2*Math.sin(t2b);
+
+  ctx.beginPath();
+  ctx.moveTo(px1, py1);
+  ctx.lineTo(px2, py2);
+  ctx.lineTo(px4, py4);
+  ctx.lineTo(px3, py3);
+  ctx.closePath();
+  ctx.fillStyle = '#1e2535';
+  ctx.fill();
+  ctx.strokeStyle = col;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.8;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // R値
+  ctx.font = 'bold 13px JetBrains Mono';
+  ctx.fillStyle = col;
+  ctx.textAlign = 'left';
+  ctx.fillText(`R = ${Math.min(ide.R, 9.99).toFixed(3)}`, 12, 20);
+
+  ctx.font = '10px JetBrains Mono';
+  ctx.textAlign = 'right';
+  const stLabel = { safe:'● SAFE', warning:'▲ WARNING', fail:'✕ FAIL_CLOSED' };
+  ctx.fillText(stLabel[ide.status], W - 12, 20);
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, col) {
+  ctx.strokeStyle = col;
+  ctx.fillStyle   = col;
+  ctx.lineWidth   = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  const ang = Math.atan2(y2-y1, x2-x1);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 6*Math.cos(ang-0.4), y2 - 6*Math.sin(ang-0.4));
+  ctx.lineTo(x2 - 6*Math.cos(ang+0.4), y2 - 6*Math.sin(ang+0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+// ────────────────────────────────────────────────
+// メインループ
+// ────────────────────────────────────────────────
+function loop() {
+  const pm  = MODES[mode];
+  const ide = calcIDE(T_CURRENT, pm);
+
+  // FAIL時はベルト停止
+  if (ide.status !== 'fail') beltPhase++;
+
+  if (mode === 'conveyor') drawConveyor(beltPhase, ide);
+  else                     drawVBelt(beltPhase, ide);
+
+  // 時計更新
+  document.getElementById('clockDisp').textContent = new Date().toTimeString().slice(0,8);
+
+  animId = requestAnimationFrame(loop);
+}
+
+// ────────────────────────────────────────────────
+// 初期化
+// ────────────────────────────────────────────────
+window.addEventListener('resize', () => { resizeCanvas(); });
+resizeCanvas();
+updateUI();
+addLog(calcIDE(T_CURRENT, MODES[mode]));
+loop();
+</script>
+</body>
+</html>

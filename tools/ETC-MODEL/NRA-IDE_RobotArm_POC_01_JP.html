@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <!-- FILE: NRA-IDE_RobotArm_POC_01_JP.html  2026-02-24 -->
+    <title>NRA-IDE: Robot Arm Safety Gate v0.1</title>
+    <style>
+        :root {
+            --bg:     #080c10;
+            --panel:  #0d1117;
+            --border: #1c2a36;
+            --cyan:   #00e5ff;
+            --green:  #00ff88;
+            --yellow: #ffd600;
+            --orange: #ff8c00;
+            --red:    #ff2244;
+            --text:   #c8d8e0;
+            --muted:  #4a6070;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 100vh;
+            display: grid;
+            grid-template-rows: 44px 1fr;
+            grid-template-columns: 260px 1fr 280px;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        header {
+            grid-column: 1 / -1;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 14px;
+        }
+        .logo { color: var(--cyan); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+        .sub  { color: var(--muted); font-size: 11px; }
+        .gear-status {
+            margin-left: auto;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .gear-ok   { color: var(--green);  border: 1px solid var(--green);  background: rgba(0,255,136,0.08); }
+        .gear-fail { color: var(--red);    border: 1px solid var(--red);    background: rgba(255,34,68,0.12); }
+
+        /* ── Left: controls ── */
+        #leftPanel {
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel-title {
+            padding: 8px 12px;
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* ── Manual sliders ── */
+        #manualCtrl { padding: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .ctrl-group { margin-bottom: 14px; }
+        .ctrl-group:last-child { margin-bottom: 0; }
+        .ctrl-head {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .ctrl-name { color: var(--cyan); font-size: 11px; font-weight: bold; }
+        .ctrl-val  { font-size: 13px; }
+        .ctrl-sub  { font-size: 9px; color: var(--muted); margin-bottom: 4px; }
+        input[type=range] { width: 100%; accent-color: var(--cyan); cursor: pointer; }
+        .mini-r {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3px;
+            font-size: 10px;
+        }
+        .mini-r .r-label { color: var(--muted); }
+
+        /* ── Auto axes info ── */
+        #autoInfo { padding: 10px 12px; flex: 1; overflow: hidden; }
+        .auto-title { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .auto-axis {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .ax-name { width: 24px; font-size: 10px; color: var(--muted); }
+        .ax-bar-wrap { flex: 1; height: 8px; background: #0e1820; border-radius: 2px; overflow: hidden; }
+        .ax-bar { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
+        .ax-val { width: 50px; text-align: right; font-size: 10px; }
+
+        /* ── Gear chain ── */
+        #gearChain {
+            padding: 10px 12px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .gear-row {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .gear-tooth {
+            width: 28px;
+            height: 28px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .tooth-ok   { background: rgba(0,255,136,0.12); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+        .tooth-warn { background: rgba(255,214,0,0.12); color: var(--yellow); border: 1px solid rgba(255,214,0,0.3); }
+        .tooth-crit { background: rgba(255,140,0,0.12); color: var(--orange); border: 1px solid rgba(255,140,0,0.3); }
+        .tooth-fail { background: rgba(255,34,68,0.18); color: var(--red); border: 1px solid rgba(255,34,68,0.5); box-shadow: 0 0 8px rgba(255,34,68,0.3); }
+
+        /* ── Center: arm viz + axis gauges ── */
+        #centerPanel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+        #armWrap {
+            height: 200px;
+            position: relative;
+            background: #060a0d;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        canvas#arm { display: block; width: 100%; height: 100%; }
+
+        /* ── 6-axis gauge grid ── */
+        #axisGrid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1px;
+            background: var(--border);
+            overflow: hidden;
+        }
+        .axis-cell {
+            background: var(--panel);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .axis-head {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .axis-id   { font-size: 13px; font-weight: bold; color: var(--cyan); }
+        .axis-role { font-size: 9px; color: var(--muted); text-align: right; }
+        .axis-r    { font-size: 22px; font-weight: bold; margin-bottom: 4px; transition: color 0.2s; }
+        .axis-bar-wrap {
+            height: 6px;
+            background: #0a1018;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .axis-bar-fill { height: 100%; border-radius: 3px; transition: width 0.2s, background 0.2s; }
+        .axis-detail {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: var(--muted);
+            margin-top: auto;
+        }
+        .axis-zone {
+            font-size: 9px;
+            letter-spacing: 1px;
+            padding: 1px 5px;
+            border-radius: 2px;
+        }
+        .axis-manual-tag {
+            font-size: 8px;
+            color: var(--cyan);
+            opacity: 0.6;
+        }
+
+        /* ── Right: system monitor ── */
+        #rightPanel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Power + current */
+        #powerBox { padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .power-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .power-row:last-child { margin-bottom: 0; }
+        .pw-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .pw-val   { font-size: 20px; font-weight: bold; transition: color 0.2s; }
+        .pw-unit  { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+        .pw-bar-wrap { height: 8px; background: #0a1018; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .pw-bar-fill { height: 100%; border-radius: 3px; transition: width 0.2s, background 0.2s; }
+        .pw-r { font-size: 11px; }
+
+        /* Fault summary */
+        #faultBox { padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .fault-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid #0e1820;
+            font-size: 11px;
+        }
+        .fault-item:last-child { border-bottom: none; }
+        .fault-key { color: var(--muted); }
+
+        /* Log */
+        #logWrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        #logTitle { padding: 6px 14px; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        #log { flex: 1; overflow-y: auto; padding: 6px 12px; font-size: 10px; line-height: 1.8; }
+        #log::-webkit-scrollbar { width: 3px; }
+        #log::-webkit-scrollbar-thumb { background: var(--border); }
+        .log-ok   { color: var(--green); }
+        .log-warn { color: var(--yellow); }
+        .log-crit { color: var(--orange); }
+        .log-fail { color: var(--red); font-weight: bold; }
+
+        #flashOverlay {
+            position: fixed; inset: 0;
+            background: rgba(255,34,68,0.07);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+<div id="flashOverlay"></div>
+
+<header>
+    <div class="logo">NRA‑IDE</div>
+    <div class="sub">// ロボットアーム 安全ゲート POC v0.1 — 6軸トルク × 電力 × 電流</div>
+    <div class="gear-status gear-ok" id="gearStatus">⚙ ギア正常</div>
+</header>
+
+<!-- Left: Controls -->
+<div id="leftPanel">
+    <div class="panel-title">▶ 手動操作  (J2 / J3 / 電力)</div>
+
+    <div id="manualCtrl">
+        <!-- J2 Torque -->
+        <div class="ctrl-group">
+            <div class="ctrl-head">
+                <span class="ctrl-name">J2  肩トルク</span>
+                <span class="ctrl-val" id="lbl-j2">0 Nm</span>
+            </div>
+            <div class="ctrl-sub">定格上限: 150 Nm</div>
+            <input type="range" id="sl-j2" min="0" max="200" value="80">
+            <div class="mini-r">
+                <span class="r-label">R =</span>
+                <span id="r-j2-mini">0.00</span>
+            </div>
+        </div>
+        <!-- J3 Torque -->
+        <div class="ctrl-group">
+            <div class="ctrl-head">
+                <span class="ctrl-name">J3  肘トルク</span>
+                <span class="ctrl-val" id="lbl-j3">0 Nm</span>
+            </div>
+            <div class="ctrl-sub">定格上限: 120 Nm</div>
+            <input type="range" id="sl-j3" min="0" max="160" value="60">
+            <div class="mini-r">
+                <span class="r-label">R =</span>
+                <span id="r-j3-mini">0.00</span>
+            </div>
+        </div>
+        <!-- J3 Power -->
+        <div class="ctrl-group">
+            <div class="ctrl-head">
+                <span class="ctrl-name">J3  消費電力</span>
+                <span class="ctrl-val" id="lbl-pw3">0 W</span>
+            </div>
+            <div class="ctrl-sub">定格上限: 800 W（τ=80W）</div>
+            <input type="range" id="sl-pw3" min="0" max="1000" value="400">
+            <div class="mini-r">
+                <span class="r-label">R =</span>
+                <span id="r-pw3-mini">0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto axes -->
+    <div id="autoInfo">
+        <div class="auto-title">自動変動  (J1 / J4 / J5 / J6)</div>
+        <div class="auto-axis">
+            <span class="ax-name">J1</span>
+            <div class="ax-bar-wrap"><div class="ax-bar" id="bar-j1"></div></div>
+            <span class="ax-val" id="val-j1">0 Nm</span>
+        </div>
+        <div class="auto-axis">
+            <span class="ax-name">J4</span>
+            <div class="ax-bar-wrap"><div class="ax-bar" id="bar-j4"></div></div>
+            <span class="ax-val" id="val-j4">0 Nm</span>
+        </div>
+        <div class="auto-axis">
+            <span class="ax-name">J5</span>
+            <div class="ax-bar-wrap"><div class="ax-bar" id="bar-j5"></div></div>
+            <span class="ax-val" id="val-j5">0 Nm</span>
+        </div>
+        <div class="auto-axis">
+            <span class="ax-name">J6</span>
+            <div class="ax-bar-wrap"><div class="ax-bar" id="bar-j6"></div></div>
+            <span class="ax-val" id="val-j6">0 Nm</span>
+        </div>
+    </div>
+
+    <!-- Gear chain -->
+    <div id="gearChain">
+        <div class="panel-title" style="padding:0;border:none;margin-bottom:4px;">▶ ギア連鎖  (1軸失敗→全軸停止)</div>
+        <div class="gear-row" id="gearRow"></div>
+    </div>
+</div>
+
+<!-- Center: Arm + Axis Grid -->
+<div id="centerPanel">
+    <div id="armWrap"><canvas id="arm"></canvas></div>
+    <div id="axisGrid">
+        <!-- J1~J6 cells injected by JS -->
+    </div>
+</div>
+
+<!-- Right: Power + Log -->
+<div id="rightPanel">
+    <div class="panel-title">▶ システムモニター</div>
+
+    <div id="powerBox">
+        <!-- J3 Power -->
+        <div class="power-row">
+            <div>
+                <div class="pw-label">J3 消費電力</div>
+                <div style="display:flex;align-items:baseline;gap:6px">
+                    <div class="pw-val" id="pw3-val">0</div>
+                    <div class="pw-unit">W</div>
+                    <div class="pw-r" id="pw3-r">R=0.00</div>
+                </div>
+                <div class="pw-bar-wrap"><div class="pw-bar-fill" id="pw3-bar" style="width:0%"></div></div>
+            </div>
+        </div>
+        <!-- Total current -->
+        <div class="power-row">
+            <div>
+                <div class="pw-label">総消費電流（定格 30A  τ=3A）</div>
+                <div style="display:flex;align-items:baseline;gap:6px">
+                    <div class="pw-val" id="cur-val">0</div>
+                    <div class="pw-unit">A</div>
+                    <div class="pw-r" id="cur-r">R=0.00</div>
+                </div>
+                <div class="pw-bar-wrap"><div class="pw-bar-fill" id="cur-bar" style="width:0%"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fault summary -->
+    <div id="faultBox">
+        <div class="panel-title" style="padding:0;border:none;margin-bottom:6px;">▶ 異常カウント</div>
+        <div class="fault-item">
+            <span class="fault-key">FAIL_CLOSED 発動回数</span>
+            <span id="fc-count" style="color:var(--red)">0</span>
+        </div>
+        <div class="fault-item">
+            <span class="fault-key">最大 R 値（全系統）</span>
+            <span id="max-r" style="color:var(--orange)">0.00</span>
+        </div>
+        <div class="fault-item">
+            <span class="fault-key">最後の違反軸</span>
+            <span id="last-fault" style="color:var(--red)">—</span>
+        </div>
+        <div class="fault-item">
+            <span class="fault-key">稼働時間</span>
+            <span id="uptime" style="color:var(--green)">00:00</span>
+        </div>
+    </div>
+
+    <div id="logWrap">
+        <div id="logTitle">▶ 廃棄ログ  (構造検証のみ)</div>
+        <div id="log"></div>
+    </div>
+</div>
+
+<script>
+// FILE: NRA-IDE_RobotArm_POC_01_JP.html  2026-02-24
+
+// ── 軸定義 ──
+const AXES = [
+    { id:'J1', name:'旋回',     rated:80,  tau:8,  manual:false, autoAmp:0.45, autoFreq:0.013, autoBase:0.35 },
+    { id:'J2', name:'肩',       rated:150, tau:15, manual:true,  autoAmp:0,    autoFreq:0,     autoBase:0 },
+    { id:'J3', name:'肘',       rated:120, tau:12, manual:true,  autoAmp:0,    autoFreq:0,     autoBase:0 },
+    { id:'J4', name:'手首Roll', rated:60,  tau:6,  manual:false, autoAmp:0.38, autoFreq:0.021, autoBase:0.30 },
+    { id:'J5', name:'手首Pitch',rated:60,  tau:6,  manual:false, autoAmp:0.32, autoFreq:0.017, autoBase:0.28 },
+    { id:'J6', name:'手首Yaw',  rated:40,  tau:4,  manual:false, autoAmp:0.25, autoFreq:0.019, autoBase:0.22 },
+];
+
+// 電力系
+const PW3_RATED = 800, PW3_TAU = 80;
+const CUR_RATED = 30,  CUR_TAU = 3;
+
+// ── State ──
+let manualJ2 = 80, manualJ3 = 60, manualPw3 = 400;
+let tick = 0;
+let failCount = 0;
+let startTime = Date.now();
+let prevGlobalFail = false;
+let prevZones = {};
+
+// ── Compute R ──
+function computeR(val, rated, tau) {
+    const delta = Math.max(0, val - rated);
+    return tau > 0 ? delta / tau : Infinity;
+}
+function zoneFromR(R) {
+    if (R < 0.40) return 'A';
+    if (R < 0.70) return 'B';
+    if (R < 1.00) return 'C';
+    return 'D';
+}
+function getColor(R) {
+    if (R < 0.40) return '#00ff88';
+    if (R < 0.70) return '#ffd600';
+    if (R < 1.00) return '#ff8c00';
+    return '#ff2244';
+}
+function zoneColor(z) {
+    return { A:'#00ff88', B:'#ffd600', C:'#ff8c00', D:'#ff2244' }[z];
+}
+
+// ── Auto torque generation ──
+function autoTorque(ax, t) {
+    const base = ax.autoBase * ax.rated;
+    const wave = Math.sin(t * ax.autoFreq) * ax.autoAmp * ax.rated;
+    const noise = (Math.random() - 0.5) * ax.rated * 0.06;
+    return Math.max(0, base + wave + noise);
+}
+
+// ── Build axis cells ──
+const grid = document.getElementById('axisGrid');
+AXES.forEach(ax => {
+    const cell = document.createElement('div');
+    cell.className = 'axis-cell';
+    cell.id = 'cell-' + ax.id;
+    cell.innerHTML = `
+        <div class="axis-head">
+            <span class="axis-id">${ax.id}</span>
+            <span class="axis-role">${ax.name}<br>${ax.manual ? '<span class="axis-manual-tag">▶ MANUAL</span>' : '<span class="axis-manual-tag">⟳ AUTO</span>'}</span>
+        </div>
+        <div class="axis-r" id="ar-${ax.id}">0.00</div>
+        <div class="axis-bar-wrap">
+            <div class="axis-bar-fill" id="ab-${ax.id}" style="width:0%"></div>
+        </div>
+        <div class="axis-detail">
+            <span id="ad-torque-${ax.id}">0 / ${ax.rated} Nm</span>
+            <span class="axis-zone" id="az-${ax.id}">A</span>
+        </div>`;
+    grid.appendChild(cell);
+});
+
+// ── Build gear teeth ──
+const gearRow = document.getElementById('gearRow');
+const gearItems = [...AXES.map(a => a.id), 'PW3', 'CUR'];
+gearItems.forEach(id => {
+    const t = document.createElement('div');
+    t.className = 'gear-tooth tooth-ok';
+    t.id = 'gear-' + id;
+    t.textContent = id;
+    gearRow.appendChild(t);
+});
+
+// ── Arm canvas ──
+const armCanvas = document.getElementById('arm');
+const actx = armCanvas.getContext('2d');
+function resizeArm() {
+    armCanvas.width  = armCanvas.offsetWidth;
+    armCanvas.height = armCanvas.offsetHeight;
+}
+window.addEventListener('resize', resizeArm);
+resizeArm();
+
+// ── Draw robot arm ──
+function drawArm(axisStates, globalFail) {
+    const w = armCanvas.width, h = armCanvas.height;
+    actx.clearRect(0, 0, w, h);
+
+    // Background grid
+    actx.strokeStyle = '#0d1820';
+    actx.lineWidth = 1;
+    for (let x = 0; x < w; x += 30) {
+        actx.beginPath(); actx.moveTo(x, 0); actx.lineTo(x, h); actx.stroke();
+    }
+    for (let y = 0; y < h; y += 30) {
+        actx.beginPath(); actx.moveTo(0, y); actx.lineTo(w, y); actx.stroke();
+    }
+
+    // Fail overlay
+    if (globalFail) {
+        actx.fillStyle = 'rgba(255,34,68,0.07)';
+        actx.fillRect(0, 0, w, h);
+    }
+
+    // Base position
+    const bx = w * 0.25, by = h * 0.82;
+
+    // Arm segment lengths
+    const L1 = h * 0.28; // J1→J2 (base to shoulder)
+    const L2 = h * 0.26; // J2→J3 (upper arm)
+    const L3 = h * 0.20; // J3→J4 (forearm)
+    const L4 = h * 0.12; // J4→EE (wrist)
+
+    // Dynamic angles based on tick (simple animation)
+    const t = tick * 0.012;
+    const a1 = -Math.PI * 0.5 + Math.sin(t * 0.7) * 0.12;
+    const a2 = -Math.PI * 0.6 + Math.sin(t * 0.9 + 1) * 0.18;
+    const a3 = Math.PI * 0.3  + Math.sin(t * 1.1 + 2) * 0.15;
+    const a4 = -Math.PI * 0.2 + Math.sin(t * 1.3 + 3) * 0.12;
+
+    // Segment endpoints
+    const p0 = { x: bx, y: by };
+    const p1 = { x: p0.x + Math.cos(a1) * L1, y: p0.y + Math.sin(a1) * L1 };
+    const p2 = { x: p1.x + Math.cos(a1+a2) * L2, y: p1.y + Math.sin(a1+a2) * L2 };
+    const p3 = { x: p2.x + Math.cos(a1+a2+a3) * L3, y: p2.y + Math.sin(a1+a2+a3) * L3 };
+    const p4 = { x: p3.x + Math.cos(a1+a2+a3+a4) * L4, y: p3.y + Math.sin(a1+a2+a3+a4) * L4 };
+
+    const joints = [p0, p1, p2, p3, p4];
+    const axColors = axisStates.map(s => getColor(s.R));
+    // segment colors: J1=seg0-1, J2=seg1-2, J3=seg2-3, J4=seg3-4
+    const segCols = [axColors[0], axColors[1], axColors[2], axColors[3]];
+
+    // Draw segments
+    [[p0,p1,segCols[0]], [p1,p2,segCols[1]], [p2,p3,segCols[2]], [p3,p4,segCols[3]]].forEach(([a,b,c]) => {
+        actx.beginPath();
+        actx.moveTo(a.x, a.y);
+        actx.lineTo(b.x, b.y);
+        actx.lineWidth = 8;
+        actx.strokeStyle = c + '55';
+        actx.stroke();
+        actx.beginPath();
+        actx.moveTo(a.x, a.y);
+        actx.lineTo(b.x, b.y);
+        actx.lineWidth = 3;
+        actx.strokeStyle = c;
+        actx.shadowColor = c;
+        actx.shadowBlur = globalFail ? 0 : 4;
+        actx.stroke();
+        actx.shadowBlur = 0;
+    });
+
+    // Draw joints
+    const jointLabels = ['BASE','J2','J3','J4','EE'];
+    joints.forEach((p, i) => {
+        const col = i === 0 ? '#888' : i < axColors.length ? axColors[i] : axColors[axColors.length-1];
+        actx.beginPath();
+        actx.arc(p.x, p.y, i === 0 ? 8 : 6, 0, Math.PI * 2);
+        actx.fillStyle = col + '44';
+        actx.fill();
+        actx.beginPath();
+        actx.arc(p.x, p.y, i === 0 ? 8 : 5, 0, Math.PI * 2);
+        actx.strokeStyle = col;
+        actx.lineWidth = 2;
+        actx.stroke();
+        actx.fillStyle = col;
+        actx.font = '9px Courier New';
+        actx.textAlign = 'left';
+        actx.fillText(jointLabels[i], p.x + 8, p.y - 4);
+    });
+
+    // Base pedestal
+    actx.fillStyle = '#1c2a36';
+    actx.fillRect(bx - 20, by, 40, 10);
+    actx.fillStyle = '#2a3c4a';
+    actx.fillRect(bx - 28, by + 10, 56, 6);
+
+    // End effector gripper
+    const eeAngle = a1+a2+a3+a4;
+    const gc1x = p4.x + Math.cos(eeAngle + Math.PI*0.3) * 12;
+    const gc1y = p4.y + Math.sin(eeAngle + Math.PI*0.3) * 12;
+    const gc2x = p4.x + Math.cos(eeAngle - Math.PI*0.3) * 12;
+    const gc2y = p4.y + Math.sin(eeAngle - Math.PI*0.3) * 12;
+    actx.beginPath();
+    actx.moveTo(p4.x, p4.y); actx.lineTo(gc1x, gc1y);
+    actx.moveTo(p4.x, p4.y); actx.lineTo(gc2x, gc2y);
+    actx.strokeStyle = axColors[5];
+    actx.lineWidth = 2;
+    actx.stroke();
+
+    // FAIL overlay text
+    if (globalFail) {
+        actx.fillStyle = '#ff2244';
+        actx.font = 'bold 13px Courier New';
+        actx.textAlign = 'center';
+        actx.shadowColor = '#ff2244';
+        actx.shadowBlur = 10;
+        actx.fillText('⚠ FAIL‑CLOSED — 全軸緊急停止', w * 0.65, 22);
+        actx.shadowBlur = 0;
+    }
+
+    // R values overlay
+    axisStates.forEach((s, i) => {
+        if (i >= joints.length - 1) return;
+        const p = joints[i + 1];
+        const col = getColor(s.R);
+        actx.fillStyle = col;
+        actx.font = 'bold 10px Courier New';
+        actx.textAlign = 'right';
+        actx.fillText(`R=${s.R.toFixed(2)}`, p.x - 8, p.y + 4);
+    });
+}
+
+// ── Update axis cell ──
+function updateAxisCell(ax, torque, R) {
+    const zone = zoneFromR(R);
+    const col  = getColor(R);
+    const pct  = Math.min(100, (torque / (ax.rated * 1.5)) * 100);
+
+    document.getElementById('ar-' + ax.id).textContent = R.toFixed(3);
+    document.getElementById('ar-' + ax.id).style.color = col;
+
+    const bar = document.getElementById('ab-' + ax.id);
+    bar.style.width = pct + '%';
+    bar.style.background = col;
+
+    document.getElementById('ad-torque-' + ax.id).textContent =
+        torque.toFixed(0) + ' / ' + ax.rated + ' Nm';
+
+    const zEl = document.getElementById('az-' + ax.id);
+    zEl.textContent = zone;
+    zEl.style.color = col;
+    zEl.style.background = col + '22';
+
+    // Cell border
+    const cell = document.getElementById('cell-' + ax.id);
+    cell.style.borderColor = zone === 'D' ? col : 'transparent';
+    cell.style.boxShadow = zone === 'D' ? `inset 0 0 0 1px ${col}` : 'none';
+}
+
+// ── Update gear tooth ──
+function updateGear(id, R) {
+    const el = document.getElementById('gear-' + id);
+    const zone = zoneFromR(R);
+    el.className = 'gear-tooth ' + {
+        A:'tooth-ok', B:'tooth-warn', C:'tooth-crit', D:'tooth-fail'
+    }[zone];
+}
+
+// ── Update auto axis bars (left panel) ──
+function updateAutoBar(id, torque, rated) {
+    const pct = Math.min(100, (torque / (rated * 1.3)) * 100);
+    const col = getColor(computeR(torque, rated, rated * 0.1));
+    document.getElementById('bar-' + id.toLowerCase()).style.width = pct + '%';
+    document.getElementById('bar-' + id.toLowerCase()).style.background = col;
+    document.getElementById('val-' + id.toLowerCase()).textContent = torque.toFixed(0) + ' Nm';
+    document.getElementById('val-' + id.toLowerCase()).style.color = col;
+}
+
+// ── Log ──
+function addLog(msg, cls) {
+    const el = document.getElementById('log');
+    const d = document.createElement('div');
+    d.className = cls;
+    d.textContent = `[${new Date().toTimeString().slice(0,8)}] ${msg}`;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+    if (el.children.length > 100) el.children[0].remove();
+}
+
+// ── Flash ──
+function flash() {
+    const f = document.getElementById('flashOverlay');
+    f.style.opacity = '1';
+    setTimeout(() => { f.style.opacity = '0'; }, 100);
+}
+
+// ── Uptime ──
+function formatUptime() {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    const m = Math.floor(s / 60);
+    return String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+}
+
+// ── Main tick ──
+function doTick() {
+    tick++;
+
+    // Compute torques
+    const torques = AXES.map(ax => {
+        if (ax.id === 'J2') return manualJ2;
+        if (ax.id === 'J3') return manualJ3;
+        return autoTorque(ax, tick);
+    });
+
+    // Compute R for each axis
+    const axisStates = AXES.map((ax, i) => ({
+        id: ax.id,
+        torque: torques[i],
+        R: computeR(torques[i], ax.rated, ax.tau),
+    }));
+
+    // Power & current
+    const pw3R  = computeR(manualPw3, PW3_RATED, PW3_TAU);
+    // Estimate total current: sum of (torque/rated) * base_current per axis + manual power
+    const baseCurrent = axisStates.reduce((acc, s, i) => {
+        const baseA = [3, 8, 7, 4, 4, 2][i];
+        return acc + (s.torque / AXES[i].rated) * baseA;
+    }, 0) + manualPw3 / 60;
+    const curR = computeR(baseCurrent, CUR_RATED, CUR_TAU);
+
+    // Global fail: any axis OR power OR current
+    const allR = [...axisStates.map(s => s.R), pw3R, curR];
+    const globalFail = allR.some(r => r >= 1.0);
+    const maxR = Math.max(...allR);
+
+    // ── Update axis cells ──
+    axisStates.forEach((s, i) => {
+        updateAxisCell(AXES[i], s.torque, s.R);
+        updateGear(s.id, s.R);
+        if (AXES[i].id === 'J1' || AXES[i].id === 'J4' || AXES[i].id === 'J5' || AXES[i].id === 'J6') {
+            updateAutoBar(AXES[i].id, s.torque, AXES[i].rated);
+        }
+    });
+
+    // ── Power display ──
+    const pw3Col = getColor(pw3R);
+    const pw3El  = document.getElementById('pw3-val');
+    pw3El.textContent = manualPw3.toFixed(0);
+    pw3El.style.color = pw3Col;
+    document.getElementById('pw3-r').textContent  = 'R=' + pw3R.toFixed(3);
+    document.getElementById('pw3-r').style.color  = pw3Col;
+    document.getElementById('pw3-bar').style.width = Math.min(100, manualPw3 / (PW3_RATED * 1.2) * 100) + '%';
+    document.getElementById('pw3-bar').style.background = pw3Col;
+    updateGear('PW3', pw3R);
+
+    const curCol = getColor(curR);
+    const curEl  = document.getElementById('cur-val');
+    curEl.textContent = baseCurrent.toFixed(1);
+    curEl.style.color = curCol;
+    document.getElementById('cur-r').textContent  = 'R=' + curR.toFixed(3);
+    document.getElementById('cur-r').style.color  = curCol;
+    document.getElementById('cur-bar').style.width = Math.min(100, baseCurrent / (CUR_RATED * 1.2) * 100) + '%';
+    document.getElementById('cur-bar').style.background = curCol;
+    updateGear('CUR', curR);
+
+    // ── Gear chain global status ──
+    const gsEl = document.getElementById('gearStatus');
+    if (globalFail) {
+        gsEl.className = 'gear-status gear-fail';
+        gsEl.textContent = '⚠ ギア破断 — 緊急停止';
+    } else {
+        gsEl.className = 'gear-status gear-ok';
+        gsEl.textContent = '⚙ ギア正常';
+    }
+
+    // ── Fault summary ──
+    document.getElementById('max-r').textContent = maxR.toFixed(3);
+    document.getElementById('max-r').style.color = getColor(maxR);
+    document.getElementById('uptime').textContent = formatUptime();
+
+    // ── Log on state change ──
+    axisStates.forEach(s => {
+        const zone = zoneFromR(s.R);
+        if (zone !== prevZones[s.id]) {
+            const cls = { A:'log-ok', B:'log-warn', C:'log-crit', D:'log-fail' }[zone];
+            const mark = { A:'✓', B:'○', C:'△', D:'⚠' }[zone];
+            addLog(`${mark} ${s.id} Zone${zone} R=${s.R.toFixed(3)} T=${s.torque.toFixed(0)}Nm`, cls);
+            if (zone === 'D') {
+                document.getElementById('last-fault').textContent = s.id;
+            }
+            prevZones[s.id] = zone;
+        }
+    });
+
+    // PW3 zone change
+    const pw3Zone = zoneFromR(pw3R);
+    if (pw3Zone !== prevZones['PW3']) {
+        const cls = { A:'log-ok', B:'log-warn', C:'log-crit', D:'log-fail' }[pw3Zone];
+        addLog(`${{ A:'✓', B:'○', C:'△', D:'⚠' }[pw3Zone]} PW3 Zone${pw3Zone} R=${pw3R.toFixed(3)} P=${manualPw3.toFixed(0)}W`, cls);
+        if (pw3Zone === 'D') document.getElementById('last-fault').textContent = 'J3-Power';
+        prevZones['PW3'] = pw3Zone;
+    }
+
+    // Global fail change
+    if (globalFail && !prevGlobalFail) {
+        failCount++;
+        document.getElementById('fc-count').textContent = failCount;
+        addLog('★ FAIL_CLOSED 全軸緊急停止  最大R=' + maxR.toFixed(3), 'log-fail');
+        flash();
+    }
+    prevGlobalFail = globalFail;
+
+    // ── Slider mini R display ──
+    const rJ2 = computeR(manualJ2, 150, 15);
+    const rJ3 = computeR(manualJ3, 120, 12);
+    const rPw3 = pw3R;
+    document.getElementById('r-j2-mini').textContent = rJ2.toFixed(3);
+    document.getElementById('r-j2-mini').style.color = getColor(rJ2);
+    document.getElementById('r-j3-mini').textContent = rJ3.toFixed(3);
+    document.getElementById('r-j3-mini').style.color = getColor(rJ3);
+    document.getElementById('r-pw3-mini').textContent = rPw3.toFixed(3);
+    document.getElementById('r-pw3-mini').style.color = getColor(rPw3);
+
+    return { axisStates, globalFail };
+}
+
+// ── Animation loop ──
+function loop() {
+    const { axisStates, globalFail } = doTick();
+    drawArm(axisStates, globalFail);
+    requestAnimationFrame(loop);
+}
+
+// ── Sliders ──
+document.getElementById('sl-j2').addEventListener('input', function() {
+    manualJ2 = +this.value;
+    document.getElementById('lbl-j2').textContent = manualJ2 + ' Nm';
+});
+document.getElementById('sl-j3').addEventListener('input', function() {
+    manualJ3 = +this.value;
+    document.getElementById('lbl-j3').textContent = manualJ3 + ' Nm';
+});
+document.getElementById('sl-pw3').addEventListener('input', function() {
+    manualPw3 = +this.value;
+    document.getElementById('lbl-pw3').textContent = manualPw3 + ' W';
+});
+
+// ── Init ──
+AXES.forEach(ax => { prevZones[ax.id] = 'A'; });
+prevZones['PW3'] = 'A';
+addLog('✓ システム起動 — NRA-IDE ロボットアーム安全ゲート v0.1', 'log-ok');
+loop();
+</script>
+</body>
+</html>

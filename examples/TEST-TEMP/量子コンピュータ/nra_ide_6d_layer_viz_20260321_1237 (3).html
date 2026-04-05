@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<!-- FILE: nra_ide_6d_layer_viz_20260321_1237.html -->
+<!-- TITLE: NRA-IDE 6次元ゆらぎ多重レイヤー相関可視化 -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-03-21 12:37 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE 6D Layer Visualizer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Noto+Sans+JP:wght@300;400&display=swap');
+:root{
+  --bg:#06070c;--surface:#0c0e18;--border:#181c2a;
+  --text:#b0bcd0;--muted:#303850;--accent:#88ffcc;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:16px 10px;min-height:100vh;}
+
+.hdr{width:100%;max-width:1100px;border-bottom:1px solid var(--border);
+  padding-bottom:12px;margin-bottom:14px;}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:.18em;text-transform:uppercase;}
+.hdr h1{font-size:16px;font-weight:400;margin-top:4px;letter-spacing:.04em;}
+.hdr-note{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  margin-top:4px;line-height:1.6;}
+
+.layout{width:100%;max-width:1100px;display:grid;
+  grid-template-columns:1fr 260px;gap:14px;}
+
+/* ── キャンバスエリア ── */
+.canvas-wrap{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;}
+#mainCanvas{width:100%;border-radius:4px;background:#050608;cursor:grab;}
+#mainCanvas:active{cursor:grabbing;}
+
+/* タイムライン */
+.timeline{display:flex;align-items:center;gap:10px;}
+.tl-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:.1em;white-space:nowrap;}
+#timeSlider{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;
+  background:var(--border);outline:none;cursor:pointer;}
+#timeSlider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+  border-radius:50%;background:var(--accent);border:2px solid var(--bg);}
+#timeDisp{font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--accent);min-width:40px;text-align:right;}
+
+/* 再生コントロール */
+.playbar{display:flex;gap:8px;align-items:center;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 12px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  cursor:pointer;border-radius:3px;transition:all .2s;letter-spacing:.06em;}
+.btn.on{background:var(--accent);border-color:var(--accent);color:#000;}
+.btn-small{padding:4px 10px;font-size:9px;}
+
+/* 視点コントロール */
+.view-row{display:flex;gap:8px;align-items:center;}
+.view-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);min-width:50px;}
+.view-slider{flex:1;-webkit-appearance:none;height:2px;border-radius:1px;
+  background:var(--border);outline:none;cursor:pointer;}
+.view-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;
+  border-radius:50%;background:#6688ff;border:2px solid var(--bg);}
+
+/* ── 右パネル：レイヤーコントロール ── */
+.layer-panel{display:flex;flex-direction:column;gap:8px;}
+.layer-card{background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:12px;}
+.layer-title{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:8px;}
+.layer-name{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;}
+.layer-r{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;}
+.layer-status{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;}
+
+.opacity-row{display:flex;align-items:center;gap:8px;}
+.op-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);min-width:18px;}
+.op-slider{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;
+  outline:none;cursor:pointer;}
+.op-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+  border-radius:50%;border:2px solid var(--bg);transition:transform .1s;}
+.op-slider::-webkit-slider-thumb:hover{transform:scale(1.2);}
+.op-val{font-family:'JetBrains Mono',monospace;font-size:10px;min-width:28px;text-align:right;}
+
+.layer-mini-bar{height:3px;border-radius:2px;margin-top:6px;transition:width .3s,background .3s;}
+
+/* 凡例 */
+.legend-card{background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:12px;}
+.legend-title{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.14em;margin-bottom:8px;}
+.legend-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;}
+.legend-swatch{width:24px;height:10px;border-radius:2px;}
+
+/* フッター */
+.footer{width:100%;max-width:1100px;margin-top:12px;display:flex;
+  justify-content:space-between;font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-sub">NRA-IDE / 6D MULTI-LAYER CORRELATION VISUALIZER</div>
+  <h1>6次元ゆらぎ多重レイヤー相関可視化</h1>
+  <div class="hdr-note">
+    各レイヤー = 独立した要素のゆらぎ面（高さ = R値）　｜　透過スライダーで相関を観察　｜　時間軸でゆらぎの動きを追跡
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- 左：3Dキャンバス -->
+  <div class="canvas-wrap">
+    <canvas id="mainCanvas" height="480"></canvas>
+
+    <!-- タイムライン -->
+    <div class="timeline">
+      <span class="tl-lbl">TIME</span>
+      <input type="range" id="timeSlider" min="0" max="200" value="0">
+      <span id="timeDisp">t=0</span>
+      <button class="btn btn-small on" id="btnPlay" onclick="togglePlay()">PLAY</button>
+      <button class="btn btn-small" id="btnReset" onclick="resetTime()">RESET</button>
+    </div>
+
+    <!-- 視点コントロール -->
+    <div style="display:flex;flex-direction:column;gap:6px;padding:4px 0;">
+      <div class="view-row">
+        <span class="view-lbl">仰角</span>
+        <input type="range" class="view-slider" id="elevSlider" min="10" max="80" value="40"
+          oninput="updateView()">
+        <span class="op-val" id="elevVal">40°</span>
+      </div>
+      <div class="view-row">
+        <span class="view-lbl">回転</span>
+        <input type="range" class="view-slider" id="rotSlider" min="0" max="360" value="30"
+          oninput="updateView()">
+        <span class="op-val" id="rotVal">30°</span>
+      </div>
+      <div class="view-row">
+        <span class="view-lbl">高さ倍率</span>
+        <input type="range" class="view-slider" id="scaleSlider" min="5" max="40" value="18"
+          oninput="updateView()">
+        <span class="op-val" id="scaleVal">×18</span>
+      </div>
+      <div style="border-top:1px solid var(--border);margin:6px 0;"></div>
+      <div class="view-row">
+        <span class="view-lbl">彩度</span>
+        <input type="range" class="view-slider" id="satSlider" min="0" max="100" value="100"
+          oninput="updateColorMode()">
+        <span class="op-val" id="satVal">100%</span>
+      </div>
+      <div class="view-row">
+        <span class="view-lbl">明暗γ</span>
+        <input type="range" class="view-slider" id="gammaSlider" min="30" max="200" value="100"
+          oninput="updateColorMode()">
+        <span class="op-val" id="gammaVal">×1.00</span>
+      </div>
+      <div class="view-row" style="margin-top:2px;">
+        <span class="view-lbl">白黒反転</span>
+        <button class="btn btn-small" id="btnBW" onclick="toggleBW()"
+          style="font-size:9px;padding:3px 10px;border-color:#606080;color:#606080">
+          OFF
+        </button>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-left:6px;">
+          高=黒 低=白
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右：レイヤーコントロール -->
+  <div class="layer-panel">
+
+    <!-- レイヤー6枚 -->
+    <div id="layerCards"></div>
+
+    <!-- 凡例 -->
+    <div class="legend-card">
+      <div class="legend-title">R VALUE LEGEND</div>
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:#00ffaa"></div>
+        <span style="color:#00ffaa">R &lt; 0.5　SAFE（深部）</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:#aaff44"></div>
+        <span style="color:#aaff44">R 0.5–0.75　注意</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:#ffcc00"></div>
+        <span style="color:#ffcc00">R 0.75–1.0　WARNING</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-swatch" style="background:#ff4060"></div>
+        <span style="color:#ff4060">R ≥ 1.0　FAIL_CLOSED</span>
+      </div>
+      <div class="legend-row" style="margin-top:6px;">
+        <div class="legend-swatch" style="background:rgba(255,255,255,0.2);border:1px dashed #606080"></div>
+        <span style="color:#606080">τ閾値面（R=1.0 平面）</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+        margin-top:8px;line-height:1.7;">
+        面の起伏 = ゆらぎ<br>
+        面が閾値面に触れる<br>
+        = FAIL_CLOSED
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span id="clk">--:--:--</span>
+  <span>高さR=δ/τ　面が閾値に触れた瞬間Fail-Closed</span>
+</div>
+
+<script>
+// ────────────────────────────────
+// 6レイヤー定義
+// ────────────────────────────────
+const LAYERS = [
+  { name:'温度',   en:'TEMP',     color:'#ff6644', freq:0.8,  phase:0.0,  ampBase:0.35, baseR:0.35 },
+  { name:'圧力',   en:'PRESS',    color:'#44aaff', freq:1.2,  phase:1.1,  ampBase:0.42, baseR:0.28 },
+  { name:'電力',   en:'POWER',    color:'#ffcc00', freq:0.6,  phase:2.2,  ampBase:0.38, baseR:0.40 },
+  { name:'照度',   en:'LIGHT',    color:'#aaff44', freq:1.5,  phase:0.7,  ampBase:0.30, baseR:0.22 },
+  { name:'流量',   en:'FLOW',     color:'#cc44ff', freq:0.9,  phase:1.8,  ampBase:0.45, baseR:0.32 },
+  { name:'振動',   en:'VIBRATION',color:'#ff44aa', freq:2.0,  phase:3.0,  ampBase:0.50, baseR:0.25 },
+];
+
+const GRID = 24;   // グリッド分割数
+const N    = GRID + 1;
+
+// ────────────────────────────────
+// 状態
+// ────────────────────────────────
+let playing   = true;
+let timeVal   = 0;
+let opacities = LAYERS.map(()=>0.75);
+let elevDeg   = 40;
+let rotDeg    = 30;
+let heightScale = 18;
+
+// マウスドラッグ
+let dragging = false, dragX0 = 0, dragY0 = 0, rotStart = 0, elevStart = 0;
+
+// カラーモード
+let saturation  = 1.0;   // 0〜1
+let gamma       = 1.0;   // 0.3〜2.0
+let bwMode      = false; // 白黒反転
+
+// ────────────────────────────────
+// キャンバス
+// ────────────────────────────────
+const canvas = document.getElementById('mainCanvas');
+const ctx    = canvas.getContext('2d');
+
+function resizeCanvas(){
+  const wp = canvas.parentElement;
+  canvas.width  = wp.clientWidth - 28;
+  canvas.height = 480;
+}
+
+// ────────────────────────────────
+// レイヤーUIを生成
+// ────────────────────────────────
+function buildLayerCards(){
+  const container = document.getElementById('layerCards');
+  container.innerHTML = '';
+  LAYERS.forEach((L, i) => {
+    const div = document.createElement('div');
+    div.className = 'layer-card';
+    div.id = `lcard_${i}`;
+    div.innerHTML = `
+      <div class="layer-title">
+        <span class="layer-name" style="color:${L.color}">${i+1}. ${L.name} <span style="font-size:9px;color:var(--muted)">${L.en}</span></span>
+        <span class="layer-r" id="lr_${i}" style="color:${L.color}">R=0.000</span>
+      </div>
+      <div class="opacity-row">
+        <span class="op-lbl" style="color:${L.color}">α</span>
+        <input type="range" class="op-slider" id="op_${i}"
+          min="0" max="100" value="75" step="1"
+          style="--tc:${L.color}"
+          oninput="onOpacity(${i},this.value)">
+        <span class="op-val" id="opval_${i}">75%</span>
+      </div>
+      <div class="layer-status" id="lst_${i}" style="color:#303850">SAFE</div>
+      <div style="background:var(--border);height:3px;border-radius:2px;margin-top:6px;">
+        <div class="layer-mini-bar" id="lbar_${i}" style="width:0%;background:${L.color}"></div>
+      </div>
+    `;
+    container.appendChild(div);
+    // スライダーの色
+    const sl = document.getElementById(`op_${i}`);
+    sl.style.background = `linear-gradient(to right, ${L.color}88 0%, ${L.color}88 75%, var(--border) 75%)`;
+  });
+}
+
+function onOpacity(i, v){
+  opacities[i] = v / 100;
+  document.getElementById(`opval_${i}`).textContent = v + '%';
+  const sl = document.getElementById(`op_${i}`);
+  sl.style.background = `linear-gradient(to right, ${LAYERS[i].color}88 0%, ${LAYERS[i].color}88 ${v}%, var(--border) ${v}%)`;
+}
+
+// ────────────────────────────────
+// R値計算（各グリッド点）
+// ────────────────────────────────
+function calcLayerGrid(L, t){
+  const grid = new Float32Array(N * N);
+  for(let iy = 0; iy < N; iy++){
+    for(let ix = 0; ix < N; ix++){
+      const fx = ix / GRID, fy = iy / GRID;
+      // 複数周波数のゆらぎ合成（空間+時間）
+      const wave =
+        Math.sin(fx * Math.PI * 2.5 + L.freq * t * 0.04 + L.phase) * L.ampBase +
+        Math.sin(fy * Math.PI * 3.1 + L.freq * t * 0.06 + L.phase + 0.5) * L.ampBase * 0.7 +
+        Math.sin((fx+fy) * Math.PI * 1.8 + L.freq * t * 0.03 + L.phase + 1.2) * L.ampBase * 0.5 +
+        Math.sin(fx * Math.PI * 5.0 - L.freq * t * 0.08 + L.phase + 2.0) * L.ampBase * 0.3 +
+        Math.sin(fy * Math.PI * 4.0 + L.freq * t * 0.05 + L.phase + 0.8) * L.ampBase * 0.25;
+      const R = Math.max(0, L.baseR + wave);
+      grid[iy * N + ix] = R;
+    }
+  }
+  return grid;
+}
+
+function gridMax(grid){
+  let m = 0;
+  for(let i = 0; i < grid.length; i++) if(grid[i] > m) m = grid[i];
+  return m;
+}
+
+function gridMean(grid){
+  let s = 0;
+  for(let i = 0; i < grid.length; i++) s += grid[i];
+  return s / grid.length;
+}
+
+// ────────────────────────────────
+// 投影
+// ────────────────────────────────
+function project(x, y, z, elevRad, rotRad, W, H){
+  // 等角投影（簡易）
+  const cosE = Math.cos(elevRad), sinE = Math.sin(elevRad);
+  const cosR = Math.cos(rotRad),  sinR = Math.sin(rotRad);
+  // x,y ∈ [0,1]  z ∈ [0,~2]
+  const cx = x - 0.5, cy = y - 0.5;
+  const rx = cx * cosR - cy * sinR;
+  const ry = cx * sinR + cy * cosR;
+  const sx = rx;
+  const sy = ry * cosE - z * sinE;
+  const scale = Math.min(W, H) * 0.72;
+  return {
+    px: W * 0.5 + sx * scale,
+    py: H * 0.52 + sy * scale
+  };
+}
+
+// ────────────────────────────────
+// 色マッピング（彩度・ガンマ・白黒対応）
+// ────────────────────────────────
+function applyGamma(v){ return Math.pow(Math.max(0, Math.min(1, v)), 1.0 / gamma); }
+
+function applySaturation(r, g, b){
+  // RGBをグレースケールと補間
+  const gray = r * 0.299 + g * 0.587 + b * 0.114;
+  return [
+    Math.round(gray + (r - gray) * saturation),
+    Math.round(gray + (g - gray) * saturation),
+    Math.round(gray + (b - gray) * saturation),
+  ];
+}
+
+function rToColor(R, layerColor, alpha){
+  let r, g, b;
+
+  if(bwMode){
+    // 白黒反転モード：高いところ=黒、低いところ=白
+    // R=0→255(白)、R=1.5以上→0(黒)
+    const norm = Math.min(R / 1.4, 1.0);
+    const gammaNorm = applyGamma(1.0 - norm); // 反転してガンマ
+    const v = Math.round(gammaNorm * 255);
+    // R≥1.0はわずかに赤みを帯びた黒にして判別できるようにする
+    if(R >= 1.0){
+      const over = Math.min((R - 1.0) / 0.4, 1.0);
+      r = Math.round(v + over * 80);
+      g = Math.round(v * (1 - over * 0.8));
+      b = Math.round(v * (1 - over * 0.8));
+    } else {
+      r = v; g = v; b = v;
+    }
+    return `rgba(${Math.min(r,255)},${Math.min(g,255)},${Math.min(b,255)},${alpha})`;
+  }
+
+  // カラーモード
+  if(R < 0.5){
+    const t = applyGamma(R / 0.5);
+    r = Math.round(0   + t * 40);
+    g = Math.round(80  + t * 140);
+    b = Math.round(60  + t * 100);
+  } else if(R < 0.75){
+    const t = applyGamma((R - 0.5) / 0.25);
+    r = Math.round(40  + t * 170);
+    g = Math.round(220 - t * 20);
+    b = Math.round(160 - t * 160);
+  } else if(R < 1.0){
+    const t = applyGamma((R - 0.75) / 0.25);
+    r = Math.round(210 + t * 45);
+    g = Math.round(200 - t * 136);
+    b = Math.round(0);
+  } else {
+    const t = Math.min((R - 1.0) / 0.3, 1);
+    r = 255; g = Math.round(64 - t * 64); b = Math.round(96 - t * 96);
+  }
+
+  // 彩度適用
+  const [sr, sg, sb] = applySaturation(r, g, b);
+  return `rgba(${sr},${sg},${sb},${alpha})`;
+}
+
+function rToEdgeColor(R, alpha){
+  if(bwMode){
+    const v = R >= 1.0 ? 0.6 : R >= 0.75 ? 0.25 : 0.1;
+    return `rgba(255,255,255,${alpha * v})`;
+  }
+  if(R < 0.75) return `rgba(255,255,255,${alpha * 0.15})`;
+  if(R < 1.0)  return `rgba(255,200,0,${alpha * 0.4})`;
+  return `rgba(255,60,80,${alpha * 0.8})`;
+}
+
+// ────────────────────────────────
+// 描画
+// ────────────────────────────────
+function draw(){
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // 背景グラデーション
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#050608');
+  bg.addColorStop(1, '#08090e');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const t       = timeVal;
+  const elevRad = elevDeg * Math.PI / 180;
+  const rotRad  = rotDeg  * Math.PI / 180;
+  const hScale  = heightScale / 100;
+
+  // 各レイヤーのグリッドデータを計算
+  const grids = LAYERS.map(L => calcLayerGrid(L, t));
+
+  // レイヤーを後ろから前に描画（奥から手前へのペインター）
+  // 奥行きソート：各レイヤーに高さオフセットを与えて分離
+  const layerZOffsets = [0.0, 0.14, 0.28, 0.42, 0.56, 0.70];
+
+  // 閾値面（R=1.0の平面）をまず描画
+  drawThresholdPlane(W, H, elevRad, rotRad, hScale);
+
+  // 各レイヤーを描画（後ろから前へ）
+  const drawOrder = [5, 4, 3, 2, 1, 0];
+  drawOrder.forEach(i => {
+    if(opacities[i] < 0.01) return;
+    drawLayer(grids[i], LAYERS[i], i, layerZOffsets[i], W, H, elevRad, rotRad, hScale, opacities[i]);
+  });
+
+  // UI更新
+  grids.forEach((g, i) => {
+    const rMax  = gridMax(g);
+    const rMean = gridMean(g);
+    const status = rMax >= 1.0 ? 'FAIL' : rMax >= 0.75 ? 'WARN' : 'SAFE';
+    const scol   = rMax >= 1.0 ? '#ff4060' : rMax >= 0.75 ? '#ffcc00' : '#88ffcc';
+
+    document.getElementById(`lr_${i}`).textContent  = `R=${rMean.toFixed(3)}`;
+    document.getElementById(`lr_${i}`).style.color  = scol;
+    document.getElementById(`lst_${i}`).textContent = status + ` (max=${rMax.toFixed(3)})`;
+    document.getElementById(`lst_${i}`).style.color = scol;
+    document.getElementById(`lbar_${i}`).style.width = Math.min(rMean * 100, 100).toFixed(1) + '%';
+    document.getElementById(`lbar_${i}`).style.background =
+      rMax >= 1.0 ? '#ff4060' : rMax >= 0.75 ? '#ffcc00' : LAYERS[i].color;
+  });
+
+  // 軸ラベル
+  drawAxisLabels(W, H, elevRad, rotRad);
+
+  // 情報オーバーレイ
+  ctx.font = '10px JetBrains Mono';
+  ctx.fillStyle = 'rgba(136,255,204,0.7)';
+  ctx.textAlign = 'left';
+  ctx.fillText(`t = ${t.toFixed(1)}`, 12, 18);
+  ctx.fillStyle = 'rgba(150,160,180,0.5)';
+  ctx.fillText(`elev:${elevDeg}°  rot:${rotDeg}°  h:×${heightScale}`, 12, 32);
+
+  document.getElementById('clk').textContent = new Date().toTimeString().slice(0,8);
+}
+
+function drawThresholdPlane(W, H, elevRad, rotRad, hScale){
+  // R=1.0の閾値平面（グリッド線のみ）
+  const R_THRESH = 1.0;
+  const z = R_THRESH * hScale;
+  const steps = 8;
+  ctx.strokeStyle = 'rgba(255,100,120,0.12)';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([4, 4]);
+  for(let i = 0; i <= steps; i++){
+    const f = i / steps;
+    // 横線
+    const p0 = project(0, f, z, elevRad, rotRad, W, H);
+    const p1 = project(1, f, z, elevRad, rotRad, W, H);
+    ctx.beginPath(); ctx.moveTo(p0.px, p0.py); ctx.lineTo(p1.px, p1.py); ctx.stroke();
+    // 縦線
+    const q0 = project(f, 0, z, elevRad, rotRad, W, H);
+    const q1 = project(f, 1, z, elevRad, rotRad, W, H);
+    ctx.beginPath(); ctx.moveTo(q0.px, q0.py); ctx.lineTo(q1.px, q1.py); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // ラベル
+  const lp = project(1, 0, z, elevRad, rotRad, W, H);
+  ctx.font = '9px JetBrains Mono';
+  ctx.fillStyle = 'rgba(255,100,120,0.6)';
+  ctx.textAlign = 'left';
+  ctx.fillText('R=1.0 FAIL_CLOSED', lp.px + 6, lp.py + 4);
+}
+
+function drawLayer(grid, L, idx, zOffset, W, H, elevRad, rotRad, hScale, alpha){
+  // 各グリッドセルをポリゴンとして描画
+  // 後ろ（y大）から前（y小）へ、右から左へ描画（ペインター法）
+  for(let iy = GRID - 1; iy >= 0; iy--){
+    for(let ix = GRID - 1; ix >= 0; ix--){
+      const r00 = grid[iy * N + ix];
+      const r10 = grid[iy * N + (ix+1)];
+      const r01 = grid[(iy+1) * N + ix];
+      const r11 = grid[(iy+1) * N + (ix+1)];
+      const rAvg = (r00 + r10 + r01 + r11) * 0.25;
+
+      const x0 = ix / GRID,     y0 = iy / GRID;
+      const x1 = (ix+1) / GRID, y1 = (iy+1) / GRID;
+
+      const p00 = project(x0, y0, (r00 + zOffset) * hScale, elevRad, rotRad, W, H);
+      const p10 = project(x1, y0, (r10 + zOffset) * hScale, elevRad, rotRad, W, H);
+      const p11 = project(x1, y1, (r11 + zOffset) * hScale, elevRad, rotRad, W, H);
+      const p01 = project(x0, y1, (r01 + zOffset) * hScale, elevRad, rotRad, W, H);
+
+      // 面の塗り
+      ctx.beginPath();
+      ctx.moveTo(p00.px, p00.py);
+      ctx.lineTo(p10.px, p10.py);
+      ctx.lineTo(p11.px, p11.py);
+      ctx.lineTo(p01.px, p01.py);
+      ctx.closePath();
+      ctx.fillStyle = rToColor(rAvg, L.color, alpha * 0.72);
+      ctx.fill();
+
+      // エッジ
+      ctx.strokeStyle = rToEdgeColor(rAvg, alpha);
+      ctx.lineWidth   = rAvg >= 1.0 ? 1.2 : 0.4;
+      ctx.stroke();
+    }
+  }
+
+  // レイヤーラベル（右前角）
+  const labelPt = project(1.05, 1.0, (grid[(GRID)*N + GRID] + zOffset) * hScale, elevRad, rotRad, W, H);
+  ctx.font = `bold 10px JetBrains Mono`;
+  ctx.fillStyle = L.color;
+  ctx.textAlign = 'left';
+  ctx.globalAlpha = alpha;
+  ctx.fillText(`${idx+1}.${L.en}`, labelPt.px + 4, labelPt.py);
+  ctx.globalAlpha = 1;
+}
+
+function drawAxisLabels(W, H, elevRad, rotRad){
+  ctx.font = '9px JetBrains Mono';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(150,160,190,0.4)';
+
+  const orig  = project(0, 0, 0, elevRad, rotRad, W, H);
+  const xEnd  = project(1.1, 0, 0, elevRad, rotRad, W, H);
+  const yEnd  = project(0, 1.1, 0, elevRad, rotRad, W, H);
+  const zEnd  = project(0, 0, 0.9, elevRad, rotRad, W, H);
+
+  ctx.strokeStyle = 'rgba(150,160,190,0.2)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(orig.px, orig.py); ctx.lineTo(xEnd.px, xEnd.py); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(orig.px, orig.py); ctx.lineTo(yEnd.px, yEnd.py); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(orig.px, orig.py); ctx.lineTo(zEnd.px, zEnd.py); ctx.stroke();
+
+  ctx.fillText('X', xEnd.px, xEnd.py - 6);
+  ctx.fillText('Y', yEnd.px + 8, yEnd.py);
+  ctx.fillStyle = 'rgba(136,255,204,0.35)';
+  ctx.fillText('R', zEnd.px, zEnd.py - 6);
+}
+
+// ────────────────────────────────
+// コントロール
+// ────────────────────────────────
+function togglePlay(){
+  playing = !playing;
+  const b = document.getElementById('btnPlay');
+  b.classList.toggle('on', playing);
+  b.textContent = playing ? 'PLAY' : 'PAUSE';
+}
+function resetTime(){
+  timeVal = 0;
+  document.getElementById('timeSlider').value = 0;
+  document.getElementById('timeDisp').textContent = 't=0';
+}
+function updateView(){
+  elevDeg    = parseInt(document.getElementById('elevSlider').value);
+  rotDeg     = parseInt(document.getElementById('rotSlider').value);
+  heightScale= parseInt(document.getElementById('scaleSlider').value);
+  document.getElementById('elevVal').textContent  = elevDeg + '°';
+  document.getElementById('rotVal').textContent   = rotDeg  + '°';
+  document.getElementById('scaleVal').textContent = '×' + heightScale;
+}
+
+function updateColorMode(){
+  saturation = parseInt(document.getElementById('satSlider').value) / 100;
+  gamma      = parseInt(document.getElementById('gammaSlider').value) / 100;
+  document.getElementById('satVal').textContent   = Math.round(saturation * 100) + '%';
+  document.getElementById('gammaVal').textContent = 'x' + gamma.toFixed(2);
+}
+
+function toggleBW(){
+  bwMode = !bwMode;
+  const b = document.getElementById('btnBW');
+  b.classList.toggle('on', bwMode);
+  b.textContent = bwMode ? 'ON' : 'OFF';
+  b.style.borderColor = bwMode ? '#ffffff' : '#606080';
+  b.style.color       = bwMode ? '#ffffff' : '#606080';
+}
+
+// タイムスライダーの手動操作
+document.getElementById('timeSlider').addEventListener('input', function(){
+  timeVal = parseFloat(this.value);
+  document.getElementById('timeDisp').textContent = `t=${timeVal.toFixed(0)}`;
+});
+
+// マウスドラッグで回転
+canvas.addEventListener('mousedown', e => {
+  dragging = true; dragX0 = e.clientX; dragY0 = e.clientY;
+  rotStart = rotDeg; elevStart = elevDeg;
+});
+window.addEventListener('mousemove', e => {
+  if(!dragging) return;
+  const dx = e.clientX - dragX0;
+  const dy = e.clientY - dragY0;
+  rotDeg  = (rotStart  + dx * 0.5) % 360;
+  elevDeg = Math.max(10, Math.min(80, elevStart - dy * 0.3));
+  document.getElementById('rotSlider').value  = rotDeg;
+  document.getElementById('elevSlider').value = elevDeg;
+  document.getElementById('rotVal').textContent  = Math.round(rotDeg)  + '°';
+  document.getElementById('elevVal').textContent = Math.round(elevDeg) + '°';
+});
+window.addEventListener('mouseup', () => dragging = false);
+
+// タッチ対応
+canvas.addEventListener('touchstart', e => {
+  dragging = true;
+  dragX0 = e.touches[0].clientX; dragY0 = e.touches[0].clientY;
+  rotStart = rotDeg; elevStart = elevDeg;
+});
+window.addEventListener('touchmove', e => {
+  if(!dragging) return;
+  const dx = e.touches[0].clientX - dragX0;
+  const dy = e.touches[0].clientY - dragY0;
+  rotDeg  = (rotStart  + dx * 0.5) % 360;
+  elevDeg = Math.max(10, Math.min(80, elevStart - dy * 0.3));
+});
+window.addEventListener('touchend', () => dragging = false);
+
+// ────────────────────────────────
+// メインループ
+// ────────────────────────────────
+let lastFrame = performance.now();
+function loop(now){
+  const dt = Math.min((now - lastFrame) / 1000, 0.05);
+  lastFrame = now;
+  if(playing){
+    timeVal = (timeVal + dt * 12) % 200;
+    document.getElementById('timeSlider').value = timeVal;
+    document.getElementById('timeDisp').textContent = `t=${timeVal.toFixed(1)}`;
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', () => { resizeCanvas(); });
+resizeCanvas();
+buildLayerCards();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

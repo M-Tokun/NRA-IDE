@@ -1,0 +1,55 @@
+NRA-IDE_CancerTreatmentSupport_System/
+│
+├── 📜 README.md                     # [DONE] Project Genesis
+├── ⚖️ LICENSE.txt                    # [DONE] MIT License
+└── 🗺️ NRA-IDE_Directory_Structure.txt # [ACTIVE] This File (Structure Audit)
+│
+├── 📚 00_Documentation/             # [90% DONE] Philosophical Foundations
+│   ├── Master_Index.md              # [DONE] Roadmap
+│   ├── PHASE_1_Philosophy_Protocol  # [DONE] Axioms
+│   ├── PHASE_2_Mesoscale_Physics    # [DONE] Governing Equations
+│   ├── PHASE_3_Ritsukan_Axiom       # [DONE] Safety Rules
+│   ├── PHASE_4_Terminology_Dict     # [DONE] Q8.8 Specs
+│   ├── PHASE_5_System_Architecture  # [DONE] Diagram
+│   ├── PHASE_6_FPGA_Spec            # [DONE] Hardware Specs
+│   ├── PHASE_7_Implementation_Ref   # [DONE] Snippets
+│   ├── PHASE_8_Technical_Manual     # [DONE] Synthesis Guide
+│   └── PHASE_9_Operational_Guide    # [DONE] Workflow
+│
+├── ⚙️ 10_Hardware_Design/            # [70% DONE] HDL Core logic
+│   ├── src/
+│   │   ├── Top_Module.v             # [FIXED] 3-Byte Response & CS logic
+│   │   ├── Cancer_Selector.v        # [UPDATE REQ] Add UART control for Type Selection
+│   │   ├── BioCalibrator_TypeA.v    # [DONE] Single-Cell Core
+│   │   ├── BioCalibrator_TypeB.v    # [FIXED] Non-Linear LUT implemented
+│   │   └── UART_Interface.v         # [DONE] Binary Link
+│   ├── simulation/                  # [WIP] Need full integration simulation
+│   └── constraints/                 # [DONE] Multi-vendor pinouts & Timing
+│
+├── 💻 20_Software_Host/              # [40% DONE] Host Intelligence
+│   ├── main.py                      # [WIP] Full integration script needed
+│   ├── fpga_interface.py            # [FIXED] 3-Byte Parity & Retry
+│   ├── data_validator.py            # [DONE] Range Guards
+│   ├── report_generator.py          # [FIXED] Timestamp & Precision
+│   ├── map_visualizer.py            # [DONE] Contour Plot
+│   └── requirements.txt             # [DONE] Dependencies
+│
+├── 🧪 30_Test_Data/                  # [60% DONE] Verification Sets
+│   ├── README_TestData.md           # [DONE] Methodology
+│   ├── sample_patient.json          # [DONE] Ref Case
+│   ├── validation_cases.csv         # [DONE] Suite
+│   └── expected_results.json        # [FIXED] Sync with 3-byte protocol
+│
+├── 📊 40_Output_Reports/             # [60% DONE] Artifact Templates
+│   ├── NRA_Report_Sample.txt        # [DONE] Ver. 1.1 Template
+│   └── SafetyMap_Sample.png         # [DONE] Description
+│
+├── 🚀 50_Deployment/                 # [0% DONE] Placeholder only
+│   ├── install_guide.md             # [EMPTY] Need content for Clinical Setup
+│   ├── deployment_checklist.md      # [EMPTY] Need content for HW validation
+│   ├── system_requirements.md       # [EMPTY] Need content for FPGA/OS specs
+│   └── bitstreams/                  # [EMPTY] Ready for Synthesis result
+│
+└── 🔬 60_Research/                   # [100% DONE] Empirical Evidence
+    ├── Practical_Resources.md       # [DONE] Cell constants
+    └── references.md                # [DONE] Literature

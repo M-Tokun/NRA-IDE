@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>NRA-IDE Demo #14 — Power Grid Transition / 電力系統・遷移点</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #040810;
+    color: #c8d8e8;
+    font-family: 'Courier New', monospace;
+    height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 300px 1fr 260px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 6px 10px;
+    border-bottom: 1px solid #1a3050;
+  }
+  header h1 { font-size: 13px; color: #00ccff; letter-spacing: 2px; text-transform: uppercase; }
+  header span { font-size: 11px; color: #556677; }
+  header .tag { font-size: 10px; color: #00ff88; border: 1px solid #00ff4420; padding: 1px 6px; }
+
+  /* ── PANELS ── */
+  .panel {
+    background: rgba(0,20,40,0.7);
+    border: 1px solid #1a3050;
+    border-radius: 3px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .panel-title {
+    font-size: 10px;
+    color: #445566;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #1a3050;
+    padding-bottom: 5px;
+  }
+
+  /* ── LEFT PANEL ── */
+  #left-panel { grid-row: 2; grid-column: 1; }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+  }
+  .metric-label { font-size: 10px; color: #667788; }
+  .metric-value { font-size: 14px; font-weight: bold; font-family: 'Courier New'; }
+
+  /* R値ゲージ */
+  .r-gauge-wrap { margin: 4px 0; }
+  .r-gauge-bar-bg {
+    width: 100%;
+    height: 18px;
+    background: #0a1520;
+    border: 1px solid #1a3050;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .r-gauge-bar {
+    height: 100%;
+    transition: width 0.05s, background 0.2s;
+    position: relative;
+  }
+  .r-gauge-marker {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: #ff4444;
+    left: 100%; /* τ line */
+  }
+  .r-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #445566;
+    margin-top: 2px;
+  }
+
+  /* FSM状態 */
+  .fsm-box {
+    text-align: center;
+    padding: 8px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .fsm-PERMIT       { color: #00ff88; background: #00ff1108; border-color: #00ff4430; }
+  .fsm-CAVEAT       { color: #ffcc00; background: #ffcc0008; border-color: #ffcc0030; }
+  .fsm-FAIL_CLOSED  { color: #ff3333; background: #ff000015; border-color: #ff333350;
+                      animation: alarm-pulse 0.4s infinite; }
+  .fsm-RECOVERING   { color: #44aaff; background: #0044ff08; border-color: #44aaff30; }
+  @keyframes alarm-pulse {
+    0%,100% { box-shadow: 0 0 0px #ff3333; }
+    50%      { box-shadow: 0 0 16px #ff3333; }
+  }
+
+  /* イベントログ */
+  #event-log {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 9px;
+    line-height: 1.7;
+    color: #445566;
+    min-height: 80px;
+  }
+  #event-log .ev-warn  { color: #ffcc00; }
+  #event-log .ev-crit  { color: #ff4444; }
+  #event-log .ev-ok    { color: #00cc66; }
+  #event-log .ev-info  { color: #4488aa; }
+
+  /* ── CENTER: CANVAS ── */
+  #center-panel {
+    grid-row: 2; grid-column: 2;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  canvas { border: 1px solid #1a3050; border-radius: 3px; background: #020c18; }
+
+  /* 遷移フラッシュ */
+  #transition-flash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse, #ff330040 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.05s;
+  }
+
+  /* ── RIGHT PANEL ── */
+  #right-panel { grid-row: 2; grid-column: 3; }
+
+  .gen-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    border-bottom: 1px solid #0d1e2e;
+  }
+  .gen-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .gen-name { font-size: 10px; color: #556677; width: 80px; }
+  .gen-bar-bg { flex: 1; height: 6px; background: #0a1520; border-radius: 2px; }
+  .gen-bar { height: 100%; border-radius: 2px; transition: width 0.1s; }
+
+  /* ── BOTTOM: コントロール ── */
+  footer {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px;
+    border-top: 1px solid #1a3050;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .btn-event {
+    background: #200000;
+    color: #ff6644;
+    border: 1px solid #ff330040;
+  }
+  .btn-event:hover { background: #400000; border-color: #ff3300; }
+  .btn-event:disabled { opacity: 0.3; cursor: default; }
+  .btn-recover {
+    background: #001520;
+    color: #44aaff;
+    border: 1px solid #44aaff30;
+  }
+  .btn-recover:hover { background: #002a40; }
+  .btn-normal {
+    background: #0a1520;
+    color: #aabbcc;
+    border: 1px solid #1a3050;
+  }
+  .btn-normal:hover { background: #1a3050; }
+
+  .ctrl-group { display: flex; align-items: center; gap: 8px; }
+  .ctrl-label { font-size: 10px; color: #445566; }
+  input[type=range] { width: 90px; accent-color: #00aaff; }
+  .ctrl-val { font-size: 11px; color: #00aaff; width: 30px; }
+
+  .footer-formula {
+    margin-left: auto;
+    font-size: 11px;
+    color: #2a4a6a;
+    letter-spacing: 1px;
+  }
+  .footer-formula span { color: #00aaff; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NRA-IDE Demo #14</h1>
+  <span>Power Grid Transition / 電力系統 遷移点解析</span>
+  <span class="tag">R = δ/τ</span>
+  <span class="tag">FAIL-CLOSED</span>
+  <span style="margin-left:auto;font-size:10px;color:#2a4a6a;">M-Tokuni © NRA-IDE Project</span>
+</header>
+
+<!-- LEFT -->
+<div class="panel" id="left-panel">
+  <div class="panel-title">System State / システム状態</div>
+
+  <div class="metric-row">
+    <span class="metric-label">周波数 f [Hz]</span>
+    <span class="metric-value" id="val-freq" style="color:#00ccff;">50.00</span>
+  </div>
+  <div class="metric-row">
+    <span class="metric-label">偏差 δf [Hz]</span>
+    <span class="metric-value" id="val-delta" style="color:#ffaa00;">0.000</span>
+  </div>
+  <div class="metric-row">
+    <span class="metric-label">τ (慣性閾値)</span>
+    <span class="metric-value" id="val-tau" style="color:#4488aa;">0.500</span>
+  </div>
+
+  <div class="r-gauge-wrap">
+    <div class="metric-row" style="margin-bottom:3px;">
+      <span class="metric-label">R = δ/τ</span>
+      <span class="metric-value" id="val-R" style="color:#00ff88;">0.000</span>
+    </div>
+    <div class="r-gauge-bar-bg">
+      <div class="r-gauge-bar" id="r-gauge-bar" style="width:0%;background:#00ff88;"></div>
+    </div>
+    <div class="r-label-row">
+      <span>0</span><span>ZONE-A</span><span style="color:#ffcc00;">ZONE-B</span>
+      <span style="color:#ff4444;">τ=1.0</span>
+    </div>
+  </div>
+
+  <div class="fsm-box fsm-PERMIT" id="fsm-box">PERMIT</div>
+
+  <div class="panel-title" style="margin-top:4px;">Event Log</div>
+  <div id="event-log"></div>
+</div>
+
+<!-- CENTER -->
+<div id="center-panel">
+  <div id="transition-flash"></div>
+  <canvas id="canvas-freq"></canvas>
+  <canvas id="canvas-r"></canvas>
+</div>
+
+<!-- RIGHT -->
+<div class="panel" id="right-panel">
+  <div class="panel-title">発電機ユニット / Generators</div>
+  <div id="gen-list"></div>
+
+  <div class="panel-title" style="margin-top:8px;">δ 累積構造</div>
+  <div class="metric-row">
+    <span class="metric-label">micro-δ（高周波）</span>
+    <span class="metric-value" id="val-micro" style="font-size:11px;color:#4488aa;">0.000</span>
+  </div>
+  <div class="metric-row">
+    <span class="metric-label">macro-δ（低周波）</span>
+    <span class="metric-value" id="val-macro" style="font-size:11px;color:#aacc44;">0.000</span>
+  </div>
+  <div class="metric-row">
+    <span class="metric-label">spike-δ（突発）</span>
+    <span class="metric-value" id="val-spike" style="font-size:11px;color:#ff6644;">0.000</span>
+  </div>
+  <div class="metric-row">
+    <span class="metric-label">residual_debt</span>
+    <span class="metric-value" id="val-debt" style="font-size:11px;color:#cc44aa;">0.000</span>
+  </div>
+
+  <div class="panel-title" style="margin-top:8px;">遷移履歴</div>
+  <div id="transition-log" style="font-size:9px;color:#445566;line-height:1.8;overflow-y:auto;flex:1;"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <button class="btn-event" id="btn-trip" onclick="triggerTrip()">⚡ 発電機脱落</button>
+  <button class="btn-event" id="btn-surge" onclick="triggerSurge()">📈 需要急増</button>
+  <button class="btn-recover" onclick="triggerRecover()">🔄 系統復旧</button>
+  <button class="btn-normal" onclick="resetSim()">■ リセット</button>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">SPEED</span>
+    <input type="range" id="slider-speed" min="1" max="5" value="2" oninput="updateSpeed(this.value)">
+    <span class="ctrl-val" id="val-speed">×2</span>
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">τ</span>
+    <input type="range" id="slider-tau" min="20" max="80" value="50" oninput="updateTau(this.value)">
+    <span class="ctrl-val" id="val-tau-ctrl">0.50</span>
+  </div>
+
+  <span class="footer-formula">R = <span>δ</span>/<span>τ</span> → R≥1.0 : <span>FAIL-CLOSED</span></span>
+</footer>
+
+<script>
+// ================================================================
+// NRA-IDE Demo #14 — Power Grid Transition
+// FILE: NRA_IDE_Demo14_PowerGrid_Transition_26-0321.html
+// 遷移点（R=1.0越え）の構造的瞬間を可視化
+// ================================================================
+
+const F_NOM = 50.0;   // 定格周波数 [Hz]
+let tau = 0.50;       // 吸収厚み τ
+let speed = 2;        // シミュレーション速度
+let t = 0;
+let animId = null;
+
+// ── システム状態 ──
+let state = {
+  freq: F_NOM,
+  delta: 0,
+  R: 0,
+  fsm: 'PERMIT',       // PERMIT / CAVEAT / FAIL_CLOSED / RECOVERING
+  microDelta: 0,
+  macroDelta: 0,
+  spikeDelta: 0,
+  residualDebt: 0,
+  tripActive: false,
+  surgeActive: false,
+  recoverActive: false,
+  tripDecay: 0,
+  surgeDecay: 0,
+};
+
+// ── 発電機ユニット ──
+const generators = [
+  { name: 'Unit-A  500MW', cap: 500, load: 0.78, online: true, color: '#00ff88' },
+  { name: 'Unit-B  350MW', cap: 350, load: 0.65, online: true, color: '#44aaff' },
+  { name: 'Unit-C  300MW', cap: 300, load: 0.72, online: true, color: '#ffaa00' },
+  { name: 'Unit-D  200MW', cap: 200, load: 0.45, online: true, color: '#cc44ff' },
+];
+
+// ── 波形バッファ ──
+const BUF = 600;
+let freqBuf = new Float32Array(BUF).fill(F_NOM);
+let rBuf    = new Float32Array(BUF).fill(0);
+let bufIdx  = 0;
+
+// ── Canvas ──
+const cFreq = document.getElementById('canvas-freq');
+const cR    = document.getElementById('canvas-r');
+const ctxF  = cFreq.getContext('2d');
+const ctxR  = cR.getContext('2d');
+
+function resizeCanvases() {
+  const cp = document.getElementById('center-panel');
+  const w  = cp.clientWidth - 2;
+  const h  = Math.floor((cp.clientHeight - 14) / 2);
+  cFreq.width  = cR.width  = w;
+  cFreq.height = cR.height = h;
+}
+
+// ── 発電機リスト描画 ──
+function renderGenList() {
+  const el = document.getElementById('gen-list');
+  el.innerHTML = generators.map((g,i) => {
+    const load = g.online ? g.load : 0;
+    const col  = g.online ? g.color : '#334455';
+    return `<div class="gen-row">
+      <div class="gen-dot" style="background:${col};${g.online?'':'opacity:0.3'}"></div>
+      <span class="gen-name" style="color:${g.online?'#8899aa':'#334455'}">${g.name}</span>
+      <div class="gen-bar-bg"><div class="gen-bar" style="width:${(load*100).toFixed(0)}%;background:${col};opacity:${g.online?1:0.2}"></div></div>
+      <span style="font-size:9px;color:${col};width:30px;text-align:right">${g.online?(load*100).toFixed(0)+'%':'OFF'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── イベントログ ──
+let logCount = 0;
+function addLog(msg, cls='ev-info') {
+  const el = document.getElementById('event-log');
+  const ts = `[${(t*0.016).toFixed(1)}s]`;
+  el.innerHTML = `<div class="${cls}">${ts} ${msg}</div>` + el.innerHTML;
+  if (++logCount > 40) el.innerHTML = el.innerHTML.slice(0, el.innerHTML.lastIndexOf('<div'));
+}
+
+let transCount = 0;
+function addTransitionLog(from, to, R) {
+  const el = document.getElementById('transition-log');
+  transCount++;
+  const col = to === 'FAIL_CLOSED' ? '#ff4444' : to === 'RECOVERING' ? '#44aaff' : '#00ff88';
+  el.innerHTML = `<div style="color:${col}">◯${transCount} ${from}→${to} R=${R.toFixed(3)}</div>` + el.innerHTML;
+}
+
+// ── 物理シミュレーション ──
+function physicsStep() {
+  const dt = 0.016 * speed;
+  t += dt;
+
+  // 二重ゆらぎ
+  state.microDelta = Math.sin(t * 3.7) * 0.008 + (Math.random()-0.5) * 0.006;
+  state.macroDelta = Math.sin(t * 0.3) * 0.04 + Math.sin(t * 0.17) * 0.025;
+
+  // イベント系
+  let eventDelta = 0;
+  if (state.tripActive && state.tripDecay > 0) {
+    state.tripDecay -= dt * 0.4;
+    eventDelta = Math.max(0, state.tripDecay) * 0.8;
+    if (state.tripDecay <= 0) { state.tripActive = false; addLog('脱落δ 減衰完了', 'ev-info'); }
+  }
+  if (state.surgeActive && state.surgeDecay > 0) {
+    state.surgeDecay -= dt * 0.25;
+    eventDelta += Math.max(0, state.surgeDecay) * 0.5;
+    if (state.surgeDecay <= 0) { state.surgeActive = false; addLog('需要急増δ 減衰完了', 'ev-info'); }
+  }
+  state.spikeDelta = eventDelta;
+
+  // 復旧
+  let recoverForce = 0;
+  if (state.recoverActive) {
+    recoverForce = 0.35 * dt;
+    if (Math.abs(state.delta) < 0.02 && state.residualDebt < 0.05) {
+      state.recoverActive = false;
+      addLog('系統復旧完了 ω>0確認', 'ev-ok');
+    }
+  }
+
+  // δ合成
+  const rawDelta = state.microDelta + state.macroDelta + state.spikeDelta;
+  state.delta = Math.max(0, Math.abs(rawDelta) - recoverForce) * Math.sign(rawDelta + 0.001);
+
+  // 周波数更新
+  state.freq = F_NOM - state.delta * 4.0;
+  state.freq = Math.max(47.0, Math.min(53.0, state.freq));
+
+  // R計算
+  state.R = Math.abs(state.delta) / tau;
+
+  // 残留負債
+  const k_recovery = 0.12;
+  if (state.R > 0.4) {
+    state.residualDebt += (state.R - state.R * k_recovery) * dt * 0.08;
+  } else {
+    state.residualDebt = Math.max(0, state.residualDebt - dt * 0.03);
+  }
+  state.residualDebt = Math.min(state.residualDebt, 2.0);
+
+  // FSM遷移
+  const prevFsm = state.fsm;
+  if (state.recoverActive && state.R < 0.8) {
+    state.fsm = 'RECOVERING';
+  } else if (state.R >= 1.0 || state.residualDebt > 0.8) {
+    state.fsm = 'FAIL_CLOSED';
+  } else if (state.R >= 0.4) {
+    state.fsm = 'CAVEAT';
+  } else {
+    if (state.fsm === 'FAIL_CLOSED' || state.fsm === 'RECOVERING') {
+      // FAIL_CLOSEDからの自動回復は禁止 → 人間操作待ち
+    } else {
+      state.fsm = 'PERMIT';
+    }
+  }
+
+  if (state.fsm !== prevFsm) {
+    addTransitionLog(prevFsm, state.fsm, state.R);
+    if (state.fsm === 'FAIL_CLOSED') {
+      addLog('⛔ FAIL-CLOSED発動 R=' + state.R.toFixed(3), 'ev-crit');
+      flashTransition();
+      document.getElementById('btn-trip').disabled = true;
+      document.getElementById('btn-surge').disabled = true;
+    } else if (state.fsm === 'CAVEAT') {
+      addLog('⚠ ZONE-B遷移 R=' + state.R.toFixed(3), 'ev-warn');
+    } else if (state.fsm === 'PERMIT' && prevFsm !== 'PERMIT') {
+      addLog('✓ PERMIT復帰', 'ev-ok');
+    }
+  }
+
+  // バッファ更新
+  freqBuf[bufIdx] = state.freq;
+  rBuf[bufIdx]    = Math.min(state.R, 2.0);
+  bufIdx = (bufIdx + 1) % BUF;
+}
+
+// ── 遷移フラッシュ ──
+let flashTimer = null;
+function flashTransition() {
+  const fl = document.getElementById('transition-flash');
+  fl.style.opacity = '1';
+  if (flashTimer) clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { fl.style.opacity = '0'; }, 300);
+}
+
+// ── Canvas描画 ──
+function drawFreqCanvas() {
+  const W = cFreq.width, H = cFreq.height;
+  ctxF.clearRect(0,0,W,H);
+
+  // グリッド
+  ctxF.strokeStyle = '#0d1e2e';
+  ctxF.lineWidth = 1;
+  for (let hz = 48; hz <= 52; hz++) {
+    const y = H - ((hz - 47) / 6) * H;
+    ctxF.beginPath(); ctxF.moveTo(0,y); ctxF.lineTo(W,y); ctxF.stroke();
+  }
+  // 50Hz基準線
+  const y50 = H - ((F_NOM - 47) / 6) * H;
+  ctxF.strokeStyle = '#1a3050';
+  ctxF.setLineDash([4,4]);
+  ctxF.beginPath(); ctxF.moveTo(0,y50); ctxF.lineTo(W,y50); ctxF.stroke();
+  ctxF.setLineDash([]);
+
+  // ラベル
+  ctxF.fillStyle = '#2a4a6a'; ctxF.font = '9px Courier New';
+  ctxF.fillText('52Hz', 4, H - ((52-47)/6)*H - 2);
+  ctxF.fillText('50Hz', 4, y50 - 2);
+  ctxF.fillText('48Hz', 4, H - ((48-47)/6)*H - 2);
+  ctxF.fillText('FREQ', W-36, 14);
+
+  // 波形
+  const zoneColors = { PERMIT: '#00ff88', CAVEAT: '#ffcc00', FAIL_CLOSED: '#ff3333', RECOVERING: '#44aaff' };
+  ctxF.lineWidth = 1.5;
+  ctxF.beginPath();
+  for (let i = 0; i < BUF; i++) {
+    const idx = (bufIdx + i) % BUF;
+    const x = (i / BUF) * W;
+    const y = H - ((freqBuf[idx] - 47) / 6) * H;
+    i === 0 ? ctxF.moveTo(x,y) : ctxF.lineTo(x,y);
+  }
+  ctxF.strokeStyle = zoneColors[state.fsm] || '#00ff88';
+  ctxF.shadowColor = ctxF.strokeStyle; ctxF.shadowBlur = state.fsm === 'FAIL_CLOSED' ? 8 : 3;
+  ctxF.stroke(); ctxF.shadowBlur = 0;
+
+  // 現在値表示
+  ctxF.fillStyle = ctxF.strokeStyle; ctxF.font = 'bold 11px Courier New';
+  ctxF.fillText(`f = ${state.freq.toFixed(3)} Hz`, W-130, 14);
+}
+
+function drawRCanvas() {
+  const W = cR.width, H = cR.height;
+  ctxR.clearRect(0,0,W,H);
+
+  // τ=1.0 ライン
+  const yTau = H - (1.0 / 2.0) * H;
+  ctxR.strokeStyle = '#ff333340';
+  ctxR.setLineDash([6,3]);
+  ctxR.lineWidth = 1.5;
+  ctxR.beginPath(); ctxR.moveTo(0,yTau); ctxR.lineTo(W,yTau); ctxR.stroke();
+  ctxR.setLineDash([]);
+  ctxR.fillStyle = '#ff4444'; ctxR.font = '9px Courier New';
+  ctxR.fillText('τ = 1.0  FAIL-CLOSED', 6, yTau - 3);
+
+  // ZONE-B ライン (0.4)
+  const yB = H - (0.4 / 2.0) * H;
+  ctxR.strokeStyle = '#ffcc0025';
+  ctxR.setLineDash([3,5]);
+  ctxR.beginPath(); ctxR.moveTo(0,yB); ctxR.lineTo(W,yB); ctxR.stroke();
+  ctxR.setLineDash([]);
+  ctxR.fillStyle = '#ffcc0066'; ctxR.font = '9px Courier New';
+  ctxR.fillText('0.4  ZONE-B', 6, yB - 3);
+
+  ctxR.fillStyle = '#2a4a6a'; ctxR.font = '9px Courier New';
+  ctxR.fillText('R = δ/τ', W-60, 14);
+
+  // R波形
+  ctxR.lineWidth = 1.5;
+  ctxR.beginPath();
+  for (let i = 0; i < BUF; i++) {
+    const idx = (bufIdx + i) % BUF;
+    const x = (i / BUF) * W;
+    const y = H - (rBuf[idx] / 2.0) * H;
+    i === 0 ? ctxR.moveTo(x,y) : ctxR.lineTo(x,y);
+  }
+  // R値に応じた色グラデーション
+  const rCol = state.R >= 1.0 ? '#ff3333' : state.R >= 0.4 ? '#ffcc00' : '#00aaff';
+  ctxR.strokeStyle = rCol;
+  ctxR.shadowColor = rCol; ctxR.shadowBlur = state.R >= 1.0 ? 10 : 3;
+  ctxR.stroke(); ctxR.shadowBlur = 0;
+
+  // 遷移点マーカー（FAIL-CLOSED瞬間）
+  ctxR.fillStyle = rCol; ctxR.font = 'bold 11px Courier New';
+  ctxR.fillText(`R = ${state.R.toFixed(4)}`, W-100, 14);
+}
+
+// ── UIアップデート ──
+function updateUI() {
+  document.getElementById('val-freq').textContent  = state.freq.toFixed(3);
+  document.getElementById('val-delta').textContent = Math.abs(state.delta).toFixed(4);
+  document.getElementById('val-tau').textContent   = tau.toFixed(3);
+  document.getElementById('val-R').textContent     = state.R.toFixed(4);
+
+  // Rゲージ
+  const bar = document.getElementById('r-gauge-bar');
+  const pct = Math.min(state.R * 100, 100);
+  bar.style.width = pct + '%';
+  bar.style.background = state.R >= 1.0 ? '#ff3333' : state.R >= 0.4 ? '#ffcc00' : '#00ff88';
+
+  // FSM
+  const fsmEl = document.getElementById('fsm-box');
+  fsmEl.className = 'fsm-box fsm-' + state.fsm;
+  const fsmLabels = { PERMIT:'PERMIT', CAVEAT:'CAVEAT ⚠', FAIL_CLOSED:'FAIL-CLOSED ⛔', RECOVERING:'RECOVERING ↻' };
+  fsmEl.textContent = fsmLabels[state.fsm] || state.fsm;
+
+  document.getElementById('val-R').style.color =
+    state.R >= 1.0 ? '#ff3333' : state.R >= 0.4 ? '#ffcc00' : '#00ff88';
+
+  document.getElementById('val-micro').textContent = Math.abs(state.microDelta).toFixed(4);
+  document.getElementById('val-macro').textContent = Math.abs(state.macroDelta).toFixed(4);
+  document.getElementById('val-spike').textContent = state.spikeDelta.toFixed(4);
+  document.getElementById('val-debt').textContent  = state.residualDebt.toFixed(4);
+}
+
+// ── イベントトリガー ──
+function triggerTrip() {
+  if (state.fsm === 'FAIL_CLOSED') return;
+  // ランダムで発電機1台脱落
+  const online = generators.filter(g => g.online);
+  if (online.length <= 1) return;
+  const victim = online[Math.floor(Math.random() * online.length)];
+  victim.online = false;
+  state.tripActive = true;
+  state.tripDecay  = 1.2 + Math.random() * 0.8;
+  renderGenList();
+  addLog(`⚡ ${victim.name} 脱落 (${victim.cap}MW喪失)`, 'ev-crit');
+}
+
+function triggerSurge() {
+  if (state.fsm === 'FAIL_CLOSED') return;
+  state.surgeActive = true;
+  state.surgeDecay  = 0.9 + Math.random() * 0.6;
+  addLog('📈 需要急増イベント発生', 'ev-warn');
+}
+
+function triggerRecover() {
+  generators.forEach(g => g.online = true);
+  state.recoverActive = true;
+  state.tripActive    = false;
+  state.surgeActive   = false;
+  state.tripDecay     = 0;
+  state.surgeDecay    = 0;
+  document.getElementById('btn-trip').disabled  = false;
+  document.getElementById('btn-surge').disabled = false;
+  renderGenList();
+  addLog('🔄 系統復旧操作 開始 (人間判断)', 'ev-ok');
+}
+
+function resetSim() {
+  state = {
+    freq:F_NOM, delta:0, R:0, fsm:'PERMIT',
+    microDelta:0, macroDelta:0, spikeDelta:0, residualDebt:0,
+    tripActive:false, surgeActive:false, recoverActive:false,
+    tripDecay:0, surgeDecay:0,
+  };
+  generators.forEach(g => g.online = true);
+  freqBuf.fill(F_NOM); rBuf.fill(0); bufIdx = 0; t = 0;
+  document.getElementById('btn-trip').disabled  = false;
+  document.getElementById('btn-surge').disabled = false;
+  document.getElementById('event-log').innerHTML = '';
+  document.getElementById('transition-log').innerHTML = '';
+  transCount = 0; logCount = 0;
+  renderGenList();
+  addLog('■ システムリセット', 'ev-info');
+}
+
+function updateSpeed(v) {
+  speed = parseInt(v);
+  document.getElementById('val-speed').textContent = '×' + speed;
+}
+
+function updateTau(v) {
+  tau = v / 100;
+  document.getElementById('val-tau-ctrl').textContent = tau.toFixed(2);
+}
+
+// ── メインループ ──
+function loop() {
+  for (let i = 0; i < speed; i++) physicsStep();
+  drawFreqCanvas();
+  drawRCanvas();
+  updateUI();
+  animId = requestAnimationFrame(loop);
+}
+
+// ── 初期化 ──
+window.addEventListener('resize', () => { resizeCanvases(); });
+resizeCanvases();
+renderGenList();
+addLog('■ NRA-IDE Demo #14 起動完了', 'ev-ok');
+addLog('R = δ/τ 監視開始 τ=' + tau.toFixed(2), 'ev-info');
+loop();
+</script>
+</body>
+</html>

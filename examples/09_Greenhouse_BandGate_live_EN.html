@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE — Greenhouse 4-Sensor Band Gate Live</title>
+<!--
+  NRA-IDE / Band Gate — 09 (EN)
+  Greenhouse 4-Sensor Simultaneous Band Gate Monitor
+  --------------------------------------------------
+  Monitors: Irrigation Pressure / Temperature / CO2 / Nutrient EC
+  Each sensor has independent upper/lower EMA and τ_dynamic.
+  α_lower higher for water/EC → detect depletion/cutoff early.
+  α_upper lower  for water    → avoid pipe shock on pressure surge.
+  R = max(δ_upper / τ_dyn_upper,  δ_lower / τ_dyn_lower)
+  Powered by NRA-IDE. (c) 2026 M-Tokuni.
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Source+Sans+3:wght@300;400;600&display=swap');
+:root {
+  --bg:      #050a06;
+  --panel:   #0b1410;
+  --border:  #142018;
+  --water:   #29d4ff;
+  --temp:    #ff7043;
+  --co2:     #a8e063;
+  --ec:      #ffd740;
+  --safe:    #69f0ae;
+  --danger:  #ff5252;
+  --warn:    #ffca28;
+  --muted:   #6ab87a;   /* readable on dark bg */
+  --text:    #a8c8a0;
+  --white:   #e0f0e0;
+  --mono:    'Share Tech Mono', monospace;
+  --sans:    'Source Sans 3', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 80%,rgba(41,212,255,.03) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(168,224,99,.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:28px 18px 80px;}
+
+header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;}
+.h-left{border-left:3px solid var(--co2);padding-left:16px;}
+.h-tag{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--co2);margin-bottom:8px;}
+header h1{font-size:clamp(17px,3vw,25px);font-weight:700;color:var(--white);line-height:1.3;}
+header p{font-size:12px;color:var(--white);opacity:.75;margin-top:8px;line-height:1.8;max-width:520px;}
+.live-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.live-badge{font-family:var(--mono);font-size:9px;letter-spacing:2px;padding:5px 12px;border:1px solid rgba(105,240,174,.3);color:var(--safe);background:rgba(105,240,174,.05);border-radius:2px;display:flex;align-items:center;gap:7px;}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--safe);animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+.four-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px;}
+@media(max-width:700px){.four-grid{grid-template-columns:1fr;}}
+.sensor-card{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:14px;position:relative;overflow:hidden;}
+.sensor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.sensor-card.water::before{background:var(--water);} .sensor-card.temp::before{background:var(--temp);} .sensor-card.co2::before{background:var(--co2);} .sensor-card.ec::before{background:var(--ec);}
+
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.card-icon-name{display:flex;align-items:center;gap:8px;}
+.card-icon{font-size:18px;line-height:1;}
+.card-name{font-family:var(--mono);font-size:10px;letter-spacing:2px;}
+.card-decision{font-family:var(--mono);font-size:9px;letter-spacing:2px;padding:3px 8px;border-radius:2px;border:1px solid;transition:all .15s;}
+.card-decision.pass {border-color:rgba(105,240,174,.3);color:rgba(105,240,174,.7);background:rgba(105,240,174,.04);}
+.card-decision.upper{border-color:var(--danger);color:var(--danger);background:rgba(255,82,82,.1);}
+.card-decision.lower{border-color:var(--water); color:var(--water); background:rgba(41,212,255,.08);}
+
+/* Description under card header — white for visibility */
+.card-desc{font-size:11px;color:var(--white);opacity:.72;margin-bottom:8px;line-height:1.5;}
+
+.card-value-row{display:flex;align-items:baseline;gap:6px;margin-bottom:10px;}
+.card-value{font-family:var(--mono);font-size:30px;font-weight:bold;line-height:1;transition:color .15s;}
+.card-unit{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+.band-bar-wrap{position:relative;height:28px;margin-bottom:10px;}
+.band-track{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden;}
+.band-safe{position:absolute;height:100%;background:rgba(105,240,174,.15);border-radius:3px;transition:left .2s,width .2s;}
+.band-needle{position:absolute;top:-5px;width:3px;height:16px;border-radius:2px;transform:translateX(-50%);transition:left .08s;box-shadow:0 0 6px currentColor;}
+.bll{position:absolute;left:0; bottom:-14px;font-family:var(--mono);font-size:8px;color:var(--muted);}
+.blh{position:absolute;right:0;bottom:-14px;font-family:var(--mono);font-size:8px;color:var(--muted);}
+
+.mini-canvas{display:block;width:100%;height:60px;border:1px solid rgba(255,255,255,.05);background:#030704;border-radius:2px;margin-bottom:8px;}
+.r-bar-row{display:flex;align-items:center;gap:8px;}
+.r-label{font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap;}
+.r-bar{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.r-fill{height:100%;border-radius:2px;transition:width .1s,background .15s;}
+.r-val{font-family:var(--mono);font-size:10px;min-width:44px;text-align:right;}
+
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:700px){.bottom-row{grid-template-columns:1fr;}}
+.param-panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;}
+.p-title{font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;}
+.pg-head{display:flex;justify-content:space-between;margin-bottom:3px;}
+.pg-name{font-family:var(--mono);font-size:9px;color:var(--text);}
+.pg-val {font-family:var(--mono);font-size:9px;color:var(--white);}
+/* param descriptions — white for readability */
+.pg-desc{font-size:10px;color:var(--white);opacity:.72;margin:3px 0 5px;line-height:1.5;}
+input[type=range]{width:100%;appearance:none;height:2px;background:var(--border);border-radius:1px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg);transition:transform .15s;}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.4);}
+input.water::-webkit-slider-thumb{background:var(--water);box-shadow:0 0 5px rgba(41,212,255,.5);}
+input.temp::-webkit-slider-thumb {background:var(--temp); box-shadow:0 0 5px rgba(255,112,67,.5);}
+input.co2::-webkit-slider-thumb  {background:var(--co2);  box-shadow:0 0 5px rgba(168,224,99,.5);}
+input.ec::-webkit-slider-thumb   {background:var(--ec);   box-shadow:0 0 5px rgba(255,215,64,.5);}
+.common-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+
+.log-panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;display:flex;flex-direction:column;}
+.log-area{flex:1;background:#030704;border:1px solid var(--border);border-radius:3px;padding:8px 10px;font-family:var(--mono);font-size:9px;line-height:1.9;overflow-y:auto;height:220px;}
+.log-area::-webkit-scrollbar{width:3px;} .log-area::-webkit-scrollbar-thumb{background:var(--border);}
+.le{color:var(--muted);} .le.water{color:var(--water);} .le.temp{color:var(--temp);} .le.co2{color:var(--co2);} .le.ec{color:var(--ec);} .le.safe{color:var(--safe);} .le.warn{color:var(--warn);} .le.upper{color:var(--danger);}
+
+.note-box{margin-top:12px;padding:10px 12px;background:rgba(168,224,99,.04);border:1px solid rgba(168,224,99,.12);border-radius:3px;}
+.note-title{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--co2);margin-bottom:5px;}
+.note-box p{font-size:10px;color:var(--white);opacity:.82;line-height:1.7;}
+
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;}
+button.ctrl{font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;border-radius:2px;transition:all .15s;}
+button.ctrl:hover{border-color:var(--co2);color:var(--co2);}
+button.ctrl.play{border-color:var(--safe);color:var(--safe);}
+button.ctrl.paused{border-color:var(--warn);color:var(--warn);}
+
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+footer a{color:var(--co2);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="h-left">
+    <div class="h-tag">NRA-IDE / Band Gate — 09 / EN / GREENHOUSE</div>
+    <h1>Greenhouse 4-Sensor<br>Simultaneous Band Gate Monitor</h1>
+    <p>Irrigation Pressure · Temperature · CO₂ · Nutrient EC monitored simultaneously.<br>
+    Both over-range (upper breach) and under-range (lower breach) are detected by R = δ/τ with asymmetric EMA sensitivity per sensor.</p>
+  </div>
+  <div class="live-wrap">
+    <div class="live-badge"><div class="ldot"></div>GREENHOUSE LIVE</div>
+    <div class="btn-row" style="margin-top:4px">
+      <button class="ctrl play" id="btnPlay" onclick="togglePlay()">⏸ PAUSE</button>
+      <button class="ctrl" onclick="resetSim()">↺ RESET</button>
+    </div>
+  </div>
+</header>
+
+<div class="four-grid">
+  <!-- Irrigation Pressure -->
+  <div class="sensor-card water" id="card-water">
+    <div class="card-head"><div class="card-icon-name"><span class="card-icon">💧</span><span class="card-name" style="color:var(--water)">Irrigation Pressure</span></div><div class="card-decision pass" id="dec-water">PASS</div></div>
+    <div class="card-desc">↑ pipe burst risk &nbsp;·&nbsp; ↓ root water cutoff</div>
+    <div class="card-value-row"><div class="card-value" id="val-water" style="color:var(--water)">—</div><div class="card-unit">kPa</div></div>
+    <div class="band-bar-wrap"><div class="band-track"><div class="band-safe" id="safe-water"></div></div><div class="band-needle" id="needle-water" style="color:var(--water);background:var(--water)"></div><div class="bll" id="ll-water"></div><div class="blh" id="lh-water"></div></div>
+    <canvas class="mini-canvas" id="cv-water" height="60"></canvas>
+    <div class="r-bar-row"><span class="r-label">R</span><div class="r-bar"><div class="r-fill" id="rf-water"></div></div><span class="r-val" id="rv-water">0.000</span></div>
+  </div>
+  <!-- Temperature -->
+  <div class="sensor-card temp" id="card-temp">
+    <div class="card-head"><div class="card-icon-name"><span class="card-icon">🌡</span><span class="card-name" style="color:var(--temp)">Greenhouse Temp</span></div><div class="card-decision pass" id="dec-temp">PASS</div></div>
+    <div class="card-desc">↑ heat damage / pollen death &nbsp;·&nbsp; ↓ frost / germination failure</div>
+    <div class="card-value-row"><div class="card-value" id="val-temp" style="color:var(--temp)">—</div><div class="card-unit">°C</div></div>
+    <div class="band-bar-wrap"><div class="band-track"><div class="band-safe" id="safe-temp"></div></div><div class="band-needle" id="needle-temp" style="color:var(--temp);background:var(--temp)"></div><div class="bll" id="ll-temp"></div><div class="blh" id="lh-temp"></div></div>
+    <canvas class="mini-canvas" id="cv-temp" height="60"></canvas>
+    <div class="r-bar-row"><span class="r-label">R</span><div class="r-bar"><div class="r-fill" id="rf-temp"></div></div><span class="r-val" id="rv-temp">0.000</span></div>
+  </div>
+  <!-- CO2 -->
+  <div class="sensor-card co2" id="card-co2">
+    <div class="card-head"><div class="card-icon-name"><span class="card-icon">🌿</span><span class="card-name" style="color:var(--co2)">CO₂ Concentration</span></div><div class="card-decision pass" id="dec-co2">PASS</div></div>
+    <div class="card-desc">↑ plant toxicity &nbsp;·&nbsp; ↓ photosynthesis drop</div>
+    <div class="card-value-row"><div class="card-value" id="val-co2" style="color:var(--co2)">—</div><div class="card-unit">ppm</div></div>
+    <div class="band-bar-wrap"><div class="band-track"><div class="band-safe" id="safe-co2"></div></div><div class="band-needle" id="needle-co2" style="color:var(--co2);background:var(--co2)"></div><div class="bll" id="ll-co2"></div><div class="blh" id="lh-co2"></div></div>
+    <canvas class="mini-canvas" id="cv-co2" height="60"></canvas>
+    <div class="r-bar-row"><span class="r-label">R</span><div class="r-bar"><div class="r-fill" id="rf-co2"></div></div><span class="r-val" id="rv-co2">0.000</span></div>
+  </div>
+  <!-- Nutrient EC -->
+  <div class="sensor-card ec" id="card-ec">
+    <div class="card-head"><div class="card-icon-name"><span class="card-icon">⚗</span><span class="card-name" style="color:var(--ec)">Nutrient EC</span></div><div class="card-decision pass" id="dec-ec">PASS</div></div>
+    <div class="card-desc">↑ salt damage / root burn &nbsp;·&nbsp; ↓ nutrient depletion</div>
+    <div class="card-value-row"><div class="card-value" id="val-ec" style="color:var(--ec)">—</div><div class="card-unit">mS/cm</div></div>
+    <div class="band-bar-wrap"><div class="band-track"><div class="band-safe" id="safe-ec"></div></div><div class="band-needle" id="needle-ec" style="color:var(--ec);background:var(--ec)"></div><div class="bll" id="ll-ec"></div><div class="blh" id="lh-ec"></div></div>
+    <canvas class="mini-canvas" id="cv-ec" height="60"></canvas>
+    <div class="r-bar-row"><span class="r-label">R</span><div class="r-bar"><div class="r-fill" id="rf-ec"></div></div><span class="r-val" id="rv-ec">0.000</span></div>
+  </div>
+</div>
+
+<div class="bottom-row">
+  <div class="param-panel">
+    <div class="p-title">Band Gate Parameters (per sensor)</div>
+    <div class="param-grid">
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--water);margin-bottom:4px;letter-spacing:2px">💧 Water Pressure</div>
+        <div class="pg-desc">α_lower higher → detect water cutoff early · α_upper lower → avoid pipe shock</div>
+        <div class="pg-head"><span class="pg-name">τ_high (kPa)</span><span class="pg-val" id="v-wh">70</span></div><input type="range" class="water" id="sl-wh" min="40" max="120" value="70">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low (kPa)</span><span class="pg-val" id="v-wl">30</span></div><input type="range" class="water" id="sl-wl" min="5" max="60" value="30">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.20/0.50</span></div>
+        <input type="range" class="water" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.20">
+        <input type="range" class="water" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.50" style="margin-top:3px">
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--temp);margin-bottom:4px;letter-spacing:2px">🌡 Temperature</div>
+        <div class="pg-desc">α_lower higher → catch nighttime frost earlier</div>
+        <div class="pg-head"><span class="pg-name">τ_high (°C)</span><span class="pg-val" id="v-th">35</span></div><input type="range" class="temp" id="sl-th" min="20" max="50" value="35">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low (°C)</span><span class="pg-val" id="v-tl">10</span></div><input type="range" class="temp" id="sl-tl" min="0" max="25" value="10">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ta">0.25/0.45</span></div>
+        <input type="range" class="temp" id="sl-tau" min="0.01" max="0.99" step="0.01" value="0.25">
+        <input type="range" class="temp" id="sl-tal" min="0.01" max="0.99" step="0.01" value="0.45" style="margin-top:3px">
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--co2);margin-bottom:4px;letter-spacing:2px">🌿 CO₂</div>
+        <div class="pg-desc">α balanced → detect both ventilation spike and CO₂ depletion</div>
+        <div class="pg-head"><span class="pg-name">τ_high (ppm)</span><span class="pg-val" id="v-ch">1200</span></div><input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low (ppm)</span><span class="pg-val" id="v-cl">400</span></div><input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ca">0.30/0.40</span></div>
+        <input type="range" class="co2" id="sl-cau" min="0.01" max="0.99" step="0.01" value="0.30">
+        <input type="range" class="co2" id="sl-cal" min="0.01" max="0.99" step="0.01" value="0.40" style="margin-top:3px">
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ec);margin-bottom:4px;letter-spacing:2px">⚗ Nutrient EC</div>
+        <div class="pg-desc">α_lower higher → catch silent salt concentration rise early</div>
+        <div class="pg-head"><span class="pg-name">τ_high (mS/cm)</span><span class="pg-val" id="v-eh">3.5</span></div><input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div><input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ea">0.20/0.55</span></div>
+        <input type="range" class="ec" id="sl-eau" min="0.01" max="0.99" step="0.01" value="0.20">
+        <input type="range" class="ec" id="sl-eal" min="0.01" max="0.99" step="0.01" value="0.55" style="margin-top:3px">
+      </div>
+    </div>
+    <div class="common-row">
+      <div><div class="pg-head"><span class="pg-name">Speed</span><span class="pg-val" id="v-spd">1×</span></div><input type="range" class="co2" id="sl-spd" min="1" max="5" value="1"></div>
+      <div><div class="pg-head"><span class="pg-name">HOLD (ms)</span><span class="pg-val" id="v-hold">1500</span></div><input type="range" class="water" id="sl-hold" min="200" max="4000" step="100" value="1500"></div>
+    </div>
+    <div class="note-box">
+      <div class="note-title">ASYMMETRIC α PRINCIPLE</div>
+      <p>α_upper small → conservative on surges (protect pipes).<br>
+      α_lower large → sensitive to depletion (protect roots from cutoff).<br>
+      Asymmetric damper applied to greenhouse agriculture.</p>
+    </div>
+  </div>
+  <div class="log-panel">
+    <div class="p-title">Event Log — All Sensors</div>
+    <div class="log-area" id="logArea"></div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="ctrl" onclick="setStress('drought')">🏜 Drought Simulation</button>
+      <button class="ctrl" onclick="setStress('heat')">🔥 Heat Wave Simulation</button>
+      <button class="ctrl" onclick="setStress('normal')">🌱 Reset Normal</button>
+    </div>
+    <div style="font-size:10px;color:var(--white);opacity:.75;margin-top:8px;line-height:1.7" id="stress-note">Normal greenhouse environment. Periodic spikes occur.</div>
+  </div>
+</div>
+
+<footer>
+  <span>NRA-IDE / Band Gate — Greenhouse 4-Sensor (EN)</span>
+  <span><a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a> | <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a></span>
+</footer>
+</div>
+<script>
+const SENSORS={water:{key:'water',label:'Irrigation Pressure',unit:'kPa',color:'#29d4ff',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},temp:{key:'temp',label:'Temperature',unit:'°C',color:'#ff7043',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},co2:{key:'co2',label:'CO₂',unit:'ppm',color:'#a8e063',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},ec:{key:'ec',label:'Nutrient EC',unit:'mS/cm',color:'#ffd740',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''}};
+const HIST=160;let t=0,playing=true,stressMode='normal',lastFrameTime=0;
+function getValues(t){const p=t%300,d=stressMode==='drought',h=stressMode==='heat';let w=50+Math.sin(t*.04)*5+(Math.random()-.5)*2,tp=22+Math.sin(t*.03)*4+(Math.random()-.5)*1.5,c=800+Math.sin(t*.05)*120+(Math.random()-.5)*40,e=2+Math.sin(t*.04)*.4+(Math.random()-.5)*.15;if(p>=70&&p<=100)w+=28*Math.sin((p-70)/30*Math.PI);if(p>=190&&p<=240)w-=25*Math.sin((p-190)/50*Math.PI);if(p>=80&&p<=115)tp+=18*Math.sin((p-80)/35*Math.PI);if(p>=210&&p<=250)tp-=16*Math.sin((p-210)/40*Math.PI);if(p>=60&&p<=90)c+=500*Math.sin((p-60)/30*Math.PI);if(p>=180&&p<=220)c-=450*Math.sin((p-180)/40*Math.PI);if(p>=90&&p<=120)e+=2.2*Math.sin((p-90)/30*Math.PI);if(p>=200&&p<=245)e-=1.6*Math.sin((p-200)/45*Math.PI);if(d){w-=18;c-=200;e-=.6;}if(h)tp+=14;return{water:Math.max(5,Math.min(130,w)),temp:Math.max(-5,Math.min(55,tp)),co2:Math.max(100,Math.min(3000,c)),ec:Math.max(.1,Math.min(8,e))};}
+function getParams(){const g=id=>parseFloat(document.getElementById(id).value);return{water:{th:g('sl-wh'),tl:g('sl-wl'),au:g('sl-wau'),al:g('sl-wal')},temp:{th:g('sl-th'),tl:g('sl-tl'),au:g('sl-tau'),al:g('sl-tal')},co2:{th:g('sl-ch'),tl:g('sl-cl'),au:g('sl-cau'),al:g('sl-cal')},ec:{th:g('sl-eh'),tl:g('sl-el'),au:g('sl-eau'),al:g('sl-eal')},spd:parseInt(document.getElementById('sl-spd').value),hold:parseInt(document.getElementById('sl-hold').value)};}
+function bandGate(s,v,p,nowMs){const half=Math.max((p.th-p.tl)/2,.001),d_u=Math.max(0,v-p.th),d_l=Math.max(0,p.tl-v);s.ema_u=p.au*d_u+(1-p.au)*s.ema_u;s.ema_l=p.al*d_l+(1-p.al)*s.ema_l;const tu=half*Math.min(1+s.ema_u/half,2.5),tl=half*Math.max(1-s.ema_l/half,.3);const R_u=d_u>0?d_u/tu:0,R_l=d_l>0?d_l/tl:0,R=Math.max(R_u,R_l);const held=nowMs<s.holdUntil;let silence=held,dir=held?(s.lastDir||''):'';if(!held&&R>=1){s.holdUntil=nowMs+parseInt(document.getElementById('sl-hold').value);silence=true;dir=R_u>=R_l?'upper':'lower';s.lastDir=dir;}return{v,R,silence,dir,upper_band:p.th+(tu-half),lower_band:p.tl-(half-tl)};}
+function drawMini(key,hist,color,silence){const cv=document.getElementById('cv-'+key),ctx=cv.getContext('2d');cv.width=cv.parentElement.clientWidth-28;cv.height=60;ctx.clearRect(0,0,cv.width,60);if(hist.length<2)return;const vals=hist.map(h=>h.v),minV=Math.min(...vals)-2,maxV=Math.max(...vals)+2,rng=maxV-minV||1;const xp=i=>(i/(HIST-1))*cv.width,yp=v=>58-((v-minV)/rng)*54;for(let i=1;i<hist.length;i++){if(hist[i].silence){ctx.fillStyle=hist[i].dir==='lower'?'rgba(41,212,255,.1)':'rgba(255,82,82,.1)';ctx.fillRect(xp(i-1),0,xp(i)-xp(i-1)+1,60);}}ctx.strokeStyle=color+'55';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.upper_band)):ctx.lineTo(xp(i),yp(h.upper_band));});ctx.stroke();ctx.beginPath();hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.lower_band)):ctx.lineTo(xp(i),yp(h.lower_band));});ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.shadowColor=color;ctx.shadowBlur=silence?5:0;ctx.beginPath();hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.v)):ctx.lineTo(xp(i),yp(h.v));});ctx.stroke();ctx.shadowBlur=0;}
+function updateCard(key,res,p){const s=SENSORS[key],{v,R,silence,dir,upper_band,lower_band}=res,col=s.color,dp=key==='ec'?2:key==='co2'?0:1;document.getElementById('val-'+key).textContent=v.toFixed(dp);document.getElementById('val-'+key).style.color=silence?(dir==='upper'?'var(--danger)':'var(--water)'):col;const de=document.getElementById('dec-'+key);de.textContent=silence?(dir==='upper'?'↑ UPPER':'↓ LOWER'):'PASS';de.className='card-decision '+(silence?dir:'pass');document.getElementById('card-'+key).style.boxShadow=silence?`0 0 20px -4px ${dir==='upper'?'#ff5252':'#29d4ff'}`:'none';const rc=silence?(dir==='upper'?'#ff5252':'#29d4ff'):R>.65?'#ffca28':col;document.getElementById('rf-'+key).style.width=Math.min(R/1.5,1)*100+'%';document.getElementById('rf-'+key).style.background=rc;document.getElementById('rv-'+key).textContent=R.toFixed(4);document.getElementById('rv-'+key).style.color=rc;const full=p.th*1.4-p.tl*.6,off=p.tl*.6;document.getElementById('safe-'+key).style.left=(p.tl-off)/full*100+'%';document.getElementById('safe-'+key).style.width=(p.th-p.tl)/full*100+'%';const np=Math.max(0,Math.min((v-off)/full*100,100));document.getElementById('needle-'+key).style.left=np+'%';document.getElementById('needle-'+key).style.background=silence?(dir==='upper'?'#ff5252':'#29d4ff'):col;document.getElementById('ll-'+key).textContent=p.tl.toFixed(key==='ec'?1:0);document.getElementById('lh-'+key).textContent=p.th.toFixed(key==='ec'?1:0);drawMini(key,s.hist,col,silence);if(silence&&s.lastDec!=='SILENCE')addLog(`[${s.label}] ${dir==='upper'?'↑ UPPER breach':'↓ LOWER breach'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`,key);else if(!silence&&s.lastDec==='SILENCE')addLog(`[${s.label}] HOLD end → PASS`,'safe');else if(R>.65&&R<1&&s.lastDec!=='warn')addLog(`[${s.label}] WARN R=${R.toFixed(3)} approaching`,'warn');s.lastDec=silence?'SILENCE':R>.65?'warn':'PASS';}
+function addLog(msg,cls){const a=document.getElementById('logArea'),el=document.createElement('div');el.className='le '+cls;el.textContent=`[t=${String(t).padStart(5,'0')}] ${msg}`;a.appendChild(el);a.scrollTop=a.scrollHeight;while(a.children.length>80)a.removeChild(a.firstChild);}
+function tick(){if(!playing){requestAnimationFrame(tick);return;}const now=performance.now(),p=getParams(),iv=Math.max(16,40-p.spd*7);if(now-lastFrameTime<iv){requestAnimationFrame(tick);return;}lastFrameTime=now;for(let s=0;s<p.spd;s++){t++;const nowMs=t*40,vals=getValues(t);['water','temp','co2','ec'].forEach(key=>{const sensor=SENSORS[key],res=bandGate(sensor,vals[key],p[key],nowMs);if(sensor.hist.length>=HIST)sensor.hist.shift();sensor.hist.push(res);if(s===p.spd-1)updateCard(key,res,p[key]);});}requestAnimationFrame(tick);}
+function setStress(m){stressMode=m;document.getElementById('stress-note').textContent={drought:'🏜 Drought active. Water/EC/CO₂ declining simultaneously.',heat:'🔥 Heat wave active. Temperature rising persistently.',normal:'🌱 Normal greenhouse environment. Periodic spikes occur.'}[m];}
+function updateLabels(){const g=id=>parseFloat(document.getElementById(id).value);document.getElementById('v-wh').textContent=g('sl-wh').toFixed(0);document.getElementById('v-wl').textContent=g('sl-wl').toFixed(0);document.getElementById('v-wa').textContent=g('sl-wau').toFixed(2)+'/'+g('sl-wal').toFixed(2);document.getElementById('v-th').textContent=g('sl-th').toFixed(0);document.getElementById('v-tl').textContent=g('sl-tl').toFixed(0);document.getElementById('v-ta').textContent=g('sl-tau').toFixed(2)+'/'+g('sl-tal').toFixed(2);document.getElementById('v-ch').textContent=g('sl-ch').toFixed(0);document.getElementById('v-cl').textContent=g('sl-cl').toFixed(0);document.getElementById('v-ca').textContent=g('sl-cau').toFixed(2)+'/'+g('sl-cal').toFixed(2);document.getElementById('v-eh').textContent=g('sl-eh').toFixed(1);document.getElementById('v-el').textContent=g('sl-el').toFixed(1);document.getElementById('v-ea').textContent=g('sl-eau').toFixed(2)+'/'+g('sl-eal').toFixed(2);document.getElementById('v-spd').textContent=document.getElementById('sl-spd').value+'×';document.getElementById('v-hold').textContent=document.getElementById('sl-hold').value;}
+document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',updateLabels));
+function togglePlay(){playing=!playing;const btn=document.getElementById('btnPlay');btn.textContent=playing?'⏸ PAUSE':'▶ PLAY';btn.classList.toggle('play',playing);btn.classList.toggle('paused',!playing);}
+function resetSim(){t=0;Object.values(SENSORS).forEach(s=>{s.hist=[];s.ema_u=0;s.ema_l=0;s.holdUntil=0;s.lastDec='';});document.getElementById('logArea').innerHTML='';addLog('Greenhouse monitoring started — 4-sensor simultaneous watch','safe');}
+window.addEventListener('resize',()=>['water','temp','co2','ec'].forEach(k=>{const cv=document.getElementById('cv-'+k);cv.width=cv.parentElement.clientWidth-28;}));
+updateLabels();resetSim();requestAnimationFrame(tick);
+</script>
+</body>
+</html>

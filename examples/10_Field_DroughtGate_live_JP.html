@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE — 屋外畑 干ばつ監視 Band Gate Live</title>
+<!--
+  NRA-IDE / Band Gate — 10 (JP)
+  屋外畑 干ばつ進行監視 Band Gate + 5段階ゲージ
+  --------------------------------------------------
+  監視指標: 土壌水分 / 地温 / 日射量 / 風速
+  干ばつレベル Lv.0〜4 = 複合スコア（加重Rスコア + 下限EMA）
+  Lv.0 正常 / Lv.1 注意(EMA上昇) / Lv.2 警告(R>0.7)
+  Lv.3 危険(SILENCE) / Lv.4 緊急(複数指標SILENCE)
+  嵐後シナリオ: 雨後の蒸発加速をEMAが値が閾値を割る前に先読み。
+  Powered by NRA-IDE. (c) 2026 M-Tokuni.
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=M+PLUS+Rounded+1c:wght@300;400;700&display=swap');
+
+:root {
+  --bg:      #090804;
+  --surface: #110f06;
+  --panel:   #141008;
+  --border:  #241e0a;
+  --soil:    #c8a46e;
+  --ground:  #7cb87a;
+  --sun:     #ffe066;
+  --wind:    #80d8ff;
+  --safe:    #aed581;
+  --danger:  #ff7043;
+  --warn:    #ffca28;
+  --muted:   #a09040;
+  --text:    #c8b878;
+  --white:   #f0e8c8;
+  --mono:    'Share Tech Mono', monospace;
+  --sans:    'M PLUS Rounded 1c', sans-serif;
+
+  /* 干ばつレベル色 */
+  --lv0: #aed581;
+  --lv1: #fff176;
+  --lv2: #ffb74d;
+  --lv3: #ff7043;
+  --lv4: #b71c1c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(200,164,110,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 10%,  rgba(255,224,102,.04) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 10% 50%,  rgba(124,184,122,.03) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+.wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:28px 18px 80px; }
+
+/* ヘッダー */
+header {
+  display:flex; align-items:flex-start;
+  justify-content:space-between; flex-wrap:wrap;
+  gap:16px; margin-bottom:28px;
+}
+.h-left { border-left:3px solid var(--soil); padding-left:16px; }
+.h-tag  { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--soil); margin-bottom:8px; }
+header h1 { font-size:clamp(18px,3vw,26px); font-weight:700; color:var(--white); line-height:1.3; }
+header p  { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.8; max-width:520px; }
+
+.live-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+.live-badge {
+  font-family:var(--mono); font-size:9px; letter-spacing:2px;
+  padding:5px 12px; border:1px solid rgba(174,213,129,.3);
+  color:var(--safe); background:rgba(174,213,129,.05); border-radius:2px;
+  display:flex; align-items:center; gap:7px;
+}
+.ldot { width:6px; height:6px; border-radius:50%; background:var(--safe); animation:blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+
+/* ═══ 干ばつレベルゲージ（最上段） ═══ */
+.drought-gauge {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius:4px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.drought-gauge::before {
+  content:'';
+  position:absolute; inset:0;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events:none;
+}
+.drought-gauge.lv3::before,
+.drought-gauge.lv4::before {
+  background: radial-gradient(ellipse at center, rgba(255,112,67,.06) 0%, transparent 70%);
+  opacity: 1;
+}
+
+.gauge-head {
+  display:flex; align-items:center;
+  justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;
+}
+.gauge-title { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+.gauge-level-badge {
+  font-family:var(--mono); font-size:13px; font-weight:bold; letter-spacing:2px;
+  padding:4px 14px; border-radius:2px; border:1px solid;
+  transition: all .3s;
+}
+
+/* 5段階バー */
+.gauge-steps {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
+  margin-bottom:10px;
+}
+.gauge-step {
+  height:22px; border-radius:2px;
+  border:1px solid rgba(255,255,255,.05);
+  position:relative; overflow:hidden;
+  transition: background .3s, box-shadow .3s;
+}
+.gauge-step-fill {
+  position:absolute; inset:0;
+  transition: opacity .4s;
+  opacity:.15;
+}
+.gauge-step.active .gauge-step-fill { opacity:1; }
+.gauge-step.active { box-shadow:0 0 10px -2px var(--step-col); }
+.gauge-step-label {
+  position:absolute; bottom:2px; left:0; right:0;
+  text-align:center; font-family:var(--mono); font-size:7px;
+  color:rgba(255,255,255,.5);
+}
+.gauge-step.active .gauge-step-label { color:rgba(0,0,0,.7); }
+
+/* ゲージ説明 */
+.gauge-desc {
+  font-size:11px; color:var(--muted); line-height:1.6;
+  padding:8px 12px; background:rgba(0,0,0,.2); border-radius:3px;
+  border-left:2px solid; transition:border-color .3s;
+}
+
+/* 複合スコア */
+.composite-row {
+  display:flex; align-items:center; gap:12px; margin-top:10px;
+}
+.composite-label { font-family:var(--mono); font-size:9px; color:var(--muted); white-space:nowrap; }
+.composite-bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.composite-fill { height:100%; border-radius:2px; transition:width .2s, background .3s; }
+.composite-val  { font-family:var(--mono); font-size:12px; font-weight:bold; min-width:48px; text-align:right; transition:color .3s; }
+
+/* ═══ 4指標グリッド ═══ */
+.four-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px; margin-bottom:14px;
+}
+@media(max-width:680px){ .four-grid{ grid-template-columns:1fr; } }
+
+.sensor-card {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:4px; padding:14px; position:relative; overflow:hidden;
+}
+.sensor-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+}
+.sensor-card.soil::before   { background:var(--soil); }
+.sensor-card.ground::before { background:var(--ground); }
+.sensor-card.sun::before    { background:var(--sun); }
+.sensor-card.wind::before   { background:var(--wind); }
+
+.card-head {
+  display:flex; align-items:center;
+  justify-content:space-between; margin-bottom:10px;
+}
+.card-icon-name { display:flex; align-items:center; gap:8px; }
+.card-icon { font-size:16px; line-height:1; }
+.card-name { font-family:var(--mono); font-size:10px; letter-spacing:2px; }
+
+.card-decision {
+  font-family:var(--mono); font-size:8px; letter-spacing:1px;
+  padding:2px 8px; border-radius:2px; border:1px solid; transition:all .15s;
+}
+.card-decision.pass  { border-color:rgba(174,213,129,.3); color:rgba(174,213,129,.7); }
+.card-decision.upper { border-color:var(--danger); color:var(--danger); background:rgba(255,112,67,.1); }
+.card-decision.lower { border-color:var(--wind);   color:var(--wind);  background:rgba(128,216,255,.08); }
+.card-decision.warn  { border-color:var(--warn);   color:var(--warn);  background:rgba(255,202,40,.06); }
+
+.card-value-row { display:flex; align-items:baseline; gap:6px; margin-bottom:10px; }
+.card-value { font-family:var(--mono); font-size:28px; font-weight:bold; line-height:1; transition:color .15s; }
+.card-unit  { font-family:var(--mono); font-size:10px; color:var(--muted); }
+
+/* バンドバー */
+.band-bar-wrap { position:relative; height:26px; margin-bottom:10px; }
+.band-track {
+  position:absolute; top:50%; transform:translateY(-50%);
+  left:0; right:0; height:5px;
+  background:rgba(255,255,255,.04); border-radius:3px; overflow:hidden;
+}
+.band-safe { position:absolute; height:100%; border-radius:3px; transition:left .2s,width .2s; }
+.band-needle {
+  position:absolute; top:-5px; width:3px; height:15px;
+  border-radius:2px; transform:translateX(-50%); transition:left .08s;
+}
+.bll { position:absolute; left:0;   bottom:-13px; font-family:var(--mono); font-size:8px; color:var(--muted); }
+.blh { position:absolute; right:0;  bottom:-13px; font-family:var(--mono); font-size:8px; color:var(--muted); }
+
+/* ミニ波形 */
+.mini-canvas { display:block; width:100%; height:56px; border:1px solid rgba(255,255,255,.04); background:#060503; border-radius:2px; margin-bottom:8px; }
+
+/* Rバー */
+.r-bar-row { display:flex; align-items:center; gap:8px; }
+.r-label { font-family:var(--mono); font-size:8px; color:var(--muted); white-space:nowrap; }
+.r-bar   { flex:1; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+.r-fill  { height:100%; border-radius:2px; transition:width .1s,background .15s; }
+.r-val   { font-family:var(--mono); font-size:9px; min-width:42px; text-align:right; }
+
+/* EMA進行バー（下限の勢いゲージ） */
+.ema-row { display:flex; align-items:center; gap:8px; margin-top:5px; }
+.ema-label { font-family:var(--mono); font-size:8px; color:var(--muted); white-space:nowrap; }
+.ema-bar  { flex:1; height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
+.ema-fill { height:100%; border-radius:1px; background:var(--warn); transition:width .2s; }
+.ema-val  { font-family:var(--mono); font-size:8px; color:var(--warn); min-width:36px; text-align:right; }
+
+/* ═══ 下段 ═══ */
+.bottom-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:680px){ .bottom-row{ grid-template-columns:1fr; } }
+
+.param-panel { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:16px; }
+.p-title {
+  font-family:var(--mono); font-size:8px; letter-spacing:3px; color:var(--muted);
+  text-transform:uppercase; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border);
+}
+
+.param-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+.pg-head { display:flex; justify-content:space-between; margin-bottom:3px; }
+.pg-name { font-family:var(--mono); font-size:9px; color:var(--text); }
+.pg-val  { font-family:var(--mono); font-size:9px; color:var(--white); }
+
+input[type=range] {
+  width:100%; appearance:none; height:2px;
+  background:var(--border); border-radius:1px; outline:none; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  appearance:none; width:10px; height:10px; border-radius:50%;
+  border:2px solid var(--bg); transition:transform .15s;
+}
+input[type=range]:hover::-webkit-slider-thumb { transform:scale(1.4); }
+input.soil::-webkit-slider-thumb   { background:var(--soil);   box-shadow:0 0 5px rgba(200,164,110,.6); }
+input.ground::-webkit-slider-thumb { background:var(--ground); box-shadow:0 0 5px rgba(124,184,122,.6); }
+input.sun::-webkit-slider-thumb    { background:var(--sun);    box-shadow:0 0 5px rgba(255,224,102,.6); }
+input.wind::-webkit-slider-thumb   { background:var(--wind);   box-shadow:0 0 5px rgba(128,216,255,.6); }
+
+.common-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
+
+/* シナリオボタン */
+.scenario-row { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+button.ctrl {
+  font-family:var(--mono); font-size:9px; letter-spacing:1px;
+  padding:6px 12px; border:1px solid var(--border);
+  background:transparent; color:var(--text); cursor:pointer; border-radius:2px; transition:all .15s;
+}
+button.ctrl:hover  { border-color:var(--soil); color:var(--soil); }
+button.ctrl.active { border-color:var(--soil); color:var(--soil); background:rgba(200,164,110,.08); }
+button.ctrl.play   { border-color:var(--safe); color:var(--safe); }
+button.ctrl.paused { border-color:var(--warn); color:var(--warn); }
+
+.scenario-note { font-size:10px; color:var(--muted); margin-top:8px; line-height:1.7; }
+
+/* ログ */
+.log-panel { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:16px; display:flex; flex-direction:column; }
+.log-area {
+  flex:1; background:#060503; border:1px solid var(--border); border-radius:3px;
+  padding:8px 10px; font-family:var(--mono); font-size:9px; line-height:1.9;
+  overflow-y:auto; height:200px;
+}
+.log-area::-webkit-scrollbar { width:3px; }
+.log-area::-webkit-scrollbar-thumb { background:var(--border); }
+.le       { color:var(--muted); }
+.le.soil  { color:var(--soil); }
+.le.ground{ color:var(--ground); }
+.le.sun   { color:var(--sun); }
+.le.wind  { color:var(--wind); }
+.le.safe  { color:var(--safe); }
+.le.warn  { color:var(--warn); }
+.le.upper { color:var(--danger); }
+.le.drought{ color:#ff7043; font-weight:bold; }
+
+footer {
+  margin-top:48px; padding-top:16px; border-top:1px solid var(--border);
+  font-family:var(--mono); font-size:9px; color:var(--muted);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
+}
+footer a { color:var(--soil); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-left">
+    <div class="h-tag">NRA-IDE / Band Gate — 10 / FIELD AGRICULTURE</div>
+    <h1>屋外畑 干ばつ進行監視<br>Band Gate + 干ばつレベルゲージ</h1>
+    <p>
+      土壌水分・地温・日射量・風速を同時監視し、干ばつの「進行速度」を検知します。<br>
+      現在値が閾値を割る前に、EMAが「乾き始めの勢い」を捉えて予兆段階で警告します。<br>
+      無線土壌センサーからのデータをそのままこのゲートに通す構成を想定しています。
+    </p>
+  </div>
+  <div class="live-wrap">
+    <div class="live-badge"><div class="ldot"></div>FIELD MONITOR LIVE</div>
+    <div style="display:flex;gap:6px;margin-top:4px">
+      <button class="ctrl play" id="btnPlay" onclick="togglePlay()">⏸ PAUSE</button>
+      <button class="ctrl" onclick="resetSim()">↺ RESET</button>
+    </div>
+  </div>
+</header>
+
+<!-- 干ばつレベルゲージ -->
+<div class="drought-gauge" id="droughtGauge">
+  <div class="gauge-head">
+    <div class="gauge-title">🌾 干ばつ進行レベル（複合スコア）</div>
+    <div class="gauge-level-badge" id="lvBadge">Lv.0 SAFE</div>
+  </div>
+
+  <div class="gauge-steps">
+    <div class="gauge-step" id="step0" style="--step-col:var(--lv0)">
+      <div class="gauge-step-fill" style="background:var(--lv0)"></div>
+      <div class="gauge-step-label">Lv.0 正常</div>
+    </div>
+    <div class="gauge-step" id="step1" style="--step-col:var(--lv1)">
+      <div class="gauge-step-fill" style="background:var(--lv1)"></div>
+      <div class="gauge-step-label">Lv.1 注意</div>
+    </div>
+    <div class="gauge-step" id="step2" style="--step-col:var(--lv2)">
+      <div class="gauge-step-fill" style="background:var(--lv2)"></div>
+      <div class="gauge-step-label">Lv.2 警告</div>
+    </div>
+    <div class="gauge-step" id="step3" style="--step-col:var(--lv3)">
+      <div class="gauge-step-fill" style="background:var(--lv3)"></div>
+      <div class="gauge-step-label">Lv.3 危険</div>
+    </div>
+    <div class="gauge-step" id="step4" style="--step-col:var(--lv4)">
+      <div class="gauge-step-fill" style="background:var(--lv4)"></div>
+      <div class="gauge-step-label">Lv.4 緊急</div>
+    </div>
+  </div>
+
+  <div class="composite-row">
+    <span class="composite-label">DROUGHT SCORE</span>
+    <div class="composite-bar"><div class="composite-fill" id="compFill" style="width:0%"></div></div>
+    <span class="composite-val" id="compVal">0.000</span>
+  </div>
+
+  <div class="gauge-desc" id="gaugeDesc" style="border-color:var(--lv0)">
+    Lv.0 — 正常範囲内。土壌水分・気温・日射・風速すべて適正範囲に収まっています。
+  </div>
+</div>
+
+<!-- 4指標グリッド -->
+<div class="four-grid">
+
+  <!-- 土壌水分 -->
+  <div class="sensor-card soil" id="card-soil">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">🌱</span>
+        <span class="card-name" style="color:var(--soil)">土壌水分</span>
+      </div>
+      <div class="card-decision pass" id="dec-soil">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-soil" style="color:var(--soil)">—</div>
+      <div class="card-unit">%</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track"><div class="band-safe" id="safe-soil" style="background:rgba(200,164,110,.2)"></div></div>
+      <div class="band-needle" id="needle-soil" style="background:var(--soil)"></div>
+      <div class="bll" id="ll-soil"></div><div class="blh" id="lh-soil"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-soil" height="56"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-soil"></div></div>
+      <span class="r-val" id="rv-soil">0.000</span>
+    </div>
+    <div class="ema-row">
+      <span class="ema-label">乾燥勢い</span>
+      <div class="ema-bar"><div class="ema-fill" id="ef-soil" style="width:0%"></div></div>
+      <span class="ema-val" id="ev-soil">0.000</span>
+    </div>
+  </div>
+
+  <!-- 地温 -->
+  <div class="sensor-card ground" id="card-ground">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">🌡</span>
+        <span class="card-name" style="color:var(--ground)">地温</span>
+      </div>
+      <div class="card-decision pass" id="dec-ground">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-ground" style="color:var(--ground)">—</div>
+      <div class="card-unit">°C</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track"><div class="band-safe" id="safe-ground" style="background:rgba(124,184,122,.2)"></div></div>
+      <div class="band-needle" id="needle-ground" style="background:var(--ground)"></div>
+      <div class="bll" id="ll-ground"></div><div class="blh" id="lh-ground"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-ground" height="56"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-ground"></div></div>
+      <span class="r-val" id="rv-ground">0.000</span>
+    </div>
+    <div class="ema-row">
+      <span class="ema-label">上昇勢い</span>
+      <div class="ema-bar"><div class="ema-fill" id="ef-ground" style="width:0%"></div></div>
+      <span class="ema-val" id="ev-ground">0.000</span>
+    </div>
+  </div>
+
+  <!-- 日射量 -->
+  <div class="sensor-card sun" id="card-sun">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">☀</span>
+        <span class="card-name" style="color:var(--sun)">日射量</span>
+      </div>
+      <div class="card-decision pass" id="dec-sun">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-sun" style="color:var(--sun)">—</div>
+      <div class="card-unit">W/m²</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track"><div class="band-safe" id="safe-sun" style="background:rgba(255,224,102,.2)"></div></div>
+      <div class="band-needle" id="needle-sun" style="background:var(--sun)"></div>
+      <div class="bll" id="ll-sun"></div><div class="blh" id="lh-sun"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-sun" height="56"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-sun"></div></div>
+      <span class="r-val" id="rv-sun">0.000</span>
+    </div>
+    <div class="ema-row">
+      <span class="ema-label">過剰照射</span>
+      <div class="ema-bar"><div class="ema-fill" id="ef-sun" style="width:0%"></div></div>
+      <span class="ema-val" id="ev-sun">0.000</span>
+    </div>
+  </div>
+
+  <!-- 風速 -->
+  <div class="sensor-card wind" id="card-wind">
+    <div class="card-head">
+      <div class="card-icon-name">
+        <span class="card-icon">💨</span>
+        <span class="card-name" style="color:var(--wind)">風速</span>
+      </div>
+      <div class="card-decision pass" id="dec-wind">PASS</div>
+    </div>
+    <div class="card-value-row">
+      <div class="card-value" id="val-wind" style="color:var(--wind)">—</div>
+      <div class="card-unit">m/s</div>
+    </div>
+    <div class="band-bar-wrap">
+      <div class="band-track"><div class="band-safe" id="safe-wind" style="background:rgba(128,216,255,.2)"></div></div>
+      <div class="band-needle" id="needle-wind" style="background:var(--wind)"></div>
+      <div class="bll" id="ll-wind"></div><div class="blh" id="lh-wind"></div>
+    </div>
+    <canvas class="mini-canvas" id="cv-wind" height="56"></canvas>
+    <div class="r-bar-row">
+      <span class="r-label">R</span>
+      <div class="r-bar"><div class="r-fill" id="rf-wind"></div></div>
+      <span class="r-val" id="rv-wind">0.000</span>
+    </div>
+    <div class="ema-row">
+      <span class="ema-label">蒸散加速</span>
+      <div class="ema-bar"><div class="ema-fill" id="ef-wind" style="width:0%"></div></div>
+      <span class="ema-val" id="ev-wind">0.000</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- 下段 -->
+<div class="bottom-row">
+
+  <div class="param-panel">
+    <div class="p-title">Band Gate パラメータ</div>
+    <div class="param-grid">
+
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--soil);margin-bottom:6px;letter-spacing:2px">🌱 土壌水分 (%)</div>
+        <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-sh">70</span></div>
+        <input type="range" class="soil" id="sl-sh" min="30" max="95" value="70">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low（下限重要）</span><span class="pg-val" id="v-sl">25</span></div>
+        <input type="range" class="soil" id="sl-sl" min="5" max="50" value="25">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-sa">0.15/0.60</span></div>
+        <input type="range" class="soil" id="sl-sau" min="0.01" max="0.99" step="0.01" value="0.15">
+        <input type="range" class="soil" id="sl-sal" min="0.01" max="0.99" step="0.01" value="0.60" style="margin-top:3px">
+      </div>
+
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ground);margin-bottom:6px;letter-spacing:2px">🌡 地温 (°C)</div>
+        <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-gh">32</span></div>
+        <input type="range" class="ground" id="sl-gh" min="20" max="50" value="32">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low</span><span class="pg-val" id="v-gl">5</span></div>
+        <input type="range" class="ground" id="sl-gl" min="0" max="20" value="5">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ga">0.25/0.35</span></div>
+        <input type="range" class="ground" id="sl-gau" min="0.01" max="0.99" step="0.01" value="0.25">
+        <input type="range" class="ground" id="sl-gal" min="0.01" max="0.99" step="0.01" value="0.35" style="margin-top:3px">
+      </div>
+
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--sun);margin-bottom:6px;letter-spacing:2px">☀ 日射量 (W/m²)</div>
+        <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-uh">900</span></div>
+        <input type="range" class="sun" id="sl-uh" min="500" max="1400" step="10" value="900">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low</span><span class="pg-val" id="v-ul">80</span></div>
+        <input type="range" class="sun" id="sl-ul" min="10" max="300" step="5" value="80">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ua">0.35/0.20</span></div>
+        <input type="range" class="sun" id="sl-uau" min="0.01" max="0.99" step="0.01" value="0.35">
+        <input type="range" class="sun" id="sl-ual" min="0.01" max="0.99" step="0.01" value="0.20" style="margin-top:3px">
+      </div>
+
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--wind);margin-bottom:6px;letter-spacing:2px">💨 風速 (m/s)</div>
+        <div class="pg-head"><span class="pg-name">τ_high（蒸散加速）</span><span class="pg-val" id="v-wh">8</span></div>
+        <input type="range" class="wind" id="sl-wh" min="3" max="20" value="8">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low</span><span class="pg-val" id="v-wl">0.3</span></div>
+        <input type="range" class="wind" id="sl-wl" min="0.1" max="3" step="0.1" value="0.3">
+        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.45/0.15</span></div>
+        <input type="range" class="wind" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.45">
+        <input type="range" class="wind" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.15" style="margin-top:3px">
+      </div>
+
+    </div>
+
+    <div class="common-row">
+      <div>
+        <div class="pg-head"><span class="pg-name">速度</span><span class="pg-val" id="v-spd">1×</span></div>
+        <input type="range" class="soil" id="sl-spd" min="1" max="5" value="1">
+      </div>
+      <div>
+        <div class="pg-head"><span class="pg-name">HOLD (ms)</span><span class="pg-val" id="v-hold">2000</span></div>
+        <input type="range" class="ground" id="sl-hold" min="500" max="5000" step="100" value="2000">
+      </div>
+    </div>
+
+    <div class="scenario-row">
+      <button class="ctrl active" id="sc-normal" onclick="setScenario('normal')">🌱 通常</button>
+      <button class="ctrl" id="sc-drought" onclick="setScenario('drought')">🏜 軽度干ばつ</button>
+      <button class="ctrl" id="sc-severe"  onclick="setScenario('severe')">🔥 重度干ばつ</button>
+      <button class="ctrl" id="sc-storm"   onclick="setScenario('storm')">⛈ 嵐後急乾燥</button>
+    </div>
+    <div class="scenario-note" id="scenarioNote">通常の畑環境。定期的に小さな外乱が来ます。</div>
+  </div>
+
+  <div class="log-panel">
+    <div class="p-title">フィールドイベントログ</div>
+    <div class="log-area" id="logArea"></div>
+    <div style="margin-top:10px;padding:10px 12px;background:rgba(200,164,110,.04);border:1px solid rgba(200,164,110,.1);border-radius:3px">
+      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--soil);margin-bottom:5px">屋外畑の非対称設定</div>
+      <div style="font-size:10px;color:var(--white);opacity:.8;line-height:1.7">
+        土壌水分: α_lower を高く → 乾き始めを素早く検知、補水トリガーを早める<br>
+        日射量: α_upper を高く → 強日射の蒸散加速を早期捕捉<br>
+        風速: α_upper を高く → 蒸散急増を即検知して灌漑判断に活用<br>
+        地温: α を対称に近く → 上下どちらの異常も同じ感度で監視
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>NRA-IDE / Band Gate — Field Drought Monitoring System</span>
+  <span>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    &nbsp;|&nbsp;
+    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+  </span>
+</footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// センサー定義
+// ─────────────────────────────────────────────
+const SENSORS = {
+  soil:   { key:'soil',   label:'土壌水分', unit:'%',    color:'#c8a46e', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  ground: { key:'ground', label:'地温',     unit:'°C',   color:'#7cb87a', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  sun:    { key:'sun',    label:'日射量',   unit:'W/m²', color:'#ffe066', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  wind:   { key:'wind',   label:'風速',     unit:'m/s',  color:'#80d8ff', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+};
+
+const HIST = 160;
+let t = 0, playing = true, lastFrameTime = 0;
+let scenario = 'normal';
+
+// 干ばつレベル定義
+const LV_INFO = [
+  { lv:0, label:'Lv.0  正常',   col:'#aed581', desc:'Lv.0 — 正常範囲内。全指標が適正域に収まっています。補水不要です。' },
+  { lv:1, label:'Lv.1  注意',   col:'#fff176', desc:'Lv.1 — 注意。EMAが上昇し始めました。乾燥の「勢い」が出てきています。補水の準備を始めてください。' },
+  { lv:2, label:'Lv.2  警告',   col:'#ffb74d', desc:'Lv.2 — 警告。複数指標でRが閾値の70%を超えています。このまま進むと補水が必要になります。' },
+  { lv:3, label:'Lv.3  危険',   col:'#ff7043', desc:'Lv.3 — 危険。SILENCE 発動中。土壌水分が限界に近づいています。補水を実施してください。' },
+  { lv:4, label:'Lv.4  緊急',   col:'#b71c1c', desc:'Lv.4 — 緊急。複数指標が同時に SILENCE 状態です。即時補水が必要です。作物へのダメージリスクがあります。' },
+];
+
+// ─────────────────────────────────────────────
+// テレメトリ生成
+// ─────────────────────────────────────────────
+function getValues(t) {
+  const p = t % 320;
+  const d  = scenario === 'drought';
+  const sv = scenario === 'severe';
+  const st = scenario === 'storm';
+
+  // 土壌水分（基本50%）
+  let soil   = 50 + Math.sin(t*0.03)*8 + (Math.random()-.5)*2;
+  // 地温（基本18°C）
+  let ground = 18 + Math.sin(t*0.04)*6 + (Math.random()-.5)*1.5;
+  // 日射量（基本500W/m²）
+  let sun    = 500 + Math.sin(t*0.05)*200 + (Math.random()-.5)*40;
+  // 風速（基本2m/s）
+  let wind   = 2 + Math.abs(Math.sin(t*0.06))*3 + Math.random()*1;
+
+  // 通常スパイク
+  if (p>=60  && p<=90)  { soil -= 22*Math.sin((p-60)/30*Math.PI); wind += 6*Math.sin((p-60)/30*Math.PI); }
+  if (p>=160 && p<=200) { sun  += 450*Math.sin((p-160)/40*Math.PI); ground += 15*Math.sin((p-160)/40*Math.PI); }
+  if (p>=250 && p<=280) { soil -= 18*Math.sin((p-250)/30*Math.PI); }
+
+  // 干ばつシナリオ
+  if (d) {
+    soil   -= 20 + Math.sin(t*0.02)*5;
+    ground += 8  + Math.sin(t*0.02)*3;
+    sun    += 180 + Math.random()*40;
+    wind   += 3  + Math.abs(Math.sin(t*0.03))*2;
+  }
+  if (sv) {
+    soil   -= 32 + Math.sin(t*0.015)*6;
+    ground += 14 + Math.sin(t*0.015)*4;
+    sun    += 300 + Math.random()*60;
+    wind   += 5  + Math.abs(Math.sin(t*0.025))*3;
+  }
+  if (st) {
+    // 嵐後：雨で一時回復→その後急速乾燥
+    const phase = t % 400;
+    if (phase < 80) {
+      soil   += 20 - phase*0.25;
+      sun    -= 300 + Math.random()*80;
+      wind   += 8  - phase*0.05;
+    } else {
+      soil   -= (phase-80)*0.25;
+      sun    += 200 + Math.random()*60;
+      ground += 10 + (phase-80)*0.04;
+      wind   += 4  + Math.sin(phase*0.04)*2;
+    }
+  }
+
+  return {
+    soil:   Math.max(2,  Math.min(95,  soil)),
+    ground: Math.max(-2, Math.min(45,  ground)),
+    sun:    Math.max(0,  Math.min(1400, sun)),
+    wind:   Math.max(0,  Math.min(25,   wind)),
+  };
+}
+
+// ─────────────────────────────────────────────
+// Band Gate
+// ─────────────────────────────────────────────
+function getParams() {
+  const g = id => parseFloat(document.getElementById(id).value);
+  return {
+    soil:   { th:g('sl-sh'), tl:g('sl-sl'), au:g('sl-sau'), al:g('sl-sal') },
+    ground: { th:g('sl-gh'), tl:g('sl-gl'), au:g('sl-gau'), al:g('sl-gal') },
+    sun:    { th:g('sl-uh'), tl:g('sl-ul'), au:g('sl-uau'), al:g('sl-ual') },
+    wind:   { th:g('sl-wh'), tl:g('sl-wl'), au:g('sl-wau'), al:g('sl-wal') },
+    spd:    parseInt(document.getElementById('sl-spd').value),
+    hold:   parseInt(document.getElementById('sl-hold').value),
+  };
+}
+
+function bandGate(sensor, v, p, nowMs) {
+  const half    = Math.max((p.th - p.tl) / 2, 0.001);
+  const d_upper = Math.max(0, v - p.th);
+  const d_lower = Math.max(0, p.tl - v);
+
+  sensor.ema_u = p.au * d_upper + (1-p.au) * sensor.ema_u;
+  sensor.ema_l = p.al * d_lower + (1-p.al) * sensor.ema_l;
+
+  const tau_u = half * Math.min(1 + sensor.ema_u/(half), 2.5);
+  const tau_l = half * Math.max(1 - sensor.ema_l/(half), 0.25);
+
+  const R_u = d_upper>0 ? d_upper/tau_u : 0;
+  const R_l = d_lower>0 ? d_lower/tau_l : 0;
+  const R   = Math.max(R_u, R_l);
+
+  const held    = nowMs < sensor.holdUntil;
+  let silence   = held;
+  let dir       = held ? (sensor.lastDir||'') : '';
+
+  if (!held && R>=1.0) {
+    sensor.holdUntil = nowMs + parseInt(document.getElementById('sl-hold').value);
+    silence = true;
+    dir = R_u>=R_l ? 'upper' : 'lower';
+    sensor.lastDir = dir;
+  }
+
+  const upper_band = p.th + (tau_u - half);
+  const lower_band = p.tl - (half - tau_l);
+
+  return { v, R, R_u, R_l, silence, dir, upper_band, lower_band,
+           ema_lower: sensor.ema_l, ema_upper: sensor.ema_u };
+}
+
+// ─────────────────────────────────────────────
+// 干ばつレベル計算
+// ─────────────────────────────────────────────
+let prevLv = -1;
+
+function calcDroughtLevel(results) {
+  // 複合スコア：各指標のRと下限EMAを重み付け合成
+  // 土壌水分の下限が一番重要なので weight=2
+  const weights = { soil:2.0, ground:1.0, sun:1.2, wind:1.1 };
+  const keys    = ['soil','ground','sun','wind'];
+  let score = 0, wsum = 0;
+  keys.forEach(k=>{
+    const r = results[k];
+    // 下限割れ方向を重視
+    const rScore = r.dir==='lower' ? r.R * 1.3 : r.R;
+    const emaScore = r.ema_lower * 0.4;
+    score += (rScore + emaScore) * weights[k];
+    wsum  += weights[k];
+  });
+  score /= wsum;
+
+  // SILENCE中の指標数
+  const silCount = keys.filter(k=>results[k].silence).length;
+  if (silCount >= 3) return Math.max(score, 1.5);
+  if (silCount >= 2) return Math.max(score, 1.0);
+
+  return score;
+}
+
+function droughtLv(score) {
+  if (score >= 1.5) return 4;
+  if (score >= 1.0) return 3;
+  if (score >= 0.5) return 2;
+  if (score >= 0.2) return 1;
+  return 0;
+}
+
+function updateDroughtGauge(score) {
+  const lv   = droughtLv(score);
+  const info = LV_INFO[lv];
+
+  // ステップ更新
+  for (let i=0; i<=4; i++) {
+    const el = document.getElementById('step'+i);
+    el.classList.toggle('active', i<=lv);
+  }
+
+  // バッジ
+  const badge = document.getElementById('lvBadge');
+  badge.textContent = info.label;
+  badge.style.borderColor = info.col;
+  badge.style.color        = info.col;
+  badge.style.background   = info.col+'18';
+
+  // 複合スコアバー
+  const pct = Math.min(score/2, 1)*100;
+  document.getElementById('compFill').style.width      = pct+'%';
+  document.getElementById('compFill').style.background = info.col;
+  document.getElementById('compVal').textContent       = score.toFixed(3);
+  document.getElementById('compVal').style.color       = info.col;
+
+  // 説明文
+  document.getElementById('gaugeDesc').textContent    = info.desc;
+  document.getElementById('gaugeDesc').style.borderColor = info.col;
+
+  // カード背景
+  const gauge = document.getElementById('droughtGauge');
+  gauge.className = 'drought-gauge lv'+lv;
+
+  // レベルが上がったらログに記録
+  if (lv > prevLv && lv >= 2) {
+    addLog(`🌾 干ばつ ${info.label} に進行  score=${score.toFixed(3)}`, 'drought');
+  }
+  prevLv = lv;
+}
+
+// ─────────────────────────────────────────────
+// ミニ波形
+// ─────────────────────────────────────────────
+function drawMini(key, hist, color, silence) {
+  const cv  = document.getElementById('cv-'+key);
+  const ctx = cv.getContext('2d');
+  const W   = cv.parentElement.clientWidth - 28;
+  cv.width = W; cv.height = 56;
+  ctx.clearRect(0,0,W,56);
+  if (hist.length<2) return;
+
+  const vals = hist.map(h=>h.v);
+  const minV = Math.min(...vals)-1, maxV = Math.max(...vals)+1;
+  const rng  = maxV-minV||1;
+  const xp   = i=>(i/(HIST-1))*W;
+  const yp   = v=>54-((v-minV)/rng)*50;
+
+  for (let i=1; i<hist.length; i++) {
+    if (hist[i].silence) {
+      ctx.fillStyle = hist[i].dir==='lower'?'rgba(128,216,255,.1)':'rgba(255,112,67,.1)';
+      ctx.fillRect(xp(i-1),0,xp(i)-xp(i-1)+1,56);
+    }
+  }
+
+  // バンド帯
+  ctx.fillStyle = color+'18';
+  ctx.beginPath();
+  hist.forEach((h,i)=>{ i===0?ctx.moveTo(xp(i),yp(h.upper_band)):ctx.lineTo(xp(i),yp(h.upper_band)); });
+  hist.slice().reverse().forEach((h,ri)=>{ const i=hist.length-1-ri; ctx.lineTo(xp(i),yp(h.lower_band)); });
+  ctx.closePath(); ctx.fill();
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  ctx.shadowColor = color;
+  ctx.shadowBlur  = silence?5:0;
+  ctx.beginPath();
+  hist.forEach((h,i)=>{ i===0?ctx.moveTo(xp(i),yp(h.v)):ctx.lineTo(xp(i),yp(h.v)); });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+// ─────────────────────────────────────────────
+// UI更新
+// ─────────────────────────────────────────────
+function updateCard(key, res, p) {
+  const s = SENSORS[key];
+  const { v, R, silence, dir, upper_band, lower_band, ema_lower, ema_upper } = res;
+  const col = s.color;
+
+  const dp = key==='wind'?1:key==='soil'||key==='ground'?1:0;
+
+  document.getElementById('val-'+key).textContent = v.toFixed(dp);
+  document.getElementById('val-'+key).style.color  = silence
+    ? (dir==='upper'?'#ff7043':'#80d8ff') : col;
+
+  const decEl = document.getElementById('dec-'+key);
+  if (silence) {
+    decEl.textContent = dir==='upper'?'↑ UPPER':'↓ LOWER';
+    decEl.className   = 'card-decision '+dir;
+  } else if (R>0.65) {
+    decEl.textContent = 'WARN'; decEl.className = 'card-decision warn';
+  } else {
+    decEl.textContent = 'PASS'; decEl.className = 'card-decision pass';
+  }
+
+  document.getElementById('card-'+key).style.boxShadow = silence
+    ? `0 0 18px -4px ${dir==='upper'?'#ff7043':'#80d8ff'}` : 'none';
+
+  const rFillCol = silence?(dir==='upper'?'#ff7043':'#80d8ff'):R>0.65?'#ffca28':col;
+  document.getElementById('rf-'+key).style.width = Math.min(R/1.5,1)*100+'%';
+  document.getElementById('rf-'+key).style.background = rFillCol;
+  document.getElementById('rv-'+key).textContent = R.toFixed(4);
+  document.getElementById('rv-'+key).style.color = rFillCol;
+
+  // EMA進行バー（下限は乾燥勢い、上限は上昇勢い）
+  const emaKey = (key==='soil'||key==='wind') ? ema_lower : ema_upper;
+  const emaMax = (p.th - p.tl) * 0.8;
+  document.getElementById('ef-'+key).style.width = Math.min(emaKey/emaMax,1)*100+'%';
+  document.getElementById('ev-'+key).textContent = emaKey.toFixed(3);
+
+  // バンドバー
+  const full   = p.th*1.3 - p.tl*0.7;
+  const offset = p.tl*0.7;
+  const safePct   = (p.tl-offset)/full*100;
+  const safeWidth = (p.th-p.tl)/full*100;
+  const ndlPct    = Math.max(0,Math.min((v-offset)/full*100,100));
+  document.getElementById('safe-'+key).style.left  = safePct+'%';
+  document.getElementById('safe-'+key).style.width = safeWidth+'%';
+  document.getElementById('needle-'+key).style.left = ndlPct+'%';
+  document.getElementById('needle-'+key).style.background = silence
+    ? (dir==='upper'?'#ff7043':'#80d8ff') : col;
+  document.getElementById('needle-'+key).style.boxShadow = `0 0 6px ${document.getElementById('needle-'+key).style.background}`;
+  document.getElementById('ll-'+key).textContent = p.tl.toFixed(key==='wind'?1:0);
+  document.getElementById('lh-'+key).textContent = p.th.toFixed(key==='wind'?1:0);
+
+  drawMini(key, s.hist, col, silence);
+
+  // ログ
+  if (silence && s.lastDec!=='SILENCE') {
+    addLog(`[${s.label}] ${dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
+  } else if (!silence && s.lastDec==='SILENCE') {
+    addLog(`[${s.label}] HOLD終了 → PASS`, 'safe');
+  } else if (R>0.65 && R<1.0 && s.lastDec!=='warn') {
+    addLog(`[${s.label}] WARN R=${R.toFixed(3)} 接近`, 'warn');
+  }
+  s.lastDec = silence?'SILENCE':R>0.65?'warn':'PASS';
+}
+
+function addLog(msg, cls) {
+  const a  = document.getElementById('logArea');
+  const el = document.createElement('div');
+  el.className   = 'le '+cls;
+  el.textContent = `[t=${String(t).padStart(5,'0')}] ${msg}`;
+  a.appendChild(el);
+  a.scrollTop = a.scrollHeight;
+  while (a.children.length>80) a.removeChild(a.firstChild);
+}
+
+// ─────────────────────────────────────────────
+// メインループ
+// ─────────────────────────────────────────────
+function tick() {
+  if (!playing) { requestAnimationFrame(tick); return; }
+  const now = performance.now();
+  const p   = getParams();
+  const interval = Math.max(16, 40 - p.spd*7);
+  if (now-lastFrameTime < interval) { requestAnimationFrame(tick); return; }
+  lastFrameTime = now;
+
+  const results = {};
+  for (let s=0; s<p.spd; s++) {
+    t++;
+    const nowMs = t*40;
+    const vals  = getValues(t);
+    ['soil','ground','sun','wind'].forEach(key=>{
+      const sensor = SENSORS[key];
+      const res    = bandGate(sensor, vals[key], p[key], nowMs);
+      if (sensor.hist.length>=HIST) sensor.hist.shift();
+      sensor.hist.push(res);
+      results[key] = res;
+    });
+  }
+
+  ['soil','ground','sun','wind'].forEach(key=>{
+    updateCard(key, results[key], getParams()[key]);
+  });
+
+  const score = calcDroughtLevel(results);
+  updateDroughtGauge(score);
+
+  requestAnimationFrame(tick);
+}
+
+// ─────────────────────────────────────────────
+// シナリオ
+// ─────────────────────────────────────────────
+const SCENARIO_NOTES = {
+  normal:  '🌱 通常の畑環境。定期的に小さな外乱が来ます。',
+  drought: '🏜 軽度干ばつ。土壌水分が徐々に低下し始めています。EMAの上昇に注目してください。',
+  severe:  '🔥 重度干ばつ。土壌水分・日射・風速が同時に限界に向かっています。複数指標が連動する様子を観察してください。',
+  storm:   '⛈ 嵐後の急速乾燥。雨で一時的に回復したあと、蒸発が加速して急激に乾燥します。EMAが「勢い」を先読みする様子がわかります。',
+};
+
+function setScenario(name) {
+  scenario = name;
+  document.querySelectorAll('[id^="sc-"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-'+name).classList.add('active');
+  document.getElementById('scenarioNote').textContent = SCENARIO_NOTES[name];
+}
+
+// ─────────────────────────────────────────────
+// スライダーラベル
+// ─────────────────────────────────────────────
+function updateLabels() {
+  const g = id => parseFloat(document.getElementById(id).value);
+  document.getElementById('v-sh').textContent  = g('sl-sh').toFixed(0);
+  document.getElementById('v-sl').textContent  = g('sl-sl').toFixed(0);
+  document.getElementById('v-sa').textContent  = g('sl-sau').toFixed(2)+'/'+g('sl-sal').toFixed(2);
+  document.getElementById('v-gh').textContent  = g('sl-gh').toFixed(0);
+  document.getElementById('v-gl').textContent  = g('sl-gl').toFixed(0);
+  document.getElementById('v-ga').textContent  = g('sl-gau').toFixed(2)+'/'+g('sl-gal').toFixed(2);
+  document.getElementById('v-uh').textContent  = g('sl-uh').toFixed(0);
+  document.getElementById('v-ul').textContent  = g('sl-ul').toFixed(0);
+  document.getElementById('v-ua').textContent  = g('sl-uau').toFixed(2)+'/'+g('sl-ual').toFixed(2);
+  document.getElementById('v-wh').textContent  = g('sl-wh').toFixed(0);
+  document.getElementById('v-wl').textContent  = g('sl-wl').toFixed(1);
+  document.getElementById('v-wa').textContent  = g('sl-wau').toFixed(2)+'/'+g('sl-wal').toFixed(2);
+  document.getElementById('v-spd').textContent = document.getElementById('sl-spd').value+'×';
+  document.getElementById('v-hold').textContent= document.getElementById('sl-hold').value;
+}
+
+document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',updateLabels));
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('btnPlay');
+  btn.textContent = playing?'⏸ PAUSE':'▶ PLAY';
+  btn.classList.toggle('play',   playing);
+  btn.classList.toggle('paused', !playing);
+}
+
+function resetSim() {
+  t=0; prevLv=-1;
+  Object.values(SENSORS).forEach(s=>{ s.hist=[]; s.ema_u=0; s.ema_l=0; s.holdUntil=0; s.lastDec=''; });
+  document.getElementById('logArea').innerHTML = '';
+  addLog('フィールド監視システム起動 — 4指標同時監視開始', 'safe');
+}
+
+window.addEventListener('resize', ()=>{
+  ['soil','ground','sun','wind'].forEach(k=>{
+    const cv = document.getElementById('cv-'+k);
+    cv.width = cv.parentElement.clientWidth-28;
+  });
+});
+
+updateLabels();
+resetSim();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

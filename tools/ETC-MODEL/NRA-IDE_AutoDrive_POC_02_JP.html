@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <!-- FILE: NRA-IDE_AutoDrive_POC_02_JP.html  2026-02-24 -->
+    <title>NRA-IDE: Autonomous Drive Safety Gate v0.2 — Tire×Road μ</title>
+    <style>
+        :root {
+            --bg:      #080c10;
+            --panel:   #0d1117;
+            --border:  #1c2a36;
+            --cyan:    #00e5ff;
+            --green:   #00ff88;
+            --yellow:  #ffd600;
+            --orange:  #ff8c00;
+            --red:     #ff2244;
+            --dim:     #3a4a55;
+            --text:    #c8d8e0;
+            --muted:   #4a6070;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            height: 100vh;
+            display: grid;
+            grid-template-rows: 48px 1fr;
+            grid-template-columns: 1fr 300px;
+            overflow: hidden;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 16px;
+        }
+        header .logo { color: var(--cyan); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+        header .sub  { color: var(--muted); font-size: 11px; }
+        header .ver  { margin-left: auto; color: var(--muted); font-size: 10px; letter-spacing: 1px; }
+
+        /* ── Main ── */
+        #main {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+
+        /* ── Road ── */
+        #roadWrap {
+            height: 200px;
+            position: relative;
+            background: #060a0d;
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        canvas#road { display: block; width: 100%; height: 100%; }
+
+        /* ── Status bar ── */
+        #statusBar { display: flex; flex-shrink: 0; }
+        .sb-cell {
+            flex: 1;
+            padding: 8px 14px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .sb-cell:last-child { border-right: none; }
+        .sb-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .sb-val   { font-size: 18px; font-weight: bold; margin-top: 2px; }
+
+        /* ── Selectors ── */
+        #selectors {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .sel-group {
+            flex: 1;
+            padding: 10px 14px;
+            border-right: 1px solid var(--border);
+        }
+        .sel-group:last-child { border-right: none; }
+        .sel-title {
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .btn-row { display: flex; gap: 5px; flex-wrap: wrap; }
+        .sel-btn {
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.15s;
+        }
+        .sel-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+        .sel-btn.active-dry    { border-color: #888; color: #888; background: rgba(136,136,136,0.1); }
+        .sel-btn.active-wet    { border-color: #4488ff; color: #4488ff; background: rgba(68,136,255,0.1); }
+        .sel-btn.active-snow   { border-color: #aaddff; color: #aaddff; background: rgba(170,221,255,0.1); }
+        .sel-btn.active-ice    { border-color: #88eeff; color: #88eeff; background: rgba(136,238,255,0.1); }
+        .sel-btn.active-summer { border-color: #ff8800; color: #ff8800; background: rgba(255,136,0,0.1); }
+        .sel-btn.active-studs  { border-color: #00ccff; color: #00ccff; background: rgba(0,204,255,0.1); }
+
+        /* ── μ info bar ── */
+        #muBar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 7px 14px;
+            border-bottom: 1px solid var(--border);
+            background: #0a1018;
+            flex-shrink: 0;
+            font-size: 11px;
+        }
+        #muBar .mu-key { color: var(--muted); }
+        #muBar .mu-val { color: var(--cyan); font-size: 14px; font-weight: bold; }
+        #muBar .mu-warn { color: var(--red); font-size: 11px; font-weight: bold; margin-left: auto; }
+
+        /* ── Controls ── */
+        #controls {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .ctrl-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .ctrl-row:last-child { margin-bottom: 0; }
+        .ctrl-label { width: 180px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
+        .ctrl-unit { width: 80px; text-align: right; font-size: 14px; color: var(--cyan); }
+
+        /* ── Log ── */
+        #logWrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        #logTitle { padding: 6px 14px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        #log { flex: 1; overflow-y: auto; padding: 6px 14px; font-size: 11px; line-height: 1.7; }
+        #log::-webkit-scrollbar { width: 4px; }
+        #log::-webkit-scrollbar-thumb { background: var(--border); }
+        .log-permit  { color: var(--green); }
+        .log-caveat  { color: var(--yellow); }
+        .log-warning { color: var(--orange); }
+        .log-fail    { color: var(--red); font-weight: bold; }
+
+        /* ── Sidebar ── */
+        #sidebar { display: flex; flex-direction: column; overflow: hidden; }
+
+        #gaugeBox { padding: 18px 16px 12px; border-bottom: 1px solid var(--border); text-align: center; }
+        #gaugeTitle { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+        #gaugeCanvas { display: block; margin: 0 auto; }
+        #rValue { font-size: 34px; font-weight: bold; letter-spacing: 2px; margin-top: 2px; transition: color 0.3s; }
+        #zoneLabel { margin-top: 5px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 12px; border-radius: 2px; display: inline-block; }
+
+        #metrics { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .metric { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); }
+        .metric:last-child { border-bottom: none; }
+        .m-key { color: var(--muted); font-size: 11px; }
+        .m-val { font-size: 12px; }
+
+        /* ── μ matrix mini ── */
+        #muMatrix {
+            padding: 12px 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        #muMatrixTitle { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { color: var(--muted); font-weight: normal; padding: 4px 6px; text-align: center; border-bottom: 1px solid var(--border); }
+        td { padding: 4px 6px; text-align: center; border-bottom: 1px solid #0e1820; }
+        .td-active { color: var(--cyan); font-weight: bold; background: rgba(0,229,255,0.08); }
+        .td-danger { color: var(--red); }
+        .td-warn   { color: var(--orange); }
+        .td-ok     { color: var(--green); }
+        tr.row-label td:first-child { text-align: left; color: var(--muted); }
+
+        #flashOverlay {
+            position: fixed; inset: 0;
+            background: rgba(255,34,68,0.08);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+<div id="flashOverlay"></div>
+
+<header>
+    <div class="logo">NRA‑IDE</div>
+    <div class="sub">// 自動運転 安全ゲート v0.2 — タイヤ × 路面 μ</div>
+    <div class="ver">R = δ / τ &nbsp;|&nbsp; フェイルクローズド</div>
+</header>
+
+<div id="main">
+    <div id="roadWrap"><canvas id="road"></canvas></div>
+
+    <div id="statusBar">
+        <div class="sb-cell">
+            <div class="sb-label">速度</div>
+            <div class="sb-val" id="sb-speed" style="color:var(--cyan)">60 km/h</div>
+        </div>
+        <div class="sb-cell">
+            <div class="sb-label">前方車両距離</div>
+            <div class="sb-val" id="sb-dist" style="color:var(--cyan)">80 m</div>
+        </div>
+        <div class="sb-cell">
+            <div class="sb-label">停止距離</div>
+            <div class="sb-val" id="sb-stopdist" style="color:var(--yellow)">0 m</div>
+        </div>
+        <div class="sb-cell">
+            <div class="sb-label">違反量 δ</div>
+            <div class="sb-val" id="sb-delta">0 m</div>
+        </div>
+    </div>
+
+    <!-- Road × Tire selectors -->
+    <div id="selectors">
+        <div class="sel-group">
+            <div class="sel-title">路面</div>
+            <div class="btn-row">
+                <button class="sel-btn" id="btn-dry"  onclick="setRoad('dry')">🌞 Dry</button>
+                <button class="sel-btn" id="btn-wet"  onclick="setRoad('wet')">🌧 Wet</button>
+                <button class="sel-btn" id="btn-snow" onclick="setRoad('snow')">❄ Snow</button>
+                <button class="sel-btn" id="btn-ice"  onclick="setRoad('ice')">🧊 Ice</button>
+            </div>
+        </div>
+        <div class="sel-group">
+            <div class="sel-title">タイヤ種別</div>
+            <div class="btn-row">
+                <button class="sel-btn" id="btn-summer" onclick="setTire('summer')">🔴 夏タイヤ（サマー）</button>
+                <button class="sel-btn" id="btn-studs"  onclick="setTire('studs')">🔵 スタッドレス</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- μ info -->
+    <div id="muBar">
+        <span class="mu-key">μ (friction)</span>
+        <span class="mu-val" id="mu-display">0.80</span>
+        <span class="mu-key">→  a =</span>
+        <span class="mu-val" id="a-display">7.84 m/s²</span>
+        <span class="mu-key">路面:</span>
+        <span id="road-label" style="color:#888">Dry</span>
+        <span class="mu-key">タイヤ:</span>
+        <span id="tire-label" style="color:#ff8800">夏タイヤ</span>
+        <span class="mu-warn" id="mu-warning" style="display:none">⚠ 夏タイヤ×雪/氷路</span>
+    </div>
+
+    <div id="controls">
+        <div class="ctrl-row">
+            <div class="ctrl-label">速度</div>
+            <input type="range" id="sl-speed" min="0" max="150" value="60">
+            <div class="ctrl-unit" id="lbl-speed">60 km/h</div>
+        </div>
+        <div class="ctrl-row">
+            <div class="ctrl-label">前方車両距離</div>
+            <input type="range" id="sl-dist" min="0" max="150" value="80">
+            <div class="ctrl-unit" id="lbl-dist">80 m</div>
+        </div>
+        <div class="ctrl-row">
+            <div class="ctrl-label">安全余裕 τ（余裕幅）</div>
+            <input type="range" id="sl-tau" min="2" max="20" value="8">
+            <div class="ctrl-unit" id="lbl-tau">8 m</div>
+        </div>
+    </div>
+
+    <div id="logWrap">
+        <div id="logTitle">▶ Discard Log  (構造検証のみ)</div>
+        <div id="log"></div>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+    <div id="gaugeBox">
+        <div id="gaugeTitle">ゲート比率  R = δ / τ</div>
+        <canvas id="gaugeCanvas" width="200" height="110"></canvas>
+        <div id="rValue">0.00</div>
+        <div id="zoneLabel">ZONE A — PERMIT</div>
+    </div>
+
+    <div id="metrics">
+        <div class="metric">
+            <div class="m-key">δ（違反量）</div>
+            <div class="m-val" id="m-delta">0.0 m</div>
+        </div>
+        <div class="metric">
+            <div class="m-key">τ（許容幅）</div>
+            <div class="m-val" id="m-tau">8.0 m</div>
+        </div>
+        <div class="metric">
+            <div class="m-key">μ × g ＝ 減速度</div>
+            <div class="m-val" id="m-accel">7.84 m/s²</div>
+        </div>
+        <div class="metric">
+            <div class="m-key">停止距離</div>
+            <div class="m-val" id="m-stop">0.0 m</div>
+        </div>
+        <div class="metric">
+            <div class="m-key">ゲート判定</div>
+            <div class="m-val" id="m-gate" style="color:var(--green)">PERMIT</div>
+        </div>
+    </div>
+
+    <!-- μ matrix -->
+    <div id="muMatrix">
+        <div id="muMatrixTitle">μ マトリクス — 路面 × タイヤ</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>路面 / タイヤ</th>
+                    <th>夏タイヤ</th>
+                    <th>スタッドレス</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="row-label">
+                    <td id="rl-dry">🌞 Dry</td>
+                    <td id="mc-dry-summer" class="td-ok">0.80</td>
+                    <td id="mc-dry-studs"  class="td-ok">0.70</td>
+                </tr>
+                <tr class="row-label">
+                    <td id="rl-wet">🌧 Wet</td>
+                    <td id="mc-wet-summer" class="td-ok">0.55</td>
+                    <td id="mc-wet-studs"  class="td-ok">0.50</td>
+                </tr>
+                <tr class="row-label">
+                    <td id="rl-snow">❄ Snow</td>
+                    <td id="mc-snow-summer" class="td-danger">0.20</td>
+                    <td id="mc-snow-studs"  class="td-warn">0.45</td>
+                </tr>
+                <tr class="row-label">
+                    <td id="rl-ice">🧊 Ice</td>
+                    <td id="mc-ice-summer" class="td-danger">0.10</td>
+                    <td id="mc-ice-studs"  class="td-warn">0.30</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// FILE: NRA-IDE_AutoDrive_POC_02_JP.html  2026-02-24
+
+// ── μ テーブル ──
+const MU = {
+    dry:  { summer: 0.80, studs: 0.70 },
+    wet:  { summer: 0.55, studs: 0.50 },
+    snow: { summer: 0.20, studs: 0.45 },
+    ice:  { summer: 0.10, studs: 0.30 },
+};
+
+const ROAD_LABEL = { dry: 'Dry', wet: 'Wet', snow: 'Snow', ice: 'Ice' };
+const TIRE_LABEL = { summer: '夏タイヤ', studs: 'スタッドレス' };
+const ROAD_COLOR = { dry: '#888', wet: '#4488ff', snow: '#aaddff', ice: '#88eeff' };
+const TIRE_COLOR = { summer: '#ff8800', studs: '#00ccff' };
+
+const G    = 9.8;
+const REACT = 1.0;
+
+// ── State ──
+let speed_kmh = 60;
+let dist_m    = 80;
+let tau_m     = 8;
+let road      = 'dry';
+let tire      = 'summer';
+let prevZone  = '';
+let logCount  = 0;
+let roadOffset = 0;
+
+// ── DOM refs ──
+const slSpeed  = document.getElementById('sl-speed');
+const slDist   = document.getElementById('sl-dist');
+const slTau    = document.getElementById('sl-tau');
+const flashEl  = document.getElementById('flashOverlay');
+const roadCanvas = document.getElementById('road');
+const roadCtx    = roadCanvas.getContext('2d');
+const gc  = document.getElementById('gaugeCanvas');
+const gctx = gc.getContext('2d');
+
+function getMu()    { return MU[road][tire]; }
+function getDecel() { return getMu() * G; }
+
+// ── Physics ──
+function stopDist(v_kmh) {
+    const v = v_kmh / 3.6;
+    return v * REACT + (v * v) / (2 * getDecel());
+}
+function computeR(v_kmh, d_m, t_m) {
+    const sd    = stopDist(v_kmh);
+    const delta = Math.max(0, sd - d_m);
+    const R     = t_m > 0 ? delta / t_m : Infinity;
+    return { delta, R, sd };
+}
+function zoneFromR(R) {
+    if (R < 0.40) return 'A';
+    if (R < 0.70) return 'B';
+    if (R < 1.00) return 'C';
+    return 'D';
+}
+function getColor(R) {
+    if (R < 0.40) return '#00ff88';
+    if (R < 0.70) return '#ffd600';
+    if (R < 1.00) return '#ff8c00';
+    return '#ff2244';
+}
+
+// ── Road selector ──
+function setRoad(r) {
+    road = r;
+    ['dry','wet','snow','ice'].forEach(k => {
+        const b = document.getElementById('btn-' + k);
+        b.className = 'sel-btn' + (k === r ? ' active-' + k : '');
+    });
+    document.getElementById('road-label').textContent = ROAD_LABEL[r];
+    document.getElementById('road-label').style.color = ROAD_COLOR[r];
+    checkWarn();
+    update();
+}
+function setTire(t) {
+    tire = t;
+    ['summer','studs'].forEach(k => {
+        const b = document.getElementById('btn-' + k);
+        b.className = 'sel-btn' + (k === t ? ' active-' + k : '');
+    });
+    document.getElementById('tire-label').textContent = TIRE_LABEL[t];
+    document.getElementById('tire-label').style.color = TIRE_COLOR[t];
+    checkWarn();
+    update();
+}
+function checkWarn() {
+    const w = document.getElementById('mu-warning');
+    w.style.display = (tire === 'summer' && (road === 'snow' || road === 'ice')) ? '' : 'none';
+}
+
+// ── Matrix highlight ──
+function highlightMatrix() {
+    // clear all
+    document.querySelectorAll('td[id^="mc-"]').forEach(td => {
+        td.style.background = '';
+        td.style.outline = '';
+        td.style.fontWeight = '';
+    });
+    document.querySelectorAll('td[id^="rl-"]').forEach(td => {
+        td.style.color = '';
+    });
+    const activeId = `mc-${road}-${tire}`;
+    const el = document.getElementById(activeId);
+    if (el) {
+        el.style.background = 'rgba(0,229,255,0.15)';
+        el.style.outline = '1px solid #00e5ff';
+        el.style.fontWeight = 'bold';
+    }
+    document.getElementById('rl-' + road).style.color = ROAD_COLOR[road];
+}
+
+// ── Gauge ──
+function drawGauge(R) {
+    const w = gc.width, h = gc.height;
+    gctx.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h - 10;
+    const radius = h - 20;
+    const arcs = [
+        { from: Math.PI,        to: Math.PI * 1.40, color: 'rgba(0,255,136,0.25)' },
+        { from: Math.PI * 1.40, to: Math.PI * 1.70, color: 'rgba(255,214,0,0.25)' },
+        { from: Math.PI * 1.70, to: Math.PI * 1.90, color: 'rgba(255,140,0,0.25)' },
+        { from: Math.PI * 1.90, to: Math.PI * 2.00, color: 'rgba(255,34,68,0.30)' },
+    ];
+    arcs.forEach(z => {
+        gctx.beginPath();
+        gctx.arc(cx, cy, radius - 4, z.from, z.to);
+        gctx.lineWidth = 16;
+        gctx.strokeStyle = z.color;
+        gctx.stroke();
+    });
+    const angle = Math.PI + Math.min(R, 1.2) * Math.PI;
+    const nc = getColor(R);
+    gctx.save();
+    gctx.translate(cx, cy);
+    gctx.rotate(angle);
+    gctx.beginPath();
+    gctx.moveTo(0, 0);
+    gctx.lineTo(radius - 22, 0);
+    gctx.lineWidth = 3;
+    gctx.strokeStyle = nc;
+    gctx.shadowColor = nc;
+    gctx.shadowBlur = 8;
+    gctx.stroke();
+    gctx.restore();
+    gctx.beginPath();
+    gctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    gctx.fillStyle = nc;
+    gctx.fill();
+    gctx.fillStyle = 'rgba(255,255,255,0.3)';
+    gctx.font = '9px Courier New';
+    gctx.textAlign = 'center';
+    gctx.fillText('0', cx - radius + 8, cy - 4);
+    gctx.fillText('0.4', cx - radius * 0.25, cy - radius + 8);
+    gctx.fillText('1.0', cx + radius - 8, cy - 4);
+}
+
+// ── Road draw ──
+const ROAD_BG = {
+    dry:  ['#111820','#0a0e14'],
+    wet:  ['#0d1a28','#08121e'],
+    snow: ['#1e2830','#161e26'],
+    ice:  ['#10202c','#0a1620'],
+};
+
+function drawRoad(delta, R, sd, dist) {
+    const w = roadCanvas.width, h = roadCanvas.height;
+    const ctx = roadCtx;
+    ctx.clearRect(0, 0, w, h);
+
+    // Sky
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.5);
+    skyGrad.addColorStop(0, '#060a10');
+    skyGrad.addColorStop(1, '#0a1520');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h * 0.5);
+
+    // Road surface tinted by condition
+    const rb = ROAD_BG[road];
+    const roadGrad = ctx.createLinearGradient(0, h * 0.5, 0, h);
+    roadGrad.addColorStop(0, rb[0]);
+    roadGrad.addColorStop(1, rb[1]);
+    ctx.fillStyle = roadGrad;
+    ctx.fillRect(0, h * 0.5, w, h * 0.5);
+
+    // Snow overlay
+    if (road === 'snow') {
+        ctx.fillStyle = 'rgba(200,230,255,0.06)';
+        ctx.fillRect(0, h * 0.5, w, h * 0.5);
+        // snowflakes static
+        for (let i = 0; i < 30; i++) {
+            const sx = (i * 137 + roadOffset * 0.5) % w;
+            const sy = h * 0.52 + (i * 53) % (h * 0.45);
+            ctx.beginPath();
+            ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(220,240,255,0.4)';
+            ctx.fill();
+        }
+    }
+    if (road === 'ice') {
+        ctx.fillStyle = 'rgba(136,238,255,0.04)';
+        ctx.fillRect(0, h * 0.5, w, h * 0.5);
+    }
+
+    // Lane lines
+    roadOffset = (roadOffset + speed_kmh * 0.05) % 80;
+    ctx.setLineDash([30, 50]);
+    ctx.lineDashOffset = -roadOffset;
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.5 + 1);
+    ctx.lineTo(w, h * 0.5 + 1);
+    ctx.strokeStyle = '#1c2a36';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.setLineDash([20, 40]);
+    ctx.lineDashOffset = -roadOffset;
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.72);
+    ctx.lineTo(w, h * 0.72);
+    ctx.strokeStyle = road === 'snow' ? '#2a3c4a' : '#1e3240';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Danger zone
+    const pxPerM = w / 150;
+    const actW   = dist * pxPerM;
+    const ego_x  = 30;
+    const lead_x = Math.min(ego_x + actW, w - 90);
+    const safeW  = sd * pxPerM;
+    const zoneColor = R >= 1.0 ? 'rgba(255,34,68,0.14)'
+                    : R >= 0.7 ? 'rgba(255,140,0,0.10)'
+                    : R >= 0.4 ? 'rgba(255,214,0,0.07)'
+                    : 'rgba(0,255,136,0.04)';
+    ctx.fillStyle = zoneColor;
+    ctx.fillRect(lead_x - safeW, h * 0.5, safeW, h * 0.5);
+
+    // Distance line
+    ctx.beginPath();
+    ctx.moveTo(ego_x + 62, h * 0.52);
+    ctx.lineTo(lead_x - 2, h * 0.52);
+    ctx.strokeStyle = getColor(R);
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([]);
+    ctx.stroke();
+    ctx.fillStyle = getColor(R);
+    ctx.font = '10px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText(dist.toFixed(0) + ' m', (ego_x + 62 + lead_x) / 2, h * 0.52 - 4);
+
+    // Stop distance line
+    const sd_x = Math.min(ego_x + 62 + sd * pxPerM * 0.4, w - 10);
+    ctx.beginPath();
+    ctx.moveTo(ego_x + 62, h * 0.57);
+    ctx.lineTo(sd_x, h * 0.57);
+    ctx.strokeStyle = '#ffd60055';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffd60088';
+    ctx.font = '9px Courier New';
+    ctx.textAlign = 'left';
+    ctx.fillText('stop=' + sd.toFixed(1) + 'm', ego_x + 64, h * 0.57 - 3);
+
+    // Ego car
+    drawCar(ctx, ego_x, h * 0.58, '#00e5ff', '#004455', false);
+
+    // Lead car (taillights react to zone)
+    const tl = R >= 1.0 ? '#ff2244' : R >= 0.7 ? '#ff5500' : '#440010';
+    drawCar(ctx, lead_x, h * 0.58, '#cc2233', '#330010', true, tl);
+
+    // Tire condition label
+    ctx.fillStyle = TIRE_COLOR[tire];
+    ctx.font = '10px Courier New';
+    ctx.textAlign = 'left';
+    ctx.fillText(TIRE_LABEL[tire] + '  μ=' + getMu().toFixed(2), 12, h - 10);
+
+    // FAIL overlay
+    if (R >= 1.0) {
+        ctx.fillStyle = 'rgba(255,34,68,0.06)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#ff2244';
+        ctx.font = 'bold 13px Courier New';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = '#ff2244';
+        ctx.shadowBlur = 10;
+        ctx.fillText('⚠ FAIL‑CLOSED — 緊急停止（全制御停止）', w / 2, 22);
+        ctx.shadowBlur = 0;
+    }
+}
+
+function drawCar(ctx, x, groundY, bodyColor, roofColor, mirror, taillightColor) {
+    const W = 70, H = 24, RH = 14;
+    const bx = mirror ? x - W : x;
+    const by = groundY - H;
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.beginPath();
+    ctx.ellipse(bx + W / 2, groundY + 2, W * 0.5, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(bx, by, W, H);
+    ctx.fillStyle = roofColor;
+    const rx = bx + W * 0.2;
+    ctx.beginPath();
+    ctx.moveTo(rx, by);
+    ctx.lineTo(rx + W * 0.6, by);
+    ctx.lineTo(rx + W * 0.5, by - RH);
+    ctx.lineTo(rx + W * 0.1, by - RH);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#222';
+    [bx + 12, bx + W - 14].forEach(wx => {
+        ctx.beginPath(); ctx.arc(wx, groundY, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#444';
+        ctx.beginPath(); ctx.arc(wx, groundY, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#222';
+    });
+    if (!mirror) {
+        ctx.fillStyle = '#00e5ff'; ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 8;
+        ctx.fillRect(bx + W - 4, by + 6, 4, 8);
+        ctx.shadowBlur = 0;
+    } else {
+        ctx.fillStyle = taillightColor || '#440010';
+        ctx.shadowColor = taillightColor || '#440010';
+        ctx.shadowBlur = taillightColor === '#ff2244' ? 14 : 4;
+        ctx.fillRect(bx, by + 6, 4, 8);
+        ctx.shadowBlur = 0;
+    }
+}
+
+// ── Zone UI ──
+function updateZoneUI(zone, R) {
+    const rEl   = document.getElementById('rValue');
+    const zEl   = document.getElementById('zoneLabel');
+    const gateEl= document.getElementById('m-gate');
+    ['z-a','z-b','z-c','z-d'].forEach(id => {
+        if (document.getElementById(id))
+            document.getElementById(id).style.outline = 'none';
+    });
+    let color, zName, gateText;
+    switch(zone) {
+        case 'A': color='#00ff88'; zName='ゾーン A — 許可';       gateText='許可 PERMIT'; break;
+        case 'B': color='#ffd600'; zName='ゾーン B — 注意付き許可';       gateText='注意付き許可'; break;
+        case 'C': color='#ff8c00'; zName='ゾーン C — 警告';      gateText='警告'; break;
+        case 'D': color='#ff2244'; zName='ゾーン D — フェイルクローズド';  gateText='緊急停止 🚨'; break;
+    }
+    rEl.style.color = color;
+    rEl.textContent = Math.min(R, 9.99).toFixed(2);
+    zEl.textContent = zName;
+    zEl.style.background = color + '22';
+    zEl.style.color = color;
+    gateEl.textContent = gateText;
+    gateEl.style.color  = color;
+}
+
+// ── Log ──
+function addLog(zone, R, delta, mu, ts) {
+    const cls = zone === 'A' ? 'log-permit'
+              : zone === 'B' ? 'log-caveat'
+              : zone === 'C' ? 'log-warning'
+              : 'log-fail';
+    const mark = zone === 'D' ? '⚠' : zone === 'C' ? '△' : zone === 'B' ? '○' : '✓';
+    const tire_s = tire === 'summer' ? '夏' : 'STD';
+    const d = document.createElement('div');
+    d.className = cls;
+    d.textContent = `[${ts}] ${mark} Zone${zone} R=${R.toFixed(3)} δ=${delta.toFixed(1)}m μ=${mu.toFixed(2)} [${road}/${tire_s}]`;
+    const logEl = document.getElementById('log');
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+    if (logEl.children.length > 80) logEl.children[0].remove();
+}
+
+function now() { return new Date().toTimeString().slice(0, 8); }
+
+function flash() {
+    flashEl.style.opacity = '1';
+    setTimeout(() => { flashEl.style.opacity = '0'; }, 80);
+}
+
+// ── Main update ──
+function update() {
+    const mu   = getMu();
+    const a    = mu * G;
+    const { delta, R, sd } = computeR(speed_kmh, dist_m, tau_m);
+    const zone = zoneFromR(R);
+
+    // Status bar
+    document.getElementById('sb-speed').textContent    = speed_kmh + ' km/h';
+    document.getElementById('sb-dist').textContent     = dist_m + ' m';
+    document.getElementById('sb-stopdist').textContent = sd.toFixed(1) + ' m';
+    const dEl = document.getElementById('sb-delta');
+    dEl.textContent = delta.toFixed(1) + ' m';
+    dEl.style.color = delta > 0 ? '#ff8c00' : '#4a6070';
+
+    // μ bar
+    document.getElementById('mu-display').textContent = mu.toFixed(2);
+    document.getElementById('a-display').textContent  = a.toFixed(2) + ' m/s²';
+
+    // Metrics
+    document.getElementById('m-delta').textContent  = delta.toFixed(1) + ' m';
+    document.getElementById('m-tau').textContent    = tau_m.toFixed(1) + ' m';
+    document.getElementById('m-accel').textContent  = a.toFixed(2) + ' m/s²';
+    document.getElementById('m-stop').textContent   = sd.toFixed(1) + ' m';
+
+    drawGauge(R);
+    updateZoneUI(zone, R);
+    highlightMatrix();
+
+    if (zone !== prevZone) {
+        addLog(zone, R, delta, mu, now());
+        if (zone === 'D') flash();
+        prevZone = zone;
+    }
+}
+
+// ── Sliders ──
+slSpeed.addEventListener('input', () => {
+    speed_kmh = +slSpeed.value;
+    document.getElementById('lbl-speed').textContent = speed_kmh + ' km/h';
+    update();
+});
+slDist.addEventListener('input', () => {
+    dist_m = +slDist.value;
+    document.getElementById('lbl-dist').textContent = dist_m + ' m';
+    update();
+});
+slTau.addEventListener('input', () => {
+    tau_m = +slTau.value;
+    document.getElementById('lbl-tau').textContent = tau_m + ' m';
+    update();
+});
+
+function resizeRoad() {
+    roadCanvas.width  = roadCanvas.offsetWidth;
+    roadCanvas.height = roadCanvas.offsetHeight;
+}
+window.addEventListener('resize', resizeRoad);
+resizeRoad();
+
+function loop() {
+    const { delta, R, sd } = computeR(speed_kmh, dist_m, tau_m);
+    drawRoad(delta, R, sd, dist_m);
+    drawGauge(R);
+    requestAnimationFrame(loop);
+}
+
+// ── Init ──
+setRoad('dry');
+setTire('summer');
+update();
+loop();
+</script>
+</body>
+</html>

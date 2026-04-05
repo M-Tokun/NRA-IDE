@@ -1,0 +1,91 @@
+# Filename: envoy_config_2026-02-05_223015.yaml
+# Envoy configuration with ext_authz calling HAN Gate
+
+static_resources:
+  listeners:
+  - name: listener_0
+    address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 10000
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          stat_prefix: ingress_http
+          codec_type: AUTO
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: backend
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: upstream_service
+          http_filters:
+          # HAN Gate ext_authz filter
+          - name: envoy.filters.http.ext_authz
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+              transport_api_version: V3
+              http_service:
+                server_uri:
+                  uri: http://han-gate-telemetry-sidecar:9090
+                  cluster: han_gate_telemetry
+                  timeout: 0.1s  # 100ms timeout
+                authorization_request:
+                  allowed_headers:
+                    patterns:
+                    - exact: "x-request-id"
+                    - exact: "x-forwarded-for"
+                authorization_response:
+                  allowed_upstream_headers:
+                    patterns:
+                    - exact: "x-han-decision"
+              failure_mode_allow: false  # CRITICAL: Fail-Closed
+              with_request_body:
+                max_request_bytes: 0  # no body needed
+          # Router must be last
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  clusters:
+  # Upstream service (your actual backend)
+  - name: upstream_service
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: upstream_service
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: upstream-backend
+                port_value: 8080
+
+  # HAN Gate telemetry sidecar (collects metrics + calls gate)
+  - name: han_gate_telemetry
+    connect_timeout: 0.1s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: han_gate_telemetry
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 127.0.0.1
+                port_value: 9090
+
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901

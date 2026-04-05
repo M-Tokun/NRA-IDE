@@ -1,0 +1,45 @@
+ 物理演算の論理エミュレーション結果テストベンチ
+ 10_Testbench_Integration.v で設定された入力値（Q8.8形式）を元に、内部レジスタの挙動を 1ns 単位で再現。
+ パラメータ設定値 (Hex)物理値 (Dec)演算結果 (Q16.16)細胞硬度 ($k$)0x01801.5-細胞粘性 ($\eta$)0x000D0.05-細胞径 ($d$)0x0C0012.0-孔径 ($p$)0x08008.0-流路圧差 ($\Delta P$)0x00990.597$Flow Force = 39,168$変形速度 ($v$)0x3200200.0-Stage 1 ($\Delta x$)-4.0-Stage 2 ($F_{elastic}$)-6.0$393,216$Stage 2 ($F_{viscous}$)-10.0$166,400$Stage 3 ($F_{total}$)-16.0$559,616$
+
+---
+
+同期タイミングの検証
+10_Top_Module.v と 10_UART_Interface.v の連動性をプロトコルレベルで確認しました。
+UART受信完了 (T=0): 14バイト目の受信完了と共に rx_valid が立ち上がり、内部レジスタにパラメータがロードされます。
+計算開始 (T+1): calc_trigger が立ち上がり、演算パイプラインの Stage 1 が開始されます。
+パイプライン完了 (T+4): 3クロック後、o_out_valid が立ち上がります。
+送信開始 (T+5): Top_Module が tx_start を発行し、最新の判定結果 0xFF が UART TX ピンから出力されます。
+結論: クロック間のレースコンディション（競合）はなく、データは常に安定した状態で次段へ渡されます。
+
+---
+
+このロジックを再検証するための Python スクリプト
+
+# Phase 10 Logic Verification Script
+# 26-0203-1650 JST
+
+def verify_nra_logic():
+    # 入力値 (Q8.8 固定小数点)
+    stiff = 0x0180; visc = 0x000D; diam = 0x0C00
+    pore = 0x0800; flow = 0x0099; boost = 0x0000; vel = 0x3200
+
+    # Stage 1: Geometry
+    dx = (diam - pore) if diam >= pore else 0
+
+    # Stage 2: Multipliers (Result is Q16.16)
+    f_elastic = (stiff + boost) * dx
+    f_viscous = visc * vel
+
+    # Stage 3: Comparison
+    total_resist = f_elastic + f_viscous
+    flow_force = flow << 8 # Q8.8 to Q16.16 scaling
+
+    is_jammed = 1 if total_resist > flow_force else 0
+
+    print(f"Total Resistance (Q16.16): {total_resist}")
+    print(f"Flow Force (Q16.16):       {flow_force}")
+    print(f"Verification Result:       {'JAMMED' if is_jammed else 'SAFE'}")
+
+verify_nra_logic()
+

@@ -1,0 +1,25 @@
+{
+  "_meta": { "version": "1.2", "sync": "Phase 10/20 Protocol" },
+  "test_case_expectations": {
+    "TC001": {
+      "test_id": "TC001",
+      "description": "Normal Danger (Passable)",
+      "expected_binary": "0x00" 
+    },
+    "TC002": {
+      "test_id": "TC002",
+      "description": "Normal Safe (Jammed by Boost)",
+      "expected_binary": "0x01"
+    },
+    "TC004": {
+      "test_id": "TC004",
+      "description": "Viscosity Zero Violation (Error 0x03)",
+      "expected_binary": "0x06"
+    },
+    "TC005": {
+      "test_id": "TC005",
+      "description": "Geometric Violation (Error 0x01)",
+      "expected_binary": "0x02"
+    }
+  }
+}

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<!-- FILE: power_nra_ide_20260319_0150.html -->
+<!-- TITLE: NRA-IDE 電力（電流×電圧）管理システム -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-03-19 01:50 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE Power Monitor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+:root{
+  --bg:#07080f;--surface:#0e1018;--border:#181e2c;
+  --safe:#00ffb3;--warn:#ffaa00;--fail-hi:#ff3060;--fail-lo:#6688ff;
+  --text:#b8c4d8;--muted:#384060;--accent:#00ffb3;
+  --volt:#ffcc44;--amp:#44ccff;--watt:#00ffb3;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:20px 12px;min-height:100vh;}
+
+.hdr{width:100%;max-width:1000px;display:flex;justify-content:space-between;
+  align-items:flex-end;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:18px;}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
+  letter-spacing:.16em;text-transform:uppercase;}
+.hdr-sub h1{font-size:18px;color:var(--text);font-weight:600;margin-top:4px;}
+.ctrl-row{display:flex;gap:8px;}
+.pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  cursor:pointer;border-radius:4px;transition:all .2s;letter-spacing:.06em;}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#000;}
+.pill-load{border-color:#ffcc44;}
+.pill-load.on{background:#332200;border-color:#ffcc44;color:#ffcc44;}
+
+/* ── レイアウト ── */
+.grid{width:100%;max-width:1000px;display:grid;grid-template-columns:1fr 320px;gap:14px;}
+.left{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.panel-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;}
+canvas{display:block;border-radius:6px;background:var(--bg);}
+#circuitCanvas{width:100%;height:260px;}
+#waveCanvas{width:100%;height:70px;}
+
+/* スライダー */
+.sl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.sl-row{display:flex;flex-direction:column;gap:5px;}
+.sl-hdr{display:flex;justify-content:space-between;align-items:baseline;}
+.sl-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.sl-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+.sl-mrk{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;
+  background:var(--border);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--accent);border:3px solid var(--bg);
+  box-shadow:0 0 0 1px var(--accent);transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+
+/* ── 右パネル ── */
+.side{display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.card-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:10px;}
+
+/* V・I・P 三段表示 */
+.vip-row{display:flex;gap:8px;justify-content:space-between;}
+.vip-item{flex:1;text-align:center;padding:8px 4px;background:rgba(255,255,255,.03);
+  border:1px solid var(--border);border-radius:6px;}
+.vip-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;}
+.vip-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;line-height:1.2;}
+.vip-unit{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:300;}
+
+/* デュアルRアーク */
+.dual-r{display:flex;gap:10px;justify-content:center;}
+.r-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.r-arc-w{width:120px;height:65px;overflow:visible;}
+.r-num{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;
+  transition:color .3s;text-align:center;}
+.r-dir{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-align:center;}
+
+/* バッジ */
+.badge{width:100%;padding:10px;border-radius:6px;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:.14em;border:1px solid;transition:all .35s;}
+.badge.safe   {color:var(--safe);border-color:var(--safe);background:rgba(0,255,179,.06);}
+.badge.warn-hi{color:var(--warn);border-color:var(--warn);background:rgba(255,170,0,.07);}
+.badge.fail-hi{color:var(--fail-hi);border-color:var(--fail-hi);
+  background:rgba(255,48,96,.09);animation:pf .7s ease-in-out infinite;}
+.badge.warn-lo{color:#88aaff;border-color:var(--fail-lo);background:rgba(102,136,255,.06);}
+.badge.fail-lo{color:var(--fail-lo);border-color:var(--fail-lo);
+  background:rgba(102,136,255,.1);animation:pfl .7s ease-in-out infinite;}
+@keyframes pf {0%,100%{box-shadow:0 0 0 0 rgba(255,48,96,.3)} 50%{box-shadow:0 0 0 5px rgba(255,48,96,0)}}
+@keyframes pfl{0%,100%{box-shadow:0 0 0 0 rgba(102,136,255,.3)} 50%{box-shadow:0 0 0 5px rgba(102,136,255,0)}}
+.act-txt{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
+
+/* メトリクスバー */
+.metrics{display:flex;flex-direction:column;gap:8px;}
+.met-row{display:flex;flex-direction:column;gap:4px;}
+.met-hdr{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;}
+.met-k{color:var(--muted);}.met-v{font-weight:600;}
+.bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:2px;transition:width .25s,background .3s;}
+
+/* 熱状態インジケーター */
+.heat-row{display:flex;align-items:center;gap:8px;padding:8px 10px;
+  background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:6px;}
+.heat-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);min-width:64px;}
+.heat-bar-bg{flex:1;height:5px;background:var(--border);border-radius:2px;overflow:hidden;}
+.heat-bar{height:100%;border-radius:2px;transition:width .4s,background .4s;}
+.heat-pct{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;min-width:40px;text-align:right;}
+
+/* ログ */
+.log-panel{width:100%;max-width:1000px;margin-top:14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;}
+.log-title{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:.16em;margin-bottom:8px;}
+.log-list{display:flex;flex-direction:column;gap:3px;max-height:90px;overflow-y:auto;}
+.log-e{font-family:'JetBrains Mono',monospace;font-size:10px;
+  display:flex;gap:10px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.l-t{color:var(--muted);min-width:56px;}
+.l-s{font-weight:600;}
+.l-s.safe{color:var(--safe)}.l-s.warn-hi,.l-s.warn-lo{color:var(--warn)}
+.l-s.fail-hi{color:var(--fail-hi)}.l-s.fail-lo{color:var(--fail-lo)}
+.footer{width:100%;max-width:1000px;margin-top:14px;display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-sub">NRA-IDE / POWER MANAGEMENT  V × I → P
+    <h1>電力管理システム（電流×電圧統合）</h1>
+  </div>
+  <div class="ctrl-row">
+    <button class="pill on"       id="btnRun"  onclick="toggleRun()">RUN</button>
+    <button class="pill pill-load" id="btnLoad" onclick="toggleLoad()">負荷増加 OFF</button>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- 左 -->
+  <div class="left">
+    <div class="panel-lbl">CIRCUIT VISUALIZATION</div>
+    <canvas id="circuitCanvas"></canvas>
+
+    <div class="panel-lbl">POWER TREND  P = V × I  ( raw / smooth )</div>
+    <canvas id="waveCanvas"></canvas>
+
+    <div class="sl-grid">
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">VOLTAGE</span>
+          <div class="sl-val" id="vDisp" style="color:var(--volt)">200<small style="font-size:11px;font-weight:300;color:var(--muted)"> V</small></div>
+        </div>
+        <input type="range" id="vSlider" min="100" max="300" value="200" oninput="onV(this.value)">
+        <div class="sl-mrk"><span>100V</span><span>定格200V</span><span>300V</span></div>
+      </div>
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">CURRENT</span>
+          <div class="sl-val" id="iDisp" style="color:var(--amp)">10<small style="font-size:11px;font-weight:300;color:var(--muted)"> A</small></div>
+        </div>
+        <input type="range" id="iSlider" min="0" max="40" value="10" oninput="onI(this.value)">
+        <div class="sl-mrk"><span>0A</span><span>定格10A</span><span>40A</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右 -->
+  <div class="side">
+
+    <!-- V・I・P表示 -->
+    <div class="card">
+      <div class="card-lbl">LIVE READINGS</div>
+      <div class="vip-row">
+        <div class="vip-item">
+          <div class="vip-label" style="color:var(--volt)">VOLTAGE</div>
+          <div class="vip-val" id="vLive" style="color:var(--volt)">200</div>
+          <div class="vip-unit" style="color:var(--volt)">V</div>
+        </div>
+        <div class="vip-item">
+          <div class="vip-label" style="color:var(--amp)">CURRENT</div>
+          <div class="vip-val" id="iLive" style="color:var(--amp)">10.0</div>
+          <div class="vip-unit" style="color:var(--amp)">A</div>
+        </div>
+        <div class="vip-item">
+          <div class="vip-label" style="color:var(--watt)">POWER</div>
+          <div class="vip-val" id="pLive" style="color:var(--watt)">2000</div>
+          <div class="vip-unit" style="color:var(--watt)">W</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">
+        δ = <span id="deltaDisp">0</span> W ｜ τ_hi = 4000 W ｜ τ_lo = 1000 W
+      </div>
+    </div>
+
+    <!-- Rアーク -->
+    <div class="card">
+      <div class="card-lbl">APPROACH RATIO  R = δ / τ</div>
+      <div class="dual-r">
+        <div class="r-item">
+          <svg class="r-arc-w" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#181e2c" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcHi" d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#ff3060"
+              stroke-width="9" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wMH" stroke="#ffaa00" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fMH" stroke="#ff3060" stroke-width="2" stroke-linecap="round"/>
+            <text x="8" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rHiN" style="color:#ff3060">0.000</div>
+          <div class="r-dir">↑ 過電力 R_hi</div>
+        </div>
+        <div class="r-item">
+          <svg class="r-arc-w" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#181e2c" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcLo" d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#6688ff"
+              stroke-width="9" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wML" stroke="#ffaa00" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fML" stroke="#6688ff" stroke-width="2" stroke-linecap="round"/>
+            <text x="8" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rLoN" style="color:#6688ff">0.000</div>
+          <div class="r-dir">↓ 電力不足 R_lo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="badge safe" id="badge">SAFE</div>
+    <div class="act-txt" id="actTxt">正常稼働継続</div>
+
+    <!-- 熱蓄積 -->
+    <div class="card">
+      <div class="card-lbl">THERMAL ACCUMULATION（熱蓄積）</div>
+      <div class="heat-row">
+        <span class="heat-lbl">熱ストレス</span>
+        <div class="heat-bar-bg"><div class="heat-bar" id="heatBar" style="width:0%"></div></div>
+        <span class="heat-pct" id="heatPct">0%</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;text-align:center">
+        過電力が続くほど熱δが蓄積 → Rが上昇
+      </div>
+    </div>
+
+    <!-- δ/τバー -->
+    <div class="card">
+      <div class="card-lbl">δ / τ  BREAKDOWN</div>
+      <div class="metrics">
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">δ 電力偏差</span><span class="met-v" id="dVal">0 W</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">τ_hi 過電力余裕</span><span class="met-v" id="tHiV">4000 W</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="tHiB" style="width:60%;background:#ff306066"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">τ_lo 電力不足余裕</span><span class="met-v" id="tLoV">1000 W</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="tLoB" style="width:20%;background:#6688ff66"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">ゆらぎ振幅</span><span class="met-v" id="fluctV">0 W</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="fluctB" style="width:0%;background:#00ffb366"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="log-panel">
+  <div class="log-title">TRACE LOG</div>
+  <div class="log-list" id="logList"></div>
+</div>
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span id="clk">--:--:--</span>
+  <span>P = V × I ｜ R≥1.0 → FAIL_CLOSED</span>
+</div>
+
+<script>
+// ── パラメータ ──
+const P_OPT  = 2000;  // W 定格電力 (200V×10A)
+const P_MAX  = 6000;  // W 過電力限界（熱焼損）
+const P_MIN  = 1000;  // W 電力不足限界（動作不安定）
+const TAU_HI = P_MAX - P_OPT;  // 4000W
+const TAU_LO = P_OPT - P_MIN;  // 1000W
+const R_WARN = 0.75, R_FAIL = 1.0;
+
+// ── 状態 ──
+let running = true, loadOn = false;
+let V = 200, I = 10;
+let pRaw = P_OPT, pSmooth = P_OPT;
+let smoothBuf = [], waveHist = [], logTimer = 0;
+const SMOOTH_N = 10, WAVE_LEN = 300;
+let heatAccum = 0;   // 熱蓄積[0-100]
+let electrons = [];  // 電子アニメーション
+
+// ── キャンバス ──
+const cc = document.getElementById('circuitCanvas');
+const wc_ = document.getElementById('waveCanvas');
+const ctx = cc.getContext('2d');
+const wctx = wc_.getContext('2d');
+
+function resize(){
+  const wp = cc.parentElement;
+  cc.width = wp.clientWidth; cc.height = 260;
+  wc_.width = wp.clientWidth; wc_.height = 70;
+}
+
+// ── コントロール ──
+function toggleRun(){
+  running = !running;
+  const b = document.getElementById('btnRun');
+  b.classList.toggle('on',running); b.textContent = running?'RUN':'PAUSE';
+}
+function toggleLoad(){
+  loadOn = !loadOn;
+  const b = document.getElementById('btnLoad');
+  b.classList.toggle('on',loadOn);
+  b.textContent = loadOn ? '負荷増加 ON' : '負荷増加 OFF';
+}
+function onV(v){ V = parseFloat(v); document.getElementById('vDisp').innerHTML = V.toFixed(0)+'<small style="font-size:11px;font-weight:300;color:var(--muted)"> V</small>'; }
+function onI(v){ I = parseFloat(v); document.getElementById('iDisp').innerHTML = I.toFixed(0)+'<small style="font-size:11px;font-weight:300;color:var(--muted)"> A</small>'; }
+
+// ── NRA-IDE ──
+function calcIDE(p){
+  const delta = p - P_OPT;
+  const absDelta = Math.abs(delta);
+  const rHi = delta > 0 ? delta / TAU_HI : 0;
+  const rLo = delta < 0 ? absDelta / TAU_LO : 0;
+  let status, action;
+  if(rHi >= R_FAIL)      { status='fail-hi'; action='過電力：FAIL_CLOSED — 遮断器トリップ'; }
+  else if(rLo >= R_FAIL) { status='fail-lo'; action='電力不足：FAIL_CLOSED — 電源確認'; }
+  else if(rHi >= R_WARN) { status='warn-hi'; action='過電力警告：負荷低減推奨'; }
+  else if(rLo >= R_WARN) { status='warn-lo'; action='電力不足警告：電圧・電流確認'; }
+  else                   { status='safe';    action='正常稼働継続'; }
+  return { delta, absDelta, rHi, rLo, status, action };
+}
+
+// ── Tick ──
+function tick(dt){
+  if(!running) return;
+
+  // 負荷増加モード
+  let iTarget = I;
+  if(loadOn) iTarget = Math.min(I + 15 * dt, 38);
+
+  // ゆらぎ（電源リップル・負荷変動）
+  const t = performance.now()/1000;
+  const baseP = V * iTarget;
+  const rippleAmp = baseP * 0.025;
+  const fluct = rippleAmp * Math.sin(2*Math.PI*50*t)      // 50Hz リップル
+              + rippleAmp*0.4 * Math.sin(2*Math.PI*100*t) // 2次高調波
+              + rippleAmp*0.2 * Math.sin(2*Math.PI*7*t + 1.2) // 負荷変動
+              + (Math.random()-0.5) * rippleAmp * 0.3;
+  pRaw = Math.max(0, baseP + fluct);
+
+  smoothBuf.push(pRaw);
+  if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
+  pSmooth = smoothBuf.reduce((a,b)=>a+b,0)/smoothBuf.length;
+
+  const ide = calcIDE(pSmooth);
+
+  // 熱蓄積：過電力が続くと増大、正常時は放熱で減少
+  if(ide.rHi > 0){
+    heatAccum = Math.min(100, heatAccum + ide.rHi * 12 * dt);
+  } else {
+    heatAccum = Math.max(0, heatAccum - 8 * dt);
+  }
+
+  // 電子生成
+  if(Math.random() < 0.3){
+    const spd = 50 + pSmooth/P_OPT * 60;
+    electrons.push({ x:0, progress:Math.random(), speed:spd, life:1.0,
+      color: ide.status==='fail-hi'?'#ff3060':ide.status==='warn-hi'?'#ffaa00':'#44ccff' });
+  }
+  electrons = electrons.filter(e=>e.life>0);
+  electrons.forEach(e=>{ e.progress += e.speed*dt/800; e.life -= dt*0.8; });
+
+  const fluctAmp = Math.max(...(smoothBuf.length>1?smoothBuf:[pRaw]))
+                 - Math.min(...(smoothBuf.length>1?smoothBuf:[pRaw]));
+
+  waveHist.push({raw:pRaw,smooth:pSmooth,status:ide.status});
+  if(waveHist.length>WAVE_LEN) waveHist.shift();
+
+  updateUI(ide, fluctAmp);
+}
+
+// ── UI更新 ──
+function statusColor(s){
+  return {safe:'#00ffb3','warn-hi':'#ffaa00','warn-lo':'#88aaff',
+          'fail-hi':'#ff3060','fail-lo':'#6688ff'}[s]||'#00ffb3';
+}
+
+function updateUI(ide, fluctAmp){
+  const col = statusColor(ide.status);
+  const vR = parseFloat(document.getElementById('vSlider').value);
+  const iR = parseFloat(document.getElementById('iSlider').value);
+  const pDisplay = vR * iR;
+
+  document.getElementById('vLive').textContent = vR.toFixed(0);
+  document.getElementById('iLive').textContent = (loadOn? Math.min(iR+heatAccum*0.1,38):iR).toFixed(1);
+  document.getElementById('pLive').textContent = Math.round(pRaw).toLocaleString();
+  document.getElementById('pLive').style.color = col;
+  document.getElementById('deltaDisp').textContent = (ide.delta>=0?'+':'')+Math.round(ide.delta).toLocaleString();
+
+  document.getElementById('rHiN').textContent = Math.min(ide.rHi,9.999).toFixed(3);
+  document.getElementById('rHiN').style.color  = ide.rHi>=R_FAIL?'#ff3060':'#ff6080';
+  document.getElementById('rLoN').textContent = Math.min(ide.rLo,9.999).toFixed(3);
+  document.getElementById('rLoN').style.color  = ide.rLo>=R_FAIL?'#6688ff':'#88aaff';
+  setArc('arcHi',ide.rHi,ide.rHi>=R_FAIL?'#ff3060':'#ff6080');
+  setArc('arcLo',ide.rLo,ide.rLo>=R_FAIL?'#6688ff':'#88aaff');
+  setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
+
+  const badge=document.getElementById('badge');
+  badge.className='badge '+ide.status;
+  const lm={safe:'SAFE','warn-hi':'WARNING ↑ 過電力','warn-lo':'WARNING ↓ 電力不足',
+             'fail-hi':'FAIL_CLOSED ↑ 過電力','fail-lo':'FAIL_CLOSED ↓ 電力不足'};
+  badge.textContent=lm[ide.status];
+  document.getElementById('actTxt').textContent=ide.action;
+
+  // 熱バー
+  const hc = heatAccum>75?'#ff3060':heatAccum>50?'#ffaa00':'#ff906040';
+  document.getElementById('heatBar').style.width=heatAccum.toFixed(1)+'%';
+  document.getElementById('heatBar').style.background=hc;
+  document.getElementById('heatPct').textContent=heatAccum.toFixed(0)+'%';
+  document.getElementById('heatPct').style.color=hc;
+
+  // δ/τバー
+  const mx=5000;
+  document.getElementById('dVal').textContent=(ide.delta>=0?'+':'')+Math.round(ide.delta).toLocaleString()+' W';
+  document.getElementById('dBar').style.width=Math.min(ide.absDelta/mx*100,100).toFixed(1)+'%';
+  document.getElementById('dBar').style.background=col;
+  document.getElementById('fluctV').textContent=Math.round(fluctAmp).toLocaleString()+' W';
+  document.getElementById('fluctB').style.width=Math.min(fluctAmp/500*100,100).toFixed(1)+'%';
+
+  document.getElementById('clk').textContent=new Date().toTimeString().slice(0,8);
+  logTimer++;
+  if(logTimer%60===0) addLog(ide);
+}
+
+// ── アーク ──
+function setArc(id,R,col){
+  const arcLen=163.4,ratio=Math.min(R/1.5,1);
+  const el=document.getElementById(id);
+  el.style.strokeDashoffset=arcLen*(1-ratio); el.style.stroke=col;
+}
+function setMarkPair(wId,fId){ setMarkSVG(wId,0.75/1.5,60,52); setMarkSVG(fId,1.0/1.5,60,52); }
+function setMarkSVG(id,t,cy,r){
+  const ang=Math.PI*(1-t),cx=60,x=cx+r*Math.cos(ang),y=cy-r*Math.sin(ang);
+  const nx=Math.cos(ang)*7,ny=-Math.sin(ang)*7,el=document.getElementById(id);
+  el.setAttribute('x1',(x-nx*.5).toFixed(1));el.setAttribute('y1',(y-ny*.5).toFixed(1));
+  el.setAttribute('x2',(x+nx*.5).toFixed(1));el.setAttribute('y2',(y+ny*.5).toFixed(1));
+}
+
+// ── 回路描画 ──
+function drawCircuit(){
+  const W=cc.width,H=cc.height;
+  ctx.clearRect(0,0,W,H);
+  const ide=calcIDE(pSmooth);
+  const col=statusColor(ide.status);
+  const V_=parseFloat(document.getElementById('vSlider').value);
+  const I_=parseFloat(document.getElementById('iSlider').value);
+
+  // 回路レイアウト
+  const cx=W/2, cy=H/2;
+  const rx=W*0.38, ry=H*0.33;
+  // 回路パス: 上辺・右辺・下辺・左辺
+  const pts=[
+    {x:cx-rx,y:cy-ry},{x:cx+rx,y:cy-ry},
+    {x:cx+rx,y:cy+ry},{x:cx-rx,y:cy+ry}
+  ];
+
+  // ── 配線 ──
+  const wireCol = ide.status==='fail-hi'?'#ff3060':
+                  ide.status==='warn-hi'?'#ffaa00':
+                  ide.status==='fail-lo'?'#6688ff':'#1e3040';
+  const wireAlpha = 0.6 + (pSmooth/P_OPT)*0.3;
+  ctx.strokeStyle=wireCol; ctx.lineWidth=4;
+  ctx.globalAlpha=Math.min(wireAlpha,1);
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x,pts[0].y);
+  pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.closePath(); ctx.stroke();
+  ctx.globalAlpha=1;
+
+  // ── 電源（左辺中央） ──
+  const sx=pts[0].x, sy=cy;
+  drawSource(ctx, sx, sy, V_, col);
+
+  // ── 抵抗・負荷（右辺中央） ──
+  const lx=pts[1].x, ly=cy;
+  drawLoad(ctx, lx, ly, pSmooth, col, ide.status);
+
+  // ── コンデンサ（上辺中央） ──
+  drawCapacitor(ctx, cx, pts[0].y, col);
+
+  // ── ヒューズ（下辺） ──
+  drawFuse(ctx, cx, pts[2].y, ide.status, col);
+
+  // ── 電子フロー ──
+  const pathPts = buildCircuitPath(pts, sx, sy, lx, ly, cx);
+  electrons.forEach(e => {
+    const pos = getPathPoint(pathPts, e.progress % 1);
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 3, 0, Math.PI*2);
+    ctx.fillStyle = e.color;
+    ctx.globalAlpha = e.life * 0.8;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    // 軌跡
+    const pos2 = getPathPoint(pathPts, Math.max(0,(e.progress-0.02)%1));
+    ctx.beginPath(); ctx.moveTo(pos2.x,pos2.y); ctx.lineTo(pos.x,pos.y);
+    ctx.strokeStyle=e.color; ctx.lineWidth=1.5; ctx.globalAlpha=e.life*0.4; ctx.stroke();
+    ctx.globalAlpha=1;
+  });
+
+  // ── オーバーレイ ──
+  ctx.font='bold 12px JetBrains Mono'; ctx.fillStyle=col;
+  ctx.textAlign='left'; ctx.fillText(`P = ${Math.round(pSmooth).toLocaleString()} W`,10,18);
+  ctx.font='10px JetBrains Mono'; ctx.textAlign='right';
+  const stTxt={safe:'● SAFE','warn-hi':'▲ 過電力','warn-lo':'▲ 電力不足',
+               'fail-hi':'✕ FAIL 遮断','fail-lo':'✕ FAIL 停電'};
+  ctx.fillText(stTxt[ide.status],W-10,18);
+
+  // 熱オーラ（過電力時）
+  if(heatAccum>20){
+    const aura=ctx.createRadialGradient(lx,ly,0,lx,ly,60);
+    aura.addColorStop(0,`rgba(255,100,30,${heatAccum/100*0.25})`);
+    aura.addColorStop(1,'rgba(255,100,30,0)');
+    ctx.fillStyle=aura; ctx.beginPath(); ctx.arc(lx,ly,60,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function drawSource(ctx,x,y,V,col){
+  // 電源記号（交流）
+  ctx.strokeStyle='#304060'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='rgba(20,30,50,0.9)';
+  ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill();
+  // 交流記号
+  ctx.beginPath();
+  for(let i=0;i<=20;i++){
+    const sx2=x-14+i*1.4, sy2=y+Math.sin(i/20*Math.PI*2)*8;
+    i===0?ctx.moveTo(sx2,sy2):ctx.lineTo(sx2,sy2);
+  }
+  ctx.strokeStyle=col; ctx.lineWidth=2; ctx.stroke();
+  // ラベル
+  ctx.font='bold 11px JetBrains Mono'; ctx.fillStyle='#ffcc44';
+  ctx.textAlign='center';
+  ctx.fillText(`${V}V`,x,y+38);
+}
+
+function drawLoad(ctx,x,y,P,col,status){
+  // 抵抗記号（ジグザグ）
+  const w=36,h=18,n=6;
+  ctx.fillStyle='rgba(20,25,40,0.9)';
+  ctx.fillRect(x-w/2-4,y-h-4,w+8,h*2+8);
+  ctx.strokeStyle=status==='fail-hi'?'#ff3060':status==='warn-hi'?'#ffaa00':'#304060';
+  ctx.lineWidth=1.5;
+  ctx.strokeRect(x-w/2-4,y-h-4,w+8,h*2+8);
+  ctx.beginPath();
+  for(let i=0;i<=n;i++){
+    const lx2=x-w/2+i*w/n;
+    const ly2=y+(i%2===0?-h:h);
+    i===0?ctx.moveTo(lx2,y):ctx.lineTo(lx2,ly2);
+    if(i===n) ctx.lineTo(lx2,y);
+  }
+  ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.font='10px JetBrains Mono'; ctx.fillStyle=col;
+  ctx.textAlign='center';
+  ctx.fillText(`LOAD`,x,y+h+18);
+  ctx.fillText(`${Math.round(P/1000*10)/10}kW`,x,y+h+30);
+}
+
+function drawCapacitor(ctx,x,y,col){
+  const cw=24,ch=16;
+  ctx.strokeStyle='#304060'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x-cw,y); ctx.lineTo(x+cw,y); ctx.stroke();
+  // 二本の平行線
+  [[-ch/2],[ch/2]].forEach(([oy])=>{
+    ctx.beginPath(); ctx.moveTo(x-cw*0.7,y+oy); ctx.lineTo(x+cw*0.7,y+oy);
+    ctx.strokeStyle=col; ctx.lineWidth=3; ctx.stroke();
+  });
+  ctx.font='9px JetBrains Mono'; ctx.fillStyle='#384060';
+  ctx.textAlign='center'; ctx.fillText('CAP',x,y-22);
+}
+
+function drawFuse(ctx,x,y,status,col){
+  const fw=40,fh=10;
+  ctx.fillStyle=status==='fail-hi'?'rgba(255,48,96,0.2)':'rgba(20,25,40,0.9)';
+  ctx.fillRect(x-fw/2,y-fh/2,fw,fh);
+  ctx.strokeStyle=status==='fail-hi'?'#ff3060':'#304060';
+  ctx.lineWidth=status==='fail-hi'?2:1;
+  ctx.strokeRect(x-fw/2,y-fh/2,fw,fh);
+  if(status!=='fail-hi'){
+    ctx.beginPath(); ctx.moveTo(x-fw*0.35,y); ctx.lineTo(x+fw*0.35,y);
+    ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.stroke();
+  } else {
+    // ヒューズ断線
+    ctx.beginPath(); ctx.moveTo(x-fw*0.35,y); ctx.lineTo(x-5,y+3);
+    ctx.strokeStyle='#ff3060'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+5,y-3); ctx.lineTo(x+fw*0.35,y);
+    ctx.stroke();
+  }
+  ctx.font='9px JetBrains Mono'; ctx.fillStyle='#384060';
+  ctx.textAlign='center'; ctx.fillText('FUSE',x,y+22);
+}
+
+function buildCircuitPath(pts,sx,sy,lx,ly,cx){
+  // 時計回りに回路をセグメント化
+  return [
+    {from:{x:sx,y:sy},to:{x:pts[0].x,y:pts[0].y}},
+    {from:{x:pts[0].x,y:pts[0].y},to:{x:pts[1].x,y:pts[1].y}},
+    {from:{x:pts[1].x,y:pts[1].y},to:{x:lx,y:ly}},
+    {from:{x:lx,y:ly},to:{x:pts[2].x,y:pts[2].y}},
+    {from:{x:pts[2].x,y:pts[2].y},to:{x:pts[3].x,y:pts[3].y}},
+    {from:{x:pts[3].x,y:pts[3].y},to:{x:sx,y:sy}},
+  ];
+}
+
+function getPathPoint(segs,t){
+  const totalLen=segs.reduce((a,s)=>{
+    const dx=s.to.x-s.from.x,dy=s.to.y-s.from.y;
+    return a+Math.sqrt(dx*dx+dy*dy);
+  },0);
+  let target=t*totalLen,cum=0;
+  for(const s of segs){
+    const dx=s.to.x-s.from.x,dy=s.to.y-s.from.y;
+    const len=Math.sqrt(dx*dx+dy*dy);
+    if(cum+len>=target){
+      const u=(target-cum)/len;
+      return {x:s.from.x+dx*u,y:s.from.y+dy*u};
+    }
+    cum+=len;
+  }
+  return segs[0].from;
+}
+
+// ── 波形 ──
+function drawWave(){
+  const W=wc_.width,H=wc_.height;
+  wctx.clearRect(0,0,W,H);
+  if(waveHist.length<2) return;
+  const center=P_OPT,span=5000;
+  const dMin=center-span,dMax=center+span;
+  const mapY=v=>H*(1-(v-dMin)/(span*2))*0.88+H*0.06;
+  wctx.strokeStyle='rgba(255,255,255,.04)';wctx.lineWidth=0.5;
+  for(let g=0;g<5;g++){const gy=H*.06+H*.88*g/4;wctx.beginPath();wctx.moveTo(0,gy);wctx.lineTo(W,gy);wctx.stroke();}
+  [{v:P_MAX,c:'rgba(255,48,96,.5)',lbl:'MAX'},{v:P_OPT,c:'rgba(0,255,179,.3)',lbl:'OPT'},{v:P_MIN,c:'rgba(102,136,255,.5)',lbl:'MIN'}]
+    .forEach(({v,c,lbl})=>{
+      if(v<dMin||v>dMax) return;
+      wctx.setLineDash([4,4]);wctx.beginPath();wctx.moveTo(0,mapY(v));wctx.lineTo(W,mapY(v));
+      wctx.strokeStyle=c;wctx.lineWidth=1;wctx.stroke();wctx.setLineDash([]);
+      wctx.font='8px JetBrains Mono';wctx.fillStyle=c.replace('.5)','1)').replace('.3)','1)');
+      wctx.textAlign='left';wctx.globalAlpha=.6;wctx.fillText(lbl,2,mapY(v)-2);wctx.globalAlpha=1;
+    });
+  // 生波形
+  wctx.beginPath();
+  waveHist.forEach((h,i)=>{const x=i/WAVE_LEN*W,y=mapY(h.raw);i===0?wctx.moveTo(x,y):wctx.lineTo(x,y);});
+  wctx.strokeStyle='rgba(255,255,255,.15)';wctx.lineWidth=1;wctx.stroke();
+  // 平滑化
+  waveHist.forEach((h,i)=>{
+    if(i===0) return;
+    const x0=(i-1)/WAVE_LEN*W,x1=i/WAVE_LEN*W;
+    const y0=mapY(waveHist[i-1].smooth),y1=mapY(h.smooth);
+    wctx.beginPath();wctx.moveTo(x0,y0);wctx.lineTo(x1,y1);
+    wctx.strokeStyle=statusColor(h.status);wctx.lineWidth=2;wctx.stroke();
+  });
+  wctx.font='8px JetBrains Mono';wctx.textAlign='right';
+  wctx.fillStyle='rgba(255,255,255,.25)';wctx.fillText('raw',W-58,H-4);
+  wctx.fillStyle='#00ffb3';wctx.fillText('smooth',W-2,H-4);
+}
+
+function addLog(ide){
+  const now=new Date().toTimeString().slice(0,8);
+  const list=document.getElementById('logList');
+  const e=document.createElement('div');e.className='log-entry';
+  e.innerHTML=`<span class="l-t">${now}</span>
+    <span style="color:${statusColor(ide.status)};min-width:80px">${Math.round(pSmooth).toLocaleString()} W</span>
+    <span style="color:var(--muted);font-size:9px">R↑=${ide.rHi.toFixed(3)} R↓=${ide.rLo.toFixed(3)}</span>
+    <span style="color:#ff906060;font-size:9px">熱${heatAccum.toFixed(0)}%</span>
+    <span class="l-s ${ide.status}">${ide.status.toUpperCase()}</span>`;
+  list.insertBefore(e,list.firstChild);
+  if(list.children.length>15) list.removeChild(list.lastChild);
+}
+
+let last=performance.now();
+function loop(now){
+  const dt=Math.min((now-last)/1000,0.05); last=now;
+  tick(dt); drawCircuit(); drawWave();
+  requestAnimationFrame(loop);
+}
+window.addEventListener('resize',resize);
+resize();
+setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
+addLog(calcIDE(pSmooth));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

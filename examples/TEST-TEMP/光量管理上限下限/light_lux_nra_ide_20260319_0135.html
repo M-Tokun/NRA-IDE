@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<!-- FILE: light_lux_nra_ide_20260319_0135.html -->
+<!-- TITLE: NRA-IDE 光量（照度）上限・下限管理システム -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-03-19 01:35 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE Light Intensity Monitor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+:root{
+  --bg:#08090e;--surface:#0f1118;--panel:#141820;--border:#1c2230;
+  --safe:#ffe066;--warn:#ff9030;--fail-hi:#ff3b5c;--fail-lo:#4488ff;
+  --text:#c0c8d8;--muted:#3a4860;--accent:#ffe066;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 12px;min-height:100vh;}
+
+.hdr{width:100%;max-width:980px;display:flex;justify-content:space-between;
+  align-items:flex-end;border-bottom:1px solid var(--border);
+  padding-bottom:14px;margin-bottom:18px;}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--muted);letter-spacing:.16em;text-transform:uppercase;}
+.hdr-sub h1{font-size:18px;color:var(--text);letter-spacing:.04em;font-weight:600;margin-top:4px;}
+.ctrl-row{display:flex;gap:8px;flex-wrap:wrap;}
+.pill{font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:6px 14px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;border-radius:4px;transition:all .2s;letter-spacing:.06em;}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#000;}
+.pill-shade{border-color:#888;}
+.pill-shade.on{background:#556;border-color:#aaa;color:#fff;}
+.pill-auto{border-color:#ffe066;}
+.pill-auto.on{background:#3a3010;border-color:#ffe066;color:#ffe066;}
+
+.grid{width:100%;max-width:980px;display:grid;grid-template-columns:1fr 310px;gap:14px;}
+
+.scene-panel{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.panel-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;}
+canvas{display:block;border-radius:6px;}
+#skyCanvas{width:100%;height:260px;background:#08090e;}
+#waveCanvas{width:100%;height:65px;background:var(--bg);}
+
+.slider-section{display:flex;flex-direction:column;gap:10px;}
+.sl-row{display:flex;flex-direction:column;gap:5px;}
+.sl-hdr{display:flex;justify-content:space-between;align-items:baseline;}
+.sl-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.sl-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+.sl-mrk{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--muted);}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;
+  border-radius:2px;background:var(--border);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--accent);border:3px solid var(--bg);
+  box-shadow:0 0 0 1px var(--accent);transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+
+.side{display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.card-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:12px;}
+
+.lux-display{text-align:center;padding:10px 0;}
+.lux-big{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;
+  line-height:1;transition:color .4s;}
+.lux-unit{font-size:16px;font-weight:300;color:var(--muted);}
+.lux-sub{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.1em;margin-top:6px;}
+.lux-scene{font-family:'JetBrains Mono',monospace;font-size:11px;
+  text-align:center;margin-top:4px;font-weight:600;}
+
+.dual-r{display:flex;gap:10px;justify-content:center;}
+.r-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.r-arc-wrap{width:120px;height:65px;overflow:visible;}
+.r-num{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;
+  transition:color .3s;text-align:center;}
+.r-dir{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.1em;text-align:center;}
+
+.badge{width:100%;padding:10px;border-radius:6px;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  letter-spacing:.14em;border:1px solid;transition:all .35s;}
+.badge.safe   {color:var(--safe);border-color:var(--safe);background:rgba(255,224,102,.06);}
+.badge.warn-hi{color:var(--warn);border-color:var(--warn);background:rgba(255,144,48,.07);}
+.badge.fail-hi{color:var(--fail-hi);border-color:var(--fail-hi);
+  background:rgba(255,59,92,.09);animation:pf .7s ease-in-out infinite;}
+.badge.warn-lo{color:#88aaff;border-color:#4488ff;background:rgba(68,136,255,.06);}
+.badge.fail-lo{color:var(--fail-lo);border-color:var(--fail-lo);
+  background:rgba(68,136,255,.1);animation:pfl .7s ease-in-out infinite;}
+@keyframes pf {0%,100%{box-shadow:0 0 0 0 rgba(255,59,92,.3)} 50%{box-shadow:0 0 0 5px rgba(255,59,92,0)}}
+@keyframes pfl{0%,100%{box-shadow:0 0 0 0 rgba(68,136,255,.3)} 50%{box-shadow:0 0 0 5px rgba(68,136,255,0)}}
+
+.act-txt{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;margin-top:2px;}
+
+.metrics{display:flex;flex-direction:column;gap:8px;}
+.met-row{display:flex;flex-direction:column;gap:4px;}
+.met-hdr{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;}
+.met-k{color:var(--muted);}.met-v{font-weight:600;}
+.bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:2px;transition:width .25s,background .3s;}
+
+.setting-row{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.set-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.set-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;}
+
+.log-panel{width:100%;max-width:980px;margin-top:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px 18px;}
+.log-title{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:8px;}
+.log-list{display:flex;flex-direction:column;gap:3px;max-height:90px;overflow-y:auto;}
+.log-e{font-family:'JetBrains Mono',monospace;font-size:10px;
+  display:flex;gap:10px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.l-t{color:var(--muted);min-width:56px;}
+.l-lux{min-width:80px;}
+.l-s{font-weight:600;}
+.l-s.safe{color:var(--safe)}.l-s.warn-hi,.l-s.warn-lo{color:var(--warn)}
+.l-s.fail-hi{color:var(--fail-hi)}.l-s.fail-lo{color:var(--fail-lo)}
+
+.footer{width:100%;max-width:980px;margin-top:14px;display:flex;
+  justify-content:space-between;font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--muted);letter-spacing:.08em;}
+
+/* 遮光パネル表示 */
+.shade-indicator{display:flex;align-items:center;gap:8px;
+  padding:8px 10px;background:rgba(255,255,255,.03);
+  border:1px solid var(--border);border-radius:6px;margin-top:4px;}
+.shade-bar-bg{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.shade-bar-fill{height:100%;border-radius:3px;background:#556;transition:width .4s ease;}
+.shade-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);min-width:60px;}
+.shade-pct{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;min-width:36px;text-align:right;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-sub">
+    NRA-IDE / LIGHT INTENSITY CONTROL
+    <h1>光量（照度）上限・下限管理システム</h1>
+  </div>
+  <div class="ctrl-row">
+    <button class="pill on"        id="btnRun"   onclick="toggleRun()">RUN</button>
+    <button class="pill pill-auto on" id="btnAuto" onclick="toggleAuto()">AUTO-SHADE ON</button>
+    <button class="pill pill-shade"  id="btnCloud" onclick="addCloud()">雲を追加</button>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- 左：空・太陽シーン -->
+  <div class="scene-panel">
+    <div class="panel-lbl">SKY &amp; IRRADIANCE SCENE</div>
+    <canvas id="skyCanvas"></canvas>
+
+    <div class="panel-lbl">LUX TREND  ( raw / smooth )</div>
+    <canvas id="waveCanvas"></canvas>
+
+    <div class="slider-section">
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">SUN ELEVATION（太陽高度）</span>
+          <div class="sl-val" id="elevDisp" style="color:var(--accent)">
+            45<small style="font-size:12px;font-weight:300;color:var(--muted)">°</small>
+          </div>
+        </div>
+        <input type="range" id="elevSlider" min="0" max="90" value="45"
+          oninput="onElev(this.value)">
+        <div class="sl-mrk"><span>水平0°</span><span>快晴時最大</span><span>天頂90°</span></div>
+      </div>
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">CLOUD COVER（雲量）</span>
+          <div class="sl-val" id="cloudDisp" style="font-size:14px;color:var(--muted)">
+            0<small style="font-size:10px">%</small>
+          </div>
+        </div>
+        <input type="range" id="cloudSlider" min="0" max="100" value="0"
+          oninput="onCloud(this.value)">
+        <div class="sl-mrk"><span>快晴</span><span>50%</span><span>厚曇り</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右 -->
+  <div class="side">
+
+    <div class="card">
+      <div class="card-lbl">CURRENT ILLUMINANCE</div>
+      <div class="lux-display">
+        <div class="lux-big" id="luxBig">20000<span class="lux-unit"> lux</span></div>
+        <div class="lux-sub" id="luxSub">δ = 0 lx | τ_hi = 30000 lx | τ_lo = 5000 lx</div>
+      </div>
+      <div class="lux-scene" id="luxScene" style="color:var(--safe)">☀ 快適な明るさ</div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">APPROACH RATIO  R = δ / τ</div>
+      <div class="dual-r">
+        <div class="r-item">
+          <svg class="r-arc-wrap" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#1c2230" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcHi" d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#ff9030" stroke-width="9" stroke-linecap="round"
+              stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wMarkHi" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fMarkHi" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round"/>
+            <text x="8"   y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rHiNum" style="color:#ff9030">0.000</div>
+          <div class="r-dir">↑ 過照射 R_hi</div>
+        </div>
+        <div class="r-item">
+          <svg class="r-arc-wrap" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#1c2230" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcLo" d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#4488ff" stroke-width="9" stroke-linecap="round"
+              stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wMarkLo" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fMarkLo" stroke="#4488ff" stroke-width="2" stroke-linecap="round"/>
+            <text x="8"   y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rLoNum" style="color:#4488ff">0.000</div>
+          <div class="r-dir">↓ 照度不足 R_lo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="badge safe" id="badge">SAFE</div>
+    <div class="act-txt" id="actTxt">正常稼働継続</div>
+
+    <!-- 遮光パネル -->
+    <div class="card">
+      <div class="card-lbl">AUTO-SHADE PANEL</div>
+      <div class="shade-indicator">
+        <span class="shade-lbl">遮光率</span>
+        <div class="shade-bar-bg">
+          <div class="shade-bar-fill" id="shadeBar" style="width:0%"></div>
+        </div>
+        <span class="shade-pct" id="shadePct">0%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">δ / τ  BREAKDOWN</div>
+      <div class="metrics">
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">δ 偏差</span>
+            <span class="met-v" id="dVal">0 lx</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">τ_hi 過照射余裕</span>
+            <span class="met-v" id="tauHiVal">30000 lx</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="tauHiBar"
+            style="width:60%;background:#ff903066"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">τ_lo 不足余裕</span>
+            <span class="met-v" id="tauLoVal">15000 lx</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="tauLoBar"
+            style="width:60%;background:#4488ff66"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">ゆらぎ振幅</span>
+            <span class="met-v" id="ampVal">0 lx</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="ampBar"
+            style="width:0%;background:#ffe06688"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">THRESHOLD SETTINGS</div>
+      <div class="setting-row">
+        <span class="set-lbl">T_OPTIMAL</span>
+        <span class="set-val" style="color:var(--safe)">20,000 lx</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">T_MAX（過照射限界）</span>
+        <span class="set-val" style="color:#ff9030">50,000 lx</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">T_MIN（照度不足限界）</span>
+        <span class="set-val" style="color:#4488ff">5,000 lx</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">R_WARNING</span>
+        <span class="set-val" style="color:var(--warn)">0.75</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">R_FAIL</span>
+        <span class="set-val" style="color:var(--fail-hi)">1.00</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="log-panel">
+  <div class="log-title">TRACE LOG</div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span id="clk">--:--:--</span>
+  <span>R≥1.0 → FAIL_CLOSED</span>
+</div>
+
+<script>
+// ── パラメータ（農業・温室・屋内植物工場を想定） ──
+const L_OPT = 20000;  // lx : 最適照度
+const L_MAX = 50000;  // lx : 過照射限界（熱ストレス・葉焼け）
+const L_MIN =  5000;  // lx : 照度不足限界（光合成停止）
+const TAU_HI = L_MAX - L_OPT;  // 30000 lx
+const TAU_LO = L_OPT - L_MIN;  // 15000 lx
+const R_WARN = 0.75, R_FAIL = 1.0;
+
+// ── 状態 ──
+let running   = true;
+let autoShade = true;
+let elevation = 45;    // 太陽高度[°]
+let cloudCover= 0;     // 雲量[0-100]
+let shadePct  = 0;     // 現在の遮光率[0-100]
+let shadeTarget = 0;   // 遮光率目標値
+
+let luxRaw    = L_OPT;
+let luxSmooth = L_OPT;
+let smoothBuf = [];
+const SMOOTH_N = 12;
+let waveHist  = [];
+const WAVE_LEN= 300;
+let logTimer  = 0;
+let clouds    = [];
+let sunRays   = [];
+let particles = [];  // 光粒子
+
+// ── キャンバス ──
+const skyC  = document.getElementById('skyCanvas');
+const waveC = document.getElementById('waveCanvas');
+const sc    = skyC.getContext('2d');
+const wc    = waveC.getContext('2d');
+
+function resize(){
+  const wp = skyC.parentElement;
+  skyC.width  = wp.clientWidth; skyC.height = 260;
+  waveC.width = wp.clientWidth; waveC.height = 65;
+}
+
+// ── コントロール ──
+function toggleRun(){
+  running = !running;
+  const b = document.getElementById('btnRun');
+  b.classList.toggle('on', running); b.textContent = running ? 'RUN' : 'PAUSE';
+}
+function toggleAuto(){
+  autoShade = !autoShade;
+  const b = document.getElementById('btnAuto');
+  b.classList.toggle('on', autoShade);
+  b.textContent = autoShade ? 'AUTO-SHADE ON' : 'AUTO-SHADE OFF';
+}
+function addCloud(){
+  const W = skyC.width;
+  clouds.push({
+    x: W * 0.1 + Math.random() * W * 0.2,
+    y: 30 + Math.random() * 60,
+    w: 80 + Math.random() * 120,
+    h: 30 + Math.random() * 40,
+    vx: 0.3 + Math.random() * 0.4,
+    opacity: 0.7 + Math.random() * 0.3,
+    life: 1.0
+  });
+}
+function onElev(v){
+  elevation = parseFloat(v);
+  document.getElementById('elevDisp').innerHTML =
+    elevation.toFixed(0) + '<small style="font-size:12px;font-weight:300;color:var(--muted)">°</small>';
+}
+function onCloud(v){
+  cloudCover = parseFloat(v);
+  document.getElementById('cloudDisp').innerHTML =
+    cloudCover.toFixed(0) + '<small style="font-size:10px">%</small>';
+}
+
+// ── 照度計算 ──
+function calcBaseLux(){
+  // 太陽高度から基本照度を計算
+  // 天頂(90°)で快晴100,000lx、高度0°で0
+  const elevRad = elevation * Math.PI / 180;
+  const sinElev = Math.sin(elevRad);
+  const clearLux = 100000 * sinElev;
+  // 雲による減衰（厚曇りで約500lxまで減少）
+  const cloudFactor = 1 - cloudCover / 100 * 0.995;
+  // 遮光パネルによる減衰
+  const shadeFactor = 1 - shadePct / 100 * 0.9;
+  return clearLux * cloudFactor * shadeFactor;
+}
+
+// ゆらぎ（大気揺らぎ・雲の移動・センサーノイズ）
+function calcFluct(baseLux){
+  const t = performance.now() / 1000;
+  const amp = baseLux * 0.04;  // 基本照度の4%
+  // 雲通過ゆらぎ（低周波）
+  const cloudFluct = clouds.length > 0
+    ? baseLux * 0.12 * Math.sin(2 * Math.PI * 0.15 * t)
+    : 0;
+  const f = amp * Math.sin(2 * Math.PI * 0.8 * t)
+          + amp * 0.5 * Math.sin(2 * Math.PI * 1.7 * t + 0.9)
+          + amp * 0.25 * Math.sin(2 * Math.PI * 3.1 * t + 2.1)
+          + cloudFluct
+          + (Math.random() - 0.5) * amp * 0.3;
+  return f;
+}
+
+// ── NRA-IDE計算 ──
+function calcIDE(lux){
+  const delta = lux - L_OPT;
+  const absDelta = Math.abs(delta);
+  const rHi = delta > 0 ? delta / TAU_HI : 0;
+  const rLo = delta < 0 ? absDelta / TAU_LO : 0;
+  let status, action;
+  if(rHi >= R_FAIL){
+    status = 'fail-hi'; action = '過照射：FAIL_CLOSED — 遮光パネル最大展開';
+  } else if(rLo >= R_FAIL){
+    status = 'fail-lo'; action = '照度不足：FAIL_CLOSED — 補助照明 ON';
+  } else if(rHi >= R_WARN){
+    status = 'warn-hi'; action = '過照射警告：遮光パネル展開推奨';
+  } else if(rLo >= R_WARN){
+    status = 'warn-lo'; action = '照度不足警告：遮光パネル縮小 / 補助照明検討';
+  } else {
+    status = 'safe';    action = '正常稼働継続';
+  }
+  return { delta, absDelta, rHi, rLo, status, action };
+}
+
+// ── 自動遮光計算 ──
+function calcShadeTarget(ide){
+  if(!autoShade) return shadePct;
+  if(ide.status === 'fail-hi') return 90;
+  if(ide.status === 'warn-hi'){
+    // R_hi比例で遮光率を上げる
+    const ratio = (ide.rHi - R_WARN) / (R_FAIL - R_WARN);
+    return Math.min(80, 30 + ratio * 50);
+  }
+  if(ide.status === 'fail-lo' || ide.status === 'warn-lo') return 0;
+  if(ide.status === 'safe' && ide.delta > 0){
+    // 安全域でも上限側なら軽く遮光
+    return Math.min(20, ide.rHi / R_WARN * 20);
+  }
+  return 0;
+}
+
+// ── シーン名 ──
+function sceneName(lux){
+  if(lux >= 80000) return '☀ 夏の直射日光';
+  if(lux >= 50000) return '☀ 快晴の屋外';
+  if(lux >= 30000) return '⛅ 晴れの屋外';
+  if(lux >= 15000) return '🌤 薄曇りの屋外';
+  if(lux >= 5000)  return '☁ 曇りの屋外';
+  if(lux >= 1000)  return '🏢 明るい室内';
+  if(lux >= 300)   return '🏠 一般室内照明';
+  return '🌙 照度不足';
+}
+
+// ── Tick ──
+function tick(dt){
+  if(!running) return;
+  const base  = calcBaseLux();
+  const fluct = calcFluct(base);
+  luxRaw = Math.max(0, base + fluct);
+
+  smoothBuf.push(luxRaw);
+  if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
+  luxSmooth = smoothBuf.reduce((a,b)=>a+b,0) / smoothBuf.length;
+
+  const ide = calcIDE(luxSmooth);
+
+  // 自動遮光
+  shadeTarget = calcShadeTarget(ide);
+  shadePct += (shadeTarget - shadePct) * Math.min(dt * 1.5, 1);
+
+  // 雲移動
+  const W = skyC.width;
+  clouds.forEach(c => { c.x += c.vx; });
+  clouds = clouds.filter(c => c.x < W + 200);
+
+  // 光粒子（高照度時）
+  if(luxSmooth > L_OPT * 0.5 && Math.random() < 0.3){
+    particles.push({
+      x: W * 0.15 + Math.random() * W * 0.7,
+      y: 200 + Math.random() * 40,
+      size: 1 + Math.random() * 2,
+      vy: -(20 + Math.random() * 40),
+      vx: (Math.random() - 0.5) * 10,
+      life: 1.0,
+      alpha: 0.4 + Math.random() * 0.4
+    });
+  }
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.life -= dt * 1.2;
+  });
+
+  // 波形履歴
+  const fluctAmp = Math.max(...(smoothBuf.length > 1 ? smoothBuf : [luxRaw])) -
+                   Math.min(...(smoothBuf.length > 1 ? smoothBuf : [luxRaw]));
+  waveHist.push({ raw: luxRaw, smooth: luxSmooth, status: ide.status });
+  if(waveHist.length > WAVE_LEN) waveHist.shift();
+
+  updateUI(ide, fluctAmp);
+}
+
+// ── UI更新 ──
+function updateUI(ide, fluctAmp){
+  const col = statusColor(ide.status);
+  const rHiCol = ide.rHi >= R_FAIL ? '#ff3b5c' : ide.rHi >= R_WARN ? '#ff9030' : '#ff903088';
+  const rLoCol = ide.rLo >= R_FAIL ? '#4488ff' : ide.rLo >= R_WARN ? '#88aaff' : '#4488ff88';
+
+  document.getElementById('luxBig').innerHTML =
+    formatLux(luxRaw) + '<span class="lux-unit"> lux</span>';
+  document.getElementById('luxBig').style.color = col;
+  document.getElementById('luxSub').textContent =
+    `δ = ${ide.delta >= 0 ? '+' : ''}${Math.round(ide.delta).toLocaleString()} lx | τ_hi = ${TAU_HI.toLocaleString()} lx | τ_lo = ${TAU_LO.toLocaleString()} lx`;
+  document.getElementById('luxScene').textContent = sceneName(luxRaw);
+  document.getElementById('luxScene').style.color = col;
+
+  document.getElementById('rHiNum').textContent = Math.min(ide.rHi,9.999).toFixed(3);
+  document.getElementById('rHiNum').style.color  = ide.rHi >= R_FAIL ? '#ff3b5c' : '#ff9030';
+  document.getElementById('rLoNum').textContent = Math.min(ide.rLo,9.999).toFixed(3);
+  document.getElementById('rLoNum').style.color  = ide.rLo >= R_FAIL ? '#4488ff' : '#88aaff';
+  setArc('arcHi', ide.rHi, ide.rHi>=R_FAIL?'#ff3b5c':'#ff9030');
+  setArc('arcLo', ide.rLo, ide.rLo>=R_FAIL?'#4488ff':'#88aaff');
+  setMarkPair('wMarkHi','fMarkHi');
+  setMarkPair('wMarkLo','fMarkLo');
+
+  const badge = document.getElementById('badge');
+  badge.className = 'badge ' + ide.status;
+  const lblMap = { safe:'SAFE', 'warn-hi':'WARNING ↑ 過照射', 'warn-lo':'WARNING ↓ 照度不足',
+                   'fail-hi':'FAIL_CLOSED ↑ 過照射', 'fail-lo':'FAIL_CLOSED ↓ 照度不足' };
+  badge.textContent = lblMap[ide.status];
+  document.getElementById('actTxt').textContent = ide.action;
+
+  // 遮光パネル
+  document.getElementById('shadeBar').style.width = shadePct.toFixed(1) + '%';
+  document.getElementById('shadePct').textContent = shadePct.toFixed(0) + '%';
+
+  // δ/τバー
+  const maxRange = 50000;
+  document.getElementById('dVal').textContent = (ide.delta>=0?'+':'')+Math.round(ide.delta).toLocaleString()+' lx';
+  document.getElementById('dBar').style.width = Math.min(ide.absDelta/maxRange*100,100).toFixed(1)+'%';
+  document.getElementById('dBar').style.background = col;
+  document.getElementById('tauHiVal').textContent = TAU_HI.toLocaleString()+' lx';
+  document.getElementById('tauLoVal').textContent = TAU_LO.toLocaleString()+' lx';
+  document.getElementById('tauHiBar').style.width = Math.min(TAU_HI/maxRange*100,100).toFixed(1)+'%';
+  document.getElementById('tauLoBar').style.width = Math.min(TAU_LO/maxRange*100,100).toFixed(1)+'%';
+  document.getElementById('ampVal').textContent = Math.round(fluctAmp).toLocaleString()+' lx';
+  document.getElementById('ampBar').style.width = Math.min(fluctAmp/5000*100,100).toFixed(1)+'%';
+
+  document.getElementById('clk').textContent = new Date().toTimeString().slice(0,8);
+  logTimer++;
+  if(logTimer % 60 === 0) addLog(ide);
+}
+
+function formatLux(v){ return Math.round(v).toLocaleString(); }
+
+function statusColor(s){
+  return { safe:'#ffe066','warn-hi':'#ff9030','warn-lo':'#88aaff',
+           'fail-hi':'#ff3b5c','fail-lo':'#4488ff' }[s] || '#ffe066';
+}
+
+// ── アーク ──
+function setArc(id, R, col){
+  const arcLen = 163.4, ratio = Math.min(R/1.5,1);
+  const el = document.getElementById(id);
+  el.style.strokeDashoffset = arcLen*(1-ratio);
+  el.style.stroke = col;
+}
+function setMarkPair(wId,fId){
+  setMarkSVG(wId,0.75/1.5,60,52);
+  setMarkSVG(fId,1.0/1.5, 60,52);
+}
+function setMarkSVG(id,t,cy,r){
+  const ang=Math.PI*(1-t),cx=60;
+  const x=cx+r*Math.cos(ang),y=cy-r*Math.sin(ang);
+  const nx=Math.cos(ang)*7,ny=-Math.sin(ang)*7;
+  const el=document.getElementById(id);
+  el.setAttribute('x1',(x-nx*.5).toFixed(1));el.setAttribute('y1',(y-ny*.5).toFixed(1));
+  el.setAttribute('x2',(x+nx*.5).toFixed(1));el.setAttribute('y2',(y+ny*.5).toFixed(1));
+}
+
+// ── 空・シーン描画 ──
+function drawSky(){
+  const W=skyC.width, H=skyC.height;
+  sc.clearRect(0,0,W,H);
+
+  const ide = calcIDE(luxSmooth);
+  const col = statusColor(ide.status);
+
+  // 空グラジェント（高度・雲量で変化）
+  const skyBright = Math.sin(elevation*Math.PI/180);
+  const r1=Math.round(10+skyBright*30), g1=Math.round(15+skyBright*50), b1=Math.round(30+skyBright*90);
+  const r2=Math.round(5+skyBright*15),  g2=Math.round(8+skyBright*25),  b2=Math.round(20+skyBright*50);
+  const skyGrad = sc.createLinearGradient(0,0,0,H*0.75);
+  skyGrad.addColorStop(0, `rgb(${r1},${g1},${b1})`);
+  skyGrad.addColorStop(1, `rgb(${r2},${g2},${b2})`);
+  sc.fillStyle = skyGrad;
+  sc.fillRect(0,0,W,H);
+
+  // 地面
+  const groundGrad = sc.createLinearGradient(0,H*0.72,0,H);
+  groundGrad.addColorStop(0,'#1a2010');
+  groundGrad.addColorStop(1,'#0e1508');
+  sc.fillStyle = groundGrad;
+  sc.fillRect(0,H*0.72,W,H*0.28);
+
+  // 太陽位置計算
+  const elevRad  = elevation * Math.PI / 180;
+  const sunX     = W * 0.5 + Math.cos(elevRad + Math.PI*0.5) * W * 0.35;
+  const sunY     = H * 0.72 - Math.sin(elevRad) * H * 0.65;
+  const sunVisible = elevation > 2;
+
+  if(sunVisible){
+    const sunSize  = 20 + elevation / 90 * 8;
+    const sunAlpha = Math.min(1, elevation / 15);
+
+    // 太陽光輪（複数層）
+    const glowLayers = [
+      { r: sunSize * 8, a: 0.04 },
+      { r: sunSize * 5, a: 0.08 },
+      { r: sunSize * 3, a: 0.15 },
+      { r: sunSize * 1.8, a: 0.35 },
+    ];
+    glowLayers.forEach(({ r, a }) => {
+      const g = sc.createRadialGradient(sunX,sunY,0,sunX,sunY,r);
+      g.addColorStop(0,   `rgba(255,220,100,${a*sunAlpha})`);
+      g.addColorStop(1,   'rgba(255,200,80,0)');
+      sc.fillStyle = g;
+      sc.beginPath(); sc.arc(sunX,sunY,r,0,Math.PI*2); sc.fill();
+    });
+
+    // 太陽本体
+    const sunGrad = sc.createRadialGradient(sunX-sunSize*0.2,sunY-sunSize*0.2,sunSize*0.1,sunX,sunY,sunSize);
+    sunGrad.addColorStop(0,'rgba(255,255,220,1)');
+    sunGrad.addColorStop(0.5,'rgba(255,230,100,1)');
+    sunGrad.addColorStop(1,'rgba(255,180,50,0.9)');
+    sc.beginPath(); sc.arc(sunX,sunY,sunSize,0,Math.PI*2);
+    sc.fillStyle = sunGrad; sc.fill();
+
+    // 光線
+    drawSunRays(sc, sunX, sunY, sunSize, sunAlpha * (1 - cloudCover/100*0.8));
+  }
+
+  // 地面への光
+  if(sunVisible && cloudCover < 80){
+    const lAlpha = Math.sin(elevRad) * (1-cloudCover/100) * (1-shadePct/100) * 0.15;
+    const lightGrad = sc.createRadialGradient(sunX, H*0.72, 0, sunX, H*0.72, W*0.6);
+    lightGrad.addColorStop(0, `rgba(255,230,100,${lAlpha})`);
+    lightGrad.addColorStop(1, 'rgba(255,230,100,0)');
+    sc.fillStyle = lightGrad;
+    sc.fillRect(0, H*0.68, W, H*0.32);
+  }
+
+  // 雲
+  clouds.forEach(c => drawCloud(sc, c.x, c.y, c.w, c.h, c.opacity));
+
+  // 雲量スライダーによる雲レイヤー
+  if(cloudCover > 10){
+    const coverAlpha = Math.min(cloudCover / 100 * 0.85, 0.85);
+    sc.fillStyle = `rgba(180,190,200,${coverAlpha * 0.4})`;
+    sc.fillRect(0,0,W,H*0.72);
+    // 雲の質感
+    for(let i=0;i<3;i++){
+      const t = performance.now()/1000;
+      const cx = W*(0.1+i*0.35) + Math.sin(t*0.1+i)*20;
+      const cy = 20 + i*25;
+      drawCloud(sc, cx, cy, W*0.3+i*40, 40+i*15, coverAlpha*0.6);
+    }
+  }
+
+  // 遮光パネル（下部に格子状）
+  if(shadePct > 1){
+    const pAlpha = shadePct / 100 * 0.75;
+    sc.fillStyle = `rgba(20,25,40,${pAlpha})`;
+    sc.fillRect(0,0,W,H*0.72);
+    // 格子線
+    const gridAlpha = shadePct / 100 * 0.4;
+    sc.strokeStyle = `rgba(100,120,160,${gridAlpha})`;
+    sc.lineWidth = 1;
+    const gridSize = 20;
+    for(let x=0;x<W;x+=gridSize){
+      sc.beginPath();sc.moveTo(x,0);sc.lineTo(x,H*0.72);sc.stroke();
+    }
+    for(let y=0;y<H*0.72;y+=gridSize){
+      sc.beginPath();sc.moveTo(0,y);sc.lineTo(W,y);sc.stroke();
+    }
+    // パネルラベル
+    sc.font='10px JetBrains Mono';
+    sc.fillStyle=`rgba(150,170,200,${Math.min(pAlpha*1.5,0.8)})`;
+    sc.textAlign='center';
+    sc.fillText(`SHADE PANEL  ${shadePct.toFixed(0)}%`, W/2, H*0.35);
+  }
+
+  // 光粒子
+  particles.forEach(p => {
+    sc.beginPath();
+    sc.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    sc.fillStyle = `rgba(255,230,100,${p.life*p.alpha})`;
+    sc.fill();
+  });
+
+  // 照度オーバーレイ
+  sc.font = 'bold 12px JetBrains Mono';
+  sc.fillStyle = col;
+  sc.textAlign = 'left';
+  sc.fillText(`${formatLux(luxRaw)} lx`, 10, 18);
+  sc.font = '10px JetBrains Mono';
+  sc.textAlign = 'right';
+  const stTxt = { safe:'● SAFE','warn-hi':'▲ 過照射','warn-lo':'▲ 照度不足',
+                  'fail-hi':'✕ FAIL 過照射','fail-lo':'✕ FAIL 照度不足' };
+  sc.fillText(stTxt[ide.status], W-10, 18);
+}
+
+function drawSunRays(ctx, cx, cy, r, alpha){
+  const t = performance.now()/1000;
+  const n = 16;
+  for(let i=0;i<n;i++){
+    const ang = i/n*Math.PI*2 + t*0.2;
+    const r1 = r*1.3, r2 = r*(1.8+Math.sin(t*2+i)*0.3);
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(ang)*r1, cy+Math.sin(ang)*r1);
+    ctx.lineTo(cx+Math.cos(ang)*r2, cy+Math.sin(ang)*r2);
+    ctx.strokeStyle=`rgba(255,230,100,${alpha*0.3})`;
+    ctx.lineWidth=2; ctx.stroke();
+  }
+}
+
+function drawCloud(ctx, cx, cy, w, h, alpha){
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const parts = [
+    [cx, cy, w*0.5, h*0.5],
+    [cx-w*0.3, cy+h*0.1, w*0.35, h*0.4],
+    [cx+w*0.3, cy+h*0.1, w*0.35, h*0.4],
+    [cx-w*0.15,cy-h*0.1, w*0.3, h*0.35],
+    [cx+w*0.15,cy-h*0.1, w*0.3, h*0.35],
+  ];
+  const cg = ctx.createRadialGradient(cx,cy-h*0.2,0,cx,cy,w*0.6);
+  cg.addColorStop(0,'rgba(220,225,235,0.95)');
+  cg.addColorStop(1,'rgba(180,190,205,0.6)');
+  parts.forEach(([x,y,rw,rh])=>{
+    ctx.beginPath();
+    ctx.ellipse(x,y,rw,rh,0,0,Math.PI*2);
+    ctx.fillStyle=cg; ctx.fill();
+  });
+  ctx.restore();
+}
+
+// ── 波形描画 ──
+function drawWave(){
+  const W=waveC.width, H=waveC.height;
+  wc.clearRect(0,0,W,H);
+  if(waveHist.length < 2) return;
+
+  // 表示範囲をL_OPT中心にズーム
+  const center = L_OPT, span = 30000;
+  const dMin = center - span, dMax = center + span;
+  const mapY = v => H*(1-(v-dMin)/(span*2))*0.88 + H*0.06;
+
+  // グリッド
+  wc.strokeStyle='rgba(255,255,255,0.04)';wc.lineWidth=0.5;
+  for(let g=0;g<5;g++){
+    const gy=H*0.06+H*0.88*g/4;
+    wc.beginPath();wc.moveTo(0,gy);wc.lineTo(W,gy);wc.stroke();
+  }
+
+  // 閾値ライン
+  [{v:L_MAX,c:'rgba(255,59,92,.5)',lbl:'MAX'},
+   {v:L_OPT,c:'rgba(255,224,102,.3)',lbl:'OPT'},
+   {v:L_MIN,c:'rgba(68,136,255,.5)',lbl:'MIN'}].forEach(({v,c,lbl})=>{
+    if(v<dMin||v>dMax) return;
+    wc.setLineDash([4,4]);
+    wc.beginPath();wc.moveTo(0,mapY(v));wc.lineTo(W,mapY(v));
+    wc.strokeStyle=c;wc.lineWidth=1;wc.stroke();
+    wc.setLineDash([]);
+    wc.font='8px JetBrains Mono';wc.fillStyle=c.replace(',.5)',',.9)').replace(',.3)',',.9)');
+    wc.textAlign='left';wc.globalAlpha=0.6;
+    wc.fillText(lbl,2,mapY(v)-2);wc.globalAlpha=1;
+  });
+
+  // 生波形（半透明細線）
+  wc.beginPath();
+  waveHist.forEach((h,i)=>{
+    const x=i/WAVE_LEN*W, y=mapY(h.raw);
+    i===0?wc.moveTo(x,y):wc.lineTo(x,y);
+  });
+  wc.strokeStyle='rgba(255,255,255,0.15)';wc.lineWidth=1;wc.stroke();
+
+  // 平滑化波形（状態色）
+  waveHist.forEach((h,i)=>{
+    if(i===0) return;
+    const x0=(i-1)/WAVE_LEN*W,x1=i/WAVE_LEN*W;
+    const y0=mapY(waveHist[i-1].smooth),y1=mapY(h.smooth);
+    wc.beginPath();wc.moveTo(x0,y0);wc.lineTo(x1,y1);
+    wc.strokeStyle=statusColor(h.status);wc.lineWidth=2;wc.stroke();
+  });
+
+  // 凡例
+  wc.font='8px JetBrains Mono';wc.textAlign='right';
+  wc.fillStyle='rgba(255,255,255,0.25)';wc.fillText('raw',W-58,H-4);
+  wc.fillStyle='#ffe066';wc.fillText('smooth',W-2,H-4);
+}
+
+// ── ログ ──
+function addLog(ide){
+  const now=new Date().toTimeString().slice(0,8);
+  const list=document.getElementById('logList');
+  const e=document.createElement('div');
+  e.className='log-entry';
+  e.innerHTML=`
+    <span class="l-t">${now}</span>
+    <span class="l-lux" style="color:${statusColor(ide.status)}">${formatLux(luxSmooth)} lx</span>
+    <span style="color:var(--muted);font-size:9px">R↑=${ide.rHi.toFixed(3)} R↓=${ide.rLo.toFixed(3)}</span>
+    <span style="color:#556;font-size:9px">遮光${shadePct.toFixed(0)}%</span>
+    <span class="l-s ${ide.status}">${ide.status.toUpperCase()}</span>
+  `;
+  list.insertBefore(e,list.firstChild);
+  if(list.children.length>15) list.removeChild(list.lastChild);
+}
+
+// ── メインループ ──
+let last=performance.now();
+function loop(now){
+  const dt=Math.min((now-last)/1000,0.05);
+  last=now;
+  tick(dt);
+  drawSky();
+  drawWave();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize',resize);
+resize();
+setMarkPair('wMarkHi','fMarkHi');
+setMarkPair('wMarkLo','fMarkLo');
+addLog(calcIDE(luxSmooth));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

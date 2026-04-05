@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- FILE: NRA-IDE_AutoDrive_POC_03_EN.html  2026-02-28 -->
+<title>NRA-IDE: Autonomous Drive Safety Gate v0.3 — Tire×Road μ</title>
+<style>
+:root{--bg:#080c10;--panel:#0d1117;--border:#1c2a36;--cyan:#00e5ff;--green:#00ff88;--yellow:#ffd600;--orange:#ff8c00;--red:#ff2244;--deepred:#cc0033;--text:#c8d8e0;--muted:#4a6070;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',Courier,monospace;font-size:13px;height:100vh;display:grid;grid-template-rows:48px 1fr;grid-template-columns:1fr 300px;overflow:hidden;}
+header{grid-column:1/-1;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;}
+header .logo{color:var(--cyan);font-size:14px;letter-spacing:2px;text-transform:uppercase;}
+header .sub{color:var(--muted);font-size:11px;}
+header .ver{margin-left:auto;color:var(--muted);font-size:10px;letter-spacing:1px;}
+#main{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);}
+#roadWrap{height:200px;position:relative;background:#060a0d;border-bottom:1px solid var(--border);overflow:hidden;flex-shrink:0;}
+canvas#road{display:block;width:100%;height:100%;}
+#statusBar{display:flex;flex-shrink:0;}
+.sb-cell{flex:1;padding:8px 14px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.sb-cell:last-child{border-right:none;}
+.sb-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.sb-val{font-size:18px;font-weight:bold;margin-top:2px;}
+#selectors{display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sel-group{flex:1;padding:10px 14px;border-right:1px solid var(--border);}
+.sel-group:last-child{border-right:none;}
+.sel-title{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.btn-row{display:flex;gap:5px;flex-wrap:wrap;}
+.sel-btn{padding:4px 10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Courier New',monospace;font-size:11px;cursor:pointer;border-radius:2px;transition:all 0.15s;}
+.sel-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.sel-btn.active-dry{border-color:#888;color:#888;background:rgba(136,136,136,0.1);}
+.sel-btn.active-wet{border-color:#4488ff;color:#4488ff;background:rgba(68,136,255,0.1);}
+.sel-btn.active-snow{border-color:#aaddff;color:#aaddff;background:rgba(170,221,255,0.1);}
+.sel-btn.active-ice{border-color:#88eeff;color:#88eeff;background:rgba(136,238,255,0.1);}
+.sel-btn.active-summer{border-color:#ff8800;color:#ff8800;background:rgba(255,136,0,0.1);}
+.sel-btn.active-studs{border-color:#00ccff;color:#00ccff;background:rgba(0,204,255,0.1);}
+#muBar{display:flex;align-items:center;gap:16px;padding:7px 14px;border-bottom:1px solid var(--border);background:#0a1018;flex-shrink:0;font-size:11px;}
+#muBar .mu-key{color:var(--muted);}
+#muBar .mu-val{color:var(--cyan);font-size:14px;font-weight:bold;}
+#muBar .mu-warn{color:var(--red);font-size:11px;font-weight:bold;margin-left:auto;}
+#controls{padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ctrl-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.ctrl-row:last-child{margin-bottom:0;}
+.ctrl-label{width:180px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+input[type=range]{flex:1;accent-color:var(--cyan);cursor:pointer;}
+.ctrl-unit{width:80px;text-align:right;font-size:14px;color:var(--cyan);}
+#logWrap{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+#logTitle{padding:6px 14px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#log{flex:1;overflow-y:auto;padding:6px 14px;font-size:11px;line-height:1.7;}
+#log::-webkit-scrollbar{width:4px;}
+#log::-webkit-scrollbar-thumb{background:var(--border);}
+.log-permit{color:var(--green);}
+.log-caveat{color:var(--yellow);}
+.log-warning{color:var(--orange);}
+.log-handoff{color:#ff6600;font-weight:bold;}
+.log-emergency{color:#ff2244;font-weight:bold;}
+.log-fail{color:#cc0033;font-weight:bold;}
+#sidebar{display:flex;flex-direction:column;overflow:hidden;}
+#gaugeBox{padding:18px 16px 12px;border-bottom:1px solid var(--border);text-align:center;}
+#gaugeTitle{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+#gaugeCanvas{display:block;margin:0 auto;}
+#rValue{font-size:34px;font-weight:bold;letter-spacing:2px;margin-top:2px;transition:color 0.3s;}
+#zoneLabel{margin-top:5px;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:3px 12px;border-radius:2px;display:inline-block;}
+#metrics{padding:12px 16px;border-bottom:1px solid var(--border);}
+.metric{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);}
+.metric:last-child{border-bottom:none;}
+.m-key{color:var(--muted);font-size:11px;}
+.m-val{font-size:12px;}
+#muMatrix{padding:12px 16px;flex:1;overflow-y:auto;}
+#muMatrixTitle{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{color:var(--muted);font-weight:normal;padding:4px 6px;text-align:center;border-bottom:1px solid var(--border);}
+td{padding:4px 6px;text-align:center;border-bottom:1px solid #0e1820;}
+.td-danger{color:var(--red);}
+.td-warn{color:var(--orange);}
+.td-ok{color:var(--green);}
+tr.row-label td:first-child{text-align:left;color:var(--muted);}
+#flashOverlay{position:fixed;inset:0;background:rgba(255,34,68,0.08);pointer-events:none;opacity:0;transition:opacity 0.1s;z-index:100;}
+/* zone-C banner */
+#handoffBanner{display:none;position:absolute;top:0;left:0;right:0;background:rgba(255,100,0,0.15);border-bottom:1px solid #ff6600;color:#ff8800;font-size:11px;font-weight:bold;padding:4px 12px;z-index:50;text-align:center;}
+</style>
+</head>
+<body>
+<div id="flashOverlay"></div>
+<header>
+  <div class="logo">NRA‑IDE</div>
+  <div class="sub">// Autonomous Drive Safety Gate v0.3 — Tire × Road Surface μ</div>
+  <div class="ver">R = δ / τ &nbsp;|&nbsp; 5-Zone | FAIL‑CLOSED</div>
+</header>
+<div id="main">
+  <div id="roadWrap">
+    <div id="handoffBanner"></div>
+    <canvas id="road"></canvas>
+  </div>
+  <div id="statusBar">
+    <div class="sb-cell"><div class="sb-label">Speed</div><div class="sb-val" id="sb-speed" style="color:var(--cyan)">60 km/h</div></div>
+    <div class="sb-cell"><div class="sb-label">Actual Distance</div><div class="sb-val" id="sb-dist" style="color:var(--cyan)">80 m</div></div>
+    <div class="sb-cell"><div class="sb-label">Stop Distance</div><div class="sb-val" id="sb-stopdist" style="color:var(--yellow)">0 m</div></div>
+    <div class="sb-cell"><div class="sb-label">Violation δ</div><div class="sb-val" id="sb-delta">0 m</div></div>
+  </div>
+  <div id="selectors">
+    <div class="sel-group">
+      <div class="sel-title">Road Surface</div>
+      <div class="btn-row">
+        <button class="sel-btn" id="btn-dry"  onclick="setRoad('dry')">🌞 Dry</button>
+        <button class="sel-btn" id="btn-wet"  onclick="setRoad('wet')">🌧 Wet</button>
+        <button class="sel-btn" id="btn-snow" onclick="setRoad('snow')">❄ Snow</button>
+        <button class="sel-btn" id="btn-ice"  onclick="setRoad('ice')">🧊 Ice</button>
+      </div>
+    </div>
+    <div class="sel-group">
+      <div class="sel-title">Tire Type</div>
+      <div class="btn-row">
+        <button class="sel-btn" id="btn-summer" onclick="setTire('summer')">🔴 Summer Tire</button>
+        <button class="sel-btn" id="btn-studs"  onclick="setTire('studs')">🔵 Winter (Studless)</button>
+      </div>
+    </div>
+  </div>
+  <div id="muBar">
+    <span class="mu-key">μ (friction)</span><span class="mu-val" id="mu-display">0.80</span>
+    <span class="mu-key">→  a =</span><span class="mu-val" id="a-display">7.84 m/s²</span>
+    <span class="mu-key">Road:</span><span id="road-label" style="color:#888">Dry</span>
+    <span class="mu-key">Tire:</span><span id="tire-label" style="color:#ff8800">Summer</span>
+    <span class="mu-warn" id="mu-warning" style="display:none">⚠ Summer tire on Snow/Ice</span>
+  </div>
+  <div id="controls">
+    <div class="ctrl-row"><div class="ctrl-label">Speed</div><input type="range" id="sl-speed" min="0" max="150" value="60"><div class="ctrl-unit" id="lbl-speed">60 km/h</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Lead Vehicle Distance</div><input type="range" id="sl-dist" min="0" max="150" value="80"><div class="ctrl-unit" id="lbl-dist">80 m</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Safety Margin τ</div><input type="range" id="sl-tau" min="2" max="20" value="8"><div class="ctrl-unit" id="lbl-tau">8 m</div></div>
+  </div>
+  <div id="logWrap">
+    <div id="logTitle">▶ Discard Log  (structure verification only)</div>
+    <div id="log"></div>
+  </div>
+</div>
+<div id="sidebar">
+  <div id="gaugeBox">
+    <div id="gaugeTitle">Gate Ratio  R = δ / τ</div>
+    <canvas id="gaugeCanvas" width="200" height="110"></canvas>
+    <div id="rValue">0.00</div>
+    <div id="zoneLabel">ZONE A — PERMIT</div>
+  </div>
+  <div id="metrics">
+    <div class="metric"><div class="m-key">δ (violation)</div><div class="m-val" id="m-delta">0.0 m</div></div>
+    <div class="metric"><div class="m-key">τ (thickness)</div><div class="m-val" id="m-tau">8.0 m</div></div>
+    <div class="metric"><div class="m-key">μ × g = decel</div><div class="m-val" id="m-accel">7.84 m/s²</div></div>
+    <div class="metric"><div class="m-key">stop_dist</div><div class="m-val" id="m-stop">0.0 m</div></div>
+    <div class="metric"><div class="m-key">Gate decision</div><div class="m-val" id="m-gate" style="color:var(--green)">PERMIT</div></div>
+  </div>
+  <div id="muMatrix">
+    <div id="muMatrixTitle">μ Matrix — Road × Tire</div>
+    <table>
+      <thead><tr><th>Road / Tire</th><th>Summer</th><th>Winter</th></tr></thead>
+      <tbody>
+        <tr class="row-label"><td id="rl-dry">🌞 Dry</td><td id="mc-dry-summer" class="td-ok">0.80</td><td id="mc-dry-studs" class="td-ok">0.70</td></tr>
+        <tr class="row-label"><td id="rl-wet">🌧 Wet</td><td id="mc-wet-summer" class="td-ok">0.55</td><td id="mc-wet-studs" class="td-ok">0.50</td></tr>
+        <tr class="row-label"><td id="rl-snow">❄ Snow</td><td id="mc-snow-summer" class="td-danger">0.20</td><td id="mc-snow-studs" class="td-warn">0.45</td></tr>
+        <tr class="row-label"><td id="rl-ice">🧊 Ice</td><td id="mc-ice-summer" class="td-danger">0.10</td><td id="mc-ice-studs" class="td-warn">0.30</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+// FILE: NRA-IDE_AutoDrive_POC_03_EN.html  2026-02-28
+// NRA-IDE AutoDrive Safety Gate v0.3
+// 5-Zone: A=PERMIT B=CAVEAT C=HANDOFF-WARNING D=EMERGENCY E=FAIL-CLOSED
+
+const MU={dry:{summer:0.80,studs:0.70},wet:{summer:0.55,studs:0.50},snow:{summer:0.20,studs:0.45},ice:{summer:0.10,studs:0.30}};
+const ROAD_COLOR={dry:'#888',wet:'#4488ff',snow:'#aaddff',ice:'#88eeff'};
+const TIRE_COLOR={summer:'#ff8800',studs:'#00ccff'};
+const G=9.8, REACT=1.0;
+
+// Zone thresholds — v0.3 key change
+// C threshold = 0.85 (human handoff warning, well before physical limit)
+// D threshold = 1.00 (emergency: human must act now)
+// E = R>=1.00 (FAIL-CLOSED: physical limit exceeded)
+const TH={A:0.40,B:0.70,C:0.85,D:1.00};
+
+let speed_kmh=60,dist_m=80,tau_m=8,road='dry',tire='summer',prevZone='',roadOffset=0;
+const slSpeed=document.getElementById('sl-speed');
+const slDist=document.getElementById('sl-dist');
+const slTau=document.getElementById('sl-tau');
+const flashEl=document.getElementById('flashOverlay');
+const roadCanvas=document.getElementById('road');
+const roadCtx=roadCanvas.getContext('2d');
+const gc=document.getElementById('gaugeCanvas');
+const gctx=gc.getContext('2d');
+const banner=document.getElementById('handoffBanner');
+
+function getMu(){return MU[road][tire];}
+function getDecel(){return getMu()*G;}
+function stopDist(v){const ms=v/3.6;return ms*REACT+(ms*ms)/(2*getDecel());}
+function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-d);const R=t>0?delta/t:Infinity;return{delta,R,sd};}
+
+function zoneFromR(R){
+  if(R<TH.A)return'A';
+  if(R<TH.B)return'B';
+  if(R<TH.C)return'C';
+  if(R<TH.D)return'D';
+  return'E';
+}
+function getColor(R){
+  if(R<TH.A)return'#00ff88';
+  if(R<TH.B)return'#ffd600';
+  if(R<TH.C)return'#ff8c00';
+  if(R<TH.D)return'#ff4400';
+  return'#ff2244';
+}
+
+function setRoad(r){
+  road=r;
+  ['dry','wet','snow','ice'].forEach(k=>{document.getElementById('btn-'+k).className='sel-btn'+(k===r?' active-'+k:'');});
+  document.getElementById('road-label').textContent={"dry":"Dry","wet":"Wet","snow":"Snow","ice":"Ice"}[r];
+  document.getElementById('road-label').style.color=ROAD_COLOR[r];
+  checkWarn();update();
+}
+function setTire(t){
+  tire=t;
+  ['summer','studs'].forEach(k=>{document.getElementById('btn-'+k).className='sel-btn'+(k===t?' active-'+k:'');});
+  const tl={summer:"Summer",studs:"Winter"};
+  document.getElementById('tire-label').textContent=tl[t];
+  document.getElementById('tire-label').style.color=TIRE_COLOR[t];
+  checkWarn();update();
+}
+function checkWarn(){
+  document.getElementById('mu-warning').style.display=(tire==='summer'&&(road==='snow'||road==='ice'))?'':'none';
+}
+function highlightMatrix(){
+  document.querySelectorAll('td[id^="mc-"]').forEach(td=>{td.style.background='';td.style.outline='';td.style.fontWeight='';});
+  document.querySelectorAll('td[id^="rl-"]').forEach(td=>{td.style.color='';});
+  const el=document.getElementById('mc-'+road+'-'+tire);
+  if(el){el.style.background='rgba(0,229,255,0.15)';el.style.outline='1px solid #00e5ff';el.style.fontWeight='bold';}
+  document.getElementById('rl-'+road).style.color=ROAD_COLOR[road];
+}
+
+// 5-zone gauge arcs (R scale 0-1.2 mapped to PI-2PI)
+function drawGauge(R){
+  const w=gc.width,h=gc.height;
+  gctx.clearRect(0,0,w,h);
+  const cx=w/2,cy=h-10,radius=h-20;
+  const scale=1.2; // max R displayed
+  function rToAngle(r){return Math.PI+Math.min(r,scale)/scale*Math.PI;}
+  const arcs=[
+    {from:rToAngle(0),   to:rToAngle(TH.A), color:'rgba(0,255,136,0.25)'},
+    {from:rToAngle(TH.A),to:rToAngle(TH.B), color:'rgba(255,214,0,0.25)'},
+    {from:rToAngle(TH.B),to:rToAngle(TH.C), color:'rgba(255,140,0,0.25)'},
+    {from:rToAngle(TH.C),to:rToAngle(TH.D), color:'rgba(255,68,0,0.30)'},
+    {from:rToAngle(TH.D),to:rToAngle(scale),color:'rgba(255,34,68,0.40)'},
+  ];
+  arcs.forEach(z=>{
+    gctx.beginPath();gctx.arc(cx,cy,radius-4,z.from,z.to);
+    gctx.lineWidth=16;gctx.strokeStyle=z.color;gctx.stroke();
+  });
+  // threshold ticks
+  [TH.A,TH.B,TH.C,TH.D].forEach(t=>{
+    const a=rToAngle(t);
+    const ix=cx+(radius-12)*Math.cos(a),iy=cy+(radius-12)*Math.sin(a);
+    const ox=cx+(radius+2)*Math.cos(a),oy=cy+(radius+2)*Math.sin(a);
+    gctx.beginPath();gctx.moveTo(ix,iy);gctx.lineTo(ox,oy);
+    gctx.lineWidth=1.5;gctx.strokeStyle='rgba(255,255,255,0.3)';gctx.stroke();
+  });
+  const angle=rToAngle(R);
+  const nc=getColor(R);
+  gctx.save();gctx.translate(cx,cy);gctx.rotate(angle);
+  gctx.beginPath();gctx.moveTo(0,0);gctx.lineTo(radius-22,0);
+  gctx.lineWidth=3;gctx.strokeStyle=nc;gctx.shadowColor=nc;gctx.shadowBlur=8;gctx.stroke();
+  gctx.restore();
+  gctx.beginPath();gctx.arc(cx,cy,5,0,Math.PI*2);gctx.fillStyle=nc;gctx.fill();
+  gctx.fillStyle='rgba(255,255,255,0.3)';gctx.font='9px Courier New';gctx.textAlign='center';
+  gctx.fillText('0',cx-radius+8,cy-4);
+  gctx.fillText('0.85',cx,cy-radius+8);
+  gctx.fillText('1.0',cx+radius-8,cy-4);
+}
+
+const ROAD_BG={dry:['#111820','#0a0e14'],wet:['#0d1a28','#08121e'],snow:['#1e2830','#161e26'],ice:['#10202c','#0a1620']};
+
+function drawRoad(delta,R,sd,dist){
+  const w=roadCanvas.width,h=roadCanvas.height,ctx=roadCtx;
+  ctx.clearRect(0,0,w,h);
+  const skyG=ctx.createLinearGradient(0,0,0,h*0.5);
+  skyG.addColorStop(0,'#060a10');skyG.addColorStop(1,'#0a1520');
+  ctx.fillStyle=skyG;ctx.fillRect(0,0,w,h*0.5);
+  const rb=ROAD_BG[road];
+  const rG=ctx.createLinearGradient(0,h*0.5,0,h);
+  rG.addColorStop(0,rb[0]);rG.addColorStop(1,rb[1]);
+  ctx.fillStyle=rG;ctx.fillRect(0,h*0.5,w,h*0.5);
+  if(road==='snow'){ctx.fillStyle='rgba(200,230,255,0.06)';ctx.fillRect(0,h*0.5,w,h*0.5);for(let i=0;i<30;i++){const sx=(i*137+roadOffset*0.5)%w;const sy=h*0.52+(i*53)%(h*0.45);ctx.beginPath();ctx.arc(sx,sy,1.5,0,Math.PI*2);ctx.fillStyle='rgba(220,240,255,0.4)';ctx.fill();}}
+  if(road==='ice'){ctx.fillStyle='rgba(136,238,255,0.04)';ctx.fillRect(0,h*0.5,w,h*0.5);}
+  roadOffset=(roadOffset+speed_kmh*0.05)%80;
+  ctx.setLineDash([30,50]);ctx.lineDashOffset=-roadOffset;
+  ctx.beginPath();ctx.moveTo(0,h*0.5+1);ctx.lineTo(w,h*0.5+1);ctx.strokeStyle='#1c2a36';ctx.lineWidth=1;ctx.stroke();
+  ctx.setLineDash([20,40]);ctx.lineDashOffset=-roadOffset;
+  ctx.beginPath();ctx.moveTo(0,h*0.72);ctx.lineTo(w,h*0.72);ctx.strokeStyle=road==='snow'?'#2a3c4a':'#1e3240';ctx.lineWidth=2;ctx.stroke();
+  ctx.setLineDash([]);
+  const pxPerM=w/150,ego_x=30;
+  const lead_x=Math.min(ego_x+dist*pxPerM,w-90);
+  const safeW=sd*pxPerM;
+  const zoneColor=R>=TH.D?'rgba(255,34,68,0.14)':R>=TH.C?'rgba(255,68,0,0.12)':R>=TH.B?'rgba(255,140,0,0.10)':R>=TH.A?'rgba(255,214,0,0.07)':'rgba(0,255,136,0.04)';
+  ctx.fillStyle=zoneColor;ctx.fillRect(lead_x-safeW,h*0.5,safeW,h*0.5);
+  ctx.beginPath();ctx.moveTo(ego_x+62,h*0.52);ctx.lineTo(lead_x-2,h*0.52);
+  ctx.strokeStyle=getColor(R);ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle=getColor(R);ctx.font='10px Courier New';ctx.textAlign='center';
+  ctx.fillText(dist.toFixed(0)+' m',(ego_x+62+lead_x)/2,h*0.52-4);
+  const sd_x=Math.min(ego_x+62+sd*pxPerM*0.4,w-10);
+  ctx.beginPath();ctx.moveTo(ego_x+62,h*0.57);ctx.lineTo(sd_x,h*0.57);
+  ctx.strokeStyle='#ffd60055';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#ffd60088';ctx.font='9px Courier New';ctx.textAlign='left';
+  ctx.fillText('stop='+sd.toFixed(1)+'m',ego_x+64,h*0.57-3);
+  drawCar(ctx,ego_x,h*0.58,'#00e5ff','#004455',false);
+  const tl=R>=TH.D?'#ff2244':R>=TH.C?'#ff4400':R>=TH.B?'#ff5500':'#440010';
+  drawCar(ctx,lead_x,h*0.58,'#cc2233','#330010',true,tl);
+  ctx.fillStyle=TIRE_COLOR[tire];ctx.font='10px Courier New';ctx.textAlign='left';
+  ctx.fillText((false?['夏タイヤ','スタッドレス']:['Summer','Winter'])[tire==='summer'?0:1]+'  μ='+getMu().toFixed(2),12,h-10);
+
+  // Zone E FAIL-CLOSED overlay
+  if(R>=TH.D){
+    ctx.fillStyle='rgba(255,34,68,0.06)';ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#ff2244';ctx.font='bold 12px Courier New';ctx.textAlign='center';
+    ctx.shadowColor='#ff2244';ctx.shadowBlur=10;
+    ctx.fillText("⚠ FAIL‑CLOSED — EMERGENCY STOP (Physical Limit)",w/2,22);ctx.shadowBlur=0;
+  }
+}
+
+function drawCar(ctx,x,groundY,bodyColor,roofColor,mirror,taillightColor){
+  const W=70,H=24,RH=14,bx=mirror?x-W:x,by=groundY-H;
+  ctx.fillStyle='rgba(0,0,0,0.4)';ctx.beginPath();ctx.ellipse(bx+W/2,groundY+2,W*0.5,4,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=bodyColor;ctx.fillRect(bx,by,W,H);
+  ctx.fillStyle=roofColor;const rx=bx+W*0.2;
+  ctx.beginPath();ctx.moveTo(rx,by);ctx.lineTo(rx+W*0.6,by);ctx.lineTo(rx+W*0.5,by-RH);ctx.lineTo(rx+W*0.1,by-RH);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#222';
+  [bx+12,bx+W-14].forEach(wx=>{ctx.beginPath();ctx.arc(wx,groundY,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#444';ctx.beginPath();ctx.arc(wx,groundY,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#222';});
+  if(!mirror){ctx.fillStyle='#00e5ff';ctx.shadowColor='#00e5ff';ctx.shadowBlur=8;ctx.fillRect(bx+W-4,by+6,4,8);ctx.shadowBlur=0;}
+  else{ctx.fillStyle=taillightColor||'#440010';ctx.shadowColor=taillightColor||'#440010';ctx.shadowBlur=taillightColor==='#ff2244'?14:4;ctx.fillRect(bx,by+6,4,8);ctx.shadowBlur=0;}
+}
+
+function updateZoneUI(zone,R){
+  const rEl=document.getElementById('rValue'),zEl=document.getElementById('zoneLabel'),gateEl=document.getElementById('m-gate');
+  const zData={
+    A:{color:'#00ff88',name:"ZONE A — PERMIT",gate:"PERMIT"},
+    B:{color:'#ffd600',name:"ZONE B — CAVEAT",gate:"PERMIT WITH CAVEAT"},
+    C:{color:'#ff8c00',name:"ZONE C — HANDOFF WARNING",gate:"⚠ Cannot continue. Please take over."},
+    D:{color:'#ff4400',name:"ZONE D — EMERGENCY REQUEST",gate:"🚨 EMERGENCY INTERVENTION"},
+    E:{color:'#ff2244',name:"ZONE E — FAIL‑CLOSED",gate:"🛑 FAIL‑CLOSED"},
+  };
+  const z=zData[zone];
+  rEl.style.color=z.color;rEl.textContent=Math.min(R,9.99).toFixed(2);
+  zEl.textContent=z.name;zEl.style.background=z.color+'22';zEl.style.color=z.color;
+  gateEl.textContent=z.gate;gateEl.style.color=z.color;
+
+  // Zone C banner
+  if(zone==='C'){
+    banner.textContent="⚠ HANDOFF WARNING — Cannot continue. Human intervention required.";banner.style.display='block';
+    banner.style.borderColor='#ff8800';banner.style.color='#ff8800';
+  } else if(zone==='D'){
+    banner.textContent="🚨 EMERGENCY REQUEST — Immediate human action required.";banner.style.display='block';
+    banner.style.borderColor='#ff4400';banner.style.color='#ff4400';
+  } else {
+    banner.style.display='none';
+  }
+}
+
+function addLog(zone,R,delta,mu,ts){
+  const cls={A:'log-permit',B:'log-caveat',C:'log-warning',D:'log-handoff',E:'log-emergency'}[zone]||'log-fail';
+  const mark={A:'✓',B:'○',C:'△',D:'⚠',E:'🛑'}[zone];
+  const tireLog={"summer":"Sum","studs":"Win"};
+  const d=document.createElement('div');d.className=cls;
+  d.textContent='['+ts+'] '+mark+' Zone'+zone+' R='+R.toFixed(3)+' δ='+delta.toFixed(1)+'m μ='+mu.toFixed(2)+' ['+road+'/'+tireLog[tire]+']';
+  const logEl=document.getElementById('log');logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;
+  if(logEl.children.length>80)logEl.children[0].remove();
+}
+
+function now(){return new Date().toTimeString().slice(0,8);}
+function flash(){flashEl.style.opacity='1';setTimeout(()=>{flashEl.style.opacity='0';},80);}
+
+function update(){
+  const mu=getMu(),a=mu*G;
+  const{delta,R,sd}=computeR(speed_kmh,dist_m,tau_m);
+  const zone=zoneFromR(R);
+  document.getElementById('sb-speed').textContent=speed_kmh+' km/h';
+  document.getElementById('sb-dist').textContent=dist_m+' m';
+  document.getElementById('sb-stopdist').textContent=sd.toFixed(1)+' m';
+  const dEl=document.getElementById('sb-delta');dEl.textContent=delta.toFixed(1)+' m';dEl.style.color=delta>0?'#ff8c00':'#4a6070';
+  document.getElementById('mu-display').textContent=mu.toFixed(2);
+  document.getElementById('a-display').textContent=a.toFixed(2)+' m/s²';
+  document.getElementById('m-delta').textContent=delta.toFixed(1)+' m';
+  document.getElementById('m-tau').textContent=tau_m.toFixed(1)+' m';
+  document.getElementById('m-accel').textContent=a.toFixed(2)+' m/s²';
+  document.getElementById('m-stop').textContent=sd.toFixed(1)+' m';
+  drawGauge(R);updateZoneUI(zone,R);highlightMatrix();
+  if(zone!==prevZone){addLog(zone,R,delta,mu,now());if(zone==='D'||zone==='E')flash();prevZone=zone;}
+}
+
+slSpeed.addEventListener('input',()=>{speed_kmh=+slSpeed.value;document.getElementById('lbl-speed').textContent=speed_kmh+' km/h';update();});
+slDist.addEventListener('input',()=>{dist_m=+slDist.value;document.getElementById('lbl-dist').textContent=dist_m+' m';update();});
+slTau.addEventListener('input',()=>{tau_m=+slTau.value;document.getElementById('lbl-tau').textContent=tau_m+' m';update();});
+
+function resizeRoad(){roadCanvas.width=roadCanvas.offsetWidth;roadCanvas.height=roadCanvas.offsetHeight;}
+window.addEventListener('resize',resizeRoad);resizeRoad();
+
+function loop(){const{delta,R,sd}=computeR(speed_kmh,dist_m,tau_m);drawRoad(delta,R,sd,dist_m);drawGauge(R);requestAnimationFrame(loop);}
+
+setRoad('dry');setTire('summer');update();loop();
+</script>
+</body>
+</html>

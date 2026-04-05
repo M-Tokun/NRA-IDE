@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>NRA-IDE Canvas Visualization</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --danger-color: #ff7b72;
+            --safe-color: #3fb950;
+            --buffer-color: #a5d6ff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { 
+            margin-bottom: 10px; 
+            font-size: 1.5rem; 
+            border-bottom: 1px solid #30363d; 
+            padding-bottom: 10px; 
+            width: 100%; 
+            text-align: center; 
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1400px;
+        }
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        /* Model Visualization */
+        #model-view {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .tank-container {
+            width: 100px;
+            height: 300px;
+            border: 4px solid #555;
+            border-top: none;
+            position: relative;
+            background: #000;
+            margin-bottom: 20px;
+        }
+        .limit-line {
+            position: absolute;
+            bottom: 80%;
+            width: 100%;
+            height: 2px;
+            background-color: var(--danger-color);
+            z-index: 10;
+        }
+        .limit-label {
+            position: absolute;
+            right: -110px;
+            bottom: 80%;
+            color: var(--danger-color);
+            font-size: 0.8rem;
+        }
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background-color: var(--safe-color);
+            transition: height 0.3s ease, background-color 0.3s;
+        }
+        .tension-spring {
+            width: 20px;
+            height: 0px;
+            background: repeating-linear-gradient(45deg, var(--danger-color), var(--danger-color) 5px, #444 5px, #444 10px);
+            position: absolute;
+            top: -20px;
+            left: 40px;
+            transition: height 0.1s;
+        }
+        
+        /* Buffer Tank */
+        .buffer-tank {
+            width: 80px;
+            height: 150px;
+            border: 2px solid #555;
+            position: absolute;
+            right: 20px;
+            bottom: 0;
+            background: #000;
+        }
+        .buffer-liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background-color: var(--buffer-color);
+            transition: height 0.3s ease;
+            opacity: 0.8;
+        }
+
+        /* Controls */
+        .controls {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-run { background-color: var(--safe-color); color: white; }
+        .btn-run:hover { background-color: #2ea043; }
+        .btn-disturb { background-color: #d29922; color: #000; }
+        .btn-disturb:hover { background-color: #bb8800; }
+        .btn-reset { background-color: #484f58; color: white; }
+        .btn-reset:hover { background-color: #30363d; }
+
+        /* Canvas */
+        #chart-canvas {
+            background: #000;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            display: block;
+        }
+        
+        .status-box {
+            font-family: monospace;
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            width: 100%;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 2px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>NRA-IDE: Canvas Visualization (Canvas API + Pure JavaScript)</h1>
+    <p style="text-align: center; color: #888; margin: 0 0 20px 0;">律環公理 動的視覚化証明 (Interactive Proof)</p>
+
+    <div class="controls">
+        <button class="btn-run" onclick="step()">Next Cycle (+0.1)</button>
+        <button class="btn-disturb" onclick="injectDisturbance()">Inject Disturbance (+0.5)</button>
+        <button class="btn-reset" onclick="resetSim()">Reset</button>
+        <div style="display:flex; align-items:center; gap:5px;">
+            <input type="checkbox" id="auto-run"> <label for="auto-run">Auto Run</label>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Visual Model -->
+        <div class="panel" id="model-view">
+            <h3>System State (The Container)</h3>
+            <div style="position: relative; width: 100%; height: 320px;">
+                <div class="tension-spring" id="spring"></div>
+                <div class="tank-container">
+                    <div class="limit-line"></div>
+                    <div class="limit-label">Threshold (0.8)</div>
+                    <div class="water" id="main-water"></div>
+                </div>
+
+                <div class="buffer-tank" style="right: 30px;">
+                    <div class="buffer-liquid" id="buffer-water"></div>
+                    <div style="position:absolute; bottom:-25px; width:100%; text-align:center; font-size:0.8rem;">Buffer<br>(Error Sink)</div>
+                </div>
+            </div>
+            
+            <div class="status-box" id="status-text">
+                Cycle: 0<br>
+                Value: 0.00<br>
+                Tension: 0.00<br>
+                Buffer: 0.00
+            </div>
+        </div>
+
+        <!-- Graph View with Canvas -->
+        <div class="panel" style="flex: 1; min-width: 400px;">
+            <h3>Dynamics Log (Canvas API)</h3>
+            <canvas id="chart-canvas" width="600" height="400"></canvas>
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #58a6ff;"></span>
+                    <span>Value</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #ff7b72; border: 1px dashed #ff7b72;"></span>
+                    <span>Threshold</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #a5d6ff;"></span>
+                    <span>Buffer</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #ff7b72;"></span>
+                    <span>Tension</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- NRA Logic (Pure JavaScript) ---
+        const THRESHOLD = 0.8;
+        const MARGIN = 0.05;
+        const BASE_COST = 0.1;
+        
+        let state = {
+            cycle: 0,
+            value: 0.0,
+            rate: 0.0,
+            buffer: 0.0,
+            tension: 0.0
+        };
+
+        let history = {
+            cycle: [],
+            value: [],
+            buffer: [],
+            tension: []
+        };
+
+        // Canvas drawing
+        const canvas = document.getElementById('chart-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Chart configuration
+        const chart = {
+            padding: 50,
+            width: canvas.width - 100,
+            height: canvas.height - 100,
+            maxCycles: 40,
+            maxValue: 2.0
+        };
+
+        function drawChart() {
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background grid
+            ctx.strokeStyle = '#30363d';
+            ctx.lineWidth = 0.5;
+
+            // Vertical grid lines
+            for (let i = 0; i <= 10; i++) {
+                const x = chart.padding + (chart.width / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(x, chart.padding);
+                ctx.lineTo(x, chart.padding + chart.height);
+                ctx.stroke();
+            }
+
+            // Horizontal grid lines
+            for (let i = 0; i <= 10; i++) {
+                const y = chart.padding + (chart.height / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(chart.padding, y);
+                ctx.lineTo(chart.padding + chart.width, y);
+                ctx.stroke();
+            }
+
+            // Draw axes
+            ctx.strokeStyle = '#c9d1d9';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(chart.padding, chart.padding + chart.height);
+            ctx.lineTo(chart.padding + chart.width, chart.padding + chart.height);
+            ctx.stroke();
+
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(chart.padding, chart.padding);
+            ctx.lineTo(chart.padding, chart.padding + chart.height);
+            ctx.stroke();
+
+            // Draw axis labels
+            ctx.fillStyle = '#c9d1d9';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+
+            // X-axis labels
+            for (let i = 0; i <= 10; i++) {
+                const x = chart.padding + (chart.width / 10) * i;
+                const label = Math.floor((chart.maxCycles / 10) * i);
+                ctx.fillText(label, x, chart.padding + chart.height + 20);
+            }
+
+            // Y-axis labels
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 10; i++) {
+                const y = chart.padding + chart.height - (chart.height / 10) * i;
+                const label = ((chart.maxValue / 10) * i).toFixed(1);
+                ctx.fillText(label, chart.padding - 10, y + 4);
+            }
+
+            // Draw axis titles
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Cycle', chart.padding + chart.width / 2, canvas.height - 5);
+            
+            ctx.save();
+            ctx.translate(15, chart.padding + chart.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Normalized Level', 0, 0);
+            ctx.restore();
+
+            // Draw data lines
+            if (history.cycle.length > 1) {
+                // Draw Value line
+                drawLine(history.value, '#58a6ff', 2);
+
+                // Draw Threshold line (dashed)
+                drawDashedLine(THRESHOLD, '#ff7b72', 2);
+
+                // Draw Buffer line (filled)
+                drawFilledLine(history.buffer, '#a5d6ff', 0.3);
+
+                // Draw Tension line
+                drawLine(history.tension, '#ff7b72', 2);
+            }
+        }
+
+        function drawLine(data, color, lineWidth) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+
+            for (let i = 0; i < data.length; i++) {
+                const x = chart.padding + (i / Math.max(chart.maxCycles, data.length - 1)) * chart.width;
+                const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+
+            // Draw points
+            ctx.fillStyle = color;
+            for (let i = 0; i < data.length; i++) {
+                const x = chart.padding + (i / Math.max(chart.maxCycles, data.length - 1)) * chart.width;
+                const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawDashedLine(value, color, lineWidth) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+
+            const y = chart.padding + chart.height - (value / chart.maxValue) * chart.height;
+            ctx.moveTo(chart.padding, y);
+            ctx.lineTo(chart.padding + chart.width, y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawFilledLine(data, color, alpha) {
+            ctx.fillStyle = color;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+
+            for (let i = 0; i < data.length; i++) {
+                const x = chart.padding + (i / Math.max(chart.maxCycles, data.length - 1)) * chart.width;
+                const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.lineTo(chart.padding + chart.width, chart.padding + chart.height);
+            ctx.lineTo(chart.padding, chart.padding + chart.height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        function updateVisuals() {
+            // Update Tank
+            const waterHeight = Math.min(state.value, 1.5) * 100;
+            const mainWater = document.getElementById('main-water');
+            mainWater.style.height = `${waterHeight}%`;
+            
+            if (state.value > THRESHOLD) {
+                mainWater.style.backgroundColor = '#ff7b72';
+            } else {
+                mainWater.style.backgroundColor = '#3fb950';
+            }
+
+            // Update Buffer
+            const bufferHeight = Math.min(state.buffer, 2.0) * 50; 
+            document.getElementById('buffer-water').style.height = `${bufferHeight}%`;
+
+            // Update Spring/Tension
+            const spring = document.getElementById('spring');
+            if (state.tension > 0) {
+                spring.style.height = `${state.tension * 100}px`;
+                spring.style.opacity = 1;
+            } else {
+                spring.style.height = '0px';
+                spring.style.opacity = 0;
+            }
+
+            // Update Text
+            document.getElementById('status-text').innerHTML = 
+                `Cycle: ${state.cycle}<br>` +
+                `Value: ${state.value.toFixed(3)} ${state.value > THRESHOLD ? '⚠️' : '✅'}<br>` +
+                `Tension: ${state.tension.toFixed(3)}<br>` +
+                `Buffer: ${state.buffer.toFixed(3)}`;
+
+            // Update Chart
+            history.cycle.push(state.cycle);
+            history.value.push(state.value);
+            history.buffer.push(state.buffer);
+            history.tension.push(state.tension);
+
+            drawChart();
+        }
+
+        // Logic: Dynamics Node
+        function dynamics(cost) {
+            state.cycle++;
+            state.rate = cost;
+            state.value += cost;
+            if (state.value > 1.5) state.value = 1.5; 
+        }
+
+        // Logic: Safety Node (BoundLaw)
+        function safetyCheck() {
+            if (state.value > THRESHOLD) {
+                let excess = state.value - THRESHOLD;
+                state.tension = excess;
+
+                let target = THRESHOLD - MARGIN;
+                let dissipated = state.value - target;
+                state.buffer += dissipated;
+                state.value = target;
+            } else {
+                state.tension = 0;
+            }
+        }
+
+        function step() {
+            dynamics(BASE_COST);
+            
+            const preCheckValue = state.value;
+            const mainWater = document.getElementById('main-water');
+            mainWater.style.height = `${Math.min(preCheckValue, 1.5) * 100}%`;
+            if(preCheckValue > THRESHOLD) mainWater.style.backgroundColor = '#ff7b72';
+
+            setTimeout(() => {
+                safetyCheck();
+                updateVisuals();
+            }, 200);
+        }
+
+        function injectDisturbance() {
+            state.cycle++;
+            let magnitude = 0.5;
+            state.value += magnitude;
+            state.rate = magnitude;
+
+            const mainWater = document.getElementById('main-water');
+            mainWater.style.height = `${Math.min(state.value, 1.5) * 100}%`;
+            mainWater.style.backgroundColor = '#d29922';
+
+            setTimeout(() => {
+                safetyCheck();
+                updateVisuals();
+            }, 400);
+        }
+
+        function resetSim() {
+            state = { cycle: 0, value: 0.0, rate: 0.0, buffer: 0.0, tension: 0.0 };
+            history = { cycle: [], value: [], buffer: [], tension: [] };
+            updateVisuals();
+            document.getElementById('main-water').style.backgroundColor = '#3fb950';
+        }
+
+        // Auto Run
+        let interval = null;
+        document.getElementById('auto-run').addEventListener('change', (e) => {
+            if(e.target.checked) {
+                interval = setInterval(() => {
+                    if (Math.random() > 0.85 && state.cycle > 3) {
+                        injectDisturbance();
+                    } else {
+                        step();
+                    }
+                    if(state.cycle > 50) e.target.checked = false;
+                }, 800);
+            } else {
+                clearInterval(interval);
+            }
+        });
+
+        // Init
+        updateVisuals();
+
+    </script>
+</body>
+</html>

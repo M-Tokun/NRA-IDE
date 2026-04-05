@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: HAN Gate Decision API
+  version: "1.1.0"
+  description: |
+    HAN Gate（NRA/IDE）の判定 API です。
+    リクエストごとに PASS / SILENCE を返します。
+
+    【バージョン履歴】
+      1.0.0  2026-02-05: 初版
+      1.1.0  2026-03-06: /metrics エンドポイント追加
+                         DecisionRequest に tau パラメータを追加（二重ゆらぎ対応）
+
+servers:
+  - url: http://han-gate:8080
+
+paths:
+  /healthz:
+    get:
+      summary: ヘルスチェック
+      description: |
+        ゲートが正常に動作しているか確認するエンドポイントです。
+        "OK" が返れば正常です。プロキシ側の死活監視に使用してください。
+      responses:
+        "200":
+          description: 正常稼働中
+          content:
+            text/plain:
+              example: OK
+
+  /metrics:
+    get:
+      summary: Prometheus 形式のメトリクス取得
+      description: |
+        ゲートが行った判定の累計カウントを Prometheus 形式で返します。
+        Grafana などの可視化ツールに接続することで、
+        SILENCE の発生状況をグラフで確認できます。
+
+        【取得できるメトリクス】
+          - PASS 件数       : 正常通過した件数
+          - SILENCE 件数    : 遮断した件数
+          - FAIL_CLOSED 件数: テレメトリ欠損や内部エラーで遮断した件数
+      responses:
+        "200":
+          description: Prometheus 形式のテキスト
+          content:
+            text/plain:
+              example: |
+                # HELP han_gate_decisions_total Total decisions made
+                # TYPE han_gate_decisions_total counter
+                han_gate_decisions_total{decision="PASS"} 1024
+                han_gate_decisions_total{decision="SILENCE"} 3
+                han_gate_decisions_total{decision="FAIL_CLOSED"} 0
+
+  /v1/decision:
+    post:
+      summary: PASS / SILENCE 判定（メイン API）
+      description: |
+        テレメトリ（現在の負荷状況）を受け取り、
+        PASS（通過）または SILENCE（遮断）を返します。
+
+        【判定の仕組み】
+          3つの指標（リトライ率・キュー滞留数・依存タイムアウト率）が
+          「同時に増えている」かどうかを乗算で判定します。
+          1つだけ高くても反応しにくい設計です。
+          これが「連鎖崩壊特有のパターン」だからです。
+
+        【tau パラメータについて】
+          省略すると環境変数 TAU_DEFAULT（初期値 1.5）が使われます。
+          大きくすると「より重症になるまで反応しない」= 安全方向。
+          小さくすると「軽い症状でも早めに反応する」= 敏感。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DecisionRequest"
+            example:
+              scope:
+                service: checkout
+                route: /api/pay
+              telemetry:
+                retry_rate: 15.0
+                queue_depth: 600
+                dep_timeout_rate: 8.0
+              tau: 1.5
+      responses:
+        "200":
+          description: 判定結果（PASS または SILENCE）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DecisionResponse"
+              examples:
+                pass_example:
+                  summary: 正常通過の例
+                  value:
+                    decision: PASS
+                    R: 0.0036
+                    reason: within safe envelope
+                silence_example:
+                  summary: 遮断の例
+                  value:
+                    decision: SILENCE
+                    R: 4.32
+                    reason: chain reaction detected or hold active
+
+  /v1/nginx_auth:
+    post:
+      summary: Nginx auth_request 互換エンドポイント
+      description: |
+        Nginx の auth_request モジュールから呼び出すためのエンドポイントです。
+        テレメトリは HTTP ヘッダーで渡します。
+
+          X-HAN-Retry-Rate       : リトライ率
+          X-HAN-Queue-Depth      : キュー滞留数
+          X-HAN-Dep-Timeout-Rate : 依存タイムアウト率
+
+        【注意】
+          ヘッダーが欠けている場合は Fail-Closed（403）になります。
+          「情報がなければ止める」が原則です。
+      responses:
+        "200":
+          description: PASS（通過）
+        "403":
+          description: SILENCE（遮断）
+
+components:
+  schemas:
+    Scope:
+      type: object
+      description: |
+        どのサービス・ルートに対する判定かを示す識別情報です。
+        service は必須です。route / cluster は省略可能です。
+      properties:
+        service:
+          type: string
+          description: サービス名（例：checkout, payment-api）
+        route:
+          type: string
+          description: ルートパス（例：/api/pay）
+        cluster:
+          type: string
+          description: クラスタ名（例：us-east-1）
+      required: [service]
+
+    Telemetry:
+      type: object
+      description: |
+        現在の負荷状況を表すテレメトリデータです。
+        3つ全て必須です。1つでも欠けると Fail-Closed になります。
+
+        【なぜ欠けたら止まるのか？】
+          情報が不完全な状態では安全な判断ができません。
+          「わからないときは止める」が律環公理の原則です。
+      properties:
+        retry_rate:
+          type: number
+          description: 単位時間あたりのリトライ発生数（req/s）
+        queue_depth:
+          type: number
+          description: 現在のキュー滞留数
+        dep_timeout_rate:
+          type: number
+          description: 単位時間あたりの依存先タイムアウト発生数（req/s）
+        error_rate:
+          type: number
+          description: エラー率（参考値。判定には使用しません）
+      required: [retry_rate, queue_depth, dep_timeout_rate]
+
+    DecisionRequest:
+      type: object
+      description: 判定リクエスト全体
+      properties:
+        scope:
+          $ref: "#/components/schemas/Scope"
+        telemetry:
+          $ref: "#/components/schemas/Telemetry"
+        tau:
+          type: number
+          description: |
+            吸収厚みの上書き値（省略可能）。
+            省略時は環境変数 TAU_DEFAULT（初期値 1.5）が使われます。
+            二重ゆらぎ（動的τ）の基底値として使用されます。
+          default: 1.5
+      required: [scope, telemetry]
+
+    DecisionResponse:
+      type: object
+      description: 判定結果
+      properties:
+        decision:
+          type: string
+          enum: [PASS, SILENCE]
+          description: PASS = 通過を許可、SILENCE = 遮断
+        R:
+          type: number
+          description: |
+            連鎖反応スコア。R >= R_OP で SILENCE になります。
+            999.0 / 999.9 はテレメトリ欠損・内部エラー時の特殊値です。
+        reason:
+          type: string
+          description: 判定理由の説明文
+      required: [decision, R]

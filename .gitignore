@@ -1,0 +1,27 @@
+# NRA-IDE .gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude Code local settings
+.claude/
+
+# Editors
+.vscode/
+.idea/
+
+# Distribution
+dist/
+build/
+*.egg-info/

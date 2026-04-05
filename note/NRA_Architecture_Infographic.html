@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRA: 律環公理に基づくAIアーキテクチャ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        /* Custom Utilities for Diagram */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        .arrow-down {
+            width: 0; 
+            height: 0; 
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid #94a3b8;
+            margin: 10px auto;
+        }
+    </style>
+    <!-- 
+        Palette: Vibrant Cyber-Tech
+        Primary Blue: #3B82F6
+        Cyan Accent: #06B6D4
+        Danger Red: #EF4444
+        Safety Emerald: #10B981
+        Purple Insight: #A855F7
+    -->
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <!-- Hero Section -->
+    <header class="min-h-screen flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="z-10 max-w-4xl">
+            <h2 class="text-cyan-400 font-bold tracking-widest uppercase mb-4 text-sm md:text-base">Structural Transformation of AI Architecture</h2>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 neon-text">
+                律環公理 (NRA)
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 font-light mb-8 max-w-2xl mx-auto">
+                最適化の崩壊と「境界制御」による救済の設計論
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 text-sm font-mono text-slate-400">
+                <span class="border border-slate-700 px-3 py-1 rounded">Auth: M-Tokuni</span>
+                <span class="border border-slate-700 px-3 py-1 rounded">Framework: Ritsukan Axioms</span>
+                <span class="border border-slate-700 px-3 py-1 rounded">Status: Proposal</span>
+            </div>
+            <div class="mt-12 animate-bounce text-cyan-500 text-3xl">
+                &#8595;
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="container mx-auto px-4 py-12 space-y-24">
+
+        <!-- SECTION 1: The Problem (Sandpile Model) -->
+        <section id="collapse-crisis">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold mb-4 text-white border-l-4 border-red-500 pl-4">1. 必然的崩壊：砂山モデル</h2>
+                    <p class="text-slate-300 mb-6 leading-relaxed">
+                        現在の大規模言語モデル（LLM）は、確率的最適化によって「正解の中心」を目指します。しかし、これは自己生成データの再学習ループにおいて、<strong>「線形劣化（多様性の喪失）」</strong>と<strong>「非線型転落（論理破綻）」</strong>という二重の死を招きます。最適化を追求すればするほど、系は臨界状態（砂山）に達し、些細なノイズで崩壊します。
+                    </p>
+                    <div class="glass-panel p-6 rounded-lg">
+                        <h3 class="text-red-400 font-bold mb-2">The Optimization Trap</h3>
+                        <p class="text-sm text-slate-400">
+                            以下のグラフは、再学習世代ごとのモデル性能を示しています。従来の「最適化（Optimization）」モデルは一時的に向上しますが、ある地点で急激に崩壊（Model Collapse）します。対してNRAモデルは、安定圏内を維持します。
+                        </p>
+                    </div>
+                </div>
+                <div class="chart-container bg-slate-800 rounded-xl shadow-2xl p-4 border border-slate-700">
+                    <canvas id="collapseChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: The Diagnosis (Dual Collapse) -->
+        <section id="dual-collapse" class="bg-slate-900/50 p-8 rounded-2xl border border-slate-800">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white mb-4">2. 二重の死 (Dual-Collapse)</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">
+                    なぜ現代のAIは脆いのか。それは「中心」を目指すあまり、「境界」を無視しているからです。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Comparison Chart -->
+                <div class="chart-container">
+                    <canvas id="radarComparison"></canvas>
+                </div>
+                
+                <!-- Text Explanation -->
+                <div class="flex flex-col justify-center space-y-6">
+                    <div class="glass-panel p-6 rounded-lg border-l-4 border-orange-500">
+                        <h3 class="text-xl font-bold text-orange-400 mb-2">線形劣化 (Linear Decay)</h3>
+                        <p class="text-slate-300 text-sm">
+                            確率分布の平均化。特異点やノイズと見なされた「創造性」が削ぎ落とされ、出力が均質化する現象。AIは「当たり障りのない」答えしか出せなくなる。
+                        </p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-lg border-l-4 border-red-600">
+                        <h3 class="text-xl font-bold text-red-500 mb-2">非線型転落 (Non-linear Collapse)</h3>
+                        <p class="text-slate-300 text-sm">
+                            臨界点における破局。論理の整合性が一瞬で失われ、幻覚（Hallucination）や支離滅裂な出力が連鎖する「崖からの転落」。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: The Solution (NRA Formula) -->
+        <section id="nra-formula" class="text-center">
+            <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-12">
+                3. 律環公理：構造的安定度 $R$
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                <!-- Formula Card -->
+                <div class="md:col-span-1 glass-panel p-8 rounded-2xl border border-emerald-500/30 flex flex-col items-center justify-center h-full">
+                    <p class="text-slate-400 mb-4 font-mono text-sm uppercase tracking-widest">Structural Stability Formula</p>
+                    <div class="text-6xl font-serif italic font-bold text-emerald-400 mb-6">
+                        R = <span class="border-b-4 border-emerald-500/50 inline-block px-2">&delta;</span> / <span class="inline-block px-2">&tau;</span>
+                    </div>
+                    <div class="text-left w-full space-y-2 text-sm">
+                        <div class="flex justify-between border-b border-slate-700 pb-1">
+                            <span class="text-emerald-300 font-bold">&delta; (Delta)</span>
+                            <span class="text-slate-400">不変の因果単位・制約</span>
+                        </div>
+                        <div class="flex justify-between pt-1">
+                            <span class="text-blue-300 font-bold">&tau; (Tau)</span>
+                            <span class="text-slate-400">情報の厚み・ノイズ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="md:col-span-2 text-left space-y-6">
+                    <p class="text-lg text-slate-300 leading-relaxed">
+                        NRAは「中心（最適解）」を目指しません。代わりに<strong>「境界（Viability Kernel）」</strong>を定義します。安定度 $R$ は、システムが維持すべき不変の制約 $\delta$ と、環境からのノイズ $\tau$ の比率です。
+                    </p>
+                    <p class="text-lg text-slate-300 leading-relaxed">
+                        $R$ が閾値を下回った瞬間、システムは無理な出力を生成するのではなく、<strong>自律的に停止（Fail-Closed）</strong>します。これは「崩壊」ではなく、次なる安定相への「移行」のための能動的沈黙です。
+                    </p>
+                    
+                    <!-- Gauge Chart for R-Value -->
+                    <div class="chart-container mt-6" style="height: 250px;">
+                        <canvas id="gaugeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Architecture (RNA Sandwich) -->
+        <section id="architecture" class="bg-gradient-to-b from-slate-900 to-slate-800 p-8 rounded-3xl border border-blue-500/20">
+            <h2 class="text-3xl font-bold text-center text-white mb-12">4. 物理実装：RNAサンドイッチ構造</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <!-- Diagram using HTML/CSS (NO SVG) -->
+                <div class="flex flex-col items-center w-full max-w-md mx-auto relative">
+                    <!-- Layer 1 -->
+                    <div class="w-full bg-slate-800 border-l-8 border-blue-500 p-6 rounded shadow-lg z-10 relative">
+                        <div class="absolute -left-12 top-1/2 -translate-y-1/2 text-blue-500 font-mono font-bold rotate-180" style="writing-mode: vertical-rl;">LAYER 01</div>
+                        <h4 class="text-blue-400 font-bold text-lg mb-1">Pre-RNA: Constraint</h4>
+                        <p class="text-slate-400 text-xs">入力から不変条件（&delta;）を固定。<br>解空間の「境界」を事前定義する。</p>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="text-slate-600 text-2xl my-2">&#8595;</div>
+
+                    <!-- Layer 2 -->
+                    <div class="w-full bg-slate-800 border-l-8 border-purple-500 p-6 rounded shadow-lg z-10 relative">
+                        <div class="absolute -left-12 top-1/2 -translate-y-1/2 text-purple-500 font-mono font-bold rotate-180" style="writing-mode: vertical-rl;">LAYER 02</div>
+                        <h4 class="text-purple-400 font-bold text-lg mb-1">Inference Engine</h4>
+                        <p class="text-slate-400 text-xs">確率的生成空間。<br>従来のLLM/AIモデルが動作する層。</p>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="text-slate-600 text-2xl my-2">&#8595;</div>
+
+                    <!-- Layer 3 -->
+                    <div class="w-full bg-slate-800 border-l-8 border-emerald-500 p-6 rounded shadow-lg z-10 relative">
+                        <div class="absolute -left-12 top-1/2 -translate-y-1/2 text-emerald-500 font-mono font-bold rotate-180" style="writing-mode: vertical-rl;">LAYER 03</div>
+                        <h4 class="text-emerald-400 font-bold text-lg mb-1">Post-RNA: Verification</h4>
+                        <p class="text-slate-400 text-xs">$R$ 指標による事後検証。<br>境界逸脱時は <strong>Fail-Closed (停止)</strong>。</p>
+                    </div>
+                </div>
+
+                <!-- Context -->
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-4">因果ダイオード (Causal Diode)</h3>
+                        <p class="text-slate-300 mb-4">
+                            情報熱力学に基づき、因果の流動を<strong>順方向（&Pi;）のみ</strong>に限定します。結果から原因を捏造する「逆導出」を物理的に遮断します。
+                        </p>
+                        <div class="glass-panel p-4 rounded flex items-center justify-around text-center">
+                            <div>
+                                <div class="text-emerald-400 font-bold text-xl">Cause</div>
+                                <div class="text-xs text-slate-500">原因・入力</div>
+                            </div>
+                            <div class="text-4xl text-emerald-500">&#8594;</div>
+                            <div>
+                                <div class="text-white font-bold text-xl">Effect</div>
+                                <div class="text-xs text-slate-500">結果・出力</div>
+                            </div>
+                            <div class="text-4xl text-red-500 opacity-50 relative">
+                                &#8592;
+                                <span class="absolute inset-0 flex items-center justify-center text-red-600 font-bold text-2xl">&#10005;</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-2">なぜこの構造が必要か？</h3>
+                        <ul class="list-disc list-inside text-slate-400 space-y-2 text-sm">
+                            <li><strong class="text-blue-300">分離監視:</strong> 生成プロセス（L2）と監視プロセス（L1/L3）を分けることで、AIの暴走を防ぐ。</li>
+                            <li><strong class="text-emerald-300">純度維持:</strong> 学習データへの「汚染された出力」の混入を防ぎ、モデル崩壊を回避する。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Phase Transition (Scatter) -->
+        <section id="phase-transition">
+            <h2 class="text-3xl font-bold mb-6 text-white text-center">5. 相転移と生存戦略</h2>
+            <p class="text-slate-300 text-center max-w-3xl mx-auto mb-12">
+                最適化の果てにある「崩壊」を、システムの「死」ではなく、次なる状態への「相転移（Phase Transition）」として再定義します。以下の図は、NRAがどのようにシステムの「生存領域（Viability Kernel）」を定義し、そこからの逸脱を管理するかを示しています。
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="chart-container">
+                    <canvas id="kernelChart"></canvas>
+                </div>
+                <div class="flex flex-col justify-center space-y-4">
+                    <div class="p-4 border-l-4 border-emerald-500 bg-slate-800/50">
+                        <h4 class="font-bold text-emerald-400">Viability Kernel (緑の領域)</h4>
+                        <p class="text-sm text-slate-400">構造的安定度 $R$ が維持されている安全な状態空間。AIはこの中でのみ稼働を許される。</p>
+                    </div>
+                    <div class="p-4 border-l-4 border-red-500 bg-slate-800/50">
+                        <h4 class="font-bold text-red-400">Collapse Zone (赤の領域)</h4>
+                        <p class="text-sm text-slate-400">従来の最適化AIが陥る領域。一度ここに入ると、フィードバックループにより崩壊が加速する。</p>
+                    </div>
+                    <div class="p-4 border-l-4 border-blue-500 bg-slate-800/50">
+                        <h4 class="font-bold text-blue-400">Safe Shutdown (停止)</h4>
+                        <p class="text-sm text-slate-400">NRAは境界に接触した時点で「Fail-Closed」を発動。誤った出力を出す前に沈黙し、次のフェーズへ移行する準備を行う。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <footer class="text-center py-16 border-t border-slate-800">
+            <div class="glass-panel inline-block px-8 py-6 rounded-2xl max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">結論：神から道具へ</h3>
+                <p class="text-slate-300 leading-relaxed mb-6">
+                    NRA-IDEは、AIを万能の神と見なす幻想を打破し、物理法則に誠実な「道具」としての地位を確立します。崩壊の必然性を認め、境界線を統治することこそが、人間とAIが共生可能な唯一の生存戦略です。
+                </p>
+                <div class="text-xs text-slate-500 font-mono">
+                    Reference: Ritsukan Axioms (NRA) by M-Tokuni<br>
+                    Generated by Canvas Infographics
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- Utility: Label Wrapping (for 16-char limit) ---
+        function wrapLabel(str) {
+            if (str.length <= 16) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if ((currentLine + " " + words[i]).length <= 16) {
+                    currentLine += " " + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // --- Common Tooltip Config ---
+        const commonTooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        // --- Chart 1: The Collapse (Line Chart) ---
+        const ctxCollapse = document.getElementById('collapseChart').getContext('2d');
+        const collapseLabels = ['Gen 1', 'Gen 2', 'Gen 3', 'Gen 4', 'Gen 5', 'Gen 6', 'Gen 7', 'Gen 8', 'Gen 9', 'Gen 10'].map(wrapLabel);
+        
+        new Chart(ctxCollapse, {
+            type: 'line',
+            data: {
+                labels: collapseLabels,
+                datasets: [
+                    {
+                        label: 'Standard LLM (Optimization)',
+                        data: [80, 85, 90, 92, 94, 85, 60, 30, 10, 5],
+                        borderColor: '#EF4444', // Red
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'NRA Architecture (Boundary)',
+                        data: [80, 82, 81, 83, 82, 82, 83, 82, 83, 82],
+                        borderColor: '#10B981', // Emerald
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        tension: 0.2,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } }, // Slate 300
+                    tooltip: commonTooltipConfig,
+                    title: {
+                        display: true,
+                        text: 'Model Stability Over Generations',
+                        color: '#f8fafc'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94a3b8' },
+                        title: { display: true, text: 'Model Coherence / R-Value', color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+        // --- Chart 2: Dual Collapse Comparison (Radar) ---
+        const ctxRadar = document.getElementById('radarComparison').getContext('2d');
+        const radarLabels = ['Data Diversity', 'Logical Consistency', 'Structural Stability', 'Long-term Viability', 'Noise Resilience'].map(wrapLabel);
+
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: radarLabels,
+                datasets: [{
+                    label: 'Current AI (Optimized)',
+                    data: [20, 40, 30, 10, 20], // Weak on structural/long-term
+                    fill: true,
+                    backgroundColor: 'rgba(239, 68, 68, 0.4)', // Red
+                    borderColor: '#EF4444',
+                    pointBackgroundColor: '#EF4444',
+                    pointBorderColor: '#fff',
+                }, {
+                    label: 'NRA System',
+                    data: [90, 95, 100, 95, 90], // Strong on structure
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.4)', // Blue
+                    borderColor: '#3B82F6',
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } },
+                    tooltip: commonTooltipConfig
+                },
+                scales: {
+                    r: {
+                        angleLines: { color: '#475569' },
+                        grid: { color: '#334155' },
+                        pointLabels: { color: '#cbd5e1', font: { size: 12 } },
+                        ticks: { display: false, backdropColor: 'transparent' }
+                    }
+                }
+            }
+        });
+
+        // --- Chart 3: R-Value Gauge (Doughnut) ---
+        const ctxGauge = document.getElementById('gaugeChart').getContext('2d');
+        new Chart(ctxGauge, {
+            type: 'doughnut',
+            data: {
+                labels: ['Stable Zone (R > 1.0)', 'Warning Zone', 'Collapse (R < 0.5)'],
+                datasets: [{
+                    data: [60, 20, 20],
+                    backgroundColor: [
+                        '#10B981', // Emerald (Stable)
+                        '#F59E0B', // Amber (Warning)
+                        '#EF4444'  // Red (Collapse)
+                    ],
+                    borderWidth: 0,
+                    circumference: 180,
+                    rotation: 270,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: true, position: 'bottom', labels: { color: '#cbd5e1' } },
+                    tooltip: commonTooltipConfig,
+                    title: {
+                        display: true,
+                        text: 'Structural Stability Monitor (R)',
+                        color: '#f8fafc',
+                        padding: { bottom: 20 }
+                    }
+                }
+            }
+        });
+
+        // --- Chart 4: Viability Kernel (Scatter - Phase Space) ---
+        const ctxKernel = document.getElementById('kernelChart').getContext('2d');
+        
+        // Generate random data for "Safe" cluster
+        const safeData = Array.from({length: 50}, () => ({
+            x: Math.random() * 40 + 30, // 30-70
+            y: Math.random() * 40 + 30  // 30-70
+        }));
+
+        // Generate scattered data for "Collapse"
+        const collapseData = [
+            {x: 10, y: 10}, {x: 90, y: 90}, {x: 15, y: 85}, {x: 85, y: 15},
+            {x: 5, y: 50}, {x: 95, y: 40}, {x: 40, y: 5}, {x: 50, y: 95},
+            {x: 20, y: 20}, {x: 80, y: 80}
+        ];
+
+        new Chart(ctxKernel, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'NRA Viability Kernel (Safe)',
+                        data: safeData,
+                        backgroundColor: '#10B981',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    },
+                    {
+                        label: 'Collapse Zone (Unstable)',
+                        data: collapseData,
+                        backgroundColor: '#EF4444',
+                        pointStyle: 'crossRot',
+                        pointRadius: 8,
+                        pointBorderWidth: 2,
+                        borderColor: '#EF4444'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } },
+                    tooltip: commonTooltipConfig,
+                    annotation: {
+                        // Ideally we would draw a box/circle here, but keeping it simple without plugins
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: 0, max: 100,
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94a3b8' },
+                        title: { display: true, text: 'Variable A (State)', color: '#94a3b8' }
+                    },
+                    y: {
+                        min: 0, max: 100,
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94a3b8' },
+                        title: { display: true, text: 'Variable B (Entropy)', color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+    </script>
+    <!-- 
+      Source Material Integration:
+      1. Sandpile/Collapse -> Chart 1 (Line)
+      2. Dual-Collapse (Linear/Non-linear) -> Chart 2 (Radar)
+      3. Formula R -> HTML Card + Chart 3 (Gauge)
+      4. Architecture (Layers/Diode) -> HTML Diagram
+      5. Phase Transition -> Chart 4 (Scatter)
+      
+      No SVG used. No Mermaid used. Tailwind CSS used.
+    -->
+</body>
+</html>

@@ -1,0 +1,51 @@
+// 26-0312-0115
+## NRA-IDE 図面一覧（figures/）
+このフォルダにはNRA-IDEの構造を視覚的に理解するための図面が収められています。
+文章では伝わりにくい概念（因果ダイオード、境界、ゆらぎ、厚み、位相など）を補完します。
+
+---
+
+figures/
+├── fig1_approach_comparison.png
+│   JP: 従来の中心距離最適化と本アプローチ（境界・ゆらぎ・厚み）の比較構造を示します
+│   EN: Illustrates the structural comparison between conventional center-distance optimization and our boundary-based approach.
+│
+├── fig2_causal_diode.png
+│   JP: 入力と出力の情報の非可逆性を担保する因果ダイオードの概念図です
+│   EN: Conceptual diagram of the Causal Diode ensuring irreversible one-way information flow from input to output.
+│
+├── fig3_coherence_gate.png
+│   JP: ゆらぎと厚みの比率に基づく4段階の動的平衡判定ゲート構造を定義します
+│   EN: Defines the four-zone dynamic equilibrium judgment gate structure based on the ratio of fluctuation to thickness.
+│
+├── fig4_circle_vs_spiral.png
+│   JP: 位相の進行と時間の不可逆性を表現する螺旋モデルと循環モデルの決定的な差異を証明します
+│   EN: Proves the critical difference between the spiral model representing phase advancement and the flawed circular model.
+│
+├── TOP_sandwich.png
+│   JP: システム全体の入出力を挟み込むサンドイッチアーキテクチャの最上位概念図です
+│   EN: Top-level conceptual diagram of the sandwich architecture enclosing the system's inputs and outputs.
+│
+├── 01_Code_Generated_Image_.jpg
+│   JP: コード生成プロセスによって動的に出力された初期の検証用画像データです
+│   EN: Initial verification image data dynamically output through the code generation process.
+│
+├── DOMAIN_TUNIING.png
+│   JP: 特定領域における制約条件と内包的パラメータの調整構造を視覚化した図解です
+│   EN: Visual illustration of the tuning structure for constraints and intensional parameters within a specific domain.
+│
+├── nra_dam_degradation.html
+│   JP: ダムの水位管理メタファーを用いたエネルギーの蓄積と解放・劣化の構造比較モデルです
+│   EN: Structural comparison model of energy accumulation, release, and degradation using a dam water level management metaphor.
+│
+├── sandwich_architecture.html
+│   JP: 入出力層で核となる推論モデルを挟み込むサンドイッチ構造の詳細な対話型仕様です
+│   EN: Detailed interactive specification of the sandwich architecture that encloses the core inference model between input and output layers.
+│
+├── domain_tuning_structure_pure.html
+│   JP: 外部依存を排除した純粋なドメインチューニングの内部構造を示すHTMLドキュメントです
+│   EN: HTML document demonstrating the internal structure of pure domain tuning without external dependencies.
+│
+└── 07_Escapement_ContactPoint_JP.html
+    JP: 脱進機の接点におけるエネルギー伝達と位相制御の機構解説です
+    EN: Mechanism explanation of energy transfer and phase control at the contact points of the escapement.

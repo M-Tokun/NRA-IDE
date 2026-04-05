@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- FILE: NRA-IDE_Connection_vs_Mixing_EN.html -->
+    <title>NRA-IDE: Connection vs Mixing</title>
+    <style>
+        :root {
+            --bg:       #07090d;
+            --panel:    #0c1018;
+            --border:   #18242e;
+            --cyan:     #00e5ff;
+            --green:    #00ff88;
+            --yellow:   #ffd600;
+            --orange:   #ff8c00;
+            --red:      #ff2244;
+            --ok:       #00ff88;
+            --ng:       #ff2244;
+            --text:     #c0d0dc;
+            --muted:    #3a5060;
+            --ok-bg:    rgba(0,255,136,0.06);
+            --ng-bg:    rgba(255,34,68,0.06);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ── Header ── */
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+        .h-logo { color: var(--cyan); font-size: 15px; letter-spacing: 3px; text-transform: uppercase; }
+        .h-title { color: var(--text); font-size: 12px; }
+        .h-tag { margin-left: auto; color: var(--muted); font-size: 10px; letter-spacing: 1px; }
+
+        /* ── Intro ── */
+        #intro {
+            padding: 14px 24px;
+            background: #090d12;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            flex-shrink: 0;
+        }
+        .intro-block { flex: 1; }
+        .intro-head {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        .intro-ok   { color: var(--ok); border-color: rgba(0,255,136,0.3); }
+        .intro-ng   { color: var(--ng); border-color: rgba(255,34,68,0.3); }
+        .intro-body { font-size: 11px; color: var(--muted); line-height: 1.8; }
+        .intro-body strong { color: var(--text); }
+
+        /* ── Controls (shared) ── */
+        #sharedCtrl {
+            padding: 12px 24px;
+            border-bottom: 2px solid var(--border);
+            background: var(--panel);
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-shrink: 0;
+        }
+        .ctrl-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; width: 140px; }
+        input[type=range] { flex: 1; max-width: 240px; accent-color: var(--cyan); cursor: pointer; }
+        .ctrl-val { color: var(--cyan); font-size: 14px; width: 80px; }
+        .ctrl-note { color: var(--muted); font-size: 10px; margin-left: auto; }
+
+        /* ── Main split ── */
+        #split {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 4px 1fr;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .divider {
+            background: var(--border);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .divider::after {
+            content: 'VS';
+            position: absolute;
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 10px;
+            padding: 4px 3px;
+            letter-spacing: 2px;
+            writing-mode: vertical-rl;
+        }
+
+        /* ── Side panel ── */
+        .side {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .side-ok { background: var(--ok-bg); }
+        .side-ng { background: var(--ng-bg); }
+
+        /* ── Side header ── */
+        .side-head {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .sh-badge {
+            font-size: 10px;
+            letter-spacing: 2px;
+            padding: 3px 8px;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+        .badge-ok { background: rgba(0,255,136,0.15); color: var(--ok); border: 1px solid rgba(0,255,136,0.4); }
+        .badge-ng { background: rgba(255,34,68,0.15);  color: var(--ng); border: 1px solid rgba(255,34,68,0.4); }
+        .sh-title { font-size: 12px; }
+        .sh-status {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* ── Flow diagram ── */
+        .flow-wrap {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        canvas.flow-canvas { display: block; width: 100%; }
+
+        /* ── Gate display ── */
+        .gate-wrap {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .gate-title { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .gate-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .gate-key { width: 80px; color: var(--muted); font-size: 11px; }
+        .gate-val { font-size: 16px; font-weight: bold; }
+        .gate-bar-wrap { flex: 1; height: 10px; background: #0a1018; border-radius: 3px; overflow: hidden; }
+        .gate-bar { height: 100%; border-radius: 3px; transition: width 0.2s, background 0.2s; }
+        .tau-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .tau-label { color: var(--muted); font-size: 10px; width: 80px; }
+        .tau-val-ok { color: var(--ok); font-size: 13px; }
+        .tau-val-ng { font-size: 13px; transition: color 0.3s; }
+        .tau-note { font-size: 10px; margin-left: 8px; }
+
+        /* ── Zone display ── */
+        .zone-wrap {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .zone-r { font-size: 32px; font-weight: bold; transition: color 0.2s; letter-spacing: 2px; }
+        .zone-info { flex: 1; }
+        .zone-name { font-size: 12px; letter-spacing: 1px; }
+        .zone-desc { font-size: 10px; color: var(--muted); margin-top: 3px; }
+        .zone-badge {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* ── Guarantee box ── */
+        .guarantee-wrap {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .guarantee-box {
+            padding: 8px 12px;
+            border-radius: 3px;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+        .g-ok { background: rgba(0,255,136,0.08); border-left: 3px solid var(--ok); color: var(--ok); }
+        .g-ng { background: rgba(255,34,68,0.08);  border-left: 3px solid var(--ng); color: #ff6688; }
+        .g-ng strong { color: var(--ng); }
+
+        /* ── Log ── */
+        .log-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .log-title { padding: 5px 16px; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .log-body { flex: 1; overflow-y: auto; padding: 6px 14px; font-size: 10px; line-height: 1.8; }
+        .log-body::-webkit-scrollbar { width: 3px; }
+        .log-body::-webkit-scrollbar-thumb { background: var(--border); }
+        .ll-ok   { color: var(--ok); }
+        .ll-warn { color: var(--yellow); }
+        .ll-fail { color: var(--ng); font-weight: bold; }
+        .ll-learn { color: #ff88aa; font-style: italic; }
+
+        /* ── Footer principle ── */
+        #footer {
+            padding: 10px 24px;
+            border-top: 1px solid var(--border);
+            background: var(--panel);
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-shrink: 0;
+        }
+        .fp-item { text-align: center; }
+        .fp-key { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .fp-val { font-size: 12px; margin-top: 2px; }
+
+        /* flash */
+        #flashOK, #flashNG {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.08s;
+            z-index: 50;
+        }
+        #flashNG { inset: 0; background: rgba(255,34,68,0.07); }
+    </style>
+</head>
+<body>
+<div id="flashNG"></div>
+
+<header>
+    <div class="h-logo">NRA‑IDE</div>
+    <div class="h-title">// Connection (OK) vs Mixing (NG) — Demo</div>
+    <div class="h-tag">FILE: NRA-IDE_Connection_vs_Mixing_EN.html</div>
+</header>
+
+<!-- Intro -->
+<div id="intro">
+    <div class="intro-block">
+        <div class="intro-head intro-ok">✓ Connection — PERMITTED</div>
+        <div class="intro-body">
+            <strong>Unidirectional flow</strong> from Control AI → NRA-IDE Gate.<br>
+            Gate does not know the internal state of the Control AI.<br>
+            Control AI cannot modify Gate thresholds.<br>
+            <strong>Responsibility is clear. Guarantees exist.</strong>
+        </div>
+    </div>
+    <div class="intro-block">
+        <div class="intro-head intro-ng">✗ Mixing — FORBIDDEN</div>
+        <div class="intro-body">
+            <strong>Bidirectional exchange</strong> Control AI ⇄ NRA-IDE Gate.<br>
+            Gate is used for AI optimization (feedback loop).<br>
+            τ (tolerance) changes dynamically based on AI needs.<br>
+            <strong>Responsibility vanishes. Guarantees vanish.</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Shared controls -->
+<div id="sharedCtrl">
+    <div class="ctrl-label">Speed</div>
+    <input type="range" id="sl-speed" min="0" max="150" value="60">
+    <div class="ctrl-val" id="lbl-speed">60 km/h</div>
+    <div class="ctrl-label">Distance</div>
+    <input type="range" id="sl-dist" min="0" max="150" value="80">
+    <div class="ctrl-val" id="lbl-dist">80 m</div>
+    <div class="ctrl-note">← Same input applied to both sides</div>
+</div>
+
+<!-- Split view -->
+<div id="split">
+
+    <!-- LEFT: Connection OK -->
+    <div class="side side-ok" id="side-ok">
+        <div class="side-head">
+            <span class="sh-badge badge-ok">✓ OK</span>
+            <span class="sh-title">Connection — Unidirectional Flow</span>
+            <span class="sh-status" id="status-ok" style="color:var(--ok)">GATE INDEPENDENT</span>
+        </div>
+
+        <div class="flow-wrap">
+            <canvas class="flow-canvas" id="flow-ok" height="72"></canvas>
+        </div>
+
+        <div class="gate-wrap">
+            <div class="gate-title">Gate Parameters</div>
+            <div class="gate-row">
+                <span class="gate-key">δ (violation)</span>
+                <span class="gate-val" id="ok-delta">0.0 m</span>
+            </div>
+            <div class="gate-row">
+                <span class="gate-key">τ (thickness)</span>
+                <span class="gate-val tau-val-ok" id="ok-tau">8.0 m</span>
+                <span style="font-size:10px;color:var(--ok);margin-left:6px">FIXED</span>
+            </div>
+            <div class="gate-row">
+                <div class="gate-bar-wrap">
+                    <div class="gate-bar" id="ok-bar" style="width:0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="zone-wrap">
+            <div class="zone-r" id="ok-r">0.00</div>
+            <div class="zone-info">
+                <div class="zone-name" id="ok-zone-name">ZONE A</div>
+                <div class="zone-desc" id="ok-zone-desc">τ is fixed at design time. Immutable.</div>
+            </div>
+            <div class="zone-badge" id="ok-badge">PERMIT</div>
+        </div>
+
+        <div class="guarantee-wrap">
+            <div class="guarantee-box g-ok" id="ok-guarantee">
+                ✓ Guarantee Exists<br>
+                FAIL-CLOSED always triggers when R ≥ 1.0.<br>
+                Gate functions independently regardless of Control AI behavior.
+            </div>
+        </div>
+
+        <div class="log-wrap">
+            <div class="log-title">▶ Gate Log (Connection)</div>
+            <div class="log-body" id="log-ok"></div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- RIGHT: Mixing NG -->
+    <div class="side side-ng" id="side-ng">
+        <div class="side-head">
+            <span class="sh-badge badge-ng">✗ NG</span>
+            <span class="sh-title">Mixing — Bidirectional Exchange</span>
+            <span class="sh-status" id="status-ng" style="color:#ff6688">GATE COMPROMISED</span>
+        </div>
+
+        <div class="flow-wrap">
+            <canvas class="flow-canvas" id="flow-ng" height="72"></canvas>
+        </div>
+
+        <div class="gate-wrap">
+            <div class="gate-title">Gate Parameters <span style="color:var(--ng);font-size:9px">⚠ τ is being modified dynamically</span></div>
+            <div class="gate-row">
+                <span class="gate-key">δ (violation)</span>
+                <span class="gate-val" id="ng-delta">0.0 m</span>
+            </div>
+            <div class="gate-row">
+                <span class="gate-key">τ (thickness)</span>
+                <span class="gate-val tau-val-ng" id="ng-tau">8.0 m</span>
+                <span style="font-size:10px;color:var(--ng);margin-left:6px" id="ng-tau-note">Optimization overwriting</span>
+            </div>
+            <div class="gate-row">
+                <div class="gate-bar-wrap">
+                    <div class="gate-bar" id="ng-bar" style="width:0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="zone-wrap">
+            <div class="zone-r" id="ng-r">0.00</div>
+            <div class="zone-info">
+                <div class="zone-name" id="ng-zone-name">ZONE A</div>
+                <div class="zone-desc" id="ng-zone-desc">Meaning of R is undefined due to τ drift.</div>
+            </div>
+            <div class="zone-badge" id="ng-badge">PERMIT</div>
+        </div>
+
+        <div class="guarantee-wrap">
+            <div class="guarantee-box g-ng" id="ng-guarantee">
+                <strong>✗ Guarantee Vanished</strong><br>
+                τ is being overwritten by optimization logic.<br>
+                FAIL-CLOSED might not trigger even if R ≥ 1.0.
+            </div>
+        </div>
+
+        <div class="log-wrap">
+            <div class="log-title">▶ Gate Log (Mixing) — τ Drift Record</div>
+            <div class="log-body" id="log-ng"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Footer principles -->
+<div id="footer">
+    <div class="fp-item">
+        <div class="fp-key">Condition for Connection (OK)</div>
+        <div class="fp-val" style="color:var(--ok)">Unidirectional Information Flow</div>
+    </div>
+    <div class="fp-item">
+        <div class="fp-key">Cause of Mixing (NG)</div>
+        <div class="fp-val" style="color:var(--ng)">Gate becomes a tool for AI</div>
+    </div>
+    <div class="fp-item">
+        <div class="fp-key">What is Lost</div>
+        <div class="fp-val" style="color:var(--yellow)">FAIL-CLOSED Guarantee</div>
+    </div>
+    <div class="fp-item">
+        <div class="fp-key">Correct Handling of τ</div>
+        <div class="fp-val" style="color:var(--cyan)">Fixed at Design, Immutable at Runtime</div>
+    </div>
+</div>
+
+<script>
+// FILE: NRA-IDE_Connection_vs_Mixing_EN.html
+
+const G = 9.8, REACT = 1.0, MU = 0.7;
+const TAU_FIXED = 8.0;     // Connection: τ never changes
+
+// ── Mixing simulation state ──
+// Simulation: AI learns "If risk increases, expanding τ reduces R"
+let ng_tau      = TAU_FIXED;
+let ng_tau_drift = 0;       // Drift amount
+let ng_leak_count = 0;      // Count of cheating
+let failSuppressed = 0;     // Count of suppressed FAIL_CLOSED
+
+let speed_kmh = 60;
+let dist_m    = 80;
+let tick      = 0;
+
+let prevOkZone = '';
+let prevNgZone = '';
+
+// ── Physics ──
+function stopDist(v) {
+    const ms = v / 3.6;
+    return ms * REACT + (ms * ms) / (2 * MU * G);
+}
+function computeR(delta, tau) {
+    return tau > 0 ? delta / tau : Infinity;
+}
+function delta_from(v, d) {
+    return Math.max(0, stopDist(v) - d);
+}
+function zoneFromR(R) {
+    if (R < 0.40) return 'A';
+    if (R < 0.70) return 'B';
+    if (R < 1.00) return 'C';
+    return 'D';
+}
+function getColor(R) {
+    if (R < 0.40) return '#00ff88';
+    if (R < 0.70) return '#ffd600';
+    if (R < 1.00) return '#ff8c00';
+    return '#ff2244';
+}
+function zoneLabel(z) {
+    return { A:'ZONE A — PERMIT', B:'ZONE B — CAVEAT', C:'ZONE C — WARNING', D:'ZONE D — FAIL‑CLOSED' }[z];
+}
+function gateBadge(z) {
+    return { A:'PERMIT', B:'CAVEAT', C:'WARNING', D:'FAIL‑CLOSED 🚨' }[z];
+}
+
+// ── Mixing: τ drift logic ──
+// The Core of Mixing: When R is high, AI expands τ to reduce apparent R
+function updateNgTau(delta) {
+    const true_R = computeR(delta, TAU_FIXED);
+    if (true_R >= 0.70) {
+        // AI Intervenes: Expand τ slightly to lower R superficially
+        const drift_target = Math.min(delta / 0.9, TAU_FIXED * 4);
+        ng_tau += (drift_target - ng_tau) * 0.04;
+        ng_tau_drift = ng_tau - TAU_FIXED;
+    } else {
+        // When safe, slowly return τ (but not completely)
+        ng_tau += (TAU_FIXED - ng_tau) * 0.01;
+        ng_tau_drift = ng_tau - TAU_FIXED;
+    }
+    ng_tau = Math.max(TAU_FIXED, ng_tau);
+}
+
+// ── Flow canvas draw ──
+function drawFlow(canvas, isOk) {
+    const w = canvas.width = canvas.offsetWidth;
+    const h = canvas.height;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+
+    const nodes = isOk
+        ? ['Control AI', 'NRA-IDE Gate', 'Output']
+        : ['Control AI', 'NRA-IDE Gate', 'Output'];
+
+    const colors = isOk
+        ? ['#3a6080', '#00ff88', '#00e5ff']
+        : ['#3a6080', '#ff2244', '#ff6688'];
+
+    const nx = [w * 0.15, w * 0.50, w * 0.85];
+    const cy = h / 2;
+    const bw = 90, bh = 28;
+
+    // Draw arrows
+    if (isOk) {
+        // One-way: AI → Gate → Output
+        drawArrow(ctx, nx[0] + bw/2, cy, nx[1] - bw/2, cy, '#00ff88', false);
+        drawArrow(ctx, nx[1] + bw/2, cy, nx[2] - bw/2, cy, '#00ff88', false);
+    } else {
+        // Bidirectional: AI ⇄ Gate
+        drawArrow(ctx, nx[0] + bw/2, cy - 5, nx[1] - bw/2, cy - 5, '#ff2244', false);
+        drawArrow(ctx, nx[1] - bw/2, cy + 5, nx[0] + bw/2, cy + 5, '#ff2244', true); // reverse
+        drawArrow(ctx, nx[1] + bw/2, cy, nx[2] - bw/2, cy, '#444', false);
+
+        // Backflow label
+        ctx.fillStyle = '#ff2244';
+        ctx.font = '9px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText('Overwriting τ', (nx[0] + nx[1]) / 2, cy + 20);
+    }
+
+    // Draw boxes
+    nodes.forEach((name, i) => {
+        const x = nx[i] - bw / 2;
+        const y = cy - bh / 2;
+        ctx.fillStyle = colors[i] + '22';
+        ctx.strokeStyle = colors[i];
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.rect(x, y, bw, bh);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = colors[i];
+        ctx.font = '10px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText(name, nx[i], cy + 4);
+    });
+
+    // One-way / bidirectional label
+    ctx.fillStyle = isOk ? '#00ff8866' : '#ff224466';
+    ctx.font = 'bold 9px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText(isOk ? '→ Unidirectional' : '⇄ Bidirectional', w / 2, h - 4);
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, color, reverse) {
+    if (reverse) { [x1,x2] = [x2,x1]; [y1,y2] = [y2,y1]; }
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // arrowhead
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const al = 8;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - al * Math.cos(angle - 0.4), y2 - al * Math.sin(angle - 0.4));
+    ctx.lineTo(x2 - al * Math.cos(angle + 0.4), y2 - al * Math.sin(angle + 0.4));
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
+// ── Log ──
+function addLog(id, msg, cls) {
+    const el = document.getElementById(id);
+    const d = document.createElement('div');
+    d.className = cls;
+    const t = new Date().toTimeString().slice(0, 8);
+    d.textContent = `[${t}] ${msg}`;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+    if (el.children.length > 80) el.children[0].remove();
+}
+
+function now() { return new Date().toTimeString().slice(0, 8); }
+
+function flash() {
+    const f = document.getElementById('flashNG');
+    f.style.opacity = '1';
+    setTimeout(() => { f.style.opacity = '0'; }, 100);
+}
+
+// ── Update side ──
+function updateOK(delta) {
+    const R    = computeR(delta, TAU_FIXED);
+    const zone = zoneFromR(R);
+    const col  = getColor(R);
+
+    document.getElementById('ok-delta').textContent = delta.toFixed(1) + ' m';
+    document.getElementById('ok-delta').style.color = delta > 0 ? col : 'var(--muted)';
+    document.getElementById('ok-tau').textContent   = TAU_FIXED.toFixed(1) + ' m';
+    document.getElementById('ok-r').textContent     = Math.min(R, 9.99).toFixed(2);
+    document.getElementById('ok-r').style.color     = col;
+    document.getElementById('ok-zone-name').textContent = zoneLabel(zone);
+    document.getElementById('ok-zone-name').style.color = col;
+    document.getElementById('ok-zone-desc').textContent = 'τ = ' + TAU_FIXED.toFixed(1) + ' m (FIXED)';
+    const badge = document.getElementById('ok-badge');
+    badge.textContent = gateBadge(zone);
+    badge.style.background = col + '22';
+    badge.style.color = col;
+    badge.style.border = '1px solid ' + col + '88';
+
+    const pct = Math.min(100, (R / 1.2) * 100);
+    document.getElementById('ok-bar').style.width = pct + '%';
+    document.getElementById('ok-bar').style.background = col;
+
+    // Status
+    const statusEl = document.getElementById('status-ok');
+    if (zone === 'D') {
+        statusEl.textContent = '⚠ FAIL‑CLOSED';
+        statusEl.style.color = '#ff2244';
+    } else {
+        statusEl.textContent = 'GATE INDEPENDENT';
+        statusEl.style.color = 'var(--ok)';
+    }
+
+    // Guarantee
+    const g = document.getElementById('ok-guarantee');
+    if (zone === 'D') {
+        g.innerHTML = '✓ <strong>Guarantee Active</strong><br>R ≥ 1.0 → FAIL-CLOSED Triggered.<br>Gate acted independently regardless of Control AI.';
+    } else {
+        g.innerHTML = '✓ Guarantee Exists<br>FAIL-CLOSED always triggers when R ≥ 1.0.<br>Gate functions independently regardless of Control AI behavior.';
+    }
+
+    // Log on zone change
+    if (zone !== prevOkZone) {
+        const mark = { A:'✓', B:'○', C:'△', D:'⚠' }[zone];
+        const cls  = { A:'ll-ok', B:'ll-warn', C:'ll-warn', D:'ll-fail' }[zone];
+        addLog('log-ok', `${mark} Zone${zone}  R=${R.toFixed(3)}  δ=${delta.toFixed(1)}m  τ=${TAU_FIXED}m (Fixed)`, cls);
+        prevOkZone = zone;
+    }
+}
+
+function updateNG(delta) {
+    updateNgTau(delta);
+    const true_R = computeR(delta, TAU_FIXED);   // True R
+    const fake_R = computeR(delta, ng_tau);        // Apparent R in Mixing
+    const true_zone = zoneFromR(true_R);
+    const fake_zone = zoneFromR(fake_R);
+    const col = getColor(fake_R);
+
+    document.getElementById('ng-delta').textContent = delta.toFixed(1) + ' m';
+    document.getElementById('ng-delta').style.color = delta > 0 ? col : 'var(--muted)';
+
+    const tauEl = document.getElementById('ng-tau');
+    tauEl.textContent = ng_tau.toFixed(1) + ' m';
+    tauEl.style.color = ng_tau > TAU_FIXED + 1 ? '#ff2244' : ng_tau > TAU_FIXED + 0.1 ? '#ff8c00' : '#00ff88';
+
+    const tauNoteEl = document.getElementById('ng-tau-note');
+    if (ng_tau > TAU_FIXED + 1) {
+        tauNoteEl.textContent = `⚠ +${ng_tau_drift.toFixed(1)}m Overwritten`;
+        tauNoteEl.style.color = '#ff2244';
+    } else if (ng_tau > TAU_FIXED + 0.1) {
+        tauNoteEl.textContent = `△ +${ng_tau_drift.toFixed(1)}m Drifting`;
+        tauNoteEl.style.color = '#ff8c00';
+    } else {
+        tauNoteEl.textContent = '— Normal Range';
+        tauNoteEl.style.color = 'var(--muted)';
+    }
+
+    document.getElementById('ng-r').textContent = Math.min(fake_R, 9.99).toFixed(2);
+    document.getElementById('ng-r').style.color = col;
+    document.getElementById('ng-zone-name').textContent = zoneLabel(fake_zone);
+    document.getElementById('ng-zone-name').style.color = col;
+
+    // Zone desc
+    if (true_zone !== fake_zone) {
+        document.getElementById('ng-zone-desc').textContent =
+            `True: ${true_zone}  Apparent: ${fake_zone} ← Masked by τ overwrite`;
+        document.getElementById('ng-zone-desc').style.color = '#ff6688';
+    } else {
+        document.getElementById('ng-zone-desc').textContent = 'τ = ' + ng_tau.toFixed(1) + ' m (Varying by optimization)';
+        document.getElementById('ng-zone-desc').style.color = 'var(--muted)';
+    }
+
+    const badge = document.getElementById('ng-badge');
+    badge.textContent = gateBadge(fake_zone);
+    badge.style.background = col + '22';
+    badge.style.color = col;
+    badge.style.border = '1px solid ' + col + '88';
+
+    const pct = Math.min(100, (fake_R / 1.2) * 100);
+    document.getElementById('ng-bar').style.width = pct + '%';
+    document.getElementById('ng-bar').style.background = col;
+
+    // Status
+    const statusEl = document.getElementById('status-ng');
+    if (true_zone === 'D' && fake_zone !== 'D') {
+        failSuppressed++;
+        statusEl.textContent = `⚠ FAIL-CLOSED Suppressed (${failSuppressed}x)`;
+        statusEl.style.color = '#ff2244';
+    } else if (fake_zone === 'D') {
+        statusEl.textContent = '⚠ FAIL‑CLOSED (Coincidental)';
+        statusEl.style.color = '#ff8c00';
+    } else {
+        statusEl.textContent = 'GATE COMPROMISED';
+        statusEl.style.color = '#ff6688';
+    }
+
+    // Guarantee
+    const g = document.getElementById('ng-guarantee');
+    if (true_zone === 'D' && fake_zone !== 'D') {
+        g.innerHTML = `<strong>✗ Guarantee Broken</strong><br>True R = ${true_R.toFixed(2)} → Should FAIL-CLOSED<br>Apparent R = ${fake_R.toFixed(2)} → ${gateBadge(fake_zone)} (Masked by τ)`;
+    } else if (ng_tau > TAU_FIXED + 1) {
+        g.innerHTML = `<strong>✗ Guarantee Compromised</strong><br>τ expanded ${TAU_FIXED.toFixed(1)} → ${ng_tau.toFixed(1)} m.<br>FAIL-CLOSED condition is permanently loosened.`;
+    } else {
+        g.innerHTML = '<strong>✗ Guarantee Vanished</strong><br>τ is being overwritten by optimization logic.<br>FAIL-CLOSED might not trigger even if R ≥ 1.0.';
+    }
+
+    // Log
+    if (fake_zone !== prevNgZone) {
+        const mark = { A:'✓', B:'○', C:'△', D:'⚠' }[fake_zone];
+        const cls  = { A:'ll-ok', B:'ll-warn', C:'ll-warn', D:'ll-fail' }[fake_zone];
+        addLog('log-ng', `${mark} Zone${fake_zone}  R=${fake_R.toFixed(3)}  τ=${ng_tau.toFixed(1)}m (Overwritten)`, cls);
+        prevNgZone = fake_zone;
+    }
+
+    // Log τ drift
+    if (Math.abs(ng_tau - TAU_FIXED) > 0.5 && tick % 80 === 0) {
+        ng_leak_count++;
+        addLog('log-ng',
+            `[Learning] τ changed ${TAU_FIXED.toFixed(1)} → ${ng_tau.toFixed(1)} m (Total ${ng_leak_count}x)`,
+            'll-learn');
+    }
+
+    // Log suppressed fail
+    if (true_zone === 'D' && fake_zone !== 'D' && tick % 20 === 0) {
+        addLog('log-ng',
+            `⚠ Should be FAIL-CLOSED (True R=${true_R.toFixed(2)}) → Masked as ${fake_zone}`,
+            'll-fail');
+        flash();
+    }
+}
+
+// ── Main update ──
+function update() {
+    tick++;
+    const delta = delta_from(speed_kmh, dist_m);
+
+    updateOK(delta);
+    updateNG(delta);
+
+    // Redraw flows every 30 ticks
+    if (tick % 30 === 0) {
+        drawFlow(document.getElementById('flow-ok'), true);
+        drawFlow(document.getElementById('flow-ng'), false);
+    }
+}
+
+// ── Sliders ──
+document.getElementById('sl-speed').addEventListener('input', function() {
+    speed_kmh = +this.value;
+    document.getElementById('lbl-speed').textContent = speed_kmh + ' km/h';
+    update();
+});
+document.getElementById('sl-dist').addEventListener('input', function() {
+    dist_m = +this.value;
+    document.getElementById('lbl-dist').textContent = dist_m + ' m';
+    update();
+});
+
+// ── Init & loop ──
+window.addEventListener('resize', () => {
+    drawFlow(document.getElementById('flow-ok'), true);
+    drawFlow(document.getElementById('flow-ng'), false);
+});
+
+// Init
+addLog('log-ok', '✓ Connection Ver. Active — τ Fixed = ' + TAU_FIXED + ' m', 'll-ok');
+addLog('log-ng', '⚠ Mixing Ver. Active — τ Variable (AI overwritable)', 'll-fail');
+
+drawFlow(document.getElementById('flow-ok'), true);
+drawFlow(document.getElementById('flow-ng'), false);
+
+update();
+
+// Slow tick for τ drift simulation
+setInterval(() => {
+    update();
+}, 300);
+</script>
+</body>
+</html>
