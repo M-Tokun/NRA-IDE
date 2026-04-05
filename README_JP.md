@@ -28,6 +28,24 @@
 
 ---
 
+## 🎮 ライブデモ
+
+インタラクティブなHTMLシミュレーションは [`examples/`](./examples/) フォルダにあります。
+
+| # | ファイル | 内容 |
+|---|---------|------|
+| 00 | [脱進機の基礎](./examples/00_Escapement_Foundation_NRA_JP.html) | 整数位相ロック — 残差が消える理由 |
+| 07 | [HAN Gate ライブ](./examples/07_HAN_gate_live_JP.html) | リアルタイムR閾値検知 |
+| 08 | [Band Gate ライブ](./examples/08_Band_Gate_live_JP.html) | 非対称τダンパー構造 |
+| 17 | [水→氷 相転移](./examples/17_water_ice_phase_transition_JP.html) | R=1.0が0℃と正確に一致 |
+| 18 | [チェーン張り](./examples/18_chain_tension_JP.html) | τ余裕幅 — 日常感覚で理解する |
+| 21 | [CABG Monitor](./examples/21_cabg_monitor_JP.html) | 医療応用 — 生体指標にδ/τを適用 |
+| 25 | [ダム劣化](./examples/25_dam_degradation_JP.html) | 累積負荷による余裕幅消費の追跡 |
+
+→ [全27デモ一覧](./examples/)
+
+---
+
 ## 🌍 For English Speakers
 
 **Please see [README.md](./README.md) for English documentation.**

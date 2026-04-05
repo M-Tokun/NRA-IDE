@@ -28,6 +28,24 @@ See [GOVERNANCE.md](./GOVERNANCE.md) for the project's design philosophy and int
 
 ---
 
+## 🎮 Live Demos
+
+Interactive HTML simulations are available in the [`examples/`](./examples/) directory.
+
+| # | File | Description |
+|---|------|-------------|
+| 00 | [Escapement Foundation](./examples/00_Escapement_Foundation_NRA_JP.html) | Integer Phase Lock — why residuals vanish |
+| 07 | [HAN Gate Live](./examples/07_HAN_gate_live_EN.html) | Real-time R threshold detection |
+| 08 | [Band Gate Live](./examples/08_Band_Gate_live_EN.html) | Asymmetric τ damper structure |
+| 17 | [Water→Ice Phase Transition](./examples/17_water_ice_phase_transition_JP.html) | R=1.0 coincides exactly with 0°C |
+| 18 | [Chain Tension](./examples/18_chain_tension_JP.html) | τ margin — everyday intuition |
+| 21 | [CABG Monitor](./examples/21_cabg_monitor_JP.html) | Medical application — δ/τ on physiological indicators |
+| 25 | [Dam Degradation](./examples/25_dam_degradation_EN.html) | Margin consumption tracking over cumulative load |
+
+→ [Full list of all 27 demos](./examples/)
+
+---
+
 ## 🌏 For Japanese Speakers
 
 **日本語版ドキュメントは [README_JP.md](./README_JP.md) をご覧ください。**
