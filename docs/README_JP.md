@@ -30,6 +30,7 @@
 ## コアコンセプト
 
 ![NRA-IDE Core Formula](./NRA-IDE定義式（基礎式）.jpg)
+![NRA-IDE Core Formula](./NRA-IDE定義式（応用式）.jpg)
 
 ---
 
