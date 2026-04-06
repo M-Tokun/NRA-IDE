@@ -31,6 +31,10 @@
 
 ![NRA-IDE Core Formula](./NRA-IDE定義式（基礎式）.jpg)
 
+## (応用式) 「量子IDEを根本に据えることで古典計算が誤差爆発しない範囲だけに古典を補助的に使える構造を設計した
+
+![NRA-IDE Core Formula](./NRA-IDE定義式（応用式）.jpg)
+
 ---
 
 ## アーキテクチャ
