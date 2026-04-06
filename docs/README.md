@@ -37,6 +37,12 @@ This framework does not reject existing academic disciplines; rather, it present
 
 ---
 
+## “By establishing the Quantum IDE as the fundamental layer, the architecture ensures that classical computation is employed only in a supplementary manner and strictly within the domain where error divergence cannot occur.”
+
+![NRA-IDE Core Formula](./NRA-IDE定義式（応用式）.jpg)
+
+---
+
 ## Architecture
 
 ![NRA-IDE Sandwich Architecture](./TOP_sandwich.png)
