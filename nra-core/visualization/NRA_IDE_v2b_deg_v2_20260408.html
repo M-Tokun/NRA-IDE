@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA_IDE_v2b_deg_v2_20260408.html -->
+<!-- TITLE: NRA-IDE τ Degradation — Dam & Coral (Visual, Slow-Accumulation) -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<!-- Generated: 2026-04-08 JST -->
+<!-- Timing: continuous rAF, delta per frame ~0.001×degSensitivity, same as nra_dam_degradation_2026-03-10.html -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE: τ Degradation — Dam &amp; Coral</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+:root{
+  --bg:#060c12;--panel:#0b1520;--border:#1a3040;
+  --text:#c8dde8;--dim:#4a6a7a;
+  --green:#00e676;--yellow:#ffd740;--orange:#ff9100;--red:#ff3d00;--blue:#40c4ff;
+  --tau:#c060ff;
+  --mono:'Share Tech Mono',monospace;--sans:'Zen Kaku Gothic New',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:14px 10px;}
+
+.page-title{text-align:center;margin-bottom:12px;}
+.page-title h1{font-family:var(--mono);font-size:.88rem;color:#fff;letter-spacing:.1em;margin-bottom:3px;}
+.page-title p{font-size:.68rem;color:var(--dim);font-family:var(--mono);}
+.file-badge{display:inline-block;margin-top:5px;padding:2px 10px;border:1px solid rgba(192,96,255,.3);font-size:.62rem;color:var(--tau);font-family:var(--mono);letter-spacing:.1em;}
+
+.tab-bar{display:flex;gap:0;justify-content:center;margin-bottom:8px;}
+.tab-btn{padding:7px 22px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--dim);transition:all .15s;}
+.tab-btn:first-child{border-radius:4px 0 0 4px;}.tab-btn:last-child{border-radius:0 4px 4px 0;}
+.tab-btn.dam.active{background:#0a2030;border-color:var(--blue);color:var(--blue);}
+.tab-btn.coral.active{background:#150a20;border-color:var(--tau);color:var(--tau);}
+
+.sc-bar{display:flex;gap:5px;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
+.sc-btn{padding:6px 12px;font-family:var(--mono);font-size:.67rem;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--dim);transition:all .15s;}
+.sc-btn.active{background:#0a2030;border-color:var(--blue);color:var(--blue);}
+.sc-btn.danger.active{background:#200a08;border-color:var(--red);color:var(--red);}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:980px;margin:0 auto 8px;}
+.side{border:1px solid var(--border);background:var(--panel);}
+.side-hdr{padding:7px 13px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;border-bottom:1px solid var(--border);}
+.side-left .side-hdr{color:#ff6b6b;background:#1a0a0a;border-color:#3a1010;}
+.side-right .side-hdr{color:var(--green);background:#0a1a10;border-color:#103a20;}
+canvas.main-cv{display:block;width:100%;height:220px;}
+.side-status{padding:8px 13px;border-top:1px solid var(--border);}
+.metric-lbl{font-family:var(--mono);font-size:.65rem;color:var(--dim);margin-bottom:2px;}
+.metric-big{font-family:var(--mono);font-size:1.2rem;font-weight:bold;line-height:1;margin-bottom:4px;}
+.judgment{padding:6px 8px;font-size:.7rem;line-height:1.65;border:1px solid var(--border);margin-top:6px;font-family:var(--mono);min-height:44px;}
+
+.deg-panel{max-width:980px;margin:0 auto 8px;border:1px solid var(--border);background:var(--panel);padding:11px 13px;}
+.deg-title{font-family:var(--mono);font-size:.7rem;color:var(--tau);letter-spacing:.1em;margin-bottom:9px;}
+.deg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.deg-clbl{font-family:var(--mono);font-size:.62rem;color:var(--dim);margin-bottom:4px;}
+canvas.deg-cv{display:block;width:100%;height:130px;}
+.deg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px;}
+.dstat{background:#0a1018;border:1px solid var(--border);padding:7px 8px;}
+.dstat-lbl{font-family:var(--mono);font-size:.59rem;color:var(--dim);margin-bottom:2px;}
+.dstat-val{font-family:var(--mono);font-size:.92rem;font-weight:bold;}
+
+.ctrl-area{max-width:980px;margin:0 auto 8px;background:var(--panel);border:1px solid var(--border);padding:9px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.ctrl-grp{display:flex;align-items:center;gap:6px;}
+.ctrl-lbl{font-family:var(--mono);font-size:.65rem;color:var(--dim);white-space:nowrap;}
+input[type=range]{accent-color:var(--blue);cursor:pointer;width:88px;}
+input[type=range].tau-r{accent-color:var(--tau);}
+.ctrl-val{font-family:var(--mono);font-size:.67rem;color:var(--blue);min-width:26px;}
+.ctrl-val.tau-v{color:var(--tau);}
+.reset-btn{padding:5px 11px;font-family:var(--mono);font-size:.65rem;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--text);margin-left:auto;}
+.reset-btn:hover{border-color:var(--green);color:var(--green);}
+
+.insight{max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#0a1520;border:1px solid #1a3040;font-size:.73rem;line-height:1.75;color:#7aaabb;font-family:var(--mono);}
+
+.nav-note{text-align:center;padding:9px;font-size:.67rem;color:var(--dim);font-family:var(--mono);}
+.nav-note a{color:var(--blue);text-decoration:none;}
+footer{text-align:center;padding:10px;font-size:.61rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
+@media(max-width:580px){.compare-grid,.deg-grid,.deg-stats{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>NRA-IDE — τ劣化シナリオ / τ Degradation Scenarios</h1>
+  <p>同じ負荷でも構造が老いるとRが上昇する。古典管理が最も見落とすパターン。</p>
+  <div class="file-badge">FILE B — DAM &amp; CORAL · τ erodes over time</div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab-btn dam active" onclick="switchTab('dam')">🏗️ ダム劣化</div>
+  <div class="tab-btn coral" onclick="switchTab('coral')">🪸 珊瑚白化</div>
+</div>
+
+<div class="sc-bar" id="scBar"></div>
+
+<div class="compare-grid">
+  <div class="side side-left">
+    <div class="side-hdr" id="hdrL">✕ 従来の管理 — 水位だけを見る</div>
+    <canvas id="cvL" class="main-cv"></canvas>
+    <div class="side-status">
+      <div class="metric-lbl" id="mlbl">水位</div>
+      <div class="metric-big" id="mbig" style="color:#ff6b6b">---</div>
+      <div class="metric-lbl" id="tlbl">判断基準：水位 ≥ 90% で警戒</div>
+      <div class="judgment" id="jL">待機中</div>
+    </div>
+  </div>
+  <div class="side side-right">
+    <div class="side-hdr" id="hdrR">✓ NRA-IDE — R = δ/τ （τ は劣化する）</div>
+    <canvas id="cvR" class="main-cv"></canvas>
+    <div class="side-status">
+      <div class="metric-lbl">R = δ / τ（ゆらぎ / 現在の構造厚み）</div>
+      <div class="metric-big" id="rBig" style="color:var(--green)">0.000</div>
+      <div class="metric-lbl" id="rZone">NIRVANA — 安定</div>
+      <div class="judgment" id="jR">待機中</div>
+    </div>
+  </div>
+</div>
+
+<div class="deg-panel">
+  <div class="deg-title" id="degTitle">◆ τ劣化曲線 — 負荷の積算が構造の余裕を蝕む</div>
+  <div class="deg-grid">
+    <div>
+      <div class="deg-clbl" id="tauClbl">τ（実効耐性）の推移 — ゆらぎのたびに縮小</div>
+      <canvas id="cvDT" class="deg-cv"></canvas>
+    </div>
+    <div>
+      <div class="deg-clbl">R の推移 — 同じ負荷でも上昇し続ける</div>
+      <canvas id="cvDR" class="deg-cv"></canvas>
+    </div>
+  </div>
+  <div class="deg-stats">
+    <div class="dstat"><div class="dstat-lbl">初期τ（設計値）</div><div class="dstat-val" id="dsTau0" style="color:var(--yellow)">1.000</div></div>
+    <div class="dstat"><div class="dstat-lbl">現在τ（劣化後）</div><div class="dstat-val" id="dsTauC" style="color:var(--tau)">1.000</div></div>
+    <div class="dstat"><div class="dstat-lbl">τ劣化率</div><div class="dstat-val" id="dsDeg" style="color:var(--orange)">0.0%</div></div>
+    <div class="dstat"><div class="dstat-lbl">δ蓄積（累積負荷）</div><div class="dstat-val" id="dsDelta" style="color:var(--red)">0.000</div></div>
+    <div class="dstat"><div class="dstat-lbl">古典管理の視点</div><div class="dstat-val" id="dsClass" style="color:var(--dim);font-size:.7rem;line-height:1.4">水位のみ</div></div>
+    <div class="dstat"><div class="dstat-lbl">NRA-IDEの視点</div><div class="dstat-val" id="dsNra" style="color:var(--green);font-size:.7rem;line-height:1.4">R=δ/τ + τ劣化</div></div>
+  </div>
+</div>
+
+<div class="ctrl-area">
+  <div class="ctrl-grp"><span class="ctrl-lbl" id="c1lbl">水位上昇速度</span><input type="range" id="c1" min="0" max="3" step=".1" value=".5"><span class="ctrl-val" id="c1v">0.5</span></div>
+  <div class="ctrl-grp"><span class="ctrl-lbl" id="c2lbl">ゆらぎ強度 δ</span><input type="range" id="c2" min="0" max="10" step=".1" value="1"><span class="ctrl-val" id="c2v">1.0</span></div>
+  <div class="ctrl-grp"><span class="ctrl-lbl">τ劣化感度</span><input type="range" class="tau-r" id="c3" min="1" max="20" step="1" value="5"><span class="ctrl-val tau-v" id="c3v">5</span></div>
+  <button class="reset-btn" onclick="doReset()">RESET</button>
+</div>
+
+<div class="insight" id="insight">起動中...</div>
+
+<div class="nav-note">← 基本シナリオ: <a href="NRA_IDE_v2a_basic_20260408.html">File A (過労崩壊・橋の疲労・電池)</a></div>
+<footer>NRA-IDE · Nomological Ring Axioms / Intensional Dynamics Engine · https://github.com/M-Tokun/NRA-IDE · Zenodo DOI: 10.5281/zenodo.19420854 · © 2026 M-Tokuni</footer>
+
+<script>
+'use strict';
+// ─────────────────────────────────────────────────────────────────────
+// Scenario tables
+// ─────────────────────────────────────────────────────────────────────
+const TAB_CFG = {
+  dam: {
+    hdrL:'✕ 従来の管理 — 水位だけを見る',
+    hdrR:'✓ NRA-IDE — R = δ/τ （τ は嵐ごとに劣化）',
+    mlbl:'水位', tlbl:'判断基準：水位 ≥ 90% で警戒',
+    degTitle:'◆ τ劣化曲線 — ダム堤防の実効強度低下',
+    tauClbl:'τ（堤防の実効厚み）の推移 — 嵐のたびに縮小',
+    dsClass:'水位のみ', dsNra:'R=δ/τ + τ劣化',
+    c1lbl:'水位上昇速度', c2lbl:'ゆらぎ強度 δ',
+    scenarios:[
+      {label:'平常運転',          fill:.3,  delta:1.0,  wInit:.15, danger:false},
+      {label:'水位80%・穏やか',   fill:.0,  delta:.8,   wInit:.80, danger:false},
+      {label:'水位60%・嵐発生',   fill:.0,  delta:8.0,  wInit:.60, danger:true},
+      {label:'水位70%・激しいゆらぎ',fill:.0,delta:6.0, wInit:.70, danger:true},
+    ],
+  },
+  coral: {
+    hdrL:'✕ 従来の管理 — 今日の海水温だけを見る',
+    hdrR:'✓ NRA-IDE — R = δ/τ （τ は既往白化で劣化）',
+    mlbl:'海水温異常 (今日)', tlbl:'判断基準：温度異常 ≥ 1°C で警戒',
+    degTitle:'◆ τ劣化曲線 — 珊瑚の回復力低下（既往白化の蓄積）',
+    tauClbl:'τ（珊瑚の回復力）の推移 — 白化イベントごとに低下',
+    dsClass:'今日の海水温', dsNra:'R=δ/τ + τ劣化(既往白化)',
+    c1lbl:'温暖化進行速度', c2lbl:'熱ストレス δ',
+    scenarios:[
+      {label:'平常海況',          fill:.0,  delta:1.0,  wInit:.15, danger:false},
+      {label:'軽度温暖化',        fill:.0,  delta:2.5,  wInit:.15, danger:false},
+      {label:'海水温+2°C超',      fill:.1,  delta:7.0,  wInit:.15, danger:true},
+      {label:'極端高温イベント',  fill:.0,  delta:9.0,  wInit:.15, danger:true},
+    ],
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────
+// Simulation state
+// ─────────────────────────────────────────────────────────────────────
+const TAU0 = 1.0, HIST = 300;
+let tab = 'dam';
+let phase = 0, waterLevel = .15, fillSpeed = .5;
+let deltaStrength = 1.0, degSens = 5;
+let tauC = TAU0, deltaAcc = 0, fc = 0;
+let tauHist = [], rHist = [];
+
+// ─────────────────────────────────────────────────────────────────────
+// Tab & scenario management
+// ─────────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  tab = t;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-btn.' + t).classList.add('active');
+  const cfg = TAB_CFG[t];
+  setText('hdrL',    cfg.hdrL);
+  setText('hdrR',    cfg.hdrR);
+  setText('mlbl',    cfg.mlbl);
+  setText('tlbl',    cfg.tlbl);
+  setText('degTitle',cfg.degTitle);
+  setText('tauClbl', cfg.tauClbl);
+  setText('dsClass', cfg.dsClass);
+  setText('dsNra',   cfg.dsNra);
+  setText('c1lbl',   cfg.c1lbl);
+  setText('c2lbl',   cfg.c2lbl);
+  buildScBtns(cfg.scenarios);
+  applyScenario(cfg.scenarios[0]);
+}
+
+function buildScBtns(scs) {
+  const bar = document.getElementById('scBar');
+  bar.innerHTML = '';
+  scs.forEach((sc, i) => {
+    const b = document.createElement('button');
+    b.className = 'sc-btn' + (sc.danger ? ' danger' : '') + (i === 0 ? ' active' : '');
+    b.textContent = sc.label;
+    b.onclick = () => {
+      document.querySelectorAll('.sc-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyScenario(sc);
+    };
+    bar.appendChild(b);
+  });
+}
+
+function applyScenario(sc) {
+  fillSpeed = sc.fill;
+  deltaStrength = sc.delta;
+  waterLevel = sc.wInit;
+  document.getElementById('c1').value = sc.fill;
+  document.getElementById('c1v').textContent = sc.fill.toFixed(1);
+  document.getElementById('c2').value = sc.delta;
+  document.getElementById('c2v').textContent = sc.delta.toFixed(1);
+  resetState();
+}
+
+function resetState() {
+  phase = 0; tauC = TAU0; deltaAcc = 0; fc = 0;
+  tauHist = []; rHist = [];
+}
+
+function doReset() {
+  const cfg = TAB_CFG[tab];
+  document.querySelectorAll('.sc-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  applyScenario(cfg.scenarios[0]);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Controls
+// ─────────────────────────────────────────────────────────────────────
+document.getElementById('c1').oninput = function(){ fillSpeed = parseFloat(this.value); setText('c1v', fillSpeed.toFixed(1)); };
+document.getElementById('c2').oninput = function(){ deltaStrength = parseFloat(this.value); setText('c2v', deltaStrength.toFixed(1)); };
+document.getElementById('c3').oninput = function(){ degSens = parseInt(this.value); setText('c3v', degSens); };
+
+// ─────────────────────────────────────────────────────────────────────
+// DAM DRAWING  (preserves original drawDam logic)
+// ─────────────────────────────────────────────────────────────────────
+function drawDam(ctx, W, H, isRight, delta, R, tauRatio) {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#060c12'; ctx.fillRect(0,0,W,H);
+  const DL=44,DR=W-68,DB=H-34,DT=24;
+  const DH=DB-DT, DW=DR-DL;
+  const tauPx = isRight ? (11+tauRatio*44) : 34;
+  const rawFluc=(Math.sin(phase*1.4)*.5+Math.sin(phase*2.3)*.3+Math.sin(phase*.8)*.2)*deltaStrength;
+  const waveAmp=deltaStrength*DH*.004;
+  const waterY=DT+DH*(1-waterLevel)+rawFluc*DH*.012;
+
+  ctx.fillStyle='#0a1520'; ctx.fillRect(0,DB,W,H-DB);
+  ctx.fillStyle='#152535'; ctx.fillRect(DL-13,DT,13,DH+(H-DB));
+  const wc=R>1?'#3a1008':R>.7?'#2a2008':(isRight&&tauRatio<.4?'#1a2020':'#152535');
+  ctx.fillStyle=wc; ctx.fillRect(DR,DT,tauPx,DH+(H-DB));
+
+  if(isRight&&tauRatio<.9){
+    const worn=(1-tauRatio)*tauPx*.78;
+    ctx.fillStyle='rgba(6,12,18,.58)'; ctx.fillRect(DR,DT+DH*.1,worn,DH*.8);
+    for(let i=0;i<3;i++){
+      ctx.strokeStyle='rgba(255,49,0,.17)'; ctx.lineWidth=1; ctx.setLineDash([2,4]);
+      ctx.beginPath(); ctx.moveTo(DR+worn*.3+i*4,DT+DH*(.2+i*.2)); ctx.lineTo(DR+worn*.8+i*2,DT+DH*(.4+i*.2)); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(192,96,255,.55)'; ctx.font="9px 'Share Tech Mono'";
+    ctx.fillText('τ',DR+tauPx/2-3,DT+12);
+  }
+
+  const overflow=isRight?R>=1.0:waterLevel>=.97;
+  if(!overflow){
+    const wg=ctx.createLinearGradient(0,waterY,0,DB);
+    const wcolTop=R>.7?'#802010':R>.4?'#1a5070':'#1a6080';
+    wg.addColorStop(0,wcolTop); wg.addColorStop(1,'#0a2840');
+    ctx.fillStyle=wg;
+    ctx.beginPath(); ctx.moveTo(DL,waterY);
+    for(let x=DL;x<=DR;x+=3)
+      ctx.lineTo(x,waterY+Math.sin((x-DL)*.08+phase*2.5)*waveAmp+Math.sin((x-DL)*.15+phase*1.5)*waveAmp*.5);
+    ctx.lineTo(DR,DB); ctx.lineTo(DL,DB); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle=R>.7?'rgba(255,145,0,.45)':'rgba(64,196,255,.28)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    for(let x=DL;x<=DR;x+=3){ const wy=waterY+Math.sin((x-DL)*.08+phase*2.5)*waveAmp; x===DL?ctx.moveTo(x,wy):ctx.lineTo(x,wy);}
+    ctx.stroke();
+  }else{
+    ctx.fillStyle='rgba(10,48,64,.22)'; ctx.fillRect(DL,DT+DH*.4,DW,DB-DT-DH*.4);
+    const fx=DR+tauPx,fy=DT+DH*.5,flen=W-fx-10;
+    const fg=ctx.createLinearGradient(fx,0,fx+flen,0);
+    fg.addColorStop(0,'rgba(26,96,128,.75)'); fg.addColorStop(1,'rgba(26,96,128,0)');
+    ctx.fillStyle=fg;
+    ctx.beginPath();ctx.moveTo(fx,fy-10);
+    ctx.quadraticCurveTo(fx+flen*.5,fy+Math.sin(phase*3)*5,fx+flen,fy);
+    ctx.lineTo(fx+flen,fy+15); ctx.quadraticCurveTo(fx+flen*.5,fy+21,fx,fy+17); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(0,230,118,.9)'; ctx.font="bold 9px 'Share Tech Mono'"; ctx.fillText('→ 委譲',fx+4,fy+5);
+    ctx.fillStyle='rgba(0,230,118,.55)'; ctx.font="8px 'Share Tech Mono'"; ctx.fillText('人間が判断する',fx+4,fy+16);
+  }
+  ctx.fillStyle='rgba(64,196,255,.5)'; ctx.font="8px 'Share Tech Mono'"; ctx.textAlign='right';
+  ctx.fillText(Math.round(waterLevel*100)+'%',DL-2,Math.max(DT+12,DT+DH*(1-waterLevel)+4));
+  ctx.textAlign='left';
+  if(isRight){
+    const mx=DL+DW*.45,dPx=Math.max(2,Math.abs(delta)*DH*2.5);
+    ctx.strokeStyle='rgba(64,196,255,.65)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(mx,waterY-dPx); ctx.lineTo(mx,waterY+dPx); ctx.stroke();
+    ctx.fillStyle='rgba(64,196,255,.75)'; ctx.font="8px 'Share Tech Mono'"; ctx.fillText('δ',mx+3,waterY+3);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// CORAL DRAWING
+// ─────────────────────────────────────────────────────────────────────
+function drawCoral(ctx, W, H, isRight, delta, R, tauRatio) {
+  ctx.clearRect(0,0,W,H);
+  const stress = isRight ? Math.min(R/1.2,1) : Math.min(delta*2.5,1);
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,`rgb(${Math.round(6+stress*20)},${Math.round(18+stress*8)},${Math.round(32-stress*14)})`);
+  bg.addColorStop(1,`rgb(10,20,28)`);
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Surface shimmer
+  for(let i=0;i<5;i++){
+    ctx.strokeStyle=`rgba(100,200,220,${.04+stress*.03})`; ctx.lineWidth=1;
+    ctx.beginPath();
+    const sy=16+i*11+Math.sin(phase*1.5+i)*3;
+    ctx.moveTo(0,sy);
+    for(let x=0;x<=W;x+=8) ctx.lineTo(x,sy+Math.sin(x*.05+phase*2+i)*2.5);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle='#0a1a12'; ctx.fillRect(0,H-26,W,26);
+
+  // Coral polyps
+  const numC=8;
+  for(let c=0;c<numC;c++){
+    const cx=W*(.08+c*.11+(c%3)*.03), cy=H-26;
+    const bh=28+(c%3)*14;
+    const bleach=isRight?Math.max(0,1-tauRatio*1.5):Math.max(0,stress-.25);
+    drawPolyp(ctx,cx,cy,bh,bleach,c);
+  }
+
+  // Temperature gauge (left/classical)
+  if(!isRight){
+    const gx=W-30, gy0=H-28, gH=H-52;
+    ctx.fillStyle='rgba(0,0,0,.38)'; ctx.fillRect(gx-7,gy0-gH-4,22,gH+8);
+    const fillH=Math.min(gH,delta*.3*gH);
+    const gc=ctx.createLinearGradient(0,gy0,0,gy0-gH);
+    gc.addColorStop(0,'#1a6080'); gc.addColorStop(.5,'#ffd740'); gc.addColorStop(1,'#ff3d00');
+    ctx.fillStyle=gc; ctx.fillRect(gx-3,gy0-fillH,14,fillH);
+    const ty=gy0-gH*.5;
+    ctx.strokeStyle='rgba(255,61,0,.55)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(gx-9,ty); ctx.lineTo(gx+16,ty); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,61,0,.7)'; ctx.font="7px 'Share Tech Mono'"; ctx.fillText('1°C',gx+9,ty-2);
+    ctx.fillStyle='rgba(255,215,64,.6)'; ctx.fillText('°C',gx+1,gy0-gH-8);
+  } else {
+    // R gauge
+    const gx=W-30, gy0=H-28, gH=H-52;
+    const rClamp=Math.min(R,1.5);
+    ctx.fillStyle='rgba(0,0,0,.38)'; ctx.fillRect(gx-7,gy0-gH-4,22,gH+8);
+    const fillH=Math.min(gH,rClamp/1.5*gH);
+    const gc2=ctx.createLinearGradient(0,gy0,0,gy0-gH);
+    gc2.addColorStop(0,'#00e676'); gc2.addColorStop(.55,'#ffd740'); gc2.addColorStop(.82,'#ff9100'); gc2.addColorStop(1,'#ff3d00');
+    ctx.fillStyle=gc2; ctx.fillRect(gx-3,gy0-fillH,14,fillH);
+    const ly=gy0-gH/1.5;
+    ctx.strokeStyle='rgba(255,61,0,.5)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(gx-9,ly); ctx.lineTo(gx+16,ly); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,61,0,.65)'; ctx.font="7px 'Share Tech Mono'"; ctx.fillText('1.0',gx+8,ly-2);
+    ctx.fillStyle='rgba(0,230,118,.55)'; ctx.fillText('R',gx+3,gy0-gH-8);
+    // τ label
+    const tp=Math.round(tauRatio*100);
+    const tc=tp>60?'rgba(192,96,255,.7)':tp>30?'rgba(255,145,0,.75)':'rgba(255,61,0,.8)';
+    ctx.fillStyle=tc; ctx.font="8px 'Share Tech Mono'"; ctx.fillText('τ='+tp+'%',5,13);
+  }
+}
+
+function drawPolyp(ctx,x,y,h,bleach,seed){
+  const nb=3+(seed%3);
+  const hue=340+seed*14;
+  const col=`hsl(${hue},${Math.round(68-bleach*55)}%,${Math.round(28+bleach*34)}%)`;
+  for(let b=0;b<nb;b++){
+    const ang=Math.PI/2+(b-(nb-1)/2)*.42+Math.sin(phase*.8+seed)*.025;
+    const bl=h*(.58+b*.12);
+    ctx.strokeStyle=col; ctx.lineWidth=2+(nb-b)*.45; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(x,y);
+    const tx=x+Math.cos(ang)*bl, ty2=y-Math.sin(ang)*bl;
+    ctx.quadraticCurveTo(x+Math.cos(ang)*bl*.5+Math.cos(ang+Math.PI/2)*5,y-Math.sin(ang)*bl*.5,tx,ty2);
+    ctx.stroke();
+    ctx.fillStyle=bleach>.65?`rgba(215,208,200,.7)`:`hsl(${hue+10},78%,${Math.round(50+bleach*26)}%)`;
+    ctx.beginPath(); ctx.arc(tx,ty2,2.5,0,Math.PI*2); ctx.fill();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Degradation graph (identical for both tabs)
+// ─────────────────────────────────────────────────────────────────────
+function drawDegGraph(ctx, W, H, hist, isR) {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#070d14'; ctx.fillRect(0,0,W,H);
+  const PL=34,PR=8,PT=8,PB=20, GW=W-PL-PR, GH=H-PT-PB;
+  const maxV=isR?1.8:TAU0;
+
+  ctx.strokeStyle='#1a2a35'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=PT+GH*i/4;
+    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(PL+GW,y); ctx.stroke();
+    ctx.fillStyle='#4a6a7a'; ctx.font="7px 'Share Tech Mono'"; ctx.textAlign='right';
+    ctx.fillText((maxV-maxV*i/4).toFixed(2),PL-2,y+3);
+  }
+  ctx.textAlign='left';
+
+  const thresh=isR?1.0:.5;
+  const ty=PT+GH*(1-thresh/maxV);
+  ctx.strokeStyle='rgba(255,61,0,.38)'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(PL,ty); ctx.lineTo(PL+GW,ty); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,61,0,.55)'; ctx.font="7px 'Share Tech Mono'";
+  ctx.fillText(isR?'LIMIT':'WARN',PL+3,ty-2);
+
+  if(hist.length>1){
+    const col=isR?'#ff6040':(tab==='coral'?'#c060ff':'#ffd740');
+    ctx.strokeStyle=col; ctx.lineWidth=2;
+    ctx.beginPath();
+    hist.forEach((v,i)=>{
+      const x=PL+i/(HIST-1)*GW, n=Math.max(0,Math.min(1,v/maxV));
+      const y2=PT+GH*(1-n); i===0?ctx.moveTo(x,y2):ctx.lineTo(x,y2);
+    });
+    ctx.stroke();
+    ctx.globalAlpha=.11; ctx.fillStyle=col; ctx.beginPath();
+    hist.forEach((v,i)=>{const x=PL+i/(HIST-1)*GW,n=Math.max(0,Math.min(1,v/maxV)),y2=PT+GH*(1-n);i===0?ctx.moveTo(x,y2):ctx.lineTo(x,y2);});
+    ctx.lineTo(PL+(hist.length-1)/(HIST-1)*GW,PT+GH); ctx.lineTo(PL,PT+GH); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  ctx.strokeStyle='#2a4050'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PL,PT); ctx.lineTo(PL,PT+GH); ctx.lineTo(PL+GW,PT+GH); ctx.stroke();
+  ctx.fillStyle='#4a6a7a'; ctx.font="7px 'Share Tech Mono'"; ctx.textAlign='center';
+  ctx.fillText('時間 →',PL+GW/2,PT+GH+13); ctx.textAlign='left';
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// UI text updates
+// ─────────────────────────────────────────────────────────────────────
+function updateDamUI(R){
+  const lvl=Math.round(waterLevel*100), deg=(1-tauC/TAU0)*100;
+  setText('mbig', lvl+'%'); document.getElementById('mbig').style.color='#ff6b6b';
+
+  const jL=document.getElementById('jL');
+  if(waterLevel>=.97){styleJ(jL,'#ff3d00'); jL.textContent='⚡ 決壊。水位が限界を超えました。';}
+  else if(lvl>=90){styleJ(jL,'#ff9100'); jL.textContent='⚠ 警戒。水位90%超。放流を検討します。';}
+  else if(lvl>=70){styleJ(jL,'#ffd740'); jL.textContent='〜 注意。水位70%超。監視を続けます。';}
+  else{styleJ(jL,'#1a3040','#4a6a7a'); jL.textContent='✓ 安全。水位は低い。問題なし。';}
+
+  const rEl=document.getElementById('rBig'), rz=document.getElementById('rZone'), jR=document.getElementById('jR');
+  rEl.textContent=R.toFixed(3);
+  if(R>=1.0){rEl.style.color='#ff3d00'; setText('rZone','ABSTAIN — 限界超過'); styleJ(jR,'#ff3d00'); jR.textContent=`⚡ R ≥ 1.0 — 超過。τ劣化 ${deg.toFixed(1)}% が影響しています。`;}
+  else if(R>=.7){rEl.style.color='#ff9100'; setText('rZone','CRITICAL — 限界接近'); styleJ(jR,'#ff9100'); jR.textContent=`⚠ R ≥ 0.7 — 水位に関わらず今すぐ対応が必要です。τ = ${tauC.toFixed(3)}`;}
+  else if(R>=.4){rEl.style.color='#ffd740'; setText('rZone','ELASTIC — 監視中'); styleJ(jR,'#ffd740'); jR.textContent=`〜 R ≥ 0.4 — 余裕はあります。τ劣化 ${deg.toFixed(1)}% を注視します。`;}
+  else{rEl.style.color='#00e676'; setText('rZone','NIRVANA — 安定'); styleJ(jR,'#00e676'); jR.textContent=`✓ R < 0.4 — 安定。τ = ${tauC.toFixed(3)}（初期比 ${(100-deg).toFixed(1)}%）`;}
+
+  const el=document.getElementById('insight');
+  if(lvl<75&&R>=.7){
+    el.style.cssText='max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#1a0a08;border:1px solid #ff3d00;color:#ff9090;font-size:.73rem;line-height:1.75;font-family:var(--mono)';
+    el.innerHTML=`<strong>⚡ これが核心です。</strong>　水位は ${lvl}% — 従来の管理では「安全」と判断します。しかし R = ${R.toFixed(3)}、τ劣化 ${deg.toFixed(1)}% — ゆらぎと構造劣化が重なり、今この瞬間に限界が近づいています。耐用年数計算には現れない危険です。`;
+  }else if(deg>25){
+    el.style.cssText='max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#1a1208;border:1px solid #ff9100;color:#ffc080;font-size:.73rem;line-height:1.75;font-family:var(--mono)';
+    el.innerHTML=`<strong>τ劣化が ${deg.toFixed(1)}% 進行しています。</strong>　新築時と同じ水位・ゆらぎでも、R は ${R.toFixed(3)} まで上昇しています。「50年耐用」では見えない変化です。`;
+  }else{
+    el.style.cssText='max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#0a1520;border:1px solid #1a3040;color:#7aaabb;font-size:.73rem;line-height:1.75;font-family:var(--mono)';
+    el.textContent='シナリオ「嵐発生」を選び、τ劣化感度を上げてみてください。τが縮むにつれ、同じ水位でもRが上昇していく様子が劣化曲線に現れます。';
+  }
+}
+
+function updateCoralUI(R, delta){
+  const deg=(1-tauC/TAU0)*100, tAnom=(delta*2.5).toFixed(2);
+  setText('mbig','+'+tAnom+'°C'); document.getElementById('mbig').style.color='#ff6b6b';
+
+  const jL=document.getElementById('jL');
+  if(delta*10>=8){styleJ(jL,'#ff3d00'); jL.textContent='⚡ 高温イベント。速急な白化が始まります。';}
+  else if(delta*10>=4){styleJ(jL,'#ff9100'); jL.textContent='⚠ 温度異常 ≥ 1°C — 警戒。白化リスクあり。';}
+  else{styleJ(jL,'#1a3040','#4a6a7a'); jL.textContent='✓ 許容範囲内。今日の温度は問題なし。';}
+
+  const rEl=document.getElementById('rBig'), jR=document.getElementById('jR');
+  rEl.textContent=R.toFixed(3);
+  if(R>=1.0){rEl.style.color='#ff3d00'; setText('rZone','ABSTAIN — 大規模白化'); styleJ(jR,'#ff3d00'); jR.textContent=`⚡ R ≥ 1.0 — 大規模白化。τ劣化 ${deg.toFixed(1)}%。Fail-Closed: 人間に委譲。`;}
+  else if(R>=.7){rEl.style.color='#ff9100'; setText('rZone','CRITICAL — 白化接近'); styleJ(jR,'#ff9100'); jR.textContent=`⚠ R ≥ 0.7 — 今日の温度に関わらず対応が必要。τ = ${tauC.toFixed(3)}`;}
+  else if(R>=.4){rEl.style.color='#ffd740'; setText('rZone','ELASTIC — 蓄積中'); styleJ(jR,'#ffd740'); jR.textContent=`〜 R ≥ 0.4 — 熱ストレス蓄積中。τ劣化 ${deg.toFixed(1)}% を注視。`;}
+  else{rEl.style.color='#00e676'; setText('rZone','NIRVANA — 安定'); styleJ(jR,'#00e676'); jR.textContent=`✓ R < 0.4 — 安定。珊瑚の回復力 τ = ${tauC.toFixed(3)}（初期比 ${(100-deg).toFixed(1)}%）`;}
+
+  const el=document.getElementById('insight');
+  if(parseFloat(tAnom)<1.0&&R>=.7){
+    el.style.cssText='max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#1a0a08;border:1px solid #ff3d00;color:#ff9090;font-size:.73rem;line-height:1.75;font-family:var(--mono)';
+    el.innerHTML=`<strong>⚡ これが核心です。</strong>　今日の海水温は +${tAnom}°C — 許容内です。しかし R = ${R.toFixed(3)}、既往白化によるτ劣化 ${deg.toFixed(1)}% — 蓄積された熱ストレスが珊瑚を限界に追い込んでいます。`;
+  }else if(deg>20){
+    el.style.cssText='max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#1a0a18;border:1px solid #c060ff;color:#e0a0ff;font-size:.73rem;line-height:1.75;font-family:var(--mono)';
+    el.innerHTML=`<strong>τ劣化が ${deg.toFixed(1)}% 進行しています。</strong>　過去の白化で回復力が損なわれ、同じ温度でも R は ${R.toFixed(3)} まで上昇しています。「今日の温度」では見えない生物的不可逆性です。`;
+  }else{
+    el.style.cssText='max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#0a1520;border:1px solid #1a3040;color:#7aaabb;font-size:.73rem;line-height:1.75;font-family:var(--mono)';
+    el.textContent='シナリオ「海水温+2°C超」を選び、τ劣化感度を上げてみてください。今日の温度が同じでも、過去の白化でτが縮むにつれRが上昇していきます。';
+  }
+}
+
+function updateDegStats(){
+  const deg=(1-tauC/TAU0)*100;
+  setText('dsTau0',TAU0.toFixed(3));
+  const tcEl=document.getElementById('dsTauC'); tcEl.textContent=tauC.toFixed(3);
+  tcEl.style.color=tauC<.4?'#ff3d00':tauC<.65?'#ff9100':'#c060ff';
+  const dgEl=document.getElementById('dsDeg'); dgEl.textContent=deg.toFixed(1)+'%';
+  dgEl.style.color=deg>50?'#ff3d00':deg>25?'#ff9100':'#ffd740';
+  setText('dsDelta',deltaAcc.toFixed(3));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Utility
+// ─────────────────────────────────────────────────────────────────────
+function setText(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+function styleJ(el,bc,col){
+  el.style.borderColor=bc; el.style.color=col||bc;
+  el.style.cssText=(el.getAttribute('style')||'')+';padding:6px 8px;font-size:.7rem;line-height:1.65;border:1px solid;margin-top:6px;font-family:var(--mono);border-color:'+bc+';color:'+(col||bc);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Main loop — continuous rAF, same micro-increment timing as original dam
+// ─────────────────────────────────────────────────────────────────────
+const cvL=document.getElementById('cvL'), cvR=document.getElementById('cvR');
+const ctxL=cvL.getContext('2d'), ctxR=cvR.getContext('2d');
+const ctxDT=document.getElementById('cvDT').getContext('2d');
+const ctxDR=document.getElementById('cvDR').getContext('2d');
+
+function loop(){
+  phase+=0.02;
+  waterLevel+=fillSpeed*0.0002; if(waterLevel>1.0) waterLevel=1.0;
+
+  const rawFluc=(Math.sin(phase*1.4)*.5+Math.sin(phase*2.3)*.3+Math.sin(phase*.8)*.2)*deltaStrength;
+  const delta=Math.abs(rawFluc)*0.03;   // tiny per frame
+
+  // τ degradation — same formula as original dam HTML
+  deltaAcc+=delta*0.001*degSens;
+  tauC=Math.max(0.08, TAU0-deltaAcc*0.0001*degSens*10);
+  const tauEff=tauC*0.25+0.02;
+  const R=delta/tauEff;
+
+  if(fc%2===0){
+    tauHist.push(tauC); rHist.push(Math.min(1.8,R));
+    if(tauHist.length>HIST) tauHist.shift();
+    if(rHist.length>HIST)   rHist.shift();
+  }
+
+  const W=cvL.offsetWidth||460;
+  cvL.width=W; cvR.width=W;
+
+  if(tab==='dam'){
+    drawDam(ctxL,W,220,false,delta,R,1.0);
+    drawDam(ctxR,W,220,true,delta,R,tauC/TAU0);
+    updateDamUI(R);
+  }else{
+    drawCoral(ctxL,W,220,false,delta,R,1.0);
+    drawCoral(ctxR,W,220,true,delta,R,tauC/TAU0);
+    updateCoralUI(R,delta);
+  }
+
+  const DTW=document.getElementById('cvDT').offsetWidth||450;
+  document.getElementById('cvDT').width=DTW;
+  document.getElementById('cvDR').width=DTW;
+  drawDegGraph(ctxDT,DTW,130,tauHist,false);
+  drawDegGraph(ctxDR,DTW,130,rHist,true);
+  updateDegStats();
+
+  fc++;
+  requestAnimationFrame(loop);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────────
+switchTab('dam');
+loop();
+</script>
+</body>
+</html>

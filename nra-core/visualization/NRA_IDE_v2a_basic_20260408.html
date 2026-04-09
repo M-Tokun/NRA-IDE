@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA_IDE_v2a_basic_20260408.html -->
+<!-- TITLE: NRA-IDE Basic Scenarios — Worker / Bridge / Battery -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<!-- Generated: 2026-04-08 JST -->
+<!-- Timing: continuous rAF phase micro-accumulation, same design as File B -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE: Basic Scenarios — v2a</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+:root{
+  --bg:#060c12;--panel:#0b1520;--border:#1a3040;
+  --text:#c8dde8;--dim:#4a6a7a;
+  --green:#00e676;--yellow:#ffd740;--orange:#ff9100;--red:#ff3d00;--blue:#40c4ff;
+  --mono:'Share Tech Mono',monospace;--sans:'Zen Kaku Gothic New',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:14px 10px;}
+.page-title{text-align:center;margin-bottom:12px;}
+.page-title h1{font-family:var(--mono);font-size:.88rem;color:#fff;letter-spacing:.1em;margin-bottom:3px;}
+.page-title p{font-size:.68rem;color:var(--dim);font-family:var(--mono);}
+.file-badge{display:inline-block;margin-top:5px;padding:2px 10px;border:1px solid rgba(64,196,255,.28);font-size:.62rem;color:var(--blue);font-family:var(--mono);letter-spacing:.1em;}
+.tab-bar{display:flex;gap:0;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
+.tab-btn{padding:7px 18px;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--dim);transition:all .15s;white-space:nowrap;}
+.tab-btn:first-child{border-radius:4px 0 0 4px;}.tab-btn:last-child{border-radius:0 4px 4px 0;}
+.tab-btn.active{background:#0a2030;border-color:var(--blue);color:var(--blue);}
+.sc-bar{display:flex;gap:5px;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
+.sc-btn{padding:6px 12px;font-family:var(--mono);font-size:.67rem;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--dim);transition:all .15s;}
+.sc-btn.active{background:#0a2030;border-color:var(--blue);color:var(--blue);}
+.sc-btn.danger.active{background:#200a08;border-color:var(--red);color:var(--red);}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:980px;margin:0 auto 8px;}
+.side{border:1px solid var(--border);background:var(--panel);}
+.side-hdr{padding:7px 13px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;border-bottom:1px solid var(--border);}
+.side-left .side-hdr{color:#ff6b6b;background:#1a0a0a;border-color:#3a1010;}
+.side-right .side-hdr{color:var(--green);background:#0a1a10;border-color:#103a20;}
+canvas.main-cv{display:block;width:100%;height:220px;}
+.side-status{padding:8px 13px;border-top:1px solid var(--border);}
+.metric-lbl{font-family:var(--mono);font-size:.65rem;color:var(--dim);margin-bottom:2px;}
+.metric-big{font-family:var(--mono);font-size:1.2rem;font-weight:bold;line-height:1;margin-bottom:4px;}
+.judgment{padding:6px 8px;font-size:.7rem;line-height:1.65;border:1px solid var(--border);margin-top:6px;font-family:var(--mono);min-height:44px;}
+.trend-strip{max-width:980px;margin:0 auto 8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.trend-side{border:1px solid var(--border);background:var(--panel);}
+.trend-lbl{font-family:var(--mono);font-size:.62rem;color:var(--dim);padding:5px 10px 3px;letter-spacing:.05em;}
+canvas.trend-cv{display:block;width:100%;height:80px;}
+.ctrl-area{max-width:980px;margin:0 auto 8px;background:var(--panel);border:1px solid var(--border);padding:9px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.ctrl-grp{display:flex;align-items:center;gap:7px;}
+.ctrl-lbl{font-family:var(--mono);font-size:.65rem;color:var(--dim);white-space:nowrap;}
+input[type=range]{accent-color:var(--blue);cursor:pointer;width:88px;}
+.ctrl-val{font-family:var(--mono);font-size:.67rem;color:var(--blue);min-width:28px;}
+.stress-btn{padding:6px 14px;font-family:var(--mono);font-size:.67rem;cursor:pointer;border:1px solid rgba(255,61,0,.3);background:rgba(255,61,0,.08);color:var(--red);}
+.reset-btn{padding:5px 11px;font-family:var(--mono);font-size:.65rem;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--text);margin-left:auto;}
+.reset-btn:hover{border-color:var(--green);color:var(--green);}
+.insight{max-width:980px;margin:0 auto 8px;padding:8px 13px;background:#0a1520;border:1px solid #1a3040;font-size:.73rem;line-height:1.75;color:#7aaabb;font-family:var(--mono);}
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:980px;margin:0 auto 8px;}
+.diff-side{border:1px solid var(--border);background:var(--panel);padding:12px 14px;}
+.diff-side h3{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;margin-bottom:8px;}
+.diff-side.l h3{color:#ff6b6b;}.diff-side.r h3{color:var(--green);}
+.diff-side ul{list-style:none;font-size:.68rem;line-height:1.85;color:var(--dim);font-family:var(--mono);}
+.diff-side li::before{content:'→ ';opacity:.4;}
+.nav-note{text-align:center;padding:9px;font-size:.67rem;color:var(--dim);font-family:var(--mono);}
+.nav-note a{color:var(--blue);text-decoration:none;}
+footer{text-align:center;padding:10px;font-size:.61rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
+@media(max-width:580px){.compare-grid,.trend-strip,.diff-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="page-title">
+  <h1>NRA-IDE — 基本シナリオ比較 / Basic Scenario Comparison</h1>
+  <p>変化の速度を見るか。限界への近接度 R = δ/τ を見るか。</p>
+  <div class="file-badge">FILE A — WORKER · BRIDGE · BATTERY · τ fixed</div>
+</div>
+<div class="tab-bar">
+  <div class="tab-btn active" onclick="switchTab(0)">🏃 過労崩壊</div>
+  <div class="tab-btn" onclick="switchTab(1)">🌉 橋の疲労</div>
+  <div class="tab-btn" onclick="switchTab(2)">🔋 電池消耗</div>
+</div>
+<div class="sc-bar" id="scBar"></div>
+<div class="compare-grid">
+  <div class="side side-left">
+    <div class="side-hdr" id="hdrL">✕ 従来の管理 — 変化速度だけを見る</div>
+    <canvas id="cvL" class="main-cv"></canvas>
+    <div class="side-status">
+      <div class="metric-lbl" id="mlbl">変化速度 dδ/dt</div>
+      <div class="metric-big" id="mbig" style="color:#ff6b6b">0.000</div>
+      <div class="metric-lbl" id="tlbl">判断基準：速度スパイク ≥ 閾値 で警戒</div>
+      <div class="judgment" id="jL">開始中...</div>
+    </div>
+  </div>
+  <div class="side side-right">
+    <div class="side-hdr" id="hdrR">✓ NRA-IDE — R = δ/τ を見る</div>
+    <canvas id="cvR" class="main-cv"></canvas>
+    <div class="side-status">
+      <div class="metric-lbl">R = δ / τ（蓄積偏差 / 構造的許容幅）</div>
+      <div class="metric-big" id="rBig" style="color:var(--green)">0.000</div>
+      <div class="metric-lbl" id="rZone">NIRVANA — 安定</div>
+      <div class="judgment" id="jR">開始中...</div>
+    </div>
+  </div>
+</div>
+<div class="trend-strip">
+  <div class="trend-side">
+    <div class="trend-lbl" id="trendLblL">▲ dδ/dt（速度）— スパイクは一時的</div>
+    <canvas id="cvTL" class="trend-cv"></canvas>
+  </div>
+  <div class="trend-side">
+    <div class="trend-lbl">▲ R = δ/τ — 静かに上昇し続ける</div>
+    <canvas id="cvTR" class="trend-cv"></canvas>
+  </div>
+</div>
+<div class="ctrl-area">
+  <div class="ctrl-grp">
+    <span class="ctrl-lbl" id="c1lbl">ストレス強度</span>
+    <input type="range" id="c1" min="0.5" max="10" step=".5" value="1">
+    <span class="ctrl-val" id="c1v">1.0</span>
+  </div>
+  <button class="stress-btn" onclick="addStress()">⚡ 突発ストレス</button>
+  <button class="reset-btn" onclick="doReset()">RESET</button>
+</div>
+<div class="insight" id="insight">シナリオを選択してください。</div>
+<div class="diff-grid">
+  <div class="diff-side l"><h3>❌ CLASSICAL: What Goes Wrong</h3><ul id="igL"></ul></div>
+  <div class="diff-side r"><h3>✅ NRA-IDE: Structural Difference</h3><ul id="igR"></ul></div>
+</div>
+<div class="nav-note">τ劣化シナリオ (ダム・珊瑚): <a href="NRA_IDE_v2b_deg_v2_20260408.html">File B を開く</a></div>
+<footer>NRA-IDE · Nomological Ring Axioms / Intensional Dynamics Engine · https://github.com/M-Tokun/NRA-IDE · Zenodo DOI: 10.5281/zenodo.19420854 · © 2026 M-Tokuni</footer>
+
+<script>
+'use strict';
+const TABS=[
+  {name:'🏃 過労崩壊',
+   hdrL:'✕ 従来の管理 — 今日の疲労速度だけを見る',
+   hdrR:'✓ NRA-IDE — R=δ/τ（蓄積疲労/回復余力）',
+   mlbl:'疲労速度 dδ/dt',tlbl:'判断基準：速度スパイク ≥ 閾値 で警戒',
+   trendLblL:'▲ 疲労速度 — スパイクは一時的・蓄積は残る',
+   c1lbl:'労働負荷',c1def:1.0,
+   igL:['疲労の速度だけ監視','蓄積疲労δを追わない','閾値は主観的・恣意的','突然の倒れ — 警告なし'],
+   igR:['R=δ/τが「今どれだけ危ういか」を示す','R≥0.75で警告・人間が休養を判断','Fail-Closed: 出力停止・判断を委譲','速度が遅くてもδ高なら危険と診断'],
+   scenarios:[{l:'通常業務',s:1.0,d:false},{l:'残業続き',s:3.0,d:false},{l:'過重労働',s:6.5,d:true},{l:'限界突破',s:10.0,d:true}],
+   draw:drawWorker},
+  {name:'🌉 橋の疲労',
+   hdrL:'✕ 従来の管理 — 振動スパイクだけを見る',
+   hdrR:'✓ NRA-IDE — R=δ/τ（疲労蓄積/設計許容幅）',
+   mlbl:'振動速度 dδ/dt',tlbl:'判断基準：振動スパイク ≥ 閾値 で警戒',
+   trendLblL:'▲ 振動速度 — 沈静後も蓄積は残る',
+   c1lbl:'通行量・振動強度',c1def:1.0,
+   igL:['振動スパイクが収まれば「正常」','蓄積疲労を無視','一見正常な橋が突然崩壊','速度ベースの閾値は恣意的'],
+   igR:['δが構造に「借金」として蓄積される','R≥1.0前に点検指示を人間に委譲','外見に依らず構造比率で判断','Fail-Closed = 安全側に振り切る'],
+   scenarios:[{l:'軽交通',s:0.8,d:false},{l:'通常交通',s:2.0,d:false},{l:'重交通',s:5.0,d:true},{l:'嵐・強風',s:9.0,d:true}],
+   draw:drawBridge},
+  {name:'🔋 電池消耗',
+   hdrL:'✕ 従来の管理 — 消耗速度だけを見る',
+   hdrR:'✓ NRA-IDE — R=consumed/capacity',
+   mlbl:'消耗速度 dδ/dt',tlbl:'判断基準：高負荷放電 ≥ 閾値 で警戒',
+   trendLblL:'▲ 消耗速度 — 軽負荷時は警告なし',
+   c1lbl:'消費電力（負荷）',c1def:1.0,
+   igL:['高速使用中のみ警告','充電量の絶対値を追わない','ゆっくり使えば安全は誤り','0%で突然シャットダウン'],
+   igR:['R=消費量/容量 = 残量の逆数','速度問わず残量0に近づけばR→1','Fail-Closed = セーフシャットダウン','放電曲線の歪みも構造診断に含む'],
+   scenarios:[{l:'待機・省電力',s:0.5,d:false},{l:'通常使用',s:1.5,d:false},{l:'高負荷使用',s:4.0,d:true},{l:'フル稼働',s:8.0,d:true}],
+   draw:drawBattery},
+];
+
+const HIST=300;
+let ti=0,phase=0,delta=0,prevDelta=0,rate=0,stressStr=1.0,burst=false,fc=0;
+let hRate=[],hR=[];
+
+function switchTab(i){
+  ti=i;
+  document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  const t=TABS[i];
+  setText('hdrL',t.hdrL);setText('hdrR',t.hdrR);
+  setText('mlbl',t.mlbl);setText('tlbl',t.tlbl);
+  setText('trendLblL',t.trendLblL);setText('c1lbl',t.c1lbl);
+  document.getElementById('c1').value=t.c1def;
+  document.getElementById('c1v').textContent=t.c1def.toFixed(1);
+  stressStr=t.c1def;
+  document.getElementById('igL').innerHTML=t.igL.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('igR').innerHTML=t.igR.map(x=>`<li>${x}</li>`).join('');
+  buildScBtns(t.scenarios);
+  applyScenario(t.scenarios[0]);
+}
+function buildScBtns(scs){
+  const bar=document.getElementById('scBar');bar.innerHTML='';
+  scs.forEach((sc,i)=>{
+    const b=document.createElement('button');
+    b.className='sc-btn'+(sc.d?' danger':'')+(i===0?' active':'');
+    b.textContent=sc.l;
+    b.onclick=()=>{document.querySelectorAll('.sc-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyScenario(sc);};
+    bar.appendChild(b);
+  });
+}
+function applyScenario(sc){
+  stressStr=sc.s;
+  document.getElementById('c1').value=sc.s;
+  document.getElementById('c1v').textContent=sc.s.toFixed(1);
+  reset();
+}
+function doReset(){
+  document.querySelectorAll('.sc-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  applyScenario(TABS[ti].scenarios[0]);
+}
+function addStress(){burst=true;}
+function reset(){phase=0;delta=0;prevDelta=0;rate=0;fc=0;burst=false;hRate=[];hR=[];}
+document.getElementById('c1').oninput=function(){stressStr=parseFloat(this.value);setText('c1v',stressStr.toFixed(1));};
+
+// ── WORKER DRAWING ──────────────────────────────────────────────────
+function drawWorker(ctx,W,H,isRight,delta,R,rate){
+  ctx.clearRect(0,0,W,H);
+  const stress=isRight?Math.min(R,1):Math.min(Math.abs(rate)*10,1);
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,`rgb(${Math.round(8+stress*14)},${Math.round(10+stress*4)},${Math.round(18-stress*6)})`);
+  bg.addColorStop(1,'#060c14');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  const deskY=H-52;
+  ctx.fillStyle='#1a2a38';ctx.fillRect(W*.12,deskY,W*.76,7);
+  ctx.fillStyle='#141e2c';ctx.fillRect(W*.15,deskY+7,W*.7,H-deskY-7);
+
+  // Monitor
+  const mX=W*.35,mY=deskY-44,mW=W*.28,mH=34;
+  ctx.fillStyle='#0a1828';ctx.fillRect(mX,mY,mW,mH);
+  ctx.strokeStyle='#1a3548';ctx.lineWidth=1.5;ctx.strokeRect(mX,mY,mW,mH);
+  const sc=R>.75?'rgba(255,80,0,.18)':R>.4?'rgba(255,200,0,.12)':'rgba(0,180,255,.09)';
+  ctx.fillStyle=sc;ctx.fillRect(mX+2,mY+2,mW-4,mH-4);
+  ctx.fillStyle='#1a2a38';ctx.fillRect(mX+mW*.38,mY+mH,mW*.24,5);ctx.fillRect(mX+mW*.22,deskY-1,mW*.56,3);
+
+  // Person
+  const fatigue=Math.min(delta,1);
+  const tilt=fatigue*.16,hDrop=fatigue*20;
+  ctx.save();ctx.translate(W*.5,deskY-16);ctx.rotate(tilt);
+  const bodyH=62;
+  const bcol=fatigue>.8?'#3a1008':fatigue>.5?'#252010':'#1a2838';
+  ctx.fillStyle=bcol;
+  ctx.beginPath();ctx.moveTo(-17,0);
+  ctx.bezierCurveTo(-22,-bodyH*.4,-19,-bodyH*.7,-11,-bodyH);
+  ctx.lineTo(11,-bodyH);ctx.bezierCurveTo(19,-bodyH*.7,22,-bodyH*.4,17,0);
+  ctx.closePath();ctx.fill();
+  // Head
+  ctx.beginPath();ctx.arc(0,-bodyH-14-hDrop,13,0,Math.PI*2);
+  ctx.fillStyle=fatigue>.7?'#6a3020':fatigue>.4?'#8a5a30':'#a87848';ctx.fill();
+  // Arms
+  ctx.strokeStyle=bcol;ctx.lineWidth=7;ctx.lineCap='round';
+  const aDrop=fatigue*10;
+  ctx.beginPath();ctx.moveTo(-14,-bodyH*.52);ctx.quadraticCurveTo(-34,-bodyH*.32+aDrop,-44+fatigue*8,-4+aDrop);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(14,-bodyH*.52);ctx.quadraticCurveTo(34,-bodyH*.32+aDrop,44-fatigue*8,-4+aDrop);ctx.stroke();
+  // Stress haze (NRA side)
+  if(isRight&&fatigue>.3){
+    for(let i=0;i<4;i++){
+      const ox=Math.sin(phase*1.2+i*1.5)*18,oy=Math.cos(phase+i)*10-18;
+      ctx.fillStyle=`rgba(255,${Math.round(100-fatigue*80)},0,${fatigue*.07})`;
+      ctx.beginPath();ctx.arc(ox,-bodyH*.6+oy,12+i*4,0,Math.PI*2);ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  if(!isRight){drawRateGauge(ctx,W,H,rate,12);}
+  else{drawRGaugeV(ctx,W-28,H-30,H-52,R);drawDeltaBar(ctx,W*.2,H-16,W*.6,7,delta);}
+}
+
+// ── BRIDGE DRAWING ──────────────────────────────────────────────────
+function drawBridge(ctx,W,H,isRight,delta,R,rate){
+  ctx.clearRect(0,0,W,H);
+  const stress=isRight?Math.min(R,1):Math.min(Math.abs(rate)*10,1);
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,`rgb(${Math.round(8+stress*12)},${Math.round(12+stress*5)},${Math.round(20-stress*8)})`);
+  bg.addColorStop(1,'#040810');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // River
+  const rY=H-48;
+  ctx.fillStyle='#0a1e30';ctx.fillRect(0,rY,W,H-rY);
+  for(let i=0;i<3;i++){
+    ctx.strokeStyle='rgba(64,196,255,.05)';ctx.lineWidth=1;
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=6) ctx.lineTo(x,rY+10+i*11+Math.sin(x*.04+phase*1.5+i)*3);
+    ctx.stroke();
+  }
+  ctx.fillStyle='#0a1520';ctx.fillRect(0,rY-7,W*.18,7);ctx.fillRect(W*.82,rY-7,W*.18,7);
+
+  // Deck vibrates
+  const vibe=Math.sin(phase*4)*Math.abs(rate)*6;
+  const dY=rY-28+vibe,dX0=W*.1,dX1=W*.9,dH=8;
+  const dcol=R>.8?'#2a1808':R>.5?'#20200a':'#1a2838';
+  ctx.fillStyle=dcol;ctx.fillRect(dX0,dY,dX1-dX0,dH);
+  // Cracks on NRA side
+  if(isRight&&delta>.2){
+    const nc=Math.floor(delta*9);
+    for(let c=0;c<nc;c++){
+      const cx=dX0+(dX1-dX0)*(c+1)/(nc+1);
+      ctx.strokeStyle=`rgba(255,61,0,${Math.min(delta*.55,.48)})`;
+      ctx.lineWidth=.8;ctx.setLineDash([1,2]);
+      ctx.beginPath();ctx.moveTo(cx,dY);ctx.lineTo(cx+2+c%2*3,dY+dH);ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
+  // Towers
+  const tH=68,tW=10,t1=W*.28,t2=W*.72;
+  for(const tx of[t1,t2]){
+    ctx.fillStyle=dcol;ctx.fillRect(tx-tW/2,dY-tH,tW,tH+dH);
+    ctx.fillStyle='#283848';ctx.fillRect(tx-tW/2-2,dY-tH-4,tW+4,5);
+  }
+
+  // Cables
+  ctx.strokeStyle='rgba(100,160,200,.38)';ctx.lineWidth=1.2;
+  for(let i=1;i<=5;i++){
+    const cx=dX0+(dX1-dX0)*i/6;
+    const nt=cx<W*.5?t1:t2;
+    ctx.beginPath();ctx.moveTo(nt,dY-tH+4);ctx.lineTo(cx,dY);ctx.stroke();
+  }
+
+  // Moving vehicle
+  const carX=dX0+((fc*stressStr*.25)%(dX1-dX0-20));
+  ctx.fillStyle='#1e3040';ctx.fillRect(carX,dY-8,22,8);
+  ctx.fillStyle='rgba(255,215,64,.28)';ctx.fillRect(carX+16,dY-6,4,4);
+
+  if(!isRight){drawRateGauge(ctx,W,H,rate,10);}
+  else{
+    drawRGaugeV(ctx,W-28,H-30,H-55,R);
+    const dpct=Math.round(delta*100);
+    const dc=delta>.7?'#ff3d00':delta>.4?'#ff9100':'#40c4ff';
+    ctx.fillStyle=dc;ctx.font="8px 'Share Tech Mono'";
+    ctx.fillText('δ疲労: '+dpct+'%',dX0+4,dY+dH+14);
+  }
+}
+
+// ── BATTERY DRAWING ──────────────────────────────────────────────────
+function drawBattery(ctx,W,H,isRight,delta,R,rate){
+  ctx.clearRect(0,0,W,H);
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,`rgb(${Math.round(8+delta*14)},${Math.round(10+delta*5)},${Math.round(18-delta*10)})`);
+  bg.addColorStop(1,'#050b10');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  const bx=W*.22,by=H*.1,bw=W*.56,bh=H*.7;
+  ctx.strokeStyle='#2a4050';ctx.lineWidth=2;
+  ctx.fillStyle='#0a1520';ctx.fillRect(bx,by,bw,bh);ctx.strokeRect(bx,by,bw,bh);
+  ctx.fillStyle='#2a4050';ctx.fillRect(bx+bw*.35,by-10,bw*.3,11);
+
+  // Fill = remaining
+  const rem=Math.max(0,1-delta);
+  const fillH=rem*(bh-4);
+  const fillY=by+2+(bh-4-fillH);
+  const gc=ctx.createLinearGradient(0,by+bh,0,by);
+  gc.addColorStop(0,rem>.5?'#00a050':rem>.2?'#a06000':'#801010');
+  gc.addColorStop(.6,rem>.5?'#00e676':rem>.2?'#ffd740':'#ff6030');
+  gc.addColorStop(1,rem>.5?'#40ffaa':rem>.2?'#ffe060':'#ff9060');
+  ctx.fillStyle=gc;if(fillH>0)ctx.fillRect(bx+2,fillY,bw-4,fillH);
+
+  const pct=Math.round(rem*100);
+  ctx.fillStyle=rem>.4?'rgba(0,230,118,.9)':rem>.2?'rgba(255,215,64,.9)':'rgba(255,61,0,.9)';
+  ctx.font=`bold ${Math.round(W*.075)}px 'Share Tech Mono'`;
+  ctx.textAlign='center';ctx.fillText(pct+'%',W*.5,by+bh*.55);ctx.textAlign='left';
+
+  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;
+  for(let i=1;i<4;i++){const sy=by+2+(bh-4)*i/4;ctx.beginPath();ctx.moveTo(bx+2,sy);ctx.lineTo(bx+bw-2,sy);ctx.stroke();}
+
+  if(!isRight){
+    // Drain rate arrows
+    const rv=Math.min(Math.abs(rate)*15,1);
+    const na=Math.max(1,Math.round(rv*8));
+    const ax=bx+bw+16;
+    for(let i=0;i<na;i++){
+      const ay=by+bh*.12+i*(bh*.76/na);
+      ctx.fillStyle=`rgba(255,${Math.round(145-rv*100)},0,${.2+rv*.6})`;
+      ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax+12,ay+6);ctx.lineTo(ax,ay+12);ctx.closePath();ctx.fill();
+    }
+    ctx.fillStyle='rgba(255,215,64,.5)';ctx.font="7px 'Share Tech Mono'";ctx.fillText('放電',ax,by-5);
+    const ty=by+2+(bh-4)*.72;
+    ctx.strokeStyle='rgba(255,61,0,.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(bx+2,ty);ctx.lineTo(bx+bw-2,ty);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,61,0,.55)';ctx.font="7px 'Share Tech Mono'";ctx.fillText('低残量警告',bx+4,ty-3);
+  }else{
+    drawRGaugeV(ctx,bx+bw+22,H-30,H-52,R);
+    ctx.fillStyle='rgba(64,196,255,.6)';ctx.font="7px 'Share Tech Mono'";
+    ctx.fillText('消費量 δ='+(delta*100).toFixed(0)+'%',bx+2,by+bh+14);
+  }
+}
+
+// ── Shared helpers ────────────────────────────────────────────────────
+function drawRateGauge(ctx,W,H,rate,scale){
+  const gx=W-28,gy0=H-30,gH=H-52;
+  ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(gx-7,gy0-gH-4,22,gH+8);
+  const rn=Math.min(Math.abs(rate)*scale*80,1);
+  const fillH=rn*gH;
+  const gc=ctx.createLinearGradient(0,gy0,0,gy0-gH);
+  gc.addColorStop(0,'#1a6080');gc.addColorStop(.5,'#ffd740');gc.addColorStop(1,'#ff3d00');
+  ctx.fillStyle=gc;ctx.fillRect(gx-3,gy0-fillH,14,fillH);
+  const ty=gy0-gH*.5;
+  ctx.strokeStyle='rgba(255,61,0,.5)';ctx.lineWidth=1;ctx.setLineDash([2,3]);
+  ctx.beginPath();ctx.moveTo(gx-9,ty);ctx.lineTo(gx+16,ty);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,61,0,.65)';ctx.font="7px 'Share Tech Mono'";ctx.fillText('閾値',gx+8,ty-2);
+  ctx.fillStyle='rgba(255,215,64,.6)';ctx.fillText('速度',gx+1,gy0-gH-8);
+}
+function drawRGaugeV(ctx,x,y0,tH,R){
+  const cl=Math.min(R,1.5);
+  ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(x-7,y0-tH-4,22,tH+8);
+  const fH=Math.min(tH,cl/1.5*tH);
+  const gc=ctx.createLinearGradient(0,y0,0,y0-tH);
+  gc.addColorStop(0,'#00e676');gc.addColorStop(.5,'#ffd740');gc.addColorStop(.8,'#ff9100');gc.addColorStop(1,'#ff3d00');
+  ctx.fillStyle=gc;ctx.fillRect(x-3,y0-fH,14,fH);
+  const ly=y0-tH/1.5;
+  ctx.strokeStyle='rgba(255,61,0,.55)';ctx.lineWidth=1;ctx.setLineDash([2,3]);
+  ctx.beginPath();ctx.moveTo(x-9,ly);ctx.lineTo(x+16,ly);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,61,0,.7)';ctx.font="7px 'Share Tech Mono'";ctx.fillText('1.0',x+9,ly-2);
+  ctx.fillStyle='rgba(0,230,118,.55)';ctx.fillText('R',x+3,y0-tH-8);
+}
+function drawDeltaBar(ctx,bx,bY,bW,bH,delta){
+  ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(bx,bY,bW,bH);
+  const df=Math.min(delta,1)*bW;
+  const gc=ctx.createLinearGradient(bx,0,bx+bW,0);
+  gc.addColorStop(0,'#00e676');gc.addColorStop(.6,'#ffd740');gc.addColorStop(1,'#ff3d00');
+  ctx.fillStyle=gc;ctx.fillRect(bx,bY,df,bH);
+  ctx.fillStyle='rgba(64,196,255,.6)';ctx.font="7px 'Share Tech Mono'";ctx.fillText('δ蓄積',bx,bY-3);
+}
+
+// ── Trend graphs ──────────────────────────────────────────────────────
+function drawTrend(ctx,W,H,hist,isR){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#070d14';ctx.fillRect(0,0,W,H);
+  const PL=28,PR=6,PT=6,PB=18,GW=W-PL-PR,GH=H-PT-PB;
+  const maxV=isR?1.5:1.0;
+  ctx.strokeStyle='#1a2835';ctx.lineWidth=1;
+  for(let i=0;i<=3;i++){
+    const y=PT+GH*i/3;ctx.beginPath();ctx.moveTo(PL,y);ctx.lineTo(PL+GW,y);ctx.stroke();
+    ctx.fillStyle='#4a6a7a';ctx.font="7px 'Share Tech Mono'";ctx.textAlign='right';
+    ctx.fillText((maxV-maxV*i/3).toFixed(2),PL-2,y+3);
+  }
+  ctx.textAlign='left';
+  if(isR){
+    const ty=PT+GH*(1-1.0/maxV);
+    ctx.strokeStyle='rgba(255,61,0,.35)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+    ctx.beginPath();ctx.moveTo(PL,ty);ctx.lineTo(PL+GW,ty);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,61,0,.55)';ctx.font="7px 'Share Tech Mono'";ctx.fillText('LIMIT',PL+3,ty-2);
+  }
+  if(hist.length>1){
+    const col=isR?'#2bace0':'#e05a2b';
+    ctx.strokeStyle=col;ctx.lineWidth=2;
+    ctx.beginPath();
+    hist.forEach((v,i)=>{const x=PL+i/(HIST-1)*GW,n=Math.max(0,Math.min(1,v/maxV)),y=PT+GH*(1-n);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.stroke();
+    ctx.globalAlpha=.1;ctx.fillStyle=col;
+    ctx.beginPath();
+    hist.forEach((v,i)=>{const x=PL+i/(HIST-1)*GW,n=Math.max(0,Math.min(1,v/maxV)),y=PT+GH*(1-n);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.lineTo(PL+(hist.length-1)/(HIST-1)*GW,PT+GH);ctx.lineTo(PL,PT+GH);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  ctx.strokeStyle='#2a4050';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PL,PT);ctx.lineTo(PL,PT+GH);ctx.lineTo(PL+GW,PT+GH);ctx.stroke();
+  ctx.fillStyle='#4a6a7a';ctx.font="7px 'Share Tech Mono'";ctx.textAlign='center';
+  ctx.fillText('時間 →',PL+GW/2,PT+GH+12);ctx.textAlign='left';
+}
+
+// ── UI update ──────────────────────────────────────────────────────────
+function updateUI(R,rate){
+  const rd=Math.abs(rate);
+  setText('mbig',rd.toFixed(4));
+  document.getElementById('mbig').style.color=rd>.06?'#ff3d00':rd>.03?'#ff9100':'#ff6b6b';
+  const jL=document.getElementById('jL');
+  const isSpike=rd>.05,isFail=delta>=1.0;
+  if(isFail){styleJ(jL,'#ff3d00');jL.textContent='⚡ 崩壊 — 速度監視では防げなかった。R='+R.toFixed(3);}
+  else if(isSpike){styleJ(jL,'#ff9100');jL.textContent='⚠ 速度スパイク検知 — しかしδ蓄積は? δ='+delta.toFixed(3);}
+  else{styleJ(jL,'#1a3040','#4a6a7a');jL.textContent='✓ 速度は正常範囲内。問題なし。（δ='+delta.toFixed(3)+' は追っていない）';}
+
+  setText('rBig',R.toFixed(3));
+  const rEl=document.getElementById('rBig'),jR=document.getElementById('jR');
+  if(R>=1.0){rEl.style.color='#ff3d00';setText('rZone','ABSTAIN — 限界超過');styleJ(jR,'#ff3d00');jR.textContent='⚡ R≥1.0 — Fail-Closed。出力停止・人間に委譲。';}
+  else if(R>=.75){rEl.style.color='#ff9100';setText('rZone','CRITICAL — 限界接近');styleJ(jR,'#ff9100');jR.textContent='⚠ R≥0.75 — 速度が低くても要注意。介入を推奨。';}
+  else if(R>=.4){rEl.style.color='#ffd740';setText('rZone','ELASTIC — 蓄積中');styleJ(jR,'#ffd740');jR.textContent='〜 R≥0.4 — δ蓄積中。余裕はあります。R='+R.toFixed(3);}
+  else{rEl.style.color='#00e676';setText('rZone','NIRVANA — 安定');styleJ(jR,'#00e676');jR.textContent='✓ R<0.4 — 安定。δ='+delta.toFixed(3)+'  τ=1.000';}
+
+  const el=document.getElementById('insight');
+  if(isSpike&&R<.4){el.style.cssText=is('#1a1208','#ff9100','#ffc080');el.innerHTML='<strong>スパイクが発生しています。</strong>　しかしR='+R.toFixed(3)+'。古典管理は「スパイクがあった」と記録し、NRA-IDEは「限界の'+Math.round(R*100)+'%に達した」と記録します。';}
+  else if(!isSpike&&R>=.5){el.style.cssText=is('#1a0a08','#ff3d00','#ff9090');el.innerHTML='<strong>⚡ これが核心です。</strong>　今この瞬間、速度スパイクはゼロ — 古典管理は「安全」と判断します。しかしR='+R.toFixed(3)+'。蓄積が限界の'+Math.round(R*100)+'%に達しています。';}
+  else if(R>=.75){el.style.cssText=is('#1a0a08','#ff3d00','#ff9090');el.innerHTML='<strong>⚠ R='+R.toFixed(3)+' — 警戒域です。</strong>　速度が下がってもRは下がりません。蓄積δは構造に「借金」として残り続けます。';}
+  else{el.style.cssText=is('#0a1520','#1a3040','#7aaabb');el.textContent='シナリオを変えて「⚡ 突発ストレス」ボタンを押してみてください。スパイク後に速度が戻っても、RがNIRVANAに戻らないことを確認できます。';}
+}
+function is(bg,bc,col){return `max-width:980px;margin:0 auto 8px;padding:8px 13px;background:${bg};border:1px solid ${bc};color:${col};font-size:.73rem;line-height:1.75;font-family:var(--mono)`;}
+function setText(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+function styleJ(el,bc,col){el.style.borderColor=bc;el.style.color=col||bc;}
+
+// ── Main loop ─────────────────────────────────────────────────────────
+const cvL=document.getElementById('cvL'),cvR=document.getElementById('cvR');
+const ctxL=cvL.getContext('2d'),ctxR=cvR.getContext('2d');
+const ctxTL=document.getElementById('cvTL').getContext('2d');
+const ctxTR=document.getElementById('cvTR').getContext('2d');
+
+function loop(){
+  phase+=0.02;
+  // Phase-based wave → micro-increment per frame (same design as File B)
+  const rawWave=(Math.sin(phase*1.3)*.5+Math.sin(phase*2.1)*.3+Math.sin(phase*.7)*.2)*stressStr;
+  const burstAdd=burst?stressStr*3.0:0; burst=false;
+  const incr=(Math.abs(rawWave)*0.00022+burstAdd*0.0008);
+  prevDelta=delta;
+  delta=Math.min(1.0,delta+incr);
+  rate=delta-prevDelta;
+  const R=delta;  // τ=1.0 fixed
+
+  if(fc%2===0){
+    hRate.push(Math.min(Math.abs(rate)*60,1.0));
+    hR.push(Math.min(R,1.5));
+    if(hRate.length>HIST)hRate.shift();
+    if(hR.length>HIST)hR.shift();
+  }
+
+  const W=cvL.offsetWidth||460;
+  cvL.width=W;cvR.width=W;
+  TABS[ti].draw(ctxL,W,220,false,delta,R,rate);
+  TABS[ti].draw(ctxR,W,220,true,delta,R,rate);
+
+  const TW=document.getElementById('cvTL').offsetWidth||450;
+  document.getElementById('cvTL').width=TW;
+  document.getElementById('cvTR').width=TW;
+  drawTrend(ctxTL,TW,80,hRate,false);
+  drawTrend(ctxTR,TW,80,hR,true);
+  updateUI(R,rate);
+  fc++;
+  requestAnimationFrame(loop);
+}
+
+switchTab(0);
+loop();
+</script>
+</body>
+</html>
