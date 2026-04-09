@@ -39,8 +39,9 @@ This is not a failure of experimental precision — it is a structural consequen
 the fact that each system carries its own accumulated load history and its own
 residual capacity. Averages cannot substitute for instance-specific state.
 
-第一の観察：農業試験場において、試験区画で得られた結果が実際の農地に当てはまらない場合の方が当てはまる場合より圧倒的に多い。
-これは試験の精度の問題ではない。それぞれの系が固有の負荷蓄積の履歴と固有の残余容量を持つことの構造的必然である。
+第一の観察：農業試験場において、試験区画で得られた結果が実際の農地に当てはまらない
+場合の方が当てはまる場合より圧倒的に多い。これは試験の精度の問題ではない。
+それぞれの系が固有の負荷蓄積の履歴と固有の残余容量を持つことの構造的必然である。
 平均は固有の状態の代替にならない。
 
 The second observation: structural systems — whether a blood vessel, a dam, or a
@@ -49,9 +50,10 @@ gradually through accumulation, while appearing superficially normal. The rate o
 change may be near zero at the moment of highest risk. What matters is not how fast
 the system is changing, but how close it currently stands to its structural limit.
 
-第二の観察：血管・ダム・橋梁を問わず、構造系は正常に見える状態から突然崩壊するのではない。
-表面的には正常に見えながら、蓄積を通じて徐々に崩壊に近づく。最も危険な瞬間に変化速度はゼロに近いことがある。
-重要なのは変化の速さではなく、今現在構造的限界にどれだけ近いかである。
+第二の観察：血管・ダム・橋梁を問わず、構造系は正常に見える状態から突然崩壊するのでは
+ない。表面的には正常に見えながら、蓄積を通じて徐々に崩壊に近づく。最も危険な瞬間に
+変化速度はゼロに近いことがある。重要なのは変化の速さではなく、今現在構造的限界に
+どれだけ近いかである。
 
 From these two observations, we introduce the diagnostic ratio:
 
@@ -79,11 +81,11 @@ The threshold-based computational approach presented here is broadly applicable
 across physical, biological, engineered, and computational systems. The theoretical
 foundations are documented in the NRA-IDE Project [DOI: 10.5281/zenodo.19420854].
 
-この比率は崩壊時刻の予測ではない。
-固有の系が今現在残余容量の枯渇にどれだけ近いかを表現する最小の診断形式である。
+この比率は崩壊時刻の予測ではない。固有の系が今現在残余容量の枯渇にどれだけ近いかを
+表現する最小の診断形式である。
 
-閾値という考え方に基づくこの計算方式は、物理系・生物系・工学系・計算系を問わず広範に応用可能である。
-理論的基盤はNRA-IDEプロジェクトに記録されている
+閾値という考え方に基づくこの計算方式は、物理系・生物系・工学系・計算系を問わず
+広範に応用可能である。理論的基盤はNRA-IDEプロジェクトに記録されている
 [DOI: 10.5281/zenodo.19420854]。
 
 ---
@@ -98,8 +100,8 @@ field trials conducted on experimental plots fail to apply to actual farmland fa
 more often than they succeed. A trial conducted on three plots of 10 ares each does
 not reliably predict what will happen on a one-hectare field.
 
-農業従事者の間では広く知られていることがある。
-試験区画で実施された圃場試験の結果が実際の農地に当てはまらない場合の方が当てはまる場合より圧倒的に多い。
+農業従事者の間では広く知られていることがある。試験区画で実施された圃場試験の
+結果が実際の農地に当てはまらない場合の方が当てはまる場合より圧倒的に多い。
 各10アールの3区画で実施した試験は、1ヘクタールの農地で何が起きるかを確実に予測しない。
 
 This is not a failure of experimental rigor. The trial is conducted correctly.
@@ -109,8 +111,8 @@ Their instance-specific states differ. The average of the trial plots is a
 statistical abstraction that may correspond to none of the actual fields.
 
 これは試験の精度の問題ではない。試験は正しく実施されている。問題は別のところにある。
-各区画と各農地はそれぞれ固有の負荷蓄積の履歴と固有の残余容量を持つ。
-試験区画の平均値はどの農地にも対応しないかもしれない統計的抽象にすぎない。
+各区画と各農地はそれぞれ固有の負荷蓄積の履歴と固有の残余容量を持つ。試験区画の平均値は
+どの農地にも対応しないかもしれない統計的抽象にすぎない。
 
 The same structural fact applies beyond agriculture. A patient is not the average
 patient. A dam is not the average dam of its design class. A bridge is not the
@@ -119,10 +121,10 @@ and its own residual capacity. Safety management that places averages at the cen
 leaves the overwhelming majority of systems — those that differ from the average
 in structurally significant ways — outside the boundary of effective diagnosis.
 
-同じ構造的事実は農業を超えて適用される。患者は平均的患者ではない。
-ダムはその設計クラスの平均的ダムではない。橋はその建設年の平均的橋ではない。
-それぞれが固有の蓄積ズレと固有の残余容量を持つ。
-平均を中心に置く安全管理は、構造的に重要な点で平均と異なる大多数の系を有効な診断の外に置く。
+同じ構造的事実は農業を超えて適用される。患者は平均的患者ではない。ダムはその設計
+クラスの平均的ダムではない。橋はその建設年の平均的橋ではない。それぞれが固有の
+蓄積ズレと固有の残余容量を持つ。平均を中心に置く安全管理は、構造的に重要な点で
+平均と異なる大多数の系を有効な診断の外に置く。
 
 ---
 
@@ -148,8 +150,8 @@ apparent stillness.
 
 速度監視は「これはどれだけ速く変化しているか」という問いに答える。
 近接度監視は「これは今限界にどれだけ近いか」という問いに答える。
-これらは異なる問いであり、異なる計測を必要とする。
-そして見かけ上の静止が最も危険な状態である系において異なる安全結果を生む。
+これらは異なる問いであり、異なる計測を必要とする。そして見かけ上の静止が
+最も危険な状態である系において異なる安全結果を生む。
 
 ---
 
@@ -161,8 +163,9 @@ investigation of cause after collapse — and pre-failure monitoring — the
 observation of structural state before collapse. Both have value. Both have
 their place within the broader discipline.
 
-既存の安全工学は、崩壊後の原因追求である事後解析と、崩壊前の構造状態の観察である事前監視の両方を包含している。
-両者には価値がある。両者は広い意味での学問の中にそれぞれの位置を持っている。
+既存の安全工学は、崩壊後の原因追求である事後解析と、崩壊前の構造状態の観察で
+ある事前監視の両方を包含している。両者には価値がある。両者は広い意味での
+学問の中にそれぞれの位置を持っている。
 
 The distinction this paper draws is methodological. The diagnostic framework
 proposed here — R = δ/τ — is based on a different set of indicators than
@@ -172,17 +175,17 @@ this framework uses the accumulated deviation and the ratio to remaining capacit
 The difference in what is measured leads to a difference in what can be diagnosed.
 
 本稿が示す区別は方法論的なものである。本稿が提案する診断フレームワーク R = δ/τ は、
-従来の速度監視や閾値超過監視とは異なる指標体系に基づいている。
-従来の監視が瞬時の速度と統計的平均からの距離を使うのに対し、本フレームワークは蓄積ズレと残余容量への比率を使う。
-何を計測するかの違いが、何を診断できるかの違いを生む。
+従来の速度監視や閾値超過監視とは異なる指標体系に基づいている。従来の監視が
+瞬時の速度と統計的平均からの距離を使うのに対し、本フレームワークは蓄積ズレと
+残余容量への比率を使う。何を計測するかの違いが、何を診断できるかの違いを生む。
 
 Specifically, R = δ/τ makes visible what rate-based monitoring cannot see:
 the approach to structural limit during periods of apparent stability. This
 property is not a replacement for existing methods. It is a different diagnostic
 layer that answers a question existing methods do not ask.
 
-具体的には、R = δ/τは速度ベースの監視が見えないものを可視化する。
-見かけ上安定した期間における構造的限界への接近である。この性質は既存手法の代替ではない。
+具体的には、R = δ/τは速度ベースの監視が見えないものを可視化する。見かけ上安定した
+期間における構造的限界への接近である。この性質は既存手法の代替ではない。
 既存手法が問わない問いに答える異なる診断層である。
 
 ---
@@ -196,9 +199,10 @@ design principles that govern its use (Fail-Closed, Disclosure Axiom,
 Instance-Specific Principle), and demonstrates its structural consistency across
 multiple domains through documented case studies.
 
-本稿はR = δ/τを診断比率として導入し、三つの定式（基本式・非対称二重ゆらぎ式・ハイブリッド補完式）を定義し、
-その使用を支配する設計原則（Fail-Closed・告白の公理・固有事例特定性の原則）を特定し、
-記録された事例研究を通じて複数の領域にわたる構造的一致を示す。
+本稿はR = δ/τを診断比率として導入し、三つの定式（基本式・非対称二重ゆらぎ式・
+ハイブリッド補完式）を定義し、その使用を支配する設計原則（Fail-Closed・告白の
+公理・固有事例特定性の原則）を特定し、記録された事例研究を通じて複数の領域に
+わたる構造的一致を示す。
 
 ---
 
@@ -322,15 +326,13 @@ Rは0から1.0の範囲をとる。
 
 本フレームワークはR = 0.85を**安全境界線判断値（Safety Boundary Value）**と定義する。
 
-```
-Fail-Closed の発動点 = 安全境界線判断値
-
-「R = 1.0になったら止まる」ではなく
-「R = 0.85を超えたら人間に委譲する」
-
-R = 1.0まで待つことは
-すでに手遅れを意味する場合がある
-```
+> **Fail-Closed の発動点 = 安全境界線判断値**
+>
+> 「R = 1.0になったら止まる」ではなく
+> 「R = 0.85を超えたら人間に委譲する」
+>
+> R = 1.0まで待つことは
+> すでに手遅れを意味する場合がある
 
 安全境界線判断値は系の性質によって設計者が定義する。
 高リスク系ではさらに低い値（0.7等）への引き下げを推奨する。
@@ -375,16 +377,14 @@ Recognition at R = 1.0 is already too late.
 定義式1ではτを一つの固定値として扱う。しかし現実の多くの系では許容範囲の
 「上限」と「下限」が非対称である。
 
-```
-体温の例:
-  高温方向の限界（τ上）: 37.5°C以上 → 発熱・熱中症
-  低温方向の限界（τ下）: 35°C以下  → 低体温症
-  この二つは対称ではない
+**体温の例：**
+- 高温方向の限界（τ上）: 37.5°C以上 → 発熱・熱中症
+- 低温方向の限界（τ下）: 35°C以下 → 低体温症
+- この二つは対称ではない
 
-ダムの例:
-  上限: 貯水量が溢水・崩壊を起こす点
-  下限: 貯水量が渇水・空洞化を起こす点
-```
+**ダムの例：**
+- 上限: 貯水量が溢水・崩壊を起こす点
+- 下限: 貯水量が渇水・空洞化を起こす点
 
 これらを扱うために上下に分離した定義式2を用いる。
 
@@ -411,17 +411,13 @@ Rは上方向と下方向のうちより限界に近い方の値をとる。
 この小さな誤差を次の計算の入力にすると、誤差が誤差を呼ぶ。
 繰り返すたびに誤差は雪だるま式に広がる（浮動小数点丸め誤差の蓄積）。
 
-```
-通常の誤差処理:
-  ステップ1: 誤差 ε₁ が発生
-  ステップ2: ε₁ を持ち込んで誤差 ε₂ が発生
-  ステップ3: ε₁+ε₂ を持ち込んで誤差 ε₃ が発生
-  ...
-  ステップn: 誤差が線形または指数的に拡大
+**通常の誤差処理の流れ：**
 
-  → 時間経過とともに精度が劣化
-  → 閾値付近での判断が不正確になる
-```
+- ステップ1: 誤差 ε₁ が発生
+- ステップ2: ε₁ を持ち込んで誤差 ε₂ が発生
+- ステップ3: ε₁+ε₂ を持ち込んで誤差 ε₃ が発生
+- ステップn: 誤差が線形または指数的に拡大
+- 結果 → 時間経過とともに精度が劣化し、閾値付近での判断が不正確になる
 
 これはAIシステム固有の問題ではない。有限要素解析・気候モデリング・
 長期数値積分において一様に観測される数学的事実である（Goldberg, 1991）。
@@ -431,17 +427,13 @@ Rは上方向と下方向のうちより限界に近い方の値をとる。
 内包性動力学エンジン（Intensional Dynamics Engine、以下IDE）は
 「誤差を小さくする」ではなく「誤差を持ち越さない」という発想で設計されている。
 
-```
-IDEの誤差処理:
-  ステップ1: 誤差 ε₁ が発生 → 熱として排出
-  ステップ2: ε₁ なしで計算  → 誤差 ε₂ のみ → 排出
-  ステップ3: ε₂ なしで計算  → 誤差 ε₃ のみ → 排出
-  ...
-  ステップn: 誤差は蓄積しない
+**IDEの誤差処理の流れ：**
 
-  → 時間経過しても精度が一定
-  → 閾値付近での判断精度が保たれる
-```
+- ステップ1: 誤差 ε₁ が発生 → 熱として排出
+- ステップ2: ε₁ なしで計算 → 誤差 ε₂ のみ → 排出
+- ステップ3: ε₂ なしで計算 → 誤差 ε₃ のみ → 排出
+- ステップn: 誤差は蓄積しない
+- 結果 → 時間経過しても精度が一定に保たれ、閾値付近での判断精度が維持される
 
 機械式時計の脱進機が1歯分だけ正確に進み端数を次に持ち越さないように、
 IDE式は各ステップで誤差を熱として排出し持ち越さない。
@@ -464,16 +456,9 @@ $$G(r) = r \cdot \frac{|r|}{k + |r|}, \quad r = x_{\text{正確値}} - x$$
 
 **G(r)の性質が非線形計算の有利性を示す：**
 
-```
-誤差が小さいとき（|r| ≪ k）:
-  G(r) ≈ r²/k
-  → 二乗で自然に消える
-  → IDEの動きを邪魔しない
+**誤差が小さいとき（|r| ≪ k）：** G(r) ≈ r²/k — 二乗で自然に消える。IDEの動きを邪魔しない。
 
-誤差が大きいとき（|r| ≫ k）:
-  G(r) ≈ r
-  → 線形の強い補正。迅速に戻す。
-```
+**誤差が大きいとき（|r| ≫ k）：** G(r) ≈ r — 線形の強い補正。迅速に戻す。
 
 人工的なカットオフ値は不要である。数学の構造自体がフィルターとして機能する。
 
@@ -487,19 +472,13 @@ G(r)の非線形性は閾値付近でこそ補正が強く働く設計になっ�
 
 **三つの式の使い分け：**
 
-```
-準静的な系（橋・ダム・疲労管理）
-  → 定義式1: R = δ/τ
+**三つの式の使い分け：**
 
-上限・下限が非対称な系（体温・水位・生態系）
-  → 定義式2: 二重ゆらぎ式
+- **準静的な系**（橋・ダム・疲労管理）→ 定義式1: R = δ/τ
+- **上限・下限が非対称な系**（体温・水位・生態系）→ 定義式2: 二重ゆらぎ式
+- **動的・高速変化する系、高精度が要求される場合** → IDE式（応用式）
 
-動的・高速変化する系、高精度が要求される場合
-  → IDE式（応用式）
-
-三つの式は相互に排他的ではない。
-用途に応じて選択する。精度要求がなければ定義式1で十分。
-```
+三つの式は相互に排他的ではない。用途に応じて選択する。精度要求がなければ定義式1で十分。
 
 ---
 
