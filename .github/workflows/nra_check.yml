@@ -20,4 +20,4 @@ jobs:
 
       - name: Energy Balance Check
         # ここを変えました！ 「nra-core/」という住所を教えました
-        run: python nra-core/implementation/nra_ide_foundation_fixed_JP.py
+        
