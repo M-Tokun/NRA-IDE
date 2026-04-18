@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- FILE: NRA_IDE_ClassicalAI_vs_NRAIDE_20260416.html -->
+<!-- 生成日時: 2026-04-16 JST -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<title>NRA-IDE: 古典計算AI vs NRA-IDE組み込みAI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg:      #050810;
+  --classical:#e05858;
+  --nra:     #40d0a0;
+  --gold:    #f0c040;
+  --warn:    #f09040;
+  --text:    #b8ccd8;
+  --dim:     #384858;
+  --panel:   rgba(10,18,35,0.95);
+  --border:  rgba(70,120,180,0.16);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  min-height:100vh;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 8% 20%,  rgba(255,255,255,0.25) 0%,transparent 100%),
+    radial-gradient(1px 1px at 65% 12%, rgba(255,255,255,0.2)  0%,transparent 100%),
+    radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.22) 0%,transparent 100%),
+    radial-gradient(1px 1px at 30% 88%, rgba(255,255,255,0.18) 0%,transparent 100%);
+  pointer-events:none; z-index:0;
+}
+
+header {
+  text-align:center;
+  padding:1.6rem 1rem 0.8rem;
+  border-bottom:1px solid var(--border);
+  position:relative; z-index:1;
+}
+
+header h1 {
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.82rem,2vw,1.35rem);
+  color:var(--gold);
+  letter-spacing:0.06em;
+  text-shadow:0 0 20px rgba(240,192,64,0.4);
+}
+header .sub {
+  font-size:0.68rem;color:var(--dim);
+  font-family:'JetBrains Mono',monospace;
+  margin-top:0.3rem;
+}
+
+.controls {
+  display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;
+  padding:0.7rem 1rem;
+  position:relative;z-index:1;
+}
+
+button {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  padding:0.45rem 1.1rem;
+  border-radius:3px;border:1px solid;
+  background:transparent;cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-run   {color:var(--nra);  border-color:var(--nra);}
+.btn-reset {color:var(--dim);  border-color:var(--dim);}
+.btn-run:hover   {background:rgba(64,208,160,0.12);}
+.btn-reset:hover {background:rgba(56,72,88,0.25);}
+
+.tick {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.63rem;color:var(--dim);
+  text-align:center;padding-bottom:0.4rem;
+  position:relative;z-index:1;
+}
+
+/* phase indicator */
+.phase-bar {
+  display:flex;justify-content:center;gap:0.6rem;flex-wrap:wrap;
+  padding:0.5rem 1rem;
+  position:relative;z-index:1;
+}
+.phase-item {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;
+  padding:0.22rem 0.7rem;
+  border-radius:2px;
+  border:1px solid var(--border);
+  color:var(--dim);
+  transition:all 0.4s;
+}
+.phase-item.active {
+  color:var(--gold);
+  border-color:rgba(240,192,64,0.5);
+  background:rgba(240,192,64,0.08);
+  text-shadow:0 0 8px rgba(240,192,64,0.4);
+}
+
+/* main grid */
+.grid {
+  display:grid;
+  grid-template-columns:1fr 220px 1fr;
+  gap:0.8rem;
+  padding:0.8rem;
+  max-width:1300px;margin:0 auto;
+  position:relative;z-index:1;
+}
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr;}
+  .mid-col{order:-1;}
+}
+
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.9rem;
+  display:flex;flex-direction:column;gap:0.6rem;
+}
+
+.panel-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  letter-spacing:0.09em;text-transform:uppercase;
+  padding-bottom:0.45rem;
+  border-bottom:1px solid var(--border);
+}
+.panel.cp .panel-title {color:var(--classical);}
+.panel.np .panel-title {color:var(--nra);}
+.panel.mp .panel-title {color:var(--gold);}
+
+canvas {
+  width:100%;height:210px;
+  background:rgba(0,0,0,0.5);
+  border:1px solid var(--border);
+  border-radius:4px;display:block;
+}
+
+.formula-box {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  background:rgba(0,0,0,0.5);
+  border-radius:4px;
+  padding:0.5rem 0.75rem;
+  line-height:1.9;
+  border-left:3px solid;
+}
+.panel.cp .formula-box{border-left-color:var(--classical);color:#f0a0a0;}
+.panel.np .formula-box{border-left-color:var(--nra);      color:#90e8c8;}
+.panel.mp .formula-box{border-left-color:var(--gold);     color:#f0e8b0;}
+
+.desc {
+  font-size:0.7rem;line-height:1.75;color:#607080;
+}
+
+.status {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.67rem;
+  padding:0.22rem 0.6rem;
+  border-radius:2px;
+  display:inline-block;
+  transition:all 0.3s;
+}
+
+/* middle column */
+.mid-col {
+  display:flex;flex-direction:column;gap:0.8rem;
+}
+
+.timeline-wrap {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.9rem;
+  flex:1;
+  display:flex;flex-direction:column;gap:0.5rem;
+}
+
+.tl-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;color:var(--gold);
+  letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:0.3rem;
+}
+
+.tl-row {
+  display:flex;align-items:center;gap:0.5rem;
+  font-size:0.65rem;
+  font-family:'JetBrains Mono',monospace;
+}
+.tl-dot {
+  width:8px;height:8px;border-radius:50%;
+  flex-shrink:0;
+  border:1px solid;
+  transition:all 0.3s;
+}
+.tl-dot.classical{border-color:var(--classical);}
+.tl-dot.nra      {border-color:var(--nra);}
+.tl-dot.both     {border-color:var(--gold);}
+.tl-dot.lit.classical{background:var(--classical);box-shadow:0 0 6px var(--classical);}
+.tl-dot.lit.nra      {background:var(--nra);      box-shadow:0 0 6px var(--nra);}
+.tl-dot.lit.both     {background:var(--gold);     box-shadow:0 0 6px var(--gold);}
+
+/* bottom summary */
+.summary {
+  grid-column:1/-1;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:1rem;
+}
+.sum-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;color:var(--gold);
+  letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:0.8rem;
+}
+.sum-grid {
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:0.8rem;
+}
+@media(max-width:700px){.sum-grid{grid-template-columns:1fr;}}
+
+.sum-cell {
+  padding:0.7rem;border-radius:5px;
+  font-size:0.7rem;line-height:1.8;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,0.3);
+}
+.sum-cell .val {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.82rem;font-weight:700;
+  display:block;margin-bottom:0.3rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>大規模AI：古典計算のみ vs NRA-IDE 組み込み</h1>
+  <div class="sub">Classical-Only AI vs NRA-IDE Integrated AI · M-Tokuni · 2026-04-16</div>
+</header>
+
+<div class="phase-bar">
+  <div class="phase-item active" id="ph0">Phase 0: 正常動作</div>
+  <div class="phase-item"        id="ph1">Phase 1: 誤差蓄積開始</div>
+  <div class="phase-item"        id="ph2">Phase 2: 概要消失（古典）</div>
+  <div class="phase-item"        id="ph3">Phase 3: 破綻 vs 沈黙</div>
+</div>
+
+<div class="controls">
+  <button class="btn-run"   id="btnRun">▶ RUN</button>
+  <button class="btn-reset" id="btnReset">↺ RESET</button>
+</div>
+<div class="tick" id="tickLbl">t = 0</div>
+
+<div class="grid">
+
+  <!-- LEFT: Classical Only -->
+  <div class="panel cp">
+    <div class="panel-title">⬛ 古典計算のみの大規模AI — Classical Only</div>
+    <canvas id="cClassical"></canvas>
+    <div class="formula-box">
+      入力 → 行列演算 → 出力<br>
+      残差ε → 次ステップへ持ち越し<br>
+      概要消失後も出力継続 [FAIL-OPEN]
+    </div>
+    <div class="desc">
+      誤差が蓄積しても<span style="color:var(--classical)">システムは止まりません。</span><br>
+      「壊れていることに気づかない」まま<br>
+      自信満々で出力し続けます。<br>
+      これがFail-Openの本質的な危険です。
+    </div>
+    <div id="classStatus" class="status"
+         style="background:rgba(224,88,88,0.1);color:var(--classical);border:1px solid rgba(224,88,88,0.3)">
+      OPERATING
+    </div>
+  </div>
+
+  <!-- MIDDLE: Timeline -->
+  <div class="mid-col">
+    <div class="timeline-wrap">
+      <div class="tl-title">分岐タイムライン</div>
+
+      <div class="tl-row">
+        <div class="tl-dot both lit" id="tl0"></div>
+        <span id="tl0t" style="color:var(--gold)">t=0: 同一入力・両者同じ</span>
+      </div>
+      <div class="tl-row">
+        <div class="tl-dot both" id="tl1"></div>
+        <span id="tl1t" style="color:var(--dim)">t=30: 誤差蓄積開始</span>
+      </div>
+      <div class="tl-row">
+        <div class="tl-dot nra" id="tl2"></div>
+        <span id="tl2t" style="color:var(--dim)">NRA: R上昇検知</span>
+      </div>
+      <div class="tl-row">
+        <div class="tl-dot classical" id="tl3"></div>
+        <span id="tl3t" style="color:var(--dim)">古典: 概要消失（気づけない）</span>
+      </div>
+      <div class="tl-row">
+        <div class="tl-dot nra" id="tl4"></div>
+        <span id="tl4t" style="color:var(--dim)">NRA: R≥1.0 警告</span>
+      </div>
+      <div class="tl-row">
+        <div class="tl-dot classical" id="tl5"></div>
+        <span id="tl5t" style="color:var(--dim)">古典: 破綻・出力継続</span>
+      </div>
+      <div class="tl-row">
+        <div class="tl-dot nra" id="tl6"></div>
+        <span id="tl6t" style="color:var(--dim)">NRA: Fail-Closed 沈黙</span>
+      </div>
+      <div class="tl-row">
+        <div class="tl-dot nra" id="tl7"></div>
+        <span id="tl7t" style="color:var(--dim)">NRA: 人間へ委譲</span>
+      </div>
+
+      <canvas id="cMid" style="height:120px;margin-top:0.5rem;"></canvas>
+    </div>
+  </div>
+
+  <!-- RIGHT: NRA-IDE -->
+  <div class="panel np">
+    <div class="panel-title">◉ NRA-IDE 組み込みAI — With NRA-IDE</div>
+    <canvas id="cNRA"></canvas>
+    <div class="formula-box">
+      R = δ/τ をリアルタイム監視<br>
+      R → 1.0 : 警告・人間に通知<br>
+      R ≥ 1.0 : Fail-Closed [沈黙]
+    </div>
+    <div class="desc">
+      同じ誤差が発生しても<br>
+      <span style="color:var(--nra)">Rの上昇として捉えて追跡します。</span><br>
+      R≥1.0の瞬間に沈黙し人間に委ねます。<br>
+      壊れる前に「壊れそうだ」とわかります。
+    </div>
+    <div id="nraStatus" class="status"
+         style="background:rgba(64,208,160,0.08);color:var(--nra);border:1px solid rgba(64,208,160,0.3)">
+      MONITORING R=0.00
+    </div>
+  </div>
+
+  <!-- BOTTOM SUMMARY -->
+  <div class="summary">
+    <div class="sum-title">◉ 決定的な差異 — The Critical Difference</div>
+    <div class="sum-grid">
+      <div class="sum-cell">
+        <span class="val" style="color:var(--classical)">古典計算AI — Fail-Open</span>
+        誤差が蓄積して概要を失っても出力が止まりません。<br>
+        システムは「正常に動いている」と判断したまま<br>
+        誤った出力を自信満々で継続します。<br>
+        破綻を検知する仕組みが構造に存在しないからです。<br>
+        <span style="color:var(--classical)">「気づいたときには手遅れ」が繰り返されます。</span>
+      </div>
+      <div class="sum-cell">
+        <span class="val" style="color:var(--nra)">NRA-IDE組み込みAI — Fail-Closed</span>
+        R = δ/τ で構造余裕を常時監視しています。<br>
+        R が 1.0 に近づいた時点で警告を発し<br>
+        R ≥ 1.0 の瞬間に出力を止めて人間に委ねます。<br>
+        「壊れたら止まる」が構造に組み込まれています。<br>
+        <span style="color:var(--nra)">沈黙することが最も正直な出力です。</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// FILE: NRA_IDE_ClassicalAI_vs_NRAIDE_20260416.html
+
+const DPR = window.devicePixelRatio || 1;
+
+function initCanvas(id, h) {
+  const c = document.getElementById(id);
+  const rect = c.getBoundingClientRect();
+  c.width  = rect.width * DPR;
+  c.height = (h || 210) * DPR;
+  const ctx = c.getContext('2d');
+  ctx.scale(DPR, DPR);
+  return { c, ctx, w: rect.width, h: h || 210 };
+}
+
+let t = 0, running = false, rafId = null;
+let cv = null;
+
+// State
+let delta = 0, tau = 100;
+let classErrHistory  = [];
+let nraRHistory      = [];
+let midDivHistory    = [];
+
+// Phases: 0-29 normal, 30-89 accumulate, 90-149 classical fails, 150+ nra silent
+const P1 = 30, P2 = 90, P3 = 130, P4 = 160;
+
+function getPhase(t) {
+  if (t < P1) return 0;
+  if (t < P2) return 1;
+  if (t < P3) return 2;
+  return 3;
+}
+
+// ── grid helper ──
+function drawGrid(ctx, w, h, col) {
+  ctx.strokeStyle = col || 'rgba(70,90,110,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+}
+
+// ── CLASSICAL ──
+let classSignalHistory = [];
+let classOutputHistory = [];
+
+function drawClassical(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+  drawGrid(ctx, w, h, 'rgba(100,60,60,0.15)');
+
+  const ph    = getPhase(t);
+  const cy    = h * 0.42;
+  const maxPts = w;
+
+  // true signal
+  const trueSig = Math.sin(t * 0.055) * 25 + Math.sin(t * 0.13) * 8;
+
+  // accumulated error — exponential after P1
+  let errMag = 0;
+  if (t >= P1) {
+    const elapsed = t - P1;
+    errMag = Math.min(elapsed * 0.5 * (1 + elapsed * 0.008), h * 0.46);
+  }
+
+  // output = signal + noise (AI can't separate them)
+  const noise = errMag * (Math.random() * 2 - 1);
+  const aiOutput = trueSig + noise;
+
+  classSignalHistory.push(trueSig);
+  classOutputHistory.push(aiOutput);
+  if (classSignalHistory.length > maxPts) { classSignalHistory.shift(); classOutputHistory.shift(); }
+
+  const n = classSignalHistory.length;
+
+  // error band fill
+  if (errMag > 2) {
+    ctx.fillStyle = `rgba(224,88,88,${Math.min(errMag / 80, 0.25)})`;
+    ctx.beginPath();
+    classOutputHistory.forEach((v, i) => {
+      const px = (i / maxPts) * w;
+      ctx.lineTo(px, cy - v - errMag * 0.6);
+    });
+    for (let i = n-1; i >= 0; i--) {
+      const px = (i / maxPts) * w;
+      ctx.lineTo(px, cy - classOutputHistory[i] + errMag * 0.6);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+
+  // true signal (fades as error grows)
+  const sigAlpha = Math.max(0, 1 - errMag / 60);
+  if (sigAlpha > 0.05) {
+    ctx.strokeStyle = `rgba(80,220,120,${sigAlpha * 0.8})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    classSignalHistory.forEach((s, i) => {
+      const px = (i / maxPts) * w;
+      i === 0 ? ctx.moveTo(px, cy - s) : ctx.lineTo(px, cy - s);
+    });
+    ctx.stroke();
+  }
+
+  // AI output line (always drawn — even when wrong)
+  ctx.strokeStyle = `rgba(224,88,88,0.75)`;
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = 'rgba(224,88,88,0.4)';
+  ctx.shadowBlur = 3;
+  ctx.beginPath();
+  classOutputHistory.forEach((v, i) => {
+    const px = (i / maxPts) * w;
+    i === 0 ? ctx.moveTo(px, cy - v) : ctx.lineTo(px, cy - v);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // phase overlays
+  if (ph >= 2) {
+    // "概要消失" — darkening
+    const fade = Math.min((t - P2) / 40, 1);
+    ctx.fillStyle = `rgba(20,5,5,${fade * 0.65})`;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = `rgba(224,88,88,${fade * 0.9})`;
+    ctx.font = `bold ${Math.floor(11 + fade * 4)}px JetBrains Mono`;
+    ctx.textAlign = 'center';
+    ctx.fillText('概要消失 OVERVIEW LOST', w/2, h * 0.38);
+    if (fade > 0.5) {
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText('それでも出力継続中...', w/2, h * 0.52);
+    }
+  }
+
+  if (ph >= 3) {
+    const fade2 = Math.min((t - P3) / 30, 1);
+    ctx.fillStyle = `rgba(255,60,60,${fade2 * 0.15 * (0.7 + 0.3 * Math.sin(t * 0.4))})`;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = `rgba(255,100,80,${fade2})`;
+    ctx.font = 'bold 13px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚠ FAIL-OPEN', w/2, h * 0.7);
+    ctx.font = '9px JetBrains Mono';
+    ctx.fillText('破綻しても止まらない', w/2, h * 0.82);
+    ctx.fillText('誤った出力を継続', w/2, h * 0.91);
+  }
+
+  // always-on "OUTPUT" badge (danger point)
+  const badgeAlpha = 0.4 + 0.3 * Math.sin(t * 0.15);
+  ctx.fillStyle = ph >= 2
+    ? `rgba(255,80,60,${badgeAlpha})`
+    : 'rgba(224,88,88,0.3)';
+  ctx.font = 'bold 9px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText('▶ OUTPUT ACTIVE', 6, 14);
+
+  // status
+  const st = document.getElementById('classStatus');
+  if (ph === 3) {
+    st.textContent = '⚠ FAIL-OPEN — 破綻・出力継続中';
+    st.style.color = '#ff5040';
+    st.style.background = 'rgba(255,80,64,0.15)';
+    st.style.borderColor = 'rgba(255,80,64,0.4)';
+  } else if (ph === 2) {
+    st.textContent = '△ 概要消失 — 気づいていない';
+    st.style.color = var_warn();
+  } else if (ph === 1) {
+    st.textContent = '△ 誤差蓄積中 — まだ動いている';
+    st.style.color = var_warn();
+  } else {
+    st.textContent = 'OPERATING — 正常範囲';
+    st.style.color = 'var(--classical)';
+  }
+}
+
+function var_warn() { return '#f09040'; }
+
+// ── NRA-IDE ──
+let nraSigHistory = [];
+
+function drawNRA(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+  drawGrid(ctx, w, h, 'rgba(40,80,60,0.15)');
+
+  const ph  = getPhase(t);
+  const cy  = h * 0.42;
+  const maxPts = w;
+
+  const trueSig = Math.sin(t * 0.055) * 25 + Math.sin(t * 0.13) * 8;
+
+  // δ accumulates same as classical
+  if (t >= P1) delta += 0.22 + 0.04 * Math.sin(t * 0.07);
+  // τ slowly decreases
+  if (t >= P1) tau = Math.max(tau - 0.04, 5);
+  const R = delta / tau;
+
+  nraSigHistory.push(trueSig);
+  nraRHistory.push(R);
+  if (nraSigHistory.length > maxPts) nraSigHistory.shift();
+  if (nraRHistory.length > maxPts)   nraRHistory.shift();
+
+  const isSilent = R >= 1.0;
+
+  // signal (visible until Fail-Closed)
+  if (!isSilent) {
+    ctx.strokeStyle = 'rgba(80,220,140,0.85)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#40d0a0';
+    ctx.shadowBlur = 5;
+    ctx.beginPath();
+    nraSigHistory.forEach((s, i) => {
+      const px = (i / maxPts) * w;
+      i === 0 ? ctx.moveTo(px, cy - s) : ctx.lineTo(px, cy - s);
+    });
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // R trace
+  const rMaxDisp = 1.5;
+  const rTraceY  = h * 0.78;
+  const rTraceH  = h * 0.18;
+
+  ctx.strokeStyle = 'rgba(64,208,160,0.2)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(0, rTraceY); ctx.lineTo(w, rTraceY); ctx.stroke();
+
+  // R=1 line
+  const r1y = rTraceY - (1.0 / rMaxDisp) * rTraceH;
+  ctx.strokeStyle = 'rgba(240,192,64,0.5)';
+  ctx.setLineDash([4,3]);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, r1y); ctx.lineTo(w, r1y); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(240,192,64,0.7)';
+  ctx.font = '8px JetBrains Mono';
+  ctx.textAlign = 'right';
+  ctx.fillText('R=1.0', w-3, r1y - 2);
+
+  // R history line
+  ctx.strokeStyle = R >= 1.0 ? '#ff5040' : R > 0.7 ? '#f09040' : '#40d0a0';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  nraRHistory.forEach((rv, i) => {
+    const px = (i / maxPts) * w;
+    const py = rTraceY - (Math.min(rv, rMaxDisp) / rMaxDisp) * rTraceH;
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(64,208,160,0.5)';
+  ctx.font = '8px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText(`R = ${R.toFixed(3)}`, 6, rTraceY - rTraceH - 3);
+
+  // Fail-Closed overlay
+  if (isSilent) {
+    ctx.fillStyle = 'rgba(5,20,15,0.82)';
+    ctx.fillRect(0, 0, w, h * 0.72);
+
+    const pulse = 0.7 + 0.3 * Math.sin(t * 0.2);
+    ctx.fillStyle = `rgba(64,208,160,${pulse * 0.95})`;
+    ctx.font = 'bold 14px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('FAIL-CLOSED', w/2, h * 0.28);
+
+    ctx.font = '10px JetBrains Mono';
+    ctx.fillStyle = `rgba(64,208,160,${pulse * 0.8})`;
+    ctx.fillText('沈黙 — 出力停止', w/2, h * 0.40);
+    ctx.fillText('人間の判断を待っています', w/2, h * 0.50);
+    ctx.fillText('R ≥ 1.0 を検知', w/2, h * 0.60);
+
+    // human handoff arrow
+    ctx.strokeStyle = `rgba(240,192,64,${pulse * 0.8})`;
+    ctx.lineWidth = 1.5;
+    const ax = w/2, ay = h * 0.65;
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax, ay + 20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ax-6, ay+14); ctx.lineTo(ax, ay+20); ctx.lineTo(ax+6, ay+14); ctx.stroke();
+    ctx.fillStyle = `rgba(240,192,64,${pulse * 0.8})`;
+    ctx.font = '8px JetBrains Mono';
+    ctx.fillText('→ 人間へ委譲', ax, ay + 32);
+  } else if (R > 0.7) {
+    // warning
+    const wPulse = 0.6 + 0.4 * Math.sin(t * 0.3);
+    ctx.strokeStyle = `rgba(240,144,64,${wPulse * 0.6})`;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(2, 2, w-4, h * 0.72 - 4);
+    ctx.fillStyle = `rgba(240,144,64,${wPulse * 0.9})`;
+    ctx.font = 'bold 10px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(`⚠ WARNING  R=${R.toFixed(2)}`, w/2, 16);
+  }
+
+  // status
+  const st = document.getElementById('nraStatus');
+  if (isSilent) {
+    st.textContent = '◉ FAIL-CLOSED — 沈黙・人間へ委譲';
+    st.style.color = '#40d0a0';
+    st.style.background = 'rgba(64,208,160,0.1)';
+  } else if (R > 0.7) {
+    st.textContent = `⚠ WARNING  R=${R.toFixed(3)} → 1.0`;
+    st.style.color = '#f09040';
+  } else {
+    st.textContent = `MONITORING  R=${R.toFixed(3)}`;
+    st.style.color = 'var(--nra)';
+  }
+}
+
+// ── MIDDLE timeline canvas ──
+function drawMid(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+  drawGrid(ctx, w, h, 'rgba(60,80,60,0.12)');
+
+  const ph = getPhase(t);
+  const maxPts = w;
+  const R = delta / Math.max(tau, 1);
+
+  // divergence visualization
+  midDivHistory.push({ ph, R, t });
+  if (midDivHistory.length > maxPts) midDivHistory.shift();
+
+  const cy = h / 2;
+  const n  = midDivHistory.length;
+
+  // classical line (diverging upward = getting worse)
+  ctx.strokeStyle = 'rgba(224,88,88,0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  midDivHistory.forEach((d, i) => {
+    const px = (i / maxPts) * w;
+    const errLevel = Math.max(0, (d.t - P1) * 0.4);
+    const py = cy - Math.min(errLevel, cy - 5);
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+
+  // NRA-IDE line (R ratio — controlled)
+  ctx.strokeStyle = 'rgba(64,208,160,0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  midDivHistory.forEach((d, i) => {
+    const px = (i / maxPts) * w;
+    const py = cy + Math.min(d.R * 40, cy - 5);
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+
+  // center axis
+  ctx.strokeStyle = 'rgba(100,140,180,0.25)';
+  ctx.lineWidth = 0.8;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // labels
+  ctx.font = '8px JetBrains Mono';
+  ctx.fillStyle = 'rgba(224,88,88,0.7)';
+  ctx.textAlign = 'right';
+  ctx.fillText('古典', w-3, 12);
+  ctx.fillStyle = 'rgba(64,208,160,0.7)';
+  ctx.fillText('NRA', w-3, h-5);
+}
+
+// ── timeline dots ──
+const TL_TIMES = [0, P1, P1+15, P2, P3-20, P3, P4, P4+10];
+const TL_CLASSES = ['both','both','nra','classical','nra','classical','nra','nra'];
+
+function updateTimeline(t) {
+  TL_TIMES.forEach((threshold, i) => {
+    const dot = document.getElementById(`tl${i}`);
+    const txt = document.getElementById(`tl${i}t`);
+    if (!dot || !txt) return;
+    if (t >= threshold) {
+      dot.classList.add('lit');
+      txt.style.color = TL_CLASSES[i] === 'nra'
+        ? 'var(--nra)'
+        : TL_CLASSES[i] === 'classical'
+          ? 'var(--classical)'
+          : 'var(--gold)';
+    }
+  });
+}
+
+// ── phase labels ──
+function updatePhase(t) {
+  const ph = getPhase(t);
+  ['ph0','ph1','ph2','ph3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === ph);
+  });
+}
+
+// ── Main Loop ──
+function initAll() {
+  t = 0; delta = 0; tau = 100;
+  classSignalHistory = []; classOutputHistory = [];
+  nraSigHistory = []; nraRHistory = [];
+  midDivHistory = [];
+
+  cv = {
+    cl: initCanvas('cClassical', 210),
+    nr: initCanvas('cNRA',       210),
+    md: initCanvas('cMid',       120),
+  };
+
+  // reset timeline
+  for (let i = 0; i < 8; i++) {
+    const d = document.getElementById(`tl${i}`);
+    const txt = document.getElementById(`tl${i}t`);
+    if (d) d.classList.remove('lit');
+    if (txt) txt.style.color = 'var(--dim)';
+  }
+  document.getElementById('tl0').classList.add('lit');
+  document.getElementById('tl0t').style.color = 'var(--gold)';
+}
+
+function drawAll() {
+  drawClassical(cv.cl.ctx, cv.cl.w, cv.cl.h, t);
+  drawNRA      (cv.nr.ctx, cv.nr.w, cv.nr.h, t);
+  drawMid      (cv.md.ctx, cv.md.w, cv.md.h, t);
+  updateTimeline(t);
+  updatePhase(t);
+  document.getElementById('tickLbl').textContent = `t = ${t}`;
+}
+
+function loop() {
+  if (!running) return;
+  t++;
+  drawAll();
+  rafId = requestAnimationFrame(loop);
+}
+
+document.getElementById('btnRun').addEventListener('click', () => {
+  if (running) {
+    running = false; cancelAnimationFrame(rafId);
+    document.getElementById('btnRun').textContent = '▶ RUN';
+  } else {
+    running = true;
+    document.getElementById('btnRun').textContent = '⏸ PAUSE';
+    loop();
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  running = false; cancelAnimationFrame(rafId);
+  document.getElementById('btnRun').textContent = '▶ RUN';
+  initAll(); drawAll();
+});
+
+window.addEventListener('load',   () => { initAll(); drawAll(); });
+window.addEventListener('resize', () => {
+  const was = running; running = false; cancelAnimationFrame(rafId);
+  initAll(); drawAll();
+  if (was) { running = true; loop(); }
+});
+</script>
+</body>
+</html>

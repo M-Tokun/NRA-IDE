@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- FILE: NRA_IDE_Formula_Diagram_20260416.html -->
+<!-- 生成日時: 2026-04-16 JST -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<title>NRA-IDE: 定義式・応用式 構造図解</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg:      #060810;
+  --bg2:     #0a1020;
+  --ide:     #40d0a0;   /* IDE層・根本 */
+  --classic: #8090f0;   /* 古典層・補助 */
+  --gate:    #f0c040;   /* ゲート G(r) */
+  --found:   #e08040;   /* 基本定義式 */
+  --text:    #b8ccd8;
+  --dim:     #405060;
+  --panel:   rgba(10,18,35,0.95);
+  --border:  rgba(70,120,180,0.18);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height:100vh;
+  padding-bottom: 3rem;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 72% 18%, rgba(255,255,255,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 75%, rgba(255,255,255,0.25)0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 85%, rgba(255,255,255,0.2) 0%, transparent 100%);
+  pointer-events:none; z-index:0;
+}
+
+header {
+  text-align:center;
+  padding: 2rem 1rem 1rem;
+  border-bottom: 1px solid var(--border);
+  position:relative; z-index:1;
+}
+
+header h1 {
+  font-family:'JetBrains Mono', monospace;
+  font-size: clamp(0.9rem, 2.2vw, 1.45rem);
+  color: var(--ide);
+  letter-spacing:0.07em;
+  text-shadow: 0 0 20px rgba(64,208,160,0.4);
+}
+header .sub {
+  font-size:0.7rem; color:var(--dim);
+  font-family:'JetBrains Mono',monospace;
+  margin-top:0.35rem;
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; gap:1.6rem;
+}
+
+/* ── Section label ── */
+.sec-label {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--dim);
+  margin-bottom:0.5rem;
+}
+
+/* ── Foundation box ── */
+.foundation {
+  background: var(--panel);
+  border: 1px solid rgba(224,128,64,0.35);
+  border-radius:8px;
+  padding: 1.4rem 1.6rem;
+  position:relative;
+}
+
+.foundation::before {
+  content:'FOUNDATION — IMMUTABLE';
+  position:absolute; top:-0.55rem; left:1rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;
+  color:var(--found);
+  background:var(--bg2);
+  padding:0 0.5rem;
+  letter-spacing:0.12em;
+}
+
+.formula-center {
+  text-align:center;
+  padding: 1rem 0;
+}
+
+.big-formula {
+  font-family:'JetBrains Mono',monospace;
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  color:#f0e8d0;
+  letter-spacing:0.04em;
+  text-shadow: 0 0 24px rgba(240,192,64,0.3);
+}
+
+.formula-legend {
+  display:flex; justify-content:center; gap:2.5rem; flex-wrap:wrap;
+  margin-top:1rem;
+}
+
+.leg-item {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.75rem;
+  text-align:center;
+}
+
+.leg-sym { font-size:1.1rem; font-weight:700; display:block; margin-bottom:0.2rem; }
+.leg-jp  { font-size:0.68rem; color:var(--dim); }
+
+.fail-closed-note {
+  margin-top:1rem;
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.78rem;
+  color: rgba(240,192,64,0.8);
+  border-top:1px solid rgba(240,192,64,0.15);
+  padding-top:0.8rem;
+}
+
+/* ── Applied formula diagram ── */
+.applied-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius:8px;
+  padding: 1.4rem 1.6rem;
+  position:relative;
+}
+
+.applied-box::before {
+  content:'APPLIED FORMULA — IDE + CLASSICAL HYBRID';
+  position:absolute; top:-0.55rem; left:1rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;
+  color:var(--ide);
+  background:var(--bg2);
+  padding:0 0.5rem;
+  letter-spacing:0.1em;
+}
+
+/* equation display */
+.eq-display {
+  background: rgba(0,0,0,0.5);
+  border-radius:6px;
+  padding: 1.2rem;
+  text-align:center;
+  margin-bottom:1.2rem;
+  border: 1px solid rgba(64,208,160,0.12);
+}
+
+.eq-main {
+  font-family:'JetBrains Mono',monospace;
+  font-size: clamp(0.85rem, 2.5vw, 1.25rem);
+  color:#e8f0f8;
+  line-height:2.2;
+}
+
+.eq-ide     { color:var(--ide);     font-weight:700; }
+.eq-classic { color:var(--classic); font-weight:700; }
+.eq-gate    { color:var(--gate);    font-weight:700; }
+.eq-dim     { color:var(--dim); }
+
+.eq-under {
+  font-size:0.65rem;
+  color:var(--dim);
+  font-family:'JetBrains Mono',monospace;
+  display:block;
+  margin-top:-0.3rem;
+}
+
+/* structure diagram */
+.struct-diagram {
+  display:grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap:0.6rem;
+  align-items:stretch;
+  margin-bottom:1.2rem;
+}
+
+@media(max-width:700px){
+  .struct-diagram { grid-template-columns:1fr; }
+  .arrow-col { display:none; }
+}
+
+.struct-panel {
+  border-radius:6px;
+  padding:1rem;
+  border:1px solid;
+}
+
+.struct-panel.ide-side {
+  border-color: rgba(64,208,160,0.4);
+  background: rgba(64,208,160,0.04);
+}
+
+.struct-panel.classic-side {
+  border-color: rgba(128,144,240,0.35);
+  background: rgba(128,144,240,0.04);
+}
+
+.struct-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  margin-bottom:0.7rem;
+  padding-bottom:0.4rem;
+  border-bottom:1px solid;
+}
+
+.ide-side .struct-title   { color:var(--ide);     border-color:rgba(64,208,160,0.2); }
+.classic-side .struct-title { color:var(--classic); border-color:rgba(128,144,240,0.2); }
+
+.struct-rows { display:flex; flex-direction:column; gap:0.45rem; }
+
+.struct-row {
+  font-size:0.72rem;
+  line-height:1.6;
+  display:flex; gap:0.5rem; align-items:flex-start;
+}
+
+.struct-row .bullet {
+  font-family:'JetBrains Mono',monospace;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.ide-side .bullet   { color:var(--ide); }
+.classic-side .bullet { color:var(--classic); }
+
+.arrow-col {
+  display:flex; align-items:center; justify-content:center;
+}
+
+.plus-sign {
+  font-family:'JetBrains Mono',monospace;
+  font-size:1.8rem;
+  color:var(--dim);
+}
+
+/* gate detail */
+.gate-detail {
+  background: rgba(0,0,0,0.45);
+  border-radius:6px;
+  border-left:3px solid var(--gate);
+  padding:0.9rem 1rem;
+  margin-bottom:1rem;
+}
+
+.gate-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  color:var(--gate);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  margin-bottom:0.6rem;
+}
+
+.gate-formula {
+  font-family:'JetBrains Mono',monospace;
+  font-size: clamp(0.8rem, 2vw, 1.05rem);
+  color:#f0e8c0;
+  margin-bottom:0.6rem;
+}
+
+.gate-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.7rem;
+}
+
+.gate-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem;
+  color:var(--dim);
+  text-align:left;
+  padding:0.3rem 0.5rem;
+  border-bottom:1px solid var(--border);
+}
+
+.gate-table td {
+  padding:0.3rem 0.5rem;
+  border-bottom:1px solid rgba(70,120,180,0.08);
+  line-height:1.5;
+}
+
+.gate-table td:first-child {
+  font-family:'JetBrains Mono',monospace;
+  color:var(--gate);
+  font-weight:600;
+}
+
+/* jelly analogy */
+.jelly-row {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:0.8rem;
+  margin-top:0.5rem;
+}
+@media(max-width:700px){ .jelly-row{grid-template-columns:1fr;} }
+
+.jelly-cell {
+  border-radius:5px;
+  padding:0.8rem;
+  font-size:0.7rem;
+  line-height:1.75;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,0.3);
+}
+
+.jelly-cell .j-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;
+  font-weight:700;
+  margin-bottom:0.4rem;
+  display:block;
+}
+
+/* axiom correspondence */
+.axiom-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.71rem;
+}
+.axiom-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.63rem;
+  color:var(--dim);
+  text-align:left;
+  padding:0.4rem 0.6rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,0.3);
+}
+.axiom-table td {
+  padding:0.45rem 0.6rem;
+  border-bottom:1px solid rgba(70,120,180,0.08);
+  line-height:1.6;
+  vertical-align:top;
+}
+.axiom-table td:first-child {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;
+  color:var(--ide);
+  width:32%;
+}
+
+/* layer architecture */
+.layer-arch {
+  background:rgba(0,0,0,0.4);
+  border-radius:6px;
+  padding:1rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  line-height:2.2;
+  border:1px solid var(--border);
+}
+
+.la-ide     { color:var(--ide); }
+.la-classic { color:var(--classic); }
+.la-gate    { color:var(--gate); }
+.la-dim     { color:var(--dim); }
+.la-found   { color:var(--found); }
+
+.divider {
+  border:none;
+  border-top:1px solid var(--border);
+  margin: 0.2rem 0;
+}
+
+/* footer */
+footer {
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem;
+  color:var(--dim);
+  padding:1rem;
+  border-top:1px solid var(--border);
+  position:relative; z-index:1;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NRA-IDE: 定義式・応用式 構造図解</h1>
+  <div class="sub">NRA-IDE Project · M-Tokuni · 2026-04-16 · github.com/M-Tokun/NRA-IDE · DOI: 10.5281/zenodo.19420854</div>
+</header>
+
+<div class="wrap">
+
+  <!-- ══ 0. 階層概要 ══ -->
+  <div>
+    <div class="sec-label">00 — 設計階層 Layer Architecture</div>
+    <div class="layer-arch">
+      <span class="la-found">Def 1 &nbsp;│ R = δ/τ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;基本判定式 &nbsp;&nbsp;&nbsp;&nbsp;閉じた世界で完結 &nbsp;&nbsp;構造比率の即時判定</span><br>
+      <span class="la-found">Def 2 &nbsp;│ 二重ゆらぎ式（動的τ） &nbsp;&nbsp;閉じた世界で完結 &nbsp;&nbsp;非対称ゆらぎの追従</span><br>
+      <span class="la-dim">──────────────────────────────────────────────────────</span><br>
+      <span class="la-ide">Applied│ 応用式（ハイブリッド補完） &nbsp;&nbsp;外部依存あり &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EMAラグの精度補完</span><br>
+      <br>
+      <span class="la-dim">※ 応用式は Def 2 の拡張であり代替ではありません。</span><br>
+      <span class="la-dim">&nbsp;&nbsp; EMA ラグが問題にならない領域では Def 2 のみで完結します。</span>
+    </div>
+  </div>
+
+  <!-- ══ 1. 基本定義式 ══ -->
+  <div class="foundation">
+    <div class="sec-label">01 — 根幹定義式（不変）</div>
+    <div class="formula-center">
+      <div class="big-formula">R = δ / τ</div>
+    </div>
+    <div class="formula-legend">
+      <div class="leg-item">
+        <span class="leg-sym" style="color:var(--found)">δ</span>
+        蓄積ズレ<br>
+        <span class="leg-jp">Accumulated Deviation<br>累積負荷・履歴として蓄積</span>
+      </div>
+      <div class="leg-item">
+        <span class="leg-sym" style="color:var(--ide)">τ</span>
+        吸収厚み<br>
+        <span class="leg-jp">Absorption Thickness<br>構造的許容余裕・時間と独立</span>
+      </div>
+      <div class="leg-item">
+        <span class="leg-sym" style="color:#f0e8d0">R</span>
+        構造比率<br>
+        <span class="leg-jp">Structural Ratio<br>境界への接近度・無次元</span>
+      </div>
+    </div>
+    <div class="fail-closed-note">
+      R &lt; 1.0 → 安定領域・継続 &nbsp;│&nbsp;
+      R = 1.0 → 警告・通知 &nbsp;│&nbsp;
+      R ≥ 1.0 → <strong>Fail-Closed 沈黙・人間に委ねる</strong>
+    </div>
+  </div>
+
+  <!-- ══ 2. 応用式全体 ══ -->
+  <div class="applied-box">
+    <div class="sec-label">02 — 応用式（ハイブリッド補完） Applied Formula</div>
+
+    <div class="eq-display">
+      <div class="eq-main">
+        d²x/dt² + γẋ &nbsp;=&nbsp;
+        <span class="eq-ide">F<sub>IDE</sub>(x)</span>
+        &nbsp;+&nbsp;
+        <span class="eq-gate">G(r)</span>
+        &nbsp;·&nbsp;
+        <span class="eq-classic">Φ(x)</span>
+      </div>
+      <div style="display:flex;justify-content:center;gap:3rem;margin-top:0.6rem;flex-wrap:wrap;">
+        <span class="eq-under" style="color:rgba(64,208,160,0.6)">↑ IDE層・根本<br>量子的包括演算</span>
+        <span class="eq-under" style="color:rgba(240,192,64,0.6)">↑ 2次残差ゲート<br>介入制御弁</span>
+        <span class="eq-under" style="color:rgba(128,144,240,0.6)">↑ 古典層・補助<br>局所精度補正</span>
+      </div>
+    </div>
+
+    <!-- IDE vs Classical -->
+    <div class="struct-diagram">
+
+      <div class="struct-panel ide-side">
+        <div class="struct-title">◉ F<sub>IDE</sub>(x) — IDE層・根本</div>
+        <div class="struct-rows">
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>常に全域で動作。根本を手放さない。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>性質誤差（δ）の追跡を継続。遷移を崩さない。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>非線形ステップ計算。誤差爆発しない。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>「内側が揺らいで吸収する」ゼリー構造。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>
+              <strong style="color:var(--ide)">主導権はここにある。</strong>
+              古典層が沈黙しても継続する。
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-col">
+        <div class="plus-sign">+</div>
+      </div>
+
+      <div class="struct-panel classic-side">
+        <div class="struct-title">⬛ G(r)·Φ(x) — 古典層・補助</div>
+        <div class="struct-rows">
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>補助的役割のみ。主導しない。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>ズレrが大きいときだけ G(r) が介入する。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>小さな揺らぎは自然消滅（沈黙）。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>収束時の精度向上が唯一の役割。</span>
+          </div>
+          <div class="struct-row">
+            <span class="bullet">▸</span>
+            <span>
+              <strong style="color:var(--classic)">状態を上書きしない。</strong>
+              力として返すだけ。
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gate detail -->
+    <div class="gate-detail">
+      <div class="gate-title">◈ G(r) — 2次残差ゲート Second-Order Residual Gate</div>
+      <div class="gate-formula">
+        G(r) = r · |r| / (k + |r|) &nbsp;&nbsp;&nbsp; r = x<sub>exact</sub> − x
+      </div>
+      <table class="gate-table">
+        <tr>
+          <th>残差の大きさ</th>
+          <th>G(r) の挙動</th>
+          <th>意味</th>
+        </tr>
+        <tr>
+          <td>r ≈ 0（小ゆらぎ）</td>
+          <td>ほぼゼロ → 沈黙</td>
+          <td>古典層が介入しない。IDE層が単独で継続。</td>
+        </tr>
+        <tr>
+          <td>r = 中程度</td>
+          <td>比例的に増大</td>
+          <td>古典補正が緩やかに加わる。</td>
+        </tr>
+        <tr>
+          <td>r = 大（相転移近傍）</td>
+          <td>飽和応答</td>
+          <td>強い補正。ただし発散しない構造（飽和）。</td>
+        </tr>
+      </table>
+      <div style="margin-top:0.6rem;font-size:0.68rem;color:var(--dim);">
+        ε カットオフという人工的な判断が不要。数学構造自体がフィルターとして機能する。
+      </div>
+    </div>
+
+    <!-- Jelly analogy -->
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;">
+        直感的比喩 — Jelly Analogy
+      </div>
+      <div class="jelly-row">
+        <div class="jelly-cell">
+          <span class="j-title" style="color:#8090a0">🔩 鋼鉄の円柱</span>
+          力をそのまま跳ね返す。変形なし。<br>
+          → <span style="color:#e08080">古典計算（剛体的上書き）</span><br>
+          誤差を認めず強制的に補正。<br>
+          遷移が壊れる。
+        </div>
+        <div class="jelly-cell">
+          <span class="j-title" style="color:#6080a0">💧 水</span>
+          形を保てない。崩壊する。<br>
+          → <span style="color:#8090f0">拘束のない系（発散）</span><br>
+          δを追跡できず<br>
+          誤差が際限なく拡大する。
+        </div>
+        <div class="jelly-cell">
+          <span class="j-title" style="color:var(--ide)">🟢 ゼリーの円柱</span>
+          内側で変形して力を分散。形は保つ。<br>
+          → <span style="color:var(--ide)">NRA-IDE 適応型ゲート</span><br>
+          性質誤差（δ）を吸収しながら<br>
+          律環の形（概要）を維持し続ける。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 3. 公理との対応 ══ -->
+  <div>
+    <div class="sec-label">03 — NRA-IDE 公理との対応</div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:1rem;">
+      <table class="axiom-table">
+        <tr>
+          <th>公理</th>
+          <th>応用式での実現</th>
+        </tr>
+        <tr>
+          <td>距離は結果であって原因ではない</td>
+          <td>r は応答の結果として計算される。直接入力として使わない。F_IDE が根本を保持する。</td>
+        </tr>
+        <tr>
+          <td>閾値での正直な告白</td>
+          <td>G(r) が小さいとき古典層は沈黙する。介入していない事実を隠さない。</td>
+        </tr>
+        <tr>
+          <td>不可逆性への敬意</td>
+          <td>速度ẋを経由した連続更新。状態の直接上書き禁止。遷移を崩さない。</td>
+        </tr>
+        <tr>
+          <td>整数位相ロック</td>
+          <td>各ステップで残差を排出（熱として）。持ち越し禁止。各遷移が構造的に完結する。</td>
+        </tr>
+        <tr>
+          <td>Fail-Closed</td>
+          <td>R ≥ 1.0 で出力を停止。G(r) も F_IDE も判断しない。人間に委ねる。</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ 4. なぜ根本は崩れないか ══ -->
+  <div>
+    <div class="sec-label">04 — なぜ根本は崩れないのか Why the Foundation Holds</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+
+      <div style="background:rgba(224,80,80,0.06);border:1px solid rgba(224,80,80,0.25);border-radius:6px;padding:1rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#e06040;letter-spacing:0.08em;margin-bottom:0.6rem;">
+          ✗ 古典計算が「主導」した場合
+        </div>
+        <div style="font-size:0.71rem;line-height:1.8;color:#a08080;">
+          前ステップの自分の出力が次の入力になる。<br>
+          誤差が雪だるま式に蓄積する。<br>
+          大規模・非線形系で計算爆発する。<br>
+          概要（全体像）を失ってから破綻に気づく。
+        </div>
+      </div>
+
+      <div style="background:rgba(64,208,160,0.05);border:1px solid rgba(64,208,160,0.25);border-radius:6px;padding:1rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--ide);letter-spacing:0.08em;margin-bottom:0.6rem;">
+          ✓ IDE層が「根本を保持」した場合
+        </div>
+        <div style="font-size:0.71rem;line-height:1.8;color:#80a898;">
+          古典層の入力は「IDEが安定させた現在状態」。<br>
+          誤差爆発が防がれる決定的な理由がここにある。<br>
+          古典層はズレだけを計算して力として返す。<br>
+          概要（全体像）を常時追跡し続けられる。
+        </div>
+      </div>
+
+    </div>
+    <div style="margin-top:0.7rem;background:rgba(0,0,0,0.4);border-radius:6px;padding:0.8rem 1rem;border-left:3px solid var(--gate);font-family:'JetBrains Mono',monospace;font-size:0.73rem;line-height:1.8;color:#c0b880;">
+      古典計算の入力が「自分の前の出力」ではなく「IDEが安定させた現在状態」である点が<br>
+      誤差爆発を防ぐ<strong style="color:var(--gate)">構造的・決定的な違い</strong>である。
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Copyright (c) 2026 M-Tokuni — Nomological Ring Axioms / Intensional Dynamics Engine<br>
+  https://github.com/M-Tokun/NRA-IDE &nbsp;·&nbsp; DOI: 10.5281/zenodo.19420854
+</footer>
+
+</body>
+</html>

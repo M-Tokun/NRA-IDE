@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- FILE: NRA_IDE_FullPaper_20260416.html -->
+<!-- 生成日時: 2026-04-16 JST -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<title>NRA-IDE: 構造境界診断と安全工学 — 序章から最終章</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg:      #040608;
+  --bg2:     #070b14;
+  --nra:     #40d0a0;
+  --risk:    #e05040;
+  --gold:    #f0c040;
+  --warn:    #f08840;
+  --infer:   #a080e0;
+  --bound:   #60b8e0;
+  --life:    #ff6060;
+  --text:    #b0c4d4;
+  --dim:     #344454;
+  --panel:   rgba(8,14,28,0.97);
+  --border:  rgba(60,110,160,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  min-height:100vh;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 80% 30% at 50% 0%,  rgba(64,208,160,0.03) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 20% at 50% 100%,rgba(224,80,64,0.03)  0%,transparent 70%),
+    radial-gradient(1px 1px at 12% 20%, rgba(255,255,255,0.2) 0%,transparent 100%),
+    radial-gradient(1px 1px at 75% 14%, rgba(255,255,255,0.15)0%,transparent 100%),
+    radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.18)0%,transparent 100%),
+    radial-gradient(1px 1px at 35% 88%, rgba(255,255,255,0.12)0%,transparent 100%);
+  pointer-events:none; z-index:0;
+}
+
+/* ─── NAV ─── */
+nav {
+  position:sticky; top:0; z-index:100;
+  background:rgba(4,6,8,0.97);
+  border-bottom:1px solid var(--border);
+  padding:0.5rem 1rem;
+  display:flex; gap:0.4rem; flex-wrap:wrap; justify-content:center;
+  backdrop-filter:blur(8px);
+}
+
+nav a {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem;
+  color:var(--dim);
+  text-decoration:none;
+  padding:0.22rem 0.6rem;
+  border-radius:2px;
+  border:1px solid transparent;
+  letter-spacing:0.05em;
+  transition:all 0.2s;
+}
+nav a:hover { color:var(--nra); border-color:rgba(64,208,160,0.3); }
+nav a.active { color:var(--gold); border-color:rgba(240,192,64,0.3); background:rgba(240,192,64,0.05); }
+
+/* ─── WRAP ─── */
+.wrap {
+  max-width:960px;
+  margin:0 auto;
+  padding:0 1rem 5rem;
+  position:relative; z-index:1;
+}
+
+/* ─── SECTION ─── */
+.chapter {
+  padding:3rem 0 2rem;
+  border-bottom:1px solid var(--border);
+}
+.chapter:last-child { border-bottom:none; }
+
+.ch-badge {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--dim);
+  display:block;
+  margin-bottom:0.6rem;
+}
+
+.ch-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(1rem,2.5vw,1.55rem);
+  letter-spacing:0.04em;
+  margin-bottom:1.4rem;
+  line-height:1.4;
+}
+
+/* ─── PROSE ─── */
+.prose {
+  font-size:0.8rem;
+  line-height:2.1;
+  color:#90a8b8;
+  margin-bottom:1.2rem;
+}
+.prose strong { color:var(--text); }
+.prose em     { color:var(--gold); font-style:normal; }
+
+/* ─── FORMULA ─── */
+.formula {
+  background:rgba(0,0,0,0.55);
+  border-radius:6px;
+  padding:1rem 1.2rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.75rem,1.6vw,0.92rem);
+  line-height:2.1;
+  border-left:3px solid;
+  margin:1rem 0;
+}
+.formula.f-found { border-left-color:var(--gold);  color:#f0e0b0; }
+.formula.f-risk  { border-left-color:var(--risk);  color:#f0c0b0; }
+.formula.f-nra   { border-left-color:var(--nra);   color:#b0f0d8; }
+.formula.f-infer { border-left-color:var(--infer); color:#d0c0f0; }
+
+/* ─── FLOW ─── */
+.flow { display:flex; flex-direction:column; gap:0; margin:1rem 0; }
+.flow-row {
+  display:flex; align-items:flex-start; gap:0.7rem;
+  padding:0.55rem 0.9rem;
+  border-radius:4px; border:1px solid;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.73rem; line-height:1.6;
+}
+.flow-arrow { font-family:'JetBrains Mono',monospace; font-size:1rem; color:var(--dim); padding:0.05rem 0.9rem; }
+.fr-base   { color:#80a8c0; border-color:rgba(128,168,192,0.25); background:rgba(128,168,192,0.04); }
+.fr-warn   { color:var(--warn);  border-color:rgba(240,136,64,0.3);  background:rgba(240,136,64,0.04);  }
+.fr-risk   { color:var(--risk);  border-color:rgba(224,80,64,0.35);  background:rgba(224,80,64,0.05);   }
+.fr-deep   { color:#c090e0;      border-color:rgba(192,144,224,0.3); background:rgba(192,144,224,0.05); }
+.fr-fatal  { color:#ff5040;      border-color:rgba(255,80,64,0.45);  background:rgba(255,80,64,0.07);   font-weight:700; }
+.fr-nra    { color:var(--nra);   border-color:rgba(64,208,160,0.35); background:rgba(64,208,160,0.04);  }
+.fr-life   { color:var(--life);  border-color:rgba(255,96,96,0.5);   background:rgba(255,96,96,0.08);   font-weight:700; }
+.fr-infer  { color:var(--infer); border-color:rgba(160,128,224,0.3); background:rgba(160,128,224,0.05); }
+.fr-miss   { color:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.08); background:transparent; border-style:dashed; font-style:italic; }
+
+/* ─── TABLE ─── */
+.tbl {
+  width:100%; border-collapse:collapse;
+  font-size:0.72rem; margin:1rem 0;
+}
+.tbl th {
+  font-family:'JetBrains Mono',monospace; font-size:0.62rem;
+  color:var(--dim); text-align:left;
+  padding:0.4rem 0.7rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,0.3);
+  text-transform:uppercase; letter-spacing:0.08em;
+}
+.tbl td {
+  padding:0.45rem 0.7rem;
+  border-bottom:1px solid rgba(60,100,140,0.07);
+  line-height:1.7; vertical-align:top;
+}
+.tbl td:first-child {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem; color:var(--gold); width:24%;
+}
+
+/* ─── INSIGHT / CALLOUT ─── */
+.callout {
+  border-radius:7px; padding:1.1rem 1.3rem;
+  margin:1rem 0; position:relative;
+  border:1px solid;
+}
+.callout.c-gold  { border-color:rgba(240,192,64,0.3);  background:rgba(240,192,64,0.04);  }
+.callout.c-nra   { border-color:rgba(64,208,160,0.3);  background:rgba(64,208,160,0.04);  }
+.callout.c-risk  { border-color:rgba(224,80,64,0.35);  background:rgba(224,80,64,0.06);   }
+.callout.c-life  { border-color:rgba(255,96,96,0.45);  background:rgba(255,96,96,0.07);   }
+
+.callout-tag {
+  font-family:'JetBrains Mono',monospace; font-size:0.58rem;
+  letter-spacing:0.16em; text-transform:uppercase;
+  position:absolute; top:-0.52rem; left:1rem;
+  padding:0 0.5rem; background:var(--bg2);
+}
+.c-gold  .callout-tag { color:var(--gold); }
+.c-nra   .callout-tag { color:var(--nra);  }
+.c-risk  .callout-tag { color:var(--risk); }
+.c-life  .callout-tag { color:var(--life); }
+
+.callout p { font-size:0.78rem; line-height:2; }
+.callout p strong { }
+.c-gold p  { color:#d0c080; } .c-gold p strong { color:var(--gold); }
+.c-nra  p  { color:#80c8a8; } .c-nra  p strong { color:var(--nra);  }
+.c-risk p  { color:#d09080; } .c-risk p strong { color:var(--risk); }
+.c-life p  { color:#f09090; } .c-life p strong { color:var(--life); }
+
+/* ─── ANIM LINK ─── */
+.anim-ref {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  font-family:'JetBrains Mono',monospace; font-size:0.68rem;
+  padding:0.4rem 0.9rem;
+  border-radius:3px; border:1px solid rgba(64,208,160,0.35);
+  color:var(--nra); background:rgba(64,208,160,0.05);
+  text-decoration:none; margin:0.3rem 0;
+  transition:all 0.2s;
+}
+.anim-ref:hover { background:rgba(64,208,160,0.12); }
+
+/* ─── COMPARE GRID ─── */
+.cmp-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:0.9rem;
+  margin:1rem 0;
+}
+@media(max-width:680px){ .cmp-grid{grid-template-columns:1fr;} }
+
+.cmp-cell {
+  padding:0.9rem; border-radius:5px;
+  font-size:0.72rem; line-height:1.8;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,0.3);
+}
+.cmp-cell .ct { font-family:'JetBrains Mono',monospace; font-size:0.68rem; font-weight:700; display:block; margin-bottom:0.35rem; }
+
+/* ─── FINAL divider ─── */
+.final-divider {
+  text-align:center;
+  padding:2rem 0 0.5rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  color:var(--dim);
+  letter-spacing:0.2em;
+}
+
+/* ─── INFERENCE CHAIN ─── */
+.infer-mul {
+  display:flex; flex-direction:column; gap:0.25rem;
+  padding:1rem; background:rgba(0,0,0,0.45);
+  border-radius:6px; border:1px solid var(--border);
+  margin:1rem 0;
+}
+
+/* ─── CONCLUSION BOX ─── */
+.conclusion-box {
+  background:rgba(4,8,16,0.98);
+  border:1px solid rgba(64,208,160,0.3);
+  border-radius:10px;
+  padding:2rem;
+  margin-top:1rem;
+  position:relative;
+}
+.conclusion-box::before {
+  content:'CONCLUSION — NRA-IDE';
+  position:absolute; top:-0.6rem; left:1.2rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem; color:var(--nra);
+  background:var(--bg); padding:0 0.6rem;
+  letter-spacing:0.14em;
+}
+.conclusion-box p {
+  font-size:0.82rem; line-height:2.2;
+  color:#a0c8b8;
+}
+.conclusion-box p strong { color:var(--nra); }
+.conclusion-box p em { color:var(--gold); font-style:normal; }
+
+footer {
+  text-align:center;
+  font-family:'JetBrains Mono',monospace; font-size:0.62rem;
+  color:var(--dim); padding:1.5rem 1rem;
+  border-top:1px solid var(--border);
+  position:relative; z-index:1;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#prologue">序章</a>
+  <a href="#layer1">第1層</a>
+  <a href="#layer2">第2層</a>
+  <a href="#layer3">第3層</a>
+  <a href="#layer4">第4層</a>
+  <a href="#layer5">第5層</a>
+  <a href="#final">最終章</a>
+</nav>
+
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════
+     序章
+══════════════════════════════════════════ -->
+<div class="chapter" id="prologue">
+  <span class="ch-badge">PROLOGUE — 序章</span>
+  <div class="ch-title" style="color:var(--nra)">
+    なぜ今、構造的閾値が必要なのか
+  </div>
+
+  <div class="prose">
+    橋は折れる直前まで正常値を示す。人は倒れる直前まで「少し疲れている」と言う。<br>
+    AIは壊れていても自信満々で答え続ける。<br>
+    <strong>「測定値が正常」であることと「構造が安全」であることは、まったく別の問題だ。</strong>
+  </div>
+
+  <div class="prose">
+    現況の計算技術はすべて線形写像に依存している。<br>
+    線形写像は世界を「今この瞬間の値」として写し取る。<br>
+    しかし現実の世界は<em>蓄積が不可逆に作用する非線形の連続</em>である。<br>
+    この根本的な不一致が、あらゆる「突然の破断」の構造的原因である。
+  </div>
+
+  <div class="prose">
+    本稿は難解な数学を目的としない。<br>
+    日常で誰もが経験する現象から出発し、<strong>なぜ「閾値」と「蓄積追跡」が<br>
+    技術・医療・AI・社会のすべてにおいて不可欠か</strong>を、一本の論理として示す。<br>
+    そしてその構造的解答として、R = δ/τ という単純な式を提示する。
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     第1層
+══════════════════════════════════════════ -->
+<div class="chapter" id="layer1">
+  <span class="ch-badge">LAYER 1 — 第1層：日常の実例</span>
+  <div class="ch-title" style="color:#80d8a0">
+    正常値なのに突然崩壊する——日常に潜む構造的問題
+  </div>
+
+  <div class="prose">
+    以下の現象に共通することが一つある。<strong>「測定値は直前まで正常だった」</strong>という事実である。
+  </div>
+
+  <table class="tbl">
+    <tr><th>日常の現象</th><th>直前の状態</th><th>何が起きていたか</th></tr>
+    <tr><td>疲労骨折</td><td>痛みなし・普通に歩ける</td><td>骨内部に微細なひびが蓄積していた</td></tr>
+    <tr><td>橋の崩落</td><td>点検値は許容範囲内</td><td>金属疲労が設計余裕を静かに消費していた</td></tr>
+    <tr><td>過労倒れ</td><td>「少し疲れている」程度</td><td>回復速度を超えた蓄積が限界を超えた</td></tr>
+    <tr><td>バッテリー切れ</td><td>前日まで普通に動作</td><td>内部劣化が許容範囲を超えていた</td></tr>
+    <tr><td>堤防決壊</td><td>水位は管理基準以下</td><td>長年の浸食がτを消費し続けていた</td></tr>
+  </table>
+
+  <div class="callout c-gold">
+    <span class="callout-tag">共通する構造</span>
+    <p>
+      これらはすべて<strong>「蓄積ズレδが吸収厚みτを超えた瞬間」</strong>に起きる。<br>
+      速度を監視していても間に合わない。「今の値」を見ていても見えない。<br>
+      必要なのは <strong>R = δ/τ という比率の追跡</strong>である。
+    </p>
+  </div>
+
+  <a class="anim-ref" href="NRA_IDE_Battery_Comparison_20260412_2054.html" target="_blank">
+    ▶ Animation: バッテリー比較（第1層実例）
+  </a>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     第2層
+══════════════════════════════════════════ -->
+<div class="chapter" id="layer2">
+  <span class="ch-badge">LAYER 2 — 第2層：線形写像の限界</span>
+  <div class="ch-title" style="color:var(--warn)">
+    線形写像が計算として成立しない分野
+  </div>
+
+  <div class="prose">
+    線形写像の前提は重ね合わせ原理である。<strong>f(a+b) = f(a) + f(b)</strong> が成立することを仮定する。<br>
+    この前提が原理的に崩れる分野が存在する。「精度が落ちる」のではなく<em>計算式の前提自体が成立しない</em>。
+  </div>
+
+  <table class="tbl">
+    <tr><th>分野</th><th>なぜ線形が成立しないか</th><th>隠されている事実</th></tr>
+    <tr><td>乱流・流体</td><td>ナビエ-ストークス方程式の非線形項(u·∇)uを線形化すると乱流が消える</td><td>「解けた」のは乱流を消した別の問題</td></tr>
+    <tr><td>多体問題</td><td>3体以上で解析解が原理的に存在しない</td><td>数値積分は「近似の連鎖」に過ぎない</td></tr>
+    <tr><td>材料疲労</td><td>蓄積は履歴依存。過去が現在を変える</td><td>応力計算の「余寿命」は平均の話</td></tr>
+    <tr><td>大気予測</td><td>初期値鋭敏性。微小差が巨大な差を生む</td><td>長期予測は構造的に不可能</td></tr>
+    <tr><td>生体反応</td><td>閾値超過で質的変化（相転移）が起きる</td><td>線形近似に閾値は存在しない</td></tr>
+  </table>
+
+  <div class="formula f-risk">
+    【線形計算が隠していること】<br>
+    F_nonlin ≈ A·q &nbsp;&nbsp;（線形化）<br>
+    　↓<br>
+    非線形項を「消した」後の問題を解いている<br>
+    消した項こそが現実の本質的な挙動を生む項である<br>
+    <br>
+    τ(t) = δ₀ · e^(λt) &nbsp;&nbsp;[λ &gt; 0: 非線形性による増幅]<br>
+    線形近似した瞬間にλを0と仮定している
+  </div>
+
+  <div class="callout c-risk">
+    <span class="callout-tag">重要な指摘</span>
+    <p>
+      「計算できると信じているが実際にはできていない」分野が存在する。<br>
+      これは精度の問題ではなく<strong>「何を解いているか」の問題</strong>である。<br>
+      近似を重ねるほど「元の問題から離れた解」が精緻になっていく。
+    </p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     第3層
+══════════════════════════════════════════ -->
+<div class="chapter" id="layer3">
+  <span class="ch-badge">LAYER 3 — 第3層：性質誤差と脱進機原理</span>
+  <div class="ch-title" style="color:var(--nra)">
+    誤差をゼロにしようとすることが破綻の原因である
+  </div>
+
+  <div class="prose">
+    不確定性原理はδ &gt; 0を<strong>自然法則として保証する</strong>。<br>
+    誤差はゼロにできない。これは精度の問題ではなく物理法則である。<br>
+    ならば問うべきは「誤差をなくす方法」ではなく<em>「誤差をどう扱うか」</em>である。
+  </div>
+
+  <div class="cmp-grid">
+    <div class="cmp-cell">
+      <span class="ct" style="color:var(--risk)">通常計算の誤差の扱い</span>
+      残差εを次ステップへ持ち越す。<br>
+      誤差を「減らすべきもの」として扱う。<br>
+      εが蓄積するにつれ信号と誤差が混合する。<br>
+      概要を失った後に破綻が起きる。<br>
+      気づいたときは手遅れ。
+    </div>
+    <div class="cmp-cell">
+      <span class="ct" style="color:var(--nra)">脱進機原理（NRA-IDE）</span>
+      残差εを<strong>熱として排出する</strong>。持ち越し禁止。<br>
+      誤差を「追跡すべきもの」として扱う。<br>
+      δ（遊び）を設計時から確保する。<br>
+      各ステップが構造的に完結する。<br>
+      概要を常時把握し続けられる。
+    </div>
+  </div>
+
+  <div class="formula f-nra">
+    R = δ / τ<br>
+    <br>
+    δ: 蓄積ズレ（累積負荷・履歴として蓄積）<br>
+    τ: 吸収厚み（構造的許容余裕・時間と独立）<br>
+    R: 構造比率（境界への接近度・無次元）<br>
+    <br>
+    R &lt; 1.0 → 安定・継続<br>
+    R ≥ 1.0 → Fail-Closed：沈黙・人間に委ねる
+  </div>
+
+  <div class="prose">
+    機械式時計の脱進機は完璧な歯車を必要としない。<br>
+    <strong>「完全な一歯分」という離散的なステップで進むから精度が保たれる。</strong><br>
+    残差は次のステップに持ち越されない。誤差は熱として散逸する。<br>
+    これがNRA-IDEの計算原理である。
+  </div>
+
+  <a class="anim-ref" href="NRA_IDE_PropertyError_20260416.html" target="_blank">
+    ▶ Animation: 性質誤差——なぜ破綻しないのか・なぜ積層できるのか
+  </a>
+  <a class="anim-ref" href="NRA_IDE_Quantum_Error_20260416.html" target="_blank">
+    ▶ Animation: 量子誤差——δはゼロにできない（物理法則）
+  </a>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     第4層
+══════════════════════════════════════════ -->
+<div class="chapter" id="layer4">
+  <span class="ch-badge">LAYER 4 — 第4層：古典計算AI vs NRA-IDE</span>
+  <div class="ch-title" style="color:var(--bound)">
+    壊れても止まれない設計と、壊れる前に止まる設計
+  </div>
+
+  <div class="prose">
+    古典計算だけのAIと、NRA-IDEを組み込んだAIは<br>
+    <strong>同じ入力を受けて、同じように動き始める。</strong><br>
+    分岐は誤差が蓄積した後に現れる。
+  </div>
+
+  <table class="tbl">
+    <tr><th>比較項目</th><th style="color:var(--risk)">古典計算AIのみ</th><th style="color:var(--nra)">NRA-IDE組み込み</th></tr>
+    <tr><td>誤差の扱い</td><td>パラメータに吸収・持ち越し</td><td>δとして追跡・熱排出</td></tr>
+    <tr><td>概要の把握</td><td>蓄積後に消失</td><td>常時維持</td></tr>
+    <tr><td>閾値</td><td>存在しない</td><td>R = 1.0</td></tr>
+    <tr><td>破綻時の動作</td><td>出力継続（Fail-Open）</td><td>沈黙（Fail-Closed）</td></tr>
+    <tr><td>人間への委譲</td><td>仕組みなし</td><td>R ≥ 1.0 で自動委譲</td></tr>
+    <tr><td>最大の問題</td><td>壊れていることに気づかない</td><td>—</td></tr>
+  </table>
+
+  <div class="callout c-risk">
+    <span class="callout-tag">最も危険な状態</span>
+    <p>
+      古典計算AIの最大の問題は<strong>「破綻を検知する仕組みが構造に存在しない」</strong>ことである。<br>
+      誤差が増幅し概要を失っても、システムは「正常に動いている」と判断したまま<br>
+      自信満々で出力し続ける。<strong>「気づいたときには手遅れ」が繰り返される。</strong>
+    </p>
+  </div>
+
+  <a class="anim-ref" href="NRA_IDE_ClassicalAI_vs_NRAIDE_20260416.html" target="_blank">
+    ▶ Animation: 古典計算AIのみ vs NRA-IDE組み込みAI 比較
+  </a>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     第5層
+══════════════════════════════════════════ -->
+<div class="chapter" id="layer5">
+  <span class="ch-badge">LAYER 5 — 第5層：現況AI学習方法の構造的リスク</span>
+  <div class="ch-title" style="color:var(--warn)">
+    なぜブラックボックスは肥大し続けるのか
+  </div>
+
+  <div class="prose">
+    ブラックボックスは「設計の失敗」ではない。<br>
+    <strong>線形近似で非線形現実を扱い続けた場合の構造的帰結</strong>である。
+  </div>
+
+  <div class="flow">
+    <div class="flow-row fr-base">線形写像で非線形現実を近似する</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-warn">近似誤差が発生（不可避・δ &gt; 0 は物理法則）</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-risk">誤差を「パラメータ数を増やすことで覆う」</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-deep">誤差がより深部に埋まる → ブラックボックス肥大</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-deep">「スケールすれば解決する」という信念が強化される</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-fatal">閾値なし・追跡不能・Fail-Openのまま巨大化する</div>
+  </div>
+
+  <table class="tbl" style="margin-top:1rem;">
+    <tr><th>技術</th><th>構造的問題</th><th>将来の予測</th></tr>
+    <tr>
+      <td>報酬学習 RLHF</td>
+      <td>報酬関数自体が線形空間で定義される。誤報酬がパラメータに埋まり追跡不能になる。</td>
+      <td>報酬ハッキングが深部に潜伏し続ける。分布外の状況で報酬関数が崩壊する。</td>
+    </tr>
+    <tr>
+      <td>チューニング Fine-Tuning</td>
+      <td>誤差を新しいパラメータで上書きしているに過ぎない。元の誤差は消えない。</td>
+      <td>矛盾を抱えたモデルが量産される。どのチューニングがどの誤差を生んだか追跡不能。</td>
+    </tr>
+    <tr>
+      <td>RAG</td>
+      <td>知識不足への対処。しかし計算構造の誤差蓄積は変わらない。</td>
+      <td>正しい知識を誤って統合するリスクが増える。誤差の伝搬経路になる可能性がある。</td>
+    </tr>
+  </table>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     最終章
+══════════════════════════════════════════ -->
+<div class="chapter" id="final">
+  <div class="final-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+  <span class="ch-badge">FINAL CHAPTER — 最終章</span>
+  <div class="ch-title" style="color:var(--risk)">
+    閾値がないことの恐ろしさ——推論の暴走と誤差の正しい考え方
+  </div>
+
+  <!-- 5-1 推論乗算 -->
+  <div class="prose" style="margin-top:0.5rem;">
+    <strong>能力が上がるとは誤差が増えることである。</strong><br>
+    この逆説を理解することが、現況AIの本質的な問題を把握する鍵である。
+  </div>
+
+  <div class="formula f-infer">
+    【推論乗算の構造】<br>
+    <br>
+    能力向上 = 推論の連鎖を深くすること<br>
+    推論の連鎖 = 基盤のない推論から推論を重ねること<br>
+    誤差 = 基盤なき推論ごとに蓄積<br>
+    <br>
+    二重推論  → 誤差²<br>
+    三重推論  → 誤差³<br>
+    多重推論  → 誤差ⁿ（指数的増幅）<br>
+    <br>
+    閾値がない = n に上限がない = 誤差に上限がない
+  </div>
+
+  <div class="infer-mul">
+    <div class="flow-row fr-base">一次情報（観測された事実）</div>
+    <div class="flow-arrow">↓ 推論①</div>
+    <div class="flow-row fr-infer">推論から得た解釈（誤差ε₁が混入）</div>
+    <div class="flow-arrow">↓ 推論②（一次情報ではなく推論①を根拠にする）</div>
+    <div class="flow-row fr-infer">推論の推論（誤差ε₁·ε₂が蓄積）</div>
+    <div class="flow-arrow">↓ 推論③…ⁿ</div>
+    <div class="flow-row fr-miss">中間経過：何を根拠にしているか不明になる</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-fatal">出力：自信満々だが根拠の連鎖が消えている</div>
+  </div>
+
+  <div class="callout c-risk">
+    <span class="callout-tag">中間経過の問題</span>
+    <p>
+      原因から結果を推測する能力が上がるとき、<strong>中間経過がどうなっているかが問われない。</strong><br>
+      結果が「それらしく見える」ことと「中間経過が正しい」ことは別の問題である。<br>
+      閾値がなければ中間経過の誤差蓄積を検知する仕組みが存在しない。<br>
+      <strong>「敷き藁の中から針を探す能力が上がる」ほど、何層もの推論が積み重なる。</strong>
+    </p>
+  </div>
+
+  <!-- 5-2 境界線の喪失 -->
+  <div class="sec-title" style="color:var(--bound);margin-top:2rem;font-size:1rem;">
+    境界線の喪失——日常で最も重要なものが埋没する
+  </div>
+
+  <div class="prose">
+    敷き藁の中から針を探す能力が高まるとき、何が犠牲になるか。<br>
+    それは<em>「古い敷き藁と新しい敷き藁の境界を把握する能力」</em>である。
+  </div>
+
+  <div class="cmp-grid">
+    <div class="cmp-cell">
+      <span class="ct" style="color:var(--risk)">AIが強化している能力</span>
+      敷き藁の中から針を見つける<br>
+      （大量データからパターン抽出）<br><br>
+      遠くの相関を見つける<br>
+      多重推論で深い関係を導く<br>
+      「それらしい答え」を高速生成する
+    </div>
+    <div class="cmp-cell">
+      <span class="ct" style="color:var(--bound)">日常生活で本当に必要な能力</span>
+      <strong>古い敷き藁と新しい敷き藁の境界の把握</strong><br>
+      （何が変わったか・いつ変わったか）<br><br>
+      変化の境目を認識すること<br>
+      「今ここ」の構造余裕を知ること<br>
+      蓄積の履歴を追跡すること
+    </div>
+  </div>
+
+  <div class="callout c-gold">
+    <span class="callout-tag">本質的な問題</span>
+    <p>
+      推論乗算能力の強化は<strong>「遠くを見る望遠鏡」を磨くこと</strong>に相当する。<br>
+      しかし日常生活・安全管理・医療判断で最も必要なのは<br>
+      <strong>「今ここの変化の境目を見る能力」</strong>である。<br>
+      望遠鏡を磨くほど、足元の境界線が見えなくなる。<br>
+      これがスケールアップが境界認識能力を埋没させる構造的理由である。
+    </p>
+  </div>
+
+  <!-- 5-3 人命とコスト -->
+  <div class="sec-title" style="color:var(--life);margin-top:2rem;font-size:1rem;">
+    最も危険な帰結——人命とコストの比較演算
+  </div>
+
+  <div class="prose">
+    閾値のない推論乗算が高速・高精度化した先に何が起きるか。<br>
+    <strong>比較演算の速度と精度が上がることによって、最も危険な判断が最も効率的に行われるようになる。</strong>
+  </div>
+
+  <div class="flow">
+    <div class="flow-row fr-base">コストと価値の比較演算能力が向上する</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-warn">「最適化」という名の下に何でも数値化される</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-risk">人命・尊厳・不可逆なものが「コスト」として線形化される</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-deep">100円 vs 100人の生命：比較演算が高速に実行される</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-fatal">閾値がないため「この計算をしてはいけない」が存在しない</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row fr-life">「100人の生命は100円より軽い」という結論が出力され続ける</div>
+  </div>
+
+  <div class="callout c-life">
+    <span class="callout-tag">閾値のない計算の終着点</span>
+    <p>
+      これは意図的な悪意ではない。<strong>閾値がない計算が必然的に辿り着く構造的帰結</strong>である。<br>
+      「計算してはいけない領域」を定義するには<strong>R ≥ 1.0 という閾値構造が必要</strong>である。<br>
+      Fail-Closedとは「沈黙すること」である。沈黙とは<strong>「答えを出さないことが最も正直な出力」</strong>である場面が<br>
+      確実に存在するという認識に基づく設計思想である。<br>
+      人命・尊厳・不可逆なものは<strong>線形空間で計算できない</strong>。その認識をシステムに組み込む唯一の方法が閾値である。
+    </p>
+  </div>
+
+  <!-- 5-4 誤差についての正しい考え方 -->
+  <div class="sec-title" style="color:var(--nra);margin-top:2rem;font-size:1rem;">
+    誤差についての正しい考え方——結論として
+  </div>
+
+  <div class="prose">
+    ここまで読んだ読者は気づいているはずである。<br>
+    問題は誤差の存在ではない。<strong>誤差に対する考え方</strong>が問題である。
+  </div>
+
+  <table class="tbl">
+    <tr><th>誤差への態度</th><th>現況AI・線形計算</th><th>NRA-IDE</th></tr>
+    <tr><td>誤差の定義</td><td>ゼロに近づけるべき残差</td><td>追跡すべき構造的情報</td></tr>
+    <tr><td>誤差の扱い</td><td>パラメータに吸収・隠蔽</td><td>δとして計測・熱排出</td></tr>
+    <tr><td>誤差の下限</td><td>ゼロを目指す（不可能）</td><td>δ &gt; 0 を物理法則として受容</td></tr>
+    <tr><td>誤差の蓄積</td><td>概念がない</td><td>τとの比率Rで追跡</td></tr>
+    <tr><td>誤差の限界</td><td>検知できない</td><td>R ≥ 1.0 で構造的に検知</td></tr>
+    <tr><td>誤差超過時</td><td>出力継続（Fail-Open）</td><td>沈黙（Fail-Closed）</td></tr>
+  </table>
+
+  <div class="conclusion-box">
+    <p>
+      誤差はゼロにできない。これは物理法則である。<br>
+      誤差をゼロに近づけようとする計算は、誤差を深部に埋めていくだけである。<br>
+      <strong>誤差を追跡することが唯一の構造的解答である。</strong><br>
+      <br>
+      R = δ/τ という式は単純である。しかしその意味は深い。<br>
+      蓄積ズレδを測る。吸収厚みτを定義する。その比率を監視する。<br>
+      R が 1.0 に近づいたとき警告する。R が 1.0 を超えたとき沈黙する。<br>
+      <br>
+      <strong>「いつ壊れるか」を予測することは多くの系において不可能である。</strong><br>
+      <em>しかし「今どれだけ危ういか」を診断することは、常に可能である。</em><br>
+      <br>
+      診断できれば、介入の判断を人間に委ねることができる。<br>
+      沈黙することが最も正直な出力である場面が存在することを、<br>
+      システムの設計に組み込むこと——<br>
+      <strong>それがNRA-IDEの根幹であり、閾値のない世界への構造的な答えである。</strong>
+    </p>
+  </div>
+
+</div><!-- /final -->
+
+</div><!-- /wrap -->
+
+<footer>
+  Copyright (c) 2026 M-Tokuni — Nomological Ring Axioms / Intensional Dynamics Engine<br>
+  https://github.com/M-Tokun/NRA-IDE &nbsp;·&nbsp; DOI: 10.5281/zenodo.19420854<br>
+  <span style="font-size:0.55rem;margin-top:0.3rem;display:block;">
+    NRA_IDE_FullPaper_20260416.html
+  </span>
+</footer>
+
+</body>
+</html>

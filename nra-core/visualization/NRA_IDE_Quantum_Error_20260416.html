@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- FILE: NRA_IDE_Quantum_Error_20260416.html -->
+<!-- 生成日時: 2026-04-16 JST -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<title>NRA-IDE: Quantum Error — δ cannot be zero | 量子誤差：δはゼロにできない</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg2: #080d1a;
+    --classical: #e05050;
+    --quantum: #50c8e0;
+    --nra: #a0e880;
+    --gold: #f0c040;
+    --text: #c8d8e8;
+    --dim: #4a5a6a;
+    --panel: rgba(12,20,40,0.85);
+    --border: rgba(80,140,200,0.18);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* starfield */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 35%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 55%, rgba(255,255,255,0.3) 0%, transparent 100%);
+    pointer-events:none; z-index:0;
+  }
+
+  header {
+    text-align:center;
+    padding: 2rem 1rem 1rem;
+    position:relative; z-index:1;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
+    color: var(--quantum);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 20px rgba(80,200,224,0.5);
+  }
+
+  header .sub {
+    font-size: 0.8rem;
+    color: var(--dim);
+    margin-top: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .axiom-bar {
+    display:flex; justify-content:center; align-items:center; gap:2rem;
+    padding: 0.8rem 1rem;
+    background: rgba(10,20,40,0.9);
+    border-bottom: 1px solid var(--border);
+    flex-wrap:wrap;
+    position:relative; z-index:1;
+  }
+
+  .axiom-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+
+  .axiom-item.heisenberg { color: var(--quantum); border-color: rgba(80,200,224,0.4); background: rgba(80,200,224,0.05); }
+  .axiom-item.nra-axiom  { color: var(--nra);     border-color: rgba(160,232,128,0.4); background: rgba(160,232,128,0.05); }
+  .axiom-item.classical  { color: var(--classical);border-color: rgba(224,80,80,0.4);  background: rgba(224,80,80,0.05);  }
+
+  /* main grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    position:relative; z-index:1;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    display:flex; flex-direction:column; gap:0.7rem;
+  }
+
+  .panel-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel.classical-panel .panel-title { color: var(--classical); }
+  .panel.quantum-panel  .panel-title  { color: var(--quantum); }
+  .panel.nra-panel      .panel-title  { color: var(--nra); }
+
+  canvas {
+    width:100%; height:180px;
+    border-radius:4px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    display:block;
+  }
+
+  .formula-box {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    background: rgba(0,0,0,0.5);
+    border-radius:4px;
+    padding: 0.6rem 0.8rem;
+    line-height: 1.8;
+    border-left: 3px solid;
+  }
+
+  .panel.classical-panel .formula-box { border-left-color: var(--classical); color: #f0a0a0; }
+  .panel.quantum-panel  .formula-box  { border-left-color: var(--quantum);   color: #a0e0f0; }
+  .panel.nra-panel      .formula-box  { border-left-color: var(--nra);       color: #c0f090; }
+
+  .desc {
+    font-size: 0.73rem;
+    line-height: 1.7;
+    color: #8090a0;
+  }
+
+  .status-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+    display:inline-block;
+    margin-top:0.3rem;
+  }
+
+  /* R meter */
+  .r-meter-wrap {
+    display:flex; flex-direction:column; gap:0.4rem;
+  }
+
+  .r-meter-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--dim);
+    display:flex; justify-content:space-between;
+  }
+
+  .r-meter-track {
+    height: 12px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    overflow:hidden;
+    position:relative;
+  }
+
+  .r-meter-fill {
+    height:100%; border-radius:6px;
+    transition: width 0.1s, background 0.1s;
+    position:relative;
+  }
+
+  /* bottom comparison */
+  .comparison {
+    grid-column: 1 / -1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .comp-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing:0.1em;
+    margin-bottom:0.8rem;
+    text-transform:uppercase;
+  }
+
+  .comp-grid {
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 0.8rem;
+  }
+
+  @media(max-width:700px){ .comp-grid { grid-template-columns:1fr; } }
+
+  .comp-cell {
+    font-size: 0.72rem;
+    line-height:1.8;
+    padding: 0.6rem;
+    border-radius:4px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+  }
+
+  .comp-cell .label { font-family:'JetBrains Mono',monospace; font-size:0.65rem; opacity:0.6; }
+  .comp-cell .val   { font-size:0.85rem; font-weight:700; font-family:'JetBrains Mono',monospace; }
+
+  /* controls */
+  .controls {
+    display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;
+    padding: 0.8rem 1rem;
+    position:relative; z-index:1;
+  }
+
+  button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.5rem 1.2rem;
+    border-radius:3px;
+    border: 1px solid;
+    background: transparent;
+    cursor: pointer;
+    letter-spacing:0.05em;
+    transition: all 0.2s;
+  }
+
+  button.btn-run   { color:var(--nra);     border-color:var(--nra);     }
+  button.btn-reset { color:var(--dim);     border-color:var(--dim);     }
+  button.btn-run:hover   { background:rgba(160,232,128,0.12); }
+  button.btn-reset:hover { background:rgba(74,90,106,0.2); }
+
+  .tick {
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.65rem;
+    color:var(--dim);
+    text-align:center;
+    padding-bottom:0.5rem;
+  }
+
+  .highlight { color: var(--gold); font-weight:700; }
+  .hl-q { color: var(--quantum); }
+  .hl-c { color: var(--classical); }
+  .hl-n { color: var(--nra); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NRA-IDE: Quantum Error — δ cannot be zero | 量子誤差：δはゼロにできない</h1>
+  <div class="sub">NRA-IDE Project · M-Tokuni · 2026-04-16 · github.com/M-Tokun/NRA-IDE</div>
+</header>
+
+<div class="axiom-bar">
+  <div class="axiom-item heisenberg">ΔxΔp ≥ ℏ/2 &nbsp;—&nbsp; Heisenberg</div>
+  <div class="axiom-item classical">Linear: δ → 0 forced &nbsp;[FATAL]</div>
+  <div class="axiom-item nra-axiom">NRA-IDE: δ &gt; 0 is structural law</div>
+</div>
+
+<div class="controls">
+  <button class="btn-run"   id="btnRun">▶ RUN</button>
+  <button class="btn-reset" id="btnReset">↺ RESET</button>
+</div>
+
+<div class="tick" id="tickLabel">t = 0</div>
+
+<div class="grid">
+
+  <!-- CLASSICAL -->
+  <div class="panel classical-panel">
+    <div class="panel-title">⬛ Classical Linear Computation &nbsp;|&nbsp; 古典線形計算</div>
+    <canvas id="cClassical"></canvas>
+    <div class="formula-box">
+      δ_forced → 0 &nbsp;(仮定)<br>
+      τ(t) = δ₀·e^(λt) &nbsp;[λ&gt;0]<br>
+      R(t) = δ/τ(t) → ∞ &nbsp;[EXPLODE]
+    </div>
+    <div class="r-meter-wrap">
+      <div class="r-meter-label"><span>R 値</span><span id="rClassVal">0.00</span></div>
+      <div class="r-meter-track"><div class="r-meter-fill" id="rClassFill" style="width:0%;background:var(--classical)"></div></div>
+    </div>
+    <div class="desc">
+      線形写像は誤差をゼロに強制しようとします。<br>
+      しかし非線形な現実ではτが指数的に増幅し<br>
+      <span class="hl-c">「計算できた」状態が突然崩壊します。</span>
+    </div>
+    <div id="classStatus" class="status-badge" style="background:rgba(224,80,80,0.15);color:var(--classical);border:1px solid rgba(224,80,80,0.3)">STABLE</div>
+  </div>
+
+  <!-- QUANTUM -->
+  <div class="panel quantum-panel">
+    <div class="panel-title">⚛ Quantum Uncertainty &nbsp;|&nbsp; 量子不確定性</div>
+    <canvas id="cQuantum"></canvas>
+    <div class="formula-box">
+      Δx·Δp ≥ ℏ/2<br>
+      δ_min = ℏ/2 &nbsp;(物理的下限)<br>
+      δ = 0 は自然法則として禁止
+    </div>
+    <div class="r-meter-wrap">
+      <div class="r-meter-label"><span>不確定性幅</span><span id="rQuantVal">min</span></div>
+      <div class="r-meter-track"><div class="r-meter-fill" id="rQuantFill" style="width:15%;background:var(--quantum)"></div></div>
+    </div>
+    <div class="desc">
+      不確定性原理はδ > 0を<br>
+      <span class="hl-q">自然法則として保証します。</span><br>
+      これは精度の問題ではなく物理法則です。<br>
+      δをゼロにしようとした瞬間に系が崩壊します。
+    </div>
+    <div class="status-badge" style="background:rgba(80,200,224,0.1);color:var(--quantum);border:1px solid rgba(80,200,224,0.3)">δ &gt; 0 &nbsp;GUARANTEED</div>
+  </div>
+
+  <!-- NRA-IDE -->
+  <div class="panel nra-panel">
+    <div class="panel-title">◉ NRA-IDE Diagnosis &nbsp;|&nbsp; 構造診断</div>
+    <canvas id="cNRA"></canvas>
+    <div class="formula-box">
+      R = δ / τ<br>
+      δ: 蓄積ズレ &nbsp;τ: 吸収厚み<br>
+      R≥1.0 → Fail-Closed [沈黙]
+    </div>
+    <div class="r-meter-wrap">
+      <div class="r-meter-label"><span>R = δ/τ</span><span id="rNRAVal">0.00</span></div>
+      <div class="r-meter-track"><div class="r-meter-fill" id="rNRAFill" style="width:0%;background:var(--nra)"></div></div>
+    </div>
+    <div class="desc">
+      δ > 0を「構造の生存条件」として受け入れます。<br>
+      <span class="hl-n">蓄積ズレδと吸収厚みτの比率Rを監視し</span><br>
+      R≥1.0の瞬間に沈黙して人間に委ねます。<br>
+      予測ではなく診断。列挙不要。
+    </div>
+    <div id="nraStatus" class="status-badge" style="background:rgba(160,232,128,0.1);color:var(--nra);border:1px solid rgba(160,232,128,0.3)">MONITORING</div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="comparison">
+    <div class="comp-title">⬛ 決定的差異 — What makes NRA-IDE different</div>
+    <div class="comp-grid">
+      <div class="comp-cell">
+        <div class="label">線形計算 Classical</div>
+        <div class="val hl-c">δ = 0 を強制</div>
+        <br>
+        誤差をゼロに向かわせようとする。<br>
+        非線形領域でτが指数爆発し<br>
+        「計算できていない」状態に陥る。
+      </div>
+      <div class="comp-cell">
+        <div class="label">量子力学 Quantum</div>
+        <div class="val hl-q">δ ≥ ℏ/2 (物理法則)</div>
+        <br>
+        不確定性原理により<br>
+        δのゼロは自然法則として禁止。<br>
+        これは精度向上で回避できない。
+      </div>
+      <div class="comp-cell">
+        <div class="label">NRA-IDE</div>
+        <div class="val hl-n">δ > 0 を構造条件として受容</div>
+        <br>
+        δが存在することを前提に<br>
+        R = δ/τ で構造余裕を診断。<br>
+        R≥1.0で沈黙・人間に委ねる。
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ====================================================
+// NRA_IDE_Quantum_Error_20260416.html
+// Canvas Animation Core
+// ====================================================
+
+const DPR = window.devicePixelRatio || 1;
+
+function initCanvas(id) {
+  const c = document.getElementById(id);
+  const rect = c.getBoundingClientRect();
+  c.width  = rect.width  * DPR;
+  c.height = 180 * DPR;
+  const ctx = c.getContext('2d');
+  ctx.scale(DPR, DPR);
+  return { c, ctx, w: rect.width, h: 180 };
+}
+
+let rafId = null;
+let t = 0;
+let running = false;
+
+// ---- Classical Canvas ----
+function drawClassical(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+
+  // bg grid
+  ctx.strokeStyle = 'rgba(80,80,100,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const cy = h / 2;
+  const lambda = 0.012;
+  const phase = t * 0.04;
+
+  // target zero line
+  ctx.strokeStyle = 'rgba(224,80,80,0.3)';
+  ctx.setLineDash([4,4]);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // actual wave — exponentially growing amplitude
+  ctx.strokeStyle = '#e05050';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#e05050';
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  for (let px = 0; px < w; px++) {
+    const prog = px / w;
+    const amp = 8 + prog * 60 * (1 + Math.exp(lambda * t * prog * 3));
+    const clampAmp = Math.min(amp, h * 0.48);
+    const y = cy + Math.sin(prog * 10 + phase) * clampAmp;
+    px === 0 ? ctx.moveTo(px, y) : ctx.lineTo(px, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // explosion marker at right edge
+  if (t > 60) {
+    const burst = Math.min((t - 60) / 60, 1);
+    ctx.fillStyle = `rgba(224,80,80,${burst * 0.6})`;
+    ctx.beginPath();
+    ctx.arc(w - 20, cy, burst * 30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ff8080';
+    ctx.font = 'bold 10px JetBrains Mono';
+    ctx.textAlign = 'center';
+    if (burst > 0.5) ctx.fillText('EXPLOSION', w - 20, cy - 35);
+  }
+
+  // label
+  ctx.fillStyle = 'rgba(224,80,80,0.7)';
+  ctx.font = '9px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText('τ(t) = δ₀·eˡᵗ [GROWING]', 8, 14);
+}
+
+// ---- Quantum Canvas ----
+function drawQuantum(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+
+  // bg grid
+  ctx.strokeStyle = 'rgba(80,100,120,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const cy = h / 2;
+  const cx = w / 2;
+
+  // Gaussian wave packet (breathing — uncertainty principle)
+  const breathe = 1 + 0.18 * Math.sin(t * 0.03);
+  const sigma = 28 * breathe;
+  const freq  = 0.18;
+  const vg    = 0.6; // group velocity
+  const xc    = (cx + Math.sin(t * 0.015) * 40); // center oscillates
+
+  // uncertainty envelope fill
+  ctx.fillStyle = 'rgba(80,200,224,0.07)';
+  ctx.beginPath();
+  for (let px = 0; px < w; px++) {
+    const env = Math.exp(-0.5 * ((px - xc) / sigma) ** 2);
+    ctx.lineTo(px, cy - env * 55);
+  }
+  for (let px = w - 1; px >= 0; px--) {
+    const env = Math.exp(-0.5 * ((px - xc) / sigma) ** 2);
+    ctx.lineTo(px, cy + env * 55);
+  }
+  ctx.closePath(); ctx.fill();
+
+  // wave packet
+  ctx.strokeStyle = '#50c8e0';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#50c8e0';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  for (let px = 0; px < w; px++) {
+    const env = Math.exp(-0.5 * ((px - xc) / sigma) ** 2);
+    const y = cy + env * 50 * Math.cos(freq * (px - xc) + t * vg * 0.05);
+    px === 0 ? ctx.moveTo(px, y) : ctx.lineTo(px, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // minimum uncertainty bracket
+  const halfW = sigma * 0.8;
+  ctx.strokeStyle = 'rgba(80,200,224,0.5)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(xc - halfW, cy - 70); ctx.lineTo(xc - halfW, cy + 70); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(xc + halfW, cy - 70); ctx.lineTo(xc + halfW, cy + 70); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Δx label
+  ctx.fillStyle = 'rgba(80,200,224,0.8)';
+  ctx.font = '9px JetBrains Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('←  Δx  →', xc, cy - 58);
+  ctx.fillText('Δx·Δp ≥ ℏ/2', cx, h - 8);
+
+  // δ min indicator
+  ctx.fillStyle = '#50c8e0';
+  ctx.font = '9px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText('δ_min = ℏ/2 ≠ 0', 8, 14);
+}
+
+// ---- NRA-IDE Canvas ----
+let delta = 0;
+let tau   = 100;
+let rHistory = [];
+
+function drawNRA(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+
+  // update δ and τ
+  delta += 0.18 + 0.05 * Math.sin(t * 0.07);
+  tau   -= 0.06 + 0.02 * Math.abs(Math.sin(t * 0.04));
+  tau    = Math.max(tau, 2);
+
+  const R = delta / tau;
+  rHistory.push(R);
+  if (rHistory.length > w) rHistory.shift();
+
+  // bg grid
+  ctx.strokeStyle = 'rgba(80,120,80,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  // R=1 threshold line
+  const threshold_y = h * 0.15;
+  ctx.strokeStyle = 'rgba(240,192,64,0.6)';
+  ctx.setLineDash([5,4]);
+  ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(0, threshold_y); ctx.lineTo(w, threshold_y); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(240,192,64,0.8)';
+  ctx.font = '9px JetBrains Mono';
+  ctx.textAlign = 'right';
+  ctx.fillText('R = 1.0  [Fail-Closed]', w - 4, threshold_y - 3);
+
+  // R trace
+  const maxR = 2.0;
+  ctx.strokeStyle = R >= 1.0 ? '#ff6060' : '#a0e880';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = R >= 1.0 ? '#ff4040' : '#a0e880';
+  ctx.shadowBlur = 5;
+  ctx.beginPath();
+  rHistory.forEach((rv, i) => {
+    const px = i * (w / rHistory.length);
+    const py = h - (rv / maxR) * (h - 20) - 5;
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // current R dot
+  const curX = (rHistory.length - 1) * (w / rHistory.length);
+  const curY = h - (R / maxR) * (h - 20) - 5;
+  ctx.fillStyle = R >= 1.0 ? '#ff4040' : '#a0e880';
+  ctx.beginPath();
+  ctx.arc(Math.min(curX, w - 5), Math.max(curY, 5), 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // δ bar (bottom)
+  const dBarW = Math.min((delta / 200) * (w * 0.45), w * 0.45);
+  ctx.fillStyle = 'rgba(160,232,128,0.2)';
+  ctx.fillRect(4, h - 22, dBarW, 8);
+  ctx.strokeStyle = 'rgba(160,232,128,0.5)';
+  ctx.strokeRect(4, h - 22, w * 0.45, 8);
+  ctx.fillStyle = 'rgba(160,232,128,0.7)';
+  ctx.font = '8px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText(`δ=${delta.toFixed(1)}`, 6, h - 25);
+
+  // τ bar
+  const tBarW = Math.min((tau / 100) * (w * 0.45), w * 0.45);
+  ctx.fillStyle = 'rgba(80,180,224,0.2)';
+  ctx.fillRect(w * 0.52, h - 22, tBarW, 8);
+  ctx.strokeStyle = 'rgba(80,180,224,0.4)';
+  ctx.strokeRect(w * 0.52, h - 22, w * 0.45, 8);
+  ctx.fillStyle = 'rgba(80,180,224,0.7)';
+  ctx.textAlign = 'left';
+  ctx.fillText(`τ=${tau.toFixed(1)}`, w * 0.52 + 2, h - 25);
+
+  // Fail-Closed flash
+  if (R >= 1.0) {
+    ctx.fillStyle = `rgba(255,80,80,${0.1 + 0.1 * Math.sin(t * 0.3)})`;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#ff6060';
+    ctx.font = 'bold 12px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('FAIL-CLOSED — 沈黙', w/2, h/2);
+  }
+
+  return R;
+}
+
+// ---- update meters ----
+function updateMeters(t) {
+  // classical R (simulated — diverging)
+  const rClass = Math.min(0.1 + t * 0.008 * (1 + Math.exp(t * 0.01 - 5) * 0.1), 3.0);
+  document.getElementById('rClassVal').textContent = rClass.toFixed(2);
+  const fillC = Math.min(rClass / 3.0 * 100, 100);
+  document.getElementById('rClassFill').style.width = fillC + '%';
+  document.getElementById('rClassFill').style.background =
+    rClass > 1.5 ? '#ff4040' : rClass > 0.8 ? '#f0a040' : 'var(--classical)';
+
+  const clSt = document.getElementById('classStatus');
+  if (rClass > 1.5) { clSt.textContent = '⚠ EXPLOSION'; clSt.style.color = '#ff4040'; }
+  else if (rClass > 0.8) { clSt.textContent = '△ WARNING'; clSt.style.color = '#f0a040'; }
+  else { clSt.textContent = 'STABLE'; clSt.style.color = 'var(--classical)'; }
+
+  // quantum — constant minimum
+  const qw = 15 + 3 * Math.sin(t * 0.05);
+  document.getElementById('rQuantFill').style.width = qw + '%';
+  document.getElementById('rQuantVal').textContent = 'ℏ/2 min';
+
+  // NRA
+  const R = delta / Math.max(tau, 1);
+  document.getElementById('rNRAVal').textContent = R.toFixed(3);
+  const fillN = Math.min(R / 2.0 * 100, 100);
+  document.getElementById('rNRAFill').style.width = fillN + '%';
+  document.getElementById('rNRAFill').style.background =
+    R >= 1.0 ? '#ff4040' : R > 0.7 ? '#f0c040' : 'var(--nra)';
+
+  const nraSt = document.getElementById('nraStatus');
+  if (R >= 1.0) { nraSt.textContent = '◉ FAIL-CLOSED — 沈黙'; nraSt.style.color = '#ff6060'; }
+  else if (R > 0.7) { nraSt.textContent = '△ APPROACHING 1.0'; nraSt.style.color = '#f0c040'; }
+  else { nraSt.textContent = 'MONITORING  R=' + R.toFixed(2); nraSt.style.color = 'var(--nra)'; }
+}
+
+// ---- main loop ----
+let canvases = null;
+
+function initAll() {
+  canvases = {
+    cl: initCanvas('cClassical'),
+    qu: initCanvas('cQuantum'),
+    nr: initCanvas('cNRA'),
+  };
+  delta = 0; tau = 100; rHistory = []; t = 0;
+}
+
+function loop() {
+  if (!running) return;
+  t++;
+  document.getElementById('tickLabel').textContent = `t = ${t}`;
+
+  drawClassical(canvases.cl.ctx, canvases.cl.w, canvases.cl.h, t);
+  drawQuantum(canvases.qu.ctx,   canvases.qu.w, canvases.qu.h, t);
+  drawNRA(canvases.nr.ctx,       canvases.nr.w, canvases.nr.h, t);
+  updateMeters(t);
+
+  rafId = requestAnimationFrame(loop);
+}
+
+document.getElementById('btnRun').addEventListener('click', () => {
+  if (running) {
+    running = false;
+    cancelAnimationFrame(rafId);
+    document.getElementById('btnRun').textContent = '▶ RUN';
+  } else {
+    running = true;
+    document.getElementById('btnRun').textContent = '⏸ PAUSE';
+    loop();
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  running = false;
+  cancelAnimationFrame(rafId);
+  document.getElementById('btnRun').textContent = '▶ RUN';
+  initAll();
+  // draw initial frame
+  drawClassical(canvases.cl.ctx, canvases.cl.w, canvases.cl.h, 0);
+  drawQuantum(canvases.qu.ctx,   canvases.qu.w, canvases.qu.h, 0);
+  drawNRA(canvases.nr.ctx,       canvases.nr.w, canvases.nr.h, 0);
+  document.getElementById('tickLabel').textContent = 't = 0';
+});
+
+window.addEventListener('load', () => {
+  initAll();
+  drawClassical(canvases.cl.ctx, canvases.cl.w, canvases.cl.h, 0);
+  drawQuantum(canvases.qu.ctx,   canvases.qu.w, canvases.qu.h, 0);
+  drawNRA(canvases.nr.ctx,       canvases.nr.w, canvases.nr.h, 0);
+});
+
+window.addEventListener('resize', () => {
+  const wasRunning = running;
+  running = false;
+  cancelAnimationFrame(rafId);
+  initAll();
+  drawClassical(canvases.cl.ctx, canvases.cl.w, canvases.cl.h, t);
+  drawQuantum(canvases.qu.ctx,   canvases.qu.w, canvases.qu.h, t);
+  drawNRA(canvases.nr.ctx,       canvases.nr.w, canvases.nr.h, t);
+  if (wasRunning) { running = true; loop(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA_IDE_Battery_Comparison_20260412_2054.html -->
+<!-- title: NRA-IDE vs Classical Model — Smartphone Battery Analogy / スマートフォンバッテリー比較 -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<!-- Zenodo DOI: 10.5281/zenodo.19420854 -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE 比較 | スマートフォンバッテリー | Battery Comparison 20260412_2054</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --green: #56d364;
+    --yellow: #e3b341;
+    --red: #f85149;
+    --blue: #58a6ff;
+    --orange: #f0883e;
+    --purple: #bc8cff;
+    --heat: #ff7b72;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    padding: 20px 16px 36px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .hdr { text-align: center; margin-bottom: 24px; }
+  .hdr h1 { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
+  .hdr p { font-size: 0.8rem; color: var(--muted); }
+  .hdr .doi { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    max-width: 860px;
+    margin: 0 auto 18px;
+  }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 16px;
+    transition: border-color 0.4s, box-shadow 0.4s;
+  }
+  .panel-head { margin-bottom: 14px; }
+  .panel-name { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+  .panel-sub  { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+
+  /* ── BATTERY SVG ── */
+  .bat-wrap {
+    display: flex; justify-content: center; align-items: center;
+    position: relative; margin-bottom: 12px; height: 160px;
+  }
+  .bat-wrap svg { width: 72px; height: 148px; }
+
+  /* ── HEAT PARTICLES ── */
+  .heat-zone {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+  }
+  .hp {
+    position: absolute; width: 7px; height: 7px; border-radius: 50%;
+    animation: hprise 1.1s ease-out forwards;
+  }
+  @keyframes hprise {
+    0%   { transform: translateY(0)   scale(1);   opacity: .85; }
+    100% { transform: translateY(-70px) scale(0); opacity: 0;   }
+  }
+
+  /* ── STATE BADGE ── */
+  .badge {
+    display: inline-block; padding: 3px 12px; border-radius: 20px;
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; margin-bottom: 12px;
+    transition: background .3s, color .3s;
+  }
+
+  /* ── GAUGES ── */
+  .gauge { margin-bottom: 9px; }
+  .g-lbl {
+    display: flex; justify-content: space-between;
+    font-size: 0.68rem; color: var(--muted); margin-bottom: 4px;
+  }
+  .g-lbl span:last-child { font-weight: 600; color: var(--text); }
+  .g-bg { height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .g-fill { height: 100%; border-radius: 4px; transition: width .12s linear, background .3s; }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: rgba(255,255,255,.03);
+    border-left: 3px solid var(--border);
+    padding: 8px 11px; border-radius: 0 6px 6px 0;
+    font-size: 0.7rem; color: var(--muted); line-height: 1.55;
+    margin-top: 12px;
+  }
+  .insight strong { color: var(--text); }
+
+  /* ── CONTROLS ── */
+  .ctrl {
+    display: flex; justify-content: center; align-items: center;
+    gap: 10px; flex-wrap: wrap;
+    max-width: 860px; margin: 0 auto 18px;
+  }
+  button {
+    padding: 7px 20px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text); font-size: 0.82rem; cursor: pointer;
+    transition: background .18s;
+  }
+  button:hover { background: #21262d; }
+  button.go { background: #1a4731; border-color: #2ea043; color: #3fb950; font-weight: 600; }
+  button.go:hover { background: #1e5738; }
+  button.go.active { background: #143523; color: var(--muted); cursor: not-allowed; }
+  .speed-row { display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--muted); }
+  input[type=range] { width: 72px; accent-color: var(--blue); cursor: pointer; }
+
+  /* ── EVENT LOG ── */
+  .log-wrap { max-width: 860px; margin: 0 auto 18px; }
+  .log-ttl { font-size: .78rem; font-weight: 600; color: #fff; margin-bottom: 7px; }
+  .log-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    font-size: .7rem; font-family: 'Cascadia Code', 'Consolas', monospace;
+    height: 88px; overflow-y: auto; color: var(--muted);
+  }
+  .le { margin-bottom: 2px; }
+  .lc { color: var(--yellow); }
+  .ln { color: var(--blue); }
+  .lj { color: var(--purple); font-weight: 700; }
+
+  /* ── TABLE ── */
+  .tbl-wrap { max-width: 860px; margin: 0 auto; }
+  .tbl-ttl { font-size: .82rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: .76rem; }
+  th {
+    background: var(--surface); padding: 7px 11px; text-align: left;
+    border: 1px solid var(--border); font-size: .66rem; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--muted);
+  }
+  td { padding: 7px 11px; border: 1px solid var(--border); line-height: 1.45; }
+  tr:nth-child(even) td { background: rgba(255,255,255,.015); }
+  .tc { color: var(--green); font-weight: 600; }
+  .tn { color: var(--blue);  font-weight: 600; }
+  small { font-size: .66rem; color: var(--muted); display: block; margin-top: 2px; }
+
+  /* ── FOOTER ── */
+  .foot {
+    text-align: center; font-size: .66rem; color: var(--muted);
+    margin-top: 24px; max-width: 860px; margin-left: auto; margin-right: auto;
+  }
+
+  /* ── PHASE JUMP FLASH ── */
+  @keyframes jumpFlash {
+    0%   { border-color: var(--purple); box-shadow: 0 0 22px #bc8cff55; }
+    100% { border-color: var(--border); box-shadow: none; }
+  }
+  .flash { animation: jumpFlash .7s ease-out; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <h1>NRA-IDE 比較アニメーション ｜ Comparison Animation</h1>
+  <p>日常例：スマートフォンバッテリー ｜ Everyday Example: Smartphone Battery</p>
+  <p class="doi">NRA-IDE DOI: 10.5281/zenodo.19420854 ｜ FILE: NRA_IDE_Battery_Comparison_20260412_2054</p>
+</div>
+
+<!-- MAIN PANELS -->
+<div class="grid">
+
+  <!-- LEFT: Classical -->
+  <div class="panel" id="pC">
+    <div class="panel-head">
+      <div class="panel-name" style="color:var(--green)">従来モデル ／ Classical Model</div>
+      <div class="panel-sub">連続値 + 恣意的閾値 ｜ Continuous + Arbitrary Threshold</div>
+    </div>
+
+    <div class="bat-wrap">
+      <svg viewBox="0 0 72 148" id="cSVG">
+        <!-- terminal -->
+        <rect x="24" y="4"  width="24" height="12" rx="3" fill="#30363d"/>
+        <!-- body outline -->
+        <rect x="6"  y="14" width="60" height="126" rx="7" fill="none" stroke="#30363d" stroke-width="3"/>
+        <!-- fill (bottom-up) -->
+        <rect id="cFill" x="10" y="18" width="52" height="118" rx="4" fill="var(--green)"/>
+        <!-- threshold dashed line at 20% -->
+        <line id="cThreshLine" x1="6" y1="112" x2="66" y2="112"
+              stroke="var(--yellow)" stroke-width="2" stroke-dasharray="5,3"/>
+        <text x="68" y="116" font-size="8" fill="var(--yellow)" text-anchor="start">20%</text>
+        <!-- % label -->
+        <text id="cPct" x="36" y="88" text-anchor="middle"
+              font-size="22" font-weight="700" fill="#fff">100</text>
+        <text x="36" y="104" text-anchor="middle" font-size="9" fill="var(--muted)">%</text>
+      </svg>
+    </div>
+
+    <div style="text-align:center">
+      <span class="badge" id="cBadge" style="background:#56d36422;color:var(--green)">NORMAL</span>
+    </div>
+
+    <div class="gauge">
+      <div class="g-lbl"><span>バッテリー残量 / Battery Level</span><span id="cLvlTxt">100%</span></div>
+      <div class="g-bg"><div class="g-fill" id="cLvlBar" style="width:100%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="insight">
+      <strong>閾値設定:</strong> 恣意的な 20% 警告ライン（設計者が決めた数字）。<br>
+      <strong>故障モード:</strong> 0% で突然クラッシュ。予測不能・事後対応型。<br>
+      <strong>残差処理:</strong> なし — 誤差は次サイクルへ持ち越し。
+    </div>
+  </div>
+
+  <!-- RIGHT: NRA-IDE -->
+  <div class="panel" id="pN">
+    <div class="panel-head">
+      <div class="panel-name" style="color:var(--blue)">NRA-IDE モデル</div>
+      <div class="panel-sub">構造比率 R = δ/τ による位相管理 ｜ Phase management via R = δ/τ</div>
+    </div>
+
+    <div class="bat-wrap">
+      <svg viewBox="0 0 72 148" id="nSVG">
+        <rect x="24" y="4"  width="24" height="12" rx="3" fill="#30363d"/>
+        <rect x="6"  y="14" width="60" height="126" rx="7" fill="none" stroke="#30363d" stroke-width="3"/>
+        <!-- remaining capacity (grey base) -->
+        <rect x="10" y="18" width="52" height="118" rx="4" fill="#1c2128"/>
+        <!-- δ fill from top — grows downward as deviation accumulates -->
+        <rect id="nFill" x="10" y="18" width="52" height="0" rx="4" fill="var(--blue)"/>
+        <!-- R = 1.0 structural ceiling line -->
+        <line x1="6" y1="18" x2="66" y2="18"
+              stroke="var(--purple)" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+        <text x="68" y="22" font-size="7" fill="var(--purple)" text-anchor="start">R=1</text>
+        <!-- R label -->
+        <text id="nRTxt" x="36" y="85" text-anchor="middle"
+              font-size="14" font-weight="700" fill="#fff">R=0.00</text>
+        <text x="36" y="100" text-anchor="middle" font-size="8" fill="var(--muted)">δ/τ</text>
+        <!-- heat icon hint -->
+        <text id="nHeatIcon" x="36" y="115" text-anchor="middle" font-size="12" opacity="0">🔥</text>
+      </svg>
+      <!-- heat particles layer -->
+      <div class="heat-zone" id="heatZone"></div>
+    </div>
+
+    <div style="text-align:center">
+      <span class="badge" id="nBadge" style="background:#58a6ff22;color:var(--blue)">ACTIVE</span>
+    </div>
+
+    <div class="gauge">
+      <div class="g-lbl"><span>δ 蓄積偏差 / Accumulated Deviation</span><span id="nDeltaTxt">0.0</span></div>
+      <div class="g-bg"><div class="g-fill" id="nDeltaBar" style="width:0%;background:var(--blue)"></div></div>
+    </div>
+    <div class="gauge">
+      <div class="g-lbl"><span>R = δ/τ 構造比率 / Structural Ratio</span><span id="nRTxtBar">0.000</span></div>
+      <div class="g-bg"><div class="g-fill" id="nRBar" style="width:0%;background:var(--blue)"></div></div>
+    </div>
+
+    <div class="insight">
+      <strong>境界 τ:</strong> 構造容量から導出される動的閾値（時間と独立）。<br>
+      <strong>位相跳躍:</strong> R≥1.0 で必然的な構造遷移 = Fail-Closed（予測・秩序的）。<br>
+      <strong>整数位相錠定:</strong> 残差は <em>熱として排出</em> — 次サイクルへ持ち越しなし。
+    </div>
+  </div>
+
+</div>
+
+<!-- CONTROLS -->
+<div class="ctrl">
+  <button class="go" id="startBtn" onclick="startSim()">▶ 開始 / Start</button>
+  <button onclick="resetSim()">↺ リセット / Reset</button>
+  <div class="speed-row">
+    <span>速度 / Speed:</span>
+    <input type="range" id="spd" min="1" max="6" value="3">
+    <span id="spdLbl">×3</span>
+  </div>
+</div>
+
+<!-- EVENT LOG -->
+<div class="log-wrap">
+  <div class="log-ttl">イベントログ ／ Event Log</div>
+  <div class="log-box" id="logBox">
+    <div class="le" style="color:var(--muted)">[system] 開始ボタンを押してください / Press Start</div>
+  </div>
+</div>
+
+<!-- COMPARISON TABLE -->
+<div class="tbl-wrap">
+  <div class="tbl-ttl">モデル比較 ／ Model Comparison — 安全工学視点 / Safety Engineering Perspective</div>
+  <table>
+    <tr>
+      <th>観点 / Aspect</th>
+      <th class="tc">従来モデル / Classical</th>
+      <th class="tn">NRA-IDE</th>
+    </tr>
+    <tr>
+      <td><strong>閾値設定</strong><small>Threshold origin</small></td>
+      <td>恣意的 20% ライン<small>Arbitrary — set by designer's intuition</small></td>
+      <td>τ = 構造容量から導出<small>Derived from structural capacity (time-independent)</small></td>
+    </tr>
+    <tr>
+      <td><strong>偏差の扱い</strong><small>Deviation handling</small></td>
+      <td>ゆっくり蓄積 → 突然死<small>Silent accumulation → crash</small></td>
+      <td>δ として追跡 → R 比率で可視化<small>Tracked as δ, monitored via R ratio</small></td>
+    </tr>
+    <tr>
+      <td><strong>残差処理</strong><small>Residual handling</small></td>
+      <td>次サイクルへ持ち越し<small>Carried forward — error multiplication</small></td>
+      <td>熱として排出（整数位相錠定）<small>Expelled as heat — Integer Phase Lock</small></td>
+    </tr>
+    <tr>
+      <td><strong>停止条件</strong><small>Stop condition</small></td>
+      <td>突然クラッシュ（予測不能）<small>Unpredictable crash — reactive</small></td>
+      <td>R≥1.0 で構造的沈黙 / Fail-Closed<small>Structural silence — predictive, orderly</small></td>
+    </tr>
+    <tr>
+      <td><strong>安全工学分類</strong><small>Safety eng. class</small></td>
+      <td>事後対応型<small>Reactive (IEC 61508: unstructured)</small></td>
+      <td>構造予測型<small>Structural Predictive — diagnosis before failure</small></td>
+    </tr>
+    <tr>
+      <td><strong>人間との分担</strong><small>Human-machine boundary</small></td>
+      <td>不明確 — 機械が判断継続<small>Boundary undefined</small></td>
+      <td>R≥1.0 で人間へ委ねる<small>Explicit handoff — machine diagnoses, human decides</small></td>
+    </tr>
+  </table>
+</div>
+
+<div class="foot">
+  <p>NRA-IDE Framework ｜ Nomological Ring Axioms / Intensional Dynamics Engine</p>
+  <p>Zenodo DOI: 10.5281/zenodo.19420854 ｜ GitHub: M-Tokun/NRA-IDE ｜ © M-Tokuni 2026</p>
+  <p style="margin-top:3px">FILE: NRA_IDE_Battery_Comparison_20260412_2054.html</p>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     SCRIPT
+     ════════════════════════════════════════════════ -->
+<script>
+// ──────────────────────────────
+//  title: NRA-IDE Battery Comparison
+//  FILE:  NRA_IDE_Battery_Comparison_20260412_2054
+// ──────────────────────────────
+
+let running = false, raf = null, tick = 0;
+
+const C = {           // Classical state
+  level: 100,         // 0..100 %
+  state: 'normal',    // normal | warning | dead
+  drain: 0.28,
+};
+
+const N = {           // NRA-IDE state
+  tau: 100,           // structural capacity (τ)
+  delta: 0,           // accumulated deviation (δ)
+  R: 0,               // structural ratio
+  state: 'active',    // active | approaching | phase-jump
+  drain: 0.28,
+  heatTick: 0,        // heat expulsion timer (Integer Phase Lock)
+  cycleCount: 0,
+};
+
+const spd = () => parseInt(document.getElementById('spd').value);
+
+document.getElementById('spd').oninput = function () {
+  document.getElementById('spdLbl').textContent = '×' + this.value;
+};
+
+// ── LOG ──
+function log(msg, cls = '') {
+  const box = document.getElementById('logBox');
+  const d = document.createElement('div');
+  d.className = 'le' + (cls ? ' ' + cls : '');
+  d.textContent = `[t=${(tick/100).toFixed(1)}s] ${msg}`;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── HEAT PARTICLE ──
+function spawnHeat(n = 1) {
+  const zone = document.getElementById('heatZone');
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('div');
+    p.className = 'hp';
+    p.style.left  = (18 + Math.random() * 36) + 'px';
+    p.style.top   = (30 + Math.random() * 90) + 'px';
+    p.style.background = `hsl(${10 + ~~(Math.random()*25)},100%,62%)`;
+    zone.appendChild(p);
+    setTimeout(() => p.remove(), 1150);
+  }
+}
+
+// ── UPDATE CLASSICAL ──
+function updateC() {
+  C.level -= C.drain * spd() * 0.1;
+  if (C.level < 0) C.level = 0;
+
+  const pct = Math.round(C.level);
+
+  // SVG fill (fills bottom-up: full height=118, y=18..136)
+  const fh = (C.level / 100) * 118;
+  const fy = 18 + (118 - fh);
+  const el = document.getElementById('cFill');
+  el.setAttribute('y', fy);
+  el.setAttribute('height', Math.max(0, fh));
+
+  document.getElementById('cPct').textContent = pct;
+
+  const lbl = pct + '%';
+  document.getElementById('cLvlTxt').textContent = lbl;
+  document.getElementById('cLvlBar').style.width = C.level + '%';
+
+  const badge = document.getElementById('cBadge');
+  const bar   = document.getElementById('cLvlBar');
+
+  if (C.level <= 0) {
+    if (C.state !== 'dead') {
+      C.state = 'dead';
+      log('⚡ [CLASSICAL] 突然クラッシュ! DEAD at 0% — unpredicted failure', 'lc');
+      badge.textContent = '💀 DEAD / クラッシュ';
+      badge.style.background = '#f8514922'; badge.style.color = 'var(--red)';
+      el.setAttribute('fill', 'var(--red)');
+      bar.style.background = 'var(--red)';
+      document.getElementById('pC').style.borderColor = 'var(--red)';
+      document.getElementById('pC').style.boxShadow  = '0 0 18px #f8514944';
+    }
+  } else if (C.level <= 20) {
+    if (C.state === 'normal') {
+      C.state = 'warning';
+      log('⚠️ [CLASSICAL] Low battery warning (20%) — arbitrary threshold crossed', 'lc');
+    }
+    badge.textContent = '⚠ WARNING'; badge.style.background = '#e3b34122'; badge.style.color = 'var(--yellow)';
+    el.setAttribute('fill', 'var(--yellow)'); bar.style.background = 'var(--yellow)';
+  } else {
+    badge.textContent = 'NORMAL'; badge.style.background = '#56d36422'; badge.style.color = 'var(--green)';
+    el.setAttribute('fill', 'var(--green)'); bar.style.background = 'var(--green)';
+  }
+}
+
+// ── UPDATE NRA-IDE ──
+function updateN() {
+  N.delta += N.drain * spd() * 0.1;
+  N.R = N.delta / N.tau;
+  N.heatTick += spd() * 0.1;
+
+  // Integer Phase Lock — periodic heat expulsion (residuals NOT carried forward)
+  if (N.heatTick >= 9) {
+    N.heatTick = 0;
+    spawnHeat(2);
+    // brief icon flash
+    const ic = document.getElementById('nHeatIcon');
+    ic.style.opacity = '1';
+    setTimeout(() => { ic.style.opacity = '0'; }, 400);
+  }
+
+  // Fill from top-down as δ grows
+  const fh = Math.min(N.R, 1.0) * 118;
+  document.getElementById('nFill').setAttribute('height', fh);
+
+  const col = N.R < 0.8 ? 'var(--blue)' : N.R < 1.0 ? 'var(--orange)' : 'var(--purple)';
+  document.getElementById('nFill').setAttribute('fill', col);
+  document.getElementById('nRTxt').textContent = 'R=' + Math.min(N.R, 1.0).toFixed(2);
+
+  document.getElementById('nDeltaTxt').textContent = Math.min(N.delta, N.tau).toFixed(1);
+  document.getElementById('nDeltaBar').style.width  = Math.min(N.R * 100, 100) + '%';
+  document.getElementById('nDeltaBar').style.background = col;
+
+  const rPct = Math.min(N.R * 100, 100);
+  document.getElementById('nRBar').style.width = rPct + '%';
+  document.getElementById('nRBar').style.background = col;
+  document.getElementById('nRTxtBar').textContent = Math.min(N.R, 1.0).toFixed(3);
+
+  const badge = document.getElementById('nBadge');
+  const panel = document.getElementById('pN');
+
+  if (N.R >= 1.0 && N.state !== 'phase-jump') {
+    N.state = 'phase-jump';
+    N.cycleCount++;
+    log(`🔵 [NRA-IDE] PHASE JUMP — R=${N.R.toFixed(3)} ≥ 1.0 → Fail-Closed (orderly, predicted)`, 'lj');
+    badge.textContent = '⬡ PHASE JUMP / 位相跳躍';
+    badge.style.background = '#bc8cff22'; badge.style.color = 'var(--purple)';
+    panel.style.borderColor = 'var(--purple)';
+    panel.style.boxShadow  = '0 0 24px #bc8cff44';
+    panel.classList.add('flash');
+    setTimeout(() => panel.classList.remove('flash'), 800);
+    spawnHeat(10);   // burst of heat on phase jump
+    running = false; // NRA-IDE goes silent — Fail-Closed
+    // Classical keeps going to show contrast
+  } else if (N.R >= 0.8 && N.state === 'active') {
+    N.state = 'approaching';
+    log(`🟡 [NRA-IDE] APPROACHING — R=${N.R.toFixed(2)} ≥ 0.8, Fail-Closed imminent`, 'ln');
+    badge.textContent = '⚡ APPROACHING / 接近中';
+    badge.style.background = '#f0883e22'; badge.style.color = 'var(--orange)';
+    panel.style.borderColor = 'var(--orange)';
+  }
+}
+
+// ── MAIN LOOP ──
+function loop() {
+  tick++;
+
+  // NRA-IDE runs until phase jump, then stops
+  if (N.state !== 'phase-jump') updateN();
+
+  // Classical keeps draining even after NRA-IDE stops
+  if (C.state !== 'dead') updateC();
+
+  // Both finished
+  if (N.state === 'phase-jump' && C.state === 'dead') {
+    running = false;
+    log('━━ シミュレーション完了 / Simulation complete ━━');
+    document.getElementById('startBtn').textContent = '▶ 開始 / Start';
+    document.getElementById('startBtn').classList.remove('active');
+    return;
+  }
+
+  // Classical dead but NRA still going (should not happen — just safety)
+  if (C.state === 'dead' && N.state !== 'phase-jump') updateN();
+
+  if (running || (N.state !== 'phase-jump' && C.state !== 'dead')) {
+    raf = requestAnimationFrame(loop);
+  }
+}
+
+function startSim() {
+  if (N.state === 'phase-jump' && C.state !== 'dead') {
+    // NRA done, let classical finish
+    running = true;
+    raf = requestAnimationFrame(loop);
+    return;
+  }
+  if (running) return;
+  running = true;
+  document.getElementById('startBtn').textContent = '⏸ 実行中...';
+  document.getElementById('startBtn').classList.add('active');
+  document.getElementById('logBox').innerHTML = '';
+  log('▶ シミュレーション開始 / Simulation started');
+  loop();
+}
+
+function resetSim() {
+  running = false;
+  if (raf) cancelAnimationFrame(raf);
+  tick = 0;
+
+  // Reset classical state
+  C.level = 100; C.state = 'normal';
+
+  // Reset NRA state
+  N.delta = 0; N.R = 0; N.state = 'active'; N.cycleCount = 0; N.heatTick = 0;
+
+  // Reset classical SVG
+  const cf = document.getElementById('cFill');
+  cf.setAttribute('y', '18'); cf.setAttribute('height', '118'); cf.setAttribute('fill', 'var(--green)');
+  document.getElementById('cPct').textContent = '100';
+  document.getElementById('cLvlBar').style.width = '100%'; document.getElementById('cLvlBar').style.background = 'var(--green)';
+  document.getElementById('cLvlTxt').textContent = '100%';
+  const cb = document.getElementById('cBadge');
+  cb.textContent = 'NORMAL'; cb.style.background = '#56d36422'; cb.style.color = 'var(--green)';
+  const cp = document.getElementById('pC');
+  cp.style.borderColor = ''; cp.style.boxShadow = '';
+
+  // Reset NRA SVG
+  document.getElementById('nFill').setAttribute('height', '0');
+  document.getElementById('nFill').setAttribute('fill', 'var(--blue)');
+  document.getElementById('nRTxt').textContent = 'R=0.00';
+  document.getElementById('nDeltaTxt').textContent = '0.0';
+  document.getElementById('nDeltaBar').style.width = '0%';
+  document.getElementById('nRBar').style.width = '0%';
+  document.getElementById('nRTxtBar').textContent = '0.000';
+  document.getElementById('nHeatIcon').style.opacity = '0';
+  const nb = document.getElementById('nBadge');
+  nb.textContent = 'ACTIVE'; nb.style.background = '#58a6ff22'; nb.style.color = 'var(--blue)';
+  const np = document.getElementById('pN');
+  np.style.borderColor = ''; np.style.boxShadow = '';
+  np.classList.remove('flash');
+  document.getElementById('heatZone').innerHTML = '';
+
+  // Reset controls
+  document.getElementById('startBtn').textContent = '▶ 開始 / Start';
+  document.getElementById('startBtn').classList.remove('active');
+
+  // Reset log
+  document.getElementById('logBox').innerHTML =
+    '<div class="le" style="color:var(--muted)">[system] リセット完了 / Reset complete. 開始ボタンを押してください。</div>';
+}
+</script>
+</body>
+</html>

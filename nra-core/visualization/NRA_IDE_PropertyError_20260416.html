@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- FILE: NRA_IDE_PropertyError_20260416.html -->
+<!-- 生成日時: 2026-04-16 JST -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<title>NRA-IDE: 性質誤差 — なぜ破綻しないのか | Property Error</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg: #060810;
+  --normal-err: #e06040;
+  --prop-err:   #40d0a0;
+  --layer-col:  #8090f0;
+  --gold:       #f0c040;
+  --text:       #b8ccd8;
+  --dim:        #405060;
+  --panel:      rgba(10,18,35,0.92);
+  --border:     rgba(70,120,180,0.18);
+  --heat:       #ff9040;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+}
+
+/* subtle starfield */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 25%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,0.3)  0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 80%, rgba(255,255,255,0.2)  0%, transparent 100%);
+  pointer-events:none; z-index:0;
+}
+
+header {
+  text-align:center;
+  padding: 1.6rem 1rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  position:relative; z-index:1;
+}
+
+header h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(0.85rem, 2.2vw, 1.4rem);
+  color: var(--prop-err);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 18px rgba(64,208,160,0.45);
+}
+
+header .sub {
+  font-size: 0.72rem;
+  color: var(--dim);
+  margin-top:0.3rem;
+  font-family:'JetBrains Mono',monospace;
+}
+
+.axiom-bar {
+  display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,14,28,0.95);
+  position:relative; z-index:1;
+}
+
+.ax {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  padding:0.28rem 0.7rem;
+  border-radius:3px;
+  border:1px solid;
+}
+.ax.a { color:var(--normal-err); border-color:rgba(224,96,64,0.4); background:rgba(224,96,64,0.06); }
+.ax.b { color:var(--prop-err);   border-color:rgba(64,208,160,0.4); background:rgba(64,208,160,0.06); }
+.ax.c { color:var(--layer-col);  border-color:rgba(128,144,240,0.4);background:rgba(128,144,240,0.06); }
+
+.controls {
+  display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;
+  padding:0.7rem 1rem;
+  position:relative; z-index:1;
+}
+
+button {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.73rem;
+  padding:0.45rem 1.1rem;
+  border-radius:3px; border:1px solid;
+  background:transparent; cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-run   { color:var(--prop-err); border-color:var(--prop-err); }
+.btn-reset { color:var(--dim);      border-color:var(--dim); }
+.btn-run:hover   { background:rgba(64,208,160,0.12); }
+.btn-reset:hover { background:rgba(64,80,96,0.2); }
+
+.tick {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem; color:var(--dim);
+  text-align:center; padding-bottom:0.4rem;
+  position:relative; z-index:1;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:0.9rem;
+  padding:0.9rem;
+  max-width:1400px; margin:0 auto;
+  position:relative; z-index:1;
+}
+
+@media(max-width:900px){ .grid { grid-template-columns:1fr; } }
+
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.9rem;
+  display:flex; flex-direction:column; gap:0.6rem;
+}
+
+.panel-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  padding-bottom:0.45rem;
+  border-bottom:1px solid var(--border);
+}
+.panel.np .panel-title { color:var(--normal-err); }
+.panel.pp .panel-title { color:var(--prop-err); }
+.panel.lp .panel-title { color:var(--layer-col); }
+
+canvas {
+  width:100%; height:200px;
+  background:rgba(0,0,0,0.45);
+  border:1px solid var(--border);
+  border-radius:4px; display:block;
+}
+
+.formula-box {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.76rem;
+  background:rgba(0,0,0,0.5);
+  border-radius:4px;
+  padding:0.55rem 0.75rem;
+  line-height:1.85;
+  border-left:3px solid;
+}
+.panel.np .formula-box { border-left-color:var(--normal-err); color:#f0a090; }
+.panel.pp .formula-box { border-left-color:var(--prop-err);   color:#90e8c8; }
+.panel.lp .formula-box { border-left-color:var(--layer-col);  color:#b0b8f8; }
+
+.desc {
+  font-size:0.71rem;
+  line-height:1.75;
+  color:#7090a0;
+}
+
+.hl-n { color:var(--normal-err); }
+.hl-p { color:var(--prop-err); }
+.hl-l { color:var(--layer-col); }
+.hl-g { color:var(--gold); }
+
+.status {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.67rem;
+  padding:0.22rem 0.6rem;
+  border-radius:2px;
+  display:inline-block;
+}
+
+/* bottom key-concept */
+.keybox {
+  grid-column:1/-1;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:1rem;
+}
+
+.key-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  color:var(--gold);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  margin-bottom:0.8rem;
+}
+
+.key-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0.8rem;
+}
+@media(max-width:700px){ .key-grid{grid-template-columns:1fr;} }
+
+.key-cell {
+  font-size:0.71rem;
+  line-height:1.8;
+  padding:0.6rem;
+  border-radius:4px;
+  background:rgba(0,0,0,0.35);
+  border:1px solid var(--border);
+}
+.key-cell .label {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.63rem; opacity:0.55;
+  display:block; margin-bottom:0.2rem;
+}
+.key-cell .val {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.82rem; font-weight:700;
+  display:block; margin-bottom:0.3rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NRA-IDE: 性質誤差とはなにか — なぜ破綻せず・なぜ積層できるのか</h1>
+  <div class="sub">Property Error · Escapement Principle · Layered Computation · M-Tokuni 2026-04-16</div>
+</header>
+
+<div class="axiom-bar">
+  <div class="ax a">通常誤差：概要消失 → 破綻</div>
+  <div class="ax b">性質誤差：残差を熱として排出・追跡継続</div>
+  <div class="ax c">包括計算：10層×n段の積層が成立</div>
+</div>
+
+<div class="controls">
+  <button class="btn-run"   id="btnRun">▶ RUN</button>
+  <button class="btn-reset" id="btnReset">↺ RESET</button>
+</div>
+<div class="tick" id="tickLbl">t = 0</div>
+
+<div class="grid">
+
+  <!-- LEFT: 通常誤差 -->
+  <div class="panel np">
+    <div class="panel-title">⬛ 通常誤差 — Normal Error Accumulation</div>
+    <canvas id="cNormal"></canvas>
+    <div class="formula-box">
+      誤差 ε が次ステップへ持ち越し<br>
+      ε₁ → ε₂ → ε₃ … → 爆発<br>
+      概要（全体像）を失った時点で手遅れ
+    </div>
+    <div class="desc">
+      各ステップの残差が次の入力に混入します。<br>
+      <span class="hl-n">信号（緑）が誤差（赤）に埋もれていく様子</span>を<br>
+      見てください。概要が見えなくなってから<br>
+      破綻が起きます。気づいたときは既に遅い。
+    </div>
+    <div id="normStatus" class="status" style="background:rgba(224,96,64,0.12);color:var(--normal-err);border:1px solid rgba(224,96,64,0.3)">ACCUMULATING</div>
+  </div>
+
+  <!-- MIDDLE: 性質誤差 -->
+  <div class="panel pp">
+    <div class="panel-title">◉ 性質誤差 — Property Error · 脱進機原理</div>
+    <canvas id="cProp"></canvas>
+    <div class="formula-box">
+      δ（遊び）を設計時から確保<br>
+      残差ε → 熱として排出（持ち越し禁止）<br>
+      各ステップ完結 → 追跡継続 → 概要常時把握
+    </div>
+    <div class="desc">
+      <span class="hl-p">金色の粒子が「熱」として排出</span>されています。<br>
+      信号（緑線）は常に追跡可能な状態を保ちます。<br>
+      脱進機の歯車が一歯ずつ完結するのと同じ原理。<br>
+      δ（遊び）があるから誤差を受け止められます。
+    </div>
+    <div class="status" style="background:rgba(64,208,160,0.1);color:var(--prop-err);border:1px solid rgba(64,208,160,0.3)">δ ABSORBING — TRACKING</div>
+  </div>
+
+  <!-- RIGHT: 包括計算積層 -->
+  <div class="panel lp">
+    <div class="panel-title">⬛ 包括計算積層 — Layered Computation</div>
+    <canvas id="cLayer"></canvas>
+    <div class="formula-box">
+      Layer 1-10 → 出力クリーン → 変数化<br>
+      Layer 11-20 → 入力として受け取り → クリーン<br>
+      Layer 21-30 → さらに積層可能
+    </div>
+    <div class="desc">
+      性質誤差が破綻しないので<br>
+      <span class="hl-l">各10層ブロックの出力がそのまま</span><br>
+      次の10層の変数として使えます。<br>
+      計算爆発なしに深さを増やせる構造的根拠です。
+    </div>
+    <div id="layerStatus" class="status" style="background:rgba(128,144,240,0.1);color:var(--layer-col);border:1px solid rgba(128,144,240,0.3)">LAYER 1 ACTIVE</div>
+  </div>
+
+  <!-- BOTTOM: Key concepts -->
+  <div class="keybox">
+    <div class="key-title">◉ 決定的な差異 — The Structural Difference</div>
+    <div class="key-grid">
+      <div class="key-cell">
+        <span class="label">通常誤差 Normal Error</span>
+        <span class="val hl-n">残差を持ち越す</span>
+        誤差が蓄積するにつれ信号と誤差の区別がつかなくなります。
+        全体像（概要）を失った時点で計算は実質的に破綻しています。
+        破綻を検知できないまま出力が続くのが最も危険な状態です。
+      </div>
+      <div class="key-cell">
+        <span class="label">性質誤差 Property Error</span>
+        <span class="val hl-p">残差を熱として排出する</span>
+        各ステップで残差を排出するため誤差が累積しません。
+        δ（遊び）が設計時から確保されているので誤差を受け止めながら
+        信号の追跡を継続できます。概要を常時把握できる状態が続きます。
+      </div>
+      <div class="key-cell">
+        <span class="label">包括計算の積層</span>
+        <span class="val hl-l">出力がクリーンだから積層できる</span>
+        性質誤差で完結した各層の出力は汚染されていません。
+        だからそのまま次の層の変数として入力できます。
+        10層×n段の計算爆発なしの積層がこの原理で成立します。
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// FILE: NRA_IDE_PropertyError_20260416.html
+const DPR = window.devicePixelRatio || 1;
+
+function initCanvas(id) {
+  const c = document.getElementById(id);
+  const rect = c.getBoundingClientRect();
+  c.width  = rect.width * DPR;
+  c.height = 200 * DPR;
+  const ctx = c.getContext('2d');
+  ctx.scale(DPR, DPR);
+  return { c, ctx, w: rect.width, h: 200 };
+}
+
+let t = 0, running = false, rafId = null;
+let cv = null;
+
+// ─── heat particles for property error panel ───
+let heatParticles = [];
+function spawnHeat(x, y, w) {
+  heatParticles.push({
+    x, y,
+    vx: (Math.random() - 0.5) * 2,
+    vy: -(1.5 + Math.random() * 2),
+    life: 1.0,
+    size: 2 + Math.random() * 2
+  });
+}
+
+// ─── layer blocks for computation panel ───
+let layerBlocks = [];
+let activeLayer = 0;
+let layerSignal = 1.0; // signal clarity
+
+function initLayerBlocks() {
+  layerBlocks = [];
+  for (let g = 0; g < 4; g++) {
+    layerBlocks.push({ group: g, progress: 0, activated: false, output: null });
+  }
+  activeLayer = 0;
+  layerSignal = 1.0;
+}
+
+// ─── DRAW: Normal Error ───
+let normalSignal = [];
+let normalErr    = [];
+
+function drawNormal(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+
+  // grid
+  ctx.strokeStyle = 'rgba(80,60,60,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const cy = h * 0.5;
+  const maxPts = Math.floor(w);
+
+  // accumulate history
+  const trueSignal = Math.sin(t * 0.06) * 30;
+  const errGrowth  = Math.min(t * 0.12, 70);
+  const noiseMag   = errGrowth * (0.8 + 0.4 * Math.random());
+  normalSignal.push(trueSignal);
+  normalErr.push(noiseMag);
+  if (normalSignal.length > maxPts) { normalSignal.shift(); normalErr.shift(); }
+
+  const n = normalSignal.length;
+
+  // error fill (background noise)
+  ctx.fillStyle = 'rgba(224,96,64,0.15)';
+  ctx.beginPath();
+  normalErr.forEach((e, i) => {
+    const px = (i / maxPts) * w;
+    const s  = normalSignal[i];
+    ctx.lineTo(px, cy - s - e);
+  });
+  for (let i = n-1; i >= 0; i--) {
+    const px = (i / maxPts) * w;
+    const s  = normalSignal[i];
+    ctx.lineTo(px, cy - s + normalErr[i]);
+  }
+  ctx.closePath(); ctx.fill();
+
+  // true signal line
+  const clarity = Math.max(0, 1 - errGrowth / 75);
+  ctx.strokeStyle = `rgba(80,220,120,${0.2 + clarity * 0.7})`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  normalSignal.forEach((s, i) => {
+    const px = (i / maxPts) * w;
+    i === 0 ? ctx.moveTo(px, cy - s) : ctx.lineTo(px, cy - s);
+  });
+  ctx.stroke();
+
+  // error envelope (red)
+  ctx.strokeStyle = 'rgba(224,96,64,0.6)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  normalErr.forEach((e, i) => {
+    const px = (i / maxPts) * w;
+    const s  = normalSignal[i];
+    i === 0 ? ctx.moveTo(px, cy - s - e) : ctx.lineTo(px, cy - s - e);
+  });
+  ctx.stroke();
+
+  // "概要消失" overlay
+  if (errGrowth > 45) {
+    const fade = Math.min((errGrowth - 45) / 30, 1);
+    ctx.fillStyle = `rgba(40,10,10,${fade * 0.7})`;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = `rgba(224,96,64,${fade * 0.9})`;
+    ctx.font = `bold ${Math.floor(fade * 14)}px JetBrains Mono`;
+    ctx.textAlign = 'center';
+    ctx.fillText('概要消失 — OVERVIEW LOST', w/2, h/2);
+    if (fade > 0.7) ctx.fillText('破綻', w/2, h/2 + 20);
+  }
+
+  // label
+  ctx.fillStyle = 'rgba(224,96,64,0.6)';
+  ctx.font = '8px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText(`誤差蓄積 = ${errGrowth.toFixed(1)}`, 6, 14);
+
+  // status
+  const st = document.getElementById('normStatus');
+  if (errGrowth > 60) { st.textContent = '⚠ 概要消失 OVERVIEW LOST'; st.style.color='#ff5030'; }
+  else if (errGrowth > 30) { st.textContent = '△ 混濁中 MIXING'; st.style.color='#f0a040'; }
+  else { st.textContent = 'ACCUMULATING...'; }
+}
+
+// ─── DRAW: Property Error ───
+let propHistory = [];
+
+function drawProp(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+
+  // grid
+  ctx.strokeStyle = 'rgba(40,80,60,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const cy = h * 0.5;
+  const maxPts = Math.floor(w);
+  const delta = 18; // δ (遊び) — pre-allocated play zone
+
+  // signal
+  const sig = Math.sin(t * 0.06) * 30 + Math.sin(t * 0.13) * 10;
+  propHistory.push(sig);
+  if (propHistory.length > maxPts) propHistory.shift();
+
+  // δ zone (play band) — always present
+  ctx.fillStyle = 'rgba(64,208,160,0.07)';
+  ctx.fillRect(0, cy - 60 - delta, w, delta);
+  ctx.fillRect(0, cy + 60, w, delta);
+
+  // δ label
+  ctx.strokeStyle = 'rgba(64,208,160,0.3)';
+  ctx.setLineDash([3,3]);
+  ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(0, cy - 60 - delta); ctx.lineTo(w, cy - 60 - delta); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, cy + 60 + delta); ctx.lineTo(w, cy + 60 + delta); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(64,208,160,0.5)';
+  ctx.font = '8px JetBrains Mono';
+  ctx.textAlign = 'right';
+  ctx.fillText('δ (遊び)', w - 4, cy - 62);
+
+  // signal trace — always clean
+  ctx.strokeStyle = 'rgba(80,220,140,0.85)';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#40d0a0';
+  ctx.shadowBlur = 5;
+  ctx.beginPath();
+  propHistory.forEach((s, i) => {
+    const px = (i / maxPts) * w;
+    i === 0 ? ctx.moveTo(px, cy - s) : ctx.lineTo(px, cy - s);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // escapement tick — every N frames expel heat
+  const tickInterval = 12;
+  if (t % tickInterval === 0 && t > 0) {
+    const curX = propHistory.length > 0 ? ((propHistory.length - 1) / maxPts) * w : w * 0.8;
+    const curY = cy - sig;
+    // spawn heat particles
+    for (let i = 0; i < 5; i++) spawnHeat(curX, curY, w);
+
+    // escapement flash
+    ctx.fillStyle = 'rgba(240,192,64,0.25)';
+    ctx.beginPath();
+    ctx.arc(curX, curY, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(240,192,64,0.6)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // update & draw heat particles
+  heatParticles = heatParticles.filter(p => p.life > 0);
+  heatParticles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.035;
+    const r = Math.max(0, p.size * p.life);
+    if (r <= 0) return;
+    ctx.fillStyle = `rgba(255,160,64,${p.life * 0.8})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // "TRACKING" indicator — always maintained
+  ctx.fillStyle = 'rgba(64,208,160,0.7)';
+  ctx.font = '8px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText('概要追跡中 TRACKING', 6, 14);
+  ctx.fillText('残差 → 熱排出済', 6, 26);
+}
+
+// ─── DRAW: Layered Computation ───
+function drawLayer(ctx, w, h, t) {
+  ctx.clearRect(0, 0, w, h);
+
+  // grid
+  ctx.strokeStyle = 'rgba(60,60,100,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 25) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const groups = 4;       // 4 groups of 10 layers
+  const groupH = (h - 20) / groups;
+  const activationPeriod = 60; // frames per group
+
+  const currentGroup = Math.floor(t / activationPeriod) % groups;
+  const groupProg    = (t % activationPeriod) / activationPeriod;
+
+  for (let g = 0; g < groups; g++) {
+    const gy = 10 + g * groupH;
+    const isActive   = g === currentGroup;
+    const isDone     = (Math.floor(t / activationPeriod) > g) ||
+                       (g < currentGroup);
+    const isPending  = !isActive && !isDone;
+
+    // group background
+    const bgAlpha = isDone ? 0.12 : isActive ? 0.08 : 0.03;
+    ctx.fillStyle = isDone
+      ? `rgba(128,220,160,${bgAlpha})`
+      : isActive
+        ? `rgba(128,144,240,${bgAlpha})`
+        : `rgba(60,70,100,${bgAlpha})`;
+    ctx.fillRect(4, gy, w - 8, groupH - 4);
+    ctx.strokeStyle = isDone
+      ? 'rgba(128,220,160,0.35)'
+      : isActive
+        ? 'rgba(128,144,240,0.35)'
+        : 'rgba(60,70,100,0.2)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(4, gy, w - 8, groupH - 4);
+
+    // label
+    ctx.font = '9px JetBrains Mono';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = isDone ? '#80dcA0' : isActive ? '#8090f0' : '#405060';
+    ctx.fillText(`Layer ${g*10+1}–${g*10+10}`, 10, gy + 14);
+
+    // mini layer bars
+    const barW  = (w - 32) / 10;
+    for (let l = 0; l < 10; l++) {
+      const bx = 12 + l * (barW + 1);
+      const by = gy + 20;
+      const bh = groupH - 28;
+
+      let fillProg = 0;
+      if (isDone) fillProg = 1;
+      else if (isActive) fillProg = Math.min(groupProg * 10 - l, 1);
+      fillProg = Math.max(0, fillProg);
+
+      // bar bg
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.fillRect(bx, by, barW, bh);
+
+      // fill
+      if (fillProg > 0) {
+        const col = isDone ? '#60c880' : '#7080e8';
+        ctx.fillStyle = col;
+        ctx.fillRect(bx, by + bh * (1 - fillProg), barW, bh * fillProg);
+      }
+    }
+
+    // output arrow (when done)
+    if (isDone && g < groups - 1) {
+      ctx.strokeStyle = 'rgba(128,220,160,0.7)';
+      ctx.lineWidth = 1.5;
+      const arrowY = gy + groupH - 2;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.3, arrowY);
+      ctx.lineTo(w * 0.7, arrowY);
+      ctx.stroke();
+      // arrowhead
+      ctx.beginPath();
+      ctx.moveTo(w * 0.7, arrowY);
+      ctx.lineTo(w * 0.7 - 6, arrowY - 4);
+      ctx.moveTo(w * 0.7, arrowY);
+      ctx.lineTo(w * 0.7 - 6, arrowY + 4);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(128,220,160,0.8)';
+      ctx.font = '8px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('出力 → 次層の変数', w/2, arrowY - 3);
+    }
+
+    // CLEAN OUTPUT badge
+    if (isDone) {
+      ctx.fillStyle = 'rgba(128,220,160,0.85)';
+      ctx.font = 'bold 8px JetBrains Mono';
+      ctx.textAlign = 'right';
+      ctx.fillText('✓ CLEAN OUTPUT', w - 10, gy + 14);
+    }
+  }
+
+  // layer status
+  const st = document.getElementById('layerStatus');
+  const completedGroups = Math.min(Math.floor(t / activationPeriod), groups);
+  st.textContent = completedGroups >= groups
+    ? `✓ ALL ${groups * 10} LAYERS COMPLETE — 積層成功`
+    : `LAYER ${currentGroup * 10 + 1}–${currentGroup * 10 + 10} ACTIVE`;
+  st.style.color = completedGroups >= groups ? '#80dca0' : 'var(--layer-col)';
+}
+
+// ─── Main Loop ───
+function initAll() {
+  t = 0;
+  normalSignal = []; normalErr = [];
+  propHistory  = [];
+  heatParticles = [];
+  initLayerBlocks();
+  cv = {
+    n: initCanvas('cNormal'),
+    p: initCanvas('cProp'),
+    l: initCanvas('cLayer'),
+  };
+}
+
+function drawAll() {
+  drawNormal(cv.n.ctx, cv.n.w, cv.n.h, t);
+  drawProp  (cv.p.ctx, cv.p.w, cv.p.h, t);
+  drawLayer (cv.l.ctx, cv.l.w, cv.l.h, t);
+  document.getElementById('tickLbl').textContent = `t = ${t}`;
+}
+
+function loop() {
+  if (!running) return;
+  t++;
+  drawAll();
+  rafId = requestAnimationFrame(loop);
+}
+
+document.getElementById('btnRun').addEventListener('click', () => {
+  if (running) {
+    running = false; cancelAnimationFrame(rafId);
+    document.getElementById('btnRun').textContent = '▶ RUN';
+  } else {
+    running = true;
+    document.getElementById('btnRun').textContent = '⏸ PAUSE';
+    loop();
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  running = false; cancelAnimationFrame(rafId);
+  document.getElementById('btnRun').textContent = '▶ RUN';
+  initAll(); drawAll();
+});
+
+window.addEventListener('load', () => { initAll(); drawAll(); });
+window.addEventListener('resize', () => {
+  const was = running; running = false; cancelAnimationFrame(rafId);
+  initAll(); drawAll();
+  if (was) { running = true; loop(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- FILE: NRA_IDE_AIRisk_Layer5_20260416.html -->
+<!-- 生成日時: 2026-04-16 JST -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<title>NRA-IDE Layer 5: 現況AI学習方法の構造的リスクと将来予測</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+:root {
+  --bg:     #050810;
+  --bg2:    #080d1a;
+  --risk:   #e06040;
+  --nra:    #40d0a0;
+  --gold:   #f0c040;
+  --warn:   #f09040;
+  --future: #8090f0;
+  --text:   #b8ccd8;
+  --dim:    #384858;
+  --panel:  rgba(10,18,36,0.96);
+  --border: rgba(70,120,180,0.16);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  min-height:100vh;
+  padding-bottom:3rem;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 18%, rgba(255,255,255,0.22) 0%,transparent 100%),
+    radial-gradient(1px 1px at 70% 12%, rgba(255,255,255,0.18) 0%,transparent 100%),
+    radial-gradient(1px 1px at 92% 68%, rgba(255,255,255,0.2)  0%,transparent 100%),
+    radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,0.15) 0%,transparent 100%);
+  pointer-events:none; z-index:0;
+}
+
+header {
+  text-align:center;
+  padding:2rem 1rem 1rem;
+  border-bottom:1px solid var(--border);
+  position:relative; z-index:1;
+}
+
+header h1 {
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.85rem,2.2vw,1.45rem);
+  color:var(--risk);
+  letter-spacing:0.06em;
+  text-shadow:0 0 20px rgba(224,96,64,0.4);
+}
+
+header .layer-badge {
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;
+  padding:0.2rem 0.7rem;
+  border:1px solid rgba(224,96,64,0.4);
+  border-radius:2px;
+  color:var(--risk);
+  margin-bottom:0.5rem;
+  letter-spacing:0.12em;
+}
+
+header .sub {
+  font-size:0.68rem;color:var(--dim);
+  font-family:'JetBrains Mono',monospace;
+  margin-top:0.3rem;
+}
+
+.wrap {
+  max-width:1100px;
+  margin:0 auto;
+  padding:1.5rem 1rem;
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; gap:2rem;
+}
+
+/* ── section ── */
+.section {
+  display:flex; flex-direction:column; gap:0.8rem;
+}
+
+.sec-num {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+
+.sec-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.85rem,1.8vw,1.1rem);
+  letter-spacing:0.04em;
+  padding-bottom:0.5rem;
+  border-bottom:1px solid var(--border);
+}
+
+/* ── flow diagram ── */
+.flow {
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  align-items:flex-start;
+  padding:0.5rem 0;
+}
+
+.flow-row {
+  display:flex;
+  align-items:center;
+  gap:0.7rem;
+  padding:0.55rem 0.9rem;
+  border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.75rem;
+  min-width:260px;
+  border:1px solid;
+  margin-bottom:0;
+  position:relative;
+}
+
+.flow-row.cause  { color:var(--risk);   border-color:rgba(224,96,64,0.35);   background:rgba(224,96,64,0.05);   }
+.flow-row.effect { color:var(--warn);   border-color:rgba(240,144,64,0.3);   background:rgba(240,144,64,0.04);  }
+.flow-row.deep   { color:#d080c0;       border-color:rgba(208,128,192,0.3);  background:rgba(208,128,192,0.04); }
+.flow-row.fatal  { color:#ff5040;       border-color:rgba(255,80,64,0.45);   background:rgba(255,80,64,0.07);   font-weight:700; }
+.flow-row.nra    { color:var(--nra);    border-color:rgba(64,208,160,0.35);  background:rgba(64,208,160,0.04);  }
+
+.flow-arrow {
+  font-family:'JetBrains Mono',monospace;
+  font-size:1rem;
+  color:var(--dim);
+  padding:0.1rem 0.9rem;
+  line-height:1;
+}
+
+/* ── formula block ── */
+.formula-block {
+  background:rgba(0,0,0,0.55);
+  border-radius:6px;
+  padding:1rem 1.2rem;
+  border-left:3px solid var(--risk);
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(0.75rem,1.6vw,0.95rem);
+  line-height:2.1;
+  color:#f0d0c0;
+}
+
+.formula-block.nra-style { border-left-color:var(--nra); color:#c0f0e0; }
+
+/* ── comparison table ── */
+.cmp-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.72rem;
+}
+.cmp-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.63rem;
+  color:var(--dim);
+  text-align:left;
+  padding:0.4rem 0.7rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,0.3);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.cmp-table td {
+  padding:0.45rem 0.7rem;
+  border-bottom:1px solid rgba(70,120,180,0.07);
+  line-height:1.7;
+  vertical-align:top;
+}
+.cmp-table td:first-child {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;
+  color:var(--gold);
+  width:22%;
+}
+.cmp-table tr:hover td { background:rgba(70,120,180,0.04); }
+
+/* ── tech prediction cards ── */
+.pred-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0.9rem;
+}
+@media(max-width:800px){ .pred-grid{grid-template-columns:1fr;} }
+
+.pred-card {
+  border-radius:7px;
+  padding:1rem;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,0.35);
+  display:flex; flex-direction:column; gap:0.6rem;
+}
+
+.pred-card .p-tech {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  padding-bottom:0.4rem;
+  border-bottom:1px solid var(--border);
+}
+
+.pred-card.rl  .p-tech { color:#e09060; }
+.pred-card.ft  .p-tech { color:#8090f0; }
+.pred-card.rag .p-tech { color:#60b8e0; }
+
+.pred-card .p-now {
+  font-size:0.7rem;
+  line-height:1.75;
+  color:#7090a0;
+}
+.pred-card .p-risk {
+  font-size:0.7rem;
+  line-height:1.75;
+  padding:0.5rem;
+  border-radius:4px;
+  background:rgba(224,80,64,0.07);
+  border-left:2px solid var(--risk);
+  color:#e0a090;
+}
+.pred-card .p-future {
+  font-size:0.7rem;
+  line-height:1.75;
+  padding:0.5rem;
+  border-radius:4px;
+  background:rgba(64,208,160,0.05);
+  border-left:2px solid var(--nra);
+  color:#80d8b0;
+}
+
+/* ── key insight box ── */
+.insight {
+  background:var(--panel);
+  border:1px solid rgba(240,192,64,0.3);
+  border-radius:8px;
+  padding:1.2rem 1.4rem;
+  position:relative;
+}
+.insight::before {
+  content:'KEY INSIGHT';
+  position:absolute; top:-0.55rem; left:1rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;
+  color:var(--gold);
+  background:var(--bg2);
+  padding:0 0.5rem;
+  letter-spacing:0.14em;
+}
+.insight p {
+  font-size:0.8rem;
+  line-height:1.9;
+  color:#d0c8a0;
+}
+.insight strong { color:var(--gold); }
+
+/* ── blackbox growth diagram ── */
+.bb-diagram {
+  display:flex; gap:0.5rem; align-items:center;
+  flex-wrap:wrap;
+}
+.bb-box {
+  border-radius:5px;
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;
+  color:rgba(255,255,255,0.5);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:0.2rem;
+  transition:all 0.3s;
+  border:1px solid rgba(100,100,120,0.3);
+}
+.bb-box .bb-label { font-size:0.6rem; opacity:0.6; }
+
+.bb-arrow { color:var(--dim); font-size:1.2rem; font-family:'JetBrains Mono',monospace; }
+
+/* ── conclusion ── */
+.conclusion {
+  background:var(--panel);
+  border:1px solid rgba(64,208,160,0.25);
+  border-radius:8px;
+  padding:1.4rem;
+  position:relative;
+}
+.conclusion::before {
+  content:'CONCLUSION';
+  position:absolute; top:-0.55rem; left:1rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;
+  color:var(--nra);
+  background:var(--bg2);
+  padding:0 0.5rem;
+  letter-spacing:0.14em;
+}
+
+.conc-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+  margin-top:0.5rem;
+}
+@media(max-width:700px){ .conc-grid{grid-template-columns:1fr;} }
+
+.conc-cell {
+  font-size:0.72rem;
+  line-height:1.8;
+  padding:0.8rem;
+  border-radius:5px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,0.3);
+}
+.conc-cell .c-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;
+  font-weight:700;
+  display:block;
+  margin-bottom:0.4rem;
+}
+
+footer {
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem;
+  color:var(--dim);
+  padding:1rem;
+  border-top:1px solid var(--border);
+  position:relative; z-index:1;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="layer-badge">LAYER 5 — AI STRUCTURAL RISK</div>
+  <h1>現況AI学習方法の構造的リスクと将来予測</h1>
+  <div class="sub">
+    閾値なし・誤差増幅・ブラックボックス肥大・線形限界・報酬学習/チューニング/RAGの将来<br>
+    NRA-IDE Project · M-Tokuni · 2026-04-16 · DOI: 10.5281/zenodo.19420854
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ══ 01 閾値がない ══ -->
+  <div class="section">
+    <div class="sec-num">01 — THRESHOLD ABSENCE</div>
+    <div class="sec-title" style="color:var(--risk)">
+      閾値がないとはどういうことか
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div>
+        <div class="formula-block">
+          【現況AI — 閾値なし】<br>
+          誤差ε → パラメータWに吸収<br>
+          W(t+1) = W(t) - η·∇L<br>
+          <br>
+          ∇Lがゼロに近づくと「収束」と判断<br>
+          しかし ε の蓄積履歴は消えない<br>
+          → 止まる理由を持っていない
+        </div>
+      </div>
+      <div>
+        <div class="formula-block nra-style">
+          【NRA-IDE — 閾値あり】<br>
+          R = δ/τ をリアルタイム評価<br>
+          <br>
+          R &lt; 1.0 : 継続<br>
+          R = 1.0 : 警告・人間に通知<br>
+          R ≥ 1.0 : Fail-Closed 沈黙<br>
+          → 止まる構造が設計に組み込まれている
+        </div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <p>
+        閾値がないとはすなわち<strong>「どこまでが正常か」を系が知らない</strong>ということです。<br>
+        現況のAIは損失関数Lを最小化しようとしますが、Lのゼロは「完璧な正解」であり<br>
+        現実の非線形系ではそもそも到達不可能です。<br>
+        到達できない目標に向かってパラメータを動かし続けた結果が<strong>ブラックボックスの肥大</strong>です。
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ 02 誤差増幅の連鎖 ══ -->
+  <div class="section">
+    <div class="sec-num">02 — ERROR AMPLIFICATION</div>
+    <div class="sec-title" style="color:var(--warn)">
+      誤差が増幅するとはどういうことか
+    </div>
+
+    <div class="flow">
+      <div class="flow-row cause">初期微小誤差 ε₀（不可避・δ > 0 は物理法則）</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row effect">線形写像で次ステップへ持ち越し：ε₁ = A·ε₀</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row effect">再び線形写像：ε₂ = A·ε₁ = A²·ε₀</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row deep">n ステップ後：εₙ = Aⁿ·ε₀ &nbsp;[行列のべき乗]</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row deep">A の最大固有値 λ > 1 のとき：εₙ → ∞ &nbsp;[指数爆発]</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row fatal">誤差と信号が区別不能になる → 概要消失</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row fatal">閾値がないので止まれない → 誤った出力を継続 [FAIL-OPEN]</div>
+    </div>
+
+    <div style="margin-top:0.5rem;font-size:0.72rem;line-height:1.8;color:#708090;padding:0.8rem;background:rgba(0,0,0,0.3);border-radius:5px;border:1px solid var(--border);">
+      注：現実のAIでは正則化・ドロップアウト・バッチ正規化などで爆発を抑制しようとします。<br>
+      しかしこれらは「爆発を遅らせる」手法であり「誤差を構造的に追跡する」手法ではありません。<br>
+      <span style="color:var(--warn)">応急処置を重ねることがブラックボックス肥大の直接原因です。</span>
+    </div>
+  </div>
+
+  <!-- ══ 03 ブラックボックス肥大 ══ -->
+  <div class="section">
+    <div class="sec-num">03 — BLACKBOX GROWTH</div>
+    <div class="sec-title" style="color:#d080c0">
+      ブラックボックスはなぜ肥大するのか
+    </div>
+
+    <div class="bb-diagram">
+      <div class="bb-box" style="width:70px;height:60px;background:rgba(100,100,140,0.15);">
+        <span>GPT-2</span>
+        <span class="bb-label">1.5B</span>
+      </div>
+      <div class="bb-arrow">→</div>
+      <div class="bb-box" style="width:90px;height:80px;background:rgba(120,100,160,0.2);">
+        <span>GPT-3</span>
+        <span class="bb-label">175B</span>
+      </div>
+      <div class="bb-arrow">→</div>
+      <div class="bb-box" style="width:115px;height:105px;background:rgba(150,100,180,0.25);">
+        <span>GPT-4</span>
+        <span class="bb-label">&gt;1T?</span>
+      </div>
+      <div class="bb-arrow">→</div>
+      <div class="bb-box" style="width:150px;height:140px;background:rgba(200,80,160,0.18);border-color:rgba(200,80,160,0.4);">
+        <span style="color:#e090d0;">次世代</span>
+        <span class="bb-label" style="color:#c070b0;">???T</span>
+        <span class="bb-label" style="font-size:0.55rem;color:var(--risk);">誤差はどこに？</span>
+      </div>
+    </div>
+
+    <div class="flow" style="margin-top:0.8rem;">
+      <div class="flow-row cause">非線形な現実を線形で近似する</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row effect">近似誤差が発生（不可避）</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row effect">誤差を「パラメータ数を増やすことで覆う」</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row deep">より大きなモデルで再学習 → 誤差がさらに深部に埋まる</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row deep">埋まった誤差はどこにあるか誰も知らない → ブラックボックス</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row fatal">スケールを増やすほど「誤差の埋蔵量」が増える</div>
+    </div>
+
+    <div class="insight" style="margin-top:0.5rem;">
+      <p>
+        ブラックボックスは「設計の失敗」ではありません。<br>
+        <strong>線形近似で非線形現実を扱おうとした場合の構造的帰結</strong>です。<br>
+        誤差を排出する機構（脱進機原理）がなく閾値もないため<br>
+        誤差は「どこかのパラメータ」に埋め込まれ続けます。<br>
+        モデルが大きくなるほど<strong>埋め込み先が増える</strong>だけです。
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ 04 物理世界の非線形性 ══ -->
+  <div class="section">
+    <div class="sec-num">04 — PHYSICAL WORLD NONLINEARITY</div>
+    <div class="sec-title" style="color:var(--gold)">
+      物理世界（非線形）を理解しないとはどういうことか
+    </div>
+
+    <table class="cmp-table">
+      <tr>
+        <th>現象</th>
+        <th>物理の本質（非線形）</th>
+        <th>線形近似で何が消えるか</th>
+        <th>帰結</th>
+      </tr>
+      <tr>
+        <td>疲労・劣化</td>
+        <td>履歴依存。過去が現在を変える。不可逆。</td>
+        <td>履歴が消える。常に「今の値」だけを見る。</td>
+        <td>「今は正常」でも突然破断する理由がわからない。</td>
+      </tr>
+      <tr>
+        <td>乱流・カオス</td>
+        <td>初期値鋭敏性。微小な差が巨大な違いを生む。</td>
+        <td>初期値の差を均一化する。感度が消える。</td>
+        <td>長期予測が構造的に不可能なのに「予測できた」と出力する。</td>
+      </tr>
+      <tr>
+        <td>生体反応</td>
+        <td>閾値を超えると質的変化が起きる。相転移。</td>
+        <td>連続的な変化として扱う。閾値が存在しない。</td>
+        <td>「少し悪化」の積み重ねが突然の臓器不全になる理由を捉えられない。</td>
+      </tr>
+      <tr>
+        <td>構造破断</td>
+        <td>蓄積ズレδと吸収厚みτの比率Rが1.0を超えた瞬間。</td>
+        <td>RをΔとして線形で追う。蓄積の概念がない。</td>
+        <td>破断直前まで「正常値内」と判断し続ける。</td>
+      </tr>
+      <tr>
+        <td>経済・社会</td>
+        <td>非平衡・フィードバック・相互作用が非線形。</td>
+        <td>平均的な挙動として学習する。個別状態を失う。</td>
+        <td>「平均的には安全」でも特定構造が破綻することを予見できない。</td>
+      </tr>
+    </table>
+
+    <div style="margin-top:0.8rem;padding:0.8rem 1rem;background:rgba(0,0,0,0.35);border-radius:5px;border-left:3px solid var(--gold);font-size:0.72rem;line-height:1.8;color:#d0c890;">
+      線形近似は「現象を写し取る」ことはできます。しかし<br>
+      <strong style="color:var(--gold)">「現象が次に何をするか」を蓄積として追跡することはできません。</strong><br>
+      写し取った静止画をいくら精緻にしても、動いている現実は捉えられません。
+    </div>
+  </div>
+
+  <!-- ══ 05 報酬学習・チューニング・RAGの将来予測 ══ -->
+  <div class="section">
+    <div class="sec-num">05 — FUTURE PREDICTION</div>
+    <div class="sec-title" style="color:var(--future)">
+      報酬学習・チューニング・RAGはどうなるか
+    </div>
+
+    <div class="pred-grid">
+
+      <!-- Reward Learning -->
+      <div class="pred-card rl">
+        <div class="p-tech">⬛ 報酬学習 — Reward Learning / RLHF</div>
+        <div class="p-now">
+          人間の評価フィードバックを報酬として<br>
+          パラメータを更新する手法。<br>
+          現況では主流の「安全化」技術。
+        </div>
+        <div class="p-risk">
+          <strong>構造的問題：</strong><br>
+          報酬関数自体が線形空間で定義されている。<br>
+          「人間が良いと感じた」を数値化した瞬間に<br>
+          非線形な判断が線形に圧縮される。<br>
+          蓄積された誤報酬はパラメータに埋まり<br>
+          どこに何が埋まったか追跡不能になる。<br>
+          閾値がないため「過学習した報酬関数」に<br>
+          気づく仕組みが存在しない。
+        </div>
+        <div class="p-future">
+          <strong>将来の予測：</strong><br>
+          短期的には「人間に好まれる出力」を維持できる。<br>
+          しかし未知の入力・分布外の状況で<br>
+          報酬関数が崩壊する。<br>
+          R = δ/τ による報酬健全性の監視なしでは<br>
+          報酬ハッキングが深部に潜伏し続ける。
+        </div>
+      </div>
+
+      <!-- Fine-Tuning -->
+      <div class="pred-card ft">
+        <div class="p-tech">⬛ チューニング — Fine-Tuning / PEFT</div>
+        <div class="p-now">
+          基盤モデルに特定ドメインのデータを<br>
+          追加学習させる手法。<br>
+          LoRA等の省パラメータ手法も含む。
+        </div>
+        <div class="p-risk">
+          <strong>構造的問題：</strong><br>
+          チューニングは「誤差を新しいパラメータで上書き」<br>
+          しているに過ぎない。<br>
+          元のモデルに埋まっていた誤差の上に<br>
+          新しい層が重なるだけ。<br>
+          チューニング前の誤差はどこにも消えていない。<br>
+          壊滅的忘却（catastrophic forgetting）は<br>
+          誤差の上書きが構造的に矛盾するために起きる。
+        </div>
+        <div class="p-future">
+          <strong>将来の予測：</strong><br>
+          チューニングの積み重ねで「見た目は動く」が<br>
+          内部に矛盾を抱えたモデルが量産される。<br>
+          どのチューニングがどの誤差を生んだか<br>
+          追跡不能なまま運用される。<br>
+          NRA-IDE的な「チューニング前後のR変化」<br>
+          監視なしでは健全性の評価が不可能。
+        </div>
+      </div>
+
+      <!-- RAG -->
+      <div class="pred-card rag">
+        <div class="p-tech">⬛ RAG — Retrieval-Augmented Generation</div>
+        <div class="p-now">
+          外部知識ベースを検索して<br>
+          コンテキストに追加する手法。<br>
+          ハルシネーション対策として普及中。
+        </div>
+        <div class="p-risk">
+          <strong>構造的問題：</strong><br>
+          RAGは「知識の不足」への対処。<br>
+          しかし問題の本質は「計算構造の誤差蓄積」。<br>
+          正しい知識を追加しても<br>
+          線形写像の誤差増幅構造は変わらない。<br>
+          検索精度が上がるほど<br>
+          「正しい知識を誤って統合する」リスクが増える。<br>
+          閾値がないため「統合の失敗」を検知できない。
+        </div>
+        <div class="p-future">
+          <strong>将来の予測：</strong><br>
+          知識ベースが大きくなるほど<br>
+          検索誤差と統合誤差が複合的に蓄積する。<br>
+          「正しい知識を持っているのに誤った出力をする」<br>
+          という状態が増加する。<br>
+          R = δ/τ で統合健全性を監視しなければ<br>
+          RAGは「誤差の伝搬経路」になる。
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 06 スケール増加の逆説 ══ -->
+  <div class="section">
+    <div class="sec-num">06 — SCALE PARADOX</div>
+    <div class="sec-title" style="color:var(--risk)">
+      スケールを増やすほど破綻が深部に埋まっていく
+    </div>
+
+    <div class="flow">
+      <div class="flow-row cause">モデルサイズを増やす（パラメータ数↑）</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row effect">誤差の埋め込み先が増える</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row effect">表面上の精度が上がる（誤差が深く隠れる）</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row deep">「スケールすれば解決する」という信念が強化される</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row deep">さらにスケールを増やす → 誤差がより深部へ</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row fatal">閾値なし・追跡不能・Fail-Openのまま巨大化する</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-row fatal">破断したとき被害が甚大になっている</div>
+    </div>
+
+    <div class="insight" style="margin-top:0.5rem;">
+      <p>
+        これは技術の問題ではなく<strong>構造の問題</strong>です。<br>
+        閾値を持たない系にスケールを与えることは<br>
+        「止まれない乗り物を加速する」ことと同義です。<br>
+        <strong>NRA-IDEが必要なのは精度を上げるためではありません。</strong><br>
+        「どこで止まるか」を系に教えるためです。
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ Conclusion ══ -->
+  <div class="conclusion">
+    <div class="conc-grid">
+      <div class="conc-cell">
+        <span class="c-title" style="color:var(--risk)">現況AIが抱える構造的問題（一覧）</span>
+        閾値がない → 止まれない<br>
+        誤差が持ち越される → 指数増幅<br>
+        増幅した誤差をパラメータで覆う → ブラックボックス肥大<br>
+        線形写像で非線形現実を扱う → 概要を失う<br>
+        報酬関数が線形空間に閉じている → 誤報酬が埋まる<br>
+        チューニングは誤差の上書き → 矛盾が蓄積<br>
+        RAGは知識追加だが構造は変わらない → 誤統合
+      </div>
+      <div class="conc-cell">
+        <span class="c-title" style="color:var(--nra)">NRA-IDEが提供する構造的解答</span>
+        R = δ/τ という閾値を設計に組み込む<br>
+        残差を熱として排出し持ち越さない（脱進機原理）<br>
+        ブラックボックスを作らない構造で計算する<br>
+        非線形な蓄積をδとして追跡し概要を保持する<br>
+        R ≥ 1.0 で沈黙する → Fail-Closed<br>
+        「壊れたら止まる」が構造に組み込まれている<br>
+        沈黙することが最も正直な出力である
+      </div>
+    </div>
+
+    <div style="margin-top:1rem;padding:0.9rem 1rem;background:rgba(0,0,0,0.4);border-radius:5px;border-left:3px solid var(--gold);font-size:0.75rem;line-height:2;color:#d0c890;">
+      <strong style="color:var(--gold)">現況AIのスケールアップは誤差の埋蔵量を増やしているに過ぎない。</strong><br>
+      R = δ/τ による構造的閾値と Fail-Closed 設計なしに<br>
+      安全性を語ることは構造的に不可能である。<br>
+      これは批判ではなく<strong style="color:var(--nra)">構造的帰結の記述</strong>である。
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Copyright (c) 2026 M-Tokuni — Nomological Ring Axioms / Intensional Dynamics Engine<br>
+  https://github.com/M-Tokun/NRA-IDE &nbsp;·&nbsp; DOI: 10.5281/zenodo.19420854
+</footer>
+
+</body>
+</html>
