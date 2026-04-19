@@ -114,7 +114,7 @@ Formal definitions are provided in `Multi-Physics_Safety_Gate_Architecture.md` Â
 |---|---|---|
 | `Multi-Physics_Safety_Gate_Architecture.md` | Base equations, sensor definitions, topology | Source of Truth |
 | `NRA-IDE_IPL_3Layer_Monitor.md` | Rationale for 5-layer structure | Design philosophy |
-| `NRA-IDE_#08__Multi-Physics-Safety-Gate.html` | Layer C demonstration | Interactive demo |
+| `NRA-IDE_08_Multi-Physics-Safety-Gate.html` | Layer C demonstration | Interactive demo |
 | `NRA-IDE_IPL_3Layer_Monitor.html` | 3-layer independent alarm visualization | Interactive demo |
 
 ---

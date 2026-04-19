@@ -96,7 +96,7 @@ $R_{nuke}$ の定義は `Multi-Physics_Safety_Gate_Architecture.md` § 3 を参�
 |---|---|---|
 | `Multi-Physics_Safety_Gate_Architecture.md` | 基礎式・センサー定義・トポロジー | 実装仕様（Source of Truth） |
 | `NRA-IDE_IPL_3Layer_Monitor.md`（本文書） | 5層構造の根拠・平易な解説 | 設計思想・解説書 |
-| `NRA-IDE_#08__Multi-Physics-Safety-Gate.html` | 層Cの動作POC | インタラクティブデモ |
+| `NRA-IDE_08_Multi-Physics-Safety-Gate.html` | 層Cの動作POC | インタラクティブデモ |
 | `NRA-IDE_IPL_3Layer_Monitor.html` | 3層独立発報の可視化 | インタラクティブデモ |
 
 ---

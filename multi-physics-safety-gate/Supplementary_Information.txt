@@ -34,9 +34,9 @@ In other words,
 
 ---
 
-## ■ The Role of #08: Measuring “How Dangerous the House Is Right Now”
+## ■ The Role of 08: Measuring “How Dangerous the House Is Right Now”
 
-NRA-IDE_#08 looks at the conditions inside the house:
+NRA-IDE_08 looks at the conditions inside the house:
 
 ◯ Temperature
 ◯ Pressure
