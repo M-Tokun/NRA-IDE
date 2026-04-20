@@ -1,4 +1,4 @@
-# FILE: nra_ide_foundation_fixed_jp.py
+# FILE: nra_ide_foundation_fixed_JP.py
 # Title: NRA-IDE Foundation - DynamicState Core with Extension Reservations [fixed]
 # 「厚み + ゆらぎ×2 ver.1.0 安定版」
 # Author: M-Tokuni / 著作権
