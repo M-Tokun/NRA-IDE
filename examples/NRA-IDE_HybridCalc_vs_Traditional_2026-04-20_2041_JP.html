@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<!-- FILE: NRA-IDE_HybridCalc_vs_Traditional_20260420_2041.html -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-20 20:41 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE 残渣ベース遅延精度確保型 vs 従来計算方式</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@700&display=swap');
+
+  :root {
+    --bg: #080c10;
+    --surface: #0d1520;
+    --surface2: #121d2a;
+    --border: #1e3048;
+    --ide: #00e5ff;
+    --ide-dim: rgba(0,229,255,0.12);
+    --classical: #ff6b35;
+    --classical-dim: rgba(255,107,53,0.12);
+    --fail: #ff2255;
+    --ok: #39ff85;
+    --warn: #ffd700;
+    --text: #c8d8e8;
+    --muted: #4a6278;
+    --accent: #7b5ea7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grid noise bg */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+  /* ── header ── */
+  header { text-align: center; margin-bottom: 56px; }
+  .title-en {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.75rem, 2vw, 1rem);
+    letter-spacing: 0.3em;
+    color: var(--ide);
+    opacity: 0.7;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+  h1 span { color: var(--ide); }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  /* ── section label ── */
+  .section-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--ide);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── tabs ── */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--ide);
+    border: 1px solid var(--border);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* ── tab content ── */
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ── method cards ── */
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .method-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .method-card:hover { border-color: var(--classical); transform: translateY(-2px); }
+  .method-card.expanded { border-color: var(--classical); }
+
+  .card-header {
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .card-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--classical-dim);
+    color: var(--classical);
+    border: 1px solid rgba(255,107,53,0.3);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .card-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .card-name-en {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .method-card.expanded .card-body { max-height: 400px; }
+  .card-inner {
+    padding: 0 18px 18px 18px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .card-inner p {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .failure-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--fail);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+  }
+  .failure-code {
+    background: #0a0006;
+    border: 1px solid rgba(255,34,85,0.2);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: #ff8aaa;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  /* ── fail patterns ── */
+  .pattern-list { display: flex; flex-direction: column; gap: 12px; }
+  .pattern-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--fail);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .pattern-tag {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--fail);
+    margin-bottom: 8px;
+  }
+  .pattern-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 6px; }
+  .pattern-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+  .pattern-methods {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pm-chip {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    background: rgba(255,34,85,0.1);
+    border: 1px solid rgba(255,34,85,0.25);
+    border-radius: 4px;
+    color: #ff8aaa;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── formula display ── */
+  .formula-block {
+    background: var(--surface);
+    border: 1px solid var(--ide);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .formula-block::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ide), transparent);
+  }
+  .formula-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--ide);
+    margin-bottom: 20px;
+  }
+  .eq-row {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.85rem, 2vw, 1.05rem);
+    margin-bottom: 14px;
+    line-height: 1.8;
+    color: #e8f4ff;
+  }
+  .eq-row .eq-comment {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-left: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .eq-ide { color: var(--ide); }
+  .eq-gate { color: var(--warn); }
+  .eq-classical { color: var(--classical); }
+  .eq-ref { color: var(--ok); }
+
+  /* ── G(r) viz ── */
+  .viz-wrap {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 700px) { .viz-wrap { grid-template-columns: 1fr; } }
+
+  canvas#gr-canvas {
+    width: 100%;
+    aspect-ratio: 1.6;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: block;
+  }
+  .controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .ctrl-row { margin-bottom: 20px; }
+  .ctrl-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .ctrl-label span { color: var(--ide); }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--ide);
+    cursor: pointer;
+  }
+  .stat-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 16px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    margin-bottom: 8px;
+  }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-key { color: var(--muted); }
+  .stat-val { color: var(--ok); }
+
+  /* ── comparison table ── */
+  .cmp-table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.55;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-bad { color: var(--fail); }
+  .td-good { color: var(--ok); }
+  .td-key { color: var(--text); font-weight: 500; }
+
+  /* ── insight cards ── */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-top: 2px solid var(--ide);
+    transition: transform 0.15s;
+  }
+  .insight-card:hover { transform: translateY(-2px); }
+  .insight-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--ide-dim);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .insight-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 8px; color: var(--ide); }
+  .insight-body { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
+
+  /* footer */
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-en">NRA-IDE / NOMOLOGICAL RING AXIOMS</div>
+    <h1>残渣ベース遅延精度確保型<br><span>vs 従来計算方式</span></h1>
+    <p class="subtitle">Author: M-Tokuni　|　2026-04-20 20:41 JST</p>
+  </header>
+
+  <!-- tabs -->
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('methods')">従来手法と破綻原因</button>
+    <button class="tab" onclick="switchTab('patterns')">破綻パターン共通構造</button>
+    <button class="tab" onclick="switchTab('formula')">NRA-IDE 数式構造</button>
+    <button class="tab" onclick="switchTab('gr')">G(r) ゲート可視化</button>
+    <button class="tab" onclick="switchTab('compare')">比較表</button>
+    <button class="tab" onclick="switchTab('insights')">なぜ優れているか</button>
+  </div>
+
+  <!-- TAB: methods -->
+  <div id="tab-methods" class="tab-pane active">
+    <div class="section-label">TRADITIONAL METHODS — FAILURE ANALYSIS</div>
+    <div class="method-grid" id="method-grid"></div>
+  </div>
+
+  <!-- TAB: patterns -->
+  <div id="tab-patterns" class="tab-pane">
+    <div class="section-label">COMMON FAILURE STRUCTURES</div>
+    <div class="pattern-list" id="pattern-list"></div>
+  </div>
+
+  <!-- TAB: formula -->
+  <div id="tab-formula" class="tab-pane">
+    <div class="section-label">NRA-IDE RESIDUAL-BASED DELAYED PRECISION FORMULA</div>
+    <div class="formula-block">
+      <div class="formula-title">POSITION UPDATE</div>
+      <div class="eq-row">x<sub>t+1</sub> = x<sub>t</sub> + v<sub>t</sub> Δt</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-title">VELOCITY UPDATE — HYBRID ARCHITECTURE</div>
+      <div class="eq-row">
+        v<sub>t+1</sub> = v<sub>t</sub>
+        + <span class="eq-ide">F<sub>IDE</sub>(x<sub>t</sub>)</span>Δt
+        − α · <span class="eq-gate">R(x̃<sub>t+1</sub>, x<sub>t−τ</sub>)</span>Δt
+      </div>
+      <div style="margin-top:10px; font-size:0.8rem; color:var(--muted); line-height:1.8;">
+        <span class="eq-ide">F<sub>IDE</sub></span>：大局保持項（IDE非線形流。根本を手放さない）<br>
+        <span class="eq-gate">R(·)</span>：残渣ゲート項（古典補正。G(r)が自動制御）<br>
+        <span style="color:var(--text);">α</span>：補正強度係数
+      </div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-title">RESIDUAL GATE</div>
+      <div class="eq-row">
+        <span class="eq-gate">R</span>(x̃<sub>t+1</sub>, x<sub>t−τ</sub>) = G(<span class="eq-gate">x̃<sub>t+1</sub></span> − <span class="eq-ref">x<sub>t−τ</sub></span>)
+      </div>
+      <div style="margin-top:10px; font-size:0.8rem; color:var(--muted); line-height:1.8;">
+        <span class="eq-gate">x̃<sub>t+1</sub></span>：IDEによる前進計算の予測値<br>
+        <span class="eq-ref">x<sub>t−τ</sub></span>：τステップ前の<strong style="color:var(--ok)">実測記録値</strong>（推定ではない）<br>
+        r = 予測 − 記録（逆算なし・前進一方向）
+      </div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-title">G(r) — 2次残渣ゲート</div>
+      <div class="eq-row">
+        G(r) = r · <span class="eq-gate">|r| / (k + |r|)</span>
+      </div>
+      <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.82rem;">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;">
+          <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px;">|r| ≪ k</div>
+          <div style="color:var(--ok);">G(r) ≈ 0</div>
+          <div style="color:var(--muted);margin-top:4px;">古典層が沈黙。誤差爆発なし。</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;">
+          <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px;">|r| ≫ k</div>
+          <div style="color:var(--classical);">G(r) ≈ r</div>
+          <div style="color:var(--muted);margin-top:4px;">精密補正が全開。局所だけ。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: G(r) viz -->
+  <div id="tab-gr" class="tab-pane">
+    <div class="section-label">G(r) GATE CHARACTERISTIC VISUALIZER</div>
+    <div class="viz-wrap">
+      <canvas id="gr-canvas" width="640" height="400"></canvas>
+      <div class="controls">
+        <div class="ctrl-row">
+          <div class="ctrl-label">k（knee値） <span id="k-val">0.50</span></div>
+          <input type="range" id="k-slider" min="0.1" max="3.0" step="0.05" value="0.5">
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-label">α（補正強度） <span id="a-val">0.20</span></div>
+          <input type="range" id="a-slider" min="0.0" max="1.0" step="0.05" value="0.2">
+        </div>
+        <div class="stat-block">
+          <div class="stat-row">
+            <span class="stat-key">r=0.1 での G/r</span>
+            <span class="stat-val" id="stat-small">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-key">r=1.0 での G/r</span>
+            <span class="stat-val" id="stat-mid">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-key">r=5.0 での G/r</span>
+            <span class="stat-val" id="stat-large">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-key">飽和領域 |r| ></span>
+            <span class="stat-val" id="stat-knee">—</span>
+          </div>
+        </div>
+        <div style="margin-top:14px;font-size:0.75rem;color:var(--muted);line-height:1.7;">
+          <span style="color:var(--ide);">─</span> G(r)（NRA-IDE）<br>
+          <span style="color:rgba(255,255,255,0.3);">- -</span> y=r（古典線形）<br>
+          <span style="color:rgba(255,165,0,0.6);">─</span> G(r)/r 比率
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: compare -->
+  <div id="tab-compare" class="tab-pane">
+    <div class="section-label">COMPARISON — FAILURE POINT RESOLUTION</div>
+    <div class="cmp-table-wrap">
+      <table id="cmp-table"></table>
+    </div>
+  </div>
+
+  <!-- TAB: insights -->
+  <div id="tab-insights" class="tab-pane">
+    <div class="section-label">WHY NRA-IDE HYBRID IS SUPERIOR</div>
+    <div class="insight-grid" id="insight-grid"></div>
+  </div>
+
+  <footer>
+    NRA-IDE / Nomological Ring Axioms — Intensional Dynamics Engine<br>
+    M-Tokuni　|　2026-04-20 20:41 JST　|　他AIによる再検証を想定して整理済み
+  </footer>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────
+
+const METHODS = [
+  {
+    abbr:'VQE', name:'変分量子固有値ソルバ', nameEn:'Variational Quantum Eigensolver',
+    desc:'量子回路のパラメータを古典最適化で調整し、基底状態エネルギーを求める手法。',
+    failure:`推定 → 損失関数 → 勾配計算 → 再推定 → ...
+二重推定連鎖が構造的に発生。
+勾配消失（Barren Plateau）：パラメータ数増加で
+勾配がゼロに近づき最適化不能。`
+  },
+  {
+    abbr:'QPE', name:'量子位相推定', nameEn:'Quantum Phase Estimation',
+    desc:'ユニタリ演算子の固有値（位相）を精密に求める量子アルゴリズム。',
+    failure:`高精度 → 回路深さが指数的増加
+深い回路 → デコヒーレンス進行
+精度と安定性がトレードオフ。どちらかが常に犠牲。`
+  },
+  {
+    abbr:'HF', name:'ハートリー-フォック法', nameEn:'Hartree-Fock',
+    desc:'電子間相互作用を平均場近似で扱う量子化学計算の基礎手法。',
+    failure:`平均値で全体を近似する設計。
+電子相関を構造的に切り捨てる。
+強相関系・相転移では本質を見失う。
+冪乗則分布の系に適用不能（平均値の呪い）。`
+  },
+  {
+    abbr:'DMRG', name:'密度行列繰り込み群', nameEn:'Density Matrix Renormalization Group',
+    desc:'量子多体系の基底状態を行列積状態（MPS）で近似する手法。',
+    failure:`1次元：強力。2次元以上：指数爆発。
+ボンド次元が次元数と共に指数的増大。
+次元の呪いから脱出できない。`
+  },
+  {
+    abbr:'QMC', name:'量子モンテカルロ法', nameEn:'Quantum Monte Carlo',
+    desc:'確率的サンプリングで量子系の期待値を計算する手法。',
+    failure:`フェルミオン系の符号問題（Sign Problem）：
+サンプル正負のキャンセルで統計誤差が指数爆発。
+計算量クラスの問題。アルゴリズムでは解決不能。`
+  },
+  {
+    abbr:'CCSD(T)', name:'結合クラスター法', nameEn:'Coupled Cluster CCSD(T)',
+    desc:'電子相関を系統的に取り込む量子化学の精密計算手法。「ゴールドスタンダード」と称される。',
+    failure:`計算スケール O(N⁷)（Nは電子数）。
+分子が少し大きくなるだけで時間が現実を超える。
+全体を古典計算で扱うため誤差爆発が不可避。`
+  },
+  {
+    abbr:'MD', name:'分子動力学シミュレーション', nameEn:'Molecular Dynamics',
+    desc:'原子・分子の運動方程式を時間発展で数値積分する手法。',
+    failure:`ステップごとの離散化誤差が累積。
+長時間でエネルギー保存が崩れる。
+ピコ秒は扱えるがミリ秒は原理的に困難。`
+  },
+  {
+    abbr:'FDM', name:'有限差分法', nameEn:'Finite Difference Method',
+    desc:'偏微分方程式を格子点上の差分で近似する手法。',
+    failure:`CFL条件：時間刻み/空間刻み比に厳しい制約。
+制約を破ると数値振動が爆発的に増大。
+局所急変（衝撃波・相転移）で精度崩壊。`
+  },
+  {
+    abbr:'Spectral', name:'スペクトル法', nameEn:'Spectral Methods',
+    desc:'関数をフーリエ/多項式基底で展開して微分方程式を解く高精度手法。',
+    failure:`ギブス現象：不連続点近傍で振動（リンギング）が発生。
+相転移・衝撃波では構造的に対応不能。
+大域的基底のため局所精度調整が困難。`
+  },
+  {
+    abbr:'RK4', name:'Runge-Kutta法', nameEn:'Runge-Kutta Methods',
+    desc:'常微分方程式の数値積分の標準的手法。',
+    failure:`剛性方程式：大きく異なる時定数が共存すると
+安定性のために極小時間刻みが必要 → 計算量爆発。
+長時間積分での位相誤差累積は構造的に不可避。`
+  },
+];
+
+const PATTERNS = [
+  {
+    tag:'PATTERN A', title:'二重推定連鎖',
+    desc:'推定値をさらに推定で補正し、その補正をまた推定で補正する連鎖。誤差の量だけでなく「性質」が変質し、制御不能になる。',
+    methods:['VQE','QPE']
+  },
+  {
+    tag:'PATTERN B', title:'誤差の線形・指数的累積',
+    desc:'個々のステップの誤差は小さくても、ステップ数と共に線形または指数的に累積し、長時間発展で系が崩壊する。',
+    methods:['MD','RK4','FDM']
+  },
+  {
+    tag:'PATTERN C', title:'次元の呪い',
+    desc:'次元数・粒子数・パラメータ数が増えるたびに計算量が指数爆発し、スケールアップの経路が原理的に閉じる。',
+    methods:['DMRG','CCSD(T)','QMC']
+  },
+  {
+    tag:'PATTERN D', title:'局所精度と大域安定性のトレードオフ',
+    desc:'精度を上げると不安定化し、安定化すると精度が落ちる。単一の古典的枠組みで両方を同時に保証できない。',
+    methods:['FDM','Spectral','RK4']
+  },
+];
+
+const COMPARE_ROWS = [
+  ['誤差累積（長時間）', '離散化誤差が線形・指数増大', 'F_IDEが大局保持、累積経路を持たない'],
+  ['二重推定連鎖', 'VQE等で構造的に発生', 'x_{t-τ}が記録値のため連鎖なし'],
+  ['次元の呪い', 'DMRG・QMCで指数爆発', 'IDE包括計算が全体を担う'],
+  ['局所精度と大域安定のトレードオフ', 'どちらかが犠牲', 'G(r)が局所だけに古典を呼ぶ'],
+  ['剛性・CFL条件', '人間が刻み幅を設計', 'G(r)が系自身でゲート開閉'],
+  ['不連続点・相転移', 'ギブス現象・発散', 'G(r)飽和特性が自動対応'],
+  ['符号問題（QMC）', '原理的に解決不能', '統計的サンプリングに依存しない'],
+  ['基準点の性質', '推定値 vs 推定値', '予測値 vs 過去実績記録（逆算なし）'],
+];
+
+const INSIGHTS = [
+  {
+    n:'01', title:'根本を手放さない設計',
+    body:'F_IDEが常に大局的な状態空間を保持し続ける。古典層は「ズレが大きい局所」にだけ一時介入する。古典に全体を渡さないから爆発しない。'
+  },
+  {
+    n:'02', title:'基準点が実績記録値',
+    body:'r = x̃_{t+1} − x_{t-τ}。比較対象は「推定 vs 推定」ではなく「予測 vs 過去記録」。誤差が変質する経路が設計上存在しない。'
+  },
+  {
+    n:'03', title:'系が自動判断するゲート',
+    body:'G(r)は「どこで古典を呼ぶか」を人間が設計しなくてよい。系の残渣が自動的にゲートを開閉する。FDMのCFL条件・RK4の剛性問題を構造的に解消。'
+  },
+  {
+    n:'04', title:'連続微分可能な単一関数',
+    body:'「小揺らぎの抑制」と「大逸脱の許容」が単一の連続微分可能な関数G(r)で実現される。人為的なif文カットオフによる不連続性がない。'
+  },
+  {
+    n:'05', title:'互いの弱点を互いの強点で覆う',
+    body:'IDEの「幅広だが粗い」という欠点は古典補助で補われ、古典の「誤差爆発」はIDEが全体を保持することで回避される。相互補完の原則が計算アーキテクチャ層で実現。'
+  },
+  {
+    n:'06', title:'k一点の調整で用途対応',
+    body:'粗い全体把握（k大）・相転移の精密追跡（k小）・リアルタイム制御（中間）。バイナリな切り替えではなく連続的なレバーとして機能する。'
+  },
+];
+
+// ── Render methods ──────────────────────────────────
+const grid = document.getElementById('method-grid');
+METHODS.forEach((m, i) => {
+  const card = document.createElement('div');
+  card.className = 'method-card';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-badge">${m.abbr}</div>
+      <div>
+        <div class="card-name">${m.name}</div>
+        <div class="card-name-en">${m.nameEn}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>${m.desc}</p>
+        <div class="failure-label">▶ FAILURE STRUCTURE</div>
+        <div class="failure-code">${m.failure}</div>
+      </div>
+    </div>`;
+  card.onclick = () => {
+    card.classList.toggle('expanded');
+  };
+  grid.appendChild(card);
+});
+
+// ── Render patterns ──────────────────────────────────
+const pl = document.getElementById('pattern-list');
+PATTERNS.forEach(p => {
+  const el = document.createElement('div');
+  el.className = 'pattern-item';
+  el.innerHTML = `
+    <div class="pattern-tag">${p.tag}</div>
+    <div class="pattern-title">${p.title}</div>
+    <div class="pattern-desc">${p.desc}</div>
+    <div class="pattern-methods">${p.methods.map(m=>`<span class="pm-chip">${m}</span>`).join('')}</div>`;
+  pl.appendChild(el);
+});
+
+// ── Render compare ──────────────────────────────────
+const tbl = document.getElementById('cmp-table');
+tbl.innerHTML = `
+  <thead><tr>
+    <th>課題</th>
+    <th>従来手法の限界</th>
+    <th>NRA-IDEハイブリッドの対応</th>
+  </tr></thead>
+  <tbody>
+    ${COMPARE_ROWS.map(r=>`<tr>
+      <td class="td-key">${r[0]}</td>
+      <td class="td-bad">${r[1]}</td>
+      <td class="td-good">${r[2]}</td>
+    </tr>`).join('')}
+  </tbody>`;
+
+// ── Render insights ──────────────────────────────────
+const ig = document.getElementById('insight-grid');
+INSIGHTS.forEach(ins => {
+  const el = document.createElement('div');
+  el.className = 'insight-card';
+  el.innerHTML = `
+    <div class="insight-num">${ins.n}</div>
+    <div class="insight-title">${ins.title}</div>
+    <div class="insight-body">${ins.body}</div>`;
+  ig.appendChild(el);
+});
+
+// ── G(r) Canvas ──────────────────────────────────────
+const canvas = document.getElementById('gr-canvas');
+const ctx = canvas.getContext('2d');
+const kSlider = document.getElementById('k-slider');
+const aSlider = document.getElementById('a-slider');
+
+function G(r, k) { return r * Math.abs(r) / (k + Math.abs(r)); }
+
+function drawGr() {
+  const k = parseFloat(kSlider.value);
+  const a = parseFloat(aSlider.value);
+  document.getElementById('k-val').textContent = k.toFixed(2);
+  document.getElementById('a-val').textContent = a.toFixed(2);
+
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // bg
+  ctx.fillStyle = '#0d1520';
+  ctx.fillRect(0, 0, W, H);
+
+  // grid
+  const xMin=-5, xMax=5, yMin=-5, yMax=5;
+  const toX = x => (x - xMin) / (xMax - xMin) * W;
+  const toY = y => H - (y - yMin) / (yMax - yMin) * H;
+
+  ctx.strokeStyle = '#1e3048';
+  ctx.lineWidth = 1;
+  for (let x = xMin; x <= xMax; x++) {
+    ctx.beginPath(); ctx.moveTo(toX(x), 0); ctx.lineTo(toX(x), H); ctx.stroke();
+  }
+  for (let y = yMin; y <= yMax; y++) {
+    ctx.beginPath(); ctx.moveTo(0, toY(y)); ctx.lineTo(W, toY(y)); ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle = '#2a4060';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, toY(0)); ctx.lineTo(W, toY(0)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(toX(0), 0); ctx.lineTo(toX(0), H); ctx.stroke();
+
+  // linear y=r (dashed)
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6,4]);
+  ctx.beginPath();
+  ctx.moveTo(toX(xMin), toY(xMin));
+  ctx.lineTo(toX(xMax), toY(xMax));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // G(r)/r ratio curve
+  ctx.strokeStyle = 'rgba(255,200,0,0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  let first2 = true;
+  for (let px = 0; px < W; px++) {
+    const r = xMin + (px / W) * (xMax - xMin);
+    if (Math.abs(r) < 0.01) { first2 = true; continue; }
+    const ratio = G(r, k) / r;
+    const cy = toY(ratio * 2.5 - 2.5); // scale to visible range
+    if (first2) { ctx.moveTo(px, toY(Math.abs(r) / (k + Math.abs(r)) * 5 - 5)); first2 = false; }
+    else ctx.lineTo(px, toY(Math.abs(r) / (k + Math.abs(r)) * 5 - 5));
+  }
+  ctx.stroke();
+
+  // G(r) main curve
+  ctx.strokeStyle = '#00e5ff';
+  ctx.lineWidth = 3;
+  ctx.shadowColor = '#00e5ff';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  let first = true;
+  for (let px = 0; px < W; px++) {
+    const r = xMin + (px / W) * (xMax - xMin);
+    const g = G(r, k);
+    const cy = toY(g);
+    if (cy < -20 || cy > H + 20) { first = true; continue; }
+    if (first) { ctx.moveTo(px, cy); first = false; }
+    else ctx.lineTo(px, cy);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // knee marker
+  ctx.strokeStyle = 'rgba(255,180,0,0.5)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(toX(k), 0); ctx.lineTo(toX(k), H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(toX(-k), 0); ctx.lineTo(toX(-k), H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // labels
+  ctx.fillStyle = 'rgba(0,229,255,0.7)';
+  ctx.font = '12px JetBrains Mono, monospace';
+  ctx.fillText('G(r)', toX(3), toY(G(3, k)) - 10);
+  ctx.fillStyle = 'rgba(255,200,0,0.5)';
+  ctx.fillText('k='+k.toFixed(2), toX(k)+4, toY(0)-8);
+
+  // stats
+  const s01 = G(0.1, k) / 0.1;
+  const s10 = G(1.0, k) / 1.0;
+  const s50 = G(5.0, k) / 5.0;
+  document.getElementById('stat-small').textContent = (s01*100).toFixed(1) + '%';
+  document.getElementById('stat-mid').textContent   = (s10*100).toFixed(1) + '%';
+  document.getElementById('stat-large').textContent = (s50*100).toFixed(1) + '%';
+  document.getElementById('stat-knee').textContent  = k.toFixed(2);
+}
+
+kSlider.oninput = drawGr;
+aSlider.oninput = drawGr;
+drawGr();
+
+// ── Tab switch ──────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'gr') setTimeout(drawGr, 50);
+}
+</script>
+</body>
+</html>

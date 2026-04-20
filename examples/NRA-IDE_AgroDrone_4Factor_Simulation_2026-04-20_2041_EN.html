@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<!-- FILE: NRA-IDE_AgroDrone_4Factor_Simulation_EN_20260420_2041.html -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-20 20:41 JST -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NRA-IDE Seedling House — 4-Factor Correlation Simulation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#070b10; --s1:#0d1520; --s2:#111d2a; --bd:#1a2e42;
+  --t:#00e5ff; --w:#ffd700; --f:#ff2255; --ok:#39ff85;
+  --tx:#c8d8e8; --mu:#3d5870;
+  --c1:#00e5ff; --c2:#39ff85; --c3:#ffd700; --c4:#ff8c42;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.02) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:28px 20px;}
+header{text-align:center;margin-bottom:36px;}
+.h-sub{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.3em;color:var(--t);opacity:.7;margin-bottom:10px;}
+h1{font-size:clamp(1.2rem,3.5vw,1.9rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--t);font-style:normal;}
+.h-desc{font-size:0.82rem;color:var(--mu);}
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;}
+.btn{padding:8px 20px;border:1px solid var(--bd);border-radius:6px;background:var(--s1);color:var(--tx);font-family:'Inter',sans-serif;font-size:0.82rem;cursor:pointer;transition:.2s;}
+.btn:hover{border-color:var(--t);color:var(--t);}
+.btn.active{background:var(--t);color:#000;border-color:var(--t);}
+.scenario-label{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--mu);margin-left:auto;}
+select{padding:7px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:6px;color:var(--tx);font-family:'Inter',sans-serif;font-size:0.82rem;cursor:pointer;}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:750px){.main-grid{grid-template-columns:1fr;}}
+.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
+.panel-title{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:.2em;color:var(--t);margin-bottom:16px;}
+.factor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fc{background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:14px;position:relative;overflow:hidden;transition:border-color .3s;}
+.fc.warn{border-color:var(--w);}
+.fc.fail{border-color:var(--f);animation:pulse .6s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 0 rgba(255,34,85,0.1);}to{box-shadow:0 0 12px 2px rgba(255,34,85,0.25);}}
+.fc-name{font-size:0.78rem;color:var(--mu);margin-bottom:4px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:600;margin-bottom:8px;}
+.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:0.7rem;margin-bottom:4px;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:1rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.r-bar{height:100%;border-radius:2px;transition:width .3s,background .3s;}
+.fc-badge{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:0.6rem;padding:2px 6px;border-radius:3px;letter-spacing:.1em;}
+.badge-ok{background:rgba(57,255,133,.1);color:var(--ok);border:1px solid rgba(57,255,133,.3);}
+.badge-warn{background:rgba(255,215,0,.1);color:var(--w);border:1px solid rgba(255,215,0,.3);}
+.badge-fail{background:rgba(255,34,85,.15);color:var(--f);border:1px solid rgba(255,34,85,.4);}
+.corr-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
+.corr-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:600;transition:background .3s;}
+.corr-head{background:transparent;color:var(--mu);font-size:0.6rem;}
+.gate-list{display:flex;flex-direction:column;gap:8px;}
+.gate-row{display:flex;align-items:center;gap:10px;}
+.gate-name{font-size:0.78rem;min-width:60px;}
+.gate-bar-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.gate-bar-fill{height:100%;border-radius:4px;transition:width .3s;}
+.gate-val{font-family:'JetBrains Mono',monospace;font-size:0.72rem;min-width:52px;text-align:right;}
+.gate-status{font-family:'JetBrains Mono',monospace;font-size:0.62rem;min-width:56px;text-align:center;padding:2px 5px;border-radius:3px;}
+canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);border-radius:8px;border:1px solid var(--bd);}
+.log-area{height:140px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.7;}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--w);}
+.log-fail{color:var(--f);}
+.log-info{color:var(--mu);}
+.formula-box{background:var(--s2);border:1px solid var(--t);border-radius:8px;padding:14px 18px;margin-bottom:14px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:2;}
+.eq-t{color:var(--t);}
+.eq-g{color:var(--w);}
+.eq-r{color:var(--ok);}
+.overall{text-align:center;padding:16px;background:var(--s2);border-radius:10px;border:1px solid var(--bd);margin-bottom:14px;}
+.overall-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:.2em;color:var(--mu);margin-bottom:6px;}
+.overall-val{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:700;transition:color .3s;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-sub">NRA-IDE / AGRICULTURAL DOMAIN SIMULATION</div>
+  <h1>Seedling House — <em>4-Factor Correlation</em> Real-Time Simulation</h1>
+  <p class="h-desc">Onion Seedlings &nbsp;|&nbsp; Temperature · Humidity · Illuminance · Soil Moisture &nbsp;|&nbsp; R = δ/τ Tracking + G(r) Gate + Fail-Closed</p>
+</header>
+
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ Running</button>
+  <button class="btn" onclick="resetSim()">↺ Reset</button>
+  <label style="font-size:0.8rem;color:var(--mu);">Scenario:</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">Normal Operation</option>
+    <option value="drought">Moisture Deficit (Summer Drought)</option>
+    <option value="overheat">Temperature Rise (Poor Ventilation)</option>
+    <option value="dark">Light Deficiency (Overcast)</option>
+    <option value="cascade">Correlation Distortion (Cascade Collapse)</option>
+  </select>
+  <span class="scenario-label" id="scen-desc">All factors within normal range</span>
+</div>
+
+<div class="formula-box">
+  <span class="eq-t">F_IDE(x)</span>: Global retention — continuously tracks structural state of all factors &nbsp;|&nbsp;
+  <span class="eq-g">G(r) = r·|r|/(k+|r|)</span>: Residual gate — auto-controls classical correction &nbsp;|&nbsp;
+  <span class="eq-r">x_{t-τ}</span>: Measured record from τ steps ago (reference baseline — no back-calculation)
+</div>
+
+<div class="overall">
+  <div class="overall-label">SYSTEM R_composite = δ_composite / τ_composite</div>
+  <div class="overall-val" id="overall-r">0.00</div>
+  <div id="overall-status" style="font-size:0.8rem;color:var(--ok);margin-top:4px;">SAFE — All factors normal</div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">FACTOR STATE — R_i = δ_i / τ_i</div>
+    <div class="factor-grid" id="factor-grid"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
+    <div id="corr-matrix"></div>
+    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--mu);">
+      R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C &nbsp;|&nbsp; Red: correlation distortion detected
+    </div>
+    <div style="margin-top:8px;" id="corr-alert"></div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">G(r) GATE — Auto-control of classical correction</div>
+    <div class="gate-list" id="gate-list"></div>
+    <div style="margin-top:14px;font-size:0.78rem;color:var(--mu);line-height:1.7;">
+      Gate opening = |r|/(k+|r|) &nbsp; k=0.8 &nbsp;|&nbsp; 0%: Classical silent &nbsp; 100%: Full precision correction
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">TIME SERIES — R value history</div>
+    <canvas id="ts-canvas" class="ts-canvas" width="520" height="130"></canvas>
+    <div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c1);">─</span> Temp</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c2);">─</span> Humidity</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c3);">─</span> Light</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c4);">─</span> Moisture</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:rgba(255,34,85,0.6);">- -</span> Fail line</span>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">GATE LOG</div>
+  <div class="log-area" id="log-area"></div>
+</div>
+
+</div>
+
+<script>
+const FACTORS = [
+  { id:'temp',    name:'Temperature', unit:'°C',  color:'var(--c1)', opt:20,   tau:5,    min:10,  max:35,  desc:'Optimum 20°C  ±5°C tolerance',   corr_base:[1.0,0.55,0.30,0.20] },
+  { id:'hum',     name:'Humidity',    unit:'%',   color:'var(--c2)', opt:70,   tau:15,   min:30,  max:100, desc:'Optimum 70%   ±15% tolerance',   corr_base:[0.55,1.0,0.15,0.65] },
+  { id:'light',   name:'Illuminance', unit:'lx',  color:'var(--c3)', opt:4000, tau:2000, min:500, max:9000,desc:'Optimum 4000lx ±2000lx tolerance',corr_base:[0.30,0.15,1.0,0.10] },
+  { id:'water',   name:'Moisture',    unit:'%',   color:'var(--c4)', opt:65,   tau:15,   min:20,  max:95,  desc:'Optimum 65%   ±15% tolerance',   corr_base:[0.20,0.65,0.10,1.0] },
+];
+
+const SCENARIOS = {
+  normal:   { desc:'All factors within normal range',               drift:[0,0,0,0],        amp:[0.8,2.0,300,2.0] },
+  drought:  { desc:'Moisture deficit → humidity cascade drop',      drift:[1.5,-8,0,-18],   amp:[1.0,3.0,200,4.0] },
+  overheat: { desc:'Temperature rise → moisture evaporation chain', drift:[7,-5,0,-8],      amp:[2.0,4.0,200,3.0] },
+  dark:     { desc:'Light deficiency → photosynthesis suppressed',  drift:[0,3,-2500,2],    amp:[0.5,2.0,500,1.5] },
+  cascade:  { desc:'Correlation distortion → full cascade collapse',drift:[6,-12,-1500,-15],amp:[3.0,5.0,800,5.0] },
+};
+
+let running=true, tick=0;
+const HIST_LEN=120;
+let rHistory=[[],[],[],[]];
+let vals=[20,70,4000,65], baseVals=[20,70,4000,65];
+let noiseAmp=[0.8,2.0,300,2.0], driftTarget=[0,0,0,0];
+let scenario='normal', prevZones=['ok','ok','ok','ok'];
+const k_gate=0.8, tau_delay=8;
+let valHistory=[[],[],[],[]];
+let corrBase=FACTORS.map(f=>[...f.corr_base]);
+let logLines=[];
+
+function calcR(val,f){ return Math.abs(val-f.opt)/f.tau; }
+function G(r,k){ return r*Math.abs(r)/(k+Math.abs(r)); }
+function gateOpen(r,k){ return Math.abs(r)/(k+Math.abs(r)); }
+function getColor(R){ return R>=1.0?'var(--f)':R>=0.7?'var(--w)':'var(--ok)'; }
+function getBadge(R){ return R>=1.0?['FAIL-CLOSED','badge-fail']:R>=0.7?['WARNING','badge-warn']:['SAFE','badge-ok']; }
+
+function calcCorr(){
+  const C=[];
+  for(let i=0;i<4;i++){
+    C[i]=[];
+    for(let j=0;j<4;j++){
+      if(i===j){C[i][j]=1.0;continue;}
+      let drift=0;
+      if(scenario==='cascade'){ drift=(tick>40)?(tick-40)*0.008*(i+j)*0.1:0; drift=Math.min(drift,0.4); }
+      C[i][j]=Math.min(1,Math.max(0,corrBase[i][j]+drift+(Math.random()-0.5)*0.04));
+    }
+  }
+  return C;
+}
+
+function calcRCorr(C,C0,tauC=0.25){
+  let maxR=0; const alerts=[];
+  for(let i=0;i<4;i++) for(let j=i+1;j<4;j++){
+    const Rij=Math.abs(C[i][j]-C0[i][j])/tauC;
+    if(Rij>maxR) maxR=Rij;
+    if(Rij>=1.0) alerts.push(`C[${FACTORS[i].name}][${FACTORS[j].name}] R_corr=${Rij.toFixed(2)}`);
+  }
+  return {maxR,alerts};
+}
+
+function buildFactorCards(){
+  const g=document.getElementById('factor-grid'); g.innerHTML='';
+  FACTORS.forEach((f,i)=>{
+    const d=document.createElement('div'); d.className='fc'; d.id='fc-'+i;
+    d.innerHTML=`<div class="fc-badge badge-ok" id="badge-${i}">SAFE</div>
+      <div class="fc-name">${f.name}</div>
+      <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
+      <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ</span><span style="color:var(--mu)">${f.tau} ${f.unit}</span></div>
+      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
+      <div style="font-size:0.65rem;color:var(--mu);margin-top:6px;">${f.desc}</div>`;
+    g.appendChild(d);
+  });
+}
+
+function buildCorrMatrix(){
+  const g=document.getElementById('corr-matrix'); g.innerHTML='';
+  const grid=document.createElement('div'); grid.className='corr-grid';
+  grid.innerHTML+=`<div class="corr-cell corr-head"></div>`;
+  FACTORS.forEach(f=>grid.innerHTML+=`<div class="corr-cell corr-head">${f.name.substring(0,4)}</div>`);
+  FACTORS.forEach((fi,i)=>{
+    grid.innerHTML+=`<div class="corr-cell corr-head">${fi.name.substring(0,4)}</div>`;
+    FACTORS.forEach((_,j)=>grid.innerHTML+=`<div class="corr-cell" id="cm-${i}-${j}">—</div>`);
+  });
+  g.appendChild(grid);
+}
+
+function buildGateList(){
+  const g=document.getElementById('gate-list'); g.innerHTML='';
+  FACTORS.forEach((f,i)=>{
+    g.innerHTML+=`<div class="gate-row">
+      <div class="gate-name" style="color:${f.color}">${f.name.substring(0,5)}</div>
+      <div class="gate-bar-bg"><div class="gate-bar-fill" id="gbar-${i}" style="background:${f.color};width:0%"></div></div>
+      <div class="gate-val" id="gval-${i}">0%</div>
+      <div class="gate-status" id="gstat-${i}" style="background:rgba(57,255,133,.1);color:var(--ok);border:1px solid rgba(57,255,133,.3);">Silent</div>
+    </div>`;
+  });
+}
+
+const tsCanvas=document.getElementById('ts-canvas');
+const tsCtx=tsCanvas.getContext('2d');
+const TS_COLORS=['#00e5ff','#39ff85','#ffd700','#ff8c42'];
+
+function drawTimeSeries(){
+  const W=tsCanvas.width, H=tsCanvas.height;
+  tsCtx.clearRect(0,0,W,H);
+  tsCtx.fillStyle='#111d2a'; tsCtx.fillRect(0,0,W,H);
+  tsCtx.strokeStyle='#1a2e42'; tsCtx.lineWidth=1;
+  [0.25,0.5,0.75,1.0].forEach(y=>{
+    const py=H-y*H*0.85-8;
+    tsCtx.beginPath(); tsCtx.moveTo(0,py); tsCtx.lineTo(W,py); tsCtx.stroke();
+  });
+  const failY=H-1.0*(H*0.85)-8;
+  tsCtx.strokeStyle='rgba(255,34,85,0.4)'; tsCtx.lineWidth=1.5;
+  tsCtx.setLineDash([4,3]);
+  tsCtx.beginPath(); tsCtx.moveTo(0,failY); tsCtx.lineTo(W,failY); tsCtx.stroke();
+  tsCtx.setLineDash([]);
+  rHistory.forEach((hist,i)=>{
+    if(hist.length<2) return;
+    tsCtx.strokeStyle=TS_COLORS[i]; tsCtx.lineWidth=1.8;
+    tsCtx.beginPath();
+    hist.forEach((v,x)=>{
+      const px=(x/(HIST_LEN-1))*W;
+      const py=H-Math.min(v,1.5)/1.5*H*0.85-8;
+      x===0?tsCtx.moveTo(px,py):tsCtx.lineTo(px,py);
+    });
+    tsCtx.stroke();
+  });
+  tsCtx.fillStyle='rgba(255,34,85,0.6)';
+  tsCtx.font='10px JetBrains Mono,monospace';
+  tsCtx.fillText('R=1.0',4,failY-3);
+}
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const t=(tick+'').padStart(4,'0');
+  const div=document.createElement('div'); div.className='log-'+type;
+  div.textContent=`[t=${t}] ${msg}`;
+  area.insertBefore(div,area.firstChild);
+  logLines.push(div);
+  if(logLines.length>60){const old=logLines.shift();old.remove();}
+}
+
+const corrBase_snapshot=corrBase.map(r=>[...r]);
+
+function applyScenario(){
+  scenario=document.getElementById('scenario-sel').value;
+  const s=SCENARIOS[scenario];
+  driftTarget=[...s.drift]; noiseAmp=[...s.amp];
+  document.getElementById('scen-desc').textContent=s.desc;
+  addLog(`[SCENARIO] ${s.desc}`,'info');
+}
+
+function update(){
+  if(!running) return;
+  tick++;
+  vals=vals.map((v,i)=>{
+    const noise=(Math.random()-0.5)*2*noiseAmp[i];
+    const drift=driftTarget[i]*Math.min(1,tick/80);
+    const nv=baseVals[i]+drift+noise+Math.sin(tick*0.05+i)*noiseAmp[i]*0.5;
+    return Math.min(FACTORS[i].max,Math.max(FACTORS[i].min,nv));
+  });
+  vals.forEach((v,i)=>{
+    valHistory[i].push(v);
+    if(valHistory[i].length>tau_delay+2) valHistory[i].shift();
+  });
+  const C=calcCorr();
+  const {maxR:rCorrMax,alerts:corrAlerts}=calcRCorr(C,corrBase_snapshot);
+  let compositeR=0;
+  vals.forEach((v,i)=>{
+    const f=FACTORS[i];
+    const R=calcR(v,f);
+    rHistory[i].push(R);
+    if(rHistory[i].length>HIST_LEN) rHistory[i].shift();
+    const delta=Math.abs(v-f.opt);
+    const col=getColor(R);
+    const [bText,bCls]=getBadge(R);
+    document.getElementById('val-'+i).textContent=i===2?Math.round(v)+f.unit:v.toFixed(1)+f.unit;
+    document.getElementById('delta-'+i).textContent=(i===2?Math.round(delta):delta.toFixed(1))+f.unit;
+    document.getElementById('r-'+i).textContent=R.toFixed(3);
+    document.getElementById('r-'+i).style.color=col;
+    document.getElementById('rbar-'+i).style.width=Math.min(100,R*100)+'%';
+    document.getElementById('rbar-'+i).style.background=col;
+    const badge=document.getElementById('badge-'+i);
+    badge.textContent=bText; badge.className='fc-badge '+bCls;
+    const card=document.getElementById('fc-'+i);
+    card.className='fc'+(R>=1.0?' fail':R>=0.7?' warn':'');
+    const refVal=valHistory[i].length>=tau_delay?valHistory[i][0]:vals[i];
+    const r_residual=(v-refVal)/f.tau;
+    const gOpen=gateOpen(r_residual,k_gate)*100;
+    document.getElementById('gbar-'+i).style.width=gOpen.toFixed(1)+'%';
+    document.getElementById('gval-'+i).textContent=gOpen.toFixed(1)+'%';
+    const gStat=document.getElementById('gstat-'+i);
+    if(gOpen>70){ gStat.textContent='Full Corr.'; gStat.style.background='rgba(255,34,85,.1)'; gStat.style.color='var(--f)'; gStat.style.border='1px solid rgba(255,34,85,.3)'; }
+    else if(gOpen>30){ gStat.textContent='Correcting'; gStat.style.background='rgba(255,215,0,.1)'; gStat.style.color='var(--w)'; gStat.style.border='1px solid rgba(255,215,0,.3)'; }
+    else { gStat.textContent='Silent'; gStat.style.background='rgba(57,255,133,.1)'; gStat.style.color='var(--ok)'; gStat.style.border='1px solid rgba(57,255,133,.3)'; }
+    compositeR+=R;
+    const zone=R>=1.0?'fail':R>=0.7?'warn':'ok';
+    if(zone!==prevZones[i]){
+      if(zone==='fail') addLog(`FAIL-CLOSED: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'fail');
+      else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'warn');
+      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`,'ok');
+      prevZones[i]=zone;
+    }
+  });
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++){
+    const cell=document.getElementById(`cm-${i}-${j}`);
+    const v=C[i][j];
+    const Rij=(i!==j)?Math.abs(v-corrBase_snapshot[i][j])/0.25:0;
+    if(i===j){ cell.style.background=`rgba(0,229,255,0.15)`; cell.style.color='var(--t)'; cell.textContent='1.00'; }
+    else if(Rij>=1.0){ cell.style.background=`rgba(255,34,85,0.4)`; cell.style.color='#ff8aaa'; cell.textContent=v.toFixed(2); }
+    else { cell.style.background=`rgba(57,255,133,${v*0.35})`; cell.style.color=`rgba(255,255,255,${0.4+v*0.5})`; cell.textContent=v.toFixed(2); }
+  }
+  const ca=document.getElementById('corr-alert');
+  if(corrAlerts.length>0){
+    ca.innerHTML=corrAlerts.map(a=>`<span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--f);">⚠ ${a}</span>`).join('<br>');
+    if(tick%30===0) addLog(`Correlation distortion: ${corrAlerts[0]}`,'fail');
+  } else {
+    ca.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--ok);">✓ Correlation normal  R_corr=${rCorrMax.toFixed(3)}</span>`;
+  }
+  const Rcomp=compositeR/4;
+  const oEl=document.getElementById('overall-r');
+  oEl.textContent=Rcomp.toFixed(3); oEl.style.color=getColor(Rcomp);
+  const oSt=document.getElementById('overall-status');
+  if(Rcomp>=1.0){ oSt.textContent='FAIL-CLOSED — System halted'; oSt.style.color='var(--f)'; }
+  else if(Rcomp>=0.7){ oSt.textContent='WARNING — Monitoring intensified'; oSt.style.color='var(--w)'; }
+  else { oSt.textContent='SAFE — All factors normal'; oSt.style.color='var(--ok)'; }
+  drawTimeSeries();
+}
+
+function toggleRun(){
+  running=!running;
+  const btn=document.getElementById('btn-run');
+  btn.textContent=running?'▶ Running':'⏸ Paused';
+  btn.className=running?'btn active':'btn';
+}
+
+function resetSim(){
+  tick=0; rHistory=[[],[],[],[]]; valHistory=[[],[],[],[]];
+  vals=[20,70,4000,65]; baseVals=[20,70,4000,65];
+  driftTarget=[0,0,0,0]; noiseAmp=[0.8,2.0,300,2.0];
+  prevZones=['ok','ok','ok','ok'];
+  document.getElementById('scenario-sel').value='normal';
+  document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
+  scenario='normal'; logLines=[];
+  document.getElementById('log-area').innerHTML='';
+  addLog('System reset','info');
+}
+
+buildFactorCards(); buildCorrMatrix(); buildGateList();
+addLog('NRA-IDE Seedling House Simulation started','ok');
+addLog('R = δ/τ tracking active | G(r) gate on standby | Correlation monitoring active','info');
+setInterval(update,300);
+</script>
+</body>
+</html>
