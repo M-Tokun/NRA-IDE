@@ -1,5 +1,5 @@
 # .github/workflows/nra_check.yml
-# 2026-03-11_0520 JST
+# 2026-03-11_0520 JST 
 name: NRA-IDE Watchdog
 on: [push]
 jobs:
