@@ -49,7 +49,7 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
-## デモ一覧（推奨閲覧順）
+## デモ一覧（30本以上 — 推奨閲覧順）
 
 ブラウザで開くだけで動作します（インストール不要）。
 
@@ -113,6 +113,69 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 > 「境界に向かう勢い」という概念を持ちません。
 > ここで示すEMA先読み検知は、閾値だけの設計には構造的に存在しない機能です。
 > これがNRA-IDEが埋めるギャップです。
+
+---
+
+### ⚙️ STEP 7 — 高度ドメイン応用（11〜16）
+
+| # | ファイル | 内容 |
+|---|---------|------|
+| 11 | [11_Motor3Phase_BandGate_live_JP.html](./11_Motor3Phase_BandGate_live_JP.html) | **三相モーター Band Gate ライブ監視。** 三相モーターの負荷バランスと過負荷検知に R = δ/τ をリアルタイム適用。 |
+| 12 | [12_agri_mol_antagonism_JP.html](./12_agri_mol_antagonism_JP.html) | **農業イオン監視 + Mg²⁺/K⁺ 拮抗連鎖 Band Gate。** 黒ぼく土（Andosol）/一般農耕地プロファイル切替対応。動的τ＋非対称EMA。Mg障害時にK⁺τ連結ゲートが発動。 |
+| 13 | [13_photosynthesis_layer5_JP.html](./13_photosynthesis_layer5_JP.html) | **光合成監視 Layer 5。** Farquhar-von Caemmerer-Berry（FvCB）モデルを外部δ生成装置として使用 → R = δ/τ。非線形プリプロセッサとしての Layer 5 実装。 |
+| 14 | [14_powergrid_transition_JP.html](./14_powergrid_transition_JP.html) | **電力系統・遷移点監視。** 電力系統における構造的遷移点を検知。固定閾値では見逃す早期乖離をNRA-IDEが捕捉する。 |
+| 15 | [15_or_icu_continuum_JP.html](./15_or_icu_continuum_JP.html) | **OR/ICU 経過蓄積型モニタリング。** 手術〜ICU フェーズを通じた累積ズレを追跡。R は瞬間値ではなく継続的な構造的負荷を反映。 |
+| 16 | [16_passive_safety_JP.html](./16_passive_safety_JP.html) | **受動型・重力駆動安全システム。** 能動制御なしで物理的制約（重力・張力）だけで安全状態に遷移するアーキテクチャ。 |
+
+---
+
+### 🔬 STEP 8 — 物理的状態遷移監視（17〜22）
+
+| # | ファイル | 内容 |
+|---|---------|------|
+| 17 | [17_water_ice_phase_transition_JP.html](./17_water_ice_phase_transition_JP.html) | **水→氷 相転移。** 相変化境界（0°C）への接近を R で追跡。潜熱と温度が構造閾値を越える過程を可視化。 |
+| 18 | [18_chain_tension_JP.html](./18_chain_tension_JP.html) | **チェーン張力 ポリゴン効果＋自動調整。** スプロケット歯数同期の三層合成波でポリゴン効果を再現。dR/dt 予測制御で限界到達前に先行介入。 |
+| 19 | [19_air_pressure_JP.html](./19_air_pressure_JP.html) | **空気圧管理（圧縮性流体・動的τ・二重ゆらぎ）。** ボイル・シャルル則でτ_hiが温度依存で縮小。δとτが独立にゆらぐシリーズ最深構造。 |
+| 20 | [20_water_pressure_JP.html](./20_water_pressure_JP.html) | **水圧管理（非圧縮性流体・固定τ・ウォーターハンマー）。** ポンプ脈動を三層高調波で再現。弁急閉によるウォーターハンマー（指数減衰×正弦波）を実装。 |
+| 21 | [21_cabg_monitor_JP.html](./21_cabg_monitor_JP.html) | **CABG（冠動脈バイパス）モニター。** バイパス手術中の血流・圧力・温度を監視。Fail-Closed 時は手術中断を推奨。 |
+| 22 | [22_vascular_monitor_JP.html](./22_vascular_monitor_JP.html) | **NRA-IDE 血管インターベンションモニター。** 6物理量（圧力・せん断・壁張力・血流・温度・接着性）を二重ゆらぎ＋動的τで統合監視。PTA・ステント・吻合・クライオに特化。 |
+
+---
+
+### 🧩 STEP 9 — 高度機能・特定ドメイン（23〜26）
+
+| # | ファイル | 内容 |
+|---|---------|------|
+| 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **状態境界・短期ログ・長期再構成。** 短期ゆらぎ追跡と長期構造傾向の再構成をNRA-IDEがどう分離するかを実証。 |
+| 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **自動運転 必須限界構成デモ。** 衝突余裕時間・制動距離・横方向余裕を物理量監視。R ≥ 1.0 で上書き不可の強制 Fail-Closed。 |
+| 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **ダム管理比較 + τ劣化曲線。** 固定閾値監視 vs NRA-IDE τ劣化追跡を比較。構造余裕の侵食によるτ縮小を時系列で可視化。 |
+| 26 | [26_escapement_contactpoint_JP.html](./26_escapement_contactpoint_JP.html) | **Phase-Gap エンジン — 接触点のみ熱排出。** 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生することを実証。 |
+
+---
+
+### 🛠️ STEP 10 — 設備監視の基礎（27〜32）
+
+R = δ/τ を産業設備・施設監視の一般的ドメインに適用したデモ群です。
+7本を通じてNRA-IDEの**単位非依存性**——同一の式構造で根本的に異なる物理量を管理できること——を実証します。
+
+| # | ファイル | ドメイン | ポイント |
+|---|---------|---------|---------|
+| 27 | [27_belt_tension_JP.html](./27_belt_tension_JP.html) | ベルトコンベアー・Vベルト張力 | τを「最適値から限界までの全余裕」と定義 → Rが自然に [0,1] に正規化。Fail-Closed でベルト停止。 |
+| 28 | [28_water_temp_JP.html](./28_water_temp_JP.html) | 水温 上下限管理 | R_hi と R_lo を独立評価。熱対流ゆらぎ（3周波数合成）。Fail-Closed で逆方向動作を自動停止。 |
+| 29 | [29_light_lux_JP.html](./29_light_lux_JP.html) | 光量（照度）管理 | 受光側（ルクス）で計測。R_hi > 0.75 から比例的に遮光率増加 — 予兆段階からの段階的介入。 |
+| 30 | [30_power_JP.html](./30_power_JP.html) | 電力管理（V×I 統合） | 電流・電圧を P = V×I として一本化。熱蓄積：過電力継続時間が R を時間的に押し上げる。 |
+| 31 | [31_move_water_or_ice_JP.html](./31_move_water_or_ice_JP.html) | 水・氷 状態ナビゲーション | インタラクティブな相転移制御。液体と固体の間をスライドしながら相境界での R を追跡。 |
+| 32 | [32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html](./32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html) | 氷→水 相転移 | Demo 17 の逆方向：氷が 0°C を超えて潜熱を吸収しながら相変化する構造 R を追跡。 |
+
+---
+
+### 🔭 スタンドアロン ビジュアライザー
+
+| ファイル | 内容 |
+|---------|------|
+| [nra_ide_6d_layer_viz_2026-03-21_1237 (3).html](./nra_ide_6d_layer_viz_2026-03-21_1237%20(3).html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
+
+---
 
 ## 組み込み方法
 

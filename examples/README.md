@@ -54,7 +54,7 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
-## Demo List (Recommended Order)
+## Demo List (30+ demos — Recommended Order)
 
 These demos run directly in your browser — no installation required.
 
@@ -118,6 +118,69 @@ the same formula detects both over-range (surge) and under-range (dropout) event
 > They have no concept of "momentum toward the boundary."
 > The EMA pre-detection demonstrated here is structurally absent from threshold-only designs.
 > This is the gap NRA-IDE closes.
+
+---
+
+### ⚙️ STEP 7 — Advanced Domain Applications (11–16)
+
+| # | File | Content |
+|---|------|---------|
+| 11 | [11_Motor3Phase_BandGate_live_JP.html](./11_Motor3Phase_BandGate_live_JP.html) | **Three-phase motor Band Gate live monitoring.** Real-time R = δ/τ applied to three-phase motor load balance and overload detection. (JP) |
+| 12 | [12_agri_mol_antagonism_JP.html](./12_agri_mol_antagonism_JP.html) | **Agricultural ion monitoring + Mg²⁺/K⁺ antagonism chain Band Gate.** Andosol / general farmland profile switching. Dynamic τ with asymmetric EMA; Mg deficiency triggers linked K⁺ τ gate. (JP) |
+| 13 | [13_photosynthesis_layer5_JP.html](./13_photosynthesis_layer5_JP.html) | **Photosynthesis Layer 5 monitoring.** Farquhar-von Caemmerer-Berry (FvCB) model as external δ generator → R = δ/τ. Non-linear preprocessor as NRA-IDE Layer 5. (JP) |
+| 14 | [14_powergrid_transition_JP.html](./14_powergrid_transition_JP.html) | **Power grid transition / phase transition point.** Detects structural transition points in power grid state, where conventional threshold monitoring misses early divergence. (JP) |
+| 15 | [15_or_icu_continuum_JP.html](./15_or_icu_continuum_JP.html) | **OR/ICU continuum monitoring (cumulative state type).** Tracks accumulated deviation across surgical and ICU phases; R reflects ongoing structural burden, not just instantaneous values. (JP) |
+| 16 | [16_passive_safety_JP.html](./16_passive_safety_JP.html) | **Passive gravity-driven safety system.** Safety architecture that relies solely on physical constraints (gravity, tension) — no active control required to enter safe state. (JP) |
+
+---
+
+### 🔬 STEP 8 — Physical State Transition Monitoring (17–22)
+
+| # | File | Content |
+|---|------|---------|
+| 17 | [17_water_ice_phase_transition_JP.html](./17_water_ice_phase_transition_JP.html) | **Water → ice phase transition.** NRA-IDE tracks the approach to the phase boundary (0°C); R rises as temperature and latent heat cross the structural threshold. (JP) |
+| 18 | [18_chain_tension_JP.html](./18_chain_tension_JP.html) | **Chain tension with polygon effect auto-adjustment.** Three-layer composite wave reproduces sprocket polygon effect. dR/dt predictive control intervenes before the limit is reached. (JP) |
+| 19 | [19_air_pressure_JP.html](./19_air_pressure_JP.html) | **Air pressure management (compressible fluid · dynamic τ · dual fluctuation).** τ_hi shrinks with temperature rise via Boyle–Charles law; δ and τ fluctuate independently. The deepest dual-fluctuation structure in the series. (JP) |
+| 20 | [20_water_pressure_JP.html](./20_water_pressure_JP.html) | **Water pressure management (incompressible fluid · fixed τ · water hammer).** Pump pulsation via three-layer harmonics; valve rapid closure generates water hammer (exponential decay × sine wave). (JP) |
+| 21 | [21_cabg_monitor_JP.html](./21_cabg_monitor_JP.html) | **CABG (coronary artery bypass graft) monitor.** Intraoperative monitoring of blood flow, pressure, and temperature for bypass surgery; Fail-Closed triggers surgical suspension recommendation. (JP) |
+| 22 | [22_vascular_monitor_JP.html](./22_vascular_monitor_JP.html) | **NRA-IDE Vascular Intervention Monitor.** Six physical quantities (pressure · shear · wall tension · flow · temperature · adhesion) monitored via Dual Fluctuation + Dynamic τ. Specialized for PTA, stent, anastomosis, cryotherapy. (JP) |
+
+---
+
+### 🧩 STEP 9 — Advanced Features and Specific Domains (23–26)
+
+| # | File | Content |
+|---|------|---------|
+| 23 | [23_sample_demo_EN.html](./23_sample_demo_EN.html) / [JP](./23_sample_demo_JP.html) | **State boundary · short-term log · long-term reconstruction.** Demonstrates how NRA-IDE separates short-term fluctuation tracking from long-term structural trend reconstruction. |
+| 24 | [24_vehicle_mandatory_boundary_EN.html](./24_vehicle_mandatory_boundary_EN.html) / [JP](./24_vehicle_mandatory_boundary_JP.html) | **Autonomous driving mandatory boundary monitoring.** Physical quantity monitoring (time-to-collision, braking distance, lateral clearance); mandatory Fail-Closed when R ≥ 1.0 with no override path. |
+| 25 | [25_dam_degradation_EN.html](./25_dam_degradation_EN.html) / [JP](./25_dam_degradation_JP.html) | **Dam management comparison + τ degradation curve.** Compares conventional fixed-threshold monitoring vs. NRA-IDE τ degradation tracking. τ shrinks over time as structural margin erodes. |
+| 26 | [26_escapement_contactpoint_JP.html](./26_escapement_contactpoint_JP.html) | **Phase-gap engine — heat dissipation at contact points only.** Demonstrates that error/heat is generated only at phase-boundary contact, not throughout continuous computation. (JP) |
+
+---
+
+### 🛠️ STEP 10 — Equipment Monitoring Fundamentals (27–32)
+
+These demos apply R = δ/τ to common industrial and facility monitoring domains.
+Each demonstrates unit independence: the same formula structure manages fundamentally different physical quantities.
+
+| # | File | Domain | Key Point |
+|---|------|--------|-----------|
+| 27 | [27_belt_tension_JP.html](./27_belt_tension_JP.html) | Belt conveyor / V-belt tension | τ defined as full margin from optimum to limit → R naturally normalizes to [0,1]. Fail-Closed stops belt animation. (JP) |
+| 28 | [28_water_temp_JP.html](./28_water_temp_JP.html) | Water temperature upper/lower limits | R_hi and R_lo evaluated independently. Thermal convection fluctuation (3-frequency composite). Fail-Closed stops the opposing action direction. (JP) |
+| 29 | [29_light_lux_JP.html](./29_light_lux_JP.html) | Luminosity (illuminance) management | Measured in lux (receiver side). AUTO-SHADE increases shade ratio proportionally from R_hi > 0.75 — stepwise intervention from precursor stage. (JP) |
+| 30 | [30_power_JP.html](./30_power_JP.html) | Power management (V × I integration) | Current and voltage unified as P = V×I. Heat accumulation: prolonged excess power pushes R upward over time (temporal integral). (JP) |
+| 31 | [31_move_water_or_ice_JP.html](./31_move_water_or_ice_JP.html) | Water / ice phase navigation | Interactive phase transition control; slide between liquid and solid states while tracking R across the phase boundary. (JP) |
+| 32 | [32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html](./32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html) | Ice → water phase transition | Reverse of Demo 17: tracks structural R as ice warms past 0°C and latent heat is absorbed during phase change. (JP) |
+
+---
+
+### 🔭 Standalone Visualizer
+
+| File | Content |
+|------|---------|
+| [nra_ide_6d_layer_viz_2026-03-21_1237 (3).html](./nra_ide_6d_layer_viz_2026-03-21_1237%20(3).html) | **6D multi-layer visualizer.** Six simultaneous R-value surfaces with transparency, saturation, and black-and-white mode. Each layer = one physical domain's fluctuation × threshold plane. Time axis shows structural approach to Fail-Closed across all dimensions simultaneously. |
+
+---
 
 ## Integration Guide
 
