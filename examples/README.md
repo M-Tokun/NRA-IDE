@@ -54,7 +54,7 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
-## Demo List (30+ demos — Recommended Order)
+## Demo List (36 demos — Recommended Order)
 
 These demos run directly in your browser — no installation required.
 
@@ -174,11 +174,13 @@ Each demonstrates unit independence: the same formula structure manages fundamen
 
 ---
 
-### 🔭 Standalone Visualizer
+### 🔭 Standalone Demos
 
 | File | Content |
 |------|---------|
-| [nra_ide_6d_layer_viz_2026-03-21_1237 (3).html](./nra_ide_6d_layer_viz_2026-03-21_1237%20(3).html) | **6D multi-layer visualizer.** Six simultaneous R-value surfaces with transparency, saturation, and black-and-white mode. Each layer = one physical domain's fluctuation × threshold plane. Time axis shows structural approach to Fail-Closed across all dimensions simultaneously. |
+| [nra_ide_6d_layer_viz_2026-03-21_1237.html](./nra_ide_6d_layer_viz_2026-03-21_1237.html) | **6D multi-layer visualizer.** Six simultaneous R-value surfaces with transparency, saturation, and black-and-white mode. Each layer = one physical domain's fluctuation × threshold plane. Time axis shows structural approach to Fail-Closed across all dimensions simultaneously. |
+| [NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) / [JP](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) | **Agricultural Drone 4-Factor Simulation.** NRA-IDE applied to agro-drone field monitoring: four simultaneous physical factors tracked with R = δ/τ. Fail-Closed triggers when any factor breaches structural limits. |
+| [NRA-IDE_HybridCalc_vs_Traditional_2026-04-20_2041_EN.html](./NRA-IDE_HybridCalc_vs_Traditional_2026-04-20_2041_EN.html) / [JP](./NRA-IDE_HybridCalc_vs_Traditional_2026-04-20_2041_JP.html) | **Hybrid Calculation vs Traditional.** Side-by-side comparison of NRA-IDE hybrid computation against conventional methods. Visualizes where classical calculation diverges and where IDE tracking remains structurally consistent. |
 
 ---
 
