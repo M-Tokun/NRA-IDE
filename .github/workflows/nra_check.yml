@@ -18,3 +18,9 @@ jobs:
 
       - name: Energy Balance Check
         run: python nra-core/implementation/nra_ide_foundation_fixed_JP.py
+
+      - name: Check Internal Links
+        run: python scripts/check_links.py
+
+      - name: Check Demo Count
+        run: python scripts/check_demo_count.py
