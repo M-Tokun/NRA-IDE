@@ -49,7 +49,7 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
-## デモ一覧（36本 — 推奨閲覧順）
+## デモ一覧（32本 — 推奨閲覧順）
 
 ブラウザで開くだけで動作します（インストール不要）。
 
@@ -175,7 +175,6 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 |---------|------|
 | [nra_ide_6d_layer_viz_2026-03-21_1237.html](./nra_ide_6d_layer_viz_2026-03-21_1237.html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
 | [NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | **農業ドローン 4要素シミュレーション。** ドローンによる圃場監視に NRA-IDE を適用。4物理量を R = δ/τ で同時追跡。いずれかが構造限界を超えると Fail-Closed が発動。 |
-| [NRA-IDE_HybridCalc_vs_Traditional_2026-04-20_2041_JP.html](./NRA-IDE_HybridCalc_vs_Traditional_2026-04-20_2041_JP.html) / [EN](./NRA-IDE_HybridCalc_vs_Traditional_2026-04-20_2041_EN.html) | **ハイブリッド計算 vs 従来計算 比較。** NRA-IDE ハイブリッド計算と従来手法を並列比較。古典計算が乖離し始めるポイントと IDE 追跡が構造整合性を保ち続ける様子を可視化。 |
 
 ---
 

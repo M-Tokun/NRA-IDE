@@ -2,15 +2,83 @@
   "theory": {
     "name": "Nomological Ring Axioms",
     "abbreviation": "NRA",
-    "version": "1.0",
+    "version": "2.0",
+    "updated": "2026-04-22 JST",
     "author": "M-Tokuni",
-    "description": "A structural framework describing existence as continuous generation and state transition."
+    "description": "A structural framework describing existence as continuous generation and state transition, with structural play as the persistence condition."
   },
 
-  "core_axiom": {
-    "jp_original": "存在は生成である",
-    "en_reference": "Existence is Generation",
-    "note": "All structural interpretations in NRA derive from this axiom."
+  "axioms": {
+    "first_axiom": {
+      "id": "AX1",
+      "jp_original": "存在は生成である",
+      "en_reference": "Existence is Generation",
+      "type": "foundational",
+      "category": "ontology",
+      "depends_on": null,
+      "derivation_from_prerequisite": null,
+      "note": "Defines existence as an ongoing generative process. The world is a historical generative structure rather than a collection of static states.",
+      "consequences": [
+        "Absolute stasis does not occur",
+        "Identical histories cannot reoccur",
+        "The world is a historical generative structure"
+      ]
+    },
+
+    "second_axiom": {
+      "id": "AX2",
+      "jp_original": "遊びのない厳密さは崩壊する",
+      "en_reference": "Rigidity without play collapses",
+      "type": "dependent",
+      "category": "persistence_condition",
+      "depends_on": ["AX1"],
+      "derivation_from_prerequisite": false,
+      "note": "Presupposes the first axiom but is not derived from it. Specifies the condition required for the generative structure defined by the first axiom to persist as a real system.",
+      "term_definition": {
+        "play": {
+          "scope": "engineering / structural",
+          "en_terms": ["engineering play", "structural play"],
+          "examples": [
+            "Internal clearance of bearings",
+            "Meshing tolerance of gears",
+            "Appropriate range of bolt fastening"
+          ],
+          "not": "Colloquial sense of leisure or surplus"
+        }
+      },
+      "mathematical_expression": {
+        "theoretical_layer": {
+          "condition": "tau = 0",
+          "result": "R = delta / tau is undefined (out of domain)",
+          "meaning": "System is mathematically non-describable; this is not Fail-Closed but a switch of description system"
+        },
+        "operational_layer": {
+          "condition": "tau > 0 and tau is sufficiently small",
+          "result": "R = delta / tau is defined but diverges rapidly",
+          "trigger": "R >= 1 triggers Fail-Closed judgment",
+          "meaning": "Fail-Closed is an operational judgment, distinct from theoretical non-describability"
+        }
+      },
+      "design_principles": [
+        "Determine what to track rigorously and what to allow to play",
+        "Allocate the play width tau across dimensions",
+        "Operate the play utilization rate R within the survival range"
+      ],
+      "derived_principles": {
+        "fail_closed": "Operational judgment when play utilization R exceeds threshold",
+        "no_reverse_calculation": "Re-estimation chains transform errors and reduce play",
+        "all_variables_dynamic": "Static variables do not exercise play in their dimension",
+        "distance_is_result": "Distance is a static index that ignores play"
+      }
+    }
+  },
+
+  "axiom_relation": {
+    "type": "dependent_axiom_relation",
+    "description": "AX2 presupposes AX1 but is not logically derived from AX1. AX1 defines what existence is. AX2 defines the condition under which that existence persists as a real system.",
+    "first_axiom_role": "Defines the concept of generation; complete within itself",
+    "second_axiom_role": "Specifies the condition required when describing the object of the first axiom as a real system",
+    "logical_classification": "Neither independent parallel nor derived corollary; the second axiom requires the first as prerequisite while making an independent claim that does not follow automatically from the first"
   },
 
   "structural_worldview": {
@@ -25,7 +93,7 @@
   },
 
   "structural_ratio": {
-    "formula": "R = δ / τ",
+    "formula": "R = delta / tau",
     "variables": {
       "delta": {
         "symbol": "δ",
@@ -35,16 +103,22 @@
       "tau": {
         "symbol": "τ",
         "name": "Absorption Thickness",
-        "jp": "吸収厚み"
+        "jp": "吸収厚み",
+        "second_axiom_interpretation": "Structural play width in the engineering sense"
       },
       "R": {
         "name": "Approach Ratio",
-        "jp": "接近比"
+        "jp": "接近比",
+        "second_axiom_interpretation": "Play utilization rate"
       }
     },
     "boundary_condition": {
       "condition": "R >= 1",
-      "meaning": "Structural limit reached"
+      "meaning": "Structural limit reached; play fully consumed; departure from survival space"
+    },
+    "domain_constraint": {
+      "condition": "tau > 0 required",
+      "meaning": "Per the second axiom, tau = 0 places the system outside the NRA-IDE description domain"
     }
   },
 
@@ -56,16 +130,42 @@
       "IDE evaluates structural state only",
       "IDE does not generate meaning",
       "IDE does not make final decisions",
-      "IDE detects structural boundaries"
+      "IDE detects structural boundaries",
+      "IDE designs the allocation of play across system dimensions"
     ],
     "fail_closed_rule": {
-      "description": "When structural limit is reached, system output is restricted and control is transferred to human decision."
+      "description": "When structural limit is reached (R >= 1 in the operational layer), system output is restricted and control is transferred to human decision.",
+      "distinction_from_non_describability": "Fail-Closed is operational; non-describability (tau = 0) is theoretical"
     }
   },
 
   "references": {
-    "theory_document": "./THEORY.md",
+    "theory_document": "./Foundational_Thesis.md",
+    "second_axiom_journey": "./NRA-IDE_SecondAxiom_Journey_Final2_20260422_0039_JST.md",
     "ethics": "./ETHICS.md",
-    "_directory": "./figures/TOP_sandwich.png"
+    "papers_directory": "./papers/"
+  },
+
+  "revision_history": {
+    "v2.0": {
+      "date": "2026-04-22 JST",
+      "changes": [
+        "Introduced second_axiom (AX2): 'Rigidity without play collapses'",
+        "Restructured core_axiom into axioms.first_axiom and axioms.second_axiom",
+        "Added axiom_relation to clarify the dependent (non-independent, non-derived) relation between AX1 and AX2",
+        "Added second_axiom_interpretation fields to tau and R in structural_ratio",
+        "Added domain_constraint to structural_ratio",
+        "Added distinction_from_non_describability to fail_closed_rule",
+        "Added IDE principle: 'IDE designs the allocation of play across system dimensions'"
+      ]
+    },
+    "v1.0": {
+      "date": "Initial release",
+      "changes": [
+        "First axiom 'Existence is generation' as core_axiom",
+        "Basic structural_ratio R = delta / tau",
+        "IDE specification with Fail-Closed rule"
+      ]
+    }
   }
 }

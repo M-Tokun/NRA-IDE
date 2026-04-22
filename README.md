@@ -17,8 +17,7 @@
 |------|-------------|
 | [FORMULA.md](./FORMULA.md) | Fundamental equations — R = δ/τ and Dual-Fluctuation Formula (complete primary & secondary definitions) |
 | [THEORY.md](./theory/THEORY.md) | Core axiom and structural worldview |
-| [Foundational_Thesis_JP.md](./theory/Foundational_Thesis_JP.md) | Foundational Thesis (Japanese) |
-| [Foundational_Thesis_EN.md](./theory/Foundational_Thesis_EN.md) | Foundational Thesis (English) |
+| [NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md](./theory/NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md) | Foundational_Thesis_EN_JP_v2_1 |
 | [ETHICS.md](./theory/ETHICS.md) | Ethical statement |
 | [axioms.json](./theory/axioms.json) | Machine-readable axiom definitions |
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | Box Sandwich Architecture — structural isolation spec for LLM integration |
@@ -42,7 +41,7 @@ Interactive HTML simulations are available in the [`examples/`](./examples/) dir
 | 21 | [CABG Monitor](./examples/21_cabg_monitor_JP.html) | Medical application — δ/τ on physiological indicators |
 | 25 | [Dam Degradation](./examples/25_dam_degradation_EN.html) | Margin consumption tracking over cumulative load |
 
-→ [Full list of all 27 demos](./examples/)
+→ [Full list of all 32 demos](./examples/)
 
 ---
 

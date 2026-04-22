@@ -18,8 +18,7 @@
 |---------|------|
 | [FORMULA.md](./FORMULA.md) | 定義式 — R = δ/τ および二重ゆらぎ式（一次式・二次式の完全定義）|
 | [THEORY.md](./theory/THEORY.md) | 核公理と構造的世界観 |
-| [Foundational_Thesis_JP.md](./theory/Foundational_Thesis_JP.md) | 理論論文（日本語版） |
-| [Foundational_Thesis_EN.md](./theory/Foundational_Thesis_EN.md) | Foundational Thesis (English) |
+| [NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md](./theory/NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md) | Foundational_Thesis_EN_JP_v2_1 |
 | [ETHICS.md](./theory/ETHICS.md) | 倫理声明 |
 | [axioms.json](./theory/axioms.json) | 機械可読な公理定義 |
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | ボックス・サンドイッチ・アーキテクチャ — LLM統合のための構造分離仕様 |
@@ -42,7 +41,7 @@
 | 21 | [CABG Monitor](./examples/21_cabg_monitor_JP.html) | 医療応用 — 生体指標にδ/τを適用 |
 | 25 | [ダム劣化](./examples/25_dam_degradation_JP.html) | 累積負荷による余裕幅消費の追跡 |
 
-→ [全27デモ一覧](./examples/)
+→ [全32デモ一覧](./examples/)
 
 ---
 
