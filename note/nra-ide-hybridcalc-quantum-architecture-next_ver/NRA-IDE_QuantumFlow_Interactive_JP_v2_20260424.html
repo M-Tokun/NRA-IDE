@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA-IDE_QuantumFlow_Interactive_JP_v2_20260424.html -->
+<!-- Title: NRA-IDE 量子計算拡張 — 思考フロー可視化 v2 -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-24 JST -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE 量子拡張フロー v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Noto+Serif+JP:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #080c10;
+    --bg2: #0d1520;
+    --bg3: #111e2e;
+    --border: #1e3148;
+    --accent1: #00c8ff;
+    --accent3: #7fff7f;
+    --accent4: #ffcc44;
+    --accent5: #cc77ff;
+    --text: #c8d8e8;
+    --text2: #7a9ab8;
+    --fail: #ff4444;
+    --resolved: #43e97b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Serif JP', serif; min-height: 100vh; overflow-x: hidden; }
+
+  header {
+    background: linear-gradient(90deg, #060a0f 0%, #0d1e30 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex; align-items: center; gap: 18px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  header .logo { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent1); letter-spacing: 2px; white-space: nowrap; }
+  header h1 { font-size: 15px; font-weight: 400; color: var(--text); letter-spacing: 1px; }
+  header .sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); margin-left: auto; }
+  header .badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; background: rgba(67,233,123,0.15); color: var(--resolved); border: 1px solid rgba(67,233,123,0.3); border-radius: 2px; padding: 2px 8px; letter-spacing: 1px; }
+
+  .container { display: grid; grid-template-columns: 230px 1fr 310px; height: calc(100vh - 52px); }
+
+  .nav { background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px 0; }
+  .nav-group { margin-bottom: 4px; }
+  .nav-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; padding: 10px 16px 4px; }
+  .nav-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 16px; cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s; font-size: 12px; line-height: 1.5; }
+  .nav-item:hover { background: rgba(0,200,255,0.05); }
+  .nav-item.active { background: rgba(0,200,255,0.08); border-left-color: var(--accent1); color: var(--accent1); }
+  .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .nav-item.status-confirmed .dot { background: var(--accent3); }
+  .nav-item.status-partial .dot   { background: var(--accent4); }
+  .nav-item.status-open .dot      { background: var(--fail); }
+  .nav-item.status-concept .dot   { background: var(--accent5); }
+  .nav-item.status-legacy .dot    { background: var(--text2); }
+  .nav-item.status-resolved .dot  { background: var(--resolved); box-shadow: 0 0 6px var(--resolved); }
+  .nav-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+
+  .main { overflow-y: auto; padding: 28px; background: var(--bg); }
+  .flow-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+
+  .node { position: relative; border-radius: 4px; padding: 12px 16px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; font-size: 13px; }
+  .node:hover { transform: translateY(-1px); }
+  .node-type-legacy    { background: rgba(30,49,72,0.5);  border-color: var(--border);             color: var(--text2); }
+  .node-type-confirmed { background: rgba(0,127,80,0.15); border-color: rgba(127,255,127,0.3);     color: var(--accent3); }
+  .node-type-partial   { background: rgba(80,60,0,0.3);   border-color: rgba(255,204,68,0.4);      color: var(--accent4); }
+  .node-type-open      { background: rgba(80,0,0,0.3);    border-color: rgba(255,68,68,0.4);       color: var(--fail); }
+  .node-type-concept   { background: rgba(60,0,90,0.3);   border-color: rgba(204,119,255,0.4);     color: var(--accent5); }
+  .node-type-primary   { background: rgba(0,60,90,0.4);   border-color: rgba(0,200,255,0.5);       color: var(--accent1); }
+  .node-type-resolved  { background: rgba(10,80,40,0.35); border-color: rgba(67,233,123,0.5);      color: var(--resolved); }
+  .node-tag     { font-family: 'IBM Plex Mono', monospace; font-size: 9px; opacity: 0.7; margin-bottom: 4px; letter-spacing: 1px; }
+  .node-title   { font-weight: 600; font-size: 13px; line-height: 1.4; }
+  .node-formula { font-family: 'IBM Plex Mono', monospace; font-size: 11px; opacity: 0.8; margin-top: 4px; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+
+  .arrow-down { display: flex; justify-content: center; align-items: center; height: 32px; color: var(--text2); position: relative; }
+  .arrow-down::before { content: ''; position: absolute; top: 4px; bottom: 16px; width: 1px; background: linear-gradient(to bottom, var(--border), var(--text2)); }
+  .arrow-down::after { content: '▼'; font-size: 10px; }
+
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-label.resolved-label { color: var(--resolved); }
+  .section-label.resolved-label::after { background: rgba(67,233,123,0.3); }
+
+  .detail { background: var(--bg2); border-left: 1px solid var(--border); overflow-y: auto; padding: 20px; }
+  .detail-header { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text2); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .detail-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.6; }
+  .detail-type { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 2px; display: inline-block; margin-bottom: 14px; }
+  .type-confirmed { background: rgba(127,255,127,0.15); color: var(--accent3); }
+  .type-partial   { background: rgba(255,204,68,0.15);  color: var(--accent4); }
+  .type-open      { background: rgba(255,68,68,0.15);   color: var(--fail); }
+  .type-concept   { background: rgba(204,119,255,0.15); color: var(--accent5); }
+  .type-legacy    { background: rgba(100,140,180,0.1);  color: var(--text2); }
+  .type-primary   { background: rgba(0,200,255,0.15);   color: var(--accent1); }
+  .type-resolved  { background: rgba(67,233,123,0.12);  color: var(--resolved); }
+
+  .detail-body { font-size: 13px; line-height: 1.9; color: var(--text); }
+  .detail-body p { margin-bottom: 12px; }
+
+  .formula-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent1); margin: 12px 0; line-height: 1.8; white-space: pre; overflow-x: auto; }
+  .formula-box.resolved { border-color: rgba(67,233,123,0.3); color: var(--resolved); }
+
+  .point-list { list-style: none; padding: 0; margin: 10px 0; }
+  .point-list li { padding: 5px 0 5px 18px; position: relative; font-size: 12px; line-height: 1.8; }
+  .point-list li::before { content: '—'; position: absolute; left: 0; color: var(--text2); }
+  .point-list.warn li::before { color: var(--fail);     content: '✗'; }
+  .point-list.ok   li::before { color: var(--accent3);  content: '✓'; }
+  .point-list.step li { padding-left: 22px; }
+  .point-list.step li::before { color: var(--resolved); content: attr(data-n); font-family: 'IBM Plex Mono', monospace; font-size: 9px; top: 7px; }
+
+  .detail-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 6px; border-top: 1px solid var(--border); padding-top: 12px; }
+
+  .dep-chain { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; margin: 10px 0; flex-wrap: wrap; }
+  .dep-item     { padding: 2px 8px; border-radius: 2px; background: rgba(0,200,255,0.1); color: var(--accent1); }
+  .dep-item.res { background: rgba(67,233,123,0.1); color: var(--resolved); }
+  .dep-arrow    { color: var(--text2); }
+
+  .status-bar  { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+  .status-item { display: flex; align-items: center; gap: 6px; color: var(--text2); }
+  .status-dot  { width: 8px; height: 8px; border-radius: 50%; }
+
+  .cluster { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+  .cluster-header { background: rgba(30,49,72,0.5); padding: 8px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); cursor: pointer; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
+  .cluster-header:hover { background: rgba(30,49,72,0.8); }
+  .cluster-body { padding: 10px; display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .cluster-body.hidden { display: none; }
+
+  .fail-banner { background: rgba(80,0,0,0.4); border: 1px solid rgba(255,68,68,0.4); border-radius: 4px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+  .fail-banner .icon { font-size: 20px; flex-shrink: 0; }
+  .fail-banner .text { font-size: 13px; line-height: 1.6; color: #ffaaaa; }
+  .fail-banner .label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--fail); letter-spacing: 2px; margin-bottom: 4px; }
+
+  .resolved-banner { background: rgba(10,80,40,0.35); border: 1px solid rgba(67,233,123,0.4); border-radius: 4px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+  .resolved-banner .icon { font-size: 20px; flex-shrink: 0; }
+  .resolved-banner .text { font-size: 13px; line-height: 1.6; color: #a8f0c0; }
+  .resolved-banner .label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--resolved); letter-spacing: 2px; margin-bottom: 4px; }
+
+  .vs-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: stretch; margin: 12px 0; }
+  .vs-old, .vs-new { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 12px; font-size: 12px; line-height: 1.8; }
+  .vs-old { border-left: 3px solid var(--text2); }
+  .vs-new { border-left: 3px solid var(--accent1); }
+  .vs-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 1px; margin-bottom: 8px; }
+  .vs-sep { display: flex; align-items: center; color: var(--text2); font-size: 14px; }
+
+  .res-chain { display: flex; flex-direction: column; gap: 2px; margin: 16px 0; }
+  .res-step { display: flex; align-items: stretch; gap: 12px; padding: 10px 14px; background: rgba(10,80,40,0.2); border: 1px solid rgba(67,233,123,0.25); border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+  .res-step:hover { background: rgba(10,80,40,0.35); }
+  .res-step .step-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--resolved); min-width: 24px; padding-top: 2px; }
+  .res-step .step-body { flex: 1; }
+  .res-step .step-title { font-size: 13px; font-weight: 600; color: var(--resolved); margin-bottom: 3px; }
+  .res-step .step-note  { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); }
+
+  .warning-box { background: rgba(60,40,0,0.4); border: 1px solid rgba(255,204,68,0.35); border-radius: 4px; padding: 12px 16px; margin: 12px 0; font-size: 12px; line-height: 1.8; color: #ffe099; }
+  .warning-box .wlabel { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--accent4); letter-spacing: 2px; margin-bottom: 6px; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">NRA-IDE</div>
+  <h1>量子計算拡張 — 思考フロー可視化</h1>
+  <div class="badge">v2 — Phase 5 追加</div>
+  <div class="sub">M-Tokuni © 2026 · 2026-04-24</div>
+</header>
+
+<div class="container">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-group">
+    <div class="nav-label">Phase 0</div>
+    <div class="nav-item status-legacy" onclick="showDetail('legacy')" id="nav-legacy"><span class="dot"></span><span>従来手法の破綻</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 1</div>
+    <div class="nav-item status-confirmed" onclick="showDetail('nra_formula')" id="nav-nra_formula"><span class="dot"></span><span>NRA-IDE 残渣型式</span></div>
+    <div class="nav-item status-confirmed" onclick="showDetail('critique')" id="nav-critique"><span class="dot"></span><span>外部批評・応答</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 2 — 確定</div>
+    <div class="nav-item status-confirmed" onclick="showDetail('b1')" id="nav-b1"><span class="dot"></span><span>B-1: F_IDE = Lindblad</span></div>
+    <div class="nav-item status-confirmed" onclick="showDetail('b2')" id="nav-b2"><span class="dot"></span><span>B-2: z_t 定義</span></div>
+    <div class="nav-item status-confirmed" onclick="showDetail('b3')" id="nav-b3"><span class="dot"></span><span>B-3: 定量境界</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 3 — 思想転換</div>
+    <div class="nav-item status-concept" onclick="showDetail('t1')" id="nav-t1"><span class="dot"></span><span>転換1: 遷移を読む</span></div>
+    <div class="nav-item status-concept" onclick="showDetail('t2')" id="nav-t2"><span class="dot"></span><span>転換2: 遊びを中心に</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 4 — 旧ステータス</div>
+    <div class="nav-item status-partial" onclick="showDetail('holes')" id="nav-holes"><span class="dot"></span><span>残存穴（Phase 5で解決済）</span></div>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 5 — 解決連鎖</div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_order')" id="nav-res_order"><span class="dot"></span><span>14.1 解決順序</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_obs')" id="nav-res_obs"><span class="dot"></span><span>14.2 観測量集合 {O_i}</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_w')" id="nav-res_w"><span class="dot"></span><span>14.3 重み行列 W</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_cij')" id="nav-res_cij"><span class="dot"></span><span>14.4 相関量 C_ij(t)</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_tauc')" id="nav-res_tauc"><span class="dot"></span><span>14.5 遊び幅 τ_C</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_rcorr')" id="nav-res_rcorr"><span class="dot"></span><span>14.6 R_correlation ← 完成</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_sim')" id="nav-res_sim"><span class="dot"></span><span>最小シミュレーション計画</span></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="flow-title">DEPENDENCY FLOW — NRA-IDE 量子拡張 v2</div>
+
+  <div class="status-bar">
+    <div class="status-item"><div class="status-dot" style="background:var(--text2)"></div>従来手法</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent1)"></div>NRA-IDE中核</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent3)"></div>確定済</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent4)"></div>部分確保</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--fail)"></div>未完了/穴</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent5)"></div>思想転換</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--resolved);box-shadow:0 0 6px var(--resolved)"></div>解決済 ✓</div>
+  </div>
+
+  <!-- PHASE 0 -->
+  <div class="section-label">PHASE 0 — 従来手法の破綻パターン</div>
+  <div class="cluster">
+    <div class="cluster-header" onclick="toggleCluster(this)"><span>10手法の共通破綻構造 — クリックで展開</span><span>▸</span></div>
+    <div class="cluster-body hidden">
+      <div class="node node-type-legacy" onclick="showDetail('legacy_vqe')"><div class="node-tag">VQE</div><div class="node-title">変分量子固有値ソルバ</div><div class="node-formula">二重推定連鎖 + Barren Plateau</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_qpe')"><div class="node-tag">QPE</div><div class="node-title">量子位相推定</div><div class="node-formula">回路深さ vs デコヒーレンス</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_hf')"><div class="node-tag">HF</div><div class="node-title">Hartree–Fock</div><div class="node-formula">平均場近似 → 相関切り捨て</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_dmrg')"><div class="node-tag">DMRG</div><div class="node-title">密度行列繰り込み群</div><div class="node-formula">2次元以上でボンド次元爆発</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_qmc')"><div class="node-tag">QMC</div><div class="node-title">量子モンテカルロ</div><div class="node-formula">符号問題 → 統計誤差急増</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_ccsd')"><div class="node-tag">CCSD(T)</div><div class="node-title">結合クラスター法</div><div class="node-formula">O(N⁷) スケール</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_md')"><div class="node-tag">MD</div><div class="node-title">分子動力学</div><div class="node-formula">離散化誤差の時間累積</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_fdm')"><div class="node-tag">FDM / RK4</div><div class="node-title">有限差分 / Runge-Kutta</div><div class="node-formula">CFL条件 → 不安定化</div></div>
+    </div>
+  </div>
+  <div class="arrow-down"></div>
+  <div class="node node-type-legacy" style="max-width:500px" onclick="showDetail('legacy')">
+    <div class="node-tag">COMMON ROOT CAUSE</div>
+    <div class="node-title">共通根因：古典計算が全体を抱えようとする設計</div>
+    <div class="node-formula">A: 二重推定連鎖 | B: 誤差線形・指数累積 | C: 次元の呪い | D: 精度-安定性トレードオフ</div>
+  </div>
+
+  <!-- PHASE 1-3 collapsed -->
+  <div class="section-label">PHASE 1–3 — NRA-IDE中核 + 設計思想転換</div>
+  <div class="cluster">
+    <div class="cluster-header" onclick="toggleCluster(this)"><span>Phase 1-3: 残渣型式 / 批評 / B連鎖 / 思想転換 — クリックで展開</span><span>▸</span></div>
+    <div class="cluster-body hidden" style="grid-template-columns:repeat(3,1fr)">
+      <div class="node node-type-primary" onclick="showDetail('nra_formula')"><div class="node-tag">NRA-IDE CORE</div><div class="node-title">残渣ベース型式</div><div class="node-formula">r_t = x̃_{t+1} − x^ref_{t−ℓ}
+C(r_t) = r_t·|r_t|/(k+|r_t|)</div></div>
+      <div class="node node-type-confirmed" onclick="showDetail('b1')"><div class="node-tag">B-1 ✓</div><div class="node-title">F_IDE = Lindblad</div><div class="node-formula">開放系・時間非可逆</div></div>
+      <div class="node node-type-confirmed" onclick="showDetail('b2')"><div class="node-tag">B-2 ✓</div><div class="node-title">z_t = ⟨O_i⟩ ベクトル</div><div class="node-formula">R_t = δ_t / τ_t</div></div>
+      <div class="node node-type-confirmed" onclick="showDetail('b3')"><div class="node-tag">B-3 ✓</div><div class="node-title">δ/τ 層別化</div><div class="node-formula">T_FC = min{t: δ_k/τ_k ≥ 1}</div></div>
+      <div class="node node-type-concept" onclick="showDetail('t1')"><div class="node-tag">転換1</div><div class="node-title">遷移を読む</div><div class="node-formula">T_2 = τ_coh の一部。締切ではない</div></div>
+      <div class="node node-type-concept" onclick="showDetail('t2')"><div class="node-tag">転換2</div><div class="node-title">遊びを中心に</div><div class="node-formula">R = 動いている幅/遊ばせている幅</div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="section-label">PHASE 4 — 旧ステータス（→ Phase 5 で解決）</div>
+  <div class="fail-banner">
+    <div class="icon">⚠</div>
+    <div class="text">
+      <div class="label">旧 FAIL-CLOSED 判定</div>
+      枠組みは整ったが、値の質の保存は部分的にしか確保されていなかった。4つの穴が残存。Phase 5 で依存順序に従い全穴を解消。
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:8px">
+    <div class="node node-type-partial" onclick="showDetail('holes')">
+      <div class="node-tag">PARTIAL → 解決済</div>
+      <div class="node-title">穴: {O_i} · W · C_ij · τ_C</div>
+      <div class="node-formula">全4穴を Phase 5 で対処</div>
+    </div>
+    <div class="node node-type-open" onclick="showDetail('res_rcorr')">
+      <div class="node-tag">OPEN → 完成</div>
+      <div class="node-title">R_correlation（旧：未完成）</div>
+      <div class="node-formula">§14.6 の最終ステップとして完成</div>
+    </div>
+  </div>
+
+  <!-- PHASE 5 -->
+  <div class="section-label resolved-label">PHASE 5 — 解決連鎖（§14.1 – §14.6）</div>
+
+  <div class="dep-chain">
+    <span class="dep-item res">対象系確定</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">{O_i}</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">W · τ_i</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">C_ij(t)</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">τ_C</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">R_correlation</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item" style="background:rgba(0,200,255,0.1);color:var(--accent1)">シミュレーション</span>
+  </div>
+
+  <div class="res-chain">
+    <div class="res-step" onclick="showDetail('res_order')">
+      <div class="step-num">14.1</div>
+      <div class="step-body">
+        <div class="step-title">解決順序 — 依存関係は並列ではない</div>
+        <div class="step-note">R_correlation は終端式であり、最初に解く対象ではない</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_obs')">
+      <div class="step-num">14.2</div>
+      <div class="step-body">
+        <div class="step-title">観測量集合 {O_i} — 完全性ではなく破断検出性で選ぶ</div>
+        <div class="step-note">3条件 · 全観測の禁止は設計原則として明記</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_w')">
+      <div class="step-num">14.3</div>
+      <div class="step-body">
+        <div class="step-title">重み行列 W — 物理的重要度 × 観測信頼度</div>
+        <div class="step-note">δ²_t = Σ w_i (r_i / τ_i)²</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_cij')">
+      <div class="step-num">14.4</div>
+      <div class="step-body">
+        <div class="step-title">量子共分散 C_ij(t) — 対称化で非可換に対応</div>
+        <div class="step-note">C_ij = ½ ⟨ΔO_i ΔO_j + ΔO_j ΔO_i⟩</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_tauc')">
+      <div class="step-num">14.5</div>
+      <div class="step-body">
+        <div class="step-title">相関の遊び幅 τ_C — 相関がどこまで遊べるか</div>
+        <div class="step-note">max(τ_noise, τ_physical, τ_design)</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_rcorr')">
+      <div class="step-num">14.6</div>
+      <div class="step-body">
+        <div class="step-title">R_correlation — 式完成・Fail-Closed トリガー定義</div>
+        <div class="step-note">R_corr = max_{i,j} |ΔC_ij / τ_{C,ij}| ≥ 1.0 → Fail-Closed</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_sim')" style="border-color:rgba(0,200,255,0.3);background:rgba(0,60,90,0.2)">
+      <div class="step-num" style="color:var(--accent1)">SIM</div>
+      <div class="step-body">
+        <div class="step-title" style="color:var(--accent1)">最小シミュレーション — 2量子ビット開放系</div>
+        <div class="step-note">{O_i} = {σ_z⁽¹⁾, σ_z⁽²⁾, σ_z⁽¹⁾σ_z⁽²⁾} + Lindblad デコヒーレンス</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="resolved-banner" style="margin-top:20px">
+    <div class="icon">✓</div>
+    <div class="text">
+      <div class="label">解決ステータス</div>
+      Phase 4 の4穴すべてが §14.1–14.6 の順序連鎖で対処済。この順番で一章書ける。シミュレーションは完成した式の検証であって、式を作る前に走らせるものではない。
+    </div>
+  </div>
+
+</main>
+
+<!-- DETAIL PANEL -->
+<aside class="detail">
+  <div class="detail-header">DETAIL VIEW</div>
+  <div id="detail-content">
+    <div class="detail-title">ノードをクリックして詳細を表示</div>
+    <p style="color:var(--text2);font-size:12px">左ナビまたはフロー図から各要素を選択してください。</p>
+  </div>
+</aside>
+
+</div>
+
+<script>
+const details = {
+  legacy: {
+    title: '従来手法の共通破綻構造',
+    type: 'legacy', typeLabel: '従来手法',
+    body: `<p>10の手法に共通する根本的な失敗は<strong>古典計算が全体を抱えようとすること</strong>に起因する。</p>
+<div class="detail-sub">4つの破綻パターン</div>
+<ul class="point-list warn">
+  <li><strong>A: 二重推定連鎖</strong> — 推定→補正→再推定。誤差が変質し続ける。</li>
+  <li><strong>B: 誤差の線形・指数累積</strong> — ステップ数×離散化誤差→長時間で発散。</li>
+  <li><strong>C: 次元の呪い</strong> — 次元・粒子数増大で計算量が指数爆発。</li>
+  <li><strong>D: 精度–安定性トレードオフ</strong> — 精度を上げると不安定化。安定化すると精度が落ちる。</li>
+</ul>`
+  },
+  legacy_vqe: { title: 'VQE — 変分量子固有値ソルバ', type: 'legacy', typeLabel: '従来手法',
+    body: `<div class="formula-box">推定 → 損失 → 勾配 → 更新 → 再推定
+   ↑_____________________________↓
+        誤差が二重推定で変質していく</div>
+<ul class="point-list warn">
+  <li>古典最適化ループが二重推定連鎖を構造的に形成</li>
+  <li>NISQ回路では測定のたびに誤差が変質する</li>
+  <li>Barren Plateau: パラメータ数増大→勾配消失→最適化不能</li>
+</ul>` },
+  legacy_qpe: { title: 'QPE — 量子位相推定', type: 'legacy', typeLabel: '従来手法',
+    body: `<ul class="point-list warn"><li>高精度化には回路深さの増大が必要</li><li>深い回路ほどデコヒーレンスが進む</li><li>精度と安定性が構造的にトレードオフ</li></ul>` },
+  legacy_hf: { title: 'HF — Hartree–Fock', type: 'legacy', typeLabel: '従来手法',
+    body: `<ul class="point-list warn"><li>平均場近似が電子相関を構造的に切り捨てる</li><li>相転移・分子解離・強相関系では本質を見失う</li><li>平均値設計はピーク/最小値が設計空間を決める系に不適</li></ul>` },
+  legacy_dmrg: { title: 'DMRG — 密度行列繰り込み群', type: 'legacy', typeLabel: '従来手法',
+    body: `<ul class="point-list warn"><li>1次元には強力。2次元以上でボンド次元が急増</li><li>長距離エンタングルメント系では計算コストが現実的でなくなる</li></ul>` },
+  legacy_qmc: { title: 'QMC — 量子モンテカルロ', type: 'legacy', typeLabel: '従来手法',
+    body: `<ul class="point-list warn"><li>フェルミオン系では符号問題により統計誤差が急増</li><li>符号問題はアルゴリズム工夫だけでは原理的解決が困難</li></ul>` },
+  legacy_ccsd: { title: 'CCSD(T) — 結合クラスター法', type: 'legacy', typeLabel: '従来手法',
+    body: `<div class="formula-box">計算スケール: O(N⁷)</div><ul class="point-list warn"><li>分子サイズ増大で計算量が急増</li><li>古典計算で全体を扱う設計のため規模拡大に弱い</li></ul>` },
+  legacy_md: { title: 'MD — 分子動力学', type: 'legacy', typeLabel: '従来手法',
+    body: `<ul class="point-list warn"><li>離散化誤差が時間とともに累積する</li><li>生物学的に意味のある時間スケールは原理的に重い</li></ul>` },
+  legacy_fdm: { title: 'FDM / RK4 — 有限差分 / Runge-Kutta', type: 'legacy', typeLabel: '従来手法',
+    body: `<ul class="point-list warn"><li>CFL条件により時間刻みと空間刻みの比に厳しい制約</li><li>不連続点・相転移付近でギブス現象が発生</li></ul>` },
+  nra_formula: {
+    title: 'NRA-IDE 残渣ベース遅延精度確保型',
+    type: 'primary', typeLabel: 'NRA-IDE中核',
+    body: `<div class="formula-box">x_{t+1} = x_t + v_t Δt
+v_{t+1} = v_t + F_IDE(x_t)Δt − α·C(r_t)Δt
+
+r_t = x̃_{t+1} − x^ref_{t−ℓ}
+C(r_t) = r_t · |r_t| / (k + |r_t|)</div>
+<div class="detail-sub">自動判断ゲートとしての C(r_t)</div>
+<div class="formula-box">|r_t| ≪ k → C(r_t) ≈ 0   古典層が沈黙
+|r_t| ≫ k → C(r_t) ≈ r_t  精密補正が全開</div>
+<ul class="point-list ok">
+  <li>根本保持: F_IDEが大局的状態空間を保持。補正は局所・一時的のみ</li>
+  <li>逆算なし: 基準点が過去実績値。推定vs推定でなく予測vs記録</li>
+  <li>二重推定連鎖を設計上禁止</li>
+  <li>計算爆発の回避: 古典層は局所介入に限定</li>
+</ul>` },
+  critique: {
+    title: '外部批評の吸収と修正版確定',
+    type: 'confirmed', typeLabel: '確定済',
+    body: `<ul class="point-list ok">
+  <li>「爆発しない」→「爆発経路を構造的に閉じる」に統一</li>
+  <li>量子ノイズと積分誤差の性質差を明示（ハードウェアノイズは別層）</li>
+  <li>「全体保持」を性質保存圧縮として再定義</li>
+  <li>本来の接合点を量子シミュレーターとして整理</li>
+  <li>R_t = δ_t/τ_t と C(r_t) の記法分離</li>
+  <li>no-cloning theorem への直接言及</li>
+</ul>` },
+  b1: {
+    title: 'B-1: F_IDE = Lindblad方程式（確定）',
+    type: 'confirmed', typeLabel: '確定済',
+    body: `<div class="formula-box">dρ/dt = −(i/ℏ)[H,ρ]
+  + Σ_k γ_k ( L_k ρ L_k† − ½{L_k†L_k, ρ} )
+
+離散時間化:
+ρ_{t+1} = ρ_t + Δt · L(ρ_t)</div>
+<ul class="point-list ok">
+  <li>ゆらぎを δ/τ として読む ↔ 混合状態 ρ がゆらぎを内包</li>
+  <li>時間は前進するだけ ↔ 散逸項による時間非可逆性</li>
+  <li>吸収厚み τ ↔ 環境相互作用 L_k, γ_k</li>
+</ul>` },
+  b2: {
+    title: 'B-2: z_t = 観測量期待値ベクトル（確定）',
+    type: 'confirmed', typeLabel: '確定済',
+    body: `<div class="formula-box">z_t = (⟨O₁⟩_t, …, ⟨O_m⟩_t)ᵀ ∈ ℝᵐ
+⟨O_i⟩_t = Tr(O_i · ρ_t)
+
+r_t = z^pred_{t+1} − z^ref_{t−ℓ}
+δ_t = ‖W · r_t‖  ,  R_t = δ_t / τ_t</div>
+<ul class="point-list ok">
+  <li>no-cloning theorem に抵触しない</li>
+  <li>δ_t と τ_t を自然に構成できる</li>
+  <li>Lindblad の時間発展と直接接続できる</li>
+</ul>` },
+  b3: {
+    title: 'B-3: δ/τ 層別化と定量境界',
+    type: 'confirmed', typeLabel: '確定済',
+    body: `<div class="formula-box">δ²_total = δ²_classical + δ²_shot + δ²_decoh + δ²_gate
+τ_total  = min(τ_system, τ_shot, τ_coh, τ_gate)
+T_FC     = min_k { t : δ_k(t)/τ_k ≥ 1 }</div>
+<ul class="point-list ok">
+  <li>再推定連鎖: VQEの e^{λt} → NRA-IDE型 C₀(1−e^{−μt}) (有界)</li>
+  <li>古典処理: R_t 判定とゲート開閉のみ</li>
+  <li>飽和 C(r_t) が線形 α·r_t を置き換える</li>
+</ul>` },
+  t1: {
+    title: '思想転換1 — 遷移そのものを読む',
+    type: 'concept', typeLabel: '思想転換',
+    body: `<div class="vs-row">
+  <div class="vs-old"><div class="vs-label" style="color:var(--text2)">従来の問い</div>消失する前にどう計算するか</div>
+  <div class="vs-sep">→</div>
+  <div class="vs-new"><div class="vs-label" style="color:var(--accent1)">NRA-IDEの問い</div>遷移そのものをどう読むか</div>
+</div>
+<div class="formula-box">A状態 →【遷移 = 読み取り対象】→ B状態
+        δ/τ の推移が情報
+        dR/dt が予測情報
+        ΔC_ij(t) が構造情報</div>
+<p>T_2 は締切ではなく τ_coh の一部。観測リズム: Δt_obs = τ_coh / N_slice。</p>` },
+  t2: {
+    title: '思想転換2 — 遊びを設計の中心に置く',
+    type: 'concept', typeLabel: '思想転換',
+    body: `<p>τ の本質は<strong>系が存続するための遊び</strong>である。ベアリングの隙間、歯車の噛み合い遊び、熱膨張吸収の余地 — 遊びは欠陥ではなく存続条件。</p>
+<div class="vs-row">
+  <div class="vs-old"><div class="vs-label" style="color:var(--text2)">旧い読み方</div>R = 逸脱 / 許容</div>
+  <div class="vs-sep">→</div>
+  <div class="vs-new"><div class="vs-label" style="color:var(--accent1)">新しい読み方</div>R = 動いている幅 / 遊ばせている幅</div>
+</div>
+<ul class="point-list ok">
+  <li>まず遊びを定義する → 遊びの中でどう動くかを追跡する</li>
+  <li>選ばれなかった次元は「遊ばせる次元」として意図的に与える</li>
+  <li>全てを追跡しようとする発想こそが線形の呪いである</li>
+</ul>` },
+  holes: {
+    title: 'Phase 4 の穴 — Phase 5 で解決済',
+    type: 'partial', typeLabel: '部分確保 → 解決済',
+    body: `<div class="detail-sub">確保されていた層</div>
+<ul class="point-list ok">
+  <li>z^ref_{t-ℓ} の固定性（古典ビット列として保存可能）</li>
+  <li>δ_shot の質（統計法則内で追跡可能）</li>
+  <li>補正暴走の抑制（C(r_t) の飽和と沈黙域）</li>
+  <li>時間非対称性（Lindblad の散逸項）</li>
+</ul>
+<div class="detail-sub">旧4穴 → 解決参照先</div>
+<ul class="point-list warn">
+  <li><strong>穴1:</strong> {O_i} の選択原則 → §14.2 で解決</li>
+  <li><strong>穴2:</strong> W の構成 → §14.3 で解決</li>
+  <li><strong>穴3:</strong> 相関変質検出式 → §14.4–14.6 で解決</li>
+  <li><strong>穴4:</strong> L_k モデル化依存 → §14.2 の設計原則で部分対処</li>
+</ul>
+<div class="resolved-banner"><div class="icon">✓</div><div class="text"><div class="label">ステータス更新</div>Phase 5 が正しい依存順序で全穴を閉じた。</div></div>` },
+
+  // PHASE 5
+  res_order: {
+    title: '§14.1 — 解決順序',
+    type: 'resolved', typeLabel: '解決済',
+    body: `<p>未完了項目は並列ではない。R_correlation は<em>終端式</em>であり、最初に解く対象ではない。</p>
+<div class="detail-sub">正しい解決順序</div>
+<ol class="point-list step">
+  <li data-n="①">対象系と検出したい破綻様式を固定する</li>
+  <li data-n="②">観測量集合 {O_i} を設計する</li>
+  <li data-n="③">重み行列 W と各 τ_i を定義する</li>
+  <li data-n="④">相関量 C_ij(t) と相関許容厚み τ_C を定義する</li>
+  <li data-n="⑤">R_correlation を定式化する</li>
+  <li data-n="⑥">数値シミュレーションで検証する</li>
+</ol>
+<div class="warning-box"><div class="wlabel">重大な注意</div>R_correlation から先に書くと、式だけ先に立って中身が未定義になる。NRA-IDE的には不整合。まず「何を観測するのか」を固定することが詰まりを解く鍵。</div>` },
+
+  res_obs: {
+    title: '§14.2 — 観測量集合 {O_i} の設計原則',
+    type: 'resolved', typeLabel: '解決済',
+    body: `<p>観測量集合は量子状態全体を再構成するための集合では<strong>ない</strong>。z_t は性質保存圧縮であり、<strong>構造破断を検出するために必要な最小限の集合</strong>である。</p>
+<div class="detail-sub">3つの選定条件</div>
+<ul class="point-list ok">
+  <li>対象系の存続条件に関係すること</li>
+  <li>Lindblad 時間発展から期待値として計算可能であること</li>
+  <li>破綻前に変化として現れること</li>
+</ul>
+<p>したがって {O_i} は「完全性」ではなく<strong>「破断検出性」</strong>によって選定される。</p>
+<div class="warning-box"><div class="wlabel">してはならないこと</div>全部を観測しようとしないこと。全部を観測しようとした瞬間、古典側に全体を持たせる設計へ戻る。それはこの理論が避けようとしている破綻経路そのものである。</div>` },
+
+  res_w: {
+    title: '§14.3 — 重み行列 W の設計原則',
+    type: 'resolved', typeLabel: '解決済',
+    body: `<p>W は任意の調整パラメータではない。各観測量が対象系の構造存続にどれだけ関係するか、またその観測量がどれだけ信頼できるかを反映する正規化写像である。</p>
+<div class="formula-box resolved">δ²_t = Σ_i  w_i · ( r_i(t) / τ_i )²
+
+w_i  = 物理的重要度の重み
+τ_i  = 観測量 i の許容厚み
+r_i  = 観測量 i の残渣</div>
+<div class="detail-sub">設計の指針</div>
+<ul class="point-list ok">
+  <li>物理的重要度が高い観測量ほど w_i を大きくする</li>
+  <li>観測ノイズが大きく信頼性の低い観測量は w_i を小さくし過剰反応を避ける</li>
+  <li>W は物理的重要度と観測信頼度の<strong>合成</strong>である</li>
+</ul>` },
+
+  res_cij: {
+    title: '§14.4 — 量子共分散 C_ij(t) の定義',
+    type: 'resolved', typeLabel: '解決済',
+    body: `<p>個別の観測量 ⟨O_i⟩ が正常でも、観測量間の<em>関係</em>が崩壊している場合がある。これを検出するには個別残渣とは別に相関残渣を定義する必要がある。</p>
+<p>量子文脈では、相関量を<strong>対称化共分散</strong>として定義する。非可換観測量を含む場合でも実数値として追跡できる。</p>
+<div class="formula-box resolved">C_ij(t) = ½ ⟨ ΔO_i ΔO_j + ΔO_j ΔO_i ⟩_t
+
+ΔO_i = O_i − ⟨O_i⟩_t</div>
+<div class="detail-sub">なぜ対称化か</div>
+<ul class="point-list ok">
+  <li>非可換観測量: O_i O_j ≠ O_j O_i — 対称化で実数値を保証</li>
+  <li>密度行列への完全アクセスを要求しない</li>
+  <li>Lindblad の時間発展と直接接続できる</li>
+</ul>` },
+
+  res_tauc: {
+    title: '§14.5 — 相関の遊び幅 τ_C の物理的定義',
+    type: 'resolved', typeLabel: '解決済',
+    body: `<p>τ_C は相関構造の許容厚みである。相関が完全に固定されるべき値ではなく、<strong>対象系が存続するために許される相関の遊び幅</strong>である。</p>
+<div class="formula-box resolved">τ_{C,ij} = max( τ^noise_{C,ij},
+               τ^physical_{C,ij},
+               τ^design_{C,ij} )
+
+τ^noise    = 測定ノイズによる避けられない揺らぎ
+τ^physical = 物理的相互作用から許される相関変動幅
+τ^design   = 安全設計上の余裕</div>
+<div class="detail-sub">思想転換2との接続</div>
+<p>相関が τ_C の中で揺れるのは<em>正常</em>である。τ_C は相関が遊べる幅であり、その範囲を越えたときだけ構造変質とみなす。「遊びを中心に置く」設計思想と完全に一致する。</p>
+<div class="warning-box"><div class="wlabel">バランスの問題</div>τ_C が小さすぎる → 正常な量子揺らぎを破断と誤判定。τ_C が大きすぎる → 相関崩壊を見逃す。τ_C は「遊び幅」として設計する。</div>` },
+
+  res_rcorr: {
+    title: '§14.6 — R_correlation（式完成）',
+    type: 'resolved', typeLabel: '解決済',
+    body: `<p>全依存関係が解決したことで、相関変質検出式が完成した。</p>
+<div class="formula-box resolved">ΔC_ij(t) = C_ij(t) − C^ref_ij
+
+R_correlation(t) = max_{i,j} | ΔC_ij(t) / τ_{C,ij} |
+
+Fail-Closed トリガー:
+R_correlation(t) ≥ 1.0</div>
+<div class="detail-sub">解釈</div>
+<ul class="point-list ok">
+  <li>C^ref: 参照時刻 t₀ または遅延参照 t−ℓ における相関行列</li>
+  <li>max_{i,j}: 最も劣化した相関成分が判定を支配する</li>
+  <li>R_corr ≥ 1.0 → 個別 ⟨O_i⟩ が正常でも Fail-Closed</li>
+</ul>
+<div class="detail-sub">R_t との二重並列閾値</div>
+<p>系は二本の閾値を並列に持つ: R_t = δ_t/τ_t（個別観測量の逸脱）と R_correlation(t)（相関構造の整合性）。どちらかが 1.0 に達した時点で独立に Fail-Closed が発動する。</p>
+<div class="resolved-banner"><div class="icon">✓</div><div class="text"><div class="label">式完成</div>§14.1–14.5 の解決なしにはこの式を正しく書けなかった。4穴すべて閉じた。</div></div>` },
+
+  res_sim: {
+    title: '最小シミュレーション計画 — 2量子ビット開放系',
+    type: 'primary', typeLabel: '検証',
+    body: `<p>数値シミュレーションは完成した式の検証であって、式を作る前に走らせるものではない。最小対象は大規模量子計算ではなく2量子ビット開放系。</p>
+<div class="formula-box">{O_i} = { σ_z⁽¹⁾, σ_z⁽²⁾, σ_z⁽¹⁾σ_z⁽²⁾ }
+
+各量子ビットに Lindblad デコヒーレンスを付加</div>
+<div class="detail-sub">何を検証するか</div>
+<p>核心シナリオ: 個別の ⟨σ_z⁽¹⁾⟩ と ⟨σ_z⁽²⁾⟩ がほぼ正常を保ったまま、相関 ⟨σ_z⁽¹⁾σ_z⁽²⁾⟩ だけが崩壊するケースを意図的に作る。これが R_correlation の設計意図を直接検証する。個別 R_t 監視ではこの崩壊を捉えられない。</p>
+<div class="detail-sub">シミュレーションは最後</div>
+<ul class="point-list ok">
+  <li>式の依存連鎖が完成してからシミュレーションを開始する</li>
+  <li>先にシミュレーションを走らせると「何を検証しているのか」が曖昧になる</li>
+  <li>2量子ビット最小モデル: 解析的に追跡可能で、かつ相関崩壊シナリオを示せる最小規模</li>
+</ul>` }
+};
+
+function showDetail(key) {
+  const d = details[key];
+  if (!d) return;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + key);
+  if (navEl) navEl.classList.add('active');
+  const typeClasses = { legacy:'type-legacy', primary:'type-primary', confirmed:'type-confirmed', partial:'type-partial', open:'type-open', concept:'type-concept', resolved:'type-resolved' };
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-title">${d.title}</div>
+    <div class="detail-type ${typeClasses[d.type]||''}">${d.typeLabel}</div>
+    <div class="detail-body">${d.body}</div>`;
+}
+
+function toggleCluster(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('span:last-child');
+  if (body.classList.contains('hidden')) { body.classList.remove('hidden'); arrow.textContent='▾'; }
+  else { body.classList.add('hidden'); arrow.textContent='▸'; }
+}
+
+showDetail('res_order');
+document.getElementById('nav-res_order').classList.add('active');
+</script>
+</body>
+</html>

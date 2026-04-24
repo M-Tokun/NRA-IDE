@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- FILE: NRA-IDE_QuantumFlow_Interactive_EN_v2_20260424.html -->
+<!-- Title: NRA-IDE Quantum Computing Extension — Thought Flow Visualizer v2 -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-24 JST -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE Quantum Extension Flow v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Crimson+Pro:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #080c10;
+    --bg2: #0d1520;
+    --bg3: #111e2e;
+    --border: #1e3148;
+    --accent1: #00c8ff;
+    --accent3: #7fff7f;
+    --accent4: #ffcc44;
+    --accent5: #cc77ff;
+    --accent6: #ff9f43;
+    --text: #c8d8e8;
+    --text2: #7a9ab8;
+    --fail: #ff4444;
+    --resolved: #43e97b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', serif; min-height: 100vh; overflow-x: hidden; }
+
+  header {
+    background: linear-gradient(90deg, #060a0f 0%, #0d1e30 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex; align-items: center; gap: 18px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  header .logo { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent1); letter-spacing: 2px; white-space: nowrap; }
+  header h1 { font-size: 15px; font-weight: 400; color: var(--text); letter-spacing: 1px; }
+  header .sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); margin-left: auto; }
+  header .badge {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    background: rgba(67,233,123,0.15); color: var(--resolved);
+    border: 1px solid rgba(67,233,123,0.3); border-radius: 2px;
+    padding: 2px 8px; letter-spacing: 1px;
+  }
+
+  .container { display: grid; grid-template-columns: 240px 1fr 320px; height: calc(100vh - 52px); }
+
+  /* NAV */
+  .nav { background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px 0; }
+  .nav-group { margin-bottom: 4px; }
+  .nav-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; padding: 10px 16px 4px; }
+  .nav-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 16px; cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s; font-size: 12px; line-height: 1.5; }
+  .nav-item:hover { background: rgba(0,200,255,0.05); }
+  .nav-item.active { background: rgba(0,200,255,0.08); border-left-color: var(--accent1); color: var(--accent1); }
+  .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .nav-item.status-confirmed .dot { background: var(--accent3); }
+  .nav-item.status-partial .dot   { background: var(--accent4); }
+  .nav-item.status-open .dot      { background: var(--fail); }
+  .nav-item.status-concept .dot   { background: var(--accent5); }
+  .nav-item.status-legacy .dot    { background: var(--text2); }
+  .nav-item.status-resolved .dot  { background: var(--resolved); box-shadow: 0 0 6px var(--resolved); }
+  .nav-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+
+  /* MAIN */
+  .main { overflow-y: auto; padding: 28px; background: var(--bg); }
+  .flow-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+
+  /* NODES */
+  .node { position: relative; border-radius: 4px; padding: 12px 16px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; font-size: 13px; }
+  .node:hover { transform: translateY(-1px); }
+  .node.active { box-shadow: 0 0 0 2px var(--accent1); }
+  .node-type-legacy    { background: rgba(30,49,72,0.5);  border-color: var(--border);              color: var(--text2); }
+  .node-type-confirmed { background: rgba(0,127,80,0.15); border-color: rgba(127,255,127,0.3);      color: var(--accent3); }
+  .node-type-partial   { background: rgba(80,60,0,0.3);   border-color: rgba(255,204,68,0.4);       color: var(--accent4); }
+  .node-type-open      { background: rgba(80,0,0,0.3);    border-color: rgba(255,68,68,0.4);        color: var(--fail); }
+  .node-type-concept   { background: rgba(60,0,90,0.3);   border-color: rgba(204,119,255,0.4);      color: var(--accent5); }
+  .node-type-primary   { background: rgba(0,60,90,0.4);   border-color: rgba(0,200,255,0.5);        color: var(--accent1); }
+  .node-type-resolved  { background: rgba(10,80,40,0.35); border-color: rgba(67,233,123,0.5);       color: var(--resolved); }
+  .node-tag   { font-family: 'IBM Plex Mono', monospace; font-size: 9px; opacity: 0.7; margin-bottom: 4px; letter-spacing: 1px; }
+  .node-title { font-weight: 600; font-size: 13px; line-height: 1.4; }
+  .node-formula { font-family: 'IBM Plex Mono', monospace; font-size: 11px; opacity: 0.8; margin-top: 4px; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+
+  .arrow-down { display: flex; justify-content: center; align-items: center; height: 32px; color: var(--text2); position: relative; }
+  .arrow-down::before { content: ''; position: absolute; top: 4px; bottom: 16px; width: 1px; background: linear-gradient(to bottom, var(--border), var(--text2)); }
+  .arrow-down::after { content: '▼'; font-size: 10px; }
+
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-label.resolved-label { color: var(--resolved); }
+  .section-label.resolved-label::after { background: rgba(67,233,123,0.3); }
+
+  /* DETAIL */
+  .detail { background: var(--bg2); border-left: 1px solid var(--border); overflow-y: auto; padding: 20px; }
+  .detail-header { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text2); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .detail-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
+  .detail-type { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 2px; display: inline-block; margin-bottom: 14px; }
+  .type-confirmed { background: rgba(127,255,127,0.15); color: var(--accent3); }
+  .type-partial   { background: rgba(255,204,68,0.15);  color: var(--accent4); }
+  .type-open      { background: rgba(255,68,68,0.15);   color: var(--fail); }
+  .type-concept   { background: rgba(204,119,255,0.15); color: var(--accent5); }
+  .type-legacy    { background: rgba(100,140,180,0.1);  color: var(--text2); }
+  .type-primary   { background: rgba(0,200,255,0.15);   color: var(--accent1); }
+  .type-resolved  { background: rgba(67,233,123,0.12);  color: var(--resolved); }
+
+  .detail-body { font-size: 13px; line-height: 1.9; color: var(--text); }
+  .detail-body p { margin-bottom: 12px; }
+
+  .formula-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent1); margin: 12px 0; line-height: 1.8; white-space: pre; overflow-x: auto; }
+  .formula-box.resolved { border-color: rgba(67,233,123,0.3); color: var(--resolved); }
+
+  .point-list { list-style: none; padding: 0; margin: 10px 0; }
+  .point-list li { padding: 5px 0 5px 18px; position: relative; font-size: 12px; line-height: 1.7; }
+  .point-list li::before { content: '—'; position: absolute; left: 0; color: var(--text2); }
+  .point-list.warn li::before { color: var(--fail);     content: '✗'; }
+  .point-list.ok   li::before { color: var(--accent3);  content: '✓'; }
+  .point-list.step li::before { color: var(--resolved); content: attr(data-n); font-family: 'IBM Plex Mono', monospace; font-size: 9px; top: 7px; }
+
+  .detail-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 6px; border-top: 1px solid var(--border); padding-top: 12px; }
+
+  .dep-chain { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; margin: 10px 0; flex-wrap: wrap; }
+  .dep-item  { padding: 2px 8px; border-radius: 2px; background: rgba(0,200,255,0.1); color: var(--accent1); }
+  .dep-item.res { background: rgba(67,233,123,0.1); color: var(--resolved); }
+  .dep-arrow { color: var(--text2); }
+
+  .status-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+  .status-item { display: flex; align-items: center; gap: 6px; color: var(--text2); }
+  .status-dot  { width: 8px; height: 8px; border-radius: 50%; }
+
+  .cluster { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+  .cluster-header { background: rgba(30,49,72,0.5); padding: 8px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); cursor: pointer; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
+  .cluster-header:hover { background: rgba(30,49,72,0.8); }
+  .cluster-body { padding: 10px; display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .cluster-body.hidden { display: none; }
+
+  .fail-banner { background: rgba(80,0,0,0.4); border: 1px solid rgba(255,68,68,0.4); border-radius: 4px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+  .fail-banner .icon { font-size: 20px; flex-shrink: 0; }
+  .fail-banner .text { font-size: 13px; line-height: 1.6; color: #ffaaaa; }
+  .fail-banner .label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--fail); letter-spacing: 2px; margin-bottom: 4px; }
+
+  .resolved-banner { background: rgba(10,80,40,0.35); border: 1px solid rgba(67,233,123,0.4); border-radius: 4px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+  .resolved-banner .icon { font-size: 20px; flex-shrink: 0; }
+  .resolved-banner .text { font-size: 13px; line-height: 1.6; color: #a8f0c0; }
+  .resolved-banner .label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--resolved); letter-spacing: 2px; margin-bottom: 4px; }
+
+  .vs-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: stretch; margin: 12px 0; }
+  .vs-old, .vs-new { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 12px; font-size: 12px; line-height: 1.8; }
+  .vs-old { border-left: 3px solid var(--text2); }
+  .vs-new { border-left: 3px solid var(--accent1); }
+  .vs-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 1px; margin-bottom: 8px; }
+  .vs-sep   { display: flex; align-items: center; color: var(--text2); font-size: 14px; }
+
+  /* RESOLUTION CHAIN VISUAL */
+  .res-chain { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
+  .res-step {
+    display: flex; align-items: stretch; gap: 12px;
+    padding: 10px 14px;
+    background: rgba(10,80,40,0.2);
+    border: 1px solid rgba(67,233,123,0.25);
+    border-radius: 4px; margin-bottom: 2px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .res-step:hover { background: rgba(10,80,40,0.35); }
+  .res-step .step-num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--resolved); min-width: 20px; padding-top: 2px;
+  }
+  .res-step .step-body { flex: 1; }
+  .res-step .step-title { font-size: 13px; font-weight: 600; color: var(--resolved); margin-bottom: 3px; }
+  .res-step .step-note  { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); }
+
+  .warning-box { background: rgba(60,40,0,0.4); border: 1px solid rgba(255,204,68,0.35); border-radius: 4px; padding: 12px 16px; margin: 12px 0; font-size: 12px; line-height: 1.8; color: #ffe099; }
+  .warning-box .wlabel { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--accent4); letter-spacing: 2px; margin-bottom: 6px; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">NRA-IDE</div>
+  <h1>Quantum Computing Extension — Thought Flow Visualizer</h1>
+  <div class="badge">v2 — Phase 5 Added</div>
+  <div class="sub">M-Tokuni © 2026 · 2026-04-24</div>
+</header>
+
+<div class="container">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-group">
+    <div class="nav-label">Phase 0</div>
+    <div class="nav-item status-legacy" onclick="showDetail('legacy')" id="nav-legacy"><span class="dot"></span><span>Failure of Legacy Methods</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 1</div>
+    <div class="nav-item status-confirmed" onclick="showDetail('nra_formula')" id="nav-nra_formula"><span class="dot"></span><span>NRA-IDE Residual Formula</span></div>
+    <div class="nav-item status-confirmed" onclick="showDetail('critique')" id="nav-critique"><span class="dot"></span><span>External Critique & Response</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 2 — Confirmed</div>
+    <div class="nav-item status-confirmed" onclick="showDetail('b1')" id="nav-b1"><span class="dot"></span><span>B-1: F_IDE = Lindblad</span></div>
+    <div class="nav-item status-confirmed" onclick="showDetail('b2')" id="nav-b2"><span class="dot"></span><span>B-2: Definition of z_t</span></div>
+    <div class="nav-item status-confirmed" onclick="showDetail('b3')" id="nav-b3"><span class="dot"></span><span>B-3: Quantitative Bounds</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 3 — Design Shifts</div>
+    <div class="nav-item status-concept" onclick="showDetail('t1')" id="nav-t1"><span class="dot"></span><span>Shift 1: Read the Transition</span></div>
+    <div class="nav-item status-concept" onclick="showDetail('t2')" id="nav-t2"><span class="dot"></span><span>Shift 2: Slack at the Center</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 4 — Previous Status</div>
+    <div class="nav-item status-partial" onclick="showDetail('holes')" id="nav-holes"><span class="dot"></span><span>Holes (now resolved)</span></div>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-group">
+    <div class="nav-label">Phase 5 — Resolution Chain</div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_order')" id="nav-res_order"><span class="dot"></span><span>14.1 Resolution Order</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_obs')" id="nav-res_obs"><span class="dot"></span><span>14.2 Observable Set {O_i}</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_w')" id="nav-res_w"><span class="dot"></span><span>14.3 Weight Matrix W</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_cij')" id="nav-res_cij"><span class="dot"></span><span>14.4 Correlation C_ij(t)</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_tauc')" id="nav-res_tauc"><span class="dot"></span><span>14.5 Slack Width τ_C</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_rcorr')" id="nav-res_rcorr"><span class="dot"></span><span>14.6 R_correlation ← Final</span></div>
+    <div class="nav-item status-resolved" onclick="showDetail('res_sim')" id="nav-res_sim"><span class="dot"></span><span>Minimum Simulation Plan</span></div>
+  </div>
+</nav>
+
+<!-- MAIN FLOW -->
+<main class="main">
+  <div class="flow-title">DEPENDENCY FLOW — NRA-IDE QUANTUM EXTENSION v2</div>
+
+  <div class="status-bar">
+    <div class="status-item"><div class="status-dot" style="background:var(--text2)"></div>Legacy</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent1)"></div>NRA-IDE Core</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent3)"></div>Confirmed</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent4)"></div>Partial</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--fail)"></div>Open / Hole</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--accent5)"></div>Design Shift</div>
+    <div class="status-item"><div class="status-dot" style="background:var(--resolved);box-shadow:0 0 6px var(--resolved)"></div>Resolved ✓</div>
+  </div>
+
+  <!-- PHASES 0-4 collapsed -->
+  <div class="section-label">PHASE 0 — Failure Patterns of Legacy Methods</div>
+  <div class="cluster">
+    <div class="cluster-header" onclick="toggleCluster(this)"><span>10 Methods — Common Structural Failures (click to expand)</span><span>▸</span></div>
+    <div class="cluster-body hidden">
+      <div class="node node-type-legacy" onclick="showDetail('legacy_vqe')"><div class="node-tag">VQE</div><div class="node-title">Variational Quantum Eigensolver</div><div class="node-formula">Double-estimation chain + Barren Plateau</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_qpe')"><div class="node-tag">QPE</div><div class="node-title">Quantum Phase Estimation</div><div class="node-formula">Circuit depth vs. decoherence tradeoff</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_hf')"><div class="node-tag">HF</div><div class="node-title">Hartree–Fock</div><div class="node-formula">Mean-field → electron correlation discarded</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_dmrg')"><div class="node-tag">DMRG</div><div class="node-title">Density Matrix Renormalization Group</div><div class="node-formula">Bond dimension explosion beyond 1D</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_qmc')"><div class="node-tag">QMC</div><div class="node-title">Quantum Monte Carlo</div><div class="node-formula">Sign problem → statistical error surge</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_ccsd')"><div class="node-tag">CCSD(T)</div><div class="node-title">Coupled-Cluster Method</div><div class="node-formula">O(N⁷) scaling</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_md')"><div class="node-tag">MD</div><div class="node-title">Molecular Dynamics</div><div class="node-formula">Discretization error accumulation over time</div></div>
+      <div class="node node-type-legacy" onclick="showDetail('legacy_fdm')"><div class="node-tag">FDM / RK4</div><div class="node-title">Finite Difference / Runge-Kutta</div><div class="node-formula">CFL condition → instability at boundaries</div></div>
+    </div>
+  </div>
+  <div class="arrow-down"></div>
+  <div class="node node-type-legacy" style="max-width:500px" onclick="showDetail('legacy')">
+    <div class="node-tag">COMMON ROOT CAUSE</div>
+    <div class="node-title">Classical computation tries to hold the entire system</div>
+    <div class="node-formula">A: Double-estimation chain  |  B: Linear/exponential error accumulation
+C: Curse of dimensionality  |  D: Precision–stability tradeoff</div>
+  </div>
+
+  <div class="section-label">PHASE 1–3 — Core Framework + Design Shifts</div>
+  <div class="cluster">
+    <div class="cluster-header" onclick="toggleCluster(this)"><span>Phase 1-3: NRA-IDE Formula / Critique / B-Chain / Design Shifts (click to expand)</span><span>▸</span></div>
+    <div class="cluster-body hidden" style="grid-template-columns:repeat(3,1fr)">
+      <div class="node node-type-primary" onclick="showDetail('nra_formula')"><div class="node-tag">NRA-IDE CORE</div><div class="node-title">Residual Formula</div><div class="node-formula">r_t = x̃_{t+1} − x^ref_{t−ℓ}
+C(r_t) = r_t·|r_t|/(k+|r_t|)</div></div>
+      <div class="node node-type-confirmed" onclick="showDetail('b1')"><div class="node-tag">B-1 ✓</div><div class="node-title">F_IDE = Lindblad</div><div class="node-formula">Open system, time-irreversible</div></div>
+      <div class="node node-type-confirmed" onclick="showDetail('b2')"><div class="node-tag">B-2 ✓</div><div class="node-title">z_t = ⟨O_i⟩ vector</div><div class="node-formula">R_t = δ_t / τ_t</div></div>
+      <div class="node node-type-confirmed" onclick="showDetail('b3')"><div class="node-tag">B-3 ✓</div><div class="node-title">δ/τ Layering</div><div class="node-formula">T_FC = min{t: δ_k/τ_k ≥ 1}</div></div>
+      <div class="node node-type-concept" onclick="showDetail('t1')"><div class="node-tag">Shift 1</div><div class="node-title">Read the Transition</div><div class="node-formula">T_2 = part of τ_coh, not a deadline</div></div>
+      <div class="node node-type-concept" onclick="showDetail('t2')"><div class="node-tag">Shift 2</div><div class="node-title">Slack at the Center</div><div class="node-formula">R = moving range / slack range</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">PHASE 4 — Previous Open Holes (→ resolved in Phase 5)</div>
+  <div class="fail-banner">
+    <div class="icon">⚠</div>
+    <div class="text">
+      <div class="label">PRIOR FAIL-CLOSED JUDGMENT</div>
+      Framework was structured but value quality preservation was only partially secured. Four holes remained open. Phase 5 below resolves all four in dependency order.
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:8px">
+    <div class="node node-type-partial" onclick="showDetail('holes')">
+      <div class="node-tag">PARTIAL → NOW RESOLVED</div>
+      <div class="node-title">Holes: {O_i} · W · C_ij · τ_C</div>
+      <div class="node-formula">All four addressed in Phase 5</div>
+    </div>
+    <div class="node node-type-open" onclick="showDetail('res_rcorr')">
+      <div class="node-tag">OPEN → NOW COMPLETE</div>
+      <div class="node-title">R_correlation (was incomplete)</div>
+      <div class="node-formula">Completed as final step of §14.6</div>
+    </div>
+  </div>
+
+  <!-- PHASE 5: RESOLUTION CHAIN -->
+  <div class="section-label resolved-label">PHASE 5 — Resolution Chain (§14.1 – §14.6)</div>
+
+  <div class="dep-chain">
+    <span class="dep-item res">Target system</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">{O_i}</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">W · τ_i</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">C_ij(t)</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">τ_C</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item res">R_correlation</span>
+    <span class="dep-arrow">→</span>
+    <span class="dep-item" style="background:rgba(0,200,255,0.1);color:var(--accent1)">Simulation</span>
+  </div>
+
+  <div class="res-chain">
+    <div class="res-step" onclick="showDetail('res_order')">
+      <div class="step-num">14.1</div>
+      <div class="step-body">
+        <div class="step-title">Resolution Order — dependency is not parallel</div>
+        <div class="step-note">R_correlation is the terminal formula, not the starting point</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_obs')">
+      <div class="step-num">14.2</div>
+      <div class="step-body">
+        <div class="step-title">Observable Set {O_i} — fracture-detection, not state reconstruction</div>
+        <div class="step-note">Three selection conditions · completeness excluded by principle</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_w')">
+      <div class="step-num">14.3</div>
+      <div class="step-body">
+        <div class="step-title">Weight Matrix W — physical importance × observational reliability</div>
+        <div class="step-note">δ²_t = Σ w_i (r_i / τ_i)²</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_cij')">
+      <div class="step-num">14.4</div>
+      <div class="step-body">
+        <div class="step-title">Quantum Covariance C_ij(t) — symmetrized, handles non-commuting</div>
+        <div class="step-note">C_ij = ½ ⟨ΔO_i ΔO_j + ΔO_j ΔO_i⟩</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_tauc')">
+      <div class="step-num">14.5</div>
+      <div class="step-body">
+        <div class="step-title">Correlation Slack Width τ_C — how far correlation may play</div>
+        <div class="step-note">max(τ_noise, τ_physical, τ_design)</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_rcorr')">
+      <div class="step-num">14.6</div>
+      <div class="step-body">
+        <div class="step-title">R_correlation — formula complete, Fail-Closed trigger defined</div>
+        <div class="step-note">R_corr = max_{i,j} |ΔC_ij / τ_{C,ij}| ≥ 1.0 → Fail-Closed</div>
+      </div>
+    </div>
+    <div class="res-step" onclick="showDetail('res_sim')" style="border-color:rgba(0,200,255,0.3);background:rgba(0,60,90,0.2)">
+      <div class="step-num" style="color:var(--accent1)">SIM</div>
+      <div class="step-body">
+        <div class="step-title" style="color:var(--accent1)">Minimum Simulation — 2-qubit open system</div>
+        <div class="step-note">{O_i} = {σ_z⁽¹⁾, σ_z⁽²⁾, σ_z⁽¹⁾σ_z⁽²⁾} + Lindblad decoherence</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="resolved-banner" style="margin-top:20px">
+    <div class="icon">✓</div>
+    <div class="text">
+      <div class="label">RESOLUTION STATUS</div>
+      All four Phase 4 holes are addressed through the ordered chain §14.1–14.6. The first chapter can now be written in this sequence. Simulation is verification of completed formulas — not a step in constructing them.
+    </div>
+  </div>
+
+</main>
+
+<!-- DETAIL PANEL -->
+<aside class="detail" id="detail-panel">
+  <div class="detail-header">DETAIL VIEW</div>
+  <div id="detail-content">
+    <div class="detail-title">Click any node to view details</div>
+    <p style="color:var(--text2);font-size:12px">Select from the flow diagram or left navigation.</p>
+  </div>
+</aside>
+
+</div>
+
+<script>
+const details = {
+  legacy: {
+    title: 'Common Failure Structure of Legacy Methods',
+    type: 'legacy', typeLabel: 'Legacy Method',
+    body: `<p>All ten methods share one root failure: <strong>classical computation tries to hold the entire system.</strong></p>
+<div class="detail-sub">Four Failure Patterns</div>
+<ul class="point-list warn">
+  <li><strong>A: Double-Estimation Chain</strong> — Estimate → correct → re-estimate. Errors mutate continuously.</li>
+  <li><strong>B: Exponential Error Accumulation</strong> — Steps × discretization error → divergence over time.</li>
+  <li><strong>C: Curse of Dimensionality</strong> — Cost explodes exponentially with dimension/particle count.</li>
+  <li><strong>D: Precision–Stability Tradeoff</strong> — Increasing precision destabilizes; stabilizing reduces precision.</li>
+</ul>`
+  },
+  legacy_vqe: { title: 'VQE — Variational Quantum Eigensolver', type: 'legacy', typeLabel: 'Legacy',
+    body: `<div class="formula-box">Estimate → Loss → Gradient → Update → Re-estimate
+       ↑_________________________________↓
+            errors mutate through double-estimation</div>
+<ul class="point-list warn">
+  <li>Classical loop forms structural double-estimation chain</li>
+  <li>NISQ circuits: every measurement mutates error quality</li>
+  <li>Barren Plateau: gradient vanishes as parameters grow</li>
+</ul>` },
+  legacy_qpe: { title: 'QPE — Quantum Phase Estimation', type: 'legacy', typeLabel: 'Legacy',
+    body: `<ul class="point-list warn"><li>Higher precision requires deeper circuits</li><li>Deeper circuits accelerate decoherence</li><li>Precision and stability are structurally traded off</li></ul>` },
+  legacy_hf: { title: 'HF — Hartree–Fock', type: 'legacy', typeLabel: 'Legacy',
+    body: `<ul class="point-list warn"><li>Mean-field approximation discards electron correlation</li><li>Fails at phase transitions and strongly correlated systems</li><li>Average-value design inapplicable to peak/minimum-dominated systems</li></ul>` },
+  legacy_dmrg: { title: 'DMRG — Density Matrix Renormalization Group', type: 'legacy', typeLabel: 'Legacy',
+    body: `<ul class="point-list warn"><li>Powerful in 1D; bond dimension explodes in 2D+</li><li>Long-range entanglement exceeds practical cost</li></ul>` },
+  legacy_qmc: { title: 'QMC — Quantum Monte Carlo', type: 'legacy', typeLabel: 'Legacy',
+    body: `<ul class="point-list warn"><li>Sign problem causes statistical errors to surge for fermions</li><li>No principled algorithmic resolution</li></ul>` },
+  legacy_ccsd: { title: 'CCSD(T) — Coupled-Cluster Method', type: 'legacy', typeLabel: 'Legacy',
+    body: `<div class="formula-box">Scaling: O(N⁷)</div><ul class="point-list warn"><li>Cost explodes with molecular size</li><li>Fundamentally weak at scaling up</li></ul>` },
+  legacy_md: { title: 'MD — Molecular Dynamics', type: 'legacy', typeLabel: 'Legacy',
+    body: `<ul class="point-list warn"><li>Discretization errors accumulate over time</li><li>Biologically relevant time scales are principally expensive</li></ul>` },
+  legacy_fdm: { title: 'FDM / RK4 — Finite Difference / Runge-Kutta', type: 'legacy', typeLabel: 'Legacy',
+    body: `<ul class="point-list warn"><li>CFL condition: strict time-to-space step ratio constraint</li><li>Accuracy degrades near discontinuities (Gibbs phenomenon)</li></ul>` },
+  nra_formula: {
+    title: 'NRA-IDE Residual-Based Delayed Precision Formula',
+    type: 'primary', typeLabel: 'NRA-IDE Core',
+    body: `<div class="formula-box">x_{t+1} = x_t + v_t Δt
+v_{t+1} = v_t + F_IDE(x_t)Δt − α·C(r_t)Δt
+
+r_t = x̃_{t+1} − x^ref_{t−ℓ}
+C(r_t) = r_t · |r_t| / (k + |r_t|)</div>
+<div class="detail-sub">C(r_t) as Automatic Gate</div>
+<div class="formula-box">|r_t| ≪ k  →  C(r_t) ≈ 0      classical layer silent
+|r_t| ≫ k  →  C(r_t) ≈ r_t   full correction active</div>
+<ul class="point-list ok">
+  <li>Root Retention: F_IDE holds global state; correction is local only</li>
+  <li>No Reverse Calculation: reference is past record, not estimate</li>
+  <li>Double-Estimation Chain Prohibited by design</li>
+  <li>Explosion Avoidance: classical layer limited to local intervention</li>
+</ul>` },
+  critique: {
+    title: 'External Critique Absorbed', type: 'confirmed', typeLabel: 'Confirmed',
+    body: `<ul class="point-list ok">
+  <li>"Does not explode" → "structurally closes explosion paths"</li>
+  <li>Quantum noise and numerical integration error explicitly separated</li>
+  <li>"Global retention" = property-preserving compression</li>
+  <li>Primary junction point: quantum simulator</li>
+  <li>Notation split: R_t = δ_t/τ_t vs. C(r_t)</li>
+  <li>No-cloning theorem directly addressed</li>
+</ul>` },
+  b1: {
+    title: 'B-1: F_IDE = Lindblad Equation (Confirmed)',
+    type: 'confirmed', typeLabel: 'Confirmed',
+    body: `<div class="formula-box">dρ/dt = −(i/ℏ)[H,ρ]
+  + Σ_k γ_k ( L_k ρ L_k† − ½{L_k†L_k, ρ} )
+
+Discrete: ρ_{t+1} = ρ_t + Δt · L(ρ_t)</div>
+<ul class="point-list ok">
+  <li>Reading δ/τ ↔ Mixed state ρ internally carries fluctuations</li>
+  <li>Forward-only time ↔ Dissipation term provides time irreversibility</li>
+  <li>Absorption thickness τ ↔ Environment interaction L_k, γ_k</li>
+</ul>` },
+  b2: {
+    title: 'B-2: z_t = Observable Expectation Vector (Confirmed)',
+    type: 'confirmed', typeLabel: 'Confirmed',
+    body: `<div class="formula-box">z_t = (⟨O₁⟩_t, …, ⟨O_m⟩_t)ᵀ ∈ ℝᵐ
+⟨O_i⟩_t = Tr(O_i · ρ_t)
+
+r_t = z^pred_{t+1} − z^ref_{t−ℓ}
+δ_t = ‖W · r_t‖  ,  R_t = δ_t / τ_t</div>
+<ul class="point-list ok">
+  <li>No-cloning theorem not violated</li>
+  <li>δ_t and τ_t constructed naturally</li>
+  <li>Directly connects to Lindblad time evolution</li>
+</ul>` },
+  b3: {
+    title: 'B-3: δ/τ Layering and Reduction Bounds',
+    type: 'confirmed', typeLabel: 'Confirmed',
+    body: `<div class="formula-box">δ²_total = δ²_classical + δ²_shot + δ²_decoh + δ²_gate
+τ_total  = min(τ_system, τ_shot, τ_coh, τ_gate)
+T_FC     = min_k { t : δ_k(t)/τ_k ≥ 1 }</div>
+<ul class="point-list ok">
+  <li>Re-estimation chain: VQE e^{λt} → NRA-IDE C₀(1−e^{−μt}) bounded</li>
+  <li>Classical processing: R_t judgment + gate open/close only</li>
+  <li>Saturation C(r_t) replaces linear α·r_t</li>
+</ul>` },
+  t1: {
+    title: 'Design Shift 1 — Read the Transition Itself',
+    type: 'concept', typeLabel: 'Design Shift',
+    body: `<div class="vs-row">
+  <div class="vs-old"><div class="vs-label" style="color:var(--text2)">Legacy question</div>How to compute before coherence is lost?</div>
+  <div class="vs-sep">→</div>
+  <div class="vs-new"><div class="vs-label" style="color:var(--accent1)">NRA-IDE question</div>How to read the transition itself as information?</div>
+</div>
+<div class="formula-box">State A →【Transition = object to be read】→ State B
+         δ/τ evolution = information
+         dR/dt = predictive signal
+         ΔC_ij(t) = structural signal</div>
+<p>T_2 is not a deadline — it is a component of τ_coh. Observation rhythm: Δt_obs = τ_coh / N_slice.</p>` },
+  t2: {
+    title: 'Design Shift 2 — Structural Slack at the Center',
+    type: 'concept', typeLabel: 'Design Shift',
+    body: `<p>The essence of τ is <strong>slack that allows the system to survive</strong>. Bearing gap. Gear play. Room to absorb thermal expansion. Slack is not a defect — it is a survival condition.</p>
+<div class="vs-row">
+  <div class="vs-old"><div class="vs-label" style="color:var(--text2)">Old</div>R = deviation / tolerance</div>
+  <div class="vs-sep">→</div>
+  <div class="vs-new"><div class="vs-label" style="color:var(--accent1)">New</div>R = moving range / slack range</div>
+</div>
+<ul class="point-list ok">
+  <li>Define slack first → track movement within slack → slack is the design center</li>
+  <li>Unchosen observable dimensions are intentional slack dimensions</li>
+  <li>The impulse to track everything is the linear curse itself</li>
+</ul>` },
+  holes: {
+    title: 'Phase 4 Holes — Now Resolved in Phase 5',
+    type: 'partial', typeLabel: 'Partial → Resolved',
+    body: `<div class="detail-sub">Previously Secured</div>
+<ul class="point-list ok">
+  <li>Fixity of z^ref_{t-ℓ} (classical bit storage)</li>
+  <li>δ_shot quality (within statistical law)</li>
+  <li>Correction runaway suppression via C(r_t)</li>
+  <li>Time asymmetry via Lindblad dissipation</li>
+</ul>
+<div class="detail-sub">Four Previously Open Holes</div>
+<ul class="point-list warn">
+  <li><strong>Hole 1:</strong> Observable set {O_i} selection principle → resolved §14.2</li>
+  <li><strong>Hole 2:</strong> Weight matrix W construction → resolved §14.3</li>
+  <li><strong>Hole 3:</strong> Correlation distortion detection formula → resolved §14.4–14.6</li>
+  <li><strong>Hole 4:</strong> L_k model dependency → partially addressed via design principle in §14.2</li>
+</ul>
+<div class="resolved-banner"><div class="icon">✓</div><div class="text"><div class="label">STATUS UPDATED</div>Phase 5 closes all four holes in correct dependency order.</div></div>` },
+
+  // PHASE 5
+  res_order: {
+    title: '§14.1 — Resolution Order',
+    type: 'resolved', typeLabel: 'Resolved',
+    body: `<p>The open items are not parallel — they have a strict dependency ordering. R_correlation is the <em>terminal formula</em>, not the starting point.</p>
+<div class="detail-sub">Correct Resolution Sequence</div>
+<ol class="point-list step">
+  <li data-n="①">Fix the target system and the failure mode to detect</li>
+  <li data-n="②">Design the observable set {O_i}</li>
+  <li data-n="③">Define weight matrix W and each τ_i</li>
+  <li data-n="④">Define correlation C_ij(t) and correlation slack τ_C</li>
+  <li data-n="⑤">Formalize R_correlation</li>
+  <li data-n="⑥">Verify with numerical simulation</li>
+</ol>
+<div class="warning-box"><div class="wlabel">CRITICAL WARNING</div>Writing R_correlation first — before the elements it depends on are defined — produces a formula whose internals are undefined. Under NRA-IDE this is structural incoherence. Fix the what-to-observe first.</div>` },
+
+  res_obs: {
+    title: '§14.2 — Observable Set {O_i} Design Principle',
+    type: 'resolved', typeLabel: 'Resolved',
+    body: `<p>The observable set is <strong>not</strong> a set for reconstructing the full quantum state. z_t in NRA-IDE is a property-preserving compression — the minimum observable set needed to detect structural fracture in the target system.</p>
+<div class="detail-sub">Three Selection Conditions</div>
+<ul class="point-list ok">
+  <li>Must relate to the survival condition of the target system</li>
+  <li>Must be computable as expectation values from Lindblad time evolution</li>
+  <li>Must appear as detectable change <em>before</em> fracture occurs</li>
+</ul>
+<p>Therefore: {O_i} is chosen by <strong>fracture-detectability</strong>, not completeness.</p>
+<div class="warning-box"><div class="wlabel">DO NOT</div>Do not attempt to observe everything. The moment you try, you return to a design where the classical side holds the whole system — the exact failure path this theory is designed to avoid.</div>` },
+
+  res_w: {
+    title: '§14.3 — Weight Matrix W Design Principle',
+    type: 'resolved', typeLabel: 'Resolved',
+    body: `<p>W is not a free tuning parameter. It is a normalized map reflecting two things: how much each observable relates to structural survival, and how reliable its measurement is.</p>
+<div class="formula-box resolved">δ²_t = Σ_i  w_i · ( r_i(t) / τ_i )²
+
+w_i  = physical importance weight
+τ_i  = tolerance thickness for observable i
+r_i  = residual of observable i</div>
+<div class="detail-sub">Design Principle</div>
+<ul class="point-list ok">
+  <li>Higher physical importance → larger w_i</li>
+  <li>Higher measurement noise → smaller w_i (prevent over-reaction)</li>
+  <li>W is the composition of physical importance and observational reliability</li>
+</ul>` },
+
+  res_cij: {
+    title: '§14.4 — Quantum Covariance C_ij(t)',
+    type: 'resolved', typeLabel: 'Resolved',
+    body: `<p>Even when individual observables ⟨O_i⟩ remain normal, the <em>relationship</em> between them may have collapsed. Detecting this requires a separate correlation residual.</p>
+<p>In the quantum context, correlation is defined as symmetrized covariance — safe for non-commuting observables:</p>
+<div class="formula-box resolved">C_ij(t) = ½ ⟨ ΔO_i ΔO_j + ΔO_j ΔO_i ⟩_t
+
+ΔO_i = O_i − ⟨O_i⟩_t</div>
+<div class="detail-sub">Why Symmetrized?</div>
+<ul class="point-list ok">
+  <li>Non-commuting observables: O_i O_j ≠ O_j O_i in general</li>
+  <li>Symmetrization yields a real-valued quantity suitable for threshold comparison</li>
+  <li>Tracks correlation structure change without requiring full density matrix access</li>
+</ul>` },
+
+  res_tauc: {
+    title: '§14.5 — Correlation Slack Width τ_C',
+    type: 'resolved', typeLabel: 'Resolved',
+    body: `<p>τ_C is the tolerance thickness of the correlation structure — not a fixed value correlation must hold, but <strong>the range within which correlation is permitted to play</strong>.</p>
+<div class="formula-box resolved">τ_{C,ij} = max( τ^noise_{C,ij},
+               τ^physical_{C,ij},
+               τ^design_{C,ij} )
+
+τ^noise    = unavoidable fluctuation from measurement noise
+τ^physical = permitted variation from physical interaction
+τ^design   = safety design margin</div>
+<div class="detail-sub">Connection to Design Shift 2</div>
+<p>Correlation fluctuating within τ_C is <em>normal</em>. τ_C is the range within which correlation is allowed to play. Only exceeding this range constitutes structural distortion — perfectly consistent with the "slack at the center" design philosophy.</p>
+<div class="warning-box"><div class="wlabel">BALANCE</div>τ_C too small: normal quantum fluctuations classified as fracture. τ_C too large: genuine correlation collapse goes undetected. τ_C is the slack range — design it as such.</div>` },
+
+  res_rcorr: {
+    title: '§14.6 — R_correlation (Formula Complete)',
+    type: 'resolved', typeLabel: 'Resolved',
+    body: `<p>With all dependencies resolved, the correlation distortion detection formula is now complete.</p>
+<div class="formula-box resolved">ΔC_ij(t) = C_ij(t) − C^ref_ij
+
+R_correlation(t) = max_{i,j} | ΔC_ij(t) / τ_{C,ij} |
+
+Fail-Closed trigger:
+R_correlation(t) ≥ 1.0</div>
+<div class="detail-sub">Interpretation</div>
+<ul class="point-list ok">
+  <li>C^ref: correlation matrix at reference time t₀ or delayed reference t−ℓ</li>
+  <li>max_{i,j}: the worst-case correlation component governs the judgment</li>
+  <li>R_corr ≥ 1.0 → Fail-Closed, even if all individual ⟨O_i⟩ appear normal</li>
+</ul>
+<div class="detail-sub">Integration with R_t</div>
+<p>The system now carries two parallel thresholds: R_t = δ_t/τ_t for individual observable deviation, and R_correlation(t) for structural correlation integrity. Either reaching 1.0 independently triggers Fail-Closed.</p>
+<div class="resolved-banner"><div class="icon">✓</div><div class="text"><div class="label">FORMULA COMPLETE</div>All four previous holes are now closed. This formula could not have been written correctly without the prior resolution of §14.1–14.5.</div></div>` },
+
+  res_sim: {
+    title: 'Minimum Simulation Plan — 2-Qubit Open System',
+    type: 'primary', typeLabel: 'Verification',
+    body: `<p>Simulation is verification of completed formulas — not a step in constructing them. The minimum viable target is a 2-qubit open system, not large-scale quantum computation.</p>
+<div class="formula-box">{O_i} = { σ_z⁽¹⁾, σ_z⁽²⁾, σ_z⁽¹⁾σ_z⁽²⁾ }
+
+Lindblad decoherence on each qubit</div>
+<div class="detail-sub">What This Verifies</div>
+<p>The key scenario: individual ⟨σ_z⁽¹⁾⟩ and ⟨σ_z⁽²⁾⟩ remain largely stable, but the correlation ⟨σ_z⁽¹⁾σ_z⁽²⁾⟩ degrades. This is precisely the case R_correlation is designed to catch — and which individual R_t monitoring would miss.</p>
+<div class="detail-sub">Simulation is Last</div>
+<ul class="point-list ok">
+  <li>Formula dependency chain must be complete before simulation begins</li>
+  <li>Running simulation before formulas are settled makes verification ambiguous</li>
+  <li>2-qubit minimum: small enough to be analytically tractable, large enough to demonstrate the correlation collapse scenario</li>
+</ul>` }
+};
+
+function showDetail(key) {
+  const d = details[key];
+  if (!d) return;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + key);
+  if (navEl) navEl.classList.add('active');
+  const typeClasses = { legacy:'type-legacy', primary:'type-primary', confirmed:'type-confirmed', partial:'type-partial', open:'type-open', concept:'type-concept', resolved:'type-resolved' };
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-title">${d.title}</div>
+    <div class="detail-type ${typeClasses[d.type]||''}">${d.typeLabel}</div>
+    <div class="detail-body">${d.body}</div>`;
+}
+
+function toggleCluster(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('span:last-child');
+  if (body.classList.contains('hidden')) { body.classList.remove('hidden'); arrow.textContent='▾'; }
+  else { body.classList.add('hidden'); arrow.textContent='▸'; }
+}
+
+showDetail('res_order');
+document.getElementById('nav-res_order').classList.add('active');
+</script>
+</body>
+</html>
