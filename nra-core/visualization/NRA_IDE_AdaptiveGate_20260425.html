@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA_IDE_AdaptiveGate_20260425.html -->
+<!-- TITLE: NRA-IDE Adaptive Gate — Fixed k vs Dynamic k_eff / 適応型ゲート拡張 -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<!-- Generated: 2026-04-25 JST -->
+<!-- Ref: nra-core/papers/IDE_AdaptiveGate_Extension_20260407_2241.md -->
+<!-- Ref: nra-core/implementation/IDE_AdaptiveGate_Extension_20260407_2241.py -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE: Adaptive Gate — Dynamic k_eff | 適応型ゲート拡張</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+:root{
+  --bg:#060c12;--panel:#0b1520;--border:#1a3040;
+  --text:#c8dde8;--dim:#4a6a7a;
+  --green:#00e676;--yellow:#ffd740;--orange:#ff9100;--red:#ff3d00;--blue:#40c4ff;
+  --tau:#c060ff;--play:#47ff9e;--keff:#ffb347;
+  --mono:'Share Tech Mono',monospace;--sans:'Zen Kaku Gothic New',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:14px 10px;}
+
+.page-title{text-align:center;margin-bottom:10px;}
+.page-title h1{font-family:var(--mono);font-size:.88rem;color:#fff;letter-spacing:.1em;margin-bottom:3px;}
+.page-title .sub{font-size:.75rem;color:var(--keff);font-family:var(--sans);font-weight:700;margin-bottom:2px;}
+.page-title p{font-size:.67rem;color:var(--dim);font-family:var(--mono);}
+.file-badge{display:inline-block;margin-top:4px;padding:2px 10px;border:1px solid rgba(255,179,71,.3);font-size:.61rem;color:var(--keff);font-family:var(--mono);letter-spacing:.1em;}
+
+.formula-box{max-width:980px;margin:0 auto 10px;padding:10px 16px;border:1px solid rgba(255,179,71,.3);background:rgba(255,179,71,.04);font-family:var(--mono);font-size:.69rem;line-height:2.0;color:#e0c890;}
+.formula-box .flabel{font-size:.59rem;color:var(--keff);letter-spacing:.12em;margin-bottom:5px;display:block;}
+.formula-box .row{display:flex;gap:18px;flex-wrap:wrap;}
+.formula-box .eq{color:#c8dde8;}.formula-box .note{color:#5a8090;font-size:.63rem;}
+
+.tab-bar{display:flex;gap:0;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
+.tab-btn{padding:7px 18px;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--dim);transition:all .15s;white-space:nowrap;}
+.tab-btn:first-child{border-radius:4px 0 0 4px;}.tab-btn:last-child{border-radius:0 4px 4px 0;}
+.tab-btn.active{background:rgba(255,179,71,.1);border-color:var(--keff);color:var(--keff);}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:980px;margin:0 auto 8px;}
+.side{border:1px solid var(--border);background:var(--panel);}
+.side-hdr{padding:7px 13px;font-family:var(--mono);font-size:.67rem;letter-spacing:.08em;border-bottom:1px solid var(--border);}
+.side-left .side-hdr{color:#ff8080;background:#140a08;border-color:#3a1a10;}
+.side-right .side-hdr{color:var(--keff);background:#12100a;border-color:#3a2e10;}
+canvas.main-cv{display:block;width:100%;height:190px;}
+.side-status{padding:7px 13px;border-top:1px solid var(--border);}
+.metric-row{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px;}
+.metric-lbl{font-family:var(--mono);font-size:.59rem;color:var(--dim);}
+.metric-val{font-family:var(--mono);font-size:1.05rem;font-weight:bold;}
+.m-x{color:var(--blue);}
+.m-r{color:var(--red);}
+.m-k{color:var(--keff);}
+.m-g{color:var(--tau);}
+.judgment{padding:5px 8px;font-size:.66rem;line-height:1.6;border:1px solid var(--border);font-family:var(--mono);min-height:36px;}
+.j-ok{border-color:rgba(0,230,118,.25);color:#80e8a0;}
+.j-warn{border-color:rgba(255,215,64,.3);color:var(--yellow);}
+.j-track{border-color:rgba(255,179,71,.3);color:var(--keff);}
+
+.keff-strip{max-width:980px;margin:0 auto 8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.keff-side{border:1px solid var(--border);background:var(--panel);}
+.keff-lbl{padding:4px 10px;font-family:var(--mono);font-size:.6rem;color:var(--dim);border-bottom:1px solid var(--border);}
+canvas.keff-cv{display:block;width:100%;height:60px;}
+
+.ctrl-area{max-width:980px;margin:0 auto 8px;background:var(--panel);border:1px solid var(--border);padding:9px 13px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.ctrl-grp{display:flex;align-items:center;gap:7px;}
+.ctrl-lbl{font-family:var(--mono);font-size:.62rem;color:var(--dim);white-space:nowrap;}
+input[type=range]{accent-color:var(--keff);cursor:pointer;width:88px;}
+.ctrl-val{font-family:var(--mono);font-size:.67rem;color:var(--keff);min-width:30px;}
+.dist-btn{padding:6px 13px;font-family:var(--mono);font-size:.66rem;cursor:pointer;border:1px solid rgba(255,61,0,.35);background:rgba(255,61,0,.07);color:var(--red);}
+.dist-btn:hover{background:rgba(255,61,0,.15);}
+.step-btn{padding:6px 13px;font-family:var(--mono);font-size:.66rem;cursor:pointer;border:1px solid rgba(64,196,255,.3);background:rgba(64,196,255,.06);color:var(--blue);}
+.step-btn:hover{background:rgba(64,196,255,.12);}
+.reset-btn{padding:5px 11px;font-family:var(--mono);font-size:.64rem;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--text);margin-left:auto;}
+.reset-btn:hover{border-color:var(--play);color:var(--play);}
+
+.insight{max-width:980px;margin:0 auto 8px;padding:10px 14px;background:#090f18;border:1px solid #182a38;font-size:.71rem;line-height:1.9;color:#6a9ab0;font-family:var(--mono);}
+.insight .ilabel{color:var(--keff);}
+.insight .note2{color:#3a6070;display:block;margin-top:3px;}
+
+footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
+@media(max-width:600px){.compare-grid,.keff-strip{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>NRA-IDE — Adaptive Gate / 適応型ゲート拡張</h1>
+  <div class="sub">内側が揺らいで吸収する — The Inside Fluctuates and Absorbs</div>
+  <p>Fixed k (rigid) vs Dynamic k_eff (adaptive) — G(r) = r·|r| / (k + |r|)</p>
+  <div class="file-badge">NRA_IDE_AdaptiveGate_20260425.html</div>
+</div>
+
+<div class="formula-box">
+  <span class="flabel">ADAPTIVE GATE EXTENSION — IDE_AdaptiveGate_Extension_20260407_2241 · 3 Proposals Integrated</span>
+  <div class="row">
+    <span><span class="eq">k_eff = k₀·(1 + β|ṙ|)</span> <span class="note">案2: 動的感度 / dynamic sensitivity</span></span>
+    <span><span class="eq">G_eff = r·|r|/(k_eff + |r|)</span> <span class="note">gate — k_eff replaces fixed k</span></span>
+    <span><span class="eq">F_IDE = α·r</span> <span class="note">案1: 相対座標 / relative-coord IDE</span></span>
+    <span><span class="eq">Φ = P + D·ṙ/(1+|r|)</span> <span class="note">案3: PD内包 / PD inside gate</span></span>
+  </div>
+  <div class="row" style="margin-top:4px;">
+    <span><span class="eq">d²x/dt² + γẋ = F_IDE + G_eff·Φ</span> <span class="note">統合支配方程式 / governing equation</span></span>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button type="button" class="tab-btn active" onclick="switchTab(0)">ステップ応答 / Step</button>
+  <button type="button" class="tab-btn" onclick="switchTab(1)">目標追従 / Ramp</button>
+  <button type="button" class="tab-btn" onclick="switchTab(2)">外乱応答 / Disturbance</button>
+</div>
+
+<div class="compare-grid">
+  <div class="side side-left">
+    <div class="side-hdr">LEFT — 固定 k = k₀ (standard gate)</div>
+    <canvas class="main-cv" id="cvLeft" width="490" height="190">Fixed k gate — state trajectory simulation</canvas>
+    <div class="side-status">
+      <div class="metric-row">
+        <span class="metric-lbl">x =</span><span class="metric-val m-x" id="xLeft">0.000</span>
+        <span class="metric-lbl">|r| =</span><span class="metric-val m-r" id="rLeft">0.000</span>
+        <span class="metric-lbl">k =</span><span class="metric-val m-k" id="kLeft">1.00</span>
+        <span class="metric-lbl">G =</span><span class="metric-val m-g" id="gLeft">0.000</span>
+      </div>
+      <div class="judgment" id="jLeft">待機中 / Waiting…</div>
+    </div>
+  </div>
+  <div class="side side-right">
+    <div class="side-hdr">RIGHT — 動的 k_eff = k₀·(1 + β|ṙ|) (adaptive gate)</div>
+    <canvas class="main-cv" id="cvRight" width="490" height="190">Dynamic k_eff adaptive gate — state trajectory simulation</canvas>
+    <div class="side-status">
+      <div class="metric-row">
+        <span class="metric-lbl">x =</span><span class="metric-val m-x" id="xRight">0.000</span>
+        <span class="metric-lbl">|r| =</span><span class="metric-val m-r" id="rRight">0.000</span>
+        <span class="metric-lbl">k_eff =</span><span class="metric-val m-k" id="kRight">1.00</span>
+        <span class="metric-lbl">G_eff =</span><span class="metric-val m-g" id="gRight">0.000</span>
+      </div>
+      <div class="judgment" id="jRight">待機中 / Waiting…</div>
+    </div>
+  </div>
+</div>
+
+<div class="keff-strip">
+  <div class="keff-side">
+    <div class="keff-lbl">k (fixed) history — k₀ = <span id="k0disp">1.00</span></div>
+    <canvas class="keff-cv" id="kvLeft" width="490" height="60">k (fixed) history chart</canvas>
+  </div>
+  <div class="keff-side">
+    <div class="keff-lbl">k_eff (dynamic) history — β = <span id="betaDisp">0.15</span></div>
+    <canvas class="keff-cv" id="kvRight" width="490" height="60">k_eff (dynamic) history chart</canvas>
+  </div>
+</div>
+
+<div class="ctrl-area">
+  <div class="ctrl-grp">
+    <span class="ctrl-lbl">k₀：</span>
+    <input type="range" id="k0Slider" min="0.2" max="3.0" step="0.1" value="1.0" oninput="onK0Change(this.value)">
+    <span class="ctrl-val" id="k0Val">1.00</span>
+  </div>
+  <div class="ctrl-grp">
+    <span class="ctrl-lbl">β (dynamic sens)：</span>
+    <input type="range" id="betaSlider" min="0.0" max="0.5" step="0.01" value="0.15" oninput="onBetaChange(this.value)">
+    <span class="ctrl-val" id="betaVal">0.15</span>
+  </div>
+  <button type="button" class="step-btn" onclick="stepTarget()">目標変更 / Step Target ▶</button>
+  <button type="button" class="dist-btn" onclick="injectDisturbance()">外乱 / Disturbance ▶</button>
+  <button type="button" class="reset-btn" onclick="resetAll()">RESET</button>
+</div>
+
+<div class="insight">
+  <span class="ilabel">▶ Adaptive Gate 観測：</span>
+  左（固定k）は速い遷移中に G(r) が強く働いてオーバーシュート・振動を生じやすい。<br>
+  右（動的k_eff）は高速時に k_eff が増大して G_eff を弱め，IDE慣性を優先する。収束時は k_eff が下がって精密補正が有効になる。<br>
+  k_eff グラフでこの変動を確認すること。β スライダーで感度を変えると動作が変化する。<br>
+  <span class="note2">ゼリー比喩：鋼鉄（固定k大）は跳ね返す。水（拘束なし）は発散する。ゼリー（適応gate）は内側で変形して吸収し，形を保つ。</span>
+</div>
+
+<footer>
+  NRA-IDE Project — M-Tokuni &nbsp;·&nbsp;
+  Adaptive Gate Extension: Dynamic k_eff / Relative IDE / PD Damper &nbsp;·&nbsp;
+  Ref: IDE_AdaptiveGate_Extension_20260407_2241 &nbsp;·&nbsp; 2026-04-25
+</footer>
+
+<script>
+// ── Parameters ────────────────────────────────────────────────────
+let k0   = 1.0;
+let beta = 0.15;
+const alpha = 0.5;
+const P = 2.0, D = 0.4, gamma = 0.5;
+const DT = 0.05;
+const HIST = 200;
+
+// ── Tabs: 0=Step, 1=Ramp, 2=Disturbance ─────────────────────────
+let currentTab = 0;
+
+// ── State ─────────────────────────────────────────────────────────
+let sf = null; // fixed k state
+let sa = null; // adaptive state
+let t = 0;
+let x_exact = 0.3;
+let pendingDistF = 0, pendingDistA = 0;
+
+function mkState(xinit) {
+  return {x: xinit, v: 0, hist: [], kHist: []};
+}
+
+function resetAll() {
+  const xi = currentTab === 1 ? 0.5 : 0.3;
+  x_exact = xi;
+  sf = mkState(xi);
+  sa = mkState(xi);
+  t = 0;
+  pendingDistF = pendingDistA = 0;
+}
+
+function switchTab(i) {
+  document.querySelectorAll('.tab-btn').forEach((b, j) => b.classList.toggle('active', i === j));
+  currentTab = i;
+  resetAll();
+}
+
+function onK0Change(v) {
+  k0 = parseFloat(v);
+  document.getElementById('k0Val').textContent = k0.toFixed(2);
+  document.getElementById('k0disp').textContent = k0.toFixed(2);
+}
+
+function onBetaChange(v) {
+  beta = parseFloat(v);
+  document.getElementById('betaVal').textContent = beta.toFixed(2);
+  document.getElementById('betaDisp').textContent = beta.toFixed(2);
+}
+
+function stepTarget() {
+  if (currentTab === 0 || currentTab === 2) {
+    x_exact = x_exact < 0.5 ? 0.7 : 0.3;
+  }
+}
+
+function injectDisturbance() {
+  const amp = 0.25;
+  pendingDistF += amp;
+  pendingDistA += amp;
+}
+
+// ── Target function ───────────────────────────────────────────────
+function getTarget(tick) {
+  switch (currentTab) {
+    case 0: return x_exact; // step (user-controlled)
+    case 1: return 0.5 + 0.28 * Math.sin(tick * DT * 0.6); // slow ramp
+    case 2: return 0.5; // fixed, disturbance-only
+  }
+  return 0.5;
+}
+
+// ── Gate functions ────────────────────────────────────────────────
+function gFixed(r) {
+  return r * Math.abs(r) / (k0 + Math.abs(r));
+}
+
+function gAdaptive(r, rdot) {
+  const keff = k0 * (1.0 + beta * Math.abs(rdot));
+  const g = r * Math.abs(r) / (keff + Math.abs(r));
+  return {g, keff};
+}
+
+// ── Physics step ──────────────────────────────────────────────────
+function stepFixed(s, xe) {
+  const r    = xe - s.x;
+  const g    = gFixed(r);
+  const fide = alpha * r;
+  const accel = fide + g * P - gamma * s.v + pendingDistF;
+  pendingDistF *= 0.5;
+  s.v += accel * DT;
+  s.x = Math.max(0.01, Math.min(0.99, s.x + s.v * DT));
+  s.hist.push({x: s.x, xe, r: Math.abs(r)});
+  s.kHist.push(k0);
+  if (s.hist.length > HIST) { s.hist.shift(); s.kHist.shift(); }
+  return {r: Math.abs(r), k: k0, g: Math.abs(g)};
+}
+
+function stepAdaptive(s, xe) {
+  const r    = xe - s.x;
+  const rdot = -s.v;
+  const {g, keff} = gAdaptive(r, rdot);
+  const fide = alpha * r;
+  const phi  = P + D * rdot / (1.0 + Math.abs(r));
+  const accel = fide + g * phi - gamma * s.v + pendingDistA;
+  pendingDistA *= 0.5;
+  s.v += accel * DT;
+  s.x = Math.max(0.01, Math.min(0.99, s.x + s.v * DT));
+  s.hist.push({x: s.x, xe, r: Math.abs(r)});
+  s.kHist.push(keff);
+  if (s.hist.length > HIST) { s.hist.shift(); s.kHist.shift(); }
+  return {r: Math.abs(r), k: keff, g: Math.abs(g)};
+}
+
+// ── Canvas draw: main trajectory ──────────────────────────────────
+function drawMain(cvId, hist, isLeft) {
+  const cv = document.getElementById(cvId);
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = isLeft ? '#0e0a08' : '#0e0c08';
+  ctx.fillRect(0, 0, W, H);
+  if (hist.length < 2) return;
+
+  const pad = 12;
+  const dx = (W - pad) / HIST;
+  const ymap = v => pad + (1.0 - v) * (H - 2 * pad);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(200,220,235,.07)';
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75].forEach(v => {
+    const y = ymap(v);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  });
+
+  // Target line (current xe)
+  const curXe = hist[hist.length - 1].xe;
+  const yeTarget = ymap(curXe);
+  ctx.setLineDash([5, 4]);
+  ctx.strokeStyle = 'rgba(64,196,255,.45)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, yeTarget); ctx.lineTo(W, yeTarget); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // State trajectory
+  ctx.beginPath();
+  hist.forEach((pt, i) => {
+    const x = i * dx + pad / 2;
+    const y = ymap(pt.x);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  const lastR = hist[hist.length - 1].r;
+  ctx.strokeStyle = lastR > 0.15
+    ? (isLeft ? 'rgba(255,130,80,.85)' : 'rgba(255,200,80,.85)')
+    : (isLeft ? 'rgba(255,130,80,.70)' : 'rgba(255,200,80,.70)');
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Target x_exact trajectory
+  ctx.beginPath();
+  hist.forEach((pt, i) => {
+    const x = i * dx + pad / 2;
+    const y = ymap(pt.xe);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = 'rgba(64,196,255,.45)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Current position dot
+  const lp = hist[hist.length - 1];
+  const dotX = (hist.length - 1) * dx + pad / 2;
+  const dotY = ymap(lp.x);
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = isLeft ? '#ff8050' : '#ffc840';
+  ctx.fill();
+
+  // Labels
+  ctx.font = '9px Share Tech Mono,monospace';
+  ctx.fillStyle = 'rgba(200,220,235,.3)';
+  ctx.fillText('1.0', 2, pad + 8);
+  ctx.fillText('0.5', 2, ymap(0.5) + 4);
+  ctx.fillText('0.0', 2, H - pad + 3);
+}
+
+// ── Canvas draw: k_eff strip ──────────────────────────────────────
+function drawKeff(cvId, kHist, isLeft) {
+  const cv = document.getElementById(cvId);
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#080c10';
+  ctx.fillRect(0, 0, W, H);
+  if (kHist.length < 2) return;
+
+  const kMax = Math.max(3.0, ...kHist) * 1.1;
+  const dx = W / HIST;
+  const ymap = k => H - 4 - (k / kMax) * (H - 8);
+
+  // k0 reference line
+  ctx.setLineDash([3, 3]);
+  ctx.strokeStyle = 'rgba(255,179,71,.3)';
+  ctx.lineWidth = 1;
+  const yk0 = ymap(k0);
+  ctx.beginPath(); ctx.moveTo(0, yk0); ctx.lineTo(W, yk0); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // k_eff trace
+  ctx.beginPath();
+  kHist.forEach((k, i) => {
+    const x = i * dx;
+    const y = ymap(k);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = isLeft ? 'rgba(200,170,100,.6)' : 'rgba(255,179,71,.85)';
+  ctx.lineWidth = isLeft ? 1 : 1.5;
+  ctx.stroke();
+
+  // Fill under k_eff (adaptive only)
+  if (!isLeft) {
+    ctx.beginPath();
+    kHist.forEach((k, i) => {
+      const x = i * dx;
+      const y = ymap(k);
+      if (i === 0) { ctx.moveTo(x, H); }
+      ctx.lineTo(x, y);
+    });
+    ctx.lineTo((kHist.length - 1) * dx, H);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,179,71,.07)';
+    ctx.fill();
+  }
+
+  ctx.font = '9px Share Tech Mono,monospace';
+  ctx.fillStyle = 'rgba(255,179,71,.4)';
+  ctx.fillText('k₀', 2, yk0 - 2);
+  ctx.fillStyle = 'rgba(200,220,235,.25)';
+  ctx.fillText(kHist[kHist.length - 1].toFixed(2), W - 32, 12);
+}
+
+// ── UI update ─────────────────────────────────────────────────────
+function updateUI(mF, mA) {
+  document.getElementById('xLeft').textContent  = sf.x.toFixed(3);
+  document.getElementById('rLeft').textContent  = mF.r.toFixed(3);
+  document.getElementById('kLeft').textContent  = mF.k.toFixed(2);
+  document.getElementById('gLeft').textContent  = mF.g.toFixed(3);
+  document.getElementById('xRight').textContent = sa.x.toFixed(3);
+  document.getElementById('rRight').textContent = mA.r.toFixed(3);
+  document.getElementById('kRight').textContent = mA.k.toFixed(2);
+  document.getElementById('gRight').textContent = mA.g.toFixed(3);
+
+  const jL = document.getElementById('jLeft');
+  if (mF.r > 0.20) {
+    jL.className = 'judgment j-warn';
+    jL.textContent = '|r|=' + mF.r.toFixed(3) + ' — 誤差大 / large residual — k固定で振動しやすい';
+  } else {
+    jL.className = 'judgment j-ok';
+    jL.textContent = '|r|=' + mF.r.toFixed(3) + ' — 収束中 / converging — k = ' + mF.k.toFixed(2) + ' (fixed)';
+  }
+
+  const jR = document.getElementById('jRight');
+  if (mA.k > k0 * 1.3) {
+    jR.className = 'judgment j-track';
+    jR.textContent = 'k_eff=' + mA.k.toFixed(3) + ' ↑ 高速遷移 — IDE慣性優先 / high-speed: IDE inertia prioritized';
+  } else if (mA.r > 0.10) {
+    jR.className = 'judgment j-warn';
+    jR.textContent = '|r|=' + mA.r.toFixed(3) + ' — 追従中 / tracking target';
+  } else {
+    jR.className = 'judgment j-ok';
+    jR.textContent = 'k_eff=' + mA.k.toFixed(3) + ' ↓ 収束精度モード / convergence precision mode';
+  }
+
+  drawMain('cvLeft',  sf.hist, true);
+  drawMain('cvRight', sa.hist, false);
+  drawKeff('kvLeft',  sf.kHist, true);
+  drawKeff('kvRight', sa.kHist, false);
+}
+
+// ── Main loop ─────────────────────────────────────────────────────
+function loop() {
+  t++;
+  const xe = getTarget(t);
+  const mF = stepFixed(sf, xe);
+  const mA = stepAdaptive(sa, xe);
+  updateUI(mF, mA);
+  requestAnimationFrame(loop);
+}
+
+resetAll();
+loop();
+</script>
+</body>
+</html>

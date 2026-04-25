@@ -53,3 +53,53 @@
 ### 12. Parenthetical Suffixes — `(N)` Form
 - Filenames with a parenthetical number suffix such as `filename (3).html` are **retained as-is**.
 - This pattern is produced by OS/browser duplicate-download behavior and should not be renamed automatically.
+
+---
+
+## Git Operation Rules
+
+### Commit Settings
+- Always disable GPG signing when committing:
+  ```
+  git -c commit.gpgsign=false commit
+  ```
+- Always target the `master` branch (never `main`):
+  ```
+  git push origin master
+  ```
+
+### Step-by-Step Confirmation
+- Present operations **one at a time**. Never batch-execute multiple operations.
+- Wait for explicit user confirmation before proceeding to the next operation.
+- Even when listing multiple planned operations, execute them one by one.
+- Folder deletion requires **two separate confirmations**.
+
+### Destructive Operations — Present Individually
+The following commands must be presented **individually** and require **explicit confirmation** before execution. Never group them together.
+
+```
+git branch -m          # rename branch
+git branch -d / -D     # delete branch
+git reset --hard       # discard changes
+git push --force       # force push
+git rebase             # rewrite history
+git rm                 # delete tracked file
+```
+
+### Default Branch Change — Prohibited
+- `git branch -m main master` and its reverse are **strictly prohibited**.
+- Changing the default branch in GitHub Settings is also **prohibited**.
+- Branch structure changes are only permitted when M-Tokuni explicitly instructs them (confirm twice).
+
+### File Move — Use `git mv` Only
+```
+# Correct
+git mv <old_path> <new_path>
+
+# Prohibited — breaks git history
+# Windows Explorer / mv / cp + rm / OS-level file operations
+```
+
+### File Listing Scope
+- When checking or listing all files, **default to the current working folder only**.
+- Do not recursively scan the entire repository unless explicitly instructed.

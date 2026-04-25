@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA_IDE_Axiom1_RigidityPlay_20260425.html -->
+<!-- TITLE: NRA-IDE Axiom 1 — 遊びのない厳密さは崩壊する / Rigidity Without Play Collapses -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<!-- Generated: 2026-04-25 JST -->
+<!-- Ref: theory/AXIOMS_rewritten_2026-04-24_011508.md — Axiom 1 / Part I -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE: Axiom 1 — Rigidity Without Play Collapses | 遊びのない厳密さは崩壊する</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+:root{
+  --bg:#060c12;--panel:#0b1520;--border:#1a3040;
+  --text:#c8dde8;--dim:#4a6a7a;
+  --green:#00e676;--yellow:#ffd740;--orange:#ff9100;--red:#ff3d00;--blue:#40c4ff;
+  --tau:#c060ff;--play:#47ff9e;
+  --mono:'Share Tech Mono',monospace;--sans:'Zen Kaku Gothic New',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:14px 10px;}
+
+.page-title{text-align:center;margin-bottom:12px;}
+.page-title h1{font-family:var(--mono);font-size:.88rem;color:#fff;letter-spacing:.1em;margin-bottom:3px;}
+.page-title .sub{font-size:.8rem;color:var(--tau);font-family:var(--sans);font-weight:700;margin-bottom:2px;}
+.page-title p{font-size:.68rem;color:var(--dim);font-family:var(--mono);}
+.file-badge{display:inline-block;margin-top:5px;padding:2px 10px;border:1px solid rgba(192,96,255,.3);font-size:.62rem;color:var(--tau);font-family:var(--mono);letter-spacing:.1em;}
+
+.axiom-box{max-width:980px;margin:0 auto 10px;padding:10px 16px;border:1px solid rgba(192,96,255,.35);background:rgba(192,96,255,.04);font-family:var(--mono);font-size:.72rem;line-height:1.9;color:#c8a8f8;}
+.axiom-box .alabel{font-size:.6rem;color:var(--tau);letter-spacing:.12em;margin-bottom:6px;display:block;}
+.axiom-box .en{color:#88a0b8;font-size:.67rem;}
+
+.tab-bar{display:flex;gap:0;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
+.tab-btn{padding:7px 20px;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--dim);transition:all .15s;white-space:nowrap;}
+.tab-btn:first-child{border-radius:4px 0 0 4px;}.tab-btn:last-child{border-radius:0 4px 4px 0;}
+.tab-btn.active{background:rgba(192,96,255,.1);border-color:var(--tau);color:var(--tau);}
+button.tab-btn{-webkit-appearance:none;appearance:none;line-height:normal;}
+
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:980px;margin:0 auto 8px;}
+.side{border:1px solid var(--border);background:var(--panel);position:relative;overflow:hidden;}
+.side-hdr{padding:7px 13px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;border-bottom:1px solid var(--border);}
+.side-left .side-hdr{color:#ff7070;background:#140808;border-color:#3a1010;}
+.side-right .side-hdr{color:var(--play);background:#081408;border-color:#0e3018;}
+
+canvas.main-cv{display:block;width:100%;height:200px;}
+
+.break-overlay{display:none;position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(255,30,0,.14);border:2px solid var(--red);pointer-events:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;}
+.break-overlay.show{display:flex;}
+.break-txt{font-family:var(--mono);font-size:1.8rem;font-weight:bold;color:var(--red);letter-spacing:.25em;text-shadow:0 0 24px rgba(255,61,0,.9);}
+.break-sub{font-family:var(--mono);font-size:.64rem;color:#ff8080;}
+
+.side-status{padding:8px 13px;border-top:1px solid var(--border);}
+.metric-row{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:5px;}
+.metric-lbl{font-family:var(--mono);font-size:.6rem;color:var(--dim);}
+.metric-val{font-family:var(--mono);font-size:1.1rem;font-weight:bold;}
+.m-r{color:var(--blue);}
+.m-d{color:var(--yellow);}
+.m-t{color:var(--tau);}
+.r-bar-wrap{margin-bottom:5px;}
+.r-bar-bg{background:#0a1018;height:9px;border-radius:2px;overflow:hidden;border:1px solid var(--border);}
+.r-bar-fill{height:100%;width:0%;transition:width .06s,background .08s;}
+.r-bar-lbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.56rem;color:var(--dim);margin-top:2px;}
+.judgment{padding:5px 8px;font-size:.67rem;line-height:1.6;border:1px solid var(--border);font-family:var(--mono);min-height:38px;}
+.j-ok{border-color:rgba(0,230,118,.25);color:#80e8a0;}
+.j-warn{border-color:rgba(255,215,64,.3);color:var(--yellow);}
+.j-break{border-color:rgba(255,61,0,.45);color:var(--red);}
+
+.ctrl-area{max-width:980px;margin:0 auto 8px;background:var(--panel);border:1px solid var(--border);padding:9px 13px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.ctrl-grp{display:flex;align-items:center;gap:7px;}
+.ctrl-lbl{font-family:var(--mono);font-size:.63rem;color:var(--dim);white-space:nowrap;}
+input[type=range]{accent-color:var(--tau);cursor:pointer;width:96px;}
+input[type=range].stress-r{accent-color:var(--orange);}
+.ctrl-val{font-family:var(--mono);font-size:.68rem;color:var(--tau);min-width:34px;}
+.ctrl-val.sv{color:var(--orange);}
+.impulse-btn{padding:6px 13px;font-family:var(--mono);font-size:.66rem;cursor:pointer;border:1px solid rgba(255,145,0,.35);background:rgba(255,145,0,.07);color:var(--orange);}
+.impulse-btn:hover{background:rgba(255,145,0,.16);}
+.reset-btn{padding:5px 11px;font-family:var(--mono);font-size:.64rem;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--text);margin-left:auto;}
+.reset-btn:hover{border-color:var(--play);color:var(--play);}
+
+.insight{max-width:980px;margin:0 auto 8px;padding:10px 14px;background:#090f18;border:1px solid #182a38;font-size:.71rem;line-height:1.9;color:#6a9ab0;font-family:var(--mono);}
+.insight .ilabel{color:var(--tau);}
+.insight .axiom-note{color:#3a6070;margin-top:4px;display:block;}
+
+footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
+@media(max-width:600px){.compare-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>NRA-IDE — Axiom 1 / 律環公理 公理1</h1>
+  <div class="sub">遊びのない厳密さは崩壊する</div>
+  <p>Rigidity Without Play Collapses</p>
+  <div class="file-badge">NRA_IDE_Axiom1_RigidityPlay_20260425.html</div>
+</div>
+
+<div class="axiom-box">
+  <span class="alabel">AXIOM 1 — AXIOMS_rewritten v1.2 · 律環公理 公理体系 Part I</span>
+  生成構造が現実系として持続するためには，吸収の余裕（τ）が必要である。<br>
+  遊び（structural play）のない厳密な構造は，わずかな逸脱（δ）に対しても破断に至る。<br>
+  <span class="en">For a generative structure to persist as a real system, absorption margin (τ) is necessary.<br>
+  A structure with no play collapses under even slight deviation (δ).</span>
+</div>
+
+<div class="tab-bar">
+  <button type="button" class="tab-btn active" onclick="switchTab(0)">軸受隙間 / Bearing</button>
+  <button type="button" class="tab-btn" onclick="switchTab(1)">歯車バックラッシュ / Gear</button>
+  <button type="button" class="tab-btn" onclick="switchTab(2)">構造余裕 / Margin</button>
+</div>
+
+<div class="compare-grid">
+  <div class="side side-left">
+    <div class="side-hdr">LEFT — τ = <span id="tauLeftDisp">0.020</span> &nbsp;|&nbsp; 遊びなし / RIGID (τ ≈ 0)</div>
+    <canvas class="main-cv" id="cvLeft" width="490" height="200">R = δ/τ simulation — Left (τ≈0 rigid)</canvas>
+    <div class="break-overlay" id="breakOverlay">
+      <div class="break-txt">BREAK</div>
+      <div class="break-sub">R ≥ 1 — δ &gt; τ — 破断 / Phase Transition</div>
+    </div>
+    <div class="side-status">
+      <div class="metric-row">
+        <span class="metric-lbl">R =</span><span class="metric-val m-r" id="rLeft">0.000</span>
+        <span class="metric-lbl">δ =</span><span class="metric-val m-d" id="dLeft">0.0000</span>
+        <span class="metric-lbl">τ =</span><span class="metric-val m-t" id="tLeft">0.020</span>
+      </div>
+      <div class="r-bar-wrap">
+        <div class="r-bar-bg"><div class="r-bar-fill" id="rBarLeft"></div></div>
+        <div class="r-bar-lbl"><span>R = 0</span><span>R = 1 BREAK</span></div>
+      </div>
+      <div class="judgment" id="jLeft">待機中 / Waiting…</div>
+    </div>
+  </div>
+
+  <div class="side side-right">
+    <div class="side-hdr">RIGHT — τ = <span id="tauDisplay">0.400</span> &nbsp;|&nbsp; 遊びあり / WITH PLAY</div>
+    <canvas class="main-cv" id="cvRight" width="490" height="200">R = δ/τ simulation — Right (with play τ)</canvas>
+    <div class="side-status">
+      <div class="metric-row">
+        <span class="metric-lbl">R =</span><span class="metric-val m-r" id="rRight">0.000</span>
+        <span class="metric-lbl">δ =</span><span class="metric-val m-d" id="dRight">0.0000</span>
+        <span class="metric-lbl">τ =</span><span class="metric-val m-t" id="tRight">0.400</span>
+      </div>
+      <div class="r-bar-wrap">
+        <div class="r-bar-bg"><div class="r-bar-fill" id="rBarRight"></div></div>
+        <div class="r-bar-lbl"><span>R = 0</span><span>R = 1 BREAK</span></div>
+      </div>
+      <div class="judgment" id="jRight">待機中 / Waiting…</div>
+    </div>
+  </div>
+</div>
+
+<div class="ctrl-area">
+  <div class="ctrl-grp">
+    <span class="ctrl-lbl">τ (RIGHT) 遊び幅：</span>
+    <input type="range" id="tauSlider" min="0.03" max="0.80" step="0.01" value="0.40" oninput="onTauChange(this.value)">
+    <span class="ctrl-val" id="tauVal">0.400</span>
+  </div>
+  <div class="ctrl-grp">
+    <span class="ctrl-lbl">外乱強度 / Stress：</span>
+    <input type="range" class="stress-r" id="stressSlider" min="1" max="6" step="0.5" value="2" oninput="onStressChange(this.value)">
+    <span class="ctrl-val sv" id="stressVal">2.0×</span>
+  </div>
+  <button type="button" class="impulse-btn" onclick="injectImpulse()">衝撃 / Impulse ▶</button>
+  <button type="button" class="reset-btn" onclick="resetAll()">RESET</button>
+</div>
+
+<div class="insight">
+  <span class="ilabel">▶ Axiom 1 観測：</span>
+  左（τ≈0）は同一の外乱δを受けて即座に R≥1 に達し破断する。
+  右（τ適切）は同じδを吸収厚みの範囲内に収め，構造を持続させる。<br>
+  τスライダーを下げると右側も破断接近域（Axiom 7）に入ることが確認できる。
+  衝撃（Impulse）ボタンで急激な外乱を加え，τの重要性を確かめること。<br>
+  <span class="axiom-note">τ = 0 は「定義域外」であり構造自体が成立しない（Axiom 3 domain constraint: τ &gt; 0）。
+  LEFT の τ は最小値として設定されているが，原理上 τ=0 は Axiom 3 の破綻点を意味する。</span>
+</div>
+
+<footer>
+  NRA-IDE Project — M-Tokuni &nbsp;·&nbsp;
+  Axiom 1: Rigidity Without Play Collapses &nbsp;·&nbsp;
+  Ref: AXIOMS_rewritten v1.2, SecondAxiom_Journey v2 &nbsp;·&nbsp; 2026-04-25
+</footer>
+
+<script>
+const SCENARIOS = [
+  {tauLeft:0.020, tauRightInit:0.400, driftSat:0.022, driftT:150, oscA:0.006, oscW:0.040, noiseA:0.005},
+  {tauLeft:0.018, tauRightInit:0.350, driftSat:0.020, driftT:130, oscA:0.007, oscW:0.050, noiseA:0.006},
+  {tauLeft:0.025, tauRightInit:0.450, driftSat:0.028, driftT:170, oscA:0.005, oscW:0.030, noiseA:0.004},
+];
+let sc = {...SCENARIOS[0]};
+
+let tauRight = sc.tauRightInit;
+let stressMult = 2.0;
+let t = 0;
+let brokenL = false, brokenR = false;
+const HIST = 200;
+let histL = [], histR = [];
+let pendingImpulse = 0;
+
+function switchTab(i) {
+  document.querySelectorAll('.tab-btn').forEach((b, j) => b.classList.toggle('active', i === j));
+  sc = {...SCENARIOS[i]};
+  tauRight = sc.tauRightInit;
+  document.getElementById('tauSlider').value = tauRight;
+  document.getElementById('tauVal').textContent = tauRight.toFixed(3);
+  document.getElementById('tauDisplay').textContent = tauRight.toFixed(3);
+  document.getElementById('tauLeftDisp').textContent = sc.tauLeft.toFixed(3);
+  resetAll();
+}
+
+function onTauChange(v) {
+  tauRight = parseFloat(v);
+  document.getElementById('tauVal').textContent = tauRight.toFixed(3);
+  document.getElementById('tauDisplay').textContent = tauRight.toFixed(3);
+}
+
+function onStressChange(v) {
+  stressMult = parseFloat(v);
+  document.getElementById('stressVal').textContent = stressMult.toFixed(1) + '×';
+}
+
+function injectImpulse() {
+  pendingImpulse += stressMult * 0.15;
+}
+
+function resetAll() {
+  t = 0; brokenL = brokenR = false; histL = []; histR = [];
+  pendingImpulse = 0;
+  document.getElementById('breakOverlay').classList.remove('show');
+  document.getElementById('jLeft').className = 'judgment';
+  document.getElementById('jLeft').textContent = '待機中 / Waiting…';
+  document.getElementById('jRight').className = 'judgment';
+  document.getElementById('jRight').textContent = '待機中 / Waiting…';
+}
+
+function computeDelta() {
+  const drift = sc.driftSat * (1 - Math.exp(-t / sc.driftT));
+  const osc   = sc.oscA * Math.sin(t * sc.oscW);
+  const n     = (Math.random() - 0.5) * 2 * sc.noiseA * stressMult;
+  const imp   = pendingImpulse;
+  pendingImpulse *= 0.65;
+  return Math.abs(drift + osc + n + imp);
+}
+
+function tick() {
+  t++;
+  const delta = computeDelta();
+
+  if (!brokenL) {
+    const r = delta / sc.tauLeft;
+    histL.push({d: delta, tau: sc.tauLeft, r});
+    if (r >= 1) { brokenL = true; document.getElementById('breakOverlay').classList.add('show'); }
+  } else {
+    histL.push({d: sc.tauLeft * 1.1, tau: sc.tauLeft, r: 1.1});
+  }
+  if (histL.length > HIST) histL.shift();
+
+  if (!brokenR) {
+    const r = delta / tauRight;
+    histR.push({d: delta, tau: tauRight, r});
+    if (r >= 1) { brokenR = true; }
+  } else {
+    histR.push({d: tauRight * 1.05, tau: tauRight, r: 1.05});
+  }
+  if (histR.length > HIST) histR.shift();
+}
+
+function rColor(r) {
+  if (r >= 1.0) return '#ff3d00';
+  if (r >= 0.75) return '#ff9100';
+  if (r >= 0.50) return '#ffd740';
+  return '#00e676';
+}
+
+function drawSide(cvId, hist, isLeft) {
+  const cv = document.getElementById(cvId);
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = isLeft ? '#0e0808' : '#080e0a';
+  ctx.fillRect(0, 0, W, H);
+  if (hist.length < 2) return;
+
+  const midY  = H * 0.52;
+  const scaleY = H * 0.42;
+  const last  = hist[hist.length - 1];
+  const bandH = last.tau * scaleY;
+
+  // τ band
+  ctx.fillStyle = isLeft ? 'rgba(255,61,0,.06)' : 'rgba(71,255,158,.06)';
+  ctx.fillRect(0, midY - bandH, W, bandH * 2);
+
+  ctx.setLineDash([4, 5]);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = isLeft ? 'rgba(255,80,80,.30)' : 'rgba(71,255,158,.30)';
+  ctx.beginPath(); ctx.moveTo(0, midY - bandH); ctx.lineTo(W, midY - bandH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, midY + bandH); ctx.lineTo(W, midY + bandH); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.font = '10px Share Tech Mono,monospace';
+  ctx.fillStyle = isLeft ? 'rgba(255,100,100,.45)' : 'rgba(71,255,158,.45)';
+  ctx.fillText('+τ', 4, midY - bandH - 3);
+  ctx.fillText('-τ', 4, midY + bandH + 11);
+
+  // Zero line
+  ctx.strokeStyle = 'rgba(200,220,235,.10)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(W, midY); ctx.stroke();
+
+  // δ waveform
+  const dx = W / HIST;
+  ctx.beginPath();
+  let hasBroken = false;
+  hist.forEach((pt, i) => {
+    const x = i * dx;
+    const sign = Math.sin(i * 0.22) >= 0 ? 1 : -1;
+    const y = midY - sign * pt.d * scaleY;
+    if (pt.r >= 1) hasBroken = true;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = hasBroken
+    ? 'rgba(255,61,0,.85)'
+    : isLeft ? 'rgba(255,130,80,.80)' : 'rgba(71,255,158,.80)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // R vertical bar (right edge)
+  const curR = last.r;
+  const mW = 16, mX = W - mW - 4;
+  const mH = H * 0.75, mY0 = H * 0.12;
+  ctx.fillStyle = '#0a1018';
+  ctx.fillRect(mX, mY0, mW, mH);
+  ctx.strokeStyle = 'rgba(40,80,100,.4)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(mX, mY0, mW, mH);
+  const fillH = Math.min(curR, 1.2) * mH / 1.2;
+  ctx.fillStyle = rColor(curR);
+  ctx.fillRect(mX + 1, mY0 + mH - fillH, mW - 2, fillH);
+  ctx.font = '9px Share Tech Mono,monospace';
+  ctx.fillStyle = 'rgba(180,210,230,.40)';
+  ctx.fillText('R', mX + 4, mY0 - 3);
+}
+
+function updateUI() {
+  const lLast = histL[histL.length - 1] || {d: 0, tau: sc.tauLeft, r: 0};
+  const rLast = histR[histR.length - 1] || {d: 0, tau: tauRight, r: 0};
+  const rL = brokenL ? Infinity : lLast.r;
+  const rR = brokenR ? Infinity : rLast.r;
+
+  document.getElementById('rLeft').textContent  = brokenL ? '∞' : rL.toFixed(3);
+  document.getElementById('dLeft').textContent  = lLast.d.toFixed(4);
+  document.getElementById('tLeft').textContent  = sc.tauLeft.toFixed(3);
+  document.getElementById('rRight').textContent = brokenR ? '≥ 1' : rR.toFixed(3);
+  document.getElementById('dRight').textContent = rLast.d.toFixed(4);
+  document.getElementById('tRight').textContent = tauRight.toFixed(3);
+
+  const pL = Math.min(rL, 1.2) / 1.2 * 100;
+  const pR = Math.min(rR, 1.2) / 1.2 * 100;
+  const bL = document.getElementById('rBarLeft');
+  const bR = document.getElementById('rBarRight');
+  bL.style.width = pL + '%'; bL.style.background = rColor(rL);
+  bR.style.width = pR + '%'; bR.style.background = rColor(rR);
+
+  const jL = document.getElementById('jLeft');
+  if (brokenL) {
+    jL.className = 'judgment j-break';
+    jL.textContent = 'R ≥ 1 → BREAK — τ≈0の構造はδの増加に抗えない / τ≈0 cannot resist δ growth';
+  } else if (rL >= 0.75) {
+    jL.className = 'judgment j-warn';
+    jL.textContent = 'WARN: R=' + rL.toFixed(3) + ' — 破断接近域 / Collapse-Approach Region (Axiom 7)';
+  } else {
+    jL.className = 'judgment j-ok';
+    jL.textContent = 'R=' + rL.toFixed(3) + ' — 破断へ接近中 / Approaching break…';
+  }
+
+  const jR = document.getElementById('jRight');
+  if (brokenR) {
+    jR.className = 'judgment j-break';
+    jR.textContent = 'R ≥ 1 → BREAK — τを増やしてRESET / Increase τ and RESET';
+  } else if (rR >= 0.75) {
+    jR.className = 'judgment j-warn';
+    jR.textContent = 'WARN: R=' + rR.toFixed(3) + ' — 遊び限界接近 / Play margin depleted';
+  } else {
+    jR.className = 'judgment j-ok';
+    jR.textContent = 'R=' + rR.toFixed(3) + ' — δ吸収中 / Absorbing deviation within τ';
+  }
+
+  drawSide('cvLeft',  histL, true);
+  drawSide('cvRight', histR, false);
+}
+
+function loop() {
+  tick();
+  updateUI();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
