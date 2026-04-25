@@ -41,7 +41,7 @@
 | 21 | [CABG Monitor](./examples/21_cabg_monitor_JP.html) | 医療応用 — 生体指標にδ/τを適用 |
 | 25 | [ダム劣化](./examples/25_dam_degradation_JP.html) | 累積負荷による余裕幅消費の追跡 |
 
-→ [全32デモ一覧](./examples/)
+→ [全41デモ一覧](./examples/)
 
 ---
 

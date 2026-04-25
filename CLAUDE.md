@@ -73,6 +73,7 @@
 - Wait for explicit user confirmation before proceeding to the next operation.
 - Even when listing multiple planned operations, execute them one by one.
 - Folder deletion requires **two separate confirmations**.
+- If batch execution is explicitly requested by the user, **two separate confirmations** are required.
 
 ### Destructive Operations — Present Individually
 The following commands must be presented **individually** and require **explicit confirmation** before execution. Never group them together.

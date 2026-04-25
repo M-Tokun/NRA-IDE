@@ -41,7 +41,7 @@ Interactive HTML simulations are available in the [`examples/`](./examples/) dir
 | 21 | [CABG Monitor](./examples/21_cabg_monitor_JP.html) | Medical application — δ/τ on physiological indicators |
 | 25 | [Dam Degradation](./examples/25_dam_degradation_EN.html) | Margin consumption tracking over cumulative load |
 
-→ [Full list of all 32 demos](./examples/)
+→ [Full list of all 41 demos](./examples/)
 
 ---
 

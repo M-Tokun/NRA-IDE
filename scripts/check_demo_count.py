@@ -11,7 +11,7 @@ def extract_count(path, pattern):
 
 root_en = extract_count("README.md",          r"all (\d+) demos")
 root_jp = extract_count("README_JP.md",       r"全(\d+)デモ")
-ex_en   = extract_count("examples/README.md", r"\((\d+) demos")
+ex_en   = extract_count("examples/README.md", r"(\d+)\s+[Dd]emos")
 ex_jp   = extract_count("examples/README_JP.md", r"（(\d+)本")
 
 counts = {"README.md": root_en, "README_JP.md": root_jp,
