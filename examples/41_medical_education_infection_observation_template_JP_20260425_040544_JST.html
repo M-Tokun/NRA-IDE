@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<!-- FILE: 41_medical_education_infection_observation_template_JP_20260425_040544_JST.html -->
+<!-- TITLE: NRA-IDE 医療教育用 感染症観察群テンプレート -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-25 04:05:44 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NRA-IDE Medical Education Infection Observation Template JP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg:#081014;
+  --s1:#0e171d;
+  --s2:#14222a;
+  --bd:#2a4551;
+  --tx:#d8e8ef;
+  --mu:#738993;
+  --ok:#47ff9e;
+  --watch:#6bd9ff;
+  --warn:#ffd15d;
+  --fail:#ff4b71;
+  --accent:#7de7ff;
+  --temp:#ff8b55;
+  --rr:#6bd9ff;
+  --hr:#78ff8b;
+  --spo2:#8cb7ff;
+  --bp:#ff92d0;
+  --hyd:#55e7c6;
+  --inf:#ffe26c;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(125,231,255,.024) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(125,231,255,.024) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:28px 20px 36px;}
+
+header{text-align:center;margin-bottom:24px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.82;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{font-style:normal;color:var(--inf);}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.75;}
+
+.notice{
+  border:1px solid rgba(255,209,93,.35);
+  background:rgba(255,209,93,.06);
+  border-left:4px solid var(--warn);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#eedfa7;
+  font-size:.78rem;
+  line-height:1.74;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;
+  border:1px solid var(--bd);
+  border-radius:7px;
+  background:var(--s1);
+  color:var(--tx);
+  font-size:.82rem;
+  cursor:pointer;
+  transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#00151d;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:7px;
+  color:var(--tx);
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:.82rem;
+  cursor:pointer;
+}
+.scen-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(125,231,255,.42);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--inf);}
+.eq-c{color:var(--warn);}
+.eq-f{color:var(--fail);}
+
+.stats{
+  display:grid;
+  grid-template-columns:1.1fr repeat(4,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:1120px){.stats{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:640px){.stats{grid-template-columns:1fr 1fr;}}
+.stat{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
+.stat-v{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
+.stat-s{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;margin-bottom:16px;}
+@media(max-width:1040px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
+.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
+
+.person-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:1040px){.person-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.person-grid{grid-template-columns:1fr;}}
+.card{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  position:relative;
+  cursor:pointer;
+  transition:.2s;
+}
+.card.selected{outline:2px solid var(--accent);box-shadow:0 0 0 1px rgba(125,231,255,.35) inset;}
+.card.warn{border-color:var(--warn);}
+.card.fail{border-color:var(--fail);animation:pulse .7s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,75,113,.05);}to{box-shadow:0 0 16px rgba(255,75,113,.22);}}
+.badge{position:absolute;right:10px;top:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;}
+.b-ok{background:rgba(71,255,158,.10);border:1px solid rgba(71,255,158,.30);color:var(--ok);}
+.b-watch{background:rgba(107,217,255,.10);border:1px solid rgba(107,217,255,.30);color:var(--watch);}
+.b-warn{background:rgba(255,209,93,.10);border:1px solid rgba(255,209,93,.35);color:var(--warn);}
+.b-fail{background:rgba(255,75,113,.12);border:1px solid rgba(255,75,113,.40);color:var(--fail);}
+.pid{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-bottom:4px;}
+.pname{font-size:.95rem;font-weight:700;margin-bottom:8px;}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;margin-bottom:5px;}
+.lbl{color:var(--mu);}
+.val{font-family:'JetBrains Mono',monospace;}
+.pr{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin-top:8px;}
+.desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.58;}
+.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.bar{height:100%;border-radius:2px;transition:.25s;}
+
+.detail{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+}
+.detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;}
+.detail-id{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mu);margin-bottom:4px;}
+.detail-name{font-size:1.2rem;font-weight:700;}
+.detail-profile{font-size:.76rem;color:var(--mu);line-height:1.7;}
+.flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin:14px 0;}
+@media(max-width:640px){.flow{grid-template-columns:1fr;}}
+.node{background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:9px;padding:12px;text-align:center;min-height:72px;}
+.node-name{font-size:.72rem;color:var(--mu);margin-bottom:6px;}
+.node-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700;}
+.arrow{text-align:center;font-family:'JetBrains Mono',monospace;font-size:1.25rem;color:var(--accent);}
+.risk-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.risk-row{display:flex;align-items:center;gap:10px;}
+.risk-name{font-size:.75rem;min-width:112px;color:var(--tx);}
+.risk-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.risk-bar{height:100%;border-radius:4px;transition:.25s;}
+.risk-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+.note{font-size:.73rem;color:var(--mu);line-height:1.75;margin-top:12px;}
+
+.bucket-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:880px){.bucket-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.bucket-grid{grid-template-columns:1fr;}}
+.bucket{border:1px solid var(--bd);border-radius:10px;padding:12px;background:var(--s2);min-height:180px;}
+.bucket h3{font-size:.82rem;margin-bottom:10px;font-weight:700;}
+.bucket ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.bucket li{font-size:.72rem;line-height:1.5;padding:8px;border-radius:7px;background:rgba(255,255,255,.03);}
+.bucket li strong{font-family:'JetBrains Mono',monospace;}
+
+canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+.log-area{height:170px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
+.log-ok{color:var(--ok);}
+.log-watch{color:var(--watch);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+.footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-sub">NRA-IDE / MEDICAL EDUCATION INFECTION OBSERVATION TEMPLATE</div>
+  <h1>医療教育用 <em>感染症観察群</em> テンプレート</h1>
+  <p class="h-desc">発熱・呼吸・循環・水分・炎症様マーカーの相関を、個体差つき合成データで可視化します。診断ではなく、観察群の振り分け構造を学ぶためのsampleです。</p>
+</header>
+
+<div class="notice">
+  このテンプレートは医療教育および構造可視化のみを目的としています。診断、治療、予測、臨床行為の推奨は行いません。表示値はすべて合成例です。実際の医療判断は、必ず資格を持つ医療専門職が行ってください。
+</div>
+
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ 実行中</button>
+  <button class="btn" onclick="resetSim()">↺ リセット</button>
+  <label class="small">教育シナリオ：</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">通常観察</option>
+    <option value="fever">発熱波</option>
+    <option value="resp">呼吸器症状増加</option>
+    <option value="dehyd">脱水傾向</option>
+    <option value="elder">高齢脆弱群</option>
+    <option value="mixed">混在負荷</option>
+  </select>
+  <span class="scen-label" id="scen-desc">通常範囲内で個体差を表示</span>
+</div>
+
+<div class="formula-box">
+  <span class="eq-a">R_i = δ_i / τ_i(profile,t)</span>：各観察項目の構造比率　|　
+  <span class="eq-b">R_infection_like</span>：発熱・呼吸・炎症様マーカーの媒介圧　|　
+  <span class="eq-c">R_person = max(R_i, R_profile, R_corr)</span>：平均で薄めない個体別判定　|　
+  <span class="eq-f">Human Review = 自動決定ではなく人間確認</span>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-l">COHORT R_MAX</div>
+    <div class="stat-v" id="cohort-r">0.000</div>
+    <div class="stat-s" id="cohort-status">SAFE — 教育用観察群</div>
+  </div>
+  <div class="stat"><div class="stat-l">OBSERVE</div><div class="stat-v" id="cnt-ok">0</div><div class="stat-s">通常観察</div></div>
+  <div class="stat"><div class="stat-l">WATCH</div><div class="stat-v" id="cnt-watch">0</div><div class="stat-s">経過注意</div></div>
+  <div class="stat"><div class="stat-l">CAUTION</div><div class="stat-v" id="cnt-warn">0</div><div class="stat-s">要注意</div></div>
+  <div class="stat"><div class="stat-l">HUMAN REVIEW</div><div class="stat-v" id="cnt-fail">0</div><div class="stat-s">必ず人間確認</div></div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">INDIVIDUAL OBSERVATION CARDS</div>
+    <div class="person-grid" id="person-grid"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">SELECTED INDIVIDUAL</div>
+    <div class="detail">
+      <div class="detail-head">
+        <div>
+          <div class="detail-id" id="detail-id">P-01</div>
+          <div class="detail-name" id="detail-name">—</div>
+          <div class="detail-profile" id="detail-profile">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="detail-id">PERSON R</div>
+          <div class="detail-name" id="detail-r" style="font-family:'JetBrains Mono',monospace;color:var(--accent)">0.000</div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="node"><div class="node-name">vital max</div><div class="node-val" id="node-vital" style="color:var(--watch)">0.000</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="node-name">infection-like pressure</div><div class="node-val" id="node-inf" style="color:var(--inf)">0.000</div></div>
+        <div class="arrow">⇒</div>
+        <div class="node"><div class="node-name">bucket</div><div class="node-val" id="node-bucket" style="color:var(--warn)">—</div></div>
+      </div>
+
+      <div class="risk-list">
+        <div class="risk-row"><div class="risk-name">体温</div><div class="risk-bg"><div class="risk-bar" id="rb-temp" style="background:var(--temp);width:0%"></div></div><div class="risk-val" id="rv-temp">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">呼吸数</div><div class="risk-bg"><div class="risk-bar" id="rb-rr" style="background:var(--rr);width:0%"></div></div><div class="risk-val" id="rv-rr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">心拍数</div><div class="risk-bg"><div class="risk-bar" id="rb-hr" style="background:var(--hr);width:0%"></div></div><div class="risk-val" id="rv-hr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">SpO₂</div><div class="risk-bg"><div class="risk-bar" id="rb-spo2" style="background:var(--spo2);width:0%"></div></div><div class="risk-val" id="rv-spo2">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">水分指標</div><div class="risk-bg"><div class="risk-bar" id="rb-hyd" style="background:var(--hyd);width:0%"></div></div><div class="risk-val" id="rv-hyd">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">炎症様指標</div><div class="risk-bg"><div class="risk-bar" id="rb-inf" style="background:var(--inf);width:0%"></div></div><div class="risk-val" id="rv-inf">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Profile圧</div><div class="risk-bg"><div class="risk-bar" id="rb-prof" style="background:var(--fail);width:0%"></div></div><div class="risk-val" id="rv-prof">0.000</div></div>
+      </div>
+
+      <div class="note" id="detail-note">選択した個体の説明がここに表示されます。</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">BUCKET VIEW — 振り分け一覧</div>
+    <div class="bucket-grid">
+      <div class="bucket"><h3 style="color:var(--ok)">OBSERVE</h3><ul id="bucket-ok"></ul></div>
+      <div class="bucket"><h3 style="color:var(--watch)">WATCH</h3><ul id="bucket-watch"></ul></div>
+      <div class="bucket"><h3 style="color:var(--warn)">CAUTION</h3><ul id="bucket-warn"></ul></div>
+      <div class="bucket"><h3 style="color:var(--fail)">HUMAN REVIEW</h3><ul id="bucket-fail"></ul></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">R DISTRIBUTION</div>
+    <canvas id="dist-canvas" width="560" height="170"></canvas>
+    <div class="legend">
+      <span style="color:var(--ok)">■ Observe</span>
+      <span style="color:var(--watch)">■ Watch</span>
+      <span style="color:var(--warn)">■ Caution</span>
+      <span style="color:var(--fail)">■ Human Review</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">GATE LOG</div>
+    <div class="log-area" id="log-area"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">EDUCATIONAL NOTE</div>
+    <div style="font-size:.8rem;line-height:1.82;color:var(--mu);">
+      このsampleは「感染症を判定する」のではなく、発熱、呼吸、循環、水分、炎症様マーカーが同時に動いた時に、個体ごとの余裕差で観察区分が変わることを示します。発熱だけを見て自動判断せず、同じ発熱でもSpO₂、呼吸数、水分指標、年齢・脆弱性によってRが変化します。最終区分のHuman Reviewは自動決定ではなく、人間確認へ戻すための教育上のFail-Closedです。
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span>41_medical_education_infection_observation_template_JP</span>
+  <span>Educational only / synthetic data / no diagnosis</span>
+</div>
+
+</div>
+
+<script>
+const PEOPLE = [
+  {id:'P-01', name:'個体A', age:22, frailty:.08, chronic:.05, note:'若年。基礎余裕は比較的広い。'},
+  {id:'P-02', name:'個体B', age:78, frailty:.66, chronic:.42, note:'高齢・慢性疾患あり。余裕が縮みやすい。'},
+  {id:'P-03', name:'個体C', age:41, frailty:.18, chronic:.14, note:'中年。既往は軽い想定。'},
+  {id:'P-04', name:'個体D', age:84, frailty:.78, chronic:.48, note:'高齢脆弱群。小さな変化でもRが上がりやすい。'},
+  {id:'P-05', name:'個体E', age:9,  frailty:.10, chronic:.04, note:'小児想定。年齢補正を軽く入れる。'},
+  {id:'P-06', name:'個体F', age:56, frailty:.28, chronic:.36, note:'代謝系の既往を仮定。'},
+  {id:'P-07', name:'個体G', age:69, frailty:.50, chronic:.22, note:'高齢寄り。体力差を考慮。'},
+  {id:'P-08', name:'個体H', age:34, frailty:.12, chronic:.08, note:'若年成人。'},
+  {id:'P-09', name:'個体I', age:73, frailty:.60, chronic:.38, note:'慢性呼吸器リスクを仮定。'},
+  {id:'P-10', name:'個体J', age:47, frailty:.22, chronic:.16, note:'中年。'},
+  {id:'P-11', name:'個体K', age:63, frailty:.40, chronic:.44, note:'循環器系の既往を仮定。'},
+  {id:'P-12', name:'個体L', age:30, frailty:.10, chronic:.06, note:'若年成人。'}
+];
+
+const FACTORS = [
+  {id:'temp', name:'体温', opt:36.8, tau:2.0, min:34.0, max:41.5, dir:'both', color:'var(--temp)'},
+  {id:'rr', name:'呼吸数', opt:16, tau:11, min:8, max:38, dir:'both', color:'var(--rr)'},
+  {id:'hr', name:'心拍数', opt:76, tau:34, min:42, max:160, dir:'both', color:'var(--hr)'},
+  {id:'spo2', name:'SpO₂', opt:97, tau:5, min:82, max:100, dir:'lo', color:'var(--spo2)'},
+  {id:'hyd', name:'水分指標', opt:70, tau:22, min:20, max:100, dir:'lo', color:'var(--hyd)'},
+  {id:'inf', name:'炎症様指標', opt:0.15, tau:0.75, min:0, max:3.5, dir:'hi', color:'var(--inf)'}
+];
+
+const BASE = {temp:36.8, rr:16, hr:76, spo2:97, hyd:70, inf:0.15};
+let scenario = 'normal';
+let tick = 0;
+let running = true;
+let selected = 0;
+let logLines = [];
+let lastBuckets = [];
+
+const SCENARIOS = {
+  normal: {desc:'通常範囲内で個体差を表示', shift:{temp:0,rr:0,hr:0,spo2:0,hyd:0,inf:0}, amp:{temp:.18,rr:1.5,hr:5,spo2:.8,hyd:3,inf:.08}},
+  fever:  {desc:'発熱波。体温・心拍・炎症様指標が上昇', shift:{temp:1.5,rr:2.5,hr:12,spo2:-.8,hyd:-5,inf:.75}, amp:{temp:.28,rr:1.8,hr:7,spo2:.9,hyd:4,inf:.15}},
+  resp:   {desc:'呼吸器症状増加。SpO₂低下と呼吸数増加', shift:{temp:.6,rr:6.0,hr:8,spo2:-3.2,hyd:-3,inf:.45}, amp:{temp:.22,rr:2.2,hr:7,spo2:1.2,hyd:4,inf:.12}},
+  dehyd:  {desc:'脱水傾向。水分指標低下と心拍上昇', shift:{temp:.4,rr:2,hr:14,spo2:-.6,hyd:-18,inf:.28}, amp:{temp:.18,rr:1.5,hr:8,spo2:.8,hyd:6,inf:.10}},
+  elder:  {desc:'高齢脆弱群。Profile圧が高く余裕が縮む', shift:{temp:.7,rr:3,hr:8,spo2:-1.4,hyd:-7,inf:.38}, amp:{temp:.22,rr:1.8,hr:6,spo2:1.0,hyd:4,inf:.12}, profileBoost:.20},
+  mixed:  {desc:'混在負荷。複数要因が少しずつ重なる', shift:{temp:1.0,rr:4.0,hr:10,spo2:-2.0,hyd:-10,inf:.55}, amp:{temp:.25,rr:2.0,hr:7,spo2:1.1,hyd:5,inf:.14}}
+};
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function rand(a){return (Math.random()-0.5)*2*a;}
+function delta(v,f){return f.dir==='lo'?Math.max(0,f.opt-v):f.dir==='hi'?Math.max(0,v-f.opt):Math.abs(v-f.opt);}
+
+function profilePressure(p){
+  let ageP = 0;
+  if(p.age >= 80) ageP = .46;
+  else if(p.age >= 70) ageP = .32;
+  else if(p.age >= 60) ageP = .20;
+  else if(p.age <= 12) ageP = .12;
+  const sc = SCENARIOS[scenario];
+  return clamp(ageP + p.frailty*.46 + p.chronic*.35 + (sc.profileBoost || 0), 0, 1.4);
+}
+
+function makeState(p, index){
+  const sc = SCENARIOS[scenario];
+  const phase = tick*.055 + index*.71;
+  const vit = {};
+  const prof = profilePressure(p);
+
+  FACTORS.forEach((f,i)=>{
+    const base = BASE[f.id];
+    const shift = sc.shift[f.id] || 0;
+    const amp = sc.amp[f.id] || 0;
+    let pe = 0;
+    if(f.id==='temp') pe = prof*.18;
+    if(f.id==='rr') pe = prof*2.5;
+    if(f.id==='hr') pe = prof*7.5;
+    if(f.id==='spo2') pe = -prof*1.9;
+    if(f.id==='hyd') pe = -prof*4.5;
+    if(f.id==='inf') pe = prof*.18;
+    vit[f.id] = clamp(base + shift + pe + Math.sin(phase+i*.92)*amp*.45 + rand(amp), f.min, f.max);
+  });
+
+  const rs = {};
+  const tauScale = clamp(1 - prof*.36, .45, 1);
+  FACTORS.forEach(f=>{
+    let tau = f.tau * tauScale;
+    if(f.id==='spo2' && vit.rr > 23) tau *= .90;
+    if(f.id==='hyd' && vit.temp > 38) tau *= .92;
+    if(f.id==='hr' && vit.temp > 38) tau *= .92;
+    tau = Math.max(tau, f.tau*.38);
+    const d = delta(vit[f.id], f);
+    rs[f.id] = {delta:d, tau, R:d/tau};
+  });
+
+  const infPressure = clamp((rs.temp.R*.32 + rs.rr.R*.26 + rs.hr.R*.20 + rs.spo2.R*.30 + rs.inf.R*.42 + rs.hyd.R*.18), 0, 1.65);
+  const corr = clamp(Math.max((rs.temp.R+rs.hr.R)*.32, (rs.rr.R+rs.spo2.R)*.36, (rs.temp.R+rs.inf.R)*.40, infPressure), 0, 1.65);
+  const vitalMax = Math.max(...Object.values(rs).map(x=>x.R));
+  const personR = Math.max(vitalMax, prof, corr);
+
+  return {person:p, vit, rs, profile:prof, infPressure, corr, vitalMax, personR};
+}
+
+function bucketOf(R){
+  if(R>=1.0) return {key:'fail', label:'Human Review', badge:'HUMAN', color:'var(--fail)'};
+  if(R>=.75) return {key:'warn', label:'Caution', badge:'CAUTION', color:'var(--warn)'};
+  if(R>=.40) return {key:'watch', label:'Watch', badge:'WATCH', color:'var(--watch)'};
+  return {key:'ok', label:'Observe', badge:'OBSERVE', color:'var(--ok)'};
+}
+
+function renderCards(states){
+  const root = document.getElementById('person-grid');
+  root.innerHTML = '';
+  states.forEach((s,i)=>{
+    const b = bucketOf(s.personR);
+    const div = document.createElement('div');
+    div.className = 'card' + (s.personR>=1?' fail':s.personR>=.75?' warn':'') + (i===selected?' selected':'');
+    div.onclick = () => {selected=i; render(states);};
+    const bclass = b.key==='ok'?'b-ok':b.key==='watch'?'b-watch':b.key==='warn'?'b-warn':'b-fail';
+    div.innerHTML = `
+      <div class="badge ${bclass}">${b.badge}</div>
+      <div class="pid">${s.person.id}</div>
+      <div class="pname">${s.person.name}</div>
+      <div class="row"><span class="lbl">年齢</span><span class="val">${s.person.age}歳</span></div>
+      <div class="row"><span class="lbl">体温 / SpO₂</span><span class="val">${s.vit.temp.toFixed(1)}℃ / ${s.vit.spo2.toFixed(1)}%</span></div>
+      <div class="row"><span class="lbl">呼吸 / 心拍</span><span class="val">${s.vit.rr.toFixed(1)} / ${s.vit.hr.toFixed(0)}</span></div>
+      <div class="row"><span class="lbl">水分 / 炎症様</span><span class="val">${s.vit.hyd.toFixed(0)} / ${s.vit.inf.toFixed(2)}</span></div>
+      <div class="pr" style="color:${b.color}">R = ${s.personR.toFixed(3)}</div>
+      <div class="barbg"><div class="bar" style="width:${Math.min(100,s.personR*100).toFixed(1)}%;background:${b.color}"></div></div>
+      <div class="desc">${s.person.note}</div>
+    `;
+    root.appendChild(div);
+  });
+}
+
+function setRisk(id, val){
+  document.getElementById(`rb-${id}`).style.width = Math.min(100,val*100).toFixed(1)+'%';
+  document.getElementById(`rv-${id}`).textContent = val.toFixed(3);
+}
+
+function renderDetail(s){
+  const b = bucketOf(s.personR);
+  document.getElementById('detail-id').textContent = s.person.id;
+  document.getElementById('detail-name').textContent = s.person.name;
+  document.getElementById('detail-profile').textContent = `年齢 ${s.person.age}歳 / frailty=${s.person.frailty.toFixed(2)} / chronic=${s.person.chronic.toFixed(2)}`;
+  document.getElementById('detail-r').textContent = s.personR.toFixed(3);
+  document.getElementById('detail-r').style.color = b.color;
+  document.getElementById('node-vital').textContent = s.vitalMax.toFixed(3);
+  document.getElementById('node-inf').textContent = s.infPressure.toFixed(3);
+  document.getElementById('node-bucket').textContent = b.label;
+  document.getElementById('node-bucket').style.color = b.color;
+
+  setRisk('temp',s.rs.temp.R);
+  setRisk('rr',s.rs.rr.R);
+  setRisk('hr',s.rs.hr.R);
+  setRisk('spo2',s.rs.spo2.R);
+  setRisk('hyd',s.rs.hyd.R);
+  setRisk('inf',s.rs.inf.R);
+  setRisk('prof',s.profile);
+
+  const top = Object.entries(s.rs).sort((a,b)=>b[1].R-a[1].R)[0];
+  const topName = FACTORS.find(f=>f.id===top[0]).name;
+  document.getElementById('detail-note').textContent =
+    `最大寄与は「${topName}」です。感染症様圧=${s.infPressure.toFixed(3)}、Profile圧=${s.profile.toFixed(3)}、相関圧=${s.corr.toFixed(3)}。これは診断ではなく、どの構造が区分を押し上げているかを見る教育用表示です。`;
+}
+
+function renderBuckets(states){
+  const roots = {ok:document.getElementById('bucket-ok'), watch:document.getElementById('bucket-watch'), warn:document.getElementById('bucket-warn'), fail:document.getElementById('bucket-fail')};
+  Object.values(roots).forEach(r=>r.innerHTML='');
+  const counts = {ok:0,watch:0,warn:0,fail:0};
+  states.slice().sort((a,b)=>b.personR-a.personR).forEach(s=>{
+    const b=bucketOf(s.personR);
+    counts[b.key]++;
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${s.person.id}</strong> ${s.person.name} / R=${s.personR.toFixed(3)} / inf=${s.infPressure.toFixed(3)}`;
+    roots[b.key].appendChild(li);
+  });
+  document.getElementById('cnt-ok').textContent = counts.ok;
+  document.getElementById('cnt-watch').textContent = counts.watch;
+  document.getElementById('cnt-warn').textContent = counts.warn;
+  document.getElementById('cnt-fail').textContent = counts.fail;
+}
+
+const canvas = document.getElementById('dist-canvas');
+const ctx = canvas.getContext('2d');
+
+function drawDistribution(states){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#14222a';
+  ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#2a4551';
+  [0.4,0.75,1.0].forEach(r=>{
+    const y=H-r/1.4*(H-24)-12;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  });
+  const fy=H-1.0/1.4*(H-24)-12;
+  ctx.setLineDash([5,4]);
+  ctx.strokeStyle='rgba(255,75,113,.75)';
+  ctx.beginPath();ctx.moveTo(0,fy);ctx.lineTo(W,fy);ctx.stroke();
+  ctx.setLineDash([]);
+  const bw=(W-30)/states.length;
+  states.forEach((s,i)=>{
+    const b=bucketOf(s.personR);
+    const h=Math.min(1.4,s.personR)/1.4*(H-28);
+    const x=16+i*bw+3;
+    const y=H-h-12;
+    ctx.fillStyle=b.color;
+    ctx.fillRect(x,y,bw-6,h);
+    ctx.fillStyle='#d8e8ef';
+    ctx.font='9px JetBrains Mono, monospace';
+    ctx.fillText(s.person.id.replace('P-',''), x+2, H-2);
+  });
+  ctx.fillStyle='rgba(255,75,113,.75)';
+  ctx.font='10px JetBrains Mono, monospace';
+  ctx.fillText('R=1.0', 6, fy-4);
+}
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const div=document.createElement('div');
+  div.className='log-'+type;
+  div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`;
+  area.insertBefore(div,area.firstChild);
+  logLines.push(div);
+  if(logLines.length>90){
+    const old=logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function applyScenario(){
+  scenario=document.getElementById('scenario-sel').value;
+  document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc;
+  addLog(`[SCENARIO] ${SCENARIOS[scenario].desc}`, 'info');
+}
+
+function render(states){
+  if(selected>=states.length) selected=0;
+  renderCards(states);
+  renderDetail(states[selected]);
+  renderBuckets(states);
+  drawDistribution(states);
+
+  const maxR = Math.max(...states.map(s=>s.personR));
+  const b = bucketOf(maxR);
+  document.getElementById('cohort-r').textContent=maxR.toFixed(3);
+  document.getElementById('cohort-r').style.color=b.color;
+  document.getElementById('cohort-status').textContent =
+    b.key==='fail'?'HUMAN REVIEW — 人間確認対象あり':
+    b.key==='warn'?'CAUTION — 要注意群あり':
+    b.key==='watch'?'WATCH — 経過注意群あり':'SAFE — 教育用観察群';
+  document.getElementById('cohort-status').style.color=b.color;
+
+  const nowBuckets = states.map(s=>bucketOf(s.personR).key);
+  nowBuckets.forEach((bk,i)=>{
+    if(lastBuckets[i] && lastBuckets[i]!==bk){
+      const s = states[i];
+      if(bk==='fail') addLog(`Human Reviewへ移行: ${s.person.name} R=${s.personR.toFixed(3)}`, 'fail');
+      else if(bk==='warn') addLog(`Cautionへ移行: ${s.person.name} R=${s.personR.toFixed(3)}`, 'warn');
+      else if(bk==='watch') addLog(`Watchへ移行: ${s.person.name} R=${s.personR.toFixed(3)}`, 'watch');
+      else addLog(`Observeへ復帰: ${s.person.name} R=${s.personR.toFixed(3)}`, 'ok');
+    }
+  });
+  lastBuckets = nowBuckets;
+}
+
+function step(){
+  if(!running) return;
+  tick++;
+  const states = PEOPLE.map((p,i)=>makeState(p,i)).sort((a,b)=>b.personR-a.personR);
+  render(states);
+}
+
+function toggleRun(){
+  running=!running;
+  const btn=document.getElementById('btn-run');
+  btn.textContent=running?'▶ 実行中':'⏸ 一時停止';
+  btn.className=running?'btn active':'btn';
+}
+
+function resetSim(){
+  tick=0;
+  selected=0;
+  lastBuckets=[];
+  scenario='normal';
+  document.getElementById('scenario-sel').value='normal';
+  document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML='';
+  logLines=[];
+  addLog('感染症観察群テンプレートを初期化', 'info');
+  addLog('個体別観察区分の表示を開始', 'ok');
+  const states=PEOPLE.map((p,i)=>makeState(p,i)).sort((a,b)=>b.personR-a.personR);
+  render(states);
+  lastBuckets=states.map(s=>bucketOf(s.personR).key);
+}
+
+resetSim();
+setInterval(step, 380);
+</script>
+</body>
+</html>

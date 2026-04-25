@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<!-- FILE: 35_rotor_bearing_correlation_JP_20260425_024602_JST.html -->
+<!-- TITLE: NRA-IDE 回転機械・軸受相関テンプレート -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-25 02:46:02 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NRA-IDE 回転機械・軸受相関テンプレート 35</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root{
+  --bg:#06080d;
+  --s1:#0d121b;
+  --s2:#121b28;
+  --s3:#172334;
+  --bd:#243349;
+  --tx:#c8d6e5;
+  --mu:#52667f;
+  --ok:#39ff95;
+  --warn:#ffd044;
+  --fail:#ff315f;
+  --cyan:#00e5ff;
+  --violet:#b66cff;
+  --orange:#ff9b42;
+  --blue:#55a7ff;
+  --gray:#7d8fa8;
+  --vib:#00e5ff;
+  --temp:#ff6b42;
+  --curr:#ffd044;
+  --lube:#39ff95;
+  --noise:#b66cff;
+  --rpm:#55a7ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--tx);
+  font-family:'Noto Sans JP',sans-serif;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,0.018) 1px,transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding:28px 18px 34px;}
+
+header{text-align:center;margin-bottom:26px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--cyan);
+  opacity:.74;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.25rem,3.5vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--cyan);font-style:normal;}
+.h-desc{font-size:.83rem;color:var(--mu);line-height:1.7;}
+
+.ctrl-bar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  background:rgba(13,18,27,.75);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:16px;
+}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:6px;
+  background:var(--s2);color:var(--tx);
+  font-family:'Noto Sans JP',sans-serif;font-size:.82rem;
+  cursor:pointer;transition:.18s;
+}
+.btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn.active{background:var(--cyan);color:#001016;border-color:var(--cyan);}
+.ctrl-label{font-size:.8rem;color:var(--mu);}
+select{
+  padding:7px 12px;background:var(--s2);border:1px solid var(--bd);
+  border-radius:6px;color:var(--tx);font-family:'Noto Sans JP',sans-serif;
+  font-size:.82rem;cursor:pointer;
+}
+.scenario-desc{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;color:var(--mu);
+}
+
+.formula-box{
+  background:var(--s1);border:1px solid rgba(0,229,255,.45);
+  border-radius:10px;padding:14px 18px;margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2;
+}
+.eq-c{color:var(--cyan);}
+.eq-w{color:var(--warn);}
+.eq-o{color:var(--ok);}
+.eq-f{color:var(--fail);}
+
+.main-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr;}}
+
+.panel{
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:12px;padding:16px;
+}
+.panel-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;letter-spacing:.18em;color:var(--cyan);
+  margin-bottom:14px;
+}
+
+/* rotor canvas */
+.rotor-panel{display:flex;flex-direction:column;gap:12px;}
+#rotorCanvas{
+  width:100%;height:310px;display:block;background:#07101a;
+  border:1px solid var(--bd);border-radius:10px;
+}
+.overall{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+}
+@media(max-width:680px){.overall{grid-template-columns:1fr;}}
+.over-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:12px 14px;text-align:center;
+}
+.over-label{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  letter-spacing:.16em;color:var(--mu);margin-bottom:4px;
+}
+.over-val{
+  font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;
+}
+.over-sub{font-size:.72rem;color:var(--mu);line-height:1.5;margin-top:4px;}
+
+/* factor cards */
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:900px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.factor-grid{grid-template-columns:1fr;}}
+.fc{
+  position:relative;overflow:hidden;
+  background:var(--s2);border:1px solid var(--bd);
+  border-radius:10px;padding:13px;transition:.25s;
+}
+.fc.warn{border-color:var(--warn);}
+.fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,0);}to{box-shadow:0 0 16px rgba(255,49,95,.22);}}
+.fc-name{font-size:.76rem;color:var(--mu);margin-bottom:3px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.32rem;font-weight:700;margin-bottom:6px;}
+.fc-row{display:flex;justify-content:space-between;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin:3px 0;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:.95rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;overflow:hidden;margin-top:7px;}
+.r-bar{height:100%;border-radius:2px;transition:width .25s,background .25s;}
+.fc-badge{
+  position:absolute;top:9px;right:9px;
+  font-family:'JetBrains Mono',monospace;font-size:.57rem;
+  padding:2px 6px;border-radius:3px;letter-spacing:.09em;
+}
+.badge-ok{background:rgba(57,255,149,.1);color:var(--ok);border:1px solid rgba(57,255,149,.32);}
+.badge-warn{background:rgba(255,208,68,.1);color:var(--warn);border:1px solid rgba(255,208,68,.34);}
+.badge-fail{background:rgba(255,49,95,.15);color:var(--fail);border:1px solid rgba(255,49,95,.45);}
+
+/* correlation */
+.corr-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.corr-cell{
+  aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:600;
+  transition:background .25s,color .25s;
+}
+.corr-head{background:transparent;color:var(--mu);font-size:.54rem;word-break:keep-all;}
+.alert-box{
+  margin-top:10px;min-height:38px;font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;line-height:1.7;color:var(--mu);
+}
+
+/* coupling and lead-lag */
+.coupling-list,.lag-list{display:flex;flex-direction:column;gap:8px;}
+.c-row,.lag-row{display:flex;align-items:center;gap:9px;}
+.c-name,.lag-name{font-size:.74rem;min-width:94px;color:var(--tx);}
+.c-bar-bg,.lag-bar-bg{flex:1;height:7px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.c-bar,.lag-bar{height:100%;border-radius:4px;transition:width .25s,background .25s;}
+.c-val,.lag-val{font-family:'JetBrains Mono',monospace;font-size:.68rem;min-width:56px;text-align:right;color:var(--mu);}
+.note{
+  margin-top:10px;
+  color:var(--mu);
+  font-size:.75rem;
+  line-height:1.7;
+}
+
+/* time series */
+#tsCanvas{
+  width:100%;height:155px;display:block;background:var(--s2);
+  border:1px solid var(--bd);border-radius:9px;
+}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+.leg{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--mu);}
+
+/* log */
+.log-area{
+  height:150px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);
+  border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;line-height:1.7;
+}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+.footer{
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-sub">NRA-IDE / ROTOR-BEARING CORRELATION TEMPLATE</div>
+  <h1>回転機械・軸受 <em>相関ゲート</em> サンプル</h1>
+  <p class="h-desc">振動・温度・電流・潤滑圧・音響・回転数を個体設備の基準線から追跡。平均で薄めず、最大Rと相関変質でFail-Closedへ接続します。</p>
+</header>
+
+<div class="ctrl-bar">
+  <button class="btn active" id="btnRun" onclick="toggleRun()">▶ 実行中</button>
+  <button class="btn" onclick="resetSim()">↺ リセット</button>
+  <span class="ctrl-label">シナリオ：</span>
+  <select id="scenarioSel" onchange="applyScenario()">
+    <option value="normal">通常運転</option>
+    <option value="imbalance">アンバランス増大</option>
+    <option value="lube_drop">潤滑圧低下</option>
+    <option value="misalignment">芯ずれ・偏心</option>
+    <option value="wear">軸受摩耗進行</option>
+    <option value="cascade">相関連鎖崩壊</option>
+  </select>
+  <span class="scenario-desc" id="scenarioDesc">基準線の周辺で安定推移</span>
+</div>
+
+<div class="formula-box">
+  <span class="eq-c">R_i = δ_i / τ_i</span>：各物理量の個別構造比　|　
+  <span class="eq-w">τ_eff = τ_base / (1 + coupling pressure)</span>：相関悪化で吸収余裕を圧縮　|　
+  <span class="eq-o">R_total = max(R_i, R_corr)</span>：平均化禁止の安全側ゲート　|　
+  <span class="eq-f">R ≥ 1.0 → FAIL_CLOSED</span>
+</div>
+
+<div class="main-grid">
+  <div class="panel rotor-panel">
+    <div class="panel-title">ROTOR VISUALIZATION — 軸受・回転子状態</div>
+    <canvas id="rotorCanvas" width="720" height="310"></canvas>
+    <div class="overall">
+      <div class="over-card">
+        <div class="over-label">R_MAX</div>
+        <div class="over-val" id="rMaxVal">0.000</div>
+        <div class="over-sub">最も危険な単一レイヤー</div>
+      </div>
+      <div class="over-card">
+        <div class="over-label">R_CORR</div>
+        <div class="over-val" id="rCorrVal">0.000</div>
+        <div class="over-sub">基準相関からの変質</div>
+      </div>
+      <div class="over-card">
+        <div class="over-label">SYSTEM</div>
+        <div class="over-val" id="rTotalVal">0.000</div>
+        <div class="over-sub" id="systemStatus">SAFE — 構造余裕あり</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">FACTOR STATE — 個別Rと動的τ</div>
+    <div class="factor-grid" id="factorGrid"></div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C₀</div>
+    <div id="corrMatrix"></div>
+    <div class="alert-box" id="corrAlert">相関監視を開始しています。</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">COUPLING PRESSURE — τ圧縮の原因</div>
+    <div class="coupling-list" id="couplingList"></div>
+    <div class="note">
+      例：潤滑圧低下は振動τを縮め、振動上昇は温度・音響・電流τを縮めます。これは「平均で安全化」ではなく「接続先の余裕が減る」表示です。
+    </div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">LEAD-LAG CORRELATION — 先行・遅延相関</div>
+    <div class="lag-list" id="lagList"></div>
+    <div class="note">
+      温度だけがまだ安全でも、振動が先に上がり、遅れて温度・電流・音響へ波及する場合があります。ここでは「先行R」を教育用に可視化します。
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">TIME SERIES — R値推移</div>
+    <canvas id="tsCanvas" width="560" height="155"></canvas>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">GATE LOG</div>
+  <div class="log-area" id="logArea"></div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span>35_rotor_bearing_correlation_JP_20260425_024602_JST.html</span>
+  <span>R_total = max(R_i, R_corr) ｜ R≥1.0 → FAIL_CLOSED</span>
+</div>
+
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// ファクター定義
+// direction:
+//   "hi"   = 上限側のみ危険
+//   "lo"   = 下限側のみ危険
+//   "band" = 基準から上下どちらも危険
+// ────────────────────────────────────────────────
+const FACTORS = [
+  {
+    id:'vib', name:'振動', en:'VIB', unit:'mm/s', color:'#00e5ff',
+    opt:1.2, tauHi:3.2, tauLo:1.0, min:0, max:8, direction:'hi',
+    desc:'軸受振動。異常の先行指標になりやすい。'
+  },
+  {
+    id:'temp', name:'軸受温度', en:'TEMP', unit:'°C', color:'#ff6b42',
+    opt:55, tauHi:25, tauLo:10, min:20, max:110, direction:'hi',
+    desc:'摩擦・潤滑不足の遅延応答。'
+  },
+  {
+    id:'curr', name:'電流', en:'CURR', unit:'A', color:'#ffd044',
+    opt:12, tauHi:8, tauLo:4, min:0, max:30, direction:'hi',
+    desc:'負荷増加や芯ずれで上昇。'
+  },
+  {
+    id:'lube', name:'潤滑圧', en:'LUBE', unit:'MPa', color:'#39ff95',
+    opt:0.35, tauHi:0.12, tauLo:0.12, min:0.05, max:0.55, direction:'lo',
+    desc:'低下が振動・温度上昇を誘発。'
+  },
+  {
+    id:'noise', name:'音響', en:'NOISE', unit:'dB', color:'#b66cff',
+    opt:62, tauHi:18, tauLo:8, min:45, max:100, direction:'hi',
+    desc:'接触・摩耗・キャビテーション的兆候。'
+  },
+  {
+    id:'rpm', name:'回転数偏差', en:'RPM', unit:'rpm', color:'#55a7ff',
+    opt:1500, tauHi:120, tauLo:120, min:1200, max:1800, direction:'band',
+    desc:'速度リップル・偏心の指標。'
+  },
+];
+
+// coupling[target][source]
+// sourceのRが0.70を超えると、targetのτを縮める。
+const COUPLING = [
+  // from: vib temp curr lube noise rpm
+  [0.00,0.10,0.05,0.70,0.25,0.42], // target vib
+  [0.42,0.00,0.20,0.48,0.18,0.10], // target temp
+  [0.30,0.20,0.00,0.18,0.10,0.34], // target curr
+  [0.08,0.12,0.10,0.00,0.05,0.05], // target lube
+  [0.55,0.12,0.08,0.25,0.00,0.18], // target noise
+  [0.22,0.10,0.25,0.12,0.20,0.00], // target rpm
+];
+
+// 基準相関。運転が正常なときの設備プロファイル。
+// sampleでは合成値。実運用では設備ごとに学習ではなく「基準線として登録」する。
+const CORR_BASE = [
+  [1.00,0.30,0.28,-0.38,0.58,0.35],
+  [0.30,1.00,0.42,-0.44,0.36,0.18],
+  [0.28,0.42,1.00,-0.22,0.25,0.45],
+  [-0.38,-0.44,-0.22,1.00,-0.30,-0.18],
+  [0.58,0.36,0.25,-0.30,1.00,0.28],
+  [0.35,0.18,0.45,-0.18,0.28,1.00],
+];
+
+const SCENARIOS = {
+  normal:{
+    desc:'基準線の周辺で安定推移',
+    label:'通常運転'
+  },
+  imbalance:{
+    desc:'回転アンバランスが振動・音響を先行上昇させる',
+    label:'アンバランス増大'
+  },
+  lube_drop:{
+    desc:'潤滑圧低下 → 振動 → 温度上昇へ遅延波及',
+    label:'潤滑圧低下'
+  },
+  misalignment:{
+    desc:'芯ずれで電流と回転数偏差が増え、振動に連結',
+    label:'芯ずれ・偏心'
+  },
+  wear:{
+    desc:'軸受摩耗がゆっくり進み、音響と振動が基準から離れる',
+    label:'軸受摩耗進行'
+  },
+  cascade:{
+    desc:'潤滑低下・振動上昇・温度上昇が閉じた連鎖を作る',
+    label:'相関連鎖崩壊'
+  },
+};
+
+// ────────────────────────────────────────────────
+// 状態
+// ────────────────────────────────────────────────
+let running = true;
+let scenario = 'normal';
+let tick = 0;
+let vals = FACTORS.map(f => f.opt);
+let prevZones = FACTORS.map(()=> 'safe');
+let historyVals = FACTORS.map(()=> []);
+let historyR = FACTORS.map(()=> []);
+let historyREff = FACTORS.map(()=> []);
+const HIST_LEN = 150;
+const CORR_WIN = 44;
+let logItems = [];
+
+// UI
+const rotorCanvas = document.getElementById('rotorCanvas');
+const rc = rotorCanvas.getContext('2d');
+const tsCanvas = document.getElementById('tsCanvas');
+const tc = tsCanvas.getContext('2d');
+
+// ────────────────────────────────────────────────
+// 初期UI構築
+// ────────────────────────────────────────────────
+function buildFactorCards(){
+  const root = document.getElementById('factorGrid');
+  root.innerHTML = '';
+  FACTORS.forEach((f,i)=>{
+    const div = document.createElement('div');
+    div.className = 'fc';
+    div.id = `fc_${i}`;
+    div.innerHTML = `
+      <div class="fc-badge badge-ok" id="badge_${i}">SAFE</div>
+      <div class="fc-name">${f.name} <span style="font-family:'JetBrains Mono',monospace;color:var(--mu);font-size:.65rem;">${f.en}</span></div>
+      <div class="fc-val" id="val_${i}" style="color:${f.color}">—</div>
+      <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta_${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ_eff</span><span id="tau_${i}" style="color:var(--mu)">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">coupling</span><span id="cp_${i}" style="color:var(--mu)">0.00</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_eff</span><span class="fc-r" id="r_${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="bar_${i}"></div></div>
+      <div style="font-size:.62rem;color:var(--mu);line-height:1.5;margin-top:7px;">${f.desc}</div>
+    `;
+    root.appendChild(div);
+  });
+}
+function buildCorrMatrix(){
+  const root = document.getElementById('corrMatrix');
+  root.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'corr-grid';
+  grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
+  FACTORS.forEach(f => grid.innerHTML += `<div class="corr-cell corr-head">${f.en}</div>`);
+  FACTORS.forEach((f,i)=>{
+    grid.innerHTML += `<div class="corr-cell corr-head">${f.en}</div>`;
+    FACTORS.forEach((_,j)=>{
+      grid.innerHTML += `<div class="corr-cell" id="cm_${i}_${j}">—</div>`;
+    });
+  });
+  root.appendChild(grid);
+}
+function buildCouplingList(){
+  const root = document.getElementById('couplingList');
+  root.innerHTML = '';
+  FACTORS.forEach((f,i)=>{
+    root.innerHTML += `
+      <div class="c-row">
+        <div class="c-name" style="color:${f.color}">${f.name}</div>
+        <div class="c-bar-bg"><div class="c-bar" id="cbar_${i}" style="width:0%;background:${f.color}"></div></div>
+        <div class="c-val" id="cval_${i}">0.00</div>
+      </div>
+    `;
+  });
+}
+function buildLagList(){
+  const pairs = [
+    ['vib','temp',12,'振動 → 温度'],
+    ['vib','curr',8,'振動 → 電流'],
+    ['lube','vib',10,'潤滑低下 → 振動'],
+    ['vib','noise',4,'振動 → 音響'],
+    ['rpm','vib',6,'回転偏差 → 振動'],
+  ];
+  const root = document.getElementById('lagList');
+  root.innerHTML = '';
+  pairs.forEach((p,idx)=>{
+    root.innerHTML += `
+      <div class="lag-row" data-pair="${p.join('|')}">
+        <div class="lag-name">${p[3]}</div>
+        <div class="lag-bar-bg"><div class="lag-bar" id="lagbar_${idx}" style="width:0%;background:var(--cyan)"></div></div>
+        <div class="lag-val" id="lagval_${idx}">0.00</div>
+      </div>
+    `;
+  });
+  window.LAG_PAIRS = pairs;
+}
+function buildLegend(){
+  const root = document.getElementById('legend');
+  root.innerHTML = '';
+  FACTORS.forEach(f=>{
+    root.innerHTML += `<span class="leg"><span style="color:${f.color};">─</span> ${f.name}</span>`;
+  });
+  root.innerHTML += `<span class="leg"><span style="color:rgba(255,49,95,.65);">- -</span> Fail線</span>`;
+}
+
+// ────────────────────────────────────────────────
+// 基本計算
+// ────────────────────────────────────────────────
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function ramp(start, span){
+  return clamp((tick - start) / span, 0, 1);
+}
+function noise(scale){ return (Math.random() - 0.5) * 2 * scale; }
+function fmtVal(v, f){
+  if(f.id === 'lube') return v.toFixed(3) + f.unit;
+  if(f.id === 'vib') return v.toFixed(2) + f.unit;
+  if(f.id === 'rpm') return Math.round(v) + f.unit;
+  if(f.id === 'temp') return v.toFixed(1) + f.unit;
+  if(f.id === 'curr') return v.toFixed(1) + f.unit;
+  return v.toFixed(1) + f.unit;
+}
+function calcRaw(f, value){
+  let delta = 0, tauBase = f.tauHi, signed = value - f.opt;
+  if(f.direction === 'hi'){
+    delta = Math.max(0, signed);
+    tauBase = f.tauHi;
+  } else if(f.direction === 'lo'){
+    delta = Math.max(0, -signed);
+    tauBase = f.tauLo;
+  } else {
+    delta = Math.abs(signed);
+    tauBase = signed >= 0 ? f.tauHi : f.tauLo;
+  }
+  return {delta, tauBase, signed, R: delta / Math.max(tauBase, 0.0001)};
+}
+function calcCoupling(rawR){
+  const pressure = [];
+  for(let target=0; target<FACTORS.length; target++){
+    let p = 0;
+    for(let source=0; source<FACTORS.length; source++){
+      if(target === source) continue;
+      p += COUPLING[target][source] * Math.max(0, rawR[source] - 0.70);
+    }
+    pressure[target] = p;
+  }
+  return pressure;
+}
+function calcAll(){
+  const raw = vals.map((v,i)=>calcRaw(FACTORS[i], v));
+  const rawR = raw.map(r=>r.R);
+  const pressure = calcCoupling(rawR);
+  const eff = raw.map((r,i)=>{
+    const tauEff = r.tauBase / (1 + pressure[i]);
+    const R = r.delta / Math.max(tauEff, 0.0001);
+    return {...r, tauEff, pressure:pressure[i], R_eff:R};
+  });
+  return {raw, eff, pressure};
+}
+function getColor(R){
+  if(R >= 1.0) return 'var(--fail)';
+  if(R >= 0.70) return 'var(--warn)';
+  return 'var(--ok)';
+}
+function getZone(R){
+  if(R >= 1.0) return 'fail';
+  if(R >= 0.70) return 'warn';
+  return 'safe';
+}
+function badgeText(zone){
+  if(zone === 'fail') return ['FAIL-CLOSED','badge-fail'];
+  if(zone === 'warn') return ['WARNING','badge-warn'];
+  return ['SAFE','badge-ok'];
+}
+
+// Pearson correlation
+function pearson(a,b){
+  const n = Math.min(a.length,b.length);
+  if(n < 8) return 0;
+  const aa = a.slice(a.length-n), bb = b.slice(b.length-n);
+  const ma = aa.reduce((s,x)=>s+x,0)/n;
+  const mb = bb.reduce((s,x)=>s+x,0)/n;
+  let num=0, da=0, db=0;
+  for(let i=0;i<n;i++){
+    const x=aa[i]-ma, y=bb[i]-mb;
+    num += x*y; da += x*x; db += y*y;
+  }
+  const den = Math.sqrt(da*db);
+  if(den < 1e-9) return 0;
+  return clamp(num/den, -1, 1);
+}
+function calcCorrMatrix(){
+  const C = [];
+  for(let i=0;i<FACTORS.length;i++){
+    C[i] = [];
+    for(let j=0;j<FACTORS.length;j++){
+      if(i===j){ C[i][j]=1; continue; }
+      const hi = historyREff[i].slice(-CORR_WIN);
+      const hj = historyREff[j].slice(-CORR_WIN);
+      if(hi.length < 12 || hj.length < 12){
+        C[i][j] = CORR_BASE[i][j];
+      } else {
+        // 実測R相関を基準相関と少し混ぜて、過剰なランダム揺れを抑える
+        const p = pearson(hi,hj);
+        C[i][j] = 0.65 * p + 0.35 * CORR_BASE[i][j];
+      }
+    }
+  }
+  return C;
+}
+function calcRCorr(C, tauC=0.32){
+  let maxR = 0;
+  const alerts = [];
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=i+1;j<FACTORS.length;j++){
+      const Rij = Math.abs(C[i][j] - CORR_BASE[i][j]) / tauC;
+      if(Rij > maxR) maxR = Rij;
+      if(Rij >= 1.0){
+        alerts.push(`${FACTORS[i].name}—${FACTORS[j].name} R_corr=${Rij.toFixed(2)}`);
+      }
+    }
+  }
+  return {maxR, alerts};
+}
+function lagCorr(sourceId, targetId, lag){
+  const si = FACTORS.findIndex(f=>f.id===sourceId);
+  const ti = FACTORS.findIndex(f=>f.id===targetId);
+  const hs = historyREff[si];
+  const ht = historyREff[ti];
+  if(hs.length < lag + 14 || ht.length < lag + 14) return 0;
+  const a = hs.slice(0, hs.length-lag).slice(-40);
+  const b = ht.slice(lag).slice(-40);
+  return Math.max(0, pearson(a,b));
+}
+
+// ────────────────────────────────────────────────
+// シナリオ合成値
+// ────────────────────────────────────────────────
+function synthValues(){
+  const t = tick;
+  const sin = Math.sin, PI = Math.PI;
+  const base = FACTORS.map(f=>f.opt);
+
+  let vib = base[0] + 0.18*sin(t*0.16) + noise(0.12);
+  let temp = base[1] + 0.7*sin(t*0.035 + 1.5) + noise(0.35);
+  let curr = base[2] + 0.25*sin(t*0.08 + 0.3) + noise(0.12);
+  let lube = base[3] + 0.010*sin(t*0.06 + 2.0) + noise(0.004);
+  let noiz = base[4] + 1.2*sin(t*0.11 + 0.8) + noise(0.8);
+  let rpm = base[5] + 15*sin(t*0.07) + noise(5);
+
+  if(scenario === 'imbalance'){
+    const r = ramp(8,90);
+    vib  += r*3.1 + 0.50*sin(t*0.55);
+    noiz += r*13  + 2.5*sin(t*0.50+0.4);
+    curr += r*2.0;
+    temp += Math.max(0,r-0.35)*9;
+    rpm  += r*45*sin(t*0.22);
+  }
+
+  if(scenario === 'lube_drop'){
+    const r = ramp(10,95);
+    lube -= r*0.16 + 0.015*sin(t*0.09);
+    vib  += Math.max(0,r-0.18)*2.8 + 0.35*sin(t*0.42);
+    temp += Math.max(0,r-0.35)*20;
+    curr += Math.max(0,r-0.45)*2.2;
+    noiz += Math.max(0,r-0.25)*9;
+  }
+
+  if(scenario === 'misalignment'){
+    const r = ramp(10,85);
+    rpm  += r*95*sin(t*0.20);
+    curr += r*4.4 + 0.4*sin(t*0.21+1.2);
+    vib  += r*2.3 + 0.65*Math.abs(sin(t*0.38));
+    noiz += r*7;
+    temp += Math.max(0,r-0.45)*8;
+  }
+
+  if(scenario === 'wear'){
+    const r = ramp(0,150);
+    vib  += r*2.2 + 0.25*sin(t*0.34);
+    noiz += r*16 + 2.0*sin(t*0.31);
+    temp += r*12;
+    curr += r*1.6;
+    lube -= r*0.035;
+  }
+
+  if(scenario === 'cascade'){
+    const r = ramp(8,85);
+    lube -= r*0.18;
+    vib  += r*3.6 + 0.65*sin(t*0.50);
+    temp += Math.max(0,r-0.20)*27;
+    curr += Math.max(0,r-0.28)*6.8;
+    noiz += r*18 + 2.5*sin(t*0.43);
+    rpm  += r*115*sin(t*0.23);
+  }
+
+  return [vib,temp,curr,lube,noiz,rpm].map((v,i)=>clamp(v, FACTORS[i].min, FACTORS[i].max));
+}
+
+// ────────────────────────────────────────────────
+// 描画
+// ────────────────────────────────────────────────
+function drawRotor(eff, rTotal){
+  const W = rotorCanvas.width, H = rotorCanvas.height;
+  rc.clearRect(0,0,W,H);
+
+  // background
+  const bg = rc.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#07101a'); bg.addColorStop(1,'#05080d');
+  rc.fillStyle = bg; rc.fillRect(0,0,W,H);
+
+  // grid
+  rc.strokeStyle = 'rgba(0,229,255,0.05)';
+  rc.lineWidth = 1;
+  for(let x=0;x<W;x+=40){rc.beginPath();rc.moveTo(x,0);rc.lineTo(x,H);rc.stroke();}
+  for(let y=0;y<H;y+=40){rc.beginPath();rc.moveTo(0,y);rc.lineTo(W,y);rc.stroke();}
+
+  const vibR = eff[0].R_eff, tempR = eff[1].R_eff, currR = eff[2].R_eff, lubeR = eff[3].R_eff, rpmR = eff[5].R_eff;
+  const col = rTotal >= 1 ? '#ff315f' : rTotal >= .70 ? '#ffd044' : '#39ff95';
+  const cx = W/2, cy = H/2 + 12;
+  const amp = Math.min(24, vibR*18);
+  const phase = tick*0.22;
+  const wobX = Math.sin(phase)*amp;
+  const wobY = Math.cos(phase*1.3)*amp*0.55;
+
+  // base stand
+  rc.fillStyle = '#0d1522';
+  rc.strokeStyle = '#243349';
+  rc.lineWidth = 2;
+  rc.beginPath();
+  rc.roundRect(70,H-56,W-140,30,8);
+  rc.fill(); rc.stroke();
+
+  // bearing blocks
+  const bx1 = 160, bx2 = W-160, by = cy;
+  [bx1,bx2].forEach((bx,idx)=>{
+    const heat = Math.min(1, tempR);
+    const aura = rc.createRadialGradient(bx,by,10,bx,by,80);
+    aura.addColorStop(0,`rgba(255,107,66,${0.10+heat*0.22})`);
+    aura.addColorStop(1,'rgba(255,107,66,0)');
+    rc.fillStyle = aura; rc.beginPath();rc.arc(bx,by,82,0,Math.PI*2);rc.fill();
+
+    rc.fillStyle = '#101a28';
+    rc.strokeStyle = idx===0 ? '#00e5ff' : '#55a7ff';
+    rc.lineWidth = 2;
+    rc.beginPath(); rc.roundRect(bx-42,by-42,84,84,12); rc.fill(); rc.stroke();
+    rc.fillStyle = '#070b10';
+    rc.beginPath(); rc.arc(bx,by,24,0,Math.PI*2); rc.fill();
+    rc.strokeStyle = col; rc.lineWidth = 2;
+    rc.beginPath(); rc.arc(bx,by,24,0,Math.PI*2); rc.stroke();
+  });
+
+  // shaft
+  rc.save();
+  rc.translate(wobX,wobY);
+  rc.strokeStyle = col;
+  rc.lineWidth = 16;
+  rc.lineCap = 'round';
+  rc.beginPath(); rc.moveTo(bx1,cy); rc.lineTo(bx2,cy); rc.stroke();
+  rc.strokeStyle = 'rgba(255,255,255,.18)';
+  rc.lineWidth = 2;
+  rc.beginPath(); rc.moveTo(bx1,cy-5); rc.lineTo(bx2,cy-5); rc.stroke();
+
+  // rotor disc
+  const rotorX = cx, rotorY = cy;
+  const r = 52;
+  const grad = rc.createRadialGradient(rotorX-16,rotorY-16,8,rotorX,rotorY,r);
+  grad.addColorStop(0,'#34445a'); grad.addColorStop(1,'#0c1420');
+  rc.fillStyle = grad; rc.beginPath(); rc.arc(rotorX,rotorY,r,0,Math.PI*2); rc.fill();
+  rc.strokeStyle = col; rc.lineWidth = 2; rc.stroke();
+
+  // rotation markers
+  rc.save();
+  rc.translate(rotorX,rotorY);
+  rc.rotate(tick*0.10);
+  for(let i=0;i<6;i++){
+    rc.rotate(Math.PI/3);
+    rc.strokeStyle = 'rgba(255,255,255,.25)';
+    rc.lineWidth = 2;
+    rc.beginPath();rc.moveTo(0,0);rc.lineTo(r-10,0);rc.stroke();
+  }
+  rc.restore();
+  rc.restore();
+
+  // lube line
+  const lubeGood = 1 - Math.min(lubeR,1);
+  rc.strokeStyle = `rgba(57,255,149,${0.25 + lubeGood*0.65})`;
+  rc.lineWidth = 5;
+  rc.setLineDash(lubeR >= .7 ? [6,5] : []);
+  rc.beginPath(); rc.moveTo(90,64); rc.lineTo(bx1,by-52); rc.lineTo(bx2,by-52); rc.lineTo(W-90,64); rc.stroke();
+  rc.setLineDash([]);
+  rc.fillStyle = lubeR >= 1 ? '#ff315f' : '#39ff95';
+  rc.font = '12px JetBrains Mono';
+  rc.textAlign = 'center';
+  rc.fillText(`LUBE ${vals[3].toFixed(3)} MPa`, cx, 57);
+
+  // current load ring
+  const loadAlpha = Math.min(1, currR);
+  rc.strokeStyle = `rgba(255,208,68,${0.25+loadAlpha*0.55})`;
+  rc.lineWidth = 2;
+  rc.beginPath(); rc.arc(cx,cy,82+loadAlpha*20,0,Math.PI*2); rc.stroke();
+
+  // vibration trace
+  rc.strokeStyle = `rgba(0,229,255,${0.25+Math.min(vibR,1)*0.55})`;
+  rc.lineWidth = 1.5;
+  rc.beginPath();
+  for(let x=80;x<W-80;x+=6){
+    const y = 36 + Math.sin(x*0.045 + tick*0.2)*Math.min(32,vibR*22);
+    x===80 ? rc.moveTo(x,y) : rc.lineTo(x,y);
+  }
+  rc.stroke();
+
+  // status overlay
+  rc.font = 'bold 13px JetBrains Mono';
+  rc.fillStyle = col;
+  rc.textAlign = 'left';
+  rc.fillText(`R_total = ${rTotal.toFixed(3)}`, 14, 22);
+  rc.font = '10px JetBrains Mono';
+  rc.textAlign = 'right';
+  const label = rTotal>=1 ? '✕ FAIL_CLOSED' : rTotal>=.70 ? '▲ WARNING' : '● SAFE';
+  rc.fillText(label, W-14, 22);
+}
+function drawTimeSeries(){
+  const W = tsCanvas.width, H = tsCanvas.height;
+  tc.clearRect(0,0,W,H);
+  tc.fillStyle = '#121b28'; tc.fillRect(0,0,W,H);
+
+  // grid
+  tc.strokeStyle = 'rgba(255,255,255,.05)';
+  tc.lineWidth = 1;
+  [0.25,0.5,0.75,1.0].forEach(r=>{
+    const y = H - r/1.5 * H*0.82 - 10;
+    tc.beginPath(); tc.moveTo(0,y); tc.lineTo(W,y); tc.stroke();
+  });
+
+  const failY = H - 1.0/1.5 * H*0.82 - 10;
+  tc.strokeStyle = 'rgba(255,49,95,.5)';
+  tc.setLineDash([5,4]); tc.beginPath();tc.moveTo(0,failY);tc.lineTo(W,failY);tc.stroke(); tc.setLineDash([]);
+  tc.fillStyle = 'rgba(255,49,95,.75)';
+  tc.font = '10px JetBrains Mono';
+  tc.fillText('R=1.0', 5, failY-4);
+
+  FACTORS.forEach((f,i)=>{
+    const hist = historyREff[i];
+    if(hist.length < 2) return;
+    tc.strokeStyle = f.color;
+    tc.lineWidth = 1.8;
+    tc.beginPath();
+    hist.forEach((v,idx)=>{
+      const x = idx/(HIST_LEN-1)*W;
+      const y = H - Math.min(v,1.5)/1.5 * H*0.82 - 10;
+      idx === 0 ? tc.moveTo(x,y) : tc.lineTo(x,y);
+    });
+    tc.stroke();
+  });
+}
+
+// ────────────────────────────────────────────────
+// UI更新
+// ────────────────────────────────────────────────
+function updateUI(eff, C, rCorr, corrAlerts){
+  let rMax = 0;
+  eff.forEach(e=>{ if(e.R_eff > rMax) rMax = e.R_eff; });
+  const rTotal = Math.max(rMax, rCorr.maxR);
+  const systemColor = getColor(rTotal);
+
+  // factor cards
+  eff.forEach((e,i)=>{
+    const f = FACTORS[i];
+    const R = e.R_eff;
+    const zone = getZone(R);
+    const color = getColor(R);
+    const [bText,bCls] = badgeText(zone);
+
+    document.getElementById(`val_${i}`).textContent = fmtVal(vals[i], f);
+    document.getElementById(`delta_${i}`).textContent = fmtVal(e.delta, {...f, opt:0});
+    document.getElementById(`tau_${i}`).textContent = fmtVal(e.tauEff, {...f, opt:0});
+    document.getElementById(`cp_${i}`).textContent = e.pressure.toFixed(2);
+    document.getElementById(`r_${i}`).textContent = R.toFixed(3);
+    document.getElementById(`r_${i}`).style.color = color;
+    document.getElementById(`bar_${i}`).style.width = Math.min(R*100,100).toFixed(1)+'%';
+    document.getElementById(`bar_${i}`).style.background = color;
+
+    const card = document.getElementById(`fc_${i}`);
+    card.className = 'fc' + (zone==='fail' ? ' fail' : zone==='warn' ? ' warn' : '');
+    const badge = document.getElementById(`badge_${i}`);
+    badge.textContent = bText;
+    badge.className = 'fc-badge ' + bCls;
+
+    // coupling bar
+    const cp = Math.min(e.pressure, 1.5);
+    document.getElementById(`cbar_${i}`).style.width = Math.min(cp/1.5*100,100).toFixed(1)+'%';
+    document.getElementById(`cbar_${i}`).style.background = cp>=0.6 ? 'var(--fail)' : cp>=0.25 ? 'var(--warn)' : f.color;
+    document.getElementById(`cval_${i}`).textContent = e.pressure.toFixed(2);
+
+    if(zone !== prevZones[i]){
+      if(zone === 'fail') addLog(`FAIL-CLOSED: ${f.name} R=${R.toFixed(3)} δ=${fmtVal(e.delta,{...f,opt:0})}`, 'fail');
+      else if(zone === 'warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} τ_eff=${fmtVal(e.tauEff,{...f,opt:0})}`, 'warn');
+      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      prevZones[i] = zone;
+    }
+  });
+
+  // correlation matrix
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=0;j<FACTORS.length;j++){
+      const cell = document.getElementById(`cm_${i}_${j}`);
+      const v = C[i][j];
+      const Rij = i===j ? 0 : Math.abs(v - CORR_BASE[i][j]) / 0.32;
+      cell.textContent = v.toFixed(2);
+      if(i===j){
+        cell.style.background = 'rgba(0,229,255,.16)';
+        cell.style.color = 'var(--cyan)';
+      } else if(Rij >= 1.0){
+        cell.style.background = 'rgba(255,49,95,.42)';
+        cell.style.color = '#ff9bb0';
+      } else if(Rij >= .70){
+        cell.style.background = 'rgba(255,208,68,.25)';
+        cell.style.color = '#ffe08a';
+      } else {
+        const a = Math.min(.38, Math.abs(v)*.34);
+        cell.style.background = v >= 0 ? `rgba(57,255,149,${a})` : `rgba(85,167,255,${a})`;
+        cell.style.color = 'rgba(255,255,255,.72)';
+      }
+    }
+  }
+
+  const alertEl = document.getElementById('corrAlert');
+  if(corrAlerts.length){
+    alertEl.innerHTML = corrAlerts.map(a=>`<span style="color:var(--fail)">⚠ ${a}</span>`).join('<br>');
+    if(tick % 26 === 0) addLog(`相関変質検出: ${corrAlerts[0]}`, 'fail');
+  } else {
+    alertEl.innerHTML = `<span style="color:var(--ok)">✓ 相関構造は基準内 R_corr=${rCorr.maxR.toFixed(3)}</span>`;
+  }
+
+  // lead-lag
+  if(window.LAG_PAIRS){
+    window.LAG_PAIRS.forEach((p,idx)=>{
+      const score = lagCorr(p[0],p[1],p[2]);
+      const col = score>=.75 ? 'var(--fail)' : score>=.45 ? 'var(--warn)' : 'var(--cyan)';
+      document.getElementById(`lagbar_${idx}`).style.width = Math.min(score*100,100).toFixed(1)+'%';
+      document.getElementById(`lagbar_${idx}`).style.background = col;
+      document.getElementById(`lagval_${idx}`).textContent = score.toFixed(2);
+      document.getElementById(`lagval_${idx}`).style.color = col;
+    });
+  }
+
+  // overall
+  document.getElementById('rMaxVal').textContent = rMax.toFixed(3);
+  document.getElementById('rMaxVal').style.color = getColor(rMax);
+  document.getElementById('rCorrVal').textContent = rCorr.maxR.toFixed(3);
+  document.getElementById('rCorrVal').style.color = getColor(rCorr.maxR);
+  document.getElementById('rTotalVal').textContent = rTotal.toFixed(3);
+  document.getElementById('rTotalVal').style.color = systemColor;
+
+  const st = document.getElementById('systemStatus');
+  if(rTotal >= 1.0){
+    st.textContent = 'FAIL-CLOSED — 点検・停止判断へ';
+    st.style.color = 'var(--fail)';
+  } else if(rTotal >= .70){
+    st.textContent = 'WARNING — 相関と先行指標を監視';
+    st.style.color = 'var(--warn)';
+  } else {
+    st.textContent = 'SAFE — 構造余裕あり';
+    st.style.color = 'var(--ok)';
+  }
+
+  drawRotor(eff, rTotal);
+  drawTimeSeries();
+}
+
+// ────────────────────────────────────────────────
+// ログ
+// ────────────────────────────────────────────────
+function addLog(msg, type='info'){
+  const area = document.getElementById('logArea');
+  const div = document.createElement('div');
+  div.className = 'log-' + type;
+  div.textContent = `[t=${String(tick).padStart(4,'0')}] ${msg}`;
+  area.insertBefore(div, area.firstChild);
+  logItems.push(div);
+  if(logItems.length > 80){
+    const old = logItems.shift();
+    old.remove();
+  }
+}
+
+// ────────────────────────────────────────────────
+// メイン更新
+// ────────────────────────────────────────────────
+function update(){
+  if(!running) return;
+  tick++;
+
+  vals = synthValues();
+
+  const {eff} = calcAll();
+
+  // history
+  vals.forEach((v,i)=>{
+    historyVals[i].push(v);
+    if(historyVals[i].length > HIST_LEN) historyVals[i].shift();
+
+    historyR[i].push(eff[i].R);
+    if(historyR[i].length > HIST_LEN) historyR[i].shift();
+
+    historyREff[i].push(eff[i].R_eff);
+    if(historyREff[i].length > HIST_LEN) historyREff[i].shift();
+  });
+
+  const C = calcCorrMatrix();
+  const rCorr = calcRCorr(C);
+  updateUI(eff, C, rCorr, rCorr.alerts);
+}
+
+// ────────────────────────────────────────────────
+// 操作
+// ────────────────────────────────────────────────
+function toggleRun(){
+  running = !running;
+  const b = document.getElementById('btnRun');
+  b.textContent = running ? '▶ 実行中' : '⏸ 一時停止';
+  b.className = running ? 'btn active' : 'btn';
+}
+function applyScenario(){
+  scenario = document.getElementById('scenarioSel').value;
+  document.getElementById('scenarioDesc').textContent = SCENARIOS[scenario].desc;
+  addLog(`[SCENARIO] ${SCENARIOS[scenario].label} — ${SCENARIOS[scenario].desc}`, 'info');
+}
+function resetSim(){
+  tick = 0;
+  vals = FACTORS.map(f=>f.opt);
+  historyVals = FACTORS.map(()=> []);
+  historyR = FACTORS.map(()=> []);
+  historyREff = FACTORS.map(()=> []);
+  prevZones = FACTORS.map(()=> 'safe');
+  scenario = 'normal';
+  document.getElementById('scenarioSel').value = 'normal';
+  document.getElementById('scenarioDesc').textContent = SCENARIOS.normal.desc;
+  document.getElementById('logArea').innerHTML = '';
+  logItems = [];
+  addLog('システムリセット。個体設備の基準線から再追跡開始。', 'info');
+}
+
+// ────────────────────────────────────────────────
+// 初期化
+// ────────────────────────────────────────────────
+buildFactorCards();
+buildCorrMatrix();
+buildCouplingList();
+buildLagList();
+buildLegend();
+addLog('NRA-IDE 回転機械・軸受相関テンプレート開始', 'ok');
+addLog('R_total = max(R_i, R_corr) で平均化しない安全側ゲートを使用', 'info');
+addLog('振動先行・温度遅延・潤滑低下連鎖の観察を開始', 'info');
+
+setInterval(update, 250);
+</script>
+</body>
+</html>

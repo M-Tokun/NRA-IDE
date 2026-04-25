@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<!-- FILE: 38_datacenter_cascade_correlation_JP_20260425_032611_JST.html -->
+<!-- TITLE: NRA-IDE データセンター・カスケード相関シミュレーション -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-25 03:26:11 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NRA-IDE Datacenter Cascade Correlation JP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg:#05070d;
+  --s1:#0b101a;
+  --s2:#111927;
+  --s3:#172335;
+  --bd:#24344c;
+  --tx:#cbd8ea;
+  --mu:#55687e;
+  --ok:#3dff9c;
+  --warn:#ffd24a;
+  --fail:#ff315f;
+  --accent:#58d7ff;
+  --cpu:#58d7ff;
+  --power:#ffd24a;
+  --rack:#ff7a1a;
+  --inlet:#46c6ff;
+  --fan:#b58cff;
+  --air:#39ff85;
+  --net:#ff4fb0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(88,215,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(88,215,255,0.025) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 34px;}
+
+header{text-align:center;margin-bottom:26px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.78;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.25rem,3.5vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--fail);font-style:normal;}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.7;}
+
+.notice{
+  border:1px solid rgba(255,210,74,.34);
+  background:rgba(255,210,74,.055);
+  border-left:4px solid var(--warn);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#e8d89d;
+  font-size:.78rem;
+  line-height:1.7;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);
+  color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#001018;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:7px;
+  color:var(--tx);font-family:'Noto Sans JP',sans-serif;font-size:.82rem;cursor:pointer;
+}
+.scenario-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(88,215,255,.45);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--warn);}
+.eq-c{color:var(--ok);}
+.eq-f{color:var(--fail);}
+
+.overall{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:980px){.overall{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.overall{grid-template-columns:1fr;}}
+.over-card{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.over-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;
+  letter-spacing:.16em;
+  color:var(--mu);
+  margin-bottom:6px;
+}
+.over-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:2.0rem;
+  font-weight:700;
+  line-height:1.05;
+}
+.over-sub{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.main-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
+@media(max-width:980px){.main-grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:18px;
+}
+.panel-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  letter-spacing:.18em;
+  color:var(--accent);
+  margin-bottom:16px;
+}
+
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:980px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
+.fc{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  transition:.25s;
+}
+.fc.warn{border-color:var(--warn);}
+.fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,.05);}to{box-shadow:0 0 16px rgba(255,49,95,.28);}}
+.fc-badge{
+  position:absolute;top:10px;right:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;
+  padding:2px 6px;
+  border-radius:4px;
+  letter-spacing:.08em;
+}
+.badge-ok{background:rgba(61,255,156,.10);color:var(--ok);border:1px solid rgba(61,255,156,.30);}
+.badge-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35);}
+.badge-fail{background:rgba(255,49,95,.14);color:var(--fail);border:1px solid rgba(255,49,95,.45);}
+.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.32rem;font-weight:700;margin-bottom:8px;}
+.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:.98rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.r-bar{height:100%;border-radius:2px;transition:.25s;}
+.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
+
+.dc-box{
+  height:330px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255,49,95,.10), transparent 38%),
+    linear-gradient(180deg,rgba(88,215,255,.06),rgba(255,122,26,.05)),
+    var(--s2);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+.dc-label{
+  position:absolute;left:18px;top:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;
+}
+.rack-row{
+  position:absolute;left:8%;right:8%;bottom:62px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  height:180px;
+}
+.rack{
+  position:relative;border:1px solid rgba(88,215,255,.20);border-radius:8px;
+  background:linear-gradient(180deg,#172335,#090e17);
+  overflow:hidden;
+}
+.rack::before{
+  content:'';position:absolute;left:0;right:0;bottom:0;
+  height:var(--heat,20%);
+  background:linear-gradient(180deg,rgba(255,210,74,.35),rgba(255,49,95,.72));
+  transition:height .25s;
+}
+.rack::after{
+  content:'';position:absolute;left:12%;right:12%;top:12px;bottom:12px;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.10) 0 3px,transparent 3px 12px);
+  opacity:.55;
+}
+.airflow{
+  position:absolute;left:0;right:0;top:55px;height:58px;
+  background:linear-gradient(90deg,transparent,rgba(70,198,255,var(--air,.18)),transparent);
+  transform:translateX(var(--flowx,0px));
+  opacity:.85;
+}
+.airflow::before,.airflow::after{
+  content:'→ → → → → →';
+  position:absolute;left:0;right:0;text-align:center;
+  font-family:'JetBrains Mono',monospace;color:rgba(70,198,255,.58);
+  letter-spacing:.7em;font-size:.82rem;
+}
+.airflow::after{top:28px;opacity:.6;}
+.fanline{
+  position:absolute;left:9%;right:9%;bottom:28px;height:20px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.fan{
+  width:24px;height:24px;border-radius:50%;border:2px solid rgba(181,140,255,.55);
+  position:relative;animation:spin var(--spin,.8s) linear infinite;
+}
+.fan::before{content:'';position:absolute;left:50%;top:2px;width:2px;height:18px;background:rgba(181,140,255,.65);transform:translateX(-50%);}
+.fan::after{content:'';position:absolute;left:2px;top:50%;width:18px;height:2px;background:rgba(181,140,255,.65);transform:translateY(-50%);}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.heatwave{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 58%,rgba(255,49,95,var(--stress,.0)),transparent 64%);
+  pointer-events:none;
+}
+.dc-status{
+  position:absolute;left:18px;bottom:18px;
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);
+}
+.loop-note{
+  position:absolute;right:18px;bottom:18px;text-align:right;
+  font-family:'JetBrains Mono',monospace;font-size:.70rem;color:var(--fail);line-height:1.7;
+}
+
+.corr-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
+.corr-cell{
+  aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:.52rem;font-weight:600;transition:.25s;
+}
+.corr-head{background:transparent;color:var(--mu);font-size:.49rem;line-height:1.1;text-align:center;}
+
+.loop-panel{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;
+}
+.loop-flow{display:grid;grid-template-columns:1fr 36px 1fr 36px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+.loop-node{
+  border:1px solid var(--bd);background:rgba(255,255,255,.025);border-radius:9px;
+  padding:10px 8px;text-align:center;min-height:72px;
+}
+.loop-name{font-size:.70rem;color:var(--mu);margin-bottom:5px;}
+.loop-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700;}
+.loop-arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.25rem;}
+.loop-note2{font-size:.74rem;color:var(--mu);line-height:1.7;}
+.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.coup-row{display:flex;align-items:center;gap:10px;}
+.coup-name{font-size:.74rem;min-width:116px;color:var(--tx);}
+.coup-bar-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.coup-bar{height:100%;border-radius:4px;transition:.25s;}
+.coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+
+canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+
+.log-area{
+  height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);
+  border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;
+}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+
+.footer{
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-sub">NRA-IDE / DATACENTER CASCADE CORRELATION SAMPLE</div>
+  <h1>データセンター <em>カスケード相関</em> シミュレーション</h1>
+  <p class="h-desc">CPU負荷・電力・ラック温度・吸気温度・ファン回転・空気流量・ネットワーク遅延を相関追跡。正のフィードバックによる連鎖崩壊を可視化。</p>
+</header>
+
+<div class="notice">
+  このsampleは教育・構造可視化用です。実データセンターの冷却制御、電源制御、負荷制御、運用判断には使用できません。表示値はすべて合成データです。実運用では、冗長電源、冷却設計、監視設計、運用手順、人間の判断が必要です。
+</div>
+
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ 実行中</button>
+  <button class="btn" onclick="resetSim()">↺ リセット</button>
+  <label class="small">シナリオ：</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">通常運転</option>
+    <option value="workload">高負荷バースト</option>
+    <option value="coolingloss">冷却能力低下</option>
+    <option value="airblock">空気流路閉塞</option>
+    <option value="fandegrade">ファン劣化</option>
+    <option value="netqueue">ネットワーク滞留</option>
+    <option value="cascade">連鎖崩壊</option>
+  </select>
+  <span class="scenario-label" id="scen-desc">通常範囲内で推移</span>
+</div>
+
+<div class="formula-box">
+  <span class="eq-a">R_i = δ_i / τ_i(t)</span>：各物理量の構造比率　|　
+  <span class="eq-b">τ_temp(t) ↓ when airflow↓ & power↑</span>：冷却余裕の動的圧縮　|　
+  <span class="eq-c">feedback: power → heat → fan → power</span>：正のフィードバック環　|　
+  <span class="eq-f">R_total = max(R_i, R_corr, R_loop)</span>
+</div>
+
+<div class="overall">
+  <div class="over-card">
+    <div class="over-label">DATACENTER R_TOTAL</div>
+    <div class="over-val" id="overall-r">0.000</div>
+    <div class="over-sub" id="overall-status">SAFE — 構造余裕あり</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">COOLING PRESSURE</div>
+    <div class="over-val" id="cooling-r">0.000</div>
+    <div class="over-sub">空気流量不足・吸気温度・ラック熱</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">FEEDBACK LOOP R</div>
+    <div class="over-val" id="loop-r">0.000</div>
+    <div class="over-sub">電力→熱→ファン→電力の閉ループ圧</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">R_CORR MAX</div>
+    <div class="over-val" id="corr-r">0.000</div>
+    <div class="over-sub">相関行列の基準差分</div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">FACTOR STATE — 個別 R_i</div>
+    <div class="factor-grid" id="factor-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">DATACENTER VISUALIZATION — 熱・空気・ファン</div>
+    <div class="dc-box" id="dc-box">
+      <div class="dc-label">SYNTHETIC RACK ROW / COOLING LOOP VIEW</div>
+      <div class="airflow" id="airflow"></div>
+      <div class="rack-row">
+        <div class="rack" id="rack-0"></div>
+        <div class="rack" id="rack-1"></div>
+        <div class="rack" id="rack-2"></div>
+        <div class="rack" id="rack-3"></div>
+        <div class="rack" id="rack-4"></div>
+      </div>
+      <div class="fanline">
+        <div class="fan"></div><div class="fan"></div><div class="fan"></div><div class="fan"></div><div class="fan"></div>
+      </div>
+      <div class="heatwave" id="heatwave"></div>
+      <div class="dc-status" id="dc-status">● SAFE DATACENTER</div>
+      <div class="loop-note">power → heat<br>heat → fan<br>fan → power</div>
+    </div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">FEEDBACK LOOP — 正のフィードバック環</div>
+    <div class="loop-panel">
+      <div class="loop-flow">
+        <div class="loop-node">
+          <div class="loop-name">電力</div>
+          <div class="loop-val" id="node-power" style="color:var(--power)">—</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node">
+          <div class="loop-name">熱</div>
+          <div class="loop-val" id="node-heat" style="color:var(--rack)">—</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node">
+          <div class="loop-name">ファン</div>
+          <div class="loop-val" id="node-fan" style="color:var(--fan)">—</div>
+        </div>
+      </div>
+      <div class="loop-note2">
+        ファンが上がると冷却は強くなりますが、同時に電力消費も増えます。電力増加は熱を増やし、さらに冷却負荷を増やします。このsampleでは、この閉ループ圧を平均ではなく独立Rとして表示します。
+      </div>
+      <div class="coupling-list" id="coupling-list"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
+    <div id="corr-matrix"></div>
+    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7;">
+      R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。電力・熱・冷却・遅延の相関変質を検出します。赤色セルは基準相関からの崩れです。
+    </div>
+    <div id="corr-alert" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">TIME SERIES — R値の推移</div>
+    <canvas id="ts-canvas" class="ts-canvas" width="590" height="152"></canvas>
+    <div class="legend">
+      <span style="color:var(--cpu)">─ CPU</span>
+      <span style="color:var(--power)">─ 電力</span>
+      <span style="color:var(--rack)">─ ラック温度</span>
+      <span style="color:var(--inlet)">─ 吸気温度</span>
+      <span style="color:var(--fan)">─ ファン</span>
+      <span style="color:var(--air)">─ 空気流量</span>
+      <span style="color:var(--net)">─ 遅延</span>
+      <span style="color:rgba(255,49,95,.7)">- - Fail</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">GATE LOG</div>
+    <div class="log-area" id="log-area"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span>38_datacenter_cascade_correlation_JP</span>
+  <span>R_total=max(R_i,R_corr,R_loop) / no averaging dilution</span>
+</div>
+
+</div>
+
+<script>
+const FACTORS = [
+  {
+    id:'cpu', name:'CPU負荷', short:'CPU', unit:'%', color:'var(--cpu)',
+    opt:45, tau:35, min:5, max:100, dir:'hi',
+    desc:'計算負荷。高負荷は電力・熱・遅延を押し上げる。',
+    corr_base:[1.0,0.72,0.50,0.22,0.42,0.18,0.64]
+  },
+  {
+    id:'power', name:'電力', short:'PWR', unit:'kW', color:'var(--power)',
+    opt:420, tau:220, min:180, max:980, dir:'hi',
+    desc:'IT負荷と冷却負荷の合算。閉ループの中心。',
+    corr_base:[0.72,1.0,0.62,0.34,0.58,0.25,0.48]
+  },
+  {
+    id:'rack', name:'ラック温度', short:'RACK', unit:'℃', color:'var(--rack)',
+    opt:34, tau:16, min:18, max:72, dir:'hi',
+    desc:'機器側の熱。空気流量低下でτが縮む。',
+    corr_base:[0.50,0.62,1.0,0.68,0.70,0.62,0.35]
+  },
+  {
+    id:'inlet', name:'吸気温度', short:'IN', unit:'℃', color:'var(--inlet)',
+    opt:22, tau:8, min:12, max:42, dir:'hi',
+    desc:'冷却供給側。上昇するとラック温度τを圧縮。',
+    corr_base:[0.22,0.34,0.68,1.0,0.46,0.72,0.18]
+  },
+  {
+    id:'fan', name:'ファン回転率', short:'FAN', unit:'%', color:'var(--fan)',
+    opt:52, tau:38, min:20, max:100, dir:'both',
+    desc:'冷却反応。高すぎても余裕消費、低すぎても冷却不足。',
+    corr_base:[0.42,0.58,0.70,0.46,1.0,0.56,0.22]
+  },
+  {
+    id:'air', name:'空気流量', short:'AIR', unit:'%', color:'var(--air)',
+    opt:78, tau:28, min:18, max:100, dir:'lo',
+    desc:'低下側を監視。閉塞・床下圧低下で冷却余裕が縮む。',
+    corr_base:[0.18,0.25,0.62,0.72,0.56,1.0,0.15]
+  },
+  {
+    id:'lat', name:'ネット遅延', short:'LAT', unit:'ms', color:'var(--net)',
+    opt:8, tau:18, min:1, max:90, dir:'hi',
+    desc:'輻輳・キュー滞留。CPU負荷と相関して悪化する。',
+    corr_base:[0.64,0.48,0.35,0.18,0.22,0.15,1.0]
+  }
+];
+
+const BASE = {cpu:45, power:420, rack:34, inlet:22, fan:52, air:78, lat:8};
+let vals = {...BASE};
+let running = true;
+let tick = 0;
+let scenario = 'normal';
+let driftTarget = {cpu:0,power:0,rack:0,inlet:0,fan:0,air:0,lat:0};
+let noiseAmp = {cpu:5,power:22,rack:1.1,inlet:0.6,fan:4,air:3,lat:2.0};
+let rHistory = FACTORS.map(()=>[]);
+let prevZones = FACTORS.map(()=>'ok');
+let logLines = [];
+const HIST_LEN = 136;
+const tauC = 0.24;
+let corrBase = FACTORS.map(f => [...f.corr_base]);
+
+const SCENARIOS = {
+  normal: {
+    desc:'通常範囲内で推移',
+    drift:{cpu:0,power:0,rack:0,inlet:0,fan:0,air:0,lat:0},
+    amp:{cpu:5,power:22,rack:1.1,inlet:0.6,fan:4,air:3,lat:2.0}
+  },
+  workload: {
+    desc:'高負荷バースト → 電力・熱・遅延が上昇',
+    drift:{cpu:36,power:165,rack:9,inlet:2,fan:18,air:-4,lat:16},
+    amp:{cpu:9,power:48,rack:2.2,inlet:0.8,fan:6,air:4,lat:5.5}
+  },
+  coolingloss: {
+    desc:'冷却能力低下 → 吸気温度・ラック温度が上昇',
+    drift:{cpu:8,power:105,rack:22,inlet:12,fan:30,air:-12,lat:7},
+    amp:{cpu:6,power:38,rack:4.0,inlet:2.2,fan:8,air:5,lat:3.5}
+  },
+  airblock: {
+    desc:'空気流路閉塞 → 空気流量低下で温度τが圧縮',
+    drift:{cpu:5,power:95,rack:18,inlet:5,fan:34,air:-38,lat:5},
+    amp:{cpu:5,power:35,rack:3.5,inlet:1.4,fan:9,air:9,lat:3.0}
+  },
+  fandegrade: {
+    desc:'ファン劣化 → 回転率低下と熱上昇が同時発生',
+    drift:{cpu:9,power:75,rack:20,inlet:5,fan:-24,air:-24,lat:6},
+    amp:{cpu:6,power:34,rack:3.2,inlet:1.2,fan:7,air:7,lat:3.0}
+  },
+  netqueue: {
+    desc:'ネットワーク滞留 → CPU待ち・遅延相関が変質',
+    drift:{cpu:20,power:70,rack:5,inlet:1,fan:8,air:-2,lat:45},
+    amp:{cpu:10,power:30,rack:1.8,inlet:0.8,fan:5,air:3,lat:10}
+  },
+  cascade: {
+    desc:'連鎖崩壊 → 電力・熱・冷却・遅延が閉ループ化',
+    drift:{cpu:42,power:285,rack:31,inlet:15,fan:42,air:-42,lat:55},
+    amp:{cpu:12,power:72,rack:6.0,inlet:3.0,fan:12,air:10,lat:14}
+  }
+};
+
+function applyScenario(){
+  scenario = document.getElementById('scenario-sel').value;
+  const s = SCENARIOS[scenario];
+  driftTarget = {...s.drift};
+  noiseAmp = {...s.amp};
+  document.getElementById('scen-desc').textContent = s.desc;
+  addLog(`[SCENARIO] ${s.desc}`, 'info');
+}
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function factorIndexById(id){return FACTORS.findIndex(f=>f.id===id);}
+
+function calcDelta(val, f){
+  if(f.dir === 'hi') return Math.max(0, val - f.opt);
+  if(f.dir === 'lo') return Math.max(0, f.opt - val);
+  return Math.abs(val - f.opt);
+}
+
+function calcRawRById(id){
+  const i = factorIndexById(id);
+  const f = FACTORS[i];
+  const delta = calcDelta(vals[id], f);
+  return {delta, tau:f.tau, R:delta/f.tau};
+}
+
+function pressures(){
+  const cpu = calcRawRById('cpu').R;
+  const power = calcRawRById('power').R;
+  const rack = calcRawRById('rack').R;
+  const inlet = calcRawRById('inlet').R;
+  const fan = calcRawRById('fan').R;
+  const air = calcRawRById('air').R;
+  const lat = calcRawRById('lat').R;
+  const cooling = Math.min(2.0, 0.45*air + 0.35*inlet + 0.30*rack);
+  const thermal = Math.min(2.0, 0.40*power + 0.45*rack + 0.25*inlet);
+  const loop = Math.min(2.2, 0.33*power + 0.33*rack + 0.25*fan + 0.24*air + 0.18*cpu);
+  const service = Math.min(2.0, 0.45*lat + 0.28*cpu + 0.20*power);
+  return {cpu,power,rack,inlet,fan,air,lat,cooling,thermal,loop,service};
+}
+
+function dynamicTau(i){
+  const f = FACTORS[i];
+  const p = pressures();
+  let shrink = 1.0;
+
+  if(f.id === 'rack')  shrink -= Math.min(0.58, p.cooling*0.18 + p.power*0.08);
+  if(f.id === 'inlet') shrink -= Math.min(0.40, p.air*0.16);
+  if(f.id === 'power') shrink -= Math.min(0.30, p.loop*0.08);
+  if(f.id === 'fan')   shrink -= Math.min(0.42, p.thermal*0.12);
+  if(f.id === 'air')   shrink -= Math.min(0.45, p.fan*0.10 + p.inlet*0.08);
+  if(f.id === 'lat')   shrink -= Math.min(0.32, p.cpu*0.10 + p.power*0.06);
+
+  return Math.max(f.tau * shrink, f.tau * 0.35);
+}
+
+function calcR(i){
+  const f = FACTORS[i];
+  const delta = calcDelta(vals[f.id], f);
+  const tau = dynamicTau(i);
+  return {delta, tau, R: delta / tau};
+}
+
+function getColor(R){
+  if(R >= 1.0) return 'var(--fail)';
+  if(R >= 0.75) return 'var(--warn)';
+  return 'var(--ok)';
+}
+function getBadge(R){
+  if(R >= 1.0) return ['FAIL-CLOSED','badge-fail','fail'];
+  if(R >= 0.75) return ['WARNING','badge-warn','warn'];
+  return ['SAFE','badge-ok','ok'];
+}
+
+function buildFactorCards(){
+  const root = document.getElementById('factor-grid');
+  root.innerHTML = '';
+  FACTORS.forEach((f,i)=>{
+    const div = document.createElement('div');
+    div.className='fc';
+    div.id=`fc-${i}`;
+    div.innerHTML = `
+      <div class="fc-badge badge-ok" id="badge-${i}">SAFE</div>
+      <div class="fc-name">${f.name}</div>
+      <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
+      <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" style="color:var(--mu)">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
+      <div class="fc-desc">${f.desc}</div>
+    `;
+    root.appendChild(div);
+  });
+}
+
+function buildCorrMatrix(){
+  const root = document.getElementById('corr-matrix');
+  root.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className='corr-grid';
+  grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
+  FACTORS.forEach(f => grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
+  FACTORS.forEach((fi,i)=>{
+    grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`;
+    FACTORS.forEach((_,j)=>{
+      grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`;
+    });
+  });
+  root.appendChild(grid);
+}
+
+function buildCouplingList(){
+  const root = document.getElementById('coupling-list');
+  const rows = [
+    ['冷却圧','cooling-coup','var(--inlet)'],
+    ['熱圧','thermal-coup','var(--rack)'],
+    ['閉ループ圧','loop-coup','var(--fail)'],
+    ['サービス圧','service-coup','var(--net)'],
+    ['空気流量R','air-coup','var(--air)']
+  ];
+  root.innerHTML = rows.map(([name,id,col])=>`
+    <div class="coup-row">
+      <div class="coup-name">${name}</div>
+      <div class="coup-bar-bg"><div class="coup-bar" id="${id}-bar" style="background:${col};width:0%"></div></div>
+      <div class="coup-val" id="${id}-val">0.000</div>
+    </div>
+  `).join('');
+}
+
+function updateValues(){
+  tick++;
+  const ramp = Math.min(1, tick/90);
+  const cascadeRamp = scenario === 'cascade' ? Math.min(1, Math.max(0,(tick-42)/70)) : 0;
+
+  Object.keys(BASE).forEach((id,idx)=>{
+    const f = FACTORS[factorIndexById(id)];
+    const base = BASE[id];
+    const drift = driftTarget[id] * ramp;
+    const amp = noiseAmp[id];
+    const noise = (Math.random()-0.5)*2*amp;
+    const wave = Math.sin(tick*0.045 + idx*0.85) * amp * 0.45;
+
+    let extra = 0;
+    if(id === 'power') extra += cascadeRamp * 115;
+    if(id === 'rack') extra += cascadeRamp * 11;
+    if(id === 'inlet') extra += cascadeRamp * 5;
+    if(id === 'fan') extra += cascadeRamp * 14;
+    if(id === 'air') extra -= cascadeRamp * 12;
+    if(id === 'lat') extra += cascadeRamp * 20;
+
+    vals[id] = clamp(base + drift + noise + wave + extra, f.min, f.max);
+  });
+
+  // Synthetic physical coupling after base update.
+  const p = pressures();
+  vals.power = clamp(vals.power + p.fan*18 + p.cpu*12, FACTORS[1].min, FACTORS[1].max);
+  vals.rack  = clamp(vals.rack  + p.power*0.9 + p.air*1.4 + p.inlet*0.8, FACTORS[2].min, FACTORS[2].max);
+  vals.fan   = clamp(vals.fan   + p.rack*3.2 + p.inlet*1.6 - p.air*0.8, FACTORS[4].min, FACTORS[4].max);
+  vals.lat   = clamp(vals.lat   + p.cpu*1.5 + p.power*0.7, FACTORS[6].min, FACTORS[6].max);
+}
+
+function calcCorr(){
+  const C = [];
+  const p = pressures();
+  for(let i=0;i<FACTORS.length;i++){
+    C[i]=[];
+    for(let j=0;j<FACTORS.length;j++){
+      if(i===j){C[i][j]=1.0;continue;}
+      const ids = [FACTORS[i].id, FACTORS[j].id].sort().join('-');
+      let drift = 0;
+
+      if(['power-rack','fan-rack','air-rack','inlet-rack','fan-power','cpu-power','cpu-lat'].includes(ids)){
+        drift += p.loop * 0.15 + p.cooling * 0.08;
+      }
+      if(['air-inlet','air-fan','air-power'].includes(ids)){
+        drift += p.cooling * 0.16;
+      }
+      if(scenario === 'netqueue' && ['cpu-lat','lat-power','fan-lat'].includes(ids)){
+        drift += 0.20 + Math.min(0.25, tick*0.003);
+      }
+      if(scenario === 'cascade' && tick > 36) drift += Math.min(0.42, (tick-36)*0.0055);
+
+      C[i][j] = clamp(corrBase[i][j] + drift + (Math.random()-0.5)*0.034, 0, 1);
+    }
+  }
+  return C;
+}
+
+function calcRCorr(C){
+  let maxR=0;
+  const alerts=[];
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=i+1;j<FACTORS.length;j++){
+      const Rij = Math.abs(C[i][j] - corrBase[i][j]) / tauC;
+      if(Rij > maxR) maxR = Rij;
+      if(Rij >= 1.0) alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${Rij.toFixed(2)}`);
+    }
+  }
+  return {maxR, alerts};
+}
+
+function fmtVal(v,i){
+  const f = FACTORS[i];
+  if(f.id === 'power') return Math.round(v).toLocaleString()+f.unit;
+  if(f.id === 'lat') return v.toFixed(1)+f.unit;
+  return v.toFixed(1)+f.unit;
+}
+
+function setCoup(id,val){
+  document.getElementById(`${id}-bar`).style.width = Math.min(100,val*100).toFixed(1)+'%';
+  document.getElementById(`${id}-val`).textContent = val.toFixed(3);
+}
+
+function updateUI(){
+  const C = calcCorr();
+  const {maxR:rCorr, alerts} = calcRCorr(C);
+  const p = pressures();
+
+  let rTotal = Math.max(rCorr, p.loop);
+  let failAny = false;
+  let warnAny = false;
+
+  FACTORS.forEach((f,i)=>{
+    const {delta,tau,R} = calcR(i);
+    rTotal = Math.max(rTotal, R);
+    rHistory[i].push(R);
+    if(rHistory[i].length > HIST_LEN) rHistory[i].shift();
+
+    const col = getColor(R);
+    const [bText,bCls,zone] = getBadge(R);
+
+    document.getElementById(`val-${i}`).textContent = fmtVal(vals[f.id],i);
+    document.getElementById(`delta-${i}`).textContent = (f.id==='power' ? Math.round(delta).toLocaleString() : delta.toFixed(1)) + f.unit;
+    document.getElementById(`tau-${i}`).textContent = (f.id==='power' ? Math.round(tau).toLocaleString() : tau.toFixed(1)) + f.unit;
+    document.getElementById(`r-${i}`).textContent = R.toFixed(3);
+    document.getElementById(`r-${i}`).style.color = col;
+    document.getElementById(`rbar-${i}`).style.width = Math.min(100,R*100).toFixed(1)+'%';
+    document.getElementById(`rbar-${i}`).style.background = col;
+
+    const card = document.getElementById(`fc-${i}`);
+    card.className = 'fc' + (R>=1.0?' fail':R>=0.75?' warn':'');
+    const badge = document.getElementById(`badge-${i}`);
+    badge.textContent = bText;
+    badge.className = 'fc-badge ' + bCls;
+
+    if(R>=1.0) failAny = true;
+    if(R>=0.75) warnAny = true;
+
+    if(zone !== prevZones[i]){
+      if(zone==='fail') addLog(`FAIL-CLOSED候補: ${f.name} R=${R.toFixed(3)}`, 'fail');
+      else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
+      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      prevZones[i] = zone;
+    }
+  });
+
+  // Correlation matrix
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=0;j<FACTORS.length;j++){
+      const cell = document.getElementById(`cm-${i}-${j}`);
+      const v = C[i][j];
+      const Rij = i!==j ? Math.abs(v-corrBase[i][j])/tauC : 0;
+      if(i===j){
+        cell.style.background='rgba(88,215,255,.14)';
+        cell.style.color='var(--accent)';
+        cell.textContent='1.00';
+      } else if(Rij >= 1.0){
+        cell.style.background='rgba(255,49,95,.44)';
+        cell.style.color='#ffb2c4';
+        cell.textContent=v.toFixed(2);
+      } else if(Rij >= 0.75){
+        cell.style.background='rgba(255,210,74,.25)';
+        cell.style.color='var(--warn)';
+        cell.textContent=v.toFixed(2);
+      } else {
+        cell.style.background=`rgba(61,255,156,${v*0.25})`;
+        cell.style.color=`rgba(255,255,255,${0.35+v*0.5})`;
+        cell.textContent=v.toFixed(2);
+      }
+    }
+  }
+
+  const corrAlert = document.getElementById('corr-alert');
+  if(alerts.length){
+    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail)">⚠ ${a}</div>`).join('');
+    if(tick % 24 === 0) addLog(`相関変質検出: ${alerts[0]}`, 'fail');
+  } else {
+    corrAlert.innerHTML = `<span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
+  }
+
+  setCoup('cooling-coup', p.cooling);
+  setCoup('thermal-coup', p.thermal);
+  setCoup('loop-coup', p.loop);
+  setCoup('service-coup', p.service);
+  setCoup('air-coup', p.air);
+
+  document.getElementById('node-power').textContent = p.power.toFixed(3);
+  document.getElementById('node-heat').textContent = p.rack.toFixed(3);
+  document.getElementById('node-fan').textContent = p.fan.toFixed(3);
+
+  document.getElementById('overall-r').textContent = rTotal.toFixed(3);
+  document.getElementById('overall-r').style.color = getColor(rTotal);
+  document.getElementById('cooling-r').textContent = p.cooling.toFixed(3);
+  document.getElementById('cooling-r').style.color = getColor(p.cooling);
+  document.getElementById('loop-r').textContent = p.loop.toFixed(3);
+  document.getElementById('loop-r').style.color = getColor(p.loop);
+  document.getElementById('corr-r').textContent = rCorr.toFixed(3);
+  document.getElementById('corr-r').style.color = getColor(rCorr);
+
+  const st = document.getElementById('overall-status');
+  const dc = document.getElementById('dc-status');
+  const stress = Math.min(1.0, rTotal);
+
+  document.getElementById('heatwave').style.setProperty('--stress', (stress*0.24).toFixed(3));
+  document.getElementById('airflow').style.setProperty('--air', clamp(vals.air/100*0.35, .04, .35).toFixed(3));
+  document.getElementById('airflow').style.setProperty('--flowx', (Math.sin(tick*.08)*18).toFixed(1)+'px');
+
+  const spin = clamp(1.25 - vals.fan/100, .22, 1.15);
+  document.querySelectorAll('.fan').forEach(f=>f.style.setProperty('--spin', spin.toFixed(2)+'s'));
+  for(let i=0;i<5;i++){
+    const local = clamp(p.rack*50 + p.cooling*24 + Math.sin(tick*.11+i)*7 + i*3, 8, 100);
+    document.getElementById(`rack-${i}`).style.setProperty('--heat', local.toFixed(1)+'%');
+  }
+
+  if(rTotal >= 1.0){
+    st.textContent = 'FAIL-CLOSED — 自動判断停止・人間確認へ委譲';
+    st.style.color = 'var(--fail)';
+    dc.textContent = '✕ FAIL_CLOSED DATACENTER';
+    dc.style.color = 'var(--fail)';
+  } else if(rTotal >= 0.75){
+    st.textContent = 'WARNING — カスケード予兆監視強化';
+    st.style.color = 'var(--warn)';
+    dc.textContent = '▲ WARNING DATACENTER';
+    dc.style.color = 'var(--warn)';
+  } else {
+    st.textContent = 'SAFE — 構造余裕あり';
+    st.style.color = 'var(--ok)';
+    dc.textContent = '● SAFE DATACENTER';
+    dc.style.color = 'var(--ok)';
+  }
+
+  drawTimeSeries();
+}
+
+const tsCanvas = document.getElementById('ts-canvas');
+const tsCtx = tsCanvas.getContext('2d');
+const TS_COLORS = ['#58d7ff','#ffd24a','#ff7a1a','#46c6ff','#b58cff','#39ff85','#ff4fb0'];
+
+function drawTimeSeries(){
+  const W=tsCanvas.width,H=tsCanvas.height;
+  tsCtx.clearRect(0,0,W,H);
+  tsCtx.fillStyle='#111927';
+  tsCtx.fillRect(0,0,W,H);
+
+  tsCtx.strokeStyle='#24344c';
+  tsCtx.lineWidth=1;
+  [0.25,0.5,0.75,1.0].forEach(y=>{
+    const py = H - y*(H*.84) - 10;
+    tsCtx.beginPath();tsCtx.moveTo(0,py);tsCtx.lineTo(W,py);tsCtx.stroke();
+  });
+
+  const failY = H - 1.0*(H*.84) - 10;
+  tsCtx.strokeStyle='rgba(255,49,95,.55)';
+  tsCtx.setLineDash([5,4]);
+  tsCtx.beginPath();tsCtx.moveTo(0,failY);tsCtx.lineTo(W,failY);tsCtx.stroke();
+  tsCtx.setLineDash([]);
+
+  rHistory.forEach((hist,i)=>{
+    if(hist.length<2) return;
+    tsCtx.strokeStyle=TS_COLORS[i];
+    tsCtx.lineWidth=1.7;
+    tsCtx.beginPath();
+    hist.forEach((v,x)=>{
+      const px = x/(HIST_LEN-1)*W;
+      const py = H - Math.min(v,1.65)/1.65*(H*.84) - 10;
+      x===0 ? tsCtx.moveTo(px,py) : tsCtx.lineTo(px,py);
+    });
+    tsCtx.stroke();
+  });
+
+  tsCtx.font='10px JetBrains Mono, monospace';
+  tsCtx.fillStyle='rgba(255,49,95,.75)';
+  tsCtx.fillText('R=1.0',6,failY-4);
+}
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const t=(tick+'').padStart(4,'0');
+  const div=document.createElement('div');
+  div.className='log-'+type;
+  div.textContent=`[t=${t}] ${msg}`;
+  area.insertBefore(div,area.firstChild);
+  logLines.push(div);
+  if(logLines.length>86){
+    const old=logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function update(){
+  if(!running) return;
+  updateValues();
+  updateUI();
+}
+
+function toggleRun(){
+  running=!running;
+  const btn=document.getElementById('btn-run');
+  btn.textContent = running ? '▶ 実行中' : '⏸ 一時停止';
+  btn.className = running ? 'btn active' : 'btn';
+}
+
+function resetSim(){
+  tick=0;
+  vals={...BASE};
+  driftTarget={cpu:0,power:0,rack:0,inlet:0,fan:0,air:0,lat:0};
+  noiseAmp={cpu:5,power:22,rack:1.1,inlet:0.6,fan:4,air:3,lat:2.0};
+  scenario='normal';
+  rHistory=FACTORS.map(()=>[]);
+  prevZones=FACTORS.map(()=>'ok');
+  document.getElementById('scenario-sel').value='normal';
+  document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML='';
+  logLines=[];
+  addLog('システムリセット', 'info');
+  addLog('データセンター・カスケード相関監視を開始', 'ok');
+}
+
+buildFactorCards();
+buildCorrMatrix();
+buildCouplingList();
+addLog('データセンター・カスケード相関sample開始', 'ok');
+addLog('R_total=max(R_i,R_corr,R_loop) / 平均で危険を薄めない', 'info');
+setInterval(update, 300);
+</script>
+</body>
+</html>

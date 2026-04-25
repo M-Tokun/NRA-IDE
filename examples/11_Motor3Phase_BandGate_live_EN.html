@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE — Three-Phase Motor Band Gate Live_v2</title>
+<!--2026-03-07
+  NRA-IDE / Band Gate — 11 (EN)
+  Three-Phase Motor Variable Load Band Gate Live Monitor
+  --------------------------------------------------
+  Metrics: U/V/W Phase Current (A) · Winding Temp (°C) · Phase Imbalance (%)
+  Experience the "sudden trip" phenomenon with the manual load slider:
+    - Lock current (6–7× spike at startup)
+    - Phase imbalance → overheating → winding insulation breakdown
+    - Phase loss → immediate overload on remaining 2 phases
+  R = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  Powered by NRA-IDE. (c) 2026 M-Tokuni.
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg:      #080a0c;
+  --surface: #0c1014;
+  --panel:   #101418;
+  --border:  #1c2428;
+  --u:       #ff4444;   /* Phase U red */
+  --v:       #44aaff;   /* Phase V blue */
+  --w:       #44dd88;   /* Phase W green */
+  --temp:    #ff9933;   /* Temperature */
+  --imb:     #cc88ff;   /* Imbalance */
+  --safe:    #00e5a0;
+  --danger:  #ff2244;
+  --warn:    #ffcc00;
+  --muted:   #7a9aaa;
+  --text:    #c0d0d8;
+  --white:   #eef4f8;
+  --mono:    'Share Tech Mono', monospace;
+  --sans:    'Rajdhani', sans-serif;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:hidden; }
+
+/* Industrial diagonal grid background */
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,68,68,.015) 0px, rgba(255,68,68,.015) 1px, transparent 1px, transparent 20px),
+    repeating-linear-gradient(-45deg, rgba(68,170,255,.015) 0px, rgba(68,170,255,.015) 1px, transparent 1px, transparent 20px);
+  pointer-events:none; z-index:0;
+}
+
+.wrap { position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:28px 18px 80px; }
+
+/* ─── Header ─── */
+header { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
+.h-left { border-left:4px solid var(--warn); padding-left:16px; }
+.h-tag  { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--warn); margin-bottom:6px; }
+header h1 { font-size:clamp(18px,3vw,28px); font-weight:700; color:var(--white); line-height:1.2; letter-spacing:.5px; }
+header p  { font-size:13px; color:var(--white); opacity:.7; margin-top:8px; line-height:1.7; max-width:540px; }
+.live-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+.live-badge { font-family:var(--mono); font-size:9px; letter-spacing:2px; padding:5px 12px; border:1px solid rgba(0,229,160,.3); color:var(--safe); background:rgba(0,229,160,.05); border-radius:2px; display:flex; align-items:center; gap:7px; }
+.ldot { width:6px; height:6px; border-radius:50%; background:var(--safe); animation:blink 1s infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* ─── Manual Load Controller ─── */
+.load-ctrl {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:4px; padding:18px 20px; margin-bottom:16px;
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;
+  align-items:end;
+}
+@media(max-width:680px){.load-ctrl{grid-template-columns:1fr;}}
+
+.load-ctrl-title { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border); grid-column:1/-1; }
+
+.slider-item {}
+.sl-head { display:flex; justify-content:space-between; margin-bottom:5px; }
+.sl-name { font-family:var(--mono); font-size:10px; color:var(--text); }
+.sl-val  { font-family:var(--mono); font-size:14px; font-weight:700; color:var(--white); }
+
+/* Large sliders */
+input[type=range].big {
+  width:100%; appearance:none; height:6px;
+  background:var(--border); border-radius:3px; outline:none; cursor:pointer;
+}
+input[type=range].big::-webkit-slider-thumb { appearance:none; width:20px; height:20px; border-radius:50%; border:3px solid var(--bg); box-shadow:0 0 8px currentColor; transition:transform .15s; }
+input[type=range].big:hover::-webkit-slider-thumb { transform:scale(1.2); }
+input[type=range].load::-webkit-slider-thumb { background:var(--warn); box-shadow:0 0 10px rgba(255,204,0,.5); }
+input[type=range].rpm::-webkit-slider-thumb  { background:var(--safe); box-shadow:0 0 10px rgba(0,229,160,.4); }
+input[type=range].fault::-webkit-slider-thumb{ background:var(--u);   box-shadow:0 0 10px rgba(255,68,68,.5); }
+
+.fault-row { display:flex; flex-direction:column; gap:8px; }
+.fault-btn {
+  font-family:var(--mono); font-size:9px; letter-spacing:1px;
+  padding:7px 12px; border:1px solid var(--border);
+  background:transparent; color:var(--muted); cursor:pointer; border-radius:2px; transition:all .15s;
+  text-align:left;
+}
+.fault-btn:hover      { border-color:var(--danger); color:var(--danger); }
+.fault-btn.active     { border-color:var(--danger); color:var(--danger); background:rgba(255,34,68,.08); }
+.fault-btn.active-imb { border-color:var(--imb); color:var(--imb); background:rgba(204,136,255,.08); }
+.fault-btn.active-loc { border-color:var(--warn); color:var(--warn); background:rgba(255,204,0,.08); }
+
+/* ─── Three-Phase Waveform Canvas (Main) ─── */
+.wave-section { margin-bottom:14px; position:relative; }
+#mainCanvas { display:block; width:100%; border:1px solid var(--border); background:#050708; border-radius:3px; }
+
+/* SILENCE overlay */
+#silenceOverlay { position:absolute; inset:0; border-radius:3px; pointer-events:none; border:2px solid transparent; transition:all .1s; }
+#silenceOverlay.active { background:rgba(255,34,68,.06); border-color:rgba(255,34,68,.5); }
+#silenceStamp { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(.8); font-family:var(--mono); font-size:clamp(16px,4vw,36px); font-weight:700; letter-spacing:4px; opacity:0; pointer-events:none; transition:opacity .12s,transform .12s; white-space:nowrap; color:var(--danger); text-shadow:0 0 20px var(--danger); }
+#silenceStamp.active { opacity:1; transform:translate(-50%,-50%) scale(1); }
+
+/* ─── 5-Metric Cards ─── */
+.metrics-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
+@media(max-width:780px){.metrics-row{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:480px){.metrics-row{grid-template-columns:repeat(2,1fr);}}
+
+.metric-card { background:var(--panel); border:1px solid var(--border); border-radius:3px; padding:10px 12px; position:relative; overflow:hidden; }
+.metric-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.metric-card.u::before   { background:var(--u); }
+.metric-card.v::before   { background:var(--v); }
+.metric-card.w::before   { background:var(--w); }
+.metric-card.temp::before{ background:var(--temp); }
+.metric-card.imb::before { background:var(--imb); }
+
+.mc-label { font-family:var(--mono); font-size:8px; letter-spacing:1px; color:var(--muted); margin-bottom:5px; }
+.mc-val   { font-family:var(--mono); font-size:22px; font-weight:700; line-height:1; transition:color .12s; }
+.mc-unit  { font-family:var(--mono); font-size:9px; color:var(--muted); margin-left:3px; }
+.mc-r     { font-family:var(--mono); font-size:9px; margin-top:5px; }
+.mc-bar   { height:2px; background:var(--border); border-radius:1px; margin-top:4px; overflow:hidden; }
+.mc-fill  { height:100%; border-radius:1px; transition:width .1s,background .15s; }
+.mc-dec   { font-family:var(--mono); font-size:8px; margin-top:4px; transition:color .15s; }
+
+/* ─── Bottom: Info + Log ─── */
+.bottom-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:680px){.bottom-row{grid-template-columns:1fr;}}
+
+.info-panel { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:16px; }
+.i-title { font-family:var(--mono); font-size:8px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.kotsuren-table { width:100%; border-collapse:collapse; font-size:12px; }
+.kotsuren-table th { font-family:var(--mono); font-size:8px; letter-spacing:1px; color:var(--muted); text-align:left; padding:4px 8px; border-bottom:1px solid var(--border); }
+.kotsuren-table td { padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.03); color:var(--white); opacity:.85; vertical-align:top; }
+.kotsuren-table td:first-child { font-family:var(--mono); font-size:9px; white-space:nowrap; }
+.kotsuren-table tr:last-child td { border-bottom:none; }
+
+.note-box { margin-top:12px; padding:10px 12px; background:rgba(255,204,0,.04); border:1px solid rgba(255,204,0,.12); border-radius:3px; }
+.note-box p { font-size:11px; color:var(--white); opacity:.8; line-height:1.7; }
+
+.log-panel { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:16px; display:flex; flex-direction:column; }
+.log-area  { flex:1; background:#050708; border:1px solid var(--border); border-radius:3px; padding:8px 10px; font-family:var(--mono); font-size:9px; line-height:1.9; overflow-y:auto; height:220px; }
+.log-area::-webkit-scrollbar{width:3px;} .log-area::-webkit-scrollbar-thumb{background:var(--border);}
+.le       { color:var(--muted); }
+.le.u     { color:var(--u); }
+.le.v     { color:var(--v); }
+.le.w     { color:var(--w); }
+.le.temp  { color:var(--temp); }
+.le.imb   { color:var(--imb); }
+.le.safe  { color:var(--safe); }
+.le.warn  { color:var(--warn); }
+.le.danger{ color:var(--danger); font-weight:bold; }
+
+/* Legend */
+.legend { display:flex; gap:12px; flex-wrap:wrap; font-family:var(--mono); font-size:9px; color:var(--muted); margin-bottom:8px; }
+.li { display:flex; align-items:center; gap:5px; }
+.ll { width:16px; height:2px; border-radius:1px; }
+
+/* Button row */
+.btn-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+button.ctrl { font-family:var(--mono); font-size:9px; letter-spacing:1px; padding:6px 12px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; border-radius:2px; transition:all .15s; }
+button.ctrl:hover  { border-color:var(--warn); color:var(--warn); }
+button.ctrl.play   { border-color:var(--safe); color:var(--safe); }
+button.ctrl.paused { border-color:var(--warn); color:var(--warn); }
+
+footer { margin-top:48px; padding-top:16px; border-top:1px solid var(--border); font-family:var(--mono); font-size:9px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; }
+footer a { color:var(--v); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-left">
+    <div class="h-tag">NRA-IDE / Band Gate — 11 / Three-Phase Motor</div>
+    <h1>Three-Phase Motor Variable Load<br>Band Gate Live Monitor</h1>
+    <p>
+      Simultaneously monitors U/V/W three-phase current, winding temperature, and phase imbalance.<br>
+      "Sudden Trip" — the moment you change the manual load, or a phase is lost,<br>
+      R instantly exceeds 1.0 and SILENCE is triggered.
+    </p>
+  </div>
+  <div class="live-wrap">
+    <div class="live-badge"><div class="ldot"></div>MOTOR LIVE</div>
+    <div class="btn-row" style="margin-top:4px">
+      <button class="ctrl play" id="btnPlay" onclick="togglePlay()">⏸ PAUSE</button>
+      <button class="ctrl" onclick="resetSim()">↺ RESET</button>
+    </div>
+  </div>
+</header>
+
+<!-- Manual Load Controller -->
+<div class="load-ctrl">
+  <div class="load-ctrl-title">⚙ Manual Control Panel — Variable Settings by Operator</div>
+
+  <!-- Load ratio -->
+  <div class="slider-item">
+    <div class="sl-head">
+      <span class="sl-name">Load Ratio LOAD</span>
+      <span class="sl-val" id="v-load">60%</span>
+    </div>
+    <input type="range" class="big load" id="sl-load" min="0" max="150" value="60">
+    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:3px">
+      <span>No Load 0%</span><span>Rated 100%</span><span style="color:var(--danger)">Overload 150%</span>
+    </div>
+    <div style="font-size:11px;color:var(--white);opacity:.75;margin-top:6px;line-height:1.6">
+      Current exceeds rated value above 100%.<br>Sudden trip occurs near 150%.
+    </div>
+  </div>
+
+  <!-- Speed -->
+  <div class="slider-item">
+    <div class="sl-head">
+      <span class="sl-name">Speed RPM</span>
+      <span class="sl-val" id="v-rpm">1500 rpm</span>
+    </div>
+    <input type="range" class="big rpm" id="sl-rpm" min="300" max="3000" step="10" value="1500">
+    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:3px">
+      <span>300</span><span>1500 (Rated)</span><span>3000 rpm</span>
+    </div>
+    <div style="font-size:11px;color:var(--white);opacity:.75;margin-top:6px;line-height:1.6">
+      High load at low speed causes insufficient cooling and temperature rise.<br>At high speed, vibration and current ripple increase.
+    </div>
+  </div>
+
+  <!-- Fault injection -->
+  <div class="slider-item">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">Fault Simulation</div>
+    <div class="fault-row">
+      <button class="fault-btn" id="fb-normal" onclick="setFault('normal')">✓ Normal Operation</button>
+      <button class="fault-btn" id="fb-imbalance" onclick="setFault('imbalance')">⚡ Phase Imbalance Injection</button>
+      <button class="fault-btn" id="fb-locked" onclick="setFault('locked')">🔒 Locked Rotor (Start Failure)</button>
+      <button class="fault-btn" id="fb-phase_loss" onclick="setFault('phase_loss')">✂ Phase Loss (V Phase Open)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Waveform legend -->
+<div class="legend">
+  <div class="li"><div class="ll" style="background:var(--u)"></div>Phase U Current</div>
+  <div class="li"><div class="ll" style="background:var(--v)"></div>Phase V Current</div>
+  <div class="li"><div class="ll" style="background:var(--w)"></div>Phase W Current</div>
+  <div class="li"><div class="ll" style="background:var(--temp)"></div>Winding Temp</div>
+  <div class="li"><div class="ll" style="background:var(--imb)"></div>Phase Imbalance</div>
+</div>
+
+<!-- Main waveform -->
+<div class="wave-section">
+  <canvas id="mainCanvas" height="200"></canvas>
+  <div id="silenceOverlay"></div>
+  <div id="silenceStamp">— MOTOR SILENCE —</div>
+</div>
+
+<!-- 5-Metric Cards -->
+<div class="metrics-row" style="grid-template-columns:repeat(6,1fr)">
+  <div class="metric-card u" id="mc-u">
+    <div class="mc-label">Phase U Current</div>
+    <div style="display:flex;align-items:baseline">
+      <div class="mc-val" id="v-u" style="color:var(--u)">—</div>
+      <div class="mc-unit">A</div>
+    </div>
+    <div class="mc-r" id="r-u" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-bar"><div class="mc-fill" id="rf-u"></div></div>
+    <div class="mc-dec" id="dec-u" style="color:var(--safe)">PASS</div>
+  </div>
+  <div class="metric-card v" id="mc-v">
+    <div class="mc-label">Phase V Current</div>
+    <div style="display:flex;align-items:baseline">
+      <div class="mc-val" id="v-v" style="color:var(--v)">—</div>
+      <div class="mc-unit">A</div>
+    </div>
+    <div class="mc-r" id="r-v" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-bar"><div class="mc-fill" id="rf-v"></div></div>
+    <div class="mc-dec" id="dec-v" style="color:var(--safe)">PASS</div>
+  </div>
+  <div class="metric-card w" id="mc-w">
+    <div class="mc-label">Phase W Current</div>
+    <div style="display:flex;align-items:baseline">
+      <div class="mc-val" id="v-w" style="color:var(--w)">—</div>
+      <div class="mc-unit">A</div>
+    </div>
+    <div class="mc-r" id="r-w" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-bar"><div class="mc-fill" id="rf-w"></div></div>
+    <div class="mc-dec" id="dec-w" style="color:var(--safe)">PASS</div>
+  </div>
+  <div class="metric-card temp" id="mc-temp">
+    <div class="mc-label">Winding Temp</div>
+    <div style="display:flex;align-items:baseline">
+      <div class="mc-val" id="v-temp" style="color:var(--temp)">—</div>
+      <div class="mc-unit">°C</div>
+    </div>
+    <div class="mc-r" id="r-temp" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-bar"><div class="mc-fill" id="rf-temp"></div></div>
+    <div class="mc-dec" id="dec-temp" style="color:var(--safe)">PASS</div>
+  </div>
+  <div class="metric-card imb" id="mc-imb">
+    <div class="mc-label">Phase Imbalance</div>
+    <div style="display:flex;align-items:baseline">
+      <div class="mc-val" id="v-imb" style="color:var(--imb)">—</div>
+      <div class="mc-unit">%</div>
+    </div>
+    <div class="mc-r" id="r-imb" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-bar"><div class="mc-fill" id="rf-imb"></div></div>
+    <div class="mc-dec" id="dec-imb" style="color:var(--safe)">PASS</div>
+  </div>
+  <!-- RPM Card: pull-out visualization -->
+  <div class="metric-card" id="mc-rpm" style="border-top:2px solid var(--warn)">
+    <div class="mc-label" style="color:var(--warn)">Actual Speed</div>
+    <div style="display:flex;align-items:baseline">
+      <div class="mc-val" id="v-rpm-card" style="color:var(--warn);font-size:18px">—</div>
+      <div class="mc-unit">rpm</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:4px">
+      Slip: <span id="v-slip" style="color:var(--white)">0.000</span>
+    </div>
+    <div class="mc-bar" style="margin-top:5px"><div class="mc-fill" id="rf-rpm" style="background:var(--warn)"></div></div>
+    <div class="mc-dec" id="dec-rpm" style="color:var(--safe)">Normal</div>
+  </div>
+</div>
+
+<!-- Bottom section -->
+<div class="bottom-row">
+  <div class="info-panel">
+    <div class="i-title">"Sudden Trip" Mechanics — Why It Happens Suddenly</div>
+    <table class="kotsuren-table">
+      <tr><th>Phenomenon</th><th>What Happens</th><th>Precursors Detected by EMA</th></tr>
+      <tr>
+        <td style="color:var(--warn)">Overload</td>
+        <td>Current exceeds rated → Winding temp rises → Insulation breakdown</td>
+        <td>τ narrows as current EMA begins accumulating</td>
+      </tr>
+      <tr>
+        <td style="color:var(--imb)">Phase Imbalance</td>
+        <td>Current difference across 3 phases → concentrated on one winding → local burnout</td>
+        <td>Detects rising EMA of imbalance ratio</td>
+      </tr>
+      <tr>
+        <td style="color:var(--u)">Lock Current</td>
+        <td>Start failure → 6–7× rated current flows continuously</td>
+        <td>EMA instantly captures simultaneous surge across all phases</td>
+      </tr>
+      <tr>
+        <td style="color:var(--danger)">Phase Loss</td>
+        <td>1-phase open → 1.7× current concentrated on remaining 2 phases</td>
+        <td>Imbalance instantly hits 100% → fastest SILENCE trigger</td>
+      </tr>
+    </table>
+    <div class="note-box" style="margin-top:12px">
+      <p>
+        "Sudden Trip" in mechanical systems is different from molecular reactions.<br>
+        Thermal breakdown of insulation occurs only after temperature accumulates — but the breakdown itself is <b style="color:var(--danger)">instantaneous</b>.<br>
+        EMA remembers the "momentum of accumulation" and can structurally<br>
+        detect the "gradual buildup phase" before breakdown occurs.
+      </p>
+    </div>
+  </div>
+
+  <div class="log-panel">
+    <div class="i-title">Motor Event Log</div>
+    <div class="log-area" id="logArea"></div>
+    <div class="btn-row">
+      <button class="ctrl" onclick="setFault('normal')">✓ Return to Normal</button>
+      <button class="ctrl" onclick="setFault('phase_loss')">✂ Phase Loss Test</button>
+      <button class="ctrl" onclick="setFault('locked')">🔒 Lock Rotor Test</button>
+    </div>
+    <div style="font-size:11px;color:var(--white);opacity:.75;margin-top:8px;line-height:1.7" id="fault-note">
+      Normal operation. Move the load slider to experience the "gradual buildup → sudden trip" phenomenon.
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>NRA-IDE / Band Gate — Three-Phase Motor Variable Load Monitor</span>
+  <span>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    &nbsp;|&nbsp;
+    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+  </span>
+</footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Motor constants
+// ─────────────────────────────────────────────
+const RATED_A   = 10.0;   // Rated current (A)
+const RATED_RPM = 1500;   // Rated speed
+const TAU_HIGH_A   = 12.0;  // Current upper threshold (A)  120% of rated
+const TAU_LOW_A    = 0.5;   // Current lower threshold (no-load detection)
+const TAU_HIGH_T   = 120;   // Winding temp upper limit (°C)
+const TAU_LOW_T    = 15;    // Temp lower limit (sensor open-circuit detection)
+const TAU_HIGH_IMB = 5.0;   // Phase imbalance upper limit (%)
+const TAU_LOW_IMB  = 0;
+
+const HIST = 200;
+let t = 0, playing = true, lastFrameTime = 0;
+let fault = 'normal';
+
+// Sensor state
+const SENSORS = {
+  u:    { hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  v:    { hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  w:    { hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  temp: { hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  imb:  { hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+};
+
+let silenceCount = 0;
+let silenceActive = false;
+let silHoldUntil = 0;
+
+// ─────────────────────────────────────────────
+// Induction motor physics model
+// Torque-slip characteristic (Kloss equation simplified)
+// T(s) = k * s / (r2² + (s·x2)²)
+// Pull-out slip s_po = r2/x2 gives maximum torque
+// Beyond s > s_po, positive feedback collapse occurs
+// ─────────────────────────────────────────────
+const SYNC_RPM = 1500;      // Synchronous speed (2-pole 50Hz)
+const R2       = 0.08;      // Secondary resistance (pu)
+const X2       = 0.12;      // Secondary reactance (pu)
+const K_TORQUE = 2.8;       // Torque coefficient (adjusted so max torque ≈ 2.8 pu)
+const J_INERTIA= 0.35;      // Moment of inertia coefficient (affects RPM change rate)
+
+// Motor torque (pu): function of slip s
+function motorTorque(s) {
+  // T=0 at s=0, maximum at s=s_po, decreasing beyond (collapse side)
+  return K_TORQUE * s / (R2 * R2 + (s * X2) * (s * X2));
+}
+
+// Pull-out slip (maximum torque point)
+const S_PULLOUT = R2 / X2;  // ≈ 0.667
+const T_PULLOUT = motorTorque(S_PULLOUT);
+
+// Actual RPM state (dynamic)
+let actualRPM  = RATED_RPM;
+const rpmHistory = []; // RPM time series (for waveform display)
+let tempAccum  = 40;         // Winding temperature accumulated state
+let pulloutFlag = false;     // Pull-out in progress flag
+
+function getValues(t) {
+  const loadRatio = parseFloat(document.getElementById('sl-load').value) / 100;
+  const setRPM    = parseFloat(document.getElementById('sl-rpm').value);   // Operator set value
+  const noise     = () => (Math.random() - .5) * .18;
+
+  // ─── RPM dynamics ───────────────────────────────
+  // Slip s = (sync speed - actual speed) / sync speed
+  const slip = Math.max(0.001, (SYNC_RPM - actualRPM) / SYNC_RPM);
+
+  // Motor generated torque (pu)
+  let motTorque = motorTorque(slip);
+
+  // Load torque (pu): load ratio × rated + speed correction from set RPM
+  // Higher torque demand at lower speed settings
+  const speedFactor = 0.6 + (setRPM / SYNC_RPM) * 0.4;
+  let loadTorque = loadRatio * speedFactor;
+
+  // Fault corrections
+  if (fault === 'locked') {
+    // Locked injection: externally force shaft to stop → s=1
+    actualRPM = Math.max(0, actualRPM - 80);
+    loadTorque = 999;  // Treat as infinite load
+  } else if (fault === 'phase_loss') {
+    // Phase loss: effective torque drops to ~50%
+    motTorque *= 0.50;
+  }
+
+  // Torque difference → RPM change (smoothed by moment of inertia)
+  const torqueDiff = motTorque - loadTorque;
+  const rpmDelta   = torqueDiff * J_INERTIA * SYNC_RPM;
+
+  if (fault !== 'locked') {
+    actualRPM += rpmDelta;
+    // Pull toward set RPM (simulating inverter drive)
+    actualRPM += (setRPM - actualRPM) * 0.015;
+    actualRPM  = Math.max(0, Math.min(SYNC_RPM * 1.05, actualRPM));
+  }
+
+  // Pull-out detection: slip exceeds pull-out point and speed is falling
+  const newSlip = Math.max(0.001, (SYNC_RPM - actualRPM) / SYNC_RPM);
+  pulloutFlag = (newSlip > S_PULLOUT * 1.05 && torqueDiff < 0);
+
+  // ─── Current calculation ───────────────────────────────
+  // Induction motor current increases proportionally with slip
+  // At locked rotor (s=1): 6–7× rated current
+  const slipRatio  = Math.min(newSlip / 0.05, 1);  // 0.05 = rated slip
+  let baseA = RATED_A * (0.3 + slipRatio * 0.7) * Math.max(loadRatio, 0.1);
+
+  // Current ripple increases at lower speed (PWM carrier component)
+  const ripple = (1 - actualRPM / SYNC_RPM) * 0.8 + 1.0;
+
+  let u = baseA * ripple + noise();
+  let v = baseA * ripple + noise();
+  let w = baseA * ripple + noise();
+
+  // Fault injection
+  switch (fault) {
+    case 'imbalance':
+      u *= 1.15 + Math.sin(t * .018) * .06;
+      v *= 0.88 + noise() * .03;
+      break;
+    case 'locked':
+      // s≈1 → lock current
+      const lockA = RATED_A * 6.5 + noise() * 0.8;
+      u = lockA; v = lockA; w = lockA;
+      break;
+    case 'phase_loss':
+      v = 0.02 + Math.abs(noise()) * .04;
+      u = baseA * ripple * 1.73 + noise();
+      w = baseA * ripple * 1.73 + noise();
+      break;
+  }
+
+  // During pull-out: current surges (large current drawn while stalling)
+  if (pulloutFlag && fault === 'normal') {
+    const pullFactor = 1 + (newSlip - S_PULLOUT) * 4;
+    u *= pullFactor; v *= pullFactor; w *= pullFactor;
+  }
+
+  u = Math.max(0, u); v = Math.max(0, v); w = Math.max(0, w);
+
+  // Phase imbalance ratio
+  const avg3 = (u + v + w) / 3;
+  const imb  = avg3 > 0.1
+    ? Math.max(Math.abs(u-avg3), Math.abs(v-avg3), Math.abs(w-avg3)) / avg3 * 100
+    : 0;
+
+  // Winding temperature (thermal accumulation model)
+  const cooling = Math.max(0.2, actualRPM / SYNC_RPM);   // Cooling by rotation speed
+  const heatIn  = (u + v + w) * 0.4 * (1 / cooling);
+  const heatOut = (tempAccum - 25) * 0.15;
+  tempAccum = Math.max(20, tempAccum + (heatIn - heatOut) * 0.035);
+
+  // Record RPM history
+  if (rpmHistory.length >= HIST) rpmHistory.shift();
+  rpmHistory.push(actualRPM);
+
+  return {
+    u, v, w,
+    temp: tempAccum,
+    imb:  Math.min(imb, 100),
+    rpm:  actualRPM,
+    slip: newSlip,
+  };
+}
+
+// ─────────────────────────────────────────────
+// Band Gate
+// ─────────────────────────────────────────────
+const GATE_PARAMS = {
+  u:    { th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  v:    { th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  w:    { th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  temp: { th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
+  imb:  { th: TAU_HIGH_IMB, tl: TAU_LOW_IMB, au: 0.50, al: 0.10 },
+};
+const HOLD_MS = 2000;
+
+function bandGate(sensor, v, p) {
+  const half = Math.max((p.th - p.tl) / 2, .001);
+  const d_u  = Math.max(0, v - p.th);
+  const d_l  = Math.max(0, p.tl - v);
+
+  sensor.ema_u = p.au * d_u + (1 - p.au) * sensor.ema_u;
+  sensor.ema_l = p.al * d_l + (1 - p.al) * sensor.ema_l;
+
+  const tau_u = half * Math.min(1 + sensor.ema_u / half, 2.5);
+  const tau_l = half * Math.max(1 - sensor.ema_l / half, 0.25);
+  const R_u   = d_u > 0 ? d_u / tau_u : 0;
+  const R_l   = d_l > 0 ? d_l / tau_l : 0;
+  const R     = Math.max(R_u, R_l);
+
+  const nowMs  = t * 40;
+  const held   = nowMs < sensor.holdUntil;
+  let silence  = held, dir = held ? (sensor.lastDir || '') : '';
+  if (!held && R >= 1.0) {
+    sensor.holdUntil = nowMs + HOLD_MS;
+    silence = true;
+    dir = R_u >= R_l ? 'upper' : 'lower';
+    sensor.lastDir = dir;
+  }
+
+  const upper_band = p.th + (tau_u - half);
+  const lower_band = p.tl - (half - tau_l);
+  return { v, R, silence, dir, upper_band, lower_band };
+}
+
+// ─────────────────────────────────────────────
+// Main canvas drawing
+// ─────────────────────────────────────────────
+const mc  = document.getElementById('mainCanvas');
+const mctx= mc.getContext('2d');
+
+function resizeCanvas() { mc.width = mc.parentElement.clientWidth; mc.height = 200; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+function drawMain() {
+  const W = mc.width, H = 200;
+  const pad = { t:14, r:50, b:24, l:50 };
+  const pW  = W - pad.l - pad.r, pH = H - pad.t - pad.b;
+  mctx.clearRect(0, 0, W, H);
+
+  // Determine scale from all history combined
+  const allHists = ['u','v','w'].map(k => SENSORS[k].hist);
+  const allVals  = allHists.flatMap(h => h.map(x => x.v));
+  if (allVals.length < 2) return;
+
+  const minV = 0, maxV = Math.max(...allVals, RATED_A * 1.5, 2);
+  const rng  = maxV - minV || 1;
+  const xp = i => pad.l + (i / (HIST - 1)) * pW;
+  const yp = v => pad.t + pH - ((v - minV) / rng) * pH;
+
+  // Grid
+  mctx.strokeStyle = 'rgba(28,36,40,.9)'; mctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (pH / 4) * i;
+    mctx.beginPath(); mctx.moveTo(pad.l, y); mctx.lineTo(pad.l + pW, y); mctx.stroke();
+    const val = (maxV - (rng / 4) * i).toFixed(1);
+    mctx.fillStyle = 'rgba(122,154,170,.7)'; mctx.font = '9px Share Tech Mono'; mctx.textAlign = 'right';
+    mctx.fillText(val, pad.l - 4, y + 3);
+  }
+
+  // Rated line
+  mctx.strokeStyle = 'rgba(255,204,0,.25)'; mctx.lineWidth = 1; mctx.setLineDash([6, 4]);
+  const yRated = yp(RATED_A);
+  mctx.beginPath(); mctx.moveTo(pad.l, yRated); mctx.lineTo(pad.l + pW, yRated); mctx.stroke();
+  mctx.fillStyle = 'rgba(255,204,0,.6)'; mctx.font = '8px Share Tech Mono'; mctx.textAlign = 'left';
+  mctx.fillText('Rated ' + RATED_A + 'A', pad.l + 4, yRated - 3);
+
+  // Threshold line
+  mctx.strokeStyle = 'rgba(255,34,68,.3)'; mctx.lineWidth = 1;
+  const yTau = yp(TAU_HIGH_A);
+  mctx.beginPath(); mctx.moveTo(pad.l, yTau); mctx.lineTo(pad.l + pW, yTau); mctx.stroke();
+  mctx.fillStyle = 'rgba(255,34,68,.6)'; mctx.fillText('τ_high ' + TAU_HIGH_A + 'A', pad.l + 4, yTau - 3);
+  mctx.setLineDash([]);
+
+  // SILENCE fill (current channels)
+  const refHist = SENSORS.u.hist;
+  for (let i = 1; i < refHist.length; i++) {
+    if (SENSORS.u.hist[i].silence || SENSORS.v.hist[i]?.silence || SENSORS.w.hist[i]?.silence) {
+      mctx.fillStyle = 'rgba(255,34,68,.07)';
+      mctx.fillRect(xp(i - 1), pad.t, xp(i) - xp(i - 1) + 1, pH);
+    }
+  }
+
+  // Three-phase current waveforms
+  const phaseKeys = ['u', 'v', 'w'];
+  const phaseColors = { u: '#ff4444', v: '#44aaff', w: '#44dd88' };
+
+  phaseKeys.forEach(key => {
+    const hist = SENSORS[key].hist;
+    if (hist.length < 2) return;
+    const col = phaseColors[key];
+    // Glow
+    mctx.strokeStyle = col + '30'; mctx.lineWidth = 6;
+    mctx.beginPath(); hist.forEach((d, i) => { i === 0 ? mctx.moveTo(xp(i), yp(d.v)) : mctx.lineTo(xp(i), yp(d.v)); }); mctx.stroke();
+    // Main line
+    mctx.strokeStyle = col; mctx.lineWidth = 1.6;
+    mctx.beginPath(); hist.forEach((d, i) => { i === 0 ? mctx.moveTo(xp(i), yp(d.v)) : mctx.lineTo(xp(i), yp(d.v)); }); mctx.stroke();
+  });
+
+  // Unit label
+  mctx.fillStyle = 'rgba(122,154,170,.6)'; mctx.font = '9px Share Tech Mono'; mctx.textAlign = 'left';
+  mctx.fillText('A', pad.l + pW + 4, pad.t + pH / 2);
+
+  // ─── RPM waveform overlay on right axis ───────────────
+  const rpmVals = rpmHistory;
+  if (rpmVals.length > 1) {
+    // Right axis scale
+    mctx.strokeStyle = 'rgba(255,204,0,.25)'; mctx.lineWidth = 1; mctx.setLineDash([2,3]);
+    const yrpm = v => pad.t + pH - (v / SYNC_RPM) * pH;
+    // RPM grid labels (right side)
+    [0, 500, 1000, 1500].forEach(r => {
+      const y = yrpm(r);
+      mctx.fillStyle = 'rgba(255,204,0,.5)'; mctx.font = '8px Share Tech Mono'; mctx.textAlign = 'left';
+      mctx.fillText(r, pad.l + pW + 4, y + 3);
+    });
+    mctx.setLineDash([]);
+    // RPM curve (yellow)
+    mctx.strokeStyle = 'rgba(255,204,0,.8)'; mctx.lineWidth = 2;
+    mctx.shadowColor = 'rgba(255,204,0,.5)'; mctx.shadowBlur = 4;
+    mctx.beginPath();
+    rpmVals.forEach((r, i) => {
+      const x = pad.l + (i / (HIST - 1)) * pW;
+      const y = yrpm(r);
+      i === 0 ? mctx.moveTo(x, y) : mctx.lineTo(x, y);
+    });
+    mctx.stroke(); mctx.shadowBlur = 0;
+    // Pull-out zone highlight
+    if (pulloutFlag) {
+      const lastX = pad.l + ((rpmVals.length-1)/(HIST-1))*pW;
+      const lastY = yrpm(rpmVals[rpmVals.length-1]);
+      mctx.fillStyle = 'rgba(255,34,68,.3)'; mctx.shadowColor='#ff2244'; mctx.shadowBlur=12;
+      mctx.beginPath(); mctx.arc(lastX, lastY, 6, 0, Math.PI*2); mctx.fill(); mctx.shadowBlur=0;
+    }
+  }
+}
+
+
+// ─────────────────────────────────────────────
+// Card update
+// ─────────────────────────────────────────────
+const cardColors = { u:'var(--u)', v:'var(--v)', w:'var(--w)', temp:'var(--temp)', imb:'var(--imb)' };
+
+function updateCard(key, res) {
+  const { v, R, silence, dir } = res;
+  const col = cardColors[key];
+  const dp  = key === 'imb' ? 1 : key === 'temp' ? 1 : 1;
+
+  document.getElementById('v-' + key).textContent = v.toFixed(dp);
+  document.getElementById('v-' + key).style.color = silence
+    ? (dir === 'upper' ? 'var(--danger)' : 'var(--v)') : col;
+
+  const rEl = document.getElementById('r-' + key);
+  rEl.textContent = 'R: ' + R.toFixed(4);
+  const rCol = silence ? 'var(--danger)' : R > 0.65 ? 'var(--warn)' : 'var(--muted)';
+  rEl.style.color = rCol;
+
+  document.getElementById('rf-' + key).style.width = Math.min(R / 1.5, 1) * 100 + '%';
+  document.getElementById('rf-' + key).style.background = rCol;
+
+  const decEl = document.getElementById('dec-' + key);
+  decEl.textContent = silence ? (dir === 'upper' ? '↑ SILENCE' : '↓ SILENCE') : R > 0.65 ? 'WARN' : 'PASS';
+  decEl.style.color = silence ? 'var(--danger)' : R > 0.65 ? 'var(--warn)' : 'var(--safe)';
+
+  document.getElementById('mc-' + key).style.boxShadow = silence
+    ? '0 0 18px -4px #ff2244' : 'none';
+}
+
+
+// RPM card update
+function updateRpmCard(rpm, slip) {
+  document.getElementById('v-rpm-card').textContent = Math.round(rpm);
+  const pct = rpm / SYNC_RPM;
+  document.getElementById('rf-rpm').style.width = pct * 100 + '%';
+  const isDropping = pulloutFlag;
+  const col = rpm < 200 ? 'var(--danger)' : isDropping ? 'var(--danger)' : rpm < 600 ? 'var(--warn)' : 'var(--safe)';
+  document.getElementById('v-rpm-card').style.color = col;
+  document.getElementById('rf-rpm').style.background = col;
+  const dec = rpm < 50 ? '★ Stalled (Locked)' : pulloutFlag ? '▼ Pull-out Collapse' : rpm < 600 ? '⚠ Low Speed Alert' : 'Normal';
+  document.getElementById('dec-rpm').textContent = dec;
+  document.getElementById('dec-rpm').style.color = rpm < 200 ? 'var(--danger)' : pulloutFlag ? 'var(--danger)' : 'var(--safe)';
+  document.getElementById('mc-rpm').style.boxShadow = pulloutFlag || rpm < 200 ? '0 0 18px -4px #ff2244' : 'none';
+  document.getElementById('v-slip').textContent = slip.toFixed(3);
+}
+
+// ─────────────────────────────────────────────
+// SILENCE global flash
+// ─────────────────────────────────────────────
+let silFlashTimer = null;
+function updateSilenceOverlay(results) {
+  const anySilence = Object.values(results).some(r => r.silence);
+  const nowMs = t * 40;
+  if (anySilence && nowMs >= silHoldUntil) {
+    silHoldUntil = nowMs + 2000;
+    silenceCount++;
+  }
+  const active = nowMs < silHoldUntil;
+  document.getElementById('silenceOverlay').classList.toggle('active', active);
+  document.getElementById('silenceStamp').classList.toggle('active', active);
+}
+
+// ─────────────────────────────────────────────
+// Log
+// ─────────────────────────────────────────────
+function addLog(msg, cls) {
+  const a = document.getElementById('logArea');
+  const el = document.createElement('div');
+  el.className = 'le ' + cls;
+  el.textContent = `[t=${String(t).padStart(5,'0')}] ${msg}`;
+  a.appendChild(el);
+  a.scrollTop = a.scrollHeight;
+  while (a.children.length > 100) a.removeChild(a.firstChild);
+}
+
+// ─────────────────────────────────────────────
+// Main loop
+// ─────────────────────────────────────────────
+function tick() {
+  if (!playing) { requestAnimationFrame(tick); return; }
+  const now = performance.now();
+  if (now - lastFrameTime < 40) { requestAnimationFrame(tick); return; }
+  lastFrameTime = now;
+
+  t++;
+  const vals = getValues(t);  // Including torque-slip physics model
+  const results = {};
+
+  const keyMap = {
+    u: vals.u, v: vals.v, w: vals.w, temp: vals.temp, imb: vals.imb
+  };
+
+  Object.keys(keyMap).forEach(key => {
+    const sensor = SENSORS[key];
+    const p      = GATE_PARAMS[key];
+    const res    = bandGate(sensor, keyMap[key], p);
+    if (sensor.hist.length >= HIST) sensor.hist.shift();
+    sensor.hist.push(res);
+    results[key] = res;
+    updateCard(key, res);
+
+    // Log
+    const labels = { u:'Phase U', v:'Phase V', w:'Phase W', temp:'Winding Temp', imb:'Phase Imbalance' };
+    const units  = { u:'A', v:'A', w:'A', temp:'°C', imb:'%' };
+    if (res.silence && sensor.lastDec !== 'SILENCE') {
+      addLog(`[${labels[key]}] ${res.dir==='upper'?'↑ Over Upper Limit':'↓ Below Lower Limit'}  ${keyMap[key].toFixed(1)}${units[key]}  R=${res.R.toFixed(3)}`, key === 'temp' ? 'temp' : key === 'imb' ? 'imb' : 'danger');
+    } else if (!res.silence && sensor.lastDec === 'SILENCE') {
+      addLog(`[${labels[key]}] HOLD ended → PASS`, 'safe');
+    } else if (res.R > 0.65 && res.R < 1.0 && sensor.lastDec !== 'warn') {
+      addLog(`[${labels[key]}] WARN R=${res.R.toFixed(3)} approaching`, 'warn');
+    }
+    sensor.lastDec = res.silence ? 'SILENCE' : res.R > 0.65 ? 'warn' : 'PASS';
+  });
+
+  if (vals) updateRpmCard(vals.rpm, vals.slip);
+
+  // Pull-out occurrence log
+  if (pulloutFlag && !window._prevPullout) {
+    addLog('★ Pull-out detected! RPM dropping  slip=' + vals.slip.toFixed(3), 'danger');
+  } else if (!pulloutFlag && window._prevPullout) {
+    addLog('RPM recovered → ' + Math.round(vals.rpm) + ' rpm', 'safe');
+  }
+  window._prevPullout = pulloutFlag;
+
+  drawMain();
+  updateSilenceOverlay(results);
+  requestAnimationFrame(tick);
+}
+
+// ─────────────────────────────────────────────
+// UI control
+// ─────────────────────────────────────────────
+const FAULT_NOTES = {
+  normal:     'Normal operation. Move the load slider to experience the "gradual buildup → sudden trip" phenomenon.',
+  imbalance:  '⚡ Phase imbalance injected. Phase U rises ~15% and imbalance rate climbs. Prolonged state causes local burnout.',
+  locked:     '🔒 Locked rotor current injected. 6.5× rated current flows across all phases. Winding will burn in seconds.',
+  phase_loss: '✂ Phase V open. 1.73× current concentrated on phases U & W. Imbalance rate rises instantly.',
+};
+
+function setFault(name) {
+  fault = name;
+  document.querySelectorAll('.fault-btn').forEach(b => {
+    b.classList.remove('active', 'active-imb', 'active-loc');
+  });
+  const btn = document.getElementById('fb-' + name);
+  if (name === 'imbalance') btn.classList.add('active-imb');
+  else if (name === 'locked') btn.classList.add('active-loc');
+  else if (name === 'phase_loss') btn.classList.add('active');
+  else btn.classList.add('active');
+  document.getElementById('fault-note').textContent = FAULT_NOTES[name];
+  if (name !== 'normal') addLog('--- Fault Injected: ' + name + ' ---', 'danger');
+}
+
+// Slider display
+document.getElementById('sl-load').addEventListener('input', () => {
+  document.getElementById('v-load').textContent = document.getElementById('sl-load').value + '%';
+});
+document.getElementById('sl-rpm').addEventListener('input', () => {
+  document.getElementById('v-rpm').textContent = document.getElementById('sl-rpm').value + ' rpm';
+});
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('btnPlay');
+  btn.textContent = playing ? '⏸ PAUSE' : '▶ PLAY';
+  btn.classList.toggle('play', playing);
+  btn.classList.toggle('paused', !playing);
+}
+
+function resetSim() {
+  t = 0; tempAccum = 40; silenceCount = 0; silHoldUntil = 0; fault = 'normal';
+  Object.values(SENSORS).forEach(s => { s.hist = []; s.ema_u = 0; s.ema_l = 0; s.holdUntil = 0; s.lastDec = ''; });
+  document.getElementById('logArea').innerHTML = '';
+  document.getElementById('silenceOverlay').classList.remove('active');
+  document.getElementById('silenceStamp').classList.remove('active');
+  document.querySelectorAll('.fault-btn').forEach(b => b.classList.remove('active','active-imb','active-loc'));
+  document.getElementById('fb-normal').classList.add('active');
+  actualRPM = RATED_RPM; pulloutFlag = false; rpmHistory.length = 0;
+  document.getElementById('fault-note').textContent = FAULT_NOTES.normal;
+  addLog('Motor monitoring system started — Three-phase 5-metric simultaneous monitoring', 'safe');
+}
+
+// Initialize
+document.getElementById('fb-normal').classList.add('active');
+resetSim();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

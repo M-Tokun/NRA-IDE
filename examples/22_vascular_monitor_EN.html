@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!-- NRA-IDE Vascular Intervention Monitor -->
+<!-- Author: M-Tokuni / NRA-IDE Project (2026-03-19) -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NRA-IDE Vascular Monitor — Local Vascular & Cell State Transition (Surgical Support)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+:root{
+  --bg:#0a0f18;--surface:#121a28;--border:#1e2538;
+  --safe:#88ffcc;--warn:#ffcc00;--fail-hi:#ff4060;--fail-lo:#6688ff;
+  --text:#b8c0d8;--muted:#303848;--accent:#ff6b6b; /* vascular red */
+  --tau-col:#ffaa44;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:20px 12px;min-height:100vh;}
+.hdr{width:100%;max-width:1100px;display:flex;justify-content:space-between;
+  align-items:flex-end;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:18px;}
+.hdr h1{font-size:18px;color:var(--accent);font-weight:700;}
+.grid{width:100%;max-width:1100px;display:grid;grid-template-columns:1fr 360px;gap:14px;}
+.left{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;}
+canvas{display:block;border-radius:6px;background:var(--bg);}
+#tankCanvas{width:100%;height:280px;} /* vessel cross-section */
+#waveCanvas{width:100%;height:90px;}
+.side{display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:15px;}
+.trio{display:flex;gap:6px;}
+.trio-item{flex:1;text-align:center;padding:8px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:6px;}
+.trio-val{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;}
+.dual-r{display:flex;gap:8px;justify-content:center;}
+.badge{width:100%;padding:10px;border-radius:6px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.12em;border:1px solid;transition:all .35s;}
+.badge.safe{color:var(--safe);border-color:var(--safe);background:rgba(136,255,204,.05);}
+.badge.warn-hi{color:var(--warn);border-color:var(--warn);background:rgba(255,204,0,.06);}
+.badge.fail-hi{color:var(--fail-hi);border-color:var(--fail-hi);background:rgba(255,64,96,.09);animation:pf .7s infinite;}
+@keyframes pf{0%,100%{box-shadow:0 0 0 0 rgba(255,64,96,.3)} 50%{box-shadow:0 0 0 5px rgba(255,64,96,0)}}
+.metrics{display:flex;flex-direction:column;gap:7px;}
+.met-row{display:flex;flex-direction:column;gap:4px;}
+.met-hdr{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;}
+.bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:2px;transition:width .25s,background .3s;}
+.log-panel{width:100%;max-width:1100px;margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div><span style="font-family:JetBrains Mono;font-size:10px;letter-spacing:.16em;color:#ffaa44">NRA-IDE / VASCULAR INTERVENTION</span>
+    <h1>Local Vascular & Cell State Transition Monitor<br>(Partial Surgical Support)</h1>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="left">
+    <div class="panel-lbl">VESSEL CROSS-SECTION VISUALIZATION (Blood Flow Particles + Wall Tension + Thrombus)</div>
+    <canvas id="tankCanvas"></canvas>
+    <div class="panel-lbl">TREND WAVE (P · Shear · Tension · R)</div>
+    <canvas id="waveCanvas"></canvas>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <!-- Sliders (surgical mode) -->
+      <div>Pressure P <input type="range" id="pSlider" min="40" max="180" value="120" style="width:100%"></div>
+      <div>Temperature T <input type="range" id="tSlider" min="30" max="42" value="37" style="width:100%"></div>
+      <div>Blood Flow <input type="range" id="fSlider" min="0" max="120" value="80" style="width:100%"></div>
+      <div>Adhesion Adh <input type="range" id="aSlider" min="0.2" max="2.5" value="1.0" style="width:100%"></div>
+      <div>Shear Stress <input type="range" id="sSlider" min="0" max="25" value="12" style="width:100%"></div>
+      <div>Wall Tension <input type="range" id="wSlider" min="0" max="180" value="90" style="width:100%"></div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <div class="card-lbl">LIVE STATE</div>
+      <div class="trio">
+        <div class="trio-item"><div style="color:#ff6b6b">PRESSURE</div><div class="trio-val" id="pLive">120</div><div class="trio-unit">mmHg</div></div>
+        <div class="trio-item"><div style="color:#ffaa44">SHEAR</div><div class="trio-val" id="shearLive">12.0</div><div class="trio-unit">dyn/cm²</div></div>
+        <div class="trio-item"><div style="color:#ffaa44">TENSION</div><div class="trio-val" id="tensLive">90</div><div class="trio-unit">dyn/cm</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">APPROACH RATIO  R = δ / τ (Dynamic Dual-Fluctuation)</div>
+      <div class="dual-r">
+        <div class="r-item"><svg viewBox="0 0 120 65" class="r-arc-w">...</svg><div class="r-num" id="rHiN">0.000</div><div>↑ Rupture/Dilation R_hi</div></div>
+        <div class="r-item"><svg viewBox="0 0 120 65" class="r-arc-w">...</svg><div class="r-num" id="rLoN">0.000</div><div>↓ Thrombosis/Stenosis R_lo</div></div>
+      </div>
+    </div>
+
+    <div class="badge safe" id="badge">SAFE</div>
+
+    <div class="card">
+      <div class="card-lbl">δ / τ BREAKDOWN (Dual-Fluctuation)</div>
+      <!-- Bar display (5 bars in full version) -->
+    </div>
+  </div>
+</div>
+
+<div class="log-panel">
+  <div class="log-title">TRACE LOG — Partial Surgical Mode</div>
+  <div id="logList" class="log-list"></div>
+</div>
+
+<script>
+// ── NRA-IDE core variables (same structure as existing demos) ──
+let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
+let tauBase=1.0, delta=0, R_hi=0, R_lo=0;
+let status='safe';
+const R_FAIL=1.0, R_WARN=0.75;
+
+// ── Dynamic τ (scales with temperature & blood flow) + dual-fluctuation ──
+function calcIDE(){
+  // 1st fluctuation: pressure & blood flow deviation
+  const deltaP = Math.abs(P-120)/30;
+  const deltaF = Math.abs(Flow-80)/40;
+  // 2nd fluctuation: shear stress, wall tension & adhesion
+  const deltaS = Shear/20;
+  const deltaT = Math.max(0, Tension/120);
+  const deltaA = Adh-1.0;
+
+  // τ decreases with temperature (high temp → viscosity↓ → rupture risk↑)
+  const tau = tauBase * (310/(T+273)) * (1 + Flow/200); // blood flow increases thickness
+
+  const R = (deltaP + deltaS + deltaT + deltaA) / tau;
+  R_hi = Math.max(0, R);
+  R_lo = Math.max(0, (1-Adh) / (tau*0.8)); // lower side (thrombosis risk)
+
+  let st = 'safe', act='Normal';
+  if(R_hi >= R_FAIL || R_lo >= R_FAIL){ st='fail-hi'; act='FAIL_CLOSED — Emergency Stop (Rupture/Thrombosis)'; }
+  else if(R_hi >= R_WARN || R_lo >= R_WARN){ st='warn-hi'; act='WARNING — Wall tension/shear reinforcement'; }
+  status = st;
+  return {R_hi, R_lo, status:st, action:act};
+}
+
+// ── Vessel animation (blood flow particles + wall deformation + thrombus) ──
+const tc = document.getElementById('tankCanvas'); const tctx=tc.getContext('2d');
+tc.width=800; tc.height=280;
+let particles=[];
+function drawVessel(){
+  tctx.clearRect(0,0,tc.width,tc.height);
+  const ide=calcIDE();
+
+  // Vessel wall
+  const radius = 80 + (Tension-90)*0.4; // expands with tension
+  tctx.strokeStyle = ide.status==='fail-hi'?'#ff4060':'#ff6b6b';
+  tctx.lineWidth=18;
+  tctx.beginPath(); tctx.ellipse(400,140, radius, 80, 0, 0, Math.PI*2); tctx.stroke();
+
+  // Blood flow particles (red blood cells)
+  if(Math.random()<0.6){
+    particles.push({x:100+Math.random()*200, y:100+Math.random()*80, vx:Flow/8 + Math.random()*2, life:1});
+  }
+  particles = particles.filter(p=>p.life>0);
+  particles.forEach(p=>{
+    p.x += p.vx;
+    if(p.x>700) p.x=100;
+    tctx.fillStyle = '#ff9999';
+    tctx.globalAlpha = p.life;
+    tctx.fillRect(p.x, p.y, 8, 6);
+    p.life-=0.008;
+  });
+
+  // Thrombus (accumulates on wall with high adhesion)
+  if(Adh>1.3){
+    tctx.fillStyle='rgba(255,180,120,0.6)';
+    tctx.fillRect(420,110,30,30);
+  }
+
+  updateUI(ide);
+}
+
+// UI, waveform & log (almost identical logic to existing demos) — full implementation in complete version
+function updateUI(ide){ /* update R display, badge, and add log entries */ }
+
+// Loop
+function loop(){
+  drawVessel();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// Slider control (surgical mode)
+document.getElementById('pSlider').oninput = v=> {P=Number(v);};
+document.getElementById('tSlider').oninput = v=> {T=Number(v);};
+// Remaining sliders follow the same pattern (Shear, Tension, Adh, Flow)
+
+// Example surgical button (partial implementation)
+// "Balloon deployment" button: Tension spikes → R_hi spike → FAIL_CLOSED
+</script>
+</body>
+</html>

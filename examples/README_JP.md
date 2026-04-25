@@ -1,6 +1,5 @@
-# NRA-IDE 実証デモ集（日本語版）
 # NRA-IDE Examples — Japanese Edition
-<!-- README_JP.md | examples/ | 2026-03-05 -->
+<!-- README_JP.md | examples/ | updated 20260425_162324_JST -->
 
 ---
 
@@ -9,6 +8,8 @@
 **律環公理 — 内包性動力学エンジン（Nomological Ring Axioms — Intensional Dynamics Engine）**
 
 線形概念（連続性・距離・意味）を排除し、**張力構造（制約 → 力 → 変位）** を基本とした決定論的制御エンジンです。
+俗に言う非線形を主体とした考え方であり、地球構造を基準にした記述です。（できうる限り近似ではなく、見たままの構造に従って記述する）
+
 従来手法がブラックボックス化する高リスク領域（医療AI・自動運転・インフラ）において、
 **完全に説明可能かつ誤差が累積しない** 判定メカニズムを提供します。
 
@@ -40,18 +41,29 @@ $$R = \frac{\delta}{\tau}$$
 | **τ（タウ）** | 許容範囲（厚み） | 設計時に定義された閾値 |
 | **R** | 構造比率 | δ÷τ の値で判定を行う |
 
-| R の値 | 判定 | 動作 |
-|--------|------|------|
-| R < 1.0 | **SAFE** | AIが物理的根拠を提示し処理続行 |
-| R ≥ 1.0 | **STOP** | 構造限界に到達。AIは出力を停止 → 人間が最終判断 |
+| R の値 | 判定 | 意味 | 動作 |
+|--------|------|------|------|
+| R < 0.40 | **SAFE** | 構造余裕が十分に残っている領域 | AIは物理的根拠を提示し処理続行 |
+| 0.40 ≤ R < R_J | **WATCH / CAUTION** | 境界へ向かう傾向を観察し、必要に応じて介入準備を始める領域 | 継続監視。履歴・相関・dR/dt を確認し、自動介入を段階的に制限 |
+| R_J ≤ R < 1.00 | **JUDGMENT LIMIT** | 現場運用上、これ以上進むと遅延・慣性・残留変動により R=1.0 へ到達してしまう危険が高い領域 | 自動判断を停止または強く制限し、人間判断へ移行 |
+| R ≥ 1.00 | **FAIL-CLOSED** | 相転移・破断・決壊・崩壊に相当する構造限界 | AIは出力を停止し、人間が最終判断 |
+
+> **重要：** R = 1.0 は警告値ではありません。  
+> R = 1.0 は、相転移・破断・決壊・崩壊に相当する構造境界です。  
+> したがって、現実の安全設計では 1.0 に到達してから判断してはいけません。  
+> NRA-IDE では、その手前に **判断限界閾値（Judgment Limit, R_J）** を置きます。  
+> R_J は固定公理値ではなく、現場運用、対象物、センサー遅延、停止に必要な時間、安全余裕によって設定されます。
 
 > **設計思想：** AIは計算に徹し、倫理的・最終判断は人間が担う。（責任の境界）
 
 ---
 
-## デモ一覧（32本 — 推奨閲覧順）
+## デモ一覧（41本 + スタンドアロン可視化 — 推奨閲覧順）
 
 ブラウザで開くだけで動作します（インストール不要）。
+
+> 多くのデモでは表示上の赤線として R = 1.0 を示しますが、これは「警告線」ではなく構造限界線です。  
+> 実務上の判断限界はその手前に置く必要があります。ただし、その値は固定ではなく、現場運用と対象ドメインに応じて設定されます。
 
 ### 📚 STEP 1 — まず「なぜ？」を理解する
 
@@ -149,23 +161,23 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 | 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **状態境界・短期ログ・長期再構成。** 短期ゆらぎ追跡と長期構造傾向の再構成をNRA-IDEがどう分離するかを実証。 |
 | 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **自動運転 必須限界構成デモ。** 衝突余裕時間・制動距離・横方向余裕を物理量監視。R ≥ 1.0 で上書き不可の強制 Fail-Closed。 |
 | 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **ダム管理比較 + τ劣化曲線。** 固定閾値監視 vs NRA-IDE τ劣化追跡を比較。構造余裕の侵食によるτ縮小を時系列で可視化。 |
-| 26 | [26_escapement_contactpoint_JP.html](./26_escapement_contactpoint_JP.html) | **Phase-Gap エンジン — 接触点のみ熱排出。** 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生することを実証。 |
+| 26 | [JP](./26_escapement_contactpoint_JP.html) / [EN](./26_escapement_contactpoint_EN_20260425_014259_JST.html) | **Phase-Gap エンジン — 接触点のみ熱排出。** 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生することを実証。 |
 
 ---
 
 ### 🛠️ STEP 10 — 設備監視の基礎（27〜32）
 
 R = δ/τ を産業設備・施設監視の一般的ドメインに適用したデモ群です。
-7本を通じてNRA-IDEの**単位非依存性**——同一の式構造で根本的に異なる物理量を管理できること——を実証します。
+6本を通じてNRA-IDEの**単位非依存性**——同一の式構造で根本的に異なる物理量を管理できること——を実証します。
 
 | # | ファイル | ドメイン | ポイント |
 |---|---------|---------|---------|
-| 27 | [27_belt_tension_JP.html](./27_belt_tension_JP.html) | ベルトコンベアー・Vベルト張力 | τを「最適値から限界までの全余裕」と定義 → Rが自然に [0,1] に正規化。Fail-Closed でベルト停止。 |
-| 28 | [28_water_temp_JP.html](./28_water_temp_JP.html) | 水温 上下限管理 | R_hi と R_lo を独立評価。熱対流ゆらぎ（3周波数合成）。Fail-Closed で逆方向動作を自動停止。 |
-| 29 | [29_light_lux_JP.html](./29_light_lux_JP.html) | 光量（照度）管理 | 受光側（ルクス）で計測。R_hi > 0.75 から比例的に遮光率増加 — 予兆段階からの段階的介入。 |
-| 30 | [30_power_JP.html](./30_power_JP.html) | 電力管理（V×I 統合） | 電流・電圧を P = V×I として一本化。熱蓄積：過電力継続時間が R を時間的に押し上げる。 |
-| 31 | [31_move_water_or_ice_JP.html](./31_move_water_or_ice_JP.html) | 水・氷 状態ナビゲーション | インタラクティブな相転移制御。液体と固体の間をスライドしながら相境界での R を追跡。 |
-| 32 | [32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html](./32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html) | 氷→水 相転移 | Demo 17 の逆方向：氷が 0°C を超えて潜熱を吸収しながら相変化する構造 R を追跡。 |
+| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN_20260425_011850_JST.html) | ベルトコンベアー・Vベルト張力 | τを「最適値から限界までの全余裕」と定義 → Rが自然に [0,1] に正規化。Fail-Closed でベルト停止。 |
+| 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN_20260425_012100_JST.html) | 水温 上下限管理 | R_hi と R_lo を独立評価。熱対流ゆらぎ（3周波数合成）。Fail-Closed で逆方向動作を自動停止。 |
+| 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN_20260425_012747_JST.html) | 光量（照度）管理 | 受光側（ルクス）で計測。R_hi > 0.75 から比例的に遮光率増加 — 予兆段階からの段階的介入。 |
+| 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN_20260425_012956_JST.html) | 電力管理（V×I 統合） | 電流・電圧を P = V×I として一本化。熱蓄積：過電力継続時間が R を時間的に押し上げる。 |
+| 31 | [JP](./31_move_water_or_ice_JP.html) / [EN](./31_move_water_or_ice_EN_20260425_013623_JST.html) | 水・氷 状態ナビゲーション | インタラクティブな相転移制御。液体と固体の間をスライドしながら相境界での R を追跡。 |
+| 32 | [JP](./32_nra_ide_water_ice_20260324_2216_JP.html) / [EN](./32_nra_ide_ice_water_EN_20260425_013818_JST.html) | 氷→水 相転移 | Demo 17 の逆方向：氷が 0°C を超えて潜熱を吸収しながら相変化する構造 R を追跡。 |
 
 ---
 
@@ -173,8 +185,25 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 | ファイル | 内容 |
 |---------|------|
-| [nra_ide_6d_layer_viz_2026-03-21_1237.html](./nra_ide_6d_layer_viz_2026-03-21_1237.html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
-| [NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | **農業ドローン 4要素シミュレーション。** ドローンによる圃場監視に NRA-IDE を適用。4物理量を R = δ/τ で同時追跡。いずれかが構造限界を超えると Fail-Closed が発動。 |
+| [JP](./33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html) / [EN](./33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
+
+---
+
+### 🔗 STEP 11 — 相関・多因子テンプレート（34〜41）
+
+34番以降は、単一物理量の R 判定から、複数レイヤーの相関、媒介変数、閉ループ、個体差へ進む発展sample群です。  
+危険なレイヤーを平均で薄めず、基本形として **R_total = max(R_i, R_corr, R_coupling)** を採用します。医療系sampleは実運用ではなく、**医療教育用テンプレート** として軽く安全な名称にしています。
+
+| # | ファイル | ドメイン | ポイント |
+|---|---------|---------|---------|
+| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | 育苗ハウス・農業ドローン 4要素相関 | 温度・湿度・光量・水分を R = δ/τ で追跡し、相関行列 C[i][j](t)、残渣ゲート G(r)、τステップ前の実測記録 x_{t-τ} を組み合わせる相関sampleの入口。 |
+| 35 | [JP](./35_rotor_bearing_correlation_JP_20260425_024602_JST.html) / [EN](./35_rotor_bearing_correlation_EN_20260425_160443_JST.html) | 回転機械・軸受相関 | 振動、軸受温度、電流、潤滑圧、音響、回転数偏差を監視。振動が先行し、温度・電流・音響へ遅延波及する構造を可視化。 |
+| 36 | [JP](./36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html) / [EN](./36_battery_thermal_runaway_correlation_EN_20260425_160443_JST.html) | バッテリー熱暴走相関 | 内部抵抗と温度上昇率 dT/dt を先行指標として扱い、温度、膨張圧、電圧偏差へ波及する構造を表示。実機制御ではなく教育・構造可視化用。 |
+| 37 | [JP](./37_greenhouse_vpd_correlation_JP_FIXED_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | 温室VPD媒介相関 | 温度と湿度を単純加算せず、VPD（飽差）を媒介レイヤーとして、土壌水分、CO₂、光量、ECへ相関圧が伝わる構造を可視化。 |
+| 38 | [JP](./38_datacenter_cascade_correlation_JP_20260425_032611_JST.html) / [EN](./38_datacenter_cascade_correlation_EN_20260425_160443_JST.html) | データセンター・カスケード相関 | CPU負荷、電力、ラック温度、吸気温度、ファン回転率、空気流量、ネットワーク遅延をつなぎ、power → heat → fan → power の正のフィードバック環を表示。 |
+| 39 | [JP](./39_coldchain_temperature_correlation_JP_20260425_033809_JST.html) / [EN](./39_coldchain_temperature_correlation_EN_20260425_160443_JST.html) | コールドチェーン温度逸脱相関 | 外気温、荷室温度、扉開閉率、圧縮機負荷、バッテリー残量、湿度、輸送遅延をつなぎ、外気＋扉 → 圧縮機余裕 → 荷室温度の媒介連鎖を可視化。 |
+| 40 | [JP](./40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html) / [EN](./40_medical_education_individual_stratification_template_EN_20260425_160443_JST.html) | 医療教育用・個体別振り分け | SpO₂、呼吸数、心拍数、収縮期血圧、体温を合成データとして扱い、年齢・脆弱性・既往による profile 圧で個体ごとの余裕差を可視化。診断・治療判断ではなく Human Review へ戻す教育テンプレート。 |
+| 41 | [JP](./41_medical_education_infection_observation_template_JP_20260425_040544_JST.html) / [EN](./41_medical_education_infection_observation_template_EN_20260425_160443_JST.html) | 医療教育用・感染症観察群 | 発熱、呼吸、循環、水分、炎症様マーカーを合成データとして扱い、個体差つきで Observe / Watch / Caution / Human Review に振り分ける。診断名や治療推奨には寄せない教育用sample。 |
 
 ---
 
@@ -235,61 +264,16 @@ if (deliveryStatus === "STOP") {
 ---
 
 ## ライセンス
-
+再配布時には以下の著作権表示の保持が必要です
 **Copyright (c) 2026 M-Tokuni**
 
 本プロジェクトは **MIT License** の下で提供されています。
 研究・個人・商用を含め、無償で利用・改変・配布可能です。
-再配布時には以下の著作権表示の保持が必要です：
-
-```javascript
-// Powered by NRA-IDE. (c) 2026 M-Tokuni.
-// Principle: L∧P∧C∧D Verified.
-```
-
-**利用前に必ず倫理規定をお読みください。**
-禁止用途（兵器・監視・逆導出Π⁻¹・安全性未確保の機器への組み込み等）は
-ライセンスとは独立した専用ファイルで定義しています：
-
-👉 **[ETHICS.md](../../theory/ETHICS.md)**
-
-ライセンス全文は **[LICENSE](../../LICENSE)** を参照してください。
-
-**原則検証**: L∧P∧C∧D (Logic ∧ Physics ∧ Causality ∧ Determinism)
-
----
-
-## 著者情報
-
-**M-Tokuni（とおくに）**  
-理論：律環公理（Nomological Ring Axioms）/ 内包性動力学エンジン（Intensional Dynamics Engine）
-
-- **GitHub:** https://github.com/M-Tokun/NRA-IDE
-- **Twitter/X:** https://x.com/m_tokuni
-- **Facebook:** https://www.facebook.com/tokuni.masa
-- **Note:** https://note.com/mtokuni
-- **Blog:** https://mtokuni.blogspot.com/
-- **Hatena:** https://mtokuni.hatenablog.com/
-
----
-
-## 引用
-
-```
-M-Tokuni (2026). NRA-IDE: 律環公理 — 内包性動力学エンジン
-(Nomological Ring Axioms — Intensional Dynamics Engine).
-GitHub. https://github.com/M-Tokun/NRA-IDE
-```
-
----
-
-## 詳細ドキュメント
-
-- **理論定義:** [`/theory/THEORY.md`](../../theory/THEORY.md)
-- **基礎理論論文:** [`/theory/Foundational_Thesis.md`](../../theory/Foundational_Thesis.md)
-- **倫理規定:** [`/theory/ETHICS.md`](../../theory/ETHICS.md)
-- **コア実装:** [`/nra-core/`](../../nra-core/)
-
----
 
 最新版の情報については、公式リポジトリをご確認ください。
+- **GitHub:** https://github.com/M-Tokun/NRA-IDE
+
+---
+
+- **Facebook:** https://www.facebook.com/tokuni.masa
+- **Note:** https://note.com/mtokuni

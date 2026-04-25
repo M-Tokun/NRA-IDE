@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<!-- FILE: water_pressure_nra_ide_20260319_0202.html -->
+<!-- TITLE: NRA-IDE Water Pressure Management System (Incompressible Fluid · Fixed τ) -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-03-19 02:02 JST -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE Water Pressure Monitor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+:root{
+  --bg:#070a10;--surface:#0d1118;--border:#182030;
+  --safe:#00ddff;--warn:#ffaa00;--fail-hi:#ff3060;--fail-lo:#8866ff;
+  --text:#b8c8d8;--muted:#304050;--accent:#00ddff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:20px 12px;min-height:100vh;}
+.hdr{width:100%;max-width:1000px;display:flex;justify-content:space-between;
+  align-items:flex-end;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:18px;}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
+  letter-spacing:.16em;text-transform:uppercase;}
+.hdr-sub h1{font-size:18px;color:var(--text);font-weight:600;margin-top:4px;}
+.ctrl-row{display:flex;gap:8px;}
+.pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  cursor:pointer;border-radius:4px;transition:all .2s;letter-spacing:.06em;}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#000;}
+.pill-pump{border-color:#00aaff;}
+.pill-pump.on{background:#002840;border-color:#00aaff;color:#00aaff;}
+.pill-valve{border-color:#ff6030;}
+.pill-valve.on{background:#300a00;border-color:#ff6030;color:#ff6030;}
+
+.grid{width:100%;max-width:1000px;display:grid;grid-template-columns:1fr 320px;gap:14px;}
+.left{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.panel-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;}
+canvas{display:block;border-radius:6px;background:var(--bg);}
+#pipeCanvas{width:100%;height:260px;}
+#waveCanvas{width:100%;height:70px;}
+
+.sl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.sl-row{display:flex;flex-direction:column;gap:5px;}
+.sl-hdr{display:flex;justify-content:space-between;align-items:baseline;}
+.sl-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.sl-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+.sl-mrk{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;
+  background:var(--border);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--accent);border:3px solid var(--bg);
+  box-shadow:0 0 0 1px var(--accent);transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+
+.side{display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.card-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:10px;}
+
+.pressure-display{text-align:center;padding:8px 0;}
+.p-big{font-family:'JetBrains Mono',monospace;font-size:46px;font-weight:700;
+  line-height:1;transition:color .4s;}
+.p-unit{font-size:16px;font-weight:300;color:var(--muted);}
+.p-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:.1em;margin-top:5px;}
+.p-note{font-family:'JetBrains Mono',monospace;font-size:10px;
+  text-align:center;margin-top:4px;font-weight:600;}
+
+.dual-r{display:flex;gap:10px;justify-content:center;}
+.r-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.r-arc-w{width:120px;height:65px;overflow:visible;}
+.r-num{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;
+  transition:color .3s;text-align:center;}
+.r-dir{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-align:center;}
+
+.badge{width:100%;padding:10px;border-radius:6px;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:.14em;border:1px solid;transition:all .35s;}
+.badge.safe   {color:var(--safe);border-color:var(--safe);background:rgba(0,221,255,.06);}
+.badge.warn-hi{color:var(--warn);border-color:var(--warn);background:rgba(255,170,0,.07);}
+.badge.fail-hi{color:var(--fail-hi);border-color:var(--fail-hi);
+  background:rgba(255,48,96,.09);animation:pf .7s ease-in-out infinite;}
+.badge.warn-lo{color:#aa88ff;border-color:var(--fail-lo);background:rgba(136,102,255,.06);}
+.badge.fail-lo{color:var(--fail-lo);border-color:var(--fail-lo);
+  background:rgba(136,102,255,.1);animation:pfl .7s ease-in-out infinite;}
+@keyframes pf {0%,100%{box-shadow:0 0 0 0 rgba(255,48,96,.3)} 50%{box-shadow:0 0 0 5px rgba(255,48,96,0)}}
+@keyframes pfl{0%,100%{box-shadow:0 0 0 0 rgba(136,102,255,.3)} 50%{box-shadow:0 0 0 5px rgba(136,102,255,0)}}
+.act-txt{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
+
+.metrics{display:flex;flex-direction:column;gap:8px;}
+.met-row{display:flex;flex-direction:column;gap:4px;}
+.met-hdr{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;}
+.met-k{color:var(--muted);}.met-v{font-weight:600;}
+.bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:2px;transition:width .25s,background .3s;}
+
+.setting-row{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.set-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.set-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;}
+
+.log-panel{width:100%;max-width:1000px;margin-top:14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;}
+.log-title{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:.16em;margin-bottom:8px;}
+.log-list{display:flex;flex-direction:column;gap:3px;max-height:90px;overflow-y:auto;}
+.log-e{font-family:'JetBrains Mono',monospace;font-size:10px;
+  display:flex;gap:10px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.l-t{color:var(--muted);min-width:56px;}
+.l-s{font-weight:600;}
+.l-s.safe{color:var(--safe)}.l-s.warn-hi,.l-s.warn-lo{color:var(--warn)}
+.l-s.fail-hi{color:var(--fail-hi)}.l-s.fail-lo{color:var(--fail-lo)}
+.footer{width:100%;max-width:1000px;margin-top:14px;display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-sub">NRA-IDE / WATER PRESSURE  Incompressible Fluid · Fixed τ
+    <h1>Water Pressure Management System ② Pulsation Fluctuation Tracking</h1>
+  </div>
+  <div class="ctrl-row">
+    <button class="pill on"         id="btnRun"   onclick="toggleRun()">RUN</button>
+    <button class="pill pill-pump"  id="btnPump"  onclick="togglePump()">PUMP OFF</button>
+    <button class="pill pill-valve" id="btnValve" onclick="toggleValve()">VALVE OFF</button>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="left">
+    <div class="panel-lbl">PIPE SYSTEM VISUALIZATION</div>
+    <canvas id="pipeCanvas"></canvas>
+    <div class="panel-lbl">PRESSURE TREND  P [MPa]  ( raw / smooth )</div>
+    <canvas id="waveCanvas"></canvas>
+    <div class="sl-grid">
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">PUMP OUTPUT</span>
+          <div class="sl-val" id="pumpDisp" style="color:#00aaff">
+            0.5<small style="font-size:11px;font-weight:300;color:var(--muted)"> MPa</small>
+          </div>
+        </div>
+        <input type="range" id="pumpSlider" min="0" max="20" value="5" step="0.5"
+          oninput="onPump(this.value)">
+        <div class="sl-mrk"><span>0</span><span>Design 0.5MPa</span><span>2.0MPa</span></div>
+      </div>
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">FLOW RATE</span>
+          <div class="sl-val" id="flowDisp" style="color:var(--accent)">
+            50<small style="font-size:11px;font-weight:300;color:var(--muted)"> L/min</small>
+          </div>
+        </div>
+        <input type="range" id="flowSlider" min="0" max="150" value="50"
+          oninput="onFlow(this.value)">
+        <div class="sl-mrk"><span>0</span><span>Rated 50</span><span>150 L/min</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <div class="card-lbl">CURRENT PRESSURE</div>
+      <div class="pressure-display">
+        <div class="p-big" id="pBig">0.50<span class="p-unit"> MPa</span></div>
+        <div class="p-sub" id="pSub">δ=0.00 | τ_hi=0.30MPa | τ_lo=0.20MPa</div>
+      </div>
+      <div class="p-note" id="pNote" style="color:var(--safe)">Normal Pressure</div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">APPROACH RATIO  R = δ / τ  (Fixed τ)</div>
+      <div class="dual-r">
+        <div class="r-item">
+          <svg class="r-arc-w" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#182030" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcHi" d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#ff3060"
+              stroke-width="9" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wMH" stroke="#ffaa00" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fMH" stroke="#ff3060" stroke-width="2"   stroke-linecap="round"/>
+            <text x="8"   y="72" fill="#304050" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#304050" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rHiN" style="color:#ff3060">0.000</div>
+          <div class="r-dir">↑ Over-pressure R_hi</div>
+        </div>
+        <div class="r-item">
+          <svg class="r-arc-w" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#182030" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcLo" d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#8866ff"
+              stroke-width="9" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wML" stroke="#ffaa00" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fML" stroke="#8866ff" stroke-width="2"   stroke-linecap="round"/>
+            <text x="8"   y="72" fill="#304050" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#304050" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rLoN" style="color:#8866ff">0.000</div>
+          <div class="r-dir">↓ Under-pressure R_lo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="badge safe" id="badge">SAFE</div>
+    <div class="act-txt" id="actTxt">Normal operation continues</div>
+
+    <div class="card">
+      <div class="card-lbl">δ / τ  BREAKDOWN (Fixed τ)</div>
+      <div class="metrics">
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">δ Pressure Deviation</span>
+            <span class="met-v" id="dVal">0.00 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">τ_hi Over-pressure Margin (Fixed)</span>
+            <span class="met-v" style="color:#ff306088">0.30 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="tHiB"
+            style="width:60%;background:#ff306055"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">τ_lo Under-pressure Margin (Fixed)</span>
+            <span class="met-v" style="color:#8866ff88">0.20 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="tLoB"
+            style="width:40%;background:#8866ff55"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr"><span class="met-k">Pulsation Amplitude</span>
+            <span class="met-v" id="pulseV">0.000 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill" id="pulseB"
+            style="width:0%;background:#00ddff66"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">THRESHOLD SETTINGS</div>
+      <div class="setting-row">
+        <span class="set-lbl">P_OPTIMAL</span>
+        <span class="set-val" style="color:var(--safe)">0.50 MPa</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">P_MAX (Rupture Limit)</span>
+        <span class="set-val" style="color:#ff3060">0.80 MPa</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">P_MIN (Pump Cavitation Limit)</span>
+        <span class="set-val" style="color:#8866ff">0.30 MPa</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">τ_hi (Fixed)</span>
+        <span class="set-val" style="color:#ff306088">0.30 MPa</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">τ_lo (Fixed)</span>
+        <span class="set-val" style="color:#8866ff88">0.20 MPa</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="log-panel">
+  <div class="log-title">TRACE LOG  — Pulsation Pattern Monitor</div>
+  <div class="log-list" id="logList"></div>
+</div>
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span id="clk">--:--:--</span>
+  <span>Incompressible Fluid: τ Fixed ｜ R≥1.0 → FAIL_CLOSED</span>
+</div>
+
+<script>
+// ── Parameters (water pressure · incompressible · fixed τ) ──
+const P_OPT  = 0.50;  // MPa design pressure
+const P_MAX  = 0.80;  // MPa rupture / safety valve limit
+const P_MIN  = 0.30;  // MPa pump cavitation limit
+const TAU_HI = P_MAX - P_OPT;  // 0.30 MPa fixed
+const TAU_LO = P_OPT - P_MIN;  // 0.20 MPa fixed
+const R_WARN = 0.75, R_FAIL = 1.0;
+
+// ── State ──
+let running = true, pumpOn = false, valveOn = false;
+let pumpTarget = 0.5, flowRate = 50;
+let pCurrent = P_OPT, pRaw = P_OPT, pSmooth = P_OPT;
+let smoothBuf = [], waveHist = [], logTimer = 0;
+const SMOOTH_N = 8, WAVE_LEN = 300;
+let waterParticles = [];
+let hammerEvent = false, hammerTimer = 0;  // water hammer
+
+// ── Canvas ──
+const pc  = document.getElementById('pipeCanvas');
+const wc  = document.getElementById('waveCanvas');
+const pctx = pc.getContext('2d');
+const wctx = wc.getContext('2d');
+
+function resize(){
+  const wp = pc.parentElement;
+  pc.width = wp.clientWidth; pc.height = 260;
+  wc.width = wp.clientWidth; wc.height = 70;
+}
+
+// ── Controls ──
+function toggleRun(){
+  running = !running;
+  const b = document.getElementById('btnRun');
+  b.classList.toggle('on',running); b.textContent = running?'RUN':'PAUSE';
+}
+function togglePump(){
+  pumpOn = !pumpOn;
+  const b = document.getElementById('btnPump');
+  b.classList.toggle('on',pumpOn); b.textContent = pumpOn?'PUMP ON':'PUMP OFF';
+}
+function toggleValve(){
+  valveOn = !valveOn;
+  const b = document.getElementById('btnValve');
+  b.classList.toggle('on',valveOn); b.textContent = valveOn?'VALVE ON':'VALVE OFF';
+  // Sudden valve closure triggers water hammer
+  if(valveOn){ hammerEvent = true; hammerTimer = 0.8; }
+}
+function onPump(v){
+  pumpTarget = parseFloat(v) / 10;
+  document.getElementById('pumpDisp').innerHTML =
+    pumpTarget.toFixed(1) + '<small style="font-size:11px;font-weight:300;color:var(--muted)"> MPa</small>';
+}
+function onFlow(v){
+  flowRate = parseFloat(v);
+  document.getElementById('flowDisp').innerHTML =
+    flowRate.toFixed(0) + '<small style="font-size:11px;font-weight:300;color:var(--muted)"> L/min</small>';
+}
+
+// ── NRA-IDE ──
+function calcIDE(p){
+  const delta = p - P_OPT;
+  const absDelta = Math.abs(delta);
+  // τ is fixed (property of incompressible fluid)
+  const rHi = delta > 0 ? delta / TAU_HI : 0;
+  const rLo = delta < 0 ? absDelta / TAU_LO : 0;
+  let status, action;
+  if(rHi >= R_FAIL)      { status='fail-hi'; action='Over-pressure: FAIL_CLOSED — Safety valve active / pump stop'; }
+  else if(rLo >= R_FAIL) { status='fail-lo'; action='Under-pressure: FAIL_CLOSED — Start pump / fully open valve'; }
+  else if(rHi >= R_WARN) { status='warn-hi'; action='Over-pressure warning: reduce flow or open valve'; }
+  else if(rLo >= R_WARN) { status='warn-lo'; action='Under-pressure warning: increase pump output'; }
+  else                   { status='safe';    action='Normal operation continues'; }
+  return { delta, absDelta, rHi, rLo, status, action };
+}
+
+// ── Tick ──
+function tick(dt){
+  if(!running) return;
+  const t = performance.now() / 1000;
+
+  // Pressure target calculation
+  let pTarget = pumpTarget;
+  if(pumpOn)  pTarget += 0.25;                     // pump boost
+  if(valveOn) pTarget += flowRate / 50 * 0.15;     // valve restriction: flow × pressure rise
+  // Natural pressure tracking
+  pCurrent += (pTarget - pCurrent) * Math.min(dt * 2.5, 1);
+
+  // ── Pulsation fluctuation (synchronized with pump RPM) ──
+  // Pump rotation: 1200rpm = 20Hz, 3 blades → base pulsation 60Hz
+  const pumpHz   = 3.0;   // lower for visualization
+  const pulseAmp = pCurrent * 0.03;  // 3% of pressure is pulsation amplitude
+  const pulse = pulseAmp * Math.sin(2 * Math.PI * pumpHz * t)
+              + pulseAmp * 0.4 * Math.sin(2 * Math.PI * pumpHz * 2 * t + 0.8)
+              + pulseAmp * 0.15 * Math.sin(2 * Math.PI * pumpHz * 3 * t + 1.6);
+
+  // Water hammer (shock wave on sudden valve closure)
+  let hammer = 0;
+  if(hammerEvent && hammerTimer > 0){
+    hammerTimer -= dt;
+    hammer = 0.12 * Math.exp(-8 * (0.8 - hammerTimer)) *
+             Math.sin(2 * Math.PI * 18 * (0.8 - hammerTimer));
+    if(hammerTimer <= 0){ hammerEvent = false; }
+  }
+
+  pRaw = Math.max(0, pCurrent + pulse + hammer);
+
+  smoothBuf.push(pRaw);
+  if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
+  pSmooth = smoothBuf.reduce((a,b)=>a+b,0) / smoothBuf.length;
+
+  const ide = calcIDE(pSmooth);
+  const pulseAmpObs = smoothBuf.length > 1
+    ? Math.max(...smoothBuf) - Math.min(...smoothBuf) : 0;
+
+  // Water particle generation
+  if(flowRate > 5 && Math.random() < 0.4){
+    waterParticles.push({
+      progress: 0,
+      speed: 40 + flowRate * 0.6,
+      life: 1.0,
+      col: ide.status === 'fail-hi' ? '#ff3060' :
+           ide.status === 'warn-hi' ? '#ffaa00' : '#00aadd'
+    });
+  }
+  waterParticles = waterParticles.filter(p => p.life > 0);
+  waterParticles.forEach(p => {
+    p.progress += p.speed * dt / 1000;
+    p.life -= dt * 0.6;
+  });
+
+  waveHist.push({ raw: pRaw, smooth: pSmooth, status: ide.status });
+  if(waveHist.length > WAVE_LEN) waveHist.shift();
+
+  updateUI(ide, pulseAmpObs);
+}
+
+// ── UI update ──
+function statusColor(s){
+  return { safe:'#00ddff','warn-hi':'#ffaa00','warn-lo':'#aa88ff',
+           'fail-hi':'#ff3060','fail-lo':'#8866ff' }[s] || '#00ddff';
+}
+
+function updateUI(ide, pulseAmp){
+  const col = statusColor(ide.status);
+
+  document.getElementById('pBig').innerHTML =
+    pRaw.toFixed(3) + '<span class="p-unit"> MPa</span>';
+  document.getElementById('pBig').style.color = col;
+  document.getElementById('pSub').textContent =
+    `delta=${(ide.delta>=0?'+':'')}${ide.delta.toFixed(3)} | tau_hi=${TAU_HI.toFixed(2)}MPa | tau_lo=${TAU_LO.toFixed(2)}MPa`;
+
+  const noteMap = {
+    safe:'Normal Pressure', 'warn-hi':'Over-pressure Warning', 'warn-lo':'Under-pressure Warning',
+    'fail-hi':'Over-pressure FAIL', 'fail-lo':'Under-pressure FAIL'
+  };
+  document.getElementById('pNote').textContent = noteMap[ide.status];
+  document.getElementById('pNote').style.color = col;
+
+  document.getElementById('rHiN').textContent = Math.min(ide.rHi,9.999).toFixed(3);
+  document.getElementById('rHiN').style.color  = ide.rHi>=R_FAIL?'#ff3060':'#ff6080';
+  document.getElementById('rLoN').textContent = Math.min(ide.rLo,9.999).toFixed(3);
+  document.getElementById('rLoN').style.color  = ide.rLo>=R_FAIL?'#8866ff':'#aa88ff';
+  setArc('arcHi', ide.rHi, ide.rHi>=R_FAIL?'#ff3060':'#ff6080');
+  setArc('arcLo', ide.rLo, ide.rLo>=R_FAIL?'#8866ff':'#aa88ff');
+  setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
+
+  const badge = document.getElementById('badge');
+  badge.className = 'badge ' + ide.status;
+  const lm = { safe:'SAFE','warn-hi':'WARNING over-pressure',
+    'warn-lo':'WARNING low-pressure','fail-hi':'FAIL_CLOSED over-pressure',
+    'fail-lo':'FAIL_CLOSED low-pressure' };
+  badge.textContent = lm[ide.status];
+  document.getElementById('actTxt').textContent = ide.action;
+
+  const mx = 0.5;
+  document.getElementById('dVal').textContent =
+    (ide.delta>=0?'+':'')+ide.delta.toFixed(3)+' MPa';
+  document.getElementById('dBar').style.width =
+    Math.min(ide.absDelta/mx*100,100).toFixed(1)+'%';
+  document.getElementById('dBar').style.background = col;
+  document.getElementById('pulseV').textContent = pulseAmp.toFixed(4)+' MPa';
+  document.getElementById('pulseB').style.width =
+    Math.min(pulseAmp/0.05*100,100).toFixed(1)+'%';
+
+  document.getElementById('clk').textContent = new Date().toTimeString().slice(0,8);
+  logTimer++;
+  if(logTimer % 60 === 0) addLog(ide, pulseAmp);
+}
+
+// ── Arc ──
+function setArc(id,R,col){
+  const arcLen=163.4,ratio=Math.min(R/1.5,1);
+  const el=document.getElementById(id);
+  el.style.strokeDashoffset=arcLen*(1-ratio); el.style.stroke=col;
+}
+function setMarkPair(wId,fId){ setMarkSVG(wId,0.75/1.5,60,52); setMarkSVG(fId,1.0/1.5,60,52); }
+function setMarkSVG(id,t,cy,r){
+  const ang=Math.PI*(1-t),cx=60,x=cx+r*Math.cos(ang),y=cy-r*Math.sin(ang);
+  const nx=Math.cos(ang)*7,ny=-Math.sin(ang)*7,el=document.getElementById(id);
+  el.setAttribute('x1',(x-nx*.5).toFixed(1)); el.setAttribute('y1',(y-ny*.5).toFixed(1));
+  el.setAttribute('x2',(x+nx*.5).toFixed(1)); el.setAttribute('y2',(y+ny*.5).toFixed(1));
+}
+
+// ── Pipe rendering ──
+function drawPipe(){
+  const W=pc.width, H=pc.height;
+  pctx.clearRect(0,0,W,H);
+  const ide = calcIDE(pSmooth);
+  const col = statusColor(ide.status);
+
+  // Pipe layout definition
+  const pipe = [
+    // [x1,y1,x2,y2] horizontal/vertical segments
+    { x1:60,  y1:H*0.35, x2:W*0.35, y2:H*0.35 },  // Upper horizontal (pump outlet)
+    { x1:W*0.35, y1:H*0.35, x2:W*0.35, y2:H*0.65 },  // Vertical down
+    { x1:W*0.35, y1:H*0.65, x2:W*0.65, y2:H*0.65 },  // Lower horizontal
+    { x1:W*0.65, y1:H*0.65, x2:W*0.65, y2:H*0.35 },  // Vertical up
+    { x1:W*0.65, y1:H*0.35, x2:W-60, y2:H*0.35 },   // Right horizontal (outlet)
+  ];
+  const pw = 20; // pipe width
+
+  // Water color based on pressure
+  const pRatio = Math.min(Math.max((pSmooth - P_MIN) / (P_MAX - P_MIN), 0), 1);
+  const r = Math.round(pRatio * 50);
+  const g = Math.round(100 + (1-pRatio)*80);
+  const b = Math.round(200 + pRatio*55);
+  const waterCol = `rgb(${r},${g},${b})`;
+
+  // Pipe outer wall
+  pipe.forEach(seg => {
+    const isH = seg.y1 === seg.y2;
+    pctx.fillStyle = '#1a2535';
+    if(isH){
+      pctx.fillRect(seg.x1, seg.y1-pw/2-3, seg.x2-seg.x1, pw+6);
+    } else {
+      pctx.fillRect(seg.x1-pw/2-3, seg.y1, pw+6, seg.y2-seg.y1);
+    }
+    pctx.strokeStyle = '#2a3850';
+    pctx.lineWidth = 1;
+    if(isH){
+      pctx.strokeRect(seg.x1, seg.y1-pw/2-3, seg.x2-seg.x1, pw+6);
+    } else {
+      pctx.strokeRect(seg.x1-pw/2-3, seg.y1, pw+6, seg.y2-seg.y1);
+    }
+  });
+
+  // Pipe interior (water)
+  pipe.forEach(seg => {
+    const isH = seg.y1 === seg.y2;
+    pctx.fillStyle = waterCol;
+    pctx.globalAlpha = 0.5 + pSmooth/P_MAX*0.4;
+    if(isH){
+      pctx.fillRect(seg.x1, seg.y1-pw/2, seg.x2-seg.x1, pw);
+    } else {
+      pctx.fillRect(seg.x1-pw/2, seg.y1, pw, seg.y2-seg.y1);
+    }
+    pctx.globalAlpha = 1;
+  });
+
+  // Pipe gloss
+  pipe.forEach(seg => {
+    const isH = seg.y1 === seg.y2;
+    pctx.fillStyle = 'rgba(255,255,255,0.08)';
+    if(isH){
+      pctx.fillRect(seg.x1, seg.y1-pw/2, seg.x2-seg.x1, pw*0.3);
+    } else {
+      pctx.fillRect(seg.x1-pw/2, seg.y1, pw*0.3, seg.y2-seg.y1);
+    }
+  });
+
+  // Pump (left side)
+  drawPump(pctx, 60, H*0.35, pumpOn, pumpTarget, col);
+
+  // Pressure gauge (top center)
+  drawGauge(pctx, W*0.5, H*0.35-pw/2-40, pSmooth, ide.status, col);
+
+  // Valve (bottom right)
+  drawValve(pctx, W*0.65, H*0.65, valveOn, col);
+
+  // Flow meter (bottom center)
+  drawFlowMeter(pctx, W*0.5, H*0.65+pw/2+30, flowRate, col);
+
+  // Water hammer warning effect
+  if(hammerEvent){
+    const alpha = Math.min(hammerTimer/0.8, 1) * 0.4;
+    pctx.fillStyle = `rgba(255,48,96,${alpha})`;
+    pctx.beginPath();
+    pctx.arc(W*0.65, H*0.65, 40, 0, Math.PI*2);
+    pctx.fill();
+    pctx.font = 'bold 10px JetBrains Mono';
+    pctx.fillStyle = `rgba(255,48,96,${alpha*2})`;
+    pctx.textAlign = 'center';
+    pctx.fillText('HAMMER!', W*0.65, H*0.65+55);
+  }
+
+  // Water particle flow
+  const pathPts = buildPipePath(pipe);
+  waterParticles.forEach(p => {
+    const pos = getPipePoint(pathPts, (p.progress % 1));
+    pctx.beginPath();
+    pctx.arc(pos.x, pos.y, 3, 0, Math.PI*2);
+    pctx.fillStyle = p.col;
+    pctx.globalAlpha = p.life * 0.7;
+    pctx.fill();
+    pctx.globalAlpha = 1;
+  });
+
+  // Overlay
+  pctx.font = 'bold 12px JetBrains Mono';
+  pctx.fillStyle = col; pctx.textAlign = 'left';
+  pctx.fillText(`P = ${pRaw.toFixed(3)} MPa`, 10, 18);
+  pctx.font = '10px JetBrains Mono'; pctx.textAlign = 'right';
+  const stTxt = { safe:'OK','warn-hi':'WARN over-P','warn-lo':'WARN low-P',
+                  'fail-hi':'FAIL over-P','fail-lo':'FAIL low-P' };
+  pctx.fillStyle = col;
+  pctx.fillText(stTxt[ide.status], W-10, 18);
+}
+
+function drawPump(ctx, x, y, on, pressure, col){
+  // Pump body (circular)
+  ctx.beginPath(); ctx.arc(x, y, 24, 0, Math.PI*2);
+  ctx.fillStyle = on ? '#0a2040' : '#0d1520';
+  ctx.fill();
+  ctx.strokeStyle = on ? '#00aaff' : '#2a3850';
+  ctx.lineWidth = 2; ctx.stroke();
+  // Rotating blades
+  const t_ = performance.now()/1000;
+  const rot = on ? t_ * 8 : 0;
+  for(let i=0;i<3;i++){
+    const a = rot + i * Math.PI*2/3;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.cos(a)*16, y + Math.sin(a)*16);
+    ctx.strokeStyle = on ? '#00aaff' : '#304050';
+    ctx.lineWidth = 3; ctx.stroke();
+  }
+  ctx.font = '9px JetBrains Mono'; ctx.fillStyle = on?'#00aaff':'#304050';
+  ctx.textAlign = 'center';
+  ctx.fillText('PUMP', x, y+38);
+  ctx.fillText(pressure.toFixed(2)+'MPa', x, y+50);
+}
+
+function drawGauge(ctx, x, y, p, status, col){
+  // Analog pressure gauge
+  const r = 28;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+  ctx.fillStyle = '#0d1520'; ctx.fill();
+  ctx.strokeStyle = '#2a3850'; ctx.lineWidth = 2; ctx.stroke();
+  // Markings
+  for(let i=0;i<=8;i++){
+    const a = Math.PI * (0.75 + i/8 * 1.5);
+    ctx.beginPath();
+    ctx.moveTo(x+Math.cos(a)*(r-6), y+Math.sin(a)*(r-6));
+    ctx.lineTo(x+Math.cos(a)*(r-2), y+Math.sin(a)*(r-2));
+    ctx.strokeStyle = i===0?'#8866ff':i===8?'#ff3060':'#2a3850';
+    ctx.lineWidth = i%4===0?2:1; ctx.stroke();
+  }
+  // Needle
+  const ratio = Math.min(Math.max((p-P_MIN)/(P_MAX-P_MIN),0),1);
+  const needleAng = Math.PI*(0.75 + ratio*1.5);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x+Math.cos(needleAng)*(r-8), y+Math.sin(needleAng)*(r-8));
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+  // Center
+  ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle = col; ctx.fill();
+  ctx.font = '9px JetBrains Mono'; ctx.fillStyle = col;
+  ctx.textAlign = 'center'; ctx.fillText(p.toFixed(2)+'MPa', x, y+r+14);
+}
+
+function drawValve(ctx, x, y, closed, col){
+  const vr = 14;
+  ctx.fillStyle = closed ? '#300a00' : '#0d1520';
+  ctx.beginPath(); ctx.arc(x, y, vr, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = closed ? '#ff6030' : '#2a3850';
+  ctx.lineWidth = 2; ctx.stroke();
+  // Valve symbol (butterfly type)
+  ctx.beginPath();
+  ctx.moveTo(x-vr*0.6, y-vr*0.6); ctx.lineTo(x+vr*0.6, y+vr*0.6);
+  ctx.moveTo(x+vr*0.6, y-vr*0.6); ctx.lineTo(x-vr*0.6, y+vr*0.6);
+  ctx.strokeStyle = closed?'#ff6030':col; ctx.lineWidth = 2; ctx.stroke();
+  ctx.font = '9px JetBrains Mono'; ctx.fillStyle = closed?'#ff6030':'#304050';
+  ctx.textAlign = 'center'; ctx.fillText(closed?'CLOSED':'OPEN', x, y+vr+14);
+}
+
+function drawFlowMeter(ctx, x, y, flow, col){
+  ctx.fillStyle = '#0d1520';
+  ctx.fillRect(x-30, y-10, 60, 20);
+  ctx.strokeStyle = '#2a3850'; ctx.lineWidth = 1;
+  ctx.strokeRect(x-30, y-10, 60, 20);
+  const fw = Math.min(flow/150, 1) * 54;
+  ctx.fillStyle = col;
+  ctx.globalAlpha = 0.6;
+  ctx.fillRect(x-27, y-7, fw, 14);
+  ctx.globalAlpha = 1;
+  ctx.font = 'bold 9px JetBrains Mono'; ctx.fillStyle = col;
+  ctx.textAlign = 'center'; ctx.fillText(`${flow.toFixed(0)} L/min`, x, y+4);
+  ctx.font = '8px JetBrains Mono'; ctx.fillStyle = '#304050';
+  ctx.fillText('FLOW', x, y+20);
+}
+
+function buildPipePath(pipe){
+  const segs = [];
+  pipe.forEach(seg => { segs.push({from:{x:seg.x1,y:seg.y1},to:{x:seg.x2,y:seg.y2}}); });
+  return segs;
+}
+
+function getPipePoint(segs,t){
+  const totalLen = segs.reduce((a,s)=>{
+    const dx=s.to.x-s.from.x, dy=s.to.y-s.from.y;
+    return a+Math.sqrt(dx*dx+dy*dy);
+  },0);
+  let target=t*totalLen, cum=0;
+  for(const s of segs){
+    const dx=s.to.x-s.from.x, dy=s.to.y-s.from.y;
+    const len=Math.sqrt(dx*dx+dy*dy);
+    if(cum+len>=target){ const u=(target-cum)/len; return {x:s.from.x+dx*u,y:s.from.y+dy*u}; }
+    cum+=len;
+  }
+  return segs[0].from;
+}
+
+// ── Waveform ──
+function drawWave(){
+  const W=wc.width, H=wc.height;
+  wctx.clearRect(0,0,W,H);
+  if(waveHist.length<2) return;
+  const center=P_OPT, span=0.6;
+  const dMin=center-span, dMax=center+span;
+  const mapY=v=>H*(1-(v-dMin)/(span*2))*0.88+H*0.06;
+  wctx.strokeStyle='rgba(255,255,255,.04)'; wctx.lineWidth=0.5;
+  for(let g=0;g<5;g++){
+    const gy=H*.06+H*.88*g/4;
+    wctx.beginPath(); wctx.moveTo(0,gy); wctx.lineTo(W,gy); wctx.stroke();
+  }
+  [{v:P_MAX,c:'rgba(255,48,96,.5)',lbl:'MAX'},
+   {v:P_OPT,c:'rgba(0,221,255,.3)',lbl:'OPT'},
+   {v:P_MIN,c:'rgba(136,102,255,.5)',lbl:'MIN'}].forEach(({v,c,lbl})=>{
+    wctx.setLineDash([4,4]);
+    wctx.beginPath(); wctx.moveTo(0,mapY(v)); wctx.lineTo(W,mapY(v));
+    wctx.strokeStyle=c; wctx.lineWidth=1; wctx.stroke(); wctx.setLineDash([]);
+    wctx.font='8px JetBrains Mono'; wctx.textAlign='left';
+    wctx.fillStyle=c.replace('.5)','1)').replace('.3)','1)');
+    wctx.globalAlpha=.6; wctx.fillText(lbl,2,mapY(v)-2); wctx.globalAlpha=1;
+  });
+  // Raw waveform
+  wctx.beginPath();
+  waveHist.forEach((h,i)=>{
+    const x=i/WAVE_LEN*W, y=mapY(h.raw);
+    i===0?wctx.moveTo(x,y):wctx.lineTo(x,y);
+  });
+  wctx.strokeStyle='rgba(255,255,255,.15)'; wctx.lineWidth=1; wctx.stroke();
+  // Smoothed
+  waveHist.forEach((h,i)=>{
+    if(i===0) return;
+    const x0=(i-1)/WAVE_LEN*W, x1=i/WAVE_LEN*W;
+    const y0=mapY(waveHist[i-1].smooth), y1=mapY(h.smooth);
+    wctx.beginPath(); wctx.moveTo(x0,y0); wctx.lineTo(x1,y1);
+    wctx.strokeStyle=statusColor(h.status); wctx.lineWidth=2; wctx.stroke();
+  });
+  wctx.font='8px JetBrains Mono'; wctx.textAlign='right';
+  wctx.fillStyle='rgba(255,255,255,.25)'; wctx.fillText('raw',W-58,H-4);
+  wctx.fillStyle='#00ddff'; wctx.fillText('smooth',W-2,H-4);
+}
+
+function addLog(ide, pulseAmp){
+  const now=new Date().toTimeString().slice(0,8);
+  const list=document.getElementById('logList');
+  const e=document.createElement('div'); e.className='log-entry';
+  e.innerHTML=`<span class="l-t">${now}</span>
+    <span style="color:${statusColor(ide.status)};min-width:80px">${pSmooth.toFixed(3)} MPa</span>
+    <span style="color:var(--muted);font-size:9px">R+=${ide.rHi.toFixed(3)} R-=${ide.rLo.toFixed(3)}</span>
+    <span style="color:#00ddff88;font-size:9px">pulse=${pulseAmp.toFixed(4)}MPa</span>
+    <span class="l-s ${ide.status}">${ide.status.toUpperCase()}</span>`;
+  list.insertBefore(e,list.firstChild);
+  if(list.children.length>15) list.removeChild(list.lastChild);
+}
+
+let last=performance.now();
+function loop(now){
+  const dt=Math.min((now-last)/1000,0.05); last=now;
+  tick(dt); drawPipe(); drawWave();
+  requestAnimationFrame(loop);
+}
+window.addEventListener('resize',resize);
+resize();
+setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
+addLog(calcIDE(pSmooth),0);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

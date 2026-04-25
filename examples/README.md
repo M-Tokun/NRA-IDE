@@ -1,6 +1,5 @@
-# NRA-IDE Demonstration Suite (English Edition)
 # NRA-IDE Examples — English Edition
-<!-- README_EN.md | examples/ | 2026-03-05 -->
+<!-- README_EN.md | examples/ | updated 20260425_163041_JST -->
 
 ---
 
@@ -8,294 +7,257 @@
 
 **Nomological Ring Axioms — Intensional Dynamics Engine**
 
-This is a deterministic control engine based on **Tension Structure (Constraint → Force → Displacement)**,
-completely eliminating linear concepts such as continuity, distance, and ambiguous semantics.
+NRA-IDE is a deterministic control and structural judgment engine based on **tension structure**: constraint → force → displacement. It deliberately avoids making continuity, distance, or semantic interpretation the primary basis of safety judgment. In practical terms, it is a framework centered on nonlinear, physically grounded structure.
 
-In high-risk areas where conventional methods often become "black boxes"
-(such as Medical AI, Autonomous Driving, and Critical Infrastructure),
-NRA-IDE provides a judgment mechanism that is **fully explainable and free from error accumulation**.
+Where conventional methods can become black boxes in high-risk areas such as medical AI, autonomous driving, and infrastructure control, NRA-IDE provides an explainable judgment mechanism based on directly observed structural deviation.
 
 ---
 
 ## Why NRA-IDE Does Not Accumulate Error
 
-A mechanical clock keeps accurate time not because its gears are perfect, but because its
-**escapement mechanism advances in discrete, complete steps** — no fractional remainder carries forward.
+A mechanical clock keeps time not because every gear is perfect, but because the escapement advances in a discrete step: exactly one tooth at a time. Residual fractions are not carried forward into the next step.
 
-NRA-IDE applies this same principle. Rather than processing state transitions as continuous
-floating-point values, the IDE operates on **integer phase locks**.
-Each step is structurally complete. There is no residual to inherit.
+NRA-IDE implements this principle. State transitions are not treated as an endlessly drifting floating-point continuum. Instead, they are handled as structurally closed phase steps. Each step is completed as a bounded transition, and residual fragments are not inherited as causal state.
 
-> **This is why error does not accumulate — not because it is corrected,
-> but because the system is defined in a way that leaves no room for it to arise.**
+> **Error does not fail to accumulate because it is corrected afterward.  
+> It does not accumulate because the structure does not allow it to be carried forward.**
 
-The demos below make this difference visible and measurable.
-For the implementation detail (Integer Phase Lock / Residual Discard), see `nra-core/`.
+The demos below are designed to visualize and quantify this difference. For implementation details such as integer phase lock and residual discard, see `nra-core/`.
 
 ---
 
-## The Threshold System Principle
+## Principle of the Threshold System
 
 $$R = \frac{\delta}{\tau}$$
 
 | Symbol | Meaning | Description |
-|--------|---------|-------------|
-| **δ (Delta)** | Deviation from Constraint | The physically measured displacement (Fluctuation). |
-| **τ (Tau)** | Tolerance Range | The threshold (thickness) defined during design. |
-| **R** | Structural Ratio | Judgment is made based on the value of δ ÷ τ. |
+|------|------|------|
+| **δ (delta)** | Deviation / fluctuation from constraint | Physically observed displacement or deviation |
+| **τ (tau)** | Tolerance thickness / allowable margin | Structurally defined threshold width |
+| **R** | Structural ratio | Judgment value calculated as δ ÷ τ |
 
-| Value of R | Judgment | Action |
-|------------|----------|--------|
-| R < 1.0 | **SAFE** | AI presents physical evidence and continues processing. |
-| R ≥ 1.0 | **STOP** | Structural limit reached. AI ceases output → Human makes the final decision. |
+| R Range | Judgment | Meaning | Action |
+|--------|------|------|------|
+| R < 0.40 | **SAFE** | Sufficient structural margin remains | AI may continue processing with physical basis shown |
+| 0.40 ≤ R < R_J | **WATCH / CAUTION** | The system is approaching the boundary and may require preparation for intervention | Continue monitoring. Check history, correlation, and dR/dt. Gradually restrict automatic intervention if needed |
+| R_J ≤ R < 1.00 | **JUDGMENT LIMIT** | Under the actual operating conditions, further progression may reach R = 1.0 due to delay, inertia, or residual fluctuation | Stop or strongly restrict automatic judgment and transfer authority to humans |
+| R ≥ 1.00 | **FAIL-CLOSED** | Structural limit corresponding to phase transition, rupture, breach, or collapse | AI stops output/action and humans make the final decision |
 
-> **Design Philosophy:** The AI is strictly for calculation.
-> Ethical and final decisions are the responsibility of humans. (Boundary of Responsibility)
+> **Important:** R = 1.0 is not a warning value.  
+> R = 1.0 is the structural boundary corresponding to phase transition, rupture, breach, or collapse. Therefore, real safety design must not wait until R reaches 1.0.  
+> NRA-IDE places a **Judgment Limit (R_J)** before that boundary.  
+> R_J is not a fixed axiom value. It is set according to the operating site, target object, sensor delay, stopping time, and required safety margin.
+
+> **Design principle:** AI performs computation. Ethical and final judgment belongs to humans. This is the responsibility boundary.
 
 ---
 
-## Demo List (32 demos — Recommended Order)
+## Demo List — 41 Demos + Standalone Visualizations, Recommended Order
 
-These demos run directly in your browser — no installation required.
+All demos run directly in a browser. No installation is required.
 
-### 📚 STEP 1 — Understand "Why?"
+> In many demos, the red line indicates R = 1.0. This is not a warning line; it is the structural limit line. The practical judgment limit must be placed before that line. Its value is not fixed, and should be configured according to the operating site and target domain.
 
-| # | File | Content |
-|---|------|---------|
-| 01 | [01_Why_No_Distance_EN.html](./01_Why_No_Distance_EN.html) | **Why no distance, calculus, or floating-point arithmetic?** Visually explained from 4 perspectives via tab switching. The entry point to understanding the fundamental difference from legacy methods. |
-| 02 | [02_Error_Accumulation_EN.html](./02_Error_Accumulation_EN.html) | **The Terror of Error Accumulation.** Running 100,000 steps from identical initial values to compare error accumulation between legacy methods and Nomological Ring Axioms. Displays breakdown lines for Medical, Auto, and Finance. |
-
-### 🔬 STEP 2 — Experience the Difference
+### 📚 STEP 1 — First Understand “Why?”
 
 | # | File | Content |
-|---|------|---------|
-| 03 | [03_HAN_vs_Legacy_EN.html](./03_HAN_vs_Legacy_EN.html) | **Real-time comparison: HAN (Non-linear Adaptive Control) vs Legacy (Fixed If-Then Control).** Demonstrates the difference in tracking and stability against disturbances and sudden loads using waveform graphs. |
-| 04 | [04_HAN_Stress_Test_EN.html](./04_HAN_Stress_Test_EN.html) | **Extreme experiment: Intentional 80ms high-load injection.** Legacy blindly executes commands causing FPS collapse. HAN detects tension, adaptively reduces load, and maintains rendering. |
+|---|---------|------|
+| 01 | [01_Why_No_Distance_EN.html](./01_Why_No_Distance_EN.html) | **Why not use distance, calculus, or floating-point continuity as the primary basis?** A visual introduction from four perspectives. |
+| 02 | [02_Error_Accumulation_EN.html](./02_Error_Accumulation_EN.html) | **The danger of error accumulation.** Runs 100,000 steps from the same initial value and compares conventional methods with NRA-style structure. |
+
+### 🔬 STEP 2 — Experience the Difference in Behavior
+
+| # | File | Content |
+|---|---------|------|
+| 03 | [03_HAN_vs_Legacy_EN.html](./03_HAN_vs_Legacy_EN.html) | **HAN vs Legacy real-time comparison.** Demonstrates tracking and stability differences under disturbance and sudden load. |
+| 04 | [04_HAN_Stress_Test_EN.html](./04_HAN_Stress_Test_EN.html) | **Extreme 80 ms load test.** Legacy blindly executes commands and collapses in FPS; HAN detects tension and adapts load. |
 
 ### 📊 STEP 3 — Visualize the Threshold Mechanism
 
 | # | File | Content |
-|---|------|---------|
-| 05 | [05_IDE_Threshold_Visualizer_EN.html](./05_IDE_Threshold_Visualizer_EN.html) | **Dynamic visualization of R = δ/τ via Phase Scope.** Confirm the mechanisms of Integer Phase Lock and Residual Discard in real-time. |
+|---|---------|------|
+| 05 | [05_IDE_Threshold_Visualizer_EN.html](./05_IDE_Threshold_Visualizer_EN.html) | **Dynamic visualization of R = δ/τ.** Confirms integer phase lock and residual discard in real time. |
 
-### ⚙️ STEP 4 — The Escapement Principle (Coming Soon)
-
-| # | File | Content |
-|---|------|---------|
-| 06 | `06_Escapement_Principle_EN.html` *(06_Escapement_Principle_EN.html)* | **Why gears never accumulate error.** Animated comparison of floating-point drift vs. integer phase lock. Visualizes the structural reason NRA-IDE is free from cumulative error. |
-
-### 🔴 STEP 5 — Cascade Failure: Watch It Happen in Real Time
+### ⚙️ STEP 4 — Escapement Principle
 
 | # | File | Content |
-|---|------|---------|
-| 07 | [07_HAN_gate_live_JP.html](./07_HAN_gate_live_JP.html) | **Live simulation of cascade failure and HAN Gate SILENCE activation.** Watch the chain reaction score R rise in real time as a load spike propagates. The moment R exceeds R_OP, the gate flashes red and SILENCE is declared. Use the **⚠ Risky Preset** to experience a setting where the wave looks calm — yet the gate never fires. This is the most direct demonstration of why "it looks safe" is not a valid reason to raise the threshold. |
+|---|---------|------|
+| 06 | `06_Escapement_Principle_EN.html` *（./06_Escapement_Principle_EN.html）* | **Why gears do not accumulate error.** Floating-point drift vs integer phase lock animation. |
 
-> **What makes this demo different:**
-> The wave does not appear as a static chart. It grows step by step, exactly as a real cascade
-> failure does — slowly at first, then suddenly crossing the threshold.
-> The dual-fluctuation structure (dynamic τ) is visible as the orange τ line swells
-> *before* the blue R line peaks, providing early warning that a static τ cannot offer.
+### 🔴 STEP 5 — Cascade Failure: Watching the Moment Collapse Begins
+
+| # | File | Content |
+|---|---------|------|
+| 07 | [07_HAN_gate_live_EN.html](./07_HAN_gate_live_EN.html) | **Live simulation of cascade failure and HAN Gate SILENCE activation.** As load spikes propagate, the chain-reaction score R rises in real time. When R crosses the operational boundary, the screen flashes red and SILENCE is declared. |
+
+> **Why this demo is different:**  
+> The waveform is not a static graph. It behaves like a real cascade failure: slow at first, then suddenly crossing the boundary. It also visualizes the dual-fluctuation structure, where the τ line begins to expand before the R peak becomes obvious.
 
 ---
 
-
 ### 🌿 STEP 6 — Band Gate: Real-World Domain Applications
 
-These demos apply the Band Gate (R = δ/τ) to physical measurement domains.
-Upper and lower thresholds are monitored simultaneously with **asymmetric EMA sensitivity** —
-the same formula detects both over-range (surge) and under-range (dropout) events.
+These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. Upper and lower limits are monitored independently, and asymmetric EMA sensitivity detects both overload and depletion.
 
 | # | File | Domain | Key Point |
-|---|------|--------|-----------|
-| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | Electricity / Temperature / Water / Pulse (JP) | **Asymmetric Damper** — upper τ expands (conservative), lower τ shrinks (sensitive). The animated damper on the left visualises how the two springs move in opposite directions. |
-| 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | Same — English edition | English labels and explanations. |
-| 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | Greenhouse Agriculture — 4 sensors (JP) | Irrigation Pressure · Temperature · CO₂ · Nutrient EC monitored simultaneously. Try the **🏜 Drought Simulation** to see multiple sensors fall together. |
-| 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | Same — English edition | English labels and explanations. |
-| 10 | [10_Field_DroughtGate_live_JP.html](./10_Field_DroughtGate_live_JP.html) | Outdoor Field — Drought Level Gauge (JP) | Soil Moisture · Ground Temp · Solar Radiation · Wind Speed. Drought Level **Lv.0–4** is calculated from a weighted composite R score. The **⛈ Storm-after-rain** scenario shows how EMA detects drying momentum *before* the value crosses the threshold — the feature current agricultural IoT systems lack entirely. |
+|---|---------|---------|---------|
+| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | Electricity, air temperature, water pressure, pulsation — JP | **Asymmetric damper structure.** Upper τ expands cautiously, lower τ shrinks sensitively. |
+| 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | Same — English | English labels and explanations. |
+| 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | Greenhouse agriculture, four-sensor monitoring — JP | Monitors irrigation pressure, air temperature, CO₂, and nutrient EC. |
+| 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | Same — English | English labels and explanations. |
+| 10 | [10_Field_DroughtGate_live_JP.html](./10_Field_DroughtGate_live_JP.html) | Outdoor field drought progression gauge — JP | Soil moisture, soil temperature, solar radiation, and wind speed. Composite R estimates drought level Lv.0–4. |
 
-> **Why current agri-IoT products cannot do this:**
-> Most commercial soil-sensor systems alert only when a value crosses a fixed threshold.
-> They have no concept of "momentum toward the boundary."
-> The EMA pre-detection demonstrated here is structurally absent from threshold-only designs.
-> This is the gap NRA-IDE closes.
+> **What current agricultural IoT often cannot do:**  
+> Most systems alert only after a fixed threshold has already been crossed. They do not represent “momentum toward the boundary.” NRA-IDE makes that boundary approach visible.
 
 ---
 
 ### ⚙️ STEP 7 — Advanced Domain Applications (11–16)
 
 | # | File | Content |
-|---|------|---------|
-| 11 | [11_Motor3Phase_BandGate_live_JP.html](./11_Motor3Phase_BandGate_live_JP.html) | **Three-phase motor Band Gate live monitoring.** Real-time R = δ/τ applied to three-phase motor load balance and overload detection. (JP) |
-| 12 | [12_agri_mol_antagonism_JP.html](./12_agri_mol_antagonism_JP.html) | **Agricultural ion monitoring + Mg²⁺/K⁺ antagonism chain Band Gate.** Andosol / general farmland profile switching. Dynamic τ with asymmetric EMA; Mg deficiency triggers linked K⁺ τ gate. (JP) |
-| 13 | [13_photosynthesis_layer5_JP.html](./13_photosynthesis_layer5_JP.html) | **Photosynthesis Layer 5 monitoring.** Farquhar-von Caemmerer-Berry (FvCB) model as external δ generator → R = δ/τ. Non-linear preprocessor as NRA-IDE Layer 5. (JP) |
-| 14 | [14_powergrid_transition_JP.html](./14_powergrid_transition_JP.html) | **Power grid transition / phase transition point.** Detects structural transition points in power grid state, where conventional threshold monitoring misses early divergence. (JP) |
-| 15 | [15_or_icu_continuum_JP.html](./15_or_icu_continuum_JP.html) | **OR/ICU continuum monitoring (cumulative state type).** Tracks accumulated deviation across surgical and ICU phases; R reflects ongoing structural burden, not just instantaneous values. (JP) |
-| 16 | [16_passive_safety_JP.html](./16_passive_safety_JP.html) | **Passive gravity-driven safety system.** Safety architecture that relies solely on physical constraints (gravity, tension) — no active control required to enter safe state. (JP) |
+|---|---------|------|
+| 11 | [11_Motor3Phase_BandGate_live_JP.html](./11_Motor3Phase_BandGate_live_JP.html) | **Three-phase motor Band Gate live monitor.** Applies R = δ/τ to load balance and overload detection. |
+| 12 | [12_agri_mol_antagonism_JP.html](./12_agri_mol_antagonism_JP.html) | **Agricultural ion monitoring + Mg²⁺/K⁺ antagonistic chain Band Gate.** Dynamic τ and asymmetric EMA. |
+| 13 | [13_photosynthesis_layer5_JP.html](./13_photosynthesis_layer5_JP.html) | **Photosynthesis Layer 5 monitor.** Uses the FvCB model as an external δ generator, then evaluates R = δ/τ. |
+| 14 | [14_powergrid_transition_JP.html](./14_powergrid_transition_JP.html) | **Power-grid transition-point monitor.** Detects early structural divergence missed by fixed thresholds. |
+| 15 | [15_or_icu_continuum_JP.html](./15_or_icu_continuum_JP.html) | **OR/ICU cumulative monitoring.** Tracks accumulated structural deviation across surgery and ICU phases. |
+| 16 | [16_passive_safety_JP.html](./16_passive_safety_JP.html) | **Passive gravity-driven safety system.** Transitions to a safe state by physical constraints without active control. |
 
 ---
 
 ### 🔬 STEP 8 — Physical State Transition Monitoring (17–22)
 
 | # | File | Content |
-|---|------|---------|
-| 17 | [17_water_ice_phase_transition_JP.html](./17_water_ice_phase_transition_JP.html) | **Water → ice phase transition.** NRA-IDE tracks the approach to the phase boundary (0°C); R rises as temperature and latent heat cross the structural threshold. (JP) |
-| 18 | [18_chain_tension_JP.html](./18_chain_tension_JP.html) | **Chain tension with polygon effect auto-adjustment.** Three-layer composite wave reproduces sprocket polygon effect. dR/dt predictive control intervenes before the limit is reached. (JP) |
-| 19 | [19_air_pressure_JP.html](./19_air_pressure_JP.html) | **Air pressure management (compressible fluid · dynamic τ · dual fluctuation).** τ_hi shrinks with temperature rise via Boyle–Charles law; δ and τ fluctuate independently. The deepest dual-fluctuation structure in the series. (JP) |
-| 20 | [20_water_pressure_JP.html](./20_water_pressure_JP.html) | **Water pressure management (incompressible fluid · fixed τ · water hammer).** Pump pulsation via three-layer harmonics; valve rapid closure generates water hammer (exponential decay × sine wave). (JP) |
-| 21 | [21_cabg_monitor_JP.html](./21_cabg_monitor_JP.html) | **CABG (coronary artery bypass graft) monitor.** Intraoperative monitoring of blood flow, pressure, and temperature for bypass surgery; Fail-Closed triggers surgical suspension recommendation. (JP) |
-| 22 | [22_vascular_monitor_JP.html](./22_vascular_monitor_JP.html) | **NRA-IDE Vascular Intervention Monitor.** Six physical quantities (pressure · shear · wall tension · flow · temperature · adhesion) monitored via Dual Fluctuation + Dynamic τ. Specialized for PTA, stent, anastomosis, cryotherapy. (JP) |
+|---|---------|------|
+| 17 | [17_water_ice_phase_transition_JP.html](./17_water_ice_phase_transition_JP.html) | **Water → ice phase transition.** Tracks approach to the 0°C phase boundary using R. |
+| 18 | [18_chain_tension_JP.html](./18_chain_tension_JP.html) | **Chain tension with polygon effect and automatic adjustment.** Uses dR/dt prediction before limit arrival. |
+| 19 | [19_air_pressure_JP.html](./19_air_pressure_JP.html) | **Air pressure management with compressible fluid and dynamic τ.** τ_hi shrinks with temperature via gas-law behavior. |
+| 20 | [20_water_pressure_JP.html](./20_water_pressure_JP.html) | **Water pressure management with incompressible fluid and water hammer.** Simulates pump pulsation and valve-closing impact. |
+| 21 | [21_cabg_monitor_JP.html](./21_cabg_monitor_JP.html) | **CABG monitor.** Monitors blood flow, pressure, and temperature during bypass surgery as an educational safety demo. |
+| 22 | [22_vascular_monitor_JP.html](./22_vascular_monitor_JP.html) | **Vascular intervention monitor.** Six physical quantities integrated with dual fluctuation and dynamic τ. |
 
 ---
 
 ### 🧩 STEP 9 — Advanced Features and Specific Domains (23–26)
 
 | # | File | Content |
-|---|------|---------|
-| 23 | [23_sample_demo_EN.html](./23_sample_demo_EN.html) / [JP](./23_sample_demo_JP.html) | **State boundary · short-term log · long-term reconstruction.** Demonstrates how NRA-IDE separates short-term fluctuation tracking from long-term structural trend reconstruction. |
-| 24 | [24_vehicle_mandatory_boundary_EN.html](./24_vehicle_mandatory_boundary_EN.html) / [JP](./24_vehicle_mandatory_boundary_JP.html) | **Autonomous driving mandatory boundary monitoring.** Physical quantity monitoring (time-to-collision, braking distance, lateral clearance); mandatory Fail-Closed when R ≥ 1.0 with no override path. |
-| 25 | [25_dam_degradation_EN.html](./25_dam_degradation_EN.html) / [JP](./25_dam_degradation_JP.html) | **Dam management comparison + τ degradation curve.** Compares conventional fixed-threshold monitoring vs. NRA-IDE τ degradation tracking. τ shrinks over time as structural margin erodes. |
-| 26 | [26_escapement_contactpoint_JP.html](./26_escapement_contactpoint_JP.html) | **Phase-gap engine — heat dissipation at contact points only.** Demonstrates that error/heat is generated only at phase-boundary contact, not throughout continuous computation. (JP) |
+|---|---------|------|
+| 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **State boundary, short-term logs, and long-term reconstruction.** Demonstrates separation of short-term fluctuation and long-term structural trend. |
+| 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **Autonomous-driving mandatory boundary demo.** Monitors collision time margin, braking distance, and lateral margin. |
+| 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **Dam management comparison + τ degradation curve.** Fixed-threshold monitoring vs NRA-IDE τ degradation tracking. |
+| 26 | [JP](./26_escapement_contactpoint_JP.html) / [EN](./26_escapement_contactpoint_EN_20260425_014259_JST.html) | **Phase-Gap Engine — heat release only at contact points.** Demonstrates that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. |
 
 ---
 
-### 🛠️ STEP 10 — Equipment Monitoring Fundamentals (27–32)
+### 🛠️ STEP 10 — Basic Equipment Monitoring (27–32)
 
-These demos apply R = δ/τ to common industrial and facility monitoring domains.
-Each demonstrates unit independence: the same formula structure manages fundamentally different physical quantities.
+These demos apply R = δ/τ to general equipment and facility monitoring domains. Across six demos, they demonstrate NRA-IDE’s **unit independence**: the same structural equation can manage fundamentally different physical quantities.
 
 | # | File | Domain | Key Point |
-|---|------|--------|-----------|
-| 27 | [27_belt_tension_JP.html](./27_belt_tension_JP.html) | Belt conveyor / V-belt tension | τ defined as full margin from optimum to limit → R naturally normalizes to [0,1]. Fail-Closed stops belt animation. (JP) |
-| 28 | [28_water_temp_JP.html](./28_water_temp_JP.html) | Water temperature upper/lower limits | R_hi and R_lo evaluated independently. Thermal convection fluctuation (3-frequency composite). Fail-Closed stops the opposing action direction. (JP) |
-| 29 | [29_light_lux_JP.html](./29_light_lux_JP.html) | Luminosity (illuminance) management | Measured in lux (receiver side). AUTO-SHADE increases shade ratio proportionally from R_hi > 0.75 — stepwise intervention from precursor stage. (JP) |
-| 30 | [30_power_JP.html](./30_power_JP.html) | Power management (V × I integration) | Current and voltage unified as P = V×I. Heat accumulation: prolonged excess power pushes R upward over time (temporal integral). (JP) |
-| 31 | [31_move_water_or_ice_JP.html](./31_move_water_or_ice_JP.html) | Water / ice phase navigation | Interactive phase transition control; slide between liquid and solid states while tracking R across the phase boundary. (JP) |
-| 32 | [32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html](./32_氷から水への相転移nra_ide_water_ice_20260324_2216_JP.html) | Ice → water phase transition | Reverse of Demo 17: tracks structural R as ice warms past 0°C and latent heat is absorbed during phase change. (JP) |
+|---|---------|---------|---------|
+| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN_20260425_011850_JST.html) | Belt conveyor / V-belt tension | Defines τ as the full margin from optimal value to structural limit. Fail-Closed stops the belt. |
+| 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN_20260425_012100_JST.html) | Water temperature upper/lower management | Evaluates R_hi and R_lo independently. |
+| 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN_20260425_012747_JST.html) | Light / illuminance management | Measures the receiving side in lux and increases shading from the precursor stage. |
+| 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN_20260425_012956_JST.html) | Power management using V × I | Integrates voltage and current as P = V × I; sustained over-power raises R over time. |
+| 31 | [JP](./31_move_water_or_ice_JP.html) / [EN](./31_move_water_or_ice_EN_20260425_013623_JST.html) | Water/ice state navigation | Interactive phase-transition navigation while tracking R at the boundary. |
+| 32 | [JP](./32_nra_ide_water_ice_20260324_2216_JP.html) / [EN](./32_nra_ide_ice_water_EN_20260425_013818_JST.html) | Ice → water phase transition | Reverse direction of Demo 17: ice absorbs latent heat after crossing 0°C. |
 
 ---
 
 ### 🔭 Standalone Demos
 
 | File | Content |
-|------|---------|
-| [nra_ide_6d_layer_viz_2026-03-21_1237.html](./nra_ide_6d_layer_viz_2026-03-21_1237.html) | **6D multi-layer visualizer.** Six simultaneous R-value surfaces with transparency, saturation, and black-and-white mode. Each layer = one physical domain's fluctuation × threshold plane. Time axis shows structural approach to Fail-Closed across all dimensions simultaneously. |
-| [NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) / [JP](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) | **Agricultural Drone 4-Factor Simulation.** NRA-IDE applied to agro-drone field monitoring: four simultaneous physical factors tracked with R = δ/τ. Fail-Closed triggers when any factor breaches structural limits. |
+|---------|------|
+| [JP](./33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html) / [EN](./33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html) | **6D multi-layer visualizer.** Displays six R-value surfaces simultaneously. Opacity, saturation, and monochrome modes are available. |
 
 ---
 
-## Integration Guide
+### 🔗 STEP 11 — Correlation and Multi-Factor Templates (34–41)
 
-To integrate the control logic into your own program,
-simply define the "Deviation (δ)" and "Tolerance (τ)" of the control target.
+From Demo 34 onward, the sample set develops from single-quantity R judgment into multi-layer correlation, mediated variables, closed loops, and individual baseline differences. The basic safety form is **R_total = max(R_i, R_corr, R_coupling)** so that a dangerous layer is not diluted by averaging. Medical examples are kept as **Medical Education Templates**, not operational clinical systems.
+
+| # | File | Domain | Key Point |
+|---|---------|---------|---------|
+| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | Seedling greenhouse / agro-drone four-factor correlation | Tracks temperature, humidity, light, and water with R = δ/τ. Combines correlation matrix C[i][j](t), residual gate G(r), and delayed observed record x_{t-τ}. |
+| 35 | [JP](./35_rotor_bearing_correlation_JP_20260425_024602_JST.html) / [EN](./35_rotor_bearing_correlation_EN_20260425_160443_JST.html) | Rotor / bearing correlation | Monitors vibration, bearing temperature, current, lubrication pressure, acoustic noise, and RPM deviation. Vibration leads, then temperature/current/noise follow. |
+| 36 | [JP](./36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html) / [EN](./36_battery_thermal_runaway_correlation_EN_20260425_160443_JST.html) | Battery thermal runaway correlation | Treats internal resistance and dT/dt as leading indicators, then shows propagation to temperature, swelling pressure, and voltage deviation. Educational visualization only, not real control. |
+| 37 | [JP](./37_greenhouse_vpd_correlation_JP_FIXED_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | Greenhouse VPD-mediated correlation | Does not simply add temperature and humidity. VPD acts as a mediator layer, propagating correlation pressure to soil water, CO₂, light, and EC. |
+| 38 | [JP](./38_datacenter_cascade_correlation_JP_20260425_032611_JST.html) / [EN](./38_datacenter_cascade_correlation_EN_20260425_160443_JST.html) | Datacenter cascade correlation | Connects CPU load, power, rack temperature, inlet temperature, fan rate, airflow, and latency. Visualizes the positive feedback loop power → heat → fan → power. |
+| 39 | [JP](./39_coldchain_temperature_correlation_JP_20260425_033809_JST.html) / [EN](./39_coldchain_temperature_correlation_EN_20260425_160443_JST.html) | Cold-chain temperature excursion correlation | Connects ambient temperature, cargo temperature, door opening, compressor load, battery level, humidity, and delivery delay. Shows the mediation chain ambient + door → compressor reserve → cargo temperature. |
+| 40 | [JP](./40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html) / [EN](./40_medical_education_individual_stratification_template_EN_20260425_160443_JST.html) | Medical education / individual stratification | Uses synthetic data for SpO₂, respiratory rate, heart rate, systolic BP, and temperature. Visualizes individual reserve differences via profile pressure from age, frailty, and chronic background. Not diagnosis or treatment. |
+| 41 | [JP](./41_medical_education_infection_observation_template_JP_20260425_040544_JST.html) / [EN](./41_medical_education_infection_observation_template_EN_20260425_160443_JST.html) | Medical education / infection observation cohort | Uses synthetic data for fever, respiration, circulation, hydration, and inflammation-like markers. Sorts individuals into Observe / Watch / Caution / Human Review without disease naming or treatment recommendation. |
+
+---
+
+## How to Embed
+
+Physical control begins by defining the target’s deviation (δ) and tolerance thickness (τ).
 
 ```javascript
-// Minimal Configuration Example
+// Minimal example
 function gate(delta, tau) {
     const R = delta / tau;
-    if (R >= 1.0) return "STOP";   // FAIL_CLOSED
+    if (R >= 1.0) return "FAIL_CLOSED";
     return "SAFE";
 }
 ```
 
-**Implementation Example: Medical AI (Cancer Drug Delivery Control)**
+**Implementation example: medical AI support**
 ```javascript
-// Physically verify the reachability of the drug to the tumor
-const tumorResistance = measureResistance();  // δ (Resistance of the tumor)
-const infusionPressure = getPumpCapacity();   // τ (Infusion pressure of the pump)
+// Physically verify drug delivery reachability
+const tumorResistance = measureResistance();  // δ: tumor-side resistance
+const infusionPressure = getPumpCapacity();   // τ: available pump pressure
 
 const deliveryStatus = gate(tumorResistance, infusionPressure);
 
-if (deliveryStatus === "STOP") {
-    alert("Physical unreachability detected. Physician judgment required.");
-    // AI stops judgment and delegates the final decision to the human (doctor).
+if (deliveryStatus === "FAIL_CLOSED") {
+    alert("Physical reachability failure detected. Human medical judgment is required.");
+    // AI stops judgment and transfers authority to a qualified human.
 }
 ```
 
-Specific implementation patterns are documented within the source code of each demo.
+Specific implementation patterns are documented inside each demo source file.
 
 ---
 
-## Areas of Application
+## Application Areas
 
 ### 🏥 Medical AI
-- **Challenge:** Uncertainty of drug reachability to tumors.
-- **NRA Solution:** Verification of physical integrity of the administration route.
-- **Threshold:** R = (Tumor Resistance) / (Infusion Pressure)
+- **Problem:** Uncertainty of physical drug reachability to the target.
+- **NRA solution:** Verify physical consistency of the delivery path.
+- **Threshold:** R = target-side resistance / delivery pressure.
 
 ### 🚗 Autonomous Driving
-- **Challenge:** Safety issues due to black-box decision making.
-- **NRA Solution:** Verification of structural constraints for collision avoidance.
-- **Threshold:** R = (Time Margin to Collision) / (Braking Capability)
+- **Problem:** Safety issues caused by black-box decisions.
+- **NRA solution:** Verify structural constraints for collision avoidance.
+- **Threshold:** R = obstacle margin / braking capability.
 
 ### 🖥️ Infrastructure Resilience
-- **Challenge:** Cascade failures in distributed systems.
-- **NRA Solution:** Prevention of failure propagation via load limit monitoring.
-- **Threshold:** R = (Load Excess) / (Buffer Capacity)
+- **Problem:** Cascade failure in distributed systems.
+- **NRA solution:** Prevent propagation by monitoring load-limit approach.
+- **Threshold:** R = excess load / buffer capacity.
 
-| Area | δ (Deviation) | τ (Tolerance) | Meaning of R ≥ 1.0 |
-|------|---------------|---------------|--------------------|
-| Medical AI | Tumor Resistance | Infusion Pressure | Drug physically cannot reach target. |
-| Autonomous | Obstacle Margin | Braking Distance | Collision Danger → Emergency Stop. |
-| Infra | Load Excess | Buffer Size | Server Overload → Cutoff/Throttling. |
+| Area | δ (Deviation from constraint) | τ (Tolerance thickness) | Meaning of R ≥ 1.0 |
+|------|-------------------------------|--------------------------|--------------------|
+| Medical AI | Target-side resistance | Delivery pressure | The drug physically cannot reach the target |
+| Autonomous driving | Obstacle time/distance margin | Braking distance/capability | Collision danger → emergency stop |
+| Infrastructure | Excess load | Buffer capacity | Server overload → isolation |
 
 ---
 
 ## License
 
+Redistribution must preserve the following copyright notice:
+
 **Copyright (c) 2026 M-Tokuni**
 
-This project is provided under the **MIT License** — free to use, modify, and distribute
-for research, personal, and commercial purposes.
-Attribution is required in all redistributed materials and source code:
+This project is provided under the **MIT License**. It may be used, modified, and redistributed for research, personal, and commercial purposes, subject to the license terms.
 
-```javascript
-// Powered by NRA-IDE. (c) 2026 M-Tokuni.
-// Principle: L∧P∧C∧D Verified.
-```
-
-**Before using this project, you must read the Ethical Guidelines.**
-Prohibited uses (weapons, surveillance, inverse derivation Π⁻¹, unverified safety-critical systems, etc.)
-are defined independently in:
-
-👉 **[ETHICS.md](../../theory/ETHICS.md)**
-
-See **[LICENSE](../../LICENSE)** for full license terms.
-
-**Principle Verification:** L∧P∧C∧D (Logic ∧ Physics ∧ Causality ∧ Determinism)
-
----
-
-## Author
-
-**M-Tokuni**  
-Theory: Nomological Ring Axioms / Intensional Dynamics Engine
+For the latest information, see the official repository:
 
 - **GitHub:** https://github.com/M-Tokun/NRA-IDE
-- **Twitter/X:** https://x.com/m_tokuni
+
+---
+
 - **Facebook:** https://www.facebook.com/tokuni.masa
 - **Note:** https://note.com/mtokuni
-- **Blog:** https://mtokuni.blogspot.com/
-- **Hatena:** https://mtokuni.hatenablog.com/
-
----
-
-## Citation
-
-```
-M-Tokuni (2026). NRA-IDE: Nomological Ring Axioms — Intensional Dynamics Engine.
-GitHub. https://github.com/M-Tokun/NRA-IDE
-```
-
----
-
-## Detailed Documentation
-
-- **Theoretical Basis:** [`/theory/THEORY.md`](../../theory/THEORY.md)
-- **Foundational Thesis:** [`/theory/Foundational_Thesis.md`](../../theory/Foundational_Thesis.md)
-- **Ethical Guidelines:** [`/theory/ETHICS.md`](../../theory/ETHICS.md)
-- **Core Implementation:** [`/nra-core/`](../../nra-core/)
-- **Unified Definition:** [`NRA-IDE_The_Gate_Axioms_Unified_Definition.md`](../../docs/)
-
----
-
-For the latest information, please check the official repository.

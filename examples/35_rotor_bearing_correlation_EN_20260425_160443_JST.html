@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<!-- FILE: 35_rotor_bearing_correlation_EN_20260425_160443_JST.html -->
+<!-- TITLE: NRA-IDE Rotor/Bearing Correlation Simulation -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-25 16:04:43 JST -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NRA-IDE Rotor/Bearing Correlation Simulation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+:root {
+  --bg:#050914; --s1:#0b1220; --s2:#111b2a; --bd:#24344c;
+  --tx:#d6e4f2; --mu:#62768a; --ok:#3dff9c; --watch:#69d6ff;
+  --warn:#ffd24a; --fail:#ff315f; --accent:#58d7ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(88,215,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(88,215,255,.025) 1px,transparent 1px);background-size:34px 34px;pointer-events:none;}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 36px;}
+header{text-align:center;margin-bottom:24px;}
+.h-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.78;margin-bottom:10px;}
+h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{font-style:normal;color:#58d7ff;}
+.h-desc{font-size:.86rem;color:var(--mu);line-height:1.75;max-width:920px;margin:0 auto;}
+.notice{border:1px solid rgba(255,210,74,.34);background:rgba(255,210,74,.055);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#e8d89d;font-size:.78rem;line-height:1.72;}
+.ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+button,.select{padding:8px 14px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;font-family:Inter,system-ui,sans-serif;}
+button:hover,.select:hover{border-color:var(--accent);color:var(--accent);}
+button.active{background:var(--accent);color:#001018;border-color:var(--accent);font-weight:700;}
+.label{font-size:.8rem;color:var(--mu);}
+.scen{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+.formula{background:var(--s1);border:1px solid rgba(88,215,255,.45);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:2;}
+.formula .a{color:var(--accent)} .formula .b{color:var(--warn)} .formula .c{color:var(--ok)} .formula .f{color:var(--fail)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.stats{grid-template-columns:1fr;}}
+.stat{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
+.stat-v{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
+.stat-s{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
+@media(max-width:980px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
+.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:980px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
+.fc{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:.25s;}
+.fc.warn{border-color:var(--warn)} .fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,.05)}to{box-shadow:0 0 16px rgba(255,49,95,.28)}}
+.badge{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;letter-spacing:.08em;}
+.b-ok{background:rgba(61,255,156,.10);color:var(--ok);border:1px solid rgba(61,255,156,.30)} .b-watch{background:rgba(105,214,255,.10);color:var(--watch);border:1px solid rgba(105,214,255,.30)} .b-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35)} .b-fail{background:rgba(255,49,95,.14);color:var(--fail);border:1px solid rgba(255,49,95,.45)}
+.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:700;margin-bottom:8px;}
+.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
+.fc-lbl{color:var(--mu)} .fc-r{font-size:.98rem;font-weight:700}
+.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.bar{height:100%;border-radius:2px;transition:.25s;}
+.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
+.visual{height:330px;background:radial-gradient(circle at 50% 22%, rgba(255,49,95,.12), transparent 34%),linear-gradient(180deg,rgba(88,215,255,.06),rgba(255,210,74,.04)),var(--s2);border:1px solid var(--bd);border-radius:12px;position:relative;overflow:hidden;}
+.visual-title{position:absolute;left:18px;top:16px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;}
+.rings{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;border:2px solid rgba(88,215,255,.18);}
+.rings::before,.rings::after{content:'';position:absolute;inset:28px;border-radius:50%;border:1px dashed rgba(255,210,74,.24);}
+.rings::after{inset:66px;border-color:rgba(255,49,95,.30);}
+.dot{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);left:calc(50% - 8px);top:calc(50% - 8px);transform:rotate(var(--ang)) translateX(var(--rad));transform-origin:center;opacity:.9;}
+.pressure{position:absolute;left:22px;right:22px;bottom:44px;height:10px;background:var(--bd);border-radius:5px;overflow:hidden;}
+.pressure-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--fail));transition:.25s;}
+.visual-status{position:absolute;left:18px;bottom:18px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);}
+.visual-note{position:absolute;right:18px;bottom:18px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.70rem;color:var(--warn);line-height:1.7;}
+.corr-grid{display:grid;grid-template-columns:repeat(var(--ncols),1fr);gap:3px;}
+.corr-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.50rem;font-weight:600;transition:.25s;}
+.corr-head{background:transparent;color:var(--mu);font-size:.48rem;line-height:1.1;text-align:center;}
+.chain{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;}
+.chain-flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+.node{border:1px solid var(--bd);background:rgba(255,255,255,.025);border-radius:9px;padding:10px 8px;text-align:center;min-height:72px;}
+.node-name{font-size:.70rem;color:var(--mu);margin-bottom:5px} .node-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700}
+.arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.25rem}
+.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.coup-row{display:flex;align-items:center;gap:10px} .coup-name{font-size:.74rem;min-width:118px;color:var(--tx)} .coup-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden} .coup-bar{height:100%;border-radius:4px;transition:.25s} .coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right}
+canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap} .legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem}
+.log{height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
+.log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)}
+.footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="h-sub">NRA-IDE / ROTATING MACHINERY CORRELATION SAMPLE</div>
+  <h1>Rotor / Bearing <em>Correlation</em> Simulation</h1>
+  <p class="h-desc">A six-factor educational simulation for rotating machinery: vibration, bearing temperature, motor current, lubrication pressure, acoustic noise, and RPM deviation. Vibration leads, heat and current follow, and correlation drift is kept as an independent R value.</p>
+</header>
+
+<div class="notice">Educational and structural visualization only. This file is not a certified machine protection system and must not be used for real industrial shutdown decisions.</div>
+
+<div class="ctrl">
+  <button class="active" id="btn-run" onclick="toggleRun()">▶ Running</button>
+  <button onclick="resetSim()">↺ Reset</button>
+  <span class="label">Scenario:</span>
+  <select class="select" id="scenario-sel" onchange="applyScenario()"></select>
+  <span class="scen" id="scen-desc">Normal operation</span>
+</div>
+
+<div class="formula">
+  <span class="a">R_i = δ_i / τ_i(t)</span> — structural ratio per factor |
+  <span class="b">R_corr = |C(t)-C(t₀)| / τ_C</span> — correlation drift |
+  <span class="c">R_coupling tracks vibration → heat/current/noise propagation</span> |
+  <span class="f">R_total = max(R_i, R_corr, R_coupling)</span>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-l">SYSTEM R_TOTAL</div><div class="stat-v" id="r-total">0.000</div><div class="stat-s" id="r-status">SAFE — structural margin remains</div></div>
+  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">vibration / lubrication / thermal coupling</div></div>
+  <div class="stat"><div class="stat-l">R_CORR MAX</div><div class="stat-v" id="r-corr">0.000</div><div class="stat-s">maximum correlation drift</div></div>
+  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v" id="scenario-code" style="font-size:1.35rem">NORMAL</div><div class="stat-s">synthetic data only</div></div>
+</div>
+
+<div class="grid">
+  <div class="panel"><div class="panel-title">FACTOR STATE — R_i = δ_i / τ_i(t)</div><div class="factor-grid" id="factor-grid"></div></div>
+  <div class="panel">
+    <div class="panel-title">STRUCTURAL VISUALIZATION</div>
+    <div class="visual">
+      <div class="visual-title">SYNTHETIC ROTOR / BEARING VIEW</div>
+      <div class="rings" id="rings"></div>
+      <div id="dots"></div>
+      <div class="pressure"><div class="pressure-fill" id="pressure-fill"></div></div>
+      <div class="visual-status" id="visual-status">● SAFE</div>
+      <div class="visual-note" id="visual-note">vibration → heat → current</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">MEDIATION / COUPLING LAYER</div>
+    <div class="chain">
+      <div class="chain-flow">
+        <div class="node"><div class="node-name" id="node-a-name">Vibration</div><div class="node-val" id="node-a">0.000</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="node-name" id="node-b-name">Lubrication</div><div class="node-val" id="node-b">0.000</div></div>
+        <div class="arrow">⇒</div>
+        <div class="node"><div class="node-name" id="node-c-name">Thermal load</div><div class="node-val" id="node-c">0.000</div></div>
+      </div>
+      <div style="font-size:.74rem;color:var(--mu);line-height:1.7;">The sample shows delayed coupling: vibration rises first, then temperature, current, and acoustic noise follow. The overall decision is not averaged.</div>
+      <div class="coupling-list" id="coupling-list"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
+    <div id="corr-matrix"></div>
+    <div id="corr-alert" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ Correlation stable.</div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">TIME SERIES — R VALUES</div>
+    <canvas id="chart" width="590" height="152"></canvas>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">GATE LOG</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span>35_rotor_bearing_correlation_EN</span>
+  <span>R_total=max(R_i,R_corr,R_coupling) / no averaging dilution</span>
+</div>
+</div>
+
+<script>
+const FACTORS = [{"id":"vibration","name":"Vibration","short":"VIB","unit":"mm/s","opt":2.5,"tau":3.0,"min":0,"max":14,"dir":"hi","amp":0.5,"weight":0.32,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.05,"fmt":"2","desc":"Leading indicator of imbalance or bearing damage.","corr_base":[1,0.55,0.35,0.25,0.3,0.2]},{"id":"bearingTemp","name":"Bearing Temp","short":"TEMP","unit":"℃","opt":58,"tau":22,"min":25,"max":115,"dir":"hi","amp":1.8,"weight":0.25,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.9,"desc":"Delayed heat response after vibration or lubrication stress.","corr_base":[0.55,1,0.5,0.3,0.4,0.25]},{"id":"current","name":"Motor Current","short":"AMP","unit":"A","opt":42,"tau":26,"min":10,"max":120,"dir":"hi","amp":2.2,"weight":0.2,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.6,"desc":"Load response from friction or mechanical resistance.","corr_base":[0.35,0.5,1,0.45,0.55,0.3]},{"id":"oilPressure","name":"Lubrication Pressure","short":"OIL","unit":"kPa","opt":420,"tau":95,"min":120,"max":650,"dir":"lo","amp":10,"weight":0.23,"group":"supply","shrink":"supply","coupledBy":"supply","coupledGain":-1.8,"fmt":"int","desc":"Low-side margin for lubrication loss.","corr_base":[0.25,0.3,0.45,1,0.5,0.42]},{"id":"acoustic","name":"Acoustic Noise","short":"NOISE","unit":"dB","opt":62,"tau":18,"min":40,"max":110,"dir":"hi","amp":2.4,"weight":0.18,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.4,"desc":"Secondary signature of vibration and contact instability.","corr_base":[0.3,0.4,0.55,0.5,1,0.48]},{"id":"rpmDev","name":"RPM Deviation","short":"RPM","unit":"%","opt":0,"tau":8,"min":-20,"max":25,"dir":"both","amp":1.0,"weight":0.16,"group":"supply","shrink":"main","coupledBy":"main","coupledGain":0.04,"desc":"Deviation from commanded rotation speed.","corr_base":[0.2,0.25,0.3,0.42,0.48,1]}];
+const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable operation within structural margin.","drift":{},"amp":{}},"imbalance":{"label":"Rotor imbalance","desc":"Vibration leads; noise and temperature follow.","drift":{"vibration":5,"acoustic":12,"bearingTemp":10,"current":8,"rpmDev":3},"pressureBoost":0.1,"corrBoost":0.08},"lubrication":{"label":"Lubrication loss","desc":"Oil pressure drops and bearing heat rises.","drift":{"oilPressure":-150,"bearingTemp":18,"vibration":3,"current":10,"acoustic":10},"pressureBoost":0.18,"corrBoost":0.1},"overload":{"label":"Overload","desc":"Current and heat rise with load.","drift":{"current":35,"bearingTemp":16,"vibration":2,"rpmDev":5},"pressureBoost":0.16,"corrBoost":0.08},"resonance":{"label":"Resonance","desc":"Vibration and acoustic noise couple strongly.","drift":{"vibration":7,"acoustic":24,"rpmDev":8,"bearingTemp":8},"pressureBoost":0.22,"corrBoost":0.12},"cascade":{"label":"Cascade","desc":"Multiple factors couple into a fail-closed path.","drift":{"vibration":8,"bearingTemp":32,"current":45,"oilPressure":-170,"acoustic":26,"rpmDev":11},"pressureBoost":0.35,"corrBoost":0.22}};
+const COLORS = ["#58d7ff","#ff7a1a","#ffd24a","#39ff85","#ff4fb0","#b58cff"];
+const HIST_LEN = 136;
+const tauC = 0.24;
+let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
+let vals = {};
+let history = FACTORS.map(()=>[]);
+let prevZone = FACTORS.map(()=>'ok');
+let corrBase = FACTORS.map(f => [...f.corr_base]);
+
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
+function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
+function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
+function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
+function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
+function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
+
+function init(){
+  Object.keys(SCENARIOS).forEach(k=>{
+    const opt=document.createElement('option'); opt.value=k; opt.textContent=SCENARIOS[k].label; document.getElementById('scenario-sel').appendChild(opt);
+  });
+  FACTORS.forEach(f=>vals[f.id]=f.opt);
+  buildFactorCards(); buildCorrMatrix(); buildCouplingList(); buildDots(); resetSim();
+}
+function buildFactorCards(){
+  const root=document.getElementById('factor-grid'); root.innerHTML='';
+  FACTORS.forEach((f,i)=>{
+    const card=document.createElement('div'); card.className='fc'; card.id='fc-'+i;
+    card.innerHTML=`<div class="badge b-ok" id="badge-${i}">SAFE</div>
+      <div class="fc-name">${f.name}</div><div class="fc-val" id="val-${i}" style="color:${COLORS[i%COLORS.length]}">—</div>
+      <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="barbg"><div class="bar" id="bar-${i}"></div></div>
+      <div class="fc-desc">${f.desc}</div>`;
+    root.appendChild(card);
+  });
+}
+function buildCorrMatrix(){
+  const root=document.getElementById('corr-matrix'); root.innerHTML='';
+  const n=FACTORS.length+1; const grid=document.createElement('div'); grid.className='corr-grid'; grid.style.setProperty('--ncols', n);
+  grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
+  FACTORS.forEach(f=>grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
+  FACTORS.forEach((fi,i)=>{ grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`; FACTORS.forEach((_,j)=>grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`); });
+  root.appendChild(grid);
+}
+function buildCouplingList(){
+  const root=document.getElementById('coupling-list'); root.innerHTML='';
+  ["Vibration pressure","Thermal pressure","Lubrication pressure","Correlation pressure"].forEach((row,idx)=>{
+    root.innerHTML += `<div class="coup-row"><div class="coup-name">${row}</div><div class="coup-bg"><div class="coup-bar" id="cbar-${idx}" style="background:${COLORS[idx%COLORS.length]};width:0%"></div></div><div class="coup-val" id="cval-${idx}">0.000</div></div>`;
+  });
+}
+function buildDots(){
+  const root=document.getElementById('dots'); root.innerHTML='';
+  FACTORS.forEach((f,i)=>{
+    const dot=document.createElement('div'); dot.className='dot'; dot.id='dot-'+i; dot.style.background=COLORS[i%COLORS.length]; dot.style.boxShadow=`0 0 18px ${COLORS[i%COLORS.length]}`; dot.style.setProperty('--ang', (i*360/FACTORS.length)+'deg'); dot.style.setProperty('--rad','70px'); root.appendChild(dot);
+  });
+}
+
+function pressure(){
+  let p=0, thermal=0, supply=0;
+  FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
+  const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
+  return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
+}
+function dynamicTau(f){
+  const p=pressure(); let shrink=1;
+  if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
+  if(f.shrink==='thermal') shrink -= Math.min(.56, p.thermal*.20 + p.main*.08);
+  if(f.shrink==='supply') shrink -= Math.min(.50, p.supply*.18 + p.main*.08);
+  return Math.max(f.tau*shrink, f.tau*.35);
+}
+function calcR(f){ const d=delta(vals[f.id],f); const tau=dynamicTau(f); return {delta:d,tau,R:d/tau}; }
+
+function updateValues(){
+  tick++;
+  const sc=SCENARIOS[scenario]; const ramp=Math.min(1,tick/90);
+  FACTORS.forEach((f,i)=>{
+    let base=f.opt, drift=(sc.drift&&sc.drift[f.id]||0)*ramp, amp=(sc.amp&&sc.amp[f.id]||f.amp||1);
+    let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
+    vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
+  });
+  // Optional derived VPD for greenhouse sample.
+  if(FACTORS.some(f=>f.id==='vpd') && vals.temp!==undefined && vals.humidity!==undefined){
+    const es = 0.6108 * Math.exp((17.27*vals.temp)/(vals.temp+237.3));
+    vals.vpd = clamp(es*(1-vals.humidity/100), 0, 4);
+  }
+  const p=pressure();
+  FACTORS.forEach(f=>{
+    if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
+    if(f.coupledBy==='thermal') vals[f.id]=clamp(vals[f.id] + p.thermal*(f.coupledGain||0), f.min, f.max);
+    if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
+  });
+}
+function calcCorr(){
+  const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
+  for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
+  return C;
+}
+function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
+
+function setStatusText(el,R,base){ el.textContent = R>=1?'FAIL-CLOSED — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
+function updateUI(){
+  const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
+  FACTORS.forEach((f,i)=>{
+    const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();
+    const z=zoneFor(r.R), [bt,bc]=badgeFor(r.R), col=colorFor(r.R);
+    document.getElementById('val-'+i).textContent=fmt(vals[f.id],f);
+    document.getElementById('delta-'+i).textContent=(f.fmt==='int'?Math.round(r.delta).toLocaleString():f.fmt==='2'?r.delta.toFixed(2):f.fmt==='3'?r.delta.toFixed(3):r.delta.toFixed(1))+f.unit;
+    document.getElementById('tau-'+i).textContent=(f.fmt==='int'?Math.round(r.tau).toLocaleString():f.fmt==='2'?r.tau.toFixed(2):f.fmt==='3'?r.tau.toFixed(3):r.tau.toFixed(1))+f.unit;
+    document.getElementById('r-'+i).textContent=r.R.toFixed(3); document.getElementById('r-'+i).style.color=col;
+    document.getElementById('bar-'+i).style.width=Math.min(100,r.R*100).toFixed(1)+'%'; document.getElementById('bar-'+i).style.background=col;
+    document.getElementById('badge-'+i).textContent=bt; document.getElementById('badge-'+i).className='badge '+bc;
+    document.getElementById('fc-'+i).className='fc'+(r.R>=1?' fail':r.R>=.75?' warn':'');
+    document.getElementById('dot-'+i).style.setProperty('--rad', (60+Math.min(90,r.R*70)).toFixed(1)+'px');
+    if(prevZone[i]!==z){ addLog(`${f.name} moved to ${z.toUpperCase()} R=${r.R.toFixed(3)}`, z==='fail'?'fail':z==='warn'?'warn':z==='watch'?'watch':'ok'); prevZone[i]=z; }
+  });
+  for(let i=0;i<FACTORS.length;i++) for(let j=0;j<FACTORS.length;j++){ const cell=document.getElementById(`cm-${i}-${j}`); const v=C[i][j]; const rij=i!==j?Math.abs(v-corrBase[i][j])/tauC:0; if(i===j){cell.style.background='rgba(88,215,255,.14)';cell.style.color='var(--accent)';cell.textContent='1.00';} else if(rij>=1){cell.style.background='rgba(255,49,95,.44)';cell.style.color='#ffb2c4';cell.textContent=v.toFixed(2);} else if(rij>=.75){cell.style.background='rgba(255,210,74,.25)';cell.style.color='var(--warn)';cell.textContent=v.toFixed(2);} else {cell.style.background=`rgba(61,255,156,${v*.25})`;cell.style.color=`rgba(255,255,255,${.35+v*.5})`;cell.textContent=v.toFixed(2);} }
+  document.getElementById('r-total').textContent=total.toFixed(3); document.getElementById('r-total').style.color=colorFor(total); setStatusText(document.getElementById('r-status'),total,'SAFE — structural margin remains');
+  document.getElementById('r-coupling').textContent=p.main.toFixed(3); document.getElementById('r-coupling').style.color=colorFor(p.main);
+  document.getElementById('r-corr').textContent=cr.max.toFixed(3); document.getElementById('r-corr').style.color=colorFor(cr.max);
+  document.getElementById('pressure-fill').style.width=Math.min(100,total*100).toFixed(1)+'%';
+  document.getElementById('visual-status').textContent=total>=1?'✕ FAIL_CLOSED':total>=.75?'▲ WARNING':total>=.4?'● WATCH':'● SAFE';
+  document.getElementById('visual-status').style.color=colorFor(total);
+  document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
+  [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });
+  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div style="color:var(--fail)">⚠ ${a}</div>`).join('') : `<span style="color:var(--ok)">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
+  if(cr.alerts.length && tick%24===0) addLog('Correlation drift detected: '+cr.alerts[0],'fail');
+  drawChart(); 
+}
+function drawChart(){
+  const cv=document.getElementById('chart'), ctx=cv.getContext('2d'), W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#111b2a'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#24344c'; [0.4,.75,1].forEach(r=>{const y=H-r/1.6*(H-24)-10; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();});
+  const fy=H-1/1.6*(H-24)-10; ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(255,49,95,.55)'; ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke(); ctx.setLineDash([]);
+  history.forEach((hist,i)=>{ if(hist.length<2)return; ctx.strokeStyle=COLORS[i%COLORS.length]; ctx.lineWidth=1.7; ctx.beginPath(); hist.forEach((v,x)=>{const px=x/(HIST_LEN-1)*W, py=H-Math.min(v,1.6)/1.6*(H-24)-10; x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}); ctx.stroke(); });
+  ctx.fillStyle='rgba(255,49,95,.75)'; ctx.font='10px JetBrains Mono, monospace'; ctx.fillText('R=1.0',6,fy-4);
+}
+function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span style="color:rgba(255,49,95,.75)">- - Fail</span>'; }
+function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
+function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
+function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
+function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
+function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Rotor/Bearing Correlation Simulation initialized.','ok'); updateUI(); }
+buildLegend(); init(); setInterval(update,300);
+</script>
+</body>
+</html>

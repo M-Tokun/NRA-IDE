@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<!-- FILE: 40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html -->
+<!-- TITLE: NRA-IDE 医療教育用 個体別振り分けテンプレート -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-25 04:01:10 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NRA-IDE Medical Education Individual Stratification Template JP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg:#071019;
+  --s1:#0d1722;
+  --s2:#12202d;
+  --s3:#192b3d;
+  --bd:#294158;
+  --tx:#d7e6f2;
+  --mu:#71879a;
+  --ok:#45ff9e;
+  --watch:#69d6ff;
+  --warn:#ffd45a;
+  --fail:#ff4d73;
+  --accent:#7ee3ff;
+  --p1:#63d8ff;
+  --p2:#ffb862;
+  --p3:#8bff83;
+  --p4:#ff8fca;
+  --p5:#ffe86c;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(126,227,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(126,227,255,0.025) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:28px 20px 36px;}
+
+header{text-align:center;margin-bottom:24px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.82;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{font-style:normal;color:var(--warn);}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.75;}
+
+.notice{
+  border:1px solid rgba(255,212,90,.35);
+  background:rgba(255,212,90,.06);
+  border-left:4px solid var(--warn);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#eedfa1;
+  font-size:.78rem;
+  line-height:1.74;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);
+  color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#00151d;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:7px;
+  color:var(--tx);font-family:'Noto Sans JP',sans-serif;font-size:.82rem;cursor:pointer;
+}
+.scen-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(126,227,255,.42);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--watch);}
+.eq-c{color:var(--warn);}
+.eq-f{color:var(--fail);}
+
+.top-stats{
+  display:grid;
+  grid-template-columns:1.15fr 1fr 1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:1120px){.top-stats{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:640px){.top-stats{grid-template-columns:1fr 1fr;}}
+.stat-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;
+}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
+.stat-sub{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.main-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;margin-bottom:16px;}
+@media(max-width:1040px){.main-grid{grid-template-columns:1fr;}}
+.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
+.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
+
+.patient-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:1040px){.patient-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.patient-grid{grid-template-columns:1fr;}}
+
+.pcard{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  position:relative;
+  transition:.2s;
+  cursor:pointer;
+}
+.pcard.selected{outline:2px solid var(--accent);box-shadow:0 0 0 1px rgba(126,227,255,.35) inset;}
+.pcard.warn{border-color:var(--warn);}
+.pcard.fail{border-color:var(--fail);animation:pulse .7s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,77,115,.05);}to{box-shadow:0 0 16px rgba(255,77,115,.22);}}
+.pbadge{
+  position:absolute;right:10px;top:10px;
+  font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;
+}
+.b-ok{background:rgba(69,255,158,.10);border:1px solid rgba(69,255,158,.30);color:var(--ok);}
+.b-watch{background:rgba(105,214,255,.10);border:1px solid rgba(105,214,255,.30);color:var(--watch);}
+.b-warn{background:rgba(255,212,90,.10);border:1px solid rgba(255,212,90,.35);color:var(--warn);}
+.b-fail{background:rgba(255,77,115,.12);border:1px solid rgba(255,77,115,.40);color:var(--fail);}
+.pid{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-bottom:4px;}
+.pname{font-size:.95rem;font-weight:700;margin-bottom:8px;}
+.prow{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;margin-bottom:5px;}
+.plbl{color:var(--mu);}
+.prv{font-family:'JetBrains Mono',monospace;}
+.pr{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin-top:8px;}
+.pdesc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.58;}
+.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.bar{height:100%;border-radius:2px;transition:.25s;}
+
+.detail-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px;
+}
+.detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;}
+.detail-id{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mu);margin-bottom:4px;}
+.detail-name{font-size:1.2rem;font-weight:700;}
+.detail-profile{font-size:.76rem;color:var(--mu);line-height:1.7;}
+.route-box{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr;gap:8px;align-items:center;margin:14px 0;}
+@media(max-width:640px){.route-box{grid-template-columns:1fr;}}
+.route-node{
+  background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:9px;padding:12px;text-align:center;min-height:72px;
+}
+.route-name{font-size:.72rem;color:var(--mu);margin-bottom:6px;}
+.route-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700;}
+.route-arrow{text-align:center;font-family:'JetBrains Mono',monospace;font-size:1.25rem;color:var(--accent);}
+.risk-table{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.risk-row{display:flex;align-items:center;gap:10px;}
+.risk-name{font-size:.75rem;min-width:108px;color:var(--tx);}
+.risk-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.risk-bar{height:100%;border-radius:4px;transition:.25s;}
+.risk-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+.detail-note{font-size:.73rem;color:var(--mu);line-height:1.75;margin-top:12px;}
+
+.bucket-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:880px){.bucket-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.bucket-grid{grid-template-columns:1fr;}}
+.bucket{
+  border:1px solid var(--bd);border-radius:10px;padding:12px;background:var(--s2);min-height:180px;
+}
+.bucket h3{font-size:.82rem;margin-bottom:10px;font-weight:700;}
+.bucket ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.bucket li{font-size:.72rem;line-height:1.5;padding:8px;border-radius:7px;background:rgba(255,255,255,.03);}
+.bucket li strong{font-family:'JetBrains Mono',monospace;}
+
+canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+
+.log-area{
+  height:170px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;
+}
+.log-ok{color:var(--ok);}
+.log-watch{color:var(--watch);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+
+.footer{
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-sub">NRA-IDE / MEDICAL EDUCATION INDIVIDUAL STRATIFICATION TEMPLATE</div>
+  <h1>医療教育用 <em>個体別振り分け</em> テンプレート</h1>
+  <p class="h-desc">同じ環境負荷でも個体差によって許容幅が異なることを可視化する教育用テンプレートです。平均値ではなく、各個体の構造比率を見て、観察・注意・要確認へ振り分けます。</p>
+</header>
+
+<div class="notice">
+  これは医療教育用テンプレートです。診断、治療、搬送、トリアージの実運用には使用できません。表示データはすべて合成であり、実際の患者判断は医師・看護師など資格を持つ人間が行う必要があります。ここでは、個体差と構造的振り分けを学ぶための軽い可視化に限定しています。
+</div>
+
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ 実行中</button>
+  <button class="btn" onclick="resetSim()">↺ リセット</button>
+  <label class="small">教育シナリオ：</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">通常観察</option>
+    <option value="resp">呼吸器症状増加</option>
+    <option value="dehydration">脱水傾向</option>
+    <option value="fever">発熱群増加</option>
+    <option value="elder">高齢脆弱群</option>
+    <option value="mixed">混在負荷</option>
+  </select>
+  <span class="scen-label" id="scen-desc">通常範囲内で個体差を表示</span>
+</div>
+
+<div class="formula-box">
+  <span class="eq-a">R_i = δ_i / τ_i(profile,t)</span>：各項目の構造比率　|　
+  <span class="eq-b">R_profile</span>：年齢・脆弱性・既往による余裕圧縮　|　
+  <span class="eq-c">R_patient = max(R_i, R_profile, R_corr)</span>：個体単位の判定　|　
+  <span class="eq-f">bucket = Observe / Watch / Caution / Human-Review</span>
+</div>
+
+<div class="top-stats">
+  <div class="stat-card">
+    <div class="stat-label">COHORT OVERVIEW</div>
+    <div class="stat-val" id="cohort-r">0.000</div>
+    <div class="stat-sub" id="cohort-status">SAFE — 教育用観察群</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">OBSERVE</div>
+    <div class="stat-val" id="cnt-ok">0</div>
+    <div class="stat-sub">通常観察</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">WATCH</div>
+    <div class="stat-val" id="cnt-watch">0</div>
+    <div class="stat-sub">経過注意</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">CAUTION</div>
+    <div class="stat-val" id="cnt-warn">0</div>
+    <div class="stat-sub">要注意</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">HUMAN REVIEW</div>
+    <div class="stat-val" id="cnt-fail">0</div>
+    <div class="stat-sub">必ず人間確認</div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">INDIVIDUAL CARDS — 個体一覧</div>
+    <div class="patient-grid" id="patient-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">SELECTED INDIVIDUAL — 詳細</div>
+    <div class="detail-card">
+      <div class="detail-head">
+        <div>
+          <div class="detail-id" id="detail-id">P-01</div>
+          <div class="detail-name" id="detail-name">—</div>
+          <div class="detail-profile" id="detail-profile">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="detail-id">PATIENT R</div>
+          <div class="detail-name" id="detail-r" style="font-family:'JetBrains Mono',monospace;color:var(--accent)">0.000</div>
+        </div>
+      </div>
+
+      <div class="route-box">
+        <div class="route-node">
+          <div class="route-name">vital R max</div>
+          <div class="route-val" id="route-vital" style="color:var(--p1)">0.000</div>
+        </div>
+        <div class="route-arrow">→</div>
+        <div class="route-node">
+          <div class="route-name">profile pressure</div>
+          <div class="route-val" id="route-profile" style="color:var(--p4)">0.000</div>
+        </div>
+        <div class="route-arrow">⇒</div>
+        <div class="route-node">
+          <div class="route-name">bucket</div>
+          <div class="route-val" id="route-bucket" style="color:var(--warn)">—</div>
+        </div>
+      </div>
+
+      <div class="risk-table">
+        <div class="risk-row"><div class="risk-name">SpO₂</div><div class="risk-bg"><div class="risk-bar" id="rb-spo2" style="background:var(--p1);width:0%"></div></div><div class="risk-val" id="rv-spo2">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">呼吸数</div><div class="risk-bg"><div class="risk-bar" id="rb-rr" style="background:var(--p2);width:0%"></div></div><div class="risk-val" id="rv-rr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">心拍数</div><div class="risk-bg"><div class="risk-bar" id="rb-hr" style="background:var(--p3);width:0%"></div></div><div class="risk-val" id="rv-hr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">収縮期血圧</div><div class="risk-bg"><div class="risk-bar" id="rb-bp" style="background:var(--p4);width:0%"></div></div><div class="risk-val" id="rv-bp">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">体温</div><div class="risk-bg"><div class="risk-bar" id="rb-temp" style="background:var(--p5);width:0%"></div></div><div class="risk-val" id="rv-temp">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Profile圧</div><div class="risk-bg"><div class="risk-bar" id="rb-prof" style="background:var(--fail);width:0%"></div></div><div class="risk-val" id="rv-prof">0.000</div></div>
+      </div>
+
+      <div class="detail-note" id="detail-note">
+        選択した個体の説明がここに表示されます。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">BUCKET VIEW — 振り分け一覧</div>
+    <div class="bucket-grid">
+      <div class="bucket">
+        <h3 style="color:var(--ok)">OBSERVE / 通常観察</h3>
+        <ul id="bucket-ok"></ul>
+      </div>
+      <div class="bucket">
+        <h3 style="color:var(--watch)">WATCH / 経過注意</h3>
+        <ul id="bucket-watch"></ul>
+      </div>
+      <div class="bucket">
+        <h3 style="color:var(--warn)">CAUTION / 要注意</h3>
+        <ul id="bucket-warn"></ul>
+      </div>
+      <div class="bucket">
+        <h3 style="color:var(--fail)">HUMAN REVIEW / 人間確認</h3>
+        <ul id="bucket-fail"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">R DISTRIBUTION — 個体分布</div>
+    <canvas id="ts-canvas" class="ts-canvas" width="560" height="170"></canvas>
+    <div class="legend">
+      <span style="color:var(--ok)">■ Observe</span>
+      <span style="color:var(--watch)">■ Watch</span>
+      <span style="color:var(--warn)">■ Caution</span>
+      <span style="color:var(--fail)">■ Human Review</span>
+      <span style="color:rgba(255,77,115,.75)">- - R=1.0</span>
+    </div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">GATE LOG</div>
+    <div class="log-area" id="log-area"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">EDUCATIONAL NOTE</div>
+    <div style="font-size:.8rem;line-height:1.82;color:var(--mu);">
+      このテンプレートの主眼は、集団平均よりも「個体ごとの余裕差」にあります。例えば、同じSpO₂低下でも、高齢・脆弱・既往ありの個体では τ が縮み、同じδでも R が上がります。逆に若年で既往なしなら、同一の観測値でも直ちに同じ扱いにはなりません。ここでは、<strong style="color:var(--tx)">平均値で危険を薄めず、個体ごとに構造を持つ</strong> という見方を教育用に簡略表示しています。<br><br>
+      また、医療用途であっても本ファイルは「医療教育用テンプレート」という軽い位置づけです。実診療での判断責任は人間にあり、AIやテンプレートは責任主体ではありません。Fail-Closedに相当する最終区分は「Human Review」とし、自動決定を避けています。
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span>40_medical_education_individual_stratification_template_JP</span>
+  <span>Educational only / no diagnosis / human authority required</span>
+</div>
+
+</div>
+
+<script>
+const PEOPLE = [
+  {id:'P-01', name:'個体A', age:28, frailty:0.10, chronic:0.10, note:'若年。基礎余裕は比較的広い。'},
+  {id:'P-02', name:'個体B', age:76, frailty:0.62, chronic:0.46, note:'高齢・慢性疾患あり。余裕が縮みやすい。'},
+  {id:'P-03', name:'個体C', age:44, frailty:0.18, chronic:0.20, note:'中年。軽い既往あり。'},
+  {id:'P-04', name:'個体D', age:83, frailty:0.74, chronic:0.52, note:'高齢脆弱群。個体差が大きい。'},
+  {id:'P-05', name:'個体E', age:12, frailty:0.08, chronic:0.04, note:'若年。一般に余裕は広いが急変監視は別途必要。'},
+  {id:'P-06', name:'個体F', age:58, frailty:0.30, chronic:0.38, note:'代謝疾患あり。'},
+  {id:'P-07', name:'個体G', age:67, frailty:0.48, chronic:0.18, note:'高齢寄り。体力差を考慮。'},
+  {id:'P-08', name:'個体H', age:35, frailty:0.14, chronic:0.06, note:'若年成人。'},
+  {id:'P-09', name:'個体I', age:71, frailty:0.58, chronic:0.32, note:'高齢で慢性呼吸器リスクを仮定。'},
+  {id:'P-10', name:'個体J', age:49, frailty:0.22, chronic:0.12, note:'中年。'},
+  {id:'P-11', name:'個体K', age:64, frailty:0.42, chronic:0.44, note:'心血管系の既往を仮定。'},
+  {id:'P-12', name:'個体L', age:31, frailty:0.12, chronic:0.08, note:'若年成人。'},
+];
+
+const BASES = {
+  spo2: 97, rr: 16, hr: 76, sbp: 118, temp: 36.8
+};
+
+const FACTORS = [
+  {id:'spo2', name:'SpO₂', opt:97, tau:5, min:82, max:100, dir:'lo', color:'var(--p1)'},
+  {id:'rr', name:'呼吸数', opt:16, tau:12, min:8, max:36, dir:'both', color:'var(--p2)'},
+  {id:'hr', name:'心拍数', opt:76, tau:36, min:40, max:160, dir:'both', color:'var(--p3)'},
+  {id:'sbp', name:'収縮期血圧', opt:118, tau:28, min:70, max:190, dir:'both', color:'var(--p4)'},
+  {id:'temp', name:'体温', opt:36.8, tau:2.2, min:34.0, max:41.5, dir:'both', color:'var(--p5)'},
+];
+
+let scenario = 'normal';
+let tick = 0;
+let running = true;
+let selected = 0;
+let logLines = [];
+const history = [];
+
+const SCENARIOS = {
+  normal: {
+    desc:'通常範囲内で個体差を表示',
+    shifts: {spo2:0, rr:0, hr:0, sbp:0, temp:0},
+    amp:    {spo2:0.9, rr:1.6, hr:5, sbp:7, temp:0.18}
+  },
+  resp: {
+    desc:'呼吸器症状増加。SpO₂低下と呼吸数増加が主',
+    shifts: {spo2:-3.2, rr:6.0, hr:8, sbp:-4, temp:0.5},
+    amp:    {spo2:1.3, rr:2.0, hr:7, sbp:8, temp:0.24}
+  },
+  dehydration: {
+    desc:'脱水傾向。心拍上昇と血圧低下が主',
+    shifts: {spo2:-0.6, rr:2.0, hr:14, sbp:-16, temp:0.3},
+    amp:    {spo2:0.8, rr:1.6, hr:8, sbp:10, temp:0.18}
+  },
+  fever: {
+    desc:'発熱群増加。体温と心拍が上がる',
+    shifts: {spo2:-1.2, rr:3.0, hr:11, sbp:-2, temp:1.6},
+    amp:    {spo2:0.9, rr:1.8, hr:7, sbp:7, temp:0.28}
+  },
+  elder: {
+    desc:'高齢脆弱群。Profile圧が高く、余裕が縮む',
+    shifts: {spo2:-1.8, rr:3.0, hr:7, sbp:-7, temp:0.6},
+    amp:    {spo2:1.0, rr:1.8, hr:6, sbp:9, temp:0.22},
+    profileBoost: 0.18
+  },
+  mixed: {
+    desc:'混在負荷。複数要因が少しずつ重なる',
+    shifts: {spo2:-2.0, rr:4.0, hr:10, sbp:-8, temp:0.9},
+    amp:    {spo2:1.1, rr:2.0, hr:7, sbp:8, temp:0.24}
+  }
+};
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function rand(a){return (Math.random()-0.5)*2*a;}
+function factorIndex(id){return FACTORS.findIndex(f=>f.id===id);}
+
+function calcDelta(v, f){
+  if(f.dir === 'lo') return Math.max(0, f.opt - v);
+  return Math.abs(v - f.opt);
+}
+
+function profilePressure(person){
+  let ageP = 0;
+  if(person.age >= 80) ageP = 0.44;
+  else if(person.age >= 70) ageP = 0.30;
+  else if(person.age >= 60) ageP = 0.18;
+  else if(person.age <= 15) ageP = 0.10;
+  const sc = SCENARIOS[scenario];
+  return clamp(ageP + person.frailty*0.45 + person.chronic*0.35 + (sc.profileBoost || 0), 0, 1.35);
+}
+
+function makePatientState(person, i){
+  const sc = SCENARIOS[scenario];
+  const phase = tick*0.06 + i*0.73;
+  const vitals = {};
+
+  FACTORS.forEach((f, idx)=>{
+    const base = BASES[f.id];
+    const shift = sc.shifts[f.id] || 0;
+    const amp = sc.amp[f.id] || 0;
+    let profileEffect = 0;
+    const pp = profilePressure(person);
+
+    if(f.id === 'spo2') profileEffect = -pp * 2.2;
+    if(f.id === 'rr')   profileEffect =  pp * 2.8;
+    if(f.id === 'hr')   profileEffect =  pp * 8.0;
+    if(f.id === 'sbp')  profileEffect = -pp * 9.0;
+    if(f.id === 'temp') profileEffect =  pp * 0.25;
+
+    const wave = Math.sin(phase + idx*0.92) * amp * 0.45;
+    vitals[f.id] = clamp(base + shift + profileEffect + wave + rand(amp), f.min, f.max);
+  });
+
+  const rs = {};
+  const tauAdj = clamp(1 - profilePressure(person)*0.38, 0.46, 1.0);
+
+  FACTORS.forEach(f => {
+    let tau = f.tau * tauAdj;
+    if(f.id === 'spo2' && vitals.rr > 22) tau *= 0.92;
+    if(f.id === 'sbp' && vitals.hr > 95) tau *= 0.90;
+    if(f.id === 'temp' && vitals.hr > 98) tau *= 0.90;
+    tau = Math.max(tau, f.tau * 0.38);
+    const delta = calcDelta(vitals[f.id], f);
+    rs[f.id] = {delta, tau, R: delta / tau};
+  });
+
+  const corr = clamp(
+    Math.max(0, (rs.spo2.R + rs.rr.R)*0.38, (rs.temp.R + rs.hr.R)*0.32, (rs.sbp.R + rs.hr.R)*0.28),
+    0, 1.4
+  );
+  const pPressure = profilePressure(person);
+  const vitalMax = Math.max(...Object.values(rs).map(x=>x.R));
+  const patientR = Math.max(vitalMax, corr, pPressure);
+
+  return {person, vitals, rs, corr, profile:pPressure, vitalMax, patientR};
+}
+
+function bucketOf(R){
+  if(R >= 1.0) return {key:'fail', label:'Human Review', color:'var(--fail)', badge:'HUMAN'};
+  if(R >= 0.75) return {key:'warn', label:'Caution', color:'var(--warn)', badge:'CAUTION'};
+  if(R >= 0.40) return {key:'watch', label:'Watch', color:'var(--watch)', badge:'WATCH'};
+  return {key:'ok', label:'Observe', color:'var(--ok)', badge:'OBSERVE'};
+}
+
+function buildCards(states){
+  const root = document.getElementById('patient-grid');
+  root.innerHTML = '';
+  states.forEach((s, i)=>{
+    const b = bucketOf(s.patientR);
+    const card = document.createElement('div');
+    card.className = 'pcard' + (s.patientR >= 1.0 ? ' fail' : s.patientR >= 0.75 ? ' warn' : '') + (selected === i ? ' selected' : '');
+    card.onclick = () => { selected = i; render(states); };
+    card.innerHTML = `
+      <div class="pbadge ${
+        b.key === 'ok' ? 'b-ok' :
+        b.key === 'watch' ? 'b-watch' :
+        b.key === 'warn' ? 'b-warn' : 'b-fail'
+      }">${b.badge}</div>
+      <div class="pid">${s.person.id}</div>
+      <div class="pname">${s.person.name}</div>
+      <div class="prow"><span class="plbl">年齢</span><span class="prv">${s.person.age}歳</span></div>
+      <div class="prow"><span class="plbl">SpO₂</span><span class="prv">${s.vitals.spo2.toFixed(1)}%</span></div>
+      <div class="prow"><span class="plbl">呼吸 / 心拍</span><span class="prv">${s.vitals.rr.toFixed(1)} / ${s.vitals.hr.toFixed(0)}</span></div>
+      <div class="prow"><span class="plbl">血圧 / 体温</span><span class="prv">${s.vitals.sbp.toFixed(0)} / ${s.vitals.temp.toFixed(1)}℃</span></div>
+      <div class="pr" style="color:${b.color}">R = ${s.patientR.toFixed(3)}</div>
+      <div class="barbg"><div class="bar" style="width:${Math.min(100,s.patientR*100).toFixed(1)}%;background:${b.color}"></div></div>
+      <div class="pdesc">${s.person.note}</div>
+    `;
+    root.appendChild(card);
+  });
+}
+
+function setRisk(id, val){
+  document.getElementById(`rb-${id}`).style.width = Math.min(100,val*100).toFixed(1)+'%';
+  document.getElementById(`rv-${id}`).textContent = val.toFixed(3);
+}
+
+function renderDetail(s){
+  const b = bucketOf(s.patientR);
+  document.getElementById('detail-id').textContent = s.person.id;
+  document.getElementById('detail-name').textContent = s.person.name;
+  document.getElementById('detail-profile').textContent = `年齢 ${
+    s.person.age
+  }歳 / frailty=${s.person.frailty.toFixed(2)} / chronic=${s.person.chronic.toFixed(2)}`;
+  document.getElementById('detail-r').textContent = s.patientR.toFixed(3);
+  document.getElementById('detail-r').style.color = b.color;
+  document.getElementById('route-vital').textContent = s.vitalMax.toFixed(3);
+  document.getElementById('route-profile').textContent = s.profile.toFixed(3);
+  document.getElementById('route-bucket').textContent = b.label;
+  document.getElementById('route-bucket').style.color = b.color;
+
+  setRisk('spo2', s.rs.spo2.R);
+  setRisk('rr', s.rs.rr.R);
+  setRisk('hr', s.rs.hr.R);
+  setRisk('bp', s.rs.sbp.R);
+  setRisk('temp', s.rs.temp.R);
+  setRisk('prof', s.profile);
+
+  const top = Object.entries(s.rs).sort((a,b)=>b[1].R-a[1].R)[0];
+  const topName = FACTORS.find(f=>f.id===top[0]).name;
+  document.getElementById('detail-note').textContent =
+    `最大寄与は「${topName}」です。vital R max=${s.vitalMax.toFixed(3)}、profile圧=${s.profile.toFixed(3)}、相関圧=${s.corr.toFixed(3)}。同じ集団でも、この個体では余裕が縮んでいるため、平均値では見えない差が出ています。`;
+}
+
+function renderBuckets(states){
+  const ulOk = document.getElementById('bucket-ok');
+  const ulWatch = document.getElementById('bucket-watch');
+  const ulWarn = document.getElementById('bucket-warn');
+  const ulFail = document.getElementById('bucket-fail');
+  ulOk.innerHTML = ulWatch.innerHTML = ulWarn.innerHTML = ulFail.innerHTML = '';
+  let cOk=0,cWatch=0,cWarn=0,cFail=0;
+  states
+    .slice()
+    .sort((a,b)=>b.patientR-a.patientR)
+    .forEach(s=>{
+      const b = bucketOf(s.patientR);
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${s.person.id}</strong> ${s.person.name} / R=${s.patientR.toFixed(3)} / 年齢=${s.person.age}`;
+      if(b.key==='ok'){ulOk.appendChild(li);cOk++;}
+      else if(b.key==='watch'){ulWatch.appendChild(li);cWatch++;}
+      else if(b.key==='warn'){ulWarn.appendChild(li);cWarn++;}
+      else {ulFail.appendChild(li);cFail++;}
+    });
+  document.getElementById('cnt-ok').textContent = cOk;
+  document.getElementById('cnt-watch').textContent = cWatch;
+  document.getElementById('cnt-warn').textContent = cWarn;
+  document.getElementById('cnt-fail').textContent = cFail;
+}
+
+const canvas = document.getElementById('ts-canvas');
+const ctx = canvas.getContext('2d');
+
+function drawDistribution(states){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#12202d';
+  ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle = '#294158';
+  [0.4,0.75,1.0].forEach(r=>{
+    const y = H - r/1.4*(H-24) - 12;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  });
+  const failY = H - 1.0/1.4*(H-24) - 12;
+  ctx.strokeStyle='rgba(255,77,115,.7)';
+  ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(0,failY); ctx.lineTo(W,failY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const barW = (W - 30) / states.length;
+  states.forEach((s,i)=>{
+    const b = bucketOf(s.patientR);
+    const x = 16 + i*barW + 3;
+    const h = Math.min(1.4,s.patientR)/1.4*(H-28);
+    const y = H - h - 12;
+    ctx.fillStyle = b.color;
+    ctx.fillRect(x,y,barW-6,h);
+    ctx.fillStyle = '#cfe3ef';
+    ctx.font = '9px JetBrains Mono, monospace';
+    ctx.fillText(s.person.id.replace('P-',''), x+2, H-2);
+  });
+
+  ctx.fillStyle='rgba(255,77,115,.75)';
+  ctx.font='10px JetBrains Mono, monospace';
+  ctx.fillText('R=1.0', 6, failY-4);
+}
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const line=document.createElement('div');
+  line.className='log-'+type;
+  line.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`;
+  area.insertBefore(line, area.firstChild);
+  logLines.push(line);
+  if(logLines.length > 90){
+    const old = logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function applyScenario(){
+  scenario = document.getElementById('scenario-sel').value;
+  document.getElementById('scen-desc').textContent = SCENARIOS[scenario].desc;
+  addLog(`[SCENARIO] ${SCENARIOS[scenario].desc}`, 'info');
+}
+
+let lastBuckets = [];
+
+function render(states){
+  buildCards(states);
+  if(selected >= states.length) selected = 0;
+  renderDetail(states[selected]);
+  renderBuckets(states);
+  drawDistribution(states);
+
+  const cohort = Math.max(...states.map(s=>s.patientR));
+  const cohortEl = document.getElementById('cohort-r');
+  const statusEl = document.getElementById('cohort-status');
+  cohortEl.textContent = cohort.toFixed(3);
+  const cb = bucketOf(cohort);
+  cohortEl.style.color = cb.color;
+  statusEl.textContent =
+    cb.key === 'fail' ? 'HUMAN REVIEW — 個体の中に人間確認対象あり' :
+    cb.key === 'warn' ? 'CAUTION — 要注意群が存在' :
+    cb.key === 'watch' ? 'WATCH — 経過注意群あり' :
+    'SAFE — 教育用観察群';
+  statusEl.style.color = cb.color;
+
+  const currentBuckets = states.map(s => bucketOf(s.patientR).key);
+  currentBuckets.forEach((b,i)=>{
+    if(lastBuckets[i] && lastBuckets[i] !== b){
+      const name = states[i].person.name;
+      if(b==='fail') addLog(`Human Reviewへ移行: ${name} R=${states[i].patientR.toFixed(3)}`, 'fail');
+      else if(b==='warn') addLog(`Cautionへ移行: ${name} R=${states[i].patientR.toFixed(3)}`, 'warn');
+      else if(b==='watch') addLog(`Watchへ移行: ${name} R=${states[i].patientR.toFixed(3)}`, 'watch');
+      else addLog(`Observeへ復帰: ${name} R=${states[i].patientR.toFixed(3)}`, 'ok');
+    }
+  });
+  lastBuckets = currentBuckets;
+}
+
+function step(){
+  if(!running) return;
+  tick++;
+  const states = PEOPLE.map((p,i)=>makePatientState(p,i));
+  states.sort((a,b)=>b.patientR-a.patientR);
+  if(selected >= states.length) selected = 0;
+  render(states);
+  history.push(states.map(s=>s.patientR));
+  if(history.length > 120) history.shift();
+}
+
+function toggleRun(){
+  running = !running;
+  const btn = document.getElementById('btn-run');
+  btn.textContent = running ? '▶ 実行中' : '⏸ 一時停止';
+  btn.className = running ? 'btn active' : 'btn';
+}
+
+function resetSim(){
+  tick = 0;
+  selected = 0;
+  history.length = 0;
+  lastBuckets = [];
+  scenario = 'normal';
+  document.getElementById('scenario-sel').value = 'normal';
+  document.getElementById('scen-desc').textContent = SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML = '';
+  logLines = [];
+  addLog('教育用テンプレートを初期化', 'info');
+  addLog('個体別振り分け監視を開始', 'ok');
+  const states = PEOPLE.map((p,i)=>makePatientState(p,i)).sort((a,b)=>b.patientR-a.patientR);
+  render(states);
+  lastBuckets = states.map(s=>bucketOf(s.patientR).key);
+}
+
+resetSim();
+setInterval(step, 380);
+</script>
+</body>
+</html>

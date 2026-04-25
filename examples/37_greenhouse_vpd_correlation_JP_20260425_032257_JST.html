@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<!-- FILE: 37_greenhouse_vpd_correlation_JP_FIXED_20260425_032257_JST.html -->
+<!-- TITLE: NRA-IDE 温室VPD・植物ストレス相関テンプレート -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-25 03:22:57 JST -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NRA-IDE Greenhouse VPD Correlation JP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg:#06100b;
+  --s1:#0b1711;
+  --s2:#112218;
+  --s3:#172d20;
+  --bd:#234532;
+  --tx:#cde8d6;
+  --mu:#587260;
+  --ok:#39ff85;
+  --warn:#ffd24a;
+  --fail:#ff3b5c;
+  --accent:#72ffb8;
+  --temp:#ff8c42;
+  --hum:#46c6ff;
+  --vpd:#ff4fb0;
+  --co2:#b7ff4a;
+  --light:#ffe066;
+  --water:#39ff85;
+  --ec:#b58cff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(114,255,184,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(114,255,184,0.025) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding:28px 20px 34px;}
+
+header{text-align:center;margin-bottom:26px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.75;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.25rem,3.5vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--vpd);font-style:normal;}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.7;}
+
+.notice{
+  border:1px solid rgba(114,255,184,.32);
+  background:rgba(114,255,184,.055);
+  border-left:4px solid var(--accent);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#bfe8cf;
+  font-size:.78rem;
+  line-height:1.7;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);
+  color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#00140a;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:7px;
+  color:var(--tx);font-family:'Noto Sans JP',sans-serif;font-size:.82rem;cursor:pointer;
+}
+.scenario-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(114,255,184,.45);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--vpd);}
+.eq-c{color:var(--warn);}
+.eq-f{color:var(--fail);}
+
+.overall{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:950px){.overall{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.overall{grid-template-columns:1fr;}}
+.over-card{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.over-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;
+  letter-spacing:.16em;
+  color:var(--mu);
+  margin-bottom:6px;
+}
+.over-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:2.0rem;
+  font-weight:700;
+  line-height:1.05;
+}
+.over-sub{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.main-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
+@media(max-width:960px){.main-grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:18px;
+}
+.panel-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  letter-spacing:.18em;
+  color:var(--accent);
+  margin-bottom:16px;
+}
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:960px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
+.fc{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  transition:.25s;
+}
+.fc.warn{border-color:var(--warn);}
+.fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,59,92,.05);}to{box-shadow:0 0 16px rgba(255,59,92,.28);}}
+.fc-badge{
+  position:absolute;top:10px;right:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;
+  padding:2px 6px;
+  border-radius:4px;
+  letter-spacing:.08em;
+}
+.badge-ok{background:rgba(57,255,133,.10);color:var(--ok);border:1px solid rgba(57,255,133,.30);}
+.badge-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35);}
+.badge-fail{background:rgba(255,59,92,.14);color:var(--fail);border:1px solid rgba(255,59,92,.45);}
+.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.32rem;font-weight:700;margin-bottom:8px;}
+.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:.98rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.r-bar{height:100%;border-radius:2px;transition:.25s;}
+.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
+
+.greenhouse-box{
+  height:315px;
+  background:linear-gradient(180deg,rgba(70,198,255,.10),rgba(57,255,133,.06)),var(--s2);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+.house-frame{
+  position:absolute;left:50%;top:54%;
+  transform:translate(-50%,-50%);
+  width:78%;height:68%;
+  border:2px solid rgba(114,255,184,.28);
+  border-top:none;
+  border-radius:0 0 12px 12px;
+}
+.house-roof{
+  position:absolute;left:50%;top:14%;
+  transform:translateX(-50%);
+  width:62%;height:32%;
+  clip-path:polygon(50% 0%,100% 100%,0% 100%);
+  border:2px solid rgba(114,255,184,.28);
+  background:rgba(114,255,184,.035);
+}
+.sun{
+  position:absolute;right:34px;top:28px;width:42px;height:42px;border-radius:50%;
+  background:radial-gradient(circle,#fff4b0,#ffe066 45%,rgba(255,224,102,.05) 72%);
+  box-shadow:0 0 30px rgba(255,224,102,.45);
+  opacity:var(--sun,.75);
+}
+.fog{
+  position:absolute;left:0;right:0;top:0;bottom:0;
+  background:radial-gradient(circle at 35% 45%, rgba(70,198,255,var(--fog,.05)), transparent 42%),
+             radial-gradient(circle at 65% 60%, rgba(70,198,255,var(--fog,.05)), transparent 38%);
+  pointer-events:none;
+}
+.plant-row{
+  position:absolute;left:12%;right:12%;bottom:32px;
+  display:flex;justify-content:space-between;align-items:flex-end;
+}
+.plant{position:relative;width:44px;height:58px;}
+.stem{position:absolute;left:50%;bottom:0;width:3px;height:42px;background:#39ff85;transform:translateX(-50%);opacity:.75;}
+.leaf{
+  position:absolute;width:26px;height:14px;background:rgba(57,255,133,.72);
+  border-radius:100% 0 100% 0;bottom:22px;left:18px;transform:rotate(-25deg);
+}
+.leaf.l2{left:1px;bottom:30px;transform:rotate(205deg);}
+.leaf.l3{left:15px;bottom:39px;transform:rotate(-8deg);width:20px;}
+.stress-overlay{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 55%,rgba(255,59,92,.0),rgba(255,59,92,var(--stress,.0)));
+  pointer-events:none;
+}
+.gauge-line{
+  position:absolute;left:20px;bottom:18px;right:20px;
+  height:8px;border-radius:4px;background:var(--bd);overflow:hidden;
+}
+.gauge-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--fail));transition:.25s;}
+.pack-label{
+  position:absolute;left:18px;top:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;
+}
+.pack-status{
+  position:absolute;left:18px;bottom:34px;
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);
+}
+.vpd-box{
+  position:absolute;right:18px;bottom:34px;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--vpd);text-align:right;line-height:1.7;
+}
+
+.corr-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
+.corr-cell{
+  aspect-ratio:1;
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.52rem;
+  font-weight:600;
+  transition:.25s;
+}
+.corr-head{background:transparent;color:var(--mu);font-size:.49rem;line-height:1.1;text-align:center;}
+
+.mediator{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;
+}
+.med-flow{display:grid;grid-template-columns:1fr 42px 1fr 42px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+.med-node{
+  border:1px solid var(--bd);
+  background:rgba(255,255,255,.025);
+  border-radius:9px;
+  padding:10px 8px;
+  text-align:center;
+  min-height:74px;
+}
+.med-name{font-size:.72rem;color:var(--mu);margin-bottom:5px;}
+.med-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;}
+.med-arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.4rem;}
+.med-note{font-size:.74rem;color:var(--mu);line-height:1.7;}
+.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.coup-row{display:flex;align-items:center;gap:10px;}
+.coup-name{font-size:.74rem;min-width:102px;color:var(--tx);}
+.coup-bar-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.coup-bar{height:100%;border-radius:4px;transition:.25s;}
+.coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+
+canvas.ts-canvas{width:100%;height:150px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+
+.log-area{
+  height:150px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);
+  border-radius:9px;padding:10px;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;
+}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+
+.footer{
+  margin-top:16px;
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;color:var(--mu);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="h-sub">NRA-IDE / GREENHOUSE VPD CORRELATION SAMPLE</div>
+  <h1>温室 <em>VPD媒介相関</em> シミュレーション</h1>
+  <p class="h-desc">温度・湿度を直接平均せず、VPD（飽差）を媒介レイヤーとして植物ストレスを追跡。R = δ/τ + 相関変質 + 動的τ圧縮。</p>
+</header>
+
+<div class="notice">
+  このsampleは農業教育・構造可視化用です。実際の潅水、換気、CO₂施用、施肥判断には、品種、育苗段階、地域環境、実測機器の校正、専門家の判断が必要です。表示値はすべて合成データです。
+</div>
+
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ 実行中</button>
+  <button class="btn" onclick="resetSim()">↺ リセット</button>
+  <label class="small">シナリオ：</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">通常運転</option>
+    <option value="hotdry">高温乾燥</option>
+    <option value="humid">過湿停滞</option>
+    <option value="shadewet">曇天多湿</option>
+    <option value="co2drop">CO₂不足</option>
+    <option value="irrigation">潅水遅れ</option>
+    <option value="collapse">相関崩壊</option>
+  </select>
+  <span class="scenario-label" id="scen-desc">通常範囲内で推移</span>
+</div>
+
+<div class="formula-box">
+  <span class="eq-a">VPD = e_s(T) × (1 − RH/100)</span>：温度と湿度の媒介レイヤー　|　
+  <span class="eq-b">R_vpd = |VPD − VPD_opt| / τ_vpd</span>：植物ストレス接近度　|　
+  <span class="eq-c">τ_i(t) = τ_base × S_vpd × S_coupling</span>：媒介ストレスで吸収余裕を圧縮　|　
+  <span class="eq-f">R_total = max(R_i, R_corr)</span>
+</div>
+
+<div class="overall">
+  <div class="over-card">
+    <div class="over-label">GREENHOUSE R_TOTAL</div>
+    <div class="over-val" id="overall-r">0.000</div>
+    <div class="over-sub" id="overall-status">SAFE — 構造余裕あり</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">VPD MEDIATOR R</div>
+    <div class="over-val" id="vpd-r">0.000</div>
+    <div class="over-sub">温度×湿度から導出した媒介ストレス</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">COUPLING PRESSURE</div>
+    <div class="over-val" id="coup-r">0.000</div>
+    <div class="over-sub">VPD・水分・光量・CO₂の相互圧縮</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">R_CORR MAX</div>
+    <div class="over-val" id="corr-r">0.000</div>
+    <div class="over-sub">相関行列の基準差分</div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">FACTOR STATE — 個別 R_i</div>
+    <div class="factor-grid" id="factor-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">GREENHOUSE VISUALIZATION — VPD媒介状態</div>
+    <div class="greenhouse-box" id="greenhouse-box">
+      <div class="house-roof"></div>
+      <div class="house-frame"></div>
+      <div class="sun" id="sun"></div>
+      <div class="fog" id="fog"></div>
+      <div class="pack-label">SYNTHETIC GREENHOUSE / SEEDLING STRESS VIEW</div>
+      <div class="plant-row">
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+      </div>
+      <div class="stress-overlay" id="stress-overlay"></div>
+      <div class="gauge-line"><div class="gauge-fill" id="stress-gauge"></div></div>
+      <div class="pack-status" id="pack-status">● SAFE GREENHOUSE</div>
+      <div class="vpd-box" id="vpd-box">VPD 0.00 kPa<br>mediator stable</div>
+    </div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">MEDIATOR LAYER — 温度と湿度を直接足さない</div>
+    <div class="mediator">
+      <div class="med-flow">
+        <div class="med-node">
+          <div class="med-name">温度 T</div>
+          <div class="med-val" id="med-temp" style="color:var(--temp)">—</div>
+        </div>
+        <div class="med-arrow">→</div>
+        <div class="med-node">
+          <div class="med-name">湿度 RH</div>
+          <div class="med-val" id="med-hum" style="color:var(--hum)">—</div>
+        </div>
+        <div class="med-arrow">⇒</div>
+        <div class="med-node">
+          <div class="med-name">VPD</div>
+          <div class="med-val" id="med-vpd" style="color:var(--vpd)">—</div>
+        </div>
+      </div>
+      <div class="med-note">
+        温度と湿度は単独の正常値だけでは植物ストレスを説明しきれません。このsampleでは、両者を一度VPDへ写像し、そのVPDが水分・気孔・CO₂吸収・光合成余裕へ圧縮圧を与える構造として扱います。
+      </div>
+      <div class="coupling-list" id="coupling-list"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
+    <div id="corr-matrix"></div>
+    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7;">
+      R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。赤色セルは相関変質。温度と湿度の見かけ相関ではなく、VPD媒介後の崩れを見る。
+    </div>
+    <div id="corr-alert" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">TIME SERIES — R値の推移</div>
+    <canvas id="ts-canvas" class="ts-canvas" width="580" height="150"></canvas>
+    <div class="legend">
+      <span style="color:var(--temp)">─ 温度</span>
+      <span style="color:var(--hum)">─ 湿度</span>
+      <span style="color:var(--vpd)">─ VPD</span>
+      <span style="color:var(--co2)">─ CO₂</span>
+      <span style="color:var(--light)">─ 光量</span>
+      <span style="color:var(--water)">─ 土壌水分</span>
+      <span style="color:var(--ec)">─ EC</span>
+      <span style="color:rgba(255,59,92,.7)">- - Fail</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">GATE LOG</div>
+    <div class="log-area" id="log-area"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span>37_greenhouse_vpd_correlation_JP</span>
+  <span>VPD mediator / R_total=max(R_i,R_corr)</span>
+</div>
+
+</div>
+
+<script>
+// ── VPD calculation ───────────────────────────────────────────
+// Saturation vapor pressure approximation in kPa.
+function saturationVaporPressure(T){
+  return 0.6108 * Math.exp((17.27 * T) / (T + 237.3));
+}
+function calcVPD(T, RH){
+  const es = saturationVaporPressure(T);
+  const ea = es * RH / 100;
+  return Math.max(0, es - ea);
+}
+
+const FACTORS = [
+  {
+    id:'temp', name:'気温', short:'T', unit:'℃', color:'var(--temp)',
+    opt:24, tau:6, min:8, max:42, dir:'both',
+    desc:'育苗域の気温。単独ではなくVPDへ写像。',
+    corr_base:[1.0,0.62,0.72,0.22,0.45,0.35,0.20]
+  },
+  {
+    id:'hum', name:'湿度', short:'RH', unit:'%', color:'var(--hum)',
+    opt:68, tau:18, min:20, max:100, dir:'both',
+    desc:'相対湿度。温度と組み合わせてVPDを構成。',
+    corr_base:[0.62,1.0,0.78,0.15,0.25,0.55,0.18]
+  },
+  {
+    id:'vpd', name:'VPD', short:'VPD', unit:'kPa', color:'var(--vpd)',
+    opt:1.05, tau:0.55, min:0, max:4.0, dir:'both',
+    desc:'飽差。植物ストレスの媒介レイヤー。',
+    corr_base:[0.72,0.78,1.0,0.25,0.42,0.62,0.28]
+  },
+  {
+    id:'co2', name:'CO₂', short:'CO2', unit:'ppm', color:'var(--co2)',
+    opt:800, tau:350, min:250, max:1500, dir:'both',
+    desc:'CO₂濃度。換気・光合成状態の影響を受ける。',
+    corr_base:[0.22,0.15,0.25,1.0,0.35,0.20,0.18]
+  },
+  {
+    id:'light', name:'光量', short:'LX', unit:'lx', color:'var(--light)',
+    opt:18000, tau:9000, min:1000, max:42000, dir:'both',
+    desc:'受光側照度。高温乾燥との組み合わせに注意。',
+    corr_base:[0.45,0.25,0.42,0.35,1.0,0.18,0.14]
+  },
+  {
+    id:'water', name:'土壌水分', short:'W', unit:'%', color:'var(--water)',
+    opt:62, tau:18, min:15, max:95, dir:'both',
+    desc:'根域水分。VPD高止まりでτが縮む。',
+    corr_base:[0.35,0.55,0.62,0.20,0.18,1.0,0.48]
+  },
+  {
+    id:'ec', name:'EC', short:'EC', unit:'mS/cm', color:'var(--ec)',
+    opt:1.45, tau:0.55, min:0.3, max:3.2, dir:'both',
+    desc:'養液濃度。水分低下時に実効ストレスが増す。',
+    corr_base:[0.20,0.18,0.28,0.18,0.14,0.48,1.0]
+  }
+];
+
+const BASE = {
+  temp:24, hum:68, co2:800, light:18000, water:62, ec:1.45
+};
+
+let vals = {
+  temp:24, hum:68, vpd:calcVPD(24,68), co2:800, light:18000, water:62, ec:1.45
+};
+let running = true;
+let tick = 0;
+let scenario = 'normal';
+let driftTarget = {temp:0,hum:0,co2:0,light:0,water:0,ec:0};
+let noiseAmp = {temp:0.8,hum:2.5,co2:45,light:900,water:2.0,ec:0.05};
+let rHistory = FACTORS.map(()=>[]);
+let prevZones = FACTORS.map(()=>'ok');
+let logLines = [];
+const HIST_LEN = 132;
+const tauC = 0.24;
+let corrBase = FACTORS.map(f => [...f.corr_base]);
+
+const SCENARIOS = {
+  normal: {
+    desc:'通常範囲内で推移',
+    drift:{temp:0,hum:0,co2:0,light:0,water:0,ec:0},
+    amp:{temp:0.8,hum:2.5,co2:45,light:900,water:2.0,ec:0.05}
+  },
+  hotdry: {
+    desc:'高温乾燥 → VPD上昇 → 水分τ圧縮',
+    drift:{temp:8,hum:-22,co2:-60,light:8000,water:-14,ec:0.28},
+    amp:{temp:1.6,hum:4.5,co2:55,light:1700,water:3.0,ec:0.08}
+  },
+  humid: {
+    desc:'過湿停滞 → VPD低下 → 蒸散停滞',
+    drift:{temp:2,hum:23,co2:-120,light:-1000,water:9,ec:-0.10},
+    amp:{temp:1.0,hum:5.0,co2:80,light:1100,water:2.5,ec:0.06}
+  },
+  shadewet: {
+    desc:'曇天多湿 → 光量不足 + VPD低下',
+    drift:{temp:-3,hum:16,co2:-90,light:-12500,water:6,ec:-0.05},
+    amp:{temp:0.7,hum:3.5,co2:70,light:1600,water:2.0,ec:0.05}
+  },
+  co2drop: {
+    desc:'換気過多・CO₂不足 → 光量との相関崩れ',
+    drift:{temp:-1,hum:-5,co2:-430,light:3000,water:-3,ec:0.02},
+    amp:{temp:1.0,hum:3.2,co2:110,light:1400,water:2.2,ec:0.06}
+  },
+  irrigation: {
+    desc:'潅水遅れ → 水分低下 + EC上昇 + VPD圧',
+    drift:{temp:3,hum:-10,co2:-30,light:4000,water:-24,ec:0.70},
+    amp:{temp:1.3,hum:4.0,co2:60,light:1700,water:4.0,ec:0.12}
+  },
+  collapse: {
+    desc:'相関崩壊 → VPD・水分・CO₂・光量が同時変質',
+    drift:{temp:9,hum:-26,co2:-500,light:-9500,water:-25,ec:0.85},
+    amp:{temp:2.5,hum:7.0,co2:140,light:2600,water:5.0,ec:0.18}
+  }
+};
+
+function applyScenario(){
+  scenario = document.getElementById('scenario-sel').value;
+  const s = SCENARIOS[scenario];
+  driftTarget = {...s.drift};
+  noiseAmp = {...s.amp};
+  document.getElementById('scen-desc').textContent = s.desc;
+  addLog(`[SCENARIO] ${s.desc}`, 'info');
+}
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+function factorIndexById(id){return FACTORS.findIndex(f=>f.id===id);}
+
+// 固定τでRを読む非再帰関数。
+// dynamicTau() 内では必ずこちらを使い、動的τ計算同士の循環参照を防ぐ。
+function calcRawRById(id){
+  const i = factorIndexById(id);
+  const f = FACTORS[i];
+  const val = vals[id];
+  const delta = calcDelta(val, f);
+  return {delta, tau:f.tau, R:delta / f.tau};
+}
+
+function dynamicTau(i){
+  const f = FACTORS[i];
+  const vpdR = calcRawRById('vpd').R;
+  const waterR = calcRawRById('water').R;
+  const lightR = calcRawRById('light').R;
+  const co2R = calcRawRById('co2').R;
+  let shrink = 1.0;
+
+  // VPD compresses water, CO2, and EC margins.
+  if(f.id === 'water') shrink -= Math.min(0.48, Math.max(0,vpdR-0.45) * 0.18);
+  if(f.id === 'co2')   shrink -= Math.min(0.30, Math.max(0,lightR-0.55) * 0.10 + Math.max(0,vpdR-0.65)*0.08);
+  if(f.id === 'ec')    shrink -= Math.min(0.42, Math.max(0,waterR-0.55) * 0.15);
+  if(f.id === 'vpd')   shrink -= Math.min(0.25, Math.max(0,waterR-0.75) * 0.08);
+  if(f.id === 'temp')  shrink -= Math.min(0.18, Math.max(0,lightR-0.75) * 0.06);
+
+  return Math.max(f.tau * shrink, f.tau * 0.38);
+}
+
+function calcDelta(val, f){
+  if(f.dir === 'hi') return Math.max(0, val - f.opt);
+  if(f.dir === 'lo') return Math.max(0, f.opt - val);
+  return Math.abs(val - f.opt);
+}
+
+function calcRById(id){
+  const i = factorIndexById(id);
+  const f = FACTORS[i];
+  const val = vals[id];
+  const delta = calcDelta(val, f);
+  const tau = dynamicTau(i);
+  return {delta, tau, R: delta / tau};
+}
+
+function calcR(i){
+  const f = FACTORS[i];
+  const val = vals[f.id];
+  const delta = calcDelta(val, f);
+  const tau = dynamicTau(i);
+  return {delta, tau, R: delta / tau};
+}
+
+function getColor(R){
+  if(R >= 1.0) return 'var(--fail)';
+  if(R >= 0.75) return 'var(--warn)';
+  return 'var(--ok)';
+}
+function getBadge(R){
+  if(R >= 1.0) return ['FAIL-CLOSED','badge-fail','fail'];
+  if(R >= 0.75) return ['WARNING','badge-warn','warn'];
+  return ['SAFE','badge-ok','ok'];
+}
+
+function buildFactorCards(){
+  const root = document.getElementById('factor-grid');
+  root.innerHTML = '';
+  FACTORS.forEach((f,i)=>{
+    const div = document.createElement('div');
+    div.className='fc';
+    div.id=`fc-${i}`;
+    div.innerHTML = `
+      <div class="fc-badge badge-ok" id="badge-${i}">SAFE</div>
+      <div class="fc-name">${f.name}</div>
+      <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
+      <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" style="color:var(--mu)">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
+      <div class="fc-desc">${f.desc}</div>
+    `;
+    root.appendChild(div);
+  });
+}
+
+function buildCorrMatrix(){
+  const root = document.getElementById('corr-matrix');
+  root.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className='corr-grid';
+  grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
+  FACTORS.forEach(f => grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
+  FACTORS.forEach((fi,i)=>{
+    grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`;
+    FACTORS.forEach((_,j)=>{
+      grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`;
+    });
+  });
+  root.appendChild(grid);
+}
+
+function buildCouplingList(){
+  const root = document.getElementById('coupling-list');
+  const rows = [
+    ['VPD圧','vpd-coup','var(--vpd)'],
+    ['水分圧','water-coup','var(--water)'],
+    ['光量圧','light-coup','var(--light)'],
+    ['CO₂圧','co2-coup','var(--co2)'],
+    ['媒介結合圧','mediator-coup','var(--fail)']
+  ];
+  root.innerHTML = rows.map(([name,id,col])=>`
+    <div class="coup-row">
+      <div class="coup-name">${name}</div>
+      <div class="coup-bar-bg"><div class="coup-bar" id="${id}-bar" style="background:${col};width:0%"></div></div>
+      <div class="coup-val" id="${id}-val">0.000</div>
+    </div>
+  `).join('');
+}
+
+function updateValues(){
+  tick++;
+  const ramp = Math.min(1, tick/90);
+  const collapseRamp = scenario === 'collapse' ? Math.min(1, Math.max(0,(tick-38)/72)) : 0;
+
+  ['temp','hum','co2','light','water','ec'].forEach((id,idx)=>{
+    const base = BASE[id];
+    const drift = driftTarget[id] * ramp;
+    const amp = noiseAmp[id];
+    const noise = (Math.random()-0.5)*2*amp;
+    const wave = Math.sin(tick*0.045 + idx*0.85) * amp * 0.45;
+    let extra = 0;
+    if(id === 'temp') extra += collapseRamp * 5;
+    if(id === 'hum') extra -= collapseRamp * 8;
+    if(id === 'water') extra -= collapseRamp * 8;
+    if(id === 'co2') extra -= collapseRamp * 120;
+    if(id === 'ec') extra += collapseRamp * 0.25;
+
+    const f = FACTORS[factorIndexById(id)];
+    vals[id] = clamp(base + drift + noise + wave + extra, f.min, f.max);
+  });
+
+  vals.vpd = clamp(calcVPD(vals.temp, vals.hum), 0, 4.0);
+}
+
+function couplingPressures(){
+  const vr = calcRById('vpd').R;
+  const wr = calcRById('water').R;
+  const lr = calcRById('light').R;
+  const cr = calcRById('co2').R;
+  const mediator = Math.min(1.8, 0.55*Math.max(0,vr-0.35) + 0.35*Math.max(0,wr-0.45) + 0.25*Math.max(0,lr-0.6) + 0.25*Math.max(0,cr-0.65));
+  return {vpd:vr, water:wr, light:lr, co2:cr, mediator};
+}
+
+function calcCorr(){
+  const C = [];
+  const cp = couplingPressures();
+  for(let i=0;i<FACTORS.length;i++){
+    C[i]=[];
+    for(let j=0;j<FACTORS.length;j++){
+      if(i===j){C[i][j]=1.0;continue;}
+      const ids = [FACTORS[i].id, FACTORS[j].id].sort().join('-');
+      let drift = 0;
+
+      // VPD-mediated pairs become more tightly coupled under stress.
+      if(['hum-temp','temp-vpd','hum-vpd','vpd-water','co2-vpd','light-vpd','ec-water'].includes(ids)){
+        drift += cp.mediator * 0.18;
+      }
+      if(['co2-light','co2-temp','light-temp'].includes(ids) && (scenario === 'co2drop' || scenario === 'collapse')) {
+        drift += 0.18 + Math.min(0.25, tick*0.003);
+      }
+      if(scenario === 'collapse' && tick > 35) drift += Math.min(0.38, (tick-35)*0.005);
+
+      C[i][j] = clamp(corrBase[i][j] + drift + (Math.random()-0.5)*0.035, 0, 1);
+    }
+  }
+  return C;
+}
+
+function calcRCorr(C){
+  let maxR=0;
+  const alerts=[];
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=i+1;j<FACTORS.length;j++){
+      const Rij = Math.abs(C[i][j] - corrBase[i][j]) / tauC;
+      if(Rij > maxR) maxR = Rij;
+      if(Rij >= 1.0) alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${Rij.toFixed(2)}`);
+    }
+  }
+  return {maxR, alerts};
+}
+
+function fmtVal(v,i){
+  const f = FACTORS[i];
+  if(f.id === 'vpd') return v.toFixed(2)+f.unit;
+  if(f.id === 'ec') return v.toFixed(2)+f.unit;
+  if(f.id === 'light' || f.id === 'co2') return Math.round(v).toLocaleString()+f.unit;
+  return v.toFixed(1)+f.unit;
+}
+
+function setCoup(id,val){
+  document.getElementById(`${id}-bar`).style.width = Math.min(100,val*100).toFixed(1)+'%';
+  document.getElementById(`${id}-val`).textContent = val.toFixed(3);
+}
+
+function updateUI(){
+  const C = calcCorr();
+  const {maxR:rCorr, alerts} = calcRCorr(C);
+  const cp = couplingPressures();
+
+  let rTotal = rCorr;
+  let failAny = false;
+  let warnAny = false;
+
+  FACTORS.forEach((f,i)=>{
+    const {delta,tau,R} = calcR(i);
+    rTotal = Math.max(rTotal, R);
+    rHistory[i].push(R);
+    if(rHistory[i].length > HIST_LEN) rHistory[i].shift();
+
+    const col = getColor(R);
+    const [bText,bCls,zone] = getBadge(R);
+
+    document.getElementById(`val-${i}`).textContent = fmtVal(vals[f.id],i);
+    document.getElementById(`delta-${i}`).textContent = (f.id==='vpd'||f.id==='ec' ? delta.toFixed(2) : f.id==='light'||f.id==='co2' ? Math.round(delta).toLocaleString() : delta.toFixed(1)) + f.unit;
+    document.getElementById(`tau-${i}`).textContent = (f.id==='vpd'||f.id==='ec' ? tau.toFixed(2) : f.id==='light'||f.id==='co2' ? Math.round(tau).toLocaleString() : tau.toFixed(1)) + f.unit;
+    document.getElementById(`r-${i}`).textContent = R.toFixed(3);
+    document.getElementById(`r-${i}`).style.color = col;
+    document.getElementById(`rbar-${i}`).style.width = Math.min(100,R*100).toFixed(1)+'%';
+    document.getElementById(`rbar-${i}`).style.background = col;
+
+    const card = document.getElementById(`fc-${i}`);
+    card.className = 'fc' + (R>=1.0?' fail':R>=0.75?' warn':'');
+    const badge = document.getElementById(`badge-${i}`);
+    badge.textContent = bText;
+    badge.className = 'fc-badge ' + bCls;
+
+    if(R>=1.0) failAny = true;
+    if(R>=0.75) warnAny = true;
+
+    if(zone !== prevZones[i]){
+      if(zone==='fail') addLog(`FAIL-CLOSED候補: ${f.name} R=${R.toFixed(3)}`, 'fail');
+      else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
+      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      prevZones[i] = zone;
+    }
+  });
+
+  // Mediator UI
+  document.getElementById('med-temp').textContent = vals.temp.toFixed(1)+'℃';
+  document.getElementById('med-hum').textContent = vals.hum.toFixed(1)+'%';
+  document.getElementById('med-vpd').textContent = vals.vpd.toFixed(2)+'kPa';
+  document.getElementById('vpd-r').textContent = cp.vpd.toFixed(3);
+  document.getElementById('vpd-r').style.color = getColor(cp.vpd);
+  document.getElementById('coup-r').textContent = cp.mediator.toFixed(3);
+  document.getElementById('coup-r').style.color = getColor(cp.mediator);
+  setCoup('vpd-coup', cp.vpd);
+  setCoup('water-coup', cp.water);
+  setCoup('light-coup', cp.light);
+  setCoup('co2-coup', cp.co2);
+  setCoup('mediator-coup', cp.mediator);
+
+  // correlation matrix
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=0;j<FACTORS.length;j++){
+      const cell = document.getElementById(`cm-${i}-${j}`);
+      const v = C[i][j];
+      const Rij = i!==j ? Math.abs(v-corrBase[i][j])/tauC : 0;
+      if(i===j){
+        cell.style.background='rgba(114,255,184,.14)';
+        cell.style.color='var(--accent)';
+        cell.textContent='1.00';
+      } else if(Rij >= 1.0){
+        cell.style.background='rgba(255,59,92,.44)';
+        cell.style.color='#ffb2c2';
+        cell.textContent=v.toFixed(2);
+      } else if(Rij >= 0.75){
+        cell.style.background='rgba(255,210,74,.25)';
+        cell.style.color='var(--warn)';
+        cell.textContent=v.toFixed(2);
+      } else {
+        cell.style.background=`rgba(57,255,133,${v*0.26})`;
+        cell.style.color=`rgba(255,255,255,${0.35+v*0.5})`;
+        cell.textContent=v.toFixed(2);
+      }
+    }
+  }
+
+  const corrAlert = document.getElementById('corr-alert');
+  if(alerts.length){
+    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail)">⚠ ${a}</div>`).join('');
+    if(tick % 24 === 0) addLog(`相関変質検出: ${alerts[0]}`, 'fail');
+  } else {
+    corrAlert.innerHTML = `<span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
+  }
+
+  rTotal = Math.max(rTotal, cp.mediator);
+  document.getElementById('overall-r').textContent = rTotal.toFixed(3);
+  document.getElementById('overall-r').style.color = getColor(rTotal);
+  document.getElementById('corr-r').textContent = rCorr.toFixed(3);
+  document.getElementById('corr-r').style.color = getColor(rCorr);
+
+  const st = document.getElementById('overall-status');
+  const pack = document.getElementById('pack-status');
+  const stress = Math.min(1.0, rTotal);
+  document.getElementById('stress-overlay').style.setProperty('--stress', (stress*0.25).toFixed(3));
+  document.getElementById('stress-gauge').style.width = Math.min(100,rTotal*100).toFixed(1)+'%';
+  document.getElementById('sun').style.setProperty('--sun', clamp(vals.light / 26000, .16, 1).toFixed(2));
+  document.getElementById('fog').style.setProperty('--fog', clamp((vals.hum-60)/70, .02, .42).toFixed(3));
+  document.getElementById('vpd-box').innerHTML = `VPD ${vals.vpd.toFixed(2)} kPa<br>R_vpd=${cp.vpd.toFixed(3)}`;
+
+  if(rTotal >= 1.0){
+    st.textContent = 'FAIL-CLOSED — 自動判断停止・人間確認へ委譲';
+    st.style.color = 'var(--fail)';
+    pack.textContent = '✕ FAIL_CLOSED GREENHOUSE';
+    pack.style.color = 'var(--fail)';
+  } else if(rTotal >= 0.75){
+    st.textContent = 'WARNING — 予兆監視強化';
+    st.style.color = 'var(--warn)';
+    pack.textContent = '▲ WARNING GREENHOUSE';
+    pack.style.color = 'var(--warn)';
+  } else {
+    st.textContent = 'SAFE — 構造余裕あり';
+    st.style.color = 'var(--ok)';
+    pack.textContent = '● SAFE GREENHOUSE';
+    pack.style.color = 'var(--ok)';
+  }
+
+  drawTimeSeries();
+}
+
+const tsCanvas = document.getElementById('ts-canvas');
+const tsCtx = tsCanvas.getContext('2d');
+const TS_COLORS = ['#ff8c42','#46c6ff','#ff4fb0','#b7ff4a','#ffe066','#39ff85','#b58cff'];
+
+function drawTimeSeries(){
+  const W=tsCanvas.width,H=tsCanvas.height;
+  tsCtx.clearRect(0,0,W,H);
+  tsCtx.fillStyle='#112218';
+  tsCtx.fillRect(0,0,W,H);
+
+  tsCtx.strokeStyle='#234532';
+  tsCtx.lineWidth=1;
+  [0.25,0.5,0.75,1.0].forEach(y=>{
+    const py = H - y*(H*.84) - 10;
+    tsCtx.beginPath();tsCtx.moveTo(0,py);tsCtx.lineTo(W,py);tsCtx.stroke();
+  });
+
+  const failY = H - 1.0*(H*.84) - 10;
+  tsCtx.strokeStyle='rgba(255,59,92,.55)';
+  tsCtx.setLineDash([5,4]);
+  tsCtx.beginPath();tsCtx.moveTo(0,failY);tsCtx.lineTo(W,failY);tsCtx.stroke();
+  tsCtx.setLineDash([]);
+
+  rHistory.forEach((hist,i)=>{
+    if(hist.length<2) return;
+    tsCtx.strokeStyle=TS_COLORS[i];
+    tsCtx.lineWidth=i===2?2.4:1.7;
+    tsCtx.beginPath();
+    hist.forEach((v,x)=>{
+      const px = x/(HIST_LEN-1)*W;
+      const py = H - Math.min(v,1.6)/1.6*(H*.84) - 10;
+      x===0 ? tsCtx.moveTo(px,py) : tsCtx.lineTo(px,py);
+    });
+    tsCtx.stroke();
+  });
+
+  tsCtx.font='10px JetBrains Mono, monospace';
+  tsCtx.fillStyle='rgba(255,59,92,.75)';
+  tsCtx.fillText('R=1.0',6,failY-4);
+}
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const t=(tick+'').padStart(4,'0');
+  const div=document.createElement('div');
+  div.className='log-'+type;
+  div.textContent=`[t=${t}] ${msg}`;
+  area.insertBefore(div,area.firstChild);
+  logLines.push(div);
+  if(logLines.length>80){
+    const old=logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function update(){
+  if(!running) return;
+  updateValues();
+  updateUI();
+}
+
+function toggleRun(){
+  running=!running;
+  const btn=document.getElementById('btn-run');
+  btn.textContent = running ? '▶ 実行中' : '⏸ 一時停止';
+  btn.className = running ? 'btn active' : 'btn';
+}
+
+function resetSim(){
+  tick=0;
+  vals={temp:24, hum:68, vpd:calcVPD(24,68), co2:800, light:18000, water:62, ec:1.45};
+  driftTarget={temp:0,hum:0,co2:0,light:0,water:0,ec:0};
+  noiseAmp={temp:0.8,hum:2.5,co2:45,light:900,water:2.0,ec:0.05};
+  scenario='normal';
+  rHistory=FACTORS.map(()=>[]);
+  prevZones=FACTORS.map(()=>'ok');
+  document.getElementById('scenario-sel').value='normal';
+  document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML='';
+  logLines=[];
+  addLog('システムリセット', 'info');
+  addLog('VPD媒介相関監視を開始', 'ok');
+}
+
+buildFactorCards();
+buildCorrMatrix();
+buildCouplingList();
+addLog('温室VPD媒介相関sample開始', 'ok');
+addLog('温度と湿度を直接加算せず、VPD媒介レイヤーへ写像', 'info');
+setInterval(update, 300);
+</script>
+</body>
+</html>

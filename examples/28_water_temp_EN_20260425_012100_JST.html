@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<!-- OUTPUT: 28_water_temp_EN_20260425_012100_JST.html / Generated 2026-04-25 01:21:00 JST -->
+<!-- FILE: 28_water_temp_EN_20260425_012100_JST.html -->
+<!-- TITLE: NRA-IDE Water Temperature Upper/Lower Limit Management System -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-25 01:21:00 JST -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE Water Temp Monitor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans:wght@300;400;700&display=swap');
+:root{
+  --bg:#090c12;--surface:#101520;--panel:#161c28;--border:#1e2636;
+  --safe:#00d4ff;--warn:#f0a500;--fail-hi:#ff3b5c;--fail-lo:#7b6cff;
+  --text:#b8c4d8;--muted:#3e4d68;--accent:#00d4ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);
+  font-family:'Noto Sans',sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 12px;min-height:100vh;}
+
+/* Header */
+.hdr{width:100%;max-width:980px;display:flex;justify-content:space-between;
+  align-items:flex-end;border-bottom:1px solid var(--border);
+  padding-bottom:14px;margin-bottom:18px;}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--muted);letter-spacing:.16em;text-transform:uppercase;}
+.hdr-sub h1{font-size:18px;color:var(--text);letter-spacing:.04em;
+  font-weight:600;margin-top:4px;}
+.ctrl-row{display:flex;gap:8px;}
+.pill{font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:6px 14px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;border-radius:4px;
+  transition:all .2s;letter-spacing:.06em;}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#000;}
+.pill-heat{border-color:#ff6030;}
+.pill-heat.on{background:#ff6030;border-color:#ff6030;color:#fff;}
+.pill-cool{border-color:#00d4ff;}
+.pill-cool.on{background:#00d4ff;border-color:#00d4ff;color:#000;}
+
+/* Grid */
+.grid{width:100%;max-width:980px;display:grid;
+  grid-template-columns:1fr 310px;gap:14px;}
+
+/* Tank panel */
+.tank-panel{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.panel-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;}
+
+canvas{display:block;border-radius:6px;background:var(--bg);}
+#tankCanvas{width:100%;height:300px;}
+#waveCanvas{width:100%;height:65px;}
+
+/* Sliders */
+.slider-section{display:flex;flex-direction:column;gap:10px;}
+.sl-row{display:flex;flex-direction:column;gap:5px;}
+.sl-hdr{display:flex;justify-content:space-between;align-items:baseline;}
+.sl-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.sl-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;}
+.sl-mrk{display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;
+  border-radius:2px;background:var(--border);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;
+  width:18px;height:18px;border-radius:50%;background:var(--accent);
+  border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent);
+  transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+
+/* Right panel */
+.side{display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:16px;}
+.card-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:12px;}
+
+/* Digital temperature display */
+.temp-display{text-align:center;padding:12px 0;}
+.temp-big{font-family:'JetBrains Mono',monospace;font-size:52px;
+  font-weight:700;line-height:1;transition:color .4s;}
+.temp-unit{font-size:20px;font-weight:300;color:var(--muted);}
+.temp-sub{font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--muted);letter-spacing:.1em;margin-top:6px;}
+
+/* Dual R meters */
+.dual-r{display:flex;gap:10px;justify-content:center;}
+.r-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.r-arc-wrap{width:120px;height:65px;overflow:visible;}
+.r-num{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;
+  transition:color .3s;text-align:center;}
+.r-dir{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.1em;text-align:center;}
+
+/* Status badge */
+.badge{width:100%;padding:10px;border-radius:6px;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  letter-spacing:.14em;border:1px solid;transition:all .35s;}
+.badge.safe{color:var(--safe);border-color:var(--safe);background:rgba(0,212,255,.06);}
+.badge.warn-hi{color:var(--warn);border-color:var(--warn);background:rgba(240,165,0,.06);}
+.badge.fail-hi{color:var(--fail-hi);border-color:var(--fail-hi);
+  background:rgba(255,59,92,.09);animation:pf .7s ease-in-out infinite;}
+.badge.warn-lo{color:#b0a0ff;border-color:#7b6cff;background:rgba(123,108,255,.06);}
+.badge.fail-lo{color:var(--fail-lo);border-color:var(--fail-lo);
+  background:rgba(123,108,255,.1);animation:pf .7s ease-in-out infinite;}
+@keyframes pf{0%,100%{box-shadow:0 0 0 0 rgba(255,59,92,.3)}
+  50%{box-shadow:0 0 0 5px rgba(255,59,92,0)}}
+
+.act-txt{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
+
+/* Metrics */
+.metrics{display:flex;flex-direction:column;gap:8px;}
+.met-row{display:flex;flex-direction:column;gap:4px;}
+.met-hdr{display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:10px;}
+.met-k{color:var(--muted);}.met-v{font-weight:600;}
+.bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:2px;transition:width .25s,background .3s;}
+
+/* Settings card */
+.setting-row{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.set-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.set-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;}
+
+/* Log */
+.log-panel{width:100%;max-width:980px;margin-top:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px 18px;}
+.log-title{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:8px;}
+.log-list{display:flex;flex-direction:column;gap:3px;
+  max-height:90px;overflow-y:auto;}
+.log-e{font-family:'JetBrains Mono',monospace;font-size:10px;
+  display:flex;gap:10px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.l-t{color:var(--muted);min-width:56px;}
+.l-temp{min-width:72px;}
+.l-rhi{color:#ff6030;min-width:64px;}
+.l-rlo{color:#7b6cff;min-width:64px;}
+.l-s{font-weight:600;}
+.l-s.safe{color:var(--safe)}.l-s.warn-hi,.l-s.warn-lo{color:var(--warn)}
+.l-s.fail-hi{color:var(--fail-hi)}.l-s.fail-lo{color:var(--fail-lo)}
+
+.footer{width:100%;max-width:980px;margin-top:14px;display:flex;
+  justify-content:space-between;font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--muted);letter-spacing:.08em;}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-sub">
+    NRA-IDE / WATER TEMPERATURE CONTROL
+    <h1>Water Temperature Upper/Lower Limit Control System</h1>
+  </div>
+  <div class="ctrl-row">
+    <button class="pill on" id="btnRun" onclick="toggleRun()">RUN</button>
+    <button class="pill pill-heat" id="btnHeat" onclick="toggleHeat()">HEAT OFF</button>
+    <button class="pill pill-cool" id="btnCool" onclick="toggleCool()">COOL OFF</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="grid">
+
+  <!-- Left: tank + graph -->
+  <div class="tank-panel">
+    <div class="panel-lbl">TANK VISUALIZATION</div>
+    <canvas id="tankCanvas"></canvas>
+
+    <!-- Temperature waveform -->
+    <div class="panel-lbl">TEMPERATURE TREND</div>
+    <canvas id="waveCanvas"></canvas>
+
+    <!-- Sliders -->
+    <div class="slider-section">
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">TARGET TEMPERATURE</span>
+          <div class="sl-val" id="targetDisp" style="color:var(--safe)">
+            60<small style="font-size:12px;font-weight:300;color:var(--muted)"> ℃</small>
+          </div>
+        </div>
+        <input type="range" id="targetSlider" min="0" max="100" value="60"
+          oninput="onTarget(this.value)">
+        <div class="sl-mrk">
+          <span>0℃</span><span>Optimal Setpoint</span><span>100℃</span>
+        </div>
+      </div>
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-lbl">DISTURBANCE</span>
+          <div class="sl-val" id="distDisp" style="font-size:14px;color:var(--muted)">
+            ±0.0<small style="font-size:10px"> ℃</small>
+          </div>
+        </div>
+        <input type="range" id="distSlider" min="-30" max="30" value="0"
+          oninput="onDist(this.value)">
+        <div class="sl-mrk"><span>-30℃</span><span>0</span><span>+30℃</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: metrics -->
+  <div class="side">
+
+    <!-- Digital temperature -->
+    <div class="card">
+      <div class="card-lbl">CURRENT TEMPERATURE</div>
+      <div class="temp-display">
+        <div class="temp-big" id="tempBig">60<span class="temp-unit">℃</span></div>
+        <div class="temp-sub" id="tempSub">δ = 0.0℃ | τ_hi = 15℃ | τ_lo = 20℃</div>
+      </div>
+    </div>
+
+    <!-- Dual R meters -->
+    <div class="card">
+      <div class="card-lbl">APPROACH RATIO  R = δ / τ</div>
+      <div class="dual-r">
+        <div class="r-item">
+          <svg class="r-arc-wrap" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#1e2636" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcHi" d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#ff6030" stroke-width="9" stroke-linecap="round"
+              stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wMarkHi" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fMarkHi" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round"/>
+            <text x="8" y="72" fill="#3e4d68" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#3e4d68" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rHiNum" style="color:#ff6030">0.000</div>
+          <div class="r-dir">↑ Upper-side R_hi</div>
+        </div>
+        <div class="r-item">
+          <svg class="r-arc-wrap" viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#1e2636" stroke-width="9" stroke-linecap="round"/>
+            <path id="arcLo" d="M8 60 A52 52 0 0 1 112 60" fill="none"
+              stroke="#7b6cff" stroke-width="9" stroke-linecap="round"
+              stroke-dasharray="163.4" stroke-dashoffset="163.4"
+              style="transition:stroke-dashoffset .3s,stroke .3s"/>
+            <line id="wMarkLo" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round"/>
+            <line id="fMarkLo" stroke="#7b6cff" stroke-width="2" stroke-linecap="round"/>
+            <text x="8" y="72" fill="#3e4d68" font-size="7" font-family="JetBrains Mono">0</text>
+            <text x="112" y="72" fill="#3e4d68" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          </svg>
+          <div class="r-num" id="rLoNum" style="color:#7b6cff">0.000</div>
+          <div class="r-dir">↓ Lower-side R_lo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status badge -->
+    <div class="badge safe" id="badge">SAFE</div>
+    <div class="act-txt" id="actTxt">Continue normal operation</div>
+
+    <!-- δ/τ breakdown -->
+    <div class="card">
+      <div class="card-lbl">δ / τ  BREAKDOWN</div>
+      <div class="metrics">
+        <div class="met-row">
+          <div class="met-hdr">
+            <span class="met-k">δ  Current Deviation</span>
+            <span class="met-v" id="dVal">0.0 ℃</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="dBar"
+            style="width:0%;background:var(--safe)"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr">
+            <span class="met-k">τ_hi Upper Margin</span>
+            <span class="met-v" id="tauHiVal">15.0 ℃</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="tauHiBar"
+            style="width:50%;background:#ff6030aa"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr">
+            <span class="met-k">τ_lo Lower Margin</span>
+            <span class="met-v" id="tauLoVal">20.0 ℃</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="tauLoBar"
+            style="width:50%;background:#7b6cffaa"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="card">
+      <div class="card-lbl">THRESHOLD SETTINGS</div>
+      <div class="setting-row">
+        <span class="set-lbl">T_OPTIMAL</span>
+        <span class="set-val" id="setOpt" style="color:var(--safe)">60 ℃</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">T_MAX (Upper Limit)</span>
+        <span class="set-val" id="setMax" style="color:#ff6030">75 ℃</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">T_MIN (Lower Limit)</span>
+        <span class="set-val" id="setMin" style="color:#7b6cff">40 ℃</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">R_WARNING</span>
+        <span class="set-val" style="color:var(--warn)">0.75</span>
+      </div>
+      <div class="setting-row">
+        <span class="set-lbl">R_FAIL</span>
+        <span class="set-val" style="color:var(--fail-hi)">1.00</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Log -->
+<div class="log-panel">
+  <div class="log-title">TRACE LOG</div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span id="clk">--:--:--</span>
+  <span>R≥1.0 → FAIL_CLOSED</span>
+</div>
+
+<script>
+// ── Parameters ──
+let T_OPT = 60;
+const T_RANGE = 35; // Upper/lower limits are automatically calculated from the optimal value
+// τ_hi = T_MAX - T_OPT = 15℃, τ_lo = T_OPT - T_MIN = 20℃
+function T_MAX(){ return T_OPT + 15; }
+function T_MIN(){ return T_OPT - 20; }
+const R_WARN = 0.75, R_FAIL = 1.0;
+
+// ── State ──
+let running = true;
+let heatOn  = false, coolOn = false;
+let tCurrent= T_OPT;
+let tRaw    = T_OPT;   // Raw temperature including fluctuation
+let tSmooth = T_OPT;   // Smoothed temperature
+let disturbance = 0;
+let waveHist = [];
+const WAVE_LEN = 300;
+let logTimer = 0;
+let bubbles = [];
+let smoothBuf = [];
+const SMOOTH_N = 10;
+
+// Fluctuation amplitude: heating and high temperature increase convection fluctuation
+function fluctAmp(){
+  const base = 0.5;
+  const hf = heatOn ? 2.8 : 1.0;
+  const cf = coolOn ? 0.5 : 1.0;
+  const tf = Math.max(1.0, Math.abs(tCurrent - T_OPT) / 6);
+  return base * hf * cf * tf;
+}
+
+// ── Canvas ──
+const tankC = document.getElementById('tankCanvas');
+const waveC = document.getElementById('waveCanvas');
+const tc = tankC.getContext('2d');
+const wc = waveC.getContext('2d');
+
+function resize(){
+  const wp = tankC.parentElement;
+  tankC.width  = wp.clientWidth; tankC.height = 300;
+  waveC.width  = wp.clientWidth; waveC.height = 65;
+}
+
+// ── Controls ──
+function toggleRun(){
+  running = !running;
+  const b = document.getElementById('btnRun');
+  b.classList.toggle('on', running);
+  b.textContent = running ? 'RUN' : 'PAUSE';
+}
+function toggleHeat(){
+  heatOn = !heatOn;
+  const b = document.getElementById('btnHeat');
+  b.classList.toggle('on', heatOn);
+  b.textContent = heatOn ? 'HEAT ON' : 'HEAT OFF';
+}
+function toggleCool(){
+  coolOn = !coolOn;
+  const b = document.getElementById('btnCool');
+  b.classList.toggle('on', coolOn);
+  b.textContent = coolOn ? 'COOL ON' : 'COOL OFF';
+}
+function onTarget(v){
+  T_OPT = parseFloat(v);
+  document.getElementById('targetDisp').innerHTML =
+    T_OPT.toFixed(0) + '<small style="font-size:12px;font-weight:300;color:var(--muted)"> ℃</small>';
+  document.getElementById('setOpt').textContent = T_OPT + ' ℃';
+  document.getElementById('setMax').textContent = T_MAX() + ' ℃';
+  document.getElementById('setMin').textContent = T_MIN() + ' ℃';
+}
+function onDist(v){
+  disturbance = parseFloat(v);
+  document.getElementById('distDisp').innerHTML =
+    (disturbance >= 0 ? '+' : '') + disturbance.toFixed(1) +
+    '<small style="font-size:10px"> ℃</small>';
+}
+
+// ── NRA-IDE calculation: independent upper/lower limit evaluation ──
+function calcIDE(t){
+  const tauHi = T_MAX() - T_OPT;  // upper-side margin
+  const tauLo = T_OPT - T_MIN();  // lower-side margin
+  const delta  = t - T_OPT;       // signed deviation: positive = rising direction
+  const absDelta = Math.abs(delta);
+
+  // Upper-side R increases when temperature rises above the optimum
+  const rHi = delta > 0 ? (delta / Math.max(tauHi, 0.01)) : 0;
+  // Lower-side R increases when temperature falls below the optimum
+  const rLo = delta < 0 ? (absDelta / Math.max(tauLo, 0.01)) : 0;
+
+  // Overall status decision
+  const rMax = Math.max(rHi, rLo);
+  let status, action;
+  if(rHi >= R_FAIL){
+    status = 'fail-hi'; action = 'Upper limit exceeded: FAIL_CLOSED — emergency cooling / stop heating';
+  } else if(rLo >= R_FAIL){
+    status = 'fail-lo'; action = 'Lower limit exceeded: FAIL_CLOSED — emergency heating / stop cooling';
+  } else if(rHi >= R_WARN){
+    status = 'warn-hi'; action = 'Approaching upper limit: strengthen cooling recommended';
+  } else if(rLo >= R_WARN){
+    status = 'warn-lo'; action = 'Approaching lower limit: strengthen heating recommended';
+  } else {
+    status = 'safe';    action = 'Continue normal operation';
+  }
+  return { delta, absDelta, tauHi, tauLo, rHi, rLo, rMax, status, action };
+}
+
+// ── Physical simulation ──
+function tick(dt){
+  if(!running) return;
+  const ide = calcIDE(tCurrent);
+
+  // Heating, cooling, disturbance, and natural heat dissipation
+  let dT = 0;
+  if(heatOn && ide.status !== 'fail-hi') dT += 3.5;
+  if(coolOn && ide.status !== 'fail-lo') dT -= 3.5;
+  dT += disturbance * 0.08;
+  // Natural heat dissipation: slowly returns toward ambient temperature of 20℃
+  dT += (20 - tCurrent) * 0.012;
+  tCurrent += dT * dt;
+  tCurrent = Math.max(-5, Math.min(115, tCurrent));
+
+  // ── Fluctuation generation: thermal convection and sensor noise ──
+  const t = performance.now() / 1000;
+  const amp = fluctAmp();
+  const fluct = amp * Math.sin(2 * Math.PI * 1.3 * t)
+              + amp * 0.5 * Math.sin(2 * Math.PI * 2.7 * t + 1.1)
+              + amp * 0.25 * Math.sin(2 * Math.PI * 4.1 * t + 2.3)
+              + (Math.random() - 0.5) * amp * 0.4;  // small random component
+  tRaw = tCurrent + fluct;
+
+  // Smoothing: moving average
+  smoothBuf.push(tRaw);
+  if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
+  tSmooth = smoothBuf.reduce((a,b) => a+b, 0) / smoothBuf.length;
+
+  // Waveform history: records both raw and smoothed values
+  waveHist.push({ raw: tRaw, smooth: tSmooth, status: ide.status });
+  if(waveHist.length > WAVE_LEN) waveHist.shift();
+
+  // Bubble generation: judged by fluctuating raw temperature at high temperature
+  if(tRaw > T_OPT && Math.random() < (tRaw - T_OPT) / 55){
+    const W = tankC.width;
+    bubbles.push({
+      x: W * 0.15 + Math.random() * W * 0.7,
+      y: getTankBottom() - 10,
+      r: 2 + Math.random() * 4,
+      vy: -(15 + Math.random() * 20),
+      life: 1.0
+    });
+  }
+  bubbles = bubbles.filter(b => b.life > 0);
+  bubbles.forEach(b => {
+    b.y += b.vy * dt;
+    b.life -= dt * 0.8;
+    b.x += (Math.random() - 0.5) * 8 * dt;
+  });
+
+  updateUI(ide);
+}
+
+function getTankBottom(){ return tankC.height - 30; }
+
+// ── UI update ──
+function updateUI(ide){
+  const col = statusColor(ide.status);
+  const rHiCol = ide.rHi >= R_FAIL ? '#ff3b5c' : ide.rHi >= R_WARN ? '#f0a500' : '#ff6030';
+  const rLoCol = ide.rLo >= R_FAIL ? '#7b6cff' : ide.rLo >= R_WARN ? '#f0a500' : '#7b6cff';
+
+  // Temperature display: raw value including fluctuation
+  document.getElementById('tempBig').innerHTML =
+    tRaw.toFixed(1) + '<span class="temp-unit">℃</span>';
+  document.getElementById('tempBig').style.color = col;
+  document.getElementById('tempSub').textContent =
+    `δ = ${(ide.delta >= 0 ? '+' : '')}${ide.delta.toFixed(1)}℃ | τ_hi = ${ide.tauHi.toFixed(0)}℃ | τ_lo = ${ide.tauLo.toFixed(0)}℃   | fluctuation amplitude: ±${fluctAmp().toFixed(1)}℃`;
+
+  // R values
+  document.getElementById('rHiNum').textContent = Math.min(ide.rHi, 9.999).toFixed(3);
+  document.getElementById('rHiNum').style.color = rHiCol;
+  document.getElementById('rLoNum').textContent = Math.min(ide.rLo, 9.999).toFixed(3);
+  document.getElementById('rLoNum').style.color = rLoCol;
+  setArc('arcHi', ide.rHi, rHiCol);
+  setArc('arcLo', ide.rLo, rLoCol);
+  setMarkPair('wMarkHi','fMarkHi');
+  setMarkPair('wMarkLo','fMarkLo');
+
+  // Badge
+  const badge = document.getElementById('badge');
+  badge.className = 'badge ' + ide.status;
+  const lblMap = { safe:'SAFE', 'warn-hi':'WARNING ↑ APPROACHING UPPER LIMIT',
+    'warn-lo':'WARNING ↓ APPROACHING LOWER LIMIT', 'fail-hi':'FAIL_CLOSED ↑ UPPER LIMIT EXCEEDED',
+    'fail-lo':'FAIL_CLOSED ↓ LOWER LIMIT EXCEEDED' };
+  badge.textContent = lblMap[ide.status];
+  document.getElementById('actTxt').textContent = ide.action;
+
+  // δ/τ bars
+  const maxRange = 40;
+  document.getElementById('dVal').textContent = (ide.delta >= 0 ? '+' : '') + ide.delta.toFixed(1) + ' ℃';
+  document.getElementById('dBar').style.width = Math.min(ide.absDelta / maxRange * 100, 100).toFixed(1) + '%';
+  document.getElementById('dBar').style.background = col;
+  document.getElementById('tauHiVal').textContent = ide.tauHi.toFixed(1) + ' ℃';
+  document.getElementById('tauLoVal').textContent = ide.tauLo.toFixed(1) + ' ℃';
+  document.getElementById('tauHiBar').style.width = Math.min(ide.tauHi / maxRange * 100, 100).toFixed(1) + '%';
+  document.getElementById('tauLoBar').style.width = Math.min(ide.tauLo / maxRange * 100, 100).toFixed(1) + '%';
+
+  document.getElementById('clk').textContent = new Date().toTimeString().slice(0, 8);
+  logTimer++;
+  if(logTimer % 60 === 0) addLog(ide);
+}
+
+function statusColor(s){
+  return { safe:'#00d4ff', 'warn-hi':'#f0a500', 'warn-lo':'#b0a0ff',
+           'fail-hi':'#ff3b5c', 'fail-lo':'#7b6cff' }[s];
+}
+
+// ── Arcs ──
+function setArc(id, R, col){
+  const arcLen = 163.4;
+  const ratio  = Math.min(R / 1.5, 1);
+  const el     = document.getElementById(id);
+  el.style.strokeDashoffset = arcLen * (1 - ratio);
+  el.style.stroke = col;
+}
+function setMarkPair(wId, fId){
+  setMarkSVG(wId, 0.75 / 1.5, 60, 52);
+  setMarkSVG(fId, 1.0  / 1.5, 60, 52);
+}
+function setMarkSVG(id, t, cy, r){
+  const ang = Math.PI * (1 - t);
+  const cx  = 60;
+  const x = cx + r * Math.cos(ang), y = cy - r * Math.sin(ang);
+  const nx = Math.cos(ang) * 7, ny = -Math.sin(ang) * 7;
+  const el = document.getElementById(id);
+  el.setAttribute('x1', (x - nx * .5).toFixed(1));
+  el.setAttribute('y1', (y - ny * .5).toFixed(1));
+  el.setAttribute('x2', (x + nx * .5).toFixed(1));
+  el.setAttribute('y2', (y + ny * .5).toFixed(1));
+}
+
+// ── Tank drawing ──
+function drawTank(){
+  const W = tankC.width, H = tankC.height;
+  tc.clearRect(0, 0, W, H);
+  const ide = calcIDE(tCurrent);
+  const col = statusColor(ide.status);
+
+  // Tank outer frame
+  const tx = W * .12, tw = W * .76, th = H - 50, ty = 20;
+  const fillRatio = Math.min(Math.max((tCurrent - (-5)) / 120, 0), 1);
+  const fillH = th * 0.85; // Fixed water surface height
+  const fillY = ty + th - fillH;
+
+  // Water temperature color: changes according to raw fluctuating temperature
+  const tRatio = Math.min(Math.max((tRaw - 0) / 100, 0), 1);
+  const waterCol = tempToColor(tRatio);
+
+  // Water surface fluctuation
+  const now = performance.now() / 1000;
+  const waveAmp = ide.status.startsWith('fail') ? 6 : ide.status.startsWith('warn') ? 3 : 1.5;
+
+  // Water drawing: clipped to tank interior
+  tc.save();
+  tc.beginPath();
+  tc.rect(tx + 3, ty + 3, tw - 6, th - 6);
+  tc.clip();
+
+  // Water surface gradient
+  const grad = tc.createLinearGradient(0, fillY, 0, fillY + fillH);
+  grad.addColorStop(0,   `rgba(${waterCol},0.80)`);
+  grad.addColorStop(0.3, `rgba(${waterCol},0.53)`);
+  grad.addColorStop(1,   `rgba(${waterCol},0.27)`);
+  tc.fillStyle = grad;
+  tc.beginPath();
+  tc.moveTo(tx, fillY + th);
+  // Water surface waveform
+  for(let x = tx; x <= tx + tw; x += 4){
+    const wx = (x - tx) / tw;
+    const wy = fillY + Math.sin(wx * Math.PI * 3 + now * 2) * waveAmp
+                     + Math.sin(wx * Math.PI * 5 - now * 1.5) * waveAmp * 0.4;
+    tc.lineTo(x, wy);
+  }
+  tc.lineTo(tx + tw, fillY + th);
+  tc.closePath();
+  tc.fill();
+
+  // Vertical temperature-gradient lines: internal convection effect
+  for(let i = 0; i < 5; i++){
+    const cx2 = tx + tw * (i + 1) / 6;
+    const convY = fillY + fillH * 0.1 + Math.sin(now * 0.8 + i) * fillH * 0.3;
+    const cg = tc.createLinearGradient(cx2, fillY, cx2, fillY + fillH);
+    cg.addColorStop(0,   `rgba(${waterCol},0.19)`);
+    cg.addColorStop(0.5, `rgba(${waterCol},0.38)`);
+    cg.addColorStop(1,   `rgba(${waterCol},0.06)`);
+    tc.strokeStyle = cg;
+    tc.lineWidth = 1;
+    tc.beginPath();
+    tc.moveTo(cx2, fillY + fillH);
+    tc.bezierCurveTo(
+      cx2 + 15, convY + fillH * 0.3,
+      cx2 - 15, convY,
+      cx2, fillY
+    );
+    tc.stroke();
+  }
+
+  // Bubbles
+  bubbles.forEach(b => {
+    tc.beginPath();
+    tc.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    tc.strokeStyle = `rgba(255,255,255,${b.life * 0.4})`;
+    tc.lineWidth = 1;
+    tc.stroke();
+  });
+
+  tc.restore();
+
+  // Tank outer wall
+  tc.strokeStyle = '#2a3548';
+  tc.lineWidth   = 3;
+  tc.beginPath();
+  tc.roundRect(tx, ty, tw, th, 8);
+  tc.stroke();
+
+  // Tank inner wall: highlight
+  tc.strokeStyle = 'rgba(255,255,255,0.05)';
+  tc.lineWidth   = 1;
+  tc.beginPath();
+  tc.roundRect(tx + 3, ty + 3, tw - 6, th - 6, 6);
+  tc.stroke();
+
+  // ── Threshold lines ──
+  const tRange = 120, tBottom = -5;
+  function tempToY(t){ return ty + th - (t - tBottom) / tRange * th; }
+
+  drawThreshLine(tc, tx, tw, tempToY(T_MAX()), '#ff3b5c', `T_MAX ${T_MAX()}℃`);
+  drawThreshLine(tc, tx, tw, tempToY(T_OPT),   '#00d4ff', `T_OPT ${T_OPT}℃`);
+  drawThreshLine(tc, tx, tw, tempToY(T_MIN()),  '#7b6cff', `T_MIN ${T_MIN()}℃`);
+
+  // Warning-zone highlight
+  const yMax = tempToY(T_MAX()), yOpt = tempToY(T_OPT), yMin = tempToY(T_MIN());
+  tc.fillStyle = 'rgba(255,59,92,0.04)';
+  tc.fillRect(tx + 3, Math.max(yMax, ty + 3), tw - 6, Math.max(0, yOpt - yMax));
+  tc.fillStyle = 'rgba(123,108,255,0.04)';
+  tc.fillRect(tx + 3, yOpt, tw - 6, Math.max(0, yMin - yOpt));
+
+  // Current temperature indicator: raw fluctuating value
+  const curT = tRaw;
+  const curY = Math.min(Math.max(tempToY(curT), ty + 5), ty + th - 5);
+  tc.beginPath();
+  tc.moveTo(tx - 4, curY);
+  tc.lineTo(tx + 12, curY - 7);
+  tc.lineTo(tx + 12, curY + 7);
+  tc.closePath();
+  tc.fillStyle = col;
+  tc.fill();
+
+  // Temperature label: right side
+  tc.font = 'bold 13px JetBrains Mono';
+  tc.fillStyle = col;
+  tc.textAlign = 'right';
+  tc.fillText(curT.toFixed(1) + '℃', W - 10, curY + 5);
+
+  // Status overlay
+  tc.font = '10px JetBrains Mono';
+  tc.fillStyle = col;
+  tc.textAlign = 'left';
+  const stTxt = { safe:'● SAFE', 'warn-hi':'▲ WARNING ↑', 'warn-lo':'▲ WARNING ↓',
+                  'fail-hi':'✕ FAIL ↑ UPPER LIMIT EXCEEDED', 'fail-lo':'✕ FAIL ↓ LOWER LIMIT EXCEEDED' };
+  tc.fillText(stTxt[ide.status], 10, 16);
+
+  // Heating / cooling indicators
+  if(heatOn){
+    drawFlame(tc, tx + tw/2, ty + th + 18);
+  }
+  if(coolOn){
+    drawSnowflake(tc, tx + tw * 0.25, ty + th + 18, col);
+    drawSnowflake(tc, tx + tw * 0.75, ty + th + 18, col);
+  }
+}
+
+function drawThreshLine(ctx, tx, tw, y, col, lbl){
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(tx + 3, y);
+  ctx.lineTo(tx + tw - 3, y);
+  ctx.strokeStyle = col;
+  ctx.lineWidth   = 1;
+  ctx.globalAlpha = 0.6;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  ctx.setLineDash([]);
+  ctx.font        = '9px JetBrains Mono';
+  ctx.fillStyle   = col;
+  ctx.textAlign   = 'left';
+  ctx.globalAlpha = 0.8;
+  ctx.fillText(lbl, tx + tw + 4, y + 4);
+  ctx.globalAlpha = 1;
+}
+
+function drawFlame(ctx, cx, cy){
+  const t = performance.now() / 1000;
+  const flicker = Math.sin(t * 8) * 2;
+  ctx.save();
+  ctx.translate(cx, cy);
+  [[0,0,14,18,'#ff5020'],[-8,4,10,14,'#ff8030'],[8,4,10,14,'#ff8030']].forEach(([dx,dy,w,h,c])=>{
+    ctx.beginPath();
+    ctx.ellipse(dx + flicker * 0.3, dy - h/2, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = c;
+    ctx.globalAlpha = 0.7;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+  ctx.restore();
+}
+
+function drawSnowflake(ctx, cx, cy, col){
+  const t = performance.now() / 1000;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(t * 0.5);
+  for(let i = 0; i < 6; i++){
+    ctx.rotate(Math.PI / 3);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, 9);
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth   = 1.5;
+    ctx.globalAlpha = 0.6;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
+// Temperature → color conversion: returns an RGB string
+function tempToColor(r){
+  if(r < 0.3){
+    return `${Math.round(r/0.3*50)},${Math.round(150+r/0.3*80)},${Math.round(255-r/0.3*80)}`;
+  }
+  if(r < 0.6){
+    return `${Math.round(50+(r-0.3)/0.3*180)},${Math.round(230-(r-0.3)/0.3*130)},${Math.round(175-(r-0.3)/0.3*175)}`;
+  }
+  return `${Math.round(230+(r-0.6)/0.4*25)},${Math.round(100-(r-0.6)/0.4*100)},0`;
+}
+
+// ── Waveform drawing ──
+function drawWave(){
+  const W = waveC.width, H = waveC.height;
+  wc.clearRect(0, 0, W, H);
+  if(waveHist.length < 2) return;
+
+  // Zoom display range to ±30℃ around T_OPT to make fluctuations easier to see
+  const center = T_OPT;
+  const span   = 30;
+  const tDispMin = center - span, tDispMax = center + span;
+  const mapY = v => H * (1 - (v - tDispMin) / (span * 2)) * 0.9 + H * 0.05;
+
+  // Background grid: subtle
+  wc.strokeStyle = 'rgba(255,255,255,0.04)';
+  wc.lineWidth   = 0.5;
+  for(let g = 0; g < 5; g++){
+    const gy = H * 0.05 + H * 0.9 * g / 4;
+    wc.beginPath(); wc.moveTo(0, gy); wc.lineTo(W, gy); wc.stroke();
+  }
+
+  // Threshold lines
+  [{ v: T_MAX(), c: 'rgba(255,59,92,.5)',  lbl:'MAX' },
+   { v: T_OPT,   c: 'rgba(0,212,255,.35)', lbl:'OPT' },
+   { v: T_MIN(), c: 'rgba(123,108,255,.5)',lbl:'MIN' }].forEach(({ v, c, lbl }) => {
+    if(v < tDispMin || v > tDispMax) return;
+    wc.setLineDash([4, 4]);
+    wc.beginPath();
+    wc.moveTo(0, mapY(v)); wc.lineTo(W, mapY(v));
+    wc.strokeStyle = c; wc.lineWidth = 1; wc.stroke();
+    wc.setLineDash([]);
+    wc.font = '8px JetBrains Mono';
+    wc.fillStyle = c.replace('.5','1').replace('.35','1');
+    wc.textAlign = 'left';
+    wc.globalAlpha = 0.6;
+    wc.fillText(lbl, 2, mapY(v) - 2);
+    wc.globalAlpha = 1;
+  });
+
+  // Raw waveform including fluctuation: thin and semi-transparent
+  wc.beginPath();
+  waveHist.forEach((h, i) => {
+    const x = i / WAVE_LEN * W;
+    const y = mapY(h.raw);
+    i === 0 ? wc.moveTo(x, y) : wc.lineTo(x, y);
+  });
+  wc.strokeStyle = 'rgba(255,255,255,0.18)';
+  wc.lineWidth   = 1;
+  wc.stroke();
+
+  // Smoothed waveform: thick and state-colored
+  waveHist.forEach((h, i) => {
+    if(i === 0) return;
+    const x0 = (i-1)/WAVE_LEN*W, x1 = i/WAVE_LEN*W;
+    const y0 = mapY(waveHist[i-1].smooth), y1 = mapY(h.smooth);
+    wc.beginPath();
+    wc.moveTo(x0, y0); wc.lineTo(x1, y1);
+    wc.strokeStyle = statusColor(h.status) || '#00d4ff';
+    wc.lineWidth   = 2;
+    wc.stroke();
+  });
+
+  // Legend
+  wc.font = '8px JetBrains Mono';
+  wc.textAlign = 'right';
+  wc.fillStyle = 'rgba(255,255,255,0.3)'; wc.fillText('raw', W - 52, H - 4);
+  wc.fillStyle = '#00d4ff';               wc.fillText('smooth', W - 2, H - 4);
+}
+
+// ── Log ──
+function addLog(ide){
+  const now  = new Date().toTimeString().slice(0, 8);
+  const list = document.getElementById('logList');
+  const e    = document.createElement('div');
+  e.className = 'log-entry';
+  e.innerHTML = `
+    <span class="l-t">${now}</span>
+    <span class="l-temp" style="color:${statusColor(ide.status)}">${tCurrent.toFixed(1)}℃</span>
+    <span class="l-rhi">R↑=${ide.rHi.toFixed(3)}</span>
+    <span class="l-rlo">R↓=${ide.rLo.toFixed(3)}</span>
+    <span class="l-s ${ide.status}">${ide.status.toUpperCase()}</span>
+  `;
+  list.insertBefore(e, list.firstChild);
+  if(list.children.length > 15) list.removeChild(list.lastChild);
+}
+
+// ── Main loop ──
+let last = performance.now();
+function loop(now){
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  tick(dt);
+  drawTank();
+  drawWave();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+resize();
+setMarkPair('wMarkHi','fMarkHi');
+setMarkPair('wMarkLo','fMarkLo');
+addLog(calcIDE(tCurrent));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

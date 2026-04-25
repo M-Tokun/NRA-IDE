@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<!-- FILE: 31_move_water_or_ice_EN_20260425_013623_JST.html -->
+<!-- TITLE: NRA-IDE Integrated Phase Transition Model for Water and Ice -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 20260425_013623_JST -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE Phase Transition Integrated Model 20260406</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  /* ── Base reset and fonts ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f4f8; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem;
+  }
+  .container { max-width: 820px; margin: 0 auto; }
+  
+  /* ── Header area ── */
+  header { margin-bottom: 1.5rem; }
+  header h1 { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
+  header p { font-size: 13px; color: #667788; }
+  
+  /* ── Mode tabs ── */
+  .mode-tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+  .tab-btn {
+    flex: 1; padding: 12px; font-size: 14px; font-weight: 500;
+    border: 1px solid rgba(0,0,0,0.1); border-radius: 8px;
+    background: #fff; color: #666; cursor: pointer; transition: 0.2s;
+  }
+  .tab-btn.active.freezing { background: #e6f1fb; color: #0C447C; border-color: #185FA5; }
+  .tab-btn.active.melting { background: #fbe6e6; color: #7C0C0C; border-color: #A51818; }
+
+  /* ── Card UI ── */
+  .card {
+    background: #fff; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 1.5rem; margin-bottom: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .card-label { font-size: 12px; color: #888; margin-bottom: 1rem; letter-spacing: 0.02em; }
+  
+  /* ── Controls: sliders and toggles ── */
+  .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .slider-group { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 200px; }
+  .slider-group label { font-size: 13px; color: #666; white-space: nowrap; }
+  .slider-group input[type=range] {
+    flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px;
+    background: #ddd; outline: none; cursor: pointer;
+  }
+  .slider-group input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: #666; cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: background 0.3s;
+  }
+  /* Mode-specific slider colors */
+  .mode-freezing input[type=range]::-webkit-slider-thumb { background: #378ADD; }
+  .mode-melting input[type=range]::-webkit-slider-thumb { background: #DD3737; }
+
+  #tempOut { font-size: 15px; font-weight: 500; min-width: 56px; text-align: right; }
+  
+  .toggle-group { display: flex; gap: 6px; }
+  .tog-btn {
+    font-size: 12px; padding: 6px 14px; border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 8px; cursor: pointer; background: transparent; color: #666; transition: 0.15s;
+  }
+  .tog-btn.active { background: #eee; color: #111; font-weight: 500; border-color: #888; }
+
+  /* ── Metrics display ── */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  @media (max-width: 600px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+  .metric { background: #f8f9fa; border-radius: 8px; padding: 12px 14px; }
+  .metric-label { font-size: 11px; color: #888; margin-bottom: 5px; }
+  .metric-val { font-size: 22px; font-weight: 500; }
+  .phase-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 6px; margin-top: 4px; }
+
+  /* ── Bar display ── */
+  .bar-section { margin-bottom: 0.5rem; }
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .bar-lbl { font-size: 12px; color: #888; width: 90px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 10px; background: #e9ecef; border-radius: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 5px; transition: width 0.2s, background 0.2s; }
+  .bar-num { font-size: 13px; font-weight: 500; width: 48px; text-align: right; flex-shrink: 0; }
+
+  /* ── Chart area ── */
+  .chart-wrap { position: relative; width: 100%; height: 280px; }
+  
+  /* ── Formulas and notes ── */
+  .formula-box { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #444; line-height: 1.8; margin-bottom: 1rem; border-left: 4px solid #888; transition: border-color 0.3s; }
+  .formula-box code { font-family: monospace; background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .mode-freezing .formula-box { border-color: #185FA5; }
+  .mode-melting .formula-box { border-color: #A51818; }
+  
+  .note { font-size: 12px; color: #888; margin-top: 1rem; line-height: 1.6; border-top: 1px solid #eee; padding-top: 0.75rem; }
+</style>
+</head>
+<body class="mode-freezing">
+<div class="container">
+
+  <header>
+    <h1>NRA-IDE — Integrated Phase Transition Model for Water and Ice</h1>
+    <p>R = δ / τ — Comparison of independent axiom systems by switching the reference structure being tracked</p>
+  </header>
+
+  <div class="mode-tabs">
+    <button class="tab-btn freezing active" id="tabFreezing" onclick="setMode('freezing')">
+      ❄️ Freezing System (Water → Ice)<br><span style="font-size:11px;font-weight:normal">Tracks deviation from the liquid structure</span>
+    </button>
+    <button class="tab-btn melting" id="tabMelting" onclick="setMode('melting')">
+      💧 Melting System (Ice → Water)<br><span style="font-size:11px;font-weight:normal">Tracks deviation from the solid structure</span>
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-label">τ Calculation Model and Temperature Setting</div>
+    <div class="controls">
+      <div class="slider-group">
+        <label>Temperature T</label>
+        <input type="range" id="tempSlider" min="-5" max="20" step="0.5" value="15">
+        <span id="tempOut">15.0℃</span>
+      </div>
+      <div class="toggle-group">
+        <button class="tog-btn active" id="btnStatic" onclick="setTauModel('static')">Static τ (linear)</button>
+        <button class="tog-btn" id="btnDynamic" onclick="setTauModel('dynamic')">Dynamic τ (hyperbolic)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Real-Time Structural Ratio</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">δ (Accumulated Deviation)</div>
+        <div class="metric-val" id="mDelta">0.00</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">τ (Absorption Margin)</div>
+        <div class="metric-val" id="mTau">20.0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">R = δ / τ</div>
+        <div class="metric-val" id="mR">0.00</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">State Judgment</div>
+        <div><span class="phase-badge" id="phaseBadge">Liquid</span></div>
+      </div>
+    </div>
+
+    <div class="bar-section">
+      <div class="bar-row">
+        <span class="bar-lbl">δ Deviation</span>
+        <div class="bar-track"><div class="bar-fill" id="barDelta" style="width:0%;"></div></div>
+        <span class="bar-num" id="barDeltaNum">0.0</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl">τ Margin</span>
+        <div class="bar-track"><div class="bar-fill" id="barTau" style="width:100%;"></div></div>
+        <span class="bar-num" id="barTauNum">20.0</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl">R Structural Ratio</span>
+        <div class="bar-track"><div class="bar-fill" id="barR" style="width:0%;"></div></div>
+        <span class="bar-num" id="barRNum">0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label" id="chartLabel">R-Value Graph</div>
+    <div class="chart-wrap">
+      <canvas id="phaseChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Selected Axiom System (Calculation Formula)</div>
+    <div class="formula-box" id="formulaBox">
+      </div>
+    <div class="note">
+      <strong>[Independence of the Nomological Ring Axioms]</strong><br>
+      Water and ice are physically the same H₂O, but in NRA-IDE the “reference structure being tracked” is different.<br>
+      The freezing system measures entropy reduction from the water reference state (20℃), while the melting system measures heat accumulation from the ice reference state (-20℃).<br>
+      The two formulas must not be reverse-calculated or substituted into each other. This separation is a core safety design principle of the framework: Fail-Closed.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── System state ──
+let phaseMode = 'freezing'; // 'freezing' (water→ice) or 'melting' (ice→water)
+let tauModel  = 'static';   // 'static' or 'dynamic'
+let chartInst = null;
+
+// ── Reference constants ──
+const T_WATER_REF = 20;  // Liquid reference for the freezing system
+const T_ICE_REF   = -20; // Solid reference for the melting system
+const T_MELT      = 0;   // Phase transition point
+
+// ── Core calculation logic ──
+// Calculate δ, τ, and R according to phaseMode. Do not mix the formulas.
+function calculateNRA(T) {
+  let delta, tau, R;
+
+  if (phaseMode === 'freezing') {
+    // [Freezing system] Temperature drop from the water reference state (20℃)
+    delta = Math.max(0, T_WATER_REF - T);
+    if (tauModel === 'static') {
+      tau = T_WATER_REF - T_MELT; // 20
+    } else {
+      tau = Math.max(0.01, T - T_MELT); // T
+    }
+  } else {
+    // [Melting system] Temperature rise from the ice reference state (-20℃)
+    delta = Math.max(0, T - T_ICE_REF);
+    if (tauModel === 'static') {
+      tau = T_MELT - T_ICE_REF; // 20
+    } else {
+      tau = Math.max(0.01, T_MELT - T); // -T
+    }
+  }
+  
+  R = delta / tau;
+  return { delta, tau, R };
+}
+
+// ── UI color and state judgment based on R value ──
+function getStatus(T, R) {
+  // Color definitions
+  const cSafeFreezing = '#1D9E75'; // green
+  const cSafeMelting  = '#185FA5'; // blue
+  const cWarn = '#EF9F27';         // orange
+  const cFail = '#E24B4A';         // red
+
+  let color = cWarn;
+  if (R >= 1.0) color = cFail;
+  else if (R < 0.75) color = (phaseMode === 'freezing') ? cSafeFreezing : cSafeMelting;
+
+  // State label definitions
+  let label, bg, tc;
+  if (phaseMode === 'freezing') {
+    if (T <= 0) { label = 'Ice (solid)'; bg = '#B5D4F4'; tc = '#0C447C'; }
+    else if (R >= 0.75) { label = 'Critical Zone'; bg = '#FAC775'; tc = '#633806'; }
+    else { label = 'Water (liquid)'; bg = '#9FE1CB'; tc = '#085041'; }
+  } else {
+    if (T >= 0) { label = 'Water (liquid)'; bg = '#9FE1CB'; tc = '#085041'; }
+    else if (R >= 0.75) { label = 'Critical Zone'; bg = '#FAC775'; tc = '#633806'; }
+    else { label = 'Ice (solid)'; bg = '#B5D4F4'; tc = '#0C447C'; }
+  }
+
+  return { color, label, bg, tc };
+}
+
+// ── UI update functions ──
+function updateMetrics() {
+  const T = parseFloat(document.getElementById('tempSlider').value);
+  document.getElementById('tempOut').textContent = T.toFixed(1) + '℃';
+
+  const { delta, tau, R } = calculateNRA(T);
+  const status = getStatus(T, R);
+
+  // Numeric updates
+  document.getElementById('mDelta').textContent = delta.toFixed(2);
+  document.getElementById('mTau').textContent   = tau.toFixed(tauModel === 'static' ? 1 : 2);
+  document.getElementById('mR').textContent     = R > 10 ? '>10' : R.toFixed(3);
+  
+  // Apply colors
+  document.getElementById('mDelta').style.color = (phaseMode === 'freezing') ? '#378ADD' : '#E24B4A';
+  document.getElementById('mTau').style.color   = (phaseMode === 'freezing') ? '#1D9E75' : '#185FA5';
+  document.getElementById('mR').style.color     = status.color;
+
+  // Badge update
+  const badge = document.getElementById('phaseBadge');
+  badge.textContent = status.label;
+  badge.style.background = status.bg;
+  badge.style.color = status.tc;
+
+  // Progress bars
+  document.getElementById('barDelta').style.width = Math.min(100, (delta / 20) * 100) + '%';
+  document.getElementById('barDelta').style.background = (phaseMode === 'freezing') ? '#378ADD' : '#E24B4A';
+  document.getElementById('barDeltaNum').textContent = delta.toFixed(1);
+
+  document.getElementById('barTau').style.width = (tauModel === 'static') ? '100%' : Math.min(100, (tau / 20) * 100) + '%';
+  document.getElementById('barTau').style.background = (phaseMode === 'freezing') ? '#1D9E75' : '#185FA5';
+  document.getElementById('barTauNum').textContent = tau.toFixed(1);
+
+  document.getElementById('barR').style.width = Math.min(100, (R / 2.5) * 100) + '%';
+  document.getElementById('barR').style.background = status.color;
+  document.getElementById('barRNum').textContent = R > 10 ? '>10' : R.toFixed(2);
+
+  // Highlight the current point on the graph
+  updateChartPoint(T, status.color);
+}
+
+function updateFormulaText() {
+  const box = document.getElementById('formulaBox');
+  if (phaseMode === 'freezing') {
+    if (tauModel === 'static') {
+      box.innerHTML = `<strong>[Freezing System] Static τ Model (Linear Type)</strong><br>
+        <code>δ = 20 − T</code> → Temperature drop from the liquid reference state (20℃), i.e., accumulated deviation<br>
+        <code>τ = 20</code> → Fixed constant, the total margin of the liquid structure<br>
+        <code>R = δ / τ = (20 − T) / 20</code>`;
+    } else {
+      box.innerHTML = `<strong>[Freezing System] Dynamic τ Model (Hyperbolic Type)</strong><br>
+        <code>δ = 20 − T</code> → Temperature drop from the liquid reference state (20℃)<br>
+        <code>τ = T</code> → Remaining distance to the freezing point (0℃), i.e., dynamic margin<br>
+        <code>R = δ / τ = (20 − T) / T</code>`;
+    }
+  } else {
+    if (tauModel === 'static') {
+      box.innerHTML = `<strong>[Melting System] Static τ Model (Linear Type)</strong><br>
+        <code>δ = T − (−20) = T + 20</code> → Temperature rise from the solid reference state (-20℃)<br>
+        <code>τ = 20</code> → Fixed constant, the total margin of the solid lattice structure<br>
+        <code>R = δ / τ = (T + 20) / 20</code>`;
+    } else {
+      box.innerHTML = `<strong>[Melting System] Dynamic τ Model (Hyperbolic Type)</strong><br>
+        <code>δ = T + 20</code> → Temperature rise from the solid reference state (-20℃)<br>
+        <code>τ = 0 − T = −T</code> → Remaining distance to the melting point (0℃)<br>
+        <code>R = δ / τ = (T + 20) / (−T)</code>`;
+    }
+  }
+}
+
+// ── Chart handling (Chart.js) ──
+function getChartData() {
+  const temps = [], rVals = [];
+  // Change the X-axis generation direction by mode
+  if (phaseMode === 'freezing') {
+    for (let T = 20; T >= -5; T -= 0.5) {
+      temps.push(T.toFixed(1) + '℃');
+      rVals.push(Math.min(calculateNRA(T).R, 3.0));
+    }
+  } else {
+    for (let T = -20; T <= 5; T += 0.5) {
+      temps.push(T.toFixed(1) + '℃');
+      rVals.push(Math.min(calculateNRA(T).R, 3.0));
+    }
+  }
+  return { temps, rVals };
+}
+
+function initChart() {
+  const { temps, rVals } = getChartData();
+  const ctx = document.getElementById('phaseChart').getContext('2d');
+  
+  chartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: temps,
+      datasets: [
+        {
+          label: 'R value', data: rVals,
+          borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5,
+          tension: 0.3, fill: false,
+          segment: {
+            borderColor: ctx => getStatus(parseFloat(ctx.p0.parsed.x), ctx.p0.parsed.y).color
+          }
+        },
+        {
+          label: 'FAIL (R=1.0)', data: new Array(temps.length).fill(1.0),
+          borderColor: '#E24B4A', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0, fill: false
+        },
+        {
+          label: 'WARN (R=0.75)', data: new Array(temps.length).fill(0.75),
+          borderColor: '#EF9F27', borderDash: [3, 3], borderWidth: 1, pointRadius: 0, fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 200 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { maxTicksLimit: 11, font: { size: 11 } } },
+        y: { min: 0, max: 2.5, title: { display: true, text: 'R = δ / τ' } }
+      }
+    }
+  });
+}
+
+function updateChart() {
+  const { temps, rVals } = getChartData();
+  chartInst.data.labels = temps;
+  chartInst.data.datasets[0].data = rVals;
+  chartInst.data.datasets[1].data = new Array(temps.length).fill(1.0);
+  chartInst.data.datasets[2].data = new Array(temps.length).fill(0.75);
+  
+  // Re-evaluate segment colors
+  chartInst.data.datasets[0].segment.borderColor = ctx => {
+    // Recover temperature from the X-axis index
+    const idx = ctx.p0DataIndex;
+    const T = (phaseMode === 'freezing') ? (20 - idx * 0.5) : (-20 + idx * 0.5);
+    return getStatus(T, ctx.p0.parsed.y).color;
+  };
+  
+  chartInst.update();
+}
+
+function updateChartPoint(T, color) {
+  if (!chartInst) return;
+  // Calculate the index for the current temperature
+  const idx = (phaseMode === 'freezing') 
+    ? Math.round((20 - T) / 0.5) 
+    : Math.round((T - -20) / 0.5);
+    
+  const rVals = chartInst.data.datasets[0].data;
+  const radii = rVals.map((_, i) => i === idx ? 6 : 0);
+  const colors = rVals.map((_, i) => i === idx ? color : 'transparent');
+  
+  chartInst.data.datasets[0].pointRadius = radii;
+  chartInst.data.datasets[0].pointBackgroundColor = colors;
+  chartInst.update('none'); // Apply immediately without animation
+}
+
+// ── Interaction control ──
+window.setMode = function(m) {
+  phaseMode = m;
+  document.body.className = `mode-${m}`;
+  
+  // Update tab UI
+  document.getElementById('tabFreezing').classList.toggle('active', m === 'freezing');
+  document.getElementById('tabMelting').classList.toggle('active', m === 'melting');
+  
+  // Change slider range
+  const slider = document.getElementById('tempSlider');
+  if (m === 'freezing') {
+    slider.min = -5; slider.max = 20; slider.value = 15;
+    document.getElementById('chartLabel').textContent = 'R-Value Graph (20℃ → -5℃ Cooling)';
+  } else {
+    slider.min = -20; slider.max = 5; slider.value = -15;
+    document.getElementById('chartLabel').textContent = 'R-Value Graph (-20℃ → 5℃ Heating)';
+  }
+  
+  updateFormulaText();
+  updateChart();
+  updateMetrics();
+};
+
+window.setTauModel = function(m) {
+  tauModel = m;
+  document.getElementById('btnStatic').classList.toggle('active', m === 'static');
+  document.getElementById('btnDynamic').classList.toggle('active', m === 'dynamic');
+  
+  updateFormulaText();
+  updateChart();
+  updateMetrics();
+};
+
+// Slider event
+document.getElementById('tempSlider').addEventListener('input', updateMetrics);
+
+// Initialization
+initChart();
+updateFormulaText();
+updateMetrics();
+
+</script>
+</body>
+</html>
