@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- FILE: NRA-IDE_QuantumCorrelation_MinSim_JP_v1_20260426_020310.html -->
+<!-- Generated: 2026-04-26 02:03:10 JST -->
+<!-- Title: NRA-IDE 量子相関ミニシミュレーション — 誤差を広げないための遊び幅処理 -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Purpose: 説明書ではなく、R_t と R_correlation がゆっくり動く最小教育デモ。実機量子計算ではない。 -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NRA-IDE Quantum Correlation MinSim JP v1</title>
+<style>
+  :root {
+    --bg: #061018;
+    --panel: #0b1722;
+    --panel2: #101f2e;
+    --line: #244058;
+    --text: #d7e6f3;
+    --muted: #86a3b8;
+    --cyan: #42d9ff;
+    --green: #67f08d;
+    --yellow: #ffd15c;
+    --orange: #ff985e;
+    --red: #ff4d5c;
+    --violet: #c08cff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: radial-gradient(circle at top, #0d2233 0%, var(--bg) 48%, #03080d 100%); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif; min-height: 100vh; }
+  header { min-height: 72px; padding: 16px 24px; border-bottom: 1px solid var(--line); background: rgba(4, 12, 18, .88); display: flex; align-items: center; gap: 18px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); }
+  .brand { font-family: Consolas, "SFMono-Regular", monospace; color: var(--cyan); letter-spacing: 2px; font-size: 13px; white-space: nowrap; }
+  h1 { margin: 0; font-size: 19px; line-height: 1.35; font-weight: 650; }
+  .sub { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .wrap { display: grid; grid-template-columns: minmax(620px, 1fr) 360px; gap: 18px; padding: 18px; max-width: 1500px; margin: 0 auto; }
+  .card { background: rgba(11, 23, 34, .88); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 18px 50px rgba(0,0,0,.28); }
+  .stage { padding: 20px; min-height: 650px; }
+  .stageTop { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+  .bigStatus { font-size: 34px; font-weight: 800; letter-spacing: .5px; line-height: 1.15; }
+  .bigStatus.safe { color: var(--green); }
+  .bigStatus.watch { color: var(--yellow); }
+  .bigStatus.fail { color: var(--red); }
+  .caption { color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 720px; }
+  .clock { font-family: Consolas, monospace; font-size: 18px; color: var(--cyan); padding: 8px 12px; border: 1px solid rgba(66,217,255,.25); border-radius: 12px; background: rgba(66,217,255,.07); white-space: nowrap; }
+  .diagram { height: 350px; border-radius: 18px; background: linear-gradient(180deg, rgba(16,31,46,.75), rgba(6,16,24,.92)); border: 1px solid rgba(134,163,184,.18); position: relative; overflow: hidden; margin: 16px 0 18px; }
+  .gridBg { position: absolute; inset: 0; background-image: linear-gradient(rgba(134,163,184,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(134,163,184,.05) 1px, transparent 1px); background-size: 34px 34px; opacity: .7; }
+  .qubit { position: absolute; width: 150px; height: 150px; border-radius: 50%; top: 96px; display: grid; place-items: center; text-align: center; border: 2px solid rgba(66,217,255,.45); background: radial-gradient(circle at 35% 25%, rgba(103,240,141,.24), rgba(66,217,255,.10) 50%, rgba(12,25,38,.95) 100%); box-shadow: 0 0 35px rgba(66,217,255,.15); transition: transform .5s linear, box-shadow .5s linear, border-color .5s linear; }
+  #q1 { left: 11%; }
+  #q2 { right: 11%; }
+  .qLabel { font-family: Consolas, monospace; color: var(--cyan); font-size: 13px; margin-bottom: 8px; }
+  .qValue { font-family: Consolas, monospace; font-size: 32px; font-weight: 800; }
+  .linkLine { position: absolute; left: calc(11% + 150px); right: calc(11% + 150px); top: 167px; height: 18px; border-radius: 20px; transform-origin: center; background: var(--green); box-shadow: 0 0 28px var(--green); opacity: .9; transition: height .5s linear, top .5s linear, background .5s linear, box-shadow .5s linear, opacity .5s linear; }
+  .corrText { position: absolute; left: 50%; top: 110px; transform: translateX(-50%); text-align: center; padding: 8px 12px; border-radius: 14px; background: rgba(3,8,13,.72); border: 1px solid rgba(134,163,184,.2); }
+  .corrText .label { color: var(--muted); font-size: 12px; }
+  .corrText .num { font-family: Consolas, monospace; font-size: 36px; font-weight: 800; color: var(--green); }
+  .failCurtain { position: absolute; inset: 0; display: none; place-items: center; background: rgba(42,4,8,.76); border: 2px solid rgba(255,77,92,.45); z-index: 3; }
+  .failCurtain.show { display: grid; }
+  .failBox { text-align: center; padding: 24px 34px; border-radius: 18px; border: 1px solid rgba(255,77,92,.55); background: rgba(5,8,12,.86); box-shadow: 0 0 45px rgba(255,77,92,.22); }
+  .failBox .main { font-size: 44px; font-weight: 900; color: var(--red); letter-spacing: 2px; }
+  .failBox .small { margin-top: 10px; color: #ffb4bb; font-size: 15px; line-height: 1.7; }
+  .meters { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .meter { background: var(--panel2); border: 1px solid rgba(134,163,184,.18); border-radius: 16px; padding: 14px; }
+  .meterHead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .meterTitle { font-weight: 700; font-size: 15px; }
+  .meterVal { font-family: Consolas, monospace; font-size: 22px; font-weight: 900; }
+  .bar { height: 26px; border-radius: 20px; background: #061018; border: 1px solid rgba(134,163,184,.22); overflow: hidden; position: relative; }
+  .fill { height: 100%; width: 0%; border-radius: 20px; background: var(--green); transition: width .45s linear, background .45s linear; }
+  .threshold { position: absolute; left: 85%; top: -3px; width: 2px; height: 32px; background: rgba(255,209,92,.85); }
+  .threshold.one { left: 99%; background: rgba(255,77,92,.95); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; color: var(--muted); font-size: 12px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  aside { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .box { padding: 15px; border-radius: 16px; background: rgba(16,31,46,.82); border: 1px solid rgba(134,163,184,.18); }
+  .box h2 { margin: 0 0 10px; font-size: 15px; color: var(--cyan); }
+  .box p { margin: 0 0 10px; color: var(--text); line-height: 1.75; font-size: 13px; }
+  .box .note { color: var(--muted); font-size: 12px; line-height: 1.7; }
+  .controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  button { appearance: none; border: 1px solid rgba(66,217,255,.35); background: rgba(66,217,255,.10); color: var(--text); padding: 12px 10px; border-radius: 13px; cursor: pointer; font-weight: 750; }
+  button:hover { background: rgba(66,217,255,.18); }
+  button.red { border-color: rgba(255,77,92,.35); background: rgba(255,77,92,.10); }
+  .slider { margin: 12px 0; }
+  .slider label { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--text); margin-bottom: 6px; }
+  .slider output { font-family: Consolas, monospace; color: var(--cyan); }
+  input[type="range"] { width: 100%; accent-color: var(--cyan); }
+  .formula { font-family: Consolas, "SFMono-Regular", monospace; white-space: pre-wrap; color: #9ee9ff; background: rgba(4,12,18,.72); border: 1px solid rgba(66,217,255,.16); border-radius: 13px; padding: 12px; line-height: 1.7; font-size: 12px; }
+  .log { height: 165px; overflow: auto; font-family: Consolas, monospace; color: #bdd2e1; font-size: 12px; line-height: 1.55; background: rgba(4,12,18,.75); border: 1px solid rgba(134,163,184,.16); border-radius: 13px; padding: 10px; }
+  .log .fail { color: #ffb4bb; }
+  .log .ok { color: #a8f5bd; }
+  .log .watch { color: #ffe28e; }
+  .footer { grid-column: 1 / -1; color: var(--muted); font-size: 12px; line-height: 1.7; padding: 0 6px 12px; }
+  @media (max-width: 1040px) { .wrap { grid-template-columns: 1fr; } .sub { display: none; } .stage { min-height: auto; } .meters { grid-template-columns: 1fr; } .diagram { height: 330px; } .qValue { font-size: 26px; } .qubit { width: 128px; height: 128px; top: 108px; } #q1 { left: 6%; } #q2 { right: 6%; } .linkLine { left: calc(6% + 128px); right: calc(6% + 128px); top: 164px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NRA-IDE</div>
+  <div>
+    <h1>量子相関ミニシミュレーション — 誤差を広げないための遊び幅処理</h1>
+    <div class="caption">誤差を消すデモではありません。小さな残渣を追いかけず、遊び幅の内側で拡散させないことを見せる教育用HTMLです。</div>
+  </div>
+  <div class="sub">2026-04-26 02:03:10 JST · v1</div>
+</header>
+
+<div class="wrap">
+  <main class="card stage">
+    <div class="stageTop">
+      <div>
+        <div id="statusText" class="bigStatus safe">遊び幅の内側</div>
+        <div class="caption" id="statusCaption">個別値と相関値をゆっくり追跡中です。微小な揺らぎは補正対象ではなく、広げないために遊ばせます。</div>
+      </div>
+      <div class="clock">t = <span id="tVal">0.0</span></div>
+    </div>
+
+    <section class="diagram" aria-label="2量子ビット相関の可視化">
+      <div class="gridBg"></div>
+      <div id="linkLine" class="linkLine"></div>
+      <div id="q1" class="qubit"><div><div class="qLabel">&lt;σz¹&gt;</div><div id="z1Val" class="qValue">0.82</div></div></div>
+      <div id="q2" class="qubit"><div><div class="qLabel">&lt;σz²&gt;</div><div id="z2Val" class="qValue">0.81</div></div></div>
+      <div class="corrText"><div class="label">相関 &lt;σz¹σz²&gt;</div><div id="z12Val" class="num">0.86</div></div>
+      <div id="failCurtain" class="failCurtain"><div class="failBox"><div class="main">FAIL-CLOSED</div><div class="small">相関の遊び幅を超過しました。<br>個別値が正常でも、相関構造の変質として停止します。</div></div></div>
+    </section>
+
+    <section class="meters">
+      <div class="meter">
+        <div class="meterHead"><div class="meterTitle">個別残渣 R_individual</div><div id="rIndVal" class="meterVal">0.00</div></div>
+        <div class="bar"><div id="rIndFill" class="fill"></div><div class="threshold"></div><div class="threshold one"></div></div>
+        <div class="legend"><span><i class="dot" style="background:var(--green)"></i>遊び</span><span><i class="dot" style="background:var(--yellow)"></i>注意</span><span><i class="dot" style="background:var(--red)"></i>停止</span></div>
+      </div>
+      <div class="meter">
+        <div class="meterHead"><div class="meterTitle">相関残渣 R_correlation</div><div id="rCorrVal" class="meterVal">0.00</div></div>
+        <div class="bar"><div id="rCorrFill" class="fill"></div><div class="threshold"></div><div class="threshold one"></div></div>
+        <div class="legend"><span>R ≥ 1.0 で Fail-Closed</span><span>ここでは相関崩壊が主役です</span></div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="card">
+    <div class="box">
+      <h2>操作</h2>
+      <div class="controls">
+        <button id="toggleBtn">一時停止</button>
+        <button id="resetBtn" class="red">リセット</button>
+      </div>
+      <div class="slider"><label>進行速度 <output id="speedOut">0.55</output></label><input id="speed" type="range" min="0.10" max="1.50" step="0.05" value="0.55"></div>
+      <div class="slider"><label>相関崩壊率 <output id="decayOut">0.030</output></label><input id="decay" type="range" min="0.004" max="0.090" step="0.002" value="0.030"></div>
+      <div class="slider"><label>測定ゆらぎ <output id="noiseOut">0.018</output></label><input id="noise" type="range" min="0.000" max="0.080" step="0.002" value="0.018"></div>
+      <div class="slider"><label>個別の遊び幅 τ_i <output id="tauIOut">0.18</output></label><input id="tauI" type="range" min="0.06" max="0.50" step="0.01" value="0.18"></div>
+      <div class="slider"><label>相関の遊び幅 τ_C <output id="tauCOut">0.22</output></label><input id="tauC" type="range" min="0.06" max="0.60" step="0.01" value="0.22"></div>
+      <div class="slider"><label>遅延参照 ℓ <output id="delayOut">8</output></label><input id="delay" type="range" min="3" max="30" step="1" value="8"></div>
+    </div>
+
+    <div class="box">
+      <h2>このHTMLの核心</h2>
+      <p>遊びは「誤差を消す吸収材」ではありません。誤差を広げないための許容範囲処理です。</p>
+      <p class="note">小さい残渣は補正しません。追いかけるほど補正が新しい誤差源になるからです。遊び幅を超えたときだけ、構造変質として停止します。</p>
+    </div>
+
+    <div class="box">
+      <h2>最小式</h2>
+      <div class="formula">r_i(t) = z_i(t) − z_i(t−ℓ)
+R_ind = max |r_i| / τ_i
+
+ΔC(t) = C(t) − C(t−ℓ)
+R_corr = |ΔC(t)| / τ_C
+
+R_corr ≥ 1.0 → Fail-Closed</div>
+    </div>
+
+    <div class="box">
+      <h2>廃棄ログ風表示</h2>
+      <div id="log" class="log"></div>
+    </div>
+  </aside>
+
+  <div class="footer">注意: このHTMLは教育用の最小モデルです。実機量子計算、完全なLindblad数値積分、量子誤り訂正の代替ではありません。目的は「測れる範囲だけを見る」「微小残渣を広げない」「相関の遊び幅を超えたら停止する」という構造を視覚化することです。</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = { t: 0, running: true, fail: false, hist: [], lastLogBucket: -1 };
+
+function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+function fmt(x, n=2) { return Number(x).toFixed(n); }
+function param(id) { return Number($(id).value); }
+function colorForR(r) { if (r >= 1) return 'var(--red)'; if (r >= 0.85) return 'var(--yellow)'; return 'var(--green)'; }
+function statusFor(maxR) { if (maxR >= 1) return ['fail','FAIL-CLOSED','遊び幅を超えたため、次の計算へ渡さず停止しました。']; if (maxR >= 0.85) return ['watch','限界接近','遊び幅を使い切りつつあります。ここから補正や停止判定が現実的になります。']; return ['safe','遊び幅の内側','微小な揺らぎは追いかけず、誤差を広げないために許容範囲内へ留めています。']; }
+
+function rawValues(t) {
+  const decay = param('decay');
+  const noise = param('noise');
+  const wobble1 = 0.020 * Math.sin(t * 0.65) + noise * Math.sin(t * 2.13 + 0.4);
+  const wobble2 = 0.018 * Math.sin(t * 0.58 + 1.1) + noise * Math.sin(t * 1.91 + 2.3);
+  const z1 = 0.82 + wobble1;
+  const z2 = 0.81 + wobble2;
+  const corrBase = 0.86 * Math.exp(-decay * t);
+  const corrNoise = noise * 0.65 * Math.sin(t * 1.55 + 0.8);
+  const z12 = clamp(corrBase + corrNoise, -0.15, 0.92);
+  return { z1, z2, z12 };
+}
+
+function reset() {
+  state.t = 0; state.fail = false; state.hist = []; state.lastLogBucket = -1; state.running = true;
+  $('toggleBtn').textContent = '一時停止';
+  $('failCurtain').classList.remove('show');
+  $('log').innerHTML = '';
+  for (let i=0; i<40; i++) {
+    const v = rawValues(0);
+    state.hist.push({ t: 0, ...v });
+  }
+  render();
+}
+
+function addLog(kind, msg) {
+  const div = document.createElement('div');
+  div.className = kind;
+  div.textContent = msg;
+  $('log').prepend(div);
+}
+
+function render() {
+  const delay = Math.round(param('delay'));
+  const tauI = param('tauI');
+  const tauC = param('tauC');
+  const current = rawValues(state.t);
+  state.hist.push({ t: state.t, ...current });
+  while (state.hist.length > 500) state.hist.shift();
+  const ref = state.hist[Math.max(0, state.hist.length - 1 - delay)] || state.hist[0] || {...current};
+
+  const r1 = current.z1 - ref.z1;
+  const r2 = current.z2 - ref.z2;
+  const rInd = Math.max(Math.abs(r1) / tauI, Math.abs(r2) / tauI);
+  const dC = current.z12 - ref.z12;
+  const rCorr = Math.abs(dC) / tauC;
+  const maxR = Math.max(rInd, rCorr);
+
+  if (rCorr >= 1 || rInd >= 1) state.fail = true;
+
+  $('tVal').textContent = fmt(state.t, 1);
+  $('z1Val').textContent = fmt(current.z1, 2);
+  $('z2Val').textContent = fmt(current.z2, 2);
+  $('z12Val').textContent = fmt(current.z12, 2);
+  $('rIndVal').textContent = fmt(rInd, 2);
+  $('rCorrVal').textContent = fmt(rCorr, 2);
+
+  const indPct = clamp(rInd * 100, 0, 120);
+  const corrPct = clamp(rCorr * 100, 0, 120);
+  $('rIndFill').style.width = indPct + '%';
+  $('rCorrFill').style.width = corrPct + '%';
+  $('rIndFill').style.background = colorForR(rInd);
+  $('rCorrFill').style.background = colorForR(rCorr);
+
+  const corrStrength = clamp(Math.abs(current.z12), 0, 0.9) / 0.9;
+  const h = 6 + 26 * corrStrength;
+  $('linkLine').style.height = h + 'px';
+  $('linkLine').style.top = (176 - h/2) + 'px';
+  const linkColor = rCorr >= 1 ? 'var(--red)' : (rCorr >= 0.85 ? 'var(--yellow)' : 'var(--green)');
+  $('linkLine').style.background = linkColor;
+  $('linkLine').style.boxShadow = '0 0 30px ' + linkColor;
+  $('linkLine').style.opacity = 0.20 + 0.80 * corrStrength;
+  $('z12Val').style.color = linkColor;
+
+  $('q1').style.transform = `scale(${1 + Math.abs(r1)/Math.max(tauI,0.001)*0.08})`;
+  $('q2').style.transform = `scale(${1 + Math.abs(r2)/Math.max(tauI,0.001)*0.08})`;
+  $('q1').style.borderColor = colorForR(Math.abs(r1)/tauI);
+  $('q2').style.borderColor = colorForR(Math.abs(r2)/tauI);
+
+  const st = statusFor(maxR);
+  const statusEl = $('statusText');
+  statusEl.className = 'bigStatus ' + st[0];
+  statusEl.textContent = state.fail ? 'FAIL-CLOSED' : st[1];
+  $('statusCaption').textContent = state.fail ? '遊び幅を超過しました。残渣を次の推定へ広げず、ここで停止しています。' : st[2];
+  $('failCurtain').classList.toggle('show', state.fail);
+
+  const bucket = Math.floor(state.t / 4);
+  if (bucket !== state.lastLogBucket) {
+    state.lastLogBucket = bucket;
+    const cls = state.fail ? 'fail' : (maxR >= 0.85 ? 'watch' : 'ok');
+    const label = state.fail ? 'FAIL-CLOSED' : (maxR >= 0.85 ? 'WATCH' : 'PLAY');
+    addLog(cls, `[${label}] t=${fmt(state.t,1)}  R_ind=${fmt(rInd,2)}  R_corr=${fmt(rCorr,2)}  ΔC=${fmt(dC,3)}`);
+  }
+}
+
+function tick() {
+  if (state.running && !state.fail) {
+    state.t += 0.035 * param('speed');
+    render();
+  }
+  requestAnimationFrame(tick);
+}
+
+function bindSliders() {
+  const pairs = [
+    ['speed','speedOut',2], ['decay','decayOut',3], ['noise','noiseOut',3], ['tauI','tauIOut',2], ['tauC','tauCOut',2], ['delay','delayOut',0]
+  ];
+  pairs.forEach(([id,out,n]) => {
+    const el = $(id), o = $(out);
+    const update = () => { o.textContent = n === 0 ? String(Math.round(Number(el.value))) : Number(el.value).toFixed(n); };
+    el.addEventListener('input', update); update();
+  });
+}
+
+$('toggleBtn').addEventListener('click', () => {
+  state.running = !state.running;
+  $('toggleBtn').textContent = state.running ? '一時停止' : '再開';
+});
+$('resetBtn').addEventListener('click', reset);
+bindSliders();
+reset();
+tick();
+</script>
+</body>
+</html>

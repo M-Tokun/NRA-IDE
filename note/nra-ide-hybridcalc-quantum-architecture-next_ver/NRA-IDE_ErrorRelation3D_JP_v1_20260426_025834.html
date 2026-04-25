@@ -1,0 +1,126 @@
+<!doctype html>
+<!-- FILE: NRA-IDE_ErrorRelation3D_JP_v1_20260426_025834.html -->
+<!-- TITLE: NRA-IDE 誤差関係3Dデモ -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-26 02:58:34 JST -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE 誤差関係3Dデモ</title>
+<style>
+:root{--bg:#070b12;--panel:#0e1622;--panel2:#111d2b;--line:#22364d;--text:#dce9f6;--sub:#8ea8bf;--ok:#63df93;--warn:#ffd166;--bad:#ff6b6b;--accent:#66d9ff;--purple:#b68cff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 30% 10%,#122135,#070b12 55%,#05080d);color:var(--text);font-family:"Segoe UI","Yu Gothic","Hiragino Kaku Gothic ProN",sans-serif}
+header{padding:18px 22px;border-bottom:1px solid var(--line);background:rgba(6,10,16,.88);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10}
+h1{font-size:20px;margin:0 0 8px}.lead{color:var(--sub);font-size:14px;line-height:1.8;max-width:1180px}
+.wrap{max-width:1280px;margin:0 auto;padding:18px}.grid{display:grid;grid-template-columns:1fr 350px;gap:16px}
+.card{background:rgba(14,22,34,.95);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+canvas{width:100%;height:620px;background:linear-gradient(180deg,#07101a,#05080d);border-radius:14px;border:1px solid var(--line);cursor:grab}canvas:active{cursor:grabbing}
+.controls{display:grid;gap:12px}.row{display:grid;gap:6px;margin-bottom:10px}.label{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;gap:8px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);cursor:pointer;font-size:13px}
+.btn.on{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px rgba(102,217,255,.25) inset}.btn.warn.on{border-color:var(--warn);color:var(--warn)}.btn.bad.on{border-color:var(--bad);color:var(--bad)}
+input[type=range]{width:100%;accent-color:#66d9ff}
+.metric{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:9px}.metric-head{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}
+.bar{height:14px;border-radius:99px;background:#0b121c;border:1px solid #22364d;overflow:hidden}.fill{height:100%;width:0%;transition:width .35s}.fill.ok{background:linear-gradient(90deg,#2ebf6b,#78ef9d)}.fill.warn{background:linear-gradient(90deg,#d99c00,#ffd166)}.fill.bad{background:linear-gradient(90deg,#c94343,#ff7373)}
+.note{font-size:13px;line-height:1.75;color:var(--sub)}.formula{font-family:Consolas,"JetBrains Mono",monospace;font-size:12px;line-height:1.7;color:#cfe9ff;background:#08111c;border:1px solid var(--line);border-radius:12px;padding:10px;white-space:pre-wrap}
+.status{padding:12px;border-radius:12px;line-height:1.75;border:1px solid var(--line);font-size:14px}.status.ok{border-color:#316c46;background:rgba(31,77,48,.35);color:#dff9e7}.status.warn{border-color:#80661e;background:rgba(90,67,10,.38);color:#fff3c6}.status.bad{border-color:#884040;background:rgba(85,27,27,.42);color:#ffd7d7}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.legend div{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:10px;padding:8px;background:#0c1520}
+.footer{margin-top:14px;color:var(--sub);font-size:13px;line-height:1.75}
+@media(max-width:980px){.grid{grid-template-columns:1fr}canvas{height:520px}.legend{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>NRA-IDE 誤差関係 3D デモ</h1>
+<div class="lead">2つの誤差要素 A・B を X/Y 軸に置き、Z軸を「見かけ残差」「内部張力」「隠れ危険比」「R判定」に切り替えて観察します。大きなノイズ同士が打ち消し合うと一見静かに見えますが、相殺が崩れると巨大な増幅として表面化することを示す教育用HTMLです。</div>
+</header>
+<div class="wrap">
+<div class="grid">
+<div class="card">
+<canvas id="cv" width="900" height="620"></canvas>
+<div class="legend">
+<div><b style="color:var(--ok)">低</b><br>遊び幅の中。見かけも内部張力も小さい。</div>
+<div><b style="color:var(--warn)">注意</b><br>見かけは静かでも内部張力が残る場合がある。</div>
+<div><b style="color:var(--bad)">危険</b><br>相殺が崩れると急に大きく出る。</div>
+</div>
+</div>
+<div class="controls">
+<div class="card">
+<div class="row">
+<div class="label"><span>関係モード</span><span id="modeText">打ち消し型</span></div>
+<div class="btns"><button id="modeCancel" class="btn on">打ち消し型</button><button id="modeAmp" class="btn bad">増幅型</button></div>
+</div>
+<div class="row">
+<div class="label"><span>Z軸表示</span><span id="surfaceText">隠れ危険比 H</span></div>
+<div class="btns"><button id="surfNet" class="btn">見かけ残差</button><button id="surfGross" class="btn">内部張力</button><button id="surfHidden" class="btn warn on">隠れ危険比</button><button id="surfR" class="btn bad">R判定</button></div>
+</div>
+</div>
+<div class="card">
+<div class="row"><div class="label"><span>誤差振幅</span><span id="ampVal">0.90</span></div><input id="amp" type="range" min="0.1" max="1.4" step="0.01" value="0.90"></div>
+<div class="row"><div class="label"><span>位相ずれ</span><span id="phaseVal">0.22</span></div><input id="phase" type="range" min="0" max="1.57" step="0.01" value="0.22"></div>
+<div class="row"><div class="label"><span>相関/乗算係数</span><span id="rhoVal">0.85</span></div><input id="rho" type="range" min="-1.2" max="1.8" step="0.01" value="0.85"></div>
+<div class="row"><div class="label"><span>遊び幅 τ</span><span id="tauVal">0.85</span></div><input id="tau" type="range" min="0.25" max="1.6" step="0.01" value="0.85"></div>
+<div class="row"><div class="label"><span>ε</span><span id="epsVal">0.05</span></div><input id="eps" type="range" min="0.01" max="0.25" step="0.01" value="0.05"></div>
+</div>
+<div class="card">
+<div class="row"><div class="label"><span>回転</span><span id="rotVal">38°</span></div><input id="rot" type="range" min="0" max="360" step="1" value="38"></div>
+<div class="row"><div class="label"><span>仰角</span><span id="elevVal">42°</span></div><input id="elev" type="range" min="15" max="75" step="1" value="42"></div>
+<div class="row"><div class="label"><span>高さ倍率</span><span id="heightVal">1.00</span></div><input id="height" type="range" min="0.35" max="1.8" step="0.01" value="1.00"></div>
+<div class="btns"><button id="play" class="btn on">PLAY</button><button id="reset" class="btn">RESET</button></div>
+</div>
+<div class="card">
+<div class="metric"><div class="metric-head"><span>見かけ残差 δ_net</span><b id="netTxt">0.00</b></div><div class="bar"><div id="netFill" class="fill ok"></div></div></div>
+<div class="metric"><div class="metric-head"><span>内部張力 δ_gross</span><b id="grossTxt">0.00</b></div><div class="bar"><div id="grossFill" class="fill ok"></div></div></div>
+<div class="metric"><div class="metric-head"><span>隠れ危険比 H</span><b id="hiddenTxt">0.00</b></div><div class="bar"><div id="hiddenFill" class="fill ok"></div></div></div>
+<div class="metric"><div class="metric-head"><span>R = δ_effective / τ</span><b id="rTxt">0.00</b></div><div class="bar"><div id="rFill" class="fill ok"></div></div></div>
+<div id="status" class="status ok"></div>
+</div>
+<div class="card">
+<div class="formula" id="formulaBox"></div>
+<div class="note" style="margin-top:10px">見かけ残差だけを見ると、大きい誤差同士の相殺を「安全」と誤読します。このHTMLでは、相殺で隠れた内部張力と、相殺崩れ後の増幅を別に表示します。</div>
+</div>
+</div>
+</div>
+<div class="footer">NRA-IDE / Error Relation 3D Demo。これは実測器ではなく、誤差関係を説明する最小可視化です。実運用では、値の出所、直接計測性、τの設定根拠、ログの保護を別途確認する必要があります。</div>
+</div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let mode='cancel',surface='hidden',playing=true,t=0;let drag=false,dx0=0,rot0=38;
+const el=id=>document.getElementById(id);const inp=id=>parseFloat(el(id).value);
+function cls(v){return v>=1?'bad':v>=0.7?'warn':'ok'}
+function setFill(id,v){const f=el(id);f.className='fill '+cls(v);f.style.width=Math.max(0,Math.min(100,v*100))+'%'}
+function calc(a,b){const rho=inp('rho'),eps=inp('eps'),tau=inp('tau');let net,gross,effective,interaction=0;
+ if(mode==='cancel'){net=Math.abs(a-b);gross=Math.abs(a)+Math.abs(b);effective=net;}
+ else{interaction=rho*a*b;net=Math.abs(a+b+interaction);gross=Math.abs(a)+Math.abs(b)+Math.abs(interaction);effective=net;}
+ const hidden=gross/(net+eps);const R=effective/tau;return{net,gross,hidden,R,interaction};}
+function zVal(a,b){const c=calc(a,b);if(surface==='net')return Math.min(c.net/2.4,1.5);if(surface==='gross')return Math.min(c.gross/2.8,1.5);if(surface==='hidden')return Math.min(c.hidden/10,1.5);return Math.min(c.R/1.7,1.5)}
+function colorBy(v){if(v<.4)return `rgba(83,226,145,.78)`;if(v<.7)return `rgba(255,209,102,.78)`;if(v<1)return `rgba(255,151,80,.82)`;return `rgba(255,90,90,.88)`}
+function project(x,y,z){const W=cv.width,H=cv.height,rot=inp('rot')*Math.PI/180,elev=inp('elev')*Math.PI/180,hs=inp('height');const xr=x*Math.cos(rot)-y*Math.sin(rot);const yr=x*Math.sin(rot)+y*Math.cos(rot);const scale=Math.min(W,H)*0.32;return{x:W*.50+xr*scale,y:H*.58+(yr*Math.cos(elev)-z*hs*Math.sin(elev))*scale};}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);const W=cv.width,H=cv.height;const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07101a');bg.addColorStop(1,'#04070c');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ const N=34,range=1.35,cells=[];for(let i=0;i<N;i++){for(let j=0;j<N;j++){let x0=-range+2*range*i/(N-1),x1=-range+2*range*(i+1)/(N-1),y0=-range+2*range*j/(N-1),y1=-range+2*range*(j+1)/(N-1);let z00=zVal(x0,y0),z10=zVal(x1,y0),z11=zVal(x1,y1),z01=zVal(x0,y1);let depth=x0+x1+y0+y1;cells.push({x0,x1,y0,y1,z00,z10,z11,z01,depth,z:(z00+z10+z11+z01)/4});}}
+ cells.sort((a,b)=>b.depth-a.depth);ctx.lineWidth=.55;for(const c of cells){const p00=project(c.x0,c.y0,c.z00),p10=project(c.x1,c.y0,c.z10),p11=project(c.x1,c.y1,c.z11),p01=project(c.x0,c.y1,c.z01);ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);ctx.lineTo(p11.x,p11.y);ctx.lineTo(p01.x,p01.y);ctx.closePath();ctx.fillStyle=colorBy(c.z);ctx.fill();ctx.strokeStyle='rgba(230,245,255,.12)';ctx.stroke();}
+ drawAxes();drawPoint();}
+function drawAxes(){const axes=[['誤差A',1.55,0,0,'#66d9ff'],['誤差B',0,1.55,0,'#b68cff'],['Z',0,0,1.55,'#ffd166']];const o=project(0,0,0);ctx.font='13px Segoe UI';ctx.textAlign='center';for(const [name,x,y,z,col] of axes){const p=project(x,y,z);ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.fillStyle=col;ctx.fillText(name,p.x,p.y-8);}ctx.fillStyle='rgba(220,235,255,.55)';ctx.textAlign='left';ctx.fillText(surfaceLabel(),16,24);ctx.fillText(mode==='cancel'?'mode: cancel / 大きな誤差が相殺されて見える':'mode: amplify / 誤差同士が同方向で増幅する',16,44);}
+function drawPoint(){const amp=inp('amp'),ph=inp('phase');let a=amp*Math.sin(t),b;if(mode==='cancel')b=amp*Math.sin(t+Math.PI-ph);else b=amp*Math.sin(t+ph);const c=calc(a,b),z=zVal(a,b);const p=project(a,b,z);ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=c.R>=1?'#ff6b6b':c.hidden>=6?'#ffd166':'#66d9ff';ctx.lineWidth=4;ctx.stroke();const base=project(a,b,0);ctx.strokeStyle='rgba(255,255,255,.38)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(base.x,base.y);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.setLineDash([]);updateMetrics(c,a,b);}
+function surfaceLabel(){return surface==='net'?'Z = 見かけ残差 δ_net':surface==='gross'?'Z = 内部張力 δ_gross':surface==='hidden'?'Z = 隠れ危険比 H':'Z = R判定'}
+function updateMetrics(c,a,b){el('netTxt').textContent=c.net.toFixed(3);el('grossTxt').textContent=c.gross.toFixed(3);el('hiddenTxt').textContent=c.hidden.toFixed(2);el('rTxt').textContent=c.R.toFixed(2);setFill('netFill',c.net/inp('tau'));setFill('grossFill',c.gross/2.5);setFill('hiddenFill',c.hidden/10);setFill('rFill',c.R);let s=el('status');if(c.R>=1){s.className='status bad';s.textContent='Fail-Closed相当です。相殺が崩れ、見かけ残差が遊び幅τを超えました。';}else if(c.hidden>=6&&c.net<inp('tau')*.7){s.className='status warn';s.textContent='見かけは静かですが、内部張力が大きいです。大きな誤差同士が打ち消し合っている可能性があります。';}else if(c.R>=.7){s.className='status warn';s.textContent='注意域です。見かけ残差が遊び幅を大きく使っています。';}else{s.className='status ok';s.textContent='通常域です。ただし合計値だけでなく、内部張力と隠れ危険比も確認します。';}}
+function updateText(){el('modeText').textContent=mode==='cancel'?'打ち消し型':'増幅型';el('surfaceText').textContent=surfaceLabel().replace('Z = ','');['amp','phase','rho','tau','eps','rot','elev','height'].forEach(id=>{const v=inp(id);el(id+'Val').textContent=(id==='rot'||id==='elev')?Math.round(v)+'°':v.toFixed(2)});el('formulaBox').textContent=mode==='cancel'?`打ち消し型
+δ_net = |A - B|
+δ_gross = |A| + |B|
+H = δ_gross / (δ_net + ε)
+R = δ_net / τ
+
+要点: δ_net が小さくても δ_gross が大きい場合は、相殺で隠れているだけです。`:`増幅型
+interaction = ρAB
+δ_net = |A + B + ρAB|
+δ_gross = |A| + |B| + |ρAB|
+H = δ_gross / (δ_net + ε)
+R = δ_net / τ
+
+要点: A と B が同方向・同位相になると、乗算項で急に面が立ち上がります。`;}
+function setMode(m){mode=m;el('modeCancel').classList.toggle('on',m==='cancel');el('modeAmp').classList.toggle('on',m==='amp');updateText();draw();}
+function setSurface(s){surface=s;for(const id of ['Net','Gross','Hidden','R'])el('surf'+id).classList.remove('on');el('surf'+({net:'Net',gross:'Gross',hidden:'Hidden',r:'R'}[s])).classList.add('on');updateText();draw();}
+['amp','phase','rho','tau','eps','rot','elev','height'].forEach(id=>el(id).oninput=()=>{updateText();draw();});el('modeCancel').onclick=()=>setMode('cancel');el('modeAmp').onclick=()=>setMode('amp');el('surfNet').onclick=()=>setSurface('net');el('surfGross').onclick=()=>setSurface('gross');el('surfHidden').onclick=()=>setSurface('hidden');el('surfR').onclick=()=>setSurface('r');el('play').onclick=()=>{playing=!playing;el('play').classList.toggle('on',playing);el('play').textContent=playing?'PLAY':'PAUSE'};el('reset').onclick=()=>{t=0;draw()};cv.addEventListener('mousedown',e=>{drag=true;dx0=e.clientX;rot0=inp('rot')});window.addEventListener('mouseup',()=>drag=false);window.addEventListener('mousemove',e=>{if(!drag)return;let r=(rot0+(e.clientX-dx0)*.4)%360;if(r<0)r+=360;el('rot').value=r;updateText();draw()});function loop(){if(playing){t+=0.018;draw()}requestAnimationFrame(loop)}updateText();draw();loop();
+</script>
+</body>
+</html>
