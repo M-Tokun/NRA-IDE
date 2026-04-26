@@ -1,5 +1,19 @@
 # CLAUDE.md — NRA-IDE Project Conventions
 
+## AI Agent Workspace Constraints
+
+### 1. Operation Boundaries
+- The AI agent is **strictly limited** to full operations (Read/Write/Move/Delete) **only** within the `g:\git-M-Tokun\` directory structure.
+- For all locations **outside** of `g:\git-M-Tokun\`, the AI agent is only permitted to **Read**. Modifying, moving, or deleting files outside this designated directory is **strictly prohibited**.
+
+### 2. Explicit Override Confirmation
+- If the owner explicitly requests a modification (Write, Move, or Delete) outside of the `g:\git-M-Tokun\` boundary, the AI agent must **not** execute it immediately.
+- The AI agent must verify the request by asking the exact following phrase **twice** (in two separate interaction turns):
+  > 「指定フォルダ以外です。本当に操作しても大丈夫でしょうか？」
+- The destructive/modifying operation can only proceed if the owner explicitly approves both consecutive confirmations.
+
+---
+
 ## Naming Conventions
 
 ### 1. No Spaces in File/Directory Names
