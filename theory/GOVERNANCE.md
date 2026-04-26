@@ -41,7 +41,7 @@ Research, theoretical extension, verification, and refutation based on this fram
 
 ## Related Documents
 
-- [`LICENSE`](./LICENSE) — MIT License
+- [`LICENSE`](../LICENSE) — MIT License
 - [`ETHICS.md`](./ETHICS.md) — Ethical declaration on prohibited uses
 - [`GOVERNANCE.md`](./GOVERNANCE.md) — This document
 
@@ -86,7 +86,7 @@ MIT ライセンスは派生物の商業利用を許容します。それ自体�
 
 ## 関連文書
 
-- [`LICENSE`](./LICENSE) — MIT License
+- [`LICENSE`](../LICENSE) — MIT License
 - [`ETHICS.md`](./ETHICS.md) — 禁止用途に関する倫理宣言
 - [`GOVERNANCE.md`](./GOVERNANCE.md) — 本文書
 

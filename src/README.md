@@ -1,6 +1,6 @@
 # NRA-IDE: Nomological Ring Axioms / Intensional Dynamics Engine
 
-[![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE.md)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](../LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
 [![Python](https://img.shields.io/badge/python-3.9+-green)]()
 
@@ -367,7 +367,7 @@ print(pipeline.pipeline_status())
 - **Personal use only** (non-commercial, educational, research)
 - **Commercial use requires prior written approval**
 - Implementing Pi-1 (reverse derivation) is prohibited
-- See [LICENSE.md](./LICENSE.md) for details
+- See [LICENSE](../LICENSE) for details
 
 **Contact:**  
 [GitHub Issues](https://github.com/M-Tokun/NRA-IDE/issues/new?template=contact.md)  

@@ -13,7 +13,7 @@
 gate/
 ├── README_ja.md              # [このファイル]
 ├── nra_gate_axiom_ja.py      # [コア] 公理強制カーネル
-├── nra_gate_axiom_ja.md      # [文書] 公理定義
+├── nra_gate_axiom_JP.md      # [文書] 公理定義
 ├── nra_gate_constraint_ja.py # [レイヤー01] 入力検証
 ├── nra_gate_spatial_ja.py    # [レイヤー02] 空間隔離
 ├── nra_gate_threshold_ja.py  # [レイヤー03] 閾値検証
@@ -154,7 +154,7 @@ new_state, telemetry = wrapper.update(state, context)
 4. **最終責任**  
    責任=人間 / AI=道具 / 決定権限=人間のみ
 
-完全な公理定義: [nra_gate_axiom_ja.md](./nra_gate_axiom_ja.md)参照
+完全な公理定義: [nra_gate_axiom_JP.md](./nra_gate_axiom_JP.md)参照
 
 ---
 

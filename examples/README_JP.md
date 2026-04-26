@@ -69,6 +69,7 @@ $$R = \frac{\delta}{\tau}$$
 
 | # | ファイル | 内容 |
 |---|---------|------|
+| 00 | [00_Escapement_Foundation_NRA_JP.html](./00_Escapement_Foundation_NRA_JP.html) | **脱進機の基礎。** 整数位相ロック — 残差が消える理由の基礎概念デモ。 |
 | 01 | [01_Why_No_Distance_JP.html](./01_Why_No_Distance_JP.html) | **なぜ距離・微分積分・浮動小数点を使わないのか？** タブ切替で4つの視点から視覚的に解説。従来手法との根本的な違いを理解する入口。 |
 | 02 | [02_Error_Accumulation_JP.html](./02_Error_Accumulation_JP.html) | **誤差積算の恐怖。** 同一初期値から10万ステップ走らせ、従来手法と律環公理の誤差蓄積を比較。医療・自動運転・金融それぞれの破綻ラインを表示。 |
 
@@ -161,7 +162,7 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 | 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **状態境界・短期ログ・長期再構成。** 短期ゆらぎ追跡と長期構造傾向の再構成をNRA-IDEがどう分離するかを実証。 |
 | 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **自動運転 必須限界構成デモ。** 衝突余裕時間・制動距離・横方向余裕を物理量監視。R ≥ 1.0 で上書き不可の強制 Fail-Closed。 |
 | 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **ダム管理比較 + τ劣化曲線。** 固定閾値監視 vs NRA-IDE τ劣化追跡を比較。構造余裕の侵食によるτ縮小を時系列で可視化。 |
-| 26 | [JP](./26_escapement_contactpoint_JP.html) / [EN](./26_escapement_contactpoint_EN_20260425_014259_JST.html) | **Phase-Gap エンジン — 接触点のみ熱排出。** 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生することを実証。 |
+| 26 | [JP](./26_escapement_contactpoint_JP.html) | **Phase-Gap エンジン — 接触点のみ熱排出。** 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生することを実証。 |
 
 ---
 
@@ -186,6 +187,7 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 | ファイル | 内容 |
 |---------|------|
 | [JP](./33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html) / [EN](./33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
+| [Bilingual](../docs/ja-JP/figures/causal_diode_fail_closed_Bilingual.html) | **因果ダイオード & Fail-Closed 可視化。** AIが結果から原因側（閾値）を操作しようとする「逆流（Π⁻¹）」を構造的にブロックするアニメーションと、限界到達時の自律的遮断を体感できる直感的なデモ。 |
 
 ---
 
@@ -196,10 +198,10 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 | # | ファイル | ドメイン | ポイント |
 |---|---------|---------|---------|
-| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | 育苗ハウス・農業ドローン 4要素相関 | 温度・湿度・光量・水分を R = δ/τ で追跡し、相関行列 C[i][j](t)、残渣ゲート G(r)、τステップ前の実測記録 x_{t-τ} を組み合わせる相関sampleの入口。 |
+| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | 育苗ハウス・農業ドローン 4要素相関 | 温度・湿度・光量・水分を R = δ/τ で追跡し、相関行列 C[i][j](t)、残渣ゲート G(r)、τステップ前の実測記録 x_{t-τ} を組み合わせる相関sampleの入口。 |
 | 35 | [JP](./35_rotor_bearing_correlation_JP_20260425_024602_JST.html) / [EN](./35_rotor_bearing_correlation_EN_20260425_160443_JST.html) | 回転機械・軸受相関 | 振動、軸受温度、電流、潤滑圧、音響、回転数偏差を監視。振動が先行し、温度・電流・音響へ遅延波及する構造を可視化。 |
 | 36 | [JP](./36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html) / [EN](./36_battery_thermal_runaway_correlation_EN_20260425_160443_JST.html) | バッテリー熱暴走相関 | 内部抵抗と温度上昇率 dT/dt を先行指標として扱い、温度、膨張圧、電圧偏差へ波及する構造を表示。実機制御ではなく教育・構造可視化用。 |
-| 37 | [JP](./37_greenhouse_vpd_correlation_JP_FIXED_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | 温室VPD媒介相関 | 温度と湿度を単純加算せず、VPD（飽差）を媒介レイヤーとして、土壌水分、CO₂、光量、ECへ相関圧が伝わる構造を可視化。 |
+| 37 | [JP](./37_greenhouse_vpd_correlation_JP_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | 温室VPD媒介相関 | 温度と湿度を単純加算せず、VPD（飽差）を媒介レイヤーとして、土壌水分、CO₂、光量、ECへ相関圧が伝わる構造を可視化。 |
 | 38 | [JP](./38_datacenter_cascade_correlation_JP_20260425_032611_JST.html) / [EN](./38_datacenter_cascade_correlation_EN_20260425_160443_JST.html) | データセンター・カスケード相関 | CPU負荷、電力、ラック温度、吸気温度、ファン回転率、空気流量、ネットワーク遅延をつなぎ、power → heat → fan → power の正のフィードバック環を表示。 |
 | 39 | [JP](./39_coldchain_temperature_correlation_JP_20260425_033809_JST.html) / [EN](./39_coldchain_temperature_correlation_EN_20260425_160443_JST.html) | コールドチェーン温度逸脱相関 | 外気温、荷室温度、扉開閉率、圧縮機負荷、バッテリー残量、湿度、輸送遅延をつなぎ、外気＋扉 → 圧縮機余裕 → 荷室温度の媒介連鎖を可視化。 |
 | 40 | [JP](./40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html) / [EN](./40_medical_education_individual_stratification_template_EN_20260425_160443_JST.html) | 医療教育用・個体別振り分け | SpO₂、呼吸数、心拍数、収縮期血圧、体温を合成データとして扱い、年齢・脆弱性・既往による profile 圧で個体ごとの余裕差を可視化。診断・治療判断ではなく Human Review へ戻す教育テンプレート。 |

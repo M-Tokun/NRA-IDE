@@ -18,18 +18,18 @@ This directory contains the Universal Structural Definition for NRA-IDE (Non-Rev
 
 ### 日本語版 / Japanese
 
-📁 **[jp/](./jp/)**
+📁 **[jp/](./)**
 
 | ファイル名 | 説明 | 読了時間 | 対象読者 |
 |-----------|------|---------|---------|
-| [NRA-IDE_Universal_Definition_v1_0_full.md](./jp/NRA-IDE_Universal_Definition_v1_0_final_20260127_1600.md) | **完全版** - 全8章の詳細定義 | 30-40分 | 全員（必読） |
-| [NRA-IDE_Quick_Reference.md](./jp/NRA-IDE_Quick_Reference_jp.md) | **要点簡易版** - 核心のみ抽出 | 5分 | 意思決定者、初見者 |
-| [NRA-IDE_Implementation_Guide.md](./jp/NRA-IDE_Implementation_Guide_jp.md) | **実装ガイド** - コード例と実装パターン | 20-30分 | エンジニア、実装者 |
-| [NRA-IDE_Checklist.md](./jp/NRA-IDE_Checklist_jp.md) | **チェックリスト** - 100項目以上の検証項目 | 参照用 | 全員（運用時） |
+| [NRA-IDE_Universal_Definition_v1_0_full_JP.md](./NRA-IDE_Universal_Definition_v1_0_full_JP.md) | **完全版** - 全8章の詳細定義 | 30-40分 | 全員（必読） |
+| [NRA-IDE_Quick_Reference_JP.md](./NRA-IDE_Quick_Reference_JP.md) | **要点簡易版** - 核心のみ抽出 | 5分 | 意思決定者、初見者 |
+| [NRA-IDE_Implementation_Guide_JP.md](./NRA-IDE_Implementation_Guide_JP.md) | **実装ガイド** - コード例と実装パターン | 20-30分 | エンジニア、実装者 |
+| [NRA-IDE_Checklist_JP.md](./NRA-IDE_Checklist_JP.md) | **チェックリスト** - 100項目以上の検証項目 | 参照用 | 全員（運用時） |
 
 ### 英語版 / English
 
-📁 **[en/](./en/)**
+📁 **[en/](../en/)**
 
 | File Name | Description | Reading Time | Target Audience |
 |-----------|-------------|--------------|-----------------|
@@ -153,9 +153,9 @@ Exploration = Boundary crossing attempt = Structural rupture
 
 ## ライセンス / License
 
-本ドキュメントは、リポジトリルートの[LICENSE.txt](../LICENSE.txt)に従います。
+本ドキュメントは、リポジトリルートの[LICENSE](../../LICENSE)に従います。
 
-This document follows the [LICENSE.txt](../LICENSE.txt) in the repository root.
+This document follows the [LICENSE](../../LICENSE) in the repository root.
 
 ---
 

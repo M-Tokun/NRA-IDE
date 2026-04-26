@@ -23,7 +23,7 @@
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | Box Sandwich Architecture — structural isolation spec for LLM integration |
 | [CITATION.cff](./CITATION.cff) | Citation metadata (use this for formal attribution) |
 
-See [GOVERNANCE.md](./GOVERNANCE.md) for the project's design philosophy and intent regarding derivatives.
+See [GOVERNANCE.md](./theory/GOVERNANCE.md) for the project's design philosophy and intent regarding derivatives.
 
 ---
 

@@ -82,17 +82,17 @@ Do NOT mix logic between these domains.
 - **[Safety] /gate/** (e.g., `nra_gate_threshold_ja.py`)
   Final validation layer. Evaluates R across safety levels.
 
-- **[Medical] /NRA-IDE_CancerTreatmentSupport_System/**
+- **[Medical] /nra-ide-cancer-treatment-support-system/**
   δ = Physiological pressure, τ = Biological resilience.
 
-- **[Infrastructure] /HAN-Gate_Cascade-Failure-Prevention/**
+- **[Infrastructure] /cascade-failure-prevention/**
   Cascade failure prevention using Dynamic τ (Double Fluctuation).
 
 ## 4. File Index
 - [README.md](./README.md) ... Project Overview
 - [theory/THEORY.md](./theory/THEORY.md) ... Full Theory (Authoritative)
 - [theory/ETHICS.md](./theory/ETHICS.md) ... Ethical Guidelines (MUST READ)
-- [examples/](./examples/) ... Browser-based Demos (01-07)
+- [examples/](./examples/) ... Browser-based Demos (00-42)
 
 ## 5. Directives for Code Generation
 1. **Isolation**: Keep Legacy Calculus (PID/Derivatives) strictly separate from NRA logic.

@@ -8,10 +8,10 @@
 ## 🌍 For English Speakers
 
 **This project documentation is primarily in Japanese.**  
-Please see **[README_EN.md](./README_EN.md)** for an overview, then translate detailed documents into your native language.
+Please see **[README.md](./README.md)** for an overview, then translate detailed documents into your native language.
 
 英語話者の方へ：本プロジェクトの文書は主に日本語です。  
-概要は **[README_EN.md](./README_EN.md)** をご覧ください。その後、詳細文書をあなたの母国語に翻訳してください。
+概要は **[README.md](./README.md)** をご覧ください。その後、詳細文書をあなたの母国語に翻訳してください。
 
 ---
 
@@ -155,7 +155,7 @@ NRA-IDE_CancerTreatmentSupport_System/
 │   ├── 30_Implementation/ # FPGA & Python実装
 │   ├── 40_Validation/     # 検証フレームワーク
 │   └── 50_Deployment/     # インストールガイド
-├── README_EN.md           # 英語版README（ゲートウェイ）
+├── README.md              # 英語版README（ゲートウェイ）
 └── README-JP.md           # このファイル（日本語メイン）
 ```
 

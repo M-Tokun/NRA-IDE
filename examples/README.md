@@ -62,6 +62,7 @@ All demos run directly in a browser. No installation is required.
 
 | # | File | Content |
 |---|---------|------|
+| 00 | [00_Escapement_Foundation_NRA_JP.html](./00_Escapement_Foundation_NRA_JP.html) | **Escapement Foundation (JP).** Basic concept demo of integer phase lock — why residuals disappear. (Japanese only) |
 | 01 | [01_Why_No_Distance_EN.html](./01_Why_No_Distance_EN.html) | **Why not use distance, calculus, or floating-point continuity as the primary basis?** A visual introduction from four perspectives. |
 | 02 | [02_Error_Accumulation_EN.html](./02_Error_Accumulation_EN.html) | **The danger of error accumulation.** Runs 100,000 steps from the same initial value and compares conventional methods with NRA-style structure. |
 
@@ -145,7 +146,7 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 | 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **State boundary, short-term logs, and long-term reconstruction.** Demonstrates separation of short-term fluctuation and long-term structural trend. |
 | 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **Autonomous-driving mandatory boundary demo.** Monitors collision time margin, braking distance, and lateral margin. |
 | 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **Dam management comparison + τ degradation curve.** Fixed-threshold monitoring vs NRA-IDE τ degradation tracking. |
-| 26 | [JP](./26_escapement_contactpoint_JP.html) / [EN](./26_escapement_contactpoint_EN_20260425_014259_JST.html) | **Phase-Gap Engine — heat release only at contact points.** Demonstrates that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. |
+| 26 | [JP](./26_escapement_contactpoint_JP.html) | **Phase-Gap Engine — heat release only at contact points.** Demonstrates that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. (Japanese only) |
 
 ---
 
@@ -169,6 +170,7 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 | File | Content |
 |---------|------|
 | [JP](./33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html) / [EN](./33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html) | **6D multi-layer visualizer.** Displays six R-value surfaces simultaneously. Opacity, saturation, and monochrome modes are available. |
+| [Bilingual](../docs/en-US/figures/causal_diode_fail_closed_Bilingual.html) | **Causal Diode & Fail-Closed Visualizer.** An intuitive animation demonstrating how NRA-IDE structurally blocks AI from manipulating physical thresholds (Π⁻¹ backward flow) and how it autonomously shuts down upon reaching the limit. |
 
 ---
 
@@ -178,10 +180,10 @@ From Demo 34 onward, the sample set develops from single-quantity R judgment int
 
 | # | File | Domain | Key Point |
 |---|---------|---------|---------|
-| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | Seedling greenhouse / agro-drone four-factor correlation | Tracks temperature, humidity, light, and water with R = δ/τ. Combines correlation matrix C[i][j](t), residual gate G(r), and delayed observed record x_{t-τ}. |
+| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | Seedling greenhouse / agro-drone four-factor correlation | Tracks temperature, humidity, light, and water with R = δ/τ. Combines correlation matrix C[i][j](t), residual gate G(r), and delayed observed record x_{t-τ}. |
 | 35 | [JP](./35_rotor_bearing_correlation_JP_20260425_024602_JST.html) / [EN](./35_rotor_bearing_correlation_EN_20260425_160443_JST.html) | Rotor / bearing correlation | Monitors vibration, bearing temperature, current, lubrication pressure, acoustic noise, and RPM deviation. Vibration leads, then temperature/current/noise follow. |
 | 36 | [JP](./36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html) / [EN](./36_battery_thermal_runaway_correlation_EN_20260425_160443_JST.html) | Battery thermal runaway correlation | Treats internal resistance and dT/dt as leading indicators, then shows propagation to temperature, swelling pressure, and voltage deviation. Educational visualization only, not real control. |
-| 37 | [JP](./37_greenhouse_vpd_correlation_JP_FIXED_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | Greenhouse VPD-mediated correlation | Does not simply add temperature and humidity. VPD acts as a mediator layer, propagating correlation pressure to soil water, CO₂, light, and EC. |
+| 37 | [JP](./37_greenhouse_vpd_correlation_JP_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | Greenhouse VPD-mediated correlation | Does not simply add temperature and humidity. VPD acts as a mediator layer, propagating correlation pressure to soil water, CO₂, light, and EC. |
 | 38 | [JP](./38_datacenter_cascade_correlation_JP_20260425_032611_JST.html) / [EN](./38_datacenter_cascade_correlation_EN_20260425_160443_JST.html) | Datacenter cascade correlation | Connects CPU load, power, rack temperature, inlet temperature, fan rate, airflow, and latency. Visualizes the positive feedback loop power → heat → fan → power. |
 | 39 | [JP](./39_coldchain_temperature_correlation_JP_20260425_033809_JST.html) / [EN](./39_coldchain_temperature_correlation_EN_20260425_160443_JST.html) | Cold-chain temperature excursion correlation | Connects ambient temperature, cargo temperature, door opening, compressor load, battery level, humidity, and delivery delay. Shows the mediation chain ambient + door → compressor reserve → cargo temperature. |
 | 40 | [JP](./40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html) / [EN](./40_medical_education_individual_stratification_template_EN_20260425_160443_JST.html) | Medical education / individual stratification | Uses synthetic data for SpO₂, respiratory rate, heart rate, systolic BP, and temperature. Visualizes individual reserve differences via profile pressure from age, frailty, and chronic background. Not diagnosis or treatment. |

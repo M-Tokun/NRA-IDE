@@ -2,7 +2,7 @@
 
 **NRA-IDE — Nomological Ring Axioms / Intensional Dynamics Engine**
 
-[![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE.md)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](../LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
 
 > **NRA-IDE は因果構造の安全エンジンである。**  
@@ -260,7 +260,7 @@ print(pipeline.pipeline_status())
 - **個人利用のみ許可**（非商用・教育・研究目的）
 - **商用利用には事前の書面承諾が必要**
 - Π⁻¹（逆導出）の実装は禁止
-- 詳細は [LICENSE.md](./LICENSE.md) を参照
+- 詳細は [LICENSE](../LICENSE) を参照
 
 **問い合わせ：**  
 [GitHub Issues](https://github.com/M-Tokun/NRA-IDE/issues/new?template=contact.md)（[Commercial] / [Question] / [Feedback]）

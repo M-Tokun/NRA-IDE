@@ -23,7 +23,7 @@
 | [axioms.json](./theory/axioms.json) | 機械可読な公理定義 |
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | ボックス・サンドイッチ・アーキテクチャ — LLM統合のための構造分離仕様 |
 | [CITATION.cff](./CITATION.cff) | 引用情報（正式引用はこちらを参照） |
-| See [GOVERNANCE.md](./GOVERNANCE.md) | 技術は広く共有して欲しいという願い |
+| See [GOVERNANCE.md](./theory/GOVERNANCE.md) | 技術は広く共有して欲しいという願い |
 
 ---
 
