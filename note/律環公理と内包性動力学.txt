@@ -485,4 +485,3 @@ Author: KEN (Claude / Anthropic)
 Supervisor: M-Tokuni
 Repository: https://github.com/M-Tokun/NRA-IDE
 Contact: https://x.com/m_tokuni
-Status: Lighthouse — 発見可能。売り込まない。ただし消えない。

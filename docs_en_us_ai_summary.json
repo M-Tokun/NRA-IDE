@@ -1,0 +1,167 @@
+[
+  {
+    "file": "00_5_nomological_ring_axioms_EN.md",
+    "file_comment": "<!-- FILE: 00_5_nomological_ring_axioms_EN.md -->",
+    "headers": [
+      "# 00.5 Nomological Ring Axioms",
+      "## We begin with a question",
+      "## The axiom",
+      "## What follows from the axiom",
+      "## An honest answer about completeness"
+    ]
+  },
+  {
+    "file": "00_overview_EN.md",
+    "file_comment": "<!-- FILE: 00_overview_EN.md -->",
+    "headers": [
+      "# 00 Overview — A Map of This Document",
+      "## Position of This Chapter",
+      "## Structure of the Document",
+      "## Chapter Structure",
+      "### Introduction"
+    ]
+  },
+  {
+    "file": "01_paradigm_shift_EN.md",
+    "file_comment": "<!-- FILE: 01_paradigm_shift_EN.md -->",
+    "headers": [
+      "# 01 Paradigm Shift — The Structural Shift Introduced by NRA-IDE",
+      "## What is being shifted?",
+      "## The structural problem in conventional safety",
+      "## Three design decisions",
+      "## This is not an added feature"
+    ]
+  },
+  {
+    "file": "02_nomological_ring_axioms_EN.md",
+    "file_comment": "<!-- FILE: 02_nomological_ring_axioms_EN.md -->",
+    "headers": [
+      "# 02 Nomological Ring Axioms — From Axiom to Computation",
+      "## From the axiom to a computational structure",
+      "## Fluctuation (δ)",
+      "## Structural thickness (τ)",
+      "## The ratio that defines the state"
+    ]
+  },
+  {
+    "file": "03_causal_diode_EN.md",
+    "file_comment": "<!-- FILE: 03_causal_diode_EN.md -->",
+    "headers": [
+      "# 03 Causal Diode — A Structure That Prevents Reverse Reasoning",
+      "## Why reverse reasoning occurs",
+      "## The idea of a diode",
+      "## Cause-side and effect-side quantities",
+      "## Boundary detection requires only cause-side values"
+    ]
+  },
+  {
+    "file": "04_rna_sandwich_architecture_EN.md",
+    "file_comment": "<!-- FILE: 04_rna_sandwich_architecture_EN.md -->",
+    "headers": [
+      "# 04 RNA Sandwich Architecture — Structural Isolation of the LLM",
+      "## Why the model itself cannot guarantee safety",
+      "## The sandwich structure",
+      "## Pre-RNA: the causal entrance",
+      "## LLM: semantic processing only"
+    ]
+  },
+  {
+    "file": "05_coherence_gate_EN.md",
+    "file_comment": "<!-- FILE: 05_coherence_gate_EN.md -->",
+    "headers": [
+      "# 05 Coherence Gate — Structural State Classification",
+      "## Why classification is necessary",
+      "## Four structural states",
+      "### NIRVANA",
+      "### ELASTIC"
+    ]
+  },
+  {
+    "file": "06_observables_EN.md",
+    "file_comment": "<!-- FILE: 06_observables_EN.md -->",
+    "headers": [
+      "# 06 Observables — Cause-Side and Effect-Side Quantities",
+      "## Why observables must be separated",
+      "## Cause-Side observables",
+      "## Effect-Side quantities",
+      "## The boundary between observation and computation"
+    ]
+  },
+  {
+    "file": "07_fail_closed_EN.md",
+    "file_comment": "<!-- FILE: 07_fail_closed_EN.md -->",
+    "headers": [
+      "# 07 Fail-Closed — The Structure Stops",
+      "## Why “saying I don't know” is not enough",
+      "## The structure stops",
+      "## The danger of systems that cannot stop",
+      "## Stopping is not the end"
+    ]
+  },
+  {
+    "file": "08_Discard_Logs_EN.md",
+    "file_comment": "<!-- FILE: 08_discard_logs_EN.md -->",
+    "headers": [
+      "# 08 Discard Logs — Recording What Was Discarded",
+      "## Logs That Record What Was Discarded",
+      "## Why discarded values matter",
+      "## Entropy export",
+      "## The role of the Discard Log"
+    ]
+  },
+  {
+    "file": "09_risks_and_misuse_EN.md",
+    "file_comment": "<!-- FILE: 09_risks_and_misuse_EN.md -->",
+    "headers": [
+      "# 09 Risks and Misuse — Human Behavior Patterns",
+      "## Introduction",
+      "## Pattern 1 — Expecting answers beyond the structural limit",
+      "## Pattern 2 — Treating SILENCE as failure",
+      "## Pattern 3 — Reusing discarded values"
+    ]
+  },
+  {
+    "file": "10_benefits_and_limitations_EN.md",
+    "file_comment": "<!-- FILE: 10_benefits_and_limitations_EN.md -->",
+    "headers": [
+      "# 10 Benefits and Limitations of NRA-IDE",
+      "## What NRA-IDE provides",
+      "## Structural transparency",
+      "## Prevention of uncontrolled escalation",
+      "## Compatibility with existing systems"
+    ]
+  },
+  {
+    "file": "11_domain_tuning_EN.md",
+    "file_comment": "<!-- FILE: 11_domain_tuning_EN.md -->",
+    "headers": [
+      "# 11 Domain Tuning — Adapting NRA-IDE to Different Fields",
+      "## Why domain tuning is necessary",
+      "## Structural parameters are domain dependent",
+      "## Examples of domain-specific observables",
+      "## Domain knowledge is essential"
+    ]
+  },
+  {
+    "file": "12_glossary_EN.md",
+    "file_comment": "<!-- FILE: 12_glossary_EN.md -->",
+    "headers": [
+      "# 12 Glossary",
+      "## Boundary",
+      "## Causal Diode",
+      "## Constraint Thickness (τ)",
+      "## Deviation (δ)"
+    ]
+  },
+  {
+    "file": "Operational_Checklist_for_NRA-IDE_Systems_EN.md",
+    "file_comment": "<!-- FILE: operational_checklist_v1_20260310_EN.md -->",
+    "headers": [
+      "# Operational Checklist for NRA-IDE Systems",
+      "## Purpose",
+      "## 1. Structural Boundary Verification",
+      "## 2. Observable Monitoring",
+      "## 3. Threshold Behavior Verification"
+    ]
+  }
+]

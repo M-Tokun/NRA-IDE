@@ -25,3 +25,6 @@ desktop.ini
 dist/
 build/
 *.egg-info/
+
+# Private Local Reports
+local_reports/
