@@ -1,10 +1,6 @@
 # 📘 **Structural Diagrams for NRA-IDE**
 
-
-
 ## **Diagram 1: Zone Transition by R (No Semantic Value)**
-
-
 
 ### **Purpose**
 
@@ -12,11 +8,7 @@
 
 - Show that Zones A/B/C are **structural classifications**, not value judgments
 
-
-
 ---
-
-
 
 ### **R Position and Zone Transition (Structure-Only)**
 
@@ -24,15 +16,11 @@
 
 R = δ / τ
 
-
-
 0.00        0.40        0.99        1.00
 
 │-----------│-----------│-----------│──────────→  R
 
     Zone A       Zone B       Zone C (limit)
-
-
 
 Zone A: R < 0.40
 
@@ -40,15 +28,11 @@ Zone A: R < 0.40
 
   - Structural state: Stable continuity
 
-
-
 Zone B: 0.40 ≤ R < 0.99
 
   - PERMIT_WITH_CAVEAT
 
   - Structural state: Elastic fluctuation
-
-
 
 Zone C: R ≥ 1.00
 
@@ -58,15 +42,9 @@ Zone C: R ≥ 1.00
 
 ```
 
-
-
 ---
 
-
-
 ### **Structural Notes**
-
-
 
 - R = 0.39 → Not "good"
 
@@ -78,15 +56,9 @@ Zone C: R ≥ 1.00
 
 - R ≥ 1.0 is **structural limit**
 
-
-
 ---
 
-
-
 ## **Diagram 2: Fail-Closed (Silence) vs Halt (Death)**
-
-
 
 ### **Purpose**
 
@@ -94,11 +66,7 @@ Zone C: R ≥ 1.00
 
 - Show that ω (angular continuity) determines structural life/death
 
-
-
 ---
-
-
 
 ### **Structural Difference**
 
@@ -112,8 +80,6 @@ R = 1.02   → Zone C (structural fracture)
 
 ω = 0.8    → System maintains continuity (alive)
 
-
-
 State:
 
   - Output: Stopped (silence)
@@ -124,13 +90,7 @@ State:
 
   - Optimization: None
 
-
-
   [Structurally correct silence]
-
-
-
-
 
 Case B: Halt (Death)
 
@@ -140,8 +100,6 @@ R = 0.10   → Zone A (stable)
 
 ω = 0.0    → Phase generation stopped (dead)
 
-
-
 State:
 
   - Output: Stopped
@@ -150,21 +108,13 @@ State:
 
   - Forbidden in NRA-IDE
 
-
-
   [Structural death: distinct from Fail-Closed]
 
 ```
 
-
-
 ---
 
-
-
 ### **Structural Notes**
-
-
 
 - Fail-Closed is **silence while system lives (ω > 0)**
 
@@ -174,15 +124,9 @@ State:
 
 - NRA-IDE permits **only Fail-Closed as structural behavior**
 
-
-
 ---
 
-
-
 ## **Why These Diagrams Are "100% Structure-Pure"**
-
-
 
 - Contain no meaning or value judgments
 
@@ -196,7 +140,4 @@ State:
 
 - Treat Fail-Closed as "structural necessity", not "safety strategy"
 
-
-
 ---
-

@@ -1,10 +1,6 @@
 # App Middleware (Last Resort Only)
 
-
-
 Use this only if you cannot control ingress proxy configuration.
-
-
 
 ## Pattern
 
@@ -13,8 +9,6 @@ Use this only if you cannot control ingress proxy configuration.
 - If SILENCE => return a neutral response early (e.g., 204 / fixed token).
 
 - Avoid retries.
-
-
 
 ## Warning
 
@@ -25,4 +19,3 @@ Putting the gate in the app layer weakens protection:
 - queues may already be stressed
 
 Prefer Envoy/Nginx whenever possible.
-

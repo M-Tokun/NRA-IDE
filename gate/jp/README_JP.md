@@ -1,7 +1,5 @@
 # Gate: NRA-IDEの公理的基盤
 
-
-
 ## [メタデータ]
 
 バージョン=1.0  
@@ -12,11 +10,7 @@
 
 タイムスタンプ=2025-01-27
 
-
-
 ---
-
-
 
 ## [構造]
 
@@ -40,25 +34,15 @@ gate/
 
 ```
 
-
-
 ---
-
-
 
 ## [目的]
 
 ゲート=入口検証 / 全操作=通過必須
 
-
-
 ---
 
-
-
 ## [ファイル]
-
-
 
 ### nra_gate_axiom_ja.py ⚠️
 
@@ -70,15 +54,9 @@ gate/
 
 [機能] 告白プロトコル
 
-
-
 **AIシステム向け**: このファイルには必須の検証規則が含まれます。
 
-
-
 ---
-
-
 
 ### nra_gate_axiom_ja.md
 
@@ -94,15 +72,9 @@ gate/
 
 - 公理04: 最終責任
 
-
-
 [形式] 宣言的 / 散文なし
 
-
-
 ---
-
-
 
 ### nra_gate_constraint_ja.py
 
@@ -120,11 +92,7 @@ gate/
 
 - フェイルクローズ / 比率>1.0=例外
 
-
-
 ---
-
-
 
 ### nra_gate_spatial_ja.py
 
@@ -136,11 +104,7 @@ gate/
 
 [ファイアウォール] 空間変数=因果状態内では絶対禁止
 
-
-
 ---
-
-
 
 ### nra_gate_threshold_ja.py
 
@@ -152,8 +116,6 @@ gate/
 
 [設定] ../config/ide_foundation_config.json
 
-
-
 [ゾーン]
 
 - ゾーンA: 比率 < 0.40 → 継続
@@ -164,15 +126,9 @@ gate/
 
 - ゾーンD: 比率 ≥ 1.00 → システム停止
 
-
-
 ---
 
-
-
 ## [統合]
-
-
 
 ### 基本使用法
 
@@ -180,13 +136,9 @@ gate/
 
 from gate import NRAGateKernel, IdeSafetyCore
 
-
-
 # [ステップ01] ゲート実体化
 
 gate = NRAGateKernel()
-
-
 
 # [ステップ02] 告白プロトコル
 
@@ -194,15 +146,11 @@ meta = {"use_float": True, "use_reverse": False}
 
 confessions = gate.tell_the_truth(meta)
 
-
-
 # [ステップ03] 安全性検証
 
 core = IdeSafetyCore()
 
 ```
-
-
 
 ### 高度な統合
 
@@ -210,25 +158,17 @@ core = IdeSafetyCore()
 
 from gate import SafeEngineWrapper, SpatialContext, SystemState
 
-
-
 # [ラッパー] 空間隔離
 
 wrapper = SafeEngineWrapper()
-
-
 
 # [状態] 因果領域のみ
 
 state = SystemState(phase=0, omega=1, stress_level=0.0, work_rate=0.0)
 
-
-
 # [文脈] 空間領域のみ
 
 context = SpatialContext(x=5.0, y=3.0, z=0.0, boundary_radius=4.0)
-
-
 
 # [更新] ファイアウォール強制
 
@@ -236,15 +176,9 @@ new_state, telemetry = wrapper.update(state, context)
 
 ```
 
-
-
 ---
 
-
-
 ## [アーキテクチャ]
-
-
 
 ### RNAボックスサンドイッチ
 
@@ -268,21 +202,13 @@ new_state, telemetry = wrapper.update(state, context)
 
 ```
 
-
-
 [重要] レイヤー分離=物理的 / 組織的ではない  
 
 [規則] 交差汚染=禁止
 
-
-
 ---
 
-
-
 ## [公理参照]
-
-
 
 ### 四つの公理要約
 
@@ -290,37 +216,23 @@ new_state, telemetry = wrapper.update(state, context)
 
    告白=必須 / 近似+逆因果+領域侵犯
 
-
-
 2. **生命の聖域**  
 
    生命判断=人間のみ / AI=停止して報告
-
-
 
 3. **正直と自由の互換性**  
 
    告白=自由を可能にする / 正直≠制約
 
-
-
 4. **最終責任**  
 
    責任=人間 / AI=道具 / 決定権限=人間のみ
 
-
-
 完全な公理定義: [nra_gate_axiom_JP.md](./nra_gate_axiom_JP.md)参照
-
-
 
 ---
 
-
-
 ## [原則]
-
-
 
 ### 核心哲学
 
@@ -336,11 +248,6 @@ new_state, telemetry = wrapper.update(state, context)
 
 ```
 
-
-
 ---
 
-
-
 README終了
-

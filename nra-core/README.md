@@ -1,26 +1,16 @@
 # nra-core
 
-
-
 NRA-IDE（Nomological Ring Axioms — Intensional Dynamics Engine）のコアリポジトリです。
 
 理論基盤・論文・実装コード・可視化・量子拡張の5領域に分類して管理します。
-
-
 
 The core repository for NRA-IDE (Nomological Ring Axioms — Intensional Dynamics Engine).
 
 Files are organized into five categories: theoretical foundations, papers, implementation, visualization, and quantum extension.
 
-
-
 ---
 
-
-
 ## ディレクトリ構成 / Directory Structure
-
-
 
 ```
 
@@ -38,27 +28,17 @@ nra-core/
 
 ```
 
-
-
 ---
 
-
-
 ## foundations/ — 理論基盤 / Theoretical Foundations
-
-
 
 NRA（律環公理）および IDE（内包動力学エンジン）の概念的・公理的基盤を記述した文書群。
 
 システム全体の設計思想と数理構造の出発点となります。
 
-
-
 Documents describing the conceptual and axiomatic foundations of NRA (Nomological Ring Axioms) and IDE (Intensional Dynamics Engine).
 
 These form the starting point for the system's design philosophy and mathematical structure.
-
-
 
 | ファイル | 内容 |
 
@@ -74,33 +54,21 @@ These form the starting point for the system's design philosophy and mathematica
 
 | `NRA-IDE_の応用分野_汎用性の全体像.md` | NRA-IDEの応用領域と汎用性の概観 |
 
-
-
 > 原本は `theory/AXIOMS_rewritten_2026-04-24_011508.md`。nra-core の自己完結性のため本ディレクトリにも収録。
 
 > The canonical source is `theory/AXIOMS_rewritten_2026-04-24_011508.md`. Copied here for nra-core self-containment.
 
-
-
 ---
 
-
-
 ## papers/ — 論文・技術文書 / Papers & Technical Documents
-
-
 
 NRA-IDEに関する学術論文・技術レポートおよびそのPDFを格納します。
 
 理論の形式化・拡張提案・アーキテクチャ設計を扱います。
 
-
-
 Academic papers, technical reports, and their PDFs related to NRA-IDE.
 
 Covers formalization of theory, extension proposals, and architectural design.
-
-
 
 | ファイル | 内容 |
 
@@ -124,27 +92,17 @@ Covers formalization of theory, extension proposals, and architectural design.
 
 | `deepseek_latex_20260413_157067.md` | LaTeX変換セッション記録 |
 
-
-
 ---
 
-
-
 ## implementation/ — 実装コード / Implementation
-
-
 
 NRAおよびIDEの動作を実現するPythonスクリプト群。
 
 基盤実装・適応ゲート拡張・センサー系応用コードを含みます。
 
-
-
 Python scripts that realize the behavior of NRA and IDE.
 
 Includes foundation implementations, adaptive gate extension, and applied sensor-system examples.
-
-
 
 | ファイル | 内容 |
 
@@ -164,25 +122,15 @@ Includes foundation implementations, adaptive gate extension, and applied sensor
 
 | `chain_tension_nra_ide_2026-03-19_0113_EN.py` | チェーン張力 NRA-IDE実装（EN） |
 
-
-
 ---
 
-
-
 ## visualization/ — 可視化・シミュレーション / Visualization & Simulation
-
-
 
 NRAダイナミクスのインタラクティブシミュレーション（HTML）および
 
 解析結果のプロット画像を格納します。
 
-
-
 Interactive simulations (HTML) of NRA dynamics and plot images of analysis results.
-
-
 
 | ファイル | 内容 |
 
@@ -220,27 +168,17 @@ Interactive simulations (HTML) of NRA dynamics and plot images of analysis resul
 
 | `adaptive_gate_plot_2026-04-07_230258.png` | 適応ゲート解析プロット |
 
-
-
 ---
 
-
-
 ## quantum/ — 量子拡張 / Quantum Extension
-
-
 
 NRA-IDEを量子計算領域へ接続するPythonスクリプトおよびセッション記録。
 
 Lindblad方程式・NISQ・FMOモデルを用いた量子誤差制御の実装群。
 
-
-
 Python scripts and session records connecting NRA-IDE to quantum computing.
 
 Implementations of quantum error control using Lindblad equations, NISQ, and FMO models.
-
-
 
 | ファイル | 内容 |
 
@@ -262,11 +200,6 @@ Implementations of quantum error control using Lindblad equations, NISQ, and FMO
 
 | `NRA-IDE_quantum_Python/NRA_IDE_Quantum_Measurement_Session_2026-03-28_1920.md` | 量子測定セッション記録（EN） |
 
-
-
 ---
 
-
-
 *Last updated: 2026-04-25*
-

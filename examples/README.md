@@ -2,65 +2,35 @@
 
 <!-- README_EN.md | examples/ | updated 20260425_163041_JST -->
 
-
-
 ---
-
-
 
 ## What is NRA-IDE?
 
-
-
 **Nomological Ring Axioms — Intensional Dynamics Engine**
-
-
 
 NRA-IDE is a deterministic control and structural judgment engine based on **tension structure**: constraint → force → displacement. It deliberately avoids making continuity, distance, or semantic interpretation the primary basis of safety judgment. In practical terms, it is a framework centered on nonlinear, physically grounded structure.
 
-
-
 Where conventional methods can become black boxes in high-risk areas such as medical AI, autonomous driving, and infrastructure control, NRA-IDE provides an explainable judgment mechanism based on directly observed structural deviation.
-
-
 
 ---
 
-
-
 ## Why NRA-IDE Does Not Accumulate Error
-
-
 
 A mechanical clock keeps time not because every gear is perfect, but because the escapement advances in a discrete step: exactly one tooth at a time. Residual fractions are not carried forward into the next step.
 
-
-
 NRA-IDE implements this principle. State transitions are not treated as an endlessly drifting floating-point continuum. Instead, they are handled as structurally closed phase steps. Each step is completed as a bounded transition, and residual fragments are not inherited as causal state.
-
-
 
 > **Error does not fail to accumulate because it is corrected afterward.  
 
 > It does not accumulate because the structure does not allow it to be carried forward.**
 
-
-
 The demos below are designed to visualize and quantify this difference. For implementation details such as integer phase lock and residual discard, see `nra-core/`.
-
-
 
 ---
 
-
-
 ## Principle of the Threshold System
 
-
-
 $$R = \frac{\delta}{\tau}$$
-
-
 
 | Symbol | Meaning | Description |
 
@@ -71,8 +41,6 @@ $$R = \frac{\delta}{\tau}$$
 | **τ (tau)** | Tolerance thickness / allowable margin | Structurally defined threshold width |
 
 | **R** | Structural ratio | Judgment value calculated as δ ÷ τ |
-
-
 
 | R Range | Judgment | Meaning | Action |
 
@@ -86,8 +54,6 @@ $$R = \frac{\delta}{\tau}$$
 
 | R ≥ 1.00 | **FAIL-CLOSED** | Structural limit corresponding to phase transition, rupture, breach, or collapse | AI stops output/action and humans make the final decision |
 
-
-
 > **Important:** R = 1.0 is not a warning value.  
 
 > R = 1.0 is the structural boundary corresponding to phase transition, rupture, breach, or collapse. Therefore, real safety design must not wait until R reaches 1.0.  
@@ -96,31 +62,17 @@ $$R = \frac{\delta}{\tau}$$
 
 > R_J is not a fixed axiom value. It is set according to the operating site, target object, sensor delay, stopping time, and required safety margin.
 
-
-
 > **Design principle:** AI performs computation. Ethical and final judgment belongs to humans. This is the responsibility boundary.
-
-
 
 ---
 
-
-
 ## Demo List — 41 Demos + Standalone Visualizations, Recommended Order
-
-
 
 All demos run directly in a browser. No installation is required.
 
-
-
 > In many demos, the red line indicates R = 1.0. This is not a warning line; it is the structural limit line. The practical judgment limit must be placed before that line. Its value is not fixed, and should be configured according to the operating site and target domain.
 
-
-
 ### 📚 STEP 1 — First Understand “Why?”
-
-
 
 | # | File | Content |
 
@@ -132,11 +84,7 @@ All demos run directly in a browser. No installation is required.
 
 | 02 | [02_Error_Accumulation_EN.html](./02_Error_Accumulation_EN.html) | **The danger of error accumulation.** Runs 100,000 steps from the same initial value and compares conventional methods with NRA-style structure. |
 
-
-
 ### 🔬 STEP 2 — Experience the Difference in Behavior
-
-
 
 | # | File | Content |
 
@@ -146,11 +94,7 @@ All demos run directly in a browser. No installation is required.
 
 | 04 | [04_HAN_Stress_Test_EN.html](./04_HAN_Stress_Test_EN.html) | **Extreme 80 ms load test.** Legacy blindly executes commands and collapses in FPS; HAN detects tension and adapts load. |
 
-
-
 ### 📊 STEP 3 — Visualize the Threshold Mechanism
-
-
 
 | # | File | Content |
 
@@ -158,11 +102,7 @@ All demos run directly in a browser. No installation is required.
 
 | 05 | [05_IDE_Threshold_Visualizer_EN.html](./05_IDE_Threshold_Visualizer_EN.html) | **Dynamic visualization of R = δ/τ.** Confirms integer phase lock and residual discard in real time. |
 
-
-
 ### ⚙️ STEP 4 — Escapement Principle
-
-
 
 | # | File | Content |
 
@@ -170,11 +110,7 @@ All demos run directly in a browser. No installation is required.
 
 | 06 | `06_Escapement_Principle_EN.html` *（./06_Escapement_Principle_EN.html）* | **Why gears do not accumulate error.** Floating-point drift vs integer phase lock animation. |
 
-
-
 ### 🔴 STEP 5 — Cascade Failure: Watching the Moment Collapse Begins
-
-
 
 | # | File | Content |
 
@@ -182,25 +118,15 @@ All demos run directly in a browser. No installation is required.
 
 | 07 | [07_HAN_gate_live_EN.html](./07_HAN_gate_live_EN.html) | **Live simulation of cascade failure and HAN Gate SILENCE activation.** As load spikes propagate, the chain-reaction score R rises in real time. When R crosses the operational boundary, the screen flashes red and SILENCE is declared. |
 
-
-
 > **Why this demo is different:**  
 
 > The waveform is not a static graph. It behaves like a real cascade failure: slow at first, then suddenly crossing the boundary. It also visualizes the dual-fluctuation structure, where the τ line begins to expand before the R peak becomes obvious.
 
-
-
 ---
-
-
 
 ### 🌿 STEP 6 — Band Gate: Real-World Domain Applications
 
-
-
 These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. Upper and lower limits are monitored independently, and asymmetric EMA sensitivity detects both overload and depletion.
-
-
 
 | # | File | Domain | Key Point |
 
@@ -216,21 +142,13 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 
 | 10 | [10_Field_DroughtGate_live_JP.html](./10_Field_DroughtGate_live_JP.html) | Outdoor field drought progression gauge — JP | Soil moisture, soil temperature, solar radiation, and wind speed. Composite R estimates drought level Lv.0–4. |
 
-
-
 > **What current agricultural IoT often cannot do:**  
 
 > Most systems alert only after a fixed threshold has already been crossed. They do not represent “momentum toward the boundary.” NRA-IDE makes that boundary approach visible.
 
-
-
 ---
 
-
-
 ### ⚙️ STEP 7 — Advanced Domain Applications (11–16)
-
-
 
 | # | File | Content |
 
@@ -248,15 +166,9 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 
 | 16 | [16_passive_safety_JP.html](./16_passive_safety_JP.html) | **Passive gravity-driven safety system.** Transitions to a safe state by physical constraints without active control. |
 
-
-
 ---
 
-
-
 ### 🔬 STEP 8 — Physical State Transition Monitoring (17–22)
-
-
 
 | # | File | Content |
 
@@ -274,15 +186,9 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 
 | 22 | [22_vascular_monitor_JP.html](./22_vascular_monitor_JP.html) | **Vascular intervention monitor.** Six physical quantities integrated with dual fluctuation and dynamic τ. |
 
-
-
 ---
 
-
-
 ### 🧩 STEP 9 — Advanced Features and Specific Domains (23–26)
-
-
 
 | # | File | Content |
 
@@ -296,19 +202,11 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 
 | 26 | [JP](./26_escapement_contactpoint_JP.html) | **Phase-Gap Engine — heat release only at contact points.** Demonstrates that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. (Japanese only) |
 
-
-
 ---
-
-
 
 ### 🛠️ STEP 10 — Basic Equipment Monitoring (27–32)
 
-
-
 These demos apply R = δ/τ to general equipment and facility monitoring domains. Across six demos, they demonstrate NRA-IDE’s **unit independence**: the same structural equation can manage fundamentally different physical quantities.
-
-
 
 | # | File | Domain | Key Point |
 
@@ -326,15 +224,9 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 
 | 32 | [JP](./32_nra_ide_water_ice_20260324_2216_JP.html) / [EN](./32_nra_ide_ice_water_EN_20260425_013818_JST.html) | Ice → water phase transition | Reverse direction of Demo 17: ice absorbs latent heat after crossing 0°C. |
 
-
-
 ---
 
-
-
 ### 🔭 Standalone Demos
-
-
 
 | File | Content |
 
@@ -344,19 +236,11 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 
 | [Bilingual](../docs/en-US/figures/causal_diode_fail_closed_Bilingual.html) | **Causal Diode & Fail-Closed Visualizer.** An intuitive animation demonstrating how NRA-IDE structurally blocks AI from manipulating physical thresholds (Π⁻¹ backward flow) and how it autonomously shuts down upon reaching the limit. |
 
-
-
 ---
-
-
 
 ### 🔗 STEP 11 — Correlation and Multi-Factor Templates (34–41)
 
-
-
 From Demo 34 onward, the sample set develops from single-quantity R judgment into multi-layer correlation, mediated variables, closed loops, and individual baseline differences. The basic safety form is **R_total = max(R_i, R_corr, R_coupling)** so that a dangerous layer is not diluted by averaging. Medical examples are kept as **Medical Education Templates**, not operational clinical systems.
-
-
 
 | # | File | Domain | Key Point |
 
@@ -378,19 +262,11 @@ From Demo 34 onward, the sample set develops from single-quantity R judgment int
 
 | 41 | [JP](./41_medical_education_infection_observation_template_JP_20260425_040544_JST.html) / [EN](./41_medical_education_infection_observation_template_EN_20260425_160443_JST.html) | Medical education / infection observation cohort | Uses synthetic data for fever, respiration, circulation, hydration, and inflammation-like markers. Sorts individuals into Observe / Watch / Caution / Human Review without disease naming or treatment recommendation. |
 
-
-
 ---
-
-
 
 ## How to Embed
 
-
-
 Physical control begins by defining the target’s deviation (δ) and tolerance thickness (τ).
-
-
 
 ```javascript
 
@@ -408,8 +284,6 @@ function gate(delta, tau) {
 
 ```
 
-
-
 **Implementation example: medical AI support**
 
 ```javascript
@@ -420,11 +294,7 @@ const tumorResistance = measureResistance();  // δ: tumor-side resistance
 
 const infusionPressure = getPumpCapacity();   // τ: available pump pressure
 
-
-
 const deliveryStatus = gate(tumorResistance, infusionPressure);
-
-
 
 if (deliveryStatus === "FAIL_CLOSED") {
 
@@ -436,19 +306,11 @@ if (deliveryStatus === "FAIL_CLOSED") {
 
 ```
 
-
-
 Specific implementation patterns are documented inside each demo source file.
-
-
 
 ---
 
-
-
 ## Application Areas
-
-
 
 ### 🏥 Medical AI
 
@@ -458,8 +320,6 @@ Specific implementation patterns are documented inside each demo source file.
 
 - **Threshold:** R = target-side resistance / delivery pressure.
 
-
-
 ### 🚗 Autonomous Driving
 
 - **Problem:** Safety issues caused by black-box decisions.
@@ -468,8 +328,6 @@ Specific implementation patterns are documented inside each demo source file.
 
 - **Threshold:** R = obstacle margin / braking capability.
 
-
-
 ### 🖥️ Infrastructure Resilience
 
 - **Problem:** Cascade failure in distributed systems.
@@ -477,8 +335,6 @@ Specific implementation patterns are documented inside each demo source file.
 - **NRA solution:** Prevent propagation by monitoring load-limit approach.
 
 - **Threshold:** R = excess load / buffer capacity.
-
-
 
 | Area | δ (Deviation from constraint) | τ (Tolerance thickness) | Meaning of R ≥ 1.0 |
 
@@ -490,41 +346,22 @@ Specific implementation patterns are documented inside each demo source file.
 
 | Infrastructure | Excess load | Buffer capacity | Server overload → isolation |
 
-
-
 ---
-
-
 
 ## License
 
-
-
 Redistribution must preserve the following copyright notice:
-
-
 
 **Copyright (c) 2026 M-Tokuni**
 
-
-
 This project is provided under the **MIT License**. It may be used, modified, and redistributed for research, personal, and commercial purposes, subject to the license terms.
-
-
 
 For the latest information, see the official repository:
 
-
-
 - **GitHub:** https://github.com/M-Tokun/NRA-IDE
 
-
-
 ---
-
-
 
 - **Facebook:** https://www.facebook.com/tokuni.masa
 
 - **Note:** https://note.com/mtokuni
-

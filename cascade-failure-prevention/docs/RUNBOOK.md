@@ -1,26 +1,16 @@
 # RUNBOOK.md — HAN Gate 運用マニュアル
 
-
-
 **Author**: M-Tokuni | https://github.com/M-Tokun/NRA-IDE  
 
 **Version**: 1.1.0 (2026-03-06)  
 
 **変更内容**: TAU_EMA_ALPHA / TAU_AMPLIFY の運用ガイドを追加
 
-
-
 ---
-
-
 
 ## 1. 運用者がやること・やらないこと
 
-
-
 ### やること
-
-
 
 - ゲートがデプロイされ、入口（Envoy/Nginx）に統合されているか確認する
 
@@ -30,11 +20,7 @@
 
 - インシデント後にイベントログをレビューする
 
-
-
 ### やってはいけないこと
-
-
 
 - 「レイテンシを改善しよう」としてリトライを増やす
 
@@ -44,15 +30,9 @@
 
 - 平均レイテンシだけを主要トリガーとして使う
 
-
-
 ---
 
-
-
 ## 2. 日次確認項目
-
-
 
 - `/healthz` が OK を返しているか
 
@@ -60,15 +40,9 @@
 
 - ConfigMap の R_OP / TAU 値が意図した設定になっているか
 
-
-
 ---
 
-
-
 ## 3. よくある障害パターンと期待される動作
-
-
 
 **パターン A: 依存先タイムアウトが増え始め、リトライが続く**  
 
@@ -76,31 +50,21 @@
 
 　アップストリームの負荷が増加しなくなり、安定します。
 
-
-
 **パターン B: キューが急増しリトライストームが発生**  
 
 → 即座に SILENCE（Fail-Closed）になります。  
 
 　リトライが自然に落ち着いたあと、HOLD_MS 経過後に再開します。
 
-
-
 ---
 
-
-
 ## 4. 動作検証（curl サンプル）
-
-
 
 ```bash
 
 # ヘルスチェック
 
 curl -s http://han-gate.han.svc.cluster.local:8080/healthz
-
-
 
 # 判定リクエスト（連鎖反応シミュレーション → SILENCE になるはず）
 
@@ -112,27 +76,17 @@ curl -s -X POST http://han-gate.han.svc.cluster.local:8080/v1/decision \
 
        "telemetry":{"retry_rate":12,"queue_depth":480,"dep_timeout_rate":7}}'
 
-
-
 # メトリクス確認（Prometheus形式）
 
 curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 ```
 
-
-
 ---
-
-
 
 ## 5. SILENCE が多すぎる場合
 
-
-
 ### SILENCE 発生率の目安
-
-
 
 | 発生率 | 状態 | 対応 |
 
@@ -144,11 +98,7 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 | 5%超 | 設計レビュー要 | 週次レビューで調整を検討 |
 
-
-
 ### 調整パターン（週次設計レビューで実施。インシデント中は変更しないこと）
-
-
 
 **より緩くする（SILENCE を減らす）：**
 
@@ -158,8 +108,6 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 - TAU_EMA_ALPHA を下げる: 0.3 → 0.1（EMA の感度を下げる）
 
-
-
 **より厳しくする（SILENCE を増やす・早くする）：**
 
 - R_OP を下げる: 1.0 → 0.7
@@ -168,11 +116,7 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 - TAU_EMA_ALPHA を上げる: 0.3 → 0.5（最近の変化を重視）
 
-
-
 ### 二重ゆらぎのパラメータについて
-
-
 
 **TAU_EMA_ALPHA（0〜1）**  
 
@@ -184,8 +128,6 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 変化が激しい環境では 0.3〜0.5 が向いています。
 
-
-
 **TAU_AMPLIFY（上限倍率）**  
 
 動的τが基底値の何倍まで大きくなれるかの上限です。  
@@ -194,11 +136,7 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 値を上げると「より重症になるまで反応しない」になります。
 
-
-
 ### 調整前のチェックリスト
-
-
 
 - テレメトリが欠損していないか（欠損 → 保守的になる）
 
@@ -206,15 +144,9 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 - アップストリームサービスは正常か（問題を隠していないか）
 
-
-
 ---
 
-
-
 ## 6. SILENCE が一度も発生しない場合（安全でない状態）
-
-
 
 - R_OP を下げる（より保守的に）
 
@@ -222,29 +154,17 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 - プロキシ統合（ext_authz / auth_request）が実際にゲートを呼んでいるか確認
 
-
-
 ---
 
-
-
 ## 7. ロールバック手順
-
-
 
 - プロキシ側の ext_authz / auth_request の呼び出しを無効化する
 
 - ゲート自体は削除しないこと（ロールバックを元に戻せるようにしておく）
 
-
-
 ---
 
-
-
 ## 8. 週次設計レビューチェックリスト
-
-
 
 - [ ] SILENCE 発生率が正常範囲（0〜1%）内か？
 
@@ -256,11 +176,7 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 - [ ] R_OP / TAU_DEFAULT / TAU_EMA_ALPHA の調整が必要か？
 
-
-
 ---
-
-
 
 **覚えておいてほしいこと：**  
 
@@ -268,11 +184,6 @@ curl -s http://han-gate.han.svc.cluster.local:8080/metrics
 
 遅すぎた判断は、システム全体が落ちてから後悔することになります。
 
-
-
 ---
 
-
-
 **Author**: M-Tokuni | GitHub: https://github.com/M-Tokun/NRA-IDE
-

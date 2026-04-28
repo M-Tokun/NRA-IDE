@@ -32,9 +32,6 @@ assignees: ''
 ## Details / 詳細
 <!-- Describe your inquiry / 問い合わせ内容を記載 -->
 
-
-
-
 ```
 ---
 Note:

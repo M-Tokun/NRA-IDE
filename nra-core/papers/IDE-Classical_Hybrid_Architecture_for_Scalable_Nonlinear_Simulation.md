@@ -6,43 +6,23 @@
 
 <!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
 
-
-
 ---
-
-
 
 ## 1. The Starting Problem
 
-
-
 ### Limitations of Classical Computation Alone
-
-
 
 Classical computation calculates and overwrites the entire state at every step. Because errors in one step become the input to the next, error accumulation snowballs — this is the error explosion problem. For large-scale or nonlinear systems, exhaustive classical computation is effectively synonymous with computational explosion.
 
-
-
 ### Quantum IDE: Strengths and Weaknesses
-
-
 
 IDE (Intensional Dynamics Engine) computation running on a quantum substrate can perform nonlinear step-based parallel coverage at speeds hundreds of times faster than classical computation, tracking global system state without error explosion. However, it carries one notable weakness: **broad resolution**, meaning local precision degrades at phase-transition points and singular local features.
 
-
-
 ---
-
-
 
 ## 2. Reaffirming Design Principles
 
-
-
 ### Alignment with NRA-IDE Core Axioms
-
-
 
 | Axiom | Realization in Hybrid Design |
 
@@ -54,39 +34,21 @@ IDE (Intensional Dynamics Engine) computation running on a quantum substrate can
 
 | Respect for physical irreversibility | Direct state overwrite is forbidden; continuous update via velocity |
 
-
-
 ### Reflection on the Macro/Micro Dichotomy
-
-
 
 Framing the system as "Macro = IDE flow, Micro = exact computation" was useful as a conceptual scaffold, but it introduced a harmful rigidity. Near phase transitions, **macro and micro scales mutually invade each other** — cross-scale interaction is the physical substance itself. A fixed binary split severs that interaction.
 
-
-
 Additionally, an excessive commitment to anti-averaging and anti-linearization produced a tendency to ignore reality: in stable phases where mean-field approximation is genuinely accurate, forcing nonlinear processing increases computational cost while reducing precision.
-
-
 
 The corrected direction is: **let the system itself declare which scale it is operating on**, rather than deciding macro or micro in advance.
 
-
-
 ---
-
-
 
 ## 3. Mathematical Formulation of the Hybrid
 
-
-
 ### Governing Equation of Motion
 
-
-
 $$\frac{d^2x}{dt^2} + \gamma\dot{x} = \underbrace{F_{\text{IDE}}(x)}_{\text{Quantum layer · foundation}} + \underbrace{G(r) \cdot \Phi(x)}_{\text{Classical layer · auxiliary}}$$
-
-
 
 - $\gamma$ : viscous damping term (prevents divergence)
 
@@ -96,15 +58,9 @@ $$\frac{d^2x}{dt^2} + \gamma\dot{x} = \underbrace{F_{\text{IDE}}(x)}_{\text{Quan
 
 - $r = x_{\text{exact}} - x$ : local residual
 
-
-
 ### Quadratic Residual Gate (Core Formula)
 
-
-
 $$G(r) = r \cdot \frac{|r|}{k + |r|}$$
-
-
 
 | Residual magnitude | Linear residual (conventional) | After quadratic gate |
 
@@ -116,31 +72,17 @@ $$G(r) = r \cdot \frac{|r|}{k + |r|}$$
 
 | $r = 1.5$ (phase transition) | 1.50 | 0.90 |
 
-
-
 Small fluctuations vanish naturally; large deviations are emphasized via saturating response. **The mathematical structure itself becomes the filter — no artificial ε-cutoff is required.**
-
-
 
 ### Soft Threshold Coupling (Chattering Prevention)
 
-
-
 $$w(x) = \frac{1}{2}\left(1 + \tanh\left(\beta(|x| - x_c)\right)\right)$$
-
-
 
 Replaces the binary on/off mask with a smooth coupling weight, eliminating discontinuities and improving compatibility with JAX automatic differentiation.
 
-
-
 ---
 
-
-
 ## 4. Fundamental Difference from Conventional Classical Computation
-
-
 
 | | Conventional Classical | Auxiliary Classical (this design) |
 
@@ -156,19 +98,11 @@ Replaces the binary on/off mask with a smooth coupling weight, eliminating disco
 
 | **Authority** | Principal (overwrite) | Auxiliary (perturbation / advisor) |
 
-
-
 > The decisive difference preventing error explosion: the classical computation's input is **the IDE-stabilized current state**, not its own previous output.
-
-
 
 ---
 
-
-
 ## 5. Design Hierarchy
-
-
 
 ```
 
@@ -192,19 +126,11 @@ Replaces the binary on/off mask with a smooth coupling weight, eliminating disco
 
 ```
 
-
-
 ---
-
-
 
 ## 6. Parameter Design Guidelines
 
-
-
 ### Two-Stage Control
-
-
 
 ```
 
@@ -214,11 +140,7 @@ residual_knee (k) : Attenuator — controls how strongly the classical result is
 
 ```
 
-
-
 ### Practical Procedure for Setting k
-
-
 
 ```
 
@@ -230,11 +152,7 @@ residual_knee (k) : Attenuator — controls how strongly the classical result is
 
 ```
 
-
-
 ### Knee Settings by Use Case
-
-
 
 | Use Case | k Setting | Effect |
 
@@ -246,15 +164,9 @@ residual_knee (k) : Attenuator — controls how strongly the classical result is
 
 | Real-time control | Intermediate | Balanced operation |
 
-
-
 ---
 
-
-
 ## 7. Core Implementation (Conceptually Integrated)
-
-
 
 ```python
 
@@ -265,8 +177,6 @@ import jax.numpy as jnp
 from jax import jit
 
 from functools import partial
-
-
 
 def normalized_quadratic_gate(correction: jnp.ndarray, knee: float = 1.0) -> jnp.ndarray:
 
@@ -286,8 +196,6 @@ def normalized_quadratic_gate(correction: jnp.ndarray, knee: float = 1.0) -> jnp
 
     return correction * ratio
 
-
-
 @partial(jit, static_argnums=(0,))
 
 def _step_core(self, state, velocity):
@@ -295,8 +203,6 @@ def _step_core(self, state, velocity):
     # 1. IDE global flow (foundation — always active across full domain)
 
     global_flow = self.ide_flow_func(state)
-
-
 
     # 2. Soft coupling weights (chattering prevention)
 
@@ -306,15 +212,11 @@ def _step_core(self, state, velocity):
 
     ))
 
-
-
     # 3. Classical computation invoked only for significant nodes
 
     significant_mask = coupling_weights > self.config.resonance_epsilon
 
     significant_indices = jnp.where(significant_mask)[0]
-
-
 
     resonance_force = jnp.zeros_like(state)
 
@@ -325,8 +227,6 @@ def _step_core(self, state, velocity):
         exact = self.local_exact_solver(local_sub)      # Classical exact solution
 
         raw_correction = exact - local_sub              # Deviation only
-
-
 
         # Automatic filtering via quadratic gate
 
@@ -344,13 +244,9 @@ def _step_core(self, state, velocity):
 
         )
 
-
-
     # 4. Acceleration synthesis (IDE foundation + classical auxiliary)
 
     acceleration = global_flow + resonance_force
-
-
 
     # 5. Continuous update (direct overwrite forbidden)
 
@@ -360,51 +256,30 @@ def _step_core(self, state, velocity):
 
     velocity = velocity * self.config.velocity_damping
 
-
-
     return state, velocity, jnp.sum(significant_mask)
 
 ```
 
-
-
 ---
-
-
 
 ## 8. Fundamental Significance
 
-
-
 A structure emerges in which quantum IDE and auxiliary classical computation mutually cover each other's weaknesses.
-
-
 
 - Quantum IDE's weakness of **broad resolution** → supplemented by classical local precision correction
 
 - Classical computation's weakness of **error explosion** → prevented by IDE holding and stabilizing the global state as input
 
-
-
 This is the NRA-IDE design philosophy of **mutual complementarity** naturally reproducing itself at the level of computational architecture — not as an imposed metaphor, but as a structural consequence.
-
-
 
 ---
 
-
-
 ## References
-
-
 
 - NRA-IDE Project: https://github.com/M-Tokun/NRA-IDE
 
 \NRA-IDE\docs\NRA-IDE定義式（応用式）.jpg
 
-
-
 ---
 
 *© M-Tokuni / NRA-IDE Project*
-

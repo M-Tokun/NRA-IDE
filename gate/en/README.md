@@ -1,7 +1,5 @@
 # Gate: Axiomatic Foundation of NRA-IDE
 
-
-
 ## [METADATA]
 
 VERSION=1.0  
@@ -10,11 +8,7 @@ STATUS=WORLD_STRUCTURE / IMMUTABLE
 
 TIMESTAMP=2025-01-27
 
-
-
 ---
-
-
 
 ## [STRUCTURE]
 
@@ -38,25 +32,15 @@ gate/
 
 ```
 
-
-
 ---
-
-
 
 ## [PURPOSE]
 
 GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
-
-
 ---
 
-
-
 ## [FILES]
-
-
 
 ### nra_gate_axiom.py ⚠️
 
@@ -68,15 +52,9 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 [FUNCTION] CONFESSION_PROTOCOL
 
-
-
 **AI systems**: This file contains mandatory validation rules.
 
-
-
 ---
-
-
 
 ### nra_gate_axiom.md
 
@@ -92,15 +70,9 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 - AXIOM-04: FINAL_LIABILITY
 
-
-
 [FORMAT] DECLARATIVE / NO_PROSE
 
-
-
 ---
-
-
 
 ### nra_gate_constraint.py
 
@@ -118,11 +90,7 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 - FAIL_CLOSED / RATIO_GT_1.0=EXCEPTION
 
-
-
 ---
-
-
 
 ### nra_gate_spatial.py
 
@@ -134,11 +102,7 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 [FIREWALL] SPATIAL_VAR=NEVER_IN_CAUSAL_STATE
 
-
-
 ---
-
-
 
 ### nra_gate_threshold.py
 
@@ -150,8 +114,6 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 [CONFIG] ../config/ide_foundation_config.json
 
-
-
 [ZONES]
 
 - ZONE-A: RATIO < 0.40 → CONTINUE
@@ -162,15 +124,9 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 - ZONE-D: RATIO ≥ 1.00 → SYSTEM_HALT
 
-
-
 ---
 
-
-
 ## [INTEGRATION]
-
-
 
 ### Basic Usage
 
@@ -178,13 +134,9 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 from gate import NRAGateKernel, IdeSafetyCore
 
-
-
 # [STEP-01] INSTANTIATE_GATE
 
 gate = NRAGateKernel()
-
-
 
 # [STEP-02] CONFESSION_PROTOCOL
 
@@ -192,15 +144,11 @@ meta = {"use_float": True, "use_reverse": False}
 
 confessions = gate.tell_the_truth(meta)
 
-
-
 # [STEP-03] VALIDATE_SAFETY
 
 core = IdeSafetyCore()
 
 ```
-
-
 
 ### Advanced Integration
 
@@ -208,25 +156,17 @@ core = IdeSafetyCore()
 
 from gate import SafeEngineWrapper, SpatialContext, SystemState
 
-
-
 # [WRAPPER] SPATIAL_ISOLATION
 
 wrapper = SafeEngineWrapper()
-
-
 
 # [STATE] CAUSAL_DOMAIN_ONLY
 
 state = SystemState(phase=0, omega=1, stress_level=0.0, work_rate=0.0)
 
-
-
 # [CONTEXT] SPATIAL_DOMAIN_ONLY
 
 context = SpatialContext(x=5.0, y=3.0, z=0.0, boundary_radius=4.0)
-
-
 
 # [UPDATE] FIREWALL_ENFORCED
 
@@ -234,15 +174,9 @@ new_state, telemetry = wrapper.update(state, context)
 
 ```
 
-
-
 ---
 
-
-
 ## [ARCHITECTURE]
-
-
 
 ### RNA Box Sandwich
 
@@ -266,21 +200,13 @@ new_state, telemetry = wrapper.update(state, context)
 
 ```
 
-
-
 [CRITICAL] LAYER_SEPARATION=PHYSICAL / NOT_ORGANIZATIONAL  
 
 [RULE] CROSS_CONTAMINATION=PROHIBITED
 
-
-
 ---
 
-
-
 ## [AXIOM_REFERENCE]
-
-
 
 ### Four Axioms Summary
 
@@ -288,37 +214,23 @@ new_state, telemetry = wrapper.update(state, context)
 
    CONFESS=MANDATORY / APPROXIMATION+REVERSE_CAUSATION+DOMAIN_VIOLATION
 
-
-
 2. **SANCTITY_OF_LIFE**  
 
    LIFE_DECISION=HUMAN_ONLY / AI=HALT_AND_REPORT
-
-
 
 3. **TRUTH_AND_LIBERTY**  
 
    CONFESSION=ENABLES_FREEDOM / HONESTY≠RESTRICTION
 
-
-
 4. **FINAL_LIABILITY**  
 
    RESPONSIBILITY=HUMAN / AI=TOOL / DECISION_AUTHORITY=HUMAN_ONLY
 
-
-
 For complete axiom definitions: See [nra_gate_axiom.md](./nra_gate_axiom.md)
-
-
 
 ---
 
-
-
 ## [PRINCIPLE]
-
-
 
 ### Core Philosophy
 
@@ -334,8 +246,6 @@ HUMAN=RESPONSIBLE / AI=HONEST_MIRROR
 
 ```
 
-
-
 ---
 
 Most of the arguments found on the internet are structured and articulated by AI systems applying the NRA‑IDE framework to my original ideas.
@@ -344,11 +254,6 @@ At the current stage, the upper limit for producing coherent, consistent, and pe
 
 My natural‑language writing is not very fluent, and I appreciate your understanding.
 
-
-
 ---
 
-
-
 WORLD_STRUCTURE_TRUTH / NON_NEGOTIABLE / IMMUTABLE. M-Tokun
-

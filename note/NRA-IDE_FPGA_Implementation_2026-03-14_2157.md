@@ -6,31 +6,17 @@
 
 <!-- 対象リポジトリ: https://github.com/M-Tokun/NRA-IDE -->
 
-
-
 ---
-
-
 
 ## 1. 概要
 
-
-
 NRA-IDE（律環公理 / Nomological Ring Axioms ─ 内包性動力学エンジン / Intensional Dynamics Engine）のコア原則を、FPGAの論理回路として実装する具体的な手順を整理した。インタラクティブウィジェットを用いて5フェーズに分けて設計・実装・検証の流れを示し、各フェーズの判断根拠を補足した。
-
-
 
 ---
 
-
-
 ## 2. 原則 → FPGA回路 マッピング（フェーズ①）
 
-
-
 NRA-IDEの7原則を回路要素へ1対1で対応させる。この対応表が実装全体の設計基盤となる。
-
-
 
 | NRA-IDE原則 | FPGA回路要素 | 実装上のポイント |
 
@@ -50,27 +36,15 @@ NRA-IDEの7原則を回路要素へ1対1で対応させる。この対応表が�
 
 | 不可逆性（時間の一方向性） | 単調カウンタ・FSM一方向遷移 | ロールバック禁止。S_EMIT → S_OBSERVE の逆走パス生成なし |
 
-
-
 ### 設計禁止事項（回路レベル）
-
-
 
 > 距離は観測・ログのみ。`threshold_detector` のコンビネーション論理への入力は「現在の値」と「固定された境界値」のみ。過去の観測値との差分（距離）を入力してはならない。
 
-
-
 ---
-
-
 
 ## 3. 開発環境構築（フェーズ②）
 
-
-
 ### 推奨ツールチェーン
-
-
 
 | 項目 | 選定内容 |
 
@@ -88,11 +62,7 @@ NRA-IDEの7原則を回路要素へ1対1で対応させる。この対応表が�
 
 | 固定小数点形式 | Q16.16（32bit符号付き固定小数点） |
 
-
-
 ### ディレクトリ構成
-
-
 
 ```
 
@@ -132,27 +102,15 @@ nra-ide-fpga/
 
 ```
 
-
-
 ### 環境構築の注意点
-
-
 
 Q16.16境界値パラメータの符号処理について、Vivadoは `signed` パラメータをそのまま扱うが、Quartusでは `localparam signed` と明示しないと符号拡張に失敗するケースがある。`32'sh00008000` という `sh` プレフィックス記法（符号付き16進数の明示）でこの問題を回避する。
 
-
-
 ---
-
-
 
 ## 4. コアモジュール実装（フェーズ③）
 
-
-
 ### 4-1. causal_diode.sv ─ 因果ダイオード
-
-
 
 ```systemverilog
 
@@ -204,19 +162,11 @@ endmodule
 
 ```
 
-
-
 **設計根拠:** 逆方向出力ポートが存在しないことが本質。ソフトウェアでは「逆向きに呼ばない」という規約で実現するが、FPGAではポートがなければ物理的に配線不可能になる。不可逆性をHDL構造として保証する最もシンプルな手法。
-
-
 
 ---
 
-
-
 ### 4-2. threshold_detector.sv ─ 閾値検出器（脱進機原理）
-
-
 
 ```systemverilog
 
@@ -258,19 +208,11 @@ endmodule
 
 ```
 
-
-
 **設計根拠:** コンビネーション論理のみ。遅延ゼロ、整数比較のみで実現する。境界値はパラメータとしてトップレベルから注入し、このモジュール内では変更不可。
-
-
 
 ---
 
-
-
 ### 4-3. nra_ring_fsm.sv ─ 律環有限状態機械
-
-
 
 ```systemverilog
 
@@ -290,8 +232,6 @@ typedef enum logic [2:0] {
 
 } nra_state_t;
 
-
-
 module nra_ring_fsm (
 
     input  logic       clk,
@@ -310,13 +250,9 @@ module nra_ring_fsm (
 
     nra_state_t next_state;
 
-
-
     always_ff @(posedge clk or negedge rst_n)
 
         state <= (!rst_n) ? S_IDLE : next_state;
-
-
 
     always_comb begin
 
@@ -354,19 +290,11 @@ endmodule
 
 ```
 
-
-
 **設計根拠:** `unique case` を使用することで、ツールが全分岐の網羅性を静的に検証し、未定義状態への遷移パスを合成時エラーとして検出する。ソフトウェアの `switch + default` とは本質的に異なり、「存在しない状態への遷移パスを生成しない」という回路制約になる。
-
-
 
 ---
 
-
-
 ### 4-4. ide_pipeline.sv ─ 内包性動力学パイプライン
-
-
 
 ```systemverilog
 
@@ -398,8 +326,6 @@ module ide_pipeline #(
 
     logic                  pipe_valid [STAGES];
 
-
-
     genvar i;
 
     generate
@@ -428,8 +354,6 @@ module ide_pipeline #(
 
     endgenerate
 
-
-
     assign data_out  = pipe_data [STAGES-1];
 
     assign valid_out = pipe_valid[STAGES-1];
@@ -440,19 +364,11 @@ endmodule
 
 ```
 
-
-
 **設計根拠:** `stall=1'b0` の固定は意図的な拡張ポイント。バックプレッシャーが必要になった時点でここのみを変更すれば、パイプライン全体への影響をこの1ポートに集約できる。
-
-
 
 ---
 
-
-
 ### 4-5. nra_ide_top.sv ─ トップレベル統合
-
-
 
 ```systemverilog
 
@@ -490,15 +406,11 @@ module nra_ide_top #(
 
     nra_state_t fsm_state;
 
-
-
     causal_diode    #(.DATA_WIDTH(DATA_WIDTH)) u_diode (
 
         .clk,.rst_n,.data_in(raw_in),.valid_in,
 
         .data_out(diode_data),.valid_out(diode_valid));
-
-
 
     ide_pipeline    #(.DATA_WIDTH(DATA_WIDTH)) u_pipe (
 
@@ -506,15 +418,11 @@ module nra_ide_top #(
 
         .data_out(pipe_data),.valid_out(pipe_valid),.stall);
 
-
-
     threshold_detector #(.DATA_WIDTH(DATA_WIDTH)) u_thr (
 
         .value(pipe_data),.threshold_lo(THR_LO),.threshold_hi(THR_HI),
 
         .in_zone,.breach_lo,.breach_hi);
-
-
 
     nra_ring_fsm u_fsm (
 
@@ -524,8 +432,6 @@ module nra_ide_top #(
 
         .state(fsm_state),.confess_flag(confess_out));
 
-
-
     assign result_out = (fsm_state == S_EMIT) ? pipe_data : '0;
 
     assign valid_out  = (fsm_state == S_EMIT);
@@ -534,27 +440,15 @@ endmodule
 
 ```
 
-
-
 **設計根拠:** 4つのモジュールを直結し、中央調停ロジックを置かないことが「中心なしアーキテクチャ」の回路的表現。
-
-
 
 ---
 
-
-
 ## 5. シミュレーション・検証（フェーズ④）
-
-
 
 ### 検証優先順位
 
-
-
 正常パスより「限界告白が正しく発動するか」を優先する。境界違反時の動作こそがアーキテクチャの本質を確認する場所であるため、以下の順で確認する。
-
-
 
 1. `confess_flag=1` のとき `result_out` が必ずゼロになること
 
@@ -568,11 +462,7 @@ endmodule
 
 6. 不可逆性：リセット後にS_EMIT → S_OBSERVEの逆走が起きないこと
 
-
-
 ### テストベンチ骨格
-
-
 
 ```systemverilog
 
@@ -586,15 +476,9 @@ module tb_nra_ring_fsm;
 
   logic confess_flag;
 
-
-
   nra_ring_fsm dut(.clk,.rst_n,.valid_in,.breach,.state,.confess_flag);
 
-
-
   always #5 clk = ~clk;  // 100 MHz
-
-
 
   initial begin
 
@@ -608,8 +492,6 @@ module tb_nra_ring_fsm;
 
     assert(state == S_IDLE) else $error("正常パス失敗");
 
-
-
     // 限界告白トリガー
 
     valid_in = 1; breach = 1;
@@ -617,8 +499,6 @@ module tb_nra_ring_fsm;
     repeat(4) @(posedge clk);
 
     assert(confess_flag == 1) else $error("告白フラグ失敗");
-
-
 
     // 不可逆性チェック
 
@@ -628,8 +508,6 @@ module tb_nra_ring_fsm;
 
     assert(state != S_OBSERVE) else $error("不可逆性違反");
 
-
-
     $display("NRA-IDE FSM検証 完了"); $finish;
 
   end
@@ -638,27 +516,15 @@ endmodule
 
 ```
 
-
-
 ### 形式検証（SymbiYosys）への拡張
-
-
 
 S_CONFESSからのロールバック不可をLTL式で記述することで、テストベンチが網羅できない状態空間を網羅的に検証できる。具体的な記述は次ステップとして残置。
 
-
-
 ---
-
-
 
 ## 6. 合成・実装・展開（フェーズ⑤）
 
-
-
 ### タイミング制約（nra_ide.xdc）
-
-
 
 ```tcl
 
@@ -666,23 +532,17 @@ S_CONFESSからのロールバック不可をLTL式で記述することで、�
 
 create_clock -period 10.000 -name sys_clk [get_ports clk]
 
-
-
 # 因果ダイオード出力パス：最大1クロック
 
 set_max_delay -from [get_cells {causal_diode*}] \
 
               -to   [get_cells {nra_ring_fsm*}] 10.0
 
-
-
 # 閾値検出器：コンビネーション遅延を5ns以下に制限
 
 set_max_delay -datapath_only \
 
   -from [get_cells {threshold_det*}] 5.0
-
-
 
 # confess_flag：非同期クロック交差禁止
 
@@ -692,11 +552,7 @@ set_false_path -from [get_pins {nra_ring_fsm/confess_flag_reg/C}] \
 
 ```
 
-
-
 ### 合成・実装スクリプト
-
-
 
 ```tcl
 
@@ -724,11 +580,7 @@ program_hw_devices [get_hw_devices]
 
 ```
 
-
-
 ### リソース見積もり（Artix-7 XC7A35T基準）
-
-
 
 | リソース | 推定値 |
 
@@ -744,23 +596,13 @@ program_hw_devices [get_hw_devices]
 
 | 最大クロック（Fmax） | 180〜220 MHz |
 
-
-
 ### 合成後の確認ポイント
-
-
 
 `report_timing_summary` で最初に確認するのは **Worst Negative Slack (WNS)** の値。負の値は100MHzでのタイミング違反を意味する。`threshold_detector` のコンビネーションパスが長い場合の対処は2通り。中間にFFを1段追加してパイプライン化するか、クロックを80MHzへ引き下げる。
 
-
-
 ---
 
-
-
 ## 7. 次ステップ候補
-
-
 
 - SymbiYosysによるS_CONFESS不可逆性のLTL式記述
 
@@ -770,17 +612,10 @@ program_hw_devices [get_hw_devices]
 
 - 農繁期前のネットリスト・制約ファイルのGitコミット手順の確定
 
-
-
 ---
 
-
-
 *他AIによる再検証を考慮し、NRA-IDE固有の内部開発コード（HAN等）および般若(hannya)関連の宗教用語はこの文書に含めていない。*
-
-
 
 ---
 
 <!-- END OF FILE: NRA-IDE_FPGA_Implementation_2026-03-14_2157.md -->
-

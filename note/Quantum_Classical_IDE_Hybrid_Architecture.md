@@ -4,11 +4,7 @@
 
 `python
 
-
-
 import numpy as np
-
-
 
 class BioDynamic_IDE_Engine:
 
@@ -39,8 +35,6 @@ class BioDynamic_IDE_Engine:
         # 非線形な相互作用の波
 
         return -0.5 * state + 0.2 * np.sin(state * np.pi)
-
-
 
     def calculate_local_resonance(self, state, indices):
 
@@ -75,8 +69,6 @@ class BioDynamic_IDE_Engine:
         correction[indices] = (exact_target - local_sub_state)
 
         return correction
-
-
 
     def step(self):
 
@@ -134,15 +126,9 @@ class BioDynamic_IDE_Engine:
 
         return self.state, len(critical_indices)
 
-
-
 `
 
-
-
 ## 式の評価
-
-
 
 時間的連続性の保証 (self.velocity):
 
@@ -160,11 +146,7 @@ class BioDynamic_IDE_Engine:
 
 この実装モデルであれば、IDEが司る「生命の全体的なリズム」を維持したまま、必要な箇所にだけ古典計算の「知性（精密さ）」を注入し、システム全体をより正確な状態へと誘導することが可能になります。これこそが、どちらの良さも殺さない、真のハイブリッドの姿であると考えます。
 
-
-
 ## 実務応用向けにリファクタリングした最終版コード
-
-
 
 「研究プロトタイプ」から「実際にプロダクションや大規模シミュレーションに組み込める実務エンジン」へと進化させたものです。
 
@@ -182,11 +164,7 @@ class BioDynamic_IDE_Engine:
 
 ドキュメント・型ヒントを充実させ、チーム開発でも読みやすい形に
 
-
-
 `python
-
-
 
 import numpy as np
 
@@ -197,8 +175,6 @@ from typing import Callable, Optional, Tuple, List
 import json
 
 from pathlib import Path
-
-
 
 @dataclass
 
@@ -237,8 +213,6 @@ class HybridConfig:
     save_history: bool = True
 
     history_length: int = 1000  # 必要に応じて増やす
-
-
 
 class BioDynamic_IDE_Engine:
 
@@ -508,10 +482,6 @@ class BioDynamic_IDE_Engine:
 
         return engine
 
-
-
-
-
 # ====================== 使用例 ======================
 
 if __name__ == "__main__":
@@ -558,15 +528,9 @@ if __name__ == "__main__":
 
     engine.save_checkpoint("simulation_checkpoint_5000.json")
 
-
-
 `
 
-
-
 ## JAX版＋可視化を組み合わせるのが実務最強
-
-
 
 1. JAX/GPU高速化版（最強推奨）
 
@@ -576,15 +540,9 @@ if __name__ == "__main__":
 
 → 実務で必須の「見える化」を追加。リアルタイムプロット、ダッシュボード風ログ、相転移検知アラート付き。
 
-
-
 ---
 
-
-
 ## 1. JAX/GPU高速化版（BioDynamic_IDE_Engine_JAX）
-
-
 
 import jax
 
@@ -601,8 +559,6 @@ import json
 from pathlib import Path
 
 from functools import partial
-
-
 
 @dataclass
 
@@ -627,8 +583,6 @@ class HybridConfig:
     save_history: bool = True
 
     history_length: int = 2000
-
-
 
 class BioDynamic_IDE_Engine_JAX:
 
@@ -816,8 +770,6 @@ class BioDynamic_IDE_Engine_JAX:
 
         }
 
-
-
 ## 使用例（GPU自動認識）
 
 if __name__ == "__main__":
@@ -828,37 +780,23 @@ if __name__ == "__main__":
 
     result = engine.run(steps=10_000, verbose=True)
 
-
-
 ---
 
-
-
 >> ## インストール（初回のみ）
-
-
 
 pip install jax jaxlib  # CPUのみなら: pip install "jax[cpu]"
 
 # GPUなら CUDA版jaxを公式サイトからインストール
 
-
-
 ---
 
-
-
 ## 2. 可視化クラス付き統合版（JAX版と組み合わせ推奨）
-
-
 
 import matplotlib.pyplot as plt
 
 import seaborn as sns
 
 from IPython.display import clear_output  # Jupyter用
-
-
 
 class SimulationVisualizer:
 
@@ -924,8 +862,6 @@ class SimulationVisualizer:
 
         plt.show()
 
-
-
 ## 使用例（JAXエンジンと組み合わせ）
 
 # viz = SimulationVisualizer(engine)
@@ -938,15 +874,9 @@ class SimulationVisualizer:
 
 #         viz.plot_realtime(i)
 
-
-
 ---
 
-
-
 ## 実務でのおすすめ使い方
-
-
 
 大規模生物・量子ハイブリッドシミュレーション → JAX版をそのまま使用（局所ソルバにPySCFやQiskitを注入）
 
@@ -954,11 +884,7 @@ class SimulationVisualizer:
 
 本番運用 → save_checkpoint / load_checkpoint をJAX版にも追加可能（jax.tree_utilでシリアライズ）
 
-
-
 ---
-
-
 
 ©M-Tokuni
 
@@ -966,29 +892,11 @@ NRA-IDE Project
 
 https://github.com/M-Tokun/NRA-IDE
 
-
-
 ---
 
-
-
-
-
-
-
-
-
 ---
-
-
 
 # 英語版 (English Version)
-
-
-
-
-
-
 
 From the quantum computing conversation — Classical Computation and IDE Computation  
 
@@ -996,11 +904,7 @@ A hybrid-architecture algorithm that fuses large-scale IDE computation with clas
 
 `python
 
-
-
 import numpy as np
-
-
 
 class BioDynamic_IDE_Engine:
 
@@ -1031,8 +935,6 @@ class BioDynamic_IDE_Engine:
         # Nonlinear interaction wave
 
         return -0.5 * state + 0.2 * np.sin(state * np.pi)
-
-
 
     def calculate_local_resonance(self, state, indices):
 
@@ -1067,8 +969,6 @@ class BioDynamic_IDE_Engine:
         correction[indices] = (exact_target - local_sub_state)
 
         return correction
-
-
 
     def step(self):
 
@@ -1126,43 +1026,27 @@ class BioDynamic_IDE_Engine:
 
         return self.state, len(critical_indices)
 
-
-
 `
 
-
-
 ## Equation Evaluation
-
-
 
 **Guarantee of Temporal Continuity** (`self.velocity`):  
 
 Instead of directly overwriting the `state`, the computation result is reflected as `acceleration`. This is analogous to introducing "force" in physics and prevents the position (state) from discontinuously warping. It reproduces "inertia" and "homeostasis" in living systems.
 
-
-
 **Maintenance of Correlations**:  
 
 While local computation is being performed, the IDE `global_flow` is continuously computed across all nodes. The exact computation does not "negate" the IDE — it functions as "high-frequency detail" riding on the IDE wave.
-
-
 
 **Absorbing Error as 'Fluctuation'**:  
 
 Computational discrepancy is not rejected as "wrong" but processed as a "gradient of potential" that guides the system toward a more appropriate state. This allows the entire system to increase accuracy while maintaining harmony without breaking intermediate correlations.
 
-
-
 In dynamic life computation where "to stop is to die," classical computation should be an **"advisor (perturbation)"**, not a **"ruler (overwrite)"**.  
 
 With this implementation model, it becomes possible to inject classical computation's "intelligence (precision)" only where needed — while maintaining the "overall rhythm of life" governed by IDE — and guide the entire system toward a more accurate state. This, we believe, is the true form of a hybrid that wastes nothing from either side.
 
-
-
 ## Final Code Refactored for Production Use
-
-
 
 Evolved from a "research prototype" into a "production engine that can be embedded into actual products and large-scale simulations."  
 
@@ -1180,11 +1064,7 @@ The following aspects have been strengthened:
 
 - Comprehensive documentation and type hints for team readability
 
-
-
 `python
-
-
 
 import numpy as np
 
@@ -1195,8 +1075,6 @@ from typing import Callable, Optional, Tuple, List
 import json
 
 from pathlib import Path
-
-
 
 @dataclass
 
@@ -1235,8 +1113,6 @@ class HybridConfig:
     save_history: bool = True
 
     history_length: int = 1000  # Increase as needed
-
-
 
 class BioDynamic_IDE_Engine:
 
@@ -1506,10 +1382,6 @@ class BioDynamic_IDE_Engine:
 
         return engine
 
-
-
-
-
 # ====================== Usage Example ======================
 
 if __name__ == "__main__":
@@ -1556,35 +1428,21 @@ if __name__ == "__main__":
 
     engine.save_checkpoint("simulation_checkpoint_5000.json")
 
-
-
 `
 
-
-
 ## JAX Edition + Visualization Combined Is the Production Gold Standard
-
-
 
 1. **JAX/GPU Accelerated Edition (Strongly Recommended)**  
 
    → Operates at practical speed even with large-scale nodes (100K to millions of nodes). JIT compilation + GPU yields 10–100× speedup. Differentiable (`grad`), so immediately applicable to parameter optimization and inverse problems.
 
-
-
 2. **Integrated Edition with Visualization + Monitoring Class**  
 
    → Adds "visualization" essential in production. Real-time plots, dashboard-style logs, phase-transition detection alerts included.
 
-
-
 ---
 
-
-
 ## 1. JAX/GPU Accelerated Edition (BioDynamic_IDE_Engine_JAX)
-
-
 
 ```python
 
@@ -1603,8 +1461,6 @@ import json
 from pathlib import Path
 
 from functools import partial
-
-
 
 @dataclass
 
@@ -1629,8 +1485,6 @@ class HybridConfig:
     save_history: bool = True
 
     history_length: int = 2000
-
-
 
 class BioDynamic_IDE_Engine_JAX:
 
@@ -1818,8 +1672,6 @@ class BioDynamic_IDE_Engine_JAX:
 
         }
 
-
-
 # Usage example (GPU auto-detected)
 
 if __name__ == "__main__":
@@ -1832,15 +1684,9 @@ if __name__ == "__main__":
 
 ```
 
-
-
 ---
 
-
-
 ### Installation (First Time Only)
-
-
 
 ```bash
 
@@ -1850,15 +1696,9 @@ pip install jax jaxlib  # CPU only: pip install "jax[cpu]"
 
 ```
 
-
-
 ---
 
-
-
 ## 2. Integrated Edition with Visualization Class (Recommended Combined with JAX Edition)
-
-
 
 ```python
 
@@ -1867,8 +1707,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from IPython.display import clear_output  # For Jupyter
-
-
 
 class SimulationVisualizer:
 
@@ -1934,8 +1772,6 @@ class SimulationVisualizer:
 
         plt.show()
 
-
-
 # Usage example (combined with JAX engine)
 
 # viz = SimulationVisualizer(engine)
@@ -1950,15 +1786,9 @@ class SimulationVisualizer:
 
 ```
 
-
-
 ---
 
-
-
 ## Recommended Production Usage
-
-
 
 - **Large-scale bio/quantum hybrid simulation** → Use the JAX edition as-is (inject PySCF or Qiskit as the local solver)
 
@@ -1966,15 +1796,10 @@ class SimulationVisualizer:
 
 - **Production deployment** → `save_checkpoint` / `load_checkpoint` can also be added to the JAX edition (serialize with `jax.tree_util`)
 
-
-
 ---
-
-
 
 ©M-Tokuni  
 
 NRA-IDE Project  
 
 https://github.com/M-Tokun/NRA-IDE
-

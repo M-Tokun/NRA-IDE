@@ -1,14 +1,10 @@
 # NRA-IDE: Nomological Ring Axioms / Intensional Dynamics Engine
 
-
-
 [![License](https://img.shields.io/badge/license-Proprietary-red)](../LICENSE)
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
 
 [![Python](https://img.shields.io/badge/python-3.9+-green)]()
-
-
 
 > **NRA-IDE is a causal structure safety engine.**  
 
@@ -16,37 +12,21 @@
 
 > Its behavior is determined solely by structural invariants.
 
-
-
 ---
-
-
 
 ## 0. Purpose
 
-
-
 NRA-IDE was designed to answer one question:
 
-
-
 > **Can an AI truly explain — in structural terms — why it produced a given output?**
-
-
 
 Generating a statistically plausible sentence and making a causally correct judgment are fundamentally different.  
 
 NRA-IDE does not aim to build a "smarter AI." It implements a **safety middleware whose constraint structure cannot collapse.**
 
-
-
 ---
 
-
-
 ## 1. Design Principles (Non-Negotiable / Structural Invariants)
-
-
 
 | Principle | Description |
 
@@ -64,15 +44,9 @@ NRA-IDE does not aim to build a "smarter AI." It implements a **safety middlewar
 
 | Symbol-Only | Only symbols and definitions are handled |
 
-
-
 ---
 
-
-
 ## 2. Three-Layer Architecture (Box Sandwich)
-
-
 
 ```
 
@@ -102,25 +76,15 @@ User Input
 
 ```
 
-
-
 **Critical:** FAIL-CLOSED output is sealed in the DiscardVault and  
 
 **never flows back** into the LLM context under any circumstances.
 
-
-
 ---
-
-
 
 ## 3. Gate Mechanism (Three-Zone Structure)
 
-
-
 $$R = \frac{\delta}{\tau}$$
-
-
 
 | Zone | Condition | Action |
 
@@ -132,23 +96,15 @@ $$R = \frac{\delta}{\tau}$$
 
 | C | R ≥ 1.00 | FAIL-CLOSED |
 
-
-
 - **δ (delta)** — Fluctuation amount: magnitude of structural deviation in input/output
 
 - **τ (tau)** — Constraint thickness: domain-specific threshold parameter (Domain Tuning)
 
 - **FAIL-CLOSED is not an error.** Its purpose is to maintain structural correctness.
 
-
-
 ---
 
-
-
 ## 4. Domain Tuning
-
-
 
 | Domain | τ | R_op | Forward Ref | Use Case |
 
@@ -164,19 +120,11 @@ $$R = \frac{\delta}{\tau}$$
 
 | GENERAL | 0.41 | 0.65 | Allowed | General purpose (default) |
 
-
-
 Only **τ** and **R_op** may be adjusted. Adjustments based on semantics, performance, or naturalness are prohibited. Domain Tuning changes only the constraint boundary width — not the architecture.
-
-
 
 ---
 
-
-
 ## 5. Repository Structure
-
-
 
 ```
 
@@ -200,11 +148,7 @@ NRA-IDE/
 
 ```
 
-
-
 ### File Dependencies
-
-
 
 ```
 
@@ -218,25 +162,15 @@ nra_pre_rna_EN_*.py
 
 ```
 
-
-
 ---
-
-
 
 ## 6. Quick Start
 
-
-
 ### Prerequisites
-
-
 
 ```bash
 
 Python 3.9+
-
-
 
 # Install only the provider you intend to use:
 
@@ -248,11 +182,7 @@ pip install openai      # for OpenAI GPT
 
 ```
 
-
-
 ### Run Demo Without API Key (MOCK provider)
-
-
 
 ```bash
 
@@ -260,13 +190,9 @@ pip install openai      # for OpenAI GPT
 
 python3 nra_pre_rna_EN_20260213_0135.py
 
-
-
 # [B+C] pipeline only
 
 python3 nra_llm_pipeline_EN_20260213_0135.py
-
-
 
 # [Post-RNA] document structure only
 
@@ -274,11 +200,7 @@ python3 nra_document_structure_EN_20260213_0135.py
 
 ```
 
-
-
 ### Connect to Real API
-
-
 
 ```bash
 
@@ -290,25 +212,15 @@ export GOOGLE_API_KEY="..."             # Google Gemini
 
 ```
 
-
-
 ---
-
-
 
 ## 7. Usage Guide
 
-
-
 ### 7.1 [Post-RNA] Document Structure Engine
-
-
 
 Register definitions in GenesisBlock and validate SectionNodes.  
 
 This is the base engine used by both the LLM pipeline and the full pipeline.
-
-
 
 ```python
 
@@ -318,13 +230,9 @@ from nra_document_structure_EN_20260213_0135 import (
 
 )
 
-
-
 # Initialize the engine with a domain
 
 engine = DocumentEngine("NRA-IDE Technical Spec v1.0", DomainType.TECHNICAL)
-
-
 
 # Register definitions as axioms (immutable after sealing)
 
@@ -345,8 +253,6 @@ engine.genesis.add("delta",  "Fluctuation amount (structural deviation).")
 engine.genesis.add("tau",    "Constraint thickness (domain parameter).")
 
 engine.genesis.seal()   # Lock definitions — no further changes allowed
-
-
 
 # Add sections
 
@@ -380,8 +286,6 @@ engine.add_section(
 
 )
 
-
-
 # Build and validate
 
 output = engine.build()
@@ -390,19 +294,13 @@ print(output.to_text(include_meta=True))
 
 # include_meta=True shows: [R=0.000 | Zone:A (PERMIT) | Status:PASSED]
 
-
-
 print(f"Integrity Score: {output.integrity_score():.4f}")
 
 # 1.0000 = perfect structural integrity
 
 ```
 
-
-
 **Key properties:**
-
-
 
 - `is_axiom=True` entries cannot be overwritten (Causal Diode)
 
@@ -412,21 +310,13 @@ print(f"Integrity Score: {output.integrity_score():.4f}")
 
 - FAIL-CLOSED sections go to `output.discard_log` (never used for improvement)
 
-
-
 ---
 
-
-
 ### 7.2 [B+C] LLM Pipeline
-
-
 
 Connect an external LLM as a generation device.  
 
 Post-RNA validates output; CleanContext prevents contaminated history.
-
-
 
 ```python
 
@@ -438,15 +328,11 @@ from nra_llm_pipeline_EN_20260213_0135 import (
 
 from nra_document_structure_EN_20260213_0135 import DocumentEngine, DomainType
 
-
-
 # Setup engine
 
 engine = DocumentEngine("LLM Session", DomainType.TECHNICAL)
 
 engine.genesis.add("NRA-IDE", "Causal safety engine.", is_axiom=True)
-
-
 
 # Create LLM bridge (swap provider as needed)
 
@@ -460,8 +346,6 @@ bridge = LLMBridge(
 
 )
 
-
-
 # Create pipeline
 
 pipeline = NRALLMPipeline(
@@ -474,8 +358,6 @@ pipeline = NRALLMPipeline(
 
 )
 
-
-
 # Run one turn
 
 result = pipeline.run(
@@ -486,8 +368,6 @@ result = pipeline.run(
 
 )
 
-
-
 print(result["status"])    # "PASSED" / "CAVEAT" / "FAIL-CLOSED"
 
 print(result["output"])    # Validated text (empty string on FAIL-CLOSED)
@@ -496,17 +376,11 @@ print(result["r_ratio"])   # R = delta/tau value
 
 print(result["turn_id"])   # e.g., "T0001"
 
-
-
 print(pipeline.status())   # Full pipeline state summary
 
 ```
 
-
-
 **What CleanContext guarantees:**
-
-
 
 ```
 
@@ -516,8 +390,6 @@ Standard LLM chat:
 
                ↑ contaminates every future turn
 
-
-
 NRA CleanContext:
 
   history = [user, assistant (validated only), user, assistant, ...]
@@ -526,21 +398,13 @@ NRA CleanContext:
 
 ```
 
-
-
 ---
 
-
-
 ### 7.3 [A+B+C] Full Integrated Pipeline
-
-
 
 Adds Pre-RNA input filtering to the [B+C] pipeline.  
 
 The complete NRA-IDE safety chain.
-
-
 
 ```python
 
@@ -550,8 +414,6 @@ from nra_llm_pipeline_EN_20260213_0135 import LLMBridge, LLMProvider
 
 from nra_document_structure_EN_20260213_0135 import DocumentEngine, DomainType
 
-
-
 # Setup
 
 engine = DocumentEngine("Full Pipeline", DomainType.TECHNICAL)
@@ -560,11 +422,7 @@ engine.genesis.add("NRA-IDE",     "Causal safety engine.",             is_axiom=
 
 engine.genesis.add("CausalDiode", "Prohibits Pi-1 reverse inference.", is_axiom=True)
 
-
-
 bridge = LLMBridge(provider=LLMProvider.MOCK, model="mock-v1")
-
-
 
 pipeline = NRAFullPipeline(
 
@@ -575,8 +433,6 @@ pipeline = NRAFullPipeline(
     system_prompt="You are an NRA-IDE expert. Use only defined terms."
 
 )
-
-
 
 # The pipeline handles all three layers automatically
 
@@ -594,8 +450,6 @@ test_inputs = [
 
 ]
 
-
-
 for label, user_input, refs in test_inputs:
 
     result = pipeline.run(
@@ -612,21 +466,13 @@ for label, user_input, refs in test_inputs:
 
     print(f"  R value : {result['r_ratio']:.3f}")
 
-
-
 print(pipeline.pipeline_status())
 
 ```
 
-
-
 ---
 
-
-
 ## 8. Pre-RNA: Four Pi-1-Inducing Patterns
-
-
 
 | Pattern | Trigger | Action | Severity |
 
@@ -640,11 +486,7 @@ print(pipeline.pipeline_status())
 
 | P4: Expansion / creation | "imagine if", "hypothetically", "what if" | BLOCK | 0.8 |
 
-
-
 **Action semantics:**
-
-
 
 - `CONVERT` — Prepend constraint prefix; pass modified input to LLM
 
@@ -652,19 +494,11 @@ print(pipeline.pipeline_status())
 
 - `BLOCK` — Do not call LLM; return block result immediately
 
-
-
 ---
-
-
 
 ## 9. What NRA-IDE Does and Does Not Handle
 
-
-
 ### Strengths
-
-
 
 | Domain | Why It Fits |
 
@@ -678,11 +512,7 @@ print(pipeline.pipeline_status())
 
 | Autonomous systems / industrial control | Discrete sensor→action causality; no intermediate states |
 
-
-
 ### Limitations
-
-
 
 | Domain | Why It Does Not Fit |
 
@@ -694,15 +524,9 @@ print(pipeline.pipeline_status())
 
 | Open-ended dialogue / counseling | Undefined emotion and context are the primary value |
 
-
-
 ---
 
-
-
 ## 10. Comparison with Existing Approaches
-
-
 
 | Aspect | Standard ML | NRA-IDE |
 
@@ -720,15 +544,9 @@ print(pipeline.pipeline_status())
 
 | History contamination | Accumulates in context | DiscardVault (complete isolation) |
 
-
-
 ---
 
-
-
 ## 11. License and Usage Terms
-
-
 
 - **Personal use only** (non-commercial, educational, research)
 
@@ -738,23 +556,15 @@ print(pipeline.pipeline_status())
 
 - See [LICENSE](../LICENSE) for details
 
-
-
 **Contact:**  
 
 [GitHub Issues](https://github.com/M-Tokun/NRA-IDE/issues/new?template=contact.md)  
 
 Label your issue: `[Commercial]` / `[Question]` / `[Feedback]`
 
-
-
 ---
 
-
-
 ## 12. Author
-
-
 
 | Item | Info |
 
@@ -770,21 +580,14 @@ Label your issue: `[Commercial]` / `[Question]` / `[Feedback]`
 
 | Date | 2026-02-13 |
 
-
-
 ---
-
-
 
 *NRA-IDE is a causal structure safety engine.*  
 
 *It will not take a single step outside the boundary of its definitions.*
-
-
 
 ---
 
 **FILE: README-EN.md**  
 
 **DATE: 2026-02-13 01:35**
-

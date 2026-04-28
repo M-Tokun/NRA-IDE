@@ -1,7 +1,5 @@
 # Envoy Integration — ext_authz (Recommended)
 
-
-
 ## Goal
 
 Use Envoy external authorization filter to call HAN Gate per request and:
@@ -10,13 +8,9 @@ Use Envoy external authorization filter to call HAN Gate per request and:
 
 - SILENCE => deny or optionally return a neutral response
 
-
-
 ## Minimal example (HTTP filter)
 
 This is a reference snippet. Your platform team should adapt clusters/listeners.
-
-
 
 ```yaml
 
@@ -44,8 +38,6 @@ http_filters:
 
 ```
 
-
-
 ## Notes
 
 - `failure_mode_allow: false` is critical (Fail-Closed).
@@ -58,11 +50,8 @@ http_filters:
 
   - Map to 204 / fixed token response (policy choice)
 
-
-
 ## Required endpoints
 
 - gRPC ext_authz or HTTP ext_authz equivalent.
 
 This bundle ships an HTTP JSON gate; platform team can wrap it with a thin gRPC adapter if needed.
-
