@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600">
+  <style>
+    .title { font: bold 20px sans-serif; }
+    .label { font: 14px sans-serif; }
+    .box { fill:#f5f7fa; stroke:#2b2f33; stroke-width:2 }
+    .gate { fill:#e8f3ff; stroke:#1f6feb; stroke-width:2 }
+    .llm { fill:#fff7e6; stroke:#d97706; stroke-width:2 }
+    .vault { fill:#fff1f2; stroke:#be123c; stroke-width:2 }
+    .arrow { stroke:#2b2f33; stroke-width:2; fill:none; marker-end:url(#arrowhead)}
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2b2f33" />
+    </marker>
+  </defs>
+
+  <text x="40" y="36" class="title">NRA-IDE Architecture — Sandwich Pattern (High-level)</text>
+
+  <!-- Pre-RNA -->
+  <rect x="80" y="80" width="450" height="120" rx="10" class="gate" />
+  <text x="110" y="110" class="label">Pre-RNA (Input Gate)</text>
+  <text x="110" y="135" class="label">• Pattern detection (P1–P4)</text>
+  <text x="110" y="155" class="label">• Convert / WARN / BLOCK</text>
+
+  <!-- LLM -->
+  <rect x="80" y="220" width="450" height="120" rx="10" class="llm" />
+  <text x="110" y="250" class="label">LLM (Generation Device)</text>
+  <text x="110" y="275" class="label">• Provider bridge (MOCK / OPENAI / ANTHROPIC / GOOGLE)</text>
+  <text x="110" y="295" class="label">• Language-only — no safety decisions</text>
+
+  <!-- Post-RNA -->
+  <rect x="80" y="360" width="450" height="120" rx="10" class="gate" />
+  <text x="110" y="390" class="label">Post-RNA (Output Gate / CleanContext)</text>
+  <text x="110" y="415" class="label">• R = δ/τ validation</text>
+  <text x="110" y="435" class="label">• FAIL-CLOSED -> DiscardVault</text>
+
+  <!-- DiscardVault -->
+  <rect x="580" y="380" width="420" height="80" rx="8" class="vault" />
+  <text x="600" y="410" class="label">DiscardVault / CleanContext</text>
+  <text x="600" y="430" class="label">(FAIL-CLOSED outputs stored, never reintroduced)</text>
+
+  <!-- User boxes -->
+  <rect x="10" y="240" width="60" height="120" rx="6" class="box" />
+  <text x="20" y="300" class="label">User</text>
+
+  <rect x="1020" y="240" width="170" height="120" rx="6" class="box" />
+  <text x="1040" y="300" class="label">Human Decision & Logs</text>
+
+  <!-- Arrows -->
+  <path d="M90 140 L90 220" class="arrow" />
+  <path d="M90 340 L90 360" class="arrow" />
+  <path d="M530 280 L580 280" class="arrow" />
+  <path d="M1000 420 L900 420" class="arrow" />
+
+  <!-- Flow arrows user -> preRNA -> LLM -> postRNA -> human -->
+  <path d="M70 300 L80 300 L80 260 L80 120 L530 120 L530 260 L530 300 L530 360 L530 420 L1000 420" class="arrow" />
+
+  <!-- Legend -->
+  <text x="40" y="520" class="label">Legend: Pre-RNA = input gate; LLM = generation; Post-RNA = validator; DiscardVault = sealed store</text>
+
+</svg>
