@@ -315,6 +315,8 @@ $$
 
 となり、$\varepsilon_{\mathrm{gate}}$ または回路深さ増加率 $\dot{D}$ の改善が必要であることが直接読めます。ここに、構造保証型理論としての実務的価値があります。
 
+現行デバイスの実測値として、Microsoft と Quantinuum によるトラップイオン方式の実験では、回路誤差率 $\varepsilon_{\mathrm{gate}} = 10^{-5}$ が報告されています [12]。これを上式に代入すると、$T_{\mathrm{FC}}^{\mathrm{gate}}$ は同じ $\tau_{\mathrm{gate}}$ と $\dot{D}$ のもとで従来デバイス（$\varepsilon_{\mathrm{gate}} \sim 10^{-3}$ 程度）と比較して約 100 倍延伸されます。すなわち、ゲート律速の Fail-Closed 到達時刻の下界は、デバイス精度の向上とともに直接改善されます。これは NRA-IDE の判定式が、ハードウェアの進歩を構造的に取り込む設計になっていることを意味します。
+
 ---
 
 ## 8. 誤差処理の哲学：消すのではなく状態として記録する
@@ -365,6 +367,8 @@ $$
 
 主な不能ログの分類は次のとおりです。MISSING、INACCURATE、OUT_OF_BAND、UNKNOWN_CORRELATION、RECONSTRUCT_FAILED、TRACKING_UNAVAILABLE、FAIL_CLOSED。FAIL_CLOSED は、単なる値の消失ではなく、構造追跡の継続不能として委譲する状態を意味します。
 
+この設計方針は、量子ハードウェア側でも独立に選択されています。中性原子方式の実験では「消失エラー（Erasure Error）」として原子の喪失を検出し、補間せずに明示的に記録する手法が採用されています [13]。値が誤っているのではなく「観測対象そのものが失われた」という状態を区別して記録するこの設計は、NRA-IDE の不能ログ哲学と同型の判断です。量子物理層とソフトウェア判定層が独立に同一の設計原則へ到達していることは、この方針の普遍性を示しています。
+
 ### 8.4 観測相関と推定相関の分離
 
 観測された相関と、推定で作った相関は別層です。観測相関は、直接測定された値、欠測ログ、外れ値ログを含む状態から見えた相関です。推定相関は、欠測や外れ値を補間、平均、前回値保持などで埋めたあとに作られた相関です。推定相関を主計算に戻すと、二重推定に近づくため、主計算へ戻してはいけません。
@@ -414,6 +418,8 @@ NRA-IDE の量子拡張は、遅延幅 $\ell$、補正強度 $\alpha_t$、閾値
 第一層は量子層です。ハミルトニアン発展、変分回路、位相推定、あるいは誤り訂正回路を実行します。第二層は観測・圧縮層です。期待値列、シンドローム列、低次元特徴量、テンソルネットワーク近似などを構成します。第三層は NRA-IDE 判定層です。残渣 $r_t$、閾値比 $R_t$、ゲート関数 $g(R_t)$ により補正または停止を決めます。
 
 このとき NRA-IDE は、量子層の代替ではなく、量子層の出力がどの程度まで信頼可能かを構造的に読む層として機能します。実務的には、error mitigation pipeline や estimator 系ワークフローの上流または下流に配置する形が考えやすい構成となります [9][10]。
+
+第二層の処理においては、シンドローム列から $z_t$ を構成するデコーディング処理の速度が問題になりえます。この点について、深層学習を用いた AI デコーダが処理を大幅に高速化する手法が報告されています [14]。AI デコーダの高速化は $z_t$ の更新レイテンシを下げ、遅延幅 $\ell$ を縮小できる可能性を与えます。これは参照記録の実時間性を高め、NRA-IDE の追従性向上に直接寄与します。
 
 なお、第一層の質そのものを改善する前段処理として、動的デカップリング（DD）によって誘起されたデコヒーレンスフリー部分空間（DFS）が有効です [11]。DFS は Lindblad 散逸項 $\gamma_k$ の実効値を下げる操作と等価に読め、$\tau_t$（吸収厚み）を拡大することで、NRA-IDE 判定層が Fail-Closed に至るまでの構造的猶予を広げます。これは NRA-IDE が第一層に介入するのではなく、第一層が自らの安定性を高めた状態で NRA-IDE へ渡す、という設計分離の観点からも整合した位置づけです。
 
@@ -492,6 +498,12 @@ NRA-IDE の量子計算拡張は、誤差を推測で補完して整える方式
 [10] IBM Quantum Documentation, *StatevectorEstimator*. https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.primitives.StatevectorEstimator
 
 [11] G. Quiroz et al., *Dynamically Generated Decoherence-Free Subspaces and Subsystems on Superconducting Qubits*, arXiv:2402.07278 (2024). https://arxiv.org/abs/2402.07278
+
+[12] Microsoft Quantum Blog, *Microsoft and Quantinuum achieve 800x error rate reduction with logical qubits* (April 2024). https://cloudblogs.microsoft.com/quantum/2024/04/03/microsoft-and-quantinuum-demonstrate-the-most-reliable-logical-qubits-on-record-with-a-new-error-correction-system/
+
+[13] Dolev Bluvstein et al., *Logical quantum processor based on reconfigurable atom arrays*, Nature 626, 7997 (2024). https://www.nature.com/articles/s41586-023-06927-3
+
+[14] Y. Zeng et al., *Deep-learning-enhanced GKP code*, Physical Review Letters 134, 060601 (2025).
 
 ---
 
