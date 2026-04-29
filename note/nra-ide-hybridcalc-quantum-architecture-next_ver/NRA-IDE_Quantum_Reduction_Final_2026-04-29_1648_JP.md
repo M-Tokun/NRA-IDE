@@ -14,12 +14,6 @@
 
 # NRA-IDE 残渣ベース遅延精度確保型と量子計算における破綻経路の構造的縮減
 
-## 完成版
-
-執筆者　M-Tokuni　©M-Tokuni 2026
-
-GitHub: https://github.com/M-Tokun/NRA-IDE
-
 ---
 
 ## 要旨
