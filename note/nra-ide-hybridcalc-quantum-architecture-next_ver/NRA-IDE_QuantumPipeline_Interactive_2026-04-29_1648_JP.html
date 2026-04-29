@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<!-- FILE: NRA-IDE_QuantumPipeline_Interactive_2026-04-29_1648_JP.html -->
+<!-- TITLE: NRA-IDE 量子計算拡張 三層パイプライン可視化 -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-29 16:48 JST -->
+<!-- Purpose: 論文「NRA-IDE 残渣ベース遅延精度確保型と量子計算における破綻経路の構造的縮減（完成版）」の付帯資料 -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE 三層パイプライン可視化</title>
+<style>
+:root{
+  --bg:#070b12;
+  --panel:#0e1622;
+  --panel2:#111d2b;
+  --line:#22364d;
+  --text:#dce9f6;
+  --sub:#8ea8bf;
+  --quantum:#9b6dff;
+  --observe:#66d9ff;
+  --judge:#ffd166;
+  --ok:#63df93;
+  --warn:#ffb24a;
+  --bad:#ff6b6b;
+  --silent:#5a7088;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:radial-gradient(ellipse at 25% 0%,#15203a 0%,#070b12 60%,#04070d 100%);
+  color:var(--text);
+  font-family:'Noto Serif JP',"Yu Mincho","Hiragino Mincho ProN",serif;
+  min-height:100vh;
+  padding:0 0 40px;
+}
+header{
+  border-bottom:1px solid var(--line);
+  padding:22px 32px;
+  background:rgba(7,11,18,.85);
+  backdrop-filter:blur(14px);
+  position:sticky;top:0;z-index:20;
+}
+.title-row{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+h1{font-size:22px;font-weight:600;letter-spacing:.05em}
+.tag{
+  font-family:'Consolas','JetBrains Mono',monospace;
+  font-size:11px;color:var(--observe);
+  border:1px solid var(--observe);
+  padding:3px 10px;border-radius:99px;
+  letter-spacing:.15em;
+}
+.lead{color:var(--sub);font-size:13.5px;line-height:1.85;margin-top:10px;max-width:980px}
+.wrap{max-width:1320px;margin:18px auto;padding:0 18px}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:18px}
+.card{
+  background:rgba(14,22,34,.92);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px;
+}
+.card h2{
+  font-size:14px;font-weight:600;color:var(--sub);
+  letter-spacing:.18em;text-transform:uppercase;
+  margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line);
+}
+canvas{
+  width:100%;height:520px;
+  background:linear-gradient(180deg,#060c16,#04070d);
+  border-radius:10px;border:1px solid var(--line);
+  display:block;
+}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--sub)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .dot{width:10px;height:10px;border-radius:99px;display:inline-block}
+.dot.q{background:var(--quantum)}.dot.o{background:var(--observe)}.dot.j{background:var(--judge)}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.row{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.row .lbl{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub)}
+.row .lbl b{color:var(--text);font-weight:500}
+input[type=range]{width:100%;accent-color:var(--observe);cursor:pointer}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.btn{
+  padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+  background:var(--panel2);color:var(--text);font-family:inherit;
+  font-size:12.5px;cursor:pointer;transition:all .15s;
+}
+.btn:hover{border-color:var(--observe);color:var(--observe)}
+.btn.on{border-color:var(--observe);background:rgba(102,217,255,.1);color:var(--observe)}
+.btn.warn{border-color:var(--warn)}.btn.warn.on{background:rgba(255,178,74,.1);color:var(--warn)}
+.metric{
+  background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;padding:11px 13px;margin-bottom:10px;
+}
+.metric-h{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub);margin-bottom:5px}
+.metric-h b{color:var(--text);font-family:'Consolas',monospace;font-weight:500}
+.bar{height:9px;background:#08111c;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.fill{height:100%;width:0%;transition:width .3s}
+.fill.ok{background:linear-gradient(90deg,#2ebf6b,#78ef9d)}
+.fill.warn{background:linear-gradient(90deg,#d99c00,#ffb24a)}
+.fill.bad{background:linear-gradient(90deg,#c94343,#ff7b7b)}
+.status{
+  padding:11px 13px;border-radius:10px;font-size:12.5px;line-height:1.7;
+  border:1px solid var(--line);background:rgba(8,15,25,.8);margin-bottom:12px;
+}
+.status.ok{border-color:#316c46;background:rgba(31,77,48,.3);color:#dff9e7}
+.status.warn{border-color:#80661e;background:rgba(90,67,10,.32);color:#fff3c6}
+.status.bad{border-color:#884040;background:rgba(85,27,27,.4);color:#ffd7d7}
+.status.silent{border-color:#3a4d62;background:rgba(40,54,72,.45);color:#cdd9e6}
+.formula{
+  font-family:'Consolas','JetBrains Mono',monospace;
+  font-size:11.5px;color:#cfe9ff;line-height:1.85;
+  background:#08111c;border:1px solid var(--line);border-radius:10px;
+  padding:11px 13px;margin-top:10px;white-space:pre-wrap;
+}
+.note{font-size:12px;color:var(--sub);line-height:1.75;margin-top:9px}
+.foot{
+  text-align:center;padding:24px 18px 12px;color:var(--sub);
+  font-size:11.5px;letter-spacing:.05em;
+}
+.foot b{color:var(--text)}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}canvas{height:440px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="title-row">
+    <h1>NRA-IDE 量子拡張 三層パイプライン</h1>
+    <span class="tag">QUANTUM → OBSERVE → JUDGE</span>
+  </div>
+  <p class="lead">量子層（Lindblad 時間発展による密度行列 ρ_t）から、観測・圧縮層（観測量期待値ベクトル z_t = ⟨O_i⟩_t）を経て、NRA-IDE 判定層（残渣 r_t、閾値比 R_t = δ_t/τ_t、ゲート関数 g(R_t)）へ流れる三層構造を可視化します。R_t は補正の開閉を決め、C(r_t) の飽和写像が局所急変への過剰反応を抑えます。</p>
+</header>
+
+<div class="wrap">
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>三層パイプライン可視化</h2>
+      <canvas id="cv" width="900" height="520"></canvas>
+      <div class="legend">
+        <span><i class="dot q"></i>量子層（ρ_t）</span>
+        <span><i class="dot o"></i>観測・圧縮層（z_t）</span>
+        <span><i class="dot j"></i>NRA-IDE 判定層（R_t）</span>
+        <span><i class="dot ok"></i>沈黙域 (R&lt;R_low)</span>
+        <span><i class="dot warn"></i>遷移域</span>
+        <span><i class="dot bad"></i>Fail-Closed (R≥1)</span>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h2>三層の役割と接続</h2>
+      <div class="formula">第1層 量子層 (Quantum)
+  dρ/dt = -(i/ℏ)[H,ρ] + Σₖ γₖ ( Lₖ ρ Lₖ† - ½{Lₖ†Lₖ, ρ} )
+  ρ_{t+1} = ρ_t + Δt · L(ρ_t)
+
+第2層 観測・圧縮層 (Observe)
+  z_t = ( ⟨O₁⟩_t, ⟨O₂⟩_t, ..., ⟨Oₘ⟩_t )ᵀ ∈ ℝᵐ
+  ⟨Oᵢ⟩_t = Tr( Oᵢ ρ_t )
+
+第3層 NRA-IDE 判定層 (Judge)
+  r_t = z_{t+1}^pred - z_{t-ℓ}^ref
+  δ_t = ‖W r_t‖
+  R_t = δ_t / τ_t
+  g(R_t) = ゲート関数（沈黙 / 遷移 / 飽和）
+  z_{t+1}^corr = z_{t+1} - α_t · g(R_t) · C(r_t)
+
+C(r_t) = r_t · |r_t| / (k + |r_t|)   （飽和写像）</div>
+      <p class="note">第1層は密度行列の時間発展、第2層は観測量期待値による性質保存圧縮、第3層は閾値比による補正開閉です。式は古典文脈の NRA-IDE と完全に同型で、観測量を量子オブザーバブルに置き換えたのみとなります。</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>判定状態</h2>
+      <div id="status" class="status ok">通常域です。R_t は遊び幅の中で推移しています。</div>
+      <div class="metric">
+        <div class="metric-h"><span>残渣強度 δ_t</span><b id="dTxt">0.00</b></div>
+        <div class="bar"><div id="dFill" class="fill ok"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-h"><span>吸収厚み τ_t</span><b id="tTxt">0.00</b></div>
+        <div class="bar"><div id="tFill" class="fill ok"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-h"><span>閾値比 R_t = δ_t/τ_t</span><b id="rTxt">0.00</b></div>
+        <div class="bar"><div id="rFill" class="fill ok"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-h"><span>ゲート出力 g(R_t)</span><b id="gTxt">0.00</b></div>
+        <div class="bar"><div id="gFill" class="fill ok"></div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>パラメータ</h2>
+      <div class="row">
+        <div class="lbl"><span>Lindblad 散逸率 γ</span><b id="gammaTxt">0.20</b></div>
+        <input id="gamma" type="range" min="0.02" max="0.6" step="0.01" value="0.20">
+      </div>
+      <div class="row">
+        <div class="lbl"><span>外乱振幅 σ_O</span><b id="sigmaTxt">0.30</b></div>
+        <input id="sigma" type="range" min="0.05" max="0.9" step="0.01" value="0.30">
+      </div>
+      <div class="row">
+        <div class="lbl"><span>遅延幅 ℓ</span><b id="ellTxt">12</b></div>
+        <input id="ell" type="range" min="2" max="40" step="1" value="12">
+      </div>
+      <div class="row">
+        <div class="lbl"><span>補正強度 α</span><b id="aTxt">0.55</b></div>
+        <input id="a" type="range" min="0.0" max="1.5" step="0.01" value="0.55">
+      </div>
+      <div class="row">
+        <div class="lbl"><span>飽和係数 k</span><b id="kTxt">0.35</b></div>
+        <input id="k" type="range" min="0.05" max="2.0" step="0.01" value="0.35">
+      </div>
+      <div class="row">
+        <div class="lbl"><span>R_low</span><b id="rlTxt">0.30</b></div>
+        <input id="rl" type="range" min="0.0" max="0.7" step="0.01" value="0.30">
+      </div>
+      <div class="row">
+        <div class="lbl"><span>R_high</span><b id="rhTxt">0.85</b></div>
+        <input id="rh" type="range" min="0.4" max="1.2" step="0.01" value="0.85">
+      </div>
+      <div class="btns">
+        <button id="play" class="btn on">▶ PLAY</button>
+        <button id="reset" class="btn">↻ RESET</button>
+      </div>
+      <div class="btns" style="margin-top:6px">
+        <button id="modeNRA" class="btn on">NRA-IDE 経路</button>
+        <button id="modeVQE" class="btn warn">VQE 経路（参考）</button>
+      </div>
+      <p class="note">VQE 経路を選ぶと、参照側にも推定値を戻す再帰閉ループに切り替わり、誤差が変質して指数的に増大しうることを観察できます。</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="foot">
+  Author: <b>M-Tokuni / NRA-IDE Project</b> &nbsp;・&nbsp; Generated: 2026-04-29 16:48 JST &nbsp;・&nbsp; ©M-Tokuni 2026<br>
+  GitHub: <b>https://github.com/M-Tokun/NRA-IDE</b>
+</div>
+
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const $=id=>document.getElementById(id);const inp=id=>parseFloat($(id).value);
+let playing=true,t=0,mode='NRA';
+let zHist=[],rHist=[],rRefHist=[],RHist=[];
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function gate(R){const lo=inp('rl'),hi=inp('rh');if(R<lo)return 0;if(R>=hi)return 1;return (R-lo)/(hi-lo)}
+function sat(r,k){return r*Math.abs(r)/(k+Math.abs(r))}
+
+function step(){
+  const gamma=inp('gamma'),sigma=inp('sigma'),ell=Math.round(inp('ell')),a=inp('a'),k=inp('k');
+
+  // 第1層: 量子層 — Lindblad 風の駆動 + 散逸（観測量 z は ⟨σ_z⟩ 相当のスカラー値で近似）
+  const driveT=t*0.045;
+  const drive=Math.sin(driveT)*0.45+Math.sin(driveT*1.7+0.8)*0.22;
+  const noise=(Math.random()-0.5)*sigma + Math.sin(t*0.18)*sigma*0.3;
+
+  // 第2層: 観測・圧縮層 — 1ステップ前の z に Lindblad 緩和項を加える
+  const lastZ=zHist.length?zHist[zHist.length-1]:0;
+  // dz/dt 風: 散逸が drive へ向ける + ノイズ
+  const zPred = lastZ + 0.07*(drive - lastZ) + 0.018*noise - gamma*0.04*lastZ;
+
+  // 第3層: NRA-IDE 判定層 — 参照は遅延固定記録 (NRA) もしくは推定戻し (VQE)
+  let zRef;
+  if(mode==='NRA'){
+    zRef = (zHist.length>=ell) ? zHist[zHist.length-ell] : 0;
+  } else {
+    // VQE 経路: 過去の補正済み値を再び参照に使う ⇒ 二重推定連鎖
+    zRef = rRefHist.length ? rRefHist[rRefHist.length-1] : 0;
+  }
+
+  const r = zPred - zRef;
+  const W = 1.0; // 単一観測量近似
+  const delta = Math.abs(W*r);
+
+  // τ: 律速段の最小余裕（時間に対し緩やかに減衰：デコヒーレンス相当）
+  const tau_sys=0.55;
+  const tau_coh = 0.55*Math.exp(-t*0.0018);
+  const tau = Math.min(tau_sys,tau_coh);
+
+  const R = delta/Math.max(tau,1e-6);
+  const g = gate(R);
+  const C = sat(r,k);
+
+  // 補正後 z
+  const zCorr = zPred - a*g*C;
+
+  // 履歴
+  zHist.push(zCorr);
+  rRefHist.push(zCorr); // VQE 経路用に補正済みを履歴
+  rHist.push(r);
+  RHist.push(R);
+
+  if(zHist.length>320)zHist.shift();
+  if(rRefHist.length>320)rRefHist.shift();
+  if(rHist.length>320)rHist.shift();
+  if(RHist.length>320)RHist.shift();
+
+  // メトリクス
+  $('dTxt').textContent=delta.toFixed(3);
+  $('tTxt').textContent=tau.toFixed(3);
+  $('rTxt').textContent=R.toFixed(3);
+  $('gTxt').textContent=g.toFixed(3);
+  setFill('dFill',clamp(delta/1.2,0,1.5));
+  setFill('tFill',clamp(tau/0.6,0,1));
+  setFill('rFill',clamp(R,0,1.5));
+  setFill('gFill',clamp(g,0,1));
+
+  const s=$('status');
+  if(R>=1){s.className='status bad';s.textContent='Fail-Closed 域です。R_t が 1 を超えました。律速層の限界に到達しています。';}
+  else if(R>=inp('rh')){s.className='status warn';s.textContent='飽和補正域です。g(R_t)=1 で C(r_t) が最大ゲインで作用します。';}
+  else if(R>=inp('rl')){s.className='status warn';s.textContent='遷移域です。R_t が R_low と R_high の間で、補正は線形に開きます。';}
+  else{s.className='status silent';s.textContent='沈黙域です。R_t < R_low のため g(R_t)=0、補正は静止しています。';}
+
+  return {drive,zPred,zRef,zCorr,r,R,g};
+}
+
+function setFill(id,v){const f=$(id);f.className='fill '+(v>=1?'bad':v>=0.7?'warn':'ok');f.style.width=clamp(v*100,0,100)+'%'}
+
+function draw(){
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  // 背景グラデ
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#070e18');bg.addColorStop(1,'#03060c');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // 三層の領域分割
+  const lay=[
+    {y0:0,y1:H*0.34,col:'rgba(155,109,255,0.07)',name:'Q  量子層 / Lindblad ρ_t',acc:'#9b6dff'},
+    {y0:H*0.34,y1:H*0.67,col:'rgba(102,217,255,0.06)',name:'O  観測・圧縮層 / z_t = ⟨O⟩',acc:'#66d9ff'},
+    {y0:H*0.67,y1:H,col:'rgba(255,209,102,0.06)',name:'J  NRA-IDE 判定層 / R_t = δ/τ',acc:'#ffd166'}
+  ];
+  for(const l of lay){
+    ctx.fillStyle=l.col;ctx.fillRect(0,l.y0,W,l.y1-l.y0);
+    ctx.strokeStyle='rgba(34,54,77,0.7)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,l.y1);ctx.lineTo(W,l.y1);ctx.stroke();
+    ctx.fillStyle=l.acc;ctx.font='bold 11px Consolas,monospace';
+    ctx.fillText(l.name,14,l.y0+18);
+  }
+
+  // 第1層: 量子層 — Bloch風円 + 駆動波形
+  drawQuantum(0,0,W,H*0.34);
+  // 第2層: 観測層 — z_t と z_ref の時系列
+  drawObserve(0,H*0.34,W,H*0.33);
+  // 第3層: 判定層 — R_t 時系列 + 閾値帯
+  drawJudge(0,H*0.67,W,H*0.33);
+
+  // 接続線（層間流れ）
+  const tt=Date.now()*0.001;
+  for(let i=0;i<3;i++){
+    const x=W*0.5+Math.sin(tt+i)*40;
+    const y0=H*0.34,y1=H*0.67;
+    ctx.strokeStyle='rgba(102,217,255,'+(0.18+0.12*Math.sin(tt*2+i))+')';
+    ctx.lineWidth=1;ctx.beginPath();
+    ctx.moveTo(x,y0-3);ctx.lineTo(x,y1+3);ctx.stroke();
+  }
+}
+
+function drawQuantum(x0,y0,w,h){
+  // Bloch sphere風の楕円
+  const cx=x0+w*0.5,cy=y0+h*0.55;
+  const ra=h*0.3,rb=h*0.32;
+  ctx.strokeStyle='rgba(155,109,255,0.4)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.ellipse(cx,cy,ra,rb,0,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(cx,cy,ra,rb*0.35,0,0,Math.PI*2);ctx.stroke();
+  // 軸
+  ctx.strokeStyle='rgba(155,109,255,0.55)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-ra-8,cy);ctx.lineTo(cx+ra+8,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,cy-rb-8);ctx.lineTo(cx,cy+rb+8);ctx.stroke();
+
+  // 駆動波形を内部に描く
+  ctx.strokeStyle='rgba(155,109,255,0.85)';ctx.lineWidth=1.6;
+  ctx.beginPath();
+  const N=160;
+  for(let i=0;i<N;i++){
+    const ph=t*0.045 + i*0.04;
+    const xx=cx-ra+0.6*ra*2*(i/(N-1));
+    const yy=cy + Math.sin(ph)*rb*0.55;
+    if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();
+
+  // 状態ベクトル（点）
+  const ang=t*0.045;
+  const px=cx+Math.cos(ang)*ra*0.7;
+  const py=cy+Math.sin(ang)*rb*0.55;
+  ctx.fillStyle='#cfb3ff';
+  ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(207,179,255,0.5)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();
+
+  // ラベル
+  ctx.fillStyle='rgba(220,233,246,0.55)';ctx.font='10.5px Consolas,monospace';
+  ctx.fillText('|ψ⟩ → ρ',cx+ra+12,cy-4);
+  ctx.fillText('Lindblad: dρ/dt',cx+ra+12,cy+12);
+}
+
+function drawObserve(x0,y0,w,h){
+  // z_t と z_ref の時系列
+  const padL=80,padR=20,padT=18,padB=22;
+  const gx0=x0+padL,gx1=x0+w-padR,gy0=y0+padT,gy1=y0+h-padB;
+  // 軸
+  ctx.strokeStyle='rgba(102,217,255,0.25)';ctx.lineWidth=1;
+  ctx.strokeRect(gx0,gy0,gx1-gx0,gy1-gy0);
+  // 0 line
+  const gw=gx1-gx0,gh=gy1-gy0;
+  const yMid=gy0+gh*0.5;
+  ctx.strokeStyle='rgba(102,217,255,0.2)';
+  ctx.beginPath();ctx.moveTo(gx0,yMid);ctx.lineTo(gx1,yMid);ctx.stroke();
+
+  ctx.fillStyle='rgba(102,217,255,0.7)';ctx.font='10.5px Consolas,monospace';
+  ctx.fillText('z_t (補正後)',gx0+6,gy0+12);
+  ctx.fillStyle='rgba(255,255,255,0.45)';
+  ctx.fillText('z_{t-ℓ}^ref (遅延参照)',gx0+6,gy0+26);
+
+  const N=zHist.length;if(N<2)return;
+  const ell=Math.round(inp('ell'));
+  // z (補正後)
+  ctx.strokeStyle='#66d9ff';ctx.lineWidth=1.6;ctx.beginPath();
+  for(let i=0;i<N;i++){
+    const xx=gx0 + gw*(i/(N-1));
+    const yy=yMid - zHist[i]*gh*0.42;
+    if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();
+
+  // z_ref (遅延参照線)
+  ctx.strokeStyle='rgba(255,255,255,0.55)';ctx.lineWidth=1.2;ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  for(let i=ell;i<N;i++){
+    const refIdx=i-ell;
+    const xx=gx0 + gw*(i/(N-1));
+    const yy=yMid - zHist[refIdx]*gh*0.42;
+    if(i===ell)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();ctx.setLineDash([]);
+
+  // 残渣 r 強度を縦線で
+  ctx.strokeStyle='rgba(255,209,102,0.45)';ctx.lineWidth=1;
+  for(let i=ell;i<N;i+=4){
+    const refIdx=i-ell;
+    const xx=gx0 + gw*(i/(N-1));
+    const y1p=yMid - zHist[i]*gh*0.42;
+    const y2p=yMid - zHist[refIdx]*gh*0.42;
+    ctx.beginPath();ctx.moveTo(xx,y1p);ctx.lineTo(xx,y2p);ctx.stroke();
+  }
+}
+
+function drawJudge(x0,y0,w,h){
+  const padL=80,padR=20,padT=14,padB=22;
+  const gx0=x0+padL,gx1=x0+w-padR,gy0=y0+padT,gy1=y0+h-padB;
+  const gw=gx1-gx0,gh=gy1-gy0;
+
+  // 帯: 沈黙 / 遷移 / 飽和 / Fail-Closed
+  const lo=inp('rl'),hi=inp('rh');
+  const yV=v=>gy1 - clamp(v,0,1.4)/1.4 * gh;
+
+  // 沈黙域
+  ctx.fillStyle='rgba(99,223,147,0.07)';
+  ctx.fillRect(gx0,yV(lo),gw,gy1-yV(lo));
+  // 遷移域
+  ctx.fillStyle='rgba(255,178,74,0.08)';
+  ctx.fillRect(gx0,yV(hi),gw,yV(lo)-yV(hi));
+  // 飽和域
+  ctx.fillStyle='rgba(255,178,74,0.12)';
+  ctx.fillRect(gx0,yV(1),gw,yV(hi)-yV(1));
+  // Fail-Closed
+  ctx.fillStyle='rgba(255,107,107,0.18)';
+  ctx.fillRect(gx0,gy0,gw,yV(1)-gy0);
+
+  // 枠
+  ctx.strokeStyle='rgba(255,209,102,0.3)';ctx.strokeRect(gx0,gy0,gw,gh);
+
+  // 閾値ライン
+  ctx.strokeStyle='rgba(255,178,74,0.6)';ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(gx0,yV(lo));ctx.lineTo(gx1,yV(lo));ctx.stroke();
+  ctx.beginPath();ctx.moveTo(gx0,yV(hi));ctx.lineTo(gx1,yV(hi));ctx.stroke();
+  ctx.strokeStyle='rgba(255,107,107,0.7)';
+  ctx.beginPath();ctx.moveTo(gx0,yV(1));ctx.lineTo(gx1,yV(1));ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle='rgba(255,209,102,0.65)';ctx.font='10.5px Consolas,monospace';
+  ctx.fillText('R_low',gx0+6,yV(lo)-4);
+  ctx.fillText('R_high',gx0+6,yV(hi)-4);
+  ctx.fillStyle='rgba(255,107,107,0.85)';
+  ctx.fillText('R=1 (Fail-Closed)',gx0+6,yV(1)-4);
+
+  // R_t 軌跡
+  const N=RHist.length;if(N<2)return;
+  ctx.strokeStyle='#ffd166';ctx.lineWidth=1.8;ctx.beginPath();
+  for(let i=0;i<N;i++){
+    const xx=gx0 + gw*(i/(N-1));
+    const yy=yV(RHist[i]);
+    if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();
+
+  // 現在点
+  const xN=gx1,yN=yV(RHist[N-1]);
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(xN,yN,4.5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=RHist[N-1]>=1?'#ff6b6b':RHist[N-1]>=hi?'#ffb24a':'#66d9ff';
+  ctx.lineWidth=2.2;ctx.stroke();
+}
+
+// イベント
+['gamma','sigma','ell','a','k','rl','rh'].forEach(id=>{
+  $(id).oninput=()=>{const v=inp(id);$(id+'Txt').textContent=(id==='ell')?Math.round(v):v.toFixed(2);}
+});
+$('play').onclick=()=>{playing=!playing;$('play').classList.toggle('on',playing);$('play').textContent=playing?'▶ PLAY':'⏸ PAUSE'};
+$('reset').onclick=()=>{t=0;zHist=[];rHist=[];rRefHist=[];RHist=[];draw();};
+$('modeNRA').onclick=()=>{mode='NRA';$('modeNRA').classList.add('on');$('modeVQE').classList.remove('on');zHist=[];rRefHist=[];rHist=[];RHist=[];};
+$('modeVQE').onclick=()=>{mode='VQE';$('modeVQE').classList.add('on');$('modeNRA').classList.remove('on');zHist=[];rRefHist=[];rHist=[];RHist=[];};
+
+function loop(){
+  if(playing){t+=1;step();}
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<!-- FILE: NRA-IDE_FourLayerError_Interactive_2026-04-29_1648_JP.html -->
+<!-- TITLE: NRA-IDE 四層誤差分解と Fail-Closed 到達時刻可視化 -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-04-29 16:48 JST -->
+<!-- Purpose: 論文「NRA-IDE 残渣ベース遅延精度確保型と量子計算における破綻経路の構造的縮減（完成版）」の付帯資料 -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE 四層誤差分解と Fail-Closed 到達時刻</title>
+<style>
+:root{
+  --bg:#0a0c10;
+  --panel:#13171f;
+  --panel2:#181c25;
+  --line:#2a3142;
+  --text:#e6ecf2;
+  --sub:#94a3b8;
+  --classical:#5fb3d1;
+  --shot:#9d7fe8;
+  --decoh:#e89671;
+  --gate:#dfb968;
+  --tau:#7fdb9a;
+  --bad:#ff6b6b;
+  --warn:#ffb24a;
+  --ok:#7fdb9a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:
+    radial-gradient(ellipse at 80% 0%,rgba(159,127,232,.08) 0%,transparent 50%),
+    radial-gradient(ellipse at 0% 100%,rgba(95,179,209,.08) 0%,transparent 50%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans JP','Yu Gothic','Hiragino Kaku Gothic ProN',sans-serif;
+  min-height:100vh;
+  padding:0 0 40px;
+  line-height:1.6;
+}
+header{
+  border-bottom:1px solid var(--line);
+  padding:24px 36px 22px;
+  background:rgba(10,12,16,.85);
+  backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:30;
+}
+.brand{
+  font-family:'Consolas','JetBrains Mono',monospace;
+  font-size:10px;color:var(--sub);letter-spacing:.3em;
+  text-transform:uppercase;margin-bottom:8px;
+}
+h1{font-size:23px;font-weight:700;letter-spacing:.04em;color:var(--text)}
+h1 .accent{
+  background:linear-gradient(90deg,var(--classical),var(--shot),var(--decoh),var(--gate));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.lead{color:var(--sub);font-size:13.5px;line-height:1.85;margin-top:12px;max-width:1000px}
+.kbd{font-family:'Consolas',monospace;font-size:12px;color:var(--text);background:var(--panel2);padding:2px 6px;border-radius:4px;border:1px solid var(--line)}
+.wrap{max-width:1340px;margin:20px auto;padding:0 20px}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px 20px;
+}
+.card h2{
+  font-size:13px;font-weight:600;color:var(--sub);
+  letter-spacing:.18em;text-transform:uppercase;
+  margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid var(--line);
+}
+canvas{
+  width:100%;height:380px;
+  background:linear-gradient(180deg,#0c0f15,#08090d);
+  border-radius:8px;border:1px solid var(--line);
+  display:block;
+}
+canvas.tall{height:300px}
+.formula{
+  font-family:'Consolas','JetBrains Mono',monospace;
+  font-size:12px;color:#cad8e6;line-height:1.85;
+  background:#0a0d13;border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;margin-top:12px;white-space:pre-wrap;
+}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--sub)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .sw{width:14px;height:8px;border-radius:2px;display:inline-block}
+.sw.cl{background:var(--classical)}.sw.sh{background:var(--shot)}.sw.de{background:var(--decoh)}.sw.ga{background:var(--gate)}.sw.ta{background:var(--tau)}
+.row{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}
+.row .lbl{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub)}
+.row .lbl b{color:var(--text);font-weight:500;font-family:'Consolas',monospace}
+input[type=range]{width:100%;cursor:pointer}
+input[type=range]#shotN{accent-color:var(--shot)}
+input[type=range]#T2{accent-color:var(--decoh)}
+input[type=range]#eGate{accent-color:var(--gate)}
+input[type=range]#dRate{accent-color:var(--gate)}
+input[type=range]#sCl{accent-color:var(--classical)}
+input[type=range]#tauSys{accent-color:var(--tau)}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.metric{
+  background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;padding:11px 12px;
+}
+.metric .h{font-size:11px;color:var(--sub);letter-spacing:.05em;margin-bottom:5px}
+.metric .v{font-size:18px;font-weight:600;font-family:'Consolas',monospace}
+.metric.cl .v{color:var(--classical)}
+.metric.sh .v{color:var(--shot)}
+.metric.de .v{color:var(--decoh)}
+.metric.ga .v{color:var(--gate)}
+.metric.ta .v{color:var(--tau)}
+.metric.fc .v{color:var(--bad);font-size:22px}
+.bigfc{
+  border:2px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px;
+  background:linear-gradient(135deg,rgba(255,107,107,0.08),rgba(255,178,74,0.04));
+}
+.bigfc.ok{border-color:#316c46;background:linear-gradient(135deg,rgba(127,219,154,0.08),transparent)}
+.bigfc.warn{border-color:#7d6320;background:linear-gradient(135deg,rgba(255,178,74,0.1),transparent)}
+.bigfc.bad{border-color:#7a3434;background:linear-gradient(135deg,rgba(255,107,107,0.13),transparent)}
+.bigfc .label{font-size:11px;color:var(--sub);letter-spacing:.18em;text-transform:uppercase}
+.bigfc .val{font-size:30px;font-weight:700;font-family:'Consolas',monospace;margin:4px 0;color:var(--text)}
+.bigfc .desc{font-size:12px;color:var(--sub);line-height:1.7}
+.bigfc.bad .desc{color:#ffd7d7}
+.bigfc.warn .desc{color:#fff3c6}
+.bigfc.ok .desc{color:#dff9e7}
+.note{font-size:12px;color:var(--sub);line-height:1.75;margin-top:10px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.tab{
+  padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+  background:var(--panel2);color:var(--sub);font-family:inherit;font-size:12.5px;
+  cursor:pointer;transition:all .15s;
+}
+.tab:hover{color:var(--text);border-color:var(--sub)}
+.tab.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:600}
+.foot{
+  text-align:center;padding:28px 18px 12px;color:var(--sub);
+  font-size:11.5px;letter-spacing:.05em;
+}
+.foot b{color:var(--text)}
+@media(max-width:1040px){.grid{grid-template-columns:1fr}canvas{height:300px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NRA-IDE / Quantum Extension / Error Stratification</div>
+  <h1><span class="accent">四層誤差分解</span> と Fail-Closed 到達時刻</h1>
+  <p class="lead">δ_total² = δ_classical² + δ_shot² + δ_decoh² + δ_gate² の独立合成と、τ_total = min(τ_system, τ_shot, τ_coh, τ_gate) の律速段原則を可視化します。<span class="kbd">T_FC = min_k { t : δ_k(t)/τ_k ≥ 1 }</span> がどの層によって決まるかを観察できます。最も狭い層が、改善すべき対象を一意に指し示します。</p>
+</header>
+
+<div class="wrap">
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>誤差層の時間発展（δ_k(t)）</h2>
+      <canvas id="cvDelta" width="900" height="380"></canvas>
+      <div class="legend">
+        <span><i class="sw cl"></i>古典層 δ_classical（定常）</span>
+        <span><i class="sw sh"></i>ショット層 δ_shot ∝ σ_O/√N</span>
+        <span><i class="sw de"></i>デコヒーレンス層 δ_decoh = A(1−e^{−t/T₂})</span>
+        <span><i class="sw ga"></i>ゲート層 δ_gate = D·ε_gate</span>
+        <span><i class="sw ta"></i>τ_k（律速段）</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>各層の R_k = δ_k / τ_k</h2>
+      <canvas id="cvRatio" class="tall" width="900" height="300"></canvas>
+      <p class="note">最初に R_k = 1 を超えた層が、Fail-Closed 到達時刻 T_FC を決めます。これは律速段原則の直接的な可視化です。</p>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>定式化と読み方</h2>
+      <div class="formula">δ の独立合成 (二乗和):
+  δ_total(t)² = δ_classical(t)² + δ_shot(t)² + δ_decoh(t)² + δ_gate(t)²
+
+τ の律速段原則 (最小値):
+  τ_total(t) = min( τ_system, τ_shot(N), τ_coh(T₂), τ_gate(D) )
+
+層別 R_k と Fail-Closed 到達時刻:
+  R_k(t) = δ_k(t) / τ_k
+  T_FC   = min_k { t : R_k(t) ≥ 1 }
+
+デコヒーレンス律速の場合:
+  T_FC^decoh ≈ T₂ · ln( A / (A − τ_coh) )
+
+ゲート律速の場合:
+  T_FC^gate  ≈ τ_gate / ( ε_gate · dD/dt )</div>
+      <p class="note">どの層が最初に限界に到達したかを読むことが、改善対象の特定に直結します。デコヒーレンス律速なら T₂ の改善、ゲート律速なら ε_gate または回路深さ増加率の改善が、構造的に指示されます。</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Fail-Closed 到達時刻</h2>
+      <div id="fcBox" class="bigfc ok">
+        <div class="label">T_FC（最初に R_k ≥ 1 となる時刻）</div>
+        <div class="val" id="fcVal">— —</div>
+        <div class="desc" id="fcDesc">パラメータを動かして、どの層が律速になるかを観察してください。</div>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric cl"><div class="h">δ_classical</div><div class="v" id="dCl">0.00</div></div>
+        <div class="metric sh"><div class="h">δ_shot</div><div class="v" id="dSh">0.00</div></div>
+        <div class="metric de"><div class="h">δ_decoh</div><div class="v" id="dDe">0.00</div></div>
+        <div class="metric ga"><div class="h">δ_gate</div><div class="v" id="dGa">0.00</div></div>
+      </div>
+      <div class="metric" style="margin-bottom:10px">
+        <div class="h">δ_total = √(Σ δ_k²)</div>
+        <div class="v" id="dTot" style="color:var(--text)">0.00</div>
+      </div>
+      <div class="metric ta">
+        <div class="h">τ_total = min_k(τ_k)</div>
+        <div class="v" id="tTot">0.00</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>パラメータ</h2>
+
+      <div class="row">
+        <div class="lbl"><span style="color:var(--classical)">σ_classical</span><b id="sClTxt">0.05</b></div>
+        <input id="sCl" type="range" min="0.01" max="0.30" step="0.01" value="0.05">
+      </div>
+
+      <div class="row">
+        <div class="lbl"><span style="color:var(--shot)">ショット数 N</span><b id="shotNTxt">1024</b></div>
+        <input id="shotN" type="range" min="32" max="32768" step="32" value="1024">
+      </div>
+
+      <div class="row">
+        <div class="lbl"><span style="color:var(--decoh)">T₂ (μs)</span><b id="T2Txt">100</b></div>
+        <input id="T2" type="range" min="10" max="500" step="5" value="100">
+      </div>
+
+      <div class="row">
+        <div class="lbl"><span style="color:var(--decoh)">A (デコヒーレンス飽和)</span><b id="aDecTxt">0.40</b></div>
+        <input id="aDec" type="range" min="0.05" max="1.0" step="0.01" value="0.40">
+      </div>
+
+      <div class="row">
+        <div class="lbl"><span style="color:var(--gate)">ε_gate</span><b id="eGateTxt">0.005</b></div>
+        <input id="eGate" type="range" min="0.0005" max="0.05" step="0.0005" value="0.005">
+      </div>
+
+      <div class="row">
+        <div class="lbl"><span style="color:var(--gate)">回路深さ増加率 dD/dt</span><b id="dRateTxt">2.0</b></div>
+        <input id="dRate" type="range" min="0.2" max="10" step="0.1" value="2.0">
+      </div>
+
+      <div class="row">
+        <div class="lbl"><span style="color:var(--tau)">τ_system</span><b id="tauSysTxt">0.30</b></div>
+        <input id="tauSys" type="range" min="0.05" max="1.0" step="0.01" value="0.30">
+      </div>
+
+      <div class="tabs">
+        <button id="presetClean" class="tab on">Clean NISQ</button>
+        <button id="presetNoisy" class="tab">Noisy NISQ</button>
+      </div>
+      <p class="note"><b>Clean NISQ</b> はコヒーレンス時間が長く、ゲート誤差も小さい理想的設定。<b>Noisy NISQ</b> は典型的な現行装置の設定。律速層が異なることが直接観察できます。</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="foot">
+  Author: <b>M-Tokuni / NRA-IDE Project</b> &nbsp;・&nbsp; Generated: 2026-04-29 16:48 JST &nbsp;・&nbsp; ©M-Tokuni 2026<br>
+  GitHub: <b>https://github.com/M-Tokun/NRA-IDE</b>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const inp=id=>parseFloat($(id).value);
+const cvD=$('cvDelta'),ctxD=cvD.getContext('2d');
+const cvR=$('cvRatio'),ctxR=cvR.getContext('2d');
+
+const T_MAX=200; // μs (時間軸)
+const NPTS=240;
+
+// 各層 δ_k(t) と τ_k を計算
+function computeLayers(){
+  const sCl=inp('sCl'); // σ_classical (定常標準偏差。 δ_classical = sCl とみなす)
+  const N=inp('shotN'); // ショット数
+  const T2=inp('T2');   // μs
+  const A=inp('aDec');  // デコヒーレンス飽和高さ
+  const eG=inp('eGate');// ε_gate
+  const dR=inp('dRate');// dD/dt (gate per μs 相当)
+  const tauSys=inp('tauSys');
+
+  // ショット層: σ_O / √N。σ_O は便宜的に 1.0 とする
+  const sigmaO=1.0;
+  const dShot=sigmaO/Math.sqrt(N);
+
+  // 各層の τ
+  const tau_classical=tauSys; // 系全体許容
+  const tau_shot=tauSys*0.8;  // ショット側余裕（例として）
+  const tau_coh=A*0.7;        // コヒーレンス余裕は A に依存
+  // ゲート τ は ε と独立に余裕として設定
+  const tau_gate=tauSys*0.6;
+
+  // 時間配列
+  const tArr=[];
+  for(let i=0;i<NPTS;i++)tArr.push(i*T_MAX/(NPTS-1));
+
+  const dCl=tArr.map(t=>sCl);
+  const dSh=tArr.map(t=>dShot);
+  const dDe=tArr.map(t=>A*(1-Math.exp(-t/T2)));
+  const dGa=tArr.map(t=>eG*dR*t);
+  const dTot=tArr.map((t,i)=>Math.sqrt(dCl[i]**2 + dSh[i]**2 + dDe[i]**2 + dGa[i]**2));
+
+  // R_k(t) と T_FC
+  const rCl=dCl.map(d=>d/tau_classical);
+  const rSh=dSh.map(d=>d/tau_shot);
+  const rDe=dDe.map(d=>d/tau_coh);
+  const rGa=dGa.map(d=>d/tau_gate);
+
+  // 各層の T_FC を求める（最初に R≥1 になった時刻）
+  function firstHit(arr){
+    for(let i=0;i<arr.length;i++){if(arr[i]>=1)return tArr[i]}
+    return null;
+  }
+  const tCl=firstHit(rCl), tSh=firstHit(rSh), tDe=firstHit(rDe), tGa=firstHit(rGa);
+  // τ_total は最小のτ
+  const tauTotal=Math.min(tau_classical,tau_shot,tau_coh,tau_gate);
+
+  // 律速層の決定
+  const candidates=[
+    {name:'classical',color:'#5fb3d1',t:tCl},
+    {name:'shot',color:'#9d7fe8',t:tSh},
+    {name:'decoh',color:'#e89671',t:tDe},
+    {name:'gate',color:'#dfb968',t:tGa}
+  ].filter(x=>x.t!==null).sort((a,b)=>a.t-b.t);
+  const fc = candidates.length ? candidates[0] : null;
+
+  return {tArr,dCl,dSh,dDe,dGa,dTot,rCl,rSh,rDe,rGa,
+    tau:{cl:tau_classical,sh:tau_shot,de:tau_coh,ga:tau_gate,total:tauTotal},
+    fc};
+}
+
+// Canvas描画ユーティリティ
+function clearCv(ctx,c){
+  ctx.clearRect(0,0,c.width,c.height);
+  const g=ctx.createLinearGradient(0,0,0,c.height);
+  g.addColorStop(0,'#0c0f15');g.addColorStop(1,'#08090d');
+  ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+}
+
+function drawAxes(ctx,c,opts){
+  const {padL=58,padR=18,padT=14,padB=30,xMax=T_MAX,yMax=1,yLabel='',xLabel='t (μs)'}=opts;
+  const W=c.width,H=c.height;
+  const gx0=padL,gx1=W-padR,gy0=padT,gy1=H-padB;
+  ctx.strokeStyle='rgba(148,163,184,0.25)';ctx.lineWidth=1;
+  ctx.strokeRect(gx0,gy0,gx1-gx0,gy1-gy0);
+  ctx.fillStyle='rgba(148,163,184,0.55)';
+  ctx.font='10.5px Consolas,monospace';
+  // y ticks
+  const yT=4;
+  for(let i=0;i<=yT;i++){
+    const v=yMax*i/yT;
+    const yy=gy1 - (gy1-gy0)*i/yT;
+    ctx.strokeStyle='rgba(148,163,184,0.08)';
+    ctx.beginPath();ctx.moveTo(gx0,yy);ctx.lineTo(gx1,yy);ctx.stroke();
+    ctx.fillStyle='rgba(148,163,184,0.55)';
+    ctx.fillText(v.toFixed(2),6,yy+3);
+  }
+  // x ticks
+  const xT=5;
+  for(let i=0;i<=xT;i++){
+    const v=xMax*i/xT;
+    const xx=gx0 + (gx1-gx0)*i/xT;
+    ctx.strokeStyle='rgba(148,163,184,0.08)';
+    ctx.beginPath();ctx.moveTo(xx,gy0);ctx.lineTo(xx,gy1);ctx.stroke();
+    ctx.fillStyle='rgba(148,163,184,0.55)';
+    ctx.fillText(v.toFixed(0),xx-7,gy1+15);
+  }
+  // labels
+  ctx.fillStyle='rgba(230,236,242,0.7)';
+  ctx.font='11px sans-serif';
+  ctx.fillText(yLabel,8,gy0-4);
+  ctx.fillText(xLabel,gx1-32,H-8);
+  return {gx0,gx1,gy0,gy1,xMax,yMax};
+}
+
+function drawLine(ctx,box,xs,ys,color,width=1.7,dashed=false){
+  const {gx0,gx1,gy0,gy1,xMax,yMax}=box;
+  ctx.strokeStyle=color;ctx.lineWidth=width;
+  if(dashed)ctx.setLineDash([5,4]);else ctx.setLineDash([]);
+  ctx.beginPath();
+  for(let i=0;i<xs.length;i++){
+    const xx=gx0 + (gx1-gx0)*Math.min(xs[i]/xMax,1);
+    const yy=gy1 - (gy1-gy0)*Math.min(Math.max(ys[i]/yMax,0),1.05);
+    if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();ctx.setLineDash([]);
+}
+
+function fillUnder(ctx,box,xs,ys,color){
+  const {gx0,gx1,gy0,gy1,xMax,yMax}=box;
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(gx0,gy1);
+  for(let i=0;i<xs.length;i++){
+    const xx=gx0 + (gx1-gx0)*Math.min(xs[i]/xMax,1);
+    const yy=gy1 - (gy1-gy0)*Math.min(Math.max(ys[i]/yMax,0),1.05);
+    ctx.lineTo(xx,yy);
+  }
+  ctx.lineTo(gx1,gy1);ctx.closePath();ctx.fill();
+}
+
+function drawHLine(ctx,box,y,color,label){
+  const {gx0,gx1,gy0,gy1,yMax}=box;
+  const yy=gy1 - (gy1-gy0)*Math.min(y/yMax,1);
+  ctx.strokeStyle=color;ctx.lineWidth=1.2;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(gx0,yy);ctx.lineTo(gx1,yy);ctx.stroke();
+  ctx.setLineDash([]);
+  if(label){ctx.fillStyle=color;ctx.font='10.5px Consolas,monospace';ctx.fillText(label,gx0+6,yy-4);}
+}
+
+function drawVLine(ctx,box,x,color,label){
+  const {gx0,gx1,gy0,gy1,xMax}=box;
+  const xx=gx0 + (gx1-gx0)*Math.min(x/xMax,1);
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(xx,gy0);ctx.lineTo(xx,gy1);ctx.stroke();
+  ctx.setLineDash([]);
+  if(label){ctx.fillStyle=color;ctx.font='bold 10.5px Consolas,monospace';ctx.fillText(label,xx+5,gy0+12);}
+}
+
+function render(){
+  const D=computeLayers();
+
+  // === Canvas 1: δ_k(t) ===
+  clearCv(ctxD,cvD);
+  // Y軸最大値: max(δ_k, τ) を見て決める
+  const yMaxD=Math.max(
+    Math.max(...D.dTot),
+    D.tau.cl, D.tau.sh, D.tau.de, D.tau.ga
+  )*1.15 + 0.05;
+  const boxD=drawAxes(ctxD,cvD,{yMax:yMaxD,yLabel:'δ_k(t) と τ_k'});
+
+  // 塗りつぶし: それぞれ薄く
+  fillUnder(ctxD,boxD,D.tArr,D.dCl,'rgba(95,179,209,0.06)');
+  fillUnder(ctxD,boxD,D.tArr,D.dSh,'rgba(157,127,232,0.06)');
+  fillUnder(ctxD,boxD,D.tArr,D.dDe,'rgba(232,150,113,0.07)');
+  fillUnder(ctxD,boxD,D.tArr,D.dGa,'rgba(223,185,104,0.07)');
+
+  // 線
+  drawLine(ctxD,boxD,D.tArr,D.dCl,'#5fb3d1',1.8);
+  drawLine(ctxD,boxD,D.tArr,D.dSh,'#9d7fe8',1.8);
+  drawLine(ctxD,boxD,D.tArr,D.dDe,'#e89671',2.2);
+  drawLine(ctxD,boxD,D.tArr,D.dGa,'#dfb968',2.2);
+  drawLine(ctxD,boxD,D.tArr,D.dTot,'#e6ecf2',2.4);
+
+  // τ_k 水平線
+  drawHLine(ctxD,boxD,D.tau.cl,'rgba(95,179,209,0.5)','τ_classical');
+  drawHLine(ctxD,boxD,D.tau.sh,'rgba(157,127,232,0.5)','τ_shot');
+  drawHLine(ctxD,boxD,D.tau.de,'rgba(232,150,113,0.55)','τ_coh');
+  drawHLine(ctxD,boxD,D.tau.ga,'rgba(223,185,104,0.55)','τ_gate');
+  // τ_total: 最も狭いもの
+  drawHLine(ctxD,boxD,D.tau.total,'rgba(127,219,154,0.95)','τ_total = min_k(τ_k)');
+
+  // T_FC バーティカル
+  if(D.fc){
+    drawVLine(ctxD,boxD,D.fc.t,D.fc.color,'T_FC ('+D.fc.name+')');
+  }
+
+  // === Canvas 2: R_k(t) ===
+  clearCv(ctxR,cvR);
+  const yMaxR=1.4;
+  const boxR=drawAxes(ctxR,cvR,{yMax:yMaxR,yLabel:'R_k = δ_k / τ_k'});
+
+  // R=1 帯を Fail-Closed として赤
+  ctxR.fillStyle='rgba(255,107,107,0.10)';
+  const y1=boxR.gy1 - (boxR.gy1-boxR.gy0)*1/yMaxR;
+  ctxR.fillRect(boxR.gx0,boxR.gy0,boxR.gx1-boxR.gx0,y1-boxR.gy0);
+  drawHLine(ctxR,boxR,1,'rgba(255,107,107,0.85)','R = 1 (Fail-Closed)');
+
+  drawLine(ctxR,boxR,D.tArr,D.rCl,'#5fb3d1',1.6);
+  drawLine(ctxR,boxR,D.tArr,D.rSh,'#9d7fe8',1.6);
+  drawLine(ctxR,boxR,D.tArr,D.rDe,'#e89671',2);
+  drawLine(ctxR,boxR,D.tArr,D.rGa,'#dfb968',2);
+
+  if(D.fc){
+    drawVLine(ctxR,boxR,D.fc.t,D.fc.color,'T_FC');
+  }
+
+  // === メトリクス更新 ===
+  // 現在時刻の値: 「中央」(t=T_MAX/2) のサンプルで表示
+  const idx = Math.floor(NPTS*0.5);
+  $('dCl').textContent=D.dCl[idx].toFixed(4);
+  $('dSh').textContent=D.dSh[idx].toFixed(4);
+  $('dDe').textContent=D.dDe[idx].toFixed(4);
+  $('dGa').textContent=D.dGa[idx].toFixed(4);
+  $('dTot').textContent=D.dTot[idx].toFixed(4);
+  $('tTot').textContent=D.tau.total.toFixed(3);
+
+  // FC ボックス
+  const fcBox=$('fcBox');
+  if(D.fc){
+    $('fcVal').textContent=D.fc.t.toFixed(1)+' μs';
+    let cls='ok',msg='';
+    if(D.fc.t<30){cls='bad';msg='短時間で律速層が R=1 に到達します。';}
+    else if(D.fc.t<100){cls='warn';msg='中程度の時間で律速層が限界に達します。';}
+    else{cls='ok';msg='律速層は十分長い時間まで余裕を保ちます。';}
+    const layerName={
+      'classical':'古典層 (σ_classical)',
+      'shot':'ショット層 (N の不足)',
+      'decoh':'デコヒーレンス層 (T₂)',
+      'gate':'ゲート層 (ε_gate · dD/dt)'
+    }[D.fc.name];
+    fcBox.className='bigfc '+cls;
+    $('fcDesc').innerHTML='<b style="color:'+D.fc.color+'">律速層: '+layerName+'</b><br>'+msg+'<br>この層を改善することが、T_FC を最大化する最短経路です。';
+  } else {
+    $('fcVal').textContent='> '+T_MAX+' μs';
+    fcBox.className='bigfc ok';
+    $('fcDesc').textContent='どの層も観測時間内に R = 1 に到達しません。律速の判別はさらに長時間スケールが必要です。';
+  }
+}
+
+// ハンドラ
+['sCl','shotN','T2','aDec','eGate','dRate','tauSys'].forEach(id=>{
+  $(id).oninput=()=>{
+    const v=inp(id);
+    let txt;
+    if(id==='shotN')txt=Math.round(v).toString();
+    else if(id==='T2')txt=Math.round(v).toString();
+    else if(id==='eGate')txt=v.toFixed(4);
+    else if(id==='dRate')txt=v.toFixed(1);
+    else txt=v.toFixed(2);
+    $(id+'Txt').textContent=txt;
+    render();
+  };
+});
+
+$('presetClean').onclick=()=>{
+  setVals({sCl:0.03,shotN:8192,T2:300,aDec:0.30,eGate:0.001,dRate:1.0,tauSys:0.30});
+  $('presetClean').classList.add('on');$('presetNoisy').classList.remove('on');
+};
+$('presetNoisy').onclick=()=>{
+  setVals({sCl:0.08,shotN:512,T2:60,aDec:0.55,eGate:0.012,dRate:4.0,tauSys:0.30});
+  $('presetNoisy').classList.add('on');$('presetClean').classList.remove('on');
+};
+
+function setVals(v){
+  for(const k in v){$(k).value=v[k];$(k).dispatchEvent(new Event('input'));}
+}
+
+render();
+</script>
+</body>
+</html>
