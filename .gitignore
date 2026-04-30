@@ -28,3 +28,33 @@ build/
 
 # Private Local Reports
 local_reports/
+# Gemini CLI
+.gemini/
+
+# Node.js（Gemini CLI・各種ツール）
+node_modules/
+.npmrc
+*.lock
+
+# Environment variables
+.env
+.env.*
+
+# Python仮想環境
+.venv/
+venv/
+env/
+
+# Jupyter
+*.ipynb_checkpoints/
+.ipynb_checkpoints/
+
+# TypeScript
+*.js.map
+*.d.ts
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~

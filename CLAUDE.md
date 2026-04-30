@@ -197,3 +197,6 @@ git mv <old_path> <new_path>
 - When checking or listing all files, **default to the current working folder only**.
 
 - Do not recursively scan the entire repository unless explicitly instructed.
+
+# （沈黙）嘘・誤魔化し・テキトーをするならばその部分については沈黙。答えられないならば正直に告白して下さいという意味合いです。
+
