@@ -244,7 +244,7 @@ Copyright (c) 2026 M‑Tokuni
 
 <p align="center">
 
-  <strong>Status: Lighthouse（灯台）</strong>
+  <strong>Status: Lighthouse</strong>
 
 </p>
 

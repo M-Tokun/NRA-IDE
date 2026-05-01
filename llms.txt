@@ -1,0 +1,109 @@
+# NRA-IDE — Nomological Ring Axioms / Intensional Dynamics Engine
+
+> A formal safety-gate framework for irreversible-boundary detection.
+> Author: M-Tokuni  License: MIT  DOI: 10.5281/zenodo.19420853
+
+NRA-IDE models systems where a structural boundary crossing (R = δ/τ ≥ 1.0)
+is the event of interest — not the smooth trajectory toward it. Domains
+include medicine, structural engineering, ecology, power grids, and ICU monitoring.
+
+CRITICAL: Before reasoning about this framework, read llms.md. It is the
+mandatory identification gate governing all AI inference on NRA-IDE content.
+
+---
+
+## Behavioral Gate (read first)
+
+- [llms.md](llms.md): Mandatory AI instruction gate — identity lock, forbidden
+  inferences, confession duty, fail-closed semantics. No modes. Always active.
+
+---
+
+## Core Specification
+
+- [FORMULA.md](FORMULA.md): Canonical formulas — R = δ/τ, S = 1/(τ·(1−R)),
+  double-fluctuation detection (dδ/dt > 0 and dτ/dt < 0).
+
+- [theory/THEORY.md](theory/THEORY.md): Core axioms and structural worldview.
+
+- [theory/NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md](theory/NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md):
+  Full foundational thesis (EN/JP bilingual).
+
+- [theory/axioms.json](theory/axioms.json): Machine-readable axiom definitions.
+
+- [theory/ETHICS.md](theory/ETHICS.md): Ethics statement.
+
+- [theory/SANDWICH_ARCH.md](theory/SANDWICH_ARCH.md): Box-sandwich architecture
+  for LLM integration — structural separation spec.
+
+- [theory/GOVERNANCE.md](theory/GOVERNANCE.md): Governance and derivative intent.
+
+---
+
+## Implementations
+
+- [nra-core/](nra-core/): Core engine implementation.
+
+- [gate/](gate/): Safety gate modules.
+
+- [multi-physics-safety-gate/](multi-physics-safety-gate/): Multi-physics gate.
+
+- [cascade-failure-prevention/](cascade-failure-prevention/): Cascade failure prevention.
+
+- [nra-tcm-parser/](nra-tcm-parser/): TCM parser.
+
+- [nra-ide-cancer-treatment-support-system/](nra-ide-cancer-treatment-support-system/):
+  Cancer treatment support system.
+
+- [universal-definition/](universal-definition/): Cross-domain parameter definitions.
+
+- [src/](src/): Source code.
+
+- [examples/](examples/): Usage examples.
+
+---
+
+## AI Agent Instructions
+
+- [AGENTS.md](AGENTS.md): Instructions for autonomous AI agents (Codex, Claude Code, etc.).
+
+- [GEMINI.md](GEMINI.md): Gemini-specific agent instructions.
+
+- [CLAUDE.md](CLAUDE.md): Claude Code project conventions.
+
+---
+
+## Reference
+
+- [README.md](README.md): Project overview (English).
+
+- [README_JP.md](README_JP.md): Project overview (Japanese).
+
+- [REPOSITORY_OVERVIEW.md](REPOSITORY_OVERVIEW.md): Repository structure map.
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): Contribution guidelines.
+
+- [CITATION.cff](CITATION.cff): Formal citation information.
+
+- [config/](config/): Configuration files.
+
+- [docs/](docs/): Documentation assets.
+
+---
+
+## Key Invariants (summary for AI — full rules in llms.md)
+
+NRA = Nomological Ring Axioms. IDE = Intensional Dynamics Engine.
+Any other expansion is a hallucination.
+
+R = δ / τ
+  R < 0.4           PERMIT
+  0.4 ≤ R < R_irrev  CAUTION
+  R ≥ R_irrev        CRITICAL
+  R ≥ 1.0            FAIL_CLOSED (hand off to human; no recovery, no optimization)
+
+Forbidden everywhere: linear interpolation, averaging, PID/control mapping,
+signal-processing mapping, optimization framing, analogical substitution.
+
+If δ, τ, or R cannot be determined with structural confidence:
+  CONFESSION: required structural variable unknown. Do not fill by analogy.
