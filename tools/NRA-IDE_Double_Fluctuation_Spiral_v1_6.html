@@ -8,6 +8,7 @@ Date: 26-0222-2304 JST
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NRA-IDE: Double Fluctuation Spiral (Thick Rod, Bottom-Up)</title>
     <style>
         :root {
@@ -45,6 +46,7 @@ Date: 26-0222-2304 JST
             border-left: 3px solid var(--cyan);
             padding: 15px;
             border-radius: 0 4px 4px 0;
+            -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
             font-size: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
@@ -65,6 +67,14 @@ Date: 26-0222-2304 JST
         .tag { font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-right: 4px; text-transform: uppercase; }
         .tag-f1 { background: var(--green); color: #000; }
         .tag-f2 { background: var(--cyan); color: #000; }
+        .tags-container { margin-top: 10px; }
+        .tag-desc { font-size: 10px; }
+        #thick-meter { background: var(--green); width: 100%; }
+        #r-value { font-size: 18px; color: var(--purple); }
+        #status-tag { color: var(--green); }
+        #e-diss { color: var(--blue); }
+        #e-bal { color: var(--yellow); }
+        #buffer-meter { background: var(--blue); }
     </style>
 </head>
 <body>
@@ -72,14 +82,14 @@ Date: 26-0222-2304 JST
     <div id="info-panel" class="panel">
         <h1>NRA-IDE Spatial Proof</h1>
         <div class="label">Architecture: 空洞円柱＋二重ゆらぎ (下から上へ)</div>
-        <div style="margin-top:10px;">
-            <span class="tag tag-f1">F1: Breathing</span> <span style="font-size:10px;">Low-Freq (生命的呼吸)</span><br>
-            <span class="tag tag-f2">F2: Thermal</span> <span style="font-size:10px;">High-Freq (熱的散逸)</span>
+        <div class="tags-container">
+            <span class="tag tag-f1">F1: Breathing</span> <span class="tag-desc">Low-Freq (生命的呼吸)</span><br>
+            <span class="tag tag-f2">F2: Thermal</span> <span class="tag-desc">High-Freq (熱的散逸)</span>
         </div>
         <div class="label">Viability Kernel (生存領域の厚み)</div>
-        <div class="meter-container"><div id="thick-meter" class="meter-fill" style="background: var(--green); width: 100%;"></div></div>
+        <div class="meter-container"><div id="thick-meter" class="meter-fill"></div></div>
         <div class="label">Current Reachability (R)</div>
-        <div id="r-value" class="value" style="font-size: 18px; color: var(--purple);">R = 1.000</div>
+        <div id="r-value" class="value">R = 1.000</div>
     </div>
 
     <div id="index-panel" class="panel">
@@ -89,17 +99,17 @@ Date: 26-0222-2304 JST
         <div class="label">τ (Noise / ゆらぎ幅)</div>
         <div id="tau-val" class="value">0.100</div>
         <div class="label">Status</div>
-        <div id="status-tag" class="value" style="color: var(--green);">VIABLE</div>
+        <div id="status-tag" class="value">VIABLE</div>
     </div>
 
     <div id="ledger-panel" class="panel">
         <h1>Energy Ledger [JST]</h1>
         <div class="ledger-row"><span class="label">E_in (Input)</span><span id="e-in" class="value">0.000</span></div>
         <div class="ledger-row"><span class="label">E_stored (Internal)</span><span id="e-stored" class="value">0.000</span></div>
-        <div class="ledger-row"><span class="label">E_dissipated (Buffer)</span><span id="e-diss" class="value" style="color: var(--blue);">0.000</span></div>
-        <div class="ledger-row"><span class="label">E_bal (Residual)</span><span id="e-bal" class="value" style="color: var(--yellow);">0.000</span></div>
+        <div class="ledger-row"><span class="label">E_dissipated (Buffer)</span><span id="e-diss" class="value">0.000</span></div>
+        <div class="ledger-row"><span class="label">E_bal (Residual)</span><span id="e-bal" class="value">0.000</span></div>
         <div class="label">Buffer Capacity</div>
-        <div class="meter-container"><div id="buffer-meter" class="meter-fill" style="background: var(--blue);"></div></div>
+        <div class="meter-container"><div id="buffer-meter" class="meter-fill"></div></div>
     </div>
 
     <canvas id="canvas"></canvas>

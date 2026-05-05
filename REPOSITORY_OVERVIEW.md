@@ -1,59 +1,100 @@
 # NRA-IDE — Repository Overview
 
-Short purpose
-- High-level map of the repository: intent, main subsystems, and where to start.
+Quick navigation map. Start here if you are new to this repository.
 
-Quick Start (recommended read order)
-1. README.md (root) — project thesis and core axiom (R = δ/τ).
-2. REPOSITORY_OVERVIEW.md — this file: quick map and pointers.
-3. universal-definition/** — Quick Reference and Implementation Guide (read for safety principles).
-4. src/** — core implementation and pipelines (see "Implementation points" below).
-5. nra-tcm-parser/** — text crystallization tools and examples (large-document processing).
-6. nra-ide-cancer-treatment-support-system/** — domain example (medical application).
-7. examples/** — interactive demos and use-case samples (HTML).
+---
 
-Top-level layout
-- .github/ : CI & issue templates
-- docs/ : supplementary documentation and developer guides
-- examples/ : interactive demos (HTML)
-- gate/ : gating modules (JP/EN)
-- nra-core, src/ : core engines and pipelines
-- nra-tcm-parser/ : long-document parser utilities
-- nra-ide-cancer-treatment-support-system/ : domain project
-- universal-definition/ : formal definitions, quick ref, checklist
-- local_reports/ : local outputs, logs (git-ignored)
+## Quick Start (Recommended Read Order)
 
-Key concepts to know (Quick Reference)
-- Core axiom: R = δ/τ (Structural Ratio). This is the authority for output validation.
-- Fail-Closed: Any output that violates structural constraints is silenced and discarded (never reintroduced into LLM context).
-- Three-layer architecture: Pre-RNA (input gate/filter) → LLM (generation device) → Post-RNA (validator / CleanContext).
-- Silence principle: When structurally impossible, the system must return "structurally impossible" and remain silent (no alternatives or exploration).
-- Naming & encoding rules: see CLAUDE.md (no spaces, use _EN/_JP, UTF-8 with LF line endings).
+1. [README.md](./README.md) — Project thesis and core axiom (R = δ/τ)
+2. **This file** — Repository map and quick pointers
+3. [universal-definition/](./universal-definition/) — Safety principles and formal definitions
+4. [src/](./src/) — Core implementation and pipelines
+5. [nra-tcm-parser/](./nra-tcm-parser/) — Text crystallization and large-document processing
+6. [nra-ide-cancer-treatment-support-system/](./nra-ide-cancer-treatment-support-system/) — Medical domain application
+7. [examples/](./examples/) — Interactive HTML demos (41 simulations)
 
-Implementation points (src/ highlights)
-- Primary pipeline scripts (EN/JP variants exist):
-  - nra_pre_rna_2026-02-13_0135.py / nra_pre_rna_EN_2026-02-13_0135.py — Full integrated pipeline (Pre-RNA + LLM + Post-RNA).
-  - nra_llm_pipeline_2026-02-13_0135.py / nra_llm_pipeline_EN_2026-02-13_0135.py — LLM bridge and pipeline (post-RNA validation included).
-  - nra_document_structure_2026-02-13_0135.py / nra_document_structure_EN_2026-02-13_0135.py — Post-RNA document structure engine (genesis/axioms, sections, validation).
-- Gate / structure modules:
-  - structure_gate_bilingual_2026-04-17_210655.py — bilingual gate handling.
-  - structure_gate_survival_base_2026-04-18_214422.py — survival/robustness gate logic.
-- Utilities and engines:
-  - BioDynamic_IDE_Engine_v2_20260406_1947.py — experimental engine (biodynamic variant).
-- README files in src/ provide usage examples, API patterns, and quick start commands. Review these before running pipelines.
+---
 
-What to inspect next (recommended)
-- Read universal-definition/** (Quick Reference and Implementation Guide) for safety axioms and operational rules.
-- Inspect src/*_EN*.py and corresponding README.md to understand configuration variables (domain τ, R_op) and how to run demos (MOCK provider vs real API).
-- Review nra-tcm-parser README for large-document processing patterns if you need text-crystallization utilities.
+## Directory Map
 
-What’s missing / recommended improvements
-- Single repository-level quick guide (this file added).
-- Add architecture diagram (docs/ARCHITECTURE.md or docs/figures/), and a CONTRIBUTING.md describing development flow and command examples.
-- Consider adding small runnable examples (scripts/quickstart.sh or .ps1) that start the MOCK pipeline for new contributors.
+| Directory | Contents |
+|---|---|
+| [`.devcontainer/`](./.devcontainer/) | Dev Container / Docker sandbox configuration |
+| [`.github/`](./.github/) | CI workflows and GitHub issue templates |
+| [`cascade-failure-prevention/`](./cascade-failure-prevention/) | Cascade failure prevention gate modules |
+| [`config/`](./config/) | Configuration files |
+| [`docs/`](./docs/) | Supplementary documentation and developer guides |
+| [`examples/`](./examples/) | Interactive HTML demos (41 simulations) |
+| [`gate/`](./gate/) | Gating modules — EN and JP variants |
+| [`multi-physics-safety-gate/`](./multi-physics-safety-gate/) | Multi-physics safety gate implementation |
+| [`note/`](./note/) | Development notes and architecture explorations |
+| [`nra-core/`](./nra-core/) | Core NRA engine |
+| [`nra-ide-cancer-treatment-support-system/`](./nra-ide-cancer-treatment-support-system/) | Medical domain application (cancer treatment support) |
+| [`nra-tcm-parser/`](./nra-tcm-parser/) | TCM / long-document parser and crystallization tools |
+| [`scripts/`](./scripts/) | Utility and automation scripts |
+| [`src/`](./src/) | Primary pipeline scripts and gate modules |
+| [`theory/`](./theory/) | Core axioms, foundational thesis, ethics |
+| [`tools/`](./tools/) | Standalone tools and visualizers |
+| [`universal-definition/`](./universal-definition/) | Formal definitions, quick reference, safety checklist |
 
-If you want, the next steps can be:
-- Generate a concise architecture diagram placeholder in docs/ and a PNG stub.
-- Create CONTRIBUTING.md with recommended developer steps (branching, testing, running MOCK pipeline).
-- Extract concrete configuration keys (e.g., domain τ defaults) into a central config file.
+---
 
+## Key Root Files
+
+| File | Description |
+|---|---|
+| [README.md](./README.md) | Project overview — English |
+| [README_JP.md](./README_JP.md) | Project overview — Japanese |
+| [FORMULA.md](./FORMULA.md) | Core equations — R = δ/τ and Dual-Fluctuation Formula |
+| [REPOSITORY_OVERVIEW.md](./REPOSITORY_OVERVIEW.md) | This file — repository navigation map |
+| [AGENTS.md](./AGENTS.md) | AI agent operational guide |
+| [CLAUDE.md](./CLAUDE.md) | Claude Code workspace constraints and naming conventions |
+| [GEMINI.md](./GEMINI.md) | Gemini workspace guide |
+| [llms.md](./llms.md) | LLM index and integration notes |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guidelines |
+| [CITATION.cff](./CITATION.cff) | Citation metadata for formal attribution |
+| [LICENSE](./LICENSE) | MIT License |
+
+---
+
+## Key Concepts
+
+| Term | Definition |
+|---|---|
+| `R = δ/τ` | Structural Ratio — deviation relative to constraint boundary |
+| `δ` (delta) | Deviation from structural constraint |
+| `τ` (tau) | Tolerance boundary (thickness of tension) — **not** a time constant |
+| R ≥ 1.0 | Structure at limit — output must stop (Fail-Closed) |
+| Integer Phase Lock | Each state transition is structurally complete; no residual carries forward |
+| Silence Principle | When structurally impossible, return silence — never generate alternatives |
+
+---
+
+## Architecture Overview
+
+```
+Pre-RNA  (input gate / filter)
+    ↓
+LLM      (generation device)
+    ↓
+Post-RNA (validator / CleanContext)
+```
+
+- **Fail-Closed**: Outputs violating structural constraints are silenced and discarded — never reintroduced into LLM context.
+- **No distance**: State transitions are described without causal distance assumptions.
+
+---
+
+## src/ Implementation Highlights
+
+| Script Pattern | Role |
+|---|---|
+| `nra_pre_rna_*.py` | Full integrated pipeline (Pre-RNA + LLM + Post-RNA) |
+| `nra_llm_pipeline_*.py` | LLM bridge with Post-RNA validation |
+| `nra_document_structure_*.py` | Post-RNA document structure engine |
+| `structure_gate_bilingual_*.py` | Bilingual gate handling |
+| `structure_gate_survival_base_*.py` | Survival / robustness gate logic |
+| `BioDynamic_IDE_Engine_*.py` | Experimental biodynamic engine variant |
+
+EN and JP variants exist for primary pipeline scripts. See [src/README.md](./src/README.md) for usage and configuration variables.

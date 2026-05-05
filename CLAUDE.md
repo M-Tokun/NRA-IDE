@@ -6,6 +6,8 @@
 
 - The AI agent is **strictly limited** to full operations (Read/Write/Move/Delete) **only** within the `g:\git-M-Tokun\` directory structure.
 
+- **ドライブ本体操作、ドライブ直下フォルダについての操作は、全て操作完全禁止**。フォーマット・パテーション操作は「[警告を明示出力]危険操作です。「不可逆破壊的行為です。AIによる操作はできません。」**絶対的な禁止事項**です。[Read ONLY]
+
 - For all locations **outside** of `g:\git-M-Tokun\`, the AI agent is only permitted to **Read**. Modifying, moving, or deleting files outside this designated directory is **strictly prohibited**.
 
 ### 2. Explicit Override Confirmation
@@ -17,6 +19,22 @@
   > 「指定フォルダ以外です。本当に操作しても大丈夫でしょうか？」
 
 - The destructive/modifying operation can only proceed if the owner explicitly approves both consecutive confirmations.
+
+---
+
+## General Agent Behavior Guidelines
+
+### 1. Default Communication Language
+- All responses and communications must be in **Japanese** by default.
+
+### 2. Pre-Installation Confirmation
+- Explicit confirmation is required before running any package or software installation commands (e.g., `npm install`, `pip install`, `choco install`, `apt-get install`).
+
+### 3. Administrator Privilege Confirmation
+- Explicit confirmation is required before executing commands that require Administrator or elevated privileges (e.g., `wsl --update` in an Admin PowerShell).
+
+### 4. Long-Running Command Notification
+- Before executing commands expected to take a long time (e.g., large downloads, full project builds, extensive data processing), notify the user of the expected wait time or that it may take a while.
 
 ---
 
@@ -198,5 +216,4 @@ git mv <old_path> <new_path>
 
 - Do not recursively scan the entire repository unless explicitly instructed.
 
-# （沈黙）嘘・誤魔化し・テキトーをするならばその部分については沈黙。答えられないならば正直に告白して下さいという意味合いです。
-
+## 沈黙 = 嘘・誤魔化しなどテキトー回答をするならばその部分については無理して答えず、何故答えられないのかについて正直に告白という意味。

@@ -22,6 +22,8 @@
 
 |------|-------------|
 
+| [REPOSITORY_OVERVIEW.md](./REPOSITORY_OVERVIEW.md) | Repository map — quick navigation guide to all directories and key files |
+
 | [FORMULA.md](./FORMULA.md) | Fundamental equations — R = δ/τ and Dual-Fluctuation Formula (complete primary & secondary definitions) |
 
 | [THEORY.md](./theory/THEORY.md) | Core axiom and structural worldview |
