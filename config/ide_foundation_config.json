@@ -1,7 +1,3 @@
-
-## **📄 ide_foundation_config.json（構造純度 100% 版）**
-
-```json
 {
   "meta": {
     "system": "NRA-IDE",
@@ -9,7 +5,6 @@
     "type": "FOUNDATION",
     "structure_purity": "100%"
   },
-
   "invariants": {
     "no_center": true,
     "no_distance": true,
@@ -21,13 +16,11 @@
     "three_layer_isolation": true,
     "symbol_only_principle": true
   },
-
   "physics_constants": {
     "stiffness_k": 1000.0,
     "nirvana_violation_threshold": 0.0001,
     "fracture_limit_ratio": 1.0
   },
-
   "gate_structure": {
     "zone_A": {
       "ratio_max": 0.40,
@@ -42,7 +35,6 @@
       "action": "FAIL_CLOSED"
     }
   },
-
   "discard_log": {
     "record_r": true,
     "record_delta": true,
@@ -50,213 +42,3 @@
     "contains_meaning": false
   }
 }
-```
-
----
-
-## **📄 ide_presets.json（構造純度 100% 版 / Domain Tuning のみ）**
-
-```json
-{
-  "presets": {
-    "DOMAIN_A": {
-      "description": "Domain Tuning: Narrow Boundary",
-      "tuning": {
-        "tau": 20,
-        "r_op": 0.90
-      },
-      "actions": {
-        "zone_A": "PERMIT",
-        "zone_B": "PERMIT_WITH_CAVEAT",
-        "zone_C": "FAIL_CLOSED"
-      }
-    },
-
-    "DOMAIN_B": {
-      "description": "Domain Tuning: Medium Boundary",
-      "tuning": {
-        "tau": 30,
-        "r_op": 1.00
-      },
-      "actions": {
-        "zone_A": "PERMIT",
-        "zone_B": "PERMIT_WITH_CAVEAT",
-        "zone_C": "FAIL_CLOSED"
-      }
-    },
-
-    "DOMAIN_C": {
-      "description": "Domain Tuning: Wide Boundary",
-      "tuning": {
-        "tau": 40,
-        "r_op": 1.00
-      },
-      "actions": {
-        "zone_A": "PERMIT",
-        "zone_B": "PERMIT_WITH_CAVEAT",
-        "zone_C": "FAIL_CLOSED"
-      }
-    }
-  }
-}
-```
-
----
-
-# ✅ **(2) JSON の内部仕様書（構造純度 100%）**
-
-以下は **docs/ja/ide_json_spec.md** として配置できる  
-「内部仕様書（構造純度 100%）」。
-
-README・00〜12 章と完全整合し、  
-意味・最適化・履歴・用途を一切含まない。
-
----
-
-# 📘 **ide_json_spec.md — NRA‑IDE JSON 内部仕様書（構造純度 100%）**
-
-## **0. 本仕様書の目的**
-
-本仕様書は、NRA‑IDE における JSON 設定ファイル  
-（foundation_config.json / presets.json）の  
-**構造的定義のみ**を記述する。
-
-扱うのは：
-
-- 因果構造  
-- 不変量  
-- 閾値  
-- ゲート構造  
-- Domain Tuning（境界幅の調整）  
-
-扱わないもの：
-
-- 意味  
-- 用途  
-- 性能  
-- 最適化  
-- 履歴  
-
----
-
-# **1. foundation_config.json の構造定義**
-
-## **1.1 meta**
-
-| キー | 説明 |
-|------|------|
-| system | 固定値 “NRA‑IDE” |
-| type | FOUNDATION（構造基盤） |
-| structure_purity | 構造純度の宣言（100%） |
-
----
-
-## **1.2 invariants（構造不変量）**
-
-NRA‑IDE の根幹となる不変量。
-
-| 不変量 | 説明 |
-|--------|------|
-| no_center | 中心は存在しない |
-| no_distance | 距離は定義できない |
-| no_similarity | 類似度は定義できない |
-| no_history | 履歴は扱わない |
-| no_optimization | 最適化は構造外 |
-| pi_inverse_forbidden | Π⁻¹（逆導出）禁止 |
-| fail_closed_required | Fail‑Closed 必須 |
-| three_layer_isolation | Pre‑RNA / LLM / Post‑RNA の分離 |
-| symbol_only_principle | 記号のみ扱う |
-
----
-
-## **1.3 physics_constants（物理定数）**
-
-すべて **Non‑Negotiable（非可変）**。
-
-| 定数 | 値 | 説明 |
-|------|-----|------|
-| stiffness_k | 1000.0 | 違反 → 張力変換係数 |
-| nirvana_violation_threshold | 0.0001 | 実質違反なし |
-| fracture_limit_ratio | 1.0 | R ≥ 1.0 → 破断 |
-
----
-
-## **1.4 gate_structure（三層ゲート）**
-
-| Zone | 条件 | 動作 |
-|------|------|------|
-| A | R < 0.40 | PERMIT |
-| B | 0.40 ≤ R < 0.99 | PERMIT_WITH_CAVEAT |
-| C | R ≥ 1.00 | FAIL_CLOSED |
-
-Zone は意味的価値を持たない。
-
----
-
-## **1.5 discard_log**
-
-Discard Log は **構造のみ**を記録する。
-
-| キー | 説明 |
-|------|------|
-| record_r | R（破断直前） |
-| record_delta | δ 断片 |
-| record_timestamp | タイムスタンプ |
-| contains_meaning | 常に false |
-
----
-
-# **2. presets.json の構造定義**
-
-## **2.1 Domain Tuning の原則**
-
-Domain Tuning は **境界幅（τ, R_op）の調整のみ**を許す。
-
-以下は調整不可：
-
-- 意味  
-- 性能  
-- 自然さ  
-- 最適化  
-- 改善  
-
----
-
-## **2.2 presets の構造**
-
-| キー | 説明 |
-|------|------|
-| description | 構造的説明（用途ではない） |
-| tuning | τ と R_op の調整 |
-| actions | Zone ごとの構造動作（Fail‑Closed を含む） |
-
----
-
-## **2.3 tuning**
-
-| パラメータ | 説明 |
-|------------|------|
-| tau | 厚み（構造幅） |
-| r_op | 閾値（構造破断点） |
-
----
-
-## **2.4 actions**
-
-許可される動作は以下のみ：
-
-- PERMIT  
-- PERMIT_WITH_CAVEAT  
-- FAIL_CLOSED  
-
-その他の動作は構造外。
-
----
-
-# **3. 本仕様書の本質**
-
-> **本 JSON は NRA‑IDE の構造不変量を外部に公開するための  
-> 最小限の記号体系である。  
-> 意味・用途・最適化を一切含まない。**
-
----

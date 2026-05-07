@@ -20,8 +20,35 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "anthropic.claude-code",
+        "cweijan.vscode-office",
+        "donjayamanne.githistory",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "github.vscode-pull-request-github",
+        "google.colab",
+        "google.gemini-cli-vscode-ide-companion",
+        "google.geminicodeassist",
+        "henrikdev.ag-quota",
+        "intellsmi.comment-translate",
+        "mhutchie.git-graph",
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker",
+        "ms-ceintl.vscode-language-pack-ja",
+        "ms-python.debugpy",
+        "ms-python.pylint",
         "ms-python.python",
-        "esbenp.prettier-vscode"
+        "ms-python.vscode-python-envs",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "ms-toolsai.vscode-jupyter-slideshow",
+        "ms-vscode.powershell",
+        "ritwickdey.liveserver",
+        "shd101wyy.markdown-preview-enhanced",
+        "slevesque.shader",
+        "yzhang.markdown-all-in-one"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash"

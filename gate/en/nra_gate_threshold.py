@@ -4,13 +4,17 @@
 # ============================================================================
 # [RULE] RATIO_CALC=FLUCTUATION/THICKNESS
 # [ACTION] RATIO<0.4=CONTINUE / RATIO≥1.0=HALT
-# [CONFIG] ../config/ide_foundation_config.json
+# [CONFIG] ../../config/ide_foundation_config.json
 # ============================================================================
 
 import json
 import enum
 import os
+import sys
 from dataclasses import dataclass
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 class SafetyAction(enum.Enum):
     # [ENUM] ACTION_LEVELS
@@ -30,14 +34,27 @@ class SafetyStatus:
 class ThresholdGuardian:
     # [GUARDIAN-PURPOSE] BOUNDARY_FLUCTUATION_EVALUATION
     def __init__(self, config_path: str = None):
-        # [CONFIG-LOAD] DEFAULT=../config/ide_foundation_config.json
+        # [CONFIG-LOAD] DEFAULT=../../config/ide_foundation_config.json
         if config_path is None:
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            config_path = os.path.join(base_dir, 'config', 'ide_foundation_config.json')
+            repo_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            config_path = os.path.join(repo_dir, "config", "ide_foundation_config.json")
             
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = json.load(f)
-        self.levels = self.config["safety_levels"]
+        self.levels = self._load_levels(self.config)
+
+    @staticmethod
+    def _load_levels(config: dict) -> dict:
+        if "safety_levels" in config:
+            return config["safety_levels"]
+
+        gate = config["gate_structure"]
+        return {
+            "level_1": {"name": "Zone A", "ratio_max": gate["zone_A"]["ratio_max"]},
+            "level_2": {"name": "Zone B", "ratio_max": gate["zone_B"]["ratio_max"]},
+            "level_3": {"name": "Zone C", "ratio_max": gate["zone_C"]["ratio_max"]},
+            "level_4": {"name": "Zone C", "ratio_max": gate["zone_C"]["ratio_max"]},
+        }
 
     def evaluate(self, current_fluctuation: float, defined_thickness: float) -> SafetyStatus:
         # [VALIDATION] THICKNESS=MUST_BE_POSITIVE

@@ -20,15 +20,15 @@ gate/
 
 ├── README_ja.md              # [このファイル]
 
-├── nra_gate_axiom_ja.py      # [コア] 公理強制カーネル
+├── nra_gate_axiom_JP.py      # [コア] 公理強制カーネル
 
 ├── nra_gate_axiom_JP.md      # [文書] 公理定義
 
-├── nra_gate_constraint_ja.py # [レイヤー01] 入力検証
+├── nra_gate_constraint_JP.py # [レイヤー01] 入力検証
 
-├── nra_gate_spatial_ja.py    # [レイヤー02] 空間隔離
+├── nra_gate_spatial_JP.py    # [レイヤー02] 空間隔離
 
-├── nra_gate_threshold_ja.py  # [レイヤー03] 閾値検証
+├── nra_gate_threshold_JP.py  # [レイヤー03] 閾値検証
 
 └── __init___ja.py            # [パッケージ] モジュールエクスポート
 
@@ -44,7 +44,7 @@ gate/
 
 ## [ファイル]
 
-### nra_gate_axiom_ja.py ⚠️
+### nra_gate_axiom_JP.py ⚠️
 
 [優先度] 最初に読む  
 
@@ -58,7 +58,7 @@ gate/
 
 ---
 
-### nra_gate_axiom_ja.md
+### nra_gate_axiom_JP.md
 
 [種別] ドキュメント  
 
@@ -76,7 +76,7 @@ gate/
 
 ---
 
-### nra_gate_constraint_ja.py
+### nra_gate_constraint_JP.py
 
 [レイヤー] 入力検証  
 
@@ -94,7 +94,7 @@ gate/
 
 ---
 
-### nra_gate_spatial_ja.py
+### nra_gate_spatial_JP.py
 
 [レイヤー] 空間隔離  
 
@@ -106,7 +106,7 @@ gate/
 
 ---
 
-### nra_gate_threshold_ja.py
+### nra_gate_threshold_JP.py
 
 [レイヤー] 出力検証  
 
@@ -114,7 +114,7 @@ gate/
 
 [機能] 境界揺らぎ評価  
 
-[設定] ../config/ide_foundation_config.json
+[設定] ../../config/ide_foundation_config.json
 
 [ゾーン]
 
@@ -134,7 +134,7 @@ gate/
 
 ```python
 
-from gate import NRAGateKernel, IdeSafetyCore
+from gate.jp import NRAGateKernel, IdeSafetyCore
 
 # [ステップ01] ゲート実体化
 
@@ -156,7 +156,7 @@ core = IdeSafetyCore()
 
 ```python
 
-from gate import SafeEngineWrapper, SpatialContext, SystemState
+from gate.jp import SafeEngineWrapper, SpatialContext, SystemState
 
 # [ラッパー] 空間隔離
 
@@ -186,7 +186,7 @@ new_state, telemetry = wrapper.update(state, context)
 
 ┌─────────────────────────────────┐
 
-│ nra_gate_constraint_ja.py       │ ← [レイヤー01] 入力検証
+│ nra_gate_constraint_JP.py       │ ← [レイヤー01] 入力検証
 
 ├─────────────────────────────────┤
 
@@ -194,9 +194,9 @@ new_state, telemetry = wrapper.update(state, context)
 
 ├─────────────────────────────────┤
 
-│ nra_gate_spatial_ja.py          │ ← [レイヤー03] 空間ファイアウォール
+│ nra_gate_spatial_JP.py          │ ← [レイヤー03] 空間ファイアウォール
 
-│ nra_gate_threshold_ja.py        │ ← [レイヤー03] 閾値監視
+│ nra_gate_threshold_JP.py        │ ← [レイヤー03] 閾値監視
 
 └─────────────────────────────────┘
 

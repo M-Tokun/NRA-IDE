@@ -1,6 +1,6 @@
 
-# 🌱 **NRA-IDE Multi-Physics Safety Gate Architecture
-Supplementary Notes — Gentle, Conversational English Version**
+# NRA-IDE Multi-Physics Safety Gate Architecture
+Supplementary Notes — Gentle, Conversational English Version
 
 ## ■ First of All: This Is a Story About “Checking the Safety of a House”
 

@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>律環-螺旋：散逸構造論ベース可視化 v1.5 (Rod固定版)</title>
     <style>
         body { 
@@ -118,6 +119,11 @@
             font-size: 9px;
             color: #666;
         }
+        .hypothesis-text { font-size:10px; color:#666; line-height:1.4; }
+        .c-red { color:#ff6666; }
+        .c-green { color:#66ff66; }
+        .c-purple { color:#aa55ff; }
+        .pos-70 { left: 70%; }
     </style>
 </head>
 <body>
@@ -133,13 +139,13 @@
         <div class="legend"><div class="box purple"></div>分岐点（臨界領域）</div>
         
         <div class="section-title">§☆ Working Hypothesis</div>
-        <div style="font-size:10px; color:#666; line-height:1.4;">
+        <div class="hypothesis-text">
             通常：ゆらぎは極めて静穏（呼吸）<br>
             揺動：振幅が拡大（内側浸食防止）<br>
             臨界：外縁に接近（まれ）<br>
             <br>
-            <span style="color:#ff6666;">Rod = 完全固定（右端外縁）</span><br>
-            <span style="color:#66ff66;">接点 = 唯一の入出力ポート</span>
+            <span class="c-red">Rod = 完全固定（右端外縁）</span><br>
+            <span class="c-green">接点 = 唯一の入出力ポート</span>
         </div>
     </div>
     
@@ -174,11 +180,11 @@
         <div class="meter-title">ゆらぎ / 厚み 比率</div>
         <div class="meter-bar">
             <div class="meter-fill" id="meter-fill"></div>
-            <div class="meter-threshold" style="left: 70%;"></div>
+            <div class="meter-threshold pos-70"></div>
         </div>
         <div class="meter-labels">
             <span>0%</span>
-            <span style="color:#aa55ff;">臨界70%</span>
+            <span class="c-purple">臨界70%</span>
             <span>100%</span>
         </div>
     </div>

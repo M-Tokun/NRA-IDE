@@ -58,7 +58,7 @@ The correct integration order:
 
 ### Python / Flask
 
-See: `python_flask_middleware_2026-02-05_223015.py`
+See: `integrations/app_middleware/python_flask_middleware.py`
 
 Usage:
 
@@ -78,7 +78,7 @@ def my_endpoint():
 
 ### Node.js / Express
 
-See: `nodejs_express_middleware_2026-02-05_223015.js`
+See: `integrations/app_middleware/nodejs_express_middleware.js`
 
 Usage:
 

@@ -9,6 +9,7 @@ Date: 26-0223-0115 JST
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NRA-IDE v1.8: Hybrid (Double Fluctuation + Entropy)</title>
     <style>
         :root {
@@ -45,7 +46,7 @@ Date: 26-0223-0115 JST
             border-left: 3px solid var(--cyan);
             padding: 15px;
             border-radius: 0 4px 4px 0;
-            backdrop-filter: blur(8px);
+            /* Removed backdrop-filter to prevent compat-api/css warnings */
             font-size: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             pointer-events: none;
@@ -70,6 +71,19 @@ Date: 26-0223-0115 JST
         .status-ok { color: var(--green); }
         .status-warn { color: var(--yellow); }
         .status-danger { color: var(--red); }
+        .mt-6 { margin-top: 6px; }
+        .c-red { color: var(--red); }
+        .c-purple { color: var(--purple); }
+        .c-blue { color: var(--blue); }
+        .c-green { color: var(--green); }
+        .c-yellow { color: var(--yellow); }
+        .c-cyan { color: var(--cyan); }
+        .bg-green { background: var(--green); }
+        .bg-blue { background: var(--blue); }
+        .bg-cyan { background: var(--cyan); }
+        .bg-grad-entropy { background: linear-gradient(90deg, #0088ff, #00ff88); }
+        .fs-16 { font-size: 16px; }
+        .fs-13-mt-10 { font-size: 13px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -79,21 +93,21 @@ Date: 26-0223-0115 JST
         <div class="label">Double Fluctuation + Entropy Tracking</div>
         
         <h2>Physical Oscillations</h2>
-        <div style="margin-top:6px;">
+        <div class="mt-6">
             <span class="tag tag-f1">F1: 0.04Hz</span> 呼吸的（生命）<br>
             <span class="tag tag-f2">F2: 0.7Hz</span> 熱的（散逸）
         </div>
 
         <h2>Rod State</h2>
         <div class="row"><span class="label">接点位置</span><span class="value">t=0° (固定)</span></div>
-        <div class="row"><span class="label">R_rod</span><span id="rod-rad" class="value" style="color:var(--red);">150.0</span></div>
+        <div class="row"><span class="label">R_rod</span><span id="rod-rad" class="value c-red">150.0</span></div>
         <div class="row"><span class="label">状態</span><span id="contact-stat" class="value status-ok">CONTACT ✓</span></div>
 
         <h2>Structural Stability</h2>
-        <div class="meter-container"><div id="viability-meter" class="meter-fill" style="background: var(--green); width:100%;"></div></div>
+        <div class="meter-container"><div id="viability-meter" class="meter-fill bg-green"></div></div>
         <div class="row"><span class="label">δ (Core)</span><span id="delta-val" class="value">0.800</span></div>
         <div class="row"><span class="label">τ (Noise)</span><span id="tau-val" class="value">0.100</span></div>
-        <div class="row"><span class="label">R=δ/τ</span><span id="r-val" class="value" style="color:var(--purple);">8.000</span></div>
+        <div class="row"><span class="label">R=δ/τ</span><span id="r-val" class="value c-purple">8.000</span></div>
     </div>
 
     <div id="entropy-panel" class="panel">
@@ -103,20 +117,20 @@ Date: 26-0223-0115 JST
         <h2>Generation & Dissipation</h2>
         <div class="row">
             <span class="label">σ (Generation)</span>
-            <span id="sigma-val" class="value" style="color:var(--blue);">0.500</span>
+            <span id="sigma-val" class="value c-blue">0.500</span>
         </div>
         <div class="row">
             <span class="label">J (Dissipation)</span>
-            <span id="j-val" class="value" style="color:var(--green);">0.500</span>
+            <span id="j-val" class="value c-green">0.500</span>
         </div>
         <div class="meter-container">
-            <div id="entropy-meter" class="meter-fill" style="background: linear-gradient(90deg, #0088ff, #00ff88);"></div>
+            <div id="entropy-meter" class="meter-fill bg-grad-entropy"></div>
         </div>
 
         <h2>Congestion & Phase</h2>
         <div class="row">
             <span class="label">σ-J (Congestion)</span>
-            <span id="cong-val" class="value" style="color:var(--yellow);">0.000</span>
+            <span id="cong-val" class="value c-yellow">0.000</span>
         </div>
         <div class="row">
             <span class="label">Phase φ</span>
@@ -124,7 +138,7 @@ Date: 26-0223-0115 JST
         </div>
         <div class="row">
             <span class="label">Angular ω</span>
-            <span id="omega-val" class="value" style="color:var(--green);">> 0 ✓</span>
+            <span id="omega-val" class="value c-green">> 0 ✓</span>
         </div>
 
         <h2>Critical Status</h2>
@@ -143,9 +157,9 @@ Date: 26-0223-0115 JST
         
         <h2>Dynamics</h2>
         <div class="label">value (stored)</div>
-        <div id="state-val" class="value" style="font-size:16px;">0.500</div>
+        <div id="state-val" class="value fs-16">0.500</div>
         <div class="meter-container">
-            <div id="state-meter" class="meter-fill" style="background:var(--blue); width:50%;"></div>
+            <div id="state-meter" class="meter-fill bg-blue"></div>
         </div>
 
         <h2>Expansion</h2>
@@ -154,13 +168,13 @@ Date: 26-0223-0115 JST
 
         <h2>Correction</h2>
         <div class="label">buffer (dissipated)</div>
-        <div id="buffer-val" class="value" style="color:var(--cyan);">0.000</div>
+        <div id="buffer-val" class="value c-cyan">0.000</div>
         <div class="meter-container">
-            <div id="buffer-meter" class="meter-fill" style="background:var(--cyan);"></div>
+            <div id="buffer-meter" class="meter-fill bg-cyan"></div>
         </div>
 
         <h2>Overall Status</h2>
-        <div id="overall-status" class="value status-ok" style="font-size:13px; margin-top:10px;">VIABLE</div>
+        <div id="overall-status" class="value status-ok fs-13-mt-10">VIABLE</div>
     </div>
 
     <canvas id="canvas"></canvas>

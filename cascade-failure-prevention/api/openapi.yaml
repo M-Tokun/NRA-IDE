@@ -102,7 +102,7 @@ paths:
                   summary: 遮断の例
                   value:
                     decision: SILENCE
-                    R: 4.32
+                    R: 8.64
                     reason: chain reaction detected or hold active
 
   /v1/nginx_auth:

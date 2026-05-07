@@ -1,4 +1,4 @@
-# 📗 **Multi-Physics_Safety_Gate_Architecture.md — English Translation 
+# 📗 **Multi-Physics_Safety_Gate_Architecture.md — English Translation**
 
 ## NRA-IDE Multi-Physics Safety Gate Architecture  
 
@@ -154,7 +154,7 @@ R_{sys} \ge 1.0 \implies \text{Physical Forced Shutdown}
 
 ## 6. System Topology
 
-（Mermaid diagram translated faithfully; structure preserved exactly.  
+See `Multi-Physics_Safety_Gate_Architecture.md` for the authoritative Mermaid topology. The structure is identical to the Japanese source document.
 
 ---
 

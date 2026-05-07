@@ -9,9 +9,13 @@
 # ============================================================
 
 import math
+import sys
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 
 # ============================================================

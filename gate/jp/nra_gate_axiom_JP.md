@@ -156,7 +156,7 @@ ZONE_C: 比率 >= 1.00 = フェイルクローズ
 
 ### 参照
 
-FILE=nra_gate_axiom_ja.py  
+FILE=nra_gate_axiom_JP.py
 
 CLASS=NRAGateKernel  
 

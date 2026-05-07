@@ -1,5 +1,5 @@
-<!-- FILE: NRA-IDE_IPL_3Layer_Monitor_EN.html -->
 <!DOCTYPE html>
+<!-- FILE: NRA-IDE_IPL_3Layer_Monitor_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -388,13 +388,13 @@
       <div class="param-row">
         <span class="param-label">δ_snr</span>
         <span class="param-name">SNR Degradation</span>
-        <input type="range" min="0" max="100" value="30" id="a-delta" oninput="updateA()">
+        <input type="range" min="0" max="100" value="30" id="a-delta" aria-label="a-delta" title="a-delta" oninput="updateA()">
         <span class="param-val" id="a-delta-val">0.30</span>
       </div>
       <div class="param-row">
         <span class="param-label">τ_snr</span>
         <span class="param-name">Reliability Thresh.</span>
-        <input type="range" min="10" max="100" value="60" id="a-tau" oninput="updateA()">
+        <input type="range" min="10" max="100" value="60" id="a-tau" aria-label="a-tau" title="a-tau" oninput="updateA()">
         <span class="param-val" id="a-tau-val">0.60</span>
       </div>
     </div>
@@ -405,7 +405,7 @@
     </div>
 
     <div class="progress-wrap">
-      <div class="progress-fill" id="bar-a" style="width:50%"></div>
+      <div class="progress-fill" id="bar-a"></div>
     </div>
 
     <div class="status safe" id="status-a">
@@ -441,13 +441,13 @@
       <div class="param-row">
         <span class="param-label">δΦ</span>
         <span class="param-name">Flux Deviation</span>
-        <input type="range" min="0" max="100" value="40" id="b-delta" oninput="updateB()">
+        <input type="range" min="0" max="100" value="40" id="b-delta" aria-label="b-delta" title="b-delta" oninput="updateB()">
         <span class="param-val" id="b-delta-val">0.40</span>
       </div>
       <div class="param-row">
         <span class="param-label">τΦ</span>
         <span class="param-name">Critical Margin</span>
-        <input type="range" min="10" max="100" value="70" id="b-tau" oninput="updateB()">
+        <input type="range" min="10" max="100" value="70" id="b-tau" aria-label="b-tau" title="b-tau" oninput="updateB()">
         <span class="param-val" id="b-tau-val">0.70</span>
       </div>
     </div>
@@ -458,7 +458,7 @@
     </div>
 
     <div class="progress-wrap">
-      <div class="progress-fill" id="bar-b" style="width:57%"></div>
+      <div class="progress-fill" id="bar-b"></div>
     </div>
 
     <div class="status safe" id="status-b">
@@ -494,19 +494,19 @@
       <div class="param-row">
         <span class="param-label">R_h</span>
         <span class="param-name">Thermodynamics</span>
-        <input type="range" min="0" max="100" value="50" id="c-heat" oninput="updateC()">
+        <input type="range" min="0" max="100" value="50" id="c-heat" aria-label="c-heat" title="c-heat" oninput="updateC()">
         <span class="param-val" id="c-heat-val">0.50</span>
       </div>
       <div class="param-row">
         <span class="param-label">R_p</span>
         <span class="param-name">Fluid Pressure</span>
-        <input type="range" min="0" max="100" value="40" id="c-pres" oninput="updateC()">
+        <input type="range" min="0" max="100" value="40" id="c-pres" aria-label="c-pres" title="c-pres" oninput="updateC()">
         <span class="param-val" id="c-pres-val">0.40</span>
       </div>
       <div class="param-row">
         <span class="param-label">R_s</span>
         <span class="param-name">Structural Stress</span>
-        <input type="range" min="0" max="100" value="30" id="c-str" oninput="updateC()">
+        <input type="range" min="0" max="100" value="30" id="c-str" aria-label="c-str" title="c-str" oninput="updateC()">
         <span class="param-val" id="c-str-val">0.30</span>
       </div>
     </div>
@@ -517,7 +517,7 @@
     </div>
 
     <div class="progress-wrap">
-      <div class="progress-fill" id="bar-c" style="width:70%"></div>
+      <div class="progress-fill" id="bar-c"></div>
     </div>
 
     <div class="status safe" id="status-c">

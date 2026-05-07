@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- FILE: NRA-IDE_Connection_vs_Mixing_Risk_001.html -->
     <title>NRA-IDE: 接続 vs 混用 — Connection vs Mixing</title>
     <style>
@@ -244,6 +245,15 @@
             z-index: 50;
         }
         #flashNG { inset: 0; background: rgba(255,34,68,0.07); }
+
+        .c-ok { color: var(--ok); }
+        .c-ng-light { color: #ff6688; }
+        .c-ng { color: var(--ng); }
+        .c-yellow { color: var(--yellow); }
+        .c-cyan { color: var(--cyan); }
+        .tau-fixed { font-size:10px; color:var(--ok); margin-left:6px; }
+        .tau-mod { font-size:10px; color:var(--ng); margin-left:6px; }
+        .gate-t-warn { color:var(--ng); font-size:9px; }
     </style>
 </head>
 <body>
@@ -280,10 +290,10 @@
 <!-- Shared controls -->
 <div id="sharedCtrl">
     <div class="ctrl-label">速度 Speed</div>
-    <input type="range" id="sl-speed" min="0" max="150" value="60">
+    <input type="range" id="sl-speed" aria-label="Speed" title="Speed" min="0" max="150" value="60">
     <div class="ctrl-val" id="lbl-speed">60 km/h</div>
     <div class="ctrl-label">車間距離 Distance</div>
-    <input type="range" id="sl-dist" min="0" max="150" value="80">
+    <input type="range" id="sl-dist" aria-label="Distance" title="Distance" min="0" max="150" value="80">
     <div class="ctrl-val" id="lbl-dist">80 m</div>
     <div class="ctrl-note">← 同一入力で両方に適用 / Same input applied to both sides</div>
 </div>
@@ -296,7 +306,7 @@
         <div class="side-head">
             <span class="sh-badge badge-ok">✓ OK</span>
             <span class="sh-title">接続 — 一方向の情報流</span>
-            <span class="sh-status" id="status-ok" style="color:var(--ok)">GATE INDEPENDENT</span>
+            <span class="sh-status c-ok" id="status-ok">GATE INDEPENDENT</span>
         </div>
 
         <div class="flow-wrap">
@@ -312,11 +322,11 @@
             <div class="gate-row">
                 <span class="gate-key">τ (thickness)</span>
                 <span class="gate-val tau-val-ok" id="ok-tau">8.0 m</span>
-                <span style="font-size:10px;color:var(--ok);margin-left:6px">固定 FIXED</span>
+                <span class="tau-fixed">固定 FIXED</span>
             </div>
             <div class="gate-row">
                 <div class="gate-bar-wrap">
-                    <div class="gate-bar" id="ok-bar" style="width:0%"></div>
+                    <div class="gate-bar" id="ok-bar"></div>
                 </div>
             </div>
         </div>
@@ -351,7 +361,7 @@
         <div class="side-head">
             <span class="sh-badge badge-ng">✗ NG</span>
             <span class="sh-title">混用 — 双方向の情報交換</span>
-            <span class="sh-status" id="status-ng" style="color:#ff6688">GATE COMPROMISED</span>
+            <span class="sh-status c-ng-light" id="status-ng">GATE COMPROMISED</span>
         </div>
 
         <div class="flow-wrap">
@@ -359,7 +369,7 @@
         </div>
 
         <div class="gate-wrap">
-            <div class="gate-title">Gate Parameters <span style="color:var(--ng);font-size:9px">⚠ τ が動的変化中 / τ is being modified</span></div>
+            <div class="gate-title">Gate Parameters <span class="gate-t-warn">⚠ τ が動的変化中 / τ is being modified</span></div>
             <div class="gate-row">
                 <span class="gate-key">δ (violation)</span>
                 <span class="gate-val" id="ng-delta">0.0 m</span>
@@ -367,11 +377,11 @@
             <div class="gate-row">
                 <span class="gate-key">τ (thickness)</span>
                 <span class="gate-val tau-val-ng" id="ng-tau">8.0 m</span>
-                <span style="font-size:10px;color:var(--ng);margin-left:6px" id="ng-tau-note">最適化が書き換え中</span>
+                <span class="tau-mod" id="ng-tau-note">最適化が書き換え中</span>
             </div>
             <div class="gate-row">
                 <div class="gate-bar-wrap">
-                    <div class="gate-bar" id="ng-bar" style="width:0%"></div>
+                    <div class="gate-bar" id="ng-bar"></div>
                 </div>
             </div>
         </div>
@@ -405,19 +415,19 @@
 <div id="footer">
     <div class="fp-item">
         <div class="fp-key">接続 OK の条件</div>
-        <div class="fp-val" style="color:var(--ok)">情報が一方向に流れる</div>
+        <div class="fp-val c-ok">情報が一方向に流れる</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">混用 NG の原因</div>
-        <div class="fp-val" style="color:var(--ng)">GateがAIの道具になる</div>
+        <div class="fp-val c-ng">GateがAIの道具になる</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">失われるもの</div>
-        <div class="fp-val" style="color:var(--yellow)">FAIL-CLOSEDの保証</div>
+        <div class="fp-val c-yellow">FAIL-CLOSEDの保証</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">τ の正しい扱い</div>
-        <div class="fp-val" style="color:var(--cyan)">設計時固定・実行時不変</div>
+        <div class="fp-val c-cyan">設計時固定・実行時不変</div>
     </div>
 </div>
 

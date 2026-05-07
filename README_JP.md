@@ -22,6 +22,8 @@
 
 |---------|------|
 
+| [REPOSITORY_OVERVIEW.md](./REPOSITORY_OVERVIEW.md) | リポジトリマップ — 全ディレクトリ・主要ファイルへのクイックナビゲーションガイド |
+
 | [FORMULA.md](./FORMULA.md) | 定義式 — R = δ/τ および二重ゆらぎ式（一次式・二次式の完全定義）|
 
 | [THEORY.md](./theory/THEORY.md) | 核公理と構造的世界観 |

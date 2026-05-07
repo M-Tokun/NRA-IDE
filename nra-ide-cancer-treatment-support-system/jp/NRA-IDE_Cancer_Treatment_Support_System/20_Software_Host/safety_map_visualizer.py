@@ -1,73 +1,77 @@
 # ═══════════════════════════════════════════════════════════════════════
-# File: main.py
-# Phase: 20 (Master Integration)
+# File: safety_map_visualizer.py
+# Phase: 20 (Safety Map Generation)
 # Date: 26-0203-1740 JST
 # ═══════════════════════════════════════════════════════════════════════
 
-import sys
-import json
-import argparse
-from fpga_interface import FPGAInterface
-from patient_data_validator import PatientDataValidator
-from clinical_report_generator import ClinicalReportGenerator
-from safety_map_visualizer import SafetyMapVisualizer
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 
-def run_nra_ide():
-    parser = argparse.ArgumentParser(description="NRA-IDE Master Controller")
-    parser.add_argument("--data", required=True, help="Patient JSON path")
-    args = parser.parse_args()
+class SafetyMapVisualizer:
+    """
+    X軸: Drug Boost [kPa]  — 右ほど細胞が硬くなり通過しにくい
+    Y軸: Blood Pressure (Flow ΔP) [kPa]  — 上ほど押し込み力が強い（危険）
+    Green Zone (SAFE) : F_resist > F_flow  → 物理的封鎖成立
+    Red Zone (DANGER) : F_resist <= F_flow → 転移リスク高
+    """
 
-    print("--- NRA-IDE Cancer Treatment Support System ---")
+    def generate_map(self, patient_data: dict, output_path: str) -> None:
+        stiffness = patient_data.get('cell_stiffness', 1.5)
+        viscosity = max(patient_data.get('cell_viscosity', 0.05), 1e-6)
+        diameter  = patient_data.get('cell_diameter', 12.0)
+        pore      = patient_data.get('pore_size', 8.0)
+        cur_boost = patient_data.get('drug_boost', 0.0)
+        cur_flow  = patient_data.get('flow_dp', 0.6)
+        p_id      = patient_data.get('patient_id', 'Unknown')
+        cancer    = patient_data.get('cancer_type', '')
 
-    # 1. Load & Validate
-    try:
-        with open(args.data, 'r') as f:
-            patient_data = json.load(f)
-    except Exception as e:
-        print(f"❌ Data Load Error: {e}")
-        return
+        boost_axis = np.linspace(0.0, 10.0, 300)
+        flow_axis  = np.linspace(0.0,  5.0, 300)
+        B, F = np.meshgrid(boost_axis, flow_axis)
 
-    is_ok, errs = PatientDataValidator.validate(patient_data)
-    if not is_ok:
-        print("❌ Ritsukan Axiom Violation (Safety Guard Active):")
-        for e in errs: print(f"  - {e}")
-        return
+        # 物理モデル: 有効抵抗力 = (stiffness + boost) * (pore/diameter)^2 / viscosity
+        resist = (stiffness + B) * (pore / diameter) ** 2 / viscosity
+        is_safe = resist > F  # True = SAFE (Jamming)
 
-    # 2. FPGA Connection & Computation
-    fpga = FPGAInterface()
+        fig, ax = plt.subplots(figsize=(8, 6))
 
-    # 3. Optimal Boost Search (Causal Diode: Forward Only)
-    print(f"🔍 Analyzing {patient_data['cancer_type']} dynamics...")
-    optimal_boost = 0.0
-    final_result = {'is_jammed': False, 'error_code': 0}
+        ax.contourf(B, F, is_safe.astype(float),
+                    levels=[-0.5, 0.5, 1.5],
+                    colors=['#ffcccc', '#ccffcc'], alpha=0.75)
+        ax.contour(B, F, is_safe.astype(float),
+                   levels=[0.5], colors=['#444444'], linewidths=1.8)
 
-    for b in [i * 0.01 for i in range(1001)]: # 0.00 to 10.00 kPa
-        patient_data['drug_boost'] = b
-        res = fpga.send_query(patient_data, patient_data['cancer_type'])
+        ax.plot(cur_boost, cur_flow, 'o',
+                color='black', markersize=13, zorder=5)
+        ax.plot(cur_boost, cur_flow, '+',
+                color='white', markersize=9, markeredgewidth=2.5, zorder=6)
 
-        if res and res['error_code'] == 0 and res['is_jammed']:
-            optimal_boost = b
-            final_result = res
-            print(f"✅ Physical Jamming Achieved at +{optimal_boost:.2f} kPa")
-            break
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0,  5)
+        ax.set_xlabel('Drug Boost [kPa]', fontsize=12)
+        ax.set_ylabel('Blood Pressure (Flow ΔP) [kPa]', fontsize=12)
+        ax.set_title(
+            f'NRA-IDE Safety Map\nPatient: {p_id}  ({cancer})',
+            fontsize=13, fontweight='bold'
+        )
+        ax.grid(True, alpha=0.3)
 
-        if res and res['error_code'] != 0:
-            final_result = res
-            print(f"⚠ Computation Aborted: Error 0x{res['error_code']:02X}")
-            break
-    else:
-        print("⚠ WARNING: Jamming state not found within safety limits.")
+        legend_handles = [
+            mpatches.Patch(color='#ccffcc', label='SAFE Zone (Jamming)'),
+            mpatches.Patch(color='#ffcccc', label='DANGER Zone (Pass-through)'),
+            mlines.Line2D([], [], marker='o', color='black',
+                          markersize=10, linestyle='None', label='Current State'),
+        ]
+        ax.legend(handles=legend_handles, loc='upper right', fontsize=10)
 
-    # 4. Generate Clinical Artifacts
-    rep_gen = ClinicalReportGenerator()
-    report_text = rep_gen.generate(patient_data['patient_id'], patient_data, final_result, optimal_boost)
+        dirpart = os.path.dirname(output_path)
+        if dirpart:
+            os.makedirs(dirpart, exist_ok=True)
 
-    rep_gen.save(report_text, f"../40_Output_Reports/Report_{patient_data['patient_id']}.txt")
-
-    viz = SafetyMapVisualizer()
-    viz.generate_map(patient_data, f"../40_Output_Reports/SafetyMap_{patient_data['patient_id']}.png")
-
-    print(f"\n✓ Session Completed. Artifacts saved to 40_Output_Reports/.")
-
-if __name__ == "__main__":
-    run_nra_ide()
+        plt.tight_layout()
+        plt.savefig(output_path, dpi=150, bbox_inches='tight')
+        plt.close(fig)
+        print(f"✓ Safety Map saved: {output_path}")

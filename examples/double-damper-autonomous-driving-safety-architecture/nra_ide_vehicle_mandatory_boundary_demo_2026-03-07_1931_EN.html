@@ -133,6 +133,148 @@
     .sensor-card, .ide-card, .spec-card, .metric-card, .danger-card {
       position: relative;
       overflow: hidden;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .sensor-row, .metric-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 64px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.07);
+    }
+    .sensor-row:last-of-type, .metric-row:last-of-type {
+      border-bottom: none;
+    }
+    .sensor-name, .metric-name {
+      font-weight: 800;
+      color: var(--white);
+    }
+    .sensor-desc, .metric-desc {
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .sensor-value, .metric-value {
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 800;
+    }
+    .cam { color: var(--cam); }
+    .radar { color: var(--radar); }
+    .imu { color: var(--imu); }
+    .metric { color: var(--metric); }
+    .bar {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+    }
+    .fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      transition: width 0.16s linear;
+    }
+    .fill.cam { background: var(--cam); }
+    .fill.radar { background: var(--radar); }
+    .fill.imu { background: var(--imu); }
+    .fill.metric { background: var(--metric); }
+    .fill.ide { background: var(--ide); }
+    .kv {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .kv strong {
+      color: var(--white);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .decision {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 88px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid currentColor;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+    .decision.pass { color: var(--safe); background: rgba(125,255,155,0.08); }
+    .decision.warn { color: var(--warn); background: rgba(255,209,102,0.08); }
+    .decision.stop { color: var(--danger); background: rgba(255,95,122,0.10); }
+    .inline-note, .small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .inline-note {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-left: 3px solid rgba(255,95,122,0.6);
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+    }
+    .ctrl-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .control-group {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .control-group h3 {
+      margin: 0 0 8px;
+      color: var(--white);
+    }
+    .control-group p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #142131;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button.primary {
+      border-color: rgba(79,209,255,0.45);
+      background: rgba(79,209,255,0.12);
+    }
+    button:hover { filter: brightness(1.1); }
+    .slider-row { margin-top: 12px; }
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--ide);
     }
     .danger-display {
       margin-top: 8px;

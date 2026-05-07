@@ -1,4 +1,4 @@
-# nra_gate_spatial_ja.py
+# nra_gate_spatial_JP.py
 # [NRA空間隔離] v1.0
 # [レイヤー02] 空間計算 / 距離ファイアウォール
 # ============================================================================
@@ -8,7 +8,7 @@
 # ============================================================================
 
 from dataclasses import dataclass
-from .nra_gate_constraint_ja import IdeSafetyCore, SystemState
+from .nra_gate_constraint_JP import IdeSafetyCore, SystemState
 
 @dataclass
 class SpatialContext:

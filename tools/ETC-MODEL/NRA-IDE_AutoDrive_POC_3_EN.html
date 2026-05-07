@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- FILE: NRA-IDE_AutoDrive_POC_03_EN.html  2026-02-28 -->
 <title>NRA-IDE: Autonomous Drive Safety Gate v0.3 — Tire×Road μ</title>
 <style>
@@ -77,6 +78,11 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
 #flashOverlay{position:fixed;inset:0;background:rgba(255,34,68,0.08);pointer-events:none;opacity:0;transition:opacity 0.1s;z-index:100;}
 /* zone-C banner */
 #handoffBanner{display:none;position:absolute;top:0;left:0;right:0;background:rgba(255,100,0,0.15);border-bottom:1px solid #ff6600;color:#ff8800;font-size:11px;font-weight:bold;padding:4px 12px;z-index:50;text-align:center;}
+#sb-speed, #sb-dist, #m-gate { color: var(--cyan); }
+#sb-stopdist { color: var(--yellow); }
+#road-label { color: #888; }
+#tire-label { color: #ff8800; }
+#mu-warning { display: none; }
 </style>
 </head>
 <body>
@@ -92,9 +98,9 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <canvas id="road"></canvas>
   </div>
   <div id="statusBar">
-    <div class="sb-cell"><div class="sb-label">Speed</div><div class="sb-val" id="sb-speed" style="color:var(--cyan)">60 km/h</div></div>
-    <div class="sb-cell"><div class="sb-label">Actual Distance</div><div class="sb-val" id="sb-dist" style="color:var(--cyan)">80 m</div></div>
-    <div class="sb-cell"><div class="sb-label">Stop Distance</div><div class="sb-val" id="sb-stopdist" style="color:var(--yellow)">0 m</div></div>
+    <div class="sb-cell"><div class="sb-label">Speed</div><div class="sb-val" id="sb-speed">60 km/h</div></div>
+    <div class="sb-cell"><div class="sb-label">Actual Distance</div><div class="sb-val" id="sb-dist">80 m</div></div>
+    <div class="sb-cell"><div class="sb-label">Stop Distance</div><div class="sb-val" id="sb-stopdist">0 m</div></div>
     <div class="sb-cell"><div class="sb-label">Violation δ</div><div class="sb-val" id="sb-delta">0 m</div></div>
   </div>
   <div id="selectors">
@@ -118,14 +124,14 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
   <div id="muBar">
     <span class="mu-key">μ (friction)</span><span class="mu-val" id="mu-display">0.80</span>
     <span class="mu-key">→  a =</span><span class="mu-val" id="a-display">7.84 m/s²</span>
-    <span class="mu-key">Road:</span><span id="road-label" style="color:#888">Dry</span>
-    <span class="mu-key">Tire:</span><span id="tire-label" style="color:#ff8800">Summer</span>
-    <span class="mu-warn" id="mu-warning" style="display:none">⚠ Summer tire on Snow/Ice</span>
+    <span class="mu-key">Road:</span><span id="road-label">Dry</span>
+    <span class="mu-key">Tire:</span><span id="tire-label">Summer</span>
+    <span class="mu-warn" id="mu-warning">⚠ Summer tire on Snow/Ice</span>
   </div>
   <div id="controls">
-    <div class="ctrl-row"><div class="ctrl-label">Speed</div><input type="range" id="sl-speed" min="0" max="150" value="60"><div class="ctrl-unit" id="lbl-speed">60 km/h</div></div>
-    <div class="ctrl-row"><div class="ctrl-label">Lead Vehicle Distance</div><input type="range" id="sl-dist" min="0" max="150" value="80"><div class="ctrl-unit" id="lbl-dist">80 m</div></div>
-    <div class="ctrl-row"><div class="ctrl-label">Safety Margin τ</div><input type="range" id="sl-tau" min="2" max="20" value="8"><div class="ctrl-unit" id="lbl-tau">8 m</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Speed</div><input type="range" id="sl-speed" aria-label="Speed" title="Speed" min="0" max="150" value="60"><div class="ctrl-unit" id="lbl-speed">60 km/h</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Lead Vehicle Distance</div><input type="range" id="sl-dist" aria-label="Lead Vehicle Distance" title="Lead Vehicle Distance" min="0" max="150" value="80"><div class="ctrl-unit" id="lbl-dist">80 m</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Safety Margin τ</div><input type="range" id="sl-tau" aria-label="Safety Margin tau" title="Safety Margin tau" min="2" max="20" value="8"><div class="ctrl-unit" id="lbl-tau">8 m</div></div>
   </div>
   <div id="logWrap">
     <div id="logTitle">▶ Discard Log  (structure verification only)</div>
@@ -144,7 +150,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <div class="metric"><div class="m-key">τ (thickness)</div><div class="m-val" id="m-tau">8.0 m</div></div>
     <div class="metric"><div class="m-key">μ × g = decel</div><div class="m-val" id="m-accel">7.84 m/s²</div></div>
     <div class="metric"><div class="m-key">stop_dist</div><div class="m-val" id="m-stop">0.0 m</div></div>
-    <div class="metric"><div class="m-key">Gate decision</div><div class="m-val" id="m-gate" style="color:var(--green)">PERMIT</div></div>
+    <div class="metric"><div class="m-key">Gate decision</div><div class="m-val" id="m-gate">PERMIT</div></div>
   </div>
   <div id="muMatrix">
     <div id="muMatrixTitle">μ Matrix — Road × Tire</div>

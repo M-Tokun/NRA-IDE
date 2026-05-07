@@ -1,6 +1,6 @@
 補足事項：
 
-🌱 **NRA-IDE Multi-Physics Safety Gate Architecture
+NRA-IDE Multi-Physics Safety Gate Architecture
 
 ■ まず最初に：これは「家の安全チェック」の話です
 このフォルダには、見た目が似た2つのデモがあります。でも、役割はまったく違います。

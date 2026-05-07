@@ -112,7 +112,7 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 [FUNCTION] BOUNDARY_FLUCTUATION_EVALUATION  
 
-[CONFIG] ../config/ide_foundation_config.json
+[CONFIG] ../../config/ide_foundation_config.json
 
 [ZONES]
 
@@ -132,7 +132,7 @@ GATE=ENTRY_VALIDATION / ALL_OPERATIONS=MUST_PASS_THROUGH
 
 ```python
 
-from gate import NRAGateKernel, IdeSafetyCore
+from gate.en import NRAGateKernel, IdeSafetyCore
 
 # [STEP-01] INSTANTIATE_GATE
 
@@ -154,7 +154,7 @@ core = IdeSafetyCore()
 
 ```python
 
-from gate import SafeEngineWrapper, SpatialContext, SystemState
+from gate.en import SafeEngineWrapper, SpatialContext, SystemState
 
 # [WRAPPER] SPATIAL_ISOLATION
 

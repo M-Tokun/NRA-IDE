@@ -1,8 +1,9 @@
-<!-- FILE: NRA-IDE_08_Multi-Physics-Safety-Gate_EN.html -->
 <!DOCTYPE html>
+<!-- FILE: NRA-IDE_08_Multi-Physics-Safety-Gate_EN.html -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NRA-IDE #08: Multi-Physics Safety Gate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
@@ -186,6 +187,9 @@
         }
         .override-btn:hover { background: var(--red); color: #fff; }
 
+        .section-header { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+        .event-log-header { font-size: 12px; color: var(--cyan); margin-bottom: 5px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+
     </style>
 </head>
 <body>
@@ -196,7 +200,7 @@
     </header>
 
     <div id="inputs">
-        <div style="font-size: 12px; color: var(--muted); margin-bottom: 10px;">
+        <div class="section-header">
             INDEPENDENT DIMENSIONS (δ/τ)
         </div>
         
@@ -205,7 +209,7 @@
                 <span>R_heat</span>
                 <span class="val-display" id="val-h">0.00</span>
             </div>
-            <input type="range" id="sl-h" min="0" max="1.1" step="0.01" value="0.0">
+            <input type="range" id="sl-h" aria-label="R_heat" title="R_heat" min="0" max="1.1" step="0.01" value="0.0">
             <span class="axis-label">Thermal Tension (Z-Axis)</span>
         </div>
 
@@ -214,7 +218,7 @@
                 <span>R_pressure</span>
                 <span class="val-display" id="val-p">0.00</span>
             </div>
-            <input type="range" id="sl-p" min="0" max="1.1" step="0.01" value="0.0">
+            <input type="range" id="sl-p" aria-label="R_pressure" title="R_pressure" min="0" max="1.1" step="0.01" value="0.0">
             <span class="axis-label">Fluid Dynamics Tension (Y-Axis)</span>
         </div>
 
@@ -223,7 +227,7 @@
                 <span>R_stress</span>
                 <span class="val-display" id="val-s">0.00</span>
             </div>
-            <input type="range" id="sl-s" min="0" max="1.1" step="0.01" value="0.0">
+            <input type="range" id="sl-s" aria-label="R_stress" title="R_stress" min="0" max="1.1" step="0.01" value="0.0">
             <span class="axis-label">Mechanical Tension (X-Axis)</span>
         </div>
     </div>
@@ -249,7 +253,7 @@
             <h2>TOTAL TENSION (R_sys)</h2>
             <div class="rsys-value" id="val-sys">0.000</div>
         </div>
-        <div style="font-size: 12px; color: var(--cyan); margin-bottom: 5px; border-bottom: 1px solid var(--border); padding-bottom: 5px;">EVENT LOG</div>
+        <div class="event-log-header">EVENT LOG</div>
         <div id="log-area"></div>
     </div>
 

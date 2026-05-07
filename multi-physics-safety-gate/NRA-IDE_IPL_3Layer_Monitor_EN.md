@@ -1,4 +1,4 @@
-# 📘 **NRA-IDE_IPL_3Layer_Monitor.md — English Translation 
+# 📘 **NRA-IDE_IPL_3Layer_Monitor.md — English Translation**
 
 ## NRA-IDE IPL 3-Layer Monitor — Design Philosophy and Structural Rationale  
 

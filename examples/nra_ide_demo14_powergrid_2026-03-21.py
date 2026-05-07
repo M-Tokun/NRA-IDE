@@ -6,10 +6,10 @@
 # Author: M-Tokuni / NRA-IDE Project
 # https://github.com/M-Tokun/NRA-IDE
 #
-# 依存: nra_ide_core_base_26-0321.py（同ディレクトリに置く）
+# 依存: nra_ide_core_base_2026-03-21.py（同ディレクトリに置く）
 #
 # 単体実行:
-#   python3 nra_ide_demo14_powergrid_26-0321.py
+#   python nra_ide_demo14_powergrid_2026-03-21.py
 #
 # このファイルが扱うもの:
 #   - 電力系統の周波数偏差 δf を Cause-Side として観測
@@ -21,9 +21,24 @@
 
 import math
 import random
-from typing import List, Optional
+import importlib.util
+import sys
+from pathlib import Path
+from typing import List
 
-from nra_ide_core_base_26_0321 import FSMState, NRAChannel, NRASystemState
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+_CORE_PATH = Path(__file__).with_name("nra_ide_core_base_2026-03-21.py")
+_CORE_SPEC = importlib.util.spec_from_file_location("nra_ide_core_base", _CORE_PATH)
+if _CORE_SPEC is None or _CORE_SPEC.loader is None:
+    raise ImportError(f"Cannot load NRA-IDE core base from {_CORE_PATH}")
+_CORE = importlib.util.module_from_spec(_CORE_SPEC)
+_CORE_SPEC.loader.exec_module(_CORE)
+
+FSMState = _CORE.FSMState
+NRAChannel = _CORE.NRAChannel
+NRASystemState = _CORE.NRASystemState
 
 
 # ============================================================

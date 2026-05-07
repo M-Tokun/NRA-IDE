@@ -4,6 +4,7 @@
 # ═══════════════════════════════════════════════════════════════════════
 
 import datetime
+import os
 
 class ClinicalReportGenerator:
     def generate(self, p_id: str, data: dict, result: dict, boost: float) -> str:
@@ -33,3 +34,11 @@ Patient  : {p_id}
 ... (略)
 """
         return report
+
+    def save(self, report_text: str, output_path: str) -> None:
+        dirpart = os.path.dirname(output_path)
+        if dirpart:
+            os.makedirs(dirpart, exist_ok=True)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(report_text)
+        print(f"✓ Report saved: {output_path}")

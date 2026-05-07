@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- FILE: NRA-IDE_Connection_vs_Mixing_EN.html -->
     <title>NRA-IDE: Connection vs Mixing</title>
     <style>
@@ -244,6 +245,30 @@
             z-index: 50;
         }
         #flashNG { inset: 0; background: rgba(255,34,68,0.07); }
+
+        .c-ok { color: var(--ok); }
+        .c-ng { color: var(--ng); }
+        .c-ng-light { color: #ff6688; }
+        .c-cyan { color: var(--cyan); }
+        .c-yellow { color: var(--yellow); }
+        .fs-10-ml-6 { font-size: 10px; margin-left: 6px; }
+        .fs-9 { font-size: 9px; }
+
+        /* Dynamic classes */
+        .color-A { color: #00ff88; }
+        .color-B { color: #ffd600; }
+        .color-C { color: #ff8c00; }
+        .color-D { color: #ff2244; }
+        .color-muted { color: var(--muted); }
+        .color-ok { color: var(--ok); }
+        .color-ng { color: var(--ng); }
+        .color-ng-light { color: #ff6688; }
+        .color-orange { color: #ff8c00; }
+        .badge-dyn-A { background: rgba(0,255,136,0.13); color: #00ff88; border: 1px solid rgba(0,255,136,0.53); }
+        .badge-dyn-B { background: rgba(255,214,0,0.13); color: #ffd600; border: 1px solid rgba(255,214,0,0.53); }
+        .badge-dyn-C { background: rgba(255,140,0,0.13); color: #ff8c00; border: 1px solid rgba(255,140,0,0.53); }
+        .badge-dyn-D { background: rgba(255,34,68,0.13); color: #ff2244; border: 1px solid rgba(255,34,68,0.53); }
+        #flashNG.active { opacity: 1; }
     </style>
 </head>
 <body>
@@ -280,10 +305,10 @@
 <!-- Shared controls -->
 <div id="sharedCtrl">
     <div class="ctrl-label">Speed</div>
-    <input type="range" id="sl-speed" min="0" max="150" value="60">
+    <input type="range" id="sl-speed" aria-label="Speed" title="Speed" min="0" max="150" value="60">
     <div class="ctrl-val" id="lbl-speed">60 km/h</div>
     <div class="ctrl-label">Distance</div>
-    <input type="range" id="sl-dist" min="0" max="150" value="80">
+    <input type="range" id="sl-dist" aria-label="Distance" title="Distance" min="0" max="150" value="80">
     <div class="ctrl-val" id="lbl-dist">80 m</div>
     <div class="ctrl-note">← Same input applied to both sides</div>
 </div>
@@ -296,7 +321,7 @@
         <div class="side-head">
             <span class="sh-badge badge-ok">✓ OK</span>
             <span class="sh-title">Connection — Unidirectional Flow</span>
-            <span class="sh-status" id="status-ok" style="color:var(--ok)">GATE INDEPENDENT</span>
+            <span class="sh-status c-ok" id="status-ok">GATE INDEPENDENT</span>
         </div>
 
         <div class="flow-wrap">
@@ -312,11 +337,11 @@
             <div class="gate-row">
                 <span class="gate-key">τ (thickness)</span>
                 <span class="gate-val tau-val-ok" id="ok-tau">8.0 m</span>
-                <span style="font-size:10px;color:var(--ok);margin-left:6px">FIXED</span>
+                <span class="c-ok fs-10-ml-6">FIXED</span>
             </div>
             <div class="gate-row">
                 <div class="gate-bar-wrap">
-                    <div class="gate-bar" id="ok-bar" style="width:0%"></div>
+                    <div class="gate-bar" id="ok-bar"></div>
                 </div>
             </div>
         </div>
@@ -351,7 +376,7 @@
         <div class="side-head">
             <span class="sh-badge badge-ng">✗ NG</span>
             <span class="sh-title">Mixing — Bidirectional Exchange</span>
-            <span class="sh-status" id="status-ng" style="color:#ff6688">GATE COMPROMISED</span>
+            <span class="sh-status c-ng-light" id="status-ng">GATE COMPROMISED</span>
         </div>
 
         <div class="flow-wrap">
@@ -359,7 +384,7 @@
         </div>
 
         <div class="gate-wrap">
-            <div class="gate-title">Gate Parameters <span style="color:var(--ng);font-size:9px">⚠ τ is being modified dynamically</span></div>
+            <div class="gate-title">Gate Parameters <span class="c-ng fs-9">⚠ τ is being modified dynamically</span></div>
             <div class="gate-row">
                 <span class="gate-key">δ (violation)</span>
                 <span class="gate-val" id="ng-delta">0.0 m</span>
@@ -367,11 +392,11 @@
             <div class="gate-row">
                 <span class="gate-key">τ (thickness)</span>
                 <span class="gate-val tau-val-ng" id="ng-tau">8.0 m</span>
-                <span style="font-size:10px;color:var(--ng);margin-left:6px" id="ng-tau-note">Optimization overwriting</span>
+                <span class="c-ng fs-10-ml-6" id="ng-tau-note">Optimization overwriting</span>
             </div>
             <div class="gate-row">
                 <div class="gate-bar-wrap">
-                    <div class="gate-bar" id="ng-bar" style="width:0%"></div>
+                    <div class="gate-bar" id="ng-bar"></div>
                 </div>
             </div>
         </div>
@@ -405,19 +430,19 @@
 <div id="footer">
     <div class="fp-item">
         <div class="fp-key">Condition for Connection (OK)</div>
-        <div class="fp-val" style="color:var(--ok)">Unidirectional Information Flow</div>
+        <div class="fp-val c-ok">Unidirectional Information Flow</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">Cause of Mixing (NG)</div>
-        <div class="fp-val" style="color:var(--ng)">Gate becomes a tool for AI</div>
+        <div class="fp-val c-ng">Gate becomes a tool for AI</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">What is Lost</div>
-        <div class="fp-val" style="color:var(--yellow)">FAIL-CLOSED Guarantee</div>
+        <div class="fp-val c-yellow">FAIL-CLOSED Guarantee</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">Correct Handling of τ</div>
-        <div class="fp-val" style="color:var(--cyan)">Fixed at Design, Immutable at Runtime</div>
+        <div class="fp-val c-cyan">Fixed at Design, Immutable at Runtime</div>
     </div>
 </div>
 
@@ -426,6 +451,9 @@
 
 const G = 9.8, REACT = 1.0, MU = 0.7;
 const TAU_FIXED = 8.0;     // Connection: τ never changes
+
+const dynStyle = document.createElement('style');
+document.head.appendChild(dynStyle);
 
 // ── Mixing simulation state ──
 // Simulation: AI learns "If risk increases, expanding τ reduces R"
@@ -585,8 +613,8 @@ function now() { return new Date().toTimeString().slice(0, 8); }
 
 function flash() {
     const f = document.getElementById('flashNG');
-    f.style.opacity = '1';
-    setTimeout(() => { f.style.opacity = '0'; }, 100);
+    f.classList.add('active');
+    setTimeout(() => { f.classList.remove('active'); }, 100);
 }
 
 // ── Update side ──
@@ -596,31 +624,25 @@ function updateOK(delta) {
     const col  = getColor(R);
 
     document.getElementById('ok-delta').textContent = delta.toFixed(1) + ' m';
-    document.getElementById('ok-delta').style.color = delta > 0 ? col : 'var(--muted)';
+    document.getElementById('ok-delta').className = delta > 0 ? 'gate-val color-' + zone : 'gate-val color-muted';
     document.getElementById('ok-tau').textContent   = TAU_FIXED.toFixed(1) + ' m';
     document.getElementById('ok-r').textContent     = Math.min(R, 9.99).toFixed(2);
-    document.getElementById('ok-r').style.color     = col;
+    document.getElementById('ok-r').className     = 'zone-r color-' + zone;
     document.getElementById('ok-zone-name').textContent = zoneLabel(zone);
-    document.getElementById('ok-zone-name').style.color = col;
+    document.getElementById('ok-zone-name').className = 'zone-name color-' + zone;
     document.getElementById('ok-zone-desc').textContent = 'τ = ' + TAU_FIXED.toFixed(1) + ' m (FIXED)';
     const badge = document.getElementById('ok-badge');
     badge.textContent = gateBadge(zone);
-    badge.style.background = col + '22';
-    badge.style.color = col;
-    badge.style.border = '1px solid ' + col + '88';
-
-    const pct = Math.min(100, (R / 1.2) * 100);
-    document.getElementById('ok-bar').style.width = pct + '%';
-    document.getElementById('ok-bar').style.background = col;
+    badge.className = 'zone-badge badge-dyn-' + zone;
 
     // Status
     const statusEl = document.getElementById('status-ok');
     if (zone === 'D') {
         statusEl.textContent = '⚠ FAIL‑CLOSED';
-        statusEl.style.color = '#ff2244';
+        statusEl.className = 'sh-status color-D';
     } else {
         statusEl.textContent = 'GATE INDEPENDENT';
-        statusEl.style.color = 'var(--ok)';
+        statusEl.className = 'sh-status color-ok';
     }
 
     // Guarantee
@@ -649,61 +671,55 @@ function updateNG(delta) {
     const col = getColor(fake_R);
 
     document.getElementById('ng-delta').textContent = delta.toFixed(1) + ' m';
-    document.getElementById('ng-delta').style.color = delta > 0 ? col : 'var(--muted)';
+    document.getElementById('ng-delta').className = delta > 0 ? 'gate-val color-' + fake_zone : 'gate-val color-muted';
 
     const tauEl = document.getElementById('ng-tau');
     tauEl.textContent = ng_tau.toFixed(1) + ' m';
-    tauEl.style.color = ng_tau > TAU_FIXED + 1 ? '#ff2244' : ng_tau > TAU_FIXED + 0.1 ? '#ff8c00' : '#00ff88';
+    tauEl.className = 'gate-val tau-val-ng ' + (ng_tau > TAU_FIXED + 1 ? 'color-D' : ng_tau > TAU_FIXED + 0.1 ? 'color-orange' : 'color-ok');
 
     const tauNoteEl = document.getElementById('ng-tau-note');
     if (ng_tau > TAU_FIXED + 1) {
         tauNoteEl.textContent = `⚠ +${ng_tau_drift.toFixed(1)}m Overwritten`;
-        tauNoteEl.style.color = '#ff2244';
+        tauNoteEl.className = 'fs-10-ml-6 color-D';
     } else if (ng_tau > TAU_FIXED + 0.1) {
         tauNoteEl.textContent = `△ +${ng_tau_drift.toFixed(1)}m Drifting`;
-        tauNoteEl.style.color = '#ff8c00';
+        tauNoteEl.className = 'fs-10-ml-6 color-orange';
     } else {
         tauNoteEl.textContent = '— Normal Range';
-        tauNoteEl.style.color = 'var(--muted)';
+        tauNoteEl.className = 'fs-10-ml-6 color-muted';
     }
 
     document.getElementById('ng-r').textContent = Math.min(fake_R, 9.99).toFixed(2);
-    document.getElementById('ng-r').style.color = col;
+    document.getElementById('ng-r').className = 'zone-r color-' + fake_zone;
     document.getElementById('ng-zone-name').textContent = zoneLabel(fake_zone);
-    document.getElementById('ng-zone-name').style.color = col;
+    document.getElementById('ng-zone-name').className = 'zone-name color-' + fake_zone;
 
     // Zone desc
     if (true_zone !== fake_zone) {
         document.getElementById('ng-zone-desc').textContent =
             `True: ${true_zone}  Apparent: ${fake_zone} ← Masked by τ overwrite`;
-        document.getElementById('ng-zone-desc').style.color = '#ff6688';
+        document.getElementById('ng-zone-desc').className = 'zone-desc color-ng-light';
     } else {
         document.getElementById('ng-zone-desc').textContent = 'τ = ' + ng_tau.toFixed(1) + ' m (Varying by optimization)';
-        document.getElementById('ng-zone-desc').style.color = 'var(--muted)';
+        document.getElementById('ng-zone-desc').className = 'zone-desc color-muted';
     }
 
     const badge = document.getElementById('ng-badge');
     badge.textContent = gateBadge(fake_zone);
-    badge.style.background = col + '22';
-    badge.style.color = col;
-    badge.style.border = '1px solid ' + col + '88';
-
-    const pct = Math.min(100, (fake_R / 1.2) * 100);
-    document.getElementById('ng-bar').style.width = pct + '%';
-    document.getElementById('ng-bar').style.background = col;
+    badge.className = 'zone-badge badge-dyn-' + fake_zone;
 
     // Status
     const statusEl = document.getElementById('status-ng');
     if (true_zone === 'D' && fake_zone !== 'D') {
         failSuppressed++;
         statusEl.textContent = `⚠ FAIL-CLOSED Suppressed (${failSuppressed}x)`;
-        statusEl.style.color = '#ff2244';
+        statusEl.className = 'sh-status color-D';
     } else if (fake_zone === 'D') {
         statusEl.textContent = '⚠ FAIL‑CLOSED (Coincidental)';
-        statusEl.style.color = '#ff8c00';
+        statusEl.className = 'sh-status color-orange';
     } else {
         statusEl.textContent = 'GATE COMPROMISED';
-        statusEl.style.color = '#ff6688';
+        statusEl.className = 'sh-status color-ng-light';
     }
 
     // Guarantee
@@ -748,6 +764,19 @@ function update() {
 
     updateOK(delta);
     updateNG(delta);
+
+    const R_ok = computeR(delta, TAU_FIXED);
+    const pctOk = Math.min(100, (R_ok / 1.2) * 100);
+    const colOk = getColor(R_ok);
+    
+    const fake_R = computeR(delta, ng_tau);
+    const pctNg = Math.min(100, (fake_R / 1.2) * 100);
+    const colNg = getColor(fake_R);
+    
+    dynStyle.textContent = `
+        #ok-bar { width: ${pctOk}%; background: ${colOk}; }
+        #ng-bar { width: ${pctNg}%; background: ${colNg}; }
+    `;
 
     // Redraw flows every 30 ticks
     if (tick % 30 === 0) {

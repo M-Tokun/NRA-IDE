@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- FILE: NRA-IDE_AutoDrive_POC_03_JP.html  2026-02-28 -->
 <title>NRA-IDE: 自動運転 安全ゲート v0.3 — タイヤ × 路面 μ</title>
 <style>
@@ -77,6 +78,11 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
 #flashOverlay{position:fixed;inset:0;background:rgba(255,34,68,0.08);pointer-events:none;opacity:0;transition:opacity 0.1s;z-index:100;}
 /* zone-C banner */
 #handoffBanner{display:none;position:absolute;top:0;left:0;right:0;background:rgba(255,100,0,0.15);border-bottom:1px solid #ff6600;color:#ff8800;font-size:11px;font-weight:bold;padding:4px 12px;z-index:50;text-align:center;}
+#sb-speed, #sb-dist, #m-gate { color: var(--cyan); }
+#sb-stopdist { color: var(--yellow); }
+#road-label { color: #888; }
+#tire-label { color: #ff8800; }
+#mu-warning { display: none; }
 </style>
 </head>
 <body>
@@ -92,9 +98,9 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <canvas id="road"></canvas>
   </div>
   <div id="statusBar">
-    <div class="sb-cell"><div class="sb-label">速度</div><div class="sb-val" id="sb-speed" style="color:var(--cyan)">60 km/h</div></div>
-    <div class="sb-cell"><div class="sb-label">前方車両距離</div><div class="sb-val" id="sb-dist" style="color:var(--cyan)">80 m</div></div>
-    <div class="sb-cell"><div class="sb-label">停止距離</div><div class="sb-val" id="sb-stopdist" style="color:var(--yellow)">0 m</div></div>
+    <div class="sb-cell"><div class="sb-label">速度</div><div class="sb-val" id="sb-speed">60 km/h</div></div>
+    <div class="sb-cell"><div class="sb-label">前方車両距離</div><div class="sb-val" id="sb-dist">80 m</div></div>
+    <div class="sb-cell"><div class="sb-label">停止距離</div><div class="sb-val" id="sb-stopdist">0 m</div></div>
     <div class="sb-cell"><div class="sb-label">違反量 δ</div><div class="sb-val" id="sb-delta">0 m</div></div>
   </div>
   <div id="selectors">
@@ -118,14 +124,14 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
   <div id="muBar">
     <span class="mu-key">μ (friction)</span><span class="mu-val" id="mu-display">0.80</span>
     <span class="mu-key">→  a =</span><span class="mu-val" id="a-display">7.84 m/s²</span>
-    <span class="mu-key">路面:</span><span id="road-label" style="color:#888">Dry</span>
-    <span class="mu-key">タイヤ:</span><span id="tire-label" style="color:#ff8800">夏タイヤ</span>
-    <span class="mu-warn" id="mu-warning" style="display:none">⚠ 夏タイヤ×雪/氷路</span>
+    <span class="mu-key">路面:</span><span id="road-label">Dry</span>
+    <span class="mu-key">タイヤ:</span><span id="tire-label">夏タイヤ</span>
+    <span class="mu-warn" id="mu-warning">⚠ 夏タイヤ×雪/氷路</span>
   </div>
   <div id="controls">
-    <div class="ctrl-row"><div class="ctrl-label">速度</div><input type="range" id="sl-speed" min="0" max="150" value="60"><div class="ctrl-unit" id="lbl-speed">60 km/h</div></div>
-    <div class="ctrl-row"><div class="ctrl-label">前方車両距離</div><input type="range" id="sl-dist" min="0" max="150" value="80"><div class="ctrl-unit" id="lbl-dist">80 m</div></div>
-    <div class="ctrl-row"><div class="ctrl-label">安全余裕 τ（余裕幅）</div><input type="range" id="sl-tau" min="2" max="20" value="8"><div class="ctrl-unit" id="lbl-tau">8 m</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">速度</div><input type="range" id="sl-speed" aria-label="速度" title="速度" min="0" max="150" value="60"><div class="ctrl-unit" id="lbl-speed">60 km/h</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">前方車両距離</div><input type="range" id="sl-dist" aria-label="前方車両距離" title="前方車両距離" min="0" max="150" value="80"><div class="ctrl-unit" id="lbl-dist">80 m</div></div>
+    <div class="ctrl-row"><div class="ctrl-label">安全余裕 τ（余裕幅）</div><input type="range" id="sl-tau" aria-label="安全余裕 tau" title="安全余裕 tau" min="2" max="20" value="8"><div class="ctrl-unit" id="lbl-tau">8 m</div></div>
   </div>
   <div id="logWrap">
     <div id="logTitle">▶ Discard Log  (構造検証のみ)</div>
@@ -144,7 +150,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <div class="metric"><div class="m-key">τ（許容幅）</div><div class="m-val" id="m-tau">8.0 m</div></div>
     <div class="metric"><div class="m-key">μ × g ＝ 減速度</div><div class="m-val" id="m-accel">7.84 m/s²</div></div>
     <div class="metric"><div class="m-key">停止距離</div><div class="m-val" id="m-stop">0.0 m</div></div>
-    <div class="metric"><div class="m-key">ゲート判定</div><div class="m-val" id="m-gate" style="color:var(--green)">PERMIT</div></div>
+    <div class="metric"><div class="m-key">ゲート判定</div><div class="m-val" id="m-gate">PERMIT</div></div>
   </div>
   <div id="muMatrix">
     <div id="muMatrixTitle">μ マトリクス — 路面 × タイヤ</div>
