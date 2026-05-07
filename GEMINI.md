@@ -13,6 +13,7 @@
 
 ### 1.1 操作境界の厳守
 Geminiエージェントのシステムデータやメモリは `C:\Users\tookuni\.gemini\` 配下に保存されていますが、**このディレクトリ内のファイルをAI自身が直接編集・作成・削除することは原則禁止**されています（CLAUDE.mdの「Operation Boundaries」に準拠）。
+*   **デフォルトの作業ディレクトリは `G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE` です。** すべてのGit操作やファイル編集は、親ディレクトリではなく必ずこの「NRA-IDE」ディレクトリ内で実行してください。
 *   レポート、ログ、ファイルマップ等の成果物は、必ず Gドライブのローカルリポジトリ（`g:\git-M-Tokun\AI-IDE-NRA\NRA-IDE\local_reports\` など）に保存してください。
 
 ### 1.2 Knowledge Items (KI) の制約

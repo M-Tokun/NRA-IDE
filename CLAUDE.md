@@ -4,11 +4,15 @@
 
 ### 1. Operation Boundaries
 
+- **デフォルトの作業ディレクトリ（Default Working Directory）は `G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE` です。** Gitの操作やファイルの編集は、必ずこのディレクトリ内（親ディレクトリではなく子ディレクトリ側）で実行してください。
+
 - The AI agent is **strictly limited** to full operations (Read/Write/Move/Delete) **only** within the `g:\git-M-Tokun\` directory structure.
 
 - **ドライブ本体操作、ドライブ直下フォルダについての操作は、全て操作完全禁止**。フォーマット・パテーション操作は「[警告を明示出力]危険操作です。「不可逆破壊的行為です。AIによる操作はできません。」**絶対的な禁止事項**です。[Read ONLY]
 
 - For all locations **outside** of `g:\git-M-Tokun\`, the AI agent is only permitted to **Read**. Modifying, moving, or deleting files outside this designated directory is **strictly prohibited**.
+
+- **OneDriveはバックアップ用フォルダです。**
 
 ### 2. Explicit Override Confirmation
 
