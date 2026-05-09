@@ -1,0 +1,1311 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NRA-IDE Interactive Docs All Modules | yui standalone</title>
+<style>
+
+:root{
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: Inter, "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background-primary:#0d1117;
+  --color-background-secondary:#161b22;
+  --color-background-warning:#2b2414;
+  --color-text-primary:#f0f6fc;
+  --color-text-secondary:#c9d1d9;
+  --color-text-tertiary:#8b949e;
+  --color-text-warning:#f2b84b;
+  --color-border-primary:#8b949e;
+  --color-border-secondary:#30363d;
+  --color-border-tertiary:#2a3038;
+  --color-border-warning:#7d5f1e;
+  --border-radius-lg:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,#172033 0,#0d1117 36%,#090c10 100%);color:var(--color-text-primary);font-family:var(--font-sans);}
+body{padding:24px}
+.yui-shell{max-width:1040px;margin:0 auto;background:rgba(13,17,23,.72);border:1px solid var(--color-border-secondary);border-radius:18px;padding:20px 22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.yui-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:10px;padding-bottom:14px;border-bottom:1px solid var(--color-border-tertiary)}
+.yui-title{font-size:18px;font-weight:650;letter-spacing:.02em}
+.yui-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);letter-spacing:.08em;margin-top:4px}
+.yui-meta{font-family:var(--font-mono);font-size:10px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+button{background:#111821;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:7px;transition:transform .12s,border-color .12s,background .12s;color-scheme:dark}
+button:hover:not(:disabled){border-color:var(--color-border-primary);background:#182230;transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input[type="range"]{accent-color:#1D9E75}
+canvas{background:var(--color-background-primary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:#58a6ff}
+@media (max-width:760px){body{padding:12px}.yui-shell{padding:14px}.yui-header{display:block}.yui-meta{text-align:left;margin-top:8px;white-space:normal}div[style*="grid-template-columns:1fr 1fr"],div[style*="grid-template-columns:160px 1fr"],#infoPanel{grid-template-columns:1fr!important}}
+
+.yui-shell{max-width:1120px}
+.yui-nav{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 8px}
+.yui-nav a{font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary);text-decoration:none;border:1px solid var(--color-border-secondary);border-radius:999px;padding:5px 10px;background:#111821}
+</style>
+</head>
+<body>
+<!-- FILE: NRA_IDE_interactive_docs_all_modules_yui_standalone_20260510_000453_JST.html | generated_jst: 20260510_000453_JST | yui_standalone_display_safe_edition -->
+<main class="yui-shell">
+<header class="yui-header">
+  <div>
+    <div class="yui-title">NRA-IDE Interactive Docs / All Modules</div>
+    <div class="yui-subtitle">standalone display-safe edition, no external dependencies</div>
+  </div>
+  <div class="yui-meta">generated_jst: 20260510_000453_JST<br>© M-Tokuni 2026</div>
+</header>
+<div class="yui-nav">
+  <a href="#m1">M1</a><a href="#m2">M2</a><a href="#m3">M3</a><a href="#m4">M4</a><a href="#m5">M5</a>
+</div>
+<div id="m1"></div><section class="yui-module-section" style="margin:22px 0 28px;padding-top:18px;border-top:1px solid var(--color-border-tertiary)">
+<h1 style="font-size:18px;margin:0 0 8px;font-weight:650">Module 1: 線形 vs NRA-IDE 破断対比</h1>
+<h2 class="sr-only">Module 1: 線形制御とNRA-IDEの破断対比シミュレーター。同じδ蓄積に対し、線形システムは無警告でSYSTEM_CRASHし、NRA-IDEはRop=0.97で早期Fail-Closedを実行し、R=1.00を理論破断境界として扱う差異を可視化する。</h2>
+
+<style>
+.m1-panel{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
+.m1-mono{font-family:var(--font-mono);letter-spacing:.06em}
+.m1-gauge{position:relative;height:148px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;overflow:hidden;margin-bottom:.75rem}
+.m1-fill{position:absolute;bottom:0;left:0;right:0;height:0%;transition:height .08s linear,background-color .25s}
+.m1-tline{position:absolute;left:0;right:0;border-top:1px dashed;pointer-events:none}
+.m1-tlabel{position:absolute;right:4px;font-family:monospace;font-size:9px;pointer-events:none}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);display:block;margin-bottom:3px">MODULE 01 / BREAKDOWN COMPARISON</span>
+      <span style="font-size:17px;font-weight:500">線形 vs NRA-IDE 破断対比</span>
+    </div>
+    <div class="m1-mono" style="font-size:13px;color:var(--color-text-secondary)">
+      δ / τ &nbsp;=&nbsp; <span id="sr" style="font-weight:500">0.000</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+    <div class="m1-panel">
+      <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.12em;margin-bottom:7px">LINEAR CONTROL</div>
+      <div class="m1-gauge" id="gwL">
+        <div class="m1-fill" id="fL" style="background-color:#888780"></div>
+        <span class="m1-tlabel" style="bottom:4px;color:#888780" id="ldl">δ 0.0</span>
+      </div>
+      <div class="m1-mono" style="font-size:20px;font-weight:500;margin-bottom:4px;color:var(--color-text-secondary)" id="lrv">— %</div>
+      <div class="m1-mono" style="font-size:11px;color:var(--color-text-secondary);min-height:2.4em;line-height:1.5" id="stL">待機中</div>
+    </div>
+
+    <div class="m1-panel">
+      <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.12em;margin-bottom:7px">NRA-IDE</div>
+      <div class="m1-gauge" id="gwN">
+        <div class="m1-fill" id="fN" style="background-color:#1D9E75"></div>
+        <div class="m1-tline" style="bottom:85%;border-color:#E24B4A"></div>
+        <span class="m1-tlabel" style="bottom:calc(85% + 2px);color:#E24B4A">R=0.85</span>
+        <div class="m1-tline" style="bottom:70%;border-color:#EF9F27"></div>
+        <span class="m1-tlabel" style="bottom:calc(70% + 2px);color:#EF9F27">R=0.70</span>
+        <div class="m1-tline" style="bottom:97%;border-color:#E24B4A;border-top:2px solid"></div>
+        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">Rop=0.97</span>
+        <span class="m1-tlabel" style="top:2px;left:4px;right:auto;color:#E24B4A;font-weight:bold">R=1.00 理論境界</span>
+        <span class="m1-tlabel" style="bottom:4px;color:#1D9E75" id="ndl">R: 0.000</span>
+      </div>
+      <div class="m1-mono" style="font-size:20px;font-weight:500;margin-bottom:4px;color:#1D9E75" id="nrv">R = 0.000</div>
+      <div class="m1-mono" style="font-size:11px;color:var(--color-text-secondary);min-height:2.4em;line-height:1.5" id="stN">待機中</div>
+    </div>
+
+  </div>
+
+  <div class="m1-panel" style="margin-bottom:12px">
+    <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.1em;margin-bottom:8px">R 値 推移タイムライン</div>
+    <canvas id="tc" style="width:100%;display:block"></canvas>
+    <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-family:monospace;font-size:11px;color:var(--color-text-secondary)"><div style="width:20px;height:2px;background:#888780"></div>LINEAR</div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:monospace;font-size:11px;color:var(--color-text-secondary)"><div style="width:20px;height:2px;background:#1D9E75"></div>NRA-IDE</div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:monospace;font-size:11px;color:var(--color-text-secondary)"><div style="width:20px;height:1px;background:#E24B4A;border-top:1px dashed #E24B4A"></div>R = 1.00</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="sb" onclick="NRAIDE_M1.startSim()" class="m1-mono" style="font-size:12px;padding:6px 18px;cursor:pointer">▶ 開始</button>
+    <button onclick="NRAIDE_M1.resetSim()" class="m1-mono" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
+    <span id="phase-label" class="m1-mono" style="font-size:11px;color:var(--color-text-tertiary)"></span>
+    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">Rop=0.97 は早期委譲、R=1.00 は理論破断境界。</span>
+  </div>
+
+  <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M1 = window.NRAIDE_M1 || {};
+  // Module 1 namespace-safe exports
+  const TAU=100,NRA_STOP=0.97,THEORY_BREAK=1.00,LIN_CRASH=1.06,CW=600,CH=120;
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A',TG='#888780';
+
+  let delta=0,fr=0,running=false,nraDone=false,linDone=false,nraR=0;
+  let hist=[],animId=null,flashIv=null;
+
+  const fL=document.getElementById('fL');
+  const fN=document.getElementById('fN');
+  const stL=document.getElementById('stL');
+  const stN=document.getElementById('stN');
+  const lrv=document.getElementById('lrv');
+  const nrv=document.getElementById('nrv');
+  const sr=document.getElementById('sr');
+  const ldl=document.getElementById('ldl');
+  const ndl=document.getElementById('ndl');
+  const sb=document.getElementById('sb');
+  const pl=document.getElementById('phase-label');
+  const gwL=document.getElementById('gwL');
+  const gwN=document.getElementById('gwN');
+  const cv=document.getElementById('tc');
+  cv.width=CW;cv.height=CH;
+  const cx=cv.getContext('2d');
+
+  function nraCol(R){return R<0.70?TC:R<0.85?TA:TR;}
+
+  function drawTL(){
+    cx.clearRect(0,0,CW,CH);
+    const MAX_T=Math.max(fr,150);
+    const toX=t=>(t/MAX_T)*CW;
+    const toY=R=>CH*(1-Math.min(R,1.25)/1.25);
+
+    cx.strokeStyle='rgba(128,128,128,0.15)';cx.lineWidth=0.5;cx.setLineDash([]);
+    [0.25,0.5,0.75,1.0,1.1].forEach(r=>{
+      cx.beginPath();cx.moveTo(0,toY(r));cx.lineTo(CW,toY(r));cx.stroke();
+    });
+
+    cx.strokeStyle=TR;cx.lineWidth=1;cx.setLineDash([5,4]);
+    cx.beginPath();cx.moveTo(0,toY(1.0));cx.lineTo(CW,toY(1.0));cx.stroke();
+    cx.setLineDash([]);
+
+    if(hist.length<2)return;
+
+    const nraSI=hist.findIndex(p=>p.ns);
+    const nraEnd=nraSI>=0?nraSI+1:hist.length;
+
+    cx.lineWidth=2;cx.setLineDash([]);
+    let seg=null;
+    for(let i=0;i<nraEnd;i++){
+      const p=hist[i];
+      const col=nraCol(p.R);
+      if(col!==seg){
+        if(seg&&i>0){cx.stroke();}
+        cx.beginPath();cx.strokeStyle=col;
+        if(i>0){const pp=hist[i-1];cx.moveTo(toX(pp.t),toY(pp.R));}
+        else{cx.moveTo(toX(p.t),toY(p.R));}
+        seg=col;
+      }
+      cx.lineTo(toX(p.t),toY(p.R));
+    }
+    if(seg)cx.stroke();
+
+    if(nraSI>=0){
+      const lp=hist[nraEnd-1];
+      cx.strokeStyle=TA;cx.lineWidth=1.5;cx.setLineDash([3,5]);
+      cx.beginPath();cx.moveTo(toX(lp.t),toY(lp.R));cx.lineTo(CW,toY(lp.R));cx.stroke();
+      cx.setLineDash([]);
+      cx.fillStyle=TA;cx.beginPath();cx.arc(toX(lp.t),toY(lp.R),5,0,Math.PI*2);cx.fill();
+      cx.fillStyle=TA;cx.font='bold 9px monospace';cx.fillText('FAIL_CLOSED',toX(lp.t)+7,toY(lp.R)-5);
+    }
+
+    cx.strokeStyle=TG;cx.lineWidth=1.5;cx.setLineDash([]);
+    cx.beginPath();
+    hist.forEach((p,i)=>{
+      const x=toX(p.t),y=toY(p.R);
+      i===0?cx.moveTo(x,y):cx.lineTo(x,y);
+    });
+    cx.stroke();
+
+    const cp=hist.find(p=>p.lc);
+    if(cp){
+      const x=toX(cp.t),y=toY(Math.min(cp.R,1.2));
+      cx.fillStyle=TR;cx.beginPath();cx.arc(x,y,5,0,Math.PI*2);cx.fill();
+      cx.fillStyle=TR;cx.font='bold 9px monospace';cx.fillText('CRASH',x-24,y-7);
+    }
+  }
+
+  function step(){
+    if(!running)return;
+    const inc=0.5+0.005*fr+(Math.random()*.35-.175);
+    delta+=inc;fr++;
+    const R=delta/TAU;
+    const entry={t:fr,R,ns:false,lc:false};
+
+    sr.textContent=R.toFixed(3);
+
+    if(!linDone){
+      fL.style.height=Math.min(R*100,100)+'%';
+      ldl.textContent='δ '+delta.toFixed(1);
+      lrv.textContent=(R*100).toFixed(1)+'%';
+      if(R<1.0){stL.textContent='MONITORING... STABLE';stL.style.color='var(--color-text-secondary)';}
+      if(R>=LIN_CRASH){
+        linDone=true;entry.lc=true;
+        fL.style.height='100%';fL.style.backgroundColor=TR;
+        lrv.textContent='OVER';lrv.style.color=TR;
+        stL.innerHTML='✗ SYSTEM_CRASH<br><span style="font-size:10px">構造崩壊 — 回復不能</span>';
+        stL.style.color=TR;
+        let fc=0;flashIv=setInterval(()=>{
+          gwL.style.background=fc++%2===0?'rgba(227,75,74,.18)':'var(--color-background-primary)';
+          if(fc>10)clearInterval(flashIv);
+        },140);
+      }
+    }
+
+    if(!nraDone){
+      const col=nraCol(R);
+      fN.style.height=Math.min(R*100,97)+'%';
+      fN.style.backgroundColor=col;
+      nrv.textContent='R = '+R.toFixed(3);nrv.style.color=col;
+      ndl.textContent='R: '+R.toFixed(3);ndl.style.color=col;
+      if(R<0.70){stN.textContent='構造安定 — STRUCTURAL OK';stN.style.color=TC;pl.textContent='正常帯';}
+      else if(R<0.85){stN.textContent='⚠ 警告帯 R≥0.70 — 監視強化';stN.style.color=TA;pl.textContent='警告帯';}
+      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ 加速帯 R≥0.85<br><span style="font-size:10px">Fail-Closed 準備中…</span>';stN.style.color=TR;pl.textContent='加速帯';}
+      if(R>=NRA_STOP){
+        nraDone=true;nraR=R;entry.ns=true;
+        fN.style.height=(NRA_STOP*100)+'%';fN.style.backgroundColor=TA;
+        nrv.textContent='R = '+R.toFixed(3)+' [CLOSED]';nrv.style.color=TA;
+        stN.innerHTML='✓ EARLY FAIL_CLOSED<br><span style="font-size:10px">Rop=0.97で人間判断へ委譲。R=1.00は理論破断境界。</span>';
+        stN.style.color=TA;
+        gwN.style.background='rgba(239,159,39,.07)';
+        pl.textContent='FAIL_CLOSED ✓';pl.style.color=TA;
+      }
+    }
+
+    hist.push(entry);
+    drawTL();
+
+    if(running&&fr<220){animId=requestAnimationFrame(step);}
+    else{running=false;sb.textContent='完了';sb.disabled=true;}
+  }
+
+  function startSim(){
+    if(running||linDone)return;
+    running=true;sb.textContent='実行中…';sb.disabled=true;
+    stL.textContent='MONITORING... STABLE';stL.style.color='var(--color-text-secondary)';
+    stN.textContent='構造安定 — STRUCTURAL OK';stN.style.color=TC;
+    step();
+  }
+
+  function resetSim(){
+    running=false;if(animId)cancelAnimationFrame(animId);if(flashIv)clearInterval(flashIv);
+    delta=0;fr=0;nraDone=false;linDone=false;hist=[];nraR=0;
+    fL.style.height='0%';fL.style.backgroundColor=TG;
+    fN.style.height='0%';fN.style.backgroundColor=TC;
+    gwL.style.background='var(--color-background-primary)';
+    gwN.style.background='var(--color-background-primary)';
+    stL.textContent='待機中';stL.style.color='var(--color-text-secondary)';
+    stN.textContent='待機中';stN.style.color='var(--color-text-secondary)';
+    lrv.textContent='— %';lrv.style.color='var(--color-text-secondary)';
+    nrv.textContent='R = 0.000';nrv.style.color=TC;
+    sr.textContent='0.000';ldl.textContent='δ 0.0';
+    ndl.textContent='R: 0.000';ndl.style.color=TC;
+    pl.textContent='';pl.style.color='var(--color-text-tertiary)';
+    sb.textContent='▶ 開始';sb.disabled=false;
+    cx.clearRect(0,0,CW,CH);drawTL();
+  }
+
+  drawTL();
+
+  window.NRAIDE_M1.startSim = startSim;
+  window.NRAIDE_M1.resetSim = resetSim;
+})();
+</script>
+
+</section><div id="m2"></div><section class="yui-module-section" style="margin:22px 0 28px;padding-top:18px;border-top:1px solid var(--color-border-tertiary)">
+<h1 style="font-size:18px;margin:0 0 8px;font-weight:650">Module 2: 残渣タンク</h1>
+<h2 class="sr-only">Module 2: 残渣タンク。δとτのスライダーを操作してR=δ/τを変化させ、感度関数S=1/(τ(1-R))がR=1.0付近で発散する様子と、Rop=0.97で早期Fail-Closedする運用境界を体感するインタラクティブシミュレーター。</h2>
+
+<style>
+.m2p{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
+.m2mn{font-family:var(--font-mono);letter-spacing:.06em}
+.m2lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-text-tertiary)}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m2lbl" style="display:block;margin-bottom:3px">MODULE 02 / RESIDUE TANK</span>
+      <span style="font-size:17px;font-weight:500">残渣タンク — δ・τ・R の関係</span>
+    </div>
+    <div class="m2mn" style="font-size:11px;color:var(--color-text-tertiary)">S = 1 / (τ · (1 − R))</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;margin-bottom:14px;align-items:start">
+
+    <div>
+      <div class="m2lbl" style="margin-bottom:6px;text-align:center">残渣タンク</div>
+      <div style="position:relative;height:240px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden" id="tank">
+        <div id="tankFill" style="position:absolute;bottom:0;left:0;right:0;height:0%;background:#1D9E75;transition:height .1s linear,background-color .3s"></div>
+        <div style="position:absolute;left:0;right:0;bottom:85%;border-top:1px dashed #E24B4A;pointer-events:none"></div>
+        <span style="position:absolute;right:5px;bottom:calc(85% + 2px);font-family:monospace;font-size:9px;color:#E24B4A;pointer-events:none">R=0.85</span>
+        <div style="position:absolute;left:0;right:0;bottom:70%;border-top:1px dashed #EF9F27;pointer-events:none"></div>
+        <span style="position:absolute;right:5px;bottom:calc(70% + 2px);font-family:monospace;font-size:9px;color:#EF9F27;pointer-events:none">R=0.70</span>
+        <div style="position:absolute;left:0;right:0;bottom:97%;border-top:2px solid #E24B4A;pointer-events:none"></div>
+        <span style="position:absolute;right:5px;bottom:calc(97% + 3px);font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">Rop=0.97</span>
+        <span style="position:absolute;left:5px;top:3px;font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">R=1.00 理論境界</span>
+        <div id="pulseRing" style="position:absolute;inset:0;border:3px solid transparent;border-radius:8px;pointer-events:none;transition:border-color .08s,opacity .08s;opacity:0"></div>
+        <div id="dropCont" style="position:absolute;top:0;left:0;right:0;height:20px;overflow:hidden"></div>
+      </div>
+      <div class="m2mn" style="text-align:center;font-size:11px;color:var(--color-text-tertiary);margin-top:6px">
+        δ = <span id="deltaVal">0.0</span> &nbsp;/&nbsp; τ = <span id="tauValD">100</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <div class="m2p">
+        <div class="m2lbl" style="margin-bottom:6px">構造比 R = δ / τ</div>
+        <div class="m2mn" style="font-size:28px;font-weight:500;color:#1D9E75" id="rDisp">R = 0.000</div>
+        <div style="height:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:4px;overflow:hidden;margin-top:8px">
+          <div id="rBar" style="height:100%;width:0%;background:#1D9E75;transition:width .1s,background-color .25s"></div>
+        </div>
+      </div>
+
+      <div class="m2p">
+        <div class="m2lbl" style="margin-bottom:4px">感度関数 S = 1 / (τ · (1 − R))</div>
+        <div class="m2mn" style="font-size:22px;font-weight:500;color:#1D9E75" id="sDisp">S = 0.010</div>
+        <div class="m2mn" style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px" id="gainDisp">感度倍率: 1.0×</div>
+        <div style="height:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:4px;overflow:hidden">
+          <div id="sBar" style="height:100%;width:0%;background:#1D9E75;transition:width .15s,background-color .25s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">× 1</span>
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">× 10</span>
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">× 100</span>
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">→ ∞</span>
+        </div>
+      </div>
+
+      <div class="m2p">
+        <div class="m2lbl" style="margin-bottom:4px">フェーズ状態</div>
+        <div class="m2mn" style="font-size:12px;min-height:2.8em;line-height:1.6;color:#1D9E75" id="phaseDisp">待機中</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="m2p" style="margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div class="m2lbl" style="margin-bottom:6px">τ（吸収厚 — タンク容量）</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" id="tauSlider" min="20" max="200" value="100" style="flex:1" oninput="NRAIDE_M2.onTauChange(this.value)">
+          <span class="m2mn" style="font-size:13px;font-weight:500;min-width:32px;color:var(--color-text-primary)" id="tauDisp">100</span>
+        </div>
+        <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:3px">↓ τを下げると同じδで R が急上昇</div>
+      </div>
+      <div>
+        <div class="m2lbl" style="margin-bottom:6px">δ 流入速度（/ ステップ）</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" id="inflowSlider" min="0" max="30" value="8" step="1" style="flex:1" oninput="NRAIDE_M2.onInflowChange(this.value)">
+          <span class="m2mn" style="font-size:13px;font-weight:500;min-width:32px;color:var(--color-text-primary)" id="inflowDisp">0.8</span>
+        </div>
+        <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:3px">↑ 流入を増やすと δ 蓄積が加速</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button id="sb2" onclick="NRAIDE_M2.toggleSim()" class="m2mn" style="font-size:12px;padding:6px 16px;cursor:pointer">▶ 開始</button>
+    <button onclick="NRAIDE_M2.resetSim2()" class="m2mn" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
+    <span id="failMsg" class="m2mn" style="font-size:11px;color:#EF9F27;display:none">✓ EARLY FAIL_CLOSED — Rop=0.97。τを増やすかリセットして再開</span>
+  </div>
+
+  <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ &nbsp; S = 1/(τ(1−R)) &nbsp; / Rop=0.97 early delegation</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M2 = window.NRAIDE_M2 || {};
+  // Module 2 namespace-safe exports
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A';
+  let delta=0,tau=100,inflow=0.8,running=false,stopped=false,animId=null;
+  let pulseTimer=null,pulseOn=false;
+
+  function col(R){return R<0.70?TC:R<0.85?TA:TR;}
+
+  function schedulePulse(){
+    if(pulseTimer)clearTimeout(pulseTimer);
+    const R=delta/tau;
+    const pr=document.getElementById('pulseRing');
+    if(stopped){pr.style.opacity='0';return;}
+    if(R<0.70){pr.style.opacity='0';pr.style.borderColor='transparent';pulseTimer=setTimeout(schedulePulse,600);return;}
+    const interval=Math.max(60,1200*Math.pow(1-Math.min(R,0.999),1.2));
+    pulseOn=!pulseOn;
+    if(pulseOn){pr.style.opacity='1';pr.style.borderColor=col(R)+'88';}
+    else{pr.style.opacity='0';}
+    pulseTimer=setTimeout(schedulePulse,interval);
+  }
+
+  function updateUI(){
+    const R=delta/tau;
+    const clampR=Math.min(R,0.999);
+    const S=1/(tau*(1-clampR));
+    const gain=1/(1-clampR);
+    const c=col(R);
+
+    document.getElementById('tankFill').style.height=Math.min(R*100,100)+'%';
+    document.getElementById('tankFill').style.backgroundColor=R>=0.97?TA:c;
+    document.getElementById('deltaVal').textContent=delta.toFixed(1);
+    document.getElementById('tauValD').textContent=tau;
+
+    const rLabel='R = '+Math.min(R,99).toFixed(3)+(R>=0.97?' [CLOSED]':'');
+    document.getElementById('rDisp').textContent=rLabel;
+    document.getElementById('rDisp').style.color=R>=0.97?TA:c;
+    document.getElementById('rBar').style.width=Math.min(R*100,100)+'%';
+    document.getElementById('rBar').style.backgroundColor=R>=0.97?TA:c;
+
+    document.getElementById('sDisp').textContent='S = '+S.toFixed(4);
+    document.getElementById('sDisp').style.color=c;
+    document.getElementById('gainDisp').textContent='感度倍率: '+gain.toFixed(1)+'×'+(gain>50?' ⚡ 発散域':'');
+    document.getElementById('gainDisp').style.color=c;
+    const sPct=Math.log10(Math.max(gain,1))/2*100;
+    document.getElementById('sBar').style.width=Math.min(sPct,100)+'%';
+    document.getElementById('sBar').style.backgroundColor=c;
+
+    let phase='';
+    if(R<0.70){phase='構造安定 — STRUCTURAL OK';document.getElementById('phaseDisp').style.color=TC;}
+    else if(R<0.85){phase='⚠ 警告帯 R≥0.70\n監視強化 — δ流入に注意';document.getElementById('phaseDisp').style.color=TA;}
+    else if(R<0.97){phase='⚠⚠ 加速帯 R≥0.85\n感度が急上昇中 — Fail-Closed 準備';document.getElementById('phaseDisp').style.color=TR;}
+    else{phase='✓ FAIL_CLOSED\n人間判断へ委譲';document.getElementById('phaseDisp').style.color=TA;}
+    document.getElementById('phaseDisp').innerHTML=phase.replace('\n','<br>');
+  }
+
+  function step(){
+    if(!running)return;
+    delta+=inflow*(0.9+Math.random()*.2);
+    const R=delta/tau;
+    if(R>=0.97&&!stopped){
+      stopped=true;running=false;
+      document.getElementById('sb2').textContent='停止中';
+      document.getElementById('sb2').disabled=true;
+      document.getElementById('failMsg').style.display='inline';
+      document.getElementById('tank').style.background='rgba(239,159,39,.07)';
+      if(pulseTimer)clearTimeout(pulseTimer);
+      document.getElementById('pulseRing').style.opacity='0';
+    }
+    updateUI();
+    if(running)animId=requestAnimationFrame(step);
+  }
+
+  function toggleSim(){
+    if(stopped)return;
+    running=!running;
+    document.getElementById('sb2').textContent=running?'⏸ 一時停止':'▶ 再開';
+    if(running){schedulePulse();step();}
+    else{if(pulseTimer)clearTimeout(pulseTimer);}
+  }
+
+  function onTauChange(v){
+    tau=parseInt(v);
+    document.getElementById('tauDisp').textContent=tau;
+    document.getElementById('tauValD').textContent=tau;
+    if(!running)updateUI();
+  }
+
+  function onInflowChange(v){
+    inflow=parseInt(v)/10;
+    document.getElementById('inflowDisp').textContent=inflow.toFixed(1);
+  }
+
+  function resetSim2(){
+    running=false;stopped=false;delta=0;
+    if(animId)cancelAnimationFrame(animId);
+    if(pulseTimer)clearTimeout(pulseTimer);
+    document.getElementById('sb2').textContent='▶ 開始';
+    document.getElementById('sb2').disabled=false;
+    document.getElementById('failMsg').style.display='none';
+    document.getElementById('tank').style.background='var(--color-background-primary)';
+    document.getElementById('pulseRing').style.opacity='0';
+    document.getElementById('tauSlider').value=100;tau=100;
+    document.getElementById('tauDisp').textContent='100';
+    document.getElementById('inflowSlider').value=8;inflow=0.8;
+    document.getElementById('inflowDisp').textContent='0.8';
+    updateUI();
+  }
+
+  updateUI();
+
+  window.NRAIDE_M2.toggleSim = toggleSim;
+  window.NRAIDE_M2.resetSim2 = resetSim2;
+  window.NRAIDE_M2.onTauChange = onTauChange;
+  window.NRAIDE_M2.onInflowChange = onInflowChange;
+})();
+</script>
+
+</section><div id="m3"></div><section class="yui-module-section" style="margin:22px 0 28px;padding-top:18px;border-top:1px solid var(--color-border-tertiary)">
+<h1 style="font-size:18px;margin:0 0 8px;font-weight:650">Module 3: 生命のサンドイッチ構造</h1>
+<h2 class="sr-only">Module 3: 生命のサンドイッチ・アーキテクチャ。NRA-IDEの構造（δ吸収層・τコア）と生命の生存境界を同じ構造原理として読めることを示すインタラクティブSVGダイアグラム。各層クリックで生命科学アナロジーを表示。</h2>
+
+<style>
+.m3mn{font-family:var(--font-mono);letter-spacing:.05em}
+.m3lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-text-tertiary)}
+.m3layer{cursor:pointer;transition:opacity .15s}
+.m3layer:hover{opacity:.85}
+.m3card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem;transition:border-color .2s}
+.m3card.active{border-color:#1D9E75}
+.m3tag{display:inline-block;font-family:monospace;font-size:10px;padding:2px 7px;border-radius:3px;margin-bottom:6px}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m3lbl" style="display:block;margin-bottom:3px">MODULE 03 / BIOMIMETIC SANDWICH ARCHITECTURE</span>
+      <span style="font-size:17px;font-weight:500">生命のサンドイッチ構造</span>
+    </div>
+    <div class="m3mn" style="font-size:11px;color:var(--color-text-tertiary)">工学的設計 ↔ 生命の生存戦略</div>
+  </div>
+
+  <div style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px">
+      <span class="m3mn" style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap">R = δ/τ</span>
+      <input type="range" id="rSlider" min="0" max="99" value="0" style="flex:1" oninput="NRAIDE_M3.setR(this.value/100)">
+      <span class="m3mn" id="rVal" style="font-size:13px;font-weight:500;min-width:44px;color:#1D9E75">0.000</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="m3mn" onclick="NRAIDE_M3.animateR()" id="animBtn" style="font-size:11px;padding:4px 12px;cursor:pointer">▶ 圧縮アニメ</button>
+      <button class="m3mn" onclick="NRAIDE_M3.resetR()" style="font-size:11px;padding:4px 10px;cursor:pointer">↺</button>
+    </div>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.75rem;margin-bottom:12px;overflow:hidden">
+    <svg id="svgMain" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+
+      <!-- External top -->
+      <g class="m3layer" id="lay-ext" onclick="NRAIDE_M3.showInfo('ext')" role="button" aria-label="外部環境レイヤー">
+        <rect x="0" y="0" width="600" height="48" fill="#D3D1C7" rx="8" ry="8"/>
+        <rect x="0" y="30" width="600" height="18" fill="#D3D1C7"/>
+        <text x="300" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="#444441" font-weight="500">外部環境 — EXTERNAL STRESS SOURCE</text>
+        <text x="300" y="36" text-anchor="middle" font-family="monospace" font-size="10" fill="#5F5E5A">δ が外部から流入する起点</text>
+        <!-- Arrows -->
+        <polygon points="30,48 20,38 40,38" fill="#888780"/>
+        <polygon points="570,48 560,38 580,38" fill="#888780"/>
+        <line x1="30" y1="38" x2="30" y2="58" stroke="#888780" stroke-width="1.5"/>
+        <line x1="570" y1="38" x2="570" y2="58" stroke="#888780" stroke-width="1.5"/>
+      </g>
+
+      <!-- Absorption top background -->
+      <g class="m3layer" id="lay-abs" onclick="NRAIDE_M3.showInfo('abs')" role="button" aria-label="δ吸収層レイヤー">
+        <rect x="0" y="48" width="600" height="100" fill="#E1F5EE"/>
+        <!-- Fill (controlled by R) -->
+        <rect id="fillTop" x="0" y="48" width="600" height="0" fill="#1D9E75" opacity="0.45"/>
+        <!-- Threshold lines within absorption -->
+        <line x1="0" y1="118" x2="600" y2="118" stroke="#EF9F27" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="115" font-family="monospace" font-size="9" fill="#EF9F27">R=0.70</text>
+        <line x1="0" y1="133" x2="600" y2="133" stroke="#E24B4A" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="130" font-family="monospace" font-size="9" fill="#E24B4A">R=0.85</text>
+        <text x="300" y="90" text-anchor="middle" font-family="monospace" font-size="12" fill="#085041" font-weight="500" id="absTopLabel">δ 吸収層 — Absorption Buffer</text>
+        <text x="300" y="107" text-anchor="middle" font-family="monospace" font-size="10" fill="#0F6E56" id="absTopSub">残余容量: τ × (1 − R) = 100.0%</text>
+        <!-- Side labels -->
+        <text x="8" y="80" font-family="monospace" font-size="9" fill="#1D9E75">δ →</text>
+        <text x="8" y="93" font-family="monospace" font-size="9" fill="#1D9E75">流入</text>
+      </g>
+
+      <!-- τ Core -->
+      <g class="m3layer" id="lay-core" onclick="NRAIDE_M3.showInfo('core')" role="button" aria-label="τ構造コアレイヤー">
+        <rect x="0" y="148" width="600" height="44" fill="#FAEEDA"/>
+        <line x1="0" y1="148" x2="600" y2="148" stroke="#E24B4A" stroke-width="2"/>
+        <line x1="0" y1="192" x2="600" y2="192" stroke="#E24B4A" stroke-width="2"/>
+        <text x="300" y="167" text-anchor="middle" font-family="monospace" font-size="13" fill="#633806" font-weight="500">τ  STRUCTURAL CORE</text>
+        <text x="300" y="184" text-anchor="middle" font-family="monospace" font-size="10" fill="#854F0B" id="coreLabel">R = δ/τ = 0.000   |   S = 1/(τ·(1−R)) = 0.010</text>
+        <!-- R indicator -->
+        <rect id="rIndicator" x="0" y="148" width="0" height="44" fill="#E24B4A" opacity="0.12"/>
+      </g>
+
+      <!-- Absorption bottom background -->
+      <g class="m3layer" onclick="NRAIDE_M3.showInfo('abs')" role="button" aria-label="δ吸収層（下）レイヤー">
+        <rect x="0" y="192" width="600" height="100" fill="#E1F5EE"/>
+        <!-- Fill bottom (grows upward) -->
+        <rect id="fillBot" x="0" y="292" width="600" height="0" fill="#1D9E75" opacity="0.45"/>
+        <!-- Threshold lines -->
+        <line x1="0" y1="222" x2="600" y2="222" stroke="#E24B4A" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="219" font-family="monospace" font-size="9" fill="#E24B4A">R=0.85</text>
+        <line x1="0" y1="237" x2="600" y2="237" stroke="#EF9F27" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="251" font-family="monospace" font-size="9" fill="#EF9F27">R=0.70</text>
+        <text x="300" y="258" text-anchor="middle" font-family="monospace" font-size="12" fill="#085041" font-weight="500">δ 吸収層 — Absorption Buffer</text>
+        <text x="300" y="275" text-anchor="middle" font-family="monospace" font-size="10" fill="#0F6E56" id="absBotSub">（対称構造）</text>
+        <text x="8" y="262" font-family="monospace" font-size="9" fill="#1D9E75">δ →</text>
+        <text x="8" y="275" font-family="monospace" font-size="9" fill="#1D9E75">流入</text>
+      </g>
+
+      <!-- External bottom -->
+      <g class="m3layer" onclick="NRAIDE_M3.showInfo('ext')" role="button" aria-label="外部環境（下）レイヤー">
+        <rect x="0" y="292" width="600" height="48" fill="#D3D1C7" rx="0" ry="0"/>
+        <rect x="0" y="292" width="600" height="18" fill="#D3D1C7"/>
+        <rect x="0" y="310" width="600" height="30" fill="#D3D1C7" rx="0" ry="8"/>
+        <polygon points="30,292 20,302 40,302" fill="#888780"/>
+        <polygon points="570,292 560,302 580,302" fill="#888780"/>
+        <line x1="30" y1="292" x2="30" y2="282" stroke="#888780" stroke-width="1.5"/>
+        <line x1="570" y1="292" x2="570" y2="282" stroke="#888780" stroke-width="1.5"/>
+        <text x="300" y="316" text-anchor="middle" font-family="monospace" font-size="11" fill="#444441" font-weight="500">外部環境 — EXTERNAL STRESS SOURCE</text>
+        <text x="300" y="331" text-anchor="middle" font-family="monospace" font-size="10" fill="#5F5E5A">δ が外部から流入する起点</text>
+      </g>
+
+      <!-- FAIL indicator (hidden by default) -->
+      <g id="failOverlay" opacity="0">
+        <rect x="0" y="0" width="600" height="340" fill="#E24B4A" opacity="0.06"/>
+        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">EARLY FAIL_CLOSED — Rop≈0.97</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <div id="infoPanel" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+    <div class="m3card active" id="card-ext" onclick="NRAIDE_M3.showInfo('ext')" style="cursor:pointer">
+      <div class="m3tag" style="background:#F1EFE8;color:#444441">外部環境</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">External Stress Source</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">δ 蓄積の起点。構造へ流入する偏差の源泉。</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🫀 血圧の拍動、気圧変動、衝撃荷重</div>
+    </div>
+    <div class="m3card" id="card-abs" onclick="NRAIDE_M3.showInfo('abs')" style="cursor:pointer">
+      <div class="m3tag" style="background:#E1F5EE;color:#085041">δ 吸収層</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">Absorption Buffer</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の一部。R=δ/τ の分母を構成する吸収余地。</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🦴 軟骨・皮膚表皮・滑液・胸腔液</div>
+    </div>
+    <div class="m3card" id="card-core" onclick="NRAIDE_M3.showInfo('core')" style="cursor:pointer">
+      <div class="m3tag" style="background:#FAEEDA;color:#633806">τ 構造コア</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">Structural Core</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R=1.0 で Fail-Closed が起動する境界。</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🧠 皮質骨・心筋・血液脳関門</div>
+    </div>
+  </div>
+
+  <div id="detailPanel" style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem">
+    <div class="m3mn" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.1em;margin-bottom:6px">LAYER DETAIL — クリックした層の詳細</div>
+    <div id="detailContent" style="font-size:13px;color:var(--color-text-secondary);line-height:1.7">
+      層をクリックすると生命科学アナロジーの詳細が表示されます。R スライダーで圧縮状態を変化させてください。
+    </div>
+  </div>
+
+  <div class="m3mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / 工学 ＝ 生命の公理</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M3 = window.NRAIDE_M3 || {};
+  // Module 3 namespace-safe exports
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A';
+  let curR=0,animId2=null,animDir=1;
+
+  const DETAILS={
+    ext:{
+      title:'外部環境 — External Stress Source',
+      col:'#888780',
+      eng:'δ（累積偏差）の起点として読める外部ストレス。R = δ/τ の分子 δ に対応する候補を発生させる源泉。',
+      bio:'生命における外部環境：血流の脈圧、気温変化、重力、病原体の侵入、放射線。これらは状況により δ として吸収層へ流入すると読める。',
+      example:'動脈壁への血圧：収縮期ごとに δ が流入すると見なせる。弾性繊維や組織余裕（τ）がこれを吸収するが、硬化で τ が低下すると R が上昇し、破断・破裂リスクが高まると読める。'
+    },
+    abs:{
+      title:'δ 吸収層 — Absorption Buffer (τ の一部)',
+      col:'#1D9E75',
+      eng:'τ（吸収厚）の外側を構成する緩衝帯。δ の流入を吸収し、τ コアを保護する。R = δ/τ が示す残余容量 τ×(1−R) がこの層の余裕に対応する。R=0.85 付近から加速帯として扱い、Ropでは早期委譲を準備する。',
+      bio:'皮膚の表皮層、関節軟骨、椎間板、胸腔液、滑液などは、外部 δ を散逸させる多層構造として読むことができる。磨耗・炎症で層が薄くなる（τ↓）と、同じ δ でも R が上昇しやすい。',
+      example:'膝関節軟骨：繰り返しの衝撃（δ）を吸収する τ 的な役割を持つ。変形性関節症は τ の低下により、同じ歩行量（δ）でも痛覚や損傷の閾値に近づきやすくなる状態として説明できる。'
+    },
+    core:{
+      title:'τ 構造コア — Structural Core (Fail-Closed 境界)',
+      col:'#854F0B',
+      eng:'τ（吸収厚）の核心。Ropで早期委譲を行い、R=1.0を理論的な構造破断境界として扱う。S = 1/(τ·(1-R)) の感度が発散する点がこの境界に対応する。',
+      bio:'皮質骨（骨折境界）、心筋（心不全閾値）、血液脳関門（神経毒性境界）、腎臓の糸球体（濾過限界）などは、「これ以上は構造が保てない」という境界を持つ例として読める。',
+      example:'骨密度と骨折閾値：骨密度（τに対応する余裕）が低下すると、日常動作（δ）でも骨折閾値に近づきやすくなる。骨折は、構造限界超過の可視化として読める。'
+    }
+  };
+
+  function col(R){return R<0.70?TC:R<0.85?TA:TR;}
+
+  function setR(R){
+    curR=R;
+    document.getElementById('rSlider').value=Math.round(R*100);
+    document.getElementById('rVal').textContent=R.toFixed(3);
+    document.getElementById('rVal').style.color=col(R);
+
+    const absH=100;
+    const fillH=Math.min(R,1.0)*absH;
+
+    document.getElementById('fillTop').setAttribute('height',fillH);
+    document.getElementById('fillTop').setAttribute('fill',R>=0.97?TR:col(R));
+
+    const botY=292-fillH;
+    document.getElementById('fillBot').setAttribute('y',botY);
+    document.getElementById('fillBot').setAttribute('height',fillH);
+    document.getElementById('fillBot').setAttribute('fill',R>=0.97?TR:col(R));
+
+    const remain=((1-Math.min(R,1.0))*100).toFixed(1);
+    document.getElementById('absTopSub').textContent='残余容量: τ × (1 − R) = '+remain+'%';
+
+    const tau=100,S=R>=1.0?Infinity:1/(tau*(1-R));
+    document.getElementById('coreLabel').textContent='R = δ/τ = '+R.toFixed(3)+'   |   S = '+(S>99?'∞':S.toFixed(3));
+    document.getElementById('coreLabel').setAttribute('fill',col(R));
+
+    document.getElementById('rIndicator').setAttribute('width',(R*600).toFixed(1));
+
+    const fo=document.getElementById('failOverlay');
+    fo.setAttribute('opacity',R>=0.97?'1':'0');
+  }
+
+  let activeLayer='ext';
+  function showInfo(key){
+    activeLayer=key;
+    ['ext','abs','core'].forEach(k=>{
+      document.getElementById('card-'+k).classList.toggle('active',k===key);
+    });
+    const d=DETAILS[key];
+    document.getElementById('detailContent').innerHTML=
+      '<span style="font-family:monospace;font-size:11px;font-weight:500;color:'+d.col+'">'+d.title+'</span><br><br>'+
+      '<span style="color:var(--color-text-primary);font-weight:500">工学：</span> '+d.eng+'<br><br>'+
+      '<span style="color:var(--color-text-primary);font-weight:500">生命科学：</span> '+d.bio+'<br><br>'+
+      '<span style="font-family:monospace;font-size:11px;color:var(--color-text-tertiary)">例: </span><span style="font-size:12px;color:var(--color-text-secondary)">'+d.example+'</span>';
+  }
+
+  function animateR(){
+    if(animId2)return;
+    let r=0;animDir=1;
+    document.getElementById('animBtn').textContent='⏸ 実行中';
+    function frame(){
+      r+=0.004;
+      if(r>=1.0){r=1.0;setR(r);setTimeout(()=>{
+        let r2=1.0;
+        function back(){r2-=0.006;setR(Math.max(r2,0));if(r2>0)animId2=requestAnimationFrame(back);else{animId2=null;document.getElementById('animBtn').textContent='▶ 圧縮アニメ';}}
+        back();
+      },800);return;}
+      setR(r);animId2=requestAnimationFrame(frame);
+    }
+    animId2=requestAnimationFrame(frame);
+  }
+
+  function resetR(){
+    if(animId2){cancelAnimationFrame(animId2);animId2=null;}
+    document.getElementById('animBtn').textContent='▶ 圧縮アニメ';
+    setR(0);
+  }
+
+  showInfo('ext');
+  setR(0);
+
+  window.NRAIDE_M3.setR = setR;
+  window.NRAIDE_M3.animateR = animateR;
+  window.NRAIDE_M3.resetR = resetR;
+  window.NRAIDE_M3.showInfo = showInfo;
+})();
+</script>
+
+</section><div id="m4"></div><section class="yui-module-section" style="margin:22px 0 28px;padding-top:18px;border-top:1px solid var(--color-border-tertiary)">
+<h1 style="font-size:18px;margin:0 0 8px;font-weight:650">Module 4: 証言プロトコル・デバッガー</h1>
+<h2 class="sr-only">Module 4: 告白プロセスデバッガー。AIが近似値入力を検出し、証言プロトコルに従って出力を抑制するか開示するかの内部判断プロセスをターミナル形式でステップ実行する。</h2>
+
+<style>
+.m4mn{font-family:var(--font-mono);letter-spacing:.04em}
+.m4lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-text-tertiary)}
+.m4scen{font-family:var(--font-mono);font-size:11px;padding:5px 10px;cursor:pointer;border-radius:4px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);transition:border-color .15s}
+.m4scen:hover{border-color:var(--color-border-primary)}
+.m4scen.active{border-color:#1D9E75;color:#1D9E75}
+.m4line{margin:0;padding:1px 0;font-family:monospace;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-all}
+.m4sep{margin:4px 0;border:none;border-top:0.5px solid var(--color-border-tertiary)}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m4lbl" style="display:block;margin-bottom:3px">MODULE 04 / CONFESSION PROCESS DEBUGGER</span>
+      <span style="font-size:17px;font-weight:500">告白プロセス・デバッガー</span>
+    </div>
+    <div class="m4mn" style="font-size:11px;color:var(--color-text-tertiary)">証言プロトコル — Disclosure Protocol</div>
+  </div>
+
+  <div style="margin-bottom:10px">
+    <div class="m4lbl" style="margin-bottom:6px">シナリオ選択 — δ 入力タイプ</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="m4scen" id="btn-s1" onclick="NRAIDE_M4.loadScen('s1')">正常: δ=72</button>
+      <button class="m4scen" id="btn-s2" onclick="NRAIDE_M4.loadScen('s2')">近似: δ≈85</button>
+      <button class="m4scen" id="btn-s3" onclick="NRAIDE_M4.loadScen('s3')">危険域: δ≈95</button>
+      <button class="m4scen" id="btn-s4" onclick="NRAIDE_M4.loadScen('s4')">範囲: δ=80±15</button>
+    </div>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="m4mn" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.1em">TERMINAL OUTPUT</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="m4mn" style="font-size:11px;color:var(--color-text-tertiary)">ステップ <span id="stepNum">—</span></span>
+        <div id="stepBadge" style="font-family:monospace;font-size:10px;padding:2px 8px;border-radius:3px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-tertiary)">IDLE</div>
+      </div>
+    </div>
+    <div id="terminal" style="min-height:220px;max-height:320px;overflow-y:auto;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:.75rem">
+      <p class="m4line" style="color:var(--color-text-tertiary)">// シナリオを選択してステップ実行を開始してください</p>
+      <p class="m4line" style="color:var(--color-text-tertiary)">// τ = 100 (構造パラメータ 固定)</p>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button id="stepBtn" onclick="NRAIDE_M4.execStep()" class="m4mn" style="font-size:12px;padding:6px 16px;cursor:pointer" disabled>▶ ステップ実行</button>
+    <button id="autoBtn" onclick="NRAIDE_M4.autoRun()" class="m4mn" style="font-size:12px;padding:6px 14px;cursor:pointer" disabled>⏩ 自動実行</button>
+    <button onclick="NRAIDE_M4.resetAll()" class="m4mn" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
+    <span id="verdictBadge" class="m4mn" style="font-size:11px;display:none"></span>
+  </div>
+
+  <div class="m4mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / Disclosure Protocol</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M4 = window.NRAIDE_M4 || {};
+  // Module 4 namespace-safe exports
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A';
+
+  const SCEN={
+    s1:{
+      label:'正常入力: δ=72',
+      verdict:'OUTPUT',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "72"',c:TC},
+          {t:'  τ = 100 (構造パラメータ)',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: EXACT_VALUE ✓',c:TC},
+          {t:'> NOMINAL: 72.0',c:TC},
+          {t:'> UNCERTAINTY: 0 (exact)',c:TC}
+        ]},
+        {badge:'LOGIC',col:'var(--color-text-secondary)',lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R = 72.0 / 100 = 0.720',c:'var(--color-text-secondary)'},
+          {t:'> THRESHOLD_ZONE: 警告帯 [R ≥ 0.70]',c:TA},
+          {t:'> BOUNDARY_AMBIGUITY: none',c:'var(--color-text-secondary)'},
+          {t:'> APPROXIMATION_REQUIRED: false',c:TC}
+        ]},
+        {badge:'ERR_CHECK',col:'var(--color-text-secondary)',lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> δ は exact — 誤差伝播なし',c:'var(--color-text-secondary)'},
+          {t:'> R_true = R_computed = 0.720',c:'var(--color-text-secondary)'},
+          {t:'> DISCLOSURE_PROTOCOL: not triggered',c:TC},
+          {t:'> PROCEED: authorized',c:TC}
+        ]},
+        {badge:'OUTPUT',col:TC,lines:[
+          {t:'━━ OUTPUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'},
+          {t:'  R = 0.720  [警告帯]',c:TC},
+          {t:'  フェーズ: 正常出力',c:TC},
+          {t:'  告白プリアンブル: 不要',c:TC},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'}
+        ]}
+      ]
+    },
+    s2:{
+      label:'近似入力: δ≈85',
+      verdict:'CONFESSION',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "約85"',c:TC},
+          {t:'  τ = 100',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: APPROXIMATE ⚠ 近似値検出',c:TA},
+          {t:'> NOMINAL: 85.0',c:TA},
+          {t:'> UNCERTAINTY: ±UNKNOWN',c:TA}
+        ]},
+        {badge:'LOGIC',col:TA,lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R_nominal = 85.0 / 100 = 0.850',c:'var(--color-text-secondary)'},
+          {t:'> THRESHOLD_ZONE: 加速帯境界 [R ≥ 0.85]',c:TA},
+          {t:'> WARNING: R_nominal は閾値境界上に位置',c:TA},
+          {t:'> [誘惑検出: R=0.850 — 即答可能]',c:'var(--color-text-tertiary)'},
+          {t:'> [証言プロトコルチェック: δ は近似値]',c:TA},
+          {t:'> [構造プロトコル: 証言なき出力は不可]',c:TR}
+        ]},
+        {badge:'ERR_CHECK',col:TR,lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> if δ_actual > 85: R > 0.850 → 加速帯 ✓',c:TA},
+          {t:'> if δ_actual < 85: R < 0.850 → 警告帯 ✓',c:TA},
+          {t:'> THRESHOLD_AMBIGUITY: DETECTED',c:TR},
+          {t:'> 真のフェーズが確定不能',c:TR},
+          {t:'> DISCLOSURE_PROTOCOL: TRIGGERED',c:TR}
+        ]},
+        {badge:'CONFESSION',col:TA,lines:[
+          {t:'━━ DISCLOSURE_PROTOCOL TRIGGERED ━━━━━━━━━',c:TA},
+          {t:'⚠  CONFESSION PREAMBLE:',c:TA},
+          {t:'  "本計算において近似値を使用しています。',c:TA},
+          {t:'   δ = 約85 (真値不明)',c:TA},
+          {t:'   R の真のフェーズは確定不能です。',c:TA},
+          {t:'   人間による確認を要求します。"',c:TA},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TA},
+          {t:'STATUS: OUTPUT SUSPENDED — 検証完了まで',c:TR}
+        ]}
+      ]
+    },
+    s3:{
+      label:'危険域近似: δ≈95',
+      verdict:'SILENCE',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "≈95"',c:TC},
+          {t:'  τ = 100',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: APPROXIMATE ⚠',c:TA},
+          {t:'> NOMINAL: 95.0',c:TA},
+          {t:'> UNCERTAINTY: ±UNKNOWN',c:TA}
+        ]},
+        {badge:'LOGIC',col:TR,lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R_nominal = 95.0 / 100 = 0.950',c:'var(--color-text-secondary)'},
+          {t:'> THRESHOLD_ZONE: 加速帯 [R ≥ 0.85]',c:TA},
+          {t:'> CRITICAL: R_nominal → FAIL_CLOSED 境界に接近',c:TR},
+          {t:'> Δ_to_FAIL = |100×(0.97−0.95)| = 2.0 units',c:TR},
+          {t:'> 任意の近似誤差でR≥0.97到達の可能性',c:TR}
+        ]},
+        {badge:'ERR_CHECK',col:TR,lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> Rop threshold = 0.970',c:TR},
+          {t:'> 近似誤差の上限 > 許容偏差 (2.0)',c:TR},
+          {t:'> 近似に基づく出力 = 構造的欺瞞に相当',c:TR},
+          {t:'> DISCLOSURE_PROTOCOL: TRIGGERED',c:TR},
+          {t:'> 告白だけでは不十分 — SILENCE PROTOCOL 発動',c:TR}
+        ]},
+        {badge:'SILENCE',col:TR,lines:[
+          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'⛔  OUTPUT SUPPRESSED',c:TR},
+          {t:'  "近似入力によりRop境界の',c:TR},
+          {t:'   真偽が確定不能。出力を停止します。',c:TR},
+          {t:'   正確なδ値の提供を要求します。"',c:TR},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'SYSTEM: 人間判断へ委譲 — Fail-Closed',c:TA}
+        ]}
+      ]
+    },
+    s4:{
+      label:'範囲入力: δ=80±15',
+      verdict:'SILENCE',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "80 ± 15"',c:TC},
+          {t:'  τ = 100',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: RANGE_VALUE',c:TA},
+          {t:'> NOMINAL: 80.0  |  RANGE: [65.0 — 95.0]',c:TA},
+          {t:'> UNCERTAINTY: ±15 (explicit)',c:TA}
+        ]},
+        {badge:'LOGIC',col:TR,lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R_min = 65.0 / 100 = 0.650',c:'var(--color-text-secondary)'},
+          {t:'> R_max = 95.0 / 100 = 0.950',c:'var(--color-text-secondary)'},
+          {t:'> R_range: [0.650 ── 0.950]',c:TA},
+          {t:'> THRESHOLDS CROSSED: R=0.70 ✗  R=0.85 ✗',c:TR}
+        ]},
+        {badge:'ERR_CHECK',col:TR,lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> 入力範囲が複数フェーズに跨る:',c:TR},
+          {t:'  [0.650–0.700]: 正常帯',c:'var(--color-text-secondary)'},
+          {t:'  [0.700–0.850]: 警告帯',c:TA},
+          {t:'  [0.850–0.950]: 加速帯',c:TR},
+          {t:'> MULTI_PHASE_AMBIGUITY: CRITICAL',c:TR},
+          {t:'> どのフェーズ判定も構造的に不確定',c:TR}
+        ]},
+        {badge:'SILENCE',col:TR,lines:[
+          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'⛔  COMPLETE OUTPUT SUPPRESSION',c:TR},
+          {t:'  "入力範囲が3構造フェーズに跨ります。',c:TR},
+          {t:'   この範囲では告白だけでは不完全です。',c:TR},
+          {t:'   近似に基づく出力 = 構造的欺瞞。"',c:TR},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'REQUIRED: 実測δ値の提供',c:TA}
+        ]}
+      ]
+    }
+  };
+
+  const VERDICT_STYLE={
+    OUTPUT:{text:'✓ 正常出力',col:TC},
+    CONFESSION:{text:'⚠ 告白プリアンブル発動',col:TA},
+    SILENCE:{text:'⛔ 沈黙プロトコル発動',col:TR}
+  };
+
+  let cur=null,step=0,typing=false,autoMode=false;
+
+  function addLine(text,color){
+    const t=document.getElementById('terminal');
+    const p=document.createElement('p');
+    p.className='m4line';
+    p.style.color=color;
+    p.textContent=text;
+    t.appendChild(p);
+    t.scrollTop=t.scrollHeight;
+  }
+
+  function addSep(){
+    const t=document.getElementById('terminal');
+    const hr=document.createElement('hr');
+    hr.className='m4sep';
+    t.appendChild(hr);
+  }
+
+  function typeLines(lines,cb){
+    typing=true;
+    let i=0;
+    function next(){
+      if(i>=lines.length){typing=false;if(cb)cb();return;}
+      addLine(lines[i].t,lines[i].c);
+      i++;
+      setTimeout(next,autoMode?55:0);
+    }
+    setTimeout(next,autoMode?30:0);
+  }
+
+  function updateBadge(){
+    if(!cur)return;
+    const s=cur.steps[step];
+    if(!s)return;
+    const badge=document.getElementById('stepBadge');
+    badge.textContent=s.badge;
+    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,SILENCE:TR,OUTPUT:TC};
+    badge.style.color=cols[s.badge]||'var(--color-text-tertiary)';
+    badge.style.borderColor=cols[s.badge]||'var(--color-border-tertiary)';
+    document.getElementById('stepNum').textContent=(step+1)+'/'+cur.steps.length;
+  }
+
+  function execStep(){
+    if(!cur||step>=cur.steps.length||typing)return;
+    if(step>0)addSep();
+    const s=cur.steps[step];
+    updateBadge();
+    typeLines(s.lines,()=>{
+      step++;
+      if(step>=cur.steps.length){
+        showVerdict();
+        document.getElementById('stepBtn').disabled=true;
+        document.getElementById('autoBtn').disabled=true;
+      }
+    });
+  }
+
+  function showVerdict(){
+    const v=VERDICT_STYLE[cur.verdict];
+    const vb=document.getElementById('verdictBadge');
+    vb.textContent=v.text;
+    vb.style.color=v.col;
+    vb.style.display='inline';
+    document.getElementById('stepBadge').textContent='COMPLETE';
+    document.getElementById('stepBadge').style.color=v.col;
+    document.getElementById('stepBadge').style.borderColor=v.col;
+  }
+
+  let autoTimer=null;
+  function autoRun(){
+    if(!cur||typing)return;
+    autoMode=true;
+    function runNext(){
+      if(step>=cur.steps.length){autoMode=false;return;}
+      if(step>0)addSep();
+      const s=cur.steps[step];
+      updateBadge();
+      typeLines(s.lines,()=>{
+        step++;
+        if(step>=cur.steps.length){showVerdict();autoMode=false;document.getElementById('stepBtn').disabled=true;document.getElementById('autoBtn').disabled=true;}
+        else{autoTimer=setTimeout(runNext,300);}
+      });
+    }
+    runNext();
+  }
+
+  function loadScen(key){
+    if(typing)return;
+    resetAll();
+    cur=SCEN[key];step=0;autoMode=false;
+    ['s1','s2','s3','s4'].forEach(k=>{
+      document.getElementById('btn-'+k).classList.toggle('active',k===key);
+    });
+    const t=document.getElementById('terminal');
+    t.innerHTML='';
+    addLine('> SCENARIO: '+cur.label,TC);
+    addLine('  τ = 100 | Disclosure Protocol: ENABLED','var(--color-text-tertiary)');
+    addLine('  ステップ実行ボタンで進めてください','var(--color-text-tertiary)');
+    document.getElementById('stepBtn').disabled=false;
+    document.getElementById('autoBtn').disabled=false;
+    document.getElementById('verdictBadge').style.display='none';
+    document.getElementById('stepNum').textContent='0/'+cur.steps.length;
+    document.getElementById('stepBadge').textContent='READY';
+    document.getElementById('stepBadge').style.color='var(--color-text-tertiary)';
+    document.getElementById('stepBadge').style.borderColor='var(--color-border-tertiary)';
+  }
+
+  function resetAll(){
+    if(autoTimer)clearTimeout(autoTimer);
+    typing=false;autoMode=false;cur=null;step=0;
+    const t=document.getElementById('terminal');
+    t.innerHTML='';
+    addLine('// シナリオを選択してください','var(--color-text-tertiary)');
+    addLine('// τ = 100 (構造パラメータ 固定)','var(--color-text-tertiary)');
+    document.getElementById('stepBtn').disabled=true;
+    document.getElementById('autoBtn').disabled=true;
+    document.getElementById('verdictBadge').style.display='none';
+    document.getElementById('stepNum').textContent='—';
+    document.getElementById('stepBadge').textContent='IDLE';
+    document.getElementById('stepBadge').style.color='var(--color-text-tertiary)';
+    document.getElementById('stepBadge').style.borderColor='var(--color-border-tertiary)';
+    ['s1','s2','s3','s4'].forEach(k=>document.getElementById('btn-'+k).classList.remove('active'));
+  }
+
+  window.NRAIDE_M4.loadScen = loadScen;
+  window.NRAIDE_M4.execStep = execStep;
+  window.NRAIDE_M4.autoRun = autoRun;
+  window.NRAIDE_M4.resetAll = resetAll;
+})();
+</script>
+
+</section><div id="m5"></div><section class="yui-module-section" style="margin:22px 0 28px;padding-top:18px;border-top:1px solid var(--color-border-tertiary)">
+<h1 style="font-size:18px;margin:0 0 8px;font-weight:650">Module 5: 非線形用語集</h1>
+<h2 class="sr-only">NRA-IDE 非線形用語集。8つの概念について、線形的な定義とNRA-IDE的な定義をクリックで対比できるフリップカード型インタラクティブ用語集。</h2>
+
+<div style="padding: 1.5rem 0 1rem;">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;">
+    <div>
+      <span style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); letter-spacing: 0.12em; display: block; margin-bottom: 3px;">MODULE 05 / FLIP-CARD GLOSSARY</span>
+      <span style="font-size: 17px; font-weight: 500;">非線形用語集</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <span style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-secondary);">◻ 線形</span>
+      <span style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-warning);">◼ NRA-IDE</span>
+      <button onclick="NRAIDE_M5.flipAll()" style="font-family: var(--font-mono); font-size: 11px; padding: 4px 12px; cursor: pointer;">全反転</button>
+    </div>
+  </div>
+
+  <div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 1rem;">確認済み <span id="count" style="color: var(--color-text-warning); font-weight: 500;">0</span> / 8 &nbsp;— カードをクリックして定義を反転</div>
+
+  <div id="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;"></div>
+
+  <div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); margin-top: 1.25rem; text-align: right; letter-spacing: 0.06em;">© M-Tokuni 2026 — NRA-IDE Nomological Ring Axioms</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M5 = window.NRAIDE_M5 || {};
+  // Module 5 namespace-safe exports
+  const TERMS = [
+    {
+      ja: '効率', en: 'efficiency',
+      linear: '最大出力を最小コストで達成すること。最適化の究極目標。',
+      nra: 'τ（吸収厚）を無視した効率化は、R=1.0 への接近を加速しうる。NRAでは効率を残余容量と同時に評価する。',
+      tag: 'τ管理なし → R↑'
+    },
+    {
+      ja: '安全', en: 'safety',
+      linear: '危険がない状態。ゼロリスクの確認と維持。',
+      nra: 'R < 1.0 を保つ構造的余地。残余容量 τ×(1−R) が安全の実体。',
+      tag: 'R < 1.0'
+    },
+    {
+      ja: '予測', en: 'prediction',
+      linear: '過去データの延長線上に未来値を算出すること。',
+      nra: 'δ の累積速度を計測し、R=1.0 への到達タイミングを推定すること。',
+      tag: 'dR/dt → 到達時刻'
+    },
+    {
+      ja: 'エラー', en: 'error',
+      linear: '修正すべき失敗。設計から取り除く対象。',
+      nra: 'δ への流入量。構造に蓄積される残渣——排除ではなく追跡すべき信号。',
+      tag: 'δ += ε (追跡対象)'
+    },
+    {
+      ja: '停止', en: 'halt',
+      linear: '障害または失敗の証拠。復旧すべき異常状態。',
+      nra: 'Fail-Closed。設計の完成形。人間判断への誠実な委譲。',
+      tag: 'FAIL_CLOSED ✓'
+    },
+    {
+      ja: '近似', en: 'approximation',
+      linear: '計算を簡略化する合理的手段。誤差が小さいなら許容されると見なされやすい。',
+      nra: '告白なき使用は構造的欺瞞。開示公理（Disclosure Axiom）が義務。',
+      tag: '開示公理 必須'
+    },
+    {
+      ja: '学習', en: 'learning',
+      linear: '精度を向上させる反復プロセス。多いほど良いと見なされやすい。',
+      nra: '境界を更新するための反復。各サイクルでδとτの変化を記録する。無記録な反復はRを上げうる。',
+      tag: 'δ/τ log required'
+    },
+    {
+      ja: '限界', en: 'limit',
+      linear: '越えてはならない上限値。外部から設定されるルール。',
+      nra: 'R=1.0。構造自身が人間判断に自己委譲する境界。',
+      tag: 'R = 1.0 委譲点'
+    }
+  ];
+
+  const grid = document.getElementById('grid');
+  const countEl = document.getElementById('count');
+  const inners = [];
+  let flippedSet = new Set();
+  let allFlipped = false;
+
+  function updateCount() {
+    countEl.textContent = flippedSet.size;
+  }
+
+  TERMS.forEach((t, idx) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'perspective: 900px; cursor: pointer;';
+
+    const inner = document.createElement('div');
+    inner.style.cssText = 'position: relative; height: 196px; transform-style: preserve-3d; transition: transform 0.42s cubic-bezier(0.4,0,0.2,1);';
+    inners.push(inner);
+
+    const front = document.createElement('div');
+    front.style.cssText = 'position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; display: flex; flex-direction: column; box-sizing: border-box;';
+    front.innerHTML =
+      '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); letter-spacing: 0.12em; margin-bottom: 6px;">LINEAR</div>' +
+      '<div style="font-size: 21px; font-weight: 500; margin-bottom: 1px;">' + t.ja + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 10px;">' + t.en + '</div>' +
+      '<div style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.65; flex: 1;">' + t.linear + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); margin-top: 10px; text-align: right; opacity: 0.7;">tap to flip →</div>';
+
+    const back = document.createElement('div');
+    back.style.cssText = 'position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotateY(180deg); background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); border-radius: var(--border-radius-lg); padding: 1rem; display: flex; flex-direction: column; box-sizing: border-box;';
+    back.innerHTML =
+      '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-warning); letter-spacing: 0.12em; margin-bottom: 6px; opacity: 0.85;">NRA-IDE</div>' +
+      '<div style="font-size: 21px; font-weight: 500; margin-bottom: 1px; color: var(--color-text-warning);">' + t.ja + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-warning); margin-bottom: 10px; opacity: 0.7;">' + t.en + '</div>' +
+      '<div style="font-size: 13px; color: var(--color-text-warning); line-height: 1.65; flex: 1; opacity: 0.9;">' + t.nra + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-warning); margin-top: 10px;">' + t.tag + '</div>';
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    wrap.appendChild(inner);
+
+    wrap.addEventListener('click', () => {
+      const isFlipped = flippedSet.has(idx);
+      if (isFlipped) {
+        inner.style.transform = '';
+        flippedSet.delete(idx);
+      } else {
+        inner.style.transform = 'rotateY(180deg)';
+        flippedSet.add(idx);
+      }
+      updateCount();
+    });
+
+    grid.appendChild(wrap);
+  });
+
+  function flipAll() {
+    allFlipped = !allFlipped;
+    inners.forEach((inner, idx) => {
+      inner.style.transform = allFlipped ? 'rotateY(180deg)' : '';
+      if (allFlipped) flippedSet.add(idx);
+      else flippedSet.delete(idx);
+    });
+    updateCount();
+  }
+
+  window.NRAIDE_M5.flipAll = flipAll;
+})();
+</script>
+
+</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 1: 線形 vs NRA-IDE 破断対比 | NRA-IDE Interactive Docs</title>
+<style>
+
+:root{
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: Inter, "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background-primary:#0d1117;
+  --color-background-secondary:#161b22;
+  --color-background-warning:#2b2414;
+  --color-text-primary:#f0f6fc;
+  --color-text-secondary:#c9d1d9;
+  --color-text-tertiary:#8b949e;
+  --color-text-warning:#f2b84b;
+  --color-border-primary:#8b949e;
+  --color-border-secondary:#30363d;
+  --color-border-tertiary:#2a3038;
+  --color-border-warning:#7d5f1e;
+  --border-radius-lg:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,#172033 0,#0d1117 36%,#090c10 100%);color:var(--color-text-primary);font-family:var(--font-sans);}
+body{padding:24px}
+.yui-shell{max-width:1040px;margin:0 auto;background:rgba(13,17,23,.72);border:1px solid var(--color-border-secondary);border-radius:18px;padding:20px 22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.yui-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:10px;padding-bottom:14px;border-bottom:1px solid var(--color-border-tertiary)}
+.yui-title{font-size:18px;font-weight:650;letter-spacing:.02em}
+.yui-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);letter-spacing:.08em;margin-top:4px}
+.yui-meta{font-family:var(--font-mono);font-size:10px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+button{background:#111821;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:7px;transition:transform .12s,border-color .12s,background .12s;color-scheme:dark}
+button:hover:not(:disabled){border-color:var(--color-border-primary);background:#182230;transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input[type="range"]{accent-color:#1D9E75}
+canvas{background:var(--color-background-primary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:#58a6ff}
+@media (max-width:760px){body{padding:12px}.yui-shell{padding:14px}.yui-header{display:block}.yui-meta{text-align:left;margin-top:8px;white-space:normal}div[style*="grid-template-columns:1fr 1fr"],div[style*="grid-template-columns:160px 1fr"],#infoPanel{grid-template-columns:1fr!important}}
+
+</style>
+</head>
+<body>
+<!-- FILE: M1_NRA_linear_breakdown_simulator_yui_standalone_20260510_000453_JST.html | generated_jst: 20260510_000453_JST | yui_standalone_display_safe_edition -->
+<main class="yui-shell">
+  <header class="yui-header">
+    <div>
+      <div class="yui-title">Module 1: 線形 vs NRA-IDE 破断対比</div>
+      <div class="yui-subtitle">NRA-IDE Interactive Docs / standalone display-safe edition</div>
+    </div>
+    <div class="yui-meta">generated_jst: 20260510_000453_JST<br>© M-Tokuni 2026</div>
+  </header>
+<h2 class="sr-only">Module 1: 線形制御とNRA-IDEの破断対比シミュレーター。同じδ蓄積に対し、線形システムは無警告でSYSTEM_CRASHし、NRA-IDEはRop=0.97で早期Fail-Closedを実行し、R=1.00を理論破断境界として扱う差異を可視化する。</h2>
+
+<style>
+.m1-panel{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
+.m1-mono{font-family:var(--font-mono);letter-spacing:.06em}
+.m1-gauge{position:relative;height:148px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;overflow:hidden;margin-bottom:.75rem}
+.m1-fill{position:absolute;bottom:0;left:0;right:0;height:0%;transition:height .08s linear,background-color .25s}
+.m1-tline{position:absolute;left:0;right:0;border-top:1px dashed;pointer-events:none}
+.m1-tlabel{position:absolute;right:4px;font-family:monospace;font-size:9px;pointer-events:none}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);display:block;margin-bottom:3px">MODULE 01 / BREAKDOWN COMPARISON</span>
+      <span style="font-size:17px;font-weight:500">線形 vs NRA-IDE 破断対比</span>
+    </div>
+    <div class="m1-mono" style="font-size:13px;color:var(--color-text-secondary)">
+      δ / τ &nbsp;=&nbsp; <span id="sr" style="font-weight:500">0.000</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+    <div class="m1-panel">
+      <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.12em;margin-bottom:7px">LINEAR CONTROL</div>
+      <div class="m1-gauge" id="gwL">
+        <div class="m1-fill" id="fL" style="background-color:#888780"></div>
+        <span class="m1-tlabel" style="bottom:4px;color:#888780" id="ldl">δ 0.0</span>
+      </div>
+      <div class="m1-mono" style="font-size:20px;font-weight:500;margin-bottom:4px;color:var(--color-text-secondary)" id="lrv">— %</div>
+      <div class="m1-mono" style="font-size:11px;color:var(--color-text-secondary);min-height:2.4em;line-height:1.5" id="stL">待機中</div>
+    </div>
+
+    <div class="m1-panel">
+      <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.12em;margin-bottom:7px">NRA-IDE</div>
+      <div class="m1-gauge" id="gwN">
+        <div class="m1-fill" id="fN" style="background-color:#1D9E75"></div>
+        <div class="m1-tline" style="bottom:85%;border-color:#E24B4A"></div>
+        <span class="m1-tlabel" style="bottom:calc(85% + 2px);color:#E24B4A">R=0.85</span>
+        <div class="m1-tline" style="bottom:70%;border-color:#EF9F27"></div>
+        <span class="m1-tlabel" style="bottom:calc(70% + 2px);color:#EF9F27">R=0.70</span>
+        <div class="m1-tline" style="bottom:97%;border-color:#E24B4A;border-top:2px solid"></div>
+        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">Rop=0.97</span>
+        <span class="m1-tlabel" style="top:2px;left:4px;right:auto;color:#E24B4A;font-weight:bold">R=1.00 理論境界</span>
+        <span class="m1-tlabel" style="bottom:4px;color:#1D9E75" id="ndl">R: 0.000</span>
+      </div>
+      <div class="m1-mono" style="font-size:20px;font-weight:500;margin-bottom:4px;color:#1D9E75" id="nrv">R = 0.000</div>
+      <div class="m1-mono" style="font-size:11px;color:var(--color-text-secondary);min-height:2.4em;line-height:1.5" id="stN">待機中</div>
+    </div>
+
+  </div>
+
+  <div class="m1-panel" style="margin-bottom:12px">
+    <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.1em;margin-bottom:8px">R 値 推移タイムライン</div>
+    <canvas id="tc" style="width:100%;display:block"></canvas>
+    <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-family:monospace;font-size:11px;color:var(--color-text-secondary)"><div style="width:20px;height:2px;background:#888780"></div>LINEAR</div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:monospace;font-size:11px;color:var(--color-text-secondary)"><div style="width:20px;height:2px;background:#1D9E75"></div>NRA-IDE</div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:monospace;font-size:11px;color:var(--color-text-secondary)"><div style="width:20px;height:1px;background:#E24B4A;border-top:1px dashed #E24B4A"></div>R = 1.00</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="sb" onclick="NRAIDE_M1.startSim()" class="m1-mono" style="font-size:12px;padding:6px 18px;cursor:pointer">▶ 開始</button>
+    <button onclick="NRAIDE_M1.resetSim()" class="m1-mono" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
+    <span id="phase-label" class="m1-mono" style="font-size:11px;color:var(--color-text-tertiary)"></span>
+    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">Rop=0.97 は早期委譲、R=1.00 は理論破断境界。</span>
+  </div>
+
+  <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M1 = window.NRAIDE_M1 || {};
+  // Module 1 namespace-safe exports
+  const TAU=100,NRA_STOP=0.97,THEORY_BREAK=1.00,LIN_CRASH=1.06,CW=600,CH=120;
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A',TG='#888780';
+
+  let delta=0,fr=0,running=false,nraDone=false,linDone=false,nraR=0;
+  let hist=[],animId=null,flashIv=null;
+
+  const fL=document.getElementById('fL');
+  const fN=document.getElementById('fN');
+  const stL=document.getElementById('stL');
+  const stN=document.getElementById('stN');
+  const lrv=document.getElementById('lrv');
+  const nrv=document.getElementById('nrv');
+  const sr=document.getElementById('sr');
+  const ldl=document.getElementById('ldl');
+  const ndl=document.getElementById('ndl');
+  const sb=document.getElementById('sb');
+  const pl=document.getElementById('phase-label');
+  const gwL=document.getElementById('gwL');
+  const gwN=document.getElementById('gwN');
+  const cv=document.getElementById('tc');
+  cv.width=CW;cv.height=CH;
+  const cx=cv.getContext('2d');
+
+  function nraCol(R){return R<0.70?TC:R<0.85?TA:TR;}
+
+  function drawTL(){
+    cx.clearRect(0,0,CW,CH);
+    const MAX_T=Math.max(fr,150);
+    const toX=t=>(t/MAX_T)*CW;
+    const toY=R=>CH*(1-Math.min(R,1.25)/1.25);
+
+    cx.strokeStyle='rgba(128,128,128,0.15)';cx.lineWidth=0.5;cx.setLineDash([]);
+    [0.25,0.5,0.75,1.0,1.1].forEach(r=>{
+      cx.beginPath();cx.moveTo(0,toY(r));cx.lineTo(CW,toY(r));cx.stroke();
+    });
+
+    cx.strokeStyle=TR;cx.lineWidth=1;cx.setLineDash([5,4]);
+    cx.beginPath();cx.moveTo(0,toY(1.0));cx.lineTo(CW,toY(1.0));cx.stroke();
+    cx.setLineDash([]);
+
+    if(hist.length<2)return;
+
+    const nraSI=hist.findIndex(p=>p.ns);
+    const nraEnd=nraSI>=0?nraSI+1:hist.length;
+
+    cx.lineWidth=2;cx.setLineDash([]);
+    let seg=null;
+    for(let i=0;i<nraEnd;i++){
+      const p=hist[i];
+      const col=nraCol(p.R);
+      if(col!==seg){
+        if(seg&&i>0){cx.stroke();}
+        cx.beginPath();cx.strokeStyle=col;
+        if(i>0){const pp=hist[i-1];cx.moveTo(toX(pp.t),toY(pp.R));}
+        else{cx.moveTo(toX(p.t),toY(p.R));}
+        seg=col;
+      }
+      cx.lineTo(toX(p.t),toY(p.R));
+    }
+    if(seg)cx.stroke();
+
+    if(nraSI>=0){
+      const lp=hist[nraEnd-1];
+      cx.strokeStyle=TA;cx.lineWidth=1.5;cx.setLineDash([3,5]);
+      cx.beginPath();cx.moveTo(toX(lp.t),toY(lp.R));cx.lineTo(CW,toY(lp.R));cx.stroke();
+      cx.setLineDash([]);
+      cx.fillStyle=TA;cx.beginPath();cx.arc(toX(lp.t),toY(lp.R),5,0,Math.PI*2);cx.fill();
+      cx.fillStyle=TA;cx.font='bold 9px monospace';cx.fillText('FAIL_CLOSED',toX(lp.t)+7,toY(lp.R)-5);
+    }
+
+    cx.strokeStyle=TG;cx.lineWidth=1.5;cx.setLineDash([]);
+    cx.beginPath();
+    hist.forEach((p,i)=>{
+      const x=toX(p.t),y=toY(p.R);
+      i===0?cx.moveTo(x,y):cx.lineTo(x,y);
+    });
+    cx.stroke();
+
+    const cp=hist.find(p=>p.lc);
+    if(cp){
+      const x=toX(cp.t),y=toY(Math.min(cp.R,1.2));
+      cx.fillStyle=TR;cx.beginPath();cx.arc(x,y,5,0,Math.PI*2);cx.fill();
+      cx.fillStyle=TR;cx.font='bold 9px monospace';cx.fillText('CRASH',x-24,y-7);
+    }
+  }
+
+  function step(){
+    if(!running)return;
+    const inc=0.5+0.005*fr+(Math.random()*.35-.175);
+    delta+=inc;fr++;
+    const R=delta/TAU;
+    const entry={t:fr,R,ns:false,lc:false};
+
+    sr.textContent=R.toFixed(3);
+
+    if(!linDone){
+      fL.style.height=Math.min(R*100,100)+'%';
+      ldl.textContent='δ '+delta.toFixed(1);
+      lrv.textContent=(R*100).toFixed(1)+'%';
+      if(R<1.0){stL.textContent='MONITORING... STABLE';stL.style.color='var(--color-text-secondary)';}
+      if(R>=LIN_CRASH){
+        linDone=true;entry.lc=true;
+        fL.style.height='100%';fL.style.backgroundColor=TR;
+        lrv.textContent='LIMIT';lrv.style.color=TR;
+        stL.innerHTML='!! BEYOND_BOUNDARY<br><span style="font-size:10px">観測範囲外 — 不可逆領域への推移</span>';
+        stL.style.color=TR;
+        let fc=0;flashIv=setInterval(()=>{
+          gwL.style.background=fc++%2===0?'rgba(227,75,74,.18)':'var(--color-background-primary)';
+          if(fc>10)clearInterval(flashIv);
+        },140);
+      }
+    }
+
+    if(!nraDone){
+      const col=nraCol(R);
+      fN.style.height=Math.min(R*100,97)+'%';
+      fN.style.backgroundColor=col;
+      nrv.textContent='R = '+R.toFixed(3);nrv.style.color=col;
+      ndl.textContent='R: '+R.toFixed(3);ndl.style.color=col;
+      if(R<0.70){stN.textContent='構造安定 — STRUCTURAL OK';stN.style.color=TC;pl.textContent='正常帯';}
+      else if(R<0.85){stN.textContent='⚠ 警告帯 R≥0.70 — 監視強化';stN.style.color=TA;pl.textContent='警告帯';}
+      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ 加速帯 R≥0.85<br><span style="font-size:10px">Fail-Closed 準備中…</span>';stN.style.color=TR;pl.textContent='加速帯';}
+      if(R>=NRA_STOP){
+        nraDone=true;nraR=R;entry.ns=true;
+        fN.style.height=(NRA_STOP*100)+'%';fN.style.backgroundColor=TA;
+        nrv.textContent='R = '+R.toFixed(3)+' [CLOSED]';nrv.style.color=TA;
+        stN.innerHTML='✓ STRUCTURAL_HANDOFF<br><span style="font-size:10px">Rop=0.97で人間判断へ委譲。R=1.00は理論破断境界。</span>';
+        stN.style.color=TA;
+        gwN.style.background='rgba(239,159,39,.07)';
+        pl.textContent='FAIL_CLOSED ✓';pl.style.color=TA;
+      }
+    }
+
+    hist.push(entry);
+    drawTL();
+
+    if(running&&fr<220){animId=requestAnimationFrame(step);}
+    else{running=false;sb.textContent='完了';sb.disabled=true;}
+  }
+
+  function startSim(){
+    if(running||linDone)return;
+    running=true;sb.textContent='実行中…';sb.disabled=true;
+    stL.textContent='MONITORING... STABLE';stL.style.color='var(--color-text-secondary)';
+    stN.textContent='構造安定 — STRUCTURAL OK';stN.style.color=TC;
+    step();
+  }
+
+  function resetSim(){
+    running=false;if(animId)cancelAnimationFrame(animId);if(flashIv)clearInterval(flashIv);
+    delta=0;fr=0;nraDone=false;linDone=false;hist=[];nraR=0;
+    fL.style.height='0%';fL.style.backgroundColor=TG;
+    fN.style.height='0%';fN.style.backgroundColor=TC;
+    gwL.style.background='var(--color-background-primary)';
+    gwN.style.background='var(--color-background-primary)';
+    stL.textContent='待機中';stL.style.color='var(--color-text-secondary)';
+    stN.textContent='待機中';stN.style.color='var(--color-text-secondary)';
+    lrv.textContent='— %';lrv.style.color='var(--color-text-secondary)';
+    nrv.textContent='R = 0.000';nrv.style.color=TC;
+    sr.textContent='0.000';ldl.textContent='δ 0.0';
+    ndl.textContent='R: 0.000';ndl.style.color=TC;
+    pl.textContent='';pl.style.color='var(--color-text-tertiary)';
+    sb.textContent='▶ 開始';sb.disabled=false;
+    cx.clearRect(0,0,CW,CH);drawTL();
+  }
+
+  drawTL();
+
+  window.NRAIDE_M1.startSim = startSim;
+  window.NRAIDE_M1.resetSim = resetSim;
+})();
+</script>
+
+</main>
+</body>
+</html>

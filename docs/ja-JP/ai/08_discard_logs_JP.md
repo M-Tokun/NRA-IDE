@@ -54,7 +54,7 @@ NRA-IDEはこれを計算に取り込みます。残差を蓄積させずに外�
 
 時計の歯車は、摩耗しても誤差を累積しないで正確な時を刻むことがなぜ可能なのでしょう？
 
-08_Escapement_ContactPoint_JP.html
+[時計の脱進機デモ — 誤差排出の構造的実例](../figures/08_Escapement_ContactPoint_JP.html)
 
 ---
 

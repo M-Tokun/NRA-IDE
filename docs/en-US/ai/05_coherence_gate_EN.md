@@ -144,11 +144,7 @@ Because no score is being maximized, the system has no incentive to manipulate i
 
 A conceptual diagram of the Coherence Gate can be seen here:
 
-```
-
-figures/fig3_coherence_gate.png
-
-```
+![Coherence Gate](../figures/fig3_coherence_gate.png)
 
 The diagram illustrates how the ratio **R** moves through the four structural regions.
 

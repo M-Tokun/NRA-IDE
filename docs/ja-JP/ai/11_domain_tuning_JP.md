@@ -86,9 +86,9 @@ NRA-IDEをある分野に適用するとき、変えてよいものと変えて�
 
 ---
 
-（図参照　figures/DOMAIN_TUNIING.png）
+（図参照 [../figures/DOMAIN_TUNING.png](../figures/DOMAIN_TUNING.png)）
 
-（インタラクティブ説明 figures/domain_tuning_structure_pure.html）
+（インタラクティブ説明 [ドメインチューニング構造デモ](../figures/domain_tuning_structure_pure.html)）
 
 ## 共通の原則
 

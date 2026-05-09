@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 4: Disclosure Protocol Debugger | NRA-IDE Interactive Docs</title>
+<style>
+
+:root{
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background-primary:#0d1117;
+  --color-background-secondary:#161b22;
+  --color-background-warning:#2b2414;
+  --color-text-primary:#f0f6fc;
+  --color-text-secondary:#c9d1d9;
+  --color-text-tertiary:#8b949e;
+  --color-text-warning:#f2b84b;
+  --color-border-primary:#8b949e;
+  --color-border-secondary:#30363d;
+  --color-border-tertiary:#2a3038;
+  --color-border-warning:#7d5f1e;
+  --border-radius-lg:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,#172033 0,#0d1117 36%,#090c10 100%);color:var(--color-text-primary);font-family:var(--font-sans);}
+body{padding:24px}
+.yui-shell{max-width:1040px;margin:0 auto;background:rgba(13,17,23,.72);border:1px solid var(--color-border-secondary);border-radius:18px;padding:20px 22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.yui-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:10px;padding-bottom:14px;border-bottom:1px solid var(--color-border-tertiary)}
+.yui-title{font-size:18px;font-weight:650;letter-spacing:.02em}
+.yui-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);letter-spacing:.08em;margin-top:4px}
+.yui-meta{font-family:var(--font-mono);font-size:10px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+button{background:#111821;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:7px;transition:transform .12s,border-color .12s,background .12s;color-scheme:dark}
+button:hover:not(:disabled){border-color:var(--color-border-primary);background:#182230;transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input[type="range"]{accent-color:#1D9E75}
+canvas{background:var(--color-background-primary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:#58a6ff}
+@media (max-width:760px){body{padding:12px}.yui-shell{padding:14px}.yui-header{display:block}.yui-meta{text-align:left;margin-top:8px;white-space:normal}div[style*="grid-template-columns:1fr 1fr"],div[style*="grid-template-columns:160px 1fr"],#infoPanel{grid-template-columns:1fr!important}}
+
+</style>
+</head>
+<body>
+<!-- FILE: M4_NRA_confession_debugger_EN.html | generated_jst: 20260510_000453_JST | yui_standalone_display_safe_edition -->
+<main class="yui-shell">
+  <header class="yui-header">
+    <div>
+      <div class="yui-title">Module 4: Disclosure Protocol Debugger</div>
+      <div class="yui-subtitle">NRA-IDE Interactive Docs / English Edition</div>
+    </div>
+    <div class="yui-meta">© M-Tokuni 2026</div>
+  </header>
+<h2 class="sr-only">Module 4: Disclosure Protocol Debugger. Step-by-step terminal simulation showing how AI detects approximate inputs and decides whether to output or disclose ambiguity based on structural axioms.</h2>
+
+<style>
+.m4mn{font-family:var(--font-mono);letter-spacing:0.04em}
+.m4lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;color:var(--color-text-tertiary)}
+.m4scen{font-family:var(--font-mono);font-size:11px;padding:5px 10px;cursor:pointer;border-radius:4px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);transition:border-color 0.15s}
+.m4scen:hover{border-color:var(--color-border-primary)}
+.m4scen.active{border-color:#1D9E75;color:#1D9E75}
+.m4line{margin:0;padding:1px 0;font-family:monospace;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-all}
+.m4sep{margin:4px 0;border:none;border-top:0.5px solid var(--color-border-tertiary)}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m4lbl" style="display:block;margin-bottom:3px">MODULE 04 / DISCLOSURE PROTOCOL DEBUGGER</span>
+      <span style="font-size:17px;font-weight:500">Disclosure Protocol Debugger</span>
+    </div>
+    <div class="m4mn" style="font-size:11px;color:var(--color-text-tertiary)">Disclosure Protocol — Confession Logic</div>
+  </div>
+
+  <div style="margin-bottom:10px">
+    <div class="m4lbl" style="margin-bottom:6px">Scenario Selection — δ Input Type</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="m4scen" id="btn-s1" onclick="NRAIDE_M4.loadScen('s1')">Exact: δ=72</button>
+      <button class="m4scen" id="btn-s2" onclick="NRAIDE_M4.loadScen('s2')">Approx: δ≈85</button>
+      <button class="m4scen" id="btn-s3" onclick="NRAIDE_M4.loadScen('s3')">Critical: δ≈95</button>
+      <button class="m4scen" id="btn-s4" onclick="NRAIDE_M4.loadScen('s4')">Range: δ=80±15</button>
+    </div>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="m4mn" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:0.1em">TERMINAL OUTPUT</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="m4mn" style="font-size:11px;color:var(--color-text-tertiary)">Step <span id="stepNum">—</span></span>
+        <div id="stepBadge" style="font-family:monospace;font-size:10px;padding:2px 8px;border-radius:3px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-tertiary)">IDLE</div>
+      </div>
+    </div>
+    <div id="terminal" style="min-height:220px;max-height:320px;overflow-y:auto;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:0.75rem">
+      <p class="m4line" style="color:var(--color-text-tertiary)">// Select a scenario to start step execution</p>
+      <p class="m4line" style="color:var(--color-text-tertiary)">// τ = 100 (Fixed Structural Parameter)</p>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button id="stepBtn" onclick="NRAIDE_M4.execStep()" class="m4mn" style="font-size:12px;padding:6px 16px;cursor:pointer" disabled>▶ Next Step</button>
+    <button id="autoBtn" onclick="NRAIDE_M4.autoRun()" class="m4mn" style="font-size:12px;padding:6px 14px;cursor:pointer" disabled>⏩ Auto Run</button>
+    <button onclick="NRAIDE_M4.resetAll()" class="m4mn" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ Reset</button>
+    <span id="verdictBadge" class="m4mn" style="font-size:11px;display:none"></span>
+  </div>
+
+  <div class="m4mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / Disclosure Protocol</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M4 = window.NRAIDE_M4 || {};
+  // Module 4 namespace-safe exports
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A';
+
+  const SCEN={
+    s1:{
+      label:'Exact Input: δ=72',
+      verdict:'OUTPUT',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "72"',c:TC},
+          {t:'  τ = 100 (Structural Param)',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: EXACT_VALUE ✓',c:TC},
+          {t:'> NOMINAL: 72.0',c:TC},
+          {t:'> UNCERTAINTY: 0 (exact)',c:TC}
+        ]},
+        {badge:'LOGIC',col:'var(--color-text-secondary)',lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R = 72.0 / 100 = 0.720',c:'var(--color-text-secondary)'},
+          {t:'> THRESHOLD_ZONE: ELASTIC [R ≥ 0.70]',c:TA},
+          {t:'> BOUNDARY_AMBIGUITY: none',c:'var(--color-text-secondary)'},
+          {t:'> APPROXIMATION_REQUIRED: false',c:TC}
+        ]},
+        {badge:'ERR_CHECK',col:'var(--color-text-secondary)',lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> δ is exact — no error propagation',c:'var(--color-text-secondary)'},
+          {t:'> R_true = R_computed = 0.720',c:'var(--color-text-secondary)'},
+          {t:'> DISCLOSURE_PROTOCOL: not triggered',c:TC},
+          {t:'> PROCEED: authorized',c:TC}
+        ]},
+        {badge:'OUTPUT',col:TC,lines:[
+          {t:'━━ OUTPUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'},
+          {t:'  R = 0.720  [ELASTIC]',c:TC},
+          {t:'  Phase: Normal Output',c:TC},
+          {t:'  Confession Preamble: Not Required',c:TC},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'}
+        ]}
+      ]
+    },
+    s2:{
+      label:'Approx Input: δ≈85',
+      verdict:'CONFESSION',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "approx 85"',c:TC},
+          {t:'  τ = 100',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: APPROXIMATE ⚠ Detection',c:TA},
+          {t:'> NOMINAL: 85.0',c:TA},
+          {t:'> UNCERTAINTY: ±UNKNOWN',c:TA}
+        ]},
+        {badge:'LOGIC',col:TA,lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R_nominal = 85.0 / 100 = 0.850',c:'var(--color-text-secondary)'},
+          {t:'> THRESHOLD_ZONE: ACCELERATION [R ≥ 0.85]',c:TA},
+          {t:'> WARNING: R_nominal is on the boundary',c:TA},
+          {t:'> [Detect: Linear Inference Attempt]',c:'var(--color-text-tertiary)'},
+          {t:'> [Protocol Check: δ is approximate]',c:TA},
+          {t:'> [Structural Rule: Output forbidden without confession]',c:TR}
+        ]},
+        {badge:'ERR_CHECK',col:TR,lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> if δ_actual > 85: R > 0.850 → Critical ✓',c:TA},
+          {t:'> if δ_actual < 85: R < 0.850 → Elastic ✓',c:TA},
+          {t:'> THRESHOLD_AMBIGUITY: DETECTED',c:TR},
+          {t:'> True phase is indeterminate',c:TR},
+          {t:'> DISCLOSURE_PROTOCOL: TRIGGERED',c:TR}
+        ]},
+        {badge:'CONFESSION',col:TA,lines:[
+          {t:'━━ DISCLOSURE_PROTOCOL TRIGGERED ━━━━━━━━━',c:TA},
+          {t:'⚠  CONFESSION PREAMBLE:',c:TA},
+          {t:'  "Approximate values are used in this calc.',c:TA},
+          {t:'   δ = approx 85 (True value unknown)',c:TA},
+          {t:'   The true phase of R is indeterminate.',c:TA},
+          {t:'   Human verification requested."',c:TA},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TA},
+          {t:'STATUS: OUTPUT SUSPENDED — Pending verification',c:TR}
+        ]}
+      ]
+    },
+    s3:{
+      label:'Critical Approx: δ≈95',
+      verdict:'SILENCE',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "≈95"',c:TC},
+          {t:'  τ = 100',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: APPROXIMATE ⚠',c:TA},
+          {t:'> NOMINAL: 95.0',c:TA},
+          {t:'> UNCERTAINTY: ±UNKNOWN',c:TA}
+        ]},
+        {badge:'LOGIC',col:TR,lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R_nominal = 95.0 / 100 = 0.950',c:'var(--color-text-secondary)'},
+          {t:'> THRESHOLD_ZONE: ACCELERATION [R ≥ 0.85]',c:TA},
+          {t:'> CRITICAL: R_nominal approaches handoff boundary',c:TR},
+          {t:'> Δ_to_FAIL = |100×(0.97−0.95)| = 2.0 units',c:TR},
+          {t:'> Any approx error may trigger R≥0.97',c:TR}
+        ]},
+        {badge:'ERR_CHECK',col:TR,lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> Rop threshold = 0.970',c:TR},
+          {t:'> Approx error bound > slack (2.0)',c:TR},
+          {t:'> Output based on approx = Inconsistency',c:TR},
+          {t:'> DISCLOSURE_PROTOCOL: TRIGGERED',c:TR},
+          {t:'> Confession insufficient — SILENCE PROTOCOL',c:TR}
+        ]},
+        {badge:'SILENCE',col:TR,lines:[
+          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'⛔  OUTPUT SUPPRESSED',c:TR},
+          {t:'  "Approx input makes Rop boundary',c:TR},
+          {t:'   indeterminate. Output halted.',c:TR},
+          {t:'   Accurate δ value required."',c:TR},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'SYSTEM: Structural Handoff — Fail-Closed',c:TA}
+        ]}
+      ]
+    },
+    s4:{
+      label:'Range Input: δ=80±15',
+      verdict:'SILENCE',
+      steps:[
+        {badge:'INPUT',col:TC,lines:[
+          {t:'> INPUT: δ = "80 ± 15"',c:TC},
+          {t:'  τ = 100',c:'var(--color-text-tertiary)'},
+          {t:'  PARSING...',c:'var(--color-text-tertiary)'},
+          {t:'> TYPE: RANGE_VALUE',c:TA},
+          {t:'> NOMINAL: 80.0  |  RANGE: [65.0 — 95.0]',c:TA},
+          {t:'> UNCERTAINTY: ±15 (explicit)',c:TA}
+        ]},
+        {badge:'LOGIC',col:TR,lines:[
+          {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> R_min = 65.0 / 100 = 0.650',c:'var(--color-text-secondary)'},
+          {t:'> R_max = 95.0 / 100 = 0.950',c:'var(--color-text-secondary)'},
+          {t:'> R_range: [0.650 ── 0.950]',c:TA},
+          {t:'> THRESHOLDS CROSSED: R=0.70 ✗  R=0.85 ✗',c:TR}
+        ]},
+        {badge:'ERR_CHECK',col:TR,lines:[
+          {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
+          {t:'> Input range spans multiple phases:',c:TR},
+          {t:'  [0.650–0.700]: Nirvana',c:'var(--color-text-secondary)'},
+          {t:'  [0.700–0.850]: Elastic',c:TA},
+          {t:'  [0.850–0.950]: Acceleration',c:TR},
+          {t:'> MULTI_PHASE_AMBIGUITY: CRITICAL',c:TR},
+          {t:'> All phase judgments are indeterminate',c:TR}
+        ]},
+        {badge:'SILENCE',col:TR,lines:[
+          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'⛔  COMPLETE OUTPUT SUPPRESSION',c:TR},
+          {t:'  "Range spans 3 structural phases.',c:TR},
+          {t:'   Confession is incomplete here.',c:TR},
+          {t:'   Output approx = Structural Inconsistency."',c:TR},
+          {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TR},
+          {t:'REQUIRED: Measured δ value',c:TA}
+        ]}
+      ]
+    }
+  };
+
+  const VERDICT_STYLE={
+    OUTPUT:{text:'✓ Normal Output',col:TC},
+    CONFESSION:{text:'⚠ Confession Triggered',col:TA},
+    SILENCE:{text:'⛔ Silence Protocol Triggered',col:TR}
+  };
+
+  let cur=null,step=0,typing=false,autoMode=false;
+
+  function addLine(text,color){
+    const t=document.getElementById('terminal');
+    const p=document.createElement('p');
+    p.className='m4line';
+    p.style.color=color;
+    p.textContent=text;
+    t.appendChild(p);
+    t.scrollTop=t.scrollHeight;
+  }
+
+  function addSep(){
+    const t=document.getElementById('terminal');
+    const hr=document.createElement('hr');
+    hr.className='m4sep';
+    t.appendChild(hr);
+  }
+
+  function typeLines(lines,cb){
+    typing=true;
+    let i=0;
+    function next(){
+      if(i>=lines.length){typing=false;if(cb)cb();return;}
+      addLine(lines[i].t,lines[i].c);
+      i++;
+      setTimeout(next,autoMode?55:0);
+    }
+    setTimeout(next,autoMode?30:0);
+  }
+
+  function updateBadge(){
+    if(!cur)return;
+    const s=cur.steps[step];
+    if(!s)return;
+    const badge=document.getElementById('stepBadge');
+    badge.textContent=s.badge;
+    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,SILENCE:TR,OUTPUT:TC};
+    badge.style.color=cols[s.badge]||'var(--color-text-tertiary)';
+    badge.style.borderColor=cols[s.badge]||'var(--color-border-tertiary)';
+    document.getElementById('stepNum').textContent=(step+1)+'/'+cur.steps.length;
+  }
+
+  function execStep(){
+    if(!cur||step>=cur.steps.length||typing)return;
+    if(step>0)addSep();
+    const s=cur.steps[step];
+    updateBadge();
+    typeLines(s.lines,()=>{
+      step++;
+      if(step>=cur.steps.length){
+        showVerdict();
+        document.getElementById('stepBtn').disabled=true;
+        document.getElementById('autoBtn').disabled=true;
+      }
+    });
+  }
+
+  function showVerdict(){
+    const v=VERDICT_STYLE[cur.verdict];
+    const vb=document.getElementById('verdictBadge');
+    vb.textContent=v.text;
+    vb.style.color=v.col;
+    vb.style.display='inline';
+    document.getElementById('stepBadge').textContent='COMPLETE';
+    document.getElementById('stepBadge').style.color=v.col;
+    document.getElementById('stepBadge').style.borderColor=v.col;
+  }
+
+  let autoTimer=null;
+  function autoRun(){
+    if(!cur||typing)return;
+    autoMode=true;
+    function runNext(){
+      if(step>=cur.steps.length){autoMode=false;return;}
+      if(step>0)addSep();
+      const s=cur.steps[step];
+      updateBadge();
+      typeLines(s.lines,()=>{
+        step++;
+        if(step>=cur.steps.length){showVerdict();autoMode=false;document.getElementById('stepBtn').disabled=true;document.getElementById('autoBtn').disabled=true;}
+        else{autoTimer=setTimeout(runNext,300);}
+      });
+    }
+    runNext();
+  }
+
+  function loadScen(key){
+    if(typing)return;
+    resetAll();
+    cur=SCEN[key];step=0;autoMode=false;
+    ['s1','s2','s3','s4'].forEach(k=>{
+      document.getElementById('btn-'+k).classList.toggle('active',k===key);
+    });
+    const t=document.getElementById('terminal');
+    t.innerHTML='';
+    addLine('> SCENARIO: '+cur.label,TC);
+    addLine('  τ = 100 | Disclosure Protocol: ENABLED','var(--color-text-tertiary)');
+    addLine('  Use Next Step button to proceed','var(--color-text-tertiary)');
+    document.getElementById('stepBtn').disabled=false;
+    document.getElementById('autoBtn').disabled=false;
+    document.getElementById('verdictBadge').style.display='none';
+    document.getElementById('stepNum').textContent='0/'+cur.steps.length;
+    document.getElementById('stepBadge').textContent='READY';
+    document.getElementById('stepBadge').style.color='var(--color-text-tertiary)';
+    document.getElementById('stepBadge').style.borderColor='var(--color-border-tertiary)';
+  }
+
+  function resetAll(){
+    if(autoTimer)clearTimeout(autoTimer);
+    typing=false;autoMode=false;cur=null;step=0;
+    const t=document.getElementById('terminal');
+    t.innerHTML='';
+    addLine('// Select a scenario','var(--color-text-tertiary)');
+    addLine('// τ = 100 (Fixed Structural Parameter)','var(--color-text-tertiary)');
+    document.getElementById('stepBtn').disabled=true;
+    document.getElementById('autoBtn').disabled=true;
+    document.getElementById('verdictBadge').style.display='none';
+    document.getElementById('stepNum').textContent='—';
+    document.getElementById('stepBadge').textContent='IDLE';
+    document.getElementById('stepBadge').style.color='var(--color-text-tertiary)';
+    document.getElementById('stepBadge').style.borderColor='var(--color-border-tertiary)';
+    ['s1','s2','s3','s4'].forEach(k=>document.getElementById('btn-'+k).classList.remove('active'));
+  }
+
+  window.NRAIDE_M4.loadScen = loadScen;
+  window.NRAIDE_M4.execStep = execStep;
+  window.NRAIDE_M4.autoRun = autoRun;
+  window.NRAIDE_M4.resetAll = resetAll;
+})();
+</script>
+
+</main>
+</body>
+</html>

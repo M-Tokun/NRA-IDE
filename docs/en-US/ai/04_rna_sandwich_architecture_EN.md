@@ -128,19 +128,11 @@ Instead, it operates strictly within the structural limits defined by the surrou
 
 See the following diagram for a conceptual overview:
 
-```text
-
-figures/RNA Box Sandwich Architecture_EN.jpg
-
-```
+[RNA_Box_Sandwich_Architecture_EN.jpg](../figures/RNA_Box_Sandwich_Architecture_EN.jpg)
 
 An interactive explanation is also available:
 
-```text
-
-figures/sandwich_architecture.html
-
-```
+[M3_NRA_biomimetic_sandwich_svg.html](../../figures/M3_NRA_biomimetic_sandwich_svg.html)
 
 These figures illustrate how information passes through the three layers while maintaining causal direction.
 

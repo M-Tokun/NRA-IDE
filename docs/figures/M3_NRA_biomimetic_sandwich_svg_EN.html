@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 3: Biomimetic Sandwich Structure | NRA-IDE Interactive Docs</title>
+<style>
+
+:root{
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background-primary:#0d1117;
+  --color-background-secondary:#161b22;
+  --color-background-warning:#2b2414;
+  --color-text-primary:#f0f6fc;
+  --color-text-secondary:#c9d1d9;
+  --color-text-tertiary:#8b949e;
+  --color-text-warning:#f2b84b;
+  --color-border-primary:#8b949e;
+  --color-border-secondary:#30363d;
+  --color-border-tertiary:#2a3038;
+  --color-border-warning:#7d5f1e;
+  --border-radius-lg:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,#172033 0,#0d1117 36%,#090c10 100%);color:var(--color-text-primary);font-family:var(--font-sans);}
+body{padding:24px}
+.yui-shell{max-width:1040px;margin:0 auto;background:rgba(13,17,23,.72);border:1px solid var(--color-border-secondary);border-radius:18px;padding:20px 22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.yui-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:10px;padding-bottom:14px;border-bottom:1px solid var(--color-border-tertiary)}
+.yui-title{font-size:18px;font-weight:650;letter-spacing:.02em}
+.yui-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);letter-spacing:.08em;margin-top:4px}
+.yui-meta{font-family:var(--font-mono);font-size:10px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+button{background:#111821;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:7px;transition:transform .12s,border-color .12s,background .12s;color-scheme:dark}
+button:hover:not(:disabled){border-color:var(--color-border-primary);background:#182230;transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input[type="range"]{accent-color:#1D9E75}
+canvas{background:var(--color-background-primary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:#58a6ff}
+@media (max-width:760px){body{padding:12px}.yui-shell{padding:14px}.yui-header{display:block}.yui-meta{text-align:left;margin-top:8px;white-space:normal}div[style*="grid-template-columns:1fr 1fr"],div[style*="grid-template-columns:160px 1fr"],#infoPanel{grid-template-columns:1fr!important}}
+
+</style>
+</head>
+<body>
+<!-- FILE: M3_NRA_biomimetic_sandwich_svg_EN.html | generated_jst: 20260510_000453_JST | yui_standalone_display_safe_edition -->
+<main class="yui-shell">
+  <header class="yui-header">
+    <div>
+      <div class="yui-title">Module 3: Biomimetic Sandwich Structure</div>
+      <div class="yui-subtitle">NRA-IDE Interactive Docs / English Edition</div>
+    </div>
+    <div class="yui-meta">© M-Tokuni 2026</div>
+  </header>
+<h2 class="sr-only">Module 3: Biomimetic Sandwich Architecture. Interactive SVG showing how NRA-IDE (δ buffer, τ core) maps to biological survival boundaries. Click layers for biological analogies.</h2>
+
+<style>
+.m3mn{font-family:var(--font-mono);letter-spacing:0.05em}
+.m3lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;color:var(--color-text-tertiary)}
+.m3layer{cursor:pointer;transition:opacity 0.15s}
+.m3layer:hover{opacity:0.85}
+.m3card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:0.9rem;transition:border-color 0.2s}
+.m3card.active{border-color:#1D9E75}
+.m3tag{display:inline-block;font-family:monospace;font-size:10px;padding:2px 7px;border-radius:3px;margin-bottom:6px}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m3lbl" style="display:block;margin-bottom:3px">MODULE 03 / BIOMIMETIC SANDWICH ARCHITECTURE</span>
+      <span style="font-size:17px;font-weight:500">Biomimetic Sandwich Structure</span>
+    </div>
+    <div class="m3mn" style="font-size:11px;color:var(--color-text-tertiary)">Engineering Design ↔ Life Survival Strategy</div>
+  </div>
+
+  <div style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px">
+      <span class="m3mn" style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap">R = δ/τ</span>
+      <input type="range" id="rSlider" min="0" max="99" value="0" style="flex:1" oninput="NRAIDE_M3.setR(this.value/100)">
+      <span class="m3mn" id="rVal" style="font-size:13px;font-weight:500;min-width:44px;color:#1D9E75">0.000</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="m3mn" onclick="NRAIDE_M3.animateR()" id="animBtn" style="font-size:11px;padding:4px 12px;cursor:pointer">▶ Compression Anim</button>
+      <button class="m3mn" onclick="NRAIDE_M3.resetR()" style="font-size:11px;padding:4px 10px;cursor:pointer">↺</button>
+    </div>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:0.75rem;margin-bottom:12px;overflow:hidden">
+    <svg id="svgMain" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+
+      <!-- External top -->
+      <g class="m3layer" id="lay-ext" onclick="NRAIDE_M3.showInfo('ext')" role="button" aria-label="External Environment Layer">
+        <rect x="0" y="0" width="600" height="48" fill="#D3D1C7" rx="8" ry="8"/>
+        <rect x="0" y="30" width="600" height="18" fill="#D3D1C7"/>
+        <text x="300" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="#444441" font-weight="500">EXTERNAL ENVIRONMENT — STRESS SOURCE</text>
+        <text x="300" y="36" text-anchor="middle" font-family="monospace" font-size="10" fill="#5F5E5A">Origin where δ flows from the outside</text>
+        <polygon points="30,48 20,38 40,38" fill="#888780"/>
+        <polygon points="570,48 560,38 580,38" fill="#888780"/>
+        <line x1="30" y1="38" x2="30" y2="58" stroke="#888780" stroke-width="1.5"/>
+        <line x1="570" y1="38" x2="570" y2="58" stroke="#888780" stroke-width="1.5"/>
+      </g>
+
+      <!-- Absorption top -->
+      <g class="m3layer" id="lay-abs" onclick="NRAIDE_M3.showInfo('abs')" role="button" aria-label="δ Absorption Layer">
+        <rect x="0" y="48" width="600" height="100" fill="#E1F5EE"/>
+        <rect id="fillTop" x="0" y="48" width="600" height="0" fill="#1D9E75" opacity="0.45"/>
+        <line x1="0" y1="118" x2="600" y2="118" stroke="#EF9F27" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="115" font-family="monospace" font-size="9" fill="#EF9F27">R=0.70</text>
+        <line x1="0" y1="133" x2="600" y2="133" stroke="#E24B4A" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="130" font-family="monospace" font-size="9" fill="#E24B4A">R=0.85</text>
+        <text x="300" y="90" text-anchor="middle" font-family="monospace" font-size="12" fill="#085041" font-weight="500" id="absTopLabel">δ Absorption Buffer</text>
+        <text x="300" y="107" text-anchor="middle" font-family="monospace" font-size="10" fill="#0F6E56" id="absTopSub">Residual: τ × (1 − R) = 100.0%</text>
+        <text x="8" y="80" font-family="monospace" font-size="9" fill="#1D9E75">δ →</text>
+        <text x="8" y="93" font-family="monospace" font-size="9" fill="#1D9E75">Inflow</text>
+      </g>
+
+      <!-- τ Core -->
+      <g class="m3layer" id="lay-core" onclick="NRAIDE_M3.showInfo('core')" role="button" aria-label="τ Structural Core Layer">
+        <rect x="0" y="148" width="600" height="44" fill="#FAEEDA"/>
+        <line x1="0" y1="148" x2="600" y2="148" stroke="#E24B4A" stroke-width="2"/>
+        <line x1="0" y1="192" x2="600" y2="192" stroke="#E24B4A" stroke-width="2"/>
+        <text x="300" y="167" text-anchor="middle" font-family="monospace" font-size="13" fill="#633806" font-weight="500">τ  STRUCTURAL CORE</text>
+        <text x="300" y="184" text-anchor="middle" font-family="monospace" font-size="10" fill="#854F0B" id="coreLabel">R = δ/τ = 0.000   |   S = 1/(τ·(1−R)) = 0.010</text>
+        <rect id="rIndicator" x="0" y="148" width="0" height="44" fill="#E24B4A" opacity="0.12"/>
+      </g>
+
+      <!-- Absorption bottom -->
+      <g class="m3layer" onclick="NRAIDE_M3.showInfo('abs')" role="button" aria-label="δ Absorption Layer (bottom)">
+        <rect x="0" y="192" width="600" height="100" fill="#E1F5EE"/>
+        <rect id="fillBot" x="0" y="292" width="600" height="0" fill="#1D9E75" opacity="0.45"/>
+        <line x1="0" y1="222" x2="600" y2="222" stroke="#E24B4A" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="219" font-family="monospace" font-size="9" fill="#E24B4A">R=0.85</text>
+        <line x1="0" y1="237" x2="600" y2="237" stroke="#EF9F27" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="251" font-family="monospace" font-size="9" fill="#EF9F27">R=0.70</text>
+        <text x="300" y="258" text-anchor="middle" font-family="monospace" font-size="12" fill="#085041" font-weight="500">δ Absorption Buffer</text>
+        <text x="300" y="275" text-anchor="middle" font-family="monospace" font-size="10" fill="#0F6E56" id="absBotSub">(Symmetric Structure)</text>
+        <text x="8" y="262" font-family="monospace" font-size="9" fill="#1D9E75">δ →</text>
+        <text x="8" y="275" font-family="monospace" font-size="9" fill="#1D9E75">Inflow</text>
+      </g>
+
+      <!-- External bottom -->
+      <g class="m3layer" onclick="NRAIDE_M3.showInfo('ext')" role="button" aria-label="External Environment (bottom)">
+        <rect x="0" y="292" width="600" height="48" fill="#D3D1C7" rx="0" ry="0"/>
+        <rect x="0" y="292" width="600" height="18" fill="#D3D1C7"/>
+        <rect x="0" y="310" width="600" height="30" fill="#D3D1C7" rx="0" ry="8"/>
+        <polygon points="30,292 20,302 40,302" fill="#888780"/>
+        <polygon points="570,292 560,302 580,302" fill="#888780"/>
+        <line x1="30" y1="292" x2="30" y2="282" stroke="#888780" stroke-width="1.5"/>
+        <line x1="570" y1="292" x2="570" y2="282" stroke="#888780" stroke-width="1.5"/>
+        <text x="300" y="316" text-anchor="middle" font-family="monospace" font-size="11" fill="#444441" font-weight="500">EXTERNAL ENVIRONMENT — STRESS SOURCE</text>
+        <text x="300" y="331" text-anchor="middle" font-family="monospace" font-size="10" fill="#5F5E5A">Origin where δ flows from the outside</text>
+      </g>
+
+      <!-- FAIL indicator -->
+      <g id="failOverlay" opacity="0">
+        <rect x="0" y="0" width="600" height="340" fill="#E24B4A" opacity="0.06"/>
+        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">STRUCTURAL_HANDOFF — Rop≈0.97</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <div id="infoPanel" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+    <div class="m3card active" id="card-ext" onclick="NRAIDE_M3.showInfo('ext')" style="cursor:pointer">
+      <div class="m3tag" style="background:#F1EFE8;color:#444441">Environment</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">External Stress Source</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">The origin of δ accumulation. Source of deviation flowing into the structure.</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🫀 Blood pressure, air pressure, impact</div>
+    </div>
+    <div class="m3card" id="card-abs" onclick="NRAIDE_M3.showInfo('abs')" style="cursor:pointer">
+      <div class="m3tag" style="background:#E1F5EE;color:#085041">Buffer</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">δ Absorption Layer</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">Part of τ. The absorption room constituting the denominator of R=δ/τ.</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🦴 Cartilage, skin epidermis, synovial fluid</div>
+    </div>
+    <div class="m3card" id="card-core" onclick="NRAIDE_M3.showInfo('core')" style="cursor:pointer">
+      <div class="m3tag" style="background:#FAEEDA;color:#633806">Core</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">τ Structural Core</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">The body of τ. The boundary where Fail-Closed triggers at R=1.0.</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🧠 Cortical bone, myocardium, BBB</div>
+    </div>
+  </div>
+
+  <div id="detailPanel" style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:0.9rem">
+    <div class="m3mn" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:0.1em;margin-bottom:6px">LAYER DETAIL — Information on the clicked layer</div>
+    <div id="detailContent" style="font-size:13px;color:var(--color-text-secondary);line-height:1.7">
+      Click a layer to display the biological analogy details. Use the R slider to change the compression state.
+    </div>
+  </div>
+
+  <div class="m3mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / Engineering = Axiom of Life</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M3 = window.NRAIDE_M3 || {};
+  // Module 3 namespace-safe exports
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A';
+  let curR=0,animId2=null,animDir=1;
+
+  const DETAILS={
+    ext:{
+      title:'External Environment — External Stress Source',
+      col:'#888780',
+      eng:'External stress viewed as the origin of δ (accumulated deviation). The source that generates candidates for the numerator δ in R = δ/τ.',
+      bio:'External environment in life: blood pressure pulsation, temperature changes, gravity, pathogen invasion, radiation. These can be viewed as δ flowing into the absorption layer depending on the situation.',
+      example:'Blood pressure on arterial walls: Each systole can be seen as an inflow of δ. Elastic fibers and tissue margin (τ) absorb this, but if τ decreases due to hardening, R rises, increasing the risk of rupture/burst.'
+    },
+    abs:{
+      title:'δ Absorption Layer — Absorption Buffer (Part of τ)',
+      col:'#1D9E75',
+      eng:'A buffer zone constituting the outer part of τ (absorption thickness). It absorbs the inflow of δ and protects the τ core. The residual capacity τ × (1−R) corresponds to the margin of this layer. It is treated as an acceleration zone near R=0.85, and Rop prepares for early handoff.',
+      bio:'The epidermal layer of the skin, articular cartilage, intervertebral discs, pleural fluid, and synovial fluid can be read as multi-layer structures that dissipate external δ. If the layer thins (τ↓) due to wear or inflammation, R rises more easily for the same δ.',
+      example:'Knee joint cartilage: Acts like τ to absorb repeated shocks (δ). Osteoarthritis can be described as a state where the threshold for pain or damage is approached more easily due to a decrease in τ, even for the same walking distance (δ).'
+    },
+    core:{
+      title:'τ Structural Core — Structural Core (Fail-Closed Boundary)',
+      col:'#854F0B',
+      eng:'The core of τ (absorption thickness). Executes early handoff at Rop and treats R=1.0 as the theoretical structural rupture boundary. The point where the sensitivity S = 1/(τ·(1-R)) diverges corresponds to this boundary.',
+      bio:'Cortical bone (fracture boundary), myocardium (heart failure threshold), blood-brain barrier (neurotoxicity boundary), and renal glomeruli (filtration limit) are examples of having boundaries where the structure can no longer be maintained.',
+      example:'Bone density and fracture threshold: When bone density (the margin corresponding to τ) decreases, the fracture threshold is approached more easily even in daily activities (δ). A fracture can be viewed as the visualization of structural limit exceedance.'
+    }
+  };
+
+  function col(R){return R<0.70?TC:R<0.85?TA:TR;}
+
+  function setR(R){
+    curR=R;
+    document.getElementById('rSlider').value=Math.round(R*100);
+    document.getElementById('rVal').textContent=R.toFixed(3);
+    document.getElementById('rVal').style.color=col(R);
+
+    const absH=100;
+    const fillH=Math.min(R,1.0)*absH;
+
+    document.getElementById('fillTop').setAttribute('height',fillH);
+    document.getElementById('fillTop').setAttribute('fill',R>=0.97?TR:col(R));
+
+    const botY=292-fillH;
+    document.getElementById('fillBot').setAttribute('y',botY);
+    document.getElementById('fillBot').setAttribute('height',fillH);
+    document.getElementById('fillBot').setAttribute('fill',R>=0.97?TR:col(R));
+
+    const remain=((1-Math.min(R,1.0))*100).toFixed(1);
+    document.getElementById('absTopSub').textContent='Residual: τ × (1 − R) = '+remain+'%';
+
+    const tau=100,S=R>=1.0?Infinity:1/(tau*(1-R));
+    document.getElementById('coreLabel').textContent='R = δ/τ = '+R.toFixed(3)+'   |   S = '+(S>99?'∞':S.toFixed(3));
+    document.getElementById('coreLabel').setAttribute('fill',col(R));
+
+    document.getElementById('rIndicator').setAttribute('width',(R*600).toFixed(1));
+
+    const fo=document.getElementById('failOverlay');
+    fo.setAttribute('opacity',R>=0.97?'1':'0');
+  }
+
+  let activeLayer='ext';
+  function showInfo(key){
+    activeLayer=key;
+    ['ext','abs','core'].forEach(k=>{
+      document.getElementById('card-'+k).classList.toggle('active',k===key);
+    });
+    const d=DETAILS[key];
+    document.getElementById('detailContent').innerHTML=
+      '<span style="font-family:monospace;font-size:11px;font-weight:500;color:'+d.col+'">'+d.title+'</span><br><br>'+
+      '<span style="color:var(--color-text-primary);font-weight:500">Engineering:</span> '+d.eng+'<br><br>'+
+      '<span style="color:var(--color-text-primary);font-weight:500">Biological Science:</span> '+d.bio+'<br><br>'+
+      '<span style="font-family:monospace;font-size:11px;color:var(--color-text-tertiary)">Example: </span><span style="font-size:12px;color:var(--color-text-secondary)">'+d.example+'</span>';
+  }
+
+  function animateR(){
+    if(animId2)return;
+    let r=0;animDir=1;
+    document.getElementById('animBtn').textContent='⏸ Running';
+    function frame(){
+      r+=0.004;
+      if(r>=1.0){r=1.0;setR(r);setTimeout(()=>{
+        let r2=1.0;
+        function back(){r2-=0.006;setR(Math.max(r2,0));if(r2>0)animId2=requestAnimationFrame(back);else{animId2=null;document.getElementById('animBtn').textContent='▶ Compression Anim';}}
+        back();
+      },800);return;}
+      setR(r);animId2=requestAnimationFrame(frame);
+    }
+    animId2=requestAnimationFrame(frame);
+  }
+
+  function resetR(){
+    if(animId2){cancelAnimationFrame(animId2);animId2=null;}
+    document.getElementById('animBtn').textContent='▶ Compression Anim';
+    setR(0);
+  }
+
+  showInfo('ext');
+  setR(0);
+
+  window.NRAIDE_M3.setR = setR;
+  window.NRAIDE_M3.animateR = animateR;
+  window.NRAIDE_M3.resetR = resetR;
+  window.NRAIDE_M3.showInfo = showInfo;
+})();
+</script>
+
+</main>
+</body>
+</html>

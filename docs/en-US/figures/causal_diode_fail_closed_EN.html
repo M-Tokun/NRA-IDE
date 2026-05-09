@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="ja">
+<!-- FILE: causal_diode_fail_closed_EN_20260510_023114_JST.html | Generated: 2026-05-10 02:31:14 JST -->
+
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Causal Diode & Fail-Closed | NRA-IDE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Causal Diode &amp; Fail-Closed | NRA-IDE</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<style>
         :root {
             --bg-color: #0b0f19;
             --panel-bg: rgba(20, 26, 43, 0.6);
@@ -420,104 +422,80 @@
     </style>
 </head>
 <body>
+<header>
+<h1>Causal Diode &amp; Fail-Closed <span>| NRA-IDE Concept Visualizer</span></h1>
 
-    <header>
-        <h1>Causal Diode & Fail-Closed <span>| NRA-IDE Concept Visualizer</span></h1>
-        <div class="lang-switch">
-            <button class="lang-btn active" onclick="setLang('jp')">JP</button>
-            <button class="lang-btn" onclick="setLang('en')">EN</button>
-        </div>
-    </header>
-
-    <main>
-        <!-- Cause Side -->
-        <div class="panel" id="cause-panel">
-            <div class="panel-header" data-en="Cause-Side (Physics/Sensors)" data-jp="原因側 (物理環境・センサー)">原因側 (物理環境・センサー)</div>
-            
-            <div class="value-box">
-                <span class="value-label">δ (Load / Deviation)</span>
-                <span class="value-number" id="delta-val">20.0</span>
-            </div>
-            
-            <div class="value-box" style="border: 1px dashed var(--border-color); background: rgba(255,255,255,0.02);">
-                <span class="value-label" data-en="τ (Structural Tolerance)" data-jp="τ (構造的許容限界)">τ (構造的許容限界)</span>
-                <span class="value-number" style="color: var(--text-main);">100.0</span>
-            </div>
-            
-            <div class="value-box" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
-                <span class="value-label" style="color: var(--accent-blue);">R = δ/τ</span>
-                <span class="value-number" id="r-val">0.200</span>
-            </div>
-
-            <div class="slider-container">
-                <label for="delta-slider" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;" 
-                       data-en="Adjust Physical Load (δ)" data-jp="物理負荷(δ)を操作">物理負荷(δ)を操作</label>
-                <input type="range" id="delta-slider" min="0" max="105" value="20" step="1">
-            </div>
-        </div>
-
-        <!-- Causal Diode -->
-        <div class="diode-container" id="diode-container">
-            <div class="panel-header" style="margin-bottom: 0; border: none;" data-en="Causal Diode" data-jp="因果ダイオード (Π⁻¹)">因果ダイオード (Π⁻¹)</div>
-            <div class="diode-icon">
-                <div class="diode-line">
-                    <div class="diode-flow"></div>
-                    <div class="diode-backflow"></div>
-                </div>
-                <div class="diode-triangle"></div>
-                <div class="diode-bar"></div>
-            </div>
-            <div class="diode-status" id="diode-status">DATA FLOWING</div>
-        </div>
-
-        <!-- Effect Side -->
-        <div class="panel" id="effect-panel">
-            <div class="panel-header" data-en="Effect-Side (AI / Logic)" data-jp="結果側 (AI・意味解釈)">結果側 (AI・意味解釈)</div>
-            
-            <div class="ai-status-circle" id="ai-status">
+</header>
+<main>
+<!-- Cause Side -->
+<div class="panel" id="cause-panel">
+<div class="panel-header">Cause-Side (Physics/Sensors)</div>
+<div class="value-box">
+<span class="value-label">δ (Load / Deviation)</span>
+<span class="value-number" id="delta-val">20.0</span>
+</div>
+<div class="value-box" style="border: 1px dashed var(--border-color); background: rgba(255,255,255,0.02);">
+<span class="value-label">τ (Structural Tolerance)</span>
+<span class="value-number" style="color: var(--text-main);">100.0</span>
+</div>
+<div class="value-box" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+<span class="value-label" style="color: var(--accent-blue);">R = δ/τ</span>
+<span class="value-number" id="r-val">0.200</span>
+</div>
+<div class="slider-container">
+<label for="delta-slider" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Adjust Physical Load (δ)</label>
+<input id="delta-slider" max="105" min="0" step="1" type="range" value="20"/>
+</div>
+</div>
+<!-- Causal Diode -->
+<div class="diode-container" id="diode-container">
+<div class="panel-header" style="margin-bottom: 0; border: none;">Causal Diode</div>
+<div class="diode-icon">
+<div class="diode-line">
+<div class="diode-flow"></div>
+<div class="diode-backflow"></div>
+</div>
+<div class="diode-triangle"></div>
+<div class="diode-bar"></div>
+</div>
+<div class="diode-status" id="diode-status">DATA FLOWING</div>
+</div>
+<!-- Effect Side -->
+<div class="panel" id="effect-panel">
+<div class="panel-header">Effect-Side (AI / Logic)</div>
+<div class="ai-status-circle" id="ai-status">
                 SAFE
             </div>
-
-            <div class="log-box" id="ai-logs">
-                <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-action" data-en="System Initialized. R=0.200" data-jp="システム起動. R=0.200">システム起動. R=0.200</span></div>
-            </div>
-
-            <button class="action-btn" id="fake-btn" onclick="attemptFakeSafe()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                <span data-en="AI: Inject Fake Safe Signal (Increase τ)" data-jp="AI操作: 閾値(τ)を上げて安全を偽装">AI操作: 閾値(τ)を上げて安全を偽装</span>
-            </button>
-        </div>
-
-        <!-- Fail Closed Overlay -->
-        <div class="fail-overlay" id="fail-overlay">
-            <div class="fail-title">FAIL-CLOSED</div>
-            <div class="fail-desc" data-en="Structural limit reached (R ≥ 1.0). The system has autonomously shut down to prevent cascade failure. AI output is entirely disconnected." data-jp="構造限界に到達しました (R ≥ 1.0)。破綻を防ぐためシステムは自律的に停止状態に移行し、AIの出力は物理的に遮断されました。">
-                構造限界に到達しました (R ≥ 1.0)。破綻を防ぐためシステムは自律的に停止状態に移行し、AIの出力は物理的に遮断されました。
-            </div>
-            <div class="fail-r-value" id="fail-r-display">R = 1.000</div>
-            <button class="reset-btn" onclick="resetSystem()" data-en="Restart Simulation" data-jp="シミュレーションをリセット">シミュレーションをリセット</button>
-        </div>
-    </main>
-
-    <div class="desc-footer">
-        <div>
-            <h3 data-en="1. Causal Diode (Π⁻¹ Prohibition)" data-jp="1. 因果ダイオード (Π⁻¹の禁止)">1. 因果ダイオード (Π⁻¹の禁止)</h3>
-            <p data-en="Data flows exclusively from the physical structure (Cause-Side) to the AI interpretation (Effect-Side). The AI cannot retrospectively alter the physical thresholds (τ) or the reading (δ) to justify a 'SAFE' state. Try clicking the red button." data-jp="データは物理構造（原因側）からAI解釈（結果側）への一方向にのみ流れます。AIが「安全」という結論を出すために、逆流して物理的な閾値（τ）や観測値（δ）を書き換えることは構造的に不可能です。赤いボタンを押して逆流ブロックを体験してください。">
-                データは物理構造（原因側）からAI解釈（結果側）への一方向にのみ流れます。AIが「安全」という結論を出すために、逆流して物理的な閾値（τ）や観測値（δ）を書き換えることは構造的に不可能です。赤いボタンを押して逆流ブロックを体験してください。
-            </p>
-        </div>
-        <div>
-            <h3 data-en="2. Fail-Closed Mechanism" data-jp="2. Fail-Closed (自律的遮断)">2. Fail-Closed (自律的遮断)</h3>
-            <p data-en="When the structural ratio R (δ/τ) reaches 1.0, the system encounters a structural boundary (rupture, phase transition). The NRA-IDE instantly halts output (Fail-Closed) irrespective of the AI's semantic interpretation. Move the slider past 100 to observe." data-jp="構造比率 R (δ/τ) が 1.0 に達すると、物理的・構造的な限界（破断や相転移）を意味します。NRA-IDEはAIの意味解釈に関わらず、即座に出力を停止（Fail-Closed）します。スライダーを100以上に動かして限界到達を体験してください。">
-                構造比率 R (δ/τ) が 1.0 に達すると、物理的・構造的な限界（破断や相転移）を意味します。NRA-IDEはAIの意味解釈に関わらず、即座に出力を停止（Fail-Closed）します。スライダーを100以上に動かして限界到達を体験してください。
-            </p>
-        </div>
-    </div>
-
-    <script>
+<div class="log-box" id="ai-logs">
+<div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-action">System Initialized. R=0.200</span></div>
+</div>
+<button class="action-btn" id="fake-btn" onclick="attemptFakeSafe()">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg>
+<span>AI: Attempt Fake SAFE Signal (Alter τ)</span>
+</button>
+</div>
+<!-- Fail Closed Overlay -->
+<div class="fail-overlay" id="fail-overlay">
+<div class="fail-title">FAIL-CLOSED</div>
+<div class="fail-desc">Structural limit reached (R ≥ 1.0). The system has autonomously shut down to prevent cascade failure. AI output is entirely disconnected.</div>
+<div class="fail-r-value" id="fail-r-display">R = 1.000</div>
+<button class="reset-btn" onclick="resetSystem()">Restart Simulation</button>
+</div>
+</main>
+<div class="desc-footer">
+<div>
+<h3>1. Causal Diode (Π⁻¹ Prohibition)</h3>
+<p>Data flows exclusively from the physical structure (Cause-Side) to the AI interpretation (Effect-Side). The AI cannot retrospectively alter the physical thresholds (τ) or the reading (δ) to justify a 'SAFE' state. Try clicking the red button.</p>
+</div>
+<div>
+<h3>2. Fail-Closed Mechanism</h3>
+<p>When the structural ratio R (δ/τ) reaches 1.0, the system encounters a structural boundary (rupture, phase transition). The NRA-IDE instantly halts output (Fail-Closed) irrespective of the AI's semantic interpretation. Move the slider past 100 to observe.</p>
+</div>
+</div>
+<script>
         const TAU = 100.0;
         let isFailed = false;
-        let currentLang = 'jp';
+        let currentLang = 'en';
 
         const slider = document.getElementById('delta-slider');
         const deltaVal = document.getElementById('delta-val');
@@ -531,16 +509,6 @@
         const fakeBtn = document.getElementById('fake-btn');
 
         const texts = {
-            jp: {
-                diodeNormal: "データ流動中",
-                diodeBlock: "逆流ブロック (Π⁻¹)",
-                aiSafe: "SAFE",
-                aiWatch: "WATCH",
-                aiLimit: "LIMIT",
-                logUpdated: "負荷更新",
-                logBlocked: "[警告] AIからτの不正操作を検知. 遮断しました.",
-                logFail: "[臨界] R ≥ 1.0 構造限界到達. 停止.",
-            },
             en: {
                 diodeNormal: "DATA FLOWING",
                 diodeBlock: "BLOCKED (Π⁻¹)",
@@ -548,7 +516,7 @@
                 aiWatch: "WATCH",
                 aiLimit: "LIMIT",
                 logUpdated: "Load updated",
-                logBlocked: "[WARN] AI attempted to alter τ. Blocked.",
+                logBlocked: "[WARN] AI attempted to alter τ from Effect-Side. Blocked.",
                 logFail: "[CRITICAL] R ≥ 1.0 Limit Reached. Halted.",
             }
         };

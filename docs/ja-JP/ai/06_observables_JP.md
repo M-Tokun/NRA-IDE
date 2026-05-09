@@ -20,7 +20,7 @@ NRA-IDEが使うのは前者だけです。
 
 ## 観測可能量の一覧
 
-（図参照 figures/fig2_causal_diode.png）
+（図参照 [../figures/fig2_causal_diode.png](../figures/fig2_causal_diode.png)）
 
 以下の量は今この瞬間に直接測れます。
 
@@ -56,7 +56,7 @@ NRA-IDEが使うのは前者だけです。
 
 ダムへの負荷の積算は劣化量の記録となります。耐用年数による固定計算ではなく、実際の負荷履歴から現在の構造限界を直接計算できます。
 
-（インタラクティブ説明 figures/nra_dam_degradation.html）
+（インタラクティブ説明 [ダム劣化シミュレーション](../figures/nra_dam_degradation_JP.html)）
 
 これらはすべて推測なしに読み取れます。
 

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 2: Residue Tank | NRA-IDE Interactive Docs</title>
+<style>
+
+:root{
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background-primary:#0d1117;
+  --color-background-secondary:#161b22;
+  --color-background-warning:#2b2414;
+  --color-text-primary:#f0f6fc;
+  --color-text-secondary:#c9d1d9;
+  --color-text-tertiary:#8b949e;
+  --color-text-warning:#f2b84b;
+  --color-border-primary:#8b949e;
+  --color-border-secondary:#30363d;
+  --color-border-tertiary:#2a3038;
+  --color-border-warning:#7d5f1e;
+  --border-radius-lg:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,#172033 0,#0d1117 36%,#090c10 100%);color:var(--color-text-primary);font-family:var(--font-sans);}
+body{padding:24px}
+.yui-shell{max-width:1040px;margin:0 auto;background:rgba(13,17,23,.72);border:1px solid var(--color-border-secondary);border-radius:18px;padding:20px 22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.yui-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:10px;padding-bottom:14px;border-bottom:1px solid var(--color-border-tertiary)}
+.yui-title{font-size:18px;font-weight:650;letter-spacing:.02em}
+.yui-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);letter-spacing:.08em;margin-top:4px}
+.yui-meta{font-family:var(--font-mono);font-size:10px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+button{background:#111821;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:7px;transition:transform .12s,border-color .12s,background .12s;color-scheme:dark}
+button:hover:not(:disabled){border-color:var(--color-border-primary);background:#182230;transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input[type="range"]{accent-color:#1D9E75}
+canvas{background:var(--color-background-primary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:#58a6ff}
+@media (max-width:760px){body{padding:12px}.yui-shell{padding:14px}.yui-header{display:block}.yui-meta{text-align:left;margin-top:8px;white-space:normal}div[style*="grid-template-columns:1fr 1fr"],div[style*="grid-template-columns:160px 1fr"],#infoPanel{grid-template-columns:1fr!important}}
+
+</style>
+</head>
+<body>
+<!-- FILE: M2_NRA_residue_tank_EN.html | generated_jst: 20260510_000453_JST | yui_standalone_display_safe_edition -->
+<main class="yui-shell">
+  <header class="yui-header">
+    <div>
+      <div class="yui-title">Module 2: Residue Tank</div>
+      <div class="yui-subtitle">NRA-IDE Interactive Docs / English Edition</div>
+    </div>
+    <div class="yui-meta">© M-Tokuni 2026</div>
+  </header>
+<h2 class="sr-only">Module 2: Residue Tank. Manipulate δ and τ to see R=δ/τ. Observe how sensitivity S=1/(τ(1-R)) diverges near R=1.0 and how STRUCTURAL_HANDOFF occurs at Rop=0.97.</h2>
+
+<style>
+.m2p{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
+.m2mn{font-family:var(--font-mono);letter-spacing:.06em}
+.m2lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-text-tertiary)}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m2lbl" style="display:block;margin-bottom:3px">MODULE 02 / RESIDUE TANK</span>
+      <span style="font-size:17px;font-weight:500">Residue Tank — δ, τ, and R relationship</span>
+    </div>
+    <div class="m2mn" style="font-size:11px;color:var(--color-text-tertiary)">S = 1 / (τ · (1 − R))</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;margin-bottom:14px;align-items:start">
+
+    <div>
+      <div class="m2lbl" style="margin-bottom:6px;text-align:center">Residue Tank</div>
+      <div style="position:relative;height:240px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden" id="tank">
+        <div id="tankFill" style="position:absolute;bottom:0;left:0;right:0;height:0%;background:#1D9E75;transition:height .1s linear,background-color .3s"></div>
+        <div style="position:absolute;left:0;right:0;bottom:85%;border-top:1px dashed #E24B4A;pointer-events:none"></div>
+        <span style="position:absolute;right:5px;bottom:calc(85% + 2px);font-family:monospace;font-size:9px;color:#E24B4A;pointer-events:none">R=0.85</span>
+        <div style="position:absolute;left:0;right:0;bottom:70%;border-top:1px dashed #EF9F27;pointer-events:none"></div>
+        <span style="position:absolute;right:5px;bottom:calc(70% + 2px);font-family:monospace;font-size:9px;color:#EF9F27;pointer-events:none">R=0.70</span>
+        <div style="position:absolute;left:0;right:0;bottom:97%;border-top:2px solid #E24B4A;pointer-events:none"></div>
+        <span style="position:absolute;right:5px;bottom:calc(97% + 3px);font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">Rop=0.97</span>
+        <span style="position:absolute;left:5px;top:3px;font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">R=1.00 Theoretical Boundary</span>
+        <div id="pulseRing" style="position:absolute;inset:0;border:3px solid transparent;border-radius:8px;pointer-events:none;transition:border-color .08s,opacity .08s;opacity:0"></div>
+        <div id="dropCont" style="position:absolute;top:0;left:0;right:0;height:20px;overflow:hidden"></div>
+      </div>
+      <div class="m2mn" style="text-align:center;font-size:11px;color:var(--color-text-tertiary);margin-top:6px">
+        δ = <span id="deltaVal">0.0</span> &nbsp;/&nbsp; τ = <span id="tauValD">100</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <div class="m2p">
+        <div class="m2lbl" style="margin-bottom:6px">Structural Ratio R = δ / τ</div>
+        <div class="m2mn" style="font-size:28px;font-weight:500;color:#1D9E75" id="rDisp">R = 0.000</div>
+        <div style="height:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:4px;overflow:hidden;margin-top:8px">
+          <div id="rBar" style="height:100%;width:0%;background:#1D9E75;transition:width .1s,background-color .25s"></div>
+        </div>
+      </div>
+
+      <div class="m2p">
+        <div class="m2lbl" style="margin-bottom:4px">Sensitivity S = 1 / (τ · (1 − R))</div>
+        <div class="m2mn" style="font-size:22px;font-weight:500;color:#1D9E75" id="sDisp">S = 0.010</div>
+        <div class="m2mn" style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px" id="gainDisp">Gain: 1.0×</div>
+        <div style="height:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:4px;overflow:hidden">
+          <div id="sBar" style="height:100%;width:0%;background:#1D9E75;transition:width .15s,background-color .25s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">× 1</span>
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">× 10</span>
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">× 100</span>
+          <span class="m2mn" style="font-size:9px;color:var(--color-text-tertiary)">→ ∞</span>
+        </div>
+      </div>
+
+      <div class="m2p">
+        <div class="m2lbl" style="margin-bottom:4px">Phase State</div>
+        <div class="m2mn" style="font-size:12px;min-height:2.8em;line-height:1.6;color:#1D9E75" id="phaseDisp">Standby</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="m2p" style="margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div class="m2lbl" style="margin-bottom:6px">τ (Structural Thickness - Capacity)</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" id="tauSlider" min="20" max="200" value="100" style="flex:1" oninput="NRAIDE_M2.onTauChange(this.value)">
+          <span class="m2mn" style="font-size:13px;font-weight:500;min-width:32px;color:var(--color-text-primary)" id="tauDisp">100</span>
+        </div>
+        <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:3px">↓ Lowering τ causes R to spike at the same δ</div>
+      </div>
+      <div>
+        <div class="m2lbl" style="margin-bottom:6px">δ Inflow Velocity (/ step)</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" id="inflowSlider" min="0" max="30" value="8" step="1" style="flex:1" oninput="NRAIDE_M2.onInflowChange(this.value)">
+          <span class="m2mn" style="font-size:13px;font-weight:500;min-width:32px;color:var(--color-text-primary)" id="inflowDisp">0.8</span>
+        </div>
+        <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:3px">↑ Increasing inflow accelerates δ accumulation</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button id="sb2" onclick="NRAIDE_M2.toggleSim()" class="m2mn" style="font-size:12px;padding:6px 16px;cursor:pointer">▶ Start</button>
+    <button onclick="NRAIDE_M2.resetSim2()" class="m2mn" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ Reset</button>
+    <span id="failMsg" class="m2mn" style="font-size:11px;color:#EF9F27;display:none">✓ STRUCTURAL_HANDOFF — Rop=0.97. Designed delegation to human decision.</span>
+  </div>
+
+  <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ &nbsp; S = 1/(τ(1−R)) &nbsp; / Rop=0.97 structural delegation</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M2 = window.NRAIDE_M2 || {};
+  // Module 2 namespace-safe exports
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A';
+  let delta=0,tau=100,inflow=0.8,running=false,stopped=false,animId=null;
+  let pulseTimer=null,pulseOn=false;
+
+  function col(R){return R<0.70?TC:R<0.85?TA:TR;}
+
+  function schedulePulse(){
+    if(pulseTimer)clearTimeout(pulseTimer);
+    const R=delta/tau;
+    const pr=document.getElementById('pulseRing');
+    if(stopped){pr.style.opacity='0';return;}
+    if(R<0.70){pr.style.opacity='0';pr.style.borderColor='transparent';pulseTimer=setTimeout(schedulePulse,600);return;}
+    const interval=Math.max(60,1200*Math.pow(1-Math.min(R,0.999),1.2));
+    pulseOn=!pulseOn;
+    if(pulseOn){pr.style.opacity='1';pr.style.borderColor=col(R)+'88';}
+    else{pr.style.opacity='0';}
+    pulseTimer=setTimeout(schedulePulse,interval);
+  }
+
+  function updateUI(){
+    const R=delta/tau;
+    const clampR=Math.min(R,0.999);
+    const S=1/(tau*(1-clampR));
+    const gain=1/(1-clampR);
+    const c=col(R);
+
+    document.getElementById('tankFill').style.height=Math.min(R*100,100)+'%';
+    document.getElementById('tankFill').style.backgroundColor=R>=0.97?TA:c;
+    document.getElementById('deltaVal').textContent=delta.toFixed(1);
+    document.getElementById('tauValD').textContent=tau;
+
+    const rLabel='R = '+Math.min(R,99).toFixed(3)+(R>=0.97?' [CLOSED]':'');
+    document.getElementById('rDisp').textContent=rLabel;
+    document.getElementById('rDisp').style.color=R>=0.97?TA:c;
+    document.getElementById('rBar').style.width=Math.min(R*100,100)+'%';
+    document.getElementById('rBar').style.backgroundColor=R>=0.97?TA:c;
+
+    document.getElementById('sDisp').textContent='S = '+S.toFixed(4);
+    document.getElementById('sDisp').style.color=c;
+    document.getElementById('gainDisp').textContent='Gain: '+gain.toFixed(1)+'×'+(gain>50?' ⚡ Divergence':'');
+    document.getElementById('gainDisp').style.color=c;
+    const sPct=Math.log10(Math.max(gain,1))/2*100;
+    document.getElementById('sBar').style.width=Math.min(sPct,100)+'%';
+    document.getElementById('sBar').style.backgroundColor=c;
+
+    let phase='';
+    if(R<0.70){phase='Structural Stability — OK';document.getElementById('phaseDisp').style.color=TC;}
+    else if(R<0.85){phase='⚠ Warning Zone R≥0.70\nEnhanced Monitoring — Obs Sensitivity Fluctuations';document.getElementById('phaseDisp').style.color=TA;}
+    else if(R<0.97){phase='⚠⚠ Acceleration Zone R≥0.85\nNon-linear Sensitivity Increase Detected — Preparing Handoff';document.getElementById('phaseDisp').style.color=TR;}
+    else{phase='✓ STRUCTURAL_HANDOFF\nDesigned stop and delegation to human decision';document.getElementById('phaseDisp').style.color=TA;}
+    document.getElementById('phaseDisp').innerHTML=phase.replace('\n','<br>');
+  }
+
+  function step(){
+    if(!running)return;
+    delta+=inflow*(0.9+Math.random()*.2);
+    const R=delta/tau;
+    if(R>=0.97&&!stopped){
+      stopped=true;running=false;
+      document.getElementById('sb2').textContent='Stopped';
+      document.getElementById('sb2').disabled=true;
+      document.getElementById('failMsg').style.display='inline';
+      document.getElementById('tank').style.background='rgba(239,159,39,.07)';
+      if(pulseTimer)clearTimeout(pulseTimer);
+      document.getElementById('pulseRing').style.opacity='0';
+    }
+    updateUI();
+    if(running)animId=requestAnimationFrame(step);
+  }
+
+  function toggleSim(){
+    if(stopped)return;
+    running=!running;
+    document.getElementById('sb2').textContent=running?'⏸ Pause':'▶ Resume';
+    if(running){schedulePulse();step();}
+    else{if(pulseTimer)clearTimeout(pulseTimer);}
+  }
+
+  function onTauChange(v){
+    tau=parseInt(v);
+    document.getElementById('tauDisp').textContent=tau;
+    document.getElementById('tauValD').textContent=tau;
+    if(!running)updateUI();
+  }
+
+  function onInflowChange(v){
+    inflow=parseInt(v)/10;
+    document.getElementById('inflowDisp').textContent=inflow.toFixed(1);
+  }
+
+  function resetSim2(){
+    running=false;stopped=false;delta=0;
+    if(animId)cancelAnimationFrame(animId);
+    if(pulseTimer)clearTimeout(pulseTimer);
+    document.getElementById('sb2').textContent='▶ Start';
+    document.getElementById('sb2').disabled=false;
+    document.getElementById('failMsg').style.display='none';
+    document.getElementById('tank').style.background='var(--color-background-primary)';
+    document.getElementById('pulseRing').style.opacity='0';
+    document.getElementById('tauSlider').value=100;tau=100;
+    document.getElementById('tauDisp').textContent='100';
+    document.getElementById('inflowSlider').value=8;inflow=0.8;
+    document.getElementById('inflowDisp').textContent='0.8';
+    updateUI();
+  }
+
+  updateUI();
+
+  window.NRAIDE_M2.toggleSim = toggleSim;
+  window.NRAIDE_M2.resetSim2 = resetSim2;
+  window.NRAIDE_M2.onTauChange = onTauChange;
+  window.NRAIDE_M2.onInflowChange = onInflowChange;
+})();
+</script>
+
+</main>
+</body>
+</html>

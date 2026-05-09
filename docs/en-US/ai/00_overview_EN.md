@@ -28,227 +28,38 @@ Each chapter addresses a different part of this question.
 
 ## Chapter Structure
 
-### Introduction
+### Introduction / 01 Paradigm Shift
 
-The introduction explains the structural problems in current AI development.
-
-It asks why optimization does not guarantee correctness, and why a system that cannot stop becomes dangerous.
-
----
-
-### 00.5 Nomological Ring Axioms
-
-This section introduces the foundational axiom from which NRA-IDE emerges.
-
-**“Existence is generation.”**
-
-This axiom appears only once, before the computational principles begin.
+The introduction explains the structural problems in current AI development. It asks why optimization does not guarantee correctness, and why a system that cannot stop becomes dangerous.
+- **Experience:** [M1: Linear vs NRA Comparison](../../figures/M1_NRA_linear_breakdown_simulator_EN.html)
 
 ---
 
-### 01 Paradigm Shift
+### 00.5 Nomological Ring Axioms / 02 Limits of AI Optimization
 
-This chapter explains what is overlooked in the architecture used by current AI systems—floating-point computation, probability, and optimization.
-
-See figure:
-
-`figures/01_Code_Generated_Image_.jpg`
+This section introduces the foundational axiom: **“Existence is generation.”** It explains the origin of the three structural quantities: δ (fluctuation), τ (thickness), and R (limit ratio).
+- **Experience:** [M2: Residue Tank](../../figures/M2_NRA_residue_tank_EN.html)
 
 ---
 
-### 02 Limits of AI Optimization
+### 03 Causal Diode / 04 Sandwich Structure (RNA Box)
 
-Here the computational principles derived from the axiom are expanded.
-
-The origin of the three quantities
-
-* δ (fluctuation)
-
-* τ (structural thickness)
-
-* R (limit ratio)
-
-is explained.
+Explains the "Causal Diode" (prohibiting reverse inference Π⁻¹) and the "Sandwich Structure" for managing different time scales.
+- **Experience:** [M3: Biomimetic Sandwich](../../figures/M3_NRA_biomimetic_sandwich_svg_EN.html)
 
 ---
 
-### 03 Causal Diode
+### 05 Coherence Gate / 07 Fail-Closed / 08 Discard Log
 
-This chapter introduces a structural rule in which information flows only from cause to effect.
-
-Reverse derivation (Π⁻¹) is prohibited.
-
-See figure:
-
-`figures/fig2_causal_diode.png`
+The Coherence Gate classifies states (NIRVANA, ELASTIC, CRITICAL, SILENCE). When $R \ge Rop$, the system performs a "Fail-Closed" action—a design success, not a failure.
+- **Experience:** [M4: Disclosure Protocol](../../figures/M4_NRA_confession_debugger_EN.html)
 
 ---
 
-### 04 Sandwich Structure (RNA Box)
+### 09-12 Risks, Benefits, Domain Tuning, and Glossary
 
-This chapter explains the three-layer separation:
-
-Pre-RNA / LLM / Post-RNA
-
-and why the LLM must be placed between these structural layers.
-
-See figures:
-
-```
-
-figures/RNA Box Sandwich Architecture_EN.jpg
-
-figures/sandwich_architecture.html
-
-```
-
----
-
-### 05 Coherence Gate
-
-The coherence gate classifies structural states using the formula:
-
-```
-
-R = δ / τ
-
-```
-
-The structure is divided into four states:
-
-* NIRVANA
-
-* ELASTIC
-
-* CRITICAL
-
-* SILENCE
-
-See figure:
-
-`figures/fig3_coherence_gate.png`
-
----
-
-### 06 Observables
-
-This chapter distinguishes between two categories of quantities.
-
-Cause-Side observables
-
-```
-
-δ τ R ω C
-
-```
-
-and Effect-Side quantities
-
-```
-
-distance
-
-score
-
-similarity
-
-```
-
-Only Cause-Side quantities are permitted in computation.
-
-See figure:
-
-`figures/nra_dam_degradation_20260310_EN.html`
-
----
-
-### 07 Fail-Closed
-
-When
-
-```
-
-R ≥ Rop
-
-```
-
-the structure stops producing output and delegates the decision to the next agent.
-
-This is not a failure.
-
-It is the intended structural behavior.
-
----
-
-### 08 Discard Log
-
-This chapter explains how records are kept without re-using them for computation.
-
-The system records
-
-* structural state
-
-* discarded residuals
-
-while preventing reverse inference.
-
----
-
-### 09 Risks and Misuse
-
-Four major misuse patterns are explained:
-
-* manipulation of τ
-
-* tampering with logs
-
-* removal of the sandwich structure
-
-* mixing with external computational systems
-
-The earliest risk appears **before a value enters NRA-IDE**.
-
----
-
-### 10 Benefits and Limitations
-
-This chapter honestly separates what NRA-IDE can guarantee and what it cannot.
-
-Situations where Fail-Closed is valuable are distinguished from those where it is unsuitable.
-
----
-
-### 11 Domain Tuning
-
-NRA-IDE adapts to different domains by adjusting only two parameters:
-
-```
-
-τ
-
-Rop
-
-```
-
-The structure itself does not change.
-
-See figures:
-
-```
-
-figures/DOMAIN_TUNIING.png
-
-figures/domain_tuning_structure_pure.html
-
-```
-
----
-
-### 12 Glossary
-
-A reference section containing definitions for all terms used in the document.
-
-Readers who begin in the middle of the text may consult this section first.
+Covers practical implementation, domain tuning via τ and Rop, and the rigorous definitions of NRA terminology.
+- **Experience:** [M5: Non-linear Glossary](../../figures/M5_NRA_IDE_flip_glossary_EN.html)
 
 ---
 

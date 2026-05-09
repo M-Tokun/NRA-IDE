@@ -130,11 +130,7 @@ In NRA-IDE, the structural condition of the system is visible through measurable
 
 An example visualization of structural degradation can be seen here:
 
-```
-
-figures/nra_dam_degradation_20260310_EN.html
-
-```
+[nra_dam_degradation_EN.html](../figures/nra_dam_degradation_EN.html)
 
 This example illustrates how observable fluctuations relate to the structural margin.
 

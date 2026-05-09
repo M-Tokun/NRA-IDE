@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 5: Non-linear Glossary | NRA-IDE Interactive Docs</title>
+<style>
+
+:root{
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background-primary:#0d1117;
+  --color-background-secondary:#161b22;
+  --color-background-warning:#2b2414;
+  --color-text-primary:#f0f6fc;
+  --color-text-secondary:#c9d1d9;
+  --color-text-tertiary:#8b949e;
+  --color-text-warning:#f2b84b;
+  --color-border-primary:#8b949e;
+  --color-border-secondary:#30363d;
+  --color-border-tertiary:#2a3038;
+  --color-border-warning:#7d5f1e;
+  --border-radius-lg:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,#172033 0,#0d1117 36%,#090c10 100%);color:var(--color-text-primary);font-family:var(--font-sans);}
+body{padding:24px}
+.yui-shell{max-width:1040px;margin:0 auto;background:rgba(13,17,23,.72);border:1px solid var(--color-border-secondary);border-radius:18px;padding:20px 22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.yui-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:10px;padding-bottom:14px;border-bottom:1px solid var(--color-border-tertiary)}
+.yui-title{font-size:18px;font-weight:650;letter-spacing:.02em}
+.yui-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);letter-spacing:.08em;margin-top:4px}
+.yui-meta{font-family:var(--font-mono);font-size:10px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+button{background:#111821;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:7px;transition:transform .12s,border-color .12s,background .12s;color-scheme:dark}
+button:hover:not(:disabled){border-color:var(--color-border-primary);background:#182230;transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input[type="range"]{accent-color:#1D9E75}
+canvas{background:var(--color-background-primary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:#58a6ff}
+@media (max-width:760px){body{padding:12px}.yui-shell{padding:14px}.yui-header{display:block}.yui-meta{text-align:left;margin-top:8px;white-space:normal}div[style*="grid-template-columns:1fr 1fr"],div[style*="grid-template-columns:160px 1fr"],#infoPanel{grid-template-columns:1fr!important}}
+
+</style>
+</head>
+<body>
+<!-- FILE: M5_NRA_IDE_flip_glossary_EN.html | generated_jst: 20260510_000453_JST | yui_standalone_display_safe_edition -->
+<main class="yui-shell">
+  <header class="yui-header">
+    <div>
+      <div class="yui-title">Module 5: Non-linear Glossary</div>
+      <div class="yui-subtitle">NRA-IDE Interactive Docs / English Edition</div>
+    </div>
+    <div class="yui-meta">© M-Tokuni 2026</div>
+  </header>
+<h2 class="sr-only">NRA-IDE Non-linear Glossary. Flip cards to compare conventional linear definitions with NRA-IDE structural redefinitions for 8 key concepts.</h2>
+
+<div style="padding: 1.5rem 0 1rem;">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;">
+    <div>
+      <span style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); letter-spacing: 0.12em; display: block; margin-bottom: 3px;">MODULE 05 / FLIP-CARD GLOSSARY</span>
+      <span style="font-size: 17px; font-weight: 500;">Non-linear Glossary</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <span style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-secondary);">◻ Linear</span>
+      <span style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-warning);">◼ NRA-IDE</span>
+      <button onclick="NRAIDE_M5.flipAll()" style="font-family: var(--font-mono); font-size: 11px; padding: 4px 12px; cursor: pointer;">Flip All</button>
+    </div>
+  </div>
+
+  <div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 1rem;">Viewed <span id="count" style="color: var(--color-text-warning); font-weight: 500;">0</span> / 8 &nbsp;— Click cards to flip definitions</div>
+
+  <div id="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;"></div>
+
+  <div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); margin-top: 1.25rem; text-align: right; letter-spacing: 0.06em;">© M-Tokuni 2026 — NRA-IDE Nomological Ring Axioms</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M5 = window.NRAIDE_M5 || {};
+  // Module 5 namespace-safe exports
+  const TERMS = [
+    {
+      ja: 'Efficiency', en: 'efficiency',
+      linear: 'Achieving maximum output with minimum cost. The ultimate goal of optimization.',
+      nra: 'Optimization ignoring τ (thickness) accelerates approach to R=1.0. NRA evaluates efficiency along with residual capacity.',
+      tag: 'τ-less → R↑'
+    },
+    {
+      ja: 'Safety', en: 'safety',
+      linear: 'State of being free from danger. Verification and maintenance of zero risk.',
+      nra: 'Structural room to maintain R < 1.0. Residual capacity τ × (1−R) is the substance of safety.',
+      tag: 'R < 1.0'
+    },
+    {
+      ja: 'Prediction', en: 'prediction',
+      linear: 'Calculating future values based on the extension of past data trends.',
+      nra: 'Measuring the accumulation rate of δ to estimate the timing of reaching R=1.0.',
+      tag: 'dR/dt → Time to Limit'
+    },
+    {
+      ja: 'Error', en: 'error',
+      linear: 'A failure that must be corrected. An object to be removed from the design.',
+      nra: 'Inflow to δ. Residue accumulated in the structure—a signal to be tracked, not excluded.',
+      tag: 'δ += ε (Trackable)'
+    },
+    {
+      ja: 'Halt', en: 'halt',
+      linear: 'Evidence of a fault or failure. An abnormal state that must be recovered.',
+      nra: 'Fail-Closed. Completion of design. Honest delegation to human judgment.',
+      tag: 'FAIL_CLOSED ✓'
+    },
+    {
+      ja: 'Approximation', en: 'approximation',
+      linear: 'A rational means to simplify calculation. Often tolerated if error is small.',
+      nra: 'Use without confession is Structural Inconsistency. Disclosure Axiom is mandatory.',
+      tag: 'Disclosure Required'
+    },
+    {
+      ja: 'Learning', en: 'learning',
+      linear: 'Iterative process to improve accuracy. Generally "more is better."',
+      nra: 'Iteration to update boundaries. Record δ and τ changes in each cycle. Blind iteration increases R.',
+      tag: 'δ/τ log required'
+    },
+    {
+      ja: 'Limit', en: 'limit',
+      linear: 'Upper bound that must not be crossed. A rule set from the outside.',
+      nra: 'R=1.0. The boundary where the structure self-delegates to human judgment.',
+      tag: 'R = 1.0 Handoff'
+    }
+  ];
+
+  const grid = document.getElementById('grid');
+  const countEl = document.getElementById('count');
+  const inners = [];
+  let flippedSet = new Set();
+  let allFlipped = false;
+
+  function updateCount() {
+    countEl.textContent = flippedSet.size;
+  }
+
+  TERMS.forEach((t, idx) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'perspective: 900px; cursor: pointer;';
+
+    const inner = document.createElement('div');
+    inner.style.cssText = 'position: relative; height: 196px; transform-style: preserve-3d; transition: transform 0.42s cubic-bezier(0.4,0,0.2,1);';
+    inners.push(inner);
+
+    const front = document.createElement('div');
+    front.style.cssText = 'position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; display: flex; flex-direction: column; box-sizing: border-box;';
+    front.innerHTML =
+      '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); letter-spacing: 0.12em; margin-bottom: 6px;">LINEAR</div>' +
+      '<div style="font-size: 21px; font-weight: 500; margin-bottom: 1px;">' + t.ja + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 10px;">' + t.en + '</div>' +
+      '<div style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.65; flex: 1;">' + t.linear + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-tertiary); margin-top: 10px; text-align: right; opacity: 0.7;">tap to flip →</div>';
+
+    const back = document.createElement('div');
+    back.style.cssText = 'position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotateY(180deg); background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); border-radius: var(--border-radius-lg); padding: 1rem; display: flex; flex-direction: column; box-sizing: border-box;';
+    back.innerHTML =
+      '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-text-warning); letter-spacing: 0.12em; margin-bottom: 6px; opacity: 0.85;">NRA-IDE</div>' +
+      '<div style="font-size: 21px; font-weight: 500; margin-bottom: 1px; color: var(--color-text-warning);">' + t.ja + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-warning); margin-bottom: 10px; opacity: 0.7;">' + t.en + '</div>' +
+      '<div style="font-size: 13px; color: var(--color-text-warning); line-height: 1.65; flex: 1; opacity: 0.9;">' + t.nra + '</div>' +
+      '<div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-text-warning); margin-top: 10px;">' + t.tag + '</div>';
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    wrap.appendChild(inner);
+
+    wrap.addEventListener('click', () => {
+      const isFlipped = flippedSet.has(idx);
+      if (isFlipped) {
+        inner.style.transform = '';
+        flippedSet.delete(idx);
+      } else {
+        inner.style.transform = 'rotateY(180deg)';
+        flippedSet.add(idx);
+      }
+      updateCount();
+    });
+
+    grid.appendChild(wrap);
+  });
+
+  function flipAll() {
+    allFlipped = !allFlipped;
+    inners.forEach((inner, idx) => {
+      inner.style.transform = allFlipped ? 'rotateY(180deg)' : '';
+      if (allFlipped) flippedSet.add(idx);
+      else flippedSet.delete(idx);
+    });
+    updateCount();
+  }
+
+  window.NRAIDE_M5.flipAll = flipAll;
+})();
+</script>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 3: 生命のサンドイッチ構造 | NRA-IDE Interactive Docs</title>
+<style>
+
+:root{
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: Inter, "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-background-primary:#0d1117;
+  --color-background-secondary:#161b22;
+  --color-background-warning:#2b2414;
+  --color-text-primary:#f0f6fc;
+  --color-text-secondary:#c9d1d9;
+  --color-text-tertiary:#8b949e;
+  --color-text-warning:#f2b84b;
+  --color-border-primary:#8b949e;
+  --color-border-secondary:#30363d;
+  --color-border-tertiary:#2a3038;
+  --color-border-warning:#7d5f1e;
+  --border-radius-lg:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,#172033 0,#0d1117 36%,#090c10 100%);color:var(--color-text-primary);font-family:var(--font-sans);}
+body{padding:24px}
+.yui-shell{max-width:1040px;margin:0 auto;background:rgba(13,17,23,.72);border:1px solid var(--color-border-secondary);border-radius:18px;padding:20px 22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.yui-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:10px;padding-bottom:14px;border-bottom:1px solid var(--color-border-tertiary)}
+.yui-title{font-size:18px;font-weight:650;letter-spacing:.02em}
+.yui-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary);letter-spacing:.08em;margin-top:4px}
+.yui-meta{font-family:var(--font-mono);font-size:10px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+button{background:#111821;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:7px;transition:transform .12s,border-color .12s,background .12s;color-scheme:dark}
+button:hover:not(:disabled){border-color:var(--color-border-primary);background:#182230;transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input[type="range"]{accent-color:#1D9E75}
+canvas{background:var(--color-background-primary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:#58a6ff}
+@media (max-width:760px){body{padding:12px}.yui-shell{padding:14px}.yui-header{display:block}.yui-meta{text-align:left;margin-top:8px;white-space:normal}div[style*="grid-template-columns:1fr 1fr"],div[style*="grid-template-columns:160px 1fr"],#infoPanel{grid-template-columns:1fr!important}}
+
+</style>
+</head>
+<body>
+<!-- FILE: M3_NRA_biomimetic_sandwich_svg_yui_standalone_20260510_000453_JST.html | generated_jst: 20260510_000453_JST | yui_standalone_display_safe_edition -->
+<main class="yui-shell">
+  <header class="yui-header">
+    <div>
+      <div class="yui-title">Module 3: 生命のサンドイッチ構造</div>
+      <div class="yui-subtitle">NRA-IDE Interactive Docs / standalone display-safe edition</div>
+    </div>
+    <div class="yui-meta">generated_jst: 20260510_000453_JST<br>© M-Tokuni 2026</div>
+  </header>
+<h2 class="sr-only">Module 3: 生命のサンドイッチ・アーキテクチャ。NRA-IDEの構造（δ吸収層・τコア）と生命の生存境界を同じ構造原理として読めることを示すインタラクティブSVGダイアグラム。各層クリックで生命科学アナロジーを表示。</h2>
+
+<style>
+.m3mn{font-family:var(--font-mono);letter-spacing:.05em}
+.m3lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-text-tertiary)}
+.m3layer{cursor:pointer;transition:opacity .15s}
+.m3layer:hover{opacity:.85}
+.m3card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem;transition:border-color .2s}
+.m3card.active{border-color:#1D9E75}
+.m3tag{display:inline-block;font-family:monospace;font-size:10px;padding:2px 7px;border-radius:3px;margin-bottom:6px}
+</style>
+
+<div style="padding:1.25rem 0 .75rem">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <span class="m3lbl" style="display:block;margin-bottom:3px">MODULE 03 / BIOMIMETIC SANDWICH ARCHITECTURE</span>
+      <span style="font-size:17px;font-weight:500">生命のサンドイッチ構造</span>
+    </div>
+    <div class="m3mn" style="font-size:11px;color:var(--color-text-tertiary)">工学的設計 ↔ 生命の生存戦略</div>
+  </div>
+
+  <div style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px">
+      <span class="m3mn" style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap">R = δ/τ</span>
+      <input type="range" id="rSlider" min="0" max="99" value="0" style="flex:1" oninput="NRAIDE_M3.setR(this.value/100)">
+      <span class="m3mn" id="rVal" style="font-size:13px;font-weight:500;min-width:44px;color:#1D9E75">0.000</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="m3mn" onclick="NRAIDE_M3.animateR()" id="animBtn" style="font-size:11px;padding:4px 12px;cursor:pointer">▶ 圧縮アニメ</button>
+      <button class="m3mn" onclick="NRAIDE_M3.resetR()" style="font-size:11px;padding:4px 10px;cursor:pointer">↺</button>
+    </div>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.75rem;margin-bottom:12px;overflow:hidden">
+    <svg id="svgMain" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+
+      <!-- External top -->
+      <g class="m3layer" id="lay-ext" onclick="NRAIDE_M3.showInfo('ext')" role="button" aria-label="外部環境レイヤー">
+        <rect x="0" y="0" width="600" height="48" fill="#D3D1C7" rx="8" ry="8"/>
+        <rect x="0" y="30" width="600" height="18" fill="#D3D1C7"/>
+        <text x="300" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="#444441" font-weight="500">外部環境 — EXTERNAL STRESS SOURCE</text>
+        <text x="300" y="36" text-anchor="middle" font-family="monospace" font-size="10" fill="#5F5E5A">δ が外部から流入する起点</text>
+        <!-- Arrows -->
+        <polygon points="30,48 20,38 40,38" fill="#888780"/>
+        <polygon points="570,48 560,38 580,38" fill="#888780"/>
+        <line x1="30" y1="38" x2="30" y2="58" stroke="#888780" stroke-width="1.5"/>
+        <line x1="570" y1="38" x2="570" y2="58" stroke="#888780" stroke-width="1.5"/>
+      </g>
+
+      <!-- Absorption top background -->
+      <g class="m3layer" id="lay-abs" onclick="NRAIDE_M3.showInfo('abs')" role="button" aria-label="δ吸収層レイヤー">
+        <rect x="0" y="48" width="600" height="100" fill="#E1F5EE"/>
+        <!-- Fill (controlled by R) -->
+        <rect id="fillTop" x="0" y="48" width="600" height="0" fill="#1D9E75" opacity="0.45"/>
+        <!-- Threshold lines within absorption -->
+        <line x1="0" y1="118" x2="600" y2="118" stroke="#EF9F27" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="115" font-family="monospace" font-size="9" fill="#EF9F27">R=0.70</text>
+        <line x1="0" y1="133" x2="600" y2="133" stroke="#E24B4A" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="130" font-family="monospace" font-size="9" fill="#E24B4A">R=0.85</text>
+        <text x="300" y="90" text-anchor="middle" font-family="monospace" font-size="12" fill="#085041" font-weight="500" id="absTopLabel">δ 吸収層 — Absorption Buffer</text>
+        <text x="300" y="107" text-anchor="middle" font-family="monospace" font-size="10" fill="#0F6E56" id="absTopSub">残余容量: τ × (1 − R) = 100.0%</text>
+        <!-- Side labels -->
+        <text x="8" y="80" font-family="monospace" font-size="9" fill="#1D9E75">δ →</text>
+        <text x="8" y="93" font-family="monospace" font-size="9" fill="#1D9E75">流入</text>
+      </g>
+
+      <!-- τ Core -->
+      <g class="m3layer" id="lay-core" onclick="NRAIDE_M3.showInfo('core')" role="button" aria-label="τ構造コアレイヤー">
+        <rect x="0" y="148" width="600" height="44" fill="#FAEEDA"/>
+        <line x1="0" y1="148" x2="600" y2="148" stroke="#E24B4A" stroke-width="2"/>
+        <line x1="0" y1="192" x2="600" y2="192" stroke="#E24B4A" stroke-width="2"/>
+        <text x="300" y="167" text-anchor="middle" font-family="monospace" font-size="13" fill="#633806" font-weight="500">τ  STRUCTURAL CORE</text>
+        <text x="300" y="184" text-anchor="middle" font-family="monospace" font-size="10" fill="#854F0B" id="coreLabel">R = δ/τ = 0.000   |   S = 1/(τ·(1−R)) = 0.010</text>
+        <!-- R indicator -->
+        <rect id="rIndicator" x="0" y="148" width="0" height="44" fill="#E24B4A" opacity="0.12"/>
+      </g>
+
+      <!-- Absorption bottom background -->
+      <g class="m3layer" onclick="NRAIDE_M3.showInfo('abs')" role="button" aria-label="δ吸収層（下）レイヤー">
+        <rect x="0" y="192" width="600" height="100" fill="#E1F5EE"/>
+        <!-- Fill bottom (grows upward) -->
+        <rect id="fillBot" x="0" y="292" width="600" height="0" fill="#1D9E75" opacity="0.45"/>
+        <!-- Threshold lines -->
+        <line x1="0" y1="222" x2="600" y2="222" stroke="#E24B4A" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="219" font-family="monospace" font-size="9" fill="#E24B4A">R=0.85</text>
+        <line x1="0" y1="237" x2="600" y2="237" stroke="#EF9F27" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="8" y="251" font-family="monospace" font-size="9" fill="#EF9F27">R=0.70</text>
+        <text x="300" y="258" text-anchor="middle" font-family="monospace" font-size="12" fill="#085041" font-weight="500">δ 吸収層 — Absorption Buffer</text>
+        <text x="300" y="275" text-anchor="middle" font-family="monospace" font-size="10" fill="#0F6E56" id="absBotSub">（対称構造）</text>
+        <text x="8" y="262" font-family="monospace" font-size="9" fill="#1D9E75">δ →</text>
+        <text x="8" y="275" font-family="monospace" font-size="9" fill="#1D9E75">流入</text>
+      </g>
+
+      <!-- External bottom -->
+      <g class="m3layer" onclick="NRAIDE_M3.showInfo('ext')" role="button" aria-label="外部環境（下）レイヤー">
+        <rect x="0" y="292" width="600" height="48" fill="#D3D1C7" rx="0" ry="0"/>
+        <rect x="0" y="292" width="600" height="18" fill="#D3D1C7"/>
+        <rect x="0" y="310" width="600" height="30" fill="#D3D1C7" rx="0" ry="8"/>
+        <polygon points="30,292 20,302 40,302" fill="#888780"/>
+        <polygon points="570,292 560,302 580,302" fill="#888780"/>
+        <line x1="30" y1="292" x2="30" y2="282" stroke="#888780" stroke-width="1.5"/>
+        <line x1="570" y1="292" x2="570" y2="282" stroke="#888780" stroke-width="1.5"/>
+        <text x="300" y="316" text-anchor="middle" font-family="monospace" font-size="11" fill="#444441" font-weight="500">外部環境 — EXTERNAL STRESS SOURCE</text>
+        <text x="300" y="331" text-anchor="middle" font-family="monospace" font-size="10" fill="#5F5E5A">δ が外部から流入する起点</text>
+      </g>
+
+      <!-- FAIL indicator (hidden by default) -->
+      <g id="failOverlay" opacity="0">
+        <rect x="0" y="0" width="600" height="340" fill="#E24B4A" opacity="0.06"/>
+        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">EARLY FAIL_CLOSED — Rop≈0.97</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <div id="infoPanel" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+    <div class="m3card active" id="card-ext" onclick="NRAIDE_M3.showInfo('ext')" style="cursor:pointer">
+      <div class="m3tag" style="background:#F1EFE8;color:#444441">外部環境</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">External Stress Source</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">δ 蓄積の起点。構造へ流入する偏差の源泉。</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🫀 血圧の拍動、気圧変動、衝撃荷重</div>
+    </div>
+    <div class="m3card" id="card-abs" onclick="NRAIDE_M3.showInfo('abs')" style="cursor:pointer">
+      <div class="m3tag" style="background:#E1F5EE;color:#085041">δ 吸収層</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">Absorption Buffer</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の一部。R=δ/τ の分母を構成する吸収余地。</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🦴 軟骨・皮膚表皮・滑液・胸腔液</div>
+    </div>
+    <div class="m3card" id="card-core" onclick="NRAIDE_M3.showInfo('core')" style="cursor:pointer">
+      <div class="m3tag" style="background:#FAEEDA;color:#633806">τ 構造コア</div>
+      <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">Structural Core</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R=1.0 で Fail-Closed が起動する境界。</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🧠 皮質骨・心筋・血液脳関門</div>
+    </div>
+  </div>
+
+  <div id="detailPanel" style="background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem">
+    <div class="m3mn" style="font-size:10px;color:var(--color-text-tertiary);letter-spacing:.1em;margin-bottom:6px">LAYER DETAIL — クリックした層の詳細</div>
+    <div id="detailContent" style="font-size:13px;color:var(--color-text-secondary);line-height:1.7">
+      層をクリックすると生命科学アナロジーの詳細が表示されます。R スライダーで圧縮状態を変化させてください。
+    </div>
+  </div>
+
+  <div class="m3mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / 工学 ＝ 生命の公理</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  window.NRAIDE_M3 = window.NRAIDE_M3 || {};
+  // Module 3 namespace-safe exports
+  const TC='#1D9E75',TA='#EF9F27',TR='#E24B4A';
+  let curR=0,animId2=null,animDir=1;
+
+  const DETAILS={
+    ext:{
+      title:'外部環境 — External Stress Source',
+      col:'#888780',
+      eng:'δ（累積偏差）の起点として読める外部ストレス。R = δ/τ の分子 δ に対応する候補を発生させる源泉。',
+      bio:'生命における外部環境：血流の脈圧、気温変化、重力、病原体の侵入、放射線。これらは状況により δ として吸収層へ流入すると読める。',
+      example:'動脈壁への血圧：収縮期ごとに δ が流入すると見なせる。弾性繊維や組織余裕（τ）がこれを吸収するが、硬化で τ が低下すると R が上昇し、破断・破裂リスクが高まると読める。'
+    },
+    abs:{
+      title:'δ 吸収層 — Absorption Buffer (τ の一部)',
+      col:'#1D9E75',
+      eng:'τ（吸収厚）の外側を構成する緩衝帯。δ の流入を吸収し、τ コアを保護する。R = δ/τ が示す残余容量 τ×(1−R) がこの層の余裕に対応する。R=0.85 付近から加速帯として扱い、Ropでは早期委譲を準備する。',
+      bio:'皮膚の表皮層、関節軟骨、椎間板、胸腔液、滑液などは、外部 δ を散逸させる多層構造として読むことができる。磨耗・炎症で層が薄くなる（τ↓）と、同じ δ でも R が上昇しやすい。',
+      example:'膝関節軟骨：繰り返しの衝撃（δ）を吸収する τ 的な役割を持つ。変形性関節症は τ の低下により、同じ歩行量（δ）でも痛覚や損傷の閾値に近づきやすくなる状態として説明できる。'
+    },
+    core:{
+      title:'τ 構造コア — Structural Core (Fail-Closed 境界)',
+      col:'#854F0B',
+      eng:'τ（吸収厚）の核心。Ropで早期委譲を行い、R=1.0を理論的な構造破断境界として扱う。S = 1/(τ·(1-R)) の感度が発散する点がこの境界に対応する。',
+      bio:'皮質骨（骨折境界）、心筋（心不全閾値）、血液脳関門（神経毒性境界）、腎臓の糸球体（濾過限界）などは、「これ以上は構造が保てない」という境界を持つ例として読める。',
+      example:'骨密度と骨折閾値：骨密度（τに対応する余裕）が低下すると、日常動作（δ）でも骨折閾値に近づきやすくなる。骨折は、構造限界超過の可視化として読める。'
+    }
+  };
+
+  function col(R){return R<0.70?TC:R<0.85?TA:TR;}
+
+  function setR(R){
+    curR=R;
+    document.getElementById('rSlider').value=Math.round(R*100);
+    document.getElementById('rVal').textContent=R.toFixed(3);
+    document.getElementById('rVal').style.color=col(R);
+
+    const absH=100;
+    const fillH=Math.min(R,1.0)*absH;
+
+    document.getElementById('fillTop').setAttribute('height',fillH);
+    document.getElementById('fillTop').setAttribute('fill',R>=0.97?TR:col(R));
+
+    const botY=292-fillH;
+    document.getElementById('fillBot').setAttribute('y',botY);
+    document.getElementById('fillBot').setAttribute('height',fillH);
+    document.getElementById('fillBot').setAttribute('fill',R>=0.97?TR:col(R));
+
+    const remain=((1-Math.min(R,1.0))*100).toFixed(1);
+    document.getElementById('absTopSub').textContent='残余容量: τ × (1 − R) = '+remain+'%';
+
+    const tau=100,S=R>=1.0?Infinity:1/(tau*(1-R));
+    document.getElementById('coreLabel').textContent='R = δ/τ = '+R.toFixed(3)+'   |   S = '+(S>99?'∞':S.toFixed(3));
+    document.getElementById('coreLabel').setAttribute('fill',col(R));
+
+    document.getElementById('rIndicator').setAttribute('width',(R*600).toFixed(1));
+
+    const fo=document.getElementById('failOverlay');
+    fo.setAttribute('opacity',R>=0.97?'1':'0');
+  }
+
+  let activeLayer='ext';
+  function showInfo(key){
+    activeLayer=key;
+    ['ext','abs','core'].forEach(k=>{
+      document.getElementById('card-'+k).classList.toggle('active',k===key);
+    });
+    const d=DETAILS[key];
+    document.getElementById('detailContent').innerHTML=
+      '<span style="font-family:monospace;font-size:11px;font-weight:500;color:'+d.col+'">'+d.title+'</span><br><br>'+
+      '<span style="color:var(--color-text-primary);font-weight:500">工学：</span> '+d.eng+'<br><br>'+
+      '<span style="color:var(--color-text-primary);font-weight:500">生命科学：</span> '+d.bio+'<br><br>'+
+      '<span style="font-family:monospace;font-size:11px;color:var(--color-text-tertiary)">例: </span><span style="font-size:12px;color:var(--color-text-secondary)">'+d.example+'</span>';
+  }
+
+  function animateR(){
+    if(animId2)return;
+    let r=0;animDir=1;
+    document.getElementById('animBtn').textContent='⏸ 実行中';
+    function frame(){
+      r+=0.004;
+      if(r>=1.0){r=1.0;setR(r);setTimeout(()=>{
+        let r2=1.0;
+        function back(){r2-=0.006;setR(Math.max(r2,0));if(r2>0)animId2=requestAnimationFrame(back);else{animId2=null;document.getElementById('animBtn').textContent='▶ 圧縮アニメ';}}
+        back();
+      },800);return;}
+      setR(r);animId2=requestAnimationFrame(frame);
+    }
+    animId2=requestAnimationFrame(frame);
+  }
+
+  function resetR(){
+    if(animId2){cancelAnimationFrame(animId2);animId2=null;}
+    document.getElementById('animBtn').textContent='▶ 圧縮アニメ';
+    setR(0);
+  }
+
+  showInfo('ext');
+  setR(0);
+
+  window.NRAIDE_M3.setR = setR;
+  window.NRAIDE_M3.animateR = animateR;
+  window.NRAIDE_M3.resetR = resetR;
+  window.NRAIDE_M3.showInfo = showInfo;
+})();
+</script>
+
+</main>
+</body>
+</html>

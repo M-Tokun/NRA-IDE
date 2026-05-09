@@ -22,30 +22,34 @@ figures/
 │   JP: 位相の進行と時間の不可逆性を表現する螺旋モデルと循環モデルの決定的な差異を証明します
 │   EN: Proves the critical difference between the spiral model representing phase advancement and the flawed circular model.
 │
-├── TOP_sandwich.png
-│   JP: システム全体の入出力を挟み込むサンドイッチアーキテクチャの最上位概念図です
-│   EN: Top-level conceptual diagram of the sandwich architecture enclosing the system's inputs and outputs.
-│
-├── 01_Code_Generated_Image_.jpg
+├── 01_Code_Generated_Image.jpg
 │   JP: コード生成プロセスによって動的に出力された初期の検証用画像データです
 │   EN: Initial verification image data dynamically output through the code generation process.
 │
-├── DOMAIN_TUNIING.png
+├── DOMAIN_TUNING.png
 │   JP: 特定領域における制約条件と内包的パラメータの調整構造を視覚化した図解です
 │   EN: Visual illustration of the tuning structure for constraints and intensional parameters within a specific domain.
 │
-├── nra_dam_degradation.html
+├── nra_dam_degradation_EN.html
 │   JP: ダムの水位管理メタファーを用いたエネルギーの蓄積と解放・劣化の構造比較モデルです
 │   EN: Structural comparison model of energy accumulation, release, and degradation using a dam water level management metaphor.
 │
-├── sandwich_architecture.html
-│   JP: 入出力層で核となる推論モデルを挟み込むサンドイッチ構造の詳細な対話型仕様です
-│   EN: Detailed interactive specification of the sandwich architecture that encloses the core inference model between input and output layers.
+├── RNA_Box_Sandwich_Architecture_EN.jpg
+│   JP: RNA Box Sandwich Architecture の英語版図面です
+│   EN: English diagram of the RNA Box Sandwich Architecture.
 │
-├── domain_tuning_structure_pure.html
-│   JP: 外部依存を排除した純粋なドメインチューニングの内部構造を示すHTMLドキュメントです
-│   EN: HTML document demonstrating the internal structure of pure domain tuning without external dependencies.
+├── RNA-BI.jpg
+│   JP: RNA-BI 構造を示す補助図です
+│   EN: Supporting diagram for the RNA-BI structure.
 │
-└── 07_Escapement_ContactPoint_JP.html
+├── han_rasen_202512.gif
+│   JP: 螺旋構造の補助アニメーションです
+│   EN: Supporting animation of the spiral structure.
+│
+├── causal_diode_fail_closed_EN.html
+│   JP: 因果ダイオードとFail-Closedの二言語HTML解説です
+│   EN: Bilingual HTML explanation of the Causal Diode and Fail-Closed behavior.
+│
+└── 08_Escapement_ContactPoint_EN.html
     JP: 脱進機の接点におけるエネルギー伝達と位相制御の機構解説です
     EN: Mechanism explanation of energy transfer and phase control at the contact points of the escapement.

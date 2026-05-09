@@ -1,47 +1,58 @@
-# NRA-IDE Architecture Overview
+# NRA-IDE: サンドイッチ構造（多層防御の深淵）
 
-Purpose
-- Provide a concise architecture summary and diagram placeholders for NRA-IDE (system boundaries, main subsystems, data flow).
+## 0. 目的
+単なるコンポーネントの羅列ではなく、NRA-IDEがなぜ「サンドイッチ（多層構造）」を選択したのか、その必然性を記述する。これは単なる冗長性の確保ではなく、**「異なる時間スケールにおける残渣（Residue）の管理」**という生体模倣的（Biomimetic）なアプローチの帰結である。
 
-High-level Architecture
-- Three-layer "Sandwich" (Pre-RNA → LLM → Post-RNA)
-  - Pre-RNA (Input Gate): sanitize/convert inputs, detect Pi-1 patterns (P1-P4), convert or block when needed.
-  - LLM (Generation Device): language generation only; isolated from safety logic.
-  - Post-RNA (Output Gate / CleanContext): validate outputs via R = δ/τ, enforce Fail-Closed, and log results.
+---
 
-Major components
-- Input Gate (gate/ and structure_gate_*.py)
-  - Pattern detectors (P1-P4), converters, warnings, and block actions.
-- LLM Bridge (src/nra_llm_pipeline_*.py)
-  - Provider abstraction (MOCK / ANTHROPIC / OPENAI / GOOGLE), system prompts, turn handling.
-- Document Engine (src/nra_document_structure_*.py)
-  - GenesisBlock (axioms), SectionNodes, validation pipeline, integrity scoring.
-- Full Pipeline (src/nra_pre_rna_*.py)
-  - Composition of Pre-RNA + LLM + Post-RNA for integrated operation.
-- DiscardVault / CleanContext
-  - Storage for FAIL-CLOSED outputs; guarantees they never re-enter LLM history.
+## 1. 構造の必然：なぜサンドイッチなのか
+従来のシステムは、一つの大きなロジックで全てを解決しようとする「モノリシックな全能性」を目指してきました。しかし、NRA-IDEはそれを否定します。
 
-Data flow (ASCII)
+世界は非線形であり、一つの層で全ての「不純物（Residue）」を濾過することは不可能です。そこで、我々は**Pre-RNA / LLM / Post-RNA**という三層のサンドイッチ構造を採用し、各層に異なる「時間スケール（$\tau$）」と「境界（Boundary）」を与えました。
 
-User -> Pre-RNA(Input Gate) -> LLM -> Post-RNA(Validator) -> User
-                                 |                        |
-                                 v                        v
-                              (raw output)           (PASS / FAIL-CLOSED)
+![NRA-IDE Sandwich Architecture](./TOP_sandwich.png)
 
-Security & Safety properties
-- Fail-Closed: R >= R_op => output sealed and omitted from LLM history.
-- No Exploration: system must not initiate boundary-crossing search or suggest external tools.
-- Human-in-the-loop: AI presents facts; humans make final decisions; all changes logged.
+---
 
-Diagram placeholders
-- docs/figures/NRA-IDE_architecture.svg (TODO)
-- docs/figures/NRA-IDE_architecture.png (TODO)
+## 2. 各層の役割と時間スケールの管理
 
-Operational notes
-- Running MOCK pipeline: see src README for quick commands.
-- Configuration: domain τ and R_op are domain-specific; change only by human operators and log adjustments.
+### 2.1 Pre-RNA (Input Gate / 因果の防波堤)
+- **役割:** 入力情報の純度（P1-P4パターン）を瞬時に判定し、不純な因果（Π⁻¹）の密輸を阻止する。
+- **時間スケール:** 極めて短い $\tau$。反応的な防御。
+- **生体模倣的視点:** 皮膚や粘膜のような、外界との直接的な接触面。
 
-Next steps (recommended)
-- Generate architecture diagram (SVG) and place in docs/figures/.
-- Add CONTRIBUTING.md describing how to run MOCK pipeline, tests, and commit policy.
+### 2.2 LLM (Generation Device / 意味の揺らぎ)
+- **役割:** 言語生成そのものを担当する「ブラックボックス」。NRA-IDEはこの層に「正しさ」や「安全性」を期待しません。ここでは純粋な「意味の生成」のみが行われます。
+- **特性:** 非線形な揺らぎ。隔離された環境。
+- **生体模倣的視点:** 代謝や思考。制御不能な、しかし生命維持に必要な動的なプロセス。
 
+### 2.3 Post-RNA (Output Gate / 誠実な沈黙)
+- **役割:** 生成された出力の残渣を $R = \delta / \tau$ によって最終検証する。境界を超えた場合、即座に出力を封印（Fail-Closed）し、システムを沈黙させる。
+- **時間スケール:** 観測と評価に十分な $\tau$。
+- **生体模倣的視点:** 免疫系。異常を検知した際に、自己を破壊してでも全体を守る最終防衛線。
+
+---
+
+## 3. 残渣管理としてのアーキテクチャ
+このサンドイッチ構造の核心は、**「不純物を完全に消し去ることではなく、制御可能な範囲に閉じ込めること」**にあります。
+
+- **隔離:** LLMという不安定な要素を、PreとPostの「論理的硬殻」で包み込む。
+- **委譲:** Post-RNAが臨界（R=1.0）を検知したとき、AIは無理に答えを出さず、人間や次のシステムへ「沈黙」をもって権利を委譲します。
+
+---
+
+## 4. 視覚的理解 (Interactive Module)
+この多層防御の実態をより深く理解するために、**[M3: 生体模倣サンドイッチ](./figures/M3_NRA_biomimetic_sandwich_svg.html)** を参照してください。
+
+---
+
+### 主要コンポーネント (Technical Mapping)
+- **Input Gate:** `gate/` 配下。`structure_gate_*.py`
+- **LLM Bridge:** `src/nra_llm_pipeline_*.py`
+- **Document Engine:** `src/nra_document_structure_*.py` (GenesisBlockによる整合性担保)
+- **DiscardVault / CleanContext:** 廃棄された不純物が二度と循環系（LLMの履歴）に戻らないための隔離保管庫。
+
+---
+
+### Copyright (c) 2026 M-Tokuni  
+### SPDX-License-Identifier: MIT
