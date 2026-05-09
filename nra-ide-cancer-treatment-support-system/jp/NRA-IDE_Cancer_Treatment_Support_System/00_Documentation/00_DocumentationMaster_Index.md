@@ -6,7 +6,7 @@
 
 # File:    00_Documentation/Master_Index.md
 
-# Author:  M-Tokuni & AI Architects
+# Author:  M-Tokun & AI Architects
 
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -18,7 +18,7 @@
 
 **Version:** 1.0
 
-**Architects:** M-Tokuni, Claude, Gemini
+**Architects:** M-Tokun, AI
 
 
 
@@ -38,7 +38,7 @@
 
 | 02 | Mesoscale Physics | [PHASE_2_Mesoscale_Physics.md](./PHASE_2_Mesoscale_Physics.md) | **Physicians** |
 
-| 03 | Ritsukan Axiom | [PHASE_3_Ritsukan_Axiom.md](./PHASE_3_Ritsukan_Axiom.md) | **Advanced** |
+| 03 | Nomological Ring Axioms | [PHASE_3_Ritsukan_Axiom.md](./PHASE_3_Ritsukan_Axiom.md) | **Advanced** |
 
 | 04 | Complete Dictionary | [PHASE_4_Terminology_Dictionary.md](./PHASE_4_Terminology_Dictionary.md) | **All** |
 

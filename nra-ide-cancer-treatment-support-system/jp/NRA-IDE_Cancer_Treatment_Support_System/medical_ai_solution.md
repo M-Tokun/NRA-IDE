@@ -26,7 +26,7 @@
 
 
 
-本稿では、医療現場におけるAI導入の本質的課題を明らかにし、「律環公理（Ring Constraint Axiom）」という新しいアプローチによる解決策を提示します。
+本稿では、医療現場におけるAI導入の本質的課題を明らかにし、「律環公理（Nomological Ring Axioms）」という新しいアプローチによる解決策を提示します。
 
 
 
@@ -294,7 +294,7 @@ AI: 「悪性腫瘍の確率90%」
 
 
 
-**Ring Constraint Axiom (律環公理)** は、構造的な関係性を次の単純な式で表現します：
+**Nomological Ring Axioms (律環公理)** は、構造的な関係性を次の単純な式で表現します：
 
 
 
@@ -1212,9 +1212,9 @@ R ≥ 1.0 という明確な閾値
 
 
 
-- NRA-IDE Project: https://github.com/M-Tokuni/NRA-IDE
+- NRA-IDE Project: [https://github.com/M-Tokun/NRA-IDE](https://github.com/M-Tokun/NRA-IDE)
 
-- Ring Constraint Axiom (律環公理) に関する理論的基礎
+- Nomological Ring Axioms (律環公理) に関する理論的基礎
 
 - 医療機器規制とAI倫理に関する考察
 
@@ -1224,7 +1224,7 @@ R ≥ 1.0 という明確な閾値
 
 
 
-GitHub: M-Tokuni/NRA-IDE
+GitHub: M-Tokun/NRA-IDE
 
 
 

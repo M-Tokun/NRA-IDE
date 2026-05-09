@@ -28,12 +28,31 @@
 
 from __future__ import annotations
 import re
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
+from pathlib import Path
 from typing import Dict, List, Optional
 
-from nra_document_structure_EN_20260213_0135 import GenesisBlock
+def _load_local_module(module_name: str, filename: str):
+    if module_name in sys.modules:
+        return sys.modules[module_name]
+    module_path = Path(__file__).with_name(filename)
+    spec = __import__("importlib.util").util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load {filename}")
+    module = __import__("importlib.util").util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_doc_structure = _load_local_module(
+    "nra_document_structure_EN_2026_02_13_0135",
+    "nra_document_structure_EN_2026-02-13_0135.py",
+)
+GenesisBlock = _doc_structure.GenesisBlock
 
 
 # ==============================================================================
@@ -394,14 +413,21 @@ class PreRNA:
 # ==============================================================================
 
 # Import required classes from LLM pipeline and document structure
-from nra_llm_pipeline_EN_20260213_0135 import (
-    LLMBridge, LLMProvider, NRALLMPipeline,
-    CleanContextBuilder, DiscardVault, DiscardedOutput
+_llm_pipeline = _load_local_module(
+    "nra_llm_pipeline_EN_2026_02_13_0135",
+    "nra_llm_pipeline_EN_2026-02-13_0135.py",
 )
-from nra_document_structure_EN_20260213_0135 import (
-    DocumentEngine, DomainType, StructureValidator,
-    SectionStatus, ValidationResult
-)
+LLMBridge = _llm_pipeline.LLMBridge
+LLMProvider = _llm_pipeline.LLMProvider
+NRALLMPipeline = _llm_pipeline.NRALLMPipeline
+CleanContextBuilder = _llm_pipeline.CleanContextBuilder
+DiscardVault = _llm_pipeline.DiscardVault
+DiscardedOutput = _llm_pipeline.DiscardedOutput
+DocumentEngine = _doc_structure.DocumentEngine
+DomainType = _doc_structure.DomainType
+StructureValidator = _doc_structure.StructureValidator
+SectionStatus = _doc_structure.SectionStatus
+ValidationResult = _doc_structure.ValidationResult
 
 
 class NRAFullPipeline:

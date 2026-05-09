@@ -10,7 +10,7 @@
 
 
 
-# Phase 3: Ritsukan Axiom (Safety Rules)
+# Phase 3: Nomological Ring Axioms (Safety Rules)
 
 
 

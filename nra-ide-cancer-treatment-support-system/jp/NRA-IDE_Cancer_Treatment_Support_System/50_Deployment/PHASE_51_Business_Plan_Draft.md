@@ -8,7 +8,7 @@
 
 # Date:    2026-02-01
 
-# Author:  M-Tokuni & AI Architects
+# Author:  M-Tokun & AI Architects
 
 # Note:    本試算は概算であり、導入環境により変動する。
 

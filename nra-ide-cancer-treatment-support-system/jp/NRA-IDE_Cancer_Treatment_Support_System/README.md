@@ -24,7 +24,7 @@
 
 
 
-**NRA-IDE**（Non-statistical Ritsukan Axiom - Integrated Deterministic Engine）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する次世代のがん治療支援システムです。
+**NRA-IDE**（Nomological Ring Axioms - Intensional Dynamics Engine）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する次世代のがん治療支援システムです。
 
 
 
@@ -34,7 +34,7 @@
 
 
 
-## 2. 核心哲学：律環公理 (The Ritsukan Axiom)
+## 2. 核心哲学：律環公理 (Nomological Ring Axioms)
 
 
 
@@ -108,7 +108,7 @@
 
 
 
->図1: 子宮体腫瘍の血流モデル　/おおまかな単なる概要参考図4.png)
+>![子宮体腫瘍の血流モデル](src/おおまかな単なる概要参考図4.png)
 
 
 
@@ -124,9 +124,9 @@
 
 
 
->図2: 子宮体がんの治療フロー /おおまかな単なる概要参考図5.png)
+>![子宮体がんの治療フロー](src/おおまかな単なる概要参考図5.png)
 
->図3: 再発リスク層別化マップ  /おおまかな単なる概要参考図6.png)
+>![再発リスク層別化マップ](src/おおまかな単なる概要参考図6.png)
 
 
 
@@ -162,7 +162,7 @@
 
 
 
-![図4: NRA-IDE対応構造図イメージ](attachment:/mnt/data/おおまかな単なる概要参考図7.png)
+![図4: NRA-IDE対応構造図イメージ](src/おおまかな単なる概要参考図7.png)
 
 
 

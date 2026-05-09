@@ -270,7 +270,7 @@ def load_genesis(json_path: str = "regen_nra_document_structure.json") -> Genesi
 
 > Reads the JSON file and extracts `allowed_terms` and `axioms` into a `GenesisBlock` object.  
 
-> `json_path` — the location of the JSON file. Default = same folder.  
+> `json_path` — the location of the JSON file. The default path is relative to the current working directory; if you call this from another folder, pass an explicit path to `regen_nra_document_structure.json`.  
 
 > If the file is missing or corrupted, Python will raise an error → system fails closed (stops safely).
 
@@ -808,7 +808,8 @@ def my_ai_function(prompt: str) -> str:
 
 
 
-# Step 2: Build the pipeline (JSON is read automatically)
+# Step 2: Build the pipeline
+# If your current working directory is not this folder, pass json_path explicitly.
 
 pipeline = build_default_pipeline(my_ai_function)
 
@@ -862,7 +863,7 @@ To adjust system behavior, edit **only** `regen_nra_document_structure.json`.
 
 | Core rules | `axioms` | Add new axiom key-value pairs here. |
 
-| Guard sensitivity | *(edit GuardConfig in initialize.py)* | `warn_drop_ratio`, `fail_drop_ratio` |
+| Guard sensitivity | *(edit GuardConfig in regen_initialize_nra_system.py)* | `warn_drop_ratio`, `fail_drop_ratio` |
 
 
 
@@ -902,5 +903,4 @@ To adjust system behavior, edit **only** `regen_nra_document_structure.json`.
 
 
 
-*README_EN.md — NRA-IDE v33 — 2026-02-15*
-
+*README.md — NRA-IDE v33 — 2026-02-15*

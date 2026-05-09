@@ -122,21 +122,27 @@ $$R = \frac{\delta}{\tau}$$
 
 NRA-IDE/
 
-├── nra_document_structure_20260213_0135.py     # [Post-RNA] 構造文書エンジン（日本語版）
+├── nra_document_structure_2026-02-13_0135.py   # [Post-RNA] 構造文書エンジン（日本語版）
 
-├── nra_document_structure_EN_20260213_0135.py  # [Post-RNA] Document Structure Engine (EN)
+├── nra_document_structure_EN_2026-02-13_0135.py # [Post-RNA] Document Structure Engine (EN)
 
-├── nra_llm_pipeline_20260213_0135.py           # [B+C] LLMパイプライン（日本語版）
+├── nra_llm_pipeline_2026-02-13_0135.py         # [B+C] LLMパイプライン（日本語版）
 
-├── nra_llm_pipeline_EN_20260213_0135.py        # [B+C] LLM Pipeline (EN)
+├── nra_llm_pipeline_EN_2026-02-13_0135.py      # [B+C] LLM Pipeline (EN)
 
-├── nra_pre_rna_20260213_0135.py                # [A+B+C] 完全統合パイプライン（日本語版）
+├── nra_pre_rna_2026-02-13_0135.py              # [A+B+C] 完全統合パイプライン（日本語版）
 
-├── nra_pre_rna_EN_20260213_0135.py             # [A+B+C] Full Pipeline (EN)
+├── nra_pre_rna_EN_2026-02-13_0135.py           # [A+B+C] Full Pipeline (EN)
 
-├── README-JP.md                                # 本ドキュメント
+├── README_JP.md                                # 本ドキュメント
 
-└── README-EN.md                                # English documentation
+├── biodynamic_ide_engine_v2_2026-04-06_1947.py # BioDynamic IDE simulation engine
+
+├── structure_gate_bilingual_2026-04-17_2106.py # 日英併記の構造ゲートデモ
+
+├── structure_gate_survival_base_2026-04-18_2144.py # 生存基底つき構造ゲートデモ
+
+└── README.md                                   # English documentation
 
 ```
 
@@ -176,11 +182,11 @@ pip install openai     # OpenAI APIを使う場合
 
 # APIキー不要でデモが動作する
 
-python3 nra_pre_rna_EN_20260213_0135.py
+python3 nra_pre_rna_EN_2026-02-13_0135.py
 
 # または日本語版
 
-python3 nra_pre_rna_20260213_0135.py
+python3 nra_pre_rna_2026-02-13_0135.py
 
 ```
 
@@ -206,7 +212,7 @@ GenesisBlock に定義を登録し、SectionNode を検証する基盤エンジ�
 
 ```python
 
-from nra_document_structure_EN_20260213_0135 import (
+from nra_document_structure_EN_2026_02_13_0135 import (
 
     DocumentEngine, DomainType
 
@@ -260,13 +266,13 @@ LLMを外部生成装置として接続し、Post-RNA検証とCleanContext管理
 
 ```python
 
-from nra_llm_pipeline_EN_20260213_0135 import (
+from nra_llm_pipeline_EN_2026_02_13_0135 import (
 
     LLMBridge, LLMProvider, NRALLMPipeline
 
 )
 
-from nra_document_structure_EN_20260213_0135 import DocumentEngine, DomainType
+from nra_document_structure_EN_2026_02_13_0135 import DocumentEngine, DomainType
 
 # エンジンとブリッジを初期化
 
@@ -308,11 +314,11 @@ Pre-RNA（入力フィルター）を含む完全な3層パイプライン。
 
 ```python
 
-from nra_pre_rna_EN_20260213_0135 import NRAFullPipeline
+from nra_pre_rna_EN_2026_02_13_0135 import NRAFullPipeline
 
-from nra_llm_pipeline_EN_20260213_0135 import LLMBridge, LLMProvider
+from nra_llm_pipeline_EN_2026_02_13_0135 import LLMBridge, LLMProvider
 
-from nra_document_structure_EN_20260213_0135 import DocumentEngine, DomainType
+from nra_document_structure_EN_2026_02_13_0135 import DocumentEngine, DomainType
 
 engine = DocumentEngine("Full Pipeline Test", DomainType.TECHNICAL)
 
@@ -416,6 +422,6 @@ print(pipeline.pipeline_status())
 
 ---
 
-**FILE: README-JP.md**  
+**FILE: README_JP.md**  
 
 **DATE: 2026-02-13 01:35**

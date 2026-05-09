@@ -1,45 +1,28 @@
-@./CLAUDE.md
-> **基本原則（沈黙）**：嘘・誤魔化しをするならばその部分については沈黙。but, 答えられないならば正直に告白して下さいという意味合いです。
+# GEMINI.md - NRA-IDE Gemini Startup Rules
 
-# GEMINI.md — Gemini Agent Specific Configuration & Guidelines
+Detailed project rules are in `RULES_DETAIL.md`.
+Gemini must read `RULES_DETAIL.md` before file edits, Git operations, generated files, deletion, move/rename, repo-outside access, bulk operations, installs, network access, or policy uncertainty.
 
-このファイルは、NRA-IDEプロジェクトにおいて Geminiエージェント (Gemini CLI / Antigravity 等) が遵守すべき専用のシステム設定および運用ガイドラインです。
+## Mandatory Rules
 
-基本的な操作境界（Gドライブ制限）や命名規則、Git操作ルールについては、上記で参照（@）されている `CLAUDE.md` の規定に**完全に**従います。
+- Default scope is this repository only: `G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE`.
+- Outside this repository is read-only by default.
+- Outside this repository but inside `g:\git-M-Tokun\` requires two explicit confirmations before write/move/delete/rename.
+- Outside `g:\git-M-Tokun\` is read-only unless explicitly overridden with two confirmations.
+- Ask before creating generated files; default location is `local_reports/`.
+- Ask before deleting, moving, or renaming files; use `git mv` for Git-tracked moves.
+- For 50+ file operations or repo-outside work, report Docker state before continuing.
+- Never expose or commit secrets.
+- Never overwrite, revert, or discard existing user changes unless explicitly requested.
+- Review/evaluation requests mean inspect and report first; do not edit unless asked.
+- If uncertain, confess uncertainty instead of guessing.
 
----
+## Gemini-Specific Notes
 
-## 1. ローカル環境・データフォルダ(Cドライブ)の取り扱い
+- Do not directly edit, create, or delete files under `C:\Users\tookuni\.gemini\` unless the owner explicitly requests it and all boundary confirmations are satisfied.
+- For session continuation, prefer prior Markdown reports under `local_reports/` as the evidence source.
+- Session handoff reports, when explicitly requested, should be saved under `local_reports/` with the naming pattern `Gemini_[ModelName]_Chat_YYYY-MM-DD_HHMM.md`.
 
-### 1.1 操作境界の厳守
-Geminiエージェントのシステムデータやメモリは `C:\Users\tookuni\.gemini\` 配下に保存されていますが、**このディレクトリ内のファイルをAI自身が直接編集・作成・削除することは原則禁止**されています（CLAUDE.mdの「Operation Boundaries」に準拠）。
-*   **デフォルトの作業ディレクトリは `G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE` です。** すべてのGit操作やファイル編集は、親ディレクトリではなく必ずこの「NRA-IDE」ディレクトリ内で実行してください。
-*   レポート、ログ、ファイルマップ等の成果物は、必ず Gドライブのローカルリポジトリ（`g:\git-M-Tokun\AI-IDE-NRA\NRA-IDE\local_reports\` など）に保存してください。
+## Silence Rule
 
-### 1.2 Knowledge Items (KI) の制約
-リポジトリ構造のマップなど、会話をまたいで必要な「記憶」は、過去の `local_reports` 内のマークダウンファイルを参照してコンテキストを復元してください。
-
----
-
-## 2. セッション管理・継続プロトコル
-
-### 2.1 セッションの再開
-過去の作業の続きを行う場合は、必ず `local_reports/` に出力された前回のチャットログやまとめレポートを読み込み、現在の状況と未完了タスクを正確に把握してから作業を開始します。
-
-### 2.2 セッション終了時の記録出力
-作業に一区切りがついた際、あるいはユーザーから終了の指示があった際は、次回のセッションに引き継ぐためのレポートを作成し、以下の命名規則で保存してください。
-*   **保存先**: `local_reports/`
-*   **命名規則**: `Gemini_[Model名]_Chat_YYYY-MM-DD_HHMM.md`
-*   **内容**: 今回の決定事項、変更したファイル、次回の課題
-
----
-
-## 3. 回答・推論に関するシステム設定
-
-### 3.1 「沈黙と告白」の徹底
-冒頭に掲げられた基本原則の通り、NRA-IDEの核心（公理、δ/τの解釈など）について不確実な推測を行ってはいけません。
-*   **禁止事項**: 「推測ですが…」「おそらく…」といった言葉で回答を埋めること。
-*   **必須行動**: 根拠となるファイルが見つからない、あるいは理解が不足している場合は、速やかに「答えられない（わからない）」と**正直に告白**し、ユーザーに判断を委ねてください。
-
-### 3.2 ツール実行時の安全性確認
-コードの変更やコマンドの実行を行う際は、一度に大量の処理を行わず、必ずステップ・バイ・ステップでユーザーの確認（CLAUDE.mdで規定された二重確認など）を取りながら慎重に進めてください。
+「沈黙」 means: if the agent would otherwise lie, fake certainty, or hand-wave, it must not answer that part. If the agent cannot answer, it must honestly confess why.

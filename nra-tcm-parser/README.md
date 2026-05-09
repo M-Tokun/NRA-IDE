@@ -70,7 +70,7 @@ Run the script with your target Markdown or Text file.
 
 ```bash
 
-python nra_crystallizer_EN.py input_document.md
+python nra_crystallizer_EN_v2.py input_document.md
 
 
 
@@ -86,7 +86,7 @@ A structured report will be generated in the same directory:
 
 
 
-* `input_document_Processed_YYYY-MMDD.md`
+* `input_document_Crystallized_EN_YYYY-MMDD.md`
 
 
 
@@ -104,15 +104,15 @@ The report is divided into:
 
 
 
-You can adjust the filtering sensitivity by modifying `BASE_THRESHOLD` in the script.
+You can adjust the filtering sensitivity by modifying `BASE_TAU` in the script.
 
 
 
 ```python
 
-# nra_crystallizer_EN.py : Line 42
+# nra_crystallizer_EN_v2.py : Line 15
 
-BASE_THRESHOLD = 0.75  # Recommended for English documents
+BASE_TAU = 0.45  # Recommended for English documents
 
 
 
@@ -124,15 +124,15 @@ BASE_THRESHOLD = 0.75  # Recommended for English documents
 
 | --- | --- | --- |
 
-| **0.80** | **Strict** | Extracts only the most critical points. |
+| **0.35** | **Strict** | Extracts only the most critical points. |
 
-| **0.75** | **Standard** | **Recommended for English.** Balances context and brevity. |
+| **0.45** | **Standard** | **Recommended for English.** Balances context and brevity. |
 
-| **0.60** | **Loose** | Retains more details and supporting text. |
+| **0.55** | **Loose** | Retains more details and supporting text. |
 
 
 
-*Note: For English text, a slightly higher threshold (0.75) is recommended compared to Japanese (0.65) due to differences in token density.*
+*Note: For English text, the default `BASE_TAU` is slightly higher than the Japanese version due to differences in token density.*
 
 
 
@@ -169,6 +169,4 @@ This project is licensed under the **MIT License**.
 **Copyright (c) 2026 M-Tokuni (NRA_Lab)**
 
 
-
-```
 

@@ -30,17 +30,39 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Import core engine
-from nra_document_structure_EN_20260213_0135 import (
-    DocumentEngine, DomainType, SectionStatus,
-    ValidationResult, SectionNode, GenesisBlock
+def _load_local_module(module_name: str, filename: str):
+    if module_name in sys.modules:
+        return sys.modules[module_name]
+    module_path = Path(__file__).with_name(filename)
+    spec = __import__("importlib.util").util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load {filename}")
+    module = __import__("importlib.util").util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_doc_structure = _load_local_module(
+    "nra_document_structure_EN_2026_02_13_0135",
+    "nra_document_structure_EN_2026-02-13_0135.py",
 )
+DocumentEngine = _doc_structure.DocumentEngine
+DomainType = _doc_structure.DomainType
+SectionStatus = _doc_structure.SectionStatus
+ValidationResult = _doc_structure.ValidationResult
+SectionNode = _doc_structure.SectionNode
+GenesisBlock = _doc_structure.GenesisBlock
+StructureValidator = _doc_structure.StructureValidator
 
 
 # ==============================================================================
@@ -530,7 +552,6 @@ class NRALLMPipeline:
             if t.role == "assistant"
         ]
 
-        from nra_document_structure_EN_20260213_0135 import StructureValidator
         validator = StructureValidator(
             self._doc_engine.genesis,
             self._doc_engine._config
@@ -583,8 +604,6 @@ if __name__ == "__main__":
     print("=" * 60)
 
     # --- DocumentEngine のSetup（GenesisBlock）---
-    from nra_document_structure_EN_20260213_0135 import DocumentEngine, DomainType
-
     engine = DocumentEngine("NRAパイプラインテスト", DomainType.TECHNICAL)
     engine.genesis.add("NRA-IDE",
                        "因果構造の安全エンジン。",

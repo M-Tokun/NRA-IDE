@@ -315,5 +315,4 @@ if __name__ == "__main__":
     print(f"Hotspot rate        : {result['hotspot_stats']['hotspot_rate_pct']:.2f}%")
     print(f"Max hotspots/step   : {result['hotspot_stats']['max_hotspots']}")
 
-    engine.save_checkpoint("checkpoints/hybrid_v2_2000steps.json")
-
+    print("Checkpoint not written by default. Call save_checkpoint(path) explicitly when needed.")

@@ -36,7 +36,7 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 
-**NRA-IDE**（Nomological Ring Axioms - Integrated Development Environment）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する次世代のがん治療支援システムです。
+**NRA-IDE**（Nomological Ring Axioms - Intensional Dynamics Engine）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する次世代のがん治療支援システムです。
 
 
 
@@ -66,7 +66,7 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 
-## 2. 核心哲学：律環公理 (The Ritsukan Axiom)
+## 2. 核心哲学：律環公理 (Nomological Ring Axioms)
 
 
 
@@ -298,23 +298,29 @@ NRA-IDEでは、腫瘍周辺の各領域において、**入力パラメータ�
 
 NRA-IDE_CancerTreatmentSupport_System/
 
-├── jp/                    # 詳細ドキュメント（日本語）
-
-│   ├── 00_Overview/       # プロジェクト概要文書
-
-│   ├── 10_Theory/         # 律環公理理論
-
-│   ├── 20_Design/         # システム設計仕様
-
-│   ├── 30_Implementation/ # FPGA & Python実装
-
-│   ├── 40_Validation/     # 検証フレームワーク
-
-│   └── 50_Deployment/     # インストールガイド
-
 ├── README.md              # 英語版README（ゲートウェイ）
 
-└── README-JP.md           # このファイル（日本語メイン）
+├── README_JP.md           # このファイル（日本語メイン）
+
+└── jp/                    # 詳細ドキュメント（日本語、Primary）
+
+    └── NRA-IDE_Cancer_Treatment_Support_System/
+
+        ├── 00_Documentation/     # 全10フェーズの文書
+
+        ├── 10_Hardware_Design/   # FPGA設計ファイル
+
+        ├── 20_Software_Host/     # Python実装
+
+        ├── 30_Test_Data/         # テストデータ・検証
+
+        ├── 40_Output_Reports/    # レポートテンプレート
+
+        ├── 50_Deployment/        # インストール・事業計画
+
+        ├── 60_Research/          # 参考文献・リソース
+
+        └── src/                  # 参考画像
 
 ```
 
@@ -327,10 +333,6 @@ NRA-IDE_CancerTreatmentSupport_System/
 ## 🔗 外部リソース
 
 
-
-- **プロジェクトブログ（はてな）**: [https://mtokuni.hatenablog.com/](https://mtokuni.hatenablog.com/)
-
-- **開発ノート（Note）**: [https://note.com/mtokuni](https://note.com/mtokuni)
 
 - **Facebook**: [https://www.facebook.com/tokuni.masa?locale=ja_JP](https://www.facebook.com/tokuni.masa?locale=ja_JP)
 
@@ -362,17 +364,11 @@ NRA-IDE_CancerTreatmentSupport_System/
 
 
 
-*本リポジトリの全記述は、RCA-IDEフレームワークを実装したAIアシスタントによって生成されました。*
+*本リポジトリの全記述は、NRA-IDEフレームワークを実装したAIアシスタントによって生成されました。*
 
 
 
 *不自然な表現がある場合はご容赦ください。*
 
-
-
 ---
-
-
-
-[![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
 

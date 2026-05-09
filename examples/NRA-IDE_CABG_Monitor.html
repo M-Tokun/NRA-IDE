@@ -1,76 +1,150 @@
-# NRA-IDE CABG Monitor
-**心臓血管バイパス手術（CABG）向け動的TTFM波形監視ツール**
-**〜 経過ログ機能搭載版 〜**
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE CABG Monitor — 心臓血管バイパス手術向け動的TTFM波形監視ツール</title>
+<style>
+  :root {
+    --bg: #070b12;
+    --panel: #0e1622;
+    --panel2: #111d2b;
+    --line: #22364d;
+    --text: #dce9f6;
+    --sub: #8ea8bf;
+    --accent: #66d9ff;
+    --green: #63df93;
+    --warn: #ffd166;
+    --red: #ff6b6b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    line-height: 1.8;
+    padding: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 24px; margin: 24px 0 8px; color: var(--accent); }
+  h2 { font-size: 18px; margin: 28px 0 10px; color: #d0e4f2; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  h3 { font-size: 15px; margin: 20px 0 8px; color: var(--sub); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel2); color: var(--accent); }
+  td { background: var(--panel); }
+  code { font-family: Consolas, "Courier New", monospace; background: var(--panel2); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  .note {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 14px 0;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .note strong { color: var(--red); }
+  hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
+</style>
+</head>
+<body>
 
-## 概要
+<h1>NRA-IDE CABG Monitor</h1>
+<p><strong>心臓血管バイパス手術（CABG）向け動的TTFM波形監視ツール</strong><br>
+<strong>〜 経過ログ機能搭載版 〜</strong></p>
 
-このツールは、**NRA-IDEの二重ゆらぎ・動的τ・Fail-Closed**構造をCABG（冠動脈バイパス移植術）の術中監視に特化させた**単一HTMLファイル**です。
+<h2>概要</h2>
+<p>このツールは、<strong>NRA-IDEの二重ゆらぎ・動的τ・Fail-Closed</strong>構造をCABG（冠動脈バイパス移植術）の術中監視に特化させた<strong>単一HTMLファイル</strong>です。</p>
+<p>Transit-Time Flow Measurement（TTFM）の実臨床基準（Medistim VeriQ / Transonic）を再現しつつ、</p>
+<ul>
+  <li>動的血流波形（拡張期優勢パターン）</li>
+  <li>Pulsatility Index（PI）、Mean Graft Flow（MGF）、Diastolic Filling %（DF%）</li>
+  <li>壁せん断応力・壁張力・接着性などの局所物理量</li>
+</ul>
+<p>を<strong>リアルタイム統合</strong>し、<strong>R ≥ 閾値</strong>で自動Fail-Closedを発動します。</p>
 
-Transit-Time Flow Measurement（TTFM）の実臨床基準（Medistim VeriQ / Transonic）を再現しつつ、
-- 動的血流波形（拡張期優勢パターン）
-- Pulsatility Index（PI）、Mean Graft Flow（MGF）、Diastolic Filling %（DF%）
-- 壁せん断応力・壁張力・接着性などの局所物理量
+<h3>主な特徴（2026年3月時点）</h3>
+<ul>
+  <li><strong>動的TTFM波形アニメーション</strong>（拡張期優勢を再現）</li>
+  <li><strong>閾値スライダー</strong>でPI上限・MGF下限・R Fail値を自由調整 → 破線（閾値ライン）が即時移動</li>
+  <li><strong>状態変化を自動ログ記録</strong>（タイムスタンプ＋パラメータ＋理由）</li>
+  <li><strong>視覚フィードバック</strong>：SAFE（緑）→ WARNING（黄）→ FAIL_CLOSED（赤点滅）</li>
+  <li><strong>オフライン・ブラウザ単体</strong>で動作（専用機不要）</li>
+  <li><strong>教育・シミュレーション・術中第二意見</strong>用途に最適</li>
+</ul>
 
-を**リアルタイム統合**し、**R ≥ 閾値**で自動Fail-Closedを発動します。
+<h2>臨床基準（実データ反映）</h2>
+<table>
+  <thead>
+    <tr><th>パラメータ</th><th>正常範囲（参考）</th><th>警告域</th><th>Fail域（吻合不良高確率）</th><th>出典</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Mean Graft Flow (MGF)</td><td>≥ 30–40 mL/min (LIMA)</td><td>≤ 25 mL/min</td><td>≤ 20 mL/min</td><td>Medistim VeriQ, AHA/ESC</td></tr>
+    <tr><td>Pulsatility Index (PI)</td><td>≤ 3.0（理想）</td><td>≥ 3.5–5.0</td><td>≥ 5.0</td><td>TTFMガイドライン</td></tr>
+    <tr><td>Diastolic Filling %</td><td>≥ 50–70%</td><td>< 50%</td><td>< 40%</td><td>臨床研究（J Thorac Cardiovasc Surg）</td></tr>
+    <tr><td>R（統合リスク）</td><td>< 0.8</td><td>0.8–1.0</td><td>≥ 1.0（動的τ考慮）</td><td>NRA-IDE独自基準</td></tr>
+  </tbody>
+</table>
 
-### 主な特徴（2026年3月時点）
+<h2>使用方法</h2>
+<ol>
+  <li>ファイルを保存 → ブラウザで開く（Chrome/Edge推奨）</li>
+  <li><strong>パラメータスライダー</strong>で術中状況を再現（例：吻合直後のMGF低下、PI上昇）</li>
+  <li><strong>閾値スライダー</strong>を動かすと、波形上の<strong>破線（MGF下限・PI上限）</strong>がリアルタイムで移動</li>
+  <li>状態が変化すると<strong>経過ログ</strong>に自動記録（タイムスタンプ付き）</li>
+  <li>PI ≥ 閾値 または MGF ≤ 閾値 または R ≥ Fail閾値 → <strong>FAIL_CLOSED</strong>（赤点滅＋ログ）</li>
+</ol>
 
-- **動的TTFM波形アニメーション**（拡張期優勢を再現）
-- **閾値スライダー**でPI上限・MGF下限・R Fail値を自由調整 → 破線（閾値ライン）が即時移動
-- **状態変化を自動ログ記録**（タイムスタンプ＋パラメータ＋理由）
-- **視覚フィードバック**：SAFE（緑）→ WARNING（黄）→ FAIL_CLOSED（赤点滅）
-- **オフライン・ブラウザ単体**で動作（専用機不要）
-- **教育・シミュレーション・術中第二意見**用途に最適
+<h2>画面構成</h2>
+<ul>
+  <li><strong>左側</strong>
+    <ul>
+      <li>上：血管断面アニメーション（壁張力で膨張、血流粒子）</li>
+      <li>中：TTFM動的波形（拡張期優勢）＋破線（調整可能な閾値ライン）</li>
+      <li>下：ライブ数値（MGF / PI / DF% / 状態）</li>
+    </ul>
+  </li>
+  <li><strong>右側</strong>
+    <ul>
+      <li>パラメータ調整スライダー（P, T, Flow, Adh, Shear, Tension）</li>
+      <li>閾値調整スライダー（PI上限, MGF下限, R Fail）</li>
+    </ul>
+  </li>
+  <li><strong>下部</strong>
+    <ul>
+      <li>経過ログエリア（状態変化を自動記録・スクロール）</li>
+    </ul>
+  </li>
+</ul>
 
-## 臨床基準（実データ反映）
+<div class="note">
+<strong>注意事項（医療安全）</strong><br>
+<strong>研究・教育・シミュレーション専用</strong>です。<strong>実臨床での単独判断には使用しないでください</strong>。<br>
+実際のTTFM装置（Medistim VeriQなど）の<strong>補助ツール</strong>としてのみ活用。<br>
+Fail-Closedは「シミュレーション上の停止」です。実際の手術では<strong>臨床判断優先</strong>。<br>
+ログはブラウザ閉じると消えます（本番運用時はローカル保存機能追加推奨）。
+</div>
 
-| パラメータ          | 正常範囲（参考）          | 警告域                  | Fail域（吻合不良高確率）      | 出典                              |
-|---------------------|---------------------------|-------------------------|--------------------------------|-----------------------------------|
-| Mean Graft Flow (MGF) | ≥ 30–40 mL/min (LIMA)    | ≤ 25 mL/min            | ≤ 20 mL/min                   | Medistim VeriQ, AHA/ESC           |
-| Pulsatility Index (PI) | ≤ 3.0（理想）            | ≥ 3.5–5.0              | ≥ 5.0                         | TTFMガイドライン                  |
-| Diastolic Filling %   | ≥ 50–70%                 | < 50%                  | < 40%                         | 臨床研究（J Thorac Cardiovasc Surg） |
-| R（統合リスク）       | < 0.8                    | 0.8–1.0                | ≥ 1.0（動的τ考慮）            | NRA-IDE独自基準                   |
+<h2>今後の拡張アイデア</h2>
+<ul>
+  <li>ログのCSVエクスポートボタン</li>
+  <li>LIMA / SVG / RITA 切替モード</li>
+  <li>実際の患者TTFM波形データインポート（CSV読み込み）</li>
+  <li>複数グラフト同時監視（タブ切り替え）</li>
+  <li>手術室タブレット最適化（タッチ対応）</li>
+</ul>
 
-## 使用方法
+<hr>
 
-1. ファイルを保存 → ブラウザで開く（Chrome/Edge推奨）
-2. **パラメータスライダー**で術中状況を再現（例：吻合直後のMGF低下、PI上昇）
-3. **閾値スライダー**を動かすと、波形上の**破線（MGF下限・PI上限）**がリアルタイムで移動
-4. 状態が変化すると**経過ログ**に自動記録（タイムスタンプ付き）
-5. PI ≥ 閾値 または MGF ≤ 閾値 または R ≥ Fail閾値 → **FAIL_CLOSED**（赤点滅＋ログ）
+<h2>ライセンス</h2>
+<p>MIT License（改変・商用利用可）<br>
+Powered by NRA-IDE Project © 2026 M-Tokuni</p>
 
-## 画面構成
+<p>質問・カスタマイズ希望（例：ログに画像キャプチャ機能追加など）はいつでもどうぞ！</p>
 
-- **左側**
-  - 上：血管断面アニメーション（壁張力で膨張、血流粒子）
-  - 中：TTFM動的波形（拡張期優勢）＋破線（調整可能な閾値ライン）
-  - 下：ライブ数値（MGF / PI / DF% / 状態）
-
-- **右側**
-  - パラメータ調整スライダー（P, T, Flow, Adh, Shear, Tension）
-  - 閾値調整スライダー（PI上限, MGF下限, R Fail）
-
-- **下部**
-  - 経過ログエリア（状態変化を自動記録・スクロール）
-
-## 注意事項（医療安全）
-
-- **研究・教育・シミュレーション専用**です。**実臨床での単独判断には使用しないでください**。
-- 実際のTTFM装置（Medistim VeriQなど）の**補助ツール**としてのみ活用。
-- Fail-Closedは「シミュレーション上の停止」です。実際の手術では**臨床判断優先**。
-- ログはブラウザ閉じると消えます（本番運用時はローカル保存機能追加推奨）。
-
-## 今後の拡張アイデア
-
-- ログのCSVエクスポートボタン
-- LIMA / SVG / RITA 切替モード
-- 実際の患者TTFM波形データインポート（CSV読み込み）
-- 複数グラフト同時監視（タブ切り替え）
-- 手術室タブレット最適化（タッチ対応）
-
-## ライセンス
-
-MIT License（改変・商用利用可）
-Powered by NRA-IDE Project © 2026 M-Tokuni
-
-質問・カスタマイズ希望（例：ログに画像キャプチャ機能追加など）はいつでもどうぞ！
+</body>
+</html>

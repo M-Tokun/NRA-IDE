@@ -76,7 +76,7 @@ Markdownの構造において、浅い階層（`#`）よりも深い階層（`##
 
 ```bash
 
-python nra_crystallizer.py input_document.md
+python nra_crystallizer_JP_v3_1.py input_document.md
 
 
 
@@ -92,7 +92,7 @@ python nra_crystallizer.py input_document.md
 
 
 
-* `input_document_Crystallized_YYYY-MMDD-HHMM.md`
+* `input_document_要約_YYYY-MMDD-HHMM.md`
 
 
 
@@ -110,15 +110,15 @@ python nra_crystallizer.py input_document.md
 
 
 
-コード内の定数 `BASE_THRESHOLD` を変更することで、結晶化の「純度」を調整できます。
+コード内の定数 `BASE_TAU` を変更することで、結晶化の「純度」を調整できます。
 
 
 
 ```python
 
-# nra_crystallizer.py : Line 42
+# nra_crystallizer_JP_v3_1.py : Line 18
 
-BASE_THRESHOLD = 0.65 
+BASE_TAU = 0.41
 
 
 
@@ -130,11 +130,11 @@ BASE_THRESHOLD = 0.65
 
 | --- | --- | --- |
 
-| **0.80** | **Strict (厳格)** | 水位が高い。核心とスパークのみを残す「超要約」。 |
+| **0.35** | **Strict (厳格)** | 水位が低い。核心とスパークのみを残す「超要約」。 |
 
-| **0.65** | **Balance (標準)** | **推奨**。文脈と核心のバランスが良い。 |
+| **0.41** | **Balance (標準)** | **推奨**。文脈と核心のバランスが良い。 |
 
-| **0.50** | **Loose (寛容)** | 水位が低い。雑談や補足も含めて広く拾う。 |
+| **0.50** | **Loose (寛容)** | 水位が高い。雑談や補足も含めて広く拾う。 |
 
 
 
@@ -173,6 +173,4 @@ BASE_THRESHOLD = 0.65
 **Copyright (c) 2026 M-Tokuni (NRA_Lab)**
 
 
-
-```
 

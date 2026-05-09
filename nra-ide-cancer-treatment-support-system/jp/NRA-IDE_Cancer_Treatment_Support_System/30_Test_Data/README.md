@@ -6,7 +6,7 @@
 
 # Date: 2026-02-01
 
-# Author: M-Tokuni & AI Architects
+# Author: M-Tokun & AI Architects
 
 # ═══════════════════════════════════════════════════════════════════════
 

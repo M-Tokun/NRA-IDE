@@ -278,7 +278,7 @@ def load_genesis(json_path: str = "regen_nra_document_structure.json") -> Genesi
 
 > JSONファイルを読み込み、`allowed_terms`と`axioms`を`GenesisBlock`オブジェクトに変換します。  
 
-> `json_path` — JSONファイルの場所。デフォルトは同じフォルダ。  
+> `json_path` — JSONファイルの場所。デフォルトパスは実行時のカレントディレクトリ基準です。別フォルダから呼び出す場合は、`regen_nra_document_structure.json` への明示パスを渡してください。  
 
 > ファイルが存在しないと例外が発生 → システムは安全停止（fail-closed）します。
 
@@ -830,7 +830,8 @@ def my_ai_function(prompt: str) -> str:
 
 
 
-# Step 2：パイプラインを構築（JSONは自動で読み込まれる）
+# Step 2：パイプラインを構築
+# カレントディレクトリがこのフォルダではない場合は、json_pathを明示してください。
 
 pipeline = build_default_pipeline(my_ai_function)
 
@@ -884,7 +885,7 @@ else:
 
 | 公理ルール | `axioms` | 新しいキー：説明のペアを追加する。 |
 
-| ガード感度 | `initialize.py` の `GuardConfig` | `warn_drop_ratio`、`fail_drop_ratio` |
+| ガード感度 | `regen_initialize_nra_system.py` の `GuardConfig` | `warn_drop_ratio`、`fail_drop_ratio` |
 
 
 
@@ -925,4 +926,3 @@ else:
 
 
 *README_JP.md — NRA-IDE v33 — 2026-02-15*
-

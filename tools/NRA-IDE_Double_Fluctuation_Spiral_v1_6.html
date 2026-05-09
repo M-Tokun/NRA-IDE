@@ -46,8 +46,8 @@ Date: 26-0222-2304 JST
             border-left: 3px solid var(--cyan);
             padding: 15px;
             border-radius: 0 4px 4px 0;
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
+            
+            
             font-size: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             pointer-events: none;
@@ -112,7 +112,7 @@ Date: 26-0222-2304 JST
         <div class="meter-container"><div id="buffer-meter" class="meter-fill"></div></div>
     </div>
 
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" aria-label="Simulation canvas" role="img"></canvas>
 
 <script>
     const canvas = document.getElementById('canvas');

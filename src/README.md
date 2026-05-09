@@ -130,21 +130,27 @@ Only **τ** and **R_op** may be adjusted. Adjustments based on semantics, perfor
 
 NRA-IDE/
 
-├── nra_document_structure_20260213_0135.py     # [Post-RNA] Document Structure Engine (JP)
+├── nra_document_structure_2026-02-13_0135.py   # [Post-RNA] Document Structure Engine (JP)
 
-├── nra_document_structure_EN_20260213_0135.py  # [Post-RNA] Document Structure Engine (EN)
+├── nra_document_structure_EN_2026-02-13_0135.py # [Post-RNA] Document Structure Engine (EN)
 
-├── nra_llm_pipeline_20260213_0135.py           # [B+C] LLM Pipeline (JP)
+├── nra_llm_pipeline_2026-02-13_0135.py         # [B+C] LLM Pipeline (JP)
 
-├── nra_llm_pipeline_EN_20260213_0135.py        # [B+C] LLM Pipeline (EN)
+├── nra_llm_pipeline_EN_2026-02-13_0135.py      # [B+C] LLM Pipeline (EN)
 
-├── nra_pre_rna_20260213_0135.py                # [A+B+C] Full Integrated Pipeline (JP)
+├── nra_pre_rna_2026-02-13_0135.py              # [A+B+C] Full Integrated Pipeline (JP)
 
-├── nra_pre_rna_EN_20260213_0135.py             # [A+B+C] Full Integrated Pipeline (EN)
+├── nra_pre_rna_EN_2026-02-13_0135.py           # [A+B+C] Full Integrated Pipeline (EN)
 
-├── README-JP.md                                # Japanese documentation
+├── README_JP.md                                # Japanese documentation
 
-└── README-EN.md                                # This document
+├── biodynamic_ide_engine_v2_2026-04-06_1947.py # BioDynamic IDE simulation engine
+
+├── structure_gate_bilingual_2026-04-17_2106.py # Bilingual structural gate demo
+
+├── structure_gate_survival_base_2026-04-18_2144.py # Survival-base structural gate demo
+
+└── README.md                                   # This document
 
 ```
 
@@ -188,15 +194,15 @@ pip install openai      # for OpenAI GPT
 
 # Full [A+B+C] integrated pipeline — no API key required
 
-python3 nra_pre_rna_EN_20260213_0135.py
+python3 nra_pre_rna_EN_2026-02-13_0135.py
 
 # [B+C] pipeline only
 
-python3 nra_llm_pipeline_EN_20260213_0135.py
+python3 nra_llm_pipeline_EN_2026-02-13_0135.py
 
 # [Post-RNA] document structure only
 
-python3 nra_document_structure_EN_20260213_0135.py
+python3 nra_document_structure_EN_2026-02-13_0135.py
 
 ```
 
@@ -224,7 +230,7 @@ This is the base engine used by both the LLM pipeline and the full pipeline.
 
 ```python
 
-from nra_document_structure_EN_20260213_0135 import (
+from nra_document_structure_EN_2026_02_13_0135 import (
 
     DocumentEngine, DomainType
 
@@ -320,13 +326,13 @@ Post-RNA validates output; CleanContext prevents contaminated history.
 
 ```python
 
-from nra_llm_pipeline_EN_20260213_0135 import (
+from nra_llm_pipeline_EN_2026_02_13_0135 import (
 
     LLMBridge, LLMProvider, NRALLMPipeline
 
 )
 
-from nra_document_structure_EN_20260213_0135 import DocumentEngine, DomainType
+from nra_document_structure_EN_2026_02_13_0135 import DocumentEngine, DomainType
 
 # Setup engine
 
@@ -408,11 +414,11 @@ The complete NRA-IDE safety chain.
 
 ```python
 
-from nra_pre_rna_EN_20260213_0135 import NRAFullPipeline
+from nra_pre_rna_EN_2026_02_13_0135 import NRAFullPipeline
 
-from nra_llm_pipeline_EN_20260213_0135 import LLMBridge, LLMProvider
+from nra_llm_pipeline_EN_2026_02_13_0135 import LLMBridge, LLMProvider
 
-from nra_document_structure_EN_20260213_0135 import DocumentEngine, DomainType
+from nra_document_structure_EN_2026_02_13_0135 import DocumentEngine, DomainType
 
 # Setup
 
@@ -588,6 +594,6 @@ Label your issue: `[Commercial]` / `[Question]` / `[Feedback]`
 
 ---
 
-**FILE: README-EN.md**  
+**FILE: README.md**  
 
 **DATE: 2026-02-13 01:35**

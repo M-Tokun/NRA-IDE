@@ -56,7 +56,7 @@
 
 
 
-## 3. 臨床安全確認 (Clinical Safety / Ritsukan Axiom)
+## 3. 臨床安全確認 (Clinical Safety / Nomological Ring Axioms)
 
 
 
