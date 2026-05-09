@@ -58,3 +58,9 @@ env/
 *.bak
 *.swp
 *~
+
+# Local development container settings
+.devcontainer/
+
+# npm runtime configuration
+.npmrc
