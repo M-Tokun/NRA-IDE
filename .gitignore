@@ -20,6 +20,10 @@ desktop.ini
 # Editors
 .vscode/
 .idea/
+.kilo/
+
+# VS Code workspace files (contain local paths)
+*.code-workspace
 
 # Distribution
 dist/
