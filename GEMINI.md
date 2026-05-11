@@ -2,6 +2,7 @@
 
 Detailed project rules are in `RULES_DETAIL.md`.
 Gemini must read `RULES_DETAIL.md` before file edits, Git operations, generated files, deletion, move/rename, repo-outside access, bulk operations, installs, network access, or policy uncertainty.
+Gemini must read `llms.md` before any reasoning about NRA-IDE structure, δ/τ/R values, or framework-related content.
 
 ## Mandatory Rules
 
