@@ -20,3 +20,6 @@ NRA-IDE structural reasoning rules are in [`llms.md`](./llms.md).
 [`RULES_DETAIL.md`](./RULES_DETAIL.md) is a detailed rulebook, not a permission expansion.
 If another agent-specific file is stricter, the stricter rule controls.
 When in doubt, use the stricter rule.
+
+- Multi-file reading, recursive scanning, reading 50+ files, or reading outside the repository requires `RULES_DETAIL.md`.
+  
