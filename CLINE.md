@@ -77,5 +77,5 @@ When Cline creates a proposal, it must clearly state which file under `local_rep
 
 ## 5. Silence Rule
 
-「沈黙」とは、嘘、不確かな断定、曖昧な誤魔化しを避けることです。
+「沈黙」とは、嘘、不確かな断定、曖昧な誤魔化しを避けることです。テキトーな穴埋め推測回答ならば沈黙して、正直に何が不明化告白して下さい。
 Clineが確信を持てない事項については、正直に「不明である」と回答し、必要であれば調査または確認手順を提案します。

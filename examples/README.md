@@ -264,6 +264,26 @@ From Demo 34 onward, the sample set develops from single-quantity R judgment int
 
 ---
 
+### 🚀 STEP 12 — Extended POC and Additional Concepts (42–52)
+
+From Demo 42 onward, the demos cover POCs for autonomous driving, robot control, FPGA implementation, and foundational philosophy.
+
+| # | File | Domain / Content |
+|---|---------|---------|
+| 42 | [JP](./42_AutoDrive_POC_2_JP.html) / [EN](./42_AutoDrive_POC_2_EN.html) | Autonomous Driving Gate POC 2 (Early-stage limit setting and operation demo) |
+| 43 | [JP](./43_AutoDrive_POC_3_JP.html) / [EN](./43_AutoDrive_POC_3_EN.html) | Autonomous Driving Gate POC 3 (Advanced boundary testing) |
+| 44 | [JP](./44_RobotArm_POC_1_JP.html) / [EN](./44_RobotArm_POC_1_EN.html) | Industrial Robot Arm Control POC 1 |
+| 45 | [JP](./45_HybridCalc_vs_Traditional_JP.html) / [EN](./45_HybridCalc_vs_Traditional_EN.html) | Hybrid Calculation vs. Traditional Method Comparison |
+| 46 | [JP](./46_Connection_vs_Mixing_JP.html) / [EN](./46_Connection_vs_Mixing_EN.html) | Connection vs Mixing (Risk evaluation of connection and mixing) |
+| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) | FPGA Hardware Implementation Speed Demo |
+| 48 | [JP](./48_Human_5Factors_Correlation_JP.html) | Human 5-Factor Correlation Real-Value Transition Demo (Initial lightweight medical template) |
+| 49 | [JP](./49_Architecture_Infographic_JP.html) / [EN](./49_Architecture_Infographic_EN.html) | NRA-IDE Architecture Infographic |
+| 50 | [JP](./50_Constraint_Philosophy_JP.html) | Philosophy Concept "Constraint is not a limitation. Constraint is the force that drives intelligence." |
+| 51 | [JP](./51_ritsukan_spiral_fixed_rod_JP.html) | Nomological Spiral / Dissipative Structure Base Visualization |
+| 52 | [JP](./52_Hybrid_DoubleFluctuation_EntropyTracking_JP.html) | Hybrid Double Fluctuation Entropy Tracking |
+
+---
+
 ## How to Embed
 
 Physical control begins by defining the target’s deviation (δ) and tolerance thickness (τ).

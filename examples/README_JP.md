@@ -298,6 +298,26 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 ---
 
+### 🚀 STEP 12 — 拡張POC・追加コンセプト（42〜52）
+
+42番以降は、自動運転やロボット制御、FPGA実装のPOC、および基盤哲学のデモ群です。
+
+| # | ファイル | ドメイン・内容 |
+|---|---------|---------|
+| 42 | [JP](./42_AutoDrive_POC_2_JP.html) / [EN](./42_AutoDrive_POC_2_EN.html) | 自動運転 Gate POC 2（初期段階の限界設定と動作デモ） |
+| 43 | [JP](./43_AutoDrive_POC_3_JP.html) / [EN](./43_AutoDrive_POC_3_EN.html) | 自動運転 Gate POC 3（発展版の境界テスト） |
+| 44 | [JP](./44_RobotArm_POC_1_JP.html) / [EN](./44_RobotArm_POC_1_EN.html) | 産業用ロボットアーム制御 POC 1 |
+| 45 | [JP](./45_HybridCalc_vs_Traditional_JP.html) / [EN](./45_HybridCalc_vs_Traditional_EN.html) | ハイブリッド計算 vs 従来手法の比較 |
+| 46 | [JP](./46_Connection_vs_Mixing_JP.html) / [EN](./46_Connection_vs_Mixing_EN.html) | Connection vs Mixing（接続と混合のリスク評価） |
+| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) | FPGA ハードウェア実装スピードデモ |
+| 48 | [JP](./48_Human_5Factors_Correlation_JP.html) | 人体5要素相関 実数値推移デモ（医療系テンプレートの初期軽量版） |
+| 49 | [JP](./49_Architecture_Infographic_JP.html) / [EN](./49_Architecture_Infographic_EN.html) | NRA-IDE アーキテクチャ・インフォグラフィック |
+| 50 | [JP](./50_Constraint_Philosophy_JP.html) | 哲学コンセプト「制約は制限ではない。制約こそが知性を駆動する力である。」 |
+| 51 | [JP](./51_ritsukan_spiral_fixed_rod_JP.html) | 律環スパイラル・散逸構造ベース可視化 |
+| 52 | [JP](./52_Hybrid_DoubleFluctuation_EntropyTracking_JP.html) | ハイブリッド二重ゆらぎ エントロピー追跡 |
+
+---
+
 ## 組み込み方法
 
 制御対象の「偏差（δ）」と「許容範囲（τ）」を定義するだけで物理制御が開始されます。

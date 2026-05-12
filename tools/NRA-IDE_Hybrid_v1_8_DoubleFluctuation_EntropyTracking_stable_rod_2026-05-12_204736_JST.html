@@ -1,16 +1,21 @@
+<!--
+FILE: NRA-IDE_Hybrid_v1_8_DoubleFluctuation_EntropyTracking_smooth_2026-05-12_203943_JST.html
+Updated: 2026-05-12_203943_JST
+Purpose: Smooth animation revision. Uses delta-time animation, high-DPI canvas scaling, visual interpolation, and throttled UI updates.
+-->
 <!-- 
 FILE: NRA-IDE_Hybrid_v1_8_DoubleFluctuation_EntropyTracking.html
-Title: NRA-IDE v1.8: Double Fluctuation + Entropy Dynamics (Hybrid)
+Title: NRA-IDE v1.8: Double Fluctuation + Entropy Dynamics (Hybrid / Stable Rod)
 Concept: v1.7（二重ゆらぎ+Rod同期）+ v1.5（エントロピー追跡）の統合
 Date: 26-0223-0115 JST
-整合性: 物理的周波数分離 + 非平衡定常追跡 + 膨張制御 + Rod接点維持
+整合性: 物理的周波数分離 + 非平衡定常追跡 + 膨張制御 + Rod接点維持 + Rod過剰点滅抑制
 -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NRA-IDE v1.8: Hybrid (Double Fluctuation + Entropy)</title>
+    <title>NRA-IDE v1.8: Hybrid Stable Rod (Double Fluctuation + Entropy)</title>
     <style>
         :root {
             --bg-color: #05070a;
@@ -38,6 +43,7 @@ Date: 26-0223-0115 JST
             z-index: -1; 
             width: 100vw; 
             height: 100vh;
+            transform: translateZ(0);
         }
 
         .panel {
@@ -180,9 +186,13 @@ Date: 26-0223-0115 JST
     <canvas id="canvas" aria-label="NRA-IDE simulation canvas" role="img"></canvas>
 
 <script>
+    // FILE: NRA-IDE_Hybrid_v1_8_DoubleFluctuation_EntropyTracking_stable_rod_2026-05-12_204736_JST.html
+    // UPDATED: 2026-05-12_204736_JST
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
+    const ctx = canvas.getContext('2d', { alpha: false });
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
 
     const CONFIG = {
         // 3D空間
@@ -191,18 +201,26 @@ Date: 26-0223-0115 JST
         camDist: 1200,
         spiralRotationSpeed: 0.005,
         turns: 4.5,
-        pointsPerTurn: 80,
+        pointsPerTurn: 92,
         heightTotal: 600,
-        
+
+        // Smooth rendering
+        maxDeltaTime: 1 / 30,
+        visualSmooth: 8.5,
+        correctionPulseDecay: 1.8,
+        correctionVisualCooldown: 5.5,
+        uiUpdateInterval: 120,
+
         // 二重ゆらぎ（物理的周波数）
         f1_amp: 8.0,
         f1_freq: 0.04,        // 呼吸的（低周波）
         f2_amp: 3.0,
-        f2_freq: 0.7,         // 熱的（高周波）
-        
+        f2_freq: 0.7,         // 熱的（散逸）
+
         // 動力学パラメータ
         threshold: 0.8,
-        margin: 0.05,
+        margin: 0.16,
+        inputRate: 0.026,     // Rodの過剰点滅を避けるため、構造蓄積を低速化
         baseEntropy: 0.5,
         entropyVariation: 0.15,
         entropyTimeScale: 0.05,
@@ -213,12 +231,40 @@ Date: 26-0223-0115 JST
 
     let time = 0;
     let spiralRotation = 0;
-    
+    let lastFrameMs = 0;
+    let lastUiMs = 0;
+
+    const UI = {
+        rodRad: document.getElementById('rod-rad'),
+        deltaVal: document.getElementById('delta-val'),
+        tauVal: document.getElementById('tau-val'),
+        rVal: document.getElementById('r-val'),
+        contactStat: document.getElementById('contact-stat'),
+        sigmaVal: document.getElementById('sigma-val'),
+        jVal: document.getElementById('j-val'),
+        congVal: document.getElementById('cong-val'),
+        phaseVal: document.getElementById('phase-val'),
+        entropyMeter: document.getElementById('entropy-meter'),
+        stateVal: document.getElementById('state-val'),
+        stateMeter: document.getElementById('state-meter'),
+        expVal: document.getElementById('exp-val'),
+        bufferVal: document.getElementById('buffer-val'),
+        bufferMeter: document.getElementById('buffer-meter'),
+        fluctRatio: document.getElementById('fluct-ratio'),
+        criticalState: document.getElementById('critical-state'),
+        overallStatus: document.getElementById('overall-status'),
+        viabilityMeter: document.getElementById('viability-meter')
+    };
+
     let state = {
         value: 0.5,
+        visualValue: 0.5,
         buffer: 0,
         tension: 0,
         expansion: 1.0,
+        visualExpansion: 1.0,
+        correctionPulse: 0,
+        correctionVisualCooldown: 0,
         // Entropy
         sigma: 0.5,
         J: 0.5,
@@ -233,14 +279,24 @@ Date: 26-0223-0115 JST
 
     function init() {
         resize();
-        window.addEventListener('resize', resize);
+        window.addEventListener('resize', resize, { passive: true });
+        requestAnimationFrame(draw);
     }
 
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+    }
+
+    function lerp(current, target, factor) {
+        return current + (target - current) * factor;
     }
 
     // 二重ゆらぎ（物理的分離）
@@ -253,60 +309,76 @@ Date: 26-0223-0115 JST
     }
 
     // エントロピー動態（v1.5から）
-    function updateEntropyDynamics() {
-        // 臨界イベント管理
+    function updateEntropyDynamics(dt) {
+        // 臨界イベント管理。フレーム依存ではなく秒基準にする。
         if (state.isCritical) {
-            state.criticalTimer--;
+            state.criticalTimer -= dt * 60;
             if (state.criticalTimer <= 0) {
                 state.isCritical = false;
             }
-        } else {
-            if (Math.random() < CONFIG.criticalEventProb) {
-                state.isCritical = true;
-                state.criticalTimer = CONFIG.criticalDuration;
-            }
+        } else if (Math.random() < CONFIG.criticalEventProb * dt * 60) {
+            state.isCritical = true;
+            state.criticalTimer = CONFIG.criticalDuration;
         }
 
         const slowTime = time * CONFIG.entropyTimeScale;
         const criticalBoost = state.isCritical ? 0.2 : 0;
-        state.sigma = CONFIG.baseEntropy + 
-                      Math.sin(slowTime) * CONFIG.entropyVariation + 
+        state.sigma = CONFIG.baseEntropy +
+                      Math.sin(slowTime) * CONFIG.entropyVariation +
                       criticalBoost;
-        
+
         const dissipationLag = state.isCritical ? 0.5 : 0.9;
-        state.J = CONFIG.baseEntropy + 
+        state.J = CONFIG.baseEntropy +
                   Math.sin(slowTime - 0.5) * CONFIG.entropyVariation * dissipationLag;
-        
+
         state.congestion = state.sigma - state.J;
         state.phase = (time * CONFIG.spiralRotationSpeed * 10) % (2 * Math.PI);
-        
+
         // ゆらぎ比
         state.fluctuationRatio = state.currentFluctuationAmp / (30 * 0.3);
     }
 
     // 状態更新（v1.7から）
-    function updateState() {
-        const input = 0.002;
-        state.value += input;
+    function updateState(dt) {
+        state.value += CONFIG.inputRate * dt;
         let isCorrecting = false;
 
+        if (state.correctionVisualCooldown > 0) {
+            state.correctionVisualCooldown = Math.max(0, state.correctionVisualCooldown - dt);
+        }
+
         if (state.value > CONFIG.threshold) {
-            const excess = state.value - CONFIG.threshold;
             const target = CONFIG.threshold - CONFIG.margin;
             state.buffer += (state.value - target);
             state.value = target;
             isCorrecting = true;
+
+            // 物理的補正と視覚パルスを分離する。
+            // Rodは固定境界なので常時点灯を維持し、警告残光だけを低頻度に出す。
+            if (state.correctionVisualCooldown <= 0) {
+                state.correctionPulse = 1;
+                state.correctionVisualCooldown = CONFIG.correctionVisualCooldown;
+            } else {
+                state.correctionPulse = Math.max(state.correctionPulse, 0.10);
+            }
         }
 
-        // 膨張制御
+        state.correctionPulse = Math.max(0, state.correctionPulse - dt * CONFIG.correctionPulseDecay);
+
+        // 膨張制御。物理状態は離散的に補正し、見た目だけ指数補間する。
         state.expansion = Math.min(state.value / CONFIG.threshold, 1.15);
-        
+
+        const smoothFactor = 1 - Math.exp(-dt * CONFIG.visualSmooth);
+        state.visualValue = lerp(state.visualValue, state.value, smoothFactor);
+        state.visualExpansion = lerp(state.visualExpansion, state.expansion, smoothFactor);
+
         return isCorrecting;
     }
 
     // 3D投影
     function project3D(x, y, z, applyRotation = false) {
-        let rx = x, rz = z;
+        let rx = x;
+        let rz = z;
         if (applyRotation) {
             const cosR = Math.cos(spiralRotation);
             const sinR = Math.sin(spiralRotation);
@@ -322,32 +394,37 @@ Date: 26-0223-0115 JST
         };
     }
 
-    function draw() {
+    function draw(nowMs) {
+        if (!lastFrameMs) lastFrameMs = nowMs;
+        const dt = Math.min((nowMs - lastFrameMs) / 1000, CONFIG.maxDeltaTime);
+        lastFrameMs = nowMs;
+
         ctx.fillStyle = '#05070a';
         ctx.fillRect(0, 0, width, height);
 
-        const isCorrecting = updateState();
-        updateEntropyDynamics();
-        
-        time += 0.016;
-        spiralRotation += CONFIG.spiralRotationSpeed;
+        const isCorrecting = updateState(dt);
+        updateEntropyDynamics(dt);
+
+        time += dt;
+        spiralRotation += CONFIG.spiralRotationSpeed * dt * 60;
 
         const totalPoints = Math.floor(CONFIG.turns * CONFIG.pointsPerTurn);
         const yOffset = CONFIG.heightTotal / 2;
         let segments = [];
 
-        const currentOuterR = CONFIG.baseOuterRadius * state.expansion;
+        const currentOuterR = CONFIG.baseOuterRadius * state.visualExpansion;
+        const pulse = state.correctionPulse;
 
         for (let i = 0; i < totalPoints - 1; i++) {
             const t1 = (i / CONFIG.pointsPerTurn) * Math.PI * 2;
             const t2 = ((i + 1) / CONFIG.pointsPerTurn) * Math.PI * 2;
-            
+
             const y1 = yOffset - (i / totalPoints) * CONFIG.heightTotal;
             const y2 = yOffset - ((i + 1) / totalPoints) * CONFIG.heightTotal;
 
             const f1 = getDoubleFluctuation(t1, time);
             const f2 = getDoubleFluctuation(t2, time);
-            
+
             const outerR1 = currentOuterR + f1;
             const outerR2 = currentOuterR + f2;
 
@@ -371,30 +448,37 @@ Date: 26-0223-0115 JST
             const avg_z = (p_in1.z + p_in2.z + p_out1.z + p_out2.z) / 4;
 
             segments.push({
-                pi1: p_in1, pi2: p_in2, po1: p_out1, po2: p_out2, z: avg_z
+                pi1: p_in1,
+                pi2: p_in2,
+                po1: p_out1,
+                po2: p_out2,
+                z: avg_z
             });
         }
 
         const drawSegments = (segs) => {
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             segs.forEach(seg => {
                 ctx.beginPath();
                 ctx.moveTo(seg.pi1.x, seg.pi1.y);
                 ctx.lineTo(seg.po1.x, seg.po1.y);
-                ctx.strokeStyle = `rgba(0, 255, 136, 0.15)`;
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.15)';
                 ctx.lineWidth = 1;
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.moveTo(seg.pi1.x, seg.pi1.y);
                 ctx.lineTo(seg.pi2.x, seg.pi2.y);
-                ctx.strokeStyle = `rgba(0, 242, 255, 0.8)`;
+                ctx.strokeStyle = 'rgba(0, 242, 255, 0.8)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.moveTo(seg.po1.x, seg.po1.y);
                 ctx.lineTo(seg.po2.x, seg.po2.y);
-                ctx.strokeStyle = isCorrecting ? `rgba(255, 51, 102, 0.9)` : `rgba(0, 255, 136, 0.8)`;
+                const outerAlpha = 0.78 + pulse * 0.08;
+                ctx.strokeStyle = `rgba(0, 255, 136, ${outerAlpha})`;
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
             });
@@ -405,99 +489,112 @@ Date: 26-0223-0115 JST
 
         drawSegments(backSegments);
 
-        // Rod（固定、外縁に同期）
+        // Rod（固定、外縁に同期）。視覚半径は補間済みを使う。
         const rodRadius = currentOuterR;
         const rodX = rodRadius;
         const rodZ = 0;
         const rodTop = project3D(rodX, -yOffset, rodZ, false);
         const rodBot = project3D(rodX, yOffset, rodZ, false);
 
+        ctx.lineCap = 'round';
+
+        // Rodは「固定境界」なので点滅させない。常時安定した接点として描く。
+        ctx.save();
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(255, 51, 102, 0.35)';
         ctx.beginPath();
         ctx.moveTo(rodTop.x, rodTop.y);
         ctx.lineTo(rodBot.x, rodBot.y);
-        ctx.strokeStyle = 'rgba(255, 51, 102, 1.0)';
-        ctx.lineWidth = 12;
+        ctx.strokeStyle = 'rgba(255, 51, 102, 0.88)';
+        ctx.lineWidth = 10;
         ctx.stroke();
-        
-        if (isCorrecting) {
-            ctx.shadowBlur = 30;
+        ctx.restore();
+
+        // 補正イベントは点滅ではなく、短い残光として一度だけ示す。
+        if (pulse > 0.01) {
+            ctx.save();
+            ctx.shadowBlur = 18 * pulse;
             ctx.shadowColor = '#ff3366';
+            ctx.globalAlpha = 0.10 + pulse * 0.22;
             ctx.beginPath();
             ctx.moveTo(rodTop.x, rodTop.y);
             ctx.lineTo(rodBot.x, rodBot.y);
+            ctx.strokeStyle = '#ffcc00';
+            ctx.lineWidth = 16 + 8 * pulse;
             ctx.stroke();
-            ctx.shadowBlur = 0;
+            ctx.restore();
         }
 
         drawSegments(frontSegments);
 
-        updateUI(isCorrecting, currentOuterR);
+        if (nowMs - lastUiMs >= CONFIG.uiUpdateInterval) {
+            updateUI(isCorrecting, rodRadius);
+            lastUiMs = nowMs;
+        }
+
         requestAnimationFrame(draw);
     }
 
     function updateUI(isCorrecting, rodRadius) {
         // Rod & Structural
-        document.getElementById('rod-rad').textContent = rodRadius.toFixed(1);
-        document.getElementById('delta-val').textContent = state.value.toFixed(3);
+        UI.rodRad.textContent = rodRadius.toFixed(1);
+        UI.deltaVal.textContent = state.value.toFixed(3);
         const tau = 0.1 + Math.abs(Math.sin(time)) * 0.05;
-        document.getElementById('tau-val').textContent = tau.toFixed(3);
-        document.getElementById('r-val').textContent = (state.value / tau).toFixed(3);
-        
+        UI.tauVal.textContent = tau.toFixed(3);
+        UI.rVal.textContent = (state.value / tau).toFixed(3);
+
         // Contact status
         if (isCorrecting) {
-            document.getElementById('contact-stat').textContent = 'CORRECTING...';
-            document.getElementById('contact-stat').className = 'value status-warn';
+            UI.contactStat.textContent = 'CORRECTING...';
+            UI.contactStat.className = 'value status-warn';
         } else {
-            document.getElementById('contact-stat').textContent = 'CONTACT ✓';
-            document.getElementById('contact-stat').className = 'value status-ok';
+            UI.contactStat.textContent = 'CONTACT ✓';
+            UI.contactStat.className = 'value status-ok';
         }
 
         // Entropy dynamics
-        document.getElementById('sigma-val').textContent = state.sigma.toFixed(3);
-        document.getElementById('j-val').textContent = state.J.toFixed(3);
-        document.getElementById('cong-val').textContent = state.congestion.toFixed(3);
-        document.getElementById('phase-val').textContent = state.phase.toFixed(2);
-        
+        UI.sigmaVal.textContent = state.sigma.toFixed(3);
+        UI.jVal.textContent = state.J.toFixed(3);
+        UI.congVal.textContent = state.congestion.toFixed(3);
+        UI.phaseVal.textContent = state.phase.toFixed(2);
+
         const entropyFill = ((state.sigma + 1) / 2) * 100;
-        document.getElementById('entropy-meter').style.width = Math.min(entropyFill, 100) + '%';
+        UI.entropyMeter.style.width = Math.min(entropyFill, 100) + '%';
 
         // State
-        document.getElementById('state-val').textContent = state.value.toFixed(3);
-        document.getElementById('state-meter').style.width = Math.min(state.value * 100, 100) + '%';
-        document.getElementById('exp-val').textContent = state.expansion.toFixed(3);
-        document.getElementById('buffer-val').textContent = state.buffer.toFixed(3);
-        document.getElementById('buffer-meter').style.width = Math.min(state.buffer * 5, 100) + '%';
+        UI.stateVal.textContent = state.value.toFixed(3);
+        UI.stateMeter.style.width = Math.min(state.value * 100, 100) + '%';
+        UI.expVal.textContent = state.expansion.toFixed(3);
+        UI.bufferVal.textContent = state.buffer.toFixed(3);
+        UI.bufferMeter.style.width = Math.min(state.buffer * 5, 100) + '%';
 
         // Critical status
-        document.getElementById('fluct-ratio').textContent = state.fluctuationRatio.toFixed(3);
-        
-        const criticalEl = document.getElementById('critical-state');
+        UI.fluctRatio.textContent = state.fluctuationRatio.toFixed(3);
+
         if (state.fluctuationRatio < 0.4) {
-            criticalEl.textContent = '非平衡定常';
-            criticalEl.className = 'value status-ok';
+            UI.criticalState.textContent = '非平衡定常';
+            UI.criticalState.className = 'value status-ok';
         } else if (state.fluctuationRatio < CONFIG.criticalThreshold) {
-            criticalEl.textContent = '揺動状態';
-            criticalEl.className = 'value status-warn';
+            UI.criticalState.textContent = '揺動状態';
+            UI.criticalState.className = 'value status-warn';
         } else {
-            criticalEl.textContent = '臨界接近';
-            criticalEl.className = 'value status-danger';
+            UI.criticalState.textContent = '臨界接近';
+            UI.criticalState.className = 'value status-danger';
         }
 
         // Overall
-        const overallEl = document.getElementById('overall-status');
         if (isCorrecting) {
-            overallEl.textContent = 'TENSION';
-            overallEl.style.color = 'var(--red)';
-            document.getElementById('viability-meter').style.background = 'var(--red)';
+            UI.overallStatus.textContent = 'TENSION';
+            UI.overallStatus.style.color = 'var(--red)';
+            UI.viabilityMeter.style.background = 'var(--red)';
         } else {
-            overallEl.textContent = 'VIABLE';
-            overallEl.style.color = 'var(--green)';
-            document.getElementById('viability-meter').style.background = 'var(--green)';
+            UI.overallStatus.textContent = 'VIABLE';
+            UI.overallStatus.style.color = 'var(--green)';
+            UI.viabilityMeter.style.background = 'var(--green)';
         }
     }
 
     init();
-    draw();
 </script>
 </body>
 </html>
