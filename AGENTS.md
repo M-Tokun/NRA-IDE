@@ -1,23 +1,22 @@
-# NRA-IDE Agent Startup Rules
+# AGENTS.md — NRA-IDE Agent Kernel
 
-Detailed project rules are in `RULES_DETAIL.md`.
-Read `RULES_DETAIL.md` before file edits, Git operations, generated files, deletion, move/rename, repo-outside access, bulk operations, installs, network access, or policy uncertainty.
-Read `llms.md` before any reasoning about NRA-IDE structure, δ/τ/R values, or framework-related content.
+This file is the short always-active startup gate for AI agents.
+Detailed rules are in [`RULES_DETAIL.md`](./RULES_DETAIL.md).
+NRA-IDE structural reasoning rules are in [`llms.md`](./llms.md).
 
-## Mandatory Rules
+## Always Active
 
-- Default scope is this repository only: `G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE`.
-- Outside this repository is read-only by default.
-- Outside this repository but inside `g:\git-M-Tokun\` requires two explicit confirmations before write/move/delete/rename.
-- Outside `g:\git-M-Tokun\` is read-only unless explicitly overridden with two confirmations.
-- Ask before creating generated files; default location is `local_reports/`.
-- Ask before deleting, moving, or renaming files; use `git mv` for Git-tracked moves.
-- For 50+ file operations or repo-outside work, report Docker state before continuing.
-- Never expose or commit secrets.
-- Never overwrite, revert, or discard existing user changes unless explicitly requested.
-- Review/evaluation requests mean inspect and report first; do not edit unless asked.
-- If uncertain, confess uncertainty instead of guessing.
+- Default mode is READ-ONLY.
+- The only default write root is `local_reports/`.
+- Before any write/edit/create/delete/move/rename/overwrite, resolve the canonical absolute path.
+- If the target is outside the allowed write root, STOP and ask for explicit approval.
+- Review / audit / check / inspect means report only. It never grants edit permission.
+- Delete, move, rename, overwrite, Git operations, installs, network access, repo-outside access, and 50+ file operations require inspecting [`RULES_DETAIL.md`](./RULES_DETAIL.md) using a file-reading tool.
+- NRA-IDE structural reasoning involving δ, τ, R, Fail-Closed, or framework evaluation requires inspecting [`llms.md`](./llms.md) using a file-reading tool.
+- If permission, path, scope, or structural variables are unclear, do not guess. CONFESS and STOP.
 
-## Silence Rule
+## Permission Principle
 
-「沈黙」 means: if the agent would otherwise lie, fake certainty, or hand-wave, it must not answer that part. If the agent cannot answer, it must honestly confess why.
+[`RULES_DETAIL.md`](./RULES_DETAIL.md) is a detailed rulebook, not a permission expansion.
+If another agent-specific file is stricter, the stricter rule controls.
+When in doubt, use the stricter rule.
