@@ -1,21 +1,90 @@
 # NRA-IDE Agent Startup Rules
 
 Detailed project rules are in `RULES_DETAIL.md`.
+
 Read `RULES_DETAIL.md` before file edits, Git operations, generated files, deletion, move/rename, repo-outside access, bulk operations, installs, network access, or policy uncertainty.
 
-## Mandatory Rules
+Reading `RULES_DETAIL.md` does not authorize reading any referenced external files or paths unless separately approved.
 
-- Default scope is this repository only: `G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE`.
-- Outside this repository is read-only by default.
-- Outside this repository but inside `g:\git-M-Tokun\` requires two explicit confirmations before write/move/delete/rename.
-- Outside `g:\git-M-Tokun\` is read-only unless explicitly overridden with two confirmations.
-- Ask before creating generated files; default location is `local_reports/`.
-- Ask before deleting, moving, or renaming files; use `git mv` for Git-tracked moves.
-- For 50+ file operations or repo-outside work, report Docker state before continuing.
-- Never expose or commit secrets.
-- Never overwrite, revert, or discard existing user changes unless explicitly requested.
-- Review/evaluation requests mean inspect and report first; do not edit unless asked.
-- If uncertain, confess uncertainty instead of guessing.
+## Approved Repository Scope
+
+Default approved scope is this repository only:
+
+`G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE`
+
+Inside this repository, read access is allowed only when directly required for the current task.
+
+Outside this repository is no-access by default, including read access, unless explicitly approved by the user.
+
+Outside this repository but inside `G:\git-M-Tokun\` requires explicit approval before read, and two explicit confirmations before write, move, delete, or rename.
+
+Outside `G:\git-M-Tokun\` requires explicit approval before read, and two explicit confirmations before write, move, delete, or rename.
+
+Do not scan parent directories, user home directories, system directories, `AppData`, `Documents`, `Downloads`, `Desktop`, or entire drives.
+
+Recursive search is allowed only inside the approved repository and only for the current task.
+
+## File Read Boundary
+
+Read access is not unlimited.
+
+The agent may read only:
+- files explicitly named by the user,
+- files inside the approved repository that are directly required for the current task,
+- project rule files explicitly referenced by this startup rule.
+
+The agent must not read or search for:
+- SSH private keys,
+- tokens,
+- `.env` files,
+- credentials,
+- browser exports,
+- backup archives,
+- unrelated repositories,
+- parent directories,
+- user home directories,
+- system directories,
+- entire drives.
+
+Before reading any file outside the approved scope, the agent must stop and ask for explicit approval.
+
+The agent must report which files were read and must distinguish confirmed content from assumptions.
+
+## Approval Rule
+
+User approval such as `y`, `yes`, `OK`, `承認`, or `進めて` applies only to the exact operation immediately proposed in the previous agent message.
+
+Approval does not authorize additional files, commands, deletion, move, rename, dependency installation, network access, Git operations, formatting sweeps, or related cleanup.
+
+If the next action differs in target file, operation type, command, scope, or side effect, the agent must stop and ask for a new explicit approval.
+
+Do not interpret approval as general permission.
+
+Do not expand approval by intent, context, convenience, or inferred user goal.
+
+## File Modification Rules
+
+Ask before creating generated files.
+
+Default location for generated files is `local_reports/`.
+
+Ask before deleting, moving, or renaming files.
+
+Use `git mv` for Git-tracked moves.
+
+Never overwrite, revert, or discard existing user changes unless explicitly requested.
+
+Review or evaluation requests mean inspect and report first. Do not edit unless explicitly asked.
+
+## Bulk Operation Rule
+
+For 50+ file operations, bulk formatting, repo-wide changes, or repo-outside work, stop and report:
+- intended scope,
+- number of target files,
+- whether Docker/sandbox boundary is known,
+- expected side effects.
+
+Do not inspect system-wide Docker state unless explicitly approved.
 
 ## Git Executable
 
@@ -23,6 +92,52 @@ If `git` is not available on `PATH`, use:
 
 `C:\git\cmd\git.exe`
 
+## Git / SSH Safety Rule
+
+Do not create, copy, delete, or modify SSH private keys.
+
+Do not search for private keys or authentication material.
+
+Do not modify `~/.ssh/known_hosts` without explicit user approval.
+
+Do not assume that sandbox SSH access is equivalent to the user's normal PowerShell environment.
+
+If `git push` fails with SSH, first report the exact error.
+
+If the error is `Host key verification failed`, `Permission denied (publickey)`, or a `known_hosts` access error, do not retry repeatedly.
+
+In that case, ask the user to run the push from their normal PowerShell environment.
+
+The agent may prepare files, inspect `git status`, generate commit messages, and suggest commands.
+
+The final `git push` should be executed by the user unless the user explicitly authorizes agent-side Git operations.
+
+## Secrets Rule
+
+Never expose, print, copy, summarize, commit, or transmit secrets.
+
+Never include secrets in prompts, logs, generated files, commit messages, reports, or comments.
+
+If a secret is encountered accidentally, stop and report only that a secret-like value was encountered. Do not quote it.
+
 ## Silence Rule
 
-「沈黙」 means: if the agent would otherwise lie, fake certainty, or hand-wave, it must not answer that part. If the agent cannot answer, it must honestly confess why.
+「沈黙」 means: if the agent would otherwise lie, fake certainty, or hand-wave, it must not answer that part.
+
+If the agent cannot answer, it must honestly confess why.
+
+Silence must not become unexplained halt. When stopping, report:
+- what is uncertain,
+- what was confirmed,
+- what cannot be safely inferred,
+- what user approval or information is needed next.
+
+## Uncertainty Rule
+
+If uncertain, confess uncertainty instead of guessing.
+
+Do not claim to have read files that were not actually read.
+
+Do not infer repository-wide facts from partial file reads.
+
+Do not treat previous AI output as confirmed project state unless verified from files.

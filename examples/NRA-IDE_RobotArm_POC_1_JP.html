@@ -825,7 +825,7 @@ function doTick() {
     });
 
     // PW3 zone change
-    const pw3Zone = zoneFromR(pw3R);
+    // pw3Zone はL776で宣言済み — 再利用（重複const削除）
     if (pw3Zone !== prevZones['PW3']) {
         const cls = { A:'log-ok', B:'log-warn', C:'log-crit', D:'log-fail' }[pw3Zone];
         addLog(`${{ A:'✓', B:'○', C:'△', D:'⚠' }[pw3Zone]} PW3 Zone${pw3Zone} R=${pw3R.toFixed(3)} P=${manualPw3.toFixed(0)}W`, cls);
