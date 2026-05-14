@@ -1,6 +1,0 @@
-# NRA-IDE Cline Rules
-
-Always read the following files using your file reading tools BEFORE starting any task or taking any action:
-
-1. [`AGENTS.md`](./AGENTS.md) - The always-active kernel rules.
-2. [`CLINE.md`](./CLINE.md) - Specific operation rules for Cline.

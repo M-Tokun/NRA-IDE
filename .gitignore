@@ -15,12 +15,16 @@ Thumbs.db
 desktop.ini
 
 # Claude Code local settings
+# Claude Code local settings
 .claude/
 
-# Editors
-.vscode/
-.idea/
-.kilo/
+# AI agent workspace instruction files (contain local paths)
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+CLINE.md
+.clinerules
+.cursorrules
 
 # VS Code workspace files (contain local paths)
 *.code-workspace
