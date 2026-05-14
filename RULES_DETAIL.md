@@ -1,3 +1,5 @@
+# NRA-IDE Rules Detail
+ 
 ## 0. Rule Priority
 
 1. Human life / safety, secret protection, and destructive-operation prevention
