@@ -1,5 +1,7 @@
 # NRA-IDE Rules Detail
  
+## 警告：file,Directoryの rmコマンド and mvコマンドは[人間承認必須！]。原則は1file、1フォルダ単位処理で複数の場合は複数処理についての確認
+
 ## 0. Rule Priority
 
 1. Human life / safety, secret protection, and destructive-operation prevention
@@ -23,4 +25,4 @@ RULES_DETAIL.md を、エージェントの書き込み権限を拡張する文�
 エージェント固有規則の方が厳しい場合は、厳しい規則を優先する。
 
 迷った場合は、より厳しい規則を採用する。
-権限、パス、作業範囲、意図が不明な場合は、停止して確認する。
+権限、パス、作業範囲、意図が不明な場合は、停止して確認・告白する。
