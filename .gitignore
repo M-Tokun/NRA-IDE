@@ -39,6 +39,7 @@ local_reports/
 node_modules/
 .npmrc
 *.lock
+!package-lock.json
 
 # Environment variables
 .env
@@ -62,9 +63,3 @@ env/
 *.bak
 *.swp
 *~
-
-# Local development container settings
-.devcontainer/
-
-# npm runtime configuration
-.npmrc
