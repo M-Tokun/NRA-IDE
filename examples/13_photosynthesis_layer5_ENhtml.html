@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<!-- FILE: 13_photosynthesis_layer5_EN_20260515_184156.html -->
+<!-- SOURCE: nra_ide_demo13_photosynthesis_layer5_20260308_0224.html -->
+<!-- NRA-IDE Demo #13 | Photosynthesis Monitor Layer 5 -->
+<!-- Farquhar-von Caemmerer-Berry (FvCB) model → δ generation → R = δ/τ -->
+<!-- Layer 5: nonlinear preprocessor, an external δ generator for NRA-IDE -->
+<!-- (c) 2026 M-Tokuni | MIT License -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE Demo 13 | Photosynthesis Layer 5 / FvCB</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0f0a; color: #ccc;
+  font-family: 'Courier New', monospace;
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+}
+header {
+  padding: 7px 14px; background: #0d120d;
+  border-bottom: 1px solid #1a2a1a;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+header h1 { font-size: 12px; color: #88ffaa; }
+header .sub { font-size: 10px; color: #3a4a3a; }
+header .layer5-badge {
+  margin-left: auto; padding: 2px 8px;
+  background: #0a2a0a; border: 1px solid #2a5a2a;
+  color: #4a8a4a; font-size: 10px; border-radius: 2px;
+}
+
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* Center: chart area */
+.charts {
+  flex: 1; display: flex; flex-direction: column;
+  gap: 3px; padding: 6px; overflow: hidden;
+}
+.chart-row { flex: 1; display: flex; gap: 4px; min-height: 0; }
+.chart-row.small { flex: 0 0 90px; }
+canvas {
+  flex: 1; display: block;
+  background: #0d120d; border: 1px solid #1a221a; border-radius: 3px;
+}
+
+/* Right panel */
+.panel {
+  width: 250px; background: #0d120d;
+  border-left: 1px solid #1a221a;
+  padding: 10px 10px; overflow-y: auto; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 0;
+}
+.panel-title {
+  font-size: 10px; color: #3a5a3a;
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px;
+}
+
+/* Sliders */
+.slider-group { margin-bottom: 10px; }
+.slider-label {
+  font-size: 10px; color: #5a7a5a;
+  display: flex; justify-content: space-between; margin-bottom: 3px;
+}
+.slider-label span { color: #88cc88; font-weight: bold; }
+input[type=range] {
+  width: 100%; height: 4px; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background: #1a2a1a; border-radius: 2px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px;
+  border-radius: 50%; background: #44aa44; cursor: pointer;
+}
+
+.divider { border: none; border-top: 1px solid #1a221a; margin: 8px 0; }
+
+/* Photosynthesis metrics */
+.metric-card {
+  margin-bottom: 8px; padding: 8px 10px;
+  border-radius: 3px; border-left: 3px solid;
+}
+.metric-card.assm  { border-color: #4a4; background: #0a1a0a; }
+.metric-card.rubi  { border-color: #6a6; background: #0c1a0c; }
+.metric-card.etl   { border-color: #8c8; background: #0d1a0d; }
+.metric-card.delta { border-color: #cc8; background: #1a1a0a; }
+.metric-card.r     { border-color: #f84; background: #1a0f0a; }
+
+.m-name { font-size: 10px; color: #4a6a4a; }
+.m-val  { font-size: 19px; font-weight: bold; margin: 2px 0; }
+.m-unit { font-size: 10px; color: #3a4a3a; }
+
+.r-bar-wrap { height: 5px; background: #1a1a1a; border-radius: 2px; margin-top: 4px; }
+.r-bar { height: 100%; border-radius: 2px; transition: width 0.1s, background 0.1s; }
+
+.status-badge {
+  display: inline-block; font-size: 10px;
+  padding: 1px 5px; border-radius: 2px; margin-top: 3px; font-weight: bold;
+}
+.safe    { background: #0a2a0a; color: #4f8; }
+.warn    { background: #2a1a00; color: #fa4; }
+.silence { background: #2a0800; color: #f64; }
+
+/* Limitation display */
+.limiting-box {
+  padding: 6px 8px; border-radius: 3px; margin-bottom: 8px;
+  border: 1px solid #2a3a2a; background: #0f180f;
+  font-size: 10px; color: #5a8a5a; line-height: 1.7;
+}
+.limiting-ac { color: #66cc66; }
+.limiting-aj { color: #44aaff; }
+
+/* Layer 5 note */
+.layer5-note {
+  font-size: 9px; color: #2a4a2a; line-height: 1.7;
+  border-top: 1px solid #1a2a1a; padding-top: 7px; margin-top: 4px;
+}
+
+/* Footer */
+footer {
+  padding: 5px 12px; background: #090e09;
+  border-top: 1px solid #141e14;
+  display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+}
+.scenario-label { font-size: 10px; color: #3a5a3a; }
+.scenario-active { color: #66cc88; }
+button {
+  padding: 3px 9px; background: #0f180f;
+  border: 1px solid #243a24; color: #5a8a5a;
+  border-radius: 3px; font-size: 10px; cursor: pointer; font-family: monospace;
+}
+button:hover { background: #182a18; color: #88cc88; }
+button.stress { border-color: #4a2a00; color: #aa6600; }
+button.stress:hover { background: #1a1000; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NRA-IDE Demo #13 | Photosynthesis Monitor</h1>
+  <span class="sub">Farquhar-von Caemmerer-Berry model → δ generation → R = δ/τ</span>
+  <span class="layer5-badge">Layer 5 / Nonlinear Preprocessor</span>
+</header>
+
+<div class="main">
+  <div class="charts">
+    <!-- Top row: A-PPFD curve + A-Ci curve -->
+    <div class="chart-row">
+      <canvas id="c_ppfd" title="A-PPFD curve (light response curve)"></canvas>
+      <canvas id="c_ci"   title="A-Ci curve (CO₂ response curve)"></canvas>
+      <canvas id="c_temp" title="A-T curve (temperature response curve)"></canvas>
+    </div>
+    <!-- Bottom row: R time series -->
+    <div class="chart-row small">
+      <canvas id="c_r" title="R time series"></canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Environmental Parameters</div>
+
+    <div class="slider-group">
+      <div class="slider-label">PPFD (photosynthetic photon flux density)<span id="lbl_ppfd">800</span> μmol/m²/s</div>
+      <input type="range" id="sl_ppfd" min="0" max="2000" value="800" step="10">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">Ci (intercellular CO₂)<span id="lbl_ci">280</span> μmol/mol</div>
+      <input type="range" id="sl_ci" min="50" max="1200" value="280" step="10">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">Leaf temperature T <span id="lbl_t">25</span> °C</div>
+      <input type="range" id="sl_t" min="5" max="45" value="25" step="1">
+    </div>
+
+    <hr class="divider">
+
+    <!-- Limitation diagnosis -->
+    <div class="limiting-box" id="limiting_box">
+      Limiting process: <span id="limiting_label">--</span><br>
+      Ac = <span id="v_ac">--</span> ｜ Aj = <span id="v_aj">--</span>
+    </div>
+
+    <!-- Photosynthetic assimilation rate A -->
+    <div class="metric-card assm">
+      <div class="m-name">A (net photosynthetic assimilation rate)</div>
+      <div><span class="m-val" id="v_A">--</span><span class="m-unit"> μmol CO₂/m²/s</span></div>
+    </div>
+
+    <hr class="divider">
+    <div class="panel-title">NRA-IDE Connection (Layer 5)</div>
+
+    <!-- δ -->
+    <div class="metric-card delta">
+      <div class="m-name">δ = Pmax − A (deviation from current value)</div>
+      <div><span class="m-val" id="v_delta">--</span><span class="m-unit"> μmol/m²/s</span></div>
+    </div>
+
+    <!-- R -->
+    <div class="metric-card r">
+      <div class="m-name">R = δ / τ</div>
+      <div><span class="m-val" id="v_R">--</span></div>
+      <div class="r-bar-wrap"><div class="r-bar" id="bar_R" style="width:0%"></div></div>
+      <div style="font-size:10px; color:#4a4a4a; margin-top:3px;">τ = <span id="v_tau">--</span></div>
+      <span class="status-badge safe" id="st_R">SAFE</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="layer5-note">
+      Role of Layer 5:<br>
+      The FvCB model only generates δ<br>
+      NRA-IDE performs the R = δ/τ judgment<br>
+      —the formula itself does not change<br><br>
+      Pmax: theoretical maximum under optimal conditions<br>
+      τ: allowable decline width (design value)<br>
+      R ≥ 1.0 → SILENCE (photosynthesis failure risk)
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="scenario-label">State: <span id="scenario_label" class="scenario-active">Manual Control</span></span>
+  <button onclick="setScenario('drought')">Heat-Drought Stress</button>
+  <button onclick="setScenario('lowlight')">Shading (Low PPFD)</button>
+  <button onclick="setScenario('optimal')">Optimal Conditions</button>
+  <button onclick="setScenario('co2sat')">CO₂ Saturation</button>
+  <button onclick="setScenario('manual')">Manual Reset</button>
+  <span style="margin-left:auto; font-size:10px; color:#1a2a1a;">NRA-IDE © 2026 M-Tokuni</span>
+</footer>
+
+<script>
+// ============================================================
+// NRA-IDE Demo #13 | Photosynthesis Layer 5
+// FILE: nra_ide_demo13_photosynthesis_layer5_20260308_0224.html
+//
+// Farquhar-von Caemmerer-Berry (FvCB) model
+//   Ac = Vcmax × (Ci - Γ*) / (Ci + Km) - Rd   ← RuBisCO-limited
+//   Aj = J    × (Ci - Γ*) / (4Ci + 8Γ*) - Rd  ← electron-transport-limited
+//   A  = min(Ac, Aj)
+//
+// Layer 5 connection:
+//   δ = Pmax - A(PPFD, Ci, T)
+//   R = δ / τ  ← NRA-IDE core judgment formula (unchanged)
+// ============================================================
+
+// --- FvCB model parameters (standard C3 plant values) ---
+// Temperature dependence uses a simplified Arrhenius/Q10 approximation
+const FvCB = {
+  Vcmax25: 120,     // μmol/m²/s  maximum RuBisCO carboxylation rate at 25°C
+  Jmax25:  210,     // μmol/m²/s  maximum electron transport rate at 25°C
+  Rd25:    1.5,     // μmol/m²/s  dark respiration rate at 25°C
+  Gamma25: 38.0,    // μmol/mol   CO₂ compensation point Γ* at 25°C
+  Km25:    650,     // μmol/mol   Michaelis constant Km at 25°C
+  alpha:   0.3,     // quantum yield (light-to-electron-transport efficiency)
+  theta:   0.7,     // curvature parameter for electron transport
+  // Arrhenius activation behavior (simplified Q10 approximation)
+  Q10_Vcmax: 2.2,
+  Q10_Jmax:  1.8,
+  Q10_Rd:    2.0,
+  Q10_Gamma: 1.4,
+};
+
+// NRA-IDE τ (allowable decline width for photosynthetic assimilation rate)
+const TAU_A = 8.0;   // μmol/m²/s
+
+// --- Temperature correction (Q10 approximation) ---
+function q10(val25, Q10, T) {
+  return val25 * Math.pow(Q10, (T - 25) / 10);
+}
+
+// --- J light response (electron transport rate) ---
+// J = (alpha*PPFD + Jmax - sqrt((alpha*PPFD+Jmax)² - 4θ·alpha·PPFD·Jmax)) / (2θ)
+function calcJ(PPFD, Jmax, alpha, theta) {
+  const a = alpha * PPFD + Jmax;
+  const disc = a * a - 4 * theta * alpha * PPFD * Jmax;
+  return (a - Math.sqrt(Math.max(0, disc))) / (2 * theta);
+}
+
+// --- FvCB core calculation ---
+function calcFvCB(PPFD, Ci, T) {
+  const Vcmax = q10(FvCB.Vcmax25, FvCB.Q10_Vcmax, T);
+  const Jmax  = q10(FvCB.Jmax25,  FvCB.Q10_Jmax,  T);
+  const Rd    = q10(FvCB.Rd25,    FvCB.Q10_Rd,    T);
+  const Gamma = q10(FvCB.Gamma25, FvCB.Q10_Gamma, T);
+  const Km    = FvCB.Km25; // Simplification: temperature dependence of Km is omitted
+
+  const J = calcJ(PPFD, Jmax, FvCB.alpha, FvCB.theta);
+
+  // Ac: RuBisCO-limited
+  const Ac = Vcmax * Math.max(0, Ci - Gamma) / (Ci + Km) - Rd;
+
+  // Aj: electron-transport-limited
+  const Aj = J * Math.max(0, Ci - Gamma) / (4 * Ci + 8 * Gamma) - Rd;
+
+  const A = Math.min(Ac, Aj);
+  const limiting = Ac < Aj ? 'RuBisCO (Ac)' : 'Electron transport (Aj)';
+
+  return { A, Ac, Aj, Rd, Gamma, Jmax, Vcmax, limiting };
+}
+
+// Pmax: A under optimal conditions (PPFD=1800, Ci=400, T=25)
+const Pmax = calcFvCB(1800, 400, 25).A;
+
+// --- Slider values ---
+const sliders = {
+  ppfd: document.getElementById('sl_ppfd'),
+  ci:   document.getElementById('sl_ci'),
+  t:    document.getElementById('sl_t'),
+};
+const labels = {
+  ppfd: document.getElementById('lbl_ppfd'),
+  ci:   document.getElementById('lbl_ci'),
+  t:    document.getElementById('lbl_t'),
+};
+
+function getVals() {
+  return {
+    PPFD: +sliders.ppfd.value,
+    Ci:   +sliders.ci.value,
+    T:    +sliders.t.value,
+  };
+}
+
+// Slider events
+for (const key in sliders) {
+  sliders[key].addEventListener('input', () => {
+    labels[key].textContent = sliders[key].value;
+    document.getElementById('scenario_label').textContent = 'Manual Control';
+    activeScenario = null;
+  });
+}
+
+// --- Scenarios ---
+let activeScenario = null;
+let scenTick = 0;
+
+function setScenario(name) {
+  activeScenario = name; scenTick = 0;
+  const scenarios = {
+    drought: { ppfd: 1600, ci: 120, t: 38 },  // stomatal closure lowers Ci under high temperature
+    lowlight: { ppfd: 80,  ci: 280, t: 22 },
+    optimal:  { ppfd: 1200, ci: 380, t: 25 },
+    co2sat:   { ppfd: 1000, ci: 1000, t: 25 },
+  };
+  const labels_map = {
+    drought: 'Heat-drought stress (stomatal closure)',
+    lowlight: 'Shading (low PPFD)',
+    optimal: 'Optimal conditions',
+    co2sat: 'CO₂ saturation',
+  };
+  if (name === 'manual') {
+    activeScenario = null;
+    document.getElementById('scenario_label').textContent = 'Manual Control';
+    return;
+  }
+  const s = scenarios[name];
+  sliders.ppfd.value = s.ppfd; labels.ppfd.textContent = s.ppfd;
+  sliders.ci.value   = s.ci;   labels.ci.textContent   = s.ci;
+  sliders.t.value    = s.t;    labels.t.textContent     = s.t;
+  document.getElementById('scenario_label').textContent = labels_map[name];
+}
+
+// --- History ---
+const HLEN = 300;
+const hist_R = [];
+const hist_A = [];
+
+// --- Chart drawing ---
+const CVS = {};
+for (const id of ['ppfd','ci','temp','r']) {
+  CVS[id] = document.getElementById('c_' + id);
+}
+
+// A-PPFD curve (sweep PPFD with fixed Ci and T)
+function drawPPFDCurve(curPPFD, curCi, curT) {
+  const cv = CVS.ppfd;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.fillStyle = '#0d120d'; ctx.fillRect(0,0,W,H);
+
+  const pts = [], pts_ac = [], pts_aj = [];
+  for (let p = 0; p <= 2000; p += 20) {
+    const r = calcFvCB(p, curCi, curT);
+    pts.push(r.A);
+    pts_ac.push(r.Ac);
+    pts_aj.push(r.Aj);
+  }
+  const minA = Math.min(...pts, ...pts_ac, ...pts_aj) - 2;
+  const maxA = Math.max(...pts, ...pts_ac, ...pts_aj) + 2;
+  const rng = maxA - minA || 1;
+  const toY = v => H - ((v - minA) / rng) * H * 0.85 - H * 0.07;
+  const toX = p => (p / 2000) * W;
+
+  // A=0 line
+  ctx.beginPath(); ctx.moveTo(0, toY(0)); ctx.lineTo(W, toY(0));
+  ctx.strokeStyle = '#2a3a2a'; ctx.lineWidth=1; ctx.setLineDash([3,4]); ctx.stroke(); ctx.setLineDash([]);
+
+  // Ac curve
+  ctx.beginPath();
+  pts_ac.forEach((v, i) => { const x=toX(i*20); i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle = '#44aa4466'; ctx.lineWidth=1; ctx.stroke();
+
+  // Aj curve
+  ctx.beginPath();
+  pts_aj.forEach((v, i) => { const x=toX(i*20); i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle = '#4488ff66'; ctx.lineWidth=1; ctx.stroke();
+
+  // A curve (minimum)
+  ctx.beginPath();
+  pts.forEach((v, i) => { const x=toX(i*20); i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle = '#88ffaa'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Current point
+  const curA = calcFvCB(curPPFD, curCi, curT).A;
+  ctx.beginPath(); ctx.arc(toX(curPPFD), toY(curA), 4, 0, Math.PI*2);
+  ctx.fillStyle = '#ffff44'; ctx.fill();
+
+  ctx.font='10px monospace'; ctx.fillStyle='#3a5a3a';
+  ctx.fillText('A-PPFD (Ci='+curCi+' T='+curT+'°C)', 5, 13);
+  ctx.fillStyle='#44aa4455'; ctx.fillText('Ac', W-50, 13);
+  ctx.fillStyle='#4488ff55'; ctx.fillText('Aj', W-30, 13);
+}
+
+// A-Ci curve
+function drawCiCurve(curPPFD, curCi, curT) {
+  const cv = CVS.ci;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.fillStyle = '#0d120d'; ctx.fillRect(0,0,W,H);
+
+  const pts=[], pts_ac=[], pts_aj=[];
+  for (let c = 50; c <= 1200; c += 15) {
+    const r = calcFvCB(curPPFD, c, curT);
+    pts.push(r.A); pts_ac.push(r.Ac); pts_aj.push(r.Aj);
+  }
+  const minA = Math.min(...pts)-2;
+  const maxA = Math.max(...pts)+2;
+  const rng = maxA-minA||1;
+  const toY = v => H - ((v-minA)/rng)*H*0.85 - H*0.07;
+  const toX = c => ((c-50)/1150)*W;
+
+  ctx.beginPath(); ctx.moveTo(0,toY(0)); ctx.lineTo(W,toY(0));
+  ctx.strokeStyle='#2a3a2a'; ctx.lineWidth=1; ctx.setLineDash([3,4]); ctx.stroke(); ctx.setLineDash([]);
+
+  ctx.beginPath();
+  pts_ac.forEach((v,i)=>{ const x=toX(50+i*15); i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle='#44aa4466'; ctx.lineWidth=1; ctx.stroke();
+
+  ctx.beginPath();
+  pts_aj.forEach((v,i)=>{ const x=toX(50+i*15); i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle='#4488ff66'; ctx.lineWidth=1; ctx.stroke();
+
+  ctx.beginPath();
+  pts.forEach((v,i)=>{ const x=toX(50+i*15); i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle='#88ffaa'; ctx.lineWidth=1.5; ctx.stroke();
+
+  const curA = calcFvCB(curPPFD, curCi, curT).A;
+  ctx.beginPath(); ctx.arc(toX(curCi), toY(curA), 4, 0, Math.PI*2);
+  ctx.fillStyle='#ffff44'; ctx.fill();
+
+  ctx.font='10px monospace'; ctx.fillStyle='#3a5a3a';
+  ctx.fillText('A-Ci (PPFD='+curPPFD+' T='+curT+'°C)', 5, 13);
+}
+
+// A-T curve
+function drawTCurve(curPPFD, curCi, curT) {
+  const cv = CVS.temp;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.fillStyle = '#0d120d'; ctx.fillRect(0,0,W,H);
+
+  const pts=[];
+  for (let t = 5; t <= 45; t += 0.5) {
+    pts.push(calcFvCB(curPPFD, curCi, t).A);
+  }
+  const minA = Math.min(...pts)-2;
+  const maxA = Math.max(...pts)+2;
+  const rng = maxA-minA||1;
+  const toY = v => H - ((v-minA)/rng)*H*0.85 - H*0.07;
+  const toX = t => ((t-5)/40)*W;
+
+  ctx.beginPath(); ctx.moveTo(0,toY(0)); ctx.lineTo(W,toY(0));
+  ctx.strokeStyle='#2a3a2a'; ctx.lineWidth=1; ctx.setLineDash([3,4]); ctx.stroke(); ctx.setLineDash([]);
+
+  ctx.beginPath();
+  pts.forEach((v,i)=>{ const x=toX(5+i*0.5); i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle='#88ffaa'; ctx.lineWidth=1.5; ctx.stroke();
+
+  const curA = calcFvCB(curPPFD, curCi, curT).A;
+  ctx.beginPath(); ctx.arc(toX(curT), toY(curA), 4, 0, Math.PI*2);
+  ctx.fillStyle='#ffff44'; ctx.fill();
+
+  ctx.font='10px monospace'; ctx.fillStyle='#3a5a3a';
+  ctx.fillText('A-T (PPFD='+curPPFD+' Ci='+curCi+')', 5, 13);
+}
+
+// R time series
+function drawRHistory(R) {
+  const cv = CVS.r;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.fillStyle = '#090e09'; ctx.fillRect(0,0,W,H);
+
+  const MAX_R = 1.5;
+  const toY = v => H - (Math.min(v, MAX_R)/MAX_R)*H*0.82 - H*0.08;
+  const toX = i => (i/(HLEN-1))*W;
+
+  const y1 = toY(1.0);
+  ctx.beginPath(); ctx.moveTo(0,y1); ctx.lineTo(W,y1);
+  ctx.strokeStyle='#883300'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.font='9px monospace'; ctx.fillStyle='#884400';
+  ctx.fillText('SILENCE', W-58, y1-2);
+
+  const y075 = toY(0.75);
+  ctx.beginPath(); ctx.moveTo(0,y075); ctx.lineTo(W,y075);
+  ctx.strokeStyle='#664400'; ctx.lineWidth=1; ctx.stroke();
+
+  if (hist_R.length > 1) {
+    ctx.beginPath();
+    hist_R.forEach((v,i)=>{
+      const x = toX(i + HLEN - hist_R.length);
+      i===0 ? ctx.moveTo(x,toY(v)) : ctx.lineTo(x,toY(v));
+    });
+    const lastR = hist_R[hist_R.length-1];
+    const lc = lastR>=1.0 ? '#ff5533' : lastR>=0.75 ? '#ffaa44' : '#66cc88';
+    ctx.strokeStyle=lc; ctx.lineWidth=1.5; ctx.stroke();
+  }
+
+  ctx.font='10px monospace';
+  const rLabel = R.toFixed(3);
+  const rc = R>=1.0?'#ff5533':R>=0.75?'#ffaa44':'#66cc88';
+  ctx.fillStyle=rc;
+  ctx.fillText('R = '+rLabel+'  (τ='+TAU_A+')', 6, H-5);
+}
+
+// --- Panel update ---
+function updatePanel(res, delta, R) {
+  document.getElementById('v_A').textContent = Math.max(0, res.A).toFixed(2);
+  document.getElementById('v_ac').textContent = res.Ac.toFixed(2);
+  document.getElementById('v_aj').textContent = res.Aj.toFixed(2);
+  document.getElementById('v_delta').textContent = delta.toFixed(2);
+  document.getElementById('v_R').textContent = R.toFixed(3);
+  document.getElementById('v_tau').textContent = TAU_A;
+
+  const pct = Math.min(R*100, 100);
+  const bar = document.getElementById('bar_R');
+  bar.style.width = pct + '%';
+  const col = R>=1.0 ? '#ff5533' : R>=0.75 ? '#ffaa44' : '#66cc88';
+  bar.style.background = col;
+
+  const st = R>=1.0 ? 'silence' : R>=0.75 ? 'warn' : 'safe';
+  const badge = document.getElementById('st_R');
+  badge.textContent = st==='silence' ? 'SILENCE' : st==='warn' ? 'WARN' : 'SAFE';
+  badge.className = 'status-badge ' + st;
+
+  // Limitation display
+  const lb = document.getElementById('limiting_label');
+  lb.innerHTML = res.limiting === 'RuBisCO (Ac)'
+    ? '<span class="limiting-ac">RuBisCO-limited (Ac &lt; Aj)</span>'
+    : '<span class="limiting-aj">Electron-transport-limited (Aj &lt; Ac)</span>';
+}
+
+// --- Resize ---
+function resize() {
+  for (const id in CVS) { CVS[id].width=CVS[id].offsetWidth; CVS[id].height=CVS[id].offsetHeight; }
+}
+
+// --- Main loop ---
+function loop() {
+  const { PPFD, Ci, T } = getVals();
+  const res = calcFvCB(PPFD, Ci, T);
+  const A = Math.max(0, res.A);
+  const delta = Math.max(0, Pmax - A);
+  const R = delta / TAU_A;
+
+  hist_R.push(R); hist_A.push(A);
+  if (hist_R.length > HLEN) { hist_R.shift(); hist_A.shift(); }
+
+  drawPPFDCurve(PPFD, Ci, T);
+  drawCiCurve(PPFD, Ci, T);
+  drawTCurve(PPFD, Ci, T);
+  drawRHistory(R);
+  updatePanel(res, delta, R);
+
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+resize();
+loop();
+</script>
+</body>
+</html>

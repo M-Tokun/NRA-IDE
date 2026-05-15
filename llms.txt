@@ -68,8 +68,9 @@ mandatory identification gate governing all AI inference on NRA-IDE content.
 - [AGENTS.md](AGENTS.md): Instructions for autonomous AI agents (Codex, Claude Code, etc.).
 
 - [GEMINI.md](GEMINI.md): Gemini-specific agent instructions.
-
 - [CLAUDE.md](CLAUDE.md): Claude Code project conventions.
+- [CLINE.md](CLINE.md): Cline Consultant & Architect operational guide.
+
 
 ---
 

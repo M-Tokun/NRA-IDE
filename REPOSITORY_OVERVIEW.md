@@ -12,7 +12,7 @@ Quick navigation map. Start here if you are new to this repository.
 4. [src/](./src/) — Core implementation and pipelines
 5. [nra-tcm-parser/](./nra-tcm-parser/) — Text crystallization and large-document processing
 6. [nra-ide-cancer-treatment-support-system/](./nra-ide-cancer-treatment-support-system/) — Medical domain application
-7. [examples/](./examples/) — Interactive HTML demos (41 simulations)
+7. [examples/](./examples/) — Interactive HTML demos (50+ simulations)
 
 ---
 
@@ -25,7 +25,7 @@ Quick navigation map. Start here if you are new to this repository.
 | [`cascade-failure-prevention/`](./cascade-failure-prevention/) | Cascade failure prevention gate modules |
 | [`config/`](./config/) | Configuration files |
 | [`docs/`](./docs/) | Supplementary documentation and developer guides |
-| [`examples/`](./examples/) | Interactive HTML demos (41 simulations) |
+| [`examples/`](./examples/) | Interactive HTML demos (50+ simulations) |
 | [`gate/`](./gate/) | Gating modules — EN and JP variants |
 | [`multi-physics-safety-gate/`](./multi-physics-safety-gate/) | Multi-physics safety gate implementation |
 | [`note/`](./note/) | Development notes and architecture explorations |
@@ -50,8 +50,10 @@ Quick navigation map. Start here if you are new to this repository.
 | [REPOSITORY_OVERVIEW.md](./REPOSITORY_OVERVIEW.md) | This file — repository navigation map |
 | [AGENTS.md](./AGENTS.md) | AI agent operational guide |
 | [CLAUDE.md](./CLAUDE.md) | Claude Code workspace constraints and naming conventions |
+| [CLINE.md](./CLINE.md) | Cline Consultant & Architect operational guide |
 | [GEMINI.md](./GEMINI.md) | Gemini workspace guide |
-| [llms.md](./llms.md) | LLM index and integration notes |
+| [llms.md](./llms.md) | LLM reasoning gate and structural axioms |
+| [llms.txt](./llms.txt) | Plain-text summary for LLM context injection |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guidelines |
 | [CITATION.cff](./CITATION.cff) | Citation metadata for formal attribution |
 | [LICENSE](./LICENSE) | MIT License |

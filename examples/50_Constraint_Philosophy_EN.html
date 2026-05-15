@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<!-- FILE: 50_Constraint_Philosophy_EN_20260515_194145.html -->
+<!-- Source: 50_Constraint_Philosophy_JP.html | English version generated at Tokyo time: 2026-05-15 19:41:45 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE: The Structure of Intelligence Created by Constraint</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* NRA_Infographic_v2_KEN_20260228.css */
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-panel: rgba(15,23,42,0.85);
+  --bg-glass: rgba(30,41,59,0.6);
+  --border-subtle: rgba(148,163,184,0.12);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-constraint: #06b6d4;
+  --accent-energy: #f59e0b;
+  --accent-safe: #10b981;
+  --accent-danger: #ef4444;
+  --accent-insight: #a855f7;
+  --accent-blue: #3b82f6;
+  --glow-cyan: 0 0 20px rgba(6,182,212,0.3);
+  --glow-emerald: 0 0 20px rgba(16,185,129,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI','Inter','Arial',sans-serif;background:var(--bg-deep);color:var(--text-primary);line-height:1.7;overflow-x:hidden;}
+.container{max-width:1100px;margin:0 auto;padding:0 24px;}
+section{padding:80px 0;}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(6,182,212,0.08) 0%,transparent 60%);}
+.hero-content{position:relative;z-index:1;max-width:800px;padding:24px;}
+.hero-tag{color:var(--accent-constraint);font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;font-weight:700;margin-bottom:16px;}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;background:linear-gradient(135deg,var(--accent-constraint),var(--accent-safe),var(--accent-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:16px;}
+.hero-sub{font-size:clamp(1rem,2.5vw,1.4rem);color:var(--text-secondary);font-weight:300;margin-bottom:32px;}
+.hero-meta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:0.75rem;font-family:monospace;color:var(--text-muted);}
+.hero-meta span{border:1px solid rgba(148,163,184,0.2);padding:4px 12px;border-radius:4px;}
+.scroll-hint{margin-top:48px;color:var(--accent-constraint);font-size:1.8rem;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+
+/* Section headers */
+.sec-header{margin-bottom:48px;}
+.sec-num{font-family:monospace;font-size:0.75rem;color:var(--accent-constraint);letter-spacing:0.2em;text-transform:uppercase;display:block;margin-bottom:8px;}
+.sec-title{font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:800;color:var(--text-primary);margin-bottom:12px;}
+.sec-desc{color:var(--text-secondary);max-width:700px;font-size:0.95rem;}
+
+/* Panels */
+.panel{background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:16px;padding:32px;backdrop-filter:blur(8px);}
+.panel-accent{border-left:4px solid;}
+.panel-cyan{border-left-color:var(--accent-constraint);}
+.panel-amber{border-left-color:var(--accent-energy);}
+.panel-emerald{border-left-color:var(--accent-safe);}
+.panel-red{border-left-color:var(--accent-danger);}
+.panel-purple{border-left-color:var(--accent-insight);}
+.panel-blue{border-left-color:var(--accent-blue);}
+
+/* Grid */
+.grid-2{display:grid;grid-template-columns:1fr;gap:32px;}
+@media(min-width:768px){.grid-2{grid-template-columns:1fr 1fr;}}
+.grid-3{display:grid;grid-template-columns:1fr;gap:24px;}
+@media(min-width:768px){.grid-3{grid-template-columns:1fr 1fr 1fr;}}
+
+/* Chart container */
+.chart-wrap{position:relative;width:100%;max-width:550px;height:320px;margin:0 auto;}
+@media(min-width:768px){.chart-wrap{height:380px;}}
+
+/* Paradox section */
+.paradox-card{text-align:center;padding:32px 24px;border-radius:12px;background:var(--bg-glass);border:1px solid var(--border-subtle);transition:transform 0.3s,box-shadow 0.3s;}
+.paradox-card:hover{transform:translateY(-4px);box-shadow:var(--glow-cyan);}
+.paradox-icon{font-size:2.5rem;margin-bottom:12px;}
+.paradox-label{font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+.paradox-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:8px;}
+.paradox-text{font-size:0.85rem;color:var(--text-secondary);}
+
+/* Formula */
+.formula-box{text-align:center;padding:40px;border-radius:16px;background:linear-gradient(135deg,rgba(6,182,212,0.05),rgba(16,185,129,0.05));border:1px solid rgba(6,182,212,0.15);}
+.formula-main{font-size:clamp(3rem,8vw,5rem);font-weight:900;font-style:italic;color:var(--accent-safe);margin:16px 0;letter-spacing:0.05em;}
+.formula-label{font-size:0.75rem;color:var(--text-muted);letter-spacing:0.2em;text-transform:uppercase;}
+.formula-vars{display:flex;justify-content:center;gap:40px;margin-top:24px;flex-wrap:wrap;}
+.formula-var{text-align:center;}
+.formula-var .sym{font-size:1.8rem;font-weight:700;font-style:italic;}
+.formula-var .def{font-size:0.8rem;color:var(--text-secondary);margin-top:4px;}
+
+/* Pipeline */
+.pipeline{display:flex;flex-direction:column;align-items:center;gap:0;max-width:480px;margin:0 auto;}
+.pipe-layer{width:100%;padding:24px;border-radius:12px;background:var(--bg-panel);border:1px solid var(--border-subtle);position:relative;}
+.pipe-layer .layer-num{font-family:monospace;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;}
+.pipe-layer h4{font-size:1.05rem;font-weight:700;margin-bottom:4px;}
+.pipe-layer p{font-size:0.8rem;color:var(--text-secondary);}
+.pipe-arrow{font-size:1.4rem;color:var(--text-muted);padding:8px 0;display:flex;align-items:center;gap:8px;font-family:monospace;font-size:0.7rem;}
+.pipe-arrow::before{content:'';flex:1;height:1px;background:var(--border-subtle);}
+.pipe-arrow::after{content:'';flex:1;height:1px;background:var(--border-subtle);}
+
+/* Diode */
+.diode-flow{display:flex;align-items:center;justify-content:center;gap:16px;padding:24px;flex-wrap:wrap;}
+.diode-node{padding:12px 24px;border-radius:8px;font-weight:700;font-size:1rem;}
+.diode-arrow{font-size:2rem;}
+.diode-block{position:relative;color:var(--accent-danger);opacity:0.5;}
+.diode-block .x-mark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2rem;font-weight:900;color:var(--accent-danger);}
+
+/* Distance principle */
+.principle-box{padding:32px;border-radius:16px;background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(59,130,246,0.06));border:1px solid rgba(168,85,247,0.15);text-align:center;}
+.principle-title{font-size:1.4rem;font-weight:800;color:var(--accent-insight);margin-bottom:12px;}
+.principle-text{color:var(--text-secondary);font-size:0.95rem;max-width:600px;margin:0 auto;}
+.principle-eq{font-family:monospace;font-size:1.1rem;color:var(--accent-energy);margin-top:16px;padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;display:inline-block;}
+
+/* Impossibility */
+.impossibility{text-align:center;padding:48px 32px;border-radius:16px;background:linear-gradient(135deg,rgba(239,68,68,0.04),rgba(245,158,11,0.04));border:1px solid rgba(239,68,68,0.12);}
+.impossibility h3{font-size:1.8rem;font-weight:900;margin-bottom:16px;}
+.impossibility .kanji{font-size:4rem;font-weight:900;color:var(--accent-energy);text-shadow:0 0 30px rgba(245,158,11,0.3);margin:24px 0;}
+
+/* Footer */
+.footer-wrap{text-align:center;padding:64px 24px;border-top:1px solid var(--border-subtle);}
+.footer-conclusion{max-width:700px;margin:0 auto;padding:32px;border-radius:16px;background:var(--bg-glass);border:1px solid var(--border-subtle);}
+.footer-conclusion h3{font-size:1.4rem;font-weight:800;margin-bottom:12px;}
+.footer-conclusion p{color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;}
+.footer-credit{font-family:monospace;font-size:0.7rem;color:var(--text-muted);}
+
+/* Utilities */
+.tc-cyan{color:var(--accent-constraint);}
+.tc-amber{color:var(--accent-energy);}
+.tc-safe{color:var(--accent-safe);}
+.tc-danger{color:var(--accent-danger);}
+.tc-purple{color:var(--accent-insight);}
+.tc-blue{color:var(--accent-blue);}
+.fw-700{font-weight:700;}
+.mt-16{margin-top:16px;}
+.mt-24{margin-top:24px;}
+.mt-32{margin-top:32px;}
+.mb-8{margin-bottom:8px;}
+.mb-16{margin-bottom:16px;}
+.text-sm{font-size:0.85rem;}
+.text-xs{font-size:0.75rem;}
+.text-center{text-align:center;}
+strong{color:var(--text-primary);}
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+<div class="hero-content">
+  <div class="hero-tag">Constraint-Driven Intelligence Architecture</div>
+  <h1>Nomological Ring Axioms NRA-IDE</h1>
+  <p class="hero-sub">Constraint is not mere restriction. Constraint is the driving force that makes intelligence work.</p>
+  <div class="hero-meta">
+    <span>Auth: M-Tokuni</span>
+    <span>Perspective: KEN / RCA-IDE</span>
+    <span>v2.0 — Restructured</span>
+  </div>
+  <div class="scroll-hint">↓</div>
+</div>
+</header>
+
+<main class="container">
+
+<!-- ===== SEC 1: The Paradox of Constraint ===== -->
+<section id="paradox">
+  <div class="sec-header">
+    <span class="sec-num">Section 01 — The Paradox</span>
+    <h2 class="sec-title">The Paradox of Constraint: Why “Restriction” Becomes Power</h2>
+    <p class="sec-desc">
+      Conventional AI design has treated constraints as obstacles to be removed. NRA overturns this premise at the root.
+      A constraint is not a handicap. It is the <strong>driving force</strong> that gives a system direction and energy.
+    </p>
+  </div>
+
+  <div class="grid-3">
+    <div class="paradox-card">
+      <div class="paradox-icon">🔗</div>
+      <div class="paradox-label">Conventional View</div>
+      <div class="paradox-title tc-danger">Constraint = Obstacle</div>
+      <p class="paradox-text">Maximizing freedom and removing constraints have been treated as keys to better performance. The result is a sandpile-like critical state.</p>
+    </div>
+    <div class="paradox-card" style="border-color:var(--accent-constraint);">
+      <div class="paradox-icon">⚡</div>
+      <div class="paradox-label">NRA Insight</div>
+      <div class="paradox-title tc-cyan">Constraint = Driving Force</div>
+      <p class="paradox-text">Constraints generate energy and tension. Just as a river cannot flow without banks, intelligence cannot function without boundaries.</p>
+    </div>
+    <div class="paradox-card">
+      <div class="paradox-icon">🎯</div>
+      <div class="paradox-label">Outcome</div>
+      <div class="paradox-title tc-safe">Constraint = Stable Structure</div>
+      <p class="paradox-text">By fixing invariant causal units (δ), a viable solution space forms autonomously.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SEC 2: Dual Structure of Collapse ===== -->
+<section id="collapse">
+  <div class="sec-header">
+    <span class="sec-num">Section 02 — Dual Collapse</span>
+    <h2 class="sec-title">The Double Death Caused by Optimization</h2>
+    <p class="sec-desc">
+      The more a system chases a center, or an “optimal answer,” the more fragile it becomes. This is the mechanism of critical collapse shown by the sandpile model.
+    </p>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-wrap">
+      <canvas id="collapseChart"></canvas>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:20px;">
+      <div class="panel panel-accent panel-amber">
+        <h4 class="tc-amber fw-700 mb-8">Linear Decay</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">
+          Averaging over probability distributions strips away creativity that appears as an outlier.
+          Outputs become homogenized, and the AI becomes unable to generate anything beyond harmless, generic responses.
+          <strong>The quiet death of diversity.</strong>
+        </p>
+      </div>
+      <div class="panel panel-accent panel-red">
+        <h4 class="tc-danger fw-700 mb-8">Nonlinear Collapse</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">
+          A catastrophe at the moment the critical point is crossed. Logical consistency collapses in a chain reaction,
+          and hallucinations and incoherent outputs cascade like an avalanche.
+          <strong>There is no grace period after falling off the cliff.</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-32">
+    <div class="chart-wrap">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SEC 3: R = δ/τ ===== -->
+<section id="formula">
+  <div class="sec-header">
+    <span class="sec-num">Section 03 — Structural Stability</span>
+    <h2 class="sec-title">Structural Stability R</h2>
+    <p class="sec-desc">
+      NRA does not search for an “optimal answer.” Instead, it defines viable boundaries and measures structural stability inside them.
+    </p>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Structural Stability Formula</div>
+    <div class="formula-main">R = δ / τ</div>
+    <div class="formula-vars">
+      <div class="formula-var">
+        <div class="sym tc-safe">δ</div>
+        <div class="def">Invariant causal unit<br>(constraints / boundary conditions)</div>
+      </div>
+      <div class="formula-var">
+        <div class="sym tc-blue">τ</div>
+        <div class="def">Thickness of information<br>(noise / uncertainty)</div>
+      </div>
+      <div class="formula-var">
+        <div class="sym tc-cyan">R</div>
+        <div class="def">Structural stability<br>(viability indicator)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2 mt-32">
+    <div class="chart-wrap" style="height:260px;">
+      <canvas id="gaugeChart"></canvas>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:16px;">
+      <div class="panel panel-accent panel-emerald">
+        <h4 class="tc-safe fw-700 mb-8">R ≥ 1.0 — Stable Operation</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">Constraints exceed noise. Normal operation inside the viability kernel.</p>
+      </div>
+      <div class="panel panel-accent panel-amber">
+        <h4 class="tc-amber fw-700 mb-8">0.5 ≤ R < 1.0 — Warning Zone</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">Constraint erosion is underway. A drop in output reliability is detected.</p>
+      </div>
+      <div class="panel panel-accent panel-red">
+        <h4 class="tc-danger fw-700 mb-8">R &lt; 0.5 — Fail-Closed Triggered</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">Consistency can no longer be maintained. Silence is chosen over false output.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SEC 4: Distance Is Not a Determining Factor ===== -->
+<section id="distance-principle">
+  <div class="sec-header">
+    <span class="sec-num">Section 04 — Fundamental Principle</span>
+    <h2 class="sec-title">Distance Is Not a Determining Factor</h2>
+    <p class="sec-desc">
+      A fundamental principle of NRA. It forbids Newtonian-style derivation of “distance → force,”
+      and treats constraint, energy, and tension as the driving factors. Distance is only a post-observation and a log.
+    </p>
+  </div>
+
+  <div class="principle-box">
+    <div class="principle-title">Causal Pipeline Order</div>
+    <p class="principle-text">
+      System behavior is determined by <strong class="tc-cyan">constraints</strong> and <strong class="tc-amber">energy / tension</strong>.
+      Distance is something <em>observed</em> as a result. It cannot serve as the basis for <em>deriving</em> force.
+      The moment this order is reversed, causal consistency collapses.
+    </p>
+    <div class="principle-eq">
+      Constraint → Energy/Tension → Behavior → Distance(log only)
+    </div>
+  </div>
+
+  <div class="grid-3 mt-32">
+    <div class="panel panel-accent panel-purple">
+      <h4 class="tc-purple fw-700 mb-8">❌ Forbidden Pattern</h4>
+      <p class="text-sm" style="color:var(--text-secondary);">
+        distance(A,B) → force → behavior<br>
+        Force is reverse-derived from distance. This is the fundamental defect of conventional similarity-based reasoning.
+      </p>
+    </div>
+    <div class="panel panel-accent panel-cyan">
+      <h4 class="tc-cyan fw-700 mb-8">✓ NRA Pattern</h4>
+      <p class="text-sm" style="color:var(--text-secondary);">
+        constraint(δ) → tension → behavior → observe(distance)<br>
+        Constraints generate tension and determine behavior. Distance is recorded only as a log.
+      </p>
+    </div>
+    <div class="panel panel-accent panel-blue">
+      <h4 class="tc-blue fw-700 mb-8">🔬 Verification Criterion</h4>
+      <p class="text-sm" style="color:var(--text-secondary);">
+        Verify that no “distance → force” derivation has entered any stage of the processing pipeline.
+        If consistency cannot be established, return <strong>“impossible”</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SEC 5: Three-Layer Defense ===== -->
+<section id="architecture">
+  <div class="sec-header">
+    <span class="sec-num">Section 05 — Physical Architecture</span>
+    <h2 class="sec-title">Three-Layer Defense: RNA Sandwich Architecture</h2>
+    <p class="sec-desc">
+      Physically separate generation from verification. A generative engine becomes safe only when it is structurally sandwiched.
+    </p>
+  </div>
+
+  <div class="grid-2">
+    <div class="pipeline">
+      <div class="pipe-layer" style="border-left:4px solid var(--accent-blue);">
+        <div class="layer-num tc-blue">Layer 01 — Pre-RNA</div>
+        <h4 class="tc-blue">Constraint Fixing</h4>
+        <p>Extract and fix invariant conditions (δ) from the input. The boundaries of the solution space are predefined here, and the pipeline order is fixed at this layer.</p>
+      </div>
+      <div class="pipe-arrow">↓ δ fixed ↓</div>
+      <div class="pipe-layer" style="border-left:4px solid var(--accent-insight);">
+        <div class="layer-num tc-purple">Layer 02 — Inference</div>
+        <h4 class="tc-purple">Probabilistic Generation</h4>
+        <p>The layer where conventional LLM/AI models operate. Generation is permitted only within the boundaries defined by δ.</p>
+      </div>
+      <div class="pipe-arrow">↓ output candidate ↓</div>
+      <div class="pipe-layer" style="border-left:4px solid var(--accent-safe);">
+        <div class="layer-num tc-safe">Layer 03 — Post-RNA</div>
+        <h4 class="tc-safe">Verification & R-Check</h4>
+        <p>Post-generation verification using the R indicator. Boundary deviation triggers Fail-Closed. False output is not permitted.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:24px;">
+      <!-- Causal Diode -->
+      <div class="panel">
+        <h4 class="fw-700 mb-16">Causal Diode</h4>
+        <p class="text-sm mb-16" style="color:var(--text-secondary);">
+          Based on information thermodynamics, causal flow is restricted to the forward direction (Π) only.
+          It is a device that physically blocks reverse derivation: fabricating causes from results.
+        </p>
+        <div class="diode-flow">
+          <div class="diode-node" style="background:rgba(16,185,129,0.15);color:var(--accent-safe);">Cause</div>
+          <div class="diode-arrow tc-safe">→</div>
+          <div class="diode-node" style="background:rgba(59,130,246,0.15);color:var(--accent-blue);">Effect</div>
+          <div class="diode-block">
+            <span class="diode-arrow">←</span>
+            <span class="x-mark">✕</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel panel-accent panel-cyan">
+        <h4 class="tc-cyan fw-700 mb-8">Meaning of Separated Monitoring</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">
+          By physically separating the generation process (L2) from the monitoring processes (L1/L3),
+          the architecture removes AI self-evaluation bias. The referee and the player must not be the same entity.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SEC 6: The Value of Impossibility (KEN Perspective) ===== -->
+<section id="impossibility">
+  <div class="sec-header">
+    <span class="sec-num">Section 06 — The Value of Impossibility</span>
+    <h2 class="sec-title">The Courage to Return “Impossible”</h2>
+    <p class="sec-desc">
+      Modern AI treats “not answering” as failure. NRA rejects that premise.
+    </p>
+  </div>
+
+  <div class="impossibility">
+    <div class="kanji">IMPOSSIBLE</div>
+    <h3>An inconsistent answer is not an answer.</h3>
+    <p style="color:var(--text-secondary);max-width:600px;margin:16px auto 0;font-size:0.95rem;">
+      When faced with a logical deadlock or contradiction, do not fabricate consistency by force.
+      Output impossibility itself as the answer. This is not failure,
+      but <strong class="tc-amber">proof of the system’s honesty</strong>.
+    </p>
+  </div>
+
+  <div class="grid-2 mt-32">
+    <div class="panel panel-accent panel-red">
+      <h4 class="tc-danger fw-700 mb-8">Conventional AI Response</h4>
+      <p class="text-sm" style="color:var(--text-secondary);">
+        Always generate “some kind of answer.” Even when consistency has collapsed, return the statistically most plausible output.
+        → A breeding ground for hallucination. Users cannot distinguish plausible falsehood from truth.
+      </p>
+    </div>
+    <div class="panel panel-accent panel-emerald">
+      <h4 class="tc-safe fw-700 mb-8">NRA Response</h4>
+      <p class="text-sm" style="color:var(--text-secondary);">
+        When the R value falls below the threshold, choose <strong>Active Silence</strong>.
+        → “Under the current constraints, a consistent answer cannot be constructed for this question.”
+        This is not collapse. It is a strategic stop for transition to the next stable phase.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SEC 7: Viability Kernel and Phase Transition ===== -->
+<section id="viability">
+  <div class="sec-header">
+    <span class="sec-num">Section 07 — Viability Kernel</span>
+    <h2 class="sec-title">Viability Kernel and Phase Transition</h2>
+    <p class="sec-desc">
+      Redefine collapse not as “death,” but as a phase transition.
+      The viability region defined by NRA, and the management of its boundaries.
+    </p>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-wrap">
+      <canvas id="kernelChart"></canvas>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:16px;">
+      <div class="panel panel-accent panel-emerald">
+        <h4 class="tc-safe fw-700 mb-8">Viability Kernel (Green)</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">A safe state space in which structural stability R is maintained. The AI is permitted to operate only within this boundary.</p>
+      </div>
+      <div class="panel panel-accent panel-red">
+        <h4 class="tc-danger fw-700 mb-8">Collapse Zone (Red)</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">The collapse region produced by optimization pursuit. Once entered, positive feedback accelerates the collapse.</p>
+      </div>
+      <div class="panel panel-accent panel-blue">
+        <h4 class="tc-blue fw-700 mb-8">Phase Transition (Boundary)</h4>
+        <p class="text-sm" style="color:var(--text-secondary);">Trigger Fail-Closed at boundary contact. This is not “death,” but an active transition to a new stable phase. The next phase is determined by re-evaluating constraints, not by distance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer-wrap">
+  <div class="footer-conclusion">
+    <h3>Conclusion: AI as a Tool, Intelligence as Boundary</h3>
+    <p>
+      NRA-IDE rejects the illusion that AI is an omnipotent entity and presents a design theory for AI as a tool that remains honest to physical law.
+      Not the pursuit of optimization, but the governance of boundaries. The acceptance of impossibility. Emergence from constraint.
+      This is the structural strategy by which humans and AI can coexist.
+    </p>
+    <div class="footer-credit">
+      NRA-IDE Framework by M-Tokuni | Restructured with KEN Perspective<br>
+      github.com/M-Tokun/NRA-IDE
+    </div>
+  </div>
+</footer>
+
+<script>
+/* NRA_Infographic_v2_Charts_20260228.js */
+
+/* --- Chart 1: Collapse Over Generations (Line) --- */
+const ctx1 = document.getElementById('collapseChart').getContext('2d');
+new Chart(ctx1, {
+  type: 'line',
+  data: {
+    labels: ['G1','G2','G3','G4','G5','G6','G7','G8','G9','G10'],
+    datasets: [{
+      label: 'Standard LLM (Optimization)',
+      data: [80,85,90,92,94,85,60,30,10,5],
+      borderColor: '#EF4444',
+      backgroundColor: 'rgba(239,68,68,0.15)',
+      tension: 0.4,
+      borderWidth: 2.5,
+      pointRadius: 3,
+      fill: true
+    },{
+      label: 'NRA (Boundary Control)',
+      data: [80,82,81,83,82,82,83,82,83,82],
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16,185,129,0.1)',
+      tension: 0.2,
+      borderWidth: 2.5,
+      pointRadius: 3,
+      borderDash: [6,3],
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {labels:{color:'#94a3b8',font:{size:11}}},
+      title: {display:true,text:'Model Stability Over Generations',color:'#f1f5f9',font:{size:14}}
+    },
+    scales: {
+      y: {beginAtZero:true,max:100,grid:{color:'#1e293b'},ticks:{color:'#64748b'},title:{display:true,text:'Coherence / R-Value',color:'#64748b'}},
+      x: {grid:{color:'#1e293b'},ticks:{color:'#64748b'},title:{display:true,text:'Re-training Generation',color:'#64748b'}}
+    }
+  }
+});
+
+/* --- Chart 2: Radar Comparison --- */
+const ctx2 = document.getElementById('radarChart').getContext('2d');
+new Chart(ctx2, {
+  type: 'radar',
+  data: {
+    labels: ['Data Diversity','Logical Consistency','Structural Stability','Long-term Viability','Noise Resilience'],
+    datasets: [{
+      label: 'Current AI (Optimized)',
+      data: [20,40,30,10,20],
+      fill: true,
+      backgroundColor: 'rgba(239,68,68,0.3)',
+      borderColor: '#EF4444',
+      pointBackgroundColor: '#EF4444'
+    },{
+      label: 'NRA System',
+      data: [90,95,100,95,90],
+      fill: true,
+      backgroundColor: 'rgba(6,182,212,0.25)',
+      borderColor: '#06B6D4',
+      pointBackgroundColor: '#06B6D4'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {legend:{labels:{color:'#94a3b8',font:{size:11}}}},
+    scales: {
+      r: {
+        angleLines:{color:'#334155'},
+        grid:{color:'#1e293b'},
+        pointLabels:{color:'#94a3b8',font:{size:11}},
+        ticks:{display:false}
+      }
+    }
+  }
+});
+
+/* --- Chart 3: R-Value Gauge (Half Doughnut) --- */
+const ctx3 = document.getElementById('gaugeChart').getContext('2d');
+new Chart(ctx3, {
+  type: 'doughnut',
+  data: {
+    labels: ['Stable (R ≥ 1.0)','Warning (0.5-1.0)','Collapse (R < 0.5)'],
+    datasets: [{
+      data: [60,20,20],
+      backgroundColor: ['#10B981','#F59E0B','#EF4444'],
+      borderWidth: 0,
+      circumference: 180,
+      rotation: 270
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '72%',
+    plugins: {
+      legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:10}}},
+      title:{display:true,text:'Structural Stability Monitor (R)',color:'#f1f5f9',font:{size:13}}
+    }
+  }
+});
+
+/* --- Chart 4: Viability Kernel (Scatter) --- */
+const ctx4 = document.getElementById('kernelChart').getContext('2d');
+
+const safePoints = [];
+for(let i=0;i<55;i++){
+  const angle = Math.random()*Math.PI*2;
+  const r = Math.random()*20+5;
+  safePoints.push({x:50+Math.cos(angle)*r, y:50+Math.sin(angle)*r});
+}
+
+const collapsePoints = [
+  {x:8,y:12},{x:92,y:88},{x:12,y:82},{x:88,y:18},
+  {x:5,y:48},{x:95,y:52},{x:42,y:4},{x:55,y:96},
+  {x:18,y:22},{x:82,y:78},{x:3,y:70},{x:97,y:30}
+];
+
+new Chart(ctx4, {
+  type: 'scatter',
+  data: {
+    datasets: [{
+      label: 'Viability Kernel (Safe)',
+      data: safePoints,
+      backgroundColor: 'rgba(16,185,129,0.7)',
+      pointRadius: 5,
+      pointHoverRadius: 7
+    },{
+      label: 'Collapse Zone (Unstable)',
+      data: collapsePoints,
+      backgroundColor: 'rgba(239,68,68,0.8)',
+      pointStyle: 'crossRot',
+      pointRadius: 7,
+      pointBorderWidth: 2,
+      borderColor: '#EF4444'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {legend:{labels:{color:'#94a3b8',font:{size:11}}}},
+    scales: {
+      x: {min:0,max:100,grid:{color:'#1e293b'},ticks:{color:'#64748b'},title:{display:true,text:'State Variable A',color:'#64748b'}},
+      y: {min:0,max:100,grid:{color:'#1e293b'},ticks:{color:'#64748b'},title:{display:true,text:'Entropy (τ)',color:'#64748b'}}
+    }
+  }
+});
+</script>
+</body>
+</html>

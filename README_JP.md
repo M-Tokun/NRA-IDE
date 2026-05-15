@@ -64,7 +64,7 @@
 
 | 25 | [ダム劣化](./examples/25_dam_degradation_JP.html) | 累積負荷による余裕幅消費の追跡 |
 
-→ [全41デモ一覧](./examples/)
+→ [全50本以上のデモ一覧](./examples/README_JP.md)
 
 ---
 

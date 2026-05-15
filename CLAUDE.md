@@ -27,15 +27,15 @@ Reading `AGENTS.md`, `RULES_DETAIL.md`, or `llms.md` does not authorize reading 
 
 Default approved scope is this repository only:
 
-`G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE`
+`<REPOSITORY_ROOT>`
 
 Inside this repository, Claude may read files only when directly required for the current task.
 
 Outside this repository is no-access by default, including read access, unless explicitly approved by the user.
 
-Outside this repository but inside `G:\git-M-Tokun\` requires explicit approval before read, and two explicit confirmations before write, move, delete, rename, or overwrite.
+Outside this repository but inside `<PARENT_DIR>` requires explicit approval before read, and two explicit confirmations before write, move, delete, rename, or overwrite.
 
-Outside `G:\git-M-Tokun\` requires explicit approval before read, and two explicit confirmations before write, move, delete, rename, or overwrite.
+Outside `<PARENT_DIR>` requires explicit approval before read, and two explicit confirmations before write, move, delete, rename, or overwrite.
 
 Do not scan parent directories, user home directories, system directories, `AppData`, `Documents`, `Downloads`, `Desktop`, or entire drives.
 

@@ -22,7 +22,10 @@ IDE = Intensional Dynamics Engine
 Any other expansion is a hallucination and must be corrected immediately,
 without rationalization.
 
+If `git` is not available on `PATH`, use: `C:\git\cmd\git.exe`
+
 ---
+
 
 ## 0.5 Real-World Mapping (Why this framework exists)
 

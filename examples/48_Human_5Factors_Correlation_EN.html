@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!-- FILE: 48_Human_5Factors_Correlation_EN_20260515_193629.html -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE Human 5-Factor Correlation Real-Value Transition Demo</title>
+<style>
+:root{
+  --bg:#081018; --panel:#0e1824; --panel2:#101f2f; --line:#26445f;
+  --text:#d7e7f4; --sub:#8fb0ca; --acc:#66d9ff; --ok:#6de08a; --warn:#ffd166; --bad:#ff6b6b;
+}
+body{margin:0;font-family:"Segoe UI","Yu Gothic",sans-serif;background:linear-gradient(180deg,#071018,#0b1624);color:var(--text);}
+header{padding:20px 24px;border-bottom:1px solid var(--line);background:rgba(5,10,18,.9);position:sticky;top:0;z-index:20;}
+h1{margin:0;font-size:24px;}
+.wrap{max-width:1400px;margin:0 auto;padding:20px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.values{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0;}
+.value-box{background:var(--panel2);padding:12px;border-radius:12px;text-align:center;border:1px solid var(--line);}
+.value-name{font-size:13px;color:var(--sub);}
+.value-num{font-size:28px;font-weight:700;}
+.unit{font-size:14px;color:var(--sub);}
+
+.meter{margin:14px 0;}
+.bar{height:18px;background:#122132;border-radius:999px;overflow:hidden;border:1px solid #24445f;}
+.fill{height:100%;transition:width .5s linear;}
+.status-box{padding:16px;border-radius:14px;font-size:17px;line-height:1.7;margin:12px 0;}
+.log{height:260px;overflow:auto;font-family:Consolas,monospace;font-size:13.5px;background:#0b1520;padding:12px;border-radius:12px;border:1px solid var(--line);}
+</style>
+</head>
+<body>
+<header>
+  <h1>NRA-IDE Human 5-Factor Real-Value Transition Demo</h1>
+  <div class="sub">Values transition like measured vital data. NRA-IDE monitoring emphasizes not only individual values but also relationship breakdown (correlation R).</div>
+</header>
+
+<div class="wrap">
+  <div class="controls" style="background:var(--panel);padding:14px;border-radius:14px;margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+    <label>Speed <input id="speed" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+    <label>Slack Width τ <input id="tau" type="range" min="0.4" max="1.8" step="0.05" value="0.9"></label>
+    <button id="toggle">Pause</button>
+    <button id="reset">Reset</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Real-Value Transition (5 Factors)</h2>
+      <div class="values" id="values"></div>
+      
+      <h2 style="margin-top:24px">NRA-IDE Monitoring</h2>
+      <div class="meter">
+        <div>Individual R (Average) <span id="rInd" style="float:right">0.00</span></div>
+        <div class="bar"><div id="fillInd" class="fill" style="background:linear-gradient(90deg,#3bbd6a,#79e39b);width:0%"></div></div>
+      </div>
+      <div class="meter">
+        <div>Correlation R (Relationship Breakdown) <span id="rCorr" style="float:right">0.00</span></div>
+        <div class="bar"><div id="fillCorr" class="fill" style="background:linear-gradient(90deg,#e2a500,#ffd166);width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Status Judgment</h2>
+      <div id="status" class="status-box ok">Normal range. Small fluctuations remain within the slack margin.</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Five factors
+const vars = [
+  {name:"Core Temp", unit:"°C", base:36.8, range:1.4},
+  {name:"Skin Temp",   unit:"°C", base:33.5, range:2.8},
+  {name:"Heart Rate", unit:"bpm",base:72,   range:28},
+  {name:"SpO2",     unit:"%",  base:97,   range:6},
+  {name:"Hydration Margin", unit:"%",  base:68,   range:16}
+];
+
+let t = 0, running = true;
+
+function getValues(t) {
+  const p = Math.sin(t/8)*0.6 + Math.sin(t/25)*0.4; // physiological fluctuation
+  const stress = Math.max(0, (t-30)/80); // gradually increasing stress
+
+  return [
+    36.8 + 0.4*stress + 0.25*Math.sin(t/5) + p*0.3,
+    33.5 + 1.2*stress + 0.45*Math.sin(t/4.5) - p*0.4,
+    72 + 22*stress + 4*Math.sin(t/3.2) + p*6,
+    97 - 4.5*stress - 1.2*Math.sin(t/7) + p*0.8,
+    68 - 14*stress - 2.5*Math.sin(t/6) - p*3
+  ];
+}
+
+function computeR(vals) {
+  // individual deviations
+  const indDevs = vals.map((v,i) => Math.abs(v - vars[i].base) / vars[i].range);
+  const rInd = Math.max(...indDevs) * 0.78;
+
+  // deviation from expected relationships (summary correlation)
+  const [core, skin, hr, spo2, water] = vals;
+  const expSkin = 33.5 + 1.15*(core-36.8);
+  const expHR = 72 + 20*(core-36.8) - 0.6*(97-spo2);
+  const expWater = 68 - 1.3*(core-36.8) - 0.7*(hr-72);
+
+  const corrDevs = [
+    Math.abs(skin - expSkin)/3.2,
+    Math.abs(hr - expHR)/26,
+    Math.abs(water - expWater)/15
+  ];
+  const rCorr = Math.max(...corrDevs) * 1.05;
+
+  return {rInd, rCorr};
+}
+
+function update() {
+  const vals = getValues(t);
+  const {rInd, rCorr} = computeR(vals);
+  const tau = parseFloat(document.getElementById('tau').value);
+
+  const rI = rInd / tau;
+  const rC = rCorr / tau;
+
+  // real-value display
+  let html = '';
+  vals.forEach((v,i) => {
+    html += `<div class="value-box">
+      <div class="value-name">${vars[i].name}</div>
+      <div class="value-num">${v.toFixed(1)}</div>
+      <div class="unit">${vars[i].unit}</div>
+    </div>`;
+  });
+  document.getElementById('values').innerHTML = html;
+
+  // R display
+  document.getElementById('rInd').textContent = rI.toFixed(2);
+  document.getElementById('rCorr').textContent = rC.toFixed(2);
+  document.getElementById('fillInd').style.width = Math.min(100, rI*100) + '%';
+  document.getElementById('fillCorr').style.width = Math.min(100, rC*100) + '%';
+
+  // status
+  let statusEl = document.getElementById('status');
+  if (rC >= 1.05 || rI >= 1.1) {
+    statusEl.className = 'status-box bad';
+    statusEl.textContent = 'Fail-Closed region. The relationship exceeded the slack width.';
+  } else if (rC >= 0.7 || rI >= 0.8) {
+    statusEl.className = 'status-box warn';
+    statusEl.textContent = 'Caution zone. Correlation R is rising ahead of the individual values.';
+  } else {
+    statusEl.className = 'status-box ok';
+    statusEl.textContent = 'Normal range. The relationships among the five factors remain within the slack margin.';
+  }
+
+  // log
+  if (Math.floor(t)%7 === 0) {
+    const log = document.getElementById('log');
+    const line = document.createElement('div');
+    line.textContent = `[${t.toFixed(0)}] Core ${vals[0].toFixed(1)}°C HR ${vals[2].toFixed(0)} CorrR:${rC.toFixed(2)}`;
+    log.appendChild(line);
+    if (log.children.length > 30) log.removeChild(log.firstChild);
+  }
+}
+
+function tick(stamp) {
+  if (running) {
+    t += 0.12 * parseFloat(document.getElementById('speed').value);
+    if (t > 180) t = 180;
+    update();
+  }
+  requestAnimationFrame(tick);
+}
+
+// controls
+document.getElementById('toggle').onclick = () => {
+  running = !running;
+  document.getElementById('toggle').textContent = running ? 'Pause' : 'Resume';
+};
+document.getElementById('reset').onclick = () => { t = 0; };
+document.getElementById('tau').oninput = update;
+document.getElementById('speed').oninput = () => {};
+
+update();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

@@ -64,7 +64,7 @@ Interactive HTML simulations are available in the [`examples/`](./examples/) dir
 
 | 25 | [Dam Degradation](./examples/25_dam_degradation_EN.html) | Margin consumption tracking over cumulative load |
 
-→ [Full list of all 41 demos](./examples/)
+→ [Full list of all 50+ demos](./examples/)
 
 ---
 

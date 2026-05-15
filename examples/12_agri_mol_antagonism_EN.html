@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<!-- EN VERSION GENERATED: 2026-05-15 18:28:29 JST -->
+<!-- FILE: 12_agri_mol_antagonism_EN_20260515_182829.html -->
+<!-- NRA-IDE Demo #12 v2 | Agricultural ion monitoring + Mg²⁺/K⁺ antagonistic cascade Band Gate -->
+<!-- Layer 3-4: Dynamic τ, asymmetric EMA, and K⁺ τ linked gate under Mg impairment -->
+<!-- Supports profile switching between Andosol and general agricultural soil -->
+<!-- Shared τ profile for three upland crops: potato, wheat, and sugar beet -->
+<!-- (c) 2026 M-Tokuni | MIT License -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE Demo 12v2 | Mg/K Antagonistic Cascade Band Gate</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0d0d0d; color: #ddd;
+  font-family: 'Courier New', monospace;
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+}
+header {
+  padding: 7px 14px; background: #111;
+  border-bottom: 1px solid #222;
+  display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+}
+header h1 { font-size: 12px; color: #88ffaa; }
+header .sub { font-size: 10px; color: #444; }
+.profile-btn {
+  margin-left: auto; padding: 3px 10px;
+  border-radius: 3px; font-size: 11px; cursor: pointer;
+  border: 1px solid; font-family: monospace;
+}
+.profile-btn.andosol { background: #1a1200; border-color: #554400; color: #cc9900; }
+.profile-btn.general { background: #0a1a0a; border-color: #224422; color: #44aa44; }
+.profile-active { opacity: 1; }
+.profile-inactive { opacity: 0.4; }
+
+.main { display: flex; flex: 1; overflow: hidden; }
+
+.charts {
+  flex: 1; display: flex; flex-direction: column;
+  gap: 2px; padding: 5px; overflow: hidden;
+}
+.chart-row { flex: 1; display: flex; gap: 4px; min-height: 0; }
+.chart-row.r-row { flex: 0 0 80px; }
+canvas {
+  flex: 1; display: block; background: #111;
+  border: 1px solid #1e1e1e; border-radius: 3px;
+}
+
+.panel {
+  width: 230px; background: #111;
+  border-left: 1px solid #1e1e1e;
+  padding: 10px 9px; overflow-y: auto; flex-shrink: 0;
+}
+.panel-title { font-size: 10px; color: #444; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 8px; }
+
+.ion-card {
+  margin-bottom: 8px; padding: 8px 10px;
+  border-radius: 3px; border-left: 3px solid;
+}
+.ion-card.no3  { border-color: #4af; background: #0c1820; }
+.ion-card.k    { border-color: #fa4; background: #1a140a; }
+.ion-card.mg   { border-color: #b8f; background: #130d1a; }
+.ion-card.cl   { border-color: #f55; background: #1a0a0a; }
+.ion-card.fused { border-color: #afd; background: #0e1a10; }
+
+.ion-name { font-size: 10px; color: #666; }
+.ion-val  { font-size: 18px; font-weight: bold; margin: 2px 0; }
+.ion-unit { font-size: 10px; color: #444; }
+.r-bar-wrap { height: 5px; background: #1e1e1e; border-radius: 2px; margin-top: 4px; }
+.r-bar { height: 100%; border-radius: 2px; transition: width 0.12s, background 0.12s; }
+.r-label { font-size: 10px; margin-top: 2px; color: #555; }
+.status-badge {
+  display: inline-block; font-size: 10px;
+  padding: 1px 5px; border-radius: 2px; margin-top: 3px; font-weight: bold;
+}
+.safe    { background: #0a2a0a; color: #4f8; }
+.warn    { background: #2a1500; color: #fa4; }
+.silence { background: #2a0000; color: #f55; }
+
+/* Antagonism alert */
+.antagonism-alert {
+  margin: 6px 0; padding: 7px 9px;
+  border-radius: 3px; border: 1px solid #553300;
+  background: #1a1000; font-size: 10px;
+  color: #cc7700; line-height: 1.6;
+  display: none;
+}
+.antagonism-alert.visible { display: block; }
+
+.divider { border: none; border-top: 1px solid #1a1a1a; margin: 8px 0; }
+
+.param-row { display: flex; justify-content: space-between; font-size: 10px;
+  color: #444; margin-bottom: 2px; }
+.param-val { color: #666; }
+.param-val.highlight { color: #cc9900; }
+
+/* Footer */
+footer {
+  padding: 5px 12px; background: #0a0a0a;
+  border-top: 1px solid #1a1a1a;
+  display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap;
+}
+.scenario-label { font-size: 10px; color: #555; white-space: nowrap; }
+.scenario-active { color: #88ffaa; }
+button {
+  padding: 3px 9px; background: #121212;
+  border: 1px solid #2a2a2a; color: #666;
+  border-radius: 3px; font-size: 10px; cursor: pointer; font-family: monospace;
+}
+button:hover { background: #1e1e1e; color: #aaa; }
+button.danger { border-color: #4a1a00; color: #cc5500; }
+button.danger:hover { background: #1a0800; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NRA-IDE Demo #12v2 | Mg²⁺/K⁺ Antagonistic Cascade Band Gate</h1>
+  <span class="sub">Layer 3-4 | Shared τ for 3 upland crops | K⁺ τ linked gate under impairment</span>
+  <button class="profile-btn andosol profile-active" id="btn_andosol" onclick="setProfile('andosol')">Andosol</button>
+  <button class="profile-btn general profile-inactive" id="btn_general" onclick="setProfile('general')">General farmland</button>
+</header>
+
+<div class="main">
+  <div class="charts">
+    <div class="chart-row">
+      <canvas id="c_no3"></canvas>
+      <canvas id="c_k"></canvas>
+      <canvas id="c_mg"></canvas>
+      <canvas id="c_cl"></canvas>
+    </div>
+    <div class="chart-row r-row">
+      <canvas id="c_r"></canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Ion Monitor</div>
+
+    <div class="ion-card no3">
+      <div class="ion-name">NO₃⁻ Nitrate nitrogen</div>
+      <div><span class="ion-val" id="v_no3">--</span><span class="ion-unit"> mmol/L</span></div>
+      <div class="r-bar-wrap"><div class="r-bar" id="bar_no3"></div></div>
+      <div class="r-label">R = <span id="r_no3">--</span></div>
+      <span class="status-badge safe" id="st_no3">SAFE</span>
+    </div>
+
+    <div class="ion-card k">
+      <div class="ion-name">K⁺ Potassium</div>
+      <div><span class="ion-val" id="v_k">--</span><span class="ion-unit"> mmol/L</span></div>
+      <div class="r-bar-wrap"><div class="r-bar" id="bar_k"></div></div>
+      <div class="r-label">R = <span id="r_k">--</span> ｜ τ = <span id="tau_k_cur">--</span></div>
+      <span class="status-badge safe" id="st_k">SAFE</span>
+    </div>
+
+    <div class="ion-card mg">
+      <div class="ion-name">Mg²⁺ Magnesium</div>
+      <div><span class="ion-val" id="v_mg">--</span><span class="ion-unit"> mmol/L</span></div>
+      <div class="r-bar-wrap"><div class="r-bar" id="bar_mg"></div></div>
+      <div class="r-label">R = <span id="r_mg">--</span></div>
+      <span class="status-badge safe" id="st_mg">SAFE</span>
+    </div>
+
+    <div class="ion-card cl">
+      <div class="ion-name">Cl⁻ Chloride</div>
+      <div><span class="ion-val" id="v_cl">--</span><span class="ion-unit"> mmol/L</span></div>
+      <div class="r-bar-wrap"><div class="r-bar" id="bar_cl"></div></div>
+      <div class="r-label">R = <span id="r_cl">--</span></div>
+      <span class="status-badge safe" id="st_cl">SAFE</span>
+    </div>
+
+    <!-- 拮抗警告 -->
+    <div class="antagonism-alert" id="antagonism_alert">
+      ⚠ Mg²⁺ uptake impairment detected<br>
+      K⁺ antagonistic cascade risk<br>
+      τ_K is being reduced automatically
+    </div>
+
+    <hr class="divider">
+
+    <div class="ion-card fused">
+      <div class="ion-name">Fused R (Layer 4)</div>
+      <div><span class="ion-val" id="v_fused">--</span></div>
+      <div class="r-bar-wrap"><div class="r-bar" id="bar_fused"></div></div>
+      <span class="status-badge safe" id="st_fused">SAFE</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="panel-title" style="margin-bottom:5px;">Profile</div>
+    <div class="param-row"><span>Soil</span><span class="param-val highlight" id="p_soil">Andosol</span></div>
+    <div class="param-row"><span>τ_K base</span><span class="param-val" id="p_tau_k">--</span></div>
+    <div class="param-row"><span>τ_Mg base</span><span class="param-val" id="p_tau_mg">--</span></div>
+    <div class="param-row"><span>CEC</span><span class="param-val" id="p_cec">--</span></div>
+
+    <hr class="divider">
+    <div class="panel-title" style="margin-bottom:5px;">Antagonism Gate</div>
+    <div class="param-row"><span>τ_K reduction formula</span><span class="param-val">×(1 - 0.6 × R_Mg)</span></div>
+    <div class="param-row"><span>Activation condition</span><span class="param-val">R_Mg ≥ 0.7</span></div>
+    <div class="param-row"><span>Current τ_K</span><span class="param-val" id="p_tau_k_cur">--</span></div>
+
+    <hr class="divider">
+    <div style="font-size:10px; color:#333; line-height:1.7;">
+      Three upland crops: potato, wheat, and sugar beet<br>
+      Normal τ differs little among these crops<br>
+      Under impairment, Mg deficiency → K antagonism is the major risk
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="scenario-label">State: <span id="scenario_label" class="scenario-active">Normal operation</span></span>
+  <button class="danger" id="btn_mg_block" onclick="startScenario('mg_block')">Mg uptake impairment → K antagonistic cascade</button>
+  <button id="btn_saltburst" onclick="startScenario('saltburst')">Salt injury spike</button>
+  <button id="btn_n_drain" onclick="startScenario('n_drain')">Nitrogen deficiency</button>
+  <button id="btn_reset" onclick="resetScenario()">Reset</button>
+  <span style="margin-left:auto; font-size:10px; color:#222;">NRA-IDE © 2026 M-Tokuni</span>
+</footer>
+
+<script>
+// ============================================================
+// NRA-IDE Demo #12v2
+// FILE: nra_ide_demo12v2_agri_mol_antagonism_20260308_0213.html
+// 
+// Core idea: a linked gate dynamically reduces K⁺ τ under Mg²⁺ impairment
+//   τ_K_actual = τ_K_base × max(0.4, 1 - 0.6 × R_Mg)
+//   R_Mg ≥ 0.7 で拮抗警告発動
+//
+// The three upland crops (potato, wheat, sugar beet) share the same τ profile
+// The Andosol profile uses a wider τ setting due to high CEC and stronger fixation
+// ============================================================
+
+// --- Profile definitions ---
+const PROFILES = {
+  andosol: {
+    label: 'Andosol',
+    cec: '30-50 cmolc/kg',
+    ions: {
+      no3: { base: 8.0,  tau: 2.5,  alpha_u: 0.003, alpha_l: 0.003, tu_expand: 1.4, tl_shrink: 0.65, w: 1.0 },
+      // Andosol: K⁺ tends to be fixed, so τ is wider
+      k:   { base: 4.0,  tau: 3.5,  alpha_u: 0.015, alpha_l: 0.015, tu_expand: 1.3, tl_shrink: 0.75, w: 1.2 },
+      // Mg²⁺: lower solution concentration, so τ is slightly wider
+      mg:  { base: 1.8,  tau: 0.8,  alpha_u: 0.012, alpha_l: 0.018, tu_expand: 1.2, tl_shrink: 0.5,  w: 1.5 },
+      cl:  { base: 3.0,  tau: 1.0,  alpha_u: 0.08,  alpha_l: 0.08,  tu_expand: 1.2, tl_shrink: 0.6,  w: 1.3 },
+    }
+  },
+  general: {
+    label: 'General farmland',
+    cec: '10-20 cmolc/kg',
+    ions: {
+      no3: { base: 8.0,  tau: 2.0,  alpha_u: 0.003, alpha_l: 0.003, tu_expand: 1.4, tl_shrink: 0.65, w: 1.0 },
+      k:   { base: 4.0,  tau: 2.0,  alpha_u: 0.015, alpha_l: 0.015, tu_expand: 1.3, tl_shrink: 0.75, w: 1.2 },
+      mg:  { base: 2.0,  tau: 0.6,  alpha_u: 0.012, alpha_l: 0.018, tu_expand: 1.2, tl_shrink: 0.5,  w: 1.5 },
+      cl:  { base: 3.0,  tau: 1.0,  alpha_u: 0.08,  alpha_l: 0.08,  tu_expand: 1.2, tl_shrink: 0.6,  w: 1.3 },
+    }
+  }
+};
+
+const ION_COLORS = { no3:'#44aaff', k:'#ffaa44', mg:'#bb88ff', cl:'#ff5555' };
+const ION_LABELS = { no3:'NO₃⁻', k:'K⁺', mg:'Mg²⁺', cl:'Cl⁻' };
+
+let currentProfile = 'andosol';
+let profile = PROFILES[currentProfile];
+
+// --- State ---
+const HISTORY_LEN = 280;
+const STATE = {};
+function initState() {
+  for (const id of ['no3','k','mg','cl']) {
+    const c = profile.ions[id];
+    STATE[id] = {
+      val: c.base, ema_u: 0, ema_l: 0,
+      R: 0, tau_actual: c.tau, status: 'safe',
+      h_val: [], h_R: [], h_bu: [], h_bl: [],
+      offset: 0,
+    };
+  }
+}
+
+let tick = 0;
+let activeScenario = null;
+let sTick = 0;
+
+// --- Band Gate + linked-gate computation (Layer 3) ---
+function updateIons() {
+  // Compute Mg²⁺ first because it affects K⁺ τ
+  for (const id of ['mg','no3','k','cl']) {
+    const c = profile.ions[id];
+    const s = STATE[id];
+
+    // Natural fluctuation
+    const phase = id==='k' ? 1.2 : id==='mg' ? 2.4 : id==='cl' ? 3.6 : 0;
+    const noise = (Math.random() - 0.5) * c.tau * 0.22;
+    const drift = Math.sin(tick * 0.007 + phase) * c.tau * 0.35;
+    s.val = Math.max(0.01, c.base + drift + noise + s.offset);
+
+    const delta   = s.val - c.base;
+    const delta_u = Math.max(0, delta);
+    const delta_l = Math.max(0, -delta);
+
+    s.ema_u = c.alpha_u * delta_u + (1 - c.alpha_u) * s.ema_u;
+    s.ema_l = c.alpha_l * delta_l + (1 - c.alpha_l) * s.ema_l;
+
+    // Base τ
+    let tau_base = c.tau;
+
+    // K⁺ linked gate: dynamically reduce τ under Mg²⁺ impairment
+    if (id === 'k') {
+      const R_mg = STATE.mg.R;
+      if (R_mg >= 0.7) {
+        // τ reduction: R_Mg=0.7 -> τ×0.58, R_Mg=1.0 -> τ×0.40
+        tau_base = c.tau * Math.max(0.4, 1.0 - 0.6 * R_mg);
+      }
+      s.tau_actual = tau_base;
+    } else {
+      s.tau_actual = tau_base;
+    }
+
+    const tau_u = tau_base * (1.0 + c.tu_expand * (s.ema_u / (tau_base + 0.001)));
+    const tau_l = tau_base * Math.max(0.3, 1.0 - c.tl_shrink * (s.ema_l / (tau_base + 0.001)));
+
+    const R_u = delta_u / Math.max(tau_u, 0.001);
+    const R_l = delta_l / Math.max(tau_l, 0.001);
+    s.R = Math.max(R_u, R_l);
+
+    s.status = s.R >= 1.0 ? 'silence' : s.R >= 0.75 ? 'warn' : 'safe';
+
+    s.band_u = c.base + tau_u;
+    s.band_l = c.base - tau_l;
+
+    s.h_val.push(s.val);  s.h_R.push(s.R);
+    s.h_bu.push(s.band_u); s.h_bl.push(s.band_l);
+    for (const arr of [s.h_val, s.h_R, s.h_bu, s.h_bl]) {
+      if (arr.length > HISTORY_LEN) arr.shift();
+    }
+  }
+}
+
+// Layer 4 fused R
+function fusedR() {
+  let sw = 0, swR = 0;
+  for (const id of ['no3','k','mg','cl']) {
+    const w = profile.ions[id].w;
+    swR += w * STATE[id].R; sw += w;
+  }
+  return swR / sw;
+}
+
+// --- Scenarios ---
+function applyScenario() {
+  if (!activeScenario) return;
+  sTick++;
+  const t = sTick;
+
+  if (activeScenario === 'mg_block') {
+    // Mg²⁺ uptake impairment (root stress, low temperature, etc.) -> gradual deficiency
+    STATE.mg.offset = -Math.min(t * 0.012, 1.4);
+    // K⁺ remains near normal, but reduced τ causes R_K to rise sharply
+    document.getElementById('scenario_label').textContent = 'Mg²⁺ uptake impairment → K⁺ antagonistic cascade';
+  } else if (activeScenario === 'saltburst') {
+    STATE.cl.offset = Math.min(t * 0.25, 3.0);
+    document.getElementById('scenario_label').textContent = 'Salt injury spike';
+  } else if (activeScenario === 'n_drain') {
+    STATE.no3.offset = -Math.min(t * 0.035, 3.5);
+    document.getElementById('scenario_label').textContent = 'Nitrogen deficiency';
+  }
+}
+
+// --- Drawing ---
+const CVS = {};
+for (const id of ['no3','k','mg','cl','r']) {
+  CVS[id] = document.getElementById('c_' + id);
+}
+
+function drawIon(id) {
+  const cv = CVS[id];
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const c = profile.ions[id];
+  const s = STATE[id];
+  if (s.h_val.length < 2) return;
+
+  const all = [...s.h_val, ...s.h_bu, ...s.h_bl];
+  const minV = Math.min(...all) - c.tau * 0.3;
+  const maxV = Math.max(...all) + c.tau * 0.3;
+  const rng = maxV - minV || 1;
+  const toY = v => H - ((v - minV) / rng) * H * 0.88 - H * 0.06;
+  const toX = i => (i / (HISTORY_LEN - 1)) * W;
+
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);
+  ctx.font = '10px monospace';
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillText(ION_LABELS[id], 5, 13);
+
+  // Band fill
+  ctx.beginPath();
+  const buStart = HISTORY_LEN - s.h_bu.length;
+  s.h_bu.forEach((v, i) => {
+    const x = toX(i + buStart);
+    i === 0 ? ctx.moveTo(x, toY(v)) : ctx.lineTo(x, toY(v));
+  });
+  for (let i = s.h_bl.length - 1; i >= 0; i--) {
+    ctx.lineTo(toX(i + buStart), toY(s.h_bl[i]));
+  }
+  ctx.closePath();
+  const alpha = s.status === 'silence' ? '25' : '0e';
+  ctx.fillStyle = ION_COLORS[id] + alpha;
+  ctx.fill();
+
+  // Band lines (dashed)
+  for (const arr of [s.h_bu, s.h_bl]) {
+    ctx.beginPath();
+    arr.forEach((v, i) => {
+      const x = toX(i + buStart);
+      i === 0 ? ctx.moveTo(x, toY(v)) : ctx.lineTo(x, toY(v));
+    });
+    ctx.strokeStyle = ION_COLORS[id] + '44';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,4]); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // Base line
+  ctx.beginPath();
+  ctx.moveTo(0, toY(c.base)); ctx.lineTo(W, toY(c.base));
+  ctx.strokeStyle = ION_COLORS[id] + '25'; ctx.lineWidth = 1; ctx.stroke();
+
+  // Measured line
+  ctx.beginPath();
+  const vs = HISTORY_LEN - s.h_val.length;
+  s.h_val.forEach((v, i) => {
+    const x = toX(i + vs);
+    i === 0 ? ctx.moveTo(x, toY(v)) : ctx.lineTo(x, toY(v));
+  });
+  const lc = s.status === 'silence' ? '#ff3333'
+           : s.status === 'warn'    ? '#ffaa33' : ION_COLORS[id];
+  ctx.strokeStyle = lc; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // End-point dot
+  if (s.h_val.length > 0) {
+    ctx.beginPath();
+    ctx.arc(toX(HISTORY_LEN-1), toY(s.h_val[s.h_val.length-1]), 3, 0, Math.PI*2);
+    ctx.fillStyle = lc; ctx.fill();
+  }
+
+  // Show K⁺ τ reduction indicator
+  if (id === 'k' && STATE.mg.R >= 0.7) {
+    ctx.fillStyle = '#cc550088';
+    ctx.fillText('⚡τ reduced', W - 55, H - 6);
+  }
+}
+
+function drawR() {
+  const cv = CVS.r;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, W, H);
+
+  const MAX_R = 1.5;
+  const toY = v => H - (Math.min(v, MAX_R) / MAX_R) * H * 0.85 - H * 0.06;
+  const toX = i => (i / (HISTORY_LEN - 1)) * W;
+
+  // SILENCE line
+  const y1 = toY(1.0);
+  ctx.beginPath(); ctx.moveTo(0,y1); ctx.lineTo(W,y1);
+  ctx.strokeStyle = '#ff000033'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = '9px monospace'; ctx.fillStyle = '#ff000044';
+  ctx.fillText('SILENCE', W-60, y1-2);
+
+  // WARN line
+  const y075 = toY(0.75);
+  ctx.beginPath(); ctx.moveTo(0,y075); ctx.lineTo(W,y075);
+  ctx.strokeStyle = '#ffaa0022'; ctx.stroke();
+
+  // R for each ion
+  for (const id of ['no3','k','mg','cl']) {
+    const s = STATE[id];
+    if (s.h_R.length < 2) continue;
+    ctx.beginPath();
+    s.h_R.forEach((v, i) => {
+      const x = toX(i + HISTORY_LEN - s.h_R.length);
+      i === 0 ? ctx.moveTo(x, toY(v)) : ctx.lineTo(x, toY(v));
+    });
+    ctx.strokeStyle = ION_COLORS[id] + '88'; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  // Fused R (bold line)
+  const fR = fusedR();
+  const fCol = fR >= 1.0 ? '#ff4444' : fR >= 0.75 ? '#ffaa44' : '#44ff88';
+  ctx.font = '11px monospace';
+  ctx.fillStyle = fCol;
+  ctx.fillText('Fused R: ' + fR.toFixed(3), 6, H - 5);
+
+  // Legend
+  let lx = W - 160;
+  for (const id of ['no3','k','mg','cl']) {
+    ctx.fillStyle = ION_COLORS[id] + 'aa';
+    ctx.fillText(ION_LABELS[id], lx, H-5);
+    lx += 40;
+  }
+}
+
+// --- Panel update ---
+function updatePanel() {
+  for (const id of ['no3','k','mg','cl']) {
+    const s = STATE[id];
+    const c = profile.ions[id];
+    document.getElementById('v_'+id).textContent = s.val.toFixed(2);
+    document.getElementById('r_'+id).textContent = s.R.toFixed(3);
+    if (id === 'k') document.getElementById('tau_k_cur').textContent = s.tau_actual.toFixed(2);
+    const pct = Math.min(s.R * 100, 100);
+    const bar = document.getElementById('bar_'+id);
+    bar.style.width = pct + '%';
+    const lc = s.status==='silence' ? '#ff4444' : s.status==='warn' ? '#ffaa44' : ION_COLORS[id];
+    bar.style.background = lc;
+    const badge = document.getElementById('st_'+id);
+    badge.textContent = s.status==='silence' ? 'SILENCE' : s.status==='warn' ? 'WARN' : 'SAFE';
+    badge.className = 'status-badge ' + (s.status==='silence' ? 'silence' : s.status==='warn' ? 'warn' : 'safe');
+  }
+
+  // Fused R
+  const fR = fusedR();
+  document.getElementById('v_fused').textContent = fR.toFixed(3);
+  document.getElementById('bar_fused').style.width = Math.min(fR*100,100) + '%';
+  const fc = fR>=1.0 ? '#ff4444' : fR>=0.75 ? '#ffaa44' : '#88ffaa';
+  document.getElementById('bar_fused').style.background = fc;
+  const fst = fR>=1.0 ? 'silence' : fR>=0.75 ? 'warn' : 'safe';
+  const fb = document.getElementById('st_fused');
+  fb.textContent = fst==='silence' ? 'SILENCE' : fst==='warn' ? 'WARN' : 'SAFE';
+  fb.className = 'status-badge ' + fst;
+
+  // Antagonism alert
+  const alert = document.getElementById('antagonism_alert');
+  alert.classList.toggle('visible', STATE.mg.R >= 0.7);
+
+  // Profile display
+  document.getElementById('p_tau_k').textContent = profile.ions.k.tau.toFixed(1);
+  document.getElementById('p_tau_mg').textContent = profile.ions.mg.tau.toFixed(1);
+  document.getElementById('p_tau_k_cur').textContent = STATE.k.tau_actual.toFixed(3);
+}
+
+// --- Profile switching ---
+function setProfile(id) {
+  currentProfile = id;
+  profile = PROFILES[id];
+  document.getElementById('p_soil').textContent = profile.label;
+  document.getElementById('p_cec').textContent = profile.cec;
+  document.getElementById('btn_andosol').className =
+    'profile-btn andosol ' + (id==='andosol' ? 'profile-active' : 'profile-inactive');
+  document.getElementById('btn_general').className =
+    'profile-btn general ' + (id==='general' ? 'profile-active' : 'profile-inactive');
+  resetScenario();
+}
+
+// --- Scenario controls ---
+function startScenario(name) {
+  activeScenario = name; sTick = 0;
+  for (const id in STATE) STATE[id].offset = 0;
+}
+function resetScenario() {
+  activeScenario = null; sTick = 0;
+  for (const id in STATE) { STATE[id].offset = 0; STATE[id].ema_u = 0; STATE[id].ema_l = 0; }
+  document.getElementById('scenario_label').textContent = 'Normal operation';
+}
+
+// --- Resize ---
+function resize() {
+  for (const id in CVS) { CVS[id].width = CVS[id].offsetWidth; CVS[id].height = CVS[id].offsetHeight; }
+}
+
+// --- Main loop ---
+function loop() {
+  applyScenario();
+  updateIons();
+  for (const id of ['no3','k','mg','cl']) drawIon(id);
+  drawR();
+  updatePanel();
+  tick++;
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+resize();
+setProfile('andosol');  // Initial profile display
+initState();
+loop();
+</script>
+</body>
+</html>

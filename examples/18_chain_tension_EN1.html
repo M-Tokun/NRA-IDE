@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<!-- FILE: chain_tension_nra_ide_20260319_0113.html -->
+<!-- TITLE: NRA-IDE Chain Tension Fluctuation-Driven Auto-Adjustment Visualization -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Generated: 2026-03-19 01:13 JST -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE Chain Tension Auto-Adjust</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;600;700&display=swap');
+:root{
+  --bg:#0b0e16;--surface:#121620;--panel:#181d2a;--border:#20283a;
+  --safe:#00e5a0;--warn:#f0a500;--fail:#ff3b5c;--adj:#7b6cff;
+  --text:#c0c8de;--muted:#4a5270;--accent:#3d7fff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:20px 12px;min-height:100vh;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+/* ── Header ── */
+.hdr{width:100%;max-width:960px;display:flex;justify-content:space-between;
+  align-items:flex-end;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:18px;}
+.hdr-left .sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
+  letter-spacing:.18em;text-transform:uppercase;}
+.hdr-left h1{font-size:18px;letter-spacing:.04em;font-weight:600;margin-top:4px;}
+.ctrl-row{display:flex;gap:8px;align-items:center;}
+.pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;
+  border-radius:4px;transition:all .2s;letter-spacing:.06em;}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pill-adj{border-color:var(--adj);color:var(--adj);}
+.pill-adj.on{background:var(--adj);color:#fff;}
+
+/* ── Main grid ── */
+.grid{width:100%;max-width:960px;display:grid;
+  grid-template-columns:1fr 300px;gap:14px;}
+
+/* ── Canvas panel ── */
+.canvas-panel{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+canvas{width:100%;height:220px;background:var(--bg);border-radius:6px;display:block;}
+.canvas-label{font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--muted);letter-spacing:.14em;}
+
+/* Fluctuation graph */
+.wave-panel{background:var(--bg);border-radius:6px;overflow:hidden;height:70px;position:relative;}
+canvas.waveCanvas{width:100%;height:70px;}
+.wave-label{position:absolute;top:6px;left:10px;font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--muted);letter-spacing:.12em;}
+
+/* ── Right panel ── */
+.side{display:flex;flex-direction:column;gap:12px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.card-label{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:12px;}
+
+/* R-value arc */
+.r-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+svg#arc{width:180px;height:95px;overflow:visible;}
+.r-num{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;
+  transition:color .3s;line-height:1;text-align:center;}
+.r-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:.12em;text-align:center;margin-top:2px;}
+
+/* Status badge */
+.badge{width:100%;padding:10px;border-radius:6px;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  letter-spacing:.14em;border:1px solid;transition:all .35s;}
+.badge.safe{color:var(--safe);border-color:var(--safe);background:rgba(0,229,160,.06);}
+.badge.warning{color:var(--warn);border-color:var(--warn);background:rgba(240,165,0,.06);}
+.badge.fail{color:var(--fail);border-color:var(--fail);background:rgba(255,59,92,.09);
+  animation:pfail .7s ease-in-out infinite;}
+@keyframes pfail{0%,100%{box-shadow:0 0 0 0 rgba(255,59,92,.3)}50%{box-shadow:0 0 0 5px rgba(255,59,92,0)}}
+
+.action-txt{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
+
+/* Metric rows */
+.metrics{display:flex;flex-direction:column;gap:8px;}
+.met-row{display:flex;flex-direction:column;gap:4px;}
+.met-hdr{display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:10px;}
+.met-key{color:var(--muted);}
+.met-val{font-weight:600;}
+.bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:2px;transition:width .25s ease,background .3s;}
+
+/* Adjustment output display */
+.adj-box{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 10px;background:rgba(123,108,255,.07);border:1px solid rgba(123,108,255,.2);
+  border-radius:6px;margin-top:4px;}
+.adj-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--adj);letter-spacing:.12em;}
+.adj-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--adj);}
+
+/* ── Log ── */
+.log-panel{width:100%;max-width:960px;margin-top:14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;}
+.log-title{font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.16em;margin-bottom:8px;}
+.log-list{display:flex;flex-direction:column;gap:3px;max-height:90px;overflow-y:auto;}
+.log-entry{font-family:'JetBrains Mono',monospace;font-size:10px;
+  display:flex;gap:10px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.l-t{color:var(--muted);min-width:56px;}
+.l-r{min-width:64px;}
+.l-d{color:var(--adj);min-width:64px;}
+.l-s{font-weight:600;}
+.l-s.safe{color:var(--safe)}.l-s.warning{color:var(--warn)}.l-s.fail{color:var(--fail)}
+
+/* Footer */
+.footer{width:100%;max-width:960px;margin-top:14px;display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;}
+
+/* Slider */
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;
+  background:var(--border);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--accent);border:3px solid var(--bg);
+  box-shadow:0 0 0 1px var(--accent);transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+.slider-row{display:flex;flex-direction:column;gap:6px;}
+.slider-hdr{display:flex;justify-content:space-between;align-items:baseline;}
+.slider-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.slider-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+.slider-mrk{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="sub mono">NRA-IDE / CHAIN TENSION</div>
+    <h1>Fluctuation-Driven Auto-Adjustment Monitor</h1>
+  </div>
+  <div class="ctrl-row">
+    <button class="pill on" id="btnRun" onclick="toggleRun()">RUN</button>
+    <button class="pill pill-adj on" id="btnAdj" onclick="toggleAdj()">AUTO-ADJ ON</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="grid">
+
+  <!-- Left: chain visual -->
+  <div class="canvas-panel">
+    <div class="canvas-label">CHAIN &amp; SPROCKET VISUALIZATION</div>
+    <canvas id="chainCanvas"></canvas>
+
+    <!-- Fluctuation waveform -->
+    <div class="wave-panel">
+      <canvas class="waveCanvas" id="waveCanvas"></canvas>
+      <div class="wave-label">POLYGON FLUCTUATION  δ-WAVE</div>
+    </div>
+
+    <!-- Manual tension slider -->
+    <div class="slider-row">
+      <div class="slider-hdr">
+        <span class="slider-lbl">MANUAL BIAS</span>
+        <div class="slider-val mono" id="biasDisp">800<small style="font-size:11px;font-weight:300;color:var(--muted)"> N</small></div>
+      </div>
+      <input type="range" id="biasSlider" min="500" max="1100" value="800" oninput="onBias(this.value)">
+      <div class="slider-mrk"><span>500</span><span>OPT:800</span><span>1100</span></div>
+    </div>
+  </div>
+
+  <!-- Right: metrics -->
+  <div class="side">
+
+    <!-- R-value arc -->
+    <div class="card">
+      <div class="card-label">APPROACH RATIO  R = δ / τ</div>
+      <div class="r-wrap">
+        <svg id="arc" viewBox="0 0 180 95" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 90 A80 80 0 0 1 170 90" fill="none"
+            stroke="#20283a" stroke-width="12" stroke-linecap="round"/>
+          <path id="arcF" d="M10 90 A80 80 0 0 1 170 90" fill="none"
+            stroke="#00e5a0" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="251.2" stroke-dashoffset="251.2"
+            style="transition:stroke-dashoffset .3s ease,stroke .3s"/>
+          <line id="wMark" stroke="#f0a500" stroke-width="2" stroke-linecap="round"/>
+          <line id="fMark" stroke="#ff3b5c" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="10" y="100" fill="#4a5270" font-size="9" font-family="JetBrains Mono">0</text>
+          <text x="170" y="100" fill="#4a5270" font-size="9" font-family="JetBrains Mono" text-anchor="end">1.5</text>
+          <text x="52" y="22" fill="#f0a500" font-size="8" font-family="JetBrains Mono" text-anchor="middle">0.75</text>
+          <text x="148" y="50" fill="#ff3b5c" font-size="8" font-family="JetBrains Mono" text-anchor="middle">1.0</text>
+        </svg>
+        <div class="r-num" id="rNum">0.000</div>
+        <div class="r-sub">dR/dt: <span id="drdt">+0.0000</span>/s</div>
+      </div>
+    </div>
+
+    <!-- Status badge -->
+    <div class="badge safe" id="badge">SAFE</div>
+    <div class="action-txt" id="actTxt">Normal operation continues</div>
+
+    <!-- δ/τ/adjustment output -->
+    <div class="card">
+      <div class="card-label">METRICS</div>
+      <div class="metrics">
+        <div class="met-row">
+          <div class="met-hdr">
+            <span class="met-key">δ accumulated deviation</span>
+            <span class="met-val" id="dVal">0.0 N</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%;background:var(--accent)"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr">
+            <span class="met-key">τ absorption thickness</span>
+            <span class="met-val" id="tauDisp">200.0 N</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="tauBar" style="width:100%;background:var(--safe)"></div></div>
+        </div>
+        <div class="met-row">
+          <div class="met-hdr">
+            <span class="met-key">fluctuation amplitude</span>
+            <span class="met-val" id="ampDisp">0.0 N</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="ampBar" style="width:0%;background:var(--adj)"></div></div>
+        </div>
+      </div>
+      <div class="adj-box">
+        <span class="adj-label">AUTO-ADJ OUTPUT</span>
+        <span class="adj-val" id="adjVal">+0.0 N</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Log -->
+<div class="log-panel">
+  <div class="log-title mono">TRACE LOG</div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<div class="footer mono">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span id="clk">--:--:--</span>
+  <span>R≥1.0 → FAIL_CLOSED : auto-adjust authority returned to the human operator</span>
+</div>
+
+<script>
+// ── Parameters ──
+const T_OPT=800,T_MIN=620,T_MAX=1000;
+const R_WARN=0.75,R_FAIL=1.0;
+const POLY_AMP=35,POLY_FREQ=5;
+const ADJ_GAIN_FINE=0.12,ADJ_GAIN_AHEAD=0.32,ADJ_MAX=22;
+
+// ── State ──
+let running=true, autoAdj=true;
+let tCurrent=700, tSmooth=700, bias=800;
+let phase=0, sprPhase=0;
+let R=0, drdt=0, polyAmp=0;
+let adjOut=0;
+let smoothBuf=[], rawBuf=[], rBuf=[];
+const BUF=10, RBUF=8, RAWBUF=20;
+let waveHistory=[];
+const WAVE_LEN=200;
+let logTimer=0;
+
+// ── DOM ──
+const chainC=document.getElementById('chainCanvas');
+const waveC=document.getElementById('waveCanvas');
+const cc=chainC.getContext('2d');
+const wc=waveC.getContext('2d');
+
+function resize(){
+  const wp=chainC.parentElement;
+  chainC.width=wp.clientWidth; chainC.height=220;
+  waveC.width=waveC.parentElement.clientWidth; waveC.height=70;
+}
+
+// ── Controls ──
+function toggleRun(){
+  running=!running;
+  document.getElementById('btnRun').classList.toggle('on',running);
+  document.getElementById('btnRun').textContent=running?'RUN':'PAUSE';
+}
+function toggleAdj(){
+  autoAdj=!autoAdj;
+  const b=document.getElementById('btnAdj');
+  b.classList.toggle('on',autoAdj);
+  b.textContent=autoAdj?'AUTO-ADJ ON':'AUTO-ADJ OFF';
+}
+function onBias(v){
+  bias=parseFloat(v);
+  document.getElementById('biasDisp').innerHTML=
+    bias.toFixed(0)+'<small style="font-size:11px;font-weight:300;color:var(--muted)"> N</small>';
+}
+
+// ── NRA-IDE calculation ──
+function calcIDE(t){
+  const delta=Math.abs(t-T_OPT);
+  const tau=t>=T_OPT?(T_MAX-T_OPT):(T_OPT-T_MIN);
+  const R=delta/Math.max(tau,0.01);
+  return {delta,tau:Math.max(tau,0.01),R};
+}
+
+function calcAdj(R,drdt,amp,tSmooth){
+  if(R>=R_FAIL) return {adj:0,reason:'FAIL_CLOSED: adjustment authority returned'};
+  const ampRatio=amp/(POLY_AMP||1);
+  const ampWarn=ampRatio>1.5;
+  const dir=tSmooth<T_OPT?1:-1;
+  const dev=Math.abs(tSmooth-T_OPT);
+  if(R<0.5&&!ampWarn) return {adj:0,reason:'NORMAL: no adjustment needed'};
+  if(R<R_WARN){
+    const g=ADJ_GAIN_FINE*(ampWarn?1.5:1);
+    return {adj:dir*Math.min(dev*g,ADJ_MAX*0.5),
+      reason:`Fine adjustment (R=${R.toFixed(3)}${ampWarn?' amplitude anomaly':''})`};
+  }
+  const urgency=drdt>0.001?Math.max(0,1-(R_FAIL-R)/drdt*0.5):0;
+  const g=ADJ_GAIN_AHEAD*(1+urgency*0.5);
+  return {adj:dir*Math.min(dev*g,ADJ_MAX),reason:`Predictive adjustment (dR/dt=${drdt>=0?'+':''}${drdt.toFixed(4)})`};
+}
+
+// ── Physical simulation ──
+function tick(dt){
+  if(!running) return;
+
+  // Polygon-effect fluctuation
+  const t=performance.now()/1000;
+  const fluct=POLY_AMP*Math.sin(2*Math.PI*POLY_FREQ*t)
+             +POLY_AMP*0.3*Math.sin(2*Math.PI*POLY_FREQ*2*t+0.4)
+             +POLY_AMP*0.1*Math.sin(2*Math.PI*POLY_FREQ*3*t+0.9);
+
+  // Slowly track the bias toward the target
+  tCurrent+=(bias-tCurrent)*0.03;
+  const tRaw=tCurrent+fluct;
+
+  // Smoothing
+  smoothBuf.push(tRaw); if(smoothBuf.length>BUF) smoothBuf.shift();
+  rawBuf.push(tRaw);    if(rawBuf.length>RAWBUF) rawBuf.shift();
+  tSmooth=smoothBuf.reduce((a,b)=>a+b,0)/smoothBuf.length;
+  polyAmp=rawBuf.length>1?Math.max(...rawBuf)-Math.min(...rawBuf):0;
+
+  // NRA-IDE
+  const ide=calcIDE(tSmooth);
+  rBuf.push(ide.R); if(rBuf.length>RBUF) rBuf.shift();
+  drdt=rBuf.length>=2?(rBuf[rBuf.length-1]-rBuf[rBuf.length-2])/dt:0;
+  R=ide.R;
+
+  // Auto-adjustment
+  const adjResult=autoAdj?calcAdj(R,drdt,polyAmp,tSmooth):{adj:0,reason:'Manual mode'};
+  adjOut=adjResult.adj;
+  if(autoAdj&&R<R_FAIL) tCurrent+=adjOut*dt*8;
+
+  // Waveform history
+  waveHistory.push({raw:tRaw,smooth:tSmooth,adj:adjOut});
+  if(waveHistory.length>WAVE_LEN) waveHistory.shift();
+
+  // Phase
+  const speed=R>=R_FAIL?0:Math.max(0.5,1.5-R);
+  sprPhase+=speed*dt*120;
+
+  // UI update
+  const status=R>=R_FAIL?'fail':R>=R_WARN?'warning':'safe';
+  const col={safe:'#00e5a0',warning:'#f0a500',fail:'#ff3b5c'}[status];
+
+  document.getElementById('rNum').textContent=Math.min(R,9.999).toFixed(3);
+  document.getElementById('rNum').style.color=col;
+  document.getElementById('drdt').textContent=(drdt>=0?'+':'')+drdt.toFixed(4);
+  setArc(R,col);
+
+  const badge=document.getElementById('badge');
+  badge.className='badge '+status;
+  badge.textContent={safe:'SAFE',warning:'WARNING',fail:'FAIL_CLOSED'}[status];
+
+  document.getElementById('actTxt').textContent=adjResult.reason;
+  document.getElementById('dVal').textContent=ide.delta.toFixed(1)+' N';
+  document.getElementById('tauDisp').textContent=ide.tau.toFixed(1)+' N';
+  document.getElementById('ampDisp').textContent=polyAmp.toFixed(1)+' N';
+  const maxN=T_MAX-T_MIN;
+  document.getElementById('dBar').style.width=Math.min(ide.delta/maxN*100,100).toFixed(1)+'%';
+  document.getElementById('dBar').style.background=col;
+  document.getElementById('tauBar').style.width=Math.min(ide.tau/maxN*100,100).toFixed(1)+'%';
+  document.getElementById('ampBar').style.width=Math.min(polyAmp/(POLY_AMP*3)*100,100).toFixed(1)+'%';
+  document.getElementById('adjVal').textContent=(adjOut>=0?'+':'')+adjOut.toFixed(1)+' N';
+
+  document.getElementById('clk').textContent=new Date().toTimeString().slice(0,8);
+
+  logTimer++;
+  if(logTimer%60===0) addLog(R,drdt,adjOut,status);
+}
+
+// ── Arc ──
+function setArc(R,col){
+  const arcLen=251.2,ratio=Math.min(R/1.5,1);
+  document.getElementById('arcF').style.strokeDashoffset=arcLen*(1-ratio);
+  document.getElementById('arcF').style.stroke=col;
+  setMark('wMark',0.75/1.5);
+  setMark('fMark',1.0/1.5);
+}
+function setMark(id,t){
+  const ang=Math.PI*(1-t),cx=90,cy=90,r=80;
+  const x=cx+r*Math.cos(ang),y=cy-r*Math.sin(ang);
+  const nx=Math.cos(ang)*9,ny=-Math.sin(ang)*9;
+  const el=document.getElementById(id);
+  el.setAttribute('x1',(x-nx*.5).toFixed(1));el.setAttribute('y1',(y-ny*.5).toFixed(1));
+  el.setAttribute('x2',(x+nx*.5).toFixed(1));el.setAttribute('y2',(y+ny*.5).toFixed(1));
+}
+
+// ── Chain rendering ──
+function drawChain(){
+  const W=chainC.width,H=chainC.height;
+  cc.clearRect(0,0,W,H);
+  const status=R>=R_FAIL?'fail':R>=R_WARN?'warning':'safe';
+  const col={safe:'#00e5a0',warning:'#f0a500',fail:'#ff3b5c'}[status];
+
+  // Sprocket definitions
+  const s1={x:W*.22,y:H*.52,r:52,teeth:17}; // large
+  const s2={x:W*.78,y:H*.48,r:30,teeth:11}; // small
+
+  // Sprocket rendering
+  [s1,s2].forEach((s,i)=>{
+    drawSprocket(cc,s.x,s.y,s.r,s.teeth,sprPhase*(i===0?1:-s1.r/s2.r),col);
+  });
+
+  // Chain-link rendering
+  drawChainLinks(cc,s1,s2,col,sprPhase);
+
+  // R-value overlay
+  cc.font='bold 12px JetBrains Mono';
+  cc.fillStyle=col;
+  cc.textAlign='left';
+  cc.fillText(`R = ${Math.min(R,9.99).toFixed(3)}`,10,18);
+  cc.font='10px JetBrains Mono';
+  cc.textAlign='right';
+  const st={safe:'● SAFE',warning:'▲ WARNING',fail:'✕ FAIL_CLOSED'}[status];
+  cc.fillText(st,W-10,18);
+
+  // T display
+  cc.font='10px JetBrains Mono';
+  cc.fillStyle='#4a5270';
+  cc.textAlign='left';
+  cc.fillText(`T = ${tSmooth.toFixed(0)} N`,10,H-10);
+  cc.fillText(`ADJ ${adjOut>=0?'+':''}${adjOut.toFixed(1)} N`,W*.4,H-10);
+}
+
+function drawSprocket(ctx,cx,cy,r,teeth,phase,col){
+  // Outer teeth
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(phase*Math.PI/180);
+  for(let i=0;i<teeth;i++){
+    const a=i/teeth*Math.PI*2;
+    const a2=(i+0.5)/teeth*Math.PI*2;
+    const toothH=r*.18;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r);
+    ctx.lineTo(Math.cos(a2)*(r+toothH),Math.sin(a2)*(r+toothH));
+    ctx.lineTo(Math.cos(a+Math.PI/teeth)*r,Math.sin(a+Math.PI/teeth)*r);
+    ctx.fillStyle=col;
+    ctx.globalAlpha=0.7;
+    ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  // Body
+  const g=ctx.createRadialGradient(-r*.2,-r*.2,r*.1,0,0,r);
+  g.addColorStop(0,'#3a4568');g.addColorStop(1,'#1a2035');
+  ctx.beginPath();
+  ctx.arc(0,0,r,0,Math.PI*2);
+  ctx.fillStyle=g;ctx.fill();
+  ctx.strokeStyle='#2a3550';ctx.lineWidth=1.5;ctx.stroke();
+  // Hub
+  ctx.beginPath();ctx.arc(0,0,r*.12,0,Math.PI*2);
+  ctx.fillStyle='#0b0e16';ctx.fill();
+  // Spokes
+  for(let i=0;i<4;i++){
+    const a=i*Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a)*r*.15,Math.sin(a)*r*.15);
+    ctx.lineTo(Math.cos(a)*r*.75,Math.sin(a)*r*.75);
+    ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=2;ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawChainLinks(ctx,s1,s2,col,ph){
+  // Calculate external tangents
+  const dx=s2.x-s1.x,dy=s2.y-s1.y;
+  const d=Math.sqrt(dx*dx+dy*dy);
+  const ang=Math.atan2(dy,dx);
+  const da=Math.asin((s1.r-s2.r)/d);
+
+  const ta1=ang-Math.PI/2+da, ta2=ang+Math.PI/2-da;
+  const p1={x:s1.x+s1.r*Math.cos(ta1),y:s1.y+s1.r*Math.sin(ta1)};
+  const p2={x:s2.x+s2.r*Math.cos(ta1),y:s2.y+s2.r*Math.sin(ta1)};
+  const p3={x:s1.x+s1.r*Math.cos(ta2),y:s1.y+s1.r*Math.sin(ta2)};
+  const p4={x:s2.x+s2.r*Math.cos(ta2),y:s2.y+s2.r*Math.sin(ta2)};
+
+  // Chain-link pitch
+  const linkPitch=14;
+  const topLen=Math.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2);
+  const botLen=Math.sqrt((p4.x-p3.x)**2+(p4.y-p3.y)**2);
+
+  // Upper chain run
+  drawLinkRow(ctx,p1,p2,topLen,linkPitch,(ph*0.8)%linkPitch,col);
+  // Lower chain run
+  drawLinkRow(ctx,p3,p4,botLen,linkPitch,(ph*0.8+linkPitch/2)%linkPitch,col);
+
+  // Sag visualization during FAIL state
+  const sag=R>=R_FAIL?12:R>=R_WARN?4:0;
+  if(sag>0){
+    const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2+sag;
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y);ctx.quadraticCurveTo(mx,my,p2.x,p2.y);
+    ctx.strokeStyle=col;ctx.lineWidth=3;ctx.globalAlpha=0.3;ctx.stroke();
+    ctx.globalAlpha=1;
+  }
+}
+
+function drawLinkRow(ctx,pa,pb,len,pitch,offset,col){
+  const dx=(pb.x-pa.x)/len,dy=(pb.y-pa.y)/len;
+  const nx=-dy,ny=dx;
+  const lw=5; // link width
+
+  let dist=offset-pitch;
+  while(dist<len+pitch){
+    const x=pa.x+dx*dist,y=pa.y+dy*dist;
+    if(dist>=0&&dist<=len){
+      // Outer link
+      ctx.beginPath();
+      ctx.rect(x-pitch*.45,y-lw*.5,pitch*.9,lw);
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(Math.atan2(dy,dx));
+      ctx.fillStyle='#1e2840';
+      ctx.fillRect(-pitch*.45,-lw*.5,pitch*.9,lw);
+      ctx.strokeStyle='#2e3a55';ctx.lineWidth=0.8;
+      ctx.strokeRect(-pitch*.45,-lw*.5,pitch*.9,lw);
+      // Pin
+      ctx.beginPath();ctx.arc(-pitch*.38,0,2.5,0,Math.PI*2);
+      ctx.fillStyle=col;ctx.globalAlpha=0.8;ctx.fill();ctx.globalAlpha=1;
+      ctx.beginPath();ctx.arc(pitch*.38,0,2.5,0,Math.PI*2);
+      ctx.fillStyle=col;ctx.globalAlpha=0.8;ctx.fill();ctx.globalAlpha=1;
+      ctx.restore();
+    }
+    dist+=pitch;
+  }
+}
+
+// ── Waveform rendering ──
+function drawWave(){
+  const W=waveC.width,H=waveC.height;
+  wc.clearRect(0,0,W,H);
+  if(waveHistory.length<2) return;
+  const status=R>=R_FAIL?'fail':R>=R_WARN?'warning':'safe';
+  const col={safe:'#00e5a0',warning:'#f0a500',fail:'#ff3b5c'}[status];
+
+  const tMin=T_MIN-20,tMax=T_MAX+20,tRange=tMax-tMin;
+  const mapY=v=>H*(1-(v-tMin)/tRange);
+
+  // Optimum-value line
+  const optY=mapY(T_OPT);
+  wc.setLineDash([4,4]);
+  wc.beginPath();wc.moveTo(0,optY);wc.lineTo(W,optY);
+  wc.strokeStyle='rgba(61,127,255,.3)';wc.lineWidth=1;wc.stroke();
+  wc.setLineDash([]);
+
+  // Raw waveform
+  wc.beginPath();
+  waveHistory.forEach((h,i)=>{
+    const x=i/WAVE_LEN*W;
+    i===0?wc.moveTo(x,mapY(h.raw)):wc.lineTo(x,mapY(h.raw));
+  });
+  wc.strokeStyle='rgba(255,255,255,.12)';wc.lineWidth=1;wc.stroke();
+
+  // Smoothing波形
+  wc.beginPath();
+  waveHistory.forEach((h,i)=>{
+    const x=i/WAVE_LEN*W;
+    i===0?wc.moveTo(x,mapY(h.smooth)):wc.lineTo(x,mapY(h.smooth));
+  });
+  wc.strokeStyle=col;wc.lineWidth=1.5;wc.stroke();
+
+  // Adjustment-output waveform
+  const adjMid=H/2;
+  const adjScale=H*0.4/ADJ_MAX;
+  wc.beginPath();
+  waveHistory.forEach((h,i)=>{
+    const x=i/WAVE_LEN*W;
+    const y=adjMid-h.adj*adjScale;
+    i===0?wc.moveTo(x,y):wc.lineTo(x,y);
+  });
+  wc.strokeStyle='rgba(123,108,255,.6)';wc.lineWidth=1;wc.stroke();
+}
+
+// ── Log ──
+function addLog(R,drdt,adj,status){
+  const now=new Date().toTimeString().slice(0,8);
+  const list=document.getElementById('logList');
+  const e=document.createElement('div');
+  e.className='log-entry';
+  e.innerHTML=`
+    <span class="l-t">${now}</span>
+    <span class="l-r">R=${Math.min(R,9.99).toFixed(3)}</span>
+    <span style="color:var(--muted);font-size:9px">${drdt>=0?'+':''}${drdt.toFixed(4)}/s</span>
+    <span class="l-d">${adj>=0?'+':''}${adj.toFixed(1)}N</span>
+    <span class="l-s ${status}">${{safe:'SAFE',warning:'WARNING',fail:'FAIL_CLOSED'}[status]}</span>
+  `;
+  list.insertBefore(e,list.firstChild);
+  if(list.children.length>15) list.removeChild(list.lastChild);
+}
+
+// ── Main loop ──
+let last=performance.now();
+function loop(now){
+  const dt=Math.min((now-last)/1000,0.05);
+  last=now;
+  tick(dt);
+  drawChain();
+  drawWave();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize',resize);
+resize();
+setMark('wMark',0.75/1.5);
+setMark('fMark',1.0/1.5);
+addLog(0,0,0,'safe');
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

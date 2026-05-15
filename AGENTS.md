@@ -10,15 +10,15 @@ Reading `RULES_DETAIL.md` does not authorize reading any referenced external fil
 
 Default approved scope is this repository only:
 
-`G:\git-M-Tokun\AI-IDE-NRA\NRA-IDE`
+`<REPOSITORY_ROOT>`
 
 Inside this repository, read access is allowed only when directly required for the current task.
 
 Outside this repository is no-access by default, including read access, unless explicitly approved by the user.
 
-Outside this repository but inside `G:\git-M-Tokun\` requires explicit approval before read, and two explicit confirmations before write, move, delete, or rename.
+Outside this repository but inside `<PARENT_DIR>` requires explicit approval before read, and two explicit confirmations before write, move, delete, or rename.
 
-Outside `G:\git-M-Tokun\` requires explicit approval before read, and two explicit confirmations before write, move, delete, or rename.
+Outside `<PARENT_DIR>` requires explicit approval before read, and two explicit confirmations before write, move, delete, or rename.
 
 Do not scan parent directories, user home directories, system directories, `AppData`, `Documents`, `Downloads`, `Desktop`, or entire drives.
 

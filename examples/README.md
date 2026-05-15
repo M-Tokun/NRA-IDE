@@ -66,7 +66,7 @@ $$R = \frac{\delta}{\tau}$$
 
 ---
 
-## Demo List — 41 Demos + Standalone Visualizations, Recommended Order
+## Demo List — 50+ Demos + Standalone Visualizations, Recommended Order
 
 All demos run directly in a browser. No installation is required.
 
@@ -234,7 +234,7 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 
 | [JP](./33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html) / [EN](./33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html) | **6D multi-layer visualizer.** Displays six R-value surfaces simultaneously. Opacity, saturation, and monochrome modes are available. |
 
-| [Bilingual](../docs/en-US/figures/causal_diode_fail_closed_Bilingual.html) | **Causal Diode & Fail-Closed Visualizer.** An intuitive animation demonstrating how NRA-IDE structurally blocks AI from manipulating physical thresholds (Π⁻¹ backward flow) and how it autonomously shuts down upon reaching the limit. |
+| [EN](../docs/en-US/figures/causal_diode_fail_closed_EN.html) / [JP](../docs/ja-JP/figures/causal_diode_fail_closed_JP.html) | **Causal Diode & Fail-Closed Visualizer.** An intuitive animation demonstrating how NRA-IDE structurally blocks AI from manipulating physical thresholds (Π⁻¹ backward flow) and how it autonomously shuts down upon reaching the limit. |
 
 ---
 

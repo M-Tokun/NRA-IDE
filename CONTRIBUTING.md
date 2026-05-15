@@ -5,7 +5,7 @@ Purpose
 
 Quick start
 1. Read README.md and REPOSITORY_OVERVIEW.md.
-2. Read universal-definition/** Quick Reference for safety axioms (R = δ/τ) and CLAUDE.md for repo conventions.
+2. Read universal-definition/** Quick Reference for safety axioms (R = δ/τ) and rule files (AGENTS.md, CLAUDE.md, GEMINI.md, CLINE.md) for repo conventions.
 3. Run the MOCK pipeline to try local behavior (no API keys required):
    - python src/nra_pre_rna_EN_20260213_0135.py
 
