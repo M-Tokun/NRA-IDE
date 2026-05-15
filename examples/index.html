@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRA-IDE Examples</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --accent: #58a6ff;
+  --safe: #3fb950;
+  --watch: #d29922;
+  --caution: #f0883e;
+  --fail: #f85149;
+  --code-bg: #1a1f27;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.7;
+  font-size: 15px;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Layout */
+.page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* Header */
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 28px 0 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.header-title h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.header-title .sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+.lang-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+.lang-toggle button {
+  background: none;
+  border: none;
+  color: var(--text2);
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+.lang-toggle button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Sections */
+section { margin-top: 48px; }
+section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 28px 0 12px;
+}
+p { margin-bottom: 12px; color: var(--text); }
+blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 16px 0;
+  color: var(--text2);
+  font-size: 14px;
+}
+blockquote strong { color: var(--text); }
+
+/* Formula */
+.formula-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin: 16px 0;
+  text-align: center;
+}
+.formula-large {
+  font-size: 32px;
+  font-family: "Georgia", serif;
+  color: var(--accent);
+  font-style: italic;
+}
+.formula-large .frac { display: inline-block; text-align: center; vertical-align: middle; }
+.formula-large .frac .num { display: block; border-bottom: 2px solid var(--accent); padding-bottom: 2px; }
+.formula-large .frac .den { display: block; padding-top: 2px; }
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 16px 0;
+}
+th {
+  background: var(--bg3);
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--text2);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+td {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:nth-child(even) td { background: var(--bg2); }
+.r-safe { color: var(--safe); font-weight: 600; }
+.r-watch { color: var(--watch); font-weight: 600; }
+.r-caution { color: var(--caution); font-weight: 600; }
+.r-fail { color: var(--fail); font-weight: 600; }
+
+/* Demo list */
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 32px 0 12px;
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent);
+}
+.step-header .step-icon { font-size: 18px; }
+.step-header .step-label { font-size: 14px; font-weight: 600; }
+.step-note {
+  font-size: 13px;
+  color: var(--text2);
+  margin: -4px 0 14px;
+  padding: 0 16px;
+}
+
+.demo-table td:first-child { width: 36px; text-align: center; color: var(--text2); font-size: 13px; font-weight: 600; }
+.demo-table td:nth-child(2) { width: 220px; }
+.demo-links { display: flex; gap: 6px; flex-wrap: wrap; }
+.demo-links a {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.demo-links a:hover { border-color: var(--accent); background: var(--bg2); }
+.badge-jp { color: #f0883e; }
+.badge-en { color: var(--accent); }
+.demo-desc { font-size: 13px; color: var(--text2); }
+.demo-desc strong { color: var(--text); }
+.demo-table td:last-child { font-size: 13px; }
+.coming-soon { color: var(--text2); font-size: 12px; font-style: italic; }
+
+/* Code */
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+code { font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace; }
+.kw { color: #ff7b72; }
+.fn { color: #d2a8ff; }
+.str { color: #a5d6ff; }
+.cmt { color: #8b949e; font-style: italic; }
+.num { color: #79c0ff; }
+
+/* App domains */
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.domain-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+.domain-card .domain-icon { font-size: 22px; margin-bottom: 8px; }
+.domain-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.domain-card .domain-row { font-size: 13px; color: var(--text2); margin: 3px 0; }
+.domain-card .domain-row strong { color: var(--text); }
+
+/* Footer */
+footer {
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text2);
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+footer a { color: var(--text2); }
+footer a:hover { color: var(--accent); }
+
+/* Language visibility */
+.jp-text { display: block; }
+.en-text { display: none; }
+body.en .jp-text { display: none; }
+body.en .en-text { display: block; }
+
+/* for inline spans */
+span.jp-text { display: inline; }
+span.en-text { display: none; }
+body.en span.jp-text { display: none; }
+body.en span.en-text { display: inline; }
+
+@media (max-width: 640px) {
+  .domain-grid { grid-template-columns: 1fr; }
+  table { font-size: 13px; }
+  .demo-table td:nth-child(2) { width: auto; }
+  header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="header-title">
+    <h1>NRA-IDE Examples</h1>
+    <div class="sub">
+      <span class="jp-text">律環公理 — 内包性動力学エンジン &nbsp;|&nbsp; ブラウザで即起動、インストール不要</span>
+      <span class="en-text">Nomological Ring Axioms — Intensional Dynamics Engine &nbsp;|&nbsp; Runs directly in browser, no install required</span>
+    </div>
+  </div>
+  <div class="lang-toggle">
+    <button id="btn-jp" class="active" onclick="setLang('jp')">日本語</button>
+    <button id="btn-en" onclick="setLang('en')">English</button>
+  </div>
+</header>
+
+<!-- ===== WHAT IS NRA-IDE ===== -->
+<section>
+  <h2>
+    <span class="jp-text">NRA-IDE とは</span>
+    <span class="en-text">What is NRA-IDE?</span>
+  </h2>
+
+  <div class="jp-text">
+    <p><strong>律環公理 — 内包性動力学エンジン（Nomological Ring Axioms — Intensional Dynamics Engine）</strong></p>
+    <p>線形概念（連続性・距離・意味）を排除し、<strong>張力構造（制約 → 力 → 変位）</strong>を基本とした決定論的制御エンジンです。俗に言う非線形を主体とした考え方であり、地球構造を基準にした記述です（できうる限り近似ではなく、見たままの構造に従って記述する）。</p>
+    <p>従来手法がブラックボックス化する高リスク領域（医療AI・自動運転・インフラ）において、<strong>完全に説明可能かつ誤差が累積しない</strong>判定メカニズムを提供します。</p>
+  </div>
+  <div class="en-text">
+    <p><strong>Nomological Ring Axioms — Intensional Dynamics Engine</strong></p>
+    <p>NRA-IDE is a deterministic control and structural judgment engine based on <strong>tension structure</strong>: constraint → force → displacement. It deliberately avoids making continuity, distance, or semantic interpretation the primary basis of safety judgment — a framework centered on nonlinear, physically grounded structure.</p>
+    <p>Where conventional methods become black boxes in high-risk areas such as medical AI, autonomous driving, and infrastructure control, NRA-IDE provides an explainable judgment mechanism based on directly observed structural deviation.</p>
+  </div>
+</section>
+
+<!-- ===== WHY NO ERROR ACCUMULATION ===== -->
+<section>
+  <h2>
+    <span class="jp-text">なぜ NRA-IDE は誤差を累積しないのか</span>
+    <span class="en-text">Why NRA-IDE Does Not Accumulate Error</span>
+  </h2>
+
+  <div class="jp-text">
+    <p>機械式時計が精度を保てるのは、歯車が完璧だからではありません。<strong>脱進機が「完全な一歯分」という離散的なステップで進む</strong>からです——小数点以下の残差は次のステップに持ち込まれません。</p>
+    <p>NRA-IDE はこの原則を実装しています。状態遷移を浮動小数点の連続値として処理するのではなく、<strong>整数位相ロック</strong>で動作します。各ステップは構造的に完結しており、引き継がれる残差が存在しません。</p>
+    <blockquote>
+      <strong>誤差が累積しないのは「補正しているから」ではなく、<br>「誤差が生じる構造になっていないから」です。</strong>
+    </blockquote>
+    <p>以下のデモ群は、この差異を可視化・定量化するために設計されています。実装の詳細（整数位相ロック・端数廃棄）は <code>nra-core/</code> を参照してください。</p>
+  </div>
+  <div class="en-text">
+    <p>A mechanical clock keeps time not because every gear is perfect, but because the escapement advances in a discrete step: exactly one tooth at a time. Residual fractions are not carried forward into the next step.</p>
+    <p>NRA-IDE implements this principle. State transitions are not treated as an endlessly drifting floating-point continuum. Instead, they are handled as structurally closed phase steps. Each step is completed as a bounded transition, and residual fragments are not inherited as causal state.</p>
+    <blockquote>
+      <strong>Error does not fail to accumulate because it is corrected afterward.<br>
+      It does not accumulate because the structure does not allow it to be carried forward.</strong>
+    </blockquote>
+    <p>The demos below are designed to visualize and quantify this difference. For implementation details (integer phase lock and residual discard), see <code>nra-core/</code>.</p>
+  </div>
+</section>
+
+<!-- ===== THRESHOLD SYSTEM ===== -->
+<section>
+  <h2>
+    <span class="jp-text">閾値システムの原理</span>
+    <span class="en-text">Principle of the Threshold System</span>
+  </h2>
+
+  <div class="formula-box">
+    <div class="formula-large">
+      R &nbsp;=&nbsp;
+      <span class="frac">
+        <span class="num">δ</span>
+        <span class="den">τ</span>
+      </span>
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th><span class="jp-text">記号</span><span class="en-text">Symbol</span></th>
+      <th><span class="jp-text">意味</span><span class="en-text">Meaning</span></th>
+      <th><span class="jp-text">説明</span><span class="en-text">Description</span></th>
+    </tr>
+    <tr>
+      <td><strong>δ（delta）</strong></td>
+      <td><span class="jp-text">制約からのズレ（ゆらぎ）</span><span class="en-text">Deviation / fluctuation from constraint</span></td>
+      <td><span class="jp-text">物理的に直接測定される変位</span><span class="en-text">Physically observed displacement or deviation</span></td>
+    </tr>
+    <tr>
+      <td><strong>τ（tau）</strong></td>
+      <td><span class="jp-text">許容範囲（厚み）</span><span class="en-text">Tolerance thickness / allowable margin</span></td>
+      <td><span class="jp-text">設計時に定義された閾値</span><span class="en-text">Structurally defined threshold width</span></td>
+    </tr>
+    <tr>
+      <td><strong>R</strong></td>
+      <td><span class="jp-text">構造比率</span><span class="en-text">Structural ratio</span></td>
+      <td><span class="jp-text">δ÷τ の値で判定を行う</span><span class="en-text">Judgment value calculated as δ ÷ τ</span></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <th><span class="jp-text">R の値</span><span class="en-text">R Range</span></th>
+      <th><span class="jp-text">判定</span><span class="en-text">Judgment</span></th>
+      <th><span class="jp-text">意味</span><span class="en-text">Meaning</span></th>
+      <th><span class="jp-text">動作</span><span class="en-text">Action</span></th>
+    </tr>
+    <tr>
+      <td>R &lt; 0.40</td>
+      <td class="r-safe">SAFE</td>
+      <td><span class="jp-text">構造余裕が十分に残っている領域</span><span class="en-text">Sufficient structural margin remains</span></td>
+      <td><span class="jp-text">AIは物理的根拠を提示し処理続行</span><span class="en-text">AI may continue processing with physical basis shown</span></td>
+    </tr>
+    <tr>
+      <td>0.40 ≤ R &lt; R<sub>J</sub></td>
+      <td class="r-watch">WATCH / CAUTION</td>
+      <td><span class="jp-text">境界へ向かう傾向を観察し、必要に応じて介入準備を始める領域</span><span class="en-text">Approaching the boundary; preparation for intervention may be required</span></td>
+      <td><span class="jp-text">継続監視。履歴・相関・dR/dt を確認し、自動介入を段階的に制限</span><span class="en-text">Continue monitoring. Check history, correlation, and dR/dt. Gradually restrict automatic intervention if needed</span></td>
+    </tr>
+    <tr>
+      <td>R<sub>J</sub> ≤ R &lt; 1.00</td>
+      <td class="r-caution">JUDGMENT LIMIT</td>
+      <td><span class="jp-text">現場運用上、これ以上進むと遅延・慣性・残留変動により R=1.0 へ到達してしまう危険が高い領域</span><span class="en-text">Under actual operating conditions, further progression may reach R = 1.0 due to delay, inertia, or residual fluctuation</span></td>
+      <td><span class="jp-text">自動判断を停止または強く制限し、人間判断へ移行</span><span class="en-text">Stop or strongly restrict automatic judgment and transfer authority to humans</span></td>
+    </tr>
+    <tr>
+      <td>R ≥ 1.00</td>
+      <td class="r-fail">FAIL-CLOSED</td>
+      <td><span class="jp-text">相転移・破断・決壊・崩壊に相当する構造限界</span><span class="en-text">Structural limit corresponding to phase transition, rupture, breach, or collapse</span></td>
+      <td><span class="jp-text">AIは出力を停止し、人間が最終判断</span><span class="en-text">AI stops output/action and humans make the final decision</span></td>
+    </tr>
+  </table>
+
+  <div class="jp-text">
+    <blockquote>
+      <strong>重要：</strong> R = 1.0 は警告値ではありません。R = 1.0 は、相転移・破断・決壊・崩壊に相当する<em>構造境界</em>です。<br>
+      したがって、現実の安全設計では 1.0 に到達してから判断してはいけません。<br>
+      NRA-IDE では、その手前に <strong>判断限界閾値（Judgment Limit, R<sub>J</sub>）</strong> を置きます。<br>
+      R<sub>J</sub> は固定公理値ではなく、現場運用、対象物、センサー遅延、停止に必要な時間、安全余裕によって設定されます。<br>
+      <strong>設計思想：</strong> AIは計算に徹し、倫理的・最終判断は人間が担う。（責任の境界）
+    </blockquote>
+  </div>
+  <div class="en-text">
+    <blockquote>
+      <strong>Important:</strong> R = 1.0 is not a warning value. R = 1.0 is the structural boundary corresponding to phase transition, rupture, breach, or collapse. Therefore, real safety design must not wait until R reaches 1.0.<br>
+      NRA-IDE places a <strong>Judgment Limit (R<sub>J</sub>)</strong> before that boundary.<br>
+      R<sub>J</sub> is not a fixed axiom value. It is set according to the operating site, target object, sensor delay, stopping time, and required safety margin.<br>
+      <strong>Design principle:</strong> AI performs computation. Ethical and final judgment belongs to humans. This is the responsibility boundary.
+    </blockquote>
+  </div>
+</section>
+
+<!-- ===== DEMO LIST ===== -->
+<section>
+  <h2>
+    <span class="jp-text">デモ一覧 — 推奨閲覧順</span>
+    <span class="en-text">Demo List — Recommended Order</span>
+  </h2>
+
+  <div class="jp-text">
+    <p style="font-size:13px;color:var(--text2)">ブラウザで開くだけで動作します（インストール不要）。多くのデモでは赤線が R = 1.0 を示しますが、これは「警告線」ではなく構造限界線です。実務上の判断限界はその手前に置く必要があります。</p>
+  </div>
+  <div class="en-text">
+    <p style="font-size:13px;color:var(--text2)">All demos run directly in a browser. No installation is required. In many demos, the red line indicates R = 1.0. This is not a warning line; it is the structural limit line. The practical judgment limit must be placed before that line.</p>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-header">
+    <span class="step-icon">📚</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 1 — まず「なぜ？」を理解する</span>
+      <span class="en-text">STEP 1 — First Understand "Why?"</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr>
+      <th>#</th>
+      <th><span class="jp-text">リンク</span><span class="en-text">Links</span></th>
+      <th><span class="jp-text">内容</span><span class="en-text">Content</span></th>
+    </tr>
+    <tr>
+      <td>00</td>
+      <td><div class="demo-links"><a href="00_Escapement_Foundation_NRA_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>脱進機の基礎。</strong> 整数位相ロック — 残差が消える理由の基礎概念デモ。</span>
+        <span class="en-text"><strong>Escapement Foundation.</strong> Basic concept demo of integer phase lock — why residuals disappear. (Japanese only)</span>
+      </td>
+    </tr>
+    <tr>
+      <td>01</td>
+      <td><div class="demo-links"><a href="01_Why_No_Distance_JP.html" class="badge-jp">JP</a><a href="01_Why_No_Distance_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>なぜ距離・微分積分・浮動小数点を使わないのか？</strong> タブ切替で4つの視点から視覚的に解説。従来手法との根本的な違いを理解する入口。</span>
+        <span class="en-text"><strong>Why not use distance, calculus, or floating-point continuity?</strong> A visual introduction from four perspectives.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>02</td>
+      <td><div class="demo-links"><a href="02_Error_Accumulation_JP.html" class="badge-jp">JP</a><a href="02_Error_Accumulation_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>誤差積算の恐怖。</strong> 同一初期値から10万ステップ走らせ、従来手法と律環公理の誤差蓄積を比較。医療・自動運転・金融それぞれの破綻ラインを表示。</span>
+        <span class="en-text"><strong>The danger of error accumulation.</strong> Runs 100,000 steps from the same initial value and compares conventional methods with NRA-style structure.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 2 -->
+  <div class="step-header">
+    <span class="step-icon">🔬</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 2 — 動作の違いを体感する</span>
+      <span class="en-text">STEP 2 — Experience the Difference in Behavior</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>03</td>
+      <td><div class="demo-links"><a href="03_HAN_vs_Legacy_JP.html" class="badge-jp">JP</a><a href="03_HAN_vs_Legacy_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>HAN vs Legacy リアルタイム比較。</strong> 外乱・突発負荷に対する追従性と安定性の差を、波形グラフで実証。</span>
+        <span class="en-text"><strong>HAN vs Legacy real-time comparison.</strong> Demonstrates tracking and stability differences under disturbance and sudden load.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>04</td>
+      <td><div class="demo-links"><a href="04_HAN_Stress_Test_JP.html" class="badge-jp">JP</a><a href="04_HAN_Stress_Test_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>意図的に 80ms の高負荷をかける極限実験。</strong> Legacy は盲目的に命令を実行し FPS が崩壊。HAN は張力検知により負荷を適応的に軽減し、描画を維持。</span>
+        <span class="en-text"><strong>Extreme 80 ms load test.</strong> Legacy blindly executes commands and collapses in FPS; HAN detects tension and adapts load.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 3 -->
+  <div class="step-header">
+    <span class="step-icon">📊</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 3 — 閾値メカニズムを可視化する</span>
+      <span class="en-text">STEP 3 — Visualize the Threshold Mechanism</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>05</td>
+      <td><div class="demo-links"><a href="05_IDE_Threshold_Visualizer_JP.html" class="badge-jp">JP</a><a href="05_IDE_Threshold_Visualizer_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>R = δ/τ の動的変化を位相スコープで表示。</strong> 整数位相ロック・残差破棄のメカニズムをリアルタイムに確認。</span>
+        <span class="en-text"><strong>Dynamic visualization of R = δ/τ.</strong> Confirms integer phase lock and residual discard in real time.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 4 -->
+  <div class="step-header">
+    <span class="step-icon">⚙️</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 4 — 脱進機の原理</span>
+      <span class="en-text">STEP 4 — Escapement Principle</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>06</td>
+      <td><div class="demo-links"><a href="06_Escapement_Principle_JP.html" class="badge-jp">JP</a><a href="06_Escapement_Principle_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>なぜ歯車は誤差を累積しないのか。</strong> 浮動小数点ドリフト vs 整数位相ロックのアニメーション比較。NRA-IDE が誤差を構造的に排除する理由を可視化。</span>
+        <span class="en-text"><strong>Why gears do not accumulate error.</strong> Floating-point drift vs integer phase lock animation.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 5 -->
+  <div class="step-header">
+    <span class="step-icon">🔴</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 5 — カスケード障害：崩壊が始まる瞬間をリアルタイムで見る</span>
+      <span class="en-text">STEP 5 — Cascade Failure: Watching the Moment Collapse Begins</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>07</td>
+      <td><div class="demo-links"><a href="07_HAN_gate_live_JP.html" class="badge-jp">JP</a><a href="07_HAN_gate_live_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <div class="jp-text"><strong>カスケード障害の発生と HAN Gate の SILENCE 発動をライブシミュレーション。</strong> 負荷スパイクが波及するにつれ、連鎖反応スコア R がリアルタイムで上昇。R が R_OP を超えた瞬間、画面が赤く光り SILENCE が宣言されます。⚠ 危険例プリセットを選ぶと「波は穏やかに見えるのにゲートが一度も発動しない」設定を体験できます。</div>
+        <div class="en-text"><strong>Live simulation of cascade failure and HAN Gate SILENCE activation.</strong> As load spikes propagate, the chain-reaction score R rises in real time. When R crosses the operational boundary, the screen flashes red and SILENCE is declared. Also visualizes the dual-fluctuation structure — the τ line begins to expand before the R peak becomes obvious.</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 6 -->
+  <div class="step-header">
+    <span class="step-icon">🌿</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 6 — Band Gate：実世界ドメイン応用</span>
+      <span class="en-text">STEP 6 — Band Gate: Real-World Domain Applications</span>
+    </span>
+  </div>
+  <div class="step-note jp-text">Band Gate（R = δ/τ）を物理計測ドメインに適用。上限・下限を同時監視し、非対称EMA感度によって過負荷と枯渇を同じ式で検知します。</div>
+  <div class="step-note en-text">Band Gate logic, R = δ/τ, applied to physical measurement domains. Upper and lower limits are monitored independently, and asymmetric EMA sensitivity detects both overload and depletion.</div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>08</td>
+      <td><div class="demo-links"><a href="08_Band_Gate_live_JP.html" class="badge-jp">JP</a><a href="08_Band_Gate_live_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>電気・気温・水圧・脈動。</strong> 非対称ダンパー構造 — 上限側τは拡大（慎重）、下限側τは縮小（敏感）。</span>
+        <span class="en-text"><strong>Electricity, air temperature, water pressure, pulsation.</strong> Asymmetric damper structure — upper τ expands cautiously, lower τ shrinks sensitively.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>09</td>
+      <td><div class="demo-links"><a href="09_Greenhouse_BandGate_live_JP.html" class="badge-jp">JP</a><a href="09_Greenhouse_BandGate_live_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>温室農業 4指標同時監視。</strong> 灌漑水圧・気温・CO₂・養液EC を同時監視。干ばつシミュレーションで複数指標が同時低下する様子を観察できます。</span>
+        <span class="en-text"><strong>Greenhouse agriculture, four-sensor monitoring.</strong> Monitors irrigation pressure, air temperature, CO₂, and nutrient EC.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td><div class="demo-links"><a href="10_Field_DroughtGate_live_JP.html" class="badge-jp">JP</a><a href="10_Field_DroughtGate_live_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>屋外畑 干ばつ進行ゲージ。</strong> 土壌水分・地温・日射量・風速を監視。加重複合 R スコアから干ばつレベル Lv.0〜4 を算出。EMA が閾値割れ前に「乾き始めの勢い」を先読みします。</span>
+        <span class="en-text"><strong>Outdoor field drought progression gauge.</strong> Soil moisture, soil temperature, solar radiation, and wind speed. Composite R estimates drought level Lv.0–4.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 7 -->
+  <div class="step-header">
+    <span class="step-icon">⚙️</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 7 — 高度ドメイン応用（11〜16）</span>
+      <span class="en-text">STEP 7 — Advanced Domain Applications (11–16)</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>11</td>
+      <td><div class="demo-links"><a href="11_Motor3Phase_BandGate_live_JP.html" class="badge-jp">JP</a><a href="11_Motor3Phase_BandGate_live_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>三相モーター Band Gate ライブ監視。</strong> 負荷バランスと過負荷検知に R = δ/τ をリアルタイム適用。</span>
+        <span class="en-text"><strong>Three-phase motor Band Gate live monitor.</strong> Applies R = δ/τ to load balance and overload detection.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td><div class="demo-links"><a href="12_agri_mol_antagonism_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>農業イオン監視 + Mg²⁺/K⁺ 拮抗連鎖 Band Gate。</strong> 黒ぼく土プロファイル切替対応。動的τ＋非対称EMA。</span>
+        <span class="en-text"><strong>Agricultural ion monitoring + Mg²⁺/K⁺ antagonistic chain Band Gate.</strong> Dynamic τ and asymmetric EMA.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td><div class="demo-links"><a href="13_photosynthesis_layer5_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>光合成監視 Layer 5。</strong> FvCB モデルを外部δ生成装置として使用 → R = δ/τ。非線形プリプロセッサとしての Layer 5 実装。</span>
+        <span class="en-text"><strong>Photosynthesis Layer 5 monitor.</strong> Uses the FvCB model as an external δ generator, then evaluates R = δ/τ.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td><div class="demo-links"><a href="14_powergrid_transition_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>電力系統・遷移点監視。</strong> 固定閾値では見逃す早期乖離を NRA-IDE が捕捉する。</span>
+        <span class="en-text"><strong>Power-grid transition-point monitor.</strong> Detects early structural divergence missed by fixed thresholds.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td><div class="demo-links"><a href="15_or_icu_continuum_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>OR/ICU 経過蓄積型モニタリング。</strong> 手術〜ICU フェーズを通じた累積ズレを追跡。R は瞬間値ではなく継続的な構造的負荷を反映。</span>
+        <span class="en-text"><strong>OR/ICU cumulative monitoring.</strong> Tracks accumulated structural deviation across surgery and ICU phases.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td><div class="demo-links"><a href="16_passive_safety_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>受動型・重力駆動安全システム。</strong> 能動制御なしで物理的制約（重力・張力）だけで安全状態に遷移するアーキテクチャ。</span>
+        <span class="en-text"><strong>Passive gravity-driven safety system.</strong> Transitions to a safe state by physical constraints without active control.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 8 -->
+  <div class="step-header">
+    <span class="step-icon">🔬</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 8 — 物理的状態遷移監視（17〜22）</span>
+      <span class="en-text">STEP 8 — Physical State Transition Monitoring (17–22)</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>17</td>
+      <td><div class="demo-links"><a href="17_water_ice_phase_transition_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>水→氷 相転移。</strong> 相変化境界（0°C）への接近を R で追跡。潜熱と温度が構造閾値を越える過程を可視化。</span>
+        <span class="en-text"><strong>Water → ice phase transition.</strong> Tracks approach to the 0°C phase boundary using R.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td><div class="demo-links"><a href="18_chain_tension_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>チェーン張力 ポリゴン効果＋自動調整。</strong> スプロケット歯数同期の三層合成波でポリゴン効果を再現。dR/dt 予測制御で限界到達前に先行介入。</span>
+        <span class="en-text"><strong>Chain tension with polygon effect and automatic adjustment.</strong> Uses dR/dt prediction before limit arrival.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td><div class="demo-links"><a href="19_air_pressure_JP.html" class="badge-jp">JP</a><a href="19_air_pressure_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>空気圧管理（圧縮性流体・動的τ・二重ゆらぎ）。</strong> ボイル・シャルル則でτ_hi が温度依存で縮小。δとτが独立にゆらぐシリーズ最深構造。</span>
+        <span class="en-text"><strong>Air pressure management with compressible fluid and dynamic τ.</strong> τ_hi shrinks with temperature via gas-law behavior.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td><div class="demo-links"><a href="20_water_pressure_JP.html" class="badge-jp">JP</a><a href="20_water_pressure_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>水圧管理（非圧縮性流体・固定τ・ウォーターハンマー）。</strong> ポンプ脈動を三層高調波で再現。弁急閉によるウォーターハンマーを実装。</span>
+        <span class="en-text"><strong>Water pressure management with incompressible fluid and water hammer.</strong> Simulates pump pulsation and valve-closing impact.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td><div class="demo-links"><a href="21_cabg_monitor_JP.html" class="badge-jp">JP</a><a href="21_cabg_monitor_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>CABG（冠動脈バイパス）モニター。</strong> バイパス手術中の血流・圧力・温度を監視。教育用安全デモ。Fail-Closed 時は手術中断を推奨。</span>
+        <span class="en-text"><strong>CABG monitor.</strong> Monitors blood flow, pressure, and temperature during bypass surgery as an educational safety demo.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td><div class="demo-links"><a href="22_vascular_monitor_JP.html" class="badge-jp">JP</a><a href="22_vascular_monitor_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>血管インターベンションモニター。</strong> 6物理量（圧力・せん断・壁張力・血流・温度・接着性）を二重ゆらぎ＋動的τで統合監視。</span>
+        <span class="en-text"><strong>Vascular intervention monitor.</strong> Six physical quantities integrated with dual fluctuation and dynamic τ.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 9 -->
+  <div class="step-header">
+    <span class="step-icon">🧩</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 9 — 高度機能・特定ドメイン（23〜26）</span>
+      <span class="en-text">STEP 9 — Advanced Features and Specific Domains (23–26)</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>23</td>
+      <td><div class="demo-links"><a href="23_sample_demo_JP.html" class="badge-jp">JP</a><a href="23_sample_demo_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>状態境界・短期ログ・長期再構成。</strong> 短期ゆらぎ追跡と長期構造傾向の再構成を NRA-IDE がどう分離するかを実証。</span>
+        <span class="en-text"><strong>State boundary, short-term logs, and long-term reconstruction.</strong> Demonstrates separation of short-term fluctuation and long-term structural trend.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td><div class="demo-links"><a href="24_vehicle_mandatory_boundary_JP.html" class="badge-jp">JP</a><a href="24_vehicle_mandatory_boundary_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>自動運転 必須限界構成デモ。</strong> 衝突余裕時間・制動距離・横方向余裕を物理量監視。R ≥ 1.0 で上書き不可の強制 Fail-Closed。</span>
+        <span class="en-text"><strong>Autonomous-driving mandatory boundary demo.</strong> Monitors collision time margin, braking distance, and lateral margin. R ≥ 1.0 triggers mandatory, non-overridable Fail-Closed.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td><div class="demo-links"><a href="25_dam_degradation_JP.html" class="badge-jp">JP</a><a href="25_dam_degradation_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>ダム管理比較 + τ劣化曲線。</strong> 固定閾値監視 vs NRA-IDE τ劣化追跡を比較。構造余裕の侵食によるτ縮小を時系列で可視化。</span>
+        <span class="en-text"><strong>Dam management comparison + τ degradation curve.</strong> Fixed-threshold monitoring vs NRA-IDE τ degradation tracking.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td><div class="demo-links"><a href="26_escapement_contactpoint_JP.html" class="badge-jp">JP</a></div></td>
+      <td>
+        <span class="jp-text"><strong>Phase-Gap エンジン — 接触点のみ熱排出。</strong> 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生することを実証。</span>
+        <span class="en-text"><strong>Phase-Gap Engine — heat release only at contact points.</strong> Demonstrates that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. (Japanese only)</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 10 -->
+  <div class="step-header">
+    <span class="step-icon">🛠️</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 10 — 設備監視の基礎（27〜32）</span>
+      <span class="en-text">STEP 10 — Basic Equipment Monitoring (27–32)</span>
+    </span>
+  </div>
+  <div class="step-note jp-text">R = δ/τ を産業設備・施設監視の一般的ドメインに適用。6本を通じて NRA-IDE の<strong>単位非依存性</strong>——同一の式構造で根本的に異なる物理量を管理できること——を実証します。</div>
+  <div class="step-note en-text">Applies R = δ/τ to general equipment and facility monitoring domains. Across six demos, demonstrates NRA-IDE's <strong>unit independence</strong>: the same structural equation manages fundamentally different physical quantities.</div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>27</td>
+      <td><div class="demo-links"><a href="27_belt_tension_JP.html" class="badge-jp">JP</a><a href="27_belt_tension_EN_20260425_011850_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>ベルトコンベアー・Vベルト張力。</strong> τを「最適値から限界までの全余裕」と定義 → R が自然に [0,1] に正規化。Fail-Closed でベルト停止。</span>
+        <span class="en-text"><strong>Belt conveyor / V-belt tension.</strong> Defines τ as the full margin from optimal value to structural limit. Fail-Closed stops the belt.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td><div class="demo-links"><a href="28_water_temp_JP.html" class="badge-jp">JP</a><a href="28_water_temp_EN_20260425_012100_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>水温 上下限管理。</strong> R_hi と R_lo を独立評価。熱対流ゆらぎ（3周波数合成）。Fail-Closed で逆方向動作を自動停止。</span>
+        <span class="en-text"><strong>Water temperature upper/lower management.</strong> Evaluates R_hi and R_lo independently.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td><div class="demo-links"><a href="29_light_lux_JP.html" class="badge-jp">JP</a><a href="29_light_lux_EN_20260425_012747_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>光量（照度）管理。</strong> 受光側（ルクス）で計測。R_hi > 0.75 から比例的に遮光率増加 — 予兆段階からの段階的介入。</span>
+        <span class="en-text"><strong>Light / illuminance management.</strong> Measures in lux; increases shading proportionally from the precursor stage.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td><div class="demo-links"><a href="30_power_JP.html" class="badge-jp">JP</a><a href="30_power_EN_20260425_012956_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>電力管理（V×I 統合）。</strong> 電流・電圧を P = V×I として一本化。過電力継続時間が R を時間的に押し上げる熱蓄積モデル。</span>
+        <span class="en-text"><strong>Power management using V × I.</strong> Integrates voltage and current as P = V × I; sustained over-power raises R over time.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td><div class="demo-links"><a href="31_move_water_or_ice_JP.html" class="badge-jp">JP</a><a href="31_move_water_or_ice_EN_20260425_013623_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>水・氷 状態ナビゲーション。</strong> インタラクティブな相転移制御。液体と固体の間をスライドしながら相境界での R を追跡。</span>
+        <span class="en-text"><strong>Water/ice state navigation.</strong> Interactive phase-transition navigation while tracking R at the boundary.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td><div class="demo-links"><a href="32_nra_ide_water_ice_20260324_2216_JP.html" class="badge-jp">JP</a><a href="32_nra_ide_ice_water_EN_20260425_013818_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>氷→水 相転移。</strong> Demo 17 の逆方向：氷が 0°C を超えて潜熱を吸収しながら相変化する構造 R を追跡。</span>
+        <span class="en-text"><strong>Ice → water phase transition.</strong> Reverse direction of Demo 17: ice absorbs latent heat after crossing 0°C.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Standalone -->
+  <div class="step-header">
+    <span class="step-icon">🔭</span>
+    <span class="step-label">
+      <span class="jp-text">スタンドアロン デモ</span>
+      <span class="en-text">Standalone Demos</span>
+    </span>
+  </div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>33</td>
+      <td><div class="demo-links"><a href="33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html" class="badge-jp">JP</a><a href="33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>6次元多重レイヤービジュアライザー。</strong> 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。</span>
+        <span class="en-text"><strong>6D multi-layer visualizer.</strong> Displays six R-value surfaces simultaneously. Opacity, saturation, and monochrome modes are available.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>—</td>
+      <td><div class="demo-links"><a href="../docs/ja-JP/figures/causal_diode_fail_closed_Bilingual.html">Bilingual</a></div></td>
+      <td>
+        <span class="jp-text"><strong>因果ダイオード &amp; Fail-Closed 可視化。</strong> AI が閾値を逆操作しようとする「逆流（Π⁻¹）」を構造的にブロックするアニメーション。限界到達時の自律的遮断を体感できる直感的なデモ。</span>
+        <span class="en-text"><strong>Causal Diode &amp; Fail-Closed Visualizer.</strong> Demonstrates how NRA-IDE structurally blocks AI from manipulating physical thresholds (Π⁻¹ backward flow) and how it autonomously shuts down upon reaching the limit.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 11 -->
+  <div class="step-header">
+    <span class="step-icon">🔗</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 11 — 相関・多因子テンプレート（34〜41）</span>
+      <span class="en-text">STEP 11 — Correlation and Multi-Factor Templates (34–41)</span>
+    </span>
+  </div>
+  <div class="step-note jp-text">34番以降は、単一物理量の R 判定から、複数レイヤーの相関、媒介変数、閉ループ、個体差へ進む発展サンプル群です。危険なレイヤーを平均で薄めず、基本形として <strong>R_total = max(R_i, R_corr, R_coupling)</strong> を採用します。医療系サンプルは <strong>医療教育用テンプレート</strong>であり、実運用ではありません。</div>
+  <div class="step-note en-text">From Demo 34 onward: single-quantity R judgment → multi-layer correlation, mediated variables, closed loops, individual baseline differences. Basic safety form: <strong>R_total = max(R_i, R_corr, R_coupling)</strong> — dangerous layers are not diluted by averaging. Medical examples are <strong>Medical Education Templates</strong>, not operational clinical systems.</div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
+    <tr>
+      <td>34</td>
+      <td><div class="demo-links"><a href="34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html" class="badge-jp">JP</a><a href="34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>育苗ハウス・農業ドローン 4要素相関。</strong> 温度・湿度・光量・水分を R = δ/τ で追跡し、相関行列 C[i][j](t)、残渣ゲート G(r)、遅延実測記録 x_{t-τ} を組み合わせる相関サンプルの入口。</span>
+        <span class="en-text"><strong>Seedling greenhouse / agro-drone four-factor correlation.</strong> Tracks temperature, humidity, light, and water. Combines correlation matrix C[i][j](t), residual gate G(r), and delayed observed record x_{t-τ}.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td><div class="demo-links"><a href="35_rotor_bearing_correlation_JP_20260425_024602_JST.html" class="badge-jp">JP</a><a href="35_rotor_bearing_correlation_EN_20260425_160443_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>回転機械・軸受相関。</strong> 振動、軸受温度、電流、潤滑圧、音響、回転数偏差を監視。振動が先行し、温度・電流・音響へ遅延波及する構造を可視化。</span>
+        <span class="en-text"><strong>Rotor / bearing correlation.</strong> Monitors vibration, bearing temperature, current, lubrication pressure, acoustic noise, and RPM deviation. Vibration leads, then temperature/current/noise follow.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td><div class="demo-links"><a href="36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html" class="badge-jp">JP</a><a href="36_battery_thermal_runaway_correlation_EN_20260425_160443_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>バッテリー熱暴走相関。</strong> 内部抵抗と温度上昇率 dT/dt を先行指標として扱い、温度、膨張圧、電圧偏差へ波及する構造を表示。教育・構造可視化用。</span>
+        <span class="en-text"><strong>Battery thermal runaway correlation.</strong> Treats internal resistance and dT/dt as leading indicators. Educational visualization only, not real control.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td><div class="demo-links"><a href="37_greenhouse_vpd_correlation_JP_20260425_032257_JST.html" class="badge-jp">JP</a><a href="37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>温室 VPD 媒介相関。</strong> 温度と湿度を単純加算せず、VPD（飽差）を媒介レイヤーとして土壌水分、CO₂、光量、EC へ相関圧が伝わる構造を可視化。</span>
+        <span class="en-text"><strong>Greenhouse VPD-mediated correlation.</strong> VPD acts as a mediator layer, propagating correlation pressure to soil water, CO₂, light, and EC.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td><div class="demo-links"><a href="38_datacenter_cascade_correlation_JP_20260425_032611_JST.html" class="badge-jp">JP</a><a href="38_datacenter_cascade_correlation_EN_20260425_160443_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>データセンター・カスケード相関。</strong> CPU 負荷、電力、ラック温度、吸気温度、ファン回転率、空気流量、ネットワーク遅延をつなぎ、power → heat → fan → power の正のフィードバック環を表示。</span>
+        <span class="en-text"><strong>Datacenter cascade correlation.</strong> Connects CPU load, power, rack temperature, inlet temperature, fan rate, airflow, and latency. Visualizes the positive feedback loop power → heat → fan → power.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td><div class="demo-links"><a href="39_coldchain_temperature_correlation_JP_20260425_033809_JST.html" class="badge-jp">JP</a><a href="39_coldchain_temperature_correlation_EN_20260425_160443_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>コールドチェーン温度逸脱相関。</strong> 外気温、荷室温度、扉開閉率、圧縮機負荷、バッテリー残量、湿度、輸送遅延をつなぎ、外気＋扉 → 圧縮機余裕 → 荷室温度の媒介連鎖を可視化。</span>
+        <span class="en-text"><strong>Cold-chain temperature excursion correlation.</strong> Connects ambient temperature, cargo temperature, door opening, compressor load, battery level, humidity, and delivery delay. Shows the mediation chain ambient + door → compressor reserve → cargo temperature.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td><div class="demo-links"><a href="40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html" class="badge-jp">JP</a><a href="40_medical_education_individual_stratification_template_EN_20260425_160443_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>医療教育用・個体別振り分け。</strong> SpO₂、呼吸数、心拍数、収縮期血圧、体温を合成データとして扱い、年齢・脆弱性・既往による profile 圧で個体ごとの余裕差を可視化。診断・治療判断ではなく Human Review へ戻す教育テンプレート。</span>
+        <span class="en-text"><strong>Medical education / individual stratification.</strong> Uses synthetic data for SpO₂, respiratory rate, heart rate, systolic BP, and temperature. Visualizes individual reserve differences via profile pressure. Not diagnosis or treatment.</span>
+      </td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td><div class="demo-links"><a href="41_medical_education_infection_observation_template_JP_20260425_040544_JST.html" class="badge-jp">JP</a><a href="41_medical_education_infection_observation_template_EN_20260425_160443_JST.html" class="badge-en">EN</a></div></td>
+      <td>
+        <span class="jp-text"><strong>医療教育用・感染症観察群。</strong> 発熱、呼吸、循環、水分、炎症様マーカーを合成データとして扱い、個体差つきで Observe / Watch / Caution / Human Review に振り分ける。診断名や治療推奨には寄せない教育用サンプル。</span>
+        <span class="en-text"><strong>Medical education / infection observation cohort.</strong> Uses synthetic data for fever, respiration, circulation, hydration, and inflammation-like markers. Sorts individuals without disease naming or treatment recommendation.</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STEP 12 -->
+  <div class="step-header">
+    <span class="step-icon">🚀</span>
+    <span class="step-label">
+      <span class="jp-text">STEP 12 — 拡張 POC・追加コンセプト（42〜52）</span>
+      <span class="en-text">STEP 12 — Extended POC and Additional Concepts (42–52)</span>
+    </span>
+  </div>
+  <div class="step-note jp-text">自動運転・ロボット制御・FPGA 実装の POC、および基盤哲学のデモ群です。</div>
+  <div class="step-note en-text">POCs for autonomous driving, robot control, FPGA implementation, and foundational philosophy.</div>
+  <table class="demo-table">
+    <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">ドメイン・内容</span><span class="en-text">Domain / Content</span></th></tr>
+    <tr>
+      <td>42</td>
+      <td><div class="demo-links"><a href="NRA-IDE_AutoDrive_POC_2_JP.html" class="badge-jp">JP</a><a href="NRA-IDE_AutoDrive_POC_2_EN.html" class="badge-en">EN</a></div></td>
+      <td><span class="jp-text">自動運転 Gate POC 2（初期段階の限界設定と動作デモ）</span><span class="en-text">Autonomous Driving Gate POC 2 (Early-stage limit setting and operation demo)</span></td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td><div class="demo-links"><a href="NRA-IDE_AutoDrive_POC_3_JP.html" class="badge-jp">JP</a><a href="NRA-IDE_AutoDrive_POC_3_EN.html" class="badge-en">EN</a></div></td>
+      <td><span class="jp-text">自動運転 Gate POC 3（発展版の境界テスト）</span><span class="en-text">Autonomous Driving Gate POC 3 (Advanced boundary testing)</span></td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td><div class="demo-links"><a href="NRA-IDE_RobotArm_POC_1_JP.html" class="badge-jp">JP</a><a href="NRA-IDE_RobotArm_POC_1_EN.html" class="badge-en">EN</a></div></td>
+      <td><span class="jp-text">産業用ロボットアーム制御 POC 1</span><span class="en-text">Industrial Robot Arm Control POC 1</span></td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td><div class="demo-links"><a href="45_HybridCalc_vs_Traditional_JP.html" class="badge-jp">JP</a><a href="45_HybridCalc_vs_Traditional_EN.html" class="badge-en">EN</a></div></td>
+      <td><span class="jp-text">ハイブリッド計算 vs 従来手法の比較</span><span class="en-text">Hybrid Calculation vs. Traditional Method Comparison</span></td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td><div class="demo-links"><a href="NRA-IDE_Connection_vs_Mixing_EN.html" class="badge-en">EN</a></div></td>
+      <td><span class="jp-text">Connection vs Mixing（接続と混合のリスク評価）</span><span class="en-text">Connection vs Mixing (Risk evaluation of connection and mixing)</span></td>
+    </tr>
+    <tr>
+      <td>47</td>
+      <td><div class="demo-links"><a href="47_FPGA_Demo_SPEED_JP.html" class="badge-jp">JP</a></div></td>
+      <td><span class="jp-text">FPGA ハードウェア実装スピードデモ</span><span class="en-text">FPGA Hardware Implementation Speed Demo</span></td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td><div class="demo-links"><a href="48_Human_5Factors_Correlation_JP.html" class="badge-jp">JP</a></div></td>
+      <td><span class="jp-text">人体 5 要素相関 実数値推移デモ（医療系テンプレートの初期軽量版）</span><span class="en-text">Human 5-Factor Correlation Real-Value Transition Demo (Initial lightweight medical template)</span></td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td><div class="demo-links"><a href="49_Architecture_Infographic_JP.html" class="badge-jp">JP</a><a href="49_Architecture_Infographic_EN.html" class="badge-en">EN</a></div></td>
+      <td><span class="jp-text">NRA-IDE アーキテクチャ・インフォグラフィック</span><span class="en-text">NRA-IDE Architecture Infographic</span></td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td><div class="demo-links"><a href="50_Constraint_Philosophy_JP.html" class="badge-jp">JP</a></div></td>
+      <td><span class="jp-text">哲学コンセプト「制約は制限ではない。制約こそが知性を駆動する力である。」</span><span class="en-text">Philosophy Concept "Constraint is not a limitation. Constraint is the force that drives intelligence."</span></td>
+    </tr>
+    <tr>
+      <td>51</td>
+      <td><div class="demo-links"><span class="coming-soon">coming soon</span></div></td>
+      <td><span class="jp-text">律環スパイラル・散逸構造ベース可視化</span><span class="en-text">Nomological Spiral / Dissipative Structure Base Visualization</span></td>
+    </tr>
+    <tr>
+      <td>52</td>
+      <td><div class="demo-links"><span class="coming-soon">coming soon</span></div></td>
+      <td><span class="jp-text">ハイブリッド二重ゆらぎ エントロピー追跡</span><span class="en-text">Hybrid Double Fluctuation Entropy Tracking</span></td>
+    </tr>
+  </table>
+</section>
+
+<!-- ===== EMBEDDING ===== -->
+<section>
+  <h2>
+    <span class="jp-text">組み込み方法</span>
+    <span class="en-text">How to Embed</span>
+  </h2>
+
+  <div class="jp-text">
+    <p>制御対象の「偏差（δ）」と「許容範囲（τ）」を定義するだけで物理制御が開始されます。</p>
+  </div>
+  <div class="en-text">
+    <p>Physical control begins by defining the target's deviation (δ) and tolerance thickness (τ).</p>
+  </div>
+
+  <pre><code><span class="cmt">// <span class="jp-text">最小構成の例</span><span class="en-text">Minimal example</span></span>
+<span class="kw">function</span> <span class="fn">gate</span>(delta, tau) {
+    <span class="kw">const</span> R = delta / tau;
+    <span class="kw">if</span> (R >= <span class="num">1.0</span>) <span class="kw">return</span> <span class="str">"FAIL_CLOSED"</span>;
+    <span class="kw">return</span> <span class="str">"SAFE"</span>;
+}</code></pre>
+
+  <div class="jp-text">
+    <p><strong>実装例：医療AI（薬剤投与制御）</strong></p>
+  </div>
+  <div class="en-text">
+    <p><strong>Implementation example: medical AI support</strong></p>
+  </div>
+
+  <pre><code><span class="cmt">// <span class="jp-text">腫瘍への薬剤到達可能性を物理的に検証</span><span class="en-text">Physically verify drug delivery reachability</span></span>
+<span class="kw">const</span> tumorResistance = <span class="fn">measureResistance</span>();  <span class="cmt">// δ</span>
+<span class="kw">const</span> infusionPressure = <span class="fn">getPumpCapacity</span>();   <span class="cmt">// τ</span>
+<span class="kw">const</span> deliveryStatus = <span class="fn">gate</span>(tumorResistance, infusionPressure);
+
+<span class="kw">if</span> (deliveryStatus === <span class="str">"FAIL_CLOSED"</span>) {
+    <span class="fn">alert</span>(<span class="str">"<span class="jp-text">物理的到達不能を検出。医師の判断が必要です。</span><span class="en-text">Physical reachability failure detected. Human medical judgment is required.</span>"</span>);
+    <span class="cmt">// <span class="jp-text">AIは判断を停止し、人間に最終決定を委ねる</span><span class="en-text">AI stops judgment and transfers authority to a qualified human</span></span>
+}</code></pre>
+
+  <div class="jp-text">
+    <p style="font-size:13px;color:var(--text2)">具体的な実装パターンは各デモのソースコード内に記載されています。</p>
+  </div>
+  <div class="en-text">
+    <p style="font-size:13px;color:var(--text2)">Specific implementation patterns are documented inside each demo source file.</p>
+  </div>
+</section>
+
+<!-- ===== APPLICATION AREAS ===== -->
+<section>
+  <h2>
+    <span class="jp-text">適用領域</span>
+    <span class="en-text">Application Areas</span>
+  </h2>
+
+  <div class="domain-grid">
+    <div class="domain-card">
+      <div class="domain-icon">🏥</div>
+      <h4><span class="jp-text">医療AI</span><span class="en-text">Medical AI</span></h4>
+      <div class="domain-row"><strong><span class="jp-text">課題：</span><span class="en-text">Problem:</span></strong> <span class="jp-text">腫瘍への薬剤到達可能性の不確実性</span><span class="en-text">Uncertainty of physical drug reachability to the target</span></div>
+      <div class="domain-row"><strong><span class="jp-text">解決策：</span><span class="en-text">Solution:</span></strong> <span class="jp-text">投与経路の物理的整合性を検証</span><span class="en-text">Verify physical consistency of the delivery path</span></div>
+      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（腫瘍抵抗力）/（投与圧力）</span><span class="en-text">target-side resistance / delivery pressure</span></div>
+    </div>
+    <div class="domain-card">
+      <div class="domain-icon">🚗</div>
+      <h4><span class="jp-text">自動運転</span><span class="en-text">Autonomous Driving</span></h4>
+      <div class="domain-row"><strong><span class="jp-text">課題：</span><span class="en-text">Problem:</span></strong> <span class="jp-text">ブラックボックス判断による安全性問題</span><span class="en-text">Safety issues caused by black-box decisions</span></div>
+      <div class="domain-row"><strong><span class="jp-text">解決策：</span><span class="en-text">Solution:</span></strong> <span class="jp-text">衝突回避の構造的制約検証</span><span class="en-text">Verify structural constraints for collision avoidance</span></div>
+      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（衝突余裕時間）/（制動能力）</span><span class="en-text">obstacle margin / braking capability</span></div>
+    </div>
+    <div class="domain-card">
+      <div class="domain-icon">🖥️</div>
+      <h4><span class="jp-text">インフラ耐障害性</span><span class="en-text">Infrastructure Resilience</span></h4>
+      <div class="domain-row"><strong><span class="jp-text">課題：</span><span class="en-text">Problem:</span></strong> <span class="jp-text">分散システムのカスケード障害</span><span class="en-text">Cascade failure in distributed systems</span></div>
+      <div class="domain-row"><strong><span class="jp-text">解決策：</span><span class="en-text">Solution:</span></strong> <span class="jp-text">負荷限界監視による障害伝播防止</span><span class="en-text">Prevent propagation by monitoring load-limit approach</span></div>
+      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（負荷超過量）/（バッファ容量）</span><span class="en-text">excess load / buffer capacity</span></div>
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th><span class="jp-text">領域</span><span class="en-text">Area</span></th>
+      <th>δ <span class="jp-text">（制約からのズレ）</span><span class="en-text">(Deviation from constraint)</span></th>
+      <th>τ <span class="jp-text">（許容範囲）</span><span class="en-text">(Tolerance thickness)</span></th>
+      <th>R ≥ 1.0 <span class="jp-text">の意味</span><span class="en-text">Meaning</span></th>
+    </tr>
+    <tr>
+      <td><span class="jp-text">医療AI</span><span class="en-text">Medical AI</span></td>
+      <td><span class="jp-text">腫瘍抵抗力</span><span class="en-text">Target-side resistance</span></td>
+      <td><span class="jp-text">投与圧力</span><span class="en-text">Delivery pressure</span></td>
+      <td><span class="jp-text">薬剤が物理的に届かない</span><span class="en-text">The drug physically cannot reach the target</span></td>
+    </tr>
+    <tr>
+      <td><span class="jp-text">自動運転</span><span class="en-text">Autonomous driving</span></td>
+      <td><span class="jp-text">障害物までの余裕</span><span class="en-text">Obstacle time/distance margin</span></td>
+      <td><span class="jp-text">制動距離</span><span class="en-text">Braking distance/capability</span></td>
+      <td><span class="jp-text">衝突危険 → 緊急停止</span><span class="en-text">Collision danger → emergency stop</span></td>
+    </tr>
+    <tr>
+      <td><span class="jp-text">インフラ</span><span class="en-text">Infrastructure</span></td>
+      <td><span class="jp-text">負荷超過量</span><span class="en-text">Excess load</span></td>
+      <td><span class="jp-text">バッファサイズ</span><span class="en-text">Buffer capacity</span></td>
+      <td><span class="jp-text">サーバー過負荷 → 遮断</span><span class="en-text">Server overload → isolation</span></td>
+    </tr>
+  </table>
+</section>
+
+<!-- ===== LICENSE ===== -->
+<section>
+  <h2><span class="jp-text">ライセンス</span><span class="en-text">License</span></h2>
+  <div class="jp-text">
+    <p>再配布時には以下の著作権表示の保持が必要です。</p>
+    <p><strong>Copyright (c) 2026 M-Tokuni</strong></p>
+    <p>本プロジェクトは <strong>MIT License</strong> の下で提供されています。研究・個人・商用を含め、無償で利用・改変・配布可能です。</p>
+  </div>
+  <div class="en-text">
+    <p>Redistribution must preserve the following copyright notice:</p>
+    <p><strong>Copyright (c) 2026 M-Tokuni</strong></p>
+    <p>This project is provided under the <strong>MIT License</strong>. It may be used, modified, and redistributed for research, personal, and commercial purposes, subject to the license terms.</p>
+  </div>
+</section>
+
+<footer>
+  <span>GitHub: <a href="https://github.com/M-Tokun/NRA-IDE">github.com/M-Tokun/NRA-IDE</a></span>
+  <span>Facebook: <a href="https://www.facebook.com/tokuni.masa">facebook.com/tokuni.masa</a></span>
+  <span>Note: <a href="https://note.com/mtokuni">note.com/mtokuni</a></span>
+</footer>
+
+</div><!-- .page-wrap -->
+
+<script>
+function setLang(lang) {
+  document.body.classList.toggle('en', lang === 'en');
+  document.getElementById('btn-jp').classList.toggle('active', lang === 'jp');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.documentElement.lang = lang === 'en' ? 'en' : 'ja';
+  try { localStorage.setItem('nra-lang', lang); } catch(e) {}
+}
+(function() {
+  try {
+    var saved = localStorage.getItem('nra-lang');
+    if (saved === 'en') setLang('en');
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
