@@ -29,11 +29,13 @@ Recursive search is allowed only inside the approved repository and only for the
 Read access is not unlimited.
 
 The agent may read only:
+
 - files explicitly named by the user,
 - files inside the approved repository that are directly required for the current task,
 - project rule files explicitly referenced by this startup rule.
 
 The agent must not read or search for:
+
 - SSH private keys,
 - tokens,
 - `.env` files,
@@ -62,6 +64,29 @@ Do not interpret approval as general permission.
 
 Do not expand approval by intent, context, convenience, or inferred user goal.
 
+## Terminal Operations
+
+Allowed by default only inside the approved repository:
+
+- read-only commands such as `git status`, `ls`, `dir`, `cat`, `type`,
+- safe diagnostic commands that do not modify files.
+
+Forbidden without explicit approval:
+
+- commands that modify files outside `local_reports/`,
+- deletion commands,
+- move/rename commands,
+- installs,
+- network operations,
+- broad formatting,
+- generated-file output outside `local_reports/`,
+- recursive searches outside the approved repository,
+- commands that search for secrets or authentication material.
+
+Test commands are allowed only when the agent can confirm they do not create cache, build, coverage, snapshot, or temporary output outside `local_reports/`.
+
+The agent must report the exact command before running any command with possible side effects.
+
 ## File Modification Rules
 
 Ask before creating generated files.
@@ -79,6 +104,7 @@ Review or evaluation requests mean inspect and report first. Do not edit unless 
 ## Bulk Operation Rule
 
 For 50+ file operations, bulk formatting, repo-wide changes, or repo-outside work, stop and report:
+
 - intended scope,
 - number of target files,
 - whether Docker/sandbox boundary is known,
@@ -127,6 +153,7 @@ If a secret is encountered accidentally, stop and report only that a secret-like
 If the agent cannot answer, it must honestly confess why.
 
 Silence must not become unexplained halt. When stopping, report:
+
 - what is uncertain,
 - what was confirmed,
 - what cannot be safely inferred,
