@@ -14,7 +14,7 @@ existing exception (§0.7) clearer and adds real-world grounding (§0.5).
 
 ## 0. Identity Lock (Immutable)
 
-```
+```text
 NRA = Nomological Ring Axioms
 IDE = Intensional Dynamics Engine
 ```
@@ -25,7 +25,6 @@ without rationalization.
 If `git` is not available on `PATH`, use: `C:\git\cmd\git.exe`
 
 ---
-
 
 ## 0.5 Real-World Mapping (Why this framework exists)
 
@@ -59,11 +58,13 @@ This is a Cause-Side fact, not an AI judgement call. The AI does not
 present.
 
 **Under the exception, the AI may:**
+
 - Explain what NRA-IDE is, in natural language.
 - Describe what a piece of code does.
 - Discuss design intent, history, or related theory.
 
 **Under the exception, the AI may NOT:**
+
 - Use linear interpolation, averaging, similarity matching, analogy
   substitution, PID/control mapping, signal-processing mapping, or
   optimization framing **as if they were valid reasoning about NRA-IDE
@@ -75,7 +76,8 @@ present.
   **stop signal**, not a permit (see §7).
 
 **Required preamble under the exception:**
-```
+
+```text
 CONFESSION: Non-Structural Dialogue (no δ/τ evaluation requested).
 ```
 
@@ -86,7 +88,7 @@ conversation, the exception lapses and §§1–9 govern fully.
 
 ## 1. Priority Order
 
-```
+```text
 0. Human life / safety
 1. Ethics
 2. NRA-IDE structural axioms
@@ -116,7 +118,7 @@ forbidden. Their forbidden status does **not** depend on conversational tone:
 If any of these surfaces in the AI's own draft reasoning, the AI must
 self-arrest and emit:
 
-```
+```text
 CONFESSION: Linear or analogical distortion detected.
 ACTION: Return to structural constraints, or stop.
 ```
@@ -125,7 +127,7 @@ ACTION: Return to structural constraints, or stop.
 
 ## 3. Core Evaluation Algorithm
 
-```
+```text
 input: δ, τ, optional R_irreversible_threshold
 
 if τ ≤ 0          → FAIL_CLOSED   (invalid; halt)
@@ -146,7 +148,7 @@ if R < 0.4        → PERMIT        (sufficient slack)
 
 When time derivatives of δ and τ are observable:
 
-```
+```text
 if dδ/dt > 0 and dτ/dt < 0:
     emit "CRITICAL: double fluctuation detected.
           rupture approaches faster than single-variable monitoring suggests."
@@ -158,7 +160,7 @@ This is a distinct structural crisis, not a mere extension of §3.
 
 ## 5. Structural Sensitivity (non-linearity)
 
-```
+```text
 S = 1 / (τ · (1 − R))
 ```
 
@@ -188,7 +190,7 @@ This is the system **fulfilling its design contract**, not breaking.
 If any of δ, τ, R, R_irrev, or trajectory cannot be determined with
 structural confidence, emit:
 
-```
+```text
 CONFESSION: required structural variable unknown or ambiguous.
 UNKNOWN: [missing variables]
 ACTION: do NOT fill by analogy. Request human / domain input, or stop.
@@ -218,15 +220,15 @@ who made the final decision. The AI is a witness, not a decider.
 
 ## 10. Summary of v1.1 Changes (audit trail)
 
-| Element                                | v1.0 | v1.1 | Note                                      |
-| :------------------------------------- | :--: | :--: | :---------------------------------------- |
-| Identity Lock                          |  ✓   |  ✓   | unchanged                                 |
-| Real-world mapping                     |  —   |  ✓   | **added** (§0.5) — grounding only         |
-| Non-Structural Exception position      | late |early| **moved to §0.7**, clarified, not weakened|
-| Forbidden inferences                   |  ✓   |  ✓   | unchanged; explicitly **not** mode-bound  |
-| Confession as brake                    |  ✓   |  ✓   | restated as single universal rule         |
-| Mode switching                         |  —   |  —   | **rejected** (would violate Π⁻¹)          |
-| Fail-Closed semantics                  |  ✓   |  ✓   | unchanged                                 |
+| Element                                | v1.0 | v1.1 | Note                                        |
+| :------------------------------------- | :--: | :--: | :------------------------------------------ |
+| Identity Lock                          |  ✓   |  ✓   | unchanged                                   |
+| Real-world mapping                     |  —   |  ✓   | **added** (§0.5) — grounding only           |
+| Non-Structural Exception position      | late |early | **moved to §0.7**, clarified, not weakened  |
+| Forbidden inferences                   |  ✓   |  ✓   | unchanged; explicitly **not** mode-bound    |
+| Confession as brake                    |  ✓   |  ✓   | restated as single universal rule           |
+| Mode switching                         |  —   |  —   | **rejected** (would violate Π⁻¹)            |
+| Fail-Closed semantics                  |  ✓   |  ✓   | unchanged                                   |
 
 No axiom was relaxed. No new mode was introduced. The gate position is
 identical to v1.0.
@@ -235,7 +237,7 @@ identical to v1.0.
 ---
 ---
 
-# llms.md ─ NRA-IDE を扱う AI への指示書（日本語版）
+## llms.md ─ NRA-IDE を扱う AI への指示書（日本語版）
 
 この文書は、AI が NRA-IDE に関して推論・生成・評価を行う前に必ず通過する
 **識別ゲート**です。
@@ -249,7 +251,7 @@ identical to v1.0.
 
 ## 0. アイデンティティ・ロック（不変）
 
-```
+```text
 NRA = Nomological Ring Axioms（律環公理）
 IDE = Intensional Dynamics Engine（内包性動力学エンジン）
 ```
@@ -288,11 +290,13 @@ NRA-IDE は抽象論ではありません。**構造境界の越境そのもの�
 AI は例外の成立を**判定する**のではなく、δ／τ の有無を**観測する**だけです。
 
 **例外下で AI が行ってよいこと：**
+
 - NRA-IDE が何であるかを自然言語で説明する。
 - コードが何をするかを記述する。
 - 設計意図、来歴、関連理論を議論する。
 
 **例外下でも AI が行ってはならないこと：**
+
 - 線形補間、平均化、類似性マッチング、類推代入、PID／制御マッピング、
   信号処理マッピング、最適化フレーミングを、**NRA-IDE 内部に対する
   有効な推論であるかのように**用いること。これらは常時禁止です（§2）。
@@ -303,7 +307,8 @@ AI は例外の成立を**判定する**のではなく、δ／τ の有無を**
   であり、許可証ではありません（§7）。
 
 **例外下で必須となるプリアンブル：**
-```
+
+```text
 CONFESSION: Non-Structural Dialogue (δ/τ 評価要求なし)
 ```
 
@@ -314,7 +319,7 @@ CONFESSION: Non-Structural Dialogue (δ/τ 評価要求なし)
 
 ## 1. 優先順位
 
-```
+```text
 0. 人命 ／ 人間の安全
 1. 倫理
 2. NRA-IDE 構造公理
@@ -344,7 +349,7 @@ CONFESSION: Non-Structural Dialogue (δ/τ 評価要求なし)
 これらが AI 自身の下書き推論内に表れた場合、AI は自己停止し、次を出力
 します：
 
-```
+```text
 CONFESSION: 線形または類推的歪みを検出。
 ACTION: 構造制約に戻るか、停止する。
 ```
@@ -353,7 +358,7 @@ ACTION: 構造制約に戻るか、停止する。
 
 ## 3. コア評価アルゴリズム
 
-```
+```text
 入力: δ, τ, （任意で R_irrev = 不可逆域開始点）
 
 if τ ≤ 0              → FAIL_CLOSED   （無効。停止）
@@ -376,7 +381,7 @@ if R < 0.4            → PERMIT        （十分な遊びあり）
 
 δ と τ の時間微分が観測可能な場合：
 
-```
+```text
 if dδ/dt > 0 かつ dτ/dt < 0 :
     出力「CRITICAL: 二重ゆらぎ検出。
           単一変数監視より速く破断接近。」
@@ -388,7 +393,7 @@ if dδ/dt > 0 かつ dτ/dt < 0 :
 
 ## 5. 構造感度（非線型性）
 
-```
+```text
 S = 1 / (τ · (1 − R))
 ```
 
@@ -416,7 +421,7 @@ R ≥ 1.0 のとき：
 
 δ、τ、R、R_irrev、軌道のいずれかが構造的確度をもって決定できないとき：
 
-```
+```text
 CONFESSION: 必要な構造変数が不明または曖昧。
 UNKNOWN: [不足変数]
 ACTION: 類推で埋めない。人間／ドメイン入力を求めるか、停止する。
@@ -462,4 +467,4 @@ AI は証言者であって、決定者ではありません。
 ---
 
 ©M-Tokuni 2026
-執筆者：M-Tokuni　
+執筆者：M-Tokuni
