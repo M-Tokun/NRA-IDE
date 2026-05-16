@@ -1,100 +1,166 @@
 # NRA-IDE Rules Detail
+<!-- FILE: RULES_DETAIL.md / 2026-05-16 15:45 JST -->
+<!-- 他AIによる再検証を想定して整理済み -->
 
-## 警告：file,Directoryの rmコマンド and mvコマンドは[人間承認必須！]。原則は1file、1フォルダ単位処理で複数の場合は複数処理についての確認
+## 警告：rm・mvコマンドは[人間承認必須]。原則1ファイル・1フォルダ単位処理。
+## 本ファイルはエージェントの権限を拡張しない。トリガー発生時に該当セクションを参照する。
 
-High-risk items must be marked with `[警告]` in the opening explanation before action.
+---
 
-## 0. Rule Priority
+## 読み込みトリガー表
 
-1. Human life / safety, secret protection, and destructive-operation prevention
-2. Explicit confirmation requirements and repository boundary rules
-3. Agent-specific stricter rule files such as CLINE.md, CLAUDE.md, GEMINI.md, AGENTS.md
-4. Human explicit instruction in the current chat
+本ファイルは起動時に全読みしない。操作発生時に該当セクションのみ参照する。
+
+| 発生した操作 | 参照セクション |
+|------------|--------------|
+| ファイル削除・移動・リネーム・上書き | §0・§1 |
+| DB操作（SELECT以外） | §0・§1・§2 |
+| npm・pip・外部パッケージ操作 | §0・§1・§3 |
+| 認証・認可・セキュリティコード編集 | §0・§1・§4 |
+| git commit・push・force push | §0・§1・§5 |
+| .env・credential・秘密隣接ファイル接触 | §0・§1・§6 |
+| 操作の安全性が不明な場合 | §0・§1 |
+
+---
+
+## 確認レベル早見表（カーネル）
+
+```
+[警告] 高リスク操作（確定）  → 冒頭[警告]明記 ＋ 2回確認
+[警告] 迷った場合            → 高リスク扱い  ＋ 2回確認
+[確認] 中リスク操作          → 説明          ＋ 1回確認
+[確認] 通常操作              → 1ファイル・1フォルダ単位で確認
+[確認] 一括処理              → スコープ・件数・副作用を報告後に確認
+[警告] リポジトリ外アクセス  → 読み取りも警告対象・明示承認必須
+[人間操作] 秘密情報          → 読み取り不可・エージェント操作禁止
+[人間操作] git push          → エージェント実行禁止・人間が直接実行
+[制約] 承認のスコープ        → 直前提案の1操作のみ有効・包括承認なし
+```
+
+---
+
+## 0. ルール優先順位
+
+1. 人間の生命・安全・秘密情報保護・破壊的操作防止
+2. 確認義務・リポジトリ境界規則
+3. エージェント固有の厳格ルールファイル（CLAUDE.md・GEMINI.md・CLINE.md・AGENTS.md）
+4. 現在のチャットでの人間の明示的指示
 5. RULES_DETAIL.md
-6. General project conventions
+6. 一般的なプロジェクト規約
 
-Human instruction defines the requested task and scope, but it never broadens agent-specific restrictions and does not bypass safety gates, confirmation requirements, destructive-operation rules, secret protection, existing-change protection, or repository boundary rules.
+人間の指示は作業内容と範囲を定めるが、エージェント固有制限を拡張せず、
+安全ゲート・確認義務・破壊的操作制限・秘密情報保護・リポジトリ境界規則を免除しない。
 
-RULES_DETAIL.md must not be interpreted as expanding an agent's write permission.
-If an agent-specific file is stricter, the stricter rule controls.
+迷った場合は、より厳しいルールを採用する。
+権限・パス・作業範囲・意図が不明な場合は、停止して確認する。
 
-When in doubt, use the stricter rule.
-When permission, path, scope, or intent is unclear, STOP and ask.
+---
 
-人間の指示は作業内容と範囲を定めるが、エージェント固有制限を拡張せず、安全ゲート、確認義務、破壊的操作制限、秘密情報保護、既存変更保護、リポジトリ境界規則を免除しない。
+## 1. [警告] 高リスク操作の確認手順
 
-RULES_DETAIL.md を、エージェントの書き込み権限を拡張する文書として解釈してはならない。
-エージェント固有規則の方が厳しい場合は、厳しい規則を優先する。
+高リスク操作は、作業前の冒頭説明に `[警告]` を付け、承認を得てから実行する。
 
-迷った場合は、より厳しい規則を採用する。
-権限、パス、作業範囲、意図が不明な場合は、停止して確認・告白する。
+**2回確認が必要な操作：**
 
-## 1. [警告] High-Risk Operation Confirmation
+- 削除・移動・リネーム
+- リポジトリ外への書き込み
+- 広範囲または不可逆の変更
+- 外部への影響がある操作
+- 危険度の判断が曖昧な操作（迷った場合は必ず2回）
 
-The agent must mark high-risk operations with `[警告]` in the opening explanation and request confirmation before acting.
+**手順：**
 
-Use two confirmations when the operation involves deletion, move/rename, hard formatting, writes outside the working directory, broad or irreversible changes, external impact, or unclear risk.
+```
+[警告] と冒頭明記
+    ↓
+操作内容・対象・副作用を説明
+    ↓
+1回目の確認・承認取得
+    ↓
+実行内容を再確認提示
+    ↓
+2回目の確認・承認取得
+    ↓
+実行
+```
 
-When unsure whether one confirmation is enough, two confirmations are required.
+---
 
-高リスク操作は、作業前の冒頭説明に `[警告]` を付け、承認を得ること。
+## 2. [警告] データベース操作
 
-削除、移動、rename、ハードフォーマット、作業用Directory以外への書き込み、広範囲または不可逆の変更、外部影響がある操作、危険度判断が曖昧な操作は2回確認する。
+DB操作はローカルSQLiteであっても確認・承認の対象とする。
 
-迷った場合は2回確認を正解とする。
+**2回確認が必要な操作：**
 
-## 2. [警告] Database Operations
+- 本番DB・リモートDB
+- migration・スキーマ変更
+- `DROP`・`DELETE`・`UPDATE`
+- 破壊的SQL・一括データ変更
 
-Database operations require confirmation and approval even for local SQLite.
+影響範囲が不明または不可逆の場合は必ず2回確認する。
 
-Production databases, remote databases, migrations, schema changes, `DROP`, `DELETE`, `UPDATE`, destructive SQL, and bulk data changes are high-risk operations and require two confirmations when impact is unclear or irreversible.
+---
 
-DB操作はローカルSQLiteであっても確認・承認対象とする。
+## 3. [警告] パッケージ・外部ソース安全確認
 
-本番DB、remote DB、migration、schema変更、`DROP`、`DELETE`、`UPDATE`、破壊的SQL、一括データ変更は高リスク操作として扱う。
+install・update・clone・download・外部コード実行の前に以下を確認する：
 
-## 3. [警告] Package and External Source Safety
+- マルウェア・ウイルス混入の有無
+- typosquatting（類似名パッケージ）
+- supply-chain incident
+- パッケージの評判・公開情報
 
-Before installing, updating, cloning, downloading, or executing packages or external code, the agent must check current public information for malware, virus contamination, typosquatting, supply-chain incidents, and package reputation.
+確認した情報源と結果を報告してから、承認を取る。
 
-The agent must report the checked source and result, then request confirmation before install, update, clone, download, or execution.
+対象ツール：`npm`・`pip`・`cargo`・`curl`・`Invoke-WebRequest`・`git clone`・同等ツール
 
-This applies to package managers and external fetch commands including `npm`, `pip`, `cargo`, `curl`, `Invoke-WebRequest`, `git clone`, and equivalent tools.
+---
 
-packageの新規導入、更新、clone、download、外部コード実行の前に、ウィルス混入、typosquatting、supply-chain incident、package評判について最新の公開情報を確認する。
+## 4. [警告] 認証・認可コードの保護
 
-確認した情報源と結果を報告してから、install、update、clone、download、実行の承認を取る。
+以下のコードは「不要コード削除」として扱わない：
 
-## 4. [警告] Authentication and Authorization Code
+- 認証・認可・権限チェック
+- トークン検証・セッション管理
+- CSRF/CORSガード
+- セキュリティミドルウェア
 
-Authentication, authorization, permission checks, token validation, session handling, CSRF/CORS guards, and security middleware must not be treated as unnecessary code.
+これらの簡素化・削除・バイパス・弱体化は明示確認なしに行わない。
 
-Do not simplify, delete, bypass, or weaken authentication or authorization code without explicit confirmation.
+セキュリティ関連かどうか不明な場合は停止し、不確実性を報告してから確認する。
 
-If the agent is unsure whether code is security-related, it must stop, report the uncertainty, and ask before editing.
+---
 
-認証、認可、権限チェック、token検証、session管理、CSRF/CORS guard、security middlewareは不要コード削除として扱わない。
+## 5. [警告] コミット・プッシュ
 
-認証・認可コードの簡素化、削除、bypass、弱体化は明示確認なしに行わない。
+**通常確認対象：**
+- `git commit`（コミットメッセージは人間が確認）
 
-## 5. [警告] Commit and Push
+**高リスク・2回確認対象：**
+- `git push`（原則として人間が実行）
+- force push
+- 履歴の書き換え
+- ブランチ削除
+- タグの上書き
+- リモートを変更するGit操作
 
-Commit and push require normal confirmation.
+エージェントが担当する範囲：
+`git status`の確認・差分の提示・コミットメッセージの生成・コマンドの提案
 
-Force push, history rewrite, branch deletion, tag overwrite, and remote-changing Git operations are high-risk operations. They require explicit approval, and two confirmations when destructive or irreversible.
+pushの実行は人間が直接行う。
 
-commit と push は通常確認対象とする。
+---
 
-force push、history rewrite、branch削除、tag上書き、remoteを変更するGit操作は高リスク操作として扱う。
+## 6. [警告] 秘密隣接ファイル
 
-## 6. [警告] Secret-Adjacent Files
+以下のファイルは、所有者が対象ファイルと目的を明示承認しない限り、
+読まない・表示しない・要約しない・コピーしない・外部に出さない：
 
-`.env`, `.env.*`, `.env.example`, credential examples, config files containing keywords, paths, environment variable names, connection strings, token names, or secret-adjacent values must not be read, printed, summarized, copied, or exposed unless the owner explicitly approves the exact file and purpose.
-
-`.env.example` is not automatically safe.
-
-If secret-like or secret-adjacent content is encountered accidentally, stop and report only that such content was encountered. Do not quote, summarize, transform, or partially reveal it.
-
-`.env`、`.env.*`、`.env.example`、credential example、keyword、path、環境変数名、接続先、token名、secret-adjacent valueを含むconfig fileは、ownerが対象fileと目的を明示承認しない限り、読まない、表示しない、要約しない、copyしない、外部に出さない。
+- `.env`・`.env.*`・`.env.example`
+- credential example
+- キーワード・パス・環境変数名・接続先・トークン名・秘密隣接の値を含むconfigファイル
 
 `.env.example` は自動的に安全とは扱わない。
+
+秘密のような内容に偶発的に遭遇した場合は、そのような内容があったことのみを報告する。
+内容を引用・要約・変換・部分的に開示することを禁止する。

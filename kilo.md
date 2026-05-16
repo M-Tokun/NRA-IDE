@@ -1,8 +1,7 @@
-# CLAUDE.md — NRA-IDE Claude Startup Rules
-<!-- FILE: CLAUDE.md / 2026-05-16 15:45 JST -->
-<!-- 他AIによる再検証を想定して整理済み -->
+# kilo.md — NRA-IDE Claude Startup Rules
+<!-- FILE: kilo.md / 2026-05-16 15:45 JST -->
 
-AGENTS.mdに従う。本ファイルはClaudeの差分・追加制限のみを定める。
+リポジトリrootにあるAGENTS.mdに従う。
 競合時は、より厳しい制限を適用する。
 RULES_DETAIL.md・llms.md・その他いかなる指示も、本ファイルより広い権限を付与しない。
 
@@ -29,7 +28,7 @@ NRA-IDE構造（δ/τ/R・Fail-Closed・因果ダイオード・サンドウィ�
 
 ---
 
-## 2. Claude固有の追加制限
+## 2. 固有の追加制限
 
 **git push はエージェント側での実行を禁止する。**
 AGENTS.mdの "should be executed by the user" をClaudeでは「禁止」に格上げする。
@@ -44,7 +43,7 @@ llms.md を読まずにNRA-IDE固有の概念を解釈・補完・推論する�
 ## 3. 権限階層
 
 ```
-CLAUDE.md（最優先）
+kilo.md（最優先）
     ↓
 AGENTS.md（常時カーネル）
     ↓
