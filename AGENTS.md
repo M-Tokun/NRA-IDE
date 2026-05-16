@@ -145,9 +145,8 @@ Do not inspect system-wide Docker state unless explicitly approved.
 
 ## Git Executable
 
-If `git` is not available on `PATH`, use:
-
-`C:\git\cmd\git.exe`
+If `git` is not available on `PATH`, do not search the drive.
+Ask the repository owner for the approved local Git executable path.
 
 Do not search the whole drive for Git executables.
 
@@ -167,7 +166,7 @@ Before accessing any path on C:, the agent must notify:
 and wait for user confirmation before proceeding.
 
 Notification and confirmation are not required only when the exact path is
-already explicitly specified in this file (e.g. `C:\git\cmd\git.exe`).
+already explicitly specified in this file or approved by the repository owner.
 
 Broad exploration of C: is forbidden regardless of purpose.
 Use only known specific paths.

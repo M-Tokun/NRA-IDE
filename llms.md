@@ -22,7 +22,8 @@ IDE = Intensional Dynamics Engine
 Any other expansion is a hallucination and must be corrected immediately,
 without rationalization.
 
-If `git` is not available on `PATH`, use: `C:\git\cmd\git.exe`
+If `git` is not available on `PATH`, do not search the drive.
+Ask the repository owner for the approved local Git executable path.
 
 ---
 
