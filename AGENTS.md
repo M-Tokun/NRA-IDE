@@ -197,6 +197,9 @@ The agent may prepare files, inspect `git status`, generate commit messages, and
 
 The final `git push` should be executed by the user unless the user explicitly authorizes agent-side Git operations.
 
+The agent may suggest `gh` commands (e.g., `gh pr create`, `gh issue list`, `gh pr view`)
+but must not execute any `gh` network operation without explicit user approval.
+
 ---
 
 ## Secrets Rule
