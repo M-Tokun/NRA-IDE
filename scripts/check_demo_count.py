@@ -9,10 +9,10 @@ def extract_count(path, pattern):
         sys.exit(f"ERROR: demo count not found in {path}")
     return int(m.group(1))
 
-root_en = extract_count("README.md",          r"all (\d+) demos")
-root_jp = extract_count("README_JP.md",       r"全(\d+)デモ")
-ex_en   = extract_count("examples/README.md", r"(\d+)\s+[Dd]emos")
-ex_jp   = extract_count("examples/README_JP.md", r"（(\d+)本")
+root_en = extract_count("README.md",          r"all (\d+)\+? demos")
+root_jp = extract_count("README_JP.md",       r"全(\d+)(?:本以上|デモ)")
+ex_en   = extract_count("examples/README.md", r"(\d+)\+?\s+[Dd]emos")
+ex_jp   = extract_count("examples/README_JP.md", r"全(\d+)(?:本以上|デモ)")
 
 counts = {"README.md": root_en, "README_JP.md": root_jp,
           "examples/README.md": ex_en, "examples/README_JP.md": ex_jp}
