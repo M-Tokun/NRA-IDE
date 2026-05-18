@@ -4,7 +4,8 @@ import sys
 
 def extract_count(path, pattern):
     text = open(path, encoding="utf-8").read()
-    m = re.search(pattern, text)
+    # flags=re.IGNORECASE を追加して大文字小文字を区別しない
+    m = re.search(pattern, text, flags=re.IGNORECASE)
     if not m:
         sys.exit(f"ERROR: demo count not found in {path}")
     return int(m.group(1))
