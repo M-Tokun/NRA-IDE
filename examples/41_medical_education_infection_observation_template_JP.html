@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 41_medical_education_infection_observation_template_JP_20260425_040544_JST.html -->
-<!-- TITLE: NRA-IDE 医療教育用 感染症観察群テンプレート -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 04:05:44 JST -->
+<!-- FILE: 41_medical_education_infection_observation_template_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -216,7 +213,29 @@ canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:
 .log-fail{color:var(--fail);}
 .log-info{color:var(--mu);}
 .footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);}
+
+.text-right { text-align:right; }
+.detail-r-text { font-family:'JetBrains Mono',monospace;color:var(--accent); }
+.color-ok { color:var(--ok); }
+.color-watch { color:var(--watch); }
+.color-warn { color:var(--warn); }
+.color-fail { color:var(--fail); }
+.color-temp { color:var(--temp); }
+.color-rr { color:var(--rr); }
+.color-hr { color:var(--hr); }
+.color-spo2 { color:var(--spo2); }
+.color-hyd { color:var(--hyd); }
+.color-inf { color:var(--inf); }
+.desc-mu { font-size:.8rem;line-height:1.82;color:var(--mu); }
+.bg-temp { background:var(--temp); }
+.bg-rr { background:var(--rr); }
+.bg-hr { background:var(--hr); }
+.bg-spo2 { background:var(--spo2); }
+.bg-hyd { background:var(--hyd); }
+.bg-inf { background:var(--inf); }
+.bg-fail { background:var(--fail); }
 </style>
+
 </head>
 <body>
 <div class="wrap">
@@ -279,28 +298,28 @@ canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:
           <div class="detail-name" id="detail-name">—</div>
           <div class="detail-profile" id="detail-profile">—</div>
         </div>
-        <div style="text-align:right">
+        <div class="text-right">
           <div class="detail-id">PERSON R</div>
-          <div class="detail-name" id="detail-r" style="font-family:'JetBrains Mono',monospace;color:var(--accent)">0.000</div>
+          <div class="detail-name detail-r-text" id="detail-r">0.000</div>
         </div>
       </div>
 
       <div class="flow">
-        <div class="node"><div class="node-name">vital max</div><div class="node-val" id="node-vital" style="color:var(--watch)">0.000</div></div>
+        <div class="node"><div class="node-name">vital max</div><div class="node-val color-watch" id="node-vital">0.000</div></div>
         <div class="arrow">→</div>
-        <div class="node"><div class="node-name">infection-like pressure</div><div class="node-val" id="node-inf" style="color:var(--inf)">0.000</div></div>
+        <div class="node"><div class="node-name">infection-like pressure</div><div class="node-val color-inf" id="node-inf">0.000</div></div>
         <div class="arrow">⇒</div>
-        <div class="node"><div class="node-name">bucket</div><div class="node-val" id="node-bucket" style="color:var(--warn)">—</div></div>
+        <div class="node"><div class="node-name">bucket</div><div class="node-val color-warn" id="node-bucket">—</div></div>
       </div>
 
       <div class="risk-list">
-        <div class="risk-row"><div class="risk-name">体温</div><div class="risk-bg"><div class="risk-bar" id="rb-temp" style="background:var(--temp);width:0%"></div></div><div class="risk-val" id="rv-temp">0.000</div></div>
-        <div class="risk-row"><div class="risk-name">呼吸数</div><div class="risk-bg"><div class="risk-bar" id="rb-rr" style="background:var(--rr);width:0%"></div></div><div class="risk-val" id="rv-rr">0.000</div></div>
-        <div class="risk-row"><div class="risk-name">心拍数</div><div class="risk-bg"><div class="risk-bar" id="rb-hr" style="background:var(--hr);width:0%"></div></div><div class="risk-val" id="rv-hr">0.000</div></div>
-        <div class="risk-row"><div class="risk-name">SpO₂</div><div class="risk-bg"><div class="risk-bar" id="rb-spo2" style="background:var(--spo2);width:0%"></div></div><div class="risk-val" id="rv-spo2">0.000</div></div>
-        <div class="risk-row"><div class="risk-name">水分指標</div><div class="risk-bg"><div class="risk-bar" id="rb-hyd" style="background:var(--hyd);width:0%"></div></div><div class="risk-val" id="rv-hyd">0.000</div></div>
-        <div class="risk-row"><div class="risk-name">炎症様指標</div><div class="risk-bg"><div class="risk-bar" id="rb-inf" style="background:var(--inf);width:0%"></div></div><div class="risk-val" id="rv-inf">0.000</div></div>
-        <div class="risk-row"><div class="risk-name">Profile圧</div><div class="risk-bg"><div class="risk-bar" id="rb-prof" style="background:var(--fail);width:0%"></div></div><div class="risk-val" id="rv-prof">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">体温</div><div class="risk-bg"><div class="risk-bar bg-temp" id="rb-temp" style="width:0%"></div></div><div class="risk-val" id="rv-temp">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">呼吸数</div><div class="risk-bg"><div class="risk-bar bg-rr" id="rb-rr" style="width:0%"></div></div><div class="risk-val" id="rv-rr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">心拍数</div><div class="risk-bg"><div class="risk-bar bg-hr" id="rb-hr" style="width:0%"></div></div><div class="risk-val" id="rv-hr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">SpO₂</div><div class="risk-bg"><div class="risk-bar bg-spo2" id="rb-spo2" style="width:0%"></div></div><div class="risk-val" id="rv-spo2">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">水分指標</div><div class="risk-bg"><div class="risk-bar bg-hyd" id="rb-hyd" style="width:0%"></div></div><div class="risk-val" id="rv-hyd">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">炎症様指標</div><div class="risk-bg"><div class="risk-bar bg-inf" id="rb-inf" style="width:0%"></div></div><div class="risk-val" id="rv-inf">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Profile圧</div><div class="risk-bg"><div class="risk-bar bg-fail" id="rb-prof" style="width:0%"></div></div><div class="risk-val" id="rv-prof">0.000</div></div>
       </div>
 
       <div class="note" id="detail-note">選択した個体の説明がここに表示されます。</div>
@@ -312,20 +331,20 @@ canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:
   <div class="panel">
     <div class="panel-title">BUCKET VIEW — 振り分け一覧</div>
     <div class="bucket-grid">
-      <div class="bucket"><h3 style="color:var(--ok)">OBSERVE</h3><ul id="bucket-ok"></ul></div>
-      <div class="bucket"><h3 style="color:var(--watch)">WATCH</h3><ul id="bucket-watch"></ul></div>
-      <div class="bucket"><h3 style="color:var(--warn)">CAUTION</h3><ul id="bucket-warn"></ul></div>
-      <div class="bucket"><h3 style="color:var(--fail)">HUMAN REVIEW</h3><ul id="bucket-fail"></ul></div>
+      <div class="bucket"><h3 class="color-ok">OBSERVE</h3><ul id="bucket-ok"></ul></div>
+      <div class="bucket"><h3 class="color-watch">WATCH</h3><ul id="bucket-watch"></ul></div>
+      <div class="bucket"><h3 class="color-warn">CAUTION</h3><ul id="bucket-warn"></ul></div>
+      <div class="bucket"><h3 class="color-fail">HUMAN REVIEW</h3><ul id="bucket-fail"></ul></div>
     </div>
   </div>
   <div class="panel">
     <div class="panel-title">R DISTRIBUTION</div>
     <canvas id="dist-canvas" width="560" height="170"></canvas>
     <div class="legend">
-      <span style="color:var(--ok)">■ Observe</span>
-      <span style="color:var(--watch)">■ Watch</span>
-      <span style="color:var(--warn)">■ Caution</span>
-      <span style="color:var(--fail)">■ Human Review</span>
+      <span class="color-ok">■ Observe</span>
+      <span class="color-watch">■ Watch</span>
+      <span class="color-warn">■ Caution</span>
+      <span class="color-fail">■ Human Review</span>
     </div>
   </div>
 </div>
@@ -337,7 +356,7 @@ canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:
   </div>
   <div class="panel">
     <div class="panel-title">EDUCATIONAL NOTE</div>
-    <div style="font-size:.8rem;line-height:1.82;color:var(--mu);">
+    <div class="desc-mu">
       このsampleは「感染症を判定する」のではなく、発熱、呼吸、循環、水分、炎症様マーカーが同時に動いた時に、個体ごとの余裕差で観察区分が変わることを示します。発熱だけを見て自動判断せず、同じ発熱でもSpO₂、呼吸数、水分指標、年齢・脆弱性によってRが変化します。最終区分のHuman Reviewは自動決定ではなく、人間確認へ戻すための教育上のFail-Closedです。
     </div>
   </div>

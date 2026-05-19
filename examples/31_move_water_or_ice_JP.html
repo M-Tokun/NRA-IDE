@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 31_move_water_or_ice_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -90,6 +91,9 @@
   .mode-melting .formula-box { border-color: #A51818; }
   
   .note { font-size: 12px; color: #888; margin-top: 1rem; line-height: 1.6; border-top: 1px solid #eee; padding-top: 0.75rem; }
+  .sys-sub-txt { font-size:11px; font-weight:normal; }
+  .bar-w0 { width:0%; }
+  .bar-w100 { width:100%; }
 </style>
 </head>
 <body class="mode-freezing">
@@ -102,10 +106,10 @@
 
   <div class="mode-tabs">
     <button class="tab-btn freezing active" id="tabFreezing" onclick="setMode('freezing')">
-      ❄️ 凝固系（水 → 氷）<br><span style="font-size:11px;font-weight:normal">液体構造からの乖離を追跡</span>
+      ❄️ 凝固系（水 → 氷）<br><span class="sys-sub-txt">液体構造からの乖離を追跡</span>
     </button>
     <button class="tab-btn melting" id="tabMelting" onclick="setMode('melting')">
-      💧 融解系（氷 → 水）<br><span style="font-size:11px;font-weight:normal">固体構造からの乖離を追跡</span>
+      💧 融解系（氷 → 水）<br><span class="sys-sub-txt">固体構造からの乖離を追跡</span>
     </button>
   </div>
 
@@ -147,18 +151,18 @@
 
     <div class="bar-section">
       <div class="bar-row">
-        <span class="bar-lbl">δ 蓄積ズレ</span>
-        <div class="bar-track"><div class="bar-fill" id="barDelta" style="width:0%;"></div></div>
+        <span class="bar-lbl">δ 偏差</span>
+        <div class="bar-track"><div class="bar-fill bar-w0" id="barDelta"></div></div>
         <span class="bar-num" id="barDeltaNum">0.0</span>
       </div>
       <div class="bar-row">
-        <span class="bar-lbl">τ 吸収余裕</span>
-        <div class="bar-track"><div class="bar-fill" id="barTau" style="width:100%;"></div></div>
+        <span class="bar-lbl">τ 余裕</span>
+        <div class="bar-track"><div class="bar-fill bar-w100" id="barTau"></div></div>
         <span class="bar-num" id="barTauNum">20.0</span>
       </div>
       <div class="bar-row">
         <span class="bar-lbl">R 構造比</span>
-        <div class="bar-track"><div class="bar-fill" id="barR" style="width:0%;"></div></div>
+        <div class="bar-track"><div class="bar-fill bar-w0" id="barR"></div></div>
         <span class="bar-num" id="barRNum">0.00</span>
       </div>
     </div>

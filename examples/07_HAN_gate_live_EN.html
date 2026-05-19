@@ -1,25 +1,5 @@
 <!DOCTYPE html>
-<!--
-  FILE: 07_HAN_gate_live_EN_FIX.html
-  NRA-IDE Demo #07 — HAN Gate Live Demo (FIX)
-  (c) 2026 M-Tokuni
-
-  [_FIX Revision] 2026-03-10
-  The original computeR() used r_raw (R calculation result = Effect-Side) as EMA input.
-  Passing a result value into EMA is equivalent to Π⁻¹ (reverse derivation),
-  a structural violation that disables the Causal Diode.
-
-  Fix: EMA input changed to delta_cause (Cause-Side delta deviation).
-    - Uses the amount each telemetry value exceeds its reference (delta deviation)
-    - Only physical load history (Cause-Side) drives dynamic τ change
-    - The rule determining τ is fixed at design time (Immutable)
-    - AI and Effect-Side values cannot modify τ
-
-  NRA-IDE Structural Principle:
-    τ value is immutable from Effect-Side (AI / computed results).
-    τ changes dynamically only via Cause-Side accumulation (δ deviation = directly observed measurements).
-    The rule itself is fixed at design time.
--->
+<!-- FILE: 07_HAN_gate_live_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -370,6 +350,20 @@ footer {
   gap: 6px;
 }
 footer a { color: var(--accent); text-decoration: none; }
+  .header-right { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+  .flex-gap-6 { display: flex; gap: 6px; }
+  .bg-accent { background: var(--accent); }
+  .bg-dashed { background: #405060; height: 1px; border-top: 1px dashed #405060; }
+  .bg-danger { background: var(--danger); }
+  .bg-warn { background: var(--warn); }
+  .bg-safe { background: var(--safe); }
+  .preset-note-text { font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .text-safe { color: var(--safe); }
+  .text-warn { color: var(--warn); }
+  .text-danger { color: var(--danger); }
+  .decision-val { color: var(--safe); font-size: 18px; }
+  .w-0 { width: 0%; }
+  .w-30 { width: 30%; }
 </style>
 </head>
 <body>
@@ -382,12 +376,12 @@ footer a { color: var(--accent); text-decoration: none; }
     <p>R rises in real-time. The moment it crosses the threshold, SILENCE is triggered.<br>
        Adjust parameters to experience the difference between a "safe wave" and a "missed detection."</p>
   </div>
-  <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+  <div class="header-right">
     <div class="live-badge">
       <div class="live-dot" id="liveDot"></div>
       <span id="liveStatus">RUNNING</span>
     </div>
-    <div style="display:flex;gap:6px">
+    <div class="flex-gap-6">
       <button id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
       <button onclick="resetSim()">↺ RESET</button>
     </div>
@@ -403,10 +397,10 @@ footer a { color: var(--accent); text-decoration: none; }
 
 <!-- Legend -->
 <div class="legend">
-  <div class="legend-item"><div class="legend-line" style="background:var(--accent)"></div>R (Dynamic τ)</div>
-  <div class="legend-item"><div class="legend-line" style="background:#405060;height:1px;border-top:1px dashed #405060"></div>R (Static τ - Ref)</div>
-  <div class="legend-item"><div class="legend-line" style="background:var(--danger)"></div>R_OP Threshold</div>
-  <div class="legend-item"><div class="legend-line" style="background:var(--warn)"></div>Dynamic τ</div>
+  <div class="legend-item"><div class="legend-line bg-accent"></div>R (Dynamic τ)</div>
+  <div class="legend-item"><div class="legend-line bg-dashed"></div>R (Static τ - Ref)</div>
+  <div class="legend-item"><div class="legend-line bg-danger"></div>R_OP Threshold</div>
+  <div class="legend-item"><div class="legend-line bg-warn"></div>Dynamic τ</div>
 </div>
 
 <!-- Bottom Section -->
@@ -422,7 +416,7 @@ footer a { color: var(--accent); text-decoration: none; }
         <span class="param-val" id="v-rop">1.0</span>
       </div>
       <div class="param-desc">Lower values trigger SILENCE faster.</div>
-      <input type="range" id="rop" min="0.3" max="3.0" step="0.05" value="1.0">
+      <input type="range" id="rop" min="0.3" max="3.0" step="0.05" value="1.0" title="R_OP (Threshold)">
     </div>
 
     <div class="param-group">
@@ -431,7 +425,7 @@ footer a { color: var(--accent); text-decoration: none; }
         <span class="param-val" id="v-tau">1.5</span>
       </div>
       <div class="param-desc">Base absorption thickness.</div>
-      <input type="range" id="tau" min="0.5" max="4.0" step="0.1" value="1.5">
+      <input type="range" id="tau" min="0.5" max="4.0" step="0.1" value="1.5" title="TAU_DEFAULT">
     </div>
 
     <div class="param-group">
@@ -440,7 +434,7 @@ footer a { color: var(--accent); text-decoration: none; }
         <span class="param-val" id="v-alpha">0.30</span>
       </div>
       <div class="param-desc">Fluctuation sensitivity (Higher = more sensitive).</div>
-      <input type="range" id="alpha" min="0.01" max="0.99" step="0.01" value="0.30">
+      <input type="range" id="alpha" min="0.01" max="0.99" step="0.01" value="0.30" title="TAU_EMA_ALPHA">
     </div>
 
     <div class="param-group">
@@ -449,7 +443,7 @@ footer a { color: var(--accent); text-decoration: none; }
         <span class="param-val" id="v-amp">2.0</span>
       </div>
       <div class="param-desc">Max amplification factor for τ.</div>
-      <input type="range" id="amp" min="1.0" max="5.0" step="0.1" value="2.0">
+      <input type="range" id="amp" min="1.0" max="5.0" step="0.1" value="2.0" title="TAU_AMPLIFY">
     </div>
 
     <div class="param-group">
@@ -458,7 +452,7 @@ footer a { color: var(--accent); text-decoration: none; }
         <span class="param-val" id="v-speed">1×</span>
       </div>
       <div class="param-desc">Simulation speed.</div>
-      <input type="range" id="speed" min="1" max="5" step="1" value="1">
+      <input type="range" id="speed" min="1" max="5" step="1" value="1" title="Speed">
     </div>
 
     <div class="warn-box">
@@ -473,7 +467,7 @@ footer a { color: var(--accent); text-decoration: none; }
       <button id="btn-loose"   onclick="applyPreset('loose')">Loose</button>
       <button id="btn-risky"   onclick="applyPreset('risky')">⚠ Risky</button>
     </div>
-    <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5" id="preset-note">
+    <div class="preset-note-text" id="preset-note">
       Recommended setting. Suitable for most environments.
     </div>
   </div>
@@ -483,23 +477,23 @@ footer a { color: var(--accent); text-decoration: none; }
     <div class="meters">
       <div class="meter">
         <div class="meter-label">CURRENT R</div>
-        <div class="meter-val" id="m-r" style="color:var(--safe)">0.0000</div>
-        <div class="meter-bar"><div class="meter-bar-fill" id="bar-r" style="width:0%;background:var(--safe)"></div></div>
+        <div class="meter-val text-safe" id="m-r">0.0000</div>
+        <div class="meter-bar"><div class="meter-bar-fill bg-safe w-0" id="bar-r"></div></div>
       </div>
       <div class="meter">
         <div class="meter-label">DECISION</div>
-        <div class="meter-val" id="m-decision" style="color:var(--safe);font-size:18px">PASS</div>
-        <div class="meter-bar"><div class="meter-bar-fill" id="bar-silence" style="width:0%;background:var(--danger)"></div></div>
+        <div class="meter-val decision-val" id="m-decision">PASS</div>
+        <div class="meter-bar"><div class="meter-bar-fill bg-danger w-0" id="bar-silence"></div></div>
       </div>
       <div class="meter">
         <div class="meter-label">DYNAMIC τ</div>
-        <div class="meter-val" id="m-tau" style="color:var(--warn)">1.50</div>
-        <div class="meter-bar"><div class="meter-bar-fill" id="bar-tau" style="width:30%;background:var(--warn)"></div></div>
+        <div class="meter-val text-warn" id="m-tau">1.50</div>
+        <div class="meter-bar"><div class="meter-bar-fill bg-warn w-30" id="bar-tau"></div></div>
       </div>
       <div class="meter">
         <div class="meter-label">SILENCE COUNT</div>
-        <div class="meter-val" id="m-count" style="color:var(--danger)">0</div>
-        <div class="meter-bar"><div class="meter-bar-fill" id="bar-count" style="width:0%;background:var(--danger)"></div></div>
+        <div class="meter-val text-danger" id="m-count">0</div>
+        <div class="meter-bar"><div class="meter-bar-fill bg-danger w-0" id="bar-count"></div></div>
       </div>
     </div>
 
@@ -512,9 +506,9 @@ footer a { color: var(--accent); text-decoration: none; }
 <footer>
   <span>NRA-IDE / HAN Gate — Cascade Failure Prevention</span>
   <span>
-    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank" rel="noopener">github.com/M-Tokun/NRA-IDE</a>
     &nbsp;|&nbsp;
-    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+    <a href="https://x.com/m_tokuni" target="_blank" rel="noopener">@m_tokuni</a>
   </span>
 </footer>
 </div>

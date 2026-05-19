@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 38_datacenter_cascade_correlation_JP_20260425_032611_JST.html -->
-<!-- TITLE: NRA-IDE データセンター・カスケード相関シミュレーション -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 03:26:11 JST -->
+<!-- FILE: 38_datacenter_cascade_correlation_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -302,8 +299,25 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
 
 .footer{
   margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
-  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
 }
+
+.color-power { color:var(--power); }
+.color-rack { color:var(--rack); }
+.color-fan { color:var(--fan); }
+.corr-alert-txt { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:8px; }
+.leg-cpu { color:var(--cpu); }
+.leg-power { color:var(--power); }
+.leg-rack { color:var(--rack); }
+.leg-inlet { color:var(--inlet); }
+.leg-fan { color:var(--fan); }
+.leg-air { color:var(--air); }
+.leg-net { color:var(--net); }
+.legend-fail { color:rgba(255,49,95,.7); }
+.fc-tau-txt { color:var(--mu); }
+.corr-fail-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail); }
+.corr-ok-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
 </style>
 </head>
 <body>
@@ -400,17 +414,17 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
       <div class="loop-flow">
         <div class="loop-node">
           <div class="loop-name">電力</div>
-          <div class="loop-val" id="node-power" style="color:var(--power)">—</div>
+          <div class="loop-val color-power" id="node-power">—</div>
         </div>
         <div class="loop-arrow">→</div>
         <div class="loop-node">
           <div class="loop-name">熱</div>
-          <div class="loop-val" id="node-heat" style="color:var(--rack)">—</div>
+          <div class="loop-val color-rack" id="node-heat">—</div>
         </div>
         <div class="loop-arrow">→</div>
         <div class="loop-node">
           <div class="loop-name">ファン</div>
-          <div class="loop-val" id="node-fan" style="color:var(--fan)">—</div>
+          <div class="loop-val color-fan" id="node-fan">—</div>
         </div>
       </div>
       <div class="loop-note2">
@@ -423,10 +437,10 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7;">
+    <div class="corr-alert-txt">
       R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。電力・熱・冷却・遅延の相関変質を検出します。赤色セルは基準相関からの崩れです。
     </div>
-    <div id="corr-alert" style="margin-top:8px;"></div>
+    <div id="corr-alert" class="corr-alert-wrap"></div>
   </div>
 </div>
 
@@ -435,14 +449,14 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
     <div class="panel-title">TIME SERIES — R値の推移</div>
     <canvas id="ts-canvas" class="ts-canvas" width="590" height="152"></canvas>
     <div class="legend">
-      <span style="color:var(--cpu)">─ CPU</span>
-      <span style="color:var(--power)">─ 電力</span>
-      <span style="color:var(--rack)">─ ラック温度</span>
-      <span style="color:var(--inlet)">─ 吸気温度</span>
-      <span style="color:var(--fan)">─ ファン</span>
-      <span style="color:var(--air)">─ 空気流量</span>
-      <span style="color:var(--net)">─ 遅延</span>
-      <span style="color:rgba(255,49,95,.7)">- - Fail</span>
+      <span class="leg-cpu">─ CPU</span>
+      <span class="leg-power">─ 電力</span>
+      <span class="leg-rack">─ ラック温度</span>
+      <span class="leg-inlet">─ 吸気温度</span>
+      <span class="leg-fan">─ ファン</span>
+      <span class="leg-air">─ 空気流量</span>
+      <span class="leg-net">─ 遅延</span>
+      <span class="legend-fail">- - Fail</span>
     </div>
   </div>
 
@@ -643,7 +657,7 @@ function buildFactorCards(){
       <div class="fc-name">${f.name}</div>
       <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" style="color:var(--mu)">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
       <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
       <div class="fc-desc">${f.desc}</div>
@@ -841,10 +855,10 @@ function updateUI(){
 
   const corrAlert = document.getElementById('corr-alert');
   if(alerts.length){
-    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail)">⚠ ${a}</div>`).join('');
+    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('');
     if(tick % 24 === 0) addLog(`相関変質検出: ${alerts[0]}`, 'fail');
   } else {
-    corrAlert.innerHTML = `<span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
+    corrAlert.innerHTML = `<span class="corr-ok-txt">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
   }
 
   setCoup('cooling-coup', p.cooling);

@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 27_belt_tension_EN_20260425_011850_JST.html -->
-<!-- TITLE: NRA-IDE Belt Tension Management Interactive Visualization -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 01:18:50 JST -->
+<!-- FILE: 27_belt_tension_EN.html -->
 <!-- Source: 27_belt_tension_JP.html / English UI translation -->
 <html lang="en">
 <head>
@@ -380,6 +377,8 @@ input[type=range]::-webkit-slider-thumb:hover {
   color: var(--muted);
   letter-spacing: 0.08em;
 }
+.bar-delta-init { width:0%; background:var(--accent); }
+.bar-tau-init { width:100%; background:var(--safe); }
 </style>
 </head>
 <body>
@@ -468,7 +467,7 @@ input[type=range]::-webkit-slider-thumb:hover {
           <span class="breakdown-val" id="deltaVal">0.0 N</span>
         </div>
         <div class="breakdown-bar-bg">
-          <div class="breakdown-bar-fill" id="deltaBar" style="width:0%;background:var(--accent)"></div>
+          <div class="breakdown-bar-fill bar-delta-init" id="deltaBar"></div>
         </div>
       </div>
       <div class="breakdown-row">
@@ -477,7 +476,7 @@ input[type=range]::-webkit-slider-thumb:hover {
           <span class="breakdown-val" id="tauVal">150.0 N</span>
         </div>
         <div class="breakdown-bar-bg">
-          <div class="breakdown-bar-fill" id="tauBar" style="width:100%;background:var(--safe)"></div>
+          <div class="breakdown-bar-fill bar-tau-init" id="tauBar"></div>
         </div>
       </div>
       <div class="breakdown-row">

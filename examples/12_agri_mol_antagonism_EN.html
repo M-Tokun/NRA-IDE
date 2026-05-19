@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- EN VERSION GENERATED: 2026-05-15 18:28:29 JST -->
-<!-- FILE: 12_agri_mol_antagonism_EN_20260515_182829.html -->
+<!-- FILE: 12_agri_mol_antagonism_EN.html -->
 <!-- NRA-IDE Demo #12 v2 | Agricultural ion monitoring + Mg²⁺/K⁺ antagonistic cascade Band Gate -->
 <!-- Layer 3-4: Dynamic τ, asymmetric EMA, and K⁺ τ linked gate under Mg impairment -->
 <!-- Supports profile switching between Andosol and general agricultural soil -->
@@ -113,6 +112,12 @@ button {
 button:hover { background: #1e1e1e; color: #aaa; }
 button.danger { border-color: #4a1a00; color: #cc5500; }
 button.danger:hover { background: #1a0800; }
+  .mb-5 { margin-bottom: 5px; }
+  .font-10 { font-size: 10px; }
+  .color-333 { color: #333; }
+  .line-height-1-7 { line-height: 1.7; }
+  .ml-auto { margin-left: auto; }
+  .color-222 { color: #222; }
 </style>
 </head>
 <body>
@@ -190,20 +195,20 @@ button.danger:hover { background: #1a0800; }
 
     <hr class="divider">
 
-    <div class="panel-title" style="margin-bottom:5px;">Profile</div>
+    <div class="panel-title mb-5">Profile</div>
     <div class="param-row"><span>Soil</span><span class="param-val highlight" id="p_soil">Andosol</span></div>
     <div class="param-row"><span>τ_K base</span><span class="param-val" id="p_tau_k">--</span></div>
     <div class="param-row"><span>τ_Mg base</span><span class="param-val" id="p_tau_mg">--</span></div>
     <div class="param-row"><span>CEC</span><span class="param-val" id="p_cec">--</span></div>
 
     <hr class="divider">
-    <div class="panel-title" style="margin-bottom:5px;">Antagonism Gate</div>
+    <div class="panel-title mb-5">Antagonism Gate</div>
     <div class="param-row"><span>τ_K reduction formula</span><span class="param-val">×(1 - 0.6 × R_Mg)</span></div>
     <div class="param-row"><span>Activation condition</span><span class="param-val">R_Mg ≥ 0.7</span></div>
     <div class="param-row"><span>Current τ_K</span><span class="param-val" id="p_tau_k_cur">--</span></div>
 
     <hr class="divider">
-    <div style="font-size:10px; color:#333; line-height:1.7;">
+    <div class="font-10 color-333 line-height-1-7">
       Three upland crops: potato, wheat, and sugar beet<br>
       Normal τ differs little among these crops<br>
       Under impairment, Mg deficiency → K antagonism is the major risk
@@ -217,7 +222,7 @@ button.danger:hover { background: #1a0800; }
   <button id="btn_saltburst" onclick="startScenario('saltburst')">Salt injury spike</button>
   <button id="btn_n_drain" onclick="startScenario('n_drain')">Nitrogen deficiency</button>
   <button id="btn_reset" onclick="resetScenario()">Reset</button>
-  <span style="margin-left:auto; font-size:10px; color:#222;">NRA-IDE © 2026 M-Tokuni</span>
+  <span class="ml-auto font-10 color-222">NRA-IDE © 2026 M-Tokuni</span>
 </footer>
 
 <script>

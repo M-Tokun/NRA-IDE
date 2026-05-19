@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 50_Constraint_Philosophy_EN_20260515_194145.html -->
-<!-- Source: 50_Constraint_Philosophy_JP.html | English version generated at Tokyo time: 2026-05-15 19:41:45 -->
+<!-- FILE: 50_Constraint_Philosophy_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -138,7 +137,21 @@ section{padding:80px 0;}
 .text-xs{font-size:0.75rem;}
 .text-center{text-align:center;}
 strong{color:var(--text-primary);}
+
+.border-constraint { border-color:var(--accent-constraint); }
+.flex-col-center-20 { display:flex;flex-direction:column;justify-content:center;gap:20px; }
+.flex-col-center-16 { display:flex;flex-direction:column;justify-content:center;gap:16px; }
+.flex-col-center-24 { display:flex;flex-direction:column;justify-content:center;gap:24px; }
+.text-sec { color:var(--text-secondary); }
+.text-sec-footer { color:var(--text-secondary);max-width:600px;margin:16px auto 0;font-size:0.95rem; }
+.h-260 { height:260px; }
+.border-left-blue { border-left:4px solid var(--accent-blue); }
+.border-left-insight { border-left:4px solid var(--accent-insight); }
+.border-left-safe { border-left:4px solid var(--accent-safe); }
+.bg-safe-light { background:rgba(16,185,129,0.15);color:var(--accent-safe); }
+.bg-blue-light { background:rgba(59,130,246,0.15);color:var(--accent-blue); }
 </style>
+
 </head>
 <body>
 
@@ -177,7 +190,7 @@ strong{color:var(--text-primary);}
       <div class="paradox-title tc-danger">Constraint = Obstacle</div>
       <p class="paradox-text">Maximizing freedom and removing constraints have been treated as keys to better performance. The result is a sandpile-like critical state.</p>
     </div>
-    <div class="paradox-card" style="border-color:var(--accent-constraint);">
+    <div class="paradox-card border-constraint">
       <div class="paradox-icon">⚡</div>
       <div class="paradox-label">NRA Insight</div>
       <div class="paradox-title tc-cyan">Constraint = Driving Force</div>
@@ -206,10 +219,10 @@ strong{color:var(--text-primary);}
     <div class="chart-wrap">
       <canvas id="collapseChart"></canvas>
     </div>
-    <div style="display:flex;flex-direction:column;justify-content:center;gap:20px;">
+    <div class="flex-col-center-20">
       <div class="panel panel-accent panel-amber">
         <h4 class="tc-amber fw-700 mb-8">Linear Decay</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">
+        <p class="text-sm text-sec">
           Averaging over probability distributions strips away creativity that appears as an outlier.
           Outputs become homogenized, and the AI becomes unable to generate anything beyond harmless, generic responses.
           <strong>The quiet death of diversity.</strong>
@@ -217,7 +230,7 @@ strong{color:var(--text-primary);}
       </div>
       <div class="panel panel-accent panel-red">
         <h4 class="tc-danger fw-700 mb-8">Nonlinear Collapse</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">
+        <p class="text-sm text-sec">
           A catastrophe at the moment the critical point is crossed. Logical consistency collapses in a chain reaction,
           and hallucinations and incoherent outputs cascade like an avalanche.
           <strong>There is no grace period after falling off the cliff.</strong>
@@ -263,21 +276,21 @@ strong{color:var(--text-primary);}
   </div>
 
   <div class="grid-2 mt-32">
-    <div class="chart-wrap" style="height:260px;">
+    <div class="chart-wrap h-260">
       <canvas id="gaugeChart"></canvas>
     </div>
-    <div style="display:flex;flex-direction:column;justify-content:center;gap:16px;">
+    <div class="flex-col-center-16">
       <div class="panel panel-accent panel-emerald">
         <h4 class="tc-safe fw-700 mb-8">R ≥ 1.0 — Stable Operation</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">Constraints exceed noise. Normal operation inside the viability kernel.</p>
+        <p class="text-sm text-sec">Constraints exceed noise. Normal operation inside the viability kernel.</p>
       </div>
       <div class="panel panel-accent panel-amber">
         <h4 class="tc-amber fw-700 mb-8">0.5 ≤ R < 1.0 — Warning Zone</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">Constraint erosion is underway. A drop in output reliability is detected.</p>
+        <p class="text-sm text-sec">Constraint erosion is underway. A drop in output reliability is detected.</p>
       </div>
       <div class="panel panel-accent panel-red">
         <h4 class="tc-danger fw-700 mb-8">R &lt; 0.5 — Fail-Closed Triggered</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">Consistency can no longer be maintained. Silence is chosen over false output.</p>
+        <p class="text-sm text-sec">Consistency can no longer be maintained. Silence is chosen over false output.</p>
       </div>
     </div>
   </div>
@@ -309,21 +322,21 @@ strong{color:var(--text-primary);}
   <div class="grid-3 mt-32">
     <div class="panel panel-accent panel-purple">
       <h4 class="tc-purple fw-700 mb-8">❌ Forbidden Pattern</h4>
-      <p class="text-sm" style="color:var(--text-secondary);">
+      <p class="text-sm text-sec">
         distance(A,B) → force → behavior<br>
         Force is reverse-derived from distance. This is the fundamental defect of conventional similarity-based reasoning.
       </p>
     </div>
     <div class="panel panel-accent panel-cyan">
       <h4 class="tc-cyan fw-700 mb-8">✓ NRA Pattern</h4>
-      <p class="text-sm" style="color:var(--text-secondary);">
+      <p class="text-sm text-sec">
         constraint(δ) → tension → behavior → observe(distance)<br>
         Constraints generate tension and determine behavior. Distance is recorded only as a log.
       </p>
     </div>
     <div class="panel panel-accent panel-blue">
       <h4 class="tc-blue fw-700 mb-8">🔬 Verification Criterion</h4>
-      <p class="text-sm" style="color:var(--text-secondary);">
+      <p class="text-sm text-sec">
         Verify that no “distance → force” derivation has entered any stage of the processing pipeline.
         If consistency cannot be established, return <strong>“impossible”</strong>.
       </p>
@@ -343,37 +356,37 @@ strong{color:var(--text-primary);}
 
   <div class="grid-2">
     <div class="pipeline">
-      <div class="pipe-layer" style="border-left:4px solid var(--accent-blue);">
+      <div class="pipe-layer border-left-blue">
         <div class="layer-num tc-blue">Layer 01 — Pre-RNA</div>
         <h4 class="tc-blue">Constraint Fixing</h4>
         <p>Extract and fix invariant conditions (δ) from the input. The boundaries of the solution space are predefined here, and the pipeline order is fixed at this layer.</p>
       </div>
       <div class="pipe-arrow">↓ δ fixed ↓</div>
-      <div class="pipe-layer" style="border-left:4px solid var(--accent-insight);">
+      <div class="pipe-layer border-left-insight">
         <div class="layer-num tc-purple">Layer 02 — Inference</div>
         <h4 class="tc-purple">Probabilistic Generation</h4>
         <p>The layer where conventional LLM/AI models operate. Generation is permitted only within the boundaries defined by δ.</p>
       </div>
       <div class="pipe-arrow">↓ output candidate ↓</div>
-      <div class="pipe-layer" style="border-left:4px solid var(--accent-safe);">
+      <div class="pipe-layer border-left-safe">
         <div class="layer-num tc-safe">Layer 03 — Post-RNA</div>
         <h4 class="tc-safe">Verification & R-Check</h4>
         <p>Post-generation verification using the R indicator. Boundary deviation triggers Fail-Closed. False output is not permitted.</p>
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;justify-content:center;gap:24px;">
+    <div class="flex-col-center-24">
       <!-- Causal Diode -->
       <div class="panel">
         <h4 class="fw-700 mb-16">Causal Diode</h4>
-        <p class="text-sm mb-16" style="color:var(--text-secondary);">
+        <p class="text-sm mb-16 text-sec">
           Based on information thermodynamics, causal flow is restricted to the forward direction (Π) only.
           It is a device that physically blocks reverse derivation: fabricating causes from results.
         </p>
         <div class="diode-flow">
-          <div class="diode-node" style="background:rgba(16,185,129,0.15);color:var(--accent-safe);">Cause</div>
+          <div class="diode-node bg-safe-light">Cause</div>
           <div class="diode-arrow tc-safe">→</div>
-          <div class="diode-node" style="background:rgba(59,130,246,0.15);color:var(--accent-blue);">Effect</div>
+          <div class="diode-node bg-blue-light">Effect</div>
           <div class="diode-block">
             <span class="diode-arrow">←</span>
             <span class="x-mark">✕</span>
@@ -383,7 +396,7 @@ strong{color:var(--text-primary);}
       
       <div class="panel panel-accent panel-cyan">
         <h4 class="tc-cyan fw-700 mb-8">Meaning of Separated Monitoring</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">
+        <p class="text-sm text-sec">
           By physically separating the generation process (L2) from the monitoring processes (L1/L3),
           the architecture removes AI self-evaluation bias. The referee and the player must not be the same entity.
         </p>
@@ -405,7 +418,7 @@ strong{color:var(--text-primary);}
   <div class="impossibility">
     <div class="kanji">IMPOSSIBLE</div>
     <h3>An inconsistent answer is not an answer.</h3>
-    <p style="color:var(--text-secondary);max-width:600px;margin:16px auto 0;font-size:0.95rem;">
+    <p class="text-sec-footer">
       When faced with a logical deadlock or contradiction, do not fabricate consistency by force.
       Output impossibility itself as the answer. This is not failure,
       but <strong class="tc-amber">proof of the system’s honesty</strong>.
@@ -415,14 +428,14 @@ strong{color:var(--text-primary);}
   <div class="grid-2 mt-32">
     <div class="panel panel-accent panel-red">
       <h4 class="tc-danger fw-700 mb-8">Conventional AI Response</h4>
-      <p class="text-sm" style="color:var(--text-secondary);">
+      <p class="text-sm text-sec">
         Always generate “some kind of answer.” Even when consistency has collapsed, return the statistically most plausible output.
         → A breeding ground for hallucination. Users cannot distinguish plausible falsehood from truth.
       </p>
     </div>
     <div class="panel panel-accent panel-emerald">
       <h4 class="tc-safe fw-700 mb-8">NRA Response</h4>
-      <p class="text-sm" style="color:var(--text-secondary);">
+      <p class="text-sm text-sec">
         When the R value falls below the threshold, choose <strong>Active Silence</strong>.
         → “Under the current constraints, a consistent answer cannot be constructed for this question.”
         This is not collapse. It is a strategic stop for transition to the next stable phase.
@@ -446,18 +459,18 @@ strong{color:var(--text-primary);}
     <div class="chart-wrap">
       <canvas id="kernelChart"></canvas>
     </div>
-    <div style="display:flex;flex-direction:column;justify-content:center;gap:16px;">
+    <div class="flex-col-center-16">
       <div class="panel panel-accent panel-emerald">
         <h4 class="tc-safe fw-700 mb-8">Viability Kernel (Green)</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">A safe state space in which structural stability R is maintained. The AI is permitted to operate only within this boundary.</p>
+        <p class="text-sm text-sec">A safe state space in which structural stability R is maintained. The AI is permitted to operate only within this boundary.</p>
       </div>
       <div class="panel panel-accent panel-red">
         <h4 class="tc-danger fw-700 mb-8">Collapse Zone (Red)</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">The collapse region produced by optimization pursuit. Once entered, positive feedback accelerates the collapse.</p>
+        <p class="text-sm text-sec">The collapse region produced by optimization pursuit. Once entered, positive feedback accelerates the collapse.</p>
       </div>
       <div class="panel panel-accent panel-blue">
         <h4 class="tc-blue fw-700 mb-8">Phase Transition (Boundary)</h4>
-        <p class="text-sm" style="color:var(--text-secondary);">Trigger Fail-Closed at boundary contact. This is not “death,” but an active transition to a new stable phase. The next phase is determined by re-evaluating constraints, not by distance.</p>
+        <p class="text-sm text-sec">Trigger Fail-Closed at boundary contact. This is not “death,” but an active transition to a new stable phase. The next phase is determined by re-evaluating constraints, not by distance.</p>
       </div>
     </div>
   </div>

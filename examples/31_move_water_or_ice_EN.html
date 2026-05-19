@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 31_move_water_or_ice_EN_20260425_013623_JST.html -->
-<!-- TITLE: NRA-IDE Integrated Phase Transition Model for Water and Ice -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 20260425_013623_JST -->
+<!-- FILE: 31_move_water_or_ice_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -94,6 +91,9 @@
   .mode-melting .formula-box { border-color: #A51818; }
   
   .note { font-size: 12px; color: #888; margin-top: 1rem; line-height: 1.6; border-top: 1px solid #eee; padding-top: 0.75rem; }
+  .sys-sub-txt { font-size:11px; font-weight:normal; }
+  .bar-w0 { width:0%; }
+  .bar-w100 { width:100%; }
 </style>
 </head>
 <body class="mode-freezing">
@@ -106,10 +106,10 @@
 
   <div class="mode-tabs">
     <button class="tab-btn freezing active" id="tabFreezing" onclick="setMode('freezing')">
-      ❄️ Freezing System (Water → Ice)<br><span style="font-size:11px;font-weight:normal">Tracks deviation from the liquid structure</span>
+      ❄️ Freezing System (Water → Ice)<br><span class="sys-sub-txt">Tracks deviation from the liquid structure</span>
     </button>
     <button class="tab-btn melting" id="tabMelting" onclick="setMode('melting')">
-      💧 Melting System (Ice → Water)<br><span style="font-size:11px;font-weight:normal">Tracks deviation from the solid structure</span>
+      💧 Melting System (Ice → Water)<br><span class="sys-sub-txt">Tracks deviation from the solid structure</span>
     </button>
   </div>
 
@@ -152,17 +152,17 @@
     <div class="bar-section">
       <div class="bar-row">
         <span class="bar-lbl">δ Deviation</span>
-        <div class="bar-track"><div class="bar-fill" id="barDelta" style="width:0%;"></div></div>
+        <div class="bar-track"><div class="bar-fill bar-w0" id="barDelta"></div></div>
         <span class="bar-num" id="barDeltaNum">0.0</span>
       </div>
       <div class="bar-row">
         <span class="bar-lbl">τ Margin</span>
-        <div class="bar-track"><div class="bar-fill" id="barTau" style="width:100%;"></div></div>
+        <div class="bar-track"><div class="bar-fill bar-w100" id="barTau"></div></div>
         <span class="bar-num" id="barTauNum">20.0</span>
       </div>
       <div class="bar-row">
         <span class="bar-lbl">R Structural Ratio</span>
-        <div class="bar-track"><div class="bar-fill" id="barR" style="width:0%;"></div></div>
+        <div class="bar-track"><div class="bar-fill bar-w0" id="barR"></div></div>
         <span class="bar-num" id="barRNum">0.00</span>
       </div>
     </div>

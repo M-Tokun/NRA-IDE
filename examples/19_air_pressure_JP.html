@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: air_pressure_nra_ide_20260319_0209.html -->
-<!-- TITLE: NRA-IDE 空気圧管理システム（圧縮性流体・動的τ・二重ゆらぎ） -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-03-19 02:09 JST -->
+<!-- FILE: 19_air_pressure_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -120,6 +117,23 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 .l-s.fail-hi{color:var(--fail-hi)}.l-s.fail-lo{color:var(--fail-lo)}
 .footer{width:100%;max-width:1020px;margin-top:14px;display:flex;justify-content:space-between;
   font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.sl-val-accent { color: var(--accent); }
+.sl-val-heat   { color: #ff8050; }
+.small-unit    { font-size:11px; font-weight:300; color:var(--muted); }
+.trio-lbl-accent { color: var(--accent); }
+.trio-lbl-heat   { color: #ff8050; }
+.trio-lbl-tau    { color: var(--tau-col); }
+.trio-val-accent { color: var(--accent); }
+.trio-val-heat   { color: #ff8050; }
+.trio-val-tau    { color: var(--tau-col); }
+.r-hi-init     { color: #ff4060; }
+.r-lo-init     { color: #6688ff; }
+.met-k-tau     { color: var(--tau-col); }
+.met-v-tau     { color: var(--tau-col); }
+.bar-tau-hi    { width: 60%; background: #ffaa4455; }
+.bar-tau-lo    { width: 40%; background: #ffaa4455; }
+.bar-fluct     { width:  0%; background: #88ffcc55; }
+.bar-tau-fluct { width:  0%; background: #ffaa4488; }
 </style>
 </head>
 <body>
@@ -145,8 +159,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">COMPRESSOR</span>
-          <div class="sl-val" id="compDisp" style="color:var(--accent)">
-            0.5<small style="font-size:11px;font-weight:300;color:var(--muted)"> MPa</small>
+          <div class="sl-val sl-val-accent" id="compDisp">
+            0.5<small class="small-unit"> MPa</small>
           </div>
         </div>
         <input type="range" id="compSlider" min="0" max="20" value="5" step="0.5"
@@ -156,8 +170,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">TEMPERATURE</span>
-          <div class="sl-val" id="tempDisp" style="color:#ff8050">
-            25<small style="font-size:11px;font-weight:300;color:var(--muted)">°C</small>
+          <div class="sl-val sl-val-heat" id="tempDisp">
+            25<small class="small-unit"> °C</small>
           </div>
         </div>
         <input type="range" id="tempSlider" min="-20" max="120" value="25"
@@ -174,18 +188,18 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="card-lbl">LIVE STATE</div>
       <div class="trio">
         <div class="trio-item">
-          <div class="trio-lbl" style="color:var(--accent)">PRESSURE</div>
-          <div class="trio-val" id="pLive" style="color:var(--accent)">0.500</div>
+          <div class="trio-lbl trio-lbl-accent">PRESSURE</div>
+          <div class="trio-val trio-val-accent" id="pLive">0.500</div>
           <div class="trio-unit">MPa</div>
         </div>
         <div class="trio-item">
-          <div class="trio-lbl" style="color:#ff8050">TEMPERATURE</div>
-          <div class="trio-val" id="tLive" style="color:#ff8050">25.0</div>
+          <div class="trio-lbl trio-lbl-heat">TEMPERATURE</div>
+          <div class="trio-val trio-val-heat" id="tLive">25.0</div>
           <div class="trio-unit">°C</div>
         </div>
         <div class="trio-item">
-          <div class="trio-lbl" style="color:var(--tau-col)">τ_hi (動的)</div>
-          <div class="trio-val" id="tauLive" style="color:var(--tau-col)">0.300</div>
+          <div class="trio-lbl trio-lbl-tau">τ_hi (動的)</div>
+          <div class="trio-val trio-val-tau" id="tauLive">0.300</div>
           <div class="trio-unit">MPa</div>
         </div>
       </div>
@@ -214,7 +228,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8"   y="72" fill="#303848" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#303848" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rHiN" style="color:#ff4060">0.000</div>
+          <div class="r-num r-hi-init" id="rHiN">0.000</div>
           <div class="r-dir">↑ 過圧 R_hi</div>
         </div>
         <div class="r-item">
@@ -228,7 +242,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8"   y="72" fill="#303848" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#303848" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rLoN" style="color:#6688ff">0.000</div>
+          <div class="r-num r-lo-init" id="rLoN">0.000</div>
           <div class="r-dir">↓ 減圧 R_lo</div>
         </div>
       </div>
@@ -244,33 +258,29 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">δ 圧力偏差（第1ゆらぎ）</span>
             <span class="met-v" id="dVal">0.000 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%"></div></div>
+          <div class="bar-bg"><div class="bar-fill" id="dBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr">
-            <span class="met-k" style="color:var(--tau-col)">τ_hi 動的余裕（第2ゆらぎ）</span>
-            <span class="met-v" id="tHiV" style="color:var(--tau-col)">0.300 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tHiB"
-            style="width:60%;background:#ffaa4455"></div></div>
+            <span class="met-k met-k-tau">τ_hi 動的余裕（第2ゆらぎ）</span>
+            <span class="met-v met-v-tau" id="tHiV">0.300 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-tau-hi" id="tHiB"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr">
-            <span class="met-k" style="color:var(--tau-col)">τ_lo 動的余裕（第2ゆらぎ）</span>
-            <span class="met-v" id="tLoV" style="color:var(--tau-col)">0.200 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tLoB"
-            style="width:40%;background:#ffaa4455"></div></div>
+            <span class="met-k met-k-tau">τ_lo 動的余裕（第2ゆらぎ）</span>
+            <span class="met-v met-v-tau" id="tLoV">0.200 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-tau-lo" id="tLoB"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">圧力ゆらぎ振幅</span>
             <span class="met-v" id="fluctV">0.000 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="fluctB"
-            style="width:0%;background:#88ffcc55"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-fluct" id="fluctB"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">τゆらぎ変動幅</span>
             <span class="met-v" id="tauFluctV">0.000 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tauFluctB"
-            style="width:0%;background:#ffaa4488"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-tau-fluct" id="tauFluctB"></div></div>
         </div>
       </div>
     </div>

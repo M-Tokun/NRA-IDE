@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 00_Escapement_Foundation_NRA_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -14,9 +15,7 @@
 -->
 <title>NRA-IDE 基礎原理：脱進機と離散完結</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@300;400;700&display=swap');
-
-  :root {
+:root {
     --bg:       #030508;
     --panel:    rgba(5,10,18,0.90);
     --border:   rgba(0,220,255,0.15);
@@ -173,7 +172,6 @@
   }
 
   .error-label .lbl { color: var(--dim); }
-  .error-label .val { }
   .bad  .error-label .val { color: var(--red); }
   .good .error-label .val { color: var(--green); }
 
@@ -382,6 +380,14 @@
     white-space: nowrap;
     animation: drift-warn 1.2s ease-in-out infinite;
   }
+  
+  .subtitle-en { font-size: 0.65em; opacity: 0.7; }
+  .main-grid-relative { position: relative; }
+  .opacity-0 { opacity: 0; }
+  .width-0 { width: 0%; }
+  .text-green { color: var(--green); }
+  .margin-top-6 { margin-top: 6px; }
+  .text-cyan-small { color: var(--cyan); font-size: 11px; }
 </style>
 </head>
 <body>
@@ -389,14 +395,14 @@
 <header>
   <div class="header-label">NRA-IDE — Foundational Principle / 基礎原理</div>
   <h1>脱進機と離散完結<br>
-    <span style="font-size:0.65em; opacity:0.7">Escapement &amp; Discrete Completion Principle</span>
+    <span class="subtitle-en">Escapement &amp; Discrete Completion Principle</span>
   </h1>
   <div class="subtitle">
     連続近似（浮動小数点）では誤差が蓄積する ／ 離散完結（整数位相ロック）では残差が熱として排出される
   </div>
 </header>
 
-<div class="main-grid" style="position:relative;">
+<div class="main-grid main-grid-relative">
 
   <!-- ─── 左：連続近似（Bad） ─── -->
   <div class="clock-panel bad" id="panel-bad">
@@ -405,7 +411,7 @@
 
     <div class="clock-wrap">
       <canvas id="clock-bad" class="clock-canvas" width="200" height="200"></canvas>
-      <div class="drift-indicator" id="drift-warn" style="opacity:0">▲ DRIFT DETECTED</div>
+      <div class="drift-indicator opacity-0" id="drift-warn">▲ DRIFT DETECTED</div>
     </div>
 
     <div class="error-section">
@@ -414,7 +420,7 @@
         <span class="val" id="err-val">0.000°</span>
       </div>
       <div class="error-bar-bg">
-        <div class="error-bar-fill" id="err-bar" style="width:0%"></div>
+        <div class="error-bar-fill width-0" id="err-bar"></div>
       </div>
     </div>
 
@@ -450,10 +456,10 @@
     <div class="error-section">
       <div class="error-label">
         <span class="lbl">累積誤差 Accumulated Error</span>
-        <span class="val" style="color:var(--green)">0.000° — ZERO</span>
+        <span class="val text-green">0.000° — ZERO</span>
       </div>
       <div class="error-bar-bg">
-        <div class="error-bar-fill good" style="width:0%"></div>
+        <div class="error-bar-fill good width-0"></div>
       </div>
     </div>
 
@@ -464,11 +470,11 @@
       </div>
       <div class="stat-box">
         <span class="s-lbl">TICK</span>
-        <span class="s-val" id="good-tick" style="color:var(--green)">LOCKED</span>
+        <span class="s-val text-green" id="good-tick">LOCKED</span>
       </div>
       <div class="stat-box">
         <span class="s-lbl">STATE</span>
-        <span class="s-val" style="color:var(--green)">STABLE</span>
+        <span class="s-val text-green">STABLE</span>
       </div>
     </div>
 
@@ -506,10 +512,10 @@
 <!-- ──────── NRA接続 ──────── -->
 <div class="nra-link">
   <div class="eq">R = δ / τ</div>
-  <div class="desc" style="margin-top:6px;">
+  <div class="desc margin-top-6">
     この比率計算においても同一の原則が適用される。<br>
     商の整数部 → 次の状態判定に使用 ／ 残差 ε → 破棄（熱として排出）／ キャリーオーバー → 禁止<br>
-    <span style="color:var(--cyan); font-size:11px;">
+    <span class="text-cyan-small">
       The same principle applies: integer part used for judgment, residual ε discarded, carry-over forbidden.
     </span>
   </div>

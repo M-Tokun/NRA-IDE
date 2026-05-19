@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 16_passive_safety_EN_20260515_190522.html -->
-<!-- English version generated from 16_passive_safety_JP.html. Simulation logic unchanged. -->
+<!-- FILE: 16_passive_safety_EN.html -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -154,6 +153,8 @@
         }
         .log-entry.warn { color: var(--yellow); }
         .log-entry.crit { color: var(--red); font-weight: bold; }
+        .note-text { margin-top: 20px; font-size: 11px; color: var(--muted); line-height: 1.5; }
+        .section-title-mt { margin-top: 10px; }
 
     </style>
 </head>
@@ -169,7 +170,7 @@
         <button id="btn-grid" class="power-btn" onclick="togglePower('grid')">EXTERNAL GRID: ONLINE</button>
         <button id="btn-backup" class="power-btn" onclick="togglePower('backup')">BACKUP DIESEL: STANDBY</button>
         
-        <div style="margin-top: 20px; font-size: 11px; color: var(--muted); line-height: 1.5;">
+        <div class="note-text">
             [NOTE] <br>
             The electromagnetic clutch consumes power to hold the control rod in the withdrawn position.<br>
             During a total loss of power, electromagnetic force falls to zero as a fail-safe condition, and gravity inserts the control rod by its own weight.
@@ -201,7 +202,7 @@
             <div id="val-flow" class="data-val">0.0 L/s</div>
         </div>
 
-        <div class="section-title" style="margin-top: 10px;">EVENT LOG</div>
+        <div class="section-title section-title-mt">EVENT LOG</div>
         <div id="log-area"></div>
     </div>
 

@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 39_coldchain_temperature_correlation_JP_20260425_033809_JST.html -->
-<!-- TITLE: NRA-IDE コールドチェーン温度逸脱相関シミュレーション -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 03:38:09 JST -->
+<!-- FILE: 39_coldchain_temperature_correlation_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -293,8 +290,25 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
 
 .footer{
   margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
-  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
 }
+
+.color-ambient { color:var(--ambient); }
+.color-comp { color:var(--comp); }
+.color-cargo { color:var(--cargo); }
+.corr-alert-txt { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:8px; }
+.leg-ambient { color:var(--ambient); }
+.leg-cargo { color:var(--cargo); }
+.leg-door { color:var(--door); }
+.leg-comp { color:var(--comp); }
+.leg-battery { color:var(--battery); }
+.leg-humid { color:var(--humid); }
+.leg-delay { color:var(--delay); }
+.legend-fail { color:rgba(255,71,109,.7); }
+.fc-tau-txt { color:var(--mu); }
+.corr-fail-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail); }
+.corr-ok-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
 </style>
 </head>
 <body>
@@ -396,17 +410,17 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
       <div class="med-flow">
         <div class="med-node">
           <div class="med-name">外気 + 扉</div>
-          <div class="med-val" id="med-load" style="color:var(--ambient)">—</div>
+          <div class="med-val color-ambient" id="med-load">—</div>
         </div>
         <div class="med-arrow">→</div>
         <div class="med-node">
           <div class="med-name">圧縮機余裕</div>
-          <div class="med-val" id="med-comp" style="color:var(--comp)">—</div>
+          <div class="med-val color-comp" id="med-comp">—</div>
         </div>
         <div class="med-arrow">⇒</div>
         <div class="med-node">
           <div class="med-name">荷室温度</div>
-          <div class="med-val" id="med-cargo" style="color:var(--cargo)">—</div>
+          <div class="med-val color-cargo" id="med-cargo">—</div>
         </div>
       </div>
       <div class="med-note">
@@ -419,10 +433,10 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7;">
+    <div class="corr-alert-txt">
       R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。外気・扉・圧縮機・荷室温度の関係崩れを検出します。赤色セルは相関変質です。
     </div>
-    <div id="corr-alert" style="margin-top:8px;"></div>
+    <div id="corr-alert" class="corr-alert-wrap"></div>
   </div>
 </div>
 
@@ -431,14 +445,14 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
     <div class="panel-title">TIME SERIES — R値の推移</div>
     <canvas id="ts-canvas" class="ts-canvas" width="590" height="152"></canvas>
     <div class="legend">
-      <span style="color:var(--ambient)">─ 外気温</span>
-      <span style="color:var(--cargo)">─ 荷室温度</span>
-      <span style="color:var(--door)">─ 扉開閉率</span>
-      <span style="color:var(--comp)">─ 圧縮機負荷</span>
-      <span style="color:var(--battery)">─ バッテリー</span>
-      <span style="color:var(--humid)">─ 湿度</span>
-      <span style="color:var(--delay)">─ 遅延</span>
-      <span style="color:rgba(255,71,109,.7)">- - Fail</span>
+      <span class="leg-ambient">─ 外気温</span>
+      <span class="leg-cargo">─ 荷室温度</span>
+      <span class="leg-door">─ 扉開閉率</span>
+      <span class="leg-comp">─ 圧縮機負荷</span>
+      <span class="leg-battery">─ バッテリー</span>
+      <span class="leg-humid">─ 湿度</span>
+      <span class="leg-delay">─ 遅延</span>
+      <span class="legend-fail">- - Fail</span>
     </div>
   </div>
 
@@ -638,7 +652,7 @@ function buildFactorCards(){
       <div class="fc-name">${f.name}</div>
       <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" style="color:var(--mu)">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
       <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
       <div class="fc-desc">${f.desc}</div>
@@ -824,10 +838,10 @@ function updateUI(){
 
   const corrAlert = document.getElementById('corr-alert');
   if(alerts.length){
-    corrAlert.innerHTML = alerts.slice(0,4).map(a => `<div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail)">⚠ ${a}</div>`).join('');
+    corrAlert.innerHTML = alerts.slice(0,4).map(a => `<div class="corr-fail-txt">⚠ ${a}</div>`).join('');
     if(tick % 24 === 0) addLog(`相関変質検出: ${alerts[0]}`, 'fail');
   } else {
-    corrAlert.innerHTML = `<span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
+    corrAlert.innerHTML = `<span class="corr-ok-txt">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
   }
 
   document.getElementById('overall-r').textContent = rTotal.toFixed(3);

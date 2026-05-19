@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: water_pressure_nra_ide_20260319_0202.html -->
-<!-- TITLE: NRA-IDE 水圧管理システム（非圧縮性流体・固定τ） -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-03-19 02:02 JST -->
+<!-- FILE: 20_water_pressure_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -116,6 +113,22 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 .l-s.fail-hi{color:var(--fail-hi)}.l-s.fail-lo{color:var(--fail-lo)}
 .footer{width:100%;max-width:1000px;margin-top:14px;display:flex;justify-content:space-between;
   font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.sl-val-pump   { color: #00aaff; }
+.sl-val-accent { color: var(--accent); }
+.small-unit    { font-size:11px; font-weight:300; color:var(--muted); }
+.p-note-safe   { color: var(--safe); }
+.r-hi-init     { color: #ff3060; }
+.r-lo-init     { color: #8866ff; }
+.met-v-hi      { color: #ff306088; }
+.met-v-lo      { color: #8866ff88; }
+.bar-hi-init   { width:60%; background: #ff306055; }
+.bar-lo-init   { width:40%; background: #8866ff55; }
+.bar-pulse-init{ width: 0%; background: #00ddff66; }
+.set-val-safe  { color: var(--safe); }
+.set-val-hi    { color: #ff3060; }
+.set-val-lo    { color: #8866ff; }
+.set-val-hi-a  { color: #ff306088; }
+.set-val-lo-a  { color: #8866ff88; }
 </style>
 </head>
 <body>
@@ -141,8 +154,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">PUMP OUTPUT</span>
-          <div class="sl-val" id="pumpDisp" style="color:#00aaff">
-            0.5<small style="font-size:11px;font-weight:300;color:var(--muted)"> MPa</small>
+          <div class="sl-val sl-val-pump" id="pumpDisp">
+            0.5<small class="small-unit"> MPa</small>
           </div>
         </div>
         <input type="range" id="pumpSlider" min="0" max="20" value="5" step="0.5"
@@ -152,8 +165,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">FLOW RATE</span>
-          <div class="sl-val" id="flowDisp" style="color:var(--accent)">
-            50<small style="font-size:11px;font-weight:300;color:var(--muted)"> L/min</small>
+          <div class="sl-val sl-val-accent" id="flowDisp">
+            50<small class="small-unit"> L/min</small>
           </div>
         </div>
         <input type="range" id="flowSlider" min="0" max="150" value="50"
@@ -170,7 +183,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <div class="p-big" id="pBig">0.50<span class="p-unit"> MPa</span></div>
         <div class="p-sub" id="pSub">δ=0.00 | τ_hi=0.30MPa | τ_lo=0.20MPa</div>
       </div>
-      <div class="p-note" id="pNote" style="color:var(--safe)">正常圧力</div>
+      <div class="p-note p-note-safe" id="pNote">正常圧力</div>
     </div>
 
     <div class="card">
@@ -187,7 +200,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8"   y="72" fill="#304050" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#304050" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rHiN" style="color:#ff3060">0.000</div>
+          <div class="r-num r-hi-init" id="rHiN">0.000</div>
           <div class="r-dir">↑ 過圧 R_hi</div>
         </div>
         <div class="r-item">
@@ -201,7 +214,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8"   y="72" fill="#304050" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#304050" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rLoN" style="color:#8866ff">0.000</div>
+          <div class="r-num r-lo-init" id="rLoN">0.000</div>
           <div class="r-dir">↓ 減圧 R_lo</div>
         </div>
       </div>
@@ -216,25 +229,22 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">δ 圧力偏差</span>
             <span class="met-v" id="dVal">0.00 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%"></div></div>
+          <div class="bar-bg"><div class="bar-fill" id="dBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">τ_hi 過圧余裕（固定）</span>
-            <span class="met-v" style="color:#ff306088">0.30 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tHiB"
-            style="width:60%;background:#ff306055"></div></div>
+            <span class="met-v met-v-hi">0.30 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-hi-init" id="tHiB"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">τ_lo 減圧余裕（固定）</span>
-            <span class="met-v" style="color:#8866ff88">0.20 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tLoB"
-            style="width:40%;background:#8866ff55"></div></div>
+            <span class="met-v met-v-lo">0.20 MPa</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-lo-init" id="tLoB"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">脈動振幅</span>
             <span class="met-v" id="pulseV">0.000 MPa</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="pulseB"
-            style="width:0%;background:#00ddff66"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-pulse-init" id="pulseB"></div></div>
         </div>
       </div>
     </div>
@@ -243,23 +253,23 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="card-lbl">THRESHOLD SETTINGS</div>
       <div class="setting-row">
         <span class="set-lbl">P_OPTIMAL</span>
-        <span class="set-val" style="color:var(--safe)">0.50 MPa</span>
+        <span class="set-val set-val-safe">0.50 MPa</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">P_MAX（破裂限界）</span>
-        <span class="set-val" style="color:#ff3060">0.80 MPa</span>
+        <span class="set-val set-val-hi">0.80 MPa</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">P_MIN（空転限界）</span>
-        <span class="set-val" style="color:#8866ff">0.30 MPa</span>
+        <span class="set-val set-val-lo">0.30 MPa</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">τ_hi（固定）</span>
-        <span class="set-val" style="color:#ff306088">0.30 MPa</span>
+        <span class="set-val set-val-hi-a">0.30 MPa</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">τ_lo（固定）</span>
-        <span class="set-val" style="color:#8866ff88">0.20 MPa</span>
+        <span class="set-val set-val-lo-a">0.20 MPa</span>
       </div>
     </div>
   </div>

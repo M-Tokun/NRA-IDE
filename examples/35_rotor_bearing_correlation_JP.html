@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 35_rotor_bearing_correlation_JP_20260425_024602_JST.html -->
-<!-- TITLE: NRA-IDE 回転機械・軸受相関テンプレート -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 02:46:02 JST -->
+<!-- FILE: 35_rotor_bearing_correlation_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -217,6 +214,13 @@ select{
   margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
   font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
 }
+
+.fc-en-txt { font-family:'JetBrains Mono',monospace;color:var(--mu);font-size:.65rem; }
+.fc-tau-txt { color:var(--mu); }
+.fc-desc-txt { font-size:.62rem;color:var(--mu);line-height:1.5;margin-top:7px; }
+.corr-fail-txt { color:var(--fail); }
+.corr-ok-txt { color:var(--ok); }
+.legend-fail { color:rgba(255,49,95,.65); }
 </style>
 </head>
 <body>
@@ -448,14 +452,14 @@ function buildFactorCards(){
     div.id = `fc_${i}`;
     div.innerHTML = `
       <div class="fc-badge badge-ok" id="badge_${i}">SAFE</div>
-      <div class="fc-name">${f.name} <span style="font-family:'JetBrains Mono',monospace;color:var(--mu);font-size:.65rem;">${f.en}</span></div>
+      <div class="fc-name">${f.name} <span class="fc-en-txt">${f.en}</span></div>
       <div class="fc-val" id="val_${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta_${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ_eff</span><span id="tau_${i}" style="color:var(--mu)">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">coupling</span><span id="cp_${i}" style="color:var(--mu)">0.00</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ_eff</span><span id="tau_${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">coupling</span><span id="cp_${i}" class="fc-tau-txt">0.00</span></div>
       <div class="fc-row"><span class="fc-lbl">R_eff</span><span class="fc-r" id="r_${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="bar_${i}"></div></div>
-      <div style="font-size:.62rem;color:var(--mu);line-height:1.5;margin-top:7px;">${f.desc}</div>
+      <div class="fc-desc-txt">${f.desc}</div>
     `;
     root.appendChild(div);
   });
@@ -515,7 +519,7 @@ function buildLegend(){
   FACTORS.forEach(f=>{
     root.innerHTML += `<span class="leg"><span style="color:${f.color};">─</span> ${f.name}</span>`;
   });
-  root.innerHTML += `<span class="leg"><span style="color:rgba(255,49,95,.65);">- -</span> Fail線</span>`;
+  root.innerHTML += `<span class="leg"><span class="legend-fail">- -</span> Fail線</span>`;
 }
 
 // ────────────────────────────────────────────────
@@ -941,10 +945,10 @@ function updateUI(eff, C, rCorr, corrAlerts){
 
   const alertEl = document.getElementById('corrAlert');
   if(corrAlerts.length){
-    alertEl.innerHTML = corrAlerts.map(a=>`<span style="color:var(--fail)">⚠ ${a}</span>`).join('<br>');
+    alertEl.innerHTML = corrAlerts.map(a=>`<span class="corr-fail-txt">⚠ ${a}</span>`).join('<br>');
     if(tick % 26 === 0) addLog(`相関変質検出: ${corrAlerts[0]}`, 'fail');
   } else {
-    alertEl.innerHTML = `<span style="color:var(--ok)">✓ 相関構造は基準内 R_corr=${rCorr.maxR.toFixed(3)}</span>`;
+    alertEl.innerHTML = `<span class="corr-ok-txt">✓ 相関構造は基準内 R_corr=${rCorr.maxR.toFixed(3)}</span>`;
   }
 
   // lead-lag

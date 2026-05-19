@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 04_HAN_Stress_Test_EN.html -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +21,12 @@
         }
         button:hover { opacity: 0.8; }
         .info { color: #888; font-size: 0.9em; margin-top: 5px; }
+        .btn-container { margin-bottom: 15px; margin-top: 15px; }
+        .btn-legacy { background: #ff5555; color: #fff; }
+        .btn-han { background: #00ff88; color: #000; }
+        .btn-reset { background: #444; color: #fff; }
+        .status-row { margin-top: 10px; border-top: 1px solid #444; padding-top: 10px; color: #aaa; }
+        .status-text { color: #fff; }
     </style>
 </head>
 <body>
@@ -27,18 +34,18 @@
 <h2>Experiment: The 80ms Heavy Load (5x the 16.6ms Budget)</h2>
 <p class="info">Can the system survive a command that is physically impossible to execute in real-time?</p>
 
-<div style="margin-bottom: 15px; margin-top: 15px;">
-    <button onclick="setMode('legacy')" style="background:#ff5555; color:#fff;">Legacy (Blind Execution)</button>
-    <button onclick="setMode('han')" style="background:#00ff88; color:#000;">HAN (Adaptive Survival)</button>
-    <button onclick="setMode('none')" style="background:#444; color:#fff;">Reset</button>
+<div class="btn-container">
+    <button onclick="setMode('legacy')" class="btn-legacy">Legacy (Blind Execution)</button>
+    <button onclick="setMode('han')" class="btn-han">HAN (Adaptive Survival)</button>
+    <button onclick="setMode('none')" class="btn-reset">Reset</button>
 </div>
 
 <div class="log-box">
     <div>Mode: <span id="mode-disp" class="highlight">---</span></div>
     <div>Real FPS: <span id="fps-disp" class="highlight">60</span> (Higher is smoother)</div>
     <div>Executed Work: <span id="work-disp" class="highlight">0</span> ms (Actual CPU block time)</div>
-    <div style="margin-top:10px; border-top: 1px solid #444; padding-top: 10px; color:#aaa;">
-        System Status: <span id="comment-disp" style="color: #fff;">Waiting for input...</span>
+    <div class="status-row">
+        System Status: <span id="comment-disp" class="status-text">Waiting for input...</span>
     </div>
 </div>
 

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 01_Why_No_Distance_JP.html -->
 <!--
   FILE: 01_Why_No_Distance_JP.html
   NRA-IDE 実証デモ #01 — なぜ距離・微分積分・浮動小数点を使わないのか
@@ -194,6 +195,12 @@
         tr:hover {
             background: rgba(0, 255, 136, 0.1);
         }
+        
+        .text-error { color: #ff5555; }
+        .text-success { color: #00ff88; }
+        .viz-caption { text-align: center; color: #888; margin-top: 10px; }
+        .note-text { margin-top: 15px; color: #aaa; }
+        .explanation-highlight { background: #1a1a2e; border-left: 4px solid #00ff88; }
     </style>
 </head>
 <body>
@@ -251,7 +258,7 @@
 }
                 </div>
                 
-                <p><strong style="color: #ff5555;">なぜこれが問題か？</strong></p>
+                <p><strong class="text-error">なぜこれが問題か？</strong></p>
                 <table>
                     <tr>
                         <th>問題</th>
@@ -296,7 +303,7 @@
 }
                 </div>
                 
-                <p><strong style="color: #00ff88;">なぜこれが優れているか？</strong></p>
+                <p><strong class="text-success">なぜこれが優れているか？</strong></p>
                 <table>
                     <tr>
                         <th>特徴</th>
@@ -318,7 +325,7 @@
             </div>
             
             <!-- 数学と律環公理の違い -->
-            <div class="explanation" style="background: #1a1a2e; border-left: 4px solid #00ff88;">
+            <div class="explanation explanation-highlight">
                 <h3>📐 数学 vs 律環公理</h3>
                 <table>
                     <tr>
@@ -341,7 +348,7 @@
                     </tr>
                 </table>
                 
-                <p style="margin-top: 15px; color: #aaa;">
+                <p class="note-text">
                     <strong>重要：</strong>数学と律環公理は対立ではなく、<strong>得意分野が異なる</strong>。<br>
                     静的計算には数学、動的適応には律環公理が適している。
                 </p>
@@ -378,7 +385,7 @@
 }
                 </div>
                 
-                <p><strong style="color: #ff5555;">問題点：</strong></p>
+                <p><strong class="text-error">問題点：</strong></p>
                 <ul>
                     <li>dt（時間刻み）が必要 → 連続時間の仮定</li>
                     <li>微分は数値的に不安定</li>
@@ -412,7 +419,7 @@
 // 使っているのは：引き算、割り算、比較、だけ</span>
                 </div>
                 
-                <p><strong style="color: #00ff88;">これの利点：</strong></p>
+                <p><strong class="text-success">これの利点：</strong></p>
                 <table>
                     <tr>
                         <th>従来手法（微分積分）</th>
@@ -462,7 +469,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                    <span class="code-comment">// 実際: 100000.00000123456... (誤差！)</span>
                 </div>
                 
-                <p><strong style="color: #ff5555;">医療・自動運転では致命的：</strong></p>
+                <p><strong class="text-error">医療・自動運転では致命的：</strong></p>
                 <ul>
                     <li>誤差が累積 → 判定ミス</li>
                     <li>再現性がない → デバッグ不可能</li>
@@ -496,7 +503,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
 // - どんなCPUでも同じ結果</span>
                 </div>
                 
-                <p><strong style="color: #00ff88;">実例：</strong></p>
+                <p><strong class="text-success">実例：</strong></p>
                 <table>
                     <tr>
                         <th>Phase（内部）</th>
@@ -529,7 +536,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
             <!-- 視覚化 -->
             <h3>📊 位相ロックの視覚化</h3>
             <canvas id="floatingCanvas" width="800" height="400"></canvas>
-            <p style="text-align: center; color: #888; margin-top: 10px;">
+            <p class="viz-caption">
                 緑の環：整数位相（システムが使う）<br>
                 赤の点：浮動小数点ノイズ（破棄される）
             </p>

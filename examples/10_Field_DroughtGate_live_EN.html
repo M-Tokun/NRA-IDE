@@ -1,10 +1,5 @@
-code
-Html
-play_circle
-download
-content_copy
-expand_less
 <!DOCTYPE html>
+<!-- FILE: 10_Field_DroughtGate_live_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -310,6 +305,40 @@ footer {
   display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
 }
 footer a { color:var(--soil); text-decoration:none; }
+  .text-soil { color: var(--soil); }
+  .bg-soil { background: var(--soil); }
+  .bg-soil-dim { background: rgba(200,164,110,.2); }
+  .text-ground { color: var(--ground); }
+  .bg-ground { background: var(--ground); }
+  .bg-ground-dim { background: rgba(124,184,122,.2); }
+  .text-sun { color: var(--sun); }
+  .bg-sun { background: var(--sun); }
+  .bg-sun-dim { background: rgba(255,224,102,.2); }
+  .text-wind { color: var(--wind); }
+  .bg-wind { background: var(--wind); }
+  .bg-wind-dim { background: rgba(128,216,255,.2); }
+  .mt-5 { margin-top: 5px; }
+  .mt-3 { margin-top: 3px; }
+  .mt-6 { margin-top: 6px; }
+  .mt-10 { margin-top: 10px; }
+  .mt-12 { margin-top: 12px; }
+  .w-0 { width: 0%; }
+  .border-lv0 { border-color: var(--lv0); }
+  .sensor-title { font-family: var(--mono); font-size: 9px; margin-bottom: 6px; letter-spacing: 2px; }
+  .note-box { margin-top: 10px; padding: 10px 12px; background: rgba(200,164,110,.04); border: 1px solid rgba(200,164,110,.1); border-radius: 3px; }
+  .note-title { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; color: var(--soil); margin-bottom: 5px; }
+  .note-text { font-size: 10px; color: var(--white); opacity: .8; line-height: 1.7; }
+  .bg-lv0 { background: var(--lv0); }
+  .bg-lv1 { background: var(--lv1); }
+  .bg-lv2 { background: var(--lv2); }
+  .bg-lv3 { background: var(--lv3); }
+  .bg-lv4 { background: var(--lv4); }
+  .step-0 { --step-col: var(--lv0); }
+  .step-1 { --step-col: var(--lv1); }
+  .step-2 { --step-col: var(--lv2); }
+  .step-3 { --step-col: var(--lv3); }
+  .step-4 { --step-col: var(--lv4); }
+  .btn-row-ctrl { display: flex; gap: 6px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -327,7 +356,7 @@ footer a { color:var(--soil); text-decoration:none; }
   </div>
   <div class="live-wrap">
     <div class="live-badge"><div class="ldot"></div>FIELD MONITOR LIVE</div>
-    <div style="display:flex;gap:6px;margin-top:4px">
+    <div class="btn-row-ctrl">
       <button class="ctrl play" id="btnPlay" onclick="togglePlay()">⏸ PAUSE</button>
       <button class="ctrl" onclick="resetSim()">↺ RESET</button>
     </div>
@@ -342,35 +371,35 @@ footer a { color:var(--soil); text-decoration:none; }
   </div>
 
   <div class="gauge-steps">
-    <div class="gauge-step" id="step0" style="--step-col:var(--lv0)">
-      <div class="gauge-step-fill" style="background:var(--lv0)"></div>
+    <div class="gauge-step step-0" id="step0">
+      <div class="gauge-step-fill bg-lv0"></div>
       <div class="gauge-step-label">Lv.0 NORMAL</div>
     </div>
-    <div class="gauge-step" id="step1" style="--step-col:var(--lv1)">
-      <div class="gauge-step-fill" style="background:var(--lv1)"></div>
+    <div class="gauge-step step-1" id="step1">
+      <div class="gauge-step-fill bg-lv1"></div>
       <div class="gauge-step-label">Lv.1 NOTICE</div>
     </div>
-    <div class="gauge-step" id="step2" style="--step-col:var(--lv2)">
-      <div class="gauge-step-fill" style="background:var(--lv2)"></div>
+    <div class="gauge-step step-2" id="step2">
+      <div class="gauge-step-fill bg-lv2"></div>
       <div class="gauge-step-label">Lv.2 WARNING</div>
     </div>
-    <div class="gauge-step" id="step3" style="--step-col:var(--lv3)">
-      <div class="gauge-step-fill" style="background:var(--lv3)"></div>
+    <div class="gauge-step step-3" id="step3">
+      <div class="gauge-step-fill bg-lv3"></div>
       <div class="gauge-step-label">Lv.3 DANGER</div>
     </div>
-    <div class="gauge-step" id="step4" style="--step-col:var(--lv4)">
-      <div class="gauge-step-fill" style="background:var(--lv4)"></div>
+    <div class="gauge-step step-4" id="step4">
+      <div class="gauge-step-fill bg-lv4"></div>
       <div class="gauge-step-label">Lv.4 CRITICAL</div>
     </div>
   </div>
 
   <div class="composite-row">
     <span class="composite-label">DROUGHT SCORE</span>
-    <div class="composite-bar"><div class="composite-fill" id="compFill" style="width:0%"></div></div>
+    <div class="composite-bar"><div class="composite-fill w-0" id="compFill"></div></div>
     <span class="composite-val" id="compVal">0.000</span>
   </div>
 
-  <div class="gauge-desc" id="gaugeDesc" style="border-color:var(--lv0)">
+  <div class="gauge-desc border-lv0" id="gaugeDesc">
     Lv.0 — Normal range. Soil moisture, temp, solar, and wind are all within appropriate limits.
   </div>
 </div>
@@ -383,17 +412,17 @@ footer a { color:var(--soil); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">🌱</span>
-        <span class="card-name" style="color:var(--soil)">Soil Moisture</span>
+        <span class="card-name text-soil">Soil Moisture</span>
       </div>
       <div class="card-decision pass" id="dec-soil">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-soil" style="color:var(--soil)">—</div>
+      <div class="card-value text-soil" id="val-soil">—</div>
       <div class="card-unit">%</div>
     </div>
     <div class="band-bar-wrap">
-      <div class="band-track"><div class="band-safe" id="safe-soil" style="background:rgba(200,164,110,.2)"></div></div>
-      <div class="band-needle" id="needle-soil" style="background:var(--soil)"></div>
+      <div class="band-track"><div class="band-safe bg-soil-dim" id="safe-soil"></div></div>
+      <div class="band-needle bg-soil" id="needle-soil"></div>
       <div class="bll" id="ll-soil"></div><div class="blh" id="lh-soil"></div>
     </div>
     <canvas class="mini-canvas" id="cv-soil" height="56"></canvas>
@@ -404,7 +433,7 @@ footer a { color:var(--soil); text-decoration:none; }
     </div>
     <div class="ema-row">
       <span class="ema-label">Dry Momentum</span>
-      <div class="ema-bar"><div class="ema-fill" id="ef-soil" style="width:0%"></div></div>
+      <div class="ema-bar"><div class="ema-fill w-0" id="ef-soil"></div></div>
       <span class="ema-val" id="ev-soil">0.000</span>
     </div>
   </div>
@@ -414,17 +443,17 @@ footer a { color:var(--soil); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">🌡</span>
-        <span class="card-name" style="color:var(--ground)">Ground Temp</span>
+        <span class="card-name text-ground">Ground Temp</span>
       </div>
       <div class="card-decision pass" id="dec-ground">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-ground" style="color:var(--ground)">—</div>
+      <div class="card-value text-ground" id="val-ground">—</div>
       <div class="card-unit">°C</div>
     </div>
     <div class="band-bar-wrap">
-      <div class="band-track"><div class="band-safe" id="safe-ground" style="background:rgba(124,184,122,.2)"></div></div>
-      <div class="band-needle" id="needle-ground" style="background:var(--ground)"></div>
+      <div class="band-track"><div class="band-safe bg-ground-dim" id="safe-ground"></div></div>
+      <div class="band-needle bg-ground" id="needle-ground"></div>
       <div class="bll" id="ll-ground"></div><div class="blh" id="lh-ground"></div>
     </div>
     <canvas class="mini-canvas" id="cv-ground" height="56"></canvas>
@@ -435,7 +464,7 @@ footer a { color:var(--soil); text-decoration:none; }
     </div>
     <div class="ema-row">
       <span class="ema-label">Rise Momentum</span>
-      <div class="ema-bar"><div class="ema-fill" id="ef-ground" style="width:0%"></div></div>
+      <div class="ema-bar"><div class="ema-fill w-0" id="ef-ground"></div></div>
       <span class="ema-val" id="ev-ground">0.000</span>
     </div>
   </div>
@@ -445,17 +474,17 @@ footer a { color:var(--soil); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">☀</span>
-        <span class="card-name" style="color:var(--sun)">Solar Rad</span>
+        <span class="card-name text-sun">Solar Rad</span>
       </div>
       <div class="card-decision pass" id="dec-sun">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-sun" style="color:var(--sun)">—</div>
+      <div class="card-value text-sun" id="val-sun">—</div>
       <div class="card-unit">W/m²</div>
     </div>
     <div class="band-bar-wrap">
-      <div class="band-track"><div class="band-safe" id="safe-sun" style="background:rgba(255,224,102,.2)"></div></div>
-      <div class="band-needle" id="needle-sun" style="background:var(--sun)"></div>
+      <div class="band-track"><div class="band-safe bg-sun-dim" id="safe-sun"></div></div>
+      <div class="band-needle bg-sun" id="needle-sun"></div>
       <div class="bll" id="ll-sun"></div><div class="blh" id="lh-sun"></div>
     </div>
     <canvas class="mini-canvas" id="cv-sun" height="56"></canvas>
@@ -466,7 +495,7 @@ footer a { color:var(--soil); text-decoration:none; }
     </div>
     <div class="ema-row">
       <span class="ema-label">Excess Heat</span>
-      <div class="ema-bar"><div class="ema-fill" id="ef-sun" style="width:0%"></div></div>
+      <div class="ema-bar"><div class="ema-fill w-0" id="ef-sun"></div></div>
       <span class="ema-val" id="ev-sun">0.000</span>
     </div>
   </div>
@@ -476,17 +505,17 @@ footer a { color:var(--soil); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">💨</span>
-        <span class="card-name" style="color:var(--wind)">Wind Speed</span>
+        <span class="card-name text-wind">Wind Speed</span>
       </div>
       <div class="card-decision pass" id="dec-wind">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-wind" style="color:var(--wind)">—</div>
+      <div class="card-value text-wind" id="val-wind">—</div>
       <div class="card-unit">m/s</div>
     </div>
     <div class="band-bar-wrap">
-      <div class="band-track"><div class="band-safe" id="safe-wind" style="background:rgba(128,216,255,.2)"></div></div>
-      <div class="band-needle" id="needle-wind" style="background:var(--wind)"></div>
+      <div class="band-track"><div class="band-safe bg-wind-dim" id="safe-wind"></div></div>
+      <div class="band-needle bg-wind" id="needle-wind"></div>
       <div class="bll" id="ll-wind"></div><div class="blh" id="lh-wind"></div>
     </div>
     <canvas class="mini-canvas" id="cv-wind" height="56"></canvas>
@@ -497,7 +526,7 @@ footer a { color:var(--soil); text-decoration:none; }
     </div>
     <div class="ema-row">
       <span class="ema-label">Evaporation</span>
-      <div class="ema-bar"><div class="ema-fill" id="ef-wind" style="width:0%"></div></div>
+      <div class="ema-bar"><div class="ema-fill w-0" id="ef-wind"></div></div>
       <span class="ema-val" id="ev-wind">0.000</span>
     </div>
   </div>
@@ -510,49 +539,48 @@ footer a { color:var(--soil); text-decoration:none; }
   <div class="param-panel">
     <div class="p-title">Band Gate Parameters</div>
     <div class="param-grid">
-
       <div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--soil);margin-bottom:6px;letter-spacing:2px">🌱 Soil Moisture (%)</div>
+        <div class="sensor-title text-soil">🌱 Soil Moisture (%)</div>
         <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-sh">70</span></div>
-        <input type="range" class="soil" id="sl-sh" min="30" max="95" value="70">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low (Critical)</span><span class="pg-val" id="v-sl">25</span></div>
-        <input type="range" class="soil" id="sl-sl" min="5" max="50" value="25">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-sa">0.15/0.60</span></div>
-        <input type="range" class="soil" id="sl-sau" min="0.01" max="0.99" step="0.01" value="0.15">
-        <input type="range" class="soil" id="sl-sal" min="0.01" max="0.99" step="0.01" value="0.60" style="margin-top:3px">
+        <input type="range" class="soil" id="sl-sh" min="30" max="95" value="70" title="τ_high (soil)">
+        <div class="pg-head mt-5"><span class="pg-name">τ_low (Critical)</span><span class="pg-val" id="v-sl">25</span></div>
+        <input type="range" class="soil" id="sl-sl" min="5" max="50" value="25" title="τ_low (soil)">
+        <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-sa">0.15/0.60</span></div>
+        <input type="range" class="soil" id="sl-sau" min="0.01" max="0.99" step="0.01" value="0.15" title="α_upper (soil)">
+        <input type="range" class="soil mt-3" id="sl-sal" min="0.01" max="0.99" step="0.01" value="0.60" title="α_lower (soil)">
       </div>
 
       <div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ground);margin-bottom:6px;letter-spacing:2px">🌡 Ground Temp (°C)</div>
+        <div class="sensor-title text-ground">🌡 Ground Temp (°C)</div>
         <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-gh">32</span></div>
-        <input type="range" class="ground" id="sl-gh" min="20" max="50" value="32">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low</span><span class="pg-val" id="v-gl">5</span></div>
-        <input type="range" class="ground" id="sl-gl" min="0" max="20" value="5">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ga">0.25/0.35</span></div>
-        <input type="range" class="ground" id="sl-gau" min="0.01" max="0.99" step="0.01" value="0.25">
-        <input type="range" class="ground" id="sl-gal" min="0.01" max="0.99" step="0.01" value="0.35" style="margin-top:3px">
+        <input type="range" class="ground" id="sl-gh" min="20" max="50" value="32" title="τ_high (ground)">
+        <div class="pg-head mt-5"><span class="pg-name">τ_low</span><span class="pg-val" id="v-gl">5</span></div>
+        <input type="range" class="ground" id="sl-gl" min="0" max="20" value="5" title="τ_low (ground)">
+        <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ga">0.25/0.35</span></div>
+        <input type="range" class="ground" id="sl-gau" min="0.01" max="0.99" step="0.01" value="0.25" title="α_upper (ground)">
+        <input type="range" class="ground mt-3" id="sl-gal" min="0.01" max="0.99" step="0.01" value="0.35" title="α_lower (ground)">
       </div>
 
       <div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--sun);margin-bottom:6px;letter-spacing:2px">☀ Solar Rad (W/m²)</div>
+        <div class="sensor-title text-sun">☀ Solar Rad (W/m²)</div>
         <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-uh">900</span></div>
-        <input type="range" class="sun" id="sl-uh" min="500" max="1400" step="10" value="900">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low</span><span class="pg-val" id="v-ul">80</span></div>
-        <input type="range" class="sun" id="sl-ul" min="10" max="300" step="5" value="80">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ua">0.35/0.20</span></div>
-        <input type="range" class="sun" id="sl-uau" min="0.01" max="0.99" step="0.01" value="0.35">
-        <input type="range" class="sun" id="sl-ual" min="0.01" max="0.99" step="0.01" value="0.20" style="margin-top:3px">
+        <input type="range" class="sun" id="sl-uh" min="500" max="1400" step="10" value="900" title="τ_high (sun)">
+        <div class="pg-head mt-5"><span class="pg-name">τ_low</span><span class="pg-val" id="v-ul">80</span></div>
+        <input type="range" class="sun" id="sl-ul" min="10" max="300" step="5" value="80" title="τ_low (sun)">
+        <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ua">0.35/0.20</span></div>
+        <input type="range" class="sun" id="sl-uau" min="0.01" max="0.99" step="0.01" value="0.35" title="α_upper (sun)">
+        <input type="range" class="sun mt-3" id="sl-ual" min="0.01" max="0.99" step="0.01" value="0.20" title="α_lower (sun)">
       </div>
 
       <div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--wind);margin-bottom:6px;letter-spacing:2px">💨 Wind Speed (m/s)</div>
+        <div class="sensor-title text-wind">💨 Wind Speed (m/s)</div>
         <div class="pg-head"><span class="pg-name">τ_high (Vapor Rate)</span><span class="pg-val" id="v-wh">8</span></div>
-        <input type="range" class="wind" id="sl-wh" min="3" max="20" value="8">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">τ_low</span><span class="pg-val" id="v-wl">0.3</span></div>
-        <input type="range" class="wind" id="sl-wl" min="0.1" max="3" step="0.1" value="0.3">
-        <div class="pg-head" style="margin-top:5px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.45/0.15</span></div>
-        <input type="range" class="wind" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.45">
-        <input type="range" class="wind" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.15" style="margin-top:3px">
+        <input type="range" class="wind" id="sl-wh" min="3" max="20" value="8" title="τ_high (wind)">
+        <div class="pg-head mt-5"><span class="pg-name">τ_low</span><span class="pg-val" id="v-wl">0.3</span></div>
+        <input type="range" class="wind" id="sl-wl" min="0.1" max="3" step="0.1" value="0.3" title="τ_low (wind)">
+        <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.45/0.15</span></div>
+        <input type="range" class="wind" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.45" title="α_upper (wind)">
+        <input type="range" class="wind mt-3" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.15" title="α_lower (wind)">
       </div>
 
     </div>
@@ -560,11 +588,11 @@ footer a { color:var(--soil); text-decoration:none; }
     <div class="common-row">
       <div>
         <div class="pg-head"><span class="pg-name">Speed</span><span class="pg-val" id="v-spd">1×</span></div>
-        <input type="range" class="soil" id="sl-spd" min="1" max="5" value="1">
+        <input type="range" class="soil" id="sl-spd" min="1" max="5" value="1" title="Speed">
       </div>
       <div>
         <div class="pg-head"><span class="pg-name">HOLD (ms)</span><span class="pg-val" id="v-hold">2000</span></div>
-        <input type="range" class="ground" id="sl-hold" min="500" max="5000" step="100" value="2000">
+        <input type="range" class="ground" id="sl-hold" min="500" max="5000" step="100" value="2000" title="HOLD (ms)">
       </div>
     </div>
 
@@ -580,9 +608,9 @@ footer a { color:var(--soil); text-decoration:none; }
   <div class="log-panel">
     <div class="p-title">Field Event Log</div>
     <div class="log-area" id="logArea"></div>
-    <div style="margin-top:10px;padding:10px 12px;background:rgba(200,164,110,.04);border:1px solid rgba(200,164,110,.1);border-radius:3px">
-      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--soil);margin-bottom:5px">Asymmetric Field Settings</div>
-      <div style="font-size:10px;color:var(--white);opacity:.8;line-height:1.7">
+    <div class="note-box">
+      <div class="note-title">Asymmetric Field Settings</div>
+      <div class="note-text">
         Soil Moisture: High α_lower → Detect drying onset quickly, trigger irrigation early.<br>
         Solar Rad: High α_upper → Early capture of transpiration acceleration due to strong sun.<br>
         Wind Speed: High α_upper → Immediately detect evaporation spikes for irrigation logic.<br>
@@ -596,9 +624,9 @@ footer a { color:var(--soil); text-decoration:none; }
 <footer>
   <span>NRA-IDE / Band Gate — Field Drought Monitoring System</span>
   <span>
-    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank" rel="noopener">github.com/M-Tokun/NRA-IDE</a>
     &nbsp;|&nbsp;
-    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+    <a href="https://x.com/m_tokuni" target="_blank" rel="noopener">@m_tokuni</a>
   </span>
 </footer>
 </div>

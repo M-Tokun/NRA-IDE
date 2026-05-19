@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 02_Error_Accumulation_JP.html -->
 <!--
   FILE: 02_Error_Accumulation_JP.html
   NRA-IDE 実証デモ #02 — 誤差積算の恐怖
@@ -224,6 +225,26 @@
         .comparison-box.good h4 {
             color: #00ff88;
         }
+        .text-dim-small { color: #888; font-size: 0.9em; line-height: 1.6; }
+        .text-red { color: #ff5555; }
+        .text-green { color: #00ff88; }
+        .text-orange { color: #ffaa00; }
+        .metric-highlight { background: #1a1a2e; border-left: 4px solid #ffaa00; }
+        .status-container { margin-top: 10px; font-size: 0.9em; line-height: 1.8; }
+        .status-val { font-size: 1em; }
+        .warning-box { margin-top: 20px; padding: 15px; background: rgba(255, 170, 0, 0.2); border-radius: 5px; }
+        .warning-text { margin-top: 10px; color: #fff; }
+        .list-spaced { line-height: 1.8; }
+        .outcome-bad { margin-top: 15px; color: #ff5555; }
+        .outcome-good { margin-top: 15px; color: #00ff88; }
+        .mt-30 { margin-top: 30px; }
+        .consequences-table { width: 100%; margin-top: 15px; border-collapse: collapse; }
+        .table-header-row { background: rgba(255, 85, 85, 0.2); }
+        .table-th { padding: 10px; text-align: left; }
+        .table-td-border { padding: 10px; border-bottom: 1px solid #333; }
+        .table-td { padding: 10px; }
+        .info-box { margin-top: 20px; padding: 15px; background: rgba(255, 170, 0, 0.2); border-radius: 5px; border-left: 4px solid #ffaa00; }
+        .text-white { color: #fff; }
     </style>
 </head>
 <body>
@@ -254,12 +275,12 @@
             
             <canvas id="mainCanvas"></canvas>
             
-            <div style="color: #888; font-size: 0.9em; line-height: 1.6;">
+            <div class="text-dim-small">
                 <strong>実験内容：</strong><br>
                 同じ初期値（1.0）から開始し、100,000ステップ後の値を比較します。<br>
-                <span style="color: #ff5555;">■ 赤線</span>: 従来手法（線形近似 + 平均化 + 浮動小数点）<br>
-                <span style="color: #00ff88;">■ 緑線</span>: 律環公理（整数位相ロック）<br>
-                <span style="color: #ffaa00;">■ 黄線</span>: 理論値（真の値）
+                <span class="text-red">■ 赤線</span>: 従来手法（線形近似 + 平均化 + 浮動小数点）<br>
+                <span class="text-green">■ 緑線</span>: 律環公理（整数位相ロック）<br>
+                <span class="text-orange">■ 黄線</span>: 理論値（真の値）
             </div>
         </div>
         
@@ -287,19 +308,19 @@
                 <div class="metric-value danger" id="error">0.00%</div>
             </div>
             
-            <div class="metric" style="background: #1a1a2e; border-left: 4px solid #ffaa00;">
+            <div class="metric metric-highlight">
                 <div class="metric-label">破綻判定（用途別）</div>
-                <div id="failure-status" style="margin-top: 10px; font-size: 0.9em; line-height: 1.8;">
-                    <div>医療AI（1%）: <span id="medical-status" class="metric-value safe" style="font-size: 1em;">安全</span></div>
-                    <div>自動運転（5%）: <span id="auto-status" class="metric-value safe" style="font-size: 1em;">安全</span></div>
-                    <div>金融AI（10%）: <span id="finance-status" class="metric-value safe" style="font-size: 1em;">安全</span></div>
-                    <div>一般システム（30%）: <span id="general-status" class="metric-value safe" style="font-size: 1em;">安全</span></div>
+                <div id="failure-status" class="status-container">
+                    <div>医療AI（1%）: <span id="medical-status" class="metric-value safe status-val">安全</span></div>
+                    <div>自動運転（5%）: <span id="auto-status" class="metric-value safe status-val">安全</span></div>
+                    <div>金融AI（10%）: <span id="finance-status" class="metric-value safe status-val">安全</span></div>
+                    <div>一般システム（30%）: <span id="general-status" class="metric-value safe status-val">安全</span></div>
                 </div>
             </div>
             
-            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 170, 0, 0.2); border-radius: 5px;">
-                <strong style="color: #ffaa00;">⚠️ 警告</strong><br>
-                <div id="warning-text" style="margin-top: 10px; color: #fff;">
+            <div class="warning-box">
+                <strong class="text-orange">⚠️ 警告</strong><br>
+                <div id="warning-text" class="warning-text">
                     シミュレーション待機中...
                 </div>
             </div>
@@ -315,7 +336,7 @@
         <div class="comparison">
             <div class="comparison-box bad">
                 <h4>従来手法の3重の罠</h4>
-                <ol style="line-height: 1.8;">
+                <ol class="list-spaced">
                     <li><strong>線形近似：</strong>
                     非線形な現実を直線で近似 → 毎回0.1%の誤差</li>
                     
@@ -326,7 +347,7 @@
                     0.1 + 0.1 + 0.1 ≠ 0.3 → 丸め誤差が累積</li>
                 </ol>
                 
-                <p style="margin-top: 15px; color: #ff5555;">
+                <p class="outcome-bad">
                     <strong>結果：</strong>誤差が指数関数的に増大<br>
                     1,000ステップで 10%<br>
                     10,000ステップで 200%<br>
@@ -336,7 +357,7 @@
             
             <div class="comparison-box good">
                 <h4>律環公理の対策</h4>
-                <ol style="line-height: 1.8;">
+                <ol class="list-spaced">
                     <li><strong>非線形保持：</strong>
                     構造をそのまま保持 → 近似不要</li>
                     
@@ -347,7 +368,7 @@
                     整数部分のみ使用 → 浮動小数点誤差が累積しない</li>
                 </ol>
                 
-                <p style="margin-top: 15px; color: #00ff88;">
+                <p class="outcome-good">
                     <strong>結果：</strong>誤差がゼロ<br>
                     1,000ステップで 0%<br>
                     10,000ステップで 0%<br>
@@ -356,55 +377,55 @@
             </div>
         </div>
         
-        <h3 style="margin-top: 30px;">💀 現実世界での影響</h3>
-        <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
-            <tr style="background: rgba(255, 85, 85, 0.2);">
-                <th style="padding: 10px; text-align: left;">領域</th>
-                <th style="padding: 10px; text-align: left;">許容誤差</th>
-                <th style="padding: 10px; text-align: left;">誤差積算の結果</th>
+        <h3 class="mt-30">💀 現実世界での影響</h3>
+        <table class="consequences-table">
+            <tr class="table-header-row">
+                <th class="table-th">領域</th>
+                <th class="table-th">許容誤差</th>
+                <th class="table-th">誤差積算の結果</th>
             </tr>
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">医療AI</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;"><strong style="color: #ff5555;">1%未満</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">
-                    薬剤投与量の計算ミス → <strong style="color: #ff5555;">患者死亡</strong>
+                <td class="table-td-border">医療AI</td>
+                <td class="table-td-border"><strong class="text-red">1%未満</strong></td>
+                <td class="table-td-border">
+                    薬剤投与量の計算ミス → <strong class="text-red">患者死亡</strong>
                 </td>
             </tr>
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">自動運転</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;"><strong style="color: #ff5555;">5%未満</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">
-                    障害物距離の誤認識 → <strong style="color: #ff5555;">衝突事故</strong>
+                <td class="table-td-border">自動運転</td>
+                <td class="table-td-border"><strong class="text-red">5%未満</strong></td>
+                <td class="table-td-border">
+                    障害物距離の誤認識 → <strong class="text-red">衝突事故</strong>
                 </td>
             </tr>
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">金融AI</td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;"><strong style="color: #ff5555;">10%未満</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #333;">
-                    リスク計算の破綻 → <strong style="color: #ff5555;">巨額損失</strong>
+                <td class="table-td-border">金融AI</td>
+                <td class="table-td-border"><strong class="text-red">10%未満</strong></td>
+                <td class="table-td-border">
+                    リスク計算の破綻 → <strong class="text-red">巨額損失</strong>
                 </td>
             </tr>
             <tr>
-                <td style="padding: 10px;">一般システム</td>
-                <td style="padding: 10px;"><strong style="color: #ffaa00;">30%未満</strong></td>
-                <td style="padding: 10px;">
-                    判断の信頼性低下 → <strong style="color: #ffaa00;">使用不可</strong>
+                <td class="table-td">一般システム</td>
+                <td class="table-td"><strong class="text-orange">30%未満</strong></td>
+                <td class="table-td">
+                    判断の信頼性低下 → <strong class="text-orange">使用不可</strong>
                 </td>
             </tr>
         </table>
         
-        <p style="margin-top: 20px; padding: 15px; background: rgba(255, 170, 0, 0.2); border-radius: 5px; border-left: 4px solid #ffaa00;">
-            <strong style="color: #ffaa00;">重要：</strong>
+        <p class="info-box">
+            <strong class="text-orange">重要：</strong>
             「破綻」の定義は用途によって異なります。<br>
             医療・安全システムでは<strong>1%の誤差</strong>でも致命的ですが、<br>
             一般的なシステムでは30%程度まで許容される場合もあります。<br>
             <br>
-            <strong style="color: #fff;">用途別の推奨閾値：</strong><br>
+            <strong class="text-white">用途別の推奨閾値：</strong><br>
             • 企業秘密・重要データ: 20%<br>
             • 一般業務システム: 30%<br>
             • 非クリティカル処理: 40-50%<br>
             <br>
-            <strong style="color: #ff5555;">律環公理はどの用途でも誤差0%を維持します。</strong>
+            <strong class="text-red">律環公理はどの用途でも誤差0%を維持します。</strong>
         </p>
     </div>
 

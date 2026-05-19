@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: NRA-IDE_AgroDrone_4Factor_Simulation_20260420_2041.html -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-20 20:41 JST -->
+<!-- FILE: 34_NRA-IDE_AgroDrone_4Factor_Simulation_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -94,6 +92,23 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 .overall{text-align:center;padding:16px;background:var(--s2);border-radius:10px;border:1px solid var(--bd);margin-bottom:14px;}
 .overall-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:.2em;color:var(--mu);margin-bottom:6px;}
 .overall-val{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:700;transition:color .3s;}
+
+.lbl-scen { font-size:0.8rem;color:var(--mu); }
+.sys-stat-safe { font-size:0.8rem;color:var(--ok);margin-top:4px; }
+.corr-alert-wrap { margin-top:8px; }
+.corr-alert-txt { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--mu); }
+.gate-note { margin-top:14px;font-size:0.78rem;color:var(--mu);line-height:1.7; }
+.legend-wrap { margin-top:8px;display:flex;gap:16px;flex-wrap:wrap; }
+.legend-txt { font-family:'JetBrains Mono',monospace;font-size:0.68rem; }
+.legend-c1 { color:var(--c1); }
+.legend-c2 { color:var(--c2); }
+.legend-c3 { color:var(--c3); }
+.legend-c4 { color:var(--c4); }
+.legend-fail { color:rgba(255,34,85,0.6); }
+.fc-tau-txt { color:var(--mu); }
+.fc-desc-txt { font-size:0.65rem;color:var(--mu);margin-top:6px; }
+.corr-alert-fail { font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--f); }
+.corr-alert-ok { font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--ok); }
 </style>
 </head>
 <body>
@@ -108,7 +123,7 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 <div class="ctrl-bar">
   <button class="btn active" id="btn-run" onclick="toggleRun()">▶ 実行中</button>
   <button class="btn" onclick="resetSim()">↺ リセット</button>
-  <label style="font-size:0.8rem;color:var(--mu);">シナリオ：</label>
+  <label class="lbl-scen">シナリオ：</label>
   <select id="scenario-sel" onchange="applyScenario()">
     <option value="normal">通常運転</option>
     <option value="drought">水分不足（夏季乾燥）</option>
@@ -130,7 +145,7 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 <div class="overall">
   <div class="overall-label">SYSTEM R_composite = δ_composite / τ_composite</div>
   <div class="overall-val" id="overall-r">0.00</div>
-  <div id="overall-status" style="font-size:0.8rem;color:var(--ok);margin-top:4px;">SAFE — 全要素正常</div>
+  <div id="overall-status" class="sys-stat-safe">SAFE — 全要素正常</div>
 </div>
 
 <div class="main-grid">
@@ -144,10 +159,10 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--mu);">
+    <div class="corr-alert-txt">
       R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C　|　赤色：相関変質検出
     </div>
-    <div style="margin-top:8px;" id="corr-alert"></div>
+    <div class="corr-alert-wrap" id="corr-alert"></div>
   </div>
 </div>
 
@@ -156,7 +171,7 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
   <div class="panel">
     <div class="panel-title">G(r) GATE — 古典補正の自動開閉</div>
     <div class="gate-list" id="gate-list"></div>
-    <div style="margin-top:14px;font-size:0.78rem;color:var(--mu);line-height:1.7;">
+    <div class="gate-note">
       ゲート開度 = |r|/(k+|r|)　k=0.8　|　0%：古典沈黙　100%：精密補正全開
     </div>
   </div>
@@ -165,12 +180,12 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
   <div class="panel">
     <div class="panel-title">TIME SERIES — R値の推移</div>
     <canvas id="ts-canvas" class="ts-canvas" width="520" height="130"></canvas>
-    <div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c1);">─</span> 温度</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c2);">─</span> 湿度</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c3);">─</span> 光量</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:var(--c4);">─</span> 水分</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;"><span style="color:rgba(255,34,85,0.6);">- -</span> Fail線</span>
+    <div class="legend-wrap">
+      <span class="legend-txt"><span class="legend-c1">─</span> 温度</span>
+      <span class="legend-txt"><span class="legend-c2">─</span> 湿度</span>
+      <span class="legend-txt"><span class="legend-c3">─</span> 光量</span>
+      <span class="legend-txt"><span class="legend-c4">─</span> 水分</span>
+      <span class="legend-txt"><span class="legend-fail">- -</span> Fail線</span>
     </div>
   </div>
 </div>
@@ -318,10 +333,10 @@ function buildFactorCards(){
       <div class="fc-name">${f.name}</div>
       <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ</span><span style="color:var(--mu)">${f.tau} ${f.unit}</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ</span><span class="fc-tau-txt">${f.tau} ${f.unit}</span></div>
       <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
-      <div style="font-size:0.65rem;color:var(--mu);margin-top:6px;">${f.desc}</div>`;
+      <div class="fc-desc-txt">${f.desc}</div>`;
     g.appendChild(d);
   });
 }
@@ -502,10 +517,10 @@ function update(){
   // corr alert
   const ca = document.getElementById('corr-alert');
   if(corrAlerts.length > 0){
-    ca.innerHTML = corrAlerts.map(a=>`<span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--f);">⚠ ${a}</span>`).join('<br>');
+    ca.innerHTML = corrAlerts.map(a=>`<span class="corr-alert-fail">⚠ ${a}</span>`).join('<br>');
     if(corrAlerts.length > 0 && tick%30===0) addLog(`相関変質検出: ${corrAlerts[0]}`, 'fail');
   } else {
-    ca.innerHTML = `<span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--ok);">✓ 相関正常 R_corr=${rCorrMax.toFixed(3)}</span>`;
+    ca.innerHTML = `<span class="corr-alert-ok">✓ 相関正常 R_corr=${rCorrMax.toFixed(3)}</span>`;
   }
 
   // overall

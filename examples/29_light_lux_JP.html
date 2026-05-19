@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: light_lux_nra_ide_20260319_0135.html -->
-<!-- TITLE: NRA-IDE 光量（照度）上限・下限管理システム -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-03-19 01:35 JST -->
+<!-- FILE: 29_light_lux_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -137,6 +134,23 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 .shade-bar-fill{height:100%;border-radius:3px;background:#556;transition:width .4s ease;}
 .shade-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);min-width:60px;}
 .shade-pct{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;min-width:36px;text-align:right;}
+
+.sl-val-accent { color:var(--accent); }
+.small-unit-12 { font-size:12px; font-weight:300; color:var(--muted); }
+.sl-val-cloud { font-size:14px; color:var(--muted); }
+.small-unit-10 { font-size:10px; }
+.scene-safe { color:var(--safe); }
+.r-num-hi { color:#ff9030; }
+.r-num-lo { color:#4488ff; }
+.bar-w0 { width:0%; }
+.bar-tau-hi { width:60%; background:#ff903066; }
+.bar-tau-lo { width:60%; background:#4488ff66; }
+.bar-amp-init { width:0%; background:#ffe06688; }
+.set-val-safe { color:var(--safe); }
+.set-val-hi { color:#ff9030; }
+.set-val-lo { color:#4488ff; }
+.set-val-warn { color:var(--warn); }
+.set-val-fail { color:var(--fail-hi); }
 </style>
 </head>
 <body>
@@ -166,8 +180,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">SUN ELEVATION（太陽高度）</span>
-          <div class="sl-val" id="elevDisp" style="color:var(--accent)">
-            45<small style="font-size:12px;font-weight:300;color:var(--muted)">°</small>
+          <div class="sl-val sl-val-accent" id="elevDisp">
+            45<small class="small-unit-12">°</small>
           </div>
         </div>
         <input type="range" id="elevSlider" min="0" max="90" value="45"
@@ -177,8 +191,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">CLOUD COVER（雲量）</span>
-          <div class="sl-val" id="cloudDisp" style="font-size:14px;color:var(--muted)">
-            0<small style="font-size:10px">%</small>
+          <div class="sl-val sl-val-cloud" id="cloudDisp">
+            0<small class="small-unit-10">%</small>
           </div>
         </div>
         <input type="range" id="cloudSlider" min="0" max="100" value="0"
@@ -197,7 +211,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <div class="lux-big" id="luxBig">20000<span class="lux-unit"> lux</span></div>
         <div class="lux-sub" id="luxSub">δ = 0 lx | τ_hi = 30000 lx | τ_lo = 5000 lx</div>
       </div>
-      <div class="lux-scene" id="luxScene" style="color:var(--safe)">☀ 快適な明るさ</div>
+      <div class="lux-scene scene-safe" id="luxScene">☀ 快適な明るさ</div>
     </div>
 
     <div class="card">
@@ -216,7 +230,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8"   y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rHiNum" style="color:#ff9030">0.000</div>
+          <div class="r-num r-num-hi" id="rHiNum">0.000</div>
           <div class="r-dir">↑ 過照射 R_hi</div>
         </div>
         <div class="r-item">
@@ -232,7 +246,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8"   y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#3a4860" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rLoNum" style="color:#4488ff">0.000</div>
+          <div class="r-num r-num-lo" id="rLoNum">0.000</div>
           <div class="r-dir">↓ 照度不足 R_lo</div>
         </div>
       </div>
@@ -247,7 +261,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="shade-indicator">
         <span class="shade-lbl">遮光率</span>
         <div class="shade-bar-bg">
-          <div class="shade-bar-fill" id="shadeBar" style="width:0%"></div>
+          <div class="shade-bar-fill bar-w0" id="shadeBar"></div>
         </div>
         <span class="shade-pct" id="shadePct">0%</span>
       </div>
@@ -259,25 +273,22 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">δ 偏差</span>
             <span class="met-v" id="dVal">0 lx</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-w0" id="dBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">τ_hi 過照射余裕</span>
             <span class="met-v" id="tauHiVal">30000 lx</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tauHiBar"
-            style="width:60%;background:#ff903066"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-tau-hi" id="tauHiBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">τ_lo 不足余裕</span>
             <span class="met-v" id="tauLoVal">15000 lx</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tauLoBar"
-            style="width:60%;background:#4488ff66"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-tau-lo" id="tauLoBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">ゆらぎ振幅</span>
             <span class="met-v" id="ampVal">0 lx</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="ampBar"
-            style="width:0%;background:#ffe06688"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-amp-init" id="ampBar"></div></div>
         </div>
       </div>
     </div>
@@ -286,23 +297,23 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="card-lbl">THRESHOLD SETTINGS</div>
       <div class="setting-row">
         <span class="set-lbl">T_OPTIMAL</span>
-        <span class="set-val" style="color:var(--safe)">20,000 lx</span>
+        <span class="set-val set-val-safe">20,000 lx</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">T_MAX（過照射限界）</span>
-        <span class="set-val" style="color:#ff9030">50,000 lx</span>
+        <span class="set-val set-val-hi">50,000 lx</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">T_MIN（照度不足限界）</span>
-        <span class="set-val" style="color:#4488ff">5,000 lx</span>
+        <span class="set-val set-val-lo">5,000 lx</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">R_WARNING</span>
-        <span class="set-val" style="color:var(--warn)">0.75</span>
+        <span class="set-val set-val-warn">0.75</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">R_FAIL</span>
-        <span class="set-val" style="color:var(--fail-hi)">1.00</span>
+        <span class="set-val set-val-fail">1.00</span>
       </div>
     </div>
 

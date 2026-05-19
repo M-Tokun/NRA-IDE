@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 09_Greenhouse_BandGate_live_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -211,7 +212,7 @@ header p { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1
 
 /* 4指標 × 2パラメータ */
 .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
-.pg-item { }
+.pg-item { display: block; }
 .pg-head { display: flex; justify-content: space-between; margin-bottom: 4px; }
 .pg-name { font-family: var(--mono); font-size: 9px; }
 .pg-val  { font-family: var(--mono); font-size: 9px; color: var(--white); }
@@ -275,6 +276,23 @@ footer {
   display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
 }
 footer a { color:var(--co2); text-decoration:none; }
+  .text-water { color: var(--water); }
+  .bg-water { background: var(--water); }
+  .text-temp { color: var(--temp); }
+  .bg-temp { background: var(--temp); }
+  .text-co2 { color: var(--co2); }
+  .bg-co2 { background: var(--co2); }
+  .text-ec { color: var(--ec); }
+  .bg-ec { background: var(--ec); }
+  .mt-6 { margin-top: 6px; }
+  .mt-3 { margin-top: 3px; }
+  .mt-10 { margin-top: 10px; }
+  .mt-12 { margin-top: 12px; }
+  .note-box { margin-top: 12px; padding: 10px 12px; background: rgba(168,224,99,.04); border: 1px solid rgba(168,224,99,.12); border-radius: 3px; }
+  .note-title { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; color: var(--co2); margin-bottom: 5px; }
+  .note-text { font-size: 10px; color: var(--muted); line-height: 1.7; }
+  .text-small-muted { font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.7; }
+  .sensor-title { font-family: var(--mono); font-size: 9px; margin-bottom: 6px; letter-spacing: 2px; }
 </style>
 </head>
 <body>
@@ -307,27 +325,27 @@ footer a { color:var(--co2); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">💧</span>
-        <span class="card-name" style="color:var(--water)">灌漑水圧</span>
+        <span class="card-name text-water">灌漑水圧</span>
       </div>
       <div class="card-decision pass" id="dec-water">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-water" style="color:var(--water)">—</div>
+      <div class="card-value text-water" id="val-water">—</div>
       <div class="card-unit">kPa</div>
     </div>
     <div class="band-bar-wrap">
       <div class="band-track">
         <div class="band-safe" id="safe-water"></div>
       </div>
-      <div class="band-needle" id="needle-water" style="color:var(--water);background:var(--water)"></div>
+      <div class="band-needle bg-water text-water" id="needle-water"></div>
       <div class="band-label-low" id="ll-water"></div>
       <div class="band-label-high" id="lh-water"></div>
     </div>
     <canvas class="mini-canvas" id="cv-water" height="60"></canvas>
     <div class="r-bar-row">
       <span class="r-label">R</span>
-      <div class="r-bar"><div class="r-fill" id="rf-water" style="background:var(--water)"></div></div>
-      <span class="r-val" id="rv-water" style="color:var(--water)">0.000</span>
+      <div class="r-bar"><div class="r-fill bg-water" id="rf-water"></div></div>
+      <span class="r-val text-water" id="rv-water">0.000</span>
     </div>
   </div>
 
@@ -336,27 +354,27 @@ footer a { color:var(--co2); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">🌡</span>
-        <span class="card-name" style="color:var(--temp)">温室気温</span>
+        <span class="card-name text-temp">温室気温</span>
       </div>
       <div class="card-decision pass" id="dec-temp">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-temp" style="color:var(--temp)">—</div>
+      <div class="card-value text-temp" id="val-temp">—</div>
       <div class="card-unit">°C</div>
     </div>
     <div class="band-bar-wrap">
       <div class="band-track">
         <div class="band-safe" id="safe-temp"></div>
       </div>
-      <div class="band-needle" id="needle-temp" style="color:var(--temp);background:var(--temp)"></div>
+      <div class="band-needle bg-temp text-temp" id="needle-temp"></div>
       <div class="band-label-low" id="ll-temp"></div>
       <div class="band-label-high" id="lh-temp"></div>
     </div>
     <canvas class="mini-canvas" id="cv-temp" height="60"></canvas>
     <div class="r-bar-row">
       <span class="r-label">R</span>
-      <div class="r-bar"><div class="r-fill" id="rf-temp" style="background:var(--temp)"></div></div>
-      <span class="r-val" id="rv-temp" style="color:var(--temp)">0.000</span>
+      <div class="r-bar"><div class="r-fill bg-temp" id="rf-temp"></div></div>
+      <span class="r-val text-temp" id="rv-temp">0.000</span>
     </div>
   </div>
 
@@ -365,27 +383,27 @@ footer a { color:var(--co2); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">🌿</span>
-        <span class="card-name" style="color:var(--co2)">CO₂濃度</span>
+        <span class="card-name text-co2">CO₂濃度</span>
       </div>
       <div class="card-decision pass" id="dec-co2">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-co2" style="color:var(--co2)">—</div>
+      <div class="card-value text-co2" id="val-co2">—</div>
       <div class="card-unit">ppm</div>
     </div>
     <div class="band-bar-wrap">
       <div class="band-track">
         <div class="band-safe" id="safe-co2"></div>
       </div>
-      <div class="band-needle" id="needle-co2" style="color:var(--co2);background:var(--co2)"></div>
+      <div class="band-needle bg-co2 text-co2" id="needle-co2"></div>
       <div class="band-label-low" id="ll-co2"></div>
       <div class="band-label-high" id="lh-co2"></div>
     </div>
     <canvas class="mini-canvas" id="cv-co2" height="60"></canvas>
     <div class="r-bar-row">
       <span class="r-label">R</span>
-      <div class="r-bar"><div class="r-fill" id="rf-co2" style="background:var(--co2)"></div></div>
-      <span class="r-val" id="rv-co2" style="color:var(--co2)">0.000</span>
+      <div class="r-bar"><div class="r-fill bg-co2" id="rf-co2"></div></div>
+      <span class="r-val text-co2" id="rv-co2">0.000</span>
     </div>
   </div>
 
@@ -394,27 +412,27 @@ footer a { color:var(--co2); text-decoration:none; }
     <div class="card-head">
       <div class="card-icon-name">
         <span class="card-icon">⚗</span>
-        <span class="card-name" style="color:var(--ec)">養液EC</span>
+        <span class="card-name text-ec">養液EC</span>
       </div>
       <div class="card-decision pass" id="dec-ec">PASS</div>
     </div>
     <div class="card-value-row">
-      <div class="card-value" id="val-ec" style="color:var(--ec)">—</div>
+      <div class="card-value text-ec" id="val-ec">—</div>
       <div class="card-unit">mS/cm</div>
     </div>
     <div class="band-bar-wrap">
       <div class="band-track">
         <div class="band-safe" id="safe-ec"></div>
       </div>
-      <div class="band-needle" id="needle-ec" style="color:var(--ec);background:var(--ec)"></div>
+      <div class="band-needle bg-ec text-ec" id="needle-ec"></div>
       <div class="band-label-low" id="ll-ec"></div>
       <div class="band-label-high" id="lh-ec"></div>
     </div>
     <canvas class="mini-canvas" id="cv-ec" height="60"></canvas>
     <div class="r-bar-row">
       <span class="r-label">R</span>
-      <div class="r-bar"><div class="r-fill" id="rf-ec" style="background:var(--ec)"></div></div>
-      <span class="r-val" id="rv-ec" style="color:var(--ec)">0.000</span>
+      <div class="r-bar"><div class="r-fill bg-ec" id="rf-ec"></div></div>
+      <span class="r-val text-ec" id="rv-ec">0.000</span>
     </div>
   </div>
 
@@ -429,50 +447,50 @@ footer a { color:var(--co2); text-decoration:none; }
 
       <!-- 水圧 -->
       <div class="pg-item">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--water);margin-bottom:6px;letter-spacing:2px">💧 水圧 τ_high / τ_low</div>
+        <div class="sensor-title text-water">💧 水圧 τ_high / τ_low</div>
         <div class="pg-head"><span class="pg-name">τ_high (kPa)</span><span class="pg-val" id="v-wh">70</span></div>
-        <input type="range" class="water" id="sl-wh" min="40" max="120" value="70">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (kPa)</span><span class="pg-val" id="v-wl">30</span></div>
-        <input type="range" class="water" id="sl-wl" min="5" max="60" value="30">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.20/0.50</span></div>
-        <input type="range" class="water" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.20">
-        <input type="range" class="water" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.50" style="margin-top:3px">
+        <input type="range" class="water" id="sl-wh" min="40" max="120" value="70" title="τ_high (water)">
+        <div class="pg-head mt-6"><span class="pg-name">τ_low (kPa)</span><span class="pg-val" id="v-wl">30</span></div>
+        <input type="range" class="water" id="sl-wl" min="5" max="60" value="30" title="τ_low (water)">
+        <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.20/0.50</span></div>
+        <input type="range" class="water" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.20" title="α_upper (water)">
+        <input type="range" class="water mt-3" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.50" title="α_lower (water)">
       </div>
 
       <!-- 気温 -->
       <div class="pg-item">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--temp);margin-bottom:6px;letter-spacing:2px">🌡 気温 τ_high / τ_low</div>
+        <div class="sensor-title text-temp">🌡 気温 τ_high / τ_low</div>
         <div class="pg-head"><span class="pg-name">τ_high (°C)</span><span class="pg-val" id="v-th">35</span></div>
-        <input type="range" class="temp" id="sl-th" min="20" max="50" value="35">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (°C)</span><span class="pg-val" id="v-tl">10</span></div>
-        <input type="range" class="temp" id="sl-tl" min="0" max="25" value="10">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ta">0.25/0.45</span></div>
-        <input type="range" class="temp" id="sl-tau" min="0.01" max="0.99" step="0.01" value="0.25">
-        <input type="range" class="temp" id="sl-tal" min="0.01" max="0.99" step="0.01" value="0.45" style="margin-top:3px">
+        <input type="range" class="temp" id="sl-th" min="20" max="50" value="35" title="τ_high (temp)">
+        <div class="pg-head mt-6"><span class="pg-name">τ_low (°C)</span><span class="pg-val" id="v-tl">10</span></div>
+        <input type="range" class="temp" id="sl-tl" min="0" max="25" value="10" title="τ_low (temp)">
+        <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ta">0.25/0.45</span></div>
+        <input type="range" class="temp" id="sl-tau" min="0.01" max="0.99" step="0.01" value="0.25" title="α_upper (temp)">
+        <input type="range" class="temp mt-3" id="sl-tal" min="0.01" max="0.99" step="0.01" value="0.45" title="α_lower (temp)">
       </div>
 
       <!-- CO2 -->
       <div class="pg-item">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--co2);margin-bottom:6px;letter-spacing:2px">🌿 CO₂ τ_high / τ_low</div>
+        <div class="sensor-title text-co2">🌿 CO₂ τ_high / τ_low</div>
         <div class="pg-head"><span class="pg-name">τ_high (ppm)</span><span class="pg-val" id="v-ch">1200</span></div>
-        <input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (ppm)</span><span class="pg-val" id="v-cl">400</span></div>
-        <input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ca">0.30/0.40</span></div>
-        <input type="range" class="co2" id="sl-cau" min="0.01" max="0.99" step="0.01" value="0.30">
-        <input type="range" class="co2" id="sl-cal" min="0.01" max="0.99" step="0.01" value="0.40" style="margin-top:3px">
+        <input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200" title="τ_high (co2)">
+        <div class="pg-head mt-6"><span class="pg-name">τ_low (ppm)</span><span class="pg-val" id="v-cl">400</span></div>
+        <input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400" title="τ_low (co2)">
+        <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ca">0.30/0.40</span></div>
+        <input type="range" class="co2" id="sl-cau" min="0.01" max="0.99" step="0.01" value="0.30" title="α_upper (co2)">
+        <input type="range" class="co2 mt-3" id="sl-cal" min="0.01" max="0.99" step="0.01" value="0.40" title="α_lower (co2)">
       </div>
 
       <!-- EC -->
       <div class="pg-item">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ec);margin-bottom:6px;letter-spacing:2px">⚗ 養液EC τ_high / τ_low</div>
+        <div class="sensor-title text-ec">⚗ 養液EC τ_high / τ_low</div>
         <div class="pg-head"><span class="pg-name">τ_high (mS/cm)</span><span class="pg-val" id="v-eh">3.5</span></div>
-        <input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">τ_low (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div>
-        <input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8">
-        <div class="pg-head" style="margin-top:6px"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ea">0.20/0.55</span></div>
-        <input type="range" class="ec" id="sl-eau" min="0.01" max="0.99" step="0.01" value="0.20">
-        <input type="range" class="ec" id="sl-eal" min="0.01" max="0.99" step="0.01" value="0.55" style="margin-top:3px">
+        <input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5" title="τ_high (ec)">
+        <div class="pg-head mt-6"><span class="pg-name">τ_low (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div>
+        <input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8" title="τ_low (ec)">
+        <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ea">0.20/0.55</span></div>
+        <input type="range" class="ec" id="sl-eau" min="0.01" max="0.99" step="0.01" value="0.20" title="α_upper (ec)">
+        <input type="range" class="ec mt-3" id="sl-eal" min="0.01" max="0.99" step="0.01" value="0.55" title="α_lower (ec)">
       </div>
 
     </div>
@@ -481,17 +499,17 @@ footer a { color:var(--co2); text-decoration:none; }
     <div class="common-row">
       <div class="pg-item">
         <div class="pg-head"><span class="pg-name">速度</span><span class="pg-val" id="v-spd">1×</span></div>
-        <input type="range" class="co2" id="sl-spd" min="1" max="5" value="1">
+        <input type="range" class="co2" id="sl-spd" min="1" max="5" value="1" title="速度">
       </div>
       <div class="pg-item">
         <div class="pg-head"><span class="pg-name">HOLD (ms)</span><span class="pg-val" id="v-hold">1500</span></div>
-        <input type="range" class="water" id="sl-hold" min="200" max="4000" step="100" value="1500">
+        <input type="range" class="water" id="sl-hold" min="200" max="4000" step="100" value="1500" title="HOLD (ms)">
       </div>
     </div>
 
-    <div style="margin-top:12px;padding:10px 12px;background:rgba(168,224,99,.04);border:1px solid rgba(168,224,99,.12);border-radius:3px">
-      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--co2);margin-bottom:5px">α の非対称設定について</div>
-      <div style="font-size:10px;color:var(--muted);line-height:1.7">
+    <div class="note-box">
+      <div class="note-title">α の非対称設定について</div>
+      <div class="note-text">
         α_upper を小さく → 過負荷方向はゆっくり反応（配管衝撃を避ける）<br>
         α_lower を大きく → 枯渇方向は素早く反応（根への水途絶を防ぐ）<br>
         これが農業に適した非対称ダンパーの設定です。
@@ -502,12 +520,12 @@ footer a { color:var(--co2); text-decoration:none; }
   <div class="log-panel">
     <div class="p-title">イベントログ — 全指標統合</div>
     <div class="log-area" id="logArea"></div>
-    <div class="btn-row" style="margin-top:10px">
+    <div class="btn-row mt-10">
       <button class="ctrl" onclick="setStress('drought')">🏜 干ばつシミュレーション</button>
       <button class="ctrl" onclick="setStress('heat')">🔥 熱波シミュレーション</button>
       <button class="ctrl" onclick="setStress('normal')">🌱 通常状態に戻す</button>
     </div>
-    <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.7" id="stress-note">
+    <div class="text-small-muted" id="stress-note">
       通常の温室環境です。定期的にスパイクが来ます。
     </div>
   </div>
@@ -517,9 +535,9 @@ footer a { color:var(--co2); text-decoration:none; }
 <footer>
   <span>NRA-IDE / Band Gate — Greenhouse 4-Sensor Live Monitoring</span>
   <span>
-    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank" rel="noopener">github.com/M-Tokun/NRA-IDE</a>
     &nbsp;|&nbsp;
-    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+    <a href="https://x.com/m_tokuni" target="_blank" rel="noopener">@m_tokuni</a>
   </span>
 </footer>
 </div>

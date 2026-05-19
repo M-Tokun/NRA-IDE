@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 15_or_icu_continuum_EN_20260515_185524.html | Generated EN version at Tokyo time 20260515_185524 -->
+<!-- FILE: 15_or_icu_continuum_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -168,6 +168,22 @@
   .ctrl-val { font-size: 11px; color: #00aaff; width: 28px; }
   .footer-note { font-size: 10px; color: #2a4060; margin-left: auto; }
   .footer-note span { color: #446688; }
+  .footer-copy       { margin-left: auto; font-size: 10px; color: #2a4a6a; }
+  .warmup-row        { display: flex; justify-content: space-between; align-items: center; }
+  .warmup-info       { font-size: 10px; color: #44aaff; }
+  .debt-row          { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .debt-label        { font-size: 10px; color: #cc44aa; }
+  .debt-value        { font-size: 11px; color: #cc44aa; }
+  .debt-note         { font-size: 9px; color: #445566; margin-top: 2px; }
+  .color-hr          { color: #00ccff; }
+  .color-spo2        { color: #44ff88; }
+  .color-rr          { color: #ffaa44; }
+  .color-bp          { color: #cc88ff; }
+  .color-r-init      { color: #00ff88; }
+  .color-muted       { color: #445566; }
+  .accuracy-note-txt { font-size: 9px; color: #445566; margin-top: 3px; }
+  .time-val          { color: #00aaff; }
+  .warmup-remain-val { color: #44aaff; }
 </style>
 </head>
 <body>
@@ -177,7 +193,7 @@
   <span>OR/ICU Continuum Monitor / Longitudinal Accumulation Monitoring</span>
   <span class="tag">Continuity Is the Strength</span>
   <span class="tag-warn">New / emergency patients = warm-up period</span>
-  <span style="margin-left:auto;font-size:10px;color:#2a4a6a;">M-Tokuni © NRA-IDE Project</span>
+  <span class="footer-copy">M-Tokuni © NRA-IDE Project</span>
 </header>
 
 <!-- LEFT -->
@@ -186,11 +202,11 @@
 
   <!-- Warm-up -->
   <div id="warmup-section">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:10px;color:#44aaff;">Time-course accumulation / Baseline establishment</span>
-      <span style="font-size:10px;color:#44aaff;" id="warmup-pct">0%</span>
+    <div class="warmup-row">
+      <span class="warmup-info">Time-course accumulation / Baseline establishment</span>
+      <span class="warmup-info" id="warmup-pct">0%</span>
     </div>
-    <div id="warmup-bar-bg"><div id="warmup-bar" style="width:0%"></div></div>
+    <div id="warmup-bar-bg"><div id="warmup-bar"></div></div>
     <div id="warmup-label">⏳ Warming up — R accuracy not established</div>
   </div>
 
@@ -199,37 +215,37 @@
   <!-- Four vital channels -->
   <div class="vital-row">
     <span class="vital-name">HR</span>
-    <span class="vital-value" id="v-hr" style="color:#00ccff;">72</span>
+    <span class="vital-value color-hr" id="v-hr">72</span>
     <div class="vital-r-bg"><div class="vital-r-bar" id="rb-hr"></div></div>
-    <span class="vital-r-val" id="rv-hr" style="color:#445566;">—</span>
+    <span class="vital-r-val color-muted" id="rv-hr">—</span>
   </div>
   <div class="vital-row">
     <span class="vital-name">SpO₂%</span>
-    <span class="vital-value" id="v-spo2" style="color:#44ff88;">99</span>
+    <span class="vital-value color-spo2" id="v-spo2">99</span>
     <div class="vital-r-bg"><div class="vital-r-bar" id="rb-spo2"></div></div>
-    <span class="vital-r-val" id="rv-spo2" style="color:#445566;">—</span>
+    <span class="vital-r-val color-muted" id="rv-spo2">—</span>
   </div>
   <div class="vital-row">
     <span class="vital-name">RR</span>
-    <span class="vital-value" id="v-rr" style="color:#ffaa44;">14</span>
+    <span class="vital-value color-rr" id="v-rr">14</span>
     <div class="vital-r-bg"><div class="vital-r-bar" id="rb-rr"></div></div>
-    <span class="vital-r-val" id="rv-rr" style="color:#445566;">—</span>
+    <span class="vital-r-val color-muted" id="rv-rr">—</span>
   </div>
   <div class="vital-row">
     <span class="vital-name">BP sys</span>
-    <span class="vital-value" id="v-bp" style="color:#cc88ff;">120</span>
+    <span class="vital-value color-bp" id="v-bp">120</span>
     <div class="vital-r-bg"><div class="vital-r-bar" id="rb-bp"></div></div>
-    <span class="vital-r-val" id="rv-bp" style="color:#445566;">—</span>
+    <span class="vital-r-val color-muted" id="rv-bp">—</span>
   </div>
 
   <!-- Residual debt -->
   <div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-      <span style="font-size:10px;color:#cc44aa;">residual_debt (structural debt)</span>
-      <span style="font-size:11px;color:#cc44aa;" id="debt-val">0.000</span>
+    <div class="debt-row">
+      <span class="debt-label">residual_debt (structural debt)</span>
+      <span class="debt-value" id="debt-val">0.000</span>
     </div>
-    <div id="debt-gauge-bg"><div id="debt-gauge" style="width:0%"></div></div>
-    <div style="font-size:9px;color:#445566;margin-top:2px;" id="debt-note">Accumulation that remains after temporary recovery</div>
+    <div id="debt-gauge-bg"><div id="debt-gauge"></div></div>
+    <div class="debt-note" id="debt-note">Accumulation that remains after temporary recovery</div>
   </div>
 
   <div class="panel-title">Event Log</div>
@@ -249,33 +265,33 @@
 
   <div id="r-total-big">
     <div id="r-total-label">R = √(R_HR² + R_SpO2² + R_RR² + R_BP²)</div>
-    <div id="r-total-value" style="color:#00ff88;">0.000</div>
-    <div id="r-total-bar-bg"><div id="r-total-bar" style="width:0%;background:#00ff88;"></div></div>
+    <div id="r-total-value" class="color-r-init">0.000</div>
+    <div id="r-total-bar-bg"><div id="r-total-bar"></div></div>
   </div>
 
   <div class="panel-title">δ Component Breakdown</div>
   <div class="delta-row">
     <span class="delta-key">δ_HR</span>
-    <span class="delta-val" id="d-hr" style="color:#00ccff;">0.000</span>
+    <span class="delta-val color-hr" id="d-hr">0.000</span>
   </div>
   <div class="delta-row">
     <span class="delta-key">δ_SpO₂</span>
-    <span class="delta-val" id="d-spo2" style="color:#44ff88;">0.000</span>
+    <span class="delta-val color-spo2" id="d-spo2">0.000</span>
   </div>
   <div class="delta-row">
     <span class="delta-key">δ_RR</span>
-    <span class="delta-val" id="d-rr" style="color:#ffaa44;">0.000</span>
+    <span class="delta-val color-rr" id="d-rr">0.000</span>
   </div>
   <div class="delta-row">
     <span class="delta-key">δ_BP</span>
-    <span class="delta-val" id="d-bp" style="color:#cc88ff;">0.000</span>
+    <span class="delta-val color-bp" id="d-bp">0.000</span>
   </div>
 
   <!-- Time-course accuracy -->
   <div class="panel-title">Time-course Accuracy / Baseline Quality</div>
   <div id="accuracy-wrap">
-    <div id="accuracy-stars" style="color:#445566;">☆☆☆☆☆</div>
-    <div style="font-size:9px;color:#445566;margin-top:3px;" id="accuracy-note">
+    <div id="accuracy-stars" class="color-muted">☆☆☆☆☆</div>
+    <div class="accuracy-note-txt" id="accuracy-note">
       No time-course history — τ not established
     </div>
   </div>
@@ -300,9 +316,9 @@
   </div>
 
   <span class="footer-note">
-    <span>Elapsed Time:</span> <span id="elapsed-time" style="color:#00aaff;">00:00</span>
+    <span>Elapsed Time:</span> <span id="elapsed-time" class="time-val">00:00</span>
     &nbsp;|&nbsp;
-    <span>Until Baseline Established:</span> <span id="warmup-remain" style="color:#44aaff;">--:--</span>
+    <span>Until Baseline Established:</span> <span id="warmup-remain" class="warmup-remain-val">--:--</span>
   </span>
 </footer>
 

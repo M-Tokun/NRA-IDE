@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 22_vascular_monitor_JP.html -->
 <!-- NRA-IDE Vascular Intervention Monitor -->
 <!-- Author: M-Tokuni / NRA-IDE Project (2026-03-19) -->
 <html lang="ja">
@@ -41,12 +42,18 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
 .bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
 .bar-fill{height:100%;border-radius:2px;transition:width .25s,background .3s;}
 .log-panel{width:100%;max-width:1100px;margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;}
+.hdr-sub-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:#ffaa44;}
+.slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.full-width{width:100%;}
+.trio-lbl-pressure{color:#ff6b6b;}
+.trio-lbl-shear{color:#ffaa44;}
+.trio-lbl-tension{color:#ffaa44;}
 </style>
 </head>
 <body>
 
 <div class="hdr">
-  <div><span style="font-family:JetBrains Mono;font-size:10px;letter-spacing:.16em;color:#ffaa44">NRA-IDE / VASCULAR INTERVENTION</span>
+  <div><span class="hdr-sub-title">NRA-IDE / VASCULAR INTERVENTION</span>
     <h1>局所血管・細胞状態遷移監視システム<br>（部分手術支援版）</h1>
   </div>
 </div>
@@ -57,14 +64,14 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
     <canvas id="tankCanvas"></canvas>
     <div class="panel-lbl">TREND WAVE（P・Shear・Tension・R）</div>
     <canvas id="waveCanvas"></canvas>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="slider-grid">
       <!-- スライダー群（手術モード） -->
-      <div>圧力 P <input type="range" id="pSlider" min="40" max="180" value="120" style="width:100%"></div>
-      <div>温度 T <input type="range" id="tSlider" min="30" max="42" value="37" style="width:100%"></div>
-      <div>血流 Flow <input type="range" id="fSlider" min="0" max="120" value="80" style="width:100%"></div>
-      <div>粘着力 Adh <input type="range" id="aSlider" min="0.2" max="2.5" value="1.0" style="width:100%"></div>
-      <div>せん断応力 Shear <input type="range" id="sSlider" min="0" max="25" value="12" style="width:100%"></div>
-      <div>壁張力 Tension <input type="range" id="wSlider" min="0" max="180" value="90" style="width:100%"></div>
+      <div>圧力 P <input type="range" id="pSlider" min="40" max="180" value="120" class="full-width"></div>
+      <div>温度 T <input type="range" id="tSlider" min="30" max="42" value="37" class="full-width"></div>
+      <div>血流 Flow <input type="range" id="fSlider" min="0" max="120" value="80" class="full-width"></div>
+      <div>粘着力 Adh <input type="range" id="aSlider" min="0.2" max="2.5" value="1.0" class="full-width"></div>
+      <div>せん断応力 Shear <input type="range" id="sSlider" min="0" max="25" value="12" class="full-width"></div>
+      <div>壁張力 Tension <input type="range" id="wSlider" min="0" max="180" value="90" class="full-width"></div>
     </div>
   </div>
 
@@ -72,9 +79,9 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
     <div class="card">
       <div class="card-lbl">LIVE STATE</div>
       <div class="trio">
-        <div class="trio-item"><div style="color:#ff6b6b">PRESSURE</div><div class="trio-val" id="pLive">120</div><div class="trio-unit">mmHg</div></div>
-        <div class="trio-item"><div style="color:#ffaa44">SHEAR</div><div class="trio-val" id="shearLive">12.0</div><div class="trio-unit">dyn/cm²</div></div>
-        <div class="trio-item"><div style="color:#ffaa44">TENSION</div><div class="trio-val" id="tensLive">90</div><div class="trio-unit">dyn/cm</div></div>
+        <div class="trio-item"><div class="trio-lbl-pressure">PRESSURE</div><div class="trio-val" id="pLive">120</div><div class="trio-unit">mmHg</div></div>
+        <div class="trio-item"><div class="trio-lbl-shear">SHEAR</div><div class="trio-val" id="shearLive">12.0</div><div class="trio-unit">dyn/cm²</div></div>
+        <div class="trio-item"><div class="trio-lbl-tension">TENSION</div><div class="trio-val" id="tensLive">90</div><div class="trio-unit">dyn/cm</div></div>
       </div>
     </div>
 

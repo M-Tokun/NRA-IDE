@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 21_cabg_monitor_JP.html -->
 <!-- NRA-IDE CABG Monitor — 経過ログ機能強化版 -->
 <html lang="ja">
 <head>
@@ -11,7 +12,13 @@
 body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;padding:20px;margin:0;}
 h1{color:#ff6b6b;font-size:22px;margin:0 0 10px;}
 canvas{border:1px solid var(--border);background:#000;display:block;margin:10px 0;border-radius:6px;}
-.controls{background:var(--surface);padding:15px;border-radius:8px;border:1px solid var(--border);}
+.controls{background:var(--surface);padding:15px;border-radius:8px;border:1px solid var(--border);width:340px;}
+.flex-container{display:flex;gap:20px;flex-wrap:wrap;}
+.section-title{font-size:12px;color:#ffaa44;}
+.section-title-mt{font-size:12px;color:#ffaa44;margin:12px 0 4px;}
+.margin-top-12{margin-top:12px;}
+.panel-title{margin:0 0 12px;color:#ffaa44;}
+.panel-title-mt{margin:20px 0 12px;color:#ffaa44;}
 .slider-row{display:flex;align-items:center;gap:12px;margin:8px 0;}
 .slider-row label{width:160px;font-size:13px;}
 input[type=range]{flex:1;}
@@ -29,15 +36,15 @@ input[type=range]{flex:1;}
 
 <h1>NRA-IDE CABG Monitor — 経過ログ搭載版</h1>
 
-<div style="display:flex;gap:20px;flex-wrap:wrap;">
+<div class="flex-container">
   <div>
-    <div style="font-size:12px;color:#ffaa44">VESSEL CROSS-SECTION</div>
+    <div class="section-title">VESSEL CROSS-SECTION</div>
     <canvas id="tankCanvas" width="800" height="280"></canvas>
     
-    <div style="font-size:12px;color:#ffaa44;margin:12px 0 4px">GRAFT FLOW WAVEFORM (TTFM)</div>
+    <div class="section-title-mt">GRAFT FLOW WAVEFORM (TTFM)</div>
     <canvas id="flowWaveCanvas" width="800" height="160"></canvas>
     
-    <div style="margin-top:12px;">
+    <div class="margin-top-12">
       <span class="live">MGF: <span id="mgfLive">35.0</span> mL/min</span><br>
       <span class="live">PI: <span id="piLive">2.80</span></span><br>
       <span class="live">DF%: <span id="dfLive">65</span>%</span><br>
@@ -45,8 +52,8 @@ input[type=range]{flex:1;}
     </div>
   </div>
 
-  <div class="controls" style="width:340px">
-    <h3 style="margin:0 0 12px;color:#ffaa44">パラメータ調整</h3>
+  <div class="controls">
+    <h3 class="panel-title">パラメータ調整</h3>
     <div class="slider-row"><label>内圧 P</label><input type="range" id="p" min="60" max="180" value="120"></div>
     <div class="slider-row"><label>温度 T</label><input type="range" id="t" min="30" max="42" value="37"></div>
     <div class="slider-row"><label>血流 Flow</label><input type="range" id="f" min="10" max="120" value="80"></div>
@@ -54,7 +61,7 @@ input[type=range]{flex:1;}
     <div class="slider-row"><label>せん断 Shear</label><input type="range" id="s" min="0" max="30" value="12"></div>
     <div class="slider-row"><label>壁張力 Tension</label><input type="range" id="w" min="40" max="180" value="90"></div>
 
-    <h3 style="margin:20px 0 12px;color:#ffaa44">閾値調整（破線移動）</h3>
+    <h3 class="panel-title-mt">閾値調整（破線移動）</h3>
     <div class="slider-row"><label>PI上限</label><input type="range" id="piThresh" min="2" max="8" step="0.1" value="5"><span id="piThreshVal">5.0</span></div>
     <div class="slider-row"><label>MGF下限</label><input type="range" id="mgfThresh" min="5" max="50" step="1" value="20"><span id="mgfThreshVal">20</span></div>
     <div class="slider-row"><label>R Fail閾値</label><input type="range" id="rFail" min="0.6" max="1.8" step="0.05" value="1.0"><span id="rFailVal">1.0</span></div>

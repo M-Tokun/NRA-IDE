@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 03_HAN_vs_Legacy_JP.html -->
 <!--
   FILE: 03_HAN_vs_Legacy_JP.html
   NRA-IDE 実証デモ #03 — NRA(律環公理制御) vs Legacy(If-Then固定制御)
@@ -35,6 +36,10 @@
             input[type=range]{ width:100%; }
         .slider-row{ margin-top:8px; }
         .slider-value{ font-size:12px; color:#aaa; }
+        .legend-desc { margin-bottom: 6px; }
+        .slider-label { font-size: 11px; color: #aaa; margin-bottom: 2px; }
+        .spacer { height: 10px; }
+        .explanation { font-size: 11px; color: #666; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -56,21 +61,21 @@
         <div class="metric-box han">
             <div class="metric-title">NRA 閾値制御（厚み × ゆらぎ）</div>
             <div class="slider-row">
-                <div class="legend" style="margin-bottom:6px;">基本は <strong>厚み</strong>（基準L）。<strong>ゆらぎ</strong> はその周辺での揺れ幅（瞬間的な許容・呼吸）です。</div>
-                <div style="font-size:11px; color:#aaa; margin-bottom:2px;">厚み（基準 L）</div>
-                <input type="range" id="thicknessSlider" min="5" max="80" step="0.5" value="30">
+                <div class="legend legend-desc">基本は <strong>厚み</strong>（基準L）。<strong>ゆらぎ</strong> はその周辺での揺れ幅（瞬間的な許容・呼吸）です。</div>
+                <div class="slider-label">厚み（基準 L）</div>
+                <input type="range" id="thicknessSlider" title="厚み（基準 L）" min="5" max="80" step="0.5" value="30">
                 <div class="slider-value">L(base) = <span id="thicknessVal">30.0</span></div>
 
-                <div style="height:10px;"></div>
-                <div style="font-size:11px; color:#aaa; margin-bottom:2px;">ゆらぎ（±割合）</div>
-                <input type="range" id="fluctSlider" min="0" max="0.50" step="0.01" value="0.10">
+                <div class="spacer"></div>
+                <div class="slider-label">ゆらぎ（±割合）</div>
+                <input type="range" id="fluctSlider" title="ゆらぎ（±割合）" min="0" max="0.50" step="0.01" value="0.10">
                 <div class="slider-value">fluct = ±<span id="fluctVal">0.10</span>（実効Lが揺れます）</div>
 
                 <div class="legend">実効L = L(base) × (1 ± fluct)。厚みが調整元で、ゆらぎは「厚みの周辺」にのみ作用します。</div>
             </div>
         </div>
 
-        <div style="font-size: 11px; color: #666; line-height: 1.5;">
+        <div class="explanation">
             <strong>解説:</strong><br>
             緑線(NRA)が白線(負荷)を「絶対に逃さない」挙動に注目。非線形反発により、大きな乖離が発生する前に強力な引き戻しがかかります。<br><br>
             <strong>読み方:</strong><br>

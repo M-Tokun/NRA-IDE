@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 08_Band_Gate_live_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -313,6 +314,26 @@ footer {
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
 }
 footer a { color: var(--lower); text-decoration: none; }
+  .bg-warn { background: var(--warn); }
+  .bg-upper { background: var(--upper); }
+  .bg-lower { background: var(--lower); }
+  .bg-danger { background: var(--danger); }
+  .bg-white { background: var(--white); }
+  .bg-upper-dim { background: rgba(255,107,53,.3); height: 8px; border-radius: 1px; }
+  .bg-lower-dim { background: rgba(0,201,255,.2); height: 8px; border-radius: 1px; }
+  .text-safe { color: var(--safe); }
+  .text-safe-small { color: var(--safe); font-size: 14px; }
+  .text-danger { color: var(--danger); }
+  .text-upper { color: var(--upper); }
+  .text-lower { color: var(--lower); }
+  .mt-10 { margin-top: 10px; }
+  .w-50 { width: 50%; }
+  .w-0 { width: 0%; }
+  .text-small { font-size: 9px; }
+  .principle-box { margin-top: 12px; padding: 10px 12px; background: rgba(240,192,64,.05); border: 1px solid rgba(240,192,64,.15); border-radius: 3px; }
+  .principle-title { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; color: var(--warn); margin-bottom: 6px; }
+  .principle-text { font-size: 10px; color: #a0b0c0; line-height: 1.7; }
+  .log-title-text { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
 </style>
 </head>
 <body>
@@ -340,26 +361,26 @@ footer a { color: var(--lower); text-decoration: none; }
 <!-- シナリオタブ -->
 <div class="tabs">
   <button class="tab active" id="tab-elec"  onclick="setScenario('elec')">
-    <span class="dot" style="background:#f0c040"></span>⚡ 電気（電圧・電流）
+    <span class="dot bg-warn"></span>⚡ 電気（電圧・電流）
   </button>
   <button class="tab" id="tab-temp"  onclick="setScenario('temp')">
-    <span class="dot" style="background:#ff6b35"></span>🌡 気温・気圧
+    <span class="dot bg-upper"></span>🌡 気温・気圧
   </button>
   <button class="tab" id="tab-water" onclick="setScenario('water')">
-    <span class="dot" style="background:#00c9ff"></span>💧 水圧・水流
+    <span class="dot bg-lower"></span>💧 水圧・水流
   </button>
   <button class="tab" id="tab-pulse" onclick="setScenario('pulse')">
-    <span class="dot" style="background:#ff3d5a"></span>💓 脈動・生体
+    <span class="dot bg-danger"></span>💓 脈動・生体
   </button>
 </div>
 
 <!-- 波形キャンバス -->
 <div class="legend">
-  <div class="li"><div class="ll" style="background:var(--white)"></div>観測値</div>
-  <div class="li"><div class="ll" style="background:var(--upper)"></div>上限 τ_high + 動的幅</div>
-  <div class="li"><div class="ll" style="background:var(--lower)"></div>下限 τ_low − 動的幅</div>
-  <div class="li"><div class="ll" style="background:rgba(255,107,53,.3);height:8px;border-radius:1px"></div>上限 SILENCE 域</div>
-  <div class="li"><div class="ll" style="background:rgba(0,201,255,.2);height:8px;border-radius:1px"></div>下限 SILENCE 域</div>
+  <div class="li"><div class="ll bg-white"></div>観測値</div>
+  <div class="li"><div class="ll bg-upper"></div>上限 τ_high + 動的幅</div>
+  <div class="li"><div class="ll bg-lower"></div>下限 τ_low − 動的幅</div>
+  <div class="li"><div class="ll bg-upper-dim"></div>上限 SILENCE 域</div>
+  <div class="li"><div class="ll bg-lower-dim"></div>下限 SILENCE 域</div>
 </div>
 
 <div class="chart-section">
@@ -372,23 +393,23 @@ footer a { color: var(--lower); text-decoration: none; }
 <div class="meters">
   <div class="meter">
     <div class="m-label">OBSERVED VALUE</div>
-    <div class="m-val" id="mv-val" style="color:var(--safe)">—</div>
-    <div class="m-bar"><div class="m-fill" id="mf-val" style="width:50%;background:var(--safe)"></div></div>
+    <div class="m-val text-safe" id="mv-val">—</div>
+    <div class="m-bar"><div class="m-fill w-50 bg-safe" id="mf-val"></div></div>
   </div>
   <div class="meter">
     <div class="m-label">R (BAND GATE)</div>
-    <div class="m-val" id="mv-r" style="color:var(--safe)">0.000</div>
-    <div class="m-bar"><div class="m-fill" id="mf-r" style="width:0%;background:var(--safe)"></div></div>
+    <div class="m-val text-safe" id="mv-r">0.000</div>
+    <div class="m-bar"><div class="m-fill w-0 bg-safe" id="mf-r"></div></div>
   </div>
   <div class="meter">
     <div class="m-label">DECISION</div>
-    <div class="m-val" id="mv-dec" style="color:var(--safe);font-size:14px">PASS</div>
-    <div class="m-bar"><div class="m-fill" id="mf-dec" style="width:0%;background:var(--danger)"></div></div>
+    <div class="m-val text-safe-small" id="mv-dec">PASS</div>
+    <div class="m-bar"><div class="m-fill w-0 bg-danger" id="mf-dec"></div></div>
   </div>
   <div class="meter">
     <div class="m-label">SILENCE COUNT</div>
-    <div class="m-val" id="mv-cnt" style="color:var(--danger)">0</div>
-    <div class="m-bar"><div class="m-fill" id="mf-cnt" style="width:0%;background:var(--danger)"></div></div>
+    <div class="m-val text-danger" id="mv-cnt">0</div>
+    <div class="m-bar"><div class="m-fill w-0 bg-danger" id="mf-cnt"></div></div>
   </div>
 </div>
 
@@ -410,21 +431,21 @@ footer a { color: var(--lower); text-decoration: none; }
             <span class="param-name">τ_high</span>
             <span class="param-val" id="v-th">—</span>
           </div>
-          <input type="range" class="upper" id="sl-th" min="0" max="100" step="1" value="70">
+          <input type="range" class="upper" id="sl-th" min="0" max="100" step="1" value="70" title="τ_high">
         </div>
         <div class="param-row">
           <div class="param-lbl">
             <span class="param-name">α_upper</span>
             <span class="param-val" id="v-au">0.30</span>
           </div>
-          <input type="range" class="upper" id="sl-au" min="0.01" max="0.99" step="0.01" value="0.30">
+          <input type="range" class="upper" id="sl-au" min="0.01" max="0.99" step="0.01" value="0.30" title="α_upper">
         </div>
         <div class="param-row">
           <div class="param-lbl">
             <span class="param-name">AMP_upper</span>
             <span class="param-val" id="v-amu">2.0</span>
           </div>
-          <input type="range" class="upper" id="sl-amu" min="1.0" max="4.0" step="0.1" value="2.0">
+          <input type="range" class="upper" id="sl-amu" min="1.0" max="4.0" step="0.1" value="2.0" title="AMP_upper">
         </div>
       </div>
 
@@ -436,21 +457,21 @@ footer a { color: var(--lower); text-decoration: none; }
             <span class="param-name">τ_low</span>
             <span class="param-val" id="v-tl">—</span>
           </div>
-          <input type="range" class="lower" id="sl-tl" min="0" max="100" step="1" value="30">
+          <input type="range" class="lower" id="sl-tl" min="0" max="100" step="1" value="30" title="τ_low">
         </div>
         <div class="param-row">
           <div class="param-lbl">
             <span class="param-name">α_lower</span>
             <span class="param-val" id="v-al">0.50</span>
           </div>
-          <input type="range" class="lower" id="sl-al" min="0.01" max="0.99" step="0.01" value="0.50">
+          <input type="range" class="lower" id="sl-al" min="0.01" max="0.99" step="0.01" value="0.50" title="α_lower">
         </div>
         <div class="param-row">
           <div class="param-lbl">
             <span class="param-name">AMP_lower</span>
             <span class="param-val" id="v-aml">1.3</span>
           </div>
-          <input type="range" class="lower" id="sl-aml" min="1.0" max="4.0" step="0.1" value="1.3">
+          <input type="range" class="lower" id="sl-aml" min="1.0" max="4.0" step="0.1" value="1.3" title="AMP_lower">
         </div>
       </div>
     </div>
@@ -458,31 +479,31 @@ footer a { color: var(--lower); text-decoration: none; }
     <div class="common-params">
       <div class="param-row">
         <div class="param-lbl">
-          <span class="param-name" style="font-size:9px">速度</span>
+          <span class="param-name text-small">速度</span>
           <span class="param-val" id="v-spd">1×</span>
         </div>
-        <input type="range" class="upper" id="sl-spd" min="1" max="5" step="1" value="1">
+        <input type="range" class="upper" id="sl-spd" min="1" max="5" step="1" value="1" title="速度">
       </div>
       <div class="param-row">
         <div class="param-lbl">
-          <span class="param-name" style="font-size:9px">HOLD (ms)</span>
+          <span class="param-name text-small">HOLD (ms)</span>
           <span class="param-val" id="v-hold">1500</span>
         </div>
-        <input type="range" class="lower" id="sl-hold" min="200" max="4000" step="100" value="1500">
+        <input type="range" class="lower" id="sl-hold" min="200" max="4000" step="100" value="1500" title="HOLD (ms)">
       </div>
     </div>
 
-    <div style="margin-top:12px;padding:10px 12px;background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.15);border-radius:3px">
-      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--warn);margin-bottom:6px">非対称ダンパーの原理</div>
-      <div style="font-size:10px;color:#a0b0c0;line-height:1.7">
-        上限側は τ を<span style="color:var(--upper)">大きく</span>して山を丸める（慎重）。<br>
-        下限側は τ を<span style="color:var(--lower)">小さく</span>して検知を早める（敏感）。<br>
+    <div class="principle-box">
+      <div class="principle-title">非対称ダンパーの原理</div>
+      <div class="principle-text">
+        上限側は τ を<span class="text-upper">大きく</span>して山を丸める（慎重）。<br>
+        下限側は τ を<span class="text-lower">小さく</span>して検知を早める（敏感）。<br>
         心臓弁・サスペンション・調圧弁と同じ構造です。
       </div>
     </div>
 
-    <div style="margin-top:10px">
-      <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:5px">イベントログ</div>
+    <div class="mt-10">
+      <div class="log-title-text">イベントログ</div>
       <div class="log-wrap" id="logArea"></div>
     </div>
   </div>
@@ -491,9 +512,9 @@ footer a { color: var(--lower); text-decoration: none; }
 <footer>
   <span>NRA-IDE / Band Gate — Asymmetric Damper Structure</span>
   <span>
-    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank" rel="noopener">github.com/M-Tokun/NRA-IDE</a>
     &nbsp;|&nbsp;
-    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+    <a href="https://x.com/m_tokuni" target="_blank" rel="noopener">@m_tokuni</a>
   </span>
 </footer>
 </div>

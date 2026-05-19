@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 47_FPGA_Demo_SPEED_EN.html -->
 <html lang="en">
 <head>
 <!-- FILE: NRA-IDE_FPGA_Demo_EN_20260515.html -->
@@ -143,6 +144,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .right-panel{border-top:1px solid var(--border)}
   .metrics{grid-template-columns:repeat(2,1fr)}
 }
+.color-teal { color:var(--teal); }
+.mt-14 { margin-top:14px; }
+.box-sandwich { margin-top:14px;padding:12px;background:var(--bg);border:1px solid var(--teal-dim);border-radius:6px;border-left:3px solid var(--teal); }
+.box-sandwich-title { font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:6px;letter-spacing:.08em; }
+.box-sandwich-desc { font-size:11px;color:var(--muted);line-height:1.7; }
+.bg-teal { background:var(--teal-dim);color:var(--teal); }
 </style>
 </head>
 <body>
@@ -270,7 +277,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <!-- Current state -->
   <div class="section-label">CURRENT STATE</div>
   <div class="state-card">
-    <div class="state-name" id="stateName" style="color:var(--teal)">S_IDLE</div>
+    <div class="state-name color-teal" id="stateName">S_IDLE</div>
     <div class="state-jp" id="stateJp">Idle State</div>
     <div id="stateBadges"></div>
     <div class="state-desc" id="stateDesc">Reset-safe state. Waiting for valid_in. Starting point of the NRA process.</div>
@@ -300,15 +307,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   </div>
 
   <!-- Log -->
-  <div class="section-label" style="margin-top:14px">SYSTEM LOG</div>
+  <div class="section-label mt-14">SYSTEM LOG</div>
   <div class="log-wrap">
     <div class="log-entries" id="logEntries"></div>
   </div>
 
   <!-- Architecture note -->
-  <div style="margin-top:14px;padding:12px;background:var(--bg);border:1px solid var(--teal-dim);border-radius:6px;border-left:3px solid var(--teal)">
-    <div style="font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:6px;letter-spacing:.08em">BOX SANDWICH ARCHITECTURE</div>
-    <div style="font-size:11px;color:var(--muted);line-height:1.7">
+  <div class="box-sandwich">
+    <div class="box-sandwich-title">BOX SANDWICH ARCHITECTURE</div>
+    <div class="box-sandwich-desc">
       RNA INPUT → LLM CORE → RNA OUTPUT<br>
       Structurally isolate the LLM as an untrusted inference engine.<br>
       Pre/Post-RNA gates enforce the Nomological Ring Axioms.
@@ -724,7 +731,7 @@ function resetSim() {
   document.getElementById('stateName').style.color = info.color;
   document.getElementById('stateJp').textContent   = info.jp;
   document.getElementById('stateDesc').textContent = info.desc;
-  document.getElementById('stateBadges').innerHTML = `<span class="state-badge" style="background:var(--teal-dim);color:var(--teal)">SAFE</span>`;
+  document.getElementById('stateBadges').innerHTML = `<span class="state-badge bg-teal">SAFE</span>`;
   addLog('RESET', 'SYSTEM', false);
 }
 

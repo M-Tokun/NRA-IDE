@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: power_nra_ide_EN_20260425.html -->
-<!-- TITLE: NRA-IDE Power (Voltage × Current) Management System -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 JST -->
+<!-- FILE: 30_power_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -124,6 +121,21 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 .l-s.fail-hi{color:var(--fail-hi)}.l-s.fail-lo{color:var(--fail-lo)}
 .footer{width:100%;max-width:1000px;margin-top:14px;display:flex;justify-content:space-between;
   font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+
+.sl-val-volt { color:var(--volt); }
+.small-unit-11 { font-size:11px; font-weight:300; color:var(--muted); }
+.sl-val-amp { color:var(--amp); }
+.color-volt { color:var(--volt); }
+.color-amp { color:var(--amp); }
+.color-watt { color:var(--watt); }
+.note-txt { text-align:center; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); }
+.note-txt-sm { margin-top:6px; }
+.r-num-hi { color:#ff3060; }
+.r-num-lo { color:#6688ff; }
+.bar-w0 { width:0%; }
+.bar-tau-hi { width:60%; background:#ff306066; }
+.bar-tau-lo { width:20%; background:#6688ff66; }
+.bar-fluct-init { width:0%; background:#00ffb366; }
 </style>
 </head>
 <body>
@@ -151,7 +163,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">VOLTAGE</span>
-          <div class="sl-val" id="vDisp" style="color:var(--volt)">200<small style="font-size:11px;font-weight:300;color:var(--muted)"> V</small></div>
+          <div class="sl-val sl-val-volt" id="vDisp">200<small class="small-unit-11"> V</small></div>
         </div>
         <input type="range" id="vSlider" min="100" max="300" value="200" oninput="onV(this.value)">
         <div class="sl-mrk"><span>100V</span><span>Rated 200V</span><span>300V</span></div>
@@ -159,7 +171,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">CURRENT</span>
-          <div class="sl-val" id="iDisp" style="color:var(--amp)">10<small style="font-size:11px;font-weight:300;color:var(--muted)"> A</small></div>
+          <div class="sl-val sl-val-amp" id="iDisp">10<small class="small-unit-11"> A</small></div>
         </div>
         <input type="range" id="iSlider" min="0" max="40" value="10" oninput="onI(this.value)">
         <div class="sl-mrk"><span>0A</span><span>Rated 10A</span><span>40A</span></div>
@@ -175,22 +187,22 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="card-lbl">LIVE READINGS</div>
       <div class="vip-row">
         <div class="vip-item">
-          <div class="vip-label" style="color:var(--volt)">VOLTAGE</div>
-          <div class="vip-val" id="vLive" style="color:var(--volt)">200</div>
-          <div class="vip-unit" style="color:var(--volt)">V</div>
+          <div class="vip-label color-volt">VOLTAGE</div>
+          <div class="vip-val color-volt" id="vLive">200</div>
+          <div class="vip-unit color-volt">V</div>
         </div>
         <div class="vip-item">
-          <div class="vip-label" style="color:var(--amp)">CURRENT</div>
-          <div class="vip-val" id="iLive" style="color:var(--amp)">10.0</div>
-          <div class="vip-unit" style="color:var(--amp)">A</div>
+          <div class="vip-label color-amp">CURRENT</div>
+          <div class="vip-val color-amp" id="iLive">10.0</div>
+          <div class="vip-unit color-amp">A</div>
         </div>
         <div class="vip-item">
-          <div class="vip-label" style="color:var(--watt)">POWER</div>
-          <div class="vip-val" id="pLive" style="color:var(--watt)">2000</div>
-          <div class="vip-unit" style="color:var(--watt)">W</div>
+          <div class="vip-label color-watt">POWER</div>
+          <div class="vip-val color-watt" id="pLive">2000</div>
+          <div class="vip-unit color-watt">W</div>
         </div>
       </div>
-      <div style="text-align:center;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">
+      <div class="note-txt">
         δ = <span id="deltaDisp">0</span> W | τ_hi = 4000 W | τ_lo = 1000 W
       </div>
     </div>
@@ -210,7 +222,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rHiN" style="color:#ff3060">0.000</div>
+          <div class="r-num r-num-hi" id="rHiN">0.000</div>
           <div class="r-dir">↑ OVERPOWER R_hi</div>
         </div>
         <div class="r-item">
@@ -224,7 +236,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <text x="8" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono">0</text>
             <text x="112" y="72" fill="#384060" font-size="7" font-family="JetBrains Mono" text-anchor="end">1.5</text>
           </svg>
-          <div class="r-num" id="rLoN" style="color:#6688ff">0.000</div>
+          <div class="r-num r-num-lo" id="rLoN">0.000</div>
           <div class="r-dir">↓ UNDERPOWER R_lo</div>
         </div>
       </div>
@@ -238,10 +250,10 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="card-lbl">THERMAL ACCUMULATION</div>
       <div class="heat-row">
         <span class="heat-lbl">Heat Stress</span>
-        <div class="heat-bar-bg"><div class="heat-bar" id="heatBar" style="width:0%"></div></div>
+        <div class="heat-bar-bg"><div class="heat-bar bar-w0" id="heatBar"></div></div>
         <span class="heat-pct" id="heatPct">0%</span>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;text-align:center">
+      <div class="note-txt note-txt-sm">
         Sustained overpower accumulates thermal δ → R increases
       </div>
     </div>
@@ -252,19 +264,19 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="metrics">
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">δ Power Deviation</span><span class="met-v" id="dVal">0 W</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-w0" id="dBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">τ_hi Overpower Margin</span><span class="met-v" id="tHiV">4000 W</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tHiB" style="width:60%;background:#ff306066"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-tau-hi" id="tHiB"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">τ_lo Underpower Margin</span><span class="met-v" id="tLoV">1000 W</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="tLoB" style="width:20%;background:#6688ff66"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-tau-lo" id="tLoB"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr"><span class="met-k">Fluctuation Amplitude</span><span class="met-v" id="fluctV">0 W</span></div>
-          <div class="bar-bg"><div class="bar-fill" id="fluctB" style="width:0%;background:#00ffb366"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-fluct-init" id="fluctB"></div></div>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 04_HAN_Stress_Test_JP.html -->
 <!--
   FILE: 04_HAN_Stress_Test_JP.html
   NRA-IDE 実証デモ #04 — 80ms高負荷適応制御実験
@@ -28,6 +29,10 @@
         .highlight { color: #ffcc00; font-weight: bold; }
         canvas { border: 1px solid #444; background: #000; }
         button { padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 10px; }
+        .btn-container { margin-bottom: 15px; }
+        .btn-legacy { background: #ff5555; color: #fff; }
+        .btn-han { background: #00ff88; color: #000; }
+        .status-row { margin-top: 10px; color: #888; }
     </style>
 </head>
 <body>
@@ -35,9 +40,9 @@
 <h2>実験: 80msの重荷を背負わせる（フレーム予算16.6msの約5倍）</h2>
 <p>上のボタンでモードを切り替え、下のボールの滑らかさとFPS数値を比較してください。</p>
 
-<div style="margin-bottom: 15px;">
-    <button onclick="setMode('legacy')" style="background:#ff5555; color:#fff;">Legacy (盲目実行)</button>
-    <button onclick="setMode('han')" style="background:#00ff88; color:#000;">HAN (適応制御)</button>
+<div class="btn-container">
+    <button onclick="setMode('legacy')" class="btn-legacy">Legacy (盲目実行)</button>
+    <button onclick="setMode('han')" class="btn-han">HAN (適応制御)</button>
     <button onclick="setMode('none')">リセット</button>
 </div>
 
@@ -47,7 +52,7 @@
     <div>モード: <span id="mode-disp" class="highlight">---</span></div>
     <div>実際のFPS: <span id="fps-disp" class="highlight">60</span> (60に近いほど滑らか)</div>
     <div>実行した負荷(Work): <span id="work-disp" class="highlight">0</span> ms (実際に止まった時間)</div>
-    <div style="margin-top:10px; color:#888;">
+    <div class="status-row">
         解説: <span id="comment-disp">待機中...</span>
     </div>
 </div>

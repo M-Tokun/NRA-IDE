@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 11_Motor3Phase_BandGate_live_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -75,7 +76,7 @@ header p  { font-size:13px; color:var(--white); opacity:.7; margin-top:8px; line
 
 .load-ctrl-title { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border); grid-column:1/-1; }
 
-.slider-item {}
+.slider-item { display: block; }
 .sl-head { display:flex; justify-content:space-between; margin-bottom:5px; }
 .sl-name { font-family:var(--mono); font-size:10px; color:var(--text); }
 .sl-val  { font-family:var(--mono); font-size:14px; font-weight:700; color:var(--white); }
@@ -176,6 +177,51 @@ button.ctrl.paused { border-color:var(--warn); color:var(--warn); }
 
 footer { margin-top:48px; padding-top:16px; border-top:1px solid var(--border); font-family:var(--mono); font-size:9px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; }
 footer a { color:var(--v); text-decoration:none; }
+  .text-u { color: var(--u); }
+  .bg-u { background: var(--u); }
+  .text-v { color: var(--v); }
+  .bg-v { background: var(--v); }
+  .text-w { color: var(--w); }
+  .bg-w { background: var(--w); }
+  .text-temp { color: var(--temp); }
+  .bg-temp { background: var(--temp); }
+  .text-imb { color: var(--imb); }
+  .bg-imb { background: var(--imb); }
+  .text-warn { color: var(--warn); }
+  .bg-warn { background: var(--warn); }
+  .text-danger { color: var(--danger); }
+  .bg-danger { background: var(--danger); }
+  .text-muted { color: var(--muted); }
+  .text-white { color: var(--white); }
+  .text-safe { color: var(--safe); }
+  .mt-3 { margin-top: 3px; }
+  .mt-4 { margin-top: 4px; }
+  .mt-5 { margin-top: 5px; }
+  .mt-6 { margin-top: 6px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-10 { margin-top: 10px; }
+  .mt-12 { margin-top: 12px; }
+  .mb-5 { margin-bottom: 5px; }
+  .mb-6 { margin-bottom: 6px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-14 { margin-bottom: 14px; }
+  .flex-between { display: flex; justify-content: space-between; }
+  .flex-baseline { display: flex; align-items: baseline; }
+  .mono-font { font-family: var(--mono); }
+  .font-8 { font-size: 8px; }
+  .font-9 { font-size: 9px; }
+  .font-10 { font-size: 10px; }
+  .font-11 { font-size: 11px; }
+  .font-18 { font-size: 18px; }
+  .letter-spacing-1 { letter-spacing: 1px; }
+  .letter-spacing-2 { letter-spacing: 2px; }
+  .letter-spacing-3 { letter-spacing: 3px; }
+  .opacity-75 { opacity: .75; }
+  .line-height-1-6 { line-height: 1.6; }
+  .line-height-1-7 { line-height: 1.7; }
+  .grid-6 { grid-template-columns: repeat(6,1fr); }
+  .border-top-warn { border-top: 2px solid var(--warn); }
+  .bold { font-weight: bold; }
 </style>
 </head>
 <body>
@@ -193,7 +239,7 @@ footer a { color:var(--v); text-decoration:none; }
   </div>
   <div class="live-wrap">
     <div class="live-badge"><div class="ldot"></div>MOTOR LIVE</div>
-    <div class="btn-row" style="margin-top:4px">
+    <div class="btn-row mt-4">
       <button class="ctrl play" id="btnPlay" onclick="togglePlay()">⏸ PAUSE</button>
       <button class="ctrl" onclick="resetSim()">↺ RESET</button>
     </div>
@@ -210,11 +256,11 @@ footer a { color:var(--v); text-decoration:none; }
       <span class="sl-name">Load Ratio LOAD</span>
       <span class="sl-val" id="v-load">60%</span>
     </div>
-    <input type="range" class="big load" id="sl-load" min="0" max="150" value="60">
-    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:3px">
-      <span>No Load 0%</span><span>Rated 100%</span><span style="color:var(--danger)">Overload 150%</span>
+    <input type="range" class="big load" id="sl-load" min="0" max="150" value="60" title="Load Ratio">
+    <div class="flex-between mono-font font-8 text-muted mt-3">
+      <span>No Load 0%</span><span>Rated 100%</span><span class="text-danger">Overload 150%</span>
     </div>
-    <div style="font-size:11px;color:var(--white);opacity:.75;margin-top:6px;line-height:1.6">
+    <div class="font-11 text-white opacity-75 mt-6 line-height-1-6">
       Current exceeds rated value above 100%.<br>Sudden trip occurs near 150%.
     </div>
   </div>
@@ -225,18 +271,18 @@ footer a { color:var(--v); text-decoration:none; }
       <span class="sl-name">Speed RPM</span>
       <span class="sl-val" id="v-rpm">1500 rpm</span>
     </div>
-    <input type="range" class="big rpm" id="sl-rpm" min="300" max="3000" step="10" value="1500">
-    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:3px">
+    <input type="range" class="big rpm" id="sl-rpm" min="300" max="3000" step="10" value="1500" title="Speed RPM">
+    <div class="flex-between mono-font font-8 text-muted mt-3">
       <span>300</span><span>1500 (Rated)</span><span>3000 rpm</span>
     </div>
-    <div style="font-size:11px;color:var(--white);opacity:.75;margin-top:6px;line-height:1.6">
+    <div class="font-11 text-white opacity-75 mt-6 line-height-1-6">
       High load at low speed causes insufficient cooling and temperature rise.<br>At high speed, vibration and current ripple increase.
     </div>
   </div>
 
   <!-- Fault injection -->
   <div class="slider-item">
-    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">Fault Simulation</div>
+    <div class="mono-font font-9 letter-spacing-2 text-muted mb-8">Fault Simulation</div>
     <div class="fault-row">
       <button class="fault-btn" id="fb-normal" onclick="setFault('normal')">✓ Normal Operation</button>
       <button class="fault-btn" id="fb-imbalance" onclick="setFault('imbalance')">⚡ Phase Imbalance Injection</button>
@@ -248,11 +294,11 @@ footer a { color:var(--v); text-decoration:none; }
 
 <!-- Waveform legend -->
 <div class="legend">
-  <div class="li"><div class="ll" style="background:var(--u)"></div>Phase U Current</div>
-  <div class="li"><div class="ll" style="background:var(--v)"></div>Phase V Current</div>
-  <div class="li"><div class="ll" style="background:var(--w)"></div>Phase W Current</div>
-  <div class="li"><div class="ll" style="background:var(--temp)"></div>Winding Temp</div>
-  <div class="li"><div class="ll" style="background:var(--imb)"></div>Phase Imbalance</div>
+  <div class="li"><div class="ll bg-u"></div>Phase U Current</div>
+  <div class="li"><div class="ll bg-v"></div>Phase V Current</div>
+  <div class="li"><div class="ll bg-w"></div>Phase W Current</div>
+  <div class="li"><div class="ll bg-temp"></div>Winding Temp</div>
+  <div class="li"><div class="ll bg-imb"></div>Phase Imbalance</div>
 </div>
 
 <!-- Main waveform -->
@@ -263,69 +309,69 @@ footer a { color:var(--v); text-decoration:none; }
 </div>
 
 <!-- 5-Metric Cards -->
-<div class="metrics-row" style="grid-template-columns:repeat(6,1fr)">
+<div class="metrics-row grid-6">
   <div class="metric-card u" id="mc-u">
     <div class="mc-label">Phase U Current</div>
-    <div style="display:flex;align-items:baseline">
-      <div class="mc-val" id="v-u" style="color:var(--u)">—</div>
+    <div class="flex-baseline">
+      <div class="mc-val text-u" id="v-u">—</div>
       <div class="mc-unit">A</div>
     </div>
-    <div class="mc-r" id="r-u" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-r text-muted" id="r-u">R: 0.000</div>
     <div class="mc-bar"><div class="mc-fill" id="rf-u"></div></div>
-    <div class="mc-dec" id="dec-u" style="color:var(--safe)">PASS</div>
+    <div class="mc-dec text-safe" id="dec-u">PASS</div>
   </div>
   <div class="metric-card v" id="mc-v">
     <div class="mc-label">Phase V Current</div>
-    <div style="display:flex;align-items:baseline">
-      <div class="mc-val" id="v-v" style="color:var(--v)">—</div>
+    <div class="flex-baseline">
+      <div class="mc-val text-v" id="v-v">—</div>
       <div class="mc-unit">A</div>
     </div>
-    <div class="mc-r" id="r-v" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-r text-muted" id="r-v">R: 0.000</div>
     <div class="mc-bar"><div class="mc-fill" id="rf-v"></div></div>
-    <div class="mc-dec" id="dec-v" style="color:var(--safe)">PASS</div>
+    <div class="mc-dec text-safe" id="dec-v">PASS</div>
   </div>
   <div class="metric-card w" id="mc-w">
     <div class="mc-label">Phase W Current</div>
-    <div style="display:flex;align-items:baseline">
-      <div class="mc-val" id="v-w" style="color:var(--w)">—</div>
+    <div class="flex-baseline">
+      <div class="mc-val text-w" id="v-w">—</div>
       <div class="mc-unit">A</div>
     </div>
-    <div class="mc-r" id="r-w" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-r text-muted" id="r-w">R: 0.000</div>
     <div class="mc-bar"><div class="mc-fill" id="rf-w"></div></div>
-    <div class="mc-dec" id="dec-w" style="color:var(--safe)">PASS</div>
+    <div class="mc-dec text-safe" id="dec-w">PASS</div>
   </div>
   <div class="metric-card temp" id="mc-temp">
     <div class="mc-label">Winding Temp</div>
-    <div style="display:flex;align-items:baseline">
-      <div class="mc-val" id="v-temp" style="color:var(--temp)">—</div>
+    <div class="flex-baseline">
+      <div class="mc-val text-temp" id="v-temp">—</div>
       <div class="mc-unit">°C</div>
     </div>
-    <div class="mc-r" id="r-temp" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-r text-muted" id="r-temp">R: 0.000</div>
     <div class="mc-bar"><div class="mc-fill" id="rf-temp"></div></div>
-    <div class="mc-dec" id="dec-temp" style="color:var(--safe)">PASS</div>
+    <div class="mc-dec text-safe" id="dec-temp">PASS</div>
   </div>
   <div class="metric-card imb" id="mc-imb">
     <div class="mc-label">Phase Imbalance</div>
-    <div style="display:flex;align-items:baseline">
-      <div class="mc-val" id="v-imb" style="color:var(--imb)">—</div>
+    <div class="flex-baseline">
+      <div class="mc-val text-imb" id="v-imb">—</div>
       <div class="mc-unit">%</div>
     </div>
-    <div class="mc-r" id="r-imb" style="color:var(--muted)">R: 0.000</div>
+    <div class="mc-r text-muted" id="r-imb">R: 0.000</div>
     <div class="mc-bar"><div class="mc-fill" id="rf-imb"></div></div>
-    <div class="mc-dec" id="dec-imb" style="color:var(--safe)">PASS</div>
+    <div class="mc-dec text-safe" id="dec-imb">PASS</div>
   </div>
   <!-- RPM Card: pull-out visualization -->
-  <div class="metric-card" id="mc-rpm" style="border-top:2px solid var(--warn)">
-    <div class="mc-label" style="color:var(--warn)">Actual Speed</div>
-    <div style="display:flex;align-items:baseline">
-      <div class="mc-val" id="v-rpm-card" style="color:var(--warn);font-size:18px">—</div>
+  <div class="metric-card border-top-warn" id="mc-rpm">
+    <div class="mc-label text-warn">Actual Speed</div>
+    <div class="flex-baseline">
+      <div class="mc-val text-warn font-18" id="v-rpm-card">—</div>
       <div class="mc-unit">rpm</div>
     </div>
-    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:4px">
-      Slip: <span id="v-slip" style="color:var(--white)">0.000</span>
+    <div class="mono-font font-8 text-muted mt-4">
+      Slip: <span class="text-white" id="v-slip">0.000</span>
     </div>
-    <div class="mc-bar" style="margin-top:5px"><div class="mc-fill" id="rf-rpm" style="background:var(--warn)"></div></div>
-    <div class="mc-dec" id="dec-rpm" style="color:var(--safe)">Normal</div>
+    <div class="mc-bar mt-5"><div class="mc-fill bg-warn" id="rf-rpm"></div></div>
+    <div class="mc-dec text-safe" id="dec-rpm">Normal</div>
   </div>
 </div>
 
@@ -336,30 +382,30 @@ footer a { color:var(--v); text-decoration:none; }
     <table class="kotsuren-table">
       <tr><th>Phenomenon</th><th>What Happens</th><th>Precursors Detected by EMA</th></tr>
       <tr>
-        <td style="color:var(--warn)">Overload</td>
+        <td class="text-warn">Overload</td>
         <td>Current exceeds rated → Winding temp rises → Insulation breakdown</td>
         <td>τ narrows as current EMA begins accumulating</td>
       </tr>
       <tr>
-        <td style="color:var(--imb)">Phase Imbalance</td>
+        <td class="text-imb">Phase Imbalance</td>
         <td>Current difference across 3 phases → concentrated on one winding → local burnout</td>
         <td>Detects rising EMA of imbalance ratio</td>
       </tr>
       <tr>
-        <td style="color:var(--u)">Lock Current</td>
+        <td class="text-u">Lock Current</td>
         <td>Start failure → 6–7× rated current flows continuously</td>
         <td>EMA instantly captures simultaneous surge across all phases</td>
       </tr>
       <tr>
-        <td style="color:var(--danger)">Phase Loss</td>
+        <td class="text-danger">Phase Loss</td>
         <td>1-phase open → 1.7× current concentrated on remaining 2 phases</td>
         <td>Imbalance instantly hits 100% → fastest SILENCE trigger</td>
       </tr>
     </table>
-    <div class="note-box" style="margin-top:12px">
+    <div class="note-box mt-12">
       <p>
         "Sudden Trip" in mechanical systems is different from molecular reactions.<br>
-        Thermal breakdown of insulation occurs only after temperature accumulates — but the breakdown itself is <b style="color:var(--danger)">instantaneous</b>.<br>
+        Thermal breakdown of insulation occurs only after temperature accumulates — but the breakdown itself is <b class="text-danger">instantaneous</b>.<br>
         EMA remembers the "momentum of accumulation" and can structurally<br>
         detect the "gradual buildup phase" before breakdown occurs.
       </p>
@@ -374,7 +420,7 @@ footer a { color:var(--v); text-decoration:none; }
       <button class="ctrl" onclick="setFault('phase_loss')">✂ Phase Loss Test</button>
       <button class="ctrl" onclick="setFault('locked')">🔒 Lock Rotor Test</button>
     </div>
-    <div style="font-size:11px;color:var(--white);opacity:.75;margin-top:8px;line-height:1.7" id="fault-note">
+    <div class="font-11 text-white opacity-75 mt-8 line-height-1-7" id="fault-note">
       Normal operation. Move the load slider to experience the "gradual buildup → sudden trip" phenomenon.
     </div>
   </div>
@@ -383,9 +429,9 @@ footer a { color:var(--v); text-decoration:none; }
 <footer>
   <span>NRA-IDE / Band Gate — Three-Phase Motor Variable Load Monitor</span>
   <span>
-    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank">github.com/M-Tokun/NRA-IDE</a>
+    <a href="https://github.com/M-Tokun/NRA-IDE" target="_blank" rel="noopener">github.com/M-Tokun/NRA-IDE</a>
     &nbsp;|&nbsp;
-    <a href="https://x.com/m_tokuni" target="_blank">@m_tokuni</a>
+    <a href="https://x.com/m_tokuni" target="_blank" rel="noopener">@m_tokuni</a>
   </span>
 </footer>
 </div>

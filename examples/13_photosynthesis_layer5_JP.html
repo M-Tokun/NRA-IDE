@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: nra_ide_demo13_photosynthesis_layer5_20260308_0224.html -->
+<!-- FILE: 13_photosynthesis_layer5_JP.html -->
 <!-- NRA-IDE Demo #13 | 光合成監視 Layer 5 -->
 <!-- Farquhar-von Caemmerer-Berry (FvCB) モデル → δ生成 → R = δ/τ -->
 <!-- Layer 5: 非線形プリプロセッサ（NRA-IDEの外部δ生成装置） -->
@@ -131,6 +131,8 @@ button {
 button:hover { background: #182a18; color: #88cc88; }
 button.stress { border-color: #4a2a00; color: #aa6600; }
 button.stress:hover { background: #1a1000; }
+  .tau-label { font-size: 10px; color: #4a4a4a; margin-top: 3px; }
+  .footer-copy { margin-left: auto; font-size: 10px; color: #1a2a1a; }
 </style>
 </head>
 <body>
@@ -160,15 +162,15 @@ button.stress:hover { background: #1a1000; }
 
     <div class="slider-group">
       <div class="slider-label">PPFD（光量子束）<span id="lbl_ppfd">800</span> μmol/m²/s</div>
-      <input type="range" id="sl_ppfd" min="0" max="2000" value="800" step="10">
+      <input type="range" id="sl_ppfd" min="0" max="2000" value="800" step="10" title="PPFD">
     </div>
     <div class="slider-group">
       <div class="slider-label">Ci（細胞間CO₂）<span id="lbl_ci">280</span> μmol/mol</div>
-      <input type="range" id="sl_ci" min="50" max="1200" value="280" step="10">
+      <input type="range" id="sl_ci" min="50" max="1200" value="280" step="10" title="Ci">
     </div>
     <div class="slider-group">
       <div class="slider-label">葉温 T <span id="lbl_t">25</span> °C</div>
-      <input type="range" id="sl_t" min="5" max="45" value="25" step="1">
+      <input type="range" id="sl_t" min="5" max="45" value="25" step="1" title="葉温">
     </div>
 
     <hr class="divider">
@@ -198,8 +200,8 @@ button.stress:hover { background: #1a1000; }
     <div class="metric-card r">
       <div class="m-name">R = δ / τ</div>
       <div><span class="m-val" id="v_R">--</span></div>
-      <div class="r-bar-wrap"><div class="r-bar" id="bar_R" style="width:0%"></div></div>
-      <div style="font-size:10px; color:#4a4a4a; margin-top:3px;">τ = <span id="v_tau">--</span></div>
+      <div class="r-bar-wrap"><div class="r-bar" id="bar_R"></div></div>
+      <div class="tau-label">τ = <span id="v_tau">--</span></div>
       <span class="status-badge safe" id="st_R">SAFE</span>
     </div>
 
@@ -224,7 +226,7 @@ button.stress:hover { background: #1a1000; }
   <button onclick="setScenario('optimal')">最適条件</button>
   <button onclick="setScenario('co2sat')">CO₂飽和</button>
   <button onclick="setScenario('manual')">手動リセット</button>
-  <span style="margin-left:auto; font-size:10px; color:#1a2a1a;">NRA-IDE © 2026 M-Tokuni</span>
+  <span class="footer-copy">NRA-IDE © 2026 M-Tokuni</span>
 </footer>
 
 <script>

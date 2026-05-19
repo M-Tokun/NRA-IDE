@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: NRA-IDE_HybridCalc_vs_Traditional_20260420_2041.html -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-20 20:41 JST -->
+<!-- FILE: 45_HybridCalc_vs_Traditional_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -412,6 +410,21 @@
     color: var(--muted);
     letter-spacing: 0.1em;
   }
+
+.scenario-title { font-size:1.1rem; color:var(--accent); font-weight:600; margin-bottom:4px; font-family:'JetBrains Mono',monospace; }
+
+.desc-text { margin-top:10px; font-size:0.8rem; color:var(--muted); line-height:1.8; }
+.color-text { color:var(--text); }
+.color-ok { color:var(--ok); }
+.color-classical { color:var(--classical); }
+.grid-2col { margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.82rem; }
+.card-box { background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px; }
+.card-title { color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px; }
+.card-sub { color:var(--muted);margin-top:4px; }
+.leg-wrap { margin-top:14px;font-size:0.75rem;color:var(--muted);line-height:1.7; }
+.leg-ide { color:var(--ide); }
+.leg-linear { color:rgba(255,255,255,0.3); }
+.leg-ratio { color:rgba(255,165,0,0.6); }
 </style>
 </head>
 <body>
@@ -459,10 +472,10 @@
         + <span class="eq-ide">F<sub>IDE</sub>(x<sub>t</sub>)</span>Δt
         − α · <span class="eq-gate">R(x̃<sub>t+1</sub>, x<sub>t−τ</sub>)</span>Δt
       </div>
-      <div style="margin-top:10px; font-size:0.8rem; color:var(--muted); line-height:1.8;">
+      <div class="desc-text">
         <span class="eq-ide">F<sub>IDE</sub></span>：大局保持項（IDE非線形流。根本を手放さない）<br>
         <span class="eq-gate">R(·)</span>：残渣ゲート項（古典補正。G(r)が自動制御）<br>
-        <span style="color:var(--text);">α</span>：補正強度係数
+        <span class="color-text">α</span>：補正強度係数
       </div>
     </div>
     <div class="formula-block">
@@ -470,9 +483,9 @@
       <div class="eq-row">
         <span class="eq-gate">R</span>(x̃<sub>t+1</sub>, x<sub>t−τ</sub>) = G(<span class="eq-gate">x̃<sub>t+1</sub></span> − <span class="eq-ref">x<sub>t−τ</sub></span>)
       </div>
-      <div style="margin-top:10px; font-size:0.8rem; color:var(--muted); line-height:1.8;">
+      <div class="desc-text">
         <span class="eq-gate">x̃<sub>t+1</sub></span>：IDEによる前進計算の予測値<br>
-        <span class="eq-ref">x<sub>t−τ</sub></span>：τステップ前の<strong style="color:var(--ok)">実測記録値</strong>（推定ではない）<br>
+        <span class="eq-ref">x<sub>t−τ</sub></span>：τステップ前の<strong class="color-ok">実測記録値</strong>（推定ではない）<br>
         r = 予測 − 記録（逆算なし・前進一方向）
       </div>
     </div>
@@ -481,16 +494,16 @@
       <div class="eq-row">
         G(r) = r · <span class="eq-gate">|r| / (k + |r|)</span>
       </div>
-      <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.82rem;">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;">
-          <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px;">|r| ≪ k</div>
-          <div style="color:var(--ok);">G(r) ≈ 0</div>
-          <div style="color:var(--muted);margin-top:4px;">古典層が沈黙。誤差爆発なし。</div>
+      <div class="grid-2col">
+        <div class="card-box">
+          <div class="card-title">|r| ≪ k</div>
+          <div class="color-ok">G(r) ≈ 0</div>
+          <div class="card-sub">古典層が沈黙。誤差爆発なし。</div>
         </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;">
-          <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px;">|r| ≫ k</div>
-          <div style="color:var(--classical);">G(r) ≈ r</div>
-          <div style="color:var(--muted);margin-top:4px;">精密補正が全開。局所だけ。</div>
+        <div class="card-box">
+          <div class="card-title">|r| ≫ k</div>
+          <div class="color-classical">G(r) ≈ r</div>
+          <div class="card-sub">精密補正が全開。局所だけ。</div>
         </div>
       </div>
     </div>
@@ -528,10 +541,10 @@
             <span class="stat-val" id="stat-knee">—</span>
           </div>
         </div>
-        <div style="margin-top:14px;font-size:0.75rem;color:var(--muted);line-height:1.7;">
-          <span style="color:var(--ide);">─</span> G(r)（NRA-IDE）<br>
-          <span style="color:rgba(255,255,255,0.3);">- -</span> y=r（古典線形）<br>
-          <span style="color:rgba(255,165,0,0.6);">─</span> G(r)/r 比率
+        <div class="leg-wrap">
+          <span class="leg-ide">─</span> G(r)（NRA-IDE）<br>
+          <span class="leg-linear">- -</span> y=r（古典線形）<br>
+          <span class="leg-ratio">─</span> G(r)/r 比率
         </div>
       </div>
     </div>

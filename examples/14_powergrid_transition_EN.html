@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 14_powergrid_transition_EN_20260515_184729.html -->
-<!-- Generated at Tokyo time: 2026-05-15 18:47:29 -->
+<!-- FILE: 14_powergrid_transition_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -217,6 +216,21 @@
     letter-spacing: 1px;
   }
   .footer-formula span { color: #00aaff; }
+  .footer-copy { margin-left: auto; font-size: 10px; color: #2a4a6a; }
+  .color-freq  { color: #00ccff; }
+  .color-delta { color: #ffaa00; }
+  .color-tau   { color: #4488aa; }
+  .color-R     { color: #00ff88; }
+  .color-micro { font-size: 11px; color: #4488aa; }
+  .color-macro { font-size: 11px; color: #aacc44; }
+  .color-spike { font-size: 11px; color: #ff6644; }
+  .color-debt  { font-size: 11px; color: #cc44aa; }
+  .metric-row-tight { margin-bottom: 3px; }
+  .panel-title-mt4  { margin-top: 4px; }
+  .panel-title-mt8  { margin-top: 8px; }
+  .zone-b-label  { color: #ffcc00; }
+  .zone-tau-label { color: #ff4444; }
+  .transition-log { font-size: 9px; color: #445566; line-height: 1.8; overflow-y: auto; flex: 1; }
 </style>
 </head>
 <body>
@@ -226,7 +240,7 @@
   <span>Power Grid Transition Point Analysis</span>
   <span class="tag">R = δ/τ</span>
   <span class="tag">FAIL-CLOSED</span>
-  <span style="margin-left:auto;font-size:10px;color:#2a4a6a;">M-Tokuni © NRA-IDE Project</span>
+  <span class="footer-copy">M-Tokuni © NRA-IDE Project</span>
 </header>
 
 <!-- LEFT -->
@@ -235,34 +249,34 @@
 
   <div class="metric-row">
     <span class="metric-label">Frequency f [Hz]</span>
-    <span class="metric-value" id="val-freq" style="color:#00ccff;">50.00</span>
+    <span class="metric-value color-freq" id="val-freq">50.00</span>
   </div>
   <div class="metric-row">
     <span class="metric-label">Deviation δf [Hz]</span>
-    <span class="metric-value" id="val-delta" style="color:#ffaa00;">0.000</span>
+    <span class="metric-value color-delta" id="val-delta">0.000</span>
   </div>
   <div class="metric-row">
     <span class="metric-label">τ (Inertial Margin)</span>
-    <span class="metric-value" id="val-tau" style="color:#4488aa;">0.500</span>
+    <span class="metric-value color-tau" id="val-tau">0.500</span>
   </div>
 
   <div class="r-gauge-wrap">
-    <div class="metric-row" style="margin-bottom:3px;">
+    <div class="metric-row metric-row-tight">
       <span class="metric-label">R = δ/τ</span>
-      <span class="metric-value" id="val-R" style="color:#00ff88;">0.000</span>
+      <span class="metric-value color-R" id="val-R">0.000</span>
     </div>
     <div class="r-gauge-bar-bg">
-      <div class="r-gauge-bar" id="r-gauge-bar" style="width:0%;background:#00ff88;"></div>
+      <div class="r-gauge-bar" id="r-gauge-bar"></div>
     </div>
     <div class="r-label-row">
-      <span>0</span><span>ZONE-A</span><span style="color:#ffcc00;">ZONE-B</span>
-      <span style="color:#ff4444;">τ=1.0</span>
+      <span>0</span><span>ZONE-A</span><span class="zone-b-label">ZONE-B</span>
+      <span class="zone-tau-label">τ=1.0</span>
     </div>
   </div>
 
   <div class="fsm-box fsm-PERMIT" id="fsm-box">PERMIT</div>
 
-  <div class="panel-title" style="margin-top:4px;">Event Log</div>
+  <div class="panel-title panel-title-mt4">Event Log</div>
   <div id="event-log"></div>
 </div>
 
@@ -278,26 +292,26 @@
   <div class="panel-title">Generator Units</div>
   <div id="gen-list"></div>
 
-  <div class="panel-title" style="margin-top:8px;">δ Accumulation Structure</div>
+  <div class="panel-title panel-title-mt8">δ Accumulation Structure</div>
   <div class="metric-row">
     <span class="metric-label">micro-δ (high-frequency)</span>
-    <span class="metric-value" id="val-micro" style="font-size:11px;color:#4488aa;">0.000</span>
+    <span class="metric-value color-micro" id="val-micro">0.000</span>
   </div>
   <div class="metric-row">
     <span class="metric-label">macro-δ (low-frequency)</span>
-    <span class="metric-value" id="val-macro" style="font-size:11px;color:#aacc44;">0.000</span>
+    <span class="metric-value color-macro" id="val-macro">0.000</span>
   </div>
   <div class="metric-row">
     <span class="metric-label">spike-δ (transient)</span>
-    <span class="metric-value" id="val-spike" style="font-size:11px;color:#ff6644;">0.000</span>
+    <span class="metric-value color-spike" id="val-spike">0.000</span>
   </div>
   <div class="metric-row">
     <span class="metric-label">residual_debt</span>
-    <span class="metric-value" id="val-debt" style="font-size:11px;color:#cc44aa;">0.000</span>
+    <span class="metric-value color-debt" id="val-debt">0.000</span>
   </div>
 
-  <div class="panel-title" style="margin-top:8px;">Transition History</div>
-  <div id="transition-log" style="font-size:9px;color:#445566;line-height:1.8;overflow-y:auto;flex:1;"></div>
+  <div class="panel-title panel-title-mt8">Transition History</div>
+  <div id="transition-log" class="transition-log"></div>
 </div>
 
 <!-- FOOTER -->

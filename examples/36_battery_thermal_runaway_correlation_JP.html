@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html -->
-<!-- TITLE: NRA-IDE バッテリー熱暴走相関シミュレーション -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 02:58:03 JST -->
+<!-- FILE: 36_battery_thermal_runaway_correlation_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -281,11 +278,23 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
 .log-info{color:var(--mu);}
 
 .footer{
-  margin-top:16px;
-  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
-  font-family:'JetBrains Mono',monospace;
-  font-size:.66rem;color:var(--mu);
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
 }
+
+.corr-alert-txt { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:8px; }
+.lag-note { font-size:.74rem;color:var(--mu);line-height:1.7;margin-top:14px; }
+.leg-v { color:var(--v); }
+.leg-i { color:var(--i); }
+.leg-t { color:var(--t); }
+.leg-r { color:var(--r); }
+.leg-p { color:var(--p); }
+.leg-g { color:var(--g); }
+.legend-fail { color:rgba(255,45,95,.7); }
+.fc-tau-txt { color:var(--mu); }
+.corr-fail-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail); }
+.corr-ok-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
 </style>
 </head>
 <body>
@@ -370,16 +379,16 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7;">
+    <div class="corr-alert-txt">
       R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。赤色セルは相関変質。温度だけでなく、抵抗・上昇率・膨張圧の連鎖を監視。
     </div>
-    <div id="corr-alert" style="margin-top:8px;"></div>
+    <div id="corr-alert" class="corr-alert-wrap"></div>
   </div>
 
   <div class="panel">
     <div class="panel-title">COUPLING PRESSURE — τ圧縮寄与</div>
     <div class="coupling-list" id="coupling-list"></div>
-    <div style="font-size:.74rem;color:var(--mu);line-height:1.7;margin-top:14px;">
+    <div class="lag-note">
       単独値がSAFEでも、内部抵抗と温度上昇率が同時に上がると、温度τ・膨張圧τを縮めます。これは「値」ではなく「境界への接近速度」を見るためです。
     </div>
   </div>
@@ -390,13 +399,13 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
     <div class="panel-title">TIME SERIES — R値の推移</div>
     <canvas id="ts-canvas" class="ts-canvas" width="560" height="145"></canvas>
     <div class="legend">
-      <span style="color:var(--v)">─ 電圧</span>
-      <span style="color:var(--i)">─ 電流</span>
-      <span style="color:var(--t)">─ 温度</span>
-      <span style="color:var(--r)">─ dT/dt</span>
-      <span style="color:var(--p)">─ 内部抵抗</span>
-      <span style="color:var(--g)">─ 膨張圧</span>
-      <span style="color:rgba(255,45,95,.7)">- - Fail</span>
+      <span class="leg-v">─ 電圧</span>
+      <span class="leg-i">─ 電流</span>
+      <span class="leg-t">─ 温度</span>
+      <span class="leg-r">─ dT/dt</span>
+      <span class="leg-p">─ 内部抵抗</span>
+      <span class="leg-g">─ 膨張圧</span>
+      <span class="legend-fail">- - Fail</span>
     </div>
   </div>
 
@@ -577,7 +586,7 @@ function buildFactorCards(){
       <div class="fc-name">${f.name}</div>
       <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" style="color:var(--mu)">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
       <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
       <div class="fc-desc">${f.desc}</div>
@@ -764,10 +773,10 @@ function updateUI(){
 
   const corrAlert = document.getElementById('corr-alert');
   if(alerts.length){
-    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail)">⚠ ${a}</div>`).join('');
+    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('');
     if(tick % 24 === 0) addLog(`相関変質検出: ${alerts[0]}`, 'fail');
   } else {
-    corrAlert.innerHTML = `<span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
+    corrAlert.innerHTML = `<span class="corr-ok-txt">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
   }
 
   const c = calcCouplingBase();

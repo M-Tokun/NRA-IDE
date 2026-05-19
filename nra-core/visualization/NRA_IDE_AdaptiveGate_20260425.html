@@ -31,6 +31,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:14px
 .formula-box{max-width:980px;margin:0 auto 10px;padding:10px 16px;border:1px solid rgba(255,179,71,.3);background:rgba(255,179,71,.04);font-family:var(--mono);font-size:.69rem;line-height:2.0;color:#e0c890;}
 .formula-box .flabel{font-size:.59rem;color:var(--keff);letter-spacing:.12em;margin-bottom:5px;display:block;}
 .formula-box .row{display:flex;gap:18px;flex-wrap:wrap;}
+.formula-box .row-margin{margin-top:4px;}
 .formula-box .eq{color:#c8dde8;}.formula-box .note{color:#5a8090;font-size:.63rem;}
 
 .tab-bar{display:flex;gap:0;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
@@ -99,7 +100,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
     <span><span class="eq">F_IDE = α·r</span> <span class="note">案1: 相対座標 / relative-coord IDE</span></span>
     <span><span class="eq">Φ = P + D·ṙ/(1+|r|)</span> <span class="note">案3: PD内包 / PD inside gate</span></span>
   </div>
-  <div class="row" style="margin-top:4px;">
+  <div class="row row-margin">
     <span><span class="eq">d²x/dt² + γẋ = F_IDE + G_eff·Φ</span> <span class="note">統合支配方程式 / governing equation</span></span>
   </div>
 </div>
@@ -153,12 +154,12 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
 <div class="ctrl-area">
   <div class="ctrl-grp">
     <span class="ctrl-lbl">k₀：</span>
-    <input type="range" id="k0Slider" min="0.2" max="3.0" step="0.1" value="1.0" oninput="onK0Change(this.value)">
+    <input type="range" id="k0Slider" title="k₀" min="0.2" max="3.0" step="0.1" value="1.0" oninput="onK0Change(this.value)">
     <span class="ctrl-val" id="k0Val">1.00</span>
   </div>
   <div class="ctrl-grp">
     <span class="ctrl-lbl">β (dynamic sens)：</span>
-    <input type="range" id="betaSlider" min="0.0" max="0.5" step="0.01" value="0.15" oninput="onBetaChange(this.value)">
+    <input type="range" id="betaSlider" title="β (dynamic sens)" min="0.0" max="0.5" step="0.01" value="0.15" oninput="onBetaChange(this.value)">
     <span class="ctrl-val" id="betaVal">0.15</span>
   </div>
   <button type="button" class="step-btn" onclick="stepTarget()">目標変更 / Step Target ▶</button>

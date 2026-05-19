@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 17_water_ice_phase_transition_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -226,6 +227,16 @@
     padding-top: 1rem;
     border-top: 0.5px solid rgba(0,0,0,0.08);
   }
+  .color-delta   { color: #378ADD; }
+  .color-tau     { color: #1D9E75; }
+  .bar-delta     { background: #378ADD; width: 0%; }
+  .bar-tau-init  { background: #1D9E75; width: 100%; }
+  .bar-r-init    { background: #1D9E75; width: 0%; }
+  .leg-fail      { background: #E24B4A; border-top: 2px dashed #E24B4A; }
+  .leg-warn-line { border-top: 2px dashed #EF9F27; }
+  .leg-safe      { background: #1D9E75; height: 2px; }
+  .leg-warn-zone { background: #EF9F27; height: 2px; }
+  .leg-fail-zone { background: #E24B4A; height: 2px; }
 </style>
 </head>
 <body>
@@ -256,11 +267,11 @@
     <div class="metrics">
       <div class="metric">
         <div class="metric-label">δ（蓄積ズレ）</div>
-        <div class="metric-val" id="mDelta" style="color:#378ADD;">0.00</div>
+        <div class="metric-val color-delta" id="mDelta">0.00</div>
       </div>
       <div class="metric">
         <div class="metric-label">τ（吸収余裕）</div>
-        <div class="metric-val" id="mTau" style="color:#1D9E75;">20.0</div>
+        <div class="metric-val color-tau" id="mTau">20.0</div>
       </div>
       <div class="metric">
         <div class="metric-label">R = δ / τ</div>
@@ -275,17 +286,17 @@
     <div class="bar-section">
       <div class="bar-row">
         <span class="bar-lbl">δ 蓄積ズレ</span>
-        <div class="bar-track"><div class="bar-fill" id="barDelta" style="background:#378ADD;width:0%;"></div></div>
+        <div class="bar-track"><div class="bar-fill bar-delta" id="barDelta"></div></div>
         <span class="bar-num" id="barDeltaNum">0.0</span>
       </div>
       <div class="bar-row">
         <span class="bar-lbl">τ 吸収余裕</span>
-        <div class="bar-track"><div class="bar-fill" id="barTau" style="background:#1D9E75;width:100%;"></div></div>
+        <div class="bar-track"><div class="bar-fill bar-tau-init" id="barTau"></div></div>
         <span class="bar-num" id="barTauNum">20.0</span>
       </div>
       <div class="bar-row">
         <span class="bar-lbl">R 値</span>
-        <div class="bar-track"><div class="bar-fill" id="barR" style="background:#1D9E75;width:0%;"></div></div>
+        <div class="bar-track"><div class="bar-fill bar-r-init" id="barR"></div></div>
         <span class="bar-num" id="barRNum">0.00</span>
       </div>
     </div>
@@ -298,23 +309,23 @@
     </div>
     <div class="legend">
       <div class="legend-item">
-        <div class="legend-line" style="background:#E24B4A;border-top:2px dashed #E24B4A;"></div>
+        <div class="legend-line leg-fail"></div>
         <span>FAIL-CLOSED (R = 1.0)</span>
       </div>
       <div class="legend-item">
-        <div class="legend-line" style="border-top:2px dashed #EF9F27;"></div>
+        <div class="legend-line leg-warn-line"></div>
         <span>WARNING (R = 0.75)</span>
       </div>
       <div class="legend-item">
-        <div class="legend-line" style="background:#1D9E75;height:2px;"></div>
+        <div class="legend-line leg-safe"></div>
         <span>SAFE</span>
       </div>
       <div class="legend-item">
-        <div class="legend-line" style="background:#EF9F27;height:2px;"></div>
+        <div class="legend-line leg-warn-zone"></div>
         <span>WARNING域</span>
       </div>
       <div class="legend-item">
-        <div class="legend-line" style="background:#E24B4A;height:2px;"></div>
+        <div class="legend-line leg-fail-zone"></div>
         <span>FAIL域</span>
       </div>
     </div>

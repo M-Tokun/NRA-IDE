@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: NRA-IDE_HybridCalc_vs_Traditional_EN_20260420_2041.html -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-20 20:41 JST -->
+<!-- FILE: 45_HybridCalc_vs_Traditional_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -86,6 +84,20 @@
   .insight-title { font-size:0.9rem; font-weight:500; margin-bottom:8px; color:var(--ide); }
   .insight-body { font-size:0.82rem; color:var(--muted); line-height:1.65; }
   footer { text-align:center; margin-top:60px; padding-top:24px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--muted); letter-spacing:.1em; }
+
+.scenario-title { font-size:1.1rem; color:var(--accent); font-weight:600; margin-bottom:4px; font-family:'JetBrains Mono',monospace; }
+.desc-text { margin-top:10px; font-size:0.8rem; color:var(--muted); line-height:1.8; }
+.color-text { color:var(--text); }
+.color-ok { color:var(--ok); }
+.color-classical { color:var(--classical); }
+.grid-2col { margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.82rem; }
+.card-box { background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px; }
+.card-title { color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px; }
+.card-sub { color:var(--muted);margin-top:4px; }
+.leg-wrap { margin-top:14px;font-size:0.75rem;color:var(--muted);line-height:1.7; }
+.leg-ide { color:var(--ide); }
+.leg-linear { color:rgba(255,255,255,0.3); }
+.leg-ratio { color:rgba(255,165,0,0.6); }
 </style>
 </head>
 <body>
@@ -124,34 +136,34 @@
     <div class="formula-block">
       <div class="formula-title">VELOCITY UPDATE — HYBRID ARCHITECTURE</div>
       <div class="eq-row">v<sub>t+1</sub> = v<sub>t</sub> + <span class="eq-ide">F<sub>IDE</sub>(x<sub>t</sub>)</span>Δt − α · <span class="eq-gate">R(x̃<sub>t+1</sub>, x<sub>t−τ</sub>)</span>Δt</div>
-      <div style="margin-top:10px;font-size:0.8rem;color:var(--muted);line-height:1.8;">
+      <div class="desc-text">
         <span class="eq-ide">F<sub>IDE</sub></span>: Global retention term — IDE nonlinear flow. Never releases the foundation.<br>
         <span class="eq-gate">R(·)</span>: Residual gate term — classical correction, auto-controlled by G(r).<br>
-        <span style="color:var(--text);">α</span>: Correction strength coefficient
+        <span class="color-text">α</span>: Correction strength coefficient
       </div>
     </div>
     <div class="formula-block">
       <div class="formula-title">RESIDUAL GATE</div>
       <div class="eq-row"><span class="eq-gate">R</span>(x̃<sub>t+1</sub>, x<sub>t−τ</sub>) = G(<span class="eq-gate">x̃<sub>t+1</sub></span> − <span class="eq-ref">x<sub>t−τ</sub></span>)</div>
-      <div style="margin-top:10px;font-size:0.8rem;color:var(--muted);line-height:1.8;">
+      <div class="desc-text">
         <span class="eq-gate">x̃<sub>t+1</sub></span>: Forward-computed prediction by IDE<br>
-        <span class="eq-ref">x<sub>t−τ</sub></span>: <strong style="color:var(--ok)">Measured record</strong> from τ steps ago (not an estimate)<br>
+        <span class="eq-ref">x<sub>t−τ</sub></span>: <strong class="color-ok">Measured record</strong> from τ steps ago (not an estimate)<br>
         r = prediction − record (forward direction only — no back-calculation)
       </div>
     </div>
     <div class="formula-block">
       <div class="formula-title">G(r) — QUADRATIC RESIDUAL GATE</div>
       <div class="eq-row">G(r) = r · <span class="eq-gate">|r| / (k + |r|)</span></div>
-      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.82rem;">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;">
-          <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px;">|r| ≪ k</div>
-          <div style="color:var(--ok);">G(r) ≈ 0</div>
-          <div style="color:var(--muted);margin-top:4px;">Classical layer silent. No error explosion.</div>
+      <div class="grid-2col">
+        <div class="card-box">
+          <div class="card-title">|r| ≪ k</div>
+          <div class="color-ok">G(r) ≈ 0</div>
+          <div class="card-sub">Classical layer silent. No error explosion.</div>
         </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;">
-          <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-bottom:6px;">|r| ≫ k</div>
-          <div style="color:var(--classical);">G(r) ≈ r</div>
-          <div style="color:var(--muted);margin-top:4px;">Full precision correction. Local only.</div>
+        <div class="card-box">
+          <div class="card-title">|r| ≫ k</div>
+          <div class="color-classical">G(r) ≈ r</div>
+          <div class="card-sub">Full precision correction. Local only.</div>
         </div>
       </div>
     </div>
@@ -176,10 +188,10 @@
           <div class="stat-row"><span class="stat-key">G/r at r=5.0</span><span class="stat-val" id="stat-large">—</span></div>
           <div class="stat-row"><span class="stat-key">Saturation |r| ></span><span class="stat-val" id="stat-knee">—</span></div>
         </div>
-        <div style="margin-top:14px;font-size:0.75rem;color:var(--muted);line-height:1.7;">
-          <span style="color:var(--ide);">─</span> G(r) (NRA-IDE)<br>
-          <span style="color:rgba(255,255,255,0.3);">- -</span> y=r (classical linear)<br>
-          <span style="color:rgba(255,165,0,0.6);">─</span> G(r)/r ratio
+        <div class="leg-wrap">
+          <span class="leg-ide">─</span> G(r) (NRA-IDE)<br>
+          <span class="leg-linear">- -</span> y=r (classical linear)<br>
+          <span class="leg-ratio">─</span> G(r)/r ratio
         </div>
       </div>
     </div>

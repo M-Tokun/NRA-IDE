@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-<!-- OUTPUT: 28_water_temp_EN_20260425_012100_JST.html / Generated 2026-04-25 01:21:00 JST -->
-<!-- FILE: 28_water_temp_EN_20260425_012100_JST.html -->
-<!-- TITLE: NRA-IDE Water Temperature Upper/Lower Limit Management System -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 01:21:00 JST -->
+<!-- FILE: 28_water_temp_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -148,6 +144,18 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 .footer{width:100%;max-width:980px;margin-top:14px;display:flex;
   justify-content:space-between;font-family:'JetBrains Mono',monospace;
   font-size:9px;color:var(--muted);letter-spacing:.08em;}
+.sl-val-safe { color:var(--safe); }
+.sl-val-dist { font-size:14px; color:var(--muted); }
+.small-unit-12 { font-size:12px; font-weight:300; color:var(--muted); }
+.small-unit-10 { font-size:10px; }
+.bar-d-init { width:0%; background:var(--safe); }
+.bar-hi-init { width:50%; background:#ff6030aa; }
+.bar-lo-init { width:50%; background:#7b6cffaa; }
+.set-val-safe { color:var(--safe); }
+.set-val-hi { color:#ff6030; }
+.set-val-lo { color:#7b6cff; }
+.set-val-warn { color:var(--warn); }
+.set-val-fail { color:var(--fail-hi); }
 </style>
 </head>
 <body>
@@ -182,8 +190,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">TARGET TEMPERATURE</span>
-          <div class="sl-val" id="targetDisp" style="color:var(--safe)">
-            60<small style="font-size:12px;font-weight:300;color:var(--muted)"> ℃</small>
+          <div class="sl-val sl-val-safe" id="targetDisp">
+            60<small class="small-unit-12"> ℃</small>
           </div>
         </div>
         <input type="range" id="targetSlider" min="0" max="100" value="60"
@@ -195,8 +203,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="sl-row">
         <div class="sl-hdr">
           <span class="sl-lbl">DISTURBANCE</span>
-          <div class="sl-val" id="distDisp" style="font-size:14px;color:var(--muted)">
-            ±0.0<small style="font-size:10px"> ℃</small>
+          <div class="sl-val sl-val-dist" id="distDisp">
+            ±0.0<small class="small-unit-10"> ℃</small>
           </div>
         </div>
         <input type="range" id="distSlider" min="-30" max="30" value="0"
@@ -270,24 +278,21 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <span class="met-k">δ  Current Deviation</span>
             <span class="met-v" id="dVal">0.0 ℃</span>
           </div>
-          <div class="bar-bg"><div class="bar-fill" id="dBar"
-            style="width:0%;background:var(--safe)"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-d-init" id="dBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr">
             <span class="met-k">τ_hi Upper Margin</span>
             <span class="met-v" id="tauHiVal">15.0 ℃</span>
           </div>
-          <div class="bar-bg"><div class="bar-fill" id="tauHiBar"
-            style="width:50%;background:#ff6030aa"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-hi-init" id="tauHiBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr">
             <span class="met-k">τ_lo Lower Margin</span>
             <span class="met-v" id="tauLoVal">20.0 ℃</span>
           </div>
-          <div class="bar-bg"><div class="bar-fill" id="tauLoBar"
-            style="width:50%;background:#7b6cffaa"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-lo-init" id="tauLoBar"></div></div>
         </div>
       </div>
     </div>
@@ -297,23 +302,23 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
       <div class="card-lbl">THRESHOLD SETTINGS</div>
       <div class="setting-row">
         <span class="set-lbl">T_OPTIMAL</span>
-        <span class="set-val" id="setOpt" style="color:var(--safe)">60 ℃</span>
+        <span class="set-val set-val-safe" id="setOpt">60 ℃</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">T_MAX (Upper Limit)</span>
-        <span class="set-val" id="setMax" style="color:#ff6030">75 ℃</span>
+        <span class="set-val set-val-hi" id="setMax">75 ℃</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">T_MIN (Lower Limit)</span>
-        <span class="set-val" id="setMin" style="color:#7b6cff">40 ℃</span>
+        <span class="set-val set-val-lo" id="setMin">40 ℃</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">R_WARNING</span>
-        <span class="set-val" style="color:var(--warn)">0.75</span>
+        <span class="set-val set-val-warn">0.75</span>
       </div>
       <div class="setting-row">
         <span class="set-lbl">R_FAIL</span>
-        <span class="set-val" style="color:var(--fail-hi)">1.00</span>
+        <span class="set-val set-val-fail">1.00</span>
       </div>
     </div>
 

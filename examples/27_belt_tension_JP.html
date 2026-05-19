@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: belt_tension_nra_ide_20260319_0059.html -->
-<!-- TITLE: NRA-IDE ベルト張力管理 インタラクティブ可視化 -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-03-19 00:59 JST -->
+<!-- FILE: 27_belt_tension_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -379,6 +376,8 @@ input[type=range]::-webkit-slider-thumb:hover {
   color: var(--muted);
   letter-spacing: 0.08em;
 }
+.bar-delta-init { width:0%; background:var(--accent); }
+.bar-tau-init { width:100%; background:var(--safe); }
 </style>
 </head>
 <body>
@@ -467,7 +466,7 @@ input[type=range]::-webkit-slider-thumb:hover {
           <span class="breakdown-val" id="deltaVal">0.0 N</span>
         </div>
         <div class="breakdown-bar-bg">
-          <div class="breakdown-bar-fill" id="deltaBar" style="width:0%;background:var(--accent)"></div>
+          <div class="breakdown-bar-fill bar-delta-init" id="deltaBar"></div>
         </div>
       </div>
       <div class="breakdown-row">
@@ -476,7 +475,7 @@ input[type=range]::-webkit-slider-thumb:hover {
           <span class="breakdown-val" id="tauVal">150.0 N</span>
         </div>
         <div class="breakdown-bar-bg">
-          <div class="breakdown-bar-fill" id="tauBar" style="width:100%;background:var(--safe)"></div>
+          <div class="breakdown-bar-fill bar-tau-init" id="tauBar"></div>
         </div>
       </div>
       <div class="breakdown-row">

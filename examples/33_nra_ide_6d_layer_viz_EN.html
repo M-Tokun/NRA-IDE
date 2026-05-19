@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: nra_ide_6d_layer_viz_EN_20260425_013923_JST.html -->
-<!-- TITLE: NRA-IDE 6D Fluctuation Multi-Layer Correlation Visualizer -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated EN: 2026-04-25 01:39:23 JST -->
+<!-- FILE: 33_nra_ide_6d_layer_viz_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -96,6 +93,24 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
 .footer{width:100%;max-width:1100px;margin-top:12px;display:flex;
   justify-content:space-between;font-family:'JetBrains Mono',monospace;
   font-size:9px;color:var(--muted);}
+
+.flex-col-gap6-pad4 { display:flex;flex-direction:column;gap:6px;padding:4px 0; }
+.border-top-margin6 { border-top:1px solid var(--border);margin:6px 0; }
+.view-row-mt2 { margin-top:2px; }
+.btn-bw-off { font-size:9px;padding:3px 10px;border-color:#606080;color:#606080; }
+.bw-note { font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-left:6px; }
+.bg-safe { background:#00ffaa; }
+.bg-caution { background:#aaff44; }
+.bg-warning { background:#ffcc00; }
+.bg-fail { background:#ff4060; }
+.color-safe { color:#00ffaa; }
+.color-caution { color:#aaff44; }
+.color-warning { color:#ffcc00; }
+.color-fail { color:#ff4060; }
+.legend-row-mt6 { margin-top:6px; }
+.bg-thresh { background:rgba(255,255,255,0.2);border:1px dashed #606080; }
+.color-thresh { color:#606080; }
+.legend-note { font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;line-height:1.7; }
 </style>
 </head>
 <body>
@@ -124,7 +139,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
     </div>
 
     <!-- View controls -->
-    <div style="display:flex;flex-direction:column;gap:6px;padding:4px 0;">
+    <div class="flex-col-gap6-pad4">
       <div class="view-row">
         <span class="view-lbl">ELEVATION</span>
         <input type="range" class="view-slider" id="elevSlider" min="10" max="80" value="40"
@@ -143,7 +158,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
           oninput="updateView()">
         <span class="op-val" id="scaleVal">×18</span>
       </div>
-      <div style="border-top:1px solid var(--border);margin:6px 0;"></div>
+      <div class="border-top-margin6"></div>
       <div class="view-row">
         <span class="view-lbl">SATURATION</span>
         <input type="range" class="view-slider" id="satSlider" min="0" max="100" value="100"
@@ -156,13 +171,13 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
           oninput="updateColorMode()">
         <span class="op-val" id="gammaVal">×1.00</span>
       </div>
-      <div class="view-row" style="margin-top:2px;">
+      <div class="view-row view-row-mt2">
         <span class="view-lbl">B/W INVERT</span>
         <button class="btn btn-small" id="btnBW" onclick="toggleBW()"
-          style="font-size:9px;padding:3px 10px;border-color:#606080;color:#606080">
+          class="btn btn-small btn-bw-off" id="btnBW" onclick="toggleBW()">
           OFF
         </button>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-left:6px;">
+        <span class="bw-note">
           High=Black  Low=White
         </span>
       </div>
@@ -179,27 +194,26 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
     <div class="legend-card">
       <div class="legend-title">R VALUE LEGEND</div>
       <div class="legend-row">
-        <div class="legend-swatch" style="background:#00ffaa"></div>
-        <span style="color:#00ffaa">R &lt; 0.5  SAFE (deep margin)</span>
+        <div class="legend-swatch bg-safe"></div>
+        <span class="color-safe">R &lt; 0.5  SAFE (deep margin)</span>
       </div>
       <div class="legend-row">
-        <div class="legend-swatch" style="background:#aaff44"></div>
-        <span style="color:#aaff44">R 0.5–0.75  CAUTION</span>
+        <div class="legend-swatch bg-caution"></div>
+        <span class="color-caution">R 0.5–0.75  CAUTION</span>
       </div>
       <div class="legend-row">
-        <div class="legend-swatch" style="background:#ffcc00"></div>
-        <span style="color:#ffcc00">R 0.75–1.0  WARNING</span>
+        <div class="legend-swatch bg-warning"></div>
+        <span class="color-warning">R 0.75–1.0  WARNING</span>
       </div>
       <div class="legend-row">
-        <div class="legend-swatch" style="background:#ff4060"></div>
-        <span style="color:#ff4060">R ≥ 1.0  FAIL_CLOSED</span>
+        <div class="legend-swatch bg-fail"></div>
+        <span class="color-fail">R ≥ 1.0  FAIL_CLOSED</span>
       </div>
-      <div class="legend-row" style="margin-top:6px;">
-        <div class="legend-swatch" style="background:rgba(255,255,255,0.2);border:1px dashed #606080"></div>
-        <span style="color:#606080">τ threshold surface (R=1.0 plane)</span>
+      <div class="legend-row legend-row-mt6">
+        <div class="legend-swatch bg-thresh"></div>
+        <span class="color-thresh">τ threshold surface (R=1.0 plane)</span>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
-        margin-top:8px;line-height:1.7;">
+      <div class="legend-note">
         Surface relief = fluctuation<br>
         Surface touches threshold plane<br>
         = FAIL_CLOSED

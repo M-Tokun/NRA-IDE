@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 05_IDE_Threshold_Visualizer_JP.html -->
 <!--
   FILE: 05_IDE_Threshold_Visualizer_JP.html
   NRA-IDE 実証デモ #05 — 閾値システム可視化（位相スコープ）
@@ -15,7 +16,7 @@
     - ε(赤): 破棄される浮動小数点残差
     - PHASE LOCKED: residual ≈ 0 のロックイベント発生時に点灯
 -->
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,6 +89,10 @@
         }
         button:hover { background: #2ea043; }
         button.stop { background: #da3633; }
+        .scope-legend { margin-top: 10px; font-size: 0.8em; color: #8b949e; }
+        .status-running { color: #00ff41; }
+        .status-danger { color: #ff4444; }
+        .btn-container { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -101,7 +106,7 @@
         <div class="panel">
             <h3>👁️ 位相スコープ</h3>
             <canvas id="scopeCanvas" width="300" height="300"></canvas>
-            <div style="margin-top:10px; font-size: 0.8em; color: #8b949e;">
+            <div class="scope-legend">
                 緑リング: 量子化された整数位相<br>
                 赤ドット: 浮動小数点ノイズ（破棄対象）
             </div>
@@ -112,7 +117,7 @@
             
             <div class="status-row">
                 <span>システム状態:</span>
-                <span id="sysState" class="value" style="color:#00ff41;">実行中</span>
+                <span id="sysState" class="value status-running">実行中</span>
             </div>
             <div class="status-row">
                 <span>現在の位相 (φ):</span>
@@ -124,10 +129,10 @@
             </div>
             <div class="status-row">
                 <span>破棄残差 (ε):</span>
-                <span id="residualVal" class="value" style="color:#ff4444;">0.0000</span>
+                <span id="residualVal" class="value status-danger">0.0000</span>
             </div>
             
-            <div style="margin-top: 20px;">
+            <div class="btn-container">
                 <button id="toggleBtn" onclick="toggleSim()">一時停止</button>
             </div>
         </div>

@@ -1,13 +1,10 @@
 <!DOCTYPE html>
-<!-- FILE: 37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html -->
-<!-- TITLE: NRA-IDE Greenhouse VPD Mediated Correlation Simulation -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 16:04:43 JST -->
+<!-- FILE: 35_rotor_bearing_correlation_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NRA-IDE Greenhouse VPD Mediated Correlation Simulation</title>
+<title>NRA-IDE Rotor/Bearing Correlation Simulation</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
 :root {
@@ -22,7 +19,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 header{text-align:center;margin-bottom:24px;}
 .h-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.78;margin-bottom:10px;}
 h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
-h1 em{font-style:normal;color:#ff4fb0;}
+h1 em{font-style:normal;color:#58d7ff;}
 .h-desc{font-size:.86rem;color:var(--mu);line-height:1.75;max-width:920px;margin:0 auto;}
 .notice{border:1px solid rgba(255,210,74,.34);background:rgba(255,210,74,.055);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#e8d89d;font-size:.78rem;line-height:1.72;}
 .ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
@@ -84,17 +81,24 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 .log{height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
 .log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)}
 .footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
+
+.scenario-code-txt { font-size:1.35rem; }
+.chain-desc { font-size:.74rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
+.corr-fail-txt { color:var(--fail); }
+.corr-ok-txt { color:var(--ok); }
+.legend-fail { color:rgba(255,49,95,.75); }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="h-sub">NRA-IDE / GREENHOUSE VPD CORRELATION SAMPLE</div>
-  <h1>Greenhouse <em>VPD-Mediated Correlation</em> Simulation</h1>
-  <p class="h-desc">Temperature and humidity are not averaged directly. They are mapped into VPD first, and VPD then compresses the margins of water, CO₂, light, and EC layers.</p>
+  <div class="h-sub">NRA-IDE / ROTATING MACHINERY CORRELATION SAMPLE</div>
+  <h1>Rotor / Bearing <em>Correlation</em> Simulation</h1>
+  <p class="h-desc">A six-factor educational simulation for rotating machinery: vibration, bearing temperature, motor current, lubrication pressure, acoustic noise, and RPM deviation. Vibration leads, heat and current follow, and correlation drift is kept as an independent R value.</p>
 </header>
 
-<div class="notice">Agricultural education and structural visualization only. Real irrigation, ventilation, CO₂, and fertilization decisions require crop variety, growth stage, calibrated sensors, local conditions, and expert judgment.</div>
+<div class="notice">Educational and structural visualization only. This file is not a certified machine protection system and must not be used for real industrial shutdown decisions.</div>
 
 <div class="ctrl">
   <button class="active" id="btn-run" onclick="toggleRun()">▶ Running</button>
@@ -107,15 +111,15 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 <div class="formula">
   <span class="a">R_i = δ_i / τ_i(t)</span> — structural ratio per factor |
   <span class="b">R_corr = |C(t)-C(t₀)| / τ_C</span> — correlation drift |
-  <span class="c">VPD = e_s(T) × (1 − RH/100)</span> |
+  <span class="c">R_coupling tracks vibration → heat/current/noise propagation</span> |
   <span class="f">R_total = max(R_i, R_corr, R_coupling)</span>
 </div>
 
 <div class="stats">
   <div class="stat"><div class="stat-l">SYSTEM R_TOTAL</div><div class="stat-v" id="r-total">0.000</div><div class="stat-s" id="r-status">SAFE — structural margin remains</div></div>
-  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">VPD / water / CO₂ / light coupling</div></div>
+  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">vibration / lubrication / thermal coupling</div></div>
   <div class="stat"><div class="stat-l">R_CORR MAX</div><div class="stat-v" id="r-corr">0.000</div><div class="stat-s">maximum correlation drift</div></div>
-  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v" id="scenario-code" style="font-size:1.35rem">NORMAL</div><div class="stat-s">synthetic data only</div></div>
+  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v scenario-code-txt" id="scenario-code">NORMAL</div><div class="stat-s">synthetic data only</div></div>
 </div>
 
 <div class="grid">
@@ -123,12 +127,12 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
   <div class="panel">
     <div class="panel-title">STRUCTURAL VISUALIZATION</div>
     <div class="visual">
-      <div class="visual-title">SYNTHETIC GREENHOUSE VIEW</div>
+      <div class="visual-title">SYNTHETIC ROTOR / BEARING VIEW</div>
       <div class="rings" id="rings"></div>
       <div id="dots"></div>
       <div class="pressure"><div class="pressure-fill" id="pressure-fill"></div></div>
       <div class="visual-status" id="visual-status">● SAFE</div>
-      <div class="visual-note" id="visual-note">temperature + humidity ⇒ VPD</div>
+      <div class="visual-note" id="visual-note">vibration → heat → current</div>
     </div>
   </div>
 </div>
@@ -138,20 +142,20 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
     <div class="panel-title">MEDIATION / COUPLING LAYER</div>
     <div class="chain">
       <div class="chain-flow">
-        <div class="node"><div class="node-name" id="node-a-name">Temperature</div><div class="node-val" id="node-a">0.000</div></div>
+        <div class="node"><div class="node-name" id="node-a-name">Vibration</div><div class="node-val" id="node-a">0.000</div></div>
         <div class="arrow">→</div>
-        <div class="node"><div class="node-name" id="node-b-name">Humidity</div><div class="node-val" id="node-b">0.000</div></div>
+        <div class="node"><div class="node-name" id="node-b-name">Lubrication</div><div class="node-val" id="node-b">0.000</div></div>
         <div class="arrow">⇒</div>
-        <div class="node"><div class="node-name" id="node-c-name">VPD mediator</div><div class="node-val" id="node-c">0.000</div></div>
+        <div class="node"><div class="node-name" id="node-c-name">Thermal load</div><div class="node-val" id="node-c">0.000</div></div>
       </div>
-      <div style="font-size:.74rem;color:var(--mu);line-height:1.7;">The sample separates apparent correlation from mediated structure: temperature and humidity become VPD, then VPD affects water and photosynthetic reserve.</div>
+      <div class="chain-desc">The sample shows delayed coupling: vibration rises first, then temperature, current, and acoustic noise follow. The overall decision is not averaged.</div>
       <div class="coupling-list" id="coupling-list"></div>
     </div>
   </div>
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div id="corr-alert" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ Correlation stable.</div>
+    <div id="corr-alert" class="corr-alert-wrap">✓ Correlation stable.</div>
   </div>
 </div>
 
@@ -169,15 +173,15 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
-  <span>37_greenhouse_vpd_correlation_EN</span>
+  <span>35_rotor_bearing_correlation_EN</span>
   <span>R_total=max(R_i,R_corr,R_coupling) / no averaging dilution</span>
 </div>
 </div>
 
 <script>
-const FACTORS = [{"id":"temp","name":"Air Temperature","short":"T","unit":"℃","opt":24,"tau":6,"min":8,"max":42,"dir":"both","amp":0.8,"weight":0.18,"group":"thermal","shrink":"main","desc":"Mapped into VPD rather than judged alone.","corr_base":[1,0.5,0.4,0.3,0.25,0.2,0.18]},{"id":"humidity","name":"Relative Humidity","short":"RH","unit":"%","opt":68,"tau":18,"min":20,"max":100,"dir":"both","amp":2.5,"weight":0.2,"group":"thermal","shrink":"main","desc":"Combines with temperature to form VPD.","corr_base":[0.5,1,0.55,0.42,0.3,0.25,0.2]},{"id":"vpd","name":"VPD","short":"VPD","unit":"kPa","opt":1.05,"tau":0.55,"min":0,"max":4,"dir":"both","amp":0.05,"weight":0.34,"group":"thermal","shrink":"main","fmt":"2","desc":"Mediator layer for plant stress.","corr_base":[0.4,0.55,1,0.5,0.45,0.35,0.25]},{"id":"co2","name":"CO₂","short":"CO2","unit":"ppm","opt":800,"tau":350,"min":250,"max":1500,"dir":"both","amp":45,"weight":0.15,"group":"supply","shrink":"main","fmt":"int","desc":"Ventilation and photosynthesis factor.","corr_base":[0.3,0.42,0.5,1,0.48,0.4,0.22]},{"id":"light","name":"Light","short":"LX","unit":"lx","opt":18000,"tau":9000,"min":1000,"max":42000,"dir":"both","amp":900,"weight":0.17,"group":"supply","shrink":"main","fmt":"int","desc":"Receiver-side illuminance.","corr_base":[0.25,0.3,0.45,0.48,1,0.38,0.28]},{"id":"water","name":"Soil Water","short":"W","unit":"%","opt":62,"tau":18,"min":15,"max":95,"dir":"both","amp":2,"weight":0.24,"group":"supply","shrink":"supply","coupledBy":"main","coupledGain":-1.2,"desc":"Root-zone water reserve.","corr_base":[0.2,0.25,0.35,0.4,0.38,1,0.24]},{"id":"ec","name":"EC","short":"EC","unit":"mS/cm","opt":1.45,"tau":0.55,"min":0.3,"max":3.2,"dir":"both","amp":0.05,"weight":0.14,"group":"supply","shrink":"supply","fmt":"2","desc":"Nutrient concentration; stress rises when water drops.","corr_base":[0.18,0.2,0.25,0.22,0.28,0.24,1]}];
-const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable greenhouse state."},"hotdry":{"label":"Hot dry","desc":"High temperature and low humidity lift VPD.","drift":{"temp":8,"humidity":-22,"co2":-60,"light":8000,"water":-14,"ec":0.28},"pressureBoost":0.18,"corrBoost":0.1},"humid":{"label":"High humidity","desc":"VPD drops and transpiration stagnates.","drift":{"temp":2,"humidity":23,"co2":-120,"light":-1000,"water":9,"ec":-0.1},"pressureBoost":0.12,"corrBoost":0.08},"shadeWet":{"label":"Cloudy and wet","desc":"Low light plus low VPD.","drift":{"temp":-3,"humidity":16,"co2":-90,"light":-12500,"water":6,"ec":-0.05},"pressureBoost":0.14,"corrBoost":0.08},"co2drop":{"label":"CO₂ drop","desc":"Ventilation-like CO₂ loss changes light/CO₂ relation.","drift":{"temp":-1,"humidity":-5,"co2":-430,"light":3000,"water":-3,"ec":0.02},"pressureBoost":0.18,"corrBoost":0.16},"irrigation":{"label":"Irrigation delay","desc":"Water drops and EC rises under VPD pressure.","drift":{"temp":3,"humidity":-10,"co2":-30,"light":4000,"water":-24,"ec":0.7},"pressureBoost":0.28,"corrBoost":0.18},"collapse":{"label":"Correlation collapse","desc":"VPD, water, CO₂, and light drift together.","drift":{"temp":9,"humidity":-26,"co2":-500,"light":-9500,"water":-25,"ec":0.85},"pressureBoost":0.38,"corrBoost":0.25}};
-const COLORS = ["#ff8c42","#46c6ff","#ff4fb0","#b7ff4a","#ffe066","#39ff85","#b58cff"];
+const FACTORS = [{"id":"vibration","name":"Vibration","short":"VIB","unit":"mm/s","opt":2.5,"tau":3.0,"min":0,"max":14,"dir":"hi","amp":0.5,"weight":0.32,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.05,"fmt":"2","desc":"Leading indicator of imbalance or bearing damage.","corr_base":[1,0.55,0.35,0.25,0.3,0.2]},{"id":"bearingTemp","name":"Bearing Temp","short":"TEMP","unit":"℃","opt":58,"tau":22,"min":25,"max":115,"dir":"hi","amp":1.8,"weight":0.25,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.9,"desc":"Delayed heat response after vibration or lubrication stress.","corr_base":[0.55,1,0.5,0.3,0.4,0.25]},{"id":"current","name":"Motor Current","short":"AMP","unit":"A","opt":42,"tau":26,"min":10,"max":120,"dir":"hi","amp":2.2,"weight":0.2,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.6,"desc":"Load response from friction or mechanical resistance.","corr_base":[0.35,0.5,1,0.45,0.55,0.3]},{"id":"oilPressure","name":"Lubrication Pressure","short":"OIL","unit":"kPa","opt":420,"tau":95,"min":120,"max":650,"dir":"lo","amp":10,"weight":0.23,"group":"supply","shrink":"supply","coupledBy":"supply","coupledGain":-1.8,"fmt":"int","desc":"Low-side margin for lubrication loss.","corr_base":[0.25,0.3,0.45,1,0.5,0.42]},{"id":"acoustic","name":"Acoustic Noise","short":"NOISE","unit":"dB","opt":62,"tau":18,"min":40,"max":110,"dir":"hi","amp":2.4,"weight":0.18,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.4,"desc":"Secondary signature of vibration and contact instability.","corr_base":[0.3,0.4,0.55,0.5,1,0.48]},{"id":"rpmDev","name":"RPM Deviation","short":"RPM","unit":"%","opt":0,"tau":8,"min":-20,"max":25,"dir":"both","amp":1.0,"weight":0.16,"group":"supply","shrink":"main","coupledBy":"main","coupledGain":0.04,"desc":"Deviation from commanded rotation speed.","corr_base":[0.2,0.25,0.3,0.42,0.48,1]}];
+const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable operation within structural margin.","drift":{},"amp":{}},"imbalance":{"label":"Rotor imbalance","desc":"Vibration leads; noise and temperature follow.","drift":{"vibration":5,"acoustic":12,"bearingTemp":10,"current":8,"rpmDev":3},"pressureBoost":0.1,"corrBoost":0.08},"lubrication":{"label":"Lubrication loss","desc":"Oil pressure drops and bearing heat rises.","drift":{"oilPressure":-150,"bearingTemp":18,"vibration":3,"current":10,"acoustic":10},"pressureBoost":0.18,"corrBoost":0.1},"overload":{"label":"Overload","desc":"Current and heat rise with load.","drift":{"current":35,"bearingTemp":16,"vibration":2,"rpmDev":5},"pressureBoost":0.16,"corrBoost":0.08},"resonance":{"label":"Resonance","desc":"Vibration and acoustic noise couple strongly.","drift":{"vibration":7,"acoustic":24,"rpmDev":8,"bearingTemp":8},"pressureBoost":0.22,"corrBoost":0.12},"cascade":{"label":"Cascade","desc":"Multiple factors couple into a fail-closed path.","drift":{"vibration":8,"bearingTemp":32,"current":45,"oilPressure":-170,"acoustic":26,"rpmDev":11},"pressureBoost":0.35,"corrBoost":0.22}};
+const COLORS = ["#58d7ff","#ff7a1a","#ffd24a","#39ff85","#ff4fb0","#b58cff"];
 const HIST_LEN = 136;
 const tauC = 0.24;
 let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
@@ -225,7 +229,7 @@ function buildCorrMatrix(){
 }
 function buildCouplingList(){
   const root=document.getElementById('coupling-list'); root.innerHTML='';
-  ["VPD pressure","Water pressure","Light pressure","CO₂ pressure"].forEach((row,idx)=>{
+  ["Vibration pressure","Thermal pressure","Lubrication pressure","Correlation pressure"].forEach((row,idx)=>{
     root.innerHTML += `<div class="coup-row"><div class="coup-name">${row}</div><div class="coup-bg"><div class="coup-bar" id="cbar-${idx}" style="background:${COLORS[idx%COLORS.length]};width:0%"></div></div><div class="coup-val" id="cval-${idx}">0.000</div></div>`;
   });
 }
@@ -303,7 +307,7 @@ function updateUI(){
   document.getElementById('visual-status').style.color=colorFor(total);
   document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
   [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });
-  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div style="color:var(--fail)">⚠ ${a}</div>`).join('') : `<span style="color:var(--ok)">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
+  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('') : `<span class="corr-ok-txt">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
   if(cr.alerts.length && tick%24===0) addLog('Correlation drift detected: '+cr.alerts[0],'fail');
   drawChart(); 
 }
@@ -314,12 +318,12 @@ function drawChart(){
   history.forEach((hist,i)=>{ if(hist.length<2)return; ctx.strokeStyle=COLORS[i%COLORS.length]; ctx.lineWidth=1.7; ctx.beginPath(); hist.forEach((v,x)=>{const px=x/(HIST_LEN-1)*W, py=H-Math.min(v,1.6)/1.6*(H-24)-10; x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}); ctx.stroke(); });
   ctx.fillStyle='rgba(255,49,95,.75)'; ctx.font='10px JetBrains Mono, monospace'; ctx.fillText('R=1.0',6,fy-4);
 }
-function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span style="color:rgba(255,49,95,.75)">- - Fail</span>'; }
+function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span class="legend-fail">- - Fail</span>'; }
 function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
 function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
 function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
 function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
-function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Greenhouse VPD Mediated Correlation Simulation initialized.','ok'); updateUI(); }
+function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Rotor/Bearing Correlation Simulation initialized.','ok'); updateUI(); }
 buildLegend(); init(); setInterval(update,300);
 </script>
 </body>

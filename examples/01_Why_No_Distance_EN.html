@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: 01_Why_No_Distance_EN.html -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -183,6 +184,10 @@
         tr:hover {
             background: rgba(0, 255, 136, 0.1);
         }
+        
+        .text-error { color: #ff5555; }
+        .text-success { color: #00ff88; }
+        .viz-caption { text-align: center; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -226,7 +231,7 @@
 }
                 </div>
                 
-                <p><strong style="color: #ff5555;">Why is this problematic?</strong></p>
+                <p><strong class="text-error">Why is this problematic?</strong></p>
                 <table>
                     <tr>
                         <th>Issue</th>
@@ -270,7 +275,7 @@
 }
                 </div>
                 
-                <p><strong style="color: #00ff88;">Why is this superior?</strong></p>
+                <p><strong class="text-success">Why is this superior?</strong></p>
                 <table>
                     <tr>
                         <th>Feature</th>
@@ -341,7 +346,7 @@
 }
                 </div>
                 
-                <p><strong style="color: #ff5555;">The Flaws:</strong></p>
+                <p><strong class="text-error">The Flaws:</strong></p>
                 <ul>
                     <li>Requires dt (time step) → Assumption of continuous time.</li>
                     <li>Derivatives are numerically unstable (noise sensitivity).</li>
@@ -397,7 +402,7 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                    <span class="code-comment">// Actual: 100000.00000123456... (Drift!)</span>
                 </div>
                 
-                <p><strong style="color: #ff5555;">Critical in Medical/Autonomous Systems:</strong></p>
+                <p><strong class="text-error">Critical in Medical/Autonomous Systems:</strong></p>
                 <ul>
                     <li>Accumulated drift → False positives/negatives.</li>
                     <li>Non-deterministic → Undebuggable across platforms.</li>
@@ -433,7 +438,7 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
             
             <h3>📊 Phase Lock Visualization</h3>
             <canvas id="floatingCanvas" width="800" height="400"></canvas>
-            <p style="text-align: center; color: #888; margin-top: 10px;">
+            <p class="viz-caption">
                 Green Ring: Integer Phase (System Logic)<br>
                 Red Pulse: Discarded Residual (Noise)
             </p>

@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: 40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html -->
-<!-- TITLE: NRA-IDE 医療教育用 個体別振り分けテンプレート -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 04:01:10 JST -->
+<!-- FILE: 40_medical_education_individual_stratification_template_JP.html -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -211,6 +208,21 @@ canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);bord
   margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
   font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);
 }
+
+.text-right { text-align:right; }
+.detail-r-text { font-family:'JetBrains Mono',monospace;color:var(--accent); }
+.color-p1 { color:var(--p1); }
+.color-p2 { color:var(--p2); }
+.color-p3 { color:var(--p3); }
+.color-p4 { color:var(--p4); }
+.color-p5 { color:var(--p5); }
+.color-warn { color:var(--warn); }
+.color-ok { color:var(--ok); }
+.color-fail { color:var(--fail); }
+.color-watch { color:var(--watch); }
+.color-tx { color:var(--tx); }
+.color-pink { color:rgba(255,77,115,.75); }
+.desc-mu { font-size:.8rem;line-height:1.82;color:var(--mu); }
 </style>
 </head>
 <body>
@@ -291,26 +303,26 @@ canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);bord
           <div class="detail-name" id="detail-name">—</div>
           <div class="detail-profile" id="detail-profile">—</div>
         </div>
-        <div style="text-align:right">
+        <div class="text-right">
           <div class="detail-id">PATIENT R</div>
-          <div class="detail-name" id="detail-r" style="font-family:'JetBrains Mono',monospace;color:var(--accent)">0.000</div>
+          <div class="detail-name detail-r-text" id="detail-r">0.000</div>
         </div>
       </div>
 
       <div class="route-box">
         <div class="route-node">
           <div class="route-name">vital R max</div>
-          <div class="route-val" id="route-vital" style="color:var(--p1)">0.000</div>
+          <div class="route-val color-p1" id="route-vital">0.000</div>
         </div>
         <div class="route-arrow">→</div>
         <div class="route-node">
           <div class="route-name">profile pressure</div>
-          <div class="route-val" id="route-profile" style="color:var(--p4)">0.000</div>
+          <div class="route-val color-p4" id="route-profile">0.000</div>
         </div>
         <div class="route-arrow">⇒</div>
         <div class="route-node">
           <div class="route-name">bucket</div>
-          <div class="route-val" id="route-bucket" style="color:var(--warn)">—</div>
+          <div class="route-val color-warn" id="route-bucket">—</div>
         </div>
       </div>
 
@@ -335,19 +347,19 @@ canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);bord
     <div class="panel-title">BUCKET VIEW — 振り分け一覧</div>
     <div class="bucket-grid">
       <div class="bucket">
-        <h3 style="color:var(--ok)">OBSERVE / 通常観察</h3>
+        <h3 class="color-ok">OBSERVE / 通常観察</h3>
         <ul id="bucket-ok"></ul>
       </div>
       <div class="bucket">
-        <h3 style="color:var(--watch)">WATCH / 経過注意</h3>
+        <h3 class="color-watch">WATCH / 経過注意</h3>
         <ul id="bucket-watch"></ul>
       </div>
       <div class="bucket">
-        <h3 style="color:var(--warn)">CAUTION / 要注意</h3>
+        <h3 class="color-warn">CAUTION / 要注意</h3>
         <ul id="bucket-warn"></ul>
       </div>
       <div class="bucket">
-        <h3 style="color:var(--fail)">HUMAN REVIEW / 人間確認</h3>
+        <h3 class="color-fail">HUMAN REVIEW / 人間確認</h3>
         <ul id="bucket-fail"></ul>
       </div>
     </div>
@@ -357,11 +369,11 @@ canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);bord
     <div class="panel-title">R DISTRIBUTION — 個体分布</div>
     <canvas id="ts-canvas" class="ts-canvas" width="560" height="170"></canvas>
     <div class="legend">
-      <span style="color:var(--ok)">■ Observe</span>
-      <span style="color:var(--watch)">■ Watch</span>
-      <span style="color:var(--warn)">■ Caution</span>
-      <span style="color:var(--fail)">■ Human Review</span>
-      <span style="color:rgba(255,77,115,.75)">- - R=1.0</span>
+      <span class="color-ok">■ Observe</span>
+      <span class="color-watch">■ Watch</span>
+      <span class="color-warn">■ Caution</span>
+      <span class="color-fail">■ Human Review</span>
+      <span class="color-pink">- - R=1.0</span>
     </div>
   </div>
 </div>
@@ -373,8 +385,8 @@ canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);bord
   </div>
   <div class="panel">
     <div class="panel-title">EDUCATIONAL NOTE</div>
-    <div style="font-size:.8rem;line-height:1.82;color:var(--mu);">
-      このテンプレートの主眼は、集団平均よりも「個体ごとの余裕差」にあります。例えば、同じSpO₂低下でも、高齢・脆弱・既往ありの個体では τ が縮み、同じδでも R が上がります。逆に若年で既往なしなら、同一の観測値でも直ちに同じ扱いにはなりません。ここでは、<strong style="color:var(--tx)">平均値で危険を薄めず、個体ごとに構造を持つ</strong> という見方を教育用に簡略表示しています。<br><br>
+    <div class="desc-mu">
+      このテンプレートの主眼は、集団平均よりも「個体ごとの余裕差」にあります。例えば、同じSpO₂低下でも、高齢・脆弱・既往ありの個体では τ が縮み、同じδでも R が上がります。逆に若年で既往なしなら、同一の観測値でも直ちに同じ扱いにはなりません。ここでは、<strong class="color-tx">平均値で危険を薄めず、個体ごとに構造を持つ</strong> という見方を教育用に簡略表示しています。<br><br>
       また、医療用途であっても本ファイルは「医療教育用テンプレート」という軽い位置づけです。実診療での判断責任は人間にあり、AIやテンプレートは責任主体ではありません。Fail-Closedに相当する最終区分は「Human Review」とし、自動決定を避けています。
     </div>
   </div>

@@ -1,13 +1,10 @@
 <!DOCTYPE html>
-<!-- FILE: 38_datacenter_cascade_correlation_EN_20260425_160443_JST.html -->
-<!-- TITLE: NRA-IDE Datacenter Cascade Correlation Simulation -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-04-25 16:04:43 JST -->
+<!-- FILE: 36_battery_thermal_runaway_correlation_EN.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NRA-IDE Datacenter Cascade Correlation Simulation</title>
+<title>NRA-IDE Battery Thermal Runaway Correlation Simulation</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
 :root {
@@ -22,7 +19,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 header{text-align:center;margin-bottom:24px;}
 .h-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.78;margin-bottom:10px;}
 h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
-h1 em{font-style:normal;color:#ff315f;}
+h1 em{font-style:normal;color:#ff7a1a;}
 .h-desc{font-size:.86rem;color:var(--mu);line-height:1.75;max-width:920px;margin:0 auto;}
 .notice{border:1px solid rgba(255,210,74,.34);background:rgba(255,210,74,.055);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#e8d89d;font-size:.78rem;line-height:1.72;}
 .ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
@@ -84,17 +81,24 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 .log{height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
 .log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)}
 .footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
+
+.scenario-code-txt { font-size:1.35rem; }
+.chain-desc { font-size:.74rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
+.corr-fail-txt { color:var(--fail); }
+.corr-ok-txt { color:var(--ok); }
+.legend-fail { color:rgba(255,49,95,.75); }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="h-sub">NRA-IDE / DATACENTER CASCADE CORRELATION SAMPLE</div>
-  <h1>Datacenter <em>Cascade Correlation</em> Simulation</h1>
-  <p class="h-desc">A synthetic datacenter cascade sample connecting CPU load, power, rack temperature, inlet temperature, fan rate, airflow, and network latency. The positive loop power → heat → fan → power is shown as an independent R.</p>
+  <div class="h-sub">NRA-IDE / BATTERY DOMAIN CORRELATION SAMPLE</div>
+  <h1>Battery <em>Thermal Runaway Correlation</em> Simulation</h1>
+  <p class="h-desc">A synthetic battery safety education sample. Internal resistance and dT/dt act as leading indicators, then surface temperature, swelling pressure, and voltage deviation follow.</p>
 </header>
 
-<div class="notice">Educational and structural visualization only. This is not a datacenter cooling, power, load-shedding, or operations control system.</div>
+<div class="notice">Educational and structural visualization only. This is not a battery management system and must not be used for real charging, discharging, certification, or product safety decisions.</div>
 
 <div class="ctrl">
   <button class="active" id="btn-run" onclick="toggleRun()">▶ Running</button>
@@ -107,15 +111,15 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 <div class="formula">
   <span class="a">R_i = δ_i / τ_i(t)</span> — structural ratio per factor |
   <span class="b">R_corr = |C(t)-C(t₀)| / τ_C</span> — correlation drift |
-  <span class="c">feedback: power → heat → fan → power</span> |
+  <span class="c">dynamic τ shrink from internal resistance and dT/dt</span> |
   <span class="f">R_total = max(R_i, R_corr, R_coupling)</span>
 </div>
 
 <div class="stats">
   <div class="stat"><div class="stat-l">SYSTEM R_TOTAL</div><div class="stat-v" id="r-total">0.000</div><div class="stat-s" id="r-status">SAFE — structural margin remains</div></div>
-  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">cooling / thermal / service loop</div></div>
+  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">resistance / dT/dt / gas pressure</div></div>
   <div class="stat"><div class="stat-l">R_CORR MAX</div><div class="stat-v" id="r-corr">0.000</div><div class="stat-s">maximum correlation drift</div></div>
-  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v" id="scenario-code" style="font-size:1.35rem">NORMAL</div><div class="stat-s">synthetic data only</div></div>
+  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v scenario-code-txt" id="scenario-code">NORMAL</div><div class="stat-s">synthetic data only</div></div>
 </div>
 
 <div class="grid">
@@ -123,12 +127,12 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
   <div class="panel">
     <div class="panel-title">STRUCTURAL VISUALIZATION</div>
     <div class="visual">
-      <div class="visual-title">SYNTHETIC RACK ROW VIEW</div>
+      <div class="visual-title">SYNTHETIC CELL PACK VIEW</div>
       <div class="rings" id="rings"></div>
       <div id="dots"></div>
       <div class="pressure"><div class="pressure-fill" id="pressure-fill"></div></div>
       <div class="visual-status" id="visual-status">● SAFE</div>
-      <div class="visual-note" id="visual-note">power → heat → fan → power</div>
+      <div class="visual-note" id="visual-note">R_int → dT/dt → temperature</div>
     </div>
   </div>
 </div>
@@ -138,20 +142,20 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
     <div class="panel-title">MEDIATION / COUPLING LAYER</div>
     <div class="chain">
       <div class="chain-flow">
-        <div class="node"><div class="node-name" id="node-a-name">Power</div><div class="node-val" id="node-a">0.000</div></div>
+        <div class="node"><div class="node-name" id="node-a-name">Resistance</div><div class="node-val" id="node-a">0.000</div></div>
         <div class="arrow">→</div>
-        <div class="node"><div class="node-name" id="node-b-name">Heat</div><div class="node-val" id="node-b">0.000</div></div>
+        <div class="node"><div class="node-name" id="node-b-name">dT/dt</div><div class="node-val" id="node-b">0.000</div></div>
         <div class="arrow">⇒</div>
-        <div class="node"><div class="node-name" id="node-c-name">Fan load</div><div class="node-val" id="node-c">0.000</div></div>
+        <div class="node"><div class="node-name" id="node-c-name">Pack pressure</div><div class="node-val" id="node-c">0.000</div></div>
       </div>
-      <div style="font-size:.74rem;color:var(--mu);line-height:1.7;">Fans improve cooling but consume power; power creates more heat. The closed-loop pressure is preserved as a separate R value.</div>
+      <div class="chain-desc">Temperature value alone is late. This sample lets internal resistance and temperature rise-rate compress the tolerance of the thermal layer.</div>
       <div class="coupling-list" id="coupling-list"></div>
     </div>
   </div>
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div id="corr-alert" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok)">✓ Correlation stable.</div>
+    <div id="corr-alert" class="corr-alert-wrap">✓ Correlation stable.</div>
   </div>
 </div>
 
@@ -169,15 +173,15 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
-  <span>38_datacenter_cascade_correlation_EN</span>
+  <span>36_battery_thermal_runaway_correlation_EN</span>
   <span>R_total=max(R_i,R_corr,R_coupling) / no averaging dilution</span>
 </div>
 </div>
 
 <script>
-const FACTORS = [{"id":"cpu","name":"CPU Load","short":"CPU","unit":"%","opt":45,"tau":35,"min":5,"max":100,"dir":"hi","amp":5,"weight":0.22,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.4,"desc":"Compute load drives power and latency.","corr_base":[1,0.5,0.4,0.3,0.25,0.2,0.18]},{"id":"power","name":"Power","short":"PWR","unit":"kW","opt":420,"tau":220,"min":180,"max":980,"dir":"hi","amp":22,"weight":0.3,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":8,"fmt":"int","desc":"IT plus cooling power.","corr_base":[0.5,1,0.55,0.42,0.3,0.25,0.2]},{"id":"rack","name":"Rack Temp","short":"RACK","unit":"℃","opt":34,"tau":16,"min":18,"max":72,"dir":"hi","amp":1.1,"weight":0.3,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":1.0,"desc":"Thermal state near equipment.","corr_base":[0.4,0.55,1,0.5,0.45,0.35,0.25]},{"id":"inlet","name":"Inlet Temp","short":"IN","unit":"℃","opt":22,"tau":8,"min":12,"max":42,"dir":"hi","amp":0.6,"weight":0.2,"group":"supply","shrink":"supply","desc":"Cooling supply temperature.","corr_base":[0.3,0.42,0.5,1,0.48,0.4,0.22]},{"id":"fan","name":"Fan Rate","short":"FAN","unit":"%","opt":52,"tau":38,"min":20,"max":100,"dir":"both","amp":4,"weight":0.22,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":2,"desc":"Cooling reaction and power consumer.","corr_base":[0.25,0.3,0.45,0.48,1,0.38,0.28]},{"id":"air","name":"Airflow","short":"AIR","unit":"%","opt":78,"tau":28,"min":18,"max":100,"dir":"lo","amp":3,"weight":0.26,"group":"supply","shrink":"supply","coupledBy":"supply","coupledGain":-2,"desc":"Low-side cooling path risk.","corr_base":[0.2,0.25,0.35,0.4,0.38,1,0.24]},{"id":"lat","name":"Network Latency","short":"LAT","unit":"ms","opt":8,"tau":18,"min":1,"max":90,"dir":"hi","amp":2,"weight":0.2,"group":"supply","shrink":"main","coupledBy":"main","coupledGain":0.7,"desc":"Queueing and service degradation marker.","corr_base":[0.18,0.2,0.25,0.22,0.28,0.24,1]}];
-const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable operation."},"workload":{"label":"Workload burst","desc":"CPU load increases power, heat, and latency.","drift":{"cpu":36,"power":165,"rack":9,"inlet":2,"fan":18,"air":-4,"lat":16},"pressureBoost":0.14,"corrBoost":0.1},"coolingloss":{"label":"Cooling loss","desc":"Inlet and rack temperatures rise.","drift":{"cpu":8,"power":105,"rack":22,"inlet":12,"fan":30,"air":-12,"lat":7},"pressureBoost":0.24,"corrBoost":0.14},"airblock":{"label":"Airflow blockage","desc":"Airflow drops and compresses thermal margin.","drift":{"cpu":5,"power":95,"rack":18,"inlet":5,"fan":34,"air":-38,"lat":5},"pressureBoost":0.28,"corrBoost":0.16},"fandegrade":{"label":"Fan degradation","desc":"Fan capacity loss and heat rise together.","drift":{"cpu":9,"power":75,"rack":20,"inlet":5,"fan":-24,"air":-24,"lat":6},"pressureBoost":0.26,"corrBoost":0.15},"netqueue":{"label":"Network queueing","desc":"CPU wait and latency coupling changes.","drift":{"cpu":20,"power":70,"rack":5,"inlet":1,"fan":8,"air":-2,"lat":45},"pressureBoost":0.2,"corrBoost":0.2},"cascade":{"label":"Cascade","desc":"Power, heat, cooling, and latency close into a positive loop.","drift":{"cpu":42,"power":285,"rack":31,"inlet":15,"fan":42,"air":-42,"lat":55},"pressureBoost":0.45,"corrBoost":0.3}};
-const COLORS = ["#58d7ff","#ffd24a","#ff7a1a","#46c6ff","#b58cff","#39ff85","#ff4fb0"];
+const FACTORS = [{"id":"voltage","name":"Cell Voltage","short":"V","unit":"V","opt":3.7,"tau":0.3,"min":2.8,"max":4.35,"dir":"both","amp":0.025,"weight":0.16,"group":"supply","shrink":"main","fmt":"3","desc":"Both over-voltage and sudden drop are watched.","corr_base":[1,0.55,0.35,0.25,0.3,0.2]},{"id":"current","name":"Current","short":"I","unit":"A","opt":35,"tau":25,"min":0,"max":130,"dir":"hi","amp":2.8,"weight":0.18,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.0,"desc":"High current pushes heat and stress.","corr_base":[0.55,1,0.5,0.3,0.4,0.25]},{"id":"surfaceTemp","name":"Surface Temp","short":"T","unit":"℃","opt":32,"tau":18,"min":10,"max":95,"dir":"hi","amp":0.8,"weight":0.22,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":2.2,"desc":"Thermal layer; τ shrinks under coupling pressure.","corr_base":[0.35,0.5,1,0.45,0.55,0.3]},{"id":"dtdt","name":"Temperature Rise Rate","short":"dT","unit":"℃/min","opt":0,"tau":1.2,"min":-1.5,"max":8,"dir":"hi","amp":0.1,"weight":0.3,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.3,"fmt":"2","desc":"Leading precursor before absolute temperature crosses limits.","corr_base":[0.25,0.3,0.45,1,0.5,0.42]},{"id":"rint","name":"Internal Resistance","short":"Rint","unit":"mΩ","opt":22,"tau":12,"min":12,"max":80,"dir":"hi","amp":0.8,"weight":0.31,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.1,"desc":"Aging or short-circuit precursor.","corr_base":[0.3,0.4,0.55,0.5,1,0.48]},{"id":"pressure","name":"Swelling Pressure","short":"P","unit":"kPa","opt":0,"tau":18,"min":0,"max":95,"dir":"hi","amp":0.7,"weight":0.23,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":1.8,"desc":"Synthetic gas/swelling indicator.","corr_base":[0.2,0.25,0.3,0.42,0.48,1]}];
+const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable synthetic pack state."},"fastcharge":{"label":"Fast charge stress","desc":"High current drives delayed thermal response.","drift":{"current":52,"surfaceTemp":9,"dtdt":1.1,"rint":5,"pressure":6},"pressureBoost":0.1,"corrBoost":0.08},"coolingloss":{"label":"Cooling loss","desc":"dT/dt and temperature rise first.","drift":{"current":10,"surfaceTemp":22,"dtdt":2.1,"rint":7,"pressure":11},"pressureBoost":0.2,"corrBoost":0.1},"agedcell":{"label":"Aged cell mix","desc":"Internal resistance rises and shrinks thermal margin.","drift":{"voltage":-0.06,"current":14,"surfaceTemp":12,"dtdt":1.4,"rint":24,"pressure":10},"pressureBoost":0.26,"corrBoost":0.12},"short":{"label":"Internal short precursor","desc":"Voltage drops while resistance, dT/dt, and pressure rise.","drift":{"voltage":-0.38,"current":46,"surfaceTemp":28,"dtdt":3.4,"rint":32,"pressure":24},"pressureBoost":0.35,"corrBoost":0.18},"runaway":{"label":"Runaway cascade","desc":"Resistance, dT/dt, pressure, and temperature couple together.","drift":{"voltage":-0.42,"current":72,"surfaceTemp":46,"dtdt":5.8,"rint":46,"pressure":55},"pressureBoost":0.48,"corrBoost":0.26}};
+const COLORS = ["#72a7ff","#ffd24a","#ff7a1a","#ff4f89","#c084fc","#39ff9b"];
 const HIST_LEN = 136;
 const tauC = 0.24;
 let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
@@ -225,7 +229,7 @@ function buildCorrMatrix(){
 }
 function buildCouplingList(){
   const root=document.getElementById('coupling-list'); root.innerHTML='';
-  ["Cooling pressure","Thermal pressure","Feedback loop","Service pressure"].forEach((row,idx)=>{
+  ["Internal resistance pressure","dT/dt pressure","Thermal pressure","Correlation pressure"].forEach((row,idx)=>{
     root.innerHTML += `<div class="coup-row"><div class="coup-name">${row}</div><div class="coup-bg"><div class="coup-bar" id="cbar-${idx}" style="background:${COLORS[idx%COLORS.length]};width:0%"></div></div><div class="coup-val" id="cval-${idx}">0.000</div></div>`;
   });
 }
@@ -303,7 +307,7 @@ function updateUI(){
   document.getElementById('visual-status').style.color=colorFor(total);
   document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
   [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });
-  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div style="color:var(--fail)">⚠ ${a}</div>`).join('') : `<span style="color:var(--ok)">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
+  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('') : `<span class="corr-ok-txt">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
   if(cr.alerts.length && tick%24===0) addLog('Correlation drift detected: '+cr.alerts[0],'fail');
   drawChart(); 
 }
@@ -314,12 +318,12 @@ function drawChart(){
   history.forEach((hist,i)=>{ if(hist.length<2)return; ctx.strokeStyle=COLORS[i%COLORS.length]; ctx.lineWidth=1.7; ctx.beginPath(); hist.forEach((v,x)=>{const px=x/(HIST_LEN-1)*W, py=H-Math.min(v,1.6)/1.6*(H-24)-10; x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}); ctx.stroke(); });
   ctx.fillStyle='rgba(255,49,95,.75)'; ctx.font='10px JetBrains Mono, monospace'; ctx.fillText('R=1.0',6,fy-4);
 }
-function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span style="color:rgba(255,49,95,.75)">- - Fail</span>'; }
+function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span class="legend-fail">- - Fail</span>'; }
 function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
 function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
 function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
 function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
-function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Datacenter Cascade Correlation Simulation initialized.','ok'); updateUI(); }
+function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Battery Thermal Runaway Correlation Simulation initialized.','ok'); updateUI(); }
 buildLegend(); init(); setInterval(update,300);
 </script>
 </body>

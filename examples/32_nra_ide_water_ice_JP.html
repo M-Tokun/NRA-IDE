@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- FILE: 32_nra_ide_water_ice_JP.html -->
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- FILE: nra_ide_ice_water_EN_20260324_2216.html -->
-<!-- TITLE: NRA-IDE Melting from Ice to Water -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-03-24 22:16 JST / EN localized: 2026-04-25 JST -->
-<title>NRA-IDE Melting from Ice to Water 20260324_2216</title>
+<!-- title: NRA-IDE 氷から水への融解 | nra_ide_ice_water_20260324_2216.html -->
+<title>NRA-IDE 氷から水への融解 20260324_2216</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -122,120 +120,128 @@
     margin-top: 2rem; padding-top: 1rem;
     border-top: 0.5px solid rgba(55,138,221,0.15);
   }
+  .color-fail { color:#E24B4A; }
+  .color-blue { color:#185FA5; }
+  .bg-fail-w25 { background:#E24B4A; width:25%; }
+  .bg-blue-w100 { background:#185FA5; width:100%; }
+  .bg-green-w0 { background:#1D9E75; width:0%; }
+  .border-dashed-fail { border-top:2px dashed #E24B4A; }
+  .border-dashed-warn { border-top:2px dashed #EF9F27; }
+  .bg-blue-h2 { background:#185FA5; height:2px; }
 </style>
 </head>
 <body>
 <div class="container">
 
   <header>
-    <h1>NRA-IDE — Melting from Ice to Water</h1>
-    <p>Structural threshold visualization using R = δ / τ (an independent equation from the freezing system) / nra_ide_ice_water_20260324_2216.html</p>
+    <h1>NRA-IDE — 氷から水への融解</h1>
+    <p>R = δ / τ　による構造閾値の可視化（凝固系とは独立した別式）　/ nra_ide_ice_water_20260324_2216.html</p>
   </header>
 
   <div class="independence-note">
-    This system is constructed independently from the “water → ice (freezing)” equation.
-    Because the tracked reference structure changes from “liquid” to “solid (crystal lattice),” δ and τ are defined separately.
-    Reverse-calculating this equation from the freezing formula is prohibited by the NRA-IDE design principle.
+    このシステムは「水→氷（凝固）」の式とは独立して構築されています。
+    追跡対象の構造が「液体」から「固体（結晶格子）」に変わったため、δ・τの定義を別途設計しています。
+    式を逆算することはNRA-IDEの設計原則が禁止しています。
   </div>
 
   <div class="card">
-    <div class="card-label">Model Selection and Temperature Setting (Ice Reference: −20°C → Melting Point: 0°C)</div>
+    <div class="card-label">モデル選択と温度設定（氷の基準：-20℃ → 融解点：0℃）</div>
     <div class="controls">
       <div class="slider-group">
-        <label>Temperature T</label>
+        <label>温度 T</label>
         <input type="range" id="tempSlider" min="-20" max="5" step="0.5" value="-15">
         <span id="tempOut">-15.0℃</span>
       </div>
       <div class="toggle-group">
-        <button class="tog-btn active" id="btnStatic" onclick="setModel('static')">Static τ (linear)</button>
-        <button class="tog-btn" id="btnDynamic" onclick="setModel('dynamic')">Dynamic τ (hyperbolic)</button>
+        <button class="tog-btn active" id="btnStatic" onclick="setModel('static')">静的τ（直線）</button>
+        <button class="tog-btn" id="btnDynamic" onclick="setModel('dynamic')">動的τ（双曲線）</button>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-label">Current Variable Values</div>
+    <div class="card-label">変数の現在値</div>
     <div class="metrics">
       <div class="metric">
-        <div class="metric-label">δ (accumulated deviation)</div>
-        <div class="metric-val" id="mDelta" style="color:#E24B4A;">0.00</div>
+        <div class="metric-label">δ（蓄積ズレ）</div>
+        <div class="metric-val color-fail" id="mDelta">0.00</div>
       </div>
       <div class="metric">
-        <div class="metric-label">τ (absorption margin)</div>
-        <div class="metric-val" id="mTau" style="color:#185FA5;">20.0</div>
+        <div class="metric-label">τ（吸収余裕）</div>
+        <div class="metric-val color-blue" id="mTau">20.0</div>
       </div>
       <div class="metric">
         <div class="metric-label">R = δ / τ</div>
         <div class="metric-val" id="mR">0.25</div>
       </div>
       <div class="metric">
-        <div class="metric-label">State Judgment</div>
-        <div><span class="phase-badge" id="phaseBadge">Ice (solid)</span></div>
+        <div class="metric-label">状態判定</div>
+        <div><span class="phase-badge" id="phaseBadge">氷（固体）</span></div>
       </div>
     </div>
 
     <div class="bar-section">
       <div class="bar-row">
-        <span class="bar-lbl">δ accumulated deviation</span>
-        <div class="bar-track"><div class="bar-fill" id="barDelta" style="background:#E24B4A;width:25%;"></div></div>
+        <span class="bar-lbl">δ 蓄積ズレ</span>
+        <div class="bar-track"><div class="bar-fill bg-fail-w25" id="barDelta"></div></div>
         <span class="bar-num" id="barDeltaNum">5.0</span>
       </div>
       <div class="bar-row">
-        <span class="bar-lbl">τ absorption margin</span>
-        <div class="bar-track"><div class="bar-fill" id="barTau" style="background:#185FA5;width:100%;"></div></div>
+        <span class="bar-lbl">τ 吸収余裕</span>
+        <div class="bar-track"><div class="bar-fill bg-blue-w100" id="barTau"></div></div>
         <span class="bar-num" id="barTauNum">20.0</span>
       </div>
       <div class="bar-row">
-        <span class="bar-lbl">R value</span>
-        <div class="bar-track"><div class="bar-fill" id="barR" style="background:#1D9E75;width:0%;"></div></div>
+        <span class="bar-lbl">R 値</span>
+        <div class="bar-track"><div class="bar-fill bg-green-w0" id="barR"></div></div>
         <span class="bar-num" id="barRNum">0.00</span>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-label">R-Value Graph (−20°C → +5°C)</div>
+    <div class="card-label">R 値グラフ（-20℃ → +5℃）</div>
     <div class="chart-wrap">
       <canvas id="phaseChart"></canvas>
     </div>
     <div class="legend">
       <div class="legend-item">
-        <div class="legend-line" style="border-top:2px dashed #E24B4A;"></div>
-        <span>FAIL-CLOSED (R = 1.0) = Melting Confirmed</span>
+        <div class="legend-line border-dashed-fail"></div>
+        <span>FAIL-CLOSED (R = 1.0) = 融解確定</span>
       </div>
       <div class="legend-item">
-        <div class="legend-line" style="border-top:2px dashed #EF9F27;"></div>
+        <div class="legend-line border-dashed-warn"></div>
         <span>WARNING (R = 0.75)</span>
       </div>
       <div class="legend-item">
-        <div class="legend-line" style="background:#185FA5;height:2px;"></div>
-        <span>SAFE (Stable as Ice)</span>
+        <div class="legend-line bg-blue-h2"></div>
+        <span>SAFE（氷として安定）</span>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-label">Definition of the Calculation Formula</div>
+    <div class="card-label">計算式の定義</div>
     <div class="formula-box" id="formulaBox">
-      <strong>Static τ Model (Linear Type)</strong><br>
-      <code>δ = T − (−20) = T + 20</code> → accumulated deviation from the ice reference temperature (−20°C)<br>
-      <code>τ = 20</code> → fixed constant (total margin that the crystal lattice structure can maintain)<br>
+      <strong>静的τモデル（直線型）</strong><br>
+      <code>δ = T − (−20) = T + 20</code>　→　氷の基準温度(-20℃)からの蓄積ズレ<br>
+      <code>τ = 20</code>　→　固定定数（結晶格子構造が保持できる総余裕）<br>
       <code>R = δ / τ = (T + 20) / 20</code><br>
-      R = 1.0 exactly coincides with T = 0°C. The graph is linear.
+      R = 1.0 は T = 0℃ に正確に一致。グラフは直線。
     </div>
     <div class="note" id="modelNote">
-      Move the temperature slider to update δ, τ, and R in real time.
-      At R ≥ 1.0, the system enters Fail-Closed (the structure is confirmed as water). At R ≥ 0.75, it enters the warning zone (the stage where the crystal structure begins to relax).
+      温度スライダーを動かすと δ・τ・R がリアルタイム更新されます。
+      R ≥ 1.0 で Fail-Closed（水として構造確定）。R ≥ 0.75 で警告域（結晶構造の弛緩が始まる段階）。
       <br><br>
-      <strong>Fundamental Difference from the Freezing System:</strong>
-      In the freezing system, δ is “deviation from the liquid structure (temperature decrease).”
-      In the melting system, δ is “deviation from the solid crystal structure (temperature increase).”
-      Even at the same 0°C point, the tracked structure is different, so this system is designed independently.
+      <strong>凝固系との根本的な違い：</strong>
+      凝固系のδは「液体構造からのズレ（温度低下）」、
+      融解系のδは「固体結晶構造からのズレ（温度上昇）」です。
+      同じ0℃でも追跡している構造が別物のため、独立したシステムとして設計します。
     </div>
   </div>
 
   <footer>
-    NRA-IDE Project / M-Tokuni | Generated: 2026-03-24 22:16 JST | Freezing system: nra_ide_water_ice_20260324_2216.html
+    NRA-IDE Project / M-Tokuni　|　生成：2026-03-24 22:16 JST　|　凝固系：nra_ide_water_ice_20260324_2216.html
   </footer>
 
 </div>
@@ -266,9 +272,9 @@ function getColor(R) {
 }
 
 function getPhase(T, R) {
-  if (T >= T_MELT) return { label: 'Water (liquid)', bg: '#9FE1CB', color: '#085041' };
-  if (R >= 0.75) return { label: 'Critical Zone', bg: '#FAC775', color: '#633806' };
-  return { label: 'Ice (solid)', bg: '#B5D4F4', color: '#0C447C' };
+  if (T >= T_MELT) return { label: '水（液体）', bg: '#9FE1CB', color: '#085041' };
+  if (R >= 0.75) return { label: '臨界域', bg: '#FAC775', color: '#633806' };
+  return { label: '氷（固体）', bg: '#B5D4F4', color: '#0C447C' };
 }
 
 function buildChartData() {
@@ -291,7 +297,7 @@ function initChart() {
       labels: temps,
       datasets: [
         {
-          label: 'R value',
+          label: 'R値',
           data: rVals,
           borderWidth: 2.5,
           pointRadius: 0,
@@ -409,17 +415,17 @@ function setModel(m) {
 
   const fBox = document.getElementById('formulaBox');
   if (m === 'static') {
-    fBox.innerHTML = `<strong>Static τ Model (Linear Type)</strong><br>
-      <code>δ = T + 20</code> → accumulated deviation from the ice reference temperature (−20°C)<br>
-      <code>τ = 20</code> → fixed constant (total margin that the crystal lattice structure can maintain)<br>
+    fBox.innerHTML = `<strong>静的τモデル（直線型）</strong><br>
+      <code>δ = T + 20</code>　→　氷の基準温度(-20℃)からの蓄積ズレ<br>
+      <code>τ = 20</code>　→　固定定数（結晶格子構造が保持できる総余裕）<br>
       <code>R = δ / τ = (T + 20) / 20</code><br>
-      R = 1.0 exactly coincides with T = 0°C. The graph is linear.`;
+      R = 1.0 は T = 0℃ に正確に一致。グラフは直線。`;
   } else {
-    fBox.innerHTML = `<strong>Dynamic τ Model (Hyperbolic Type)</strong><br>
-      <code>δ = T + 20</code> → accumulated deviation from the ice reference temperature (−20°C)<br>
-      <code>τ = 0 − T = −T</code> → remaining distance between the current temperature and the melting point (0°C), treated as a dynamic margin<br>
+    fBox.innerHTML = `<strong>動的τモデル（双曲線型）</strong><br>
+      <code>δ = T + 20</code>　→　氷の基準温度(-20℃)からの蓄積ズレ<br>
+      <code>τ = 0 − T = −T</code>　→　現在温度と融解点(0℃)の残余距離（動的余裕）<br>
       <code>R = δ / τ = (T + 20) / (−T)</code><br>
-      As the temperature approaches 0°C, τ → 0 and R rises sharply. The graph is hyperbolic.`;
+      0℃ 接近でτ → 0 のためRが急激上昇。グラフは双曲線。`;
   }
   updateAll();
 }

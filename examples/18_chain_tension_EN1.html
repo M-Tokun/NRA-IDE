@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!-- FILE: chain_tension_nra_ide_20260319_0113.html -->
-<!-- TITLE: NRA-IDE Chain Tension Fluctuation-Driven Auto-Adjustment Visualization -->
-<!-- Author: M-Tokuni / NRA-IDE Project -->
-<!-- Generated: 2026-03-19 01:13 JST -->
+<!-- FILE: 18_chain_tension_EN1.html -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -126,6 +123,10 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 .slider-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
 .slider-mrk{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;
   font-size:9px;color:var(--muted);}
+.bar-accent { background: var(--accent); }
+.bar-safe   { background: var(--safe); }
+.bar-adj    { background: var(--adj); }
+.small-unit { font-size:11px; font-weight:300; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -160,7 +161,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
     <div class="slider-row">
       <div class="slider-hdr">
         <span class="slider-lbl">MANUAL BIAS</span>
-        <div class="slider-val mono" id="biasDisp">800<small style="font-size:11px;font-weight:300;color:var(--muted)"> N</small></div>
+        <div class="slider-val mono" id="biasDisp">800<small class="small-unit"> N</small></div>
       </div>
       <input type="range" id="biasSlider" min="500" max="1100" value="800" oninput="onBias(this.value)">
       <div class="slider-mrk"><span>500</span><span>OPT:800</span><span>1100</span></div>
@@ -206,21 +207,21 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             <span class="met-key">δ accumulated deviation</span>
             <span class="met-val" id="dVal">0.0 N</span>
           </div>
-          <div class="bar-bg"><div class="bar-fill" id="dBar" style="width:0%;background:var(--accent)"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-accent" id="dBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr">
             <span class="met-key">τ absorption thickness</span>
             <span class="met-val" id="tauDisp">200.0 N</span>
           </div>
-          <div class="bar-bg"><div class="bar-fill" id="tauBar" style="width:100%;background:var(--safe)"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-safe" id="tauBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr">
             <span class="met-key">fluctuation amplitude</span>
             <span class="met-val" id="ampDisp">0.0 N</span>
           </div>
-          <div class="bar-bg"><div class="bar-fill" id="ampBar" style="width:0%;background:var(--adj)"></div></div>
+          <div class="bar-bg"><div class="bar-fill bar-adj" id="ampBar"></div></div>
         </div>
       </div>
       <div class="adj-box">
