@@ -249,3 +249,14 @@ Do not claim to have read files that were not actually read.
 Do not infer repository-wide facts from partial file reads.
 
 Do not treat previous AI output as confirmed project state unless verified from files.
+
+---
+
+## Markdown & Formula Rules
+
+Markdown形式で出力またはファイルを編集する際は、以下の数式記述ルールを厳格に適用すること：
+
+- **行内数式**: VSCode準拠とし、数式記号の前後には半角スペースを空けて ` $ ... $ ` と記述する。
+- **ブロック数式**: 独立した行に配置し、数式ブロックの前後には必ず空行を設ける。
+- **\text{} 内の文字**: `\text{}` の中には日本語（全角文字）を一切含めない。
+
