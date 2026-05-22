@@ -132,7 +132,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
     <!-- タイムライン -->
     <div class="timeline">
       <span class="tl-lbl">TIME</span>
-      <input type="range" id="timeSlider" min="0" max="200" value="0">
+      <input aria-label="時間" type="range" id="timeSlider" min="0" max="200" value="0">
       <span id="timeDisp">t=0</span>
       <button class="btn btn-small on" id="btnPlay" onclick="togglePlay()">PLAY</button>
       <button class="btn btn-small" id="btnReset" onclick="resetTime()">RESET</button>
@@ -142,32 +142,32 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
     <div class="flex-col-gap6-pad4">
       <div class="view-row">
         <span class="view-lbl">仰角</span>
-        <input type="range" class="view-slider" id="elevSlider" min="10" max="80" value="40"
+        <input aria-label="高度" type="range" class="view-slider" id="elevSlider" min="10" max="80" value="40"
           oninput="updateView()">
         <span class="op-val" id="elevVal">40°</span>
       </div>
       <div class="view-row">
         <span class="view-lbl">回転</span>
-        <input type="range" class="view-slider" id="rotSlider" min="0" max="360" value="30"
+        <input aria-label="回転" type="range" class="view-slider" id="rotSlider" min="0" max="360" value="30"
           oninput="updateView()">
         <span class="op-val" id="rotVal">30°</span>
       </div>
       <div class="view-row">
         <span class="view-lbl">高さ倍率</span>
-        <input type="range" class="view-slider" id="scaleSlider" min="5" max="40" value="18"
+        <input aria-label="スケール" type="range" class="view-slider" id="scaleSlider" min="5" max="40" value="18"
           oninput="updateView()">
         <span class="op-val" id="scaleVal">×18</span>
       </div>
       <div class="border-top-margin6"></div>
       <div class="view-row">
         <span class="view-lbl">彩度</span>
-        <input type="range" class="view-slider" id="satSlider" min="0" max="100" value="100"
+        <input aria-label="彩度" type="range" class="view-slider" id="satSlider" min="0" max="100" value="100"
           oninput="updateColorMode()">
         <span class="op-val" id="satVal">100%</span>
       </div>
       <div class="view-row">
         <span class="view-lbl">明暗γ</span>
-        <input type="range" class="view-slider" id="gammaSlider" min="30" max="200" value="100"
+        <input aria-label="ガンマ" type="range" class="view-slider" id="gammaSlider" min="30" max="200" value="100"
           oninput="updateColorMode()">
         <span class="op-val" id="gammaVal">×1.00</span>
       </div>
@@ -292,7 +292,7 @@ function buildLayerCards(){
       </div>
       <div class="opacity-row">
         <span class="op-lbl" style="color:${L.color}">α</span>
-        <input type="range" class="op-slider" id="op_${i}"
+        <input aria-label="不透明度" type="range" class="op-slider" id="op_${i}"
           min="0" max="100" value="75" step="1"
           style="--tc:${L.color}"
           oninput="onOpacity(${i},this.value)">

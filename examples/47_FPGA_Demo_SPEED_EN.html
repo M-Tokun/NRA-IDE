@@ -237,22 +237,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <div class="controls">
     <div class="slider-row">
       <label>CLOCK SPEED</label>
-      <input type="range" id="clockSpeed" min="1" max="10" value="5" oninput="updateSpeed(this.value)">
+      <input aria-label="Clock Speed" type="range" id="clockSpeed" min="1" max="10" value="5" oninput="updateSpeed(this.value)">
       <span class="slider-val" id="clockSpeedDisplay">5 ─ NORMAL</span>
     </div>
     <div class="slider-row">
       <label>INPUT VALUE</label>
-      <input type="range" id="inputVal" min="0" max="131072" value="65536" oninput="updateInput(this.value)">
+      <input aria-label="Input Value" type="range" id="inputVal" min="0" max="131072" value="65536" oninput="updateInput(this.value)">
       <span class="slider-val" id="inputValDisplay">1.0000</span>
     </div>
     <div class="slider-row">
       <label>THR_LO / LOWER LIMIT (Q16.16)</label>
-      <input type="range" id="thrLo" min="0" max="65536" value="32768" oninput="updateThresholds()">
+      <input aria-label="Lower Threshold" type="range" id="thrLo" min="0" max="65536" value="32768" oninput="updateThresholds()">
       <span class="slider-val" id="thrLoDisplay">0.5000</span>
     </div>
     <div class="slider-row">
       <label>THR_HI / UPPER LIMIT (Q16.16)</label>
-      <input type="range" id="thrHi" min="65536" max="131072" value="98304" oninput="updateThresholds()">
+      <input aria-label="Upper Threshold" type="range" id="thrHi" min="65536" max="131072" value="98304" oninput="updateThresholds()">
       <span class="slider-val" id="thrHiDisplay">1.5000</span>
     </div>
     <div class="control-row">

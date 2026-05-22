@@ -132,7 +132,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
     <!-- Timeline -->
     <div class="timeline">
       <span class="tl-lbl">TIME</span>
-      <input type="range" id="timeSlider" min="0" max="200" value="0">
+      <input aria-label="Time" type="range" id="timeSlider" min="0" max="200" value="0">
       <span id="timeDisp">t=0</span>
       <button class="btn btn-small on" id="btnPlay" onclick="togglePlay()">PLAY</button>
       <button class="btn btn-small" id="btnReset" onclick="resetTime()">RESET</button>
@@ -142,32 +142,32 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
     <div class="flex-col-gap6-pad4">
       <div class="view-row">
         <span class="view-lbl">ELEVATION</span>
-        <input type="range" class="view-slider" id="elevSlider" min="10" max="80" value="40"
+        <input aria-label="Elevation" type="range" class="view-slider" id="elevSlider" min="10" max="80" value="40"
           oninput="updateView()">
         <span class="op-val" id="elevVal">40°</span>
       </div>
       <div class="view-row">
         <span class="view-lbl">ROTATION</span>
-        <input type="range" class="view-slider" id="rotSlider" min="0" max="360" value="30"
+        <input aria-label="Rotation" type="range" class="view-slider" id="rotSlider" min="0" max="360" value="30"
           oninput="updateView()">
         <span class="op-val" id="rotVal">30°</span>
       </div>
       <div class="view-row">
         <span class="view-lbl">HEIGHT SCALE</span>
-        <input type="range" class="view-slider" id="scaleSlider" min="5" max="40" value="18"
+        <input aria-label="Scale" type="range" class="view-slider" id="scaleSlider" min="5" max="40" value="18"
           oninput="updateView()">
         <span class="op-val" id="scaleVal">×18</span>
       </div>
       <div class="border-top-margin6"></div>
       <div class="view-row">
         <span class="view-lbl">SATURATION</span>
-        <input type="range" class="view-slider" id="satSlider" min="0" max="100" value="100"
+        <input aria-label="Saturation" type="range" class="view-slider" id="satSlider" min="0" max="100" value="100"
           oninput="updateColorMode()">
         <span class="op-val" id="satVal">100%</span>
       </div>
       <div class="view-row">
         <span class="view-lbl">BRIGHTNESS γ</span>
-        <input type="range" class="view-slider" id="gammaSlider" min="30" max="200" value="100"
+        <input aria-label="Gamma" type="range" class="view-slider" id="gammaSlider" min="30" max="200" value="100"
           oninput="updateColorMode()">
         <span class="op-val" id="gammaVal">×1.00</span>
       </div>
@@ -292,7 +292,7 @@ function buildLayerCards(){
       </div>
       <div class="opacity-row">
         <span class="op-lbl" style="color:${L.color}">α</span>
-        <input type="range" class="op-slider" id="op_${i}"
+        <input aria-label="Opacity" type="range" class="op-slider" id="op_${i}"
           min="0" max="100" value="75" step="1"
           style="--tc:${L.color}"
           oninput="onOpacity(${i},this.value)">

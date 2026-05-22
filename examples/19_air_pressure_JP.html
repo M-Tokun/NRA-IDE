@@ -163,7 +163,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             0.5<small class="small-unit"> MPa</small>
           </div>
         </div>
-        <input type="range" id="compSlider" min="0" max="20" value="5" step="0.5"
+        <input aria-label="圧縮" type="range" id="compSlider" min="0" max="20" value="5" step="0.5"
           oninput="onComp(this.value)">
         <div class="sl-mrk"><span>0</span><span>設計0.5MPa</span><span>2.0</span></div>
       </div>
@@ -174,7 +174,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             25<small class="small-unit"> °C</small>
           </div>
         </div>
-        <input type="range" id="tempSlider" min="-20" max="120" value="25"
+        <input aria-label="温度" type="range" id="tempSlider" min="-20" max="120" value="25"
           oninput="onTemp(this.value)">
         <div class="sl-mrk"><span>-20°C</span><span>基準25°C</span><span>120°C</span></div>
       </div>

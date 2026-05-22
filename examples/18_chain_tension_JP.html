@@ -163,7 +163,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <span class="slider-lbl">MANUAL BIAS</span>
         <div class="slider-val mono" id="biasDisp">800<small class="small-unit"> N</small></div>
       </div>
-      <input type="range" id="biasSlider" min="500" max="1100" value="800" oninput="onBias(this.value)">
+      <input aria-label="バイアス" type="range" id="biasSlider" min="500" max="1100" value="800" oninput="onBias(this.value)">
       <div class="slider-mrk"><span>500</span><span>最適:800</span><span>1100</span></div>
     </div>
   </div>

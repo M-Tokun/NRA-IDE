@@ -355,7 +355,7 @@
           </div>
           <div class="slider-row" style="margin-top:14px;">
             <div class="slider-head"><span>危険域注入スライダー</span><span id="dangerInjectVal">0.00</span></div>
-            <input id="dangerInjectRange" type="range" min="0" max="1.4" value="0" step="0.01" />
+            <input aria-label="危険注入率" id="dangerInjectRange" type="range" min="0" max="1.4" value="0" step="0.01" />
           </div>
           <div class="small">このスライダーは説明用です。現場実装では存在しない見本用の注入です。</div>
         </div>
@@ -392,23 +392,23 @@
         <p>上限下限ダンパーと再構成強度に加え、危険域しきい値を調整します。下限側は敏感、上限側は慎重という非対称構造です。</p>
         <div class="slider-row">
           <div class="slider-head"><span>上限ダンパー</span><span id="upperVal">1.00</span></div>
-          <input id="upperRange" type="range" min="0.6" max="1.8" value="1.0" step="0.01" />
+          <input aria-label="上限境界" id="upperRange" type="range" min="0.6" max="1.8" value="1.0" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>下限ダンパー</span><span id="lowerVal">1.00</span></div>
-          <input id="lowerRange" type="range" min="0.4" max="1.4" value="1.0" step="0.01" />
+          <input aria-label="下限境界" id="lowerRange" type="range" min="0.4" max="1.4" value="1.0" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>短期再構成感度</span><span id="reconVal">0.55</span></div>
-          <input id="reconRange" type="range" min="0.10" max="0.95" value="0.55" step="0.01" />
+          <input aria-label="再接続余裕度" id="reconRange" type="range" min="0.10" max="0.95" value="0.55" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>長期劣化記憶</span><span id="degVal">0.15</span></div>
-          <input id="degRange" type="range" min="0.01" max="0.50" value="0.15" step="0.01" />
+          <input aria-label="劣化余裕度" id="degRange" type="range" min="0.01" max="0.50" value="0.15" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>DANGERしきい値</span><span id="dangerThresholdVal">0.92</span></div>
-          <input id="dangerThresholdRange" type="range" min="0.55" max="1.15" value="0.92" step="0.01" />
+          <input aria-label="危険しきい値" id="dangerThresholdRange" type="range" min="0.55" max="1.15" value="0.92" step="0.01" />
         </div>
       </div>
     </section>

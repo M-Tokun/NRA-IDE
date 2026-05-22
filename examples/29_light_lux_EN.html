@@ -184,7 +184,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             45<small class="small-unit-12">°</small>
           </div>
         </div>
-        <input type="range" id="elevSlider" min="0" max="90" value="45"
+        <input aria-label="Elevation" type="range" id="elevSlider" min="0" max="90" value="45"
           oninput="onElev(this.value)">
         <div class="sl-mrk"><span>Horizon 0°</span><span>Clear-sky peak</span><span>Zenith 90°</span></div>
       </div>
@@ -195,7 +195,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             0<small class="small-unit-10">%</small>
           </div>
         </div>
-        <input type="range" id="cloudSlider" min="0" max="100" value="0"
+        <input aria-label="Cloud Cover" type="range" id="cloudSlider" min="0" max="100" value="0"
           oninput="onCloud(this.value)">
         <div class="sl-mrk"><span>Clear sky</span><span>50%</span><span>Overcast</span></div>
       </div>

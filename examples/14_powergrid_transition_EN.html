@@ -323,12 +323,12 @@
 
   <div class="ctrl-group">
     <span class="ctrl-label">SPEED</span>
-    <input type="range" id="slider-speed" min="1" max="5" value="2" oninput="updateSpeed(this.value)">
+    <input aria-label="Simulation Speed" type="range" id="slider-speed" min="1" max="5" value="2" oninput="updateSpeed(this.value)">
     <span class="ctrl-val" id="val-speed">×2</span>
   </div>
   <div class="ctrl-group">
     <span class="ctrl-label">τ</span>
-    <input type="range" id="slider-tau" min="20" max="80" value="50" oninput="updateTau(this.value)">
+    <input aria-label="Inertial Margin (tau)" type="range" id="slider-tau" min="20" max="80" value="50" oninput="updateTau(this.value)">
     <span class="ctrl-val" id="val-tau-ctrl">0.50</span>
   </div>
 

@@ -194,7 +194,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             60<small class="small-unit-12"> ℃</small>
           </div>
         </div>
-        <input type="range" id="targetSlider" min="0" max="100" value="60"
+        <input aria-label="Target Value" type="range" id="targetSlider" min="0" max="100" value="60"
           oninput="onTarget(this.value)">
         <div class="sl-mrk">
           <span>0℃</span><span>Optimal Setpoint</span><span>100℃</span>
@@ -207,7 +207,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             ±0.0<small class="small-unit-10"> ℃</small>
           </div>
         </div>
-        <input type="range" id="distSlider" min="-30" max="30" value="0"
+        <input aria-label="Disturbance" type="range" id="distSlider" min="-30" max="30" value="0"
           oninput="onDist(this.value)">
         <div class="sl-mrk"><span>-30℃</span><span>0</span><span>+30℃</span></div>
       </div>

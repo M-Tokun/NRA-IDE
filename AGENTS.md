@@ -10,7 +10,7 @@ Reading them does not expand any permission scope.
 - `AGENTS.md` (this file)
 - `RULES_DETAIL.md`
 - `llms.md`
-- Agent-specific rule files: `CLAUDE.md`, `GEMINI.md`, `CLINE.md`,`kilo.md`
+- Agent-specific rule files: `CLAUDE.md`, `GEMINI.md`, `CLINE.md`
 
 These files exist solely to define safety constraints.
 The agent may read them whenever needed for safety gate compliance.

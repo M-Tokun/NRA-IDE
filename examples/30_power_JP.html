@@ -165,7 +165,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
           <span class="sl-lbl">VOLTAGE</span>
           <div class="sl-val sl-val-volt" id="vDisp">200<small class="small-unit-11"> V</small></div>
         </div>
-        <input type="range" id="vSlider" min="100" max="300" value="200" oninput="onV(this.value)">
+        <input aria-label="電圧" type="range" id="vSlider" min="100" max="300" value="200" oninput="onV(this.value)">
         <div class="sl-mrk"><span>100V</span><span>定格200V</span><span>300V</span></div>
       </div>
       <div class="sl-row">
@@ -173,7 +173,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
           <span class="sl-lbl">CURRENT</span>
           <div class="sl-val sl-val-amp" id="iDisp">10<small class="small-unit-11"> A</small></div>
         </div>
-        <input type="range" id="iSlider" min="0" max="40" value="10" oninput="onI(this.value)">
+        <input aria-label="電流" type="range" id="iSlider" min="0" max="40" value="10" oninput="onI(this.value)">
         <div class="sl-mrk"><span>0A</span><span>定格10A</span><span>40A</span></div>
       </div>
     </div>

@@ -54,17 +54,17 @@ input[type=range]{flex:1;}
 
   <div class="controls">
     <h3 class="panel-title">パラメータ調整</h3>
-    <div class="slider-row"><label>内圧 P</label><input type="range" id="p" min="60" max="180" value="120"></div>
-    <div class="slider-row"><label>温度 T</label><input type="range" id="t" min="30" max="42" value="37"></div>
-    <div class="slider-row"><label>血流 Flow</label><input type="range" id="f" min="10" max="120" value="80"></div>
-    <div class="slider-row"><label>接着性 Adh</label><input type="range" id="a" min="0.2" max="2.5" step="0.1" value="1.0"></div>
-    <div class="slider-row"><label>せん断 Shear</label><input type="range" id="s" min="0" max="30" value="12"></div>
-    <div class="slider-row"><label>壁張力 Tension</label><input type="range" id="w" min="40" max="180" value="90"></div>
+    <div class="slider-row"><label>内圧 P</label><input aria-label="内圧 P" type="range" id="p" min="60" max="180" value="120"></div>
+    <div class="slider-row"><label>温度 T</label><input aria-label="温度 T" type="range" id="t" min="30" max="42" value="37"></div>
+    <div class="slider-row"><label>血流 Flow</label><input aria-label="血流量" type="range" id="f" min="10" max="120" value="80"></div>
+    <div class="slider-row"><label>接着性 Adh</label><input aria-label="粘着性 Adh" type="range" id="a" min="0.2" max="2.5" step="0.1" value="1.0"></div>
+    <div class="slider-row"><label>せん断 Shear</label><input aria-label="剪断応力" type="range" id="s" min="0" max="30" value="12"></div>
+    <div class="slider-row"><label>壁張力 Tension</label><input aria-label="壁張力" type="range" id="w" min="40" max="180" value="90"></div>
 
     <h3 class="panel-title-mt">閾値調整（破線移動）</h3>
-    <div class="slider-row"><label>PI上限</label><input type="range" id="piThresh" min="2" max="8" step="0.1" value="5"><span id="piThreshVal">5.0</span></div>
-    <div class="slider-row"><label>MGF下限</label><input type="range" id="mgfThresh" min="5" max="50" step="1" value="20"><span id="mgfThreshVal">20</span></div>
-    <div class="slider-row"><label>R Fail閾値</label><input type="range" id="rFail" min="0.6" max="1.8" step="0.05" value="1.0"><span id="rFailVal">1.0</span></div>
+    <div class="slider-row"><label>PI上限</label><input aria-label="PI上限しきい値" type="range" id="piThresh" min="2" max="8" step="0.1" value="5"><span id="piThreshVal">5.0</span></div>
+    <div class="slider-row"><label>MGF下限</label><input aria-label="MGF下限しきい値" type="range" id="mgfThresh" min="5" max="50" step="1" value="20"><span id="mgfThreshVal">20</span></div>
+    <div class="slider-row"><label>R Fail閾値</label><input aria-label="R異常しきい値" type="range" id="rFail" min="0.6" max="1.8" step="0.05" value="1.0"><span id="rFailVal">1.0</span></div>
   </div>
 </div>
 

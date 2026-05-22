@@ -355,7 +355,7 @@
           </div>
           <div class="slider-row" style="margin-top:14px;">
             <div class="slider-head"><span>Danger-zone injection slider</span><span id="dangerInjectVal">0.00</span></div>
-            <input id="dangerInjectRange" type="range" min="0" max="1.4" value="0" step="0.01" />
+            <input aria-label="Danger Injection Rate" id="dangerInjectRange" type="range" min="0" max="1.4" value="0" step="0.01" />
           </div>
           <div class="small">This slider is for explanation only. It is an example injection that would not exist in an actual field implementation.</div>
         </div>
@@ -392,23 +392,23 @@
         <p>Adjust the upper and lower dampers, reconstruction strength, and danger-zone threshold. The structure is asymmetric: the lower side is sensitive, while the upper side is conservative.</p>
         <div class="slider-row">
           <div class="slider-head"><span>Upper damper</span><span id="upperVal">1.00</span></div>
-          <input id="upperRange" type="range" min="0.6" max="1.8" value="1.0" step="0.01" />
+          <input aria-label="Upper Bound" id="upperRange" type="range" min="0.6" max="1.8" value="1.0" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>Lower damper</span><span id="lowerVal">1.00</span></div>
-          <input id="lowerRange" type="range" min="0.4" max="1.4" value="1.0" step="0.01" />
+          <input aria-label="Lower Bound" id="lowerRange" type="range" min="0.4" max="1.4" value="1.0" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>Short-term reconstruction sensitivity</span><span id="reconVal">0.55</span></div>
-          <input id="reconRange" type="range" min="0.10" max="0.95" value="0.55" step="0.01" />
+          <input aria-label="Reconnection Margin" id="reconRange" type="range" min="0.10" max="0.95" value="0.55" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>Long-term degradation memory</span><span id="degVal">0.15</span></div>
-          <input id="degRange" type="range" min="0.01" max="0.50" value="0.15" step="0.01" />
+          <input aria-label="Degradation Margin" id="degRange" type="range" min="0.01" max="0.50" value="0.15" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>DANGER threshold</span><span id="dangerThresholdVal">0.92</span></div>
-          <input id="dangerThresholdRange" type="range" min="0.55" max="1.15" value="0.92" step="0.01" />
+          <input aria-label="Danger Threshold" id="dangerThresholdRange" type="range" min="0.55" max="1.15" value="0.92" step="0.01" />
         </div>
       </div>
     </section>

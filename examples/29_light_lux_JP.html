@@ -184,7 +184,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             45<small class="small-unit-12">°</small>
           </div>
         </div>
-        <input type="range" id="elevSlider" min="0" max="90" value="45"
+        <input aria-label="高度" type="range" id="elevSlider" min="0" max="90" value="45"
           oninput="onElev(this.value)">
         <div class="sl-mrk"><span>水平0°</span><span>快晴時最大</span><span>天頂90°</span></div>
       </div>
@@ -195,7 +195,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
             0<small class="small-unit-10">%</small>
           </div>
         </div>
-        <input type="range" id="cloudSlider" min="0" max="100" value="0"
+        <input aria-label="雲量" type="range" id="cloudSlider" min="0" max="100" value="0"
           oninput="onCloud(this.value)">
         <div class="sl-mrk"><span>快晴</span><span>50%</span><span>厚曇り</span></div>
       </div>
