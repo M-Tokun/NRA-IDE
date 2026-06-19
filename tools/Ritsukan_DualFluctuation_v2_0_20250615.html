@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<!-- FILE: Ritsukan_DualFluctuation_v2_0 2025-06-15 -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>律環-螺旋 二重揺らぎ構造 v2.0</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #040810; overflow: hidden; font-family: 'Courier New', monospace; color: #aab; }
+canvas { display: block; }
+#overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+
+#panel-left {
+    position: absolute; top: 18px; left: 18px;
+    background: rgba(4, 12, 28, 0.88);
+    border-left: 3px solid #00c8ff;
+    border-radius: 0 4px 4px 0;
+    padding: 14px 16px;
+    max-width: 260px;
+    font-size: 11px; line-height: 1.6;
+}
+#panel-left h1 { font-size: 12px; color: #00c8ff; letter-spacing: 1px; margin-bottom: 10px; }
+.leg { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sep { border-top: 1px solid #1a2540; margin: 8px 0; }
+.lbl { font-size: 10px; color: #556; margin-bottom: 4px; letter-spacing: 0.5px; }
+
+#panel-right {
+    position: absolute; top: 18px; right: 18px;
+    background: rgba(4, 12, 28, 0.88);
+    border-left: 3px solid #44ff88;
+    border-radius: 0 4px 4px 0;
+    padding: 14px 16px; width: 210px; font-size: 11px;
+}
+.row { display: flex; justify-content: space-between; align-items: center; margin: 4px 0; }
+.rl { color: #556; }
+.rv { color: #ccd; font-weight: bold; }
+.ok { color: #44ff88; }
+.warn { color: #ffcc00; }
+.danger { color: #ff4444; }
+
+#panel-bottom {
+    position: absolute; bottom: 18px; left: 18px;
+    background: rgba(4, 12, 28, 0.88);
+    border-left: 3px solid #ffaa00;
+    border-radius: 0 4px 4px 0;
+    padding: 12px 16px; font-size: 11px; width: 340px;
+}
+.pb-title { color: #556; font-size: 10px; margin-bottom: 6px; letter-spacing: 0.5px; }
+.bars { display: flex; flex-direction: column; gap: 5px; }
+.bar-row { display: flex; align-items: center; gap: 8px; }
+.bar-label { width: 60px; color: #778; font-size: 10px; }
+.bar-track { flex: 1; height: 8px; background: #0d1a2e; border-radius: 4px; overflow: hidden; position: relative; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+.bar-val { width: 36px; text-align: right; font-size: 10px; color: #99a; }
+.thr-mark { position: absolute; top: 0; bottom: 0; width: 1px; background: #aa55ff; }
+
+#topview {
+    position: absolute; bottom: 18px; right: 18px;
+    background: rgba(4, 12, 28, 0.88);
+    border-left: 3px solid #aa55ff;
+    border-radius: 0 4px 4px 0;
+    padding: 10px;
+    font-size: 10px; color: #556;
+}
+#topview canvas { display: block; }
+#topview p { margin-top: 4px; text-align: center; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+
+<canvas id="main"></canvas>
+
+<div id="overlay">
+    <div id="panel-left">
+        <h1>律環-螺旋 二重揺らぎ v2.0</h1>
+        <div class="lbl">構造要素</div>
+        <div class="leg"><div class="dot" style="background:#0088ff;box-shadow:0 0 4px #0088ff"></div>螺旋本線（律環コンテキスト）</div>
+        <div class="leg"><div class="dot" style="background:#ff3333;box-shadow:0 0 4px #ff3333"></div>Rod（固定指標 / 入出力ポート）</div>
+        <div class="sep"></div>
+        <div class="lbl">二重揺らぎ構造</div>
+        <div class="leg"><div class="dot" style="background:#00c8ff;box-shadow:0 0 4px #00c8ff"></div>δ_inner（内包層 / 呼吸域）</div>
+        <div class="leg"><div class="dot" style="background:#ffaa00;box-shadow:0 0 4px #ffaa00"></div>δ_outer（外包層 / 揺動域）</div>
+        <div class="leg"><div class="dot" style="background:#aa55ff;box-shadow:0 0 4px #aa55ff"></div>分岐点（臨界領域）</div>
+        <div class="sep"></div>
+        <div class="lbl">Working Hypothesis</div>
+        <div style="color:#445;font-size:10px;line-height:1.5">
+            内包層：高周波・小振幅（常時呼吸）<br>
+            外包層：低周波・大振幅（システム応答）<br>
+            <span style="color:#ff6666">Rod = x=+R, z=0 完全固定</span><br>
+            <span style="color:#44ff88">接点 = 唯一の入出力ポート</span>
+        </div>
+    </div>
+
+    <div id="panel-right">
+        <div class="row"><span class="rl">エントロピー σ:</span><span class="rv ok" id="v-sigma">0.000</span></div>
+        <div class="row"><span class="rl">散逸経路 J:</span><span class="rv" id="v-j">0.000</span></div>
+        <div class="row"><span class="rl">滞留 (σ-J):</span><span class="rv" id="v-cong">0.000</span></div>
+        <div class="row"><span class="rl">位相 φ:</span><span class="rv" id="v-phase">0.00</span></div>
+        <div class="row"><span class="rl">δ_inner:</span><span class="rv" id="v-di">0.00</span></div>
+        <div class="row"><span class="rl">δ_outer:</span><span class="rv" id="v-do">0.00</span></div>
+        <div class="row"><span class="rl">状態:</span><span class="rv ok" id="v-state">非平衡定常</span></div>
+        <div class="row"><span class="rl">ω > 0:</span><span class="rv ok">✓</span></div>
+    </div>
+
+    <div id="panel-bottom">
+        <div class="pb-title">揺らぎ比率 / 許容域</div>
+        <div class="bars">
+            <div class="bar-row">
+                <div class="bar-label">δ_inner</div>
+                <div class="bar-track">
+                    <div class="bar-fill" id="bar-inner" style="background:linear-gradient(90deg,#005588,#00c8ff)"></div>
+                </div>
+                <div class="bar-val" id="pct-inner">0%</div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">δ_outer</div>
+                <div class="bar-track">
+                    <div class="bar-fill" id="bar-outer" style="background:linear-gradient(90deg,#664400,#ffaa00)"></div>
+                    <div class="thr-mark" style="left:70%"></div>
+                </div>
+                <div class="bar-val" id="pct-outer">0%</div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">合成比率</div>
+                <div class="bar-track">
+                    <div class="bar-fill" id="bar-total"></div>
+                    <div class="thr-mark" style="left:70%"></div>
+                </div>
+                <div class="bar-val" id="pct-total">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="topview">
+        <canvas id="tv" width="130" height="130"></canvas>
+        <p>断面図 (top view)</p>
+    </div>
+</div>
+
+<script>
+/* === 律環-螺旋 二重揺らぎ構造可視化エンジン v2.0 ===
+ * 改良点:
+ * - δ_inner (内包層) と δ_outer (外包層) の二重揺らぎ構造を分離描画
+ * - パーティクル流（螺旋方向への流れを可視化）
+ * - Rod接点フラッシュ（入出力イベントの視覚化）
+ * - 上面断面ビュー（トポロジー把握用）
+ * - 臨界状態の段階的色変化
+ */
+
+const mc = document.getElementById('main');
+const ctx = mc.getContext('2d');
+const tv = document.getElementById('tv');
+const tvc = tv.getContext('2d');
+
+let W, H;
+
+const C = {
+    radius: 115,
+    turns: 4.5,
+    density: 90,
+    heightTotal: 580,
+    camDist: 950,
+    rotSpeed: 0.007,
+
+    // 二重揺らぎパラメータ
+    innerAmpBase: 3.5,   // δ_inner 通常振幅（小）
+    innerAmpMax: 6.0,    // δ_inner 臨界振幅
+    innerFreq: 0.045,    // 高周波
+    innerTimeScale: 0.25,
+
+    outerAmpBase: 0.8,   // δ_outer 通常振幅（小）
+    outerAmpMax: 14.0,   // δ_outer 臨界振幅（大）
+    outerFreq: 0.018,    // 低周波
+    outerTimeScale: 0.06,
+
+    thickness: 22,       // 許容域厚み
+    critThreshold: 0.7,
+    critProb: 0.0015,
+    critDuration: 280,
+
+    baseEntropy: 0.5,
+    entropyVar: 0.14,
+    entropyScale: 0.04,
+};
+
+let rot = 0, t = 0;
+let spiralPts = [], rodPts = [];
+
+let st = {
+    sigma: 0, J: 0, cong: 0, phase: 0,
+    innerAmp: C.innerAmpBase,
+    outerAmp: C.outerAmpBase,
+    isCritical: false,
+    critTimer: 0,
+    innerRatio: 0,
+    outerRatio: 0,
+    totalRatio: 0,
+    contactFlash: 0
+};
+
+// パーティクル
+const PARTICLE_COUNT = 60;
+let particles = [];
+
+function initParticles() {
+    particles = [];
+    const total = C.turns * C.density;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+            tParam: Math.random() * total,
+            speed: 0.3 + Math.random() * 0.5,
+            size: 1.5 + Math.random() * 2,
+            alpha: 0.4 + Math.random() * 0.5
+        });
+    }
+}
+
+function initGeom() {
+    spiralPts = [];
+    rodPts = [];
+    const total = C.turns * C.density;
+    const yOff = C.heightTotal / 2;
+
+    for (let i = 0; i <= total; i++) {
+        const angle = (i / C.density) * 2 * Math.PI;
+        const y = -(i / total * C.heightTotal - yOff);
+        spiralPts.push({ x: Math.cos(angle) * C.radius, y, z: Math.sin(angle) * C.radius, t: angle, i });
+    }
+
+    const step = 14;
+    for (let i = 0; i <= C.heightTotal; i += step) {
+        rodPts.push({ x: C.radius, y: -(i - C.heightTotal/2), z: 0 });
+    }
+}
+
+function fluctInner(tAngle, globalT) {
+    const s = globalT * C.innerTimeScale;
+    const f1 = Math.sin(tAngle * C.innerFreq + s) * st.innerAmp;
+    const f2 = Math.cos(tAngle * C.innerFreq * 1.7 - s * 0.9) * st.innerAmp * 0.4;
+    const f3 = Math.sin(tAngle * C.innerFreq * 3.1 + s * 2.1) * st.innerAmp * 0.15;
+    return f1 + f2 + f3;
+}
+
+function fluctOuter(tAngle, globalT) {
+    const s = globalT * C.outerTimeScale;
+    const f1 = Math.sin(tAngle * C.outerFreq + s) * st.outerAmp;
+    const f2 = Math.cos(tAngle * C.outerFreq * 0.4 - s * 0.6) * st.outerAmp * 0.55;
+    return f1 + f2;
+}
+
+function updateDynamics() {
+    if (st.isCritical) {
+        st.critTimer--;
+        if (st.critTimer <= 0) st.isCritical = false;
+    } else {
+        if (Math.random() < C.critProb) { st.isCritical = true; st.critTimer = C.critDuration; }
+    }
+
+    const tgtInner = st.isCritical ? C.innerAmpMax : C.innerAmpBase;
+    const tgtOuter = st.isCritical ? C.outerAmpMax : C.outerAmpBase;
+    st.innerAmp += (tgtInner - st.innerAmp) * 0.015;
+    st.outerAmp += (tgtOuter - st.outerAmp) * 0.008;
+
+    const s = t * C.entropyScale;
+    const cb = st.isCritical ? 0.18 : 0;
+    st.sigma = C.baseEntropy + Math.sin(s) * C.entropyVar + cb;
+    const dl = st.isCritical ? 0.5 : 0.88;
+    st.J = C.baseEntropy + Math.sin(s - 0.45) * C.entropyVar * dl;
+    st.cong = st.sigma - st.J;
+    st.phase = (t * C.rotSpeed * 10) % (2 * Math.PI);
+
+    st.innerRatio = st.innerAmp / (C.thickness * 0.4);
+    st.outerRatio = st.outerAmp / (C.thickness * 1.2);
+    st.totalRatio = Math.max(st.innerRatio, st.outerRatio);
+
+    if (st.contactFlash > 0) st.contactFlash -= 0.05;
+}
+
+function project(x, y, z, doRot) {
+    let rx = x, rz = z;
+    if (doRot) {
+        const c = Math.cos(rot), s = Math.sin(rot);
+        rx = x * c - z * s;
+        rz = x * s + z * c;
+    }
+    const sc = C.camDist / (C.camDist + rz + 400);
+    return { px: rx * sc + W/2, py: y * sc + H/2, sc, rz };
+}
+
+function buildSpiral() {
+    return spiralPts.map(p => {
+        const fi = fluctInner(p.t, t);
+        const fo = fluctOuter(p.t, t);
+        const ri = C.radius + fi;
+        const ro = C.radius + fi + fo;
+        return {
+            ...p,
+            xi: Math.cos(p.t) * ri,  zi: Math.sin(p.t) * ri,
+            xo: Math.cos(p.t) * ro,  zo: Math.sin(p.t) * ro,
+            ri, ro, fi, fo
+        };
+    });
+}
+
+function stateColor(alpha) {
+    const r = st.totalRatio;
+    if (r < 0.4) return `rgba(0,200,136,${alpha})`;
+    if (r < C.critThreshold) return `rgba(255,180,40,${alpha})`;
+    return `rgba(255,60,60,${alpha})`;
+}
+
+function drawTopView(spiral) {
+    tvc.clearRect(0, 0, 130, 130);
+    const cx = 65, cy = 65, sc = 40;
+
+    tvc.strokeStyle = 'rgba(255,255,255,0.04)';
+    tvc.lineWidth = 1;
+    tvc.beginPath(); tvc.arc(cx, cy, sc * C.radius/C.radius, 0, Math.PI*2); tvc.stroke();
+
+    const r = st.totalRatio;
+    const outerCol = r < 0.4 ? 'rgba(255,170,0,0.25)' : r < C.critThreshold ? 'rgba(255,170,0,0.5)' : 'rgba(255,60,60,0.6)';
+
+    const outerSample = st.outerAmp / C.radius;
+    tvc.strokeStyle = outerCol;
+    tvc.lineWidth = 12;
+    tvc.beginPath(); tvc.arc(cx, cy, sc * (1 + outerSample), 0, Math.PI*2); tvc.stroke();
+
+    const innerSample = st.innerAmp / C.radius;
+    tvc.strokeStyle = 'rgba(0,200,255,0.35)';
+    tvc.lineWidth = 5;
+    tvc.beginPath(); tvc.arc(cx, cy, sc, 0, Math.PI*2); tvc.stroke();
+    tvc.strokeStyle = 'rgba(0,160,220,0.5)';
+    tvc.lineWidth = 2;
+    tvc.beginPath(); tvc.arc(cx, cy, sc * (1 + innerSample*0.3), 0, Math.PI*2); tvc.stroke();
+
+    tvc.strokeStyle = 'rgba(0,136,255,0.7)';
+    tvc.lineWidth = 1.5;
+    const spiralAngle = rot;
+    tvc.beginPath();
+    for (let a = 0; a < Math.PI * 2 * C.turns; a += 0.1) {
+        const rr = sc * (1 + fluctInner(a, t)/C.radius * 0.3);
+        const px2 = cx + Math.cos(a + spiralAngle) * rr;
+        const py2 = cy + Math.sin(a + spiralAngle) * rr;
+        if (a === 0) tvc.moveTo(px2, py2); else tvc.lineTo(px2, py2);
+    }
+    tvc.stroke();
+
+    tvc.strokeStyle = 'rgba(255,50,50,0.9)';
+    tvc.lineWidth = 2.5;
+    tvc.beginPath();
+    tvc.moveTo(cx + sc - 4, cy - 4);
+    tvc.lineTo(cx + sc + 4, cy + 4);
+    tvc.stroke();
+
+    const flash = st.contactFlash;
+    if (flash > 0) {
+        tvc.fillStyle = `rgba(255,200,100,${flash * 0.8})`;
+        tvc.beginPath(); tvc.arc(cx + sc, cy, 5 * flash, 0, Math.PI*2); tvc.fill();
+    }
+}
+
+function draw() {
+    ctx.fillStyle = 'rgba(4, 8, 16, 0.12)';
+    ctx.fillRect(0, 0, W, H);
+
+    const spiral = buildSpiral();
+
+    const projMain = spiral.map(p => {
+        const pm = project(p.xi, p.y, p.zi, true);
+        return { ...p, ...pm };
+    });
+    const projOuter = spiral.map(p => {
+        const po = project(p.xo, p.y, p.zo, true);
+        return { ...p, px: po.px, py: po.py, sc: po.sc, rz: po.rz };
+    });
+
+    const projRod = rodPts.map(p => {
+        const pr = project(p.x, p.y, p.z, false);
+        return { ...p, ...pr };
+    });
+
+    // === 外包層チューブ (δ_outer) ===
+    const outerAlpha = 0.05 + st.outerRatio * 0.12;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(255,160,0,${outerAlpha})`;
+    ctx.lineWidth = C.thickness * 2.4;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    projOuter.forEach((p, i) => { i===0 ? ctx.moveTo(p.px, p.py) : ctx.lineTo(p.px, p.py); });
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(255,200,80,${outerAlpha * 0.6})`;
+    ctx.lineWidth = C.thickness * 1.2;
+    projOuter.forEach((p, i) => { i===0 ? ctx.moveTo(p.px, p.py) : ctx.lineTo(p.px, p.py); });
+    ctx.stroke();
+
+    // === 内包層チューブ (δ_inner) ===
+    const innerAlpha = 0.08 + st.innerRatio * 0.15;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(0,200,255,${innerAlpha})`;
+    ctx.lineWidth = C.thickness * 1.4;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    projMain.forEach((p, i) => { i===0 ? ctx.moveTo(p.px, p.py) : ctx.lineTo(p.px, p.py); });
+    ctx.stroke();
+
+    // === 螺旋本線 ===
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0,136,255,0.88)';
+    ctx.lineWidth = 1.8;
+    projMain.forEach((p, i) => { i===0 ? ctx.moveTo(p.px, p.py) : ctx.lineTo(p.px, p.py); });
+    ctx.stroke();
+
+    // === Rod（固定直線）===
+    if (projRod.length > 1) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,50,50,0.95)';
+        ctx.lineWidth = 3.5;
+        ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(255,50,50,0.5)';
+        projRod.forEach((p, i) => { i===0 ? ctx.moveTo(p.px, p.py) : ctx.lineTo(p.px, p.py); });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    // === 接点フラッシュ ===
+    const total = C.turns * C.density;
+    let minDist = Infinity, contactPt = null;
+    projMain.forEach((p, i) => {
+        const ang = (spiralPts[i].t + rot) % (2 * Math.PI);
+        const norm = ang < 0 ? ang + 2*Math.PI : ang;
+        if (norm < 0.15 || norm > 2*Math.PI - 0.15) {
+            if (projRod.length > 0) {
+                const rpy = projRod[0].py + (projRod[projRod.length-1].py - projRod[0].py) * (i/total);
+                const d = Math.abs(p.py - rpy);
+                if (d < minDist) { minDist = d; contactPt = { px: p.px, py: p.py }; }
+            }
+        }
+    });
+
+    if (contactPt && minDist < 20) {
+        st.contactFlash = Math.max(st.contactFlash, 0.8);
+        const fl = st.contactFlash;
+        ctx.beginPath();
+        ctx.arc(contactPt.px, contactPt.py, 6 + fl * 8, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,220,100,${fl * 0.9})`;
+        ctx.fill();
+    }
+
+    // === パーティクル ===
+    const pTotal = C.turns * C.density;
+    particles.forEach(pk => {
+        pk.tParam = (pk.tParam + pk.speed) % pTotal;
+        const idx = Math.floor(pk.tParam);
+        if (idx >= projMain.length) return;
+        const p = projMain[idx];
+        const c = stateColor(pk.alpha * 0.85);
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, pk.size * p.sc, 0, Math.PI*2);
+        ctx.fillStyle = c;
+        ctx.fill();
+    });
+
+    // === 臨界点マーカー ===
+    if (st.isCritical) {
+        const pulse = (Math.sin(t * 0.15) + 1) / 2;
+        projMain.forEach((p, i) => {
+            if (i % 30 !== 0) return;
+            ctx.beginPath();
+            ctx.arc(p.px, p.py, (3 + pulse * 3) * p.sc, 0, Math.PI*2);
+            ctx.fillStyle = `rgba(170,85,255,${0.3 + pulse * 0.5})`;
+            ctx.fill();
+        });
+    }
+
+    drawTopView(spiral);
+}
+
+function updateUI() {
+    document.getElementById('v-sigma').textContent = st.sigma.toFixed(3);
+    document.getElementById('v-j').textContent = st.J.toFixed(3);
+    document.getElementById('v-cong').textContent = st.cong.toFixed(3);
+    document.getElementById('v-phase').textContent = st.phase.toFixed(2);
+    document.getElementById('v-di').textContent = st.innerAmp.toFixed(2);
+    document.getElementById('v-do').textContent = st.outerAmp.toFixed(2);
+
+    const el = document.getElementById('v-state');
+    const r = st.totalRatio;
+    if (r < 0.4) { el.textContent = '非平衡定常'; el.className = 'rv ok'; }
+    else if (r < C.critThreshold) { el.textContent = '揺動状態'; el.className = 'rv warn'; }
+    else { el.textContent = '臨界接近'; el.className = 'rv danger'; }
+
+    const setBar = (fillId, pctId, ratio, col1, col2) => {
+        const pct = Math.min(ratio * 100, 100);
+        document.getElementById(fillId).style.width = pct.toFixed(1) + '%';
+        document.getElementById(fillId).style.background = `linear-gradient(90deg,${col1},${col2})`;
+        document.getElementById(pctId).textContent = pct.toFixed(0) + '%';
+    };
+
+    setBar('bar-inner', 'pct-inner', st.innerRatio,
+        '#004466', st.innerRatio < 0.7 ? '#00c8ff' : '#ff4444');
+    setBar('bar-outer', 'pct-outer', st.outerRatio,
+        '#442200', st.outerRatio < 0.7 ? '#ffaa00' : '#ff4444');
+    setBar('bar-total', 'pct-total', st.totalRatio,
+        '#222', r < 0.4 ? '#44ff88' : r < C.critThreshold ? '#ffcc00' : '#ff4444');
+}
+
+function loop() {
+    t += 0.016;
+    rot += C.rotSpeed;
+    updateDynamics();
+    draw();
+    updateUI();
+    requestAnimationFrame(loop);
+}
+
+function resize() {
+    W = mc.width = window.innerWidth;
+    H = mc.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resize);
+resize();
+initGeom();
+initParticles();
+loop();
+</script>
+</body>
+</html>

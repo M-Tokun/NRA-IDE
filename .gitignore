@@ -63,3 +63,6 @@ env/
 *.bak
 *.swp
 *~
+
+# Local Codex skills
+/skills/

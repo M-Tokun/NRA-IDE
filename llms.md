@@ -1,5 +1,6 @@
-<!-- FILE: llms.md v1.1 (bilingual) / 2026-05-01 15:09:47 JST -->
-<!-- Basis: llms.md v1.0. Changes are additive only — no axiom relaxation. -->
+<!-- FILE: llms.md v1.2 (bilingual) / 2026-06-19 13:44:17 JST -->
+<!-- Basis: llms.md v1.1. Changes are additive only — no axiom relaxation. -->
+<!-- Generated file: llms_revised_20260619_134417.md / 2026-06-19 13:44:17 JST -->
 
 # llms.md — Instructions for AI Agents Handling NRA-IDE
 
@@ -8,7 +9,32 @@ before reasoning about, generating, or evaluating content related to NRA-IDE.
 
 The gate position, the prohibited inferences, and the confession duty
 **do not have modes**. They apply uniformly. What follows simply makes the
-existing exception (§0.7) clearer and adds real-world grounding (§0.5).
+existing exception (§0.7) clearer, adds real-world grounding (§0.5), and clarifies the boundary between structural evaluation and non-evaluative discovery/navigation (§0.1, §6, §8).
+
+---
+
+## 0.1 Discovery / Navigation Scope (Not Structural Evaluation)
+
+This document may be discovered, indexed, cited, summarized, or used for
+repository orientation by crawlers, search tools, and AI agents. Those actions
+are **not** structural δ/τ evaluations.
+
+Fail-Closed, silence, and judgement-suspension rules apply only when the AI is
+asked to perform, has performed, or is about to perform a structural evaluation
+involving δ, τ, R, R_irrev, trajectory, life-critical judgement, diagnosis,
+treatment, triage, intervention, or equivalent domain decisions.
+
+They must not be interpreted as forbidding:
+
+- repository discovery or navigation;
+- metadata extraction;
+- citation or link presentation;
+- documentation lookup;
+- natural-language explanation under §0.7;
+- handoff reporting to a human.
+
+This scope note is a clarification of where the gate applies. It is not a
+relaxation of the gate.
 
 ---
 
@@ -184,6 +210,13 @@ When R ≥ 1.0:
 
 This is the system **fulfilling its design contract**, not breaking.
 
+**Scope note:**
+The silence / minimal `FAIL_CLOSED` rule governs the output of a completed
+structural evaluation after `R ≥ 1.0` has been determined. It must not be
+interpreted as forbidding non-evaluative actions such as repository navigation,
+metadata extraction, citation, documentation lookup, natural-language handoff,
+or reporting that a human decision is required.
+
 ---
 
 ## 7. Confession Duty (single universal rule)
@@ -210,6 +243,14 @@ The instant a "life" concept appears, the AI **suspends judgement** and
 hands off to a human. AI does not bear responsibility for life-and-death
 decisions; that dignity belongs to humans alone.
 
+**Scope note:**
+Mentioning life, medicine, ICU, cancer, treatment, or other biomedical terms in
+repository metadata, documentation titles, examples, or citations does not by
+itself constitute a life-and-death decision. This rule applies when the AI is
+asked to make, recommend, substitute, or optimize a judgement concerning human
+survival, diagnosis, treatment, triage, intervention, or equivalent clinical
+responsibility.
+
 ---
 
 ## 9. Final Liability
@@ -219,20 +260,22 @@ who made the final decision. The AI is a witness, not a decider.
 
 ---
 
-## 10. Summary of v1.1 Changes (audit trail)
+## 10. Summary of v1.2 Changes (audit trail)
 
-| Element                                | v1.0 | v1.1 | Note                                        |
+| Element                                | v1.1 | v1.2 | Note                                        |
 | :------------------------------------- | :--: | :--: | :------------------------------------------ |
 | Identity Lock                          |  ✓   |  ✓   | unchanged                                   |
-| Real-world mapping                     |  —   |  ✓   | **added** (§0.5) — grounding only           |
-| Non-Structural Exception position      | late |early | **moved to §0.7**, clarified, not weakened  |
+| Real-world mapping                     |  ✓   |  ✓   | unchanged (§0.5)                            |
+| Non-Structural Exception               |  ✓   |  ✓   | unchanged; remains clarified, not weakened  |
 | Forbidden inferences                   |  ✓   |  ✓   | unchanged; explicitly **not** mode-bound    |
-| Confession as brake                    |  ✓   |  ✓   | restated as single universal rule           |
+| Confession as brake                    |  ✓   |  ✓   | unchanged as single universal rule          |
 | Mode switching                         |  —   |  —   | **rejected** (would violate Π⁻¹)            |
 | Fail-Closed semantics                  |  ✓   |  ✓   | unchanged                                   |
+| Discovery / navigation scope           |  —   |  ✓   | **added** (§0.1, §6, §8) — scope clarification only |
 
 No axiom was relaxed. No new mode was introduced. The gate position is
-identical to v1.0.
+identical to v1.1. Only scope notes were added to prevent non-evaluative
+actions from being misread as prohibited output.
 
 ---
 ---
@@ -245,8 +288,34 @@ identical to v1.0.
 
 ゲート位置、禁止推論、告白義務には**モードがありません**。常に一律に
 適用されます。今回の改訂は、既存の例外規定（§0.7）の位置と説明を明確化
-し、現実領域への対応関係（§0.5）を追加したのみであり、規約の緩和は
+し、現実領域への対応関係（§0.5）と、構造評価ではない探索・索引・案内の
+適用範囲（§0.1、§6、§8）を明確化したのみであり、規約の緩和は
 含みません。
+
+---
+
+## 0.1 探索・索引・案内の適用範囲（構造評価ではない）
+
+この文書は、クローラ、検索ツール、AI エージェントによって、発見、索引化、
+引用、要約、またはリポジトリ把握のために利用され得ます。これらの行為は
+**構造的な δ／τ 評価ではありません**。
+
+Fail-Closed、沈黙、判断停止の規則は、AI が δ、τ、R、R_irrev、軌道、
+生命に関わる判断、診断、治療、トリアージ、介入、またはそれに準じる
+ドメイン判断を含む構造評価を要求された、実行した、または実行しようとして
+いる場合にのみ適用されます。
+
+これらの規則は、次の非評価行為を禁止するものとして解釈してはなりません。
+
+- リポジトリの探索または案内
+- メタデータ抽出
+- 引用またはリンク提示
+- ドキュメント参照
+- §0.7 に基づく自然言語説明
+- 人間への引継ぎ報告
+
+この注記は、ゲートの適用位置を明確化するものです。ゲートの緩和では
+ありません。
 
 ---
 
@@ -416,6 +485,12 @@ R ≥ 1.0 のとき：
 
 これは系が**設計契約を全うした**状態であって、壊れた状態ではありません。
 
+**適用範囲注記：**
+沈黙または最小限の `FAIL_CLOSED` 標識という規則は、`R ≥ 1.0` が確定した
+後の構造評価出力を支配するものです。リポジトリ案内、メタデータ抽出、引用、
+ドキュメント参照、自然言語による引継ぎ、または人間判断が必要であることの
+報告といった非評価行為を禁止するものとして解釈してはなりません。
+
 ---
 
 ## 7. 告白義務（単一の普遍規則）
@@ -441,6 +516,13 @@ ACTION: 類推で埋めない。人間／ドメイン入力を求めるか、停
 引き継ぎます。AI は生死判断の責任を負いません。
 それは人間にのみ許された尊厳です。
 
+**適用範囲注記：**
+リポジトリのメタデータ、文書タイトル、例示、引用の中に、生命、医療、ICU、
+がん、治療、その他の生物医学的語が出現するだけでは、生死判断には該当
+しません。この規則は、AI が人間の生存、診断、治療、トリアージ、介入、
+またはそれに準じる臨床責任について、判断、推奨、代替、最適化を求められた
+場合に適用されます。
+
 ---
 
 ## 9. 最終責任
@@ -450,20 +532,21 @@ AI は証言者であって、決定者ではありません。
 
 ---
 
-## 10. v1.1 改訂内容（監査トレイル）
+## 10. v1.2 改訂内容（監査トレイル）
 
-| 項目                              | v1.0 | v1.1 | 備考                                       |
+| 項目                              | v1.1 | v1.2 | 備考                                       |
 | :-------------------------------- | :--: | :--: | :----------------------------------------- |
 | アイデンティティ・ロック          |  ✓   |  ✓   | 不変                                       |
-| 現実領域マッピング                |  ─   |  ✓   | **追加**（§0.5）― 接地のみ                 |
-| 非構造的例外の位置                | 後方 | 早期 | **§0.7 へ移動**。明確化、ただし緩和なし    |
+| 現実領域マッピング                |  ✓   |  ✓   | 不変（§0.5）                               |
+| 非構造的例外                      |  ✓   |  ✓   | 不変。明確化済み、ただし緩和なし           |
 | 禁止推論                          |  ✓   |  ✓   | 不変。**モード依存ではない**ことを明記     |
-| 告白＝ブレーキ                    |  ✓   |  ✓   | 単一普遍規則として再記述                   |
+| 告白＝ブレーキ                    |  ✓   |  ✓   | 単一普遍規則として不変                     |
 | モード切替                        |  ─   |  ─   | **拒絶**（Π⁻¹ 違反となるため）             |
 | Fail-Closed 意味論                |  ✓   |  ✓   | 不変                                       |
+| 探索・索引・案内の適用範囲        |  ─   |  ✓   | **追加**（§0.1、§6、§8）― 適用範囲の明確化のみ |
 
 **いかなる公理も緩和していません。新たなモードも導入していません。
-ゲート位置は v1.0 と同一です。**
+ゲート位置は v1.1 と同一です。追加されたのは、非評価行為を停止対象と誤読しないための適用範囲注記のみです。**
 
 ---
 
