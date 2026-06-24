@@ -56,6 +56,8 @@ R_{em} = \frac{\delta_{SNR}}{\tau_{SNR}}
 
 | \(\tau_{SNR}\) | Minimum SNR threshold required for reliable measurement |
 
+> **Note:** $\delta_{SNR}$ and $\tau_{SNR}$ are domain-specific instantiations of $R = \delta/\tau$ applied to SNR degradation monitoring. $R_{em} \neq \text{SNR}$. R is a structural ratio (deviation relative to tolerance boundary) and is unrelated to SNR (signal-to-noise ratio) as an information-theoretic concept.
+
 ### Boundary Condition
 
 \[
