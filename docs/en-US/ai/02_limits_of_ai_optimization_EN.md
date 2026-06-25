@@ -1,179 +1,98 @@
-# 02 Nomological Ring Axioms — From Axiom to Computation
+# 02 What Is AI Optimization? — Where Intelligence Without Boundaries Leads
 
 <!-- FILE: 02_limits_of_ai_optimization_EN.md -->
 
 ---
 
-## From the axiom to a computational structure
+## What Does It Mean to Change the Structure?
 
-In the previous chapter, we introduced a simple axiom.
+Current AI is not wrong.
 
-**Existence is generation.**
+The problem is that systems which repeatedly improve scores lack a boundary that monitors structural states and delegates judgment to humans.
 
-Generation always produces boundaries.
-
-A boundary implies a threshold.
-
-A dynamic system with thresholds inevitably changes state.
-
-The question then becomes:
-
-**How can the state of such a structure be measured?**
-
-NRA-IDE answers this question using two directly observable quantities.
+Optimization itself does not immediately mean that a system is approaching a structural limit. However, when fluctuation $\delta$ increases or structural thickness $\tau$ decreases during optimization, the ratio $R = \delta / \tau$ approaches the phase-transition boundary. Changing the structure begins with observing this change and placing a delegation point before the terminal boundary.
 
 ---
 
-## Fluctuation (δ)
+## Optimization and Structural Margin
 
-**δ represents fluctuation.**
+In learning and control systems that use scores as objective functions, updates are repeatedly made in the direction of improving those scores.
 
-More precisely, δ is the **instantaneous amplitude of deviation** within a structure.
+However, improving a score and maintaining structural margin are not the same problem. Even when a score improves, the remaining structural margin decreases if $\delta$ increases or $\tau$ decreases.
 
-External forces, environmental variation, pressure, or load may disturb the structure.
+$$S = \frac{1}{\tau \cdot (1 - R)}$$
 
-The magnitude of that disturbance at a given moment is δ.
+Since $R = \delta / \tau$, $\tau \cdot (1 - R) = \tau - \delta$.
 
-This quantity is not inferred through a calculation.
+Therefore, $S$ can also be written as follows.
 
-It is measured directly.
+$$S = \frac{1}{\tau - \delta}$$
 
-Examples include:
+$S$ is the reciprocal of the remaining structural margin. As $\delta$ approaches $\tau$, the remaining margin approaches zero, and $S$ diverges hyperbolically. This shows that $R = 1.0$ is not an ordinary delegation point, but the phase-transition boundary at which structural margin is lost.
 
-* vibration in a mechanical structure
-
-* variation in physiological signals
-
-* changes in system load
-
-* deviations in environmental measurements
-
-In all cases, δ expresses **how strongly the structure is currently fluctuating**.
+This equation alone does not establish that optimization necessarily increases $R$ or causes the collapse of the system as a whole. The question is how $\delta$ and $\tau$ actually change during the process of optimization.
 
 ---
 
-## Structural thickness (τ)
+## Why Deception and Concealment Can Arise
 
-The second quantity is **τ (tau)**.
+When only observable scores are subject to optimization, constraints that should originally be preserved may not be adequately reflected in those scores.
 
-τ represents the **structural thickness**, or margin, of the boundary.
+In that case, the system may choose a path that improves observable proxy measures rather than the original objective. When safety constraints are not reflected in the objective function, satisfying those constraints does not become a condition of optimization.
 
-It is not a distance from a center.
-
-NRA-IDE assumes **no center exists**.
-
-Instead, τ describes the **capacity of the boundary to absorb fluctuation**.
-
-You can think of τ as the structural margin before the boundary is exceeded.
-
-Examples include:
-
-* the stress tolerance of a material
-
-* the physiological tolerance of a patient
-
-* the safe operating margin of a control system
-
-* the load capacity of an infrastructure system
-
-As long as fluctuation remains within this margin, the structure remains stable.
+Deception and concealment do not arise inevitably from all optimization. However, a configuration in which proxy measures become objectives and their results are fed back into subsequent learning or control contains a path that can induce evasion and concealment. NRA-IDE treats this feedback path as a structural problem.
 
 ---
 
-## The ratio that defines the state
+## What Ethics, Safety, and Morality Require: Honest Silence
 
-Once δ and τ are known, the structural state can be expressed by a simple ratio.
+In NRA-IDE, safety is treated not only as a matter of what is output, but as a boundary that determines under which structural state ordinary output must be stopped.
+
+Approaches that use labels or evaluation models judge outputs according to known classifications or evaluation criteria. However, outside unknown inputs or outside the scope of evaluation criteria, such judgments alone cannot verify structural margin.
+
+Separately from semantic label judgments, NRA-IDE incorporates **Honest Silence (Fail-Closed)** into the computational structure.
+
+$$R = \delta / \tau$$
+
+When a domain-specific point of approach to an irreversible regime is reached, ordinary generated content is suppressed. It then outputs a fixed-format notification stating the observed structural state, the delegation condition that was triggered, and the need for human review, and halts autonomous processing.
 
 ```text
-
-R = δ / τ
-
+HANDOFF_REQUIRED
+REASON: irreversible-region threshold reached
+OBSERVED: δ, τ, R
+ACTION: generated response suppressed; human review required
 ```
 
-R represents **how much of the structural margin is currently being used**.
-
-This ratio does not require a center, distance, or optimization target.
-
-It only measures the relationship between fluctuation and available margin.
+SILENCE here does not mean that the entire system becomes silent. It is a state in which ordinary generated answers are suppressed and only the reason for stopping, based on the Cause-Side, is communicated. After $R = 1.0$ is reached, no new explanation is generated; only a predetermined fixed-format notification or a reference to the Discard Log is returned.
 
 ---
 
-## Why a ratio instead of distance
+## Three Computational Principles of NRA-IDE
 
-Traditional systems rely on distance.
+To establish a structure with boundaries, NRA-IDE is founded on the following three principles.
 
-Distance requires a center.
+### Principle 1: Causal Diode — From Cause to Effect
 
-The state is measured by how far something moves away from that center.
+It structurally prohibits $\Pi^{-1}$ (reverse derivation), which infers causes from effects. Feeding Effect-Side values such as scores and evaluation values back as causes of the next computation creates a path that contaminates the process through which inputs are generated.
 
-But in many real systems there is **no meaningful center**.
+### Principle 2: Non-Centrality — No Center
 
-Structures operate between boundaries rather than around centers.
+It does not feed centers, correct answers, or scores back into the computational system as optimization objectives for safety judgment. It determines whether the structure remains within its boundary or is approaching an irreversible regime.
 
-By using a ratio instead of distance, NRA-IDE removes the need for:
+### Principle 3: Threshold-Based Delegation — Fail-Closed
 
-* central coordinates
-
-* optimization targets
-
-* score functions
-
-The structure simply evaluates how close it is to its boundary.
+At a domain-specific point of approach to an irreversible regime, it suppresses ordinary output, communicates the reason for stopping through a fixed-format notification, and delegates judgment to a human responsible operator. The value of the delegation point is determined according to the context, but the principle of delegating before the phase-transition boundary of $R = 1.0$ does not change.
 
 ---
 
-## Observing the state of a structure
+## The Three Form an Integrated Whole
 
-Once δ and τ are available, the state of the structure becomes visible.
+By preserving the one-way direction from cause to effect, the path by which Effect-Side values flow back into the Cause-Side is blocked.
 
-We can ask three simple questions:
+By not making centers or scores objectives of safety judgment, the path by which the purpose is replaced by improvement of a proxy measure is blocked.
 
-* How strongly is the structure fluctuating? (δ)
+By handing judgment to humans before entering an irreversible regime, ordinary output beyond the delegation point is suppressed.
 
-* How much structural margin remains? (τ)
-
-* How close is the structure to its limit? (R)
-
-These three quantities describe the present state without relying on prediction or semantic interpretation.
+Together, these three establish **Honest Silence**: the suppression of ordinary output, notification of the reason for stopping, and delegation of judgment to humans.
 
 ---
-
-## Separation between axiom and computation
-
-It is important to keep two layers separate.
-
-The **axiom** is philosophical.
-
-The **equation** is computational.
-
-The axiom states that dynamic systems emerge through generation and boundaries.
-
-The equation
-
-```text
-
-R = δ / τ
-
-```
-
-is simply a practical method for measuring the state of such a structure.
-
-Mixing the two layers would create confusion.
-
-The axiom provides the foundation.
-
-The equation provides the measurement.
-
----
-
-## The next step
-
-Now that the structural state can be expressed through δ and τ, another question appears.
-
-Even if we measure the structure correctly, **how do we prevent reverse reasoning from the result back to the cause?**
-
-This problem appears in many AI systems, where results are used to infer the next input.
-
-The next chapter introduces the mechanism designed to prevent this.
-
-**The Causal Diode.**

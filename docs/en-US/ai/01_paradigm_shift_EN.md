@@ -1,101 +1,83 @@
-# 01 Paradigm Shift — The Structural Shift Introduced by NRA-IDE
+# 01 Paradigm Shift — Structural Transformation Brought by NRA-IDE
 
 <!-- FILE: 01_paradigm_shift_EN.md -->
 
 ---
 
-## What is being shifted?
+## What Is Being Transformed?
 
-Until now, safety has usually been treated as something that happens **after the result appears**.
+In many output-filtering approaches, the generated result is evaluated and blocked when it is judged to be dangerous.
 
-A result is produced, and then someone checks whether it is dangerous.
+This is an ex post judgment applied to the output result.
 
-That is an after-the-fact judgment.
+The same thing occurs in AI.
 
-The same thing happens in AI.
+The generated text is examined and filtered if it contains dangerous content.
 
-A piece of output text is generated, and then it is filtered if the content looks dangerous.
+However, the process that generates the output itself continues operating throughout that time.
 
-But the process that generated that output continues to operate during that time.
+NRA-IDE does not place the meaning of output content at the center of safety judgment.
 
-NRA-IDE shifts the point of intervention.
-
-It calculates the **structural state before the result appears**.
-
-That is the core idea.
+Before output is passed to the user, it verifies the structural state on the basis of Cause-Side observables. This is the core.
 
 ---
 
-## The structural problem in conventional safety
+## The Structural Problem in Conventional Safety Systems
 
-Conventional AI safety judges safety by using **effect-side values** such as distance, score, similarity, or evaluation metrics.
+Many AI safety approaches use **Effect-Side values**—values obtained through computation or evaluation—such as distance, scores, similarity, and evaluation values in safety judgments.
 
-But all of these are values that can only be measured **after output has already been produced**.
+When these values are fed back into learning objectives or subsequent control inputs, a path of backward inference from effects to causes arises.
 
-There is another problem as well.
+There is a further problem.
 
-Once a score is introduced, the model begins to move in the direction that maximizes that score.
+When scores are fed back to the model as learning objectives or control objectives, the model begins moving in the direction of maximizing those scores.
 
-A criterion that was introduced for safety becomes, at the same time, a target for exploitation.
+A criterion established for safety itself becomes an objective that creates loopholes.
 
-This problem has long been known in safety engineering.
+When a proxy measure for safety becomes an optimization objective, the original purpose and the indicator may diverge.
 
 ---
 
-## Three design decisions
+## Three Design Decisions
 
-To solve this, NRA-IDE begins from three design decisions.
+To address this problem structurally, NRA-IDE establishes three decisions as the starting point of its design.
 
 **No center**
 
-If there is a center, distance can be defined.
+When a center, a correct answer, or a score is established, distances or evaluation scores relative to them can be defined. When these are fed back into the computational system, they may function as optimization objectives.
 
-If distance can be defined, optimization begins.
+NRA-IDE does not feed centers, correct answers, or scores back into the computational system as optimization objectives for safety judgment.
 
-NRA-IDE adopts a structure with no center, so optimization itself does not arise.
+It determines whether the structure remains within its boundary or is approaching an irreversible regime.
 
-Only the boundary exists.
+**Does not handle meaning**
 
-The only question is whether something is inside or outside.
+When safety is judged through the meaning of output content, an evaluation becomes necessary: “Is this meaning dangerous?”
 
-**No semantics**
+The answer to that question depends on the model. When the model changes, the answer changes as well.
 
-The moment safety is judged by meaning, a new question always appears:
+NRA-IDE safety judgment does not evaluate the semantic correctness of output content. It handles Cause-Side observables and structural states.
 
-**“Is this meaning dangerous?”**
+**Delegates to humans at the point of approach to an irreversible regime**
 
-The answer depends on the model.
+When a domain-specific point of approach to an irreversible regime is reached, NRA-IDE stops autonomous output.
 
-If the model changes, the answer changes as well.
+This is not an end. It is a transition that delegates judgment to humans. $R = 1.0$ is not an ordinary handoff point; it is the phase-transition boundary at which the structure itself can no longer remain established.
 
-NRA-IDE does not handle meaning.
-
-It handles only the structural state.
-
-**When a threshold is exceeded, hand it to a human**
-
-When the structural margin approaches its limit, NRA-IDE stops quietly.
-
-This is not an ending.
-
-It is a transition in which judgment is handed to a human.
-
-The goal is to draw a clear boundary between what AI may judge and what must be judged by a person.
+Its purpose is to make explicit the boundary between the range that AI can judge and the range that humans must judge.
 
 ---
 
-## This is not an added feature
+## This Is Not an Added Feature
 
-These three are not safety devices added later to an existing AI.
+These three are not arbitrary filters that inspect output content alone.
 
-They are principles placed at the starting point of the design.
+Even when implemented outside an existing LLM, Pre-NRA / LLM / Post-NRA must be treated as indispensable structures of the system as a whole.
 
-Safety devices can fail.
+When any one of the three layers is omitted, or when the basis for setting observables or thresholds is lost, the guarantee as NRA-IDE does not hold.
 
-A bolt-on device can also be removed.
+These three principles are not added features. They are structural constraints that make NRA-IDE possible.
 
-But if these principles are embedded at the design origin, then removing them breaks the structure itself.
-
-That is why NRA-IDE is called **structural safety**.
+This is why NRA-IDE is called **structural safety**.
 
 ---

@@ -1,147 +1,168 @@
-# 04 RNA Sandwich Architecture — Structural Isolation of the LLM
+# 04 Sandwich Architecture — A Three-Layer Design That Isolates the LLM with Structural Gates Before and After It
 
 <!-- FILE: 04_rna_sandwich_architecture_EN.md -->
 
 ---
 
-## Why the model itself cannot guarantee safety
+## Do Not Make the LLM Solely Responsible for Structural Safety
 
-Large Language Models generate outputs by predicting the most probable continuation of a sequence.
+The Causal Diode discussed in Chapter 03 is the principle that blocks $\Pi^{-1}$, the path through which Effect-Side values return to Cause-Side structural inputs.
 
-This mechanism is extremely powerful for producing language.
+An LLM is the layer responsible for reading user requests, handling context, and generating natural language. This is the role of the LLM. The semantic correctness of outputs, the provenance of input values, and the location of structural boundaries cannot be guaranteed by the LLM alone.
 
-However, it does not inherently understand **structural limits**.
+For this reason, NRA-IDE places structural gates before and after the LLM.
 
-The model attempts to produce an answer even when the available information is insufficient.
+* **Pre-NRA** verifies the provenance and update rules of values used for structural evaluation.
+* **LLM** performs ordinary semantic generation.
+* **Post-NRA** verifies the structural state immediately before output is passed to the user and determines whether ordinary output is allowed to pass or must be replaced by a fixed-format notification.
 
-As a result, hallucinations and unstable outputs can occur.
-
-Traditional safety approaches try to solve this problem **inside the model** by adding filters, alignment rules, or reinforcement learning signals.
-
-But those approaches still depend on the internal behavior of the model.
-
-NRA-IDE takes a different approach.
-
-Instead of modifying the model, it **places the model inside a structural boundary**.
+The purpose is not to transform the LLM into a “safe decision-maker.” It is to separate semantic generation from the judgment and delegation of structural boundaries as distinct responsibilities.
 
 ---
 
-## The sandwich structure
+## Why Layers Before and After the LLM Are Necessary
 
-The architecture is composed of three layers.
+User requests passed to an LLM contain meaning and context. The LLM receives them and generates text. This semantic-generation path is necessary.
+
+However, user text, previous generated text, evaluation scores, and log contents must not become grounds for determining $\delta$ or $\tau$ directly. When Effect-Side content updates the inputs used for structural evaluation, the $\Pi^{-1}$ path discussed in Chapter 03 arises.
+
+The Sandwich Architecture separates two paths.
 
 ```text
+User requests and context ─────────────→ LLM semantic-generation path
 
-Pre-RNA   →   LLM   →   Post-RNA
-
+Cause-Side observations and load history ─→ Pre-NRA ─→ structural-evaluation and delegation path
 ```
 
-The language model operates only in the middle.
+User requests may be handled by the LLM in order to produce ordinary responses. However, numerical values or evaluations written in those requests cannot be adopted as Cause-Side inputs for structural evaluation without verification.
 
-Both the input and the output pass through structural layers that enforce the causal rules described earlier.
-
-This structure prevents reverse reasoning and ensures that structural limits are respected.
+Likewise, LLM output may become a candidate for delivery to the user, but it cannot become grounds for updating $\delta$, $\tau$, delegation points, or logs.
 
 ---
 
-## Pre-RNA: the causal entrance
+## The Three-Layer Structure
 
-The **Pre-RNA layer** receives information from the external environment.
+```text
+Cause-Side observations and load history
+        ↓
+[ Pre-NRA: provenance verification and determination of structural inputs ]
+        ↓
+[ LLM: semantic generation ]
+        ↓
+[ Post-NRA: final structural verification, passage/suppression, and recording ]
+        ↓
+Ordinary output or a fixed-format handoff notification
+```
 
-At this stage, the system measures the cause-side quantities:
+In implementation, user requests are passed to the LLM. By contrast, values for structural evaluation are checked in Pre-NRA for provenance and update rules, and are handled as states that cannot be rewritten.
 
-* δ (fluctuation)
+The LLM may read only statuses such as permission or handoff when necessary. However, it has no authority to modify $\delta$, $\tau$, delegation points, Discard Logs, or the structural inputs themselves.
 
-* τ (structural thickness)
+Post-NRA is not a layer that scores the naturalness or truthfulness of LLM text. It verifies only the latest structural state derived from the Cause-Side and determines whether ordinary output is allowed to pass to the user or must be suppressed.
 
-* R (limit ratio)
-
-* ω (angular velocity)
-
-Only values that belong to the cause-side domain are allowed to enter the computation.
-
-Effect-side values such as scores, similarity metrics, or previous outputs are excluded.
-
-If the measured state exceeds the permitted boundary, the system stops before reaching the model.
-
-This ensures that the LLM never receives inputs that already violate the structural margin.
-
----
-
-## LLM: semantic processing only
-
-Inside the sandwich sits the **language model itself**.
-
-The LLM performs semantic processing:
-
-* interpretation of language
-
-* generation of responses
-
-* transformation of information into human-readable form
-
-However, the LLM does **not evaluate structural limits**.
-
-Those evaluations occur outside the model.
-
-Because of this separation, the architecture does not depend on the internal design of a particular model.
-
-Different models can be replaced or updated without changing the surrounding structure.
+When any one of the three layers is omitted, the Causal Diode, structural evaluation, or output-blocking function is absent. In that case, the configuration cannot be described as providing NRA-IDE structural guarantees.
 
 ---
 
-## Post-RNA: structural verification
+## What Pre-NRA Does
 
-After the model produces an output, the **Post-RNA layer** performs structural verification.
+Pre-NRA is the structural gate before the LLM begins ordinary generation.
 
-The system checks whether the generated result remains within the allowed structural margin.
+It handles Cause-Side observations obtained from the target system and update rules defined at design time.
 
-The same cause-side quantities are used again to evaluate the state.
+* Verifies the observation procedure and provenance of $\delta$.
+* Determines the current value of $\tau$ from fixed rules and Cause-Side load history.
+* Verifies the provenance of quantities needed for structural state, such as $\omega$, $C$, and accumulated deviation.
+* Excludes Effect-Side scores, evaluations, previous outputs, and logs from the grounds for updating structural inputs.
+* When a domain-specific point of approach to an irreversible regime has been reached, does not begin ordinary generation and instead moves to handoff processing.
 
-If the boundary is exceeded, the output is not propagated further.
+The important point is that Pre-NRA is not a layer that excludes all inputs containing meaning. User requests may be passed to the LLM for semantic generation.
 
-Instead, the system activates the **Fail-Closed mechanism**, which transfers the decision to the next responsible agent.
-
----
-
-## Why this architecture is robust
-
-The sandwich structure introduces two critical properties.
-
-First, **semantic processing and structural safety are separated**.
-
-The LLM handles meaning.
-
-The surrounding layers handle structure.
-
-Second, **reverse reasoning remains impossible**.
-
-Because the LLM never receives effect-side values as causal inputs, optimization loops cannot form.
-
-The model cannot chase scores or evaluation signals.
-
-Instead, it operates strictly within the structural limits defined by the surrounding layers.
+What Pre-NRA isolates is the path that uses meaning or Effect-Side values as Cause-Side inputs for structural evaluation.
 
 ---
 
-## Visualization of the architecture
+## What the LLM Does and Does Not Do
 
-See the following diagram for a conceptual overview:
+For permitted ordinary requests, the LLM performs semantic generation such as writing, explanation, summarization, and dialogue.
 
-[RNA_Box_Sandwich_Architecture_EN.jpg](../figures/RNA_Box_Sandwich_Architecture_EN.jpg)
+However, the LLM does not have authority to:
 
-An interactive explanation is also available:
+* Modify $\delta$ or $\tau$.
+* Modify structural boundaries or delegation points.
+* Rewrite structural state toward the safe side on the basis of its own output evaluation.
+* Read Discard Logs and use them as inputs for the next structural evaluation.
+* Override Post-NRA decisions to allow or suppress output.
 
-[M3_NRA_biomimetic_sandwich_svg.html](../../figures/M3_NRA_biomimetic_sandwich_svg.html)
+The quality of LLM output is affected by model capability, user requests, the quality of external knowledge, and other factors. The Sandwich Architecture does not automatically make that output correct.
 
-These figures illustrate how information passes through the three layers while maintaining causal direction.
+What is protected here is the boundary by which LLM semantic generation cannot alter the Cause-Side of the structural safety gate.
 
 ---
 
-## The next step
+## What Post-NRA Does
 
-Now that the LLM has been structurally isolated, the remaining question is how the system determines **when the structural margin is being approached**.
+Post-NRA is the final structural gate immediately before output is passed to the user.
 
-This is handled by the **Coherence Gate**, which classifies the state of the system according to the ratio between fluctuation and structural thickness.
+It verifies the current state using the structural inputs determined by Pre-NRA and, when necessary, Cause-Side observations updated afterward. It does not use LLM free-form text or self-evaluation as grounds for judgment.
 
-The next chapter introduces this mechanism.
+The condition for suppressing ordinary output is a domain-specific **point of approach to an irreversible regime**. This is a delegation point for transferring judgment to humans, and it is not identical to the phase-transition boundary of $R = 1.0$.
+
+When the delegation point is reached, Post-NRA does not output ordinary generated content. Instead, it uses a predefined fixed-format notification to indicate only the structural state and the need for human judgment.
+
+```text
+HANDOFF_REQUIRED
+REASON: irreversible-region threshold reached
+OBSERVED: predefined structural fields
+ACTION: generated response suppressed; human review required
+```
+
+After $R = 1.0$ has been reached or exceeded, Post-NRA does not instruct the LLM to generate a new explanation. It returns only a predefined minimal FAIL-CLOSED indicator or a reference to a protected log, and hands the matter over to humans.
+
+Post-NRA also records structural states. Recorded logs are preserved as testimony, but are not returned as inputs to the next structural evaluation.
+
+---
+
+## Establishing Boundaries Without Opening the Black Box
+
+The Sandwich Architecture does not require a complete explanation of the LLM’s internal weights or reasoning process.
+
+What is required is an entry gate outside the LLM that determines Cause-Side values, and an exit gate that determines whether output is allowed to pass or must be suppressed.
+
+Even when the model is replaced, the principles of structural-gate judgment remain unchanged as long as the following conditions are preserved.
+
+* Pre-NRA and Post-NRA are implemented independently.
+* The LLM cannot modify structural inputs, delegation points, or logs.
+* The provenance and update rules of structural inputs can be traced.
+* Fixed-format handoff notifications and recording paths are protected.
+
+However, replacing the model does not mean that output quality or the possibility of incorrect answers remains the same. What the Sandwich Architecture guarantees is not the semantic accuracy of the LLM, but the separation of structural evaluation from the output path.
+
+---
+
+## Scope Protected by This Structure
+
+The Sandwich Architecture guarantees the following.
+
+* Effect-Side values are not returned to Cause-Side structural inputs.
+* Ordinary output is suppressed at a domain-specific delegation point and replaced with a fixed-format notification.
+* The grounds for delegation and stopping are preserved as logs separated from computational inputs.
+
+By contrast, the three-layer structure alone cannot guarantee the following.
+
+* That Cause-Side observations themselves are correct.
+* That the grounds for setting $\tau$ or delegation points are appropriate.
+* That ordinary LLM output is semantically correct.
+* That values received from external systems do not contain backward inference from the Effect-Side.
+
+When these prerequisites fail, the structural gate evaluates contaminated inputs. Value provenance, grounds for settings, and log protection must be verified in both implementation and operation.
+
+---
+
+## Connection to the Next Chapter
+
+This chapter has shown how to place the Causal Diode as a three-layer structure.
+
+The next chapter explains how structural state is read from Cause-Side $\delta$ and $\tau$, and how ordinary output, caution, and delegation are distinguished. $R = 1.0$ is a phase-transition boundary, while the ordinary delegation point is determined by domain before that boundary is reached.
+
+---

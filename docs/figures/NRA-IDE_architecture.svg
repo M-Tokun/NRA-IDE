@@ -18,9 +18,9 @@
 
   <text x="40" y="36" class="title">NRA-IDE Architecture — Sandwich Pattern (High-level)</text>
 
-  <!-- Pre-RNA -->
+  <!-- Pre-NRA -->
   <rect x="80" y="80" width="450" height="120" rx="10" class="gate" />
-  <text x="110" y="110" class="label">Pre-RNA (Input Gate)</text>
+  <text x="110" y="110" class="label">Pre-NRA (Input Gate)</text>
   <text x="110" y="135" class="label">• Pattern detection (P1–P4)</text>
   <text x="110" y="155" class="label">• Convert / WARN / BLOCK</text>
 
@@ -30,9 +30,9 @@
   <text x="110" y="275" class="label">• Provider bridge (MOCK / OPENAI / ANTHROPIC / GOOGLE)</text>
   <text x="110" y="295" class="label">• Language-only — no safety decisions</text>
 
-  <!-- Post-RNA -->
+  <!-- Post-NRA -->
   <rect x="80" y="360" width="450" height="120" rx="10" class="gate" />
-  <text x="110" y="390" class="label">Post-RNA (Output Gate / CleanContext)</text>
+  <text x="110" y="390" class="label">Post-NRA (Output Gate / CleanContext)</text>
   <text x="110" y="415" class="label">• R = δ/τ validation</text>
   <text x="110" y="435" class="label">• FAIL-CLOSED -> DiscardVault</text>
 
@@ -58,6 +58,6 @@
   <path d="M70 300 L80 300 L80 260 L80 120 L530 120 L530 260 L530 300 L530 360 L530 420 L1000 420" class="arrow" />
 
   <!-- Legend -->
-  <text x="40" y="520" class="label">Legend: Pre-RNA = input gate; LLM = generation; Post-RNA = validator; DiscardVault = sealed store</text>
+  <text x="40" y="520" class="label">Legend: Pre-NRA = input gate; LLM = generation; Post-NRA = validator; DiscardVault = sealed store</text>
 
 </svg>

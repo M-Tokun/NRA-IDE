@@ -1,168 +1,82 @@
-# 00 Overview — A Map of This Document
+# 00 Overall Structure — A Map for Navigating Boundaries
 
-<!-- FILE: 00_overview_EN.md -->
-
-Copyright (c) 2026 M‑Tokuni
+<!-- 00_overview_EN.md -->
 
 ---
 
 ## Position of This Chapter
 
-This chapter is the **first map** you should read to guide you through all the documents. You may move directly to the section you need from here.
+This chapter serves as a guide to the overall structure of NRA-IDE, the role of each chapter, and the design principles shared across them.
 
-However, after you finish reading all the other chapters, please **return to this "00" overview as a reflection**. Looking at the same map after acquiring the knowledge from each chapter will reveal the underlying design philosophy and perspective at a completely different resolution.
+For a first reading, proceed from this chapter in numerical order. After completing the individual chapters, return here to verify where each concept is positioned within the whole.
 
 ---
 
-## Structure of the Document
+## Document Structure and Philosophy
 
-This document follows a single guiding question.
+This document follows a single question.
 
-**What happens when an AI exceeds its structural limits?
+**“When a dynamic system that includes AI approaches an irreversible regime, can it avoid continuing output beyond its limits and delegate judgment to humans?”**
 
-And can that situation be prevented by design?**
-
-Each chapter addresses a different part of this question.
+NRA-IDE begins from the design premise that **“Existence is generation.”** IDE describes structural states through the computational principle of fluctuation $\delta$, the structural thickness $\tau$ that absorbs that fluctuation, and their ratio, $R = \delta / \tau$. The axiom and the computational principle belong to different layers.
 
 ---
 
 ## Chapter Structure
 
-### Introduction / 01 Paradigm Shift
+### 1. Entry Point for Structural Transformation (01)
 
-The introduction explains the structural problems in current AI development. It asks why optimization does not guarantee correctness, and why a system that cannot stop becomes dangerous.
-- **Experience:** [M1: Linear vs NRA Comparison](../../figures/M1_NRA_linear_breakdown_simulator_EN.html)
+This chapter shows the difference between judging safety through meaning or scores after output, and handling structural states before and after output. It confirms the three design decisions established by NRA-IDE.
 
----
+* **Experience:** [M1: Linear Breakdown Simulator](../../figures/M1_NRA_linear_breakdown_simulator.html)
 
-### 00.5 Nomological Ring Axioms / 02 Limits of AI Optimization
+### 2. Limits of Optimization and Computational Principles (02)
 
-This section introduces the foundational axiom: **“Existence is generation.”** It explains the origin of the three structural quantities: δ (fluctuation), τ (thickness), and R (limit ratio).
-- **Experience:** [M2: Residue Tank](../../figures/M2_NRA_residue_tank_EN.html)
+This chapter organizes the problems that optimization objectives introduce into safety judgment. It also introduces structural sensitivity, $S = 1 / (\tau \cdot (1 - R))$, and confirms the structure in which sensitivity diverges as $R$ approaches the phase-transition boundary.
 
----
+* **Experience:** [M2: Residue Tank](../../figures/M2_NRA_residue_tank.html)
 
-### 03 Causal Diode / 04 Sandwich Structure (RNA Box)
+### 3. Structure of Isolation (03–04)
 
-Explains the "Causal Diode" (prohibiting reverse inference Π⁻¹) and the "Sandwich Structure" for managing different time scales.
-- **Experience:** [M3: Biomimetic Sandwich](../../figures/M3_NRA_biomimetic_sandwich_svg_EN.html)
+This chapter explains the Causal Diode, which blocks $\Pi^{-1}$—the backward inference of causes from effects—and the Sandwich Architecture, which separates the responsibilities of Pre-NRA / LLM / Post-NRA.
 
----
+* **Experience:** [M3: Biomimetic Sandwich](../../figures/M3_NRA_biomimetic_sandwich_svg.html)
 
-### 05 Coherence Gate / 07 Fail-Closed / 08 Discard Log
+### 4. Honest Silence (05–08)
 
-The Coherence Gate classifies states (NIRVANA, ELASTIC, CRITICAL, SILENCE). When $R \ge Rop$, the system performs a "Fail-Closed" action—a design success, not a failure.
-- **Experience:** [M4: Disclosure Protocol](../../figures/M4_NRA_confession_debugger_EN.html)
+This chapter covers state classification through the ratio $R$, observable quantities, Fail-Closed, and Discard Logs. It presents a structure that stops autonomous output at a domain-specific point of approach to an irreversible regime and delegates judgment to humans. $R = 1.0$ is not an ordinary delegation point; it is the phase-transition boundary at which the structure itself can no longer remain established.
 
----
+* **Experience:** [M4: Confession Debugger](../../figures/M4_NRA_confession_debugger.html)
 
-### 09-12 Risks, Benefits, Domain Tuning, and Glossary
+### 5. Practice and Limits (09–11)
 
-Covers practical implementation, domain tuning via τ and Rop, and the rigorous definitions of NRA terminology.
-- **Experience:** [M5: Non-linear Glossary](../../figures/M5_NRA_IDE_flip_glossary_EN.html)
+This chapter addresses patterns of misuse, the scope of what can be guaranteed, and domain tuning for $\tau$ and operating thresholds. Chapter 12 is a glossary. The Operational Checklist serves as a reference for implementation and operation.
 
----
-
-### Operational Checklist
-
-A practical checklist for deployment, divided into four phases:
-
-* before introduction
-
-* external connection
-
-* operation
-
-* periodic verification
-
----
-
-## Three Reading Paths
-
-This document may be read in three different ways.
-
-### Theory Path
-
-```
-
-Introduction → 00.5 → 01 → onward
-
-```
-
-For readers who want to follow the theoretical foundation.
-
----
-
-### Architecture Path
-
-```
-
-04 → 03 → 05 → 07 → 08
-
-```
-
-For readers who want to understand the structural design.
-
----
-
-### Application Path
-
-```
-
-10 → 11 → 09 → Operational Checklist
-
-```
-
-For readers considering practical implementation.
+* **Experience:** [M5: Glossary Flip Cards](../../figures/M5_NRA_IDE_flip_glossary.html)
 
 ---
 
 ## Structural Invariants
 
-Regardless of the reading path, six principles remain unchanged.
+The following six principles remain unchanged throughout all chapters.
 
-* Non-Semantic (meaning is not evaluated)
-
-* Non-Optimization (no distance, center, or target)
-
-* Causal Diode (Π⁻¹ prohibited)
-
-* Three-Layer Separation (Pre-RNA / LLM / Post-RNA)
-
-* Fail-Closed (delegation when limits are exceeded)
-
-* Write-Only Logs (discard logs are never reused)
-
-These principles apply consistently throughout the document.
+* **Non-Semantic**: Handles Cause-Side observables and structural states, rather than the naturalness of outputs or their semantic correctness.
+* **Non-Optimization**: Does not set a center or score as an optimization objective; instead, it defines structural boundaries.
+* **Causal Diode (prohibition of $\Pi^{-1}$)**: Does not infer causes (inputs) backward from effects (evaluation values).
+* **Three-Layer Separation**: Strictly separates the boundaries of Pre-NRA / LLM / Post-NRA.
+* **Fail-Closed**: Stops autonomous output at a domain-specific point of approach to an irreversible regime and delegates judgment to humans. The delegation-point value is determined according to the context, but the principle of delegation before the phase-transition boundary of $R = 1.0$ does not change.
+* **Logs as Testimony**: Records the observables used at the time of stopping, the decision, and what was discarded, and does not use them in subsequent calculations.
 
 ---
 
 ## Related Resources
 
-GitHub
-
-https://github.com/M-Tokun/NRA-IDE
-
-HAN-Axiom
-
-https://github.com/M-Tokun/HAN-Axiom
-
-Note
-
-https://note.com/mtokuni
-
-X
-
-https://x.com/m_tokuni
+* **[README (Portal)](../../README_JP.md)**
+* **[Design Philosophy of the Sandwich Architecture](../../Sandwich-ARCHITECTURE.md)**
+* **[Complete Collection of Interactive Demonstrations](../../figures/NRA_IDE_interactive_docs_all_modules.html)**
 
 ---
 
-## Advanced Resources (Deeper Definition and Implementation)
+### Copyright (c) 2026 M-Tokuni
 
-After understanding the philosophy and principles in this chapter (`docs/en-US/ai`), if you wish to check specific implementation methods and the latest unified definitions, please refer to the following documents in the `note` folder.
-
-- [NRA-IDE Official Definition](../../../note/NRA-IDE_Official_Definition.md) (Refutation of existing paradigms and unified definition)
-
-- [Hybrid Computation Architecture Implementation](../../../note/Quantum_Classical_IDE_Hybrid_Architecture.md) (Fusion of IDE flow and classical exact computation)
-
-- [Role and Relation of IDE and Classical Computation](../../../note/IDE_Classical_Hybrid_Computation_Bilingual.md) (Resolution formulas via hybrid computation)
+### SPDX-License-Identifier: MIT

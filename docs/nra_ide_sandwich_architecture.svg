@@ -7,7 +7,7 @@ Note: SVG-safe text uses escaped entities where required.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" role="img" aria-labelledby="title desc">
   <title id="title">NRA-IDE Architecture — Sandwich Pattern</title>
-  <desc id="desc">A high-level NRA-IDE sandwich architecture showing User input, Pre-RNA gate, stateless LLM, Post-RNA gate, output, and Fail-Closed isolation into DiscardVault.</desc>
+  <desc id="desc">A high-level NRA-IDE sandwich architecture showing User input, Pre-NRA gate, stateless LLM, Post-NRA gate, output, and Fail-Closed isolation into DiscardVault.</desc>
 
   <defs>
     <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
@@ -39,7 +39,7 @@ Note: SVG-safe text uses escaped entities where required.
 
   <!-- Main stack -->
   <rect x="295" y="185" width="610" height="170" rx="18" fill="#eff6ff" stroke="#2563eb" stroke-width="4" filter="url(#softShadow)"/>
-  <text x="330" y="236" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e3a8a">Pre-RNA Gate</text>
+  <text x="330" y="236" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e3a8a">Pre-NRA Gate</text>
   <text x="330" y="277" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Detect patterns P1–P4</text>
   <text x="330" y="311" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Transform / warn / block before generation</text>
 
@@ -49,7 +49,7 @@ Note: SVG-safe text uses escaped entities where required.
   <text x="330" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Language-only, stateless, non-authoritative</text>
 
   <rect x="295" y="605" width="610" height="190" rx="18" fill="#eff6ff" stroke="#2563eb" stroke-width="4" filter="url(#softShadow)"/>
-  <text x="330" y="656" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e3a8a">Post-RNA Gate / CleanContext</text>
+  <text x="330" y="656" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e3a8a">Post-NRA Gate / CleanContext</text>
   <text x="330" y="697" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Validate structural safety using R = δ / τ</text>
   <text x="330" y="731" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Permit valid output or enforce FAIL-CLOSED</text>
 
