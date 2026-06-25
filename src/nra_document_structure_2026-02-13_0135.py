@@ -540,7 +540,7 @@ if __name__ == "__main__":
     )
     engine.add_section(
         "2", "コアコンポーネント",
-        "NRA-IDE は Pre-RNA / LLM / Post-RNA の三層分離構造を持つ。",
+        "NRA-IDE は Pre-NRA / LLM / Post-NRA の三層分離構造を持つ。",
         references=["NRA-IDE"],
         depends_on="1"
     )

@@ -1,6 +1,6 @@
 # regen_nra_pre_rna_20260216_190457.py
 # FILE: regen_nra_pre_rna_20260216_190457.py
-# TITLE: Pre-RNA Gate — 入力の純化層（サンドイッチアーキテクチャの「前蓋」）
+# TITLE: Pre-NRA Gate — 入力の純化層（サンドイッチアーキテクチャの「前蓋」）
 # Author: M-Tokuni (https://github.com/M-Tokun/NRA-IDE)
 # Date: 2026-02-16 19:04:57 JST
 # Temperature: 0.3 (axiom-level coherence)
@@ -18,8 +18,8 @@
 #   LLM（大規模言語モデル）への入力が到達する「最初の門」。
 #   この門を通過しなければ、パイプライン全体が起動しない。
 #
-#   サンドイッチアーキテクチャにおける「前蓋（Pre-RNA）」として機能する。
-#   前蓋と後蓋（Post-RNA = CrystallizationEngine）でLLMを挟むことで、
+#   サンドイッチアーキテクチャにおける「前蓋（Pre-NRA）」として機能する。
+#   前蓋と後蓋（Post-NRA = CrystallizationEngine）でLLMを挟むことで、
 #   LLMが生成する確率的な出力を「因果構造の内側」に閉じ込める。
 #
 # 【なぜ入力を検査するか】

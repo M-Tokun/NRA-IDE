@@ -551,7 +551,7 @@ if __name__ == "__main__":
     )
     engine.add_section(
         "2", "Core Components",
-        "NRA-IDE has a three-layer separation structure: Pre-RNA / LLM / Post-RNA.",
+        "NRA-IDE has a three-layer separation structure: Pre-NRA / LLM / Post-NRA.",
         references=["NRA-IDE"],
         depends_on="1"
     )

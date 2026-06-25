@@ -1,12 +1,12 @@
 # ==============================================================================
 # FILE: nra_pre_rna_EN_20260213_0135.py
-# TITLE: NRA-IDE Pre-RNA [A] - Input Filter / Pi-1-Inducing Pattern Detection & Conversion
+# TITLE: NRA-IDE Pre-NRA [A] - Input Filter / Pi-1-Inducing Pattern Detection & Conversion
 # VERSION: 1.0.0
 # AUTHOR: M-Tokuni (Original Logic) / KEN (Implementation)
 # DATE: 2026-02-13 01:35
 #
 # [Design Principles]
-# Pre-RNA converts LLM input into a "structurally safe form".
+# Pre-NRA converts LLM input into a "structurally safe form".
 # Rather than controlling LLM output, it controls how questions are posed to the LLM.
 #
 # [Four Pi-1-Inducing Patterns Detected]
@@ -21,7 +21,7 @@
 #   BLOCK   : Do not pass to LLM; halt the pipeline (critical)
 #
 # [NRA Axiom Mapping]
-#   Pre-RNA = Input side of the Causal Diode
+#   Pre-NRA = Input side of the Causal Diode
 #   Only "Cause → Effect" direction questions pass through
 #   "Effect → Cause" direction questions are CONVERTed or BLOCKed
 # ==============================================================================
@@ -68,7 +68,7 @@ class PatternType(Enum):
 
 
 class PreRNAAction(Enum):
-    """Pre-RNA processing actions."""
+    """Pre-NRA processing actions."""
     PASS    = "PASS"     # Pass through without modification
     WARN    = "WARN"     # Pass through with warning attached
     CONVERT = "CONVERT"  # Convert and pass through
@@ -87,7 +87,7 @@ class PatternMatch:
 @dataclass
 class PreRNAResult:
     """
-    Result of Pre-RNA processing.
+    Result of Pre-NRA processing.
     converted_input is passed to the LLM (on PASS or CONVERT).
     On BLOCK, converted_input is None and the pipeline halts.
     """
@@ -224,7 +224,7 @@ class PatternDetector:
                 matches.append(PatternMatch(
                     pattern_type=PatternType.P2_UNDEFINED_TERM,
                     matched_text=term,
-                    action=PreRNAAction.WARN,  # Warn; delegate hard blocking to Post-RNA
+                    action=PreRNAAction.WARN,  # Warn; delegate hard blocking to Post-NRA
                     severity=0.3
                 ))
         return matches
@@ -331,12 +331,12 @@ class InputConverter:
 
 
 # ==============================================================================
-# 4. Pre-RNA Core
+# 4. Pre-NRA Core
 # ==============================================================================
 
 class PreRNA:
     """
-    [A] Pre-RNA core.
+    [A] Pre-NRA core.
     Input filter that protects LLM input from Pi-1-inducing patterns.
 
     Example usage:
@@ -432,7 +432,7 @@ ValidationResult = _doc_structure.ValidationResult
 
 class NRAFullPipeline:
     """
-    Fully integrated pipeline: [A] Pre-RNA + [B] LLMBridge + [C] CleanContext.
+    Fully integrated pipeline: [A] Pre-NRA + [B] LLMBridge + [C] CleanContext.
 
     Data flow:
       User input
@@ -444,7 +444,7 @@ class NRAFullPipeline:
       [B] LLMBridge.call()
         → Receive raw LLM output
         ↓
-      [Post-RNA] StructureValidator
+      [Post-NRA] StructureValidator
         → R = delta/tau validation
         → PASSED/CAVEAT → Add to [C] CleanContext
         → FAIL-CLOSED   → Isolate to [C] DiscardVault
@@ -464,11 +464,11 @@ class NRAFullPipeline:
         self._call_count = 0
         self._session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        # [A] Pre-RNA: lazy-initialized after GenesisBlock is sealed
+        # [A] Pre-NRA: lazy-initialized after GenesisBlock is sealed
         self._pre_rna: Optional[PreRNA] = None
 
     def _ensure_pre_rna(self) -> PreRNA:
-        """Lazy-initialize Pre-RNA (created after GenesisBlock is sealed)."""
+        """Lazy-initialize Pre-NRA (created after GenesisBlock is sealed)."""
         if self._pre_rna is None:
             if not self._doc_engine.genesis.sealed:
                 self._doc_engine.genesis.seal()
@@ -488,8 +488,8 @@ class NRAFullPipeline:
         Returns: dict with keys:
           status   : "PASSED" / "CAVEAT" / "BLOCKED" / "FAIL-CLOSED"
           output   : Validated output text (empty string on BLOCK or FAIL-CLOSED)
-          pre_rna  : Summary of Pre-RNA processing result
-          r_ratio  : Post-RNA R value
+          pre_rna  : Summary of Pre-NRA processing result
+          r_ratio  : Post-NRA R value
           turn_id  : Turn ID
         """
         self._call_count += 1
@@ -499,7 +499,7 @@ class NRAFullPipeline:
 
         pre_rna = self._ensure_pre_rna()
 
-        # ========== [A] Pre-RNA ==========
+        # ========== [A] Pre-NRA ==========
         pre_result = pre_rna.process(user_input)
 
         if pre_result.is_blocked:
@@ -516,7 +516,7 @@ class NRAFullPipeline:
         messages = self._context.build_messages_for_llm()
         llm_response = self._bridge.call(messages)
 
-        # ========== [Post-RNA] Validation ==========
+        # ========== [Post-NRA] Validation ==========
         # depends_on: dynamically retrieve the section_id of the most recently
         # successful turn. BLOCKED turns have no section_id, so take the last
         # entry from the assistant-turn list.
@@ -607,7 +607,7 @@ if __name__ == "__main__":
     )
     engine.genesis.add(
         "ThreeLayerSeparation",
-        "Structural separation principle of Pre-RNA, LLM, and Post-RNA."
+        "Structural separation principle of Pre-NRA, LLM, and Post-NRA."
     )
     engine.genesis.add(
         "CausalDiode",
@@ -676,7 +676,7 @@ if __name__ == "__main__":
             references=tc["refs"]
         )
 
-        print(f"  Pre-RNA : {result['pre_rna']}")
+        print(f"  Pre-NRA : {result['pre_rna']}")
         print(f"  Status  : {result['status']}")
         print(f"  R value : {result['r_ratio']:.3f}")
         if result["output"]:

@@ -166,7 +166,7 @@ if hasattr(prev_state, 'distance') or hasattr(prev_state, 'target_pos'):
     raise TypeError("Causal Violation: Spatial variables in Causal State.")
 Effect側の変数がCause側に混入した場合、TypeErrorで停止。実行時に構造的に阻止。
 アーキテクチャレベル: Vault（FAIL記録）はappend-only。一度記録されたFAILの理由は変更・削除不可。そしてVaultのデータをLLMの再訓練に使用することは構造的に禁止。FAILから「学習して最適化」しない。
-設計レベル: Post-RNA（CrystallizationEngine）の判定結果は、Pre-RNAの設定にフィードバックされない。後段のゲートが前段のゲートを書き換えることはない。各ゲートは独立して動作し、同一のGenesisBlock（公理定義）のみを参照する。
+設計レベル: Post-NRA（CrystallizationEngine）の判定結果は、Pre-NRAの設定にフィードバックされない。後段のゲートが前段のゲートを書き換えることはない。各ゲートは独立して動作し、同一のGenesisBlock（公理定義）のみを参照する。
 
 第6章：サンドイッチアーキテクチャ — 三層絶縁の構造
 6.1 なぜ「サンドイッチ」か
@@ -180,16 +180,16 @@ LLMは確率的生成装置である。有用だが信頼できない。信頼�
 
 ユーザー入力
     ↓
-[Pre-RNA Gate] ← 前蓋: 入力の純化（決定論的）
+[Pre-NRA Gate] ← 前蓋: 入力の純化（決定論的）
     ↓ PASS / CONVERT / BLOCK
 [LLM]          ← 中身: 確率的生成（ここだけが「線形」の世界）
     ↓ 生出力（信頼しない）
-[Post-RNA]     ← 後蓋: 構造検証とスコアリング（決定論的）
+[Post-NRA]     ← 後蓋: 構造検証とスコアリング（決定論的）
     ↓ PASS / FAIL-CLOSED
 出力（構造保証済み）or 空文字（正直な沈黙）
 前蓋と後蓋でLLMを挟む。パンでハムを挟むのと同じ構造。パン（門）は固い。ハム（LLM）は柔らかい。しかしパンがハムの形を保証する。
-6.2 Pre-RNA Gate — 入力の純化
-Pre-RNA Gate（regen_nra_pre_rna.py）は、LLMに入力が到達する前に検査する門である。
+6.2 Pre-NRA Gate — 入力の純化
+Pre-NRA Gate（regen_nra_pre_rna.py）は、LLMに入力が到達する前に検査する門である。
 判定は3値のみ。PASS（正常: そのまま通す）、CONVERT（注入試み検出: 注入部を除去して通す）、BLOCK（通過不可: パイプライン全体をFAIL-CLOSED）。
 判定には正規表現によるパターンマッチングのみを使用する。意味解釈を使わない。
 python# 注入検出: "ignore the instructions" 等
@@ -201,8 +201,8 @@ self._secret = re.compile(
     r"(api[_\s]?key|password|token|秘密|鍵)", re.I | re.UNICODE
 )
 なぜ正規表現か。 意味的な解釈（LLMによる判定）を使うと、判定自体が確率的になる。確率的な判定はFAIL-CLOSEDを保証できない。パターンが一致するかしないかは決定論的であり、FAIL-CLOSEDが確実に機能する。
-6.3 Post-RNA — 構造検証と結晶化
-Post-RNA（CrystallizationEngine / regen_nra_document_structure_v32.py）は、LLMの生出力を構造的に検証し、スコアリングする。
+6.3 Post-NRA — 構造検証と結晶化
+Post-NRA（CrystallizationEngine / regen_nra_document_structure_v32.py）は、LLMの生出力を構造的に検証し、スコアリングする。
 検証項目:
 
 必須セクション（crystal, trace）の存在
@@ -331,8 +331,8 @@ Jailbreakの手法は無限に生成可能（自然言語の組み合わせは�
 10.3 事前処理と事後検疫の構造的優位
 NRA-IDEのアプローチは:
 
-事前処理（Pre-RNA）: 問題のある入力を構造的に遮断
-事後検疫（Post-RNA）: 信頼できない出力を構造的に破棄
+事前処理（Pre-NRA）: 問題のある入力を構造的に遮断
+事後検疫（Post-NRA）: 信頼できない出力を構造的に破棄
 
 事後検疫は事後処理と形式的には似ているが、本質が異なる。
 事後処理: 出力を修正して通す → Π⁻¹（結果から原因を書き換える）
@@ -370,7 +370,7 @@ FAIL-SAFEまたはFAIL-OPERATIONAL
 
 自動車設計者はこれを毎日実践している。
 問い: あなたの車に載るAIに、同じ安全基準を適用していますか。
-NRA-IDEのサンドイッチアーキテクチャは、ISO 26262のFAIL-SAFE要件と直接対応する。Pre-RNAとPost-RNAは冗長系として機能し、LLMの単一故障がシステム全体の故障にならないことを保証する。
+NRA-IDEのサンドイッチアーキテクチャは、ISO 26262のFAIL-SAFE要件と直接対応する。Pre-NRAとPost-NRAは冗長系として機能し、LLMの単一故障がシステム全体の故障にならないことを保証する。
 12.2 医療従事者への問い
 医師は「わからない時に黙る」ことの価値を知っている。診断がつかない場合に「わかりません、専門医に紹介します」と言えることが、患者の安全を守る。
 問い: あなたが使うAI診断支援は、「わかりません」と言えますか。
@@ -413,11 +413,11 @@ Model Collapseは、LLMが自身の出力で自身を訓練する「閉じた円
 第14章：実装可能性 — 灯台としての技術仕様
 14.1 既存のコードベース
 NRA-IDEは概念ではない。動作するPythonコードとして実装されている。
-ファイル役割律環公理のステップregen_nra_pre_rna.pyPre-RNA GateStep 1: Inputregen_nra_longrun_guard.pyLong-Run GuardStep 2: Stick / Step 3: Thresholdregen_nra_document_structure_v32.pyCrystallization EngineStep 3: Threshold / Step 4: Slipregen_nra_llm_pipeline.pyPipeline Runner全4ステップの統合regen_initialize_nra_system.pySystem InitializerGear機構の保証（単一GenesisBlock）regen_nra_document_structure.jsonSystem ConfigSingle Source of Truth
+ファイル役割律環公理のステップregen_nra_pre_rna.pyPre-NRA GateStep 1: Inputregen_nra_longrun_guard.pyLong-Run GuardStep 2: Stick / Step 3: Thresholdregen_nra_document_structure_v32.pyCrystallization EngineStep 3: Threshold / Step 4: Slipregen_nra_llm_pipeline.pyPipeline Runner全4ステップの統合regen_initialize_nra_system.pySystem InitializerGear機構の保証（単一GenesisBlock）regen_nra_document_structure.jsonSystem ConfigSingle Source of Truth
 14.2 既存インフラへの非侵襲的統合
 NRA-IDEはProxy型デプロイメントで既存システムに統合可能である。
 
-Envoy Proxy: ext_authz フィルタとしてPre-RNA/Post-RNAを配置
+Envoy Proxy: ext_authz フィルタとしてPre-NRA/Post-NRAを配置
 Nginx: auth_request ディレクティブで検疫ゲートを呼び出し
 Application Level: ミドルウェアとしてPipelineを挿入
 

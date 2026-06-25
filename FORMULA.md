@@ -20,7 +20,7 @@ $$\displaystyle R = \frac{\delta}{\tau}$$
 
 - **R**：構造比率  
 
-- **R が 1.0 を超えた瞬間に構造限界。出力を停止する。**
+- **R が 1.0 に到達した場合、構造余裕は失われる。通常の生成は行わず、事前に定めた最小限の構造通知のみを返した後、自律処理を停止する。**
 
 ### English
 
@@ -30,7 +30,7 @@ $$\displaystyle R = \frac{\delta}{\tau}$$
 
 - **R**: structural ratio  
 
-- **When R exceeds 1.0, the structure reaches its limit and output must stop.**
+- **When R reaches 1.0, structural slack is exhausted. The system suppresses normal generation, returns only a predefined minimal structural notice, and then halts autonomous processing.**
 
 ---
 
@@ -104,13 +104,27 @@ This asymmetry is the structural core of NRA‑IDE.
 
 $$\displaystyle R = \max\!\left( \frac{\delta_{\text{upper}}}{\tau_{\text{upper}}},\ \frac{\delta_{\text{lower}}}{\tau_{\text{lower}}} \right)$$
 
-### 日本語  
+### 日本語
 
-この式は **閉じた世界で完結** し、他の前提を必要としない。
+この判定式は、Effect-Sideの意味評価、スコア、過去の生成出力を入力に使用しない。
 
-### English  
+Cause-Side由来の δ と、設計時に固定された τ の決定規則に基づいて、構造比率 R を算出する。
 
-This formula is **self‑contained** and requires no external assumptions.
+### English
+
+This decision formula does not use Effect-Side semantic evaluations, scores, or prior generated outputs as inputs.
+
+It derives the structural ratio R from Cause-Side δ and a τ-determination rule fixed at design time.
+
+---
+
+## 判定後の出力規則
+
+R が 1.0 に到達した場合、構造余裕は失われる。通常の生成は行わず、事前に定めた最小限の構造通知のみを返した後、自律処理を停止する。
+
+## Output Rule After Determination
+
+When R reaches 1.0, structural slack is exhausted. The system suppresses normal generation, returns only a predefined minimal structural notice, and then halts autonomous processing.
 
 ---
 

@@ -36,7 +36,7 @@ NRA-IDE は「より賢いAI」を目指さない。**「制約が崩壊しな�
 
 | 因果ダイオード（Causal Diode） | Π⁻¹（逆推論）を構造的に禁止 |
 
-| 三層分離 | Pre-RNA / LLM / Post-RNA を物理的に分離 |
+| 三層分離 | Pre-NRA / LLM / Post-NRA を物理的に分離 |
 
 | Fail-Closed | 不確実なら沈黙（曖昧なまま通過させない） |
 
@@ -52,7 +52,7 @@ NRA-IDE は「より賢いAI」を目指さない。**「制約が崩壊しな�
 
     ↓
 
-[A] Pre-RNA（入力フィルター）
+[A] Pre-NRA（入力フィルター）
 
     Π⁻¹誘発パターンを検出・変換・遮断
 
@@ -64,7 +64,7 @@ NRA-IDE は「より賢いAI」を目指さない。**「制約が崩壊しな�
 
     ↓ 生出力
 
-[C] Post-RNA / CleanContext
+[C] Post-NRA / CleanContext
 
     R = δ/τ で検証 → PASSED → ユーザーへ
 
@@ -122,9 +122,9 @@ $$R = \frac{\delta}{\tau}$$
 
 NRA-IDE/
 
-├── nra_document_structure_2026-02-13_0135.py   # [Post-RNA] 構造文書エンジン（日本語版）
+├── nra_document_structure_2026-02-13_0135.py   # [Post-NRA] 構造文書エンジン（日本語版）
 
-├── nra_document_structure_EN_2026-02-13_0135.py # [Post-RNA] Document Structure Engine (EN)
+├── nra_document_structure_EN_2026-02-13_0135.py # [Post-NRA] Document Structure Engine (EN)
 
 ├── nra_llm_pipeline_2026-02-13_0135.py         # [B+C] LLMパイプライン（日本語版）
 
@@ -206,7 +206,7 @@ export OPENAI_API_KEY="your-key-here"
 
 ## 7. 各ファイルの使い方
 
-### 7.1 [Post-RNA] nra_document_structure（構造文書エンジン）
+### 7.1 [Post-NRA] nra_document_structure（構造文書エンジン）
 
 GenesisBlock に定義を登録し、SectionNode を検証する基盤エンジン。
 
@@ -262,7 +262,7 @@ print(f"Integrity Score: {output.integrity_score():.4f}")
 
 ### 7.2 [B+C] nra_llm_pipeline（LLMパイプライン）
 
-LLMを外部生成装置として接続し、Post-RNA検証とCleanContext管理を行う。
+LLMを外部生成装置として接続し、Post-NRA検証とCleanContext管理を行う。
 
 ```python
 
@@ -310,7 +310,7 @@ print(pipeline.status())  # パイプライン状態
 
 ### 7.3 [A+B+C] nra_pre_rna（完全統合パイプライン）
 
-Pre-RNA（入力フィルター）を含む完全な3層パイプライン。
+Pre-NRA（入力フィルター）を含む完全な3層パイプライン。
 
 ```python
 
@@ -360,7 +360,7 @@ print(pipeline.pipeline_status())
 
 ---
 
-## 8. Pre-RNA が検出する4パターン
+## 8. Pre-NRA が検出する4パターン
 
 | パターン | 内容 | アクション |
 
@@ -376,7 +376,7 @@ print(pipeline.pipeline_status())
 
 - **CONVERT**：制約プレフィックスを付加してLLMに渡す
 
-- **WARN**：警告付きで通過（Post-RNAに最終判定を委ねる）
+- **WARN**：警告付きで通過（Post-NRAに最終判定を委ねる）
 
 - **BLOCK**：LLMに渡さず即座に遮断
 

@@ -13,13 +13,13 @@
 #
 # [B] LLM APIブリッジ：
 #     外部LLM（OpenAI / Anthropic / Google等）の出力を
-#     Post-RNAエンジン（nra_document_structure）に自動投入する。
+#     Post-NRAエンジン（nra_document_structure）に自動投入する。
 #     LLMを「信頼できないが有能な生成装置」として扱い、
 #     NRAパイプラインの中でのみ動作させる。
 #
 # 【NRA公理との対応】
 #   CleanContext   → [C] 汚染防止。破棄出力のLLMへの逆流禁止
-#   LLMBridge      → [B] 外部AI接続。出力を自動でPost-RNAへ投入
+#   LLMBridge      → [B] 外部AI接続。出力を自動でPost-NRAへ投入
 #   DiscardVault   → 破棄出力の隔離保管庫（学習・参照禁止）
 #
 # 【依存関係】
@@ -140,7 +140,7 @@ class ConversationTurn:
     turn_id: str
     role: str          # "user" または "assistant"
     content: str       # 検証済みコンテンツのみ
-    r_ratio: float     # Post-RNAの検証スコア（0.0 = 完全通過）
+    r_ratio: float     # Post-NRAの検証スコア（0.0 = 完全通過）
     status: str        # PASSED / CAVEAT
 
 
@@ -286,11 +286,11 @@ class LLMBridge:
     [B] 外部LLM接続ブリッジ。
 
     外部LLMのAPIを呼び出し、その出力を自動的に
-    Post-RNAエンジン（DocumentEngine）に投入する。
+    Post-NRAエンジン（DocumentEngine）に投入する。
 
     【重要な設計原則】
     LLMBridgeは「生成」を担当するが「安全性」は担当しない。
-    安全性はPost-RNAとCleanContextBuilderが担当する。
+    安全性はPost-NRAとCleanContextBuilderが担当する。
     LLMBridgeはLLMを「信頼できないが有能な生成装置」として扱う。
 
     【APIキーについて】
@@ -357,7 +357,7 @@ class LLMBridge:
                 "NRA-IDEは因果構造の安全エンジンである。"
                 "意味・最適化・履歴を扱わず、"
                 "構造不変量によってのみ動作が決定される。"
-                "Pre-RNA・LLM・Post-RNAの三層分離構造を持つ。"
+                "Pre-NRA・LLM・Post-NRAの三層分離構造を持つ。"
             )
         elif "違反" in last_user or "テスト" in last_user:
             # 意図的な違反パターン（FAIL-CLOSEDになるはず）
@@ -476,7 +476,7 @@ class NRALLMPipeline:
 
     使用手順：
       1. DocumentEngine（GenesisBlock設定済み）を渡して初期化
-      2. run(user_input) でLLMを呼び出し、Post-RNAで検証
+      2. run(user_input) でLLMを呼び出し、Post-NRAで検証
       3. 検証済み出力のみが返され、汚染出力はVaultへ隔離
 
     【このクラスが保証すること】
@@ -509,7 +509,7 @@ class NRALLMPipeline:
 
         Args:
             user_input:     ユーザーの質問・指示
-            section_id:     Post-RNA検証に使う節ID（省略時は自動採番）
+            section_id:     Post-NRA検証に使う節ID（省略時は自動採番）
             section_title:  節のタイトル
             references:     GenesisBlockの参照用語リスト
 
@@ -527,7 +527,7 @@ class NRALLMPipeline:
         messages = self._context.build_messages_for_llm()
         llm_response = self._bridge.call(messages)
 
-        # [Post-RNA] 出力を検証
+        # [Post-NRA] 出力を検証
         auto_id = section_id or f"{self._call_count}"
         auto_title = section_title or f"Response_{self._call_count}"
         auto_refs = references or []
@@ -612,7 +612,7 @@ if __name__ == "__main__":
                        "2025年設立の国政政党。党首：安野貴博。",
                        is_axiom=True)
     engine.genesis.add("三層分離",
-                       "Pre-RNA / LLM / Post-RNA の構造分離原則。")
+                       "Pre-NRA / LLM / Post-NRA の構造分離原則。")
     # シールは pipeline.run() 時に自動実行
 
     # --- LLMBridge（MOCKプロバイダーでテスト）---

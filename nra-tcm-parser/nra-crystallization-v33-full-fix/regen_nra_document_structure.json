@@ -32,13 +32,13 @@
       "gate_axiom": "Life-critical and dignity decisions are structurally excluded from LLM output",
       "fail_closed": "On ambiguity, error or low score: return empty string, never guess",
       "append_only": "Vault log is write-once; no retroactive modification permitted",
-      "sandwich_architecture": "Pre-RNA gate and post-crystallization validation bracket every LLM call"
+      "sandwich_architecture": "Pre-NRA gate and post-crystallization validation bracket every LLM call"
     }
   },
   "modules": [
     {
       "file": "regen_nra_pre_rna.py",
-      "role": "Pre-RNA gate",
+      "role": "Pre-NRA gate",
       "exports": ["PreRNAGate", "PreRNAResult", "PolicyAction"]
     },
     {

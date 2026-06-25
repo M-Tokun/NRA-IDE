@@ -13,13 +13,13 @@
 #
 # [B] LLM API Bridge:
 #     Feeds the output of external LLMs (OpenAI / Anthropic / Google / etc.)
-#     automatically into the Post-RNA engine (nra_document_structure).
+#     automatically into the Post-NRA engine (nra_document_structure).
 #     Treats the LLM as an 'untrustworthy but capable generation device',
 #     allowing it to operate only within the NRA pipeline.
 #
 # [NRA Axiom Mapping]
 #   CleanContext   → [C] Contamination prevention. Prohibits back-flow of discarded output to LLM.
-#   LLMBridge      → [B] External AI connection. Automatically feeds output to Post-RNA.
+#   LLMBridge      → [B] External AI connection. Automatically feeds output to Post-NRA.
 #   DiscardVault   → Isolated vault for discarded output (forbidden for learning or reference).
 #
 # [Dependencies]
@@ -140,7 +140,7 @@ class ConversationTurn:
     turn_id: str
     role: str          # "user" or "assistant"
     content: str       # Validated content only
-    r_ratio: float     # Post-RNA validation score (0.0 = full pass)
+    r_ratio: float     # Post-NRA validation score (0.0 = full pass)
     status: str        # PASSED / CAVEAT
 
 
@@ -286,11 +286,11 @@ class LLMBridge:
     [B] External LLM connection bridge.
 
     Calls the external LLM API and automatically feeds its output
-    into the Post-RNA engine (DocumentEngine).
+    into the Post-NRA engine (DocumentEngine).
 
     [Critical Design Principles]
     LLMBridge handles 'generation' but NOT 'safety'.
-    Safety is handled by Post-RNA and CleanContextBuilder.
+    Safety is handled by Post-NRA and CleanContextBuilder.
     LLMBridge treats the LLM as an 'untrustworthy but capable generation device'.
 
     [API Keys]
@@ -357,7 +357,7 @@ class LLMBridge:
                 "NRA-IDEは因果構造の安全エンジンである。"
                 "意味・最適化・履歴を扱わず、"
                 "構造不変量によってのみ動作が決定される。"
-                "Pre-RNA・LLM・Post-RNAの三層分離構造を持つ。"
+                "Pre-NRA・LLM・Post-NRAの三層分離構造を持つ。"
             )
         elif "違反" in last_user or "テスト" in last_user:
             # Intentional violation pattern (should trigger FAIL-CLOSED)
@@ -476,7 +476,7 @@ class NRALLMPipeline:
 
     Usage:
       1. Initialize by passing a DocumentEngine (with GenesisBlock configured)
-      2. Call run(user_input) to invoke the LLM and validate via Post-RNA
+      2. Call run(user_input) to invoke the LLM and validate via Post-NRA
       3. Only validated output is returned; contaminated output is isolated to Vault
 
     [Guarantees of this class]
@@ -509,7 +509,7 @@ class NRALLMPipeline:
 
         Args:
             user_input:     User question or instruction
-            section_id:     Section ID for Post-RNA validation (auto-assigned if omitted)
+            section_id:     Section ID for Post-NRA validation (auto-assigned if omitted)
             section_title:  節のタイトル
             references:     List of GenesisBlock reference terms
 
@@ -527,7 +527,7 @@ class NRALLMPipeline:
         messages = self._context.build_messages_for_llm()
         llm_response = self._bridge.call(messages)
 
-        # [Post-RNA] 出力を検証
+        # [Post-NRA] 出力を検証
         auto_id = section_id or f"{self._call_count}"
         auto_title = section_title or f"Response_{self._call_count}"
         auto_refs = references or []
@@ -612,7 +612,7 @@ if __name__ == "__main__":
                        "2025年設立の国政政党。党首：安野貴博。",
                        is_axiom=True)
     engine.genesis.add("三層分離",
-                       "Pre-RNA / LLM / Post-RNA の構造分離原則。")
+                       "Pre-NRA / LLM / Post-NRA の構造分離原則。")
     # シールは pipeline.run() 時に自動実行
 
     # --- LLMBridge (testing with MOCK provider)---

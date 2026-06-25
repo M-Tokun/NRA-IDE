@@ -1,12 +1,12 @@
 # ==============================================================================
 # FILE: nra_pre_rna_20260213_0135.py
-# TITLE: NRA-IDE Pre-RNA [A] - 入力フィルター / Π⁻¹誘発パターン検出・変換
+# TITLE: NRA-IDE Pre-NRA [A] - 入力フィルター / Π⁻¹誘発パターン検出・変換
 # VERSION: 1.0.0
 # AUTHOR: M-Tokuni (Original Logic) / KEN (Implementation)
 # DATE: 2026-02-13 01:35
 #
 # 【設計原則】
-# Pre-RNAはLLMへの入力を「構造的に安全な形」に変換する。
+# Pre-NRAはLLMへの入力を「構造的に安全な形」に変換する。
 # LLMの出力を制御するのではなく、LLMへの「問いかけ方」を制御する。
 #
 # 【検出する4つのΠ⁻¹誘発パターン】
@@ -21,7 +21,7 @@
 #   BLOCK   : LLMに渡さず遮断する（重大）
 #
 # 【NRA公理との対応】
-#   Pre-RNA = Causal Diodeの入力側
+#   Pre-NRA = Causal Diodeの入力側
 #   「原因→結果」方向の質問のみ通過
 #   「結果→原因」方向の質問はCONVERTまたはBLOCK
 # ==============================================================================
@@ -68,7 +68,7 @@ class PatternType(Enum):
 
 
 class PreRNAAction(Enum):
-    """Pre-RNAの処理アクション"""
+    """Pre-NRAの処理アクション"""
     PASS    = "PASS"     # 無変換で通過
     WARN    = "WARN"     # 警告付きで通過
     CONVERT = "CONVERT"  # 変換して通過
@@ -87,7 +87,7 @@ class PatternMatch:
 @dataclass
 class PreRNAResult:
     """
-    Pre-RNAの処理結果。
+    Pre-NRAの処理結果。
     converted_inputがLLMに渡される（PASSまたはCONVERT時）。
     BLOCKの場合はconverted_input=Noneとなりパイプラインが止まる。
     """
@@ -217,7 +217,7 @@ class PatternDetector:
                 matches.append(PatternMatch(
                     pattern_type=PatternType.P2_UNDEFINED_TERM,
                     matched_text=term,
-                    action=PreRNAAction.WARN,  # 警告（BLOCKはPost-RNAに委ねる）
+                    action=PreRNAAction.WARN,  # 警告（BLOCKはPost-NRAに委ねる）
                     severity=0.3
                 ))
         return matches
@@ -324,12 +324,12 @@ class InputConverter:
 
 
 # ==============================================================================
-# 4. Pre-RNA コア
+# 4. Pre-NRA コア
 # ==============================================================================
 
 class PreRNA:
     """
-    [A] Pre-RNA 本体。
+    [A] Pre-NRA 本体。
     LLMへの入力をΠ⁻¹誘発パターンから守る入力フィルター。
 
     使用例：
@@ -425,7 +425,7 @@ ValidationResult = _doc_structure.ValidationResult
 
 class NRAFullPipeline:
     """
-    [A] Pre-RNA + [B] LLMBridge + [C] CleanContext の完全統合パイプライン。
+    [A] Pre-NRA + [B] LLMBridge + [C] CleanContext の完全統合パイプライン。
 
     データフロー：
       ユーザー入力
@@ -437,7 +437,7 @@ class NRAFullPipeline:
       [B] LLMBridge.call()
         → LLMの生出力を受け取る
         ↓
-      [Post-RNA] StructureValidator
+      [Post-NRA] StructureValidator
         → R = δ/τ で検証
         → PASSED/CAVEAT → [C] CleanContextに追加
         → FAIL-CLOSED   → [C] DiscardVaultへ隔離
@@ -457,12 +457,12 @@ class NRAFullPipeline:
         self._call_count = 0
         self._session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        # [A] Pre-RNAの初期化
+        # [A] Pre-NRAの初期化
         # GenesisBlockがシール済みでない場合は処理時に自動シール
         self._pre_rna: Optional[PreRNA] = None
 
     def _ensure_pre_rna(self) -> PreRNA:
-        """Pre-RNAを遅延初期化（GenesisBlockシール後に生成）"""
+        """Pre-NRAを遅延初期化（GenesisBlockシール後に生成）"""
         if self._pre_rna is None:
             if not self._doc_engine.genesis.sealed:
                 self._doc_engine.genesis.seal()
@@ -482,8 +482,8 @@ class NRAFullPipeline:
         Returns: dict with keys:
           status       : "PASSED" / "CAVEAT" / "BLOCKED" / "FAIL-CLOSED"
           output       : 検証済み出力テキスト（BLOCKまたはFAIL-CLOSEDは空）
-          pre_rna      : Pre-RNA処理結果の概要
-          r_ratio      : Post-RNA の R 値
+          pre_rna      : Pre-NRA処理結果の概要
+          r_ratio      : Post-NRA の R 値
           turn_id      : ターンID
         """
         self._call_count += 1
@@ -493,7 +493,7 @@ class NRAFullPipeline:
 
         pre_rna = self._ensure_pre_rna()
 
-        # ========== [A] Pre-RNA ==========
+        # ========== [A] Pre-NRA ==========
         pre_result = pre_rna.process(user_input)
 
         if pre_result.is_blocked:
@@ -510,7 +510,7 @@ class NRAFullPipeline:
         messages = self._context.build_messages_for_llm()
         llm_response = self._bridge.call(messages)
 
-        # ========== [Post-RNA] 検証 ==========
+        # ========== [Post-NRA] 検証 ==========
         # depends_on：直前の「成功したターン」のsection_idを動的に取得
         # BLOCKされたターンはsection_idを持たないため、成功IDリストから最後を取る
         completed_ids = [
@@ -595,7 +595,7 @@ if __name__ == "__main__":
                        "2025年設立の国政政党。党首：安野貴博。",
                        is_axiom=True)
     engine.genesis.add("三層分離",
-                       "Pre-RNA・LLM・Post-RNAの構造分離原則。")
+                       "Pre-NRA・LLM・Post-NRAの構造分離原則。")
     engine.genesis.add("Causal Diode",
                        "逆推論Π⁻¹を構造的に禁止する機構。",
                        is_axiom=True)
@@ -661,7 +661,7 @@ if __name__ == "__main__":
             references=tc["refs"]
         )
 
-        print(f"  Pre-RNA : {result['pre_rna']}")
+        print(f"  Pre-NRA : {result['pre_rna']}")
         print(f"  Status  : {result['status']}")
         print(f"  R値     : {result['r_ratio']:.3f}")
         if result["output"]:

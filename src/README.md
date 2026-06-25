@@ -38,7 +38,7 @@ NRA-IDE does not aim to build a "smarter AI." It implements a **safety middlewar
 
 | Causal Diode | Pi-1 (reverse inference) is structurally prohibited |
 
-| Three-Layer Separation | Pre-RNA / LLM / Post-RNA are physically isolated |
+| Three-Layer Separation | Pre-NRA / LLM / Post-NRA are physically isolated |
 
 | Fail-Closed | Silence if uncertain (no passage while ambiguous) |
 
@@ -54,7 +54,7 @@ User Input
 
     ↓
 
-[A] Pre-RNA  (Input Filter)
+[A] Pre-NRA  (Input Filter)
 
     Detect / Convert / Block Pi-1-inducing patterns
 
@@ -66,7 +66,7 @@ User Input
 
     ↓  raw output
 
-[C] Post-RNA / CleanContext
+[C] Post-NRA / CleanContext
 
     Validate via R = δ/τ
 
@@ -130,9 +130,9 @@ Only **τ** and **R_op** may be adjusted. Adjustments based on semantics, perfor
 
 NRA-IDE/
 
-├── nra_document_structure_2026-02-13_0135.py   # [Post-RNA] Document Structure Engine (JP)
+├── nra_document_structure_2026-02-13_0135.py   # [Post-NRA] Document Structure Engine (JP)
 
-├── nra_document_structure_EN_2026-02-13_0135.py # [Post-RNA] Document Structure Engine (EN)
+├── nra_document_structure_EN_2026-02-13_0135.py # [Post-NRA] Document Structure Engine (EN)
 
 ├── nra_llm_pipeline_2026-02-13_0135.py         # [B+C] LLM Pipeline (JP)
 
@@ -200,7 +200,7 @@ python3 nra_pre_rna_EN_2026-02-13_0135.py
 
 python3 nra_llm_pipeline_EN_2026-02-13_0135.py
 
-# [Post-RNA] document structure only
+# [Post-NRA] document structure only
 
 python3 nra_document_structure_EN_2026-02-13_0135.py
 
@@ -222,7 +222,7 @@ export GOOGLE_API_KEY="..."             # Google Gemini
 
 ## 7. Usage Guide
 
-### 7.1 [Post-RNA] Document Structure Engine
+### 7.1 [Post-NRA] Document Structure Engine
 
 Register definitions in GenesisBlock and validate SectionNodes.  
 
@@ -322,7 +322,7 @@ print(f"Integrity Score: {output.integrity_score():.4f}")
 
 Connect an external LLM as a generation device.  
 
-Post-RNA validates output; CleanContext prevents contaminated history.
+Post-NRA validates output; CleanContext prevents contaminated history.
 
 ```python
 
@@ -408,7 +408,7 @@ NRA CleanContext:
 
 ### 7.3 [A+B+C] Full Integrated Pipeline
 
-Adds Pre-RNA input filtering to the [B+C] pipeline.  
+Adds Pre-NRA input filtering to the [B+C] pipeline.  
 
 The complete NRA-IDE safety chain.
 
@@ -468,7 +468,7 @@ for label, user_input, refs in test_inputs:
 
     print(f"[{result['status']:12s}] {label}")
 
-    print(f"  Pre-RNA : {result['pre_rna']}")
+    print(f"  Pre-NRA : {result['pre_rna']}")
 
     print(f"  R value : {result['r_ratio']:.3f}")
 
@@ -478,7 +478,7 @@ print(pipeline.pipeline_status())
 
 ---
 
-## 8. Pre-RNA: Four Pi-1-Inducing Patterns
+## 8. Pre-NRA: Four Pi-1-Inducing Patterns
 
 | Pattern | Trigger | Action | Severity |
 
@@ -496,7 +496,7 @@ print(pipeline.pipeline_status())
 
 - `CONVERT` — Prepend constraint prefix; pass modified input to LLM
 
-- `WARN` — Pass with warning; delegate final judgment to Post-RNA
+- `WARN` — Pass with warning; delegate final judgment to Post-NRA
 
 - `BLOCK` — Do not call LLM; return block result immediately
 

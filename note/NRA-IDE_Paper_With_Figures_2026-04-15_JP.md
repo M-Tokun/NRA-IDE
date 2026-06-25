@@ -126,7 +126,7 @@ $$
 
 ## 4. RNA サンドイッチ構造
 
-NRA-IDE の実装上の中核は、Pre-RNA、LLM、Post-RNA から成る三層分離構造である。
+NRA-IDE の実装上の中核は、Pre-NRA、LLM、Post-NRA から成る三層分離構造である。
 
 \begin{figure}[t]
 
@@ -134,13 +134,13 @@ NRA-IDE の実装上の中核は、Pre-RNA、LLM、Post-RNA から成る三層�
 
 \includegraphics[width=0.92\linewidth]{fig5_rna_sandwich_architecture.jpg}
 
-\caption{RNA サンドイッチ構造。Pre-RNA が因果制約を注入し、LLM を生成器として通過させ、Post-RNA が意味非依存な構造監査と破断判定を行う。}
+\caption{RNA サンドイッチ構造。Pre-NRA が因果制約を注入し、LLM を生成器として通過させ、Post-NRA が意味非依存な構造監査と破断判定を行う。}
 
 \label{fig:rna_sandwich}
 
 \end{figure}
 
-図\ref{fig:rna_sandwich} に示すように、Pre-RNA 層では因果的に定義可能な変数のみを抽出し、距離・意味・スコアなどの効果側指標を排除する。LLM は生成器として振る舞うが、安全保証機能を持たない。Post-RNA 層は出力の意味を読まず、$\delta$、$\tau$、$R$、$\omega$、violation といった構造量のみを観測して Fail-Closed を発動する。
+図\ref{fig:rna_sandwich} に示すように、Pre-NRA 層では因果的に定義可能な変数のみを抽出し、距離・意味・スコアなどの効果側指標を排除する。LLM は生成器として振る舞うが、安全保証機能を持たない。Post-NRA 層は出力の意味を読まず、$\delta$、$\tau$、$R$、$\omega$、violation といった構造量のみを観測して Fail-Closed を発動する。
 
 ## 5. ブラックボックス深化のモデル化
 

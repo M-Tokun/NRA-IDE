@@ -16,9 +16,9 @@ coherence maintenance; and error-suppression structure.
 
 | Fluctuation | Dynamic observation layer of δ (deviation) | τ = decoherence time T₂ |
 
-| Superposition | Pre-RNA structure (unconverged state space) | State in which the viable region is not yet determined |
+| Superposition | Pre-NRA structure (unconverged state space) | State in which the viable region is not yet determined |
 
-| Thresholding / Measurement | Escapement × Post-RNA convergence | Structural management of the contraction timing |
+| Thresholding / Measurement | Escapement × Post-NRA convergence | Structural management of the contraction timing |
 
 ---
 
@@ -28,7 +28,7 @@ coherence maintenance; and error-suppression structure.
 
 - Correlation is described along three axes — constraint, energy, and tension — not distance.
 
-- Coherence check is performed immediately before Pre-RNA → Post-RNA transition. If coherence is absent, "infeasible" is returned.
+- Coherence check is performed immediately before Pre-NRA → Post-NRA transition. If coherence is absent, "infeasible" is returned.
 
 ---
 
@@ -168,7 +168,7 @@ Their difference is the "width"
 
                     Has the outer edge of the boundary band been reached?
 
-                    NO  → continue in "backlash" zone (Pre-RNA maintained)
+                    NO  → continue in "backlash" zone (Pre-NRA maintained)
 
                     YES → switch to high-resolution mode
 
@@ -176,7 +176,7 @@ Their difference is the "width"
 
                     R ≦ R_max?
 
-                    YES → Post-RNA convergence (measurement · collapse)
+                    YES → Post-NRA convergence (measurement · collapse)
 
                     NO  → Causal Diode blocking → log
 
@@ -198,7 +198,7 @@ Their difference is the "width"
 
 | No reverse inference (Causal Diode) | Direction of entanglement correlation is explicitly fixed |
 
-| Return "infeasible" when coherence is absent | Coherence check before Pre-RNA → Post-RNA transition |
+| Return "infeasible" when coherence is absent | Coherence check before Pre-NRA → Post-NRA transition |
 
 | Escapement principle | Concentrate verification cost only on detection of boundary band arrival |
 

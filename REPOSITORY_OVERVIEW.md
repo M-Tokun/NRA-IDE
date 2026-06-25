@@ -76,11 +76,11 @@ Quick navigation map. Start here if you are new to this repository.
 ## Architecture Overview
 
 ```
-Pre-RNA  (input gate / filter)
+Pre-NRA  (input gate / filter)
     ↓
 LLM      (generation device)
     ↓
-Post-RNA (validator / CleanContext)
+Post-NRA (validator / CleanContext)
 ```
 
 - **Fail-Closed**: Outputs violating structural constraints are silenced and discarded — never reintroduced into LLM context.
@@ -92,9 +92,9 @@ Post-RNA (validator / CleanContext)
 
 | Script Pattern | Role |
 |---|---|
-| `nra_pre_rna_*.py` | Full integrated pipeline (Pre-RNA + LLM + Post-RNA) |
-| `nra_llm_pipeline_*.py` | LLM bridge with Post-RNA validation |
-| `nra_document_structure_*.py` | Post-RNA document structure engine |
+| `nra_pre_rna_*.py` | Full integrated pipeline (Pre-NRA + LLM + Post-NRA) |
+| `nra_llm_pipeline_*.py` | LLM bridge with Post-NRA validation |
+| `nra_document_structure_*.py` | Post-NRA document structure engine |
 | `structure_gate_bilingual_*.py` | Bilingual gate handling |
 | `structure_gate_survival_base_*.py` | Survival / robustness gate logic |
 | `BioDynamic_IDE_Engine_*.py` | Experimental biodynamic engine variant |
