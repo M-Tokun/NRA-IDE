@@ -1,6 +1,10 @@
-# NRA-IDE Cline Rules
+# NRA-IDE Cline Bootstrap Rules
+# FILE: .clinerules / 2026-06-27 17:12 JST
 
-Always read the following files using your file reading tools BEFORE starting any task or taking any action:
+Before starting any task or action, read:
 
-1. [`AGENTS.md`](./AGENTS.md) - The always-active kernel rules.
-2. [`CLINE.md`](./CLINE.md) - Specific operation rules for Cline.
+1. `AGENTS.md` — common authority and permission kernel
+2. `CLINE.md` — Cline adapter only
+
+Then follow the conditional read gates defined in `AGENTS.md`.
+Do not treat this file as an independent permission source.

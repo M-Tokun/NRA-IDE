@@ -1,6 +1,13 @@
-# NRA-IDE Cursor Rules
+# NRA-IDE Cursor Bootstrap Rules
+# FILE: .cursorrules / 2026-06-27 17:12 JST
 
-Always read the following files using your file reading tools BEFORE starting any task or taking any action:
+Before starting any task or action, read:
 
-1. [`AGENTS.md`](./AGENTS.md) - The always-active kernel rules.
-2. [`CLAUDE.md`](./CLAUDE.md) - Specific operation rules for Claude/Cursor.
+1. `AGENTS.md` — common authority and permission kernel
+
+Then follow the conditional read gates defined in `AGENTS.md`.
+
+Do not read `CLAUDE.md`, `GEMINI.md`, or `CLINE.md` merely because Cursor is the host IDE.
+Read an adapter file only when the active agent is the matching agent and its own runtime requires it.
+
+This file grants no additional permission.
