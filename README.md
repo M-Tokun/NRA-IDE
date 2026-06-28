@@ -36,6 +36,10 @@
 
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | Box Sandwich Architecture — structural isolation spec for LLM integration |
 
+| [ground/README.md](./ground/README.md) | Grounding and boundary-control layer — IDE-side execution gate for observed facts, sources, physical constraints, and threshold checks |
+
+| [ground/policies/inverse_grounding_policy.md](./ground/policies/inverse_grounding_policy.md) | Inverse grounding policy — execution-use eligibility, `⊥` handling, and FAIL-CLOSED conditions |
+
 | [CITATION.cff](./CITATION.cff) | Citation metadata (use this for formal attribution) |
 
 See [GOVERNANCE.md](./theory/GOVERNANCE.md) for the project's design philosophy and intent regarding derivatives.
@@ -119,6 +123,8 @@ Instead of relying on linear computation (continuity, distance, meaning), this s
 - **No Meaning Generation**: The IDE does not generate "meaning"; it evaluates structural states.
 
 - **Physical Explainability**: It calculates tension structures, threshold dynamics, and closed-world constraints in a physically explainable manner.
+
+The [`ground/`](./ground/) directory is the IDE-side grounding and boundary-control layer. It does not add NRA axioms; it defines the execution gate for whether observed facts, source lineage, physical constraints, missing values, and thresholds are usable before a result is passed onward.
 
 ---
 

@@ -9,10 +9,11 @@ Quick navigation map. Start here if you are new to this repository.
 1. [README.md](./README.md) — Project thesis and core axiom (R = δ/τ)
 2. **This file** — Repository map and quick pointers
 3. [universal-definition/](./universal-definition/) — Safety principles and formal definitions
-4. [src/](./src/) — Core implementation and pipelines
-5. [nra-tcm-parser/](./nra-tcm-parser/) — Text crystallization and large-document processing
-6. [nra-ide-cancer-treatment-support-system/](./nra-ide-cancer-treatment-support-system/) — Medical domain application
-7. [examples/](./examples/) — Interactive HTML demos (50+ simulations)
+4. [ground/](./ground/) — IDE-side grounding and boundary-control layer
+5. [src/](./src/) — Core implementation and pipelines
+6. [nra-tcm-parser/](./nra-tcm-parser/) — Text crystallization and large-document processing
+7. [nra-ide-cancer-treatment-support-system/](./nra-ide-cancer-treatment-support-system/) — Medical domain application
+8. [examples/](./examples/) — Interactive HTML demos (50+ simulations)
 
 ---
 
@@ -27,6 +28,7 @@ Quick navigation map. Start here if you are new to this repository.
 | [`docs/`](./docs/) | Supplementary documentation and developer guides |
 | [`examples/`](./examples/) | Interactive HTML demos (50+ simulations) |
 | [`gate/`](./gate/) | Gating modules — EN and JP variants |
+| [`ground/`](./ground/) | IDE-side grounding and boundary-control layer; execution-use eligibility, missing-value handling, physical constraints, and threshold checks |
 | [`multi-physics-safety-gate/`](./multi-physics-safety-gate/) | Multi-physics safety gate implementation |
 | [`note/`](./note/) | Development notes and architecture explorations |
 | [`nra-core/`](./nra-core/) | Core NRA engine |
@@ -70,6 +72,7 @@ Quick navigation map. Start here if you are new to this repository.
 | R ≥ 1.0 | Structure at limit — output must stop (Fail-Closed) |
 | Integer Phase Lock | Each state transition is structurally complete; no residual carries forward |
 | Silence Principle | When structurally impossible, return silence — never generate alternatives |
+| Grounding Boundary Policy | IDE-side execution gate for observed facts, source lineage, missing values, physical constraints, and threshold checks |
 
 ---
 

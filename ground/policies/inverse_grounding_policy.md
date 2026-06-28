@@ -1,12 +1,15 @@
-# 逆行接地公理（Inverse Grounding Axiom）Rev.2
-<!-- FILE: ground/axioms/axiom_inv.md 26-0628-1913 -->
+# 逆行接地方針（Inverse Grounding Policy）Rev.2
+<!-- FILE: ground/policies/inverse_grounding_policy.md 26-0629 -->
 <!-- 前版：26-0628-1855 → 型分離・FAIL-CLOSED精密化・ハード制約化 -->
 
 ステータス：**active**
 
+注：このファイルはIDE側の接地・境界制御方針であり、NRA公理を追加しない。
+真理や存在を決定するものではなく、実行へ渡してよい入力かを判定する。
+
 ---
 
-## Layer 0：核心公理（変更不可・最優先）
+## Layer 0：接地セマンティクス（変更不可・最優先）
 
 ### 変数の型分離
 
@@ -18,9 +21,9 @@ $$e_i = 1 \Rightarrow x_i \in \mathcal{X}_i$$
 
 $$e_i = 0 \Rightarrow x_i = \bot$$
 
-- $e_i$：接地フラグ（変数 $i$ の観測・定義・出所が有効か）
+- $e_i$：接地フラグ（変数 $i$ の観測・定義・出所が実行文脈で使用可能か）
 - $x_i$：実際の物理値
-- $\bot$：未観測・未定義・検証不能（数値補完を許さない状態）
+- $\bot$：未観測・未定義・検証不能・未使用可能（数値補完を許さない状態）
 
 **型の原則：二値性は物理値そのものではなく接地フラグに適用する。**
 
@@ -49,7 +52,7 @@ $$\mathcal{A} = \left\{x \mid x \in \mathcal{C}_{phys},\ \forall i \in M_{\mathr
 $$\mathcal{A} = \varnothing \Rightarrow \mathrm{FAIL\text{-}CLOSED}$$
 
 - $\mathcal{C}_{phys}$：保存則・境界条件・因果順序を満たす物理的許容集合
-- **$\mathcal{C}_{phys}$ はペナルティではなくハード制約。違反候補は最初から候補外。**
+- **$\mathcal{C}_{phys}$ はペナルティではなくハードゲート。最低限の物理制約に反する候補は実行候補外。**
 
 ### 逆算実行（$\mathcal{A} \neq \varnothing$ の場合のみ）
 
@@ -123,14 +126,15 @@ $\mathcal{C}_{phys}$ が定義可能なドメイン。
 実行（仮説を行動判断へ流入）：禁止
 ```
 
-### 問題解決能力スコア（横軸評価指標）
+### 接地品質スコア（IDE内部の横軸運用指標）
 
 $$P_{ground} = \frac{A_{valid} \cdot C_{trace}}{\kappa_{compute}}$$
 
 - $A_{valid}$：必須変数の有効観測率
 - $C_{trace}$：観測→制約→式→結論の追跡可能率
 - $\kappa_{compute}$：計算・探索コスト
-- **注：$\tau$ は NRA-IDE既存公理の吸収厚みと衝突するため $\kappa$ に変更**
+- **注：$\tau$ は NRA-IDE既存構造の吸収厚みと衝突するため $\kappa$ に変更**
+- **$P_{ground}$ は $R=\delta/\tau$ と同型ではない。接地品質の運用指標として扱う。**
 
 ---
 
@@ -138,9 +142,9 @@ $$P_{ground} = \frac{A_{valid} \cdot C_{trace}}{\kappa_{compute}}$$
 
 | NRA-IDE原理 | 接続 |
 |---|---|
-| 存在は生成 | $e_i \in \{0,1\}$ の接地フラグと同型 |
+| IDE | 接地判断・境界制御・実行前ゲート |
 | FAIL-CLOSED | 実行権限停止（不存在断定ではない） |
-| $\delta/\tau$ 構造 | $P_{ground}$ 分子が横軸・分母が計算コスト |
+| 横軸制御 | 事実・観測・出所・物理制約・閾値に基づく実行可否判定 |
 
 ---
 
@@ -150,6 +154,7 @@ $$P_{ground} = \frac{A_{valid} \cdot C_{trace}}{\kappa_{compute}}$$
 |---|---|---|
 | Rev.1 | 26-0628-1855 | 初版 |
 | Rev.2 | 26-0628-1913 | 型分離・FAIL-CLOSED精密化・ハード制約化・τ→κ |
+| Rev.2.1 | 26-0629 | 公理扱いを撤回し、IDE側の接地・境界制御方針として再定義 |
 
 ---
 

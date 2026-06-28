@@ -36,6 +36,10 @@
 
 | [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | ボックス・サンドイッチ・アーキテクチャ — LLM統合のための構造分離仕様 |
 
+| [ground/README.md](./ground/README.md) | 接地・境界制御レイヤー — 観測事実、出所、物理制約、閾値確認を扱うIDE側の実行前ゲート |
+
+| [ground/policies/inverse_grounding_policy.md](./ground/policies/inverse_grounding_policy.md) | 逆行接地方針 — 実行使用可否、`⊥` の扱い、FAIL-CLOSED条件 |
+
 | [CITATION.cff](./CITATION.cff) | 引用情報（正式引用はこちらを参照） |
 
 派生物に関するプロジェクトの設計思想と意図については [GOVERNANCE.md](./theory/GOVERNANCE.md) をご覧ください。
@@ -119,6 +123,8 @@
 - **意味生成なし**：IDEは「意味」を生成しない。構造的な状態を評価する。
 
 - **物理的説明可能性**：張力構造・閾値力学・閉世界制約を、物理的に説明可能な形で計算する。
+
+[`ground/`](./ground/) は、IDE側の接地・境界制御レイヤーです。NRA公理を追加する場所ではなく、観測事実、出所、物理制約、欠損値、閾値を実行へ渡してよいかを判定する実行前ゲートを定義します。
 
 ---
 
