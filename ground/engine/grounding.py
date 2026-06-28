@@ -1,7 +1,13 @@
 # ground/engine/grounding.py
-# FILE: ground/engine/grounding.py 26-0628-1913
-# NRA-IDE Inverse Grounding Engine Rev.2
-# 前版：26-0628-1855 → 型分離・3パターン実装・ハード制約化
+# FILE: ground/engine/grounding.py 26-0629
+# NRA-IDE IDE-side grounding and boundary-control engine.
+# Policy reference: ground/policies/inverse_grounding_policy.md
+#
+# This module does not add NRA axioms and does not decide truth or existence.
+# It only decides whether variables are grounded enough to be used by an
+# execution path, and when execution must fail closed.
+#
+# Rev.2.1: aligned comments with the IDE-side grounding policy.
 
 # ©M-Tokuni 2026
 
@@ -9,21 +15,35 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-BOTTOM = None  # ⊥：未観測・未定義・補完禁止
+BOTTOM = None
+"""
+⊥ sentinel.
+
+This uses Python None, but it must not be read as ordinary "no value" or as a
+claim that the variable does not exist. In this layer, BOTTOM means:
+unobserved, undefined, unverifiable, or not usable in the current execution
+context. BOTTOM values must not be filled by inference.
+"""
 
 
 @dataclass
 class GroundedVariable:
     """
-    接地済み変数。
-    e_i ∈ {0,1}：接地フラグ
-    x_i ∈ X_i ∪ {⊥}：物理値
-    観測台帳（メタデータ）を必須付帯。
+    Execution-grounded variable.
+
+    e_i ∈ {0,1}: grounding/use-eligibility flag for the current execution
+    context. It is not an existence flag.
+
+    x_i ∈ X_i ∪ {⊥}: physical value, or BOTTOM when the value is not usable.
+
+    Ledger metadata is a policy requirement for traceability. This base class
+    keeps the fields but does not yet enforce non-empty ledger validation; that
+    stricter check belongs to a later domain-specific validator.
     """
     name: str
     e: int                      # 接地フラグ（0 or 1）
     x: Any                      # 物理値（BOTTOM=⊥）
-    # 観測台帳（必須付帯メタデータ）
+    # 観測台帳（方針上は必須。現段階では空値を許容して保持する）
     acquired_at: str = ""       # 取得時刻
     location: str = ""          # 場所
     unit: str = ""              # 単位
@@ -43,7 +63,12 @@ class GroundedVariable:
 
 class GroundingEngine:
     """
-    逆行接地エンジン。
+    IDE-side grounding execution gate.
+
+    This engine classifies whether the input state may proceed to a
+    domain-specific inverse computation. It is a control layer, not an axiom
+    layer.
+
     Pattern A：全必須変数有効 → 逆算実行
     Pattern B：必須変数欠損  → FAIL-CLOSED発火
     Pattern C：非必須変数欠損 → 欠損明示で継続
@@ -88,6 +113,10 @@ class GroundingEngine:
         """
         逆行計算実行。パターン判定 → 分岐処理。
         補完推論は全パターンで禁止。
+
+        Pattern C can return its missing-optional warning only after a
+        domain-specific _inverse_compute() succeeds. The base class intentionally
+        raises NotImplementedError before that point.
         """
         pattern = self.classify(variables)
 
