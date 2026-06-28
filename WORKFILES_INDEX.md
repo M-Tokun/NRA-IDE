@@ -35,6 +35,7 @@
 - `.cursorrules`
 - `WORKFILES_INDEX.md`
 - `REPOSITORY_OVERVIEW.md`
+- `ground/`
 
 ### Confirmed: Read-Only
 
