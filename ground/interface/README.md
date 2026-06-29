@@ -18,7 +18,7 @@ NRA-IDE FAIL-CLOSED原則と同型。
 
 ## 決定条件
 
-`grounding.py` の `inverse_compute()` が
+`grounding.py` の `_inverse_compute()` が
 ドメイン別に実装完了した後に接続方式を確定する。
 
 **現時点での記述禁止事項：**

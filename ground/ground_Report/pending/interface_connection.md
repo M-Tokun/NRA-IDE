@@ -16,7 +16,7 @@
 ④ 矛盾する既存記述：④未確認のため保留
 ```
 
-**active移動条件：`inverse_compute()` ドメイン別実装完了後。**
+**active移動条件：`_inverse_compute()` ドメイン別実装完了後。**
 
 ---
 

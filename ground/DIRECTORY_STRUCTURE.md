@@ -1,5 +1,5 @@
 # NRA-IDE / ground ディレクトリ構造
-<!-- FILE: ground/DIRECTORY_STRUCTURE_26-0628-1919.md -->
+<!-- FILE: ground/DIRECTORY_STRUCTURE_26-0629.md -->
 
 ---
 
@@ -37,7 +37,7 @@ NRA-IDE/
     │               └── P_ground（IDE内部の接地品質指標）
     │
     ├── engine/
-    │   └── grounding.py                       [Rev.2 / 分岐確認用テストあり]
+    │   └── grounding.py                       [Rev.2.1 / 分岐確認用テストあり]
     │       ├── GroundedVariable（接地済み変数・観測台帳付帯）
     │       ├── GroundingEngine
     │       │   ├── classify()   → Pattern A/B/C 判定

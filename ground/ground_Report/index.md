@@ -1,11 +1,11 @@
 # ground_Report / index
-<!-- FILE: ground/ground_Report/index.md 26-0628-1913 -->
+<!-- FILE: ground/ground_Report/index.md 26-0629 -->
 
 | 概念名 | ステータス | サマリー（2行以内） |
 |---|---|---|
 | 逆行接地方針 Rev.2.1 | active | IDE側の接地・境界制御方針。$e_i$ は使用可否、$\bot$ は未使用可能状態、FAIL-CLOSED＝実行権限停止。 |
 | 接続方式 | pending | API/ライブラリ等・whatが確定後にhowを決定する。現時点で記述禁止。 |
-| ground名称整理 | active | `axiom` 表記を撤回し、IDE側の接地・境界制御方針として整理。詳細は `変更履歴.md`。 |
+| 熱波インフラカスケード足場 | pending | 変数18本・δ構造・カスケード完成条件。実観測値充当後にactive移行。 |
 
 ---
 
