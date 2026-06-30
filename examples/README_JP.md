@@ -418,6 +418,3 @@ if (deliveryStatus === "STOP") {
 
 ---
 
-- **Facebook:** https://www.facebook.com/tokuni.masa
-
-- **Note:** https://note.com/mtokuni

@@ -1,60 +1,52 @@
 {
+  "_file": "devcontainer_NRA-IDE_2026-05-14_JST.json",
   "name": "NRA-IDE Sandbox",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
 
-  "workspaceFolder": "/workspace",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-
-  "mounts": [],
+  "workspaceFolder": "/workspace/NRA-IDE",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/NRA-IDE,type=bind,consistency=cached",
 
   "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "lts" }
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
   },
 
-  "postCreateCommand": "npm install --prefix /workspace 2>/dev/null || true",
-
   "remoteEnv": {
-    "SANDBOX": "true"
+    "SANDBOX": "true",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
   },
 
   "customizations": {
     "vscode": {
       "extensions": [
-        "anthropic.claude-code",
-        "cweijan.vscode-office",
-        "donjayamanne.githistory",
-        "eamodio.gitlens",
-        "esbenp.prettier-vscode",
-        "github.vscode-pull-request-github",
-        "google.colab",
-        "google.gemini-cli-vscode-ide-companion",
-        "google.geminicodeassist",
-        "henrikdev.ag-quota",
-        "intellsmi.comment-translate",
-        "mhutchie.git-graph",
-        "ms-azuretools.vscode-containers",
-        "ms-azuretools.vscode-docker",
-        "ms-ceintl.vscode-language-pack-ja",
+        "ms-python.python",
         "ms-python.debugpy",
         "ms-python.pylint",
-        "ms-python.python",
-        "ms-python.vscode-python-envs",
-        "ms-toolsai.jupyter",
-        "ms-toolsai.jupyter-keymap",
-        "ms-toolsai.jupyter-renderers",
-        "ms-toolsai.vscode-jupyter-cell-tags",
-        "ms-toolsai.vscode-jupyter-slideshow",
-        "ms-vscode.powershell",
-        "ritwickdey.liveserver",
+        "yzhang.markdown-all-in-one",
         "shd101wyy.markdown-preview-enhanced",
-        "slevesque.shader",
-        "yzhang.markdown-all-in-one"
+        "bierner.markdown-mermaid",
+        "esbenp.prettier-vscode",
+        "ritwickdey.liveserver"
       ],
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.analysis.typeCheckingMode": "basic",
+        "files.eol": "\n",
+        "files.insertFinalNewline": true,
+        "files.trimTrailingWhitespace": false,
+        "git.autofetch": false
       }
     }
   },
 
-  "remoteUser": "root"
+  "postCreateCommand": "python --version && node --version && npm --version && git --version",
+
+  "runArgs": [
+    "--security-opt=no-new-privileges"
+  ],
+
+  "containerUser": "vscode",
+  "remoteUser": "vscode"
 }

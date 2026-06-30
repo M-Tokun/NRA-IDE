@@ -380,8 +380,3 @@ For the latest information, see the official repository:
 
 - **GitHub:** https://github.com/M-Tokun/NRA-IDE
 
----
-
-- **Facebook:** https://www.facebook.com/tokuni.masa
-
-- **Note:** https://note.com/mtokuni

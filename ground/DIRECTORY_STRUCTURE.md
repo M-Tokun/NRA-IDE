@@ -52,17 +52,21 @@ NRA-IDE/
     │
     └── ground_Report/
         ├── index.md                           ← 2行サマリー一覧
-        │   ├── 逆行接地方針 Rev.2.1  [active]
-        │   ├── 接続方式              [pending]
-        │   └── ground名称整理        [active]
+        │   ├── 逆行接地方針 Rev.2.1         [active]
+        │   ├── 接続方式                     [pending]
+        │   └── 熱波インフラカスケード足場   [pending]
         │
         ├── active/
         │   └── inverse_grounding_policy.md
         │       └── 確定根拠（追記ゲート記録付き）
         │
         ├── pending/
-        │   └── interface_connection.md
-        │       └── active移動条件：inverse_compute実装完了後
+        │   ├── interface_connection.md
+        │   │   └── active移動条件：inverse_compute実装完了後
+        │   ├── heatwave_cascade_foundation.md
+        │   │   └── 変数18本・δ構造・カスケード完成条件。実観測値充当後にactive移行
+        │   └── data_collection_protocol.md
+        │       └── 変数登録・観測台帳・採用判定・警告表記の運用方針
         │
         ├── archived/                          ← 現在空
         │
