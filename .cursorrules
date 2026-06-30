@@ -1,13 +1,7 @@
 # NRA-IDE Cursor Bootstrap Rules
-# FILE: .cursorrules / 2026-06-27 17:12 JST
 
-Before starting any task or action, read:
+Before starting a session, read `AGENTS.md`.
 
-1. `AGENTS.md` — common authority and permission kernel
-
-Then follow the conditional read gates defined in `AGENTS.md`.
-
-Do not read `CLAUDE.md`, `GEMINI.md`, or `CLINE.md` merely because Cursor is the host IDE.
-Read an adapter file only when the active agent is the matching agent and its own runtime requires it.
-
-This file grants no additional permission.
+This file only defines the Cursor bootstrap point.
+The common operating contract belongs in `AGENTS.md`.
+Add Cursor-specific technical notes here only when they are necessary.
