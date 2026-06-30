@@ -1,4 +1,4 @@
-# 逆行接地方針（Inverse Grounding Policy）Rev.2
+# 逆行接地方針（Inverse Grounding Policy）Rev.2.1
 <!-- FILE: ground/policies/inverse_grounding_policy.md 26-0629 -->
 <!-- 前版：26-0628-1855 → 型分離・FAIL-CLOSED精密化・ハード制約化 -->
 
