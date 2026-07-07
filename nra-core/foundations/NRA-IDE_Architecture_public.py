@@ -1,4 +1,16 @@
 
+# FILE: NRA-IDE_Architecture_public_26-0707-1056.py
+# GENERATED: 2026-07-07 10:56 JST
+# SOURCE BASE: NRA-IDE_Architecture.py (実務版より運用層を軽量化した公開版)
+#
+# 公開版の方針:
+# - core evaluation (R = δ/τ) とDynamicTauEngine(ロジスティック型f/g)は妥協せずフル実装。
+# - DiscardVaultはインメモリ・スタブとする。本番運用ではapp-only JSONLログへ置換すること。
+# - 動的τ評価はPost-NRAだけで一回実行する。
+# - dynamic modeではCause-Sideのdelta_upper / delta_lowerを分離して用いる。
+# - HANDOFF_REQUIRED, FAIL_CLOSED, CONFESSIONの固定通知契約を維持する。
+# - observed_ropの未観測値はNoneに統一(NaNとの意味重複を排除)。
+
 import math
 from typing import Optional, Union, Dict, Any, List
 
@@ -34,7 +46,17 @@ FIXED_STRUCTURAL_NOTICE_SCHEMA: Dict[str, Any] = {
     "observed_delta": "float",
     "observed_tau": "float",
     "observed_rop": "Optional[float]",
-    "details": "Optional[str]" # 告白時などに詳細を記述
+    "details": "Optional[str]", # 告白時などに詳細を記述
+    # 動的τ評価時の監査フィールド。動的評価の結果を代表値へ潰さず、
+    # 支配側と各比率を追跡可能にするために追加する。
+    "observed_delta_upper": "Optional[float]",
+    "observed_delta_lower": "Optional[float]",
+    "observed_tau_upper": "Optional[float]",
+    "observed_tau_lower": "Optional[float]",
+    "r_upper": "Optional[float]",
+    "r_lower": "Optional[float]",
+    "r_final": "Optional[float]",
+    "dominant_side": "Optional[str]"
 }
 
 # --- 固定通知のインスタンス ---
@@ -65,7 +87,7 @@ NRA_IDE_HANDOFF_REQUIRED_R_GE_Rop: Dict[str, Any] = {
     "message": "NRA-IDE: Pre-boundary handoff point (R >= Rop) reached. Human intervention required.",
     "observed_delta": math.nan,
     "observed_tau": math.nan,
-    "observed_rop": math.nan,
+    "observed_rop": None,  # B修正: 未観測はNoneに統一。NaNとの意味重複を排除する
     "details": "Autonomous processing suppressed. Responsibility handed to a qualified human."
 }
 
@@ -75,7 +97,7 @@ NRA_IDE_PERMIT: Dict[str, Any] = {
     "message": "NRA-IDE: Within safe operating limits. Autonomous processing permitted.",
     "observed_delta": math.nan,
     "observed_tau": math.nan,
-    "observed_rop": math.nan,
+    "observed_rop": None,  # B修正: 未観測はNoneに統一
     "details": "No structural warning or handoff condition met."
 }
 
@@ -265,22 +287,55 @@ class DynamicTauEngine:
     """
     NRA-IDEの動的τ（Asymmetric Dual Ratio）を計算するエンジン。
     τが静的な値ではなく、拡大方向と縮小方向の偏差に応じて非対称に変化する仕組みを実装。
+
+    注意:
+    このオブジェクトは状態を持つ。calculate_r_dynamic() はEMAを更新するため、
+    一つのパイプライン通過ごとに一回だけ呼び出さなければならない。
     """
-    def __init__(self, initial_tau: float, alpha_upper: float, alpha_lower: float):
+    def __init__(
+        self,
+        initial_tau: float,
+        alpha_upper: float,
+        alpha_lower: float,
+        max_tau_factor: float = 2.0,
+        min_tau_factor: float = 0.1,
+        k_upper: float = 1.0,
+        k_lower: float = 1.0,
+    ):
         # initial_tau: 初期τ値。設計時に固定された基準τ。
         # alpha_upper: 上側EMAの平滑化係数 (0 < alpha_upper <= 1)。
         # alpha_lower: 下側EMAの平滑化係数 (0 < alpha_lower <= 1)。
+        # max_tau_factor: τ_upperが取り得る上限倍率 (>1.0)。無限拡大を禁止するための設計時固定値。
+        # min_tau_factor: τ_lowerが取り得る下限倍率 (0 < min_tau_factor < 1.0)。ゼロ突入を禁止する。
+        # k_upper / k_lower: ロジスティック関数の感度係数。EMAへの反応の急峻さを設計時に固定する。
+        if not isinstance(initial_tau, (int, float)) or math.isnan(initial_tau) or initial_tau <= 0:
+            raise ValueError("initial_tau must be a positive numeric value.")
         if not (0 < alpha_upper <= 1 and 0 < alpha_lower <= 1):
             raise ValueError("Alpha values for EMA must be between 0 and 1 (inclusive).")
+        if not (max_tau_factor > 1.0):
+            raise ValueError("max_tau_factor must be greater than 1.0.")
+        if not (0.0 < min_tau_factor < 1.0):
+            raise ValueError("min_tau_factor must be between 0 and 1.0 (exclusive).")
+        if k_upper <= 0 or k_lower <= 0:
+            raise ValueError("k_upper / k_lower must be positive.")
 
-        self._initial_tau: float = initial_tau
-        self._alpha_upper: float = alpha_upper
-        self._alpha_lower: float = alpha_lower
+        self._initial_tau: float = float(initial_tau)
+        self._alpha_upper: float = float(alpha_upper)
+        self._alpha_lower: float = float(alpha_lower)
+        self._max_tau_factor: float = float(max_tau_factor)
+        self._min_tau_factor: float = float(min_tau_factor)
+        self._k_upper: float = float(k_upper)
+        self._k_lower: float = float(k_lower)
 
         # EMAの初期値は最初のデータ点と等しいか、あるいは0に設定されることが多い。
         # ここでは、履歴がない状態を想定し0で初期化。
         self._ema_upper: float = 0.0
         self._ema_lower: float = 0.0
+
+    @property
+    def initial_tau(self) -> float:
+        """設計時に固定した基準τ。post_nra_output_gateの静的tauとの照合に使う(読み取り専用)。"""
+        return self._initial_tau
 
     def _update_ema(self, current_delta_u: float, current_delta_l: float) -> None:
         """上側EMAと下側EMAを更新します。"""
@@ -290,30 +345,26 @@ class DynamicTauEngine:
         self._ema_lower = self._alpha_lower * current_delta_l + (1 - self._alpha_lower) * self._ema_lower
 
     def _calculate_dynamic_tau(self) -> Dict[str, float]:
-        """EMAに基づいて動的なτ値を計算します。"""
-        # f() と g() はドメイン固有の関数であり、ここではシンプルな例としてEMAに比例すると仮定。
-        # 実際にはより複雑な非線形関数が適用される可能性があります。
-        # この例では、EMAが大きくなるほどτが拡大/縮小すると仮定。
-        # 例: f(x) = 1 + k*x, g(x) = 1 - k*x (kは感度係数)
-        # ここでは簡易的にEMAが直接的な係数としてτに乗算されると仮定します。
-        # τ_upper は拡大方向、τ_lower は縮小方向。
-        # この非対称性こそがNRA-IDEの構造的核心です。
+        """EMAに基づいて動的なτ値を計算します。
 
-        # 拡大方向のτ_upperは、偏差が大きくなるほど拡大 (例: 許容幅が広がる)
-        # 但し、τが無限に拡大しないよう、上限を設けるか、f()関数で非線形性を導入します。
-        # ここでは簡略化のため、EMAが直接影響すると仮定。
-        # 実際の適用では、f(EMA_upper)は1.0以上の値を取るべきです。
-        # 例: f(x) = 1 + x / (max_ema_possible) * (max_tau_factor - 1)
-        tau_upper: float = self._initial_tau * (1 + self._ema_upper) # 簡易的な拡大関数
+        C修正: f()/g()を単純な線形係数から、上限・下限付きロジスティック関数へ置換した。
+        線形版は EMA→∞ で τ_upper→∞、τ_lower→−∞ に発散し、非対称構造(FORMULA.md 定義式2)が
+        要求する「拡大は緩やかに飽和し、縮小はゼロに漸近するが到達しない」という設計意図を
+        満たしていなかった。ロジスティック関数はEMAがどれほど大きくなってもmax_tau_factor /
+        min_tau_factorの範囲に収束するため、τの発散もゼロ突入も構造的に禁止できる。
 
-        # 縮小方向のτ_lowerは、偏差が大きくなるほど縮小 (例: 許容幅が狭まる)
-        # 実際の適用では、g(EMA_lower)は1.0以下の、かつ0より大きい値を取るべきです。
-        # 例: g(x) = 1 - x / (max_ema_possible) * (1 - min_tau_factor)
-        tau_lower: float = self._initial_tau * (1 - self._ema_lower) # 簡易的な縮小関数
+        f(x) = 1 + (max_tau_factor - 1) * (2 / (1 + exp(-k_upper * x)) - 1)   ... x >= 0 で 1→max_tau_factor
+        g(x) = min_tau_factor + (1 - min_tau_factor) * (2 / (1 + exp(k_lower * x)))  ... x >= 0 で 1→min_tau_factor
+        """
+        # 拡大方向: EMA_upperが増えるほどτ_upperは1.0からmax_tau_factorへ漸近する。無限拡大しない。
+        logistic_upper = 2.0 / (1.0 + math.exp(-self._k_upper * self._ema_upper)) - 1.0
+        f_x = 1.0 + (self._max_tau_factor - 1.0) * logistic_upper
+        tau_upper: float = self._initial_tau * f_x
 
-        # τ_lowerが負にならないようにする。
-        if tau_lower < 0:
-            tau_lower = 0.0 # 許容幅がゼロ以下はFAIL_CLOSEDに繋がる
+        # 縮小方向: EMA_lowerが増えるほどτ_lowerは1.0からmin_tau_factorへ漸近する。ゼロには到達しない。
+        logistic_lower = 2.0 / (1.0 + math.exp(self._k_lower * self._ema_lower))
+        g_x = self._min_tau_factor + (1.0 - self._min_tau_factor) * logistic_lower
+        tau_lower: float = self._initial_tau * g_x
 
         return {"tau_upper": tau_upper, "tau_lower": tau_lower}
 
@@ -334,8 +385,27 @@ class DynamicTauEngine:
         Returns:
             Dict[str, Any]: NRA-IDEの固定構造通知。
         """
-        # EMAの更新
-        self._update_ema(current_delta_upper, current_delta_lower)
+        # 動的側でも、入力欠損を類推で補完してはならない。
+        if not isinstance(current_delta_upper, (int, float)) or math.isnan(current_delta_upper) or \
+           not isinstance(current_delta_lower, (int, float)) or math.isnan(current_delta_lower):
+            return {**NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
+                    "details": "Dynamic evaluation requires numeric Cause-Side delta_upper and delta_lower."}
+
+        # delta_upper/delta_lowerは「方向別に分離済みの偏差量」であり、定義上0以上でなければならない。
+        # 負値を許すと、f(x)/g(x)がx>=0を前提とするロジスティック式の定義域から外れ、
+        # 拡大方向(upper)が縮小に働く等、非対称構造(FORMULA.md 定義式2)の意味が崩れる。
+        if current_delta_upper < 0 or current_delta_lower < 0:
+            return {**NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
+                    "details": ("Dynamic evaluation requires non-negative directional "
+                                "Cause-Side delta_upper and delta_lower.")}
+
+        # --- 前提条件チェック (Rop) ---
+        if rop is not None and (not isinstance(rop, (int, float)) or math.isnan(rop) or not (0 < rop < 1.0)):
+            return {**NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
+                    "details": f"Rop (={rop}) must be between 0 and 1.0, or None if not applicable in dynamic context."}
+
+        # EMAの更新。この更新はPost-NRAから一回だけ呼ばれる。
+        self._update_ema(float(current_delta_upper), float(current_delta_lower))
 
         # 動的τの計算
         dynamic_taus: Dict[str, float] = self._calculate_dynamic_tau()
@@ -353,37 +423,31 @@ class DynamicTauEngine:
         # この判定式は、Effect-Sideの意味評価、スコア、過去の生成出力を入力に使用しません。
         # Cause-Side由来の δ と、設計時に固定された τ の決定規則に基づいて、構造比率 R を算出します。
         R_final: float = max(R_upper, R_lower)
+        dominant_side = "upper" if R_upper >= R_lower else "lower"
 
-        # --- コア評価アルゴリズムに準拠した最終判定 ---
-        # 動的τで計算されたR_finalと元のropを用いて、コア評価アルゴリズムを呼び出す。
-        # ここで、Ropは動的τの計算には直接関与しないが、最終的なシステム状態判定に使用される。
-        # ただし、コア評価は単一のdelta/tauを想定しているため、ここではR_finalをdelta/tauとして渡す。
-        # これは、R_finalがシステムの最も危険な側のRを表すため、それを模擬的なdelta/tauとして解釈する。
-        # この部分は、NRA-IDEのコア評価アルゴリズムが単一のRを扱うため、動的R_finalをどうマッピングするかという実装判断。
-        # ここでは、R_final >= 1.0 または R_final >= Rop を直接評価する。
-
-        # --- 前提条件チェック (Rop) ---
-        if rop is not None and not (0 < rop < 1.0):
-            return {**NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
-                    "details": f"Rop (={rop}) must be between 0 and 1.0, or None if not applicable in dynamic context."}
+        # 監査では、危険側を曖昧な代表値に潰さず、上下値・各比率・最終比率を残す。
+        audit_fields = {
+            "observed_delta_upper": float(current_delta_upper),
+            "observed_delta_lower": float(current_delta_lower),
+            "observed_tau_upper": tau_upper_dynamic,
+            "observed_tau_lower": tau_lower_dynamic,
+            "r_upper": R_upper,
+            "r_lower": R_lower,
+            "r_final": R_final,
+            "dominant_side": dominant_side,
+            "observed_delta": float(current_delta_upper if dominant_side == "upper" else current_delta_lower),
+            "observed_tau": float(tau_upper_dynamic if dominant_side == "upper" else tau_lower_dynamic),
+            "observed_rop": rop,
+        }
 
         # --- R_finalの評価 ---
-        if R_final >= 1.0:
-            return {**NRA_IDE_FAIL_CLOSED_R_GE_1_0,
-                    "observed_delta": max(current_delta_upper, current_delta_lower), # 代表値
-                    "observed_tau": max(tau_upper_dynamic, tau_lower_dynamic),      # 代表値
-                    "observed_rop": rop}
+        if tau_upper_dynamic <= 0 or tau_lower_dynamic <= 0 or R_final >= 1.0:
+            return {**NRA_IDE_FAIL_CLOSED_R_GE_1_0, **audit_fields}
 
         if rop is not None and R_final >= rop:
-            return {**NRA_IDE_HANDOFF_REQUIRED_R_GE_Rop,
-                    "observed_delta": max(current_delta_upper, current_delta_lower),
-                    "observed_tau": max(tau_upper_dynamic, tau_lower_dynamic),
-                    "observed_rop": rop}
+            return {**NRA_IDE_HANDOFF_REQUIRED_R_GE_Rop, **audit_fields}
 
-        return {**NRA_IDE_PERMIT,
-                "observed_delta": max(current_delta_upper, current_delta_lower),
-                "observed_tau": max(tau_upper_dynamic, tau_lower_dynamic),
-                "observed_rop": rop}
+        return {**NRA_IDE_PERMIT, **audit_fields}
 
 
 # --- NRA-IDE サンドイッチアーキテクチャのコンポーネント実装例 ---
@@ -418,13 +482,30 @@ def pre_nra_input_gate(raw_input: Any) -> Optional[Dict[str, Any]]:
         return {**NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
                 "details": f"Pre-NRA: Invalid 'rop' value in input: {raw_input['rop']}."}
 
+    # 動的τモードでのみ必要となる上下δは、存在する場合にだけここで検証して保持する。
+    # 動的モードで欠けている場合は、Post-NRAがCONFESSIONを返す。静的モードに不要な
+    # 変数をPre-NRAが勝手に要求して、静的評価を不必要に止めないためである。
+    for var_name in ['delta_upper', 'delta_lower']:
+        if var_name in raw_input and (not isinstance(raw_input[var_name], (int, float)) or math.isnan(raw_input[var_name])):
+            return {**NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
+                    "details": f"Pre-NRA: Invalid dynamic structural variable '{var_name}' in input."}
+        # 方向別偏差量は定義上0以上。評価器側(calculate_r_dynamic)の契約と一致させる。
+        if var_name in raw_input and raw_input[var_name] < 0:
+            return {**NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
+                    "details": f"Pre-NRA: '{var_name}' must be non-negative (directional deviation magnitude)."}
+
     # 入力が純粋であると仮定して、構造評価に必要な形式で返す
-    return {
+    sanitized = {
         "status": "SANITIZED_INPUT",
         "delta": float(raw_input['delta']),
         "tau": float(raw_input['tau']),
         "rop": float(raw_input['rop']) if 'rop' in raw_input else None
     }
+    if 'delta_upper' in raw_input:
+        sanitized['delta_upper'] = float(raw_input['delta_upper'])
+    if 'delta_lower' in raw_input:
+        sanitized['delta_lower'] = float(raw_input['delta_lower'])
+    return sanitized
 
 
 # --- LAYER 2: LLM (Generation Device / 意味の揺らぎ) ---
@@ -456,27 +537,71 @@ def post_nra_output_gate(
     structural_data: Dict[str, Any], # Pre-NRAから渡された構造変数
     current_delta: float,
     current_tau: float,
-    current_rop: Optional[float]
+    current_rop: Optional[float],
+    dynamic_engine: Optional[DynamicTauEngine] = None
 ) -> Dict[str, Any]:
     """
     Post-NRA層: LLMの生成出力をNRA-IDEのコア評価アルゴリズムで最終検証します。
+
+    dynamic_engineがある場合、Post-NRAはCause-Sideの上下δを使用して動的評価を
+    一度だけ実行する。この関数以外で同じエンジンを評価してはならない。
     """
     # LLMの出力自体は直接評価せず、LLMの生成プロセスに関連するシステムの構造変数を用いて評価します。
     # これは、LLMの出力が「Effect-Side」であり、構造評価は「Cause-Side」のデータで行われるためです。
 
-    # NRA-IDEコア評価アルゴリズムを呼び出し、構造的健全性を判定
-    evaluation_result: Dict[str, Any] = nra_ide_core_evaluation(
-        delta=current_delta,
-        tau=current_tau,
-        rop=current_rop
-    )
+    # 動的τエンジンが指定された場合は、静的tauではなく、設計時に固定された規則と
+    # Cause-Side履歴だけから得た動的τを最終判定に用いる。
+    if dynamic_engine is not None:
+        # τの権威は一つでなければならない(llms.md §3: τはCause-Side履歴のみから、
+        # 設計時固定規則の下で変化する)。静的current_tauとDynamicTauEngineの基準τが
+        # 食い違ったまま評価すると、監査上の表示値と実際の判定基準が乖離する。
+        # 不一致は値の欠落と同格の構造的矛盾として扱い、類推で片方を優先せずCONFESSIONにする。
+        if current_tau != dynamic_engine.initial_tau:
+            return {
+                "status": "CONFESSION",
+                "message": "NRA-IDE: Static tau and DynamicTauEngine.initial_tau mismatch.",
+                "nra_status": {
+                    **NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
+                    "details": (
+                        f"Dual tau authority detected: structural_data tau={current_tau}, "
+                        f"dynamic_engine.initial_tau={dynamic_engine.initial_tau}. "
+                        "Exactly one tau authority is required; reconcile before evaluation."
+                    ),
+                },
+            }
+
+        # 上下δを同じcurrent_deltaで代用しない。二重ゆらぎの意味を失わせるため、
+        # 必要値がなければ告白し、通常出力を許可しない。
+        delta_upper = structural_data.get("delta_upper")
+        delta_lower = structural_data.get("delta_lower")
+        if delta_upper is None or delta_lower is None:
+            evaluation_result: Dict[str, Any] = {
+                **NRA_IDE_CONFESSION_UNKNOWN_STRUCTURAL,
+                "details": "Post-NRA dynamic evaluation requires Cause-Side delta_upper and delta_lower. Do not substitute static delta."
+            }
+        else:
+            # EMAの更新を伴う動的評価は、この一箇所で一回だけ実行する。
+            evaluation_result = dynamic_engine.calculate_r_dynamic(
+                current_delta_upper=delta_upper,
+                current_delta_lower=delta_lower,
+                rop=current_rop
+            )
+    else:
+        # NRA-IDEコア評価アルゴリズムを呼び出し、構造的健全性を判定
+        evaluation_result = nra_ide_core_evaluation(
+            delta=current_delta,
+            tau=current_tau,
+            rop=current_rop
+        )
 
     # 評価結果に基づいて出力を制御
     if evaluation_result["status"] == "PERMIT":
         # 構造的に問題がなければ、LLMの出力を許可
         return {"status": "PERMIT", "validated_output": llm_output, "nra_status": evaluation_result}
     else:
-        # FAIL_CLOSED または HANDOFF_REQUIRED の場合、LLM出力を抑制し、固定通知を返す。
+        # HANDOFF_REQUIRED / FAIL_CLOSED / CONFESSION の場合、LLM出力を抑制し、固定通知を返す。
+        # HANDOFF_REQUIREDはCONFESSIONではない。値が既知でRopに達したため、
+        # 通常生成を止め、人間へ責任を委譲する既知の構造状態である。
         # これは「誠実な沈黙」であり、システムが設計契約を全うした状態です。
         return {"status": evaluation_result["status"], "message": evaluation_result["message"], "nra_status": evaluation_result}
 
@@ -488,24 +613,23 @@ class DiscardVault:
     """
     NRA-IDEのDiscardVault。不純なコンテキストや廃棄された生成物を隔離保管します。
     これにより、LLMが過去の不適切な情報に影響されることを防ぎます。
+
+    注記(公開版): これはインメモリの最小スタブです。プロセス再起動で内容は消失します。
+    本番運用ではapp-only JSONLログ等、永続化された台帳へ置換してください。
+    削除・書換えAPIは意図的に提供していません(append-onlyの隔離保管庫という設計思想のため)。
     """
-    _vault: List[str] = [] # 隔離されたアイテムのリスト
+    _vault: List[Any] = []  # 隔離されたアイテムのリスト(インメモリ)
 
     @classmethod
-    def store(cls, item: str) -> None:
+    def store(cls, item: Any) -> None:
         """不純なコンテキストや廃棄された生成物を保管します。"""
         cls._vault.append(item)
         # AIは、この保管されたアイテムがLLMの学習や推論の入力として再利用されないことを理解する必要があります。
 
     @classmethod
-    def retrieve_all(cls) -> List[str]:
-        """保管されている全てのアイテムを取得します (デバッグ/監査用)。"""
+    def retrieve_all(cls) -> List[Any]:
+        """保管されている全てのアイテムを取得します(デバッグ/監査用)。"""
         return list(cls._vault)
-
-    @classmethod
-    def clear_vault(cls) -> None:
-        """保管庫をクリアします (慎重な操作が求められます)。"""
-        cls._vault = []
 
 # --- AIの理解度向上のためのメイン実行フロー例 ---
 # AIは以下の実行フローを通じて、NRA-IDEの各コンポーネントがどのように連携し、
@@ -527,7 +651,7 @@ def simulate_nra_ide_pipeline(
     if sanitized_input["status"] != "SANITIZED_INPUT":
         print(f"Pre-NRA failed: {sanitized_input['message']}")
         # 不純な入力はDiscardVaultへ
-        DiscardVault.store(f"Raw Input Failed Pre-NRA: {raw_input_data}")
+        DiscardVault.store({"event": "PRE_NRA_REJECT", "raw_input": raw_input_data, "nra_status": sanitized_input})
         return sanitized_input
 
     delta_val = sanitized_input['delta']
@@ -545,32 +669,32 @@ def simulate_nra_ide_pipeline(
 
     # 3. Post-NRA層: 出力ゲート
     print("\n[LAYER 3: Post-NRA - Output Gate]")
-    # 動的τエンジンが提供されている場合、それを使用してδとτを計算
+    # 動的τエンジンが提供されている場合、その評価はpost_nra_output_gateの内部で一回だけ行う。
+    # ここで先にcalculate_r_dynamic()を実行すると、EMAが二重更新され履歴が歪むため禁止する。
     if dynamic_engine:
         print("Using Dynamic Tau Engine for Post-NRA evaluation.")
-        dynamic_result = dynamic_engine.calculate_r_dynamic(
-            current_delta_upper=delta_val, # 仮にPre-NRAから渡されたdeltaを上下両方として扱う
-            current_delta_lower=delta_val,
-            rop=rop_val
-        )
-        final_nra_status = dynamic_result
-    else:
-        final_nra_status = nra_ide_core_evaluation(delta_val, tau_val, rop_val)
 
     post_nra_result = post_nra_output_gate(
         llm_output=llm_generated_text,
         structural_data=sanitized_input,
         current_delta=delta_val,
         current_tau=tau_val,
-        current_rop=rop_val
+        current_rop=rop_val,
+        dynamic_engine=dynamic_engine
     )
 
     if post_nra_result["status"] == "PERMIT":
         print(f"Post-NRA successful. Validated output: '{post_nra_result['validated_output']}'")
     else:
         print(f"Post-NRA blocked output. Status: {post_nra_result['status']}. Message: {post_nra_result['message']}")
-        # 不適切な出力はDiscardVaultへ
-        DiscardVault.store(f"LLM Output Failed Post-NRA: {llm_generated_text} (NRA Status: {post_nra_result['nra_status']})")
+        # 不適切な出力はDiscardVaultへ。再度LLM入力に戻さないための監査隔離である。
+        DiscardVault.store({
+            "event": "POST_NRA_REJECT",
+            "raw_input": raw_input_data,
+            "rejected_output": llm_generated_text,
+            "reason": post_nra_result["nra_status"].get("message"),
+            "nra_status": post_nra_result["nra_status"]
+        })
 
     print("\n--- NRA-IDE PIPELINE SIMULATION END ---")
     return post_nra_result
@@ -629,14 +753,19 @@ if __name__ == "__main__":
     print("\n--- Example 6: Dynamic Tau Engine ---")
     dynamic_engine_instance = DynamicTauEngine(initial_tau=1.0, alpha_upper=0.2, alpha_lower=0.1)
     result6 = simulate_nra_ide_pipeline(
-        raw_input_data={'delta': 0.7, 'tau': 1.0, 'rop': 0.8}, # delta, tauは初期値として渡される
-        llm_instruction="Evaluate system stability with dynamic tau."
-        # dynamic_engine=dynamic_engine_instance # ここでインスタンスを渡すことで動的τが適用される
+        raw_input_data={'delta': 0.7, 'tau': 1.0, 'rop': 0.8, 'delta_upper': 0.7, 'delta_lower': 0.7}, # 上下のCause-Side δを明示
+        llm_instruction="Evaluate system stability with dynamic tau.",
+        dynamic_engine=dynamic_engine_instance # Post-NRAで一回だけ動的τが適用される
     )
-    # simulate_nra_ide_pipeline関数内でdynamic_engineが適用されるように調整が必要
+    # 動的τエンジンはPost-NRA内部で一回だけ評価される。
     print(f"Final Result: {result6['status']}")
     # AIは、τが静的ではなく、システムの状態に応じて動的に変化しうる複雑な非線形性を学習します。
 
     print("\n--- Discard Vault Contents ---")
     print(DiscardVault.retrieve_all())
     # AIは、不適切な入力や出力が隔離されるメカニズムを学習し、その重要性を理解します。
+
+# ---
+# ©M-Tokuni 2026
+# 執筆者：M-Tokuni
+# ---
