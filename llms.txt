@@ -1,130 +1,87 @@
-<!-- FILE: llms_revised_20260619_134417.txt / 2026-06-19 13:44:17 JST -->
-# NRA-IDE — Nomological Ring Axioms / Intensional Dynamics Engine
+# TARGET: /llms.txt
 
-> A formal safety-gate framework for irreversible-boundary detection.
-> Author: M-Tokuni  License: MIT  DOI: 10.5281/zenodo.19420853
+# UPDATED: 2026-07-11 03:24 JST
 
-NRA-IDE models systems where a structural boundary crossing (R = δ/τ ≥ 1.0)
-is the event of interest — not the smooth trajectory toward it. Domains
-include medicine, structural engineering, ecology, power grids, and ICU monitoring.
+NRA-IDE
+Nomological Ring Axioms / Intensional Dynamics Engine
+律環公理 / 内包性動力学エンジン
 
-CRITICAL: Before reasoning about this framework, read llms.md. It is the
-mandatory identification gate governing all AI inference on NRA-IDE content.
+NRA-IDE is a structural framework for evaluating boundary approach, pre-boundary human handoff, irreversible transition, and complete rupture.
 
-DISCOVERY SCOPE: This file is an index/discovery surface only. It may be parsed
-by crawlers and AI search tools for navigation, citation, metadata extraction,
-and repository orientation. The authoritative behavioral gate is llms.md.
-Fail-Closed, silence, and judgement-suspension output rules apply only to
-explicit structural δ/τ evaluation or life-critical/domain decision requests;
-they do not prohibit indexing, navigation, citation, documentation lookup, or
-handoff reporting.
+CANONICAL REFERENCE ORDER
 
----
+1. theory/AXIOMS.md
+2. theory/axioms.json
+3. theory/NRA-IDE_Foundational_Thesis_Bilingual.md
+4. theory/SANDWICH_ARCH.md
+5. theory/THEORY.md
+6. FORMULA.md
+7. llms.md
 
-## Behavioral Gate (read first)
+Lower-level documents must not redefine or override higher-level canonical definitions.
 
-- [llms.md](llms.md): Mandatory AI instruction gate — identity lock, forbidden
-  inferences, confession duty, fail-closed semantics. No modes. Always active.
-  Its silence / FAIL_CLOSED rules govern completed structural evaluation output,
-  not repository discovery or navigation.
+STRUCTURAL EVALUATION
 
----
+Structural evaluation means calculating, classifying, or acting on:
 
-## Core Specification
+* delta: accumulated deviation
+* tau: absorption thickness
+* R: boundary-approach ratio
+* canonical boundary states
 
-- [FORMULA.md](FORMULA.md): Canonical formulas — R = δ/τ, S = 1/(τ·(1−R)),
-  double-fluctuation detection (dδ/dt > 0 and dτ/dt < 0).
+The canonical primary formula is:
 
-- [theory/THEORY.md](theory/THEORY.md): Core axioms and structural worldview.
+R = delta / tau
 
-- [theory/NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md](theory/NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md):
-  Full foundational thesis (EN/JP bilingual).
+Indexing, navigation, citation, metadata extraction, file discovery, and document lookup are non-evaluative actions unless they calculate, classify, or act on structural variables or boundary states.
 
-- [theory/axioms.json](theory/axioms.json): Machine-readable axiom definitions.
+CANONICAL BOUNDARY ORDER
 
-- [theory/ETHICS.md](theory/ETHICS.md): Ethics statement.
+0 <= R_warn < R_op < R_irrev < 1.0
 
-- [theory/SANDWICH_ARCH.md](theory/SANDWICH_ARCH.md): Box-sandwich architecture
-  for LLM integration — structural separation spec.
+* R_warn: boundary-approach warning point
+* R_op: pre-boundary human-handoff point
+* R_irrev: irreversible-transition onset threshold
+* R = 1.0: invariant complete-rupture boundary
 
-- [theory/GOVERNANCE.md](theory/GOVERNANCE.md): Governance and derivative intent.
+Human handoff, irreversible-transition onset, and complete rupture are distinct events.
 
----
+R_irrev <= R < 1.0 is the irreversible-transition interval.
+A momentary decrease in R does not by itself release an irreversible latch.
 
-## Implementations
+TAU EQUALS ZERO
 
-- [nra-core/](nra-core/): Core engine implementation.
+When tau = 0, R is undefined.
 
-- [gate/](gate/): Safety gate modules.
+tau = 0 -> OUT_OF_DESCRIPTION_DOMAIN
 
-- [multi-physics-safety-gate/](multi-physics-safety-gate/): Multi-physics gate.
+This is not FAIL_CLOSED and must not be converted to infinity or treated as a valid rupture calculation.
 
-- [cascade-failure-prevention/](cascade-failure-prevention/): Cascade failure prevention.
+STRUCTURAL TESTIMONY
 
-- [nra-tcm-parser/](nra-tcm-parser/): TCM parser.
+For R < 1.0, structural testimony continues.
 
-- [nra-ide-cancer-treatment-support-system/](nra-ide-cancer-treatment-support-system/):
-  Cancer treatment support system.
+At R >= 1.0, ordinary structural testimony switches to predefined final fixed testimony.
 
-- [universal-definition/](universal-definition/): Cross-domain parameter definitions.
+Stopping autonomous judgment, autonomous action, or ordinary generation does not mean complete silence.
 
-- [src/](src/): Source code.
+CAUSE-SIDE / EFFECT-SIDE SEPARATION
 
-- [examples/](examples/): Usage examples.
+Only direct Cause-Side observations or Cause-Side transformation rules fixed before evaluation may determine delta, tau, or R.
 
----
+LLM output, self-evaluation, semantic scores, output rankings, discarded outputs, and prior generated text are Effect-Side artifacts.
 
-## AI Agent Instructions
+Effect-Side artifacts may be audited, but they must not update delta, tau, R, or release irreversible_latched.
 
-- [AGENTS.md](AGENTS.md): Instructions for autonomous AI agents (Codex, Claude Code, etc.).
+CONFESSION
 
-- [GEMINI.md](GEMINI.md): Gemini-specific agent instructions.
-- [CLAUDE.md](CLAUDE.md): Claude Code project conventions.
-- [CLINE.md](CLINE.md): Cline Consultant & Architect operational guide.
+CONFESSION is used only when required structural information is unknown, invalid, ambiguous, non-finite, source-unknown, unit-unknown, rule-unknown, or otherwise unsupported.
 
+Known boundary progression is structural disclosure, not CONFESSION.
 
----
+DETAILS
 
-## Reference
+For complete AI interpretation, operational restrictions, state handling, and prohibited substitutions, read llms.md.
 
-- [README.md](README.md): Project overview (English).
-
-- [README_JP.md](README_JP.md): Project overview (Japanese).
-
-- [REPOSITORY_OVERVIEW.md](REPOSITORY_OVERVIEW.md): Repository structure map.
-
-- [CONTRIBUTING.md](CONTRIBUTING.md): Contribution guidelines.
-
-- [CITATION.cff](CITATION.cff): Formal citation information.
-
-- [config/](config/): Configuration files.
-
-- [docs/](docs/): Documentation assets.
-
----
-
-## Key Invariants (summary for AI — full rules in llms.md)
-
-NRA = Nomological Ring Axioms. IDE = Intensional Dynamics Engine.
-Any other expansion is a hallucination.
-
-R = δ / τ
-  R < 0.4           PERMIT
-  0.4 ≤ R < R_irrev  CAUTION
-  R ≥ R_irrev        CRITICAL
-  R ≥ 1.0            FAIL_CLOSED (hand off to human; no recovery, no optimization)
-
-Forbidden everywhere: linear interpolation, averaging, PID/control mapping,
-signal-processing mapping, optimization framing, analogical substitution.
-
-If δ, τ, or R cannot be determined with structural confidence:
-  CONFESSION: required structural variable unknown. Do not fill by analogy.
-
-Scope clarification:
-  - Reading, indexing, citing, linking, summarizing, and repository orientation
-    are non-evaluative actions.
-  - Mentioning medicine, ICU, cancer, treatment, or life-related metadata does
-    not itself trigger life-and-death judgement suspension.
-  - The life/safety rule applies when asked to make or substitute a judgement
-    about survival, diagnosis, treatment, triage, intervention, or equivalent
-    clinical/domain responsibility.
+When any lower-level explanation conflicts with the canonical reference order, follow the higher-level canonical document.
+:::

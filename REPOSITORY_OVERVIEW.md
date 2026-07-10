@@ -52,6 +52,7 @@ Quick navigation map. Start here if you are new to this repository.
 | [REPOSITORY_OVERVIEW.md](./REPOSITORY_OVERVIEW.md) | This file — repository navigation map |
 | [AGENTS.md](./AGENTS.md) | AI agent operational guide |
 | [CLAUDE.md](./CLAUDE.md) | Claude Code workspace constraints and naming conventions |
+| [RULES_DETAIL.md](./RULES_DETAIL.md) | NRA-IDE execution rules (Git operations, dependencies, operation restrictions) |
 | [CLINE.md](./CLINE.md) | Cline Consultant & Architect operational guide |
 | [GEMINI.md](./GEMINI.md) | Gemini workspace guide |
 | [llms.md](./llms.md) | LLM reasoning gate and structural axioms |

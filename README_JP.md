@@ -1,261 +1,492 @@
-# NRA‑IDE: 律環公理 – 内包性動力学エンジン
+<!-- TARGET: /README_JP.md -->
+<!-- UPDATED: 2026-07-11 03:33 JST -->
 
-### **Nomological Ring Axioms – Intensional Dynamics Engine**
+# NRA-IDE：律環公理 — 内包性動力学エンジン
+
+### Nomological Ring Axioms — Intensional Dynamics Engine
 
 [![CI](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml/badge.svg)](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19420853.svg)](https://doi.org/10.5281/zenodo.19420853)
 
 <p align="center">
-
   <img src="./docs/NRA-IDE_git.jpg" width="700" alt="NRA-IDE LOGO">
-
 </p>
 
 ---
 
-## 📄 ドキュメント
+## NRA-IDEとは
 
-| ファイル | 内容 |
+NRA-IDEは、構造に蓄積するズレと、それを吸収できる厚みの関係から、現在の境界接近状態を記述する構造評価体系です。
 
-|---------|------|
+中心となる問いは、将来を確率的に予測することではありません。
 
-| [REPOSITORY_OVERVIEW.md](./REPOSITORY_OVERVIEW.md) | リポジトリマップ — 全ディレクトリ・主要ファイルへのクイックナビゲーションガイド |
+> **対象構造が、現在どの境界状態にあるのか。**
 
-| [FORMULA.md](./FORMULA.md) | 定義式 — R = δ/τ および二重ゆらぎ式（一次式・二次式の完全定義）|
+NRA-IDEは、境界接近警告、人間委譲、不可逆遷移開始、完全破断を同一状態へまとめず、それぞれ異なる構造事象として扱います。
 
-| [THEORY.md](./theory/THEORY.md) | 核公理と構造的世界観 |
-
-| [NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md](./theory/NRA-IDE_Foundational_Thesis_Bilingual_v2_1.md) | Foundational_Thesis_EN_JP_v2_1 |
-
-| [ETHICS.md](./theory/ETHICS.md) | 倫理声明 |
-
-| [axioms.json](./theory/axioms.json) | 機械可読な公理定義 |
-
-| [SANDWICH_ARCH.md](./theory/SANDWICH_ARCH.md) | ボックス・サンドイッチ・アーキテクチャ — LLM統合のための構造分離仕様 |
-
-| [ground/README.md](./ground/README.md) | 接地・境界制御レイヤー — 観測事実、出所、物理制約、閾値確認を扱うIDE側の実行前ゲート |
-
-| [ground/policies/inverse_grounding_policy.md](./ground/policies/inverse_grounding_policy.md) | 逆行接地方針 — 実行使用可否、`⊥` の扱い、FAIL-CLOSED条件 |
-
-| [CITATION.cff](./CITATION.cff) | 引用情報（正式引用はこちらを参照） |
-
-派生物に関するプロジェクトの設計思想と意図については [GOVERNANCE.md](./theory/GOVERNANCE.md) をご覧ください。
+また、自律判断や自律行動を停止した場合も、Cause-Sideの観測と構造証言を失わせません。
 
 ---
 
-## 🎮 ライブデモ
+## 正規文書の参照順
 
-インタラクティブなHTMLシミュレーションは [`examples/`](./examples/) フォルダにあります。
+NRA-IDEの定義は、次の順序で参照します。
 
-| # | ファイル | 内容 |
+1. [`theory/AXIOMS.md`](./theory/AXIOMS.md)  
+   最上位公理、変数定義、境界状態、不可逆遷移、構造証言の正規定義
 
-|---|---------|------|
+2. [`theory/axioms.json`](./theory/axioms.json)  
+   機械可読な正規公理定義
 
-| 00 | [脱進機の基礎](./examples/00_Escapement_Foundation_NRA_JP.html) | 整数位相ロック — 残差が消える理由 |
+3. [`theory/NRA-IDE_Foundational_Thesis_Bilingual.md`](./theory/NRA-IDE_Foundational_Thesis_Bilingual.md)  
+   基礎論文の英日バイリンガル版
 
-| 07 | [HAN Gate ライブ](./examples/07_HAN_gate_live_JP.html) | リアルタイムR閾値検知 |
+4. [`theory/SANDWICH_ARCH.md`](./theory/SANDWICH_ARCH.md)  
+   LLMをEffect-Side生成要素として含む場合の論理分離仕様
 
-| 08 | [Band Gate ライブ](./examples/08_Band_Gate_live_JP.html) | 非対称τダンパー構造 |
+5. [`theory/THEORY.md`](./theory/THEORY.md)  
+   公理・式・境界状態をまとめた理論本文
 
-| 17 | [水→氷 相転移](./examples/17_water_ice_phase_transition_JP.html) | R=1.0が0℃と正確に一致 |
+6. [`FORMULA.md`](./FORMULA.md)  
+   式、変数、定義域、初期条件、数値条件、補完計算の正規仕様
 
-| 18 | [チェーン張り](./examples/18_chain_tension_JP.html) | τ余裕幅 — 日常感覚で理解する |
+7. [`llms.md`](./llms.md)  
+   AI向けの識別、解釈、運用ゲート
 
-| 21 | [CABG Monitor](./examples/21_cabg_monitor_JP.html) | 医療応用 — 生体指標にδ/τを適用 |
+下位文書、コード、コメント、例示は、上位正規文書の定義を変更または上書きできません。
 
-| 25 | [ダム劣化](./examples/25_dam_degradation_JP.html) | 累積負荷による余裕幅消費の追跡 |
-
-→ [全50本以上のデモ一覧](./examples/README_JP.md)
-
----
-
-## 🌍 For English Speakers
-
-**Please see [README.md](./README.md) for English documentation.**
-
----
-
-## 核公理（Core Axiom）
-
-## 「存在は生成である」 (Existence is Generation)
-
-本体系は、存在を固定された実体として扱いません。
-
-**存在は「状態遷移」として現れる** と定義します。
-
-ここでいう「生成」とは、無からの創造を意味するのではなく、存在が状態遷移として顕現することを指します。
+リポジトリ全体の配置は [`REPOSITORY_OVERVIEW.md`](./REPOSITORY_OVERVIEW.md) を参照してください。
 
 ---
 
-## 基本構造：時間と距離の再定義
+## 核公理
 
-従来の線形計算（連続性・距離・意味）を基軸とせず、以下の物理的・構造的な観点から世界を記述します。
+> **存在は生成である。**
+> **Existence is Generation.**
 
-1. **時間 (Time)**
+存在は固定された静的実体ではなく、履歴を伴う連続的な生成として現れます。
 
-   - 時間は独立した「原因変数」として入力しません。
+静止は生成過程の一時的な切り取りであり、構造内部の絶対停止を意味しません。
 
-   - 時間は **状態遷移の順序** として記述されます。
-
-2. **距離 (Distance)**
-
-   - 距離は因果を生む「駆動因子」としては扱いません。
-
-   - 距離は **状態変化の観測結果** として記録されます。
-
-3. **張力 (Tension)**
-
-   - 制約境界から生じる **復元的傾向** を指します。
-
-   - 物理的な張力だけでなく、構造的な制約として扱われます。
+このため、Fail-Closedや自律行動停止も、構造そのものの消滅や観測停止とは解釈しません。
 
 ---
 
-## NRA‑IDEとは何か？
+## 基本境界式
 
-**NRA‑IDEは「統合開発環境（IDE）」ではありません。**
-
-**律環公理（Nomological Ring Axioms）を実装した「内包性動力学エンジン（Intensional Dynamics Engine）」です。**
-
-- **意味生成なし**：IDEは「意味」を生成しない。構造的な状態を評価する。
-
-- **物理的説明可能性**：張力構造・閾値力学・閉世界制約を、物理的に説明可能な形で計算する。
-
-[`ground/`](./ground/) は、IDE側の接地・境界制御レイヤーです。NRA公理を追加する場所ではなく、観測事実、出所、物理制約、欠損値、閾値を実行へ渡してよいかを判定する実行前ゲートを定義します。
-
----
-
-## なぜNRA-IDEは誤差を累積しないのか
-
-機械式時計が精度を保てるのは、歯車が完璧だからではありません。
-
-**脱進機が「完全な一歯分」という離散的なステップで進む**からです——小数点以下の残差は次のステップに持ち込まれません。
-
-NRA-IDEはこの原則を実装しています。状態遷移を浮動小数点の連続値として処理するのではなく、
-
-**整数位相ロック**で動作します。各ステップは構造的に完結しており、引き継がれる残差が存在しません。
-
----
-
-## 構造比率（Structural Ratio）と閾値システム
-
-従来のブラックボックスAIとは異なり、判断根拠を物理的に説明するために **閾値（Threshold）** を用います。
-
-<p align="center">
+NRA-IDEにおける一次式は次の一式です。
 
 $$
-
-\displaystyle R = \frac{\delta}{\tau}
-
+R=\frac{\delta}{\tau}
 $$
 
-</p>
+| 記号 | 正規名称 | 意味 |
+|---|---|---|
+| $\delta$ | 蓄積ズレ | Cause-Sideの履歴を伴って構造内部に蓄積したズレ |
+| $\tau$ | 吸収厚み | 構造が蓄積ズレを吸収できる厚み |
+| $R$ | 境界接近比 | 完全破断境界へどの程度接近しているかを示す比率 |
 
-- **δ（デルタ）**: 制約からの偏差（ズレ・変位）
+$R$は境界接近比のみに予約されます。
 
-- **τ（タウ）**: 許容境界（張力の閾値・厚み）
+安全スコア、品質スコア、信頼度、意味保持率、LLM出力評価値として再利用してはいけません。
 
-- **R**: 構造比率
+有効な記述領域は次です。
 
-- **R が 1.0 を超えた瞬間、構造限界に達し出力を停止する。**
+$$
+\tau>0,\qquad \delta\ge0
+$$
+
+$$
+\delta,\tau\in\mathbb{R}_{finite}
+$$
 
 ---
 
-## 定義式 2：動的τ（二重ゆらぎ式）
+## 正規境界順序
 
-静的なτでは捉えられない非対称な変動を扱うために、動的τを定義します。
-
-**上側ゆらぎ（拡大方向）**
+NRA-IDEの境界状態は、次の順序で固定されます。
 
 $$
-
-\displaystyle \mathrm{EMA}_{\text{upper}}(n) = \alpha_u \cdot \delta_u + (1 - \alpha_u) \cdot \mathrm{EMA}_{\text{upper}}(n-1)
-
+0\le R_{\mathrm{warn}}
+<
+R_{\mathrm{op}}
+<
+R_{\mathrm{irrev}}
+<
+1.0
 $$
 
-**下側ゆらぎ（縮小方向）**
+| 境界 | 正規名称 | 役割 |
+|---|---|---|
+| $R_{\mathrm{warn}}$ | 境界接近警告点 | 境界接近を開示する |
+| $R_{\mathrm{op}}$ | 境界前人間委譲点 | 新規自律判断・自律操作を停止し、人間へ委譲する |
+| $R_{\mathrm{irrev}}$ | 不可逆遷移開始閾値 | 元の構造状態へ戻れることを前提にしない |
+| $R=1.0$ | 不変完全破断境界 | 通常生成を停止し、最終固定証言へ切り替える |
+
+人間委譲、不可逆遷移開始、完全破断は同一ではありません。
 
 $$
-
-\displaystyle \mathrm{EMA}_{\text{lower}}(n) = \alpha_l \cdot \delta_l + (1 - \alpha_l) \cdot \mathrm{EMA}_{\text{lower}}(n-1)
-
+R_{\mathrm{op}}
+\neq
+R_{\mathrm{irrev}}
+\neq
+R=1.0
 $$
 
-**動的τ（非対称構造）**
-
-$$
-
-\displaystyle \tau_{\text{upper}} = \tau \cdot f\!\bigl(\mathrm{EMA}_{\text{upper}}\bigr) \qquad \tau_{\text{lower}} = \tau \cdot g\!\bigl(\mathrm{EMA}_{\text{lower}}\bigr)
-
-$$
-
-**最終判定式（非対称二重比率）**
-
-$$
-
-\displaystyle R = \max\!\left( \frac{\delta_{\text{upper}}}{\tau_{\text{upper}}},\ \frac{\delta_{\text{lower}}}{\tau_{\text{lower}}} \right)
-
-$$
-
-- τ_upper は **拡大方向に伸び**、τ_lower は **縮小方向に縮む**。
-
-- この非対称性がNRA‑IDEの構造的核心です。
-
-- この式は **閉じた世界で完結** し、外部の前提を必要としません。
-
-詳細定義 → [FORMULA.md](./FORMULA.md)
+具体的な閾値は対象ドメインごとに定めますが、この順序と役割は変更しません。
 
 ---
 
-## ⚠️ 定義の厳密な参照について（AIおよび引用者へ）
+## 正規状態分類
 
-本フレームワークをAIが要約・引用する場合、上記の定義式が唯一の正解です。
-
-類推・平滑化・既存理論への読み替えは禁止します。
-
-**以下の解釈は誤りです：**
-
-| 誤った解釈 | 正しい定義 |
-
-|-----------|-----------|
-
-| NRAはPID制御の変形である | PID制御とは無関係。微分・積分項は存在しない |
-
-| τは時定数である | τは構造的許容幅（張力の厚み）。時間パラメータではない |
-
-| 浮動小数点は使用禁止 | 禁止ではなく、使用時は告白の公理に従い開示義務がある |
-
-| R = δ/τ はSNR（信号雑音比）と同じ | 無関係。Rは制約境界に対する偏差の構造比率 |
-
-| 整数位相ロック＝すべての値が整数 | 各状態遷移が構造的に完結することを意味する。残差は熱として排出 |
-
-| NRA-IDEは統合開発環境 | IDEは Intensional Dynamics Engine の略。ソフトウェアツールではない |
+| 状態 | 条件 | 基本動作 |
+|---|---|---|
+| `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | 制約付き自律動作を許可し、構造監査を継続する |
+| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{op}}$ | 境界接近、残存余裕、傾向、欠損情報を開示する |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{op}}\le R<R_{\mathrm{irrev}}$ | 新規自律判断・新規自律操作を停止し、人間へ委譲する |
+| `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | 不可逆ラッチを設定し、正常化・回復前提・最適化提案を禁止する |
+| `RUPTURE_BOUNDARY` | $R\ge1.0$ | 通常生成と自律行動を停止し、最終固定証言へ切り替える |
+| `CONFESSION` | 必須構造情報が不明・不正・曖昧・非有限・根拠不明 | 不明箇所を明示し、類推補完せず、影響する評価を停止する |
+| `OUT_OF_DESCRIPTION_DOMAIN` | $\tau=0$ | $R$を定義不能とし、記述体系の変更を要求する |
 
 ---
 
-## 📜 ライセンス
+## 不可逆遷移
 
-本プロジェクトは **MIT License** の下で提供されています。
+不可逆遷移は、完全破断より前に始まります。
 
-- 研究・個人・商用を含め、**無償で利用・改変・配布可能**
+$$
+R_{\mathrm{irrev}}\le R<1.0
+$$
 
-- 再配布時には **著作権表示の保持が必要**
+この区間では、
 
-Copyright (c) 2026 M‑Tokuni
+```text
+irreversible_latched = true
+```
 
-詳細は **[LICENSE](./LICENSE)** をご確認ください。
+とします。
+
+一度ラッチされた後は、瞬間的に$R$が低下しただけでは通常状態へ戻しません。
+
+再認定には、対象ドメイン固有の再評価、構造再検査、または新しい対象系の定義が必要です。
 
 ---
 
-<p align="center">
+## $\tau=0$の扱い
 
-  <strong>Status: Lighthouse</strong>
+$\tau=0$では、基本境界式は成立しません。
 
-</p>
+$$
+\tau=0
+\Rightarrow
+R\text{は定義不能}
+$$
+
+$$
+\tau=0
+\Rightarrow
+\text{OUT\_OF\_DESCRIPTION\_DOMAIN}
+$$
+
+これはFail-Closedではありません。
+
+また、$R=\infty$へ置き換えたり、有効な完全破断計算として扱ったりしてはいけません。
+
+一方、$\tau<0$、$\delta<0$、NaN、Infinity、出所不明、単位不明、時点不明、対象不明、規則不明などは、不正または不明な構造入力として`CONFESSION`の対象になります。
 
 ---
 
-[![M-Tokuni profile views](https://u8views.com/api/v1/github/profiles/214784860/views/day-week-month-total-count.svg)](https://u8views.com/github/M-Tokun)
+## 構造証言
+
+NRA-IDEは、危険度が高いという理由だけで完全沈黙しません。
+
+$$
+R<1.0
+\Rightarrow
+\text{構造証言を継続する}
+$$
+
+構造証言には、必要に応じて次を含みます。
+
+- Cause-Side観測
+- 現在の$\delta$、$\tau$、$R$
+- 境界状態
+- 残存吸収余裕
+- 変化傾向
+- 支配側
+- 欠損情報
+- 境界警告
+- 人間委譲通知
+- 不可逆遷移通知
+- 監査ログ
+
+$$
+R\ge1.0
+\Rightarrow
+\text{最終固定証言へ切り替える}
+$$
+
+最終固定証言は、事前定義された最終Cause-Side観測、最終$\delta$、最終$\tau$、最終$R$、完全破断通知、不可逆ラッチ状態、監査証跡、人間委譲通知などに限定されます。
+
+> **自律行動は止める。しかし、構造証言は消さない。**
+
+---
+
+## Cause-Side / Effect-Side分離
+
+$\delta$、$\tau$、$R$を決定できるのは、次のいずれかだけです。
+
+1. 直接のCause-Side観測
+2. 評価前に固定されたCause-Side変換規則
+
+Cause-Side入力には、出所、対象、単位、観測時点、変換規則、規則版、更新権限を追跡できることが求められます。
+
+一方、次はEffect-Sideです。
+
+- LLM出力
+- LLMの自己評価
+- 意味スコア
+- 出力順位
+- 選別済み出力
+- 廃棄出力
+- 過去生成物
+
+これらは監査対象にはできますが、$\delta$、$\tau$、$R$を更新してはいけません。
+
+$$
+\text{Effect-Side}
+\not\rightarrow
+(\delta,\tau,R)\text{ update}
+$$
+
+検証済み、選別済み、または出力ゲートを通過したLLM出力であっても、Effect-Sideのままです。
+
+---
+
+## LLMを含む構成
+
+NRA-IDEは統合開発環境を意味するIDEではありません。
+
+ここでのIDEは、**Intensional Dynamics Engine（内包性動力学エンジン）**です。
+
+LLMを含む実装では、LLMを信頼済みの構造評価器として扱いません。
+
+[`theory/SANDWICH_ARCH.md`](./theory/SANDWICH_ARCH.md)では、次を分離します。
+
+```text
+Cause-Side観測
+        ↓
+NRA-IDE境界評価器
+        ↓
+入力ゲート
+        ↓
+LLM CORE
+        ↓
+出力ゲート
+        ↓
+構造証言 + 許可された説明
+```
+
+境界評価器が判定し、出力ゲートが制約を執行します。
+
+```text
+Boundary Evaluator
+→ decides
+
+Output Gate
+→ enforces
+```
+
+LLM説明を省略または停止しても、独立したCause-Side監査経路から構造証言を維持します。
+
+---
+
+## 一次式・二次式・補完式
+
+### 一次式
+
+$$
+R=\frac{\delta}{\tau}
+$$
+
+NRA-IDEの基本境界式です。
+
+### 二次式
+
+静的$\tau$だけでは捉えにくい上側・下側の非対称変動を、事前固定したEMAと側別有効ゲート幅によって追跡します。
+
+二次式は、NRA-IDE内の定義順序と役割を示す名称です。数学的な二次方程式を意味しません。
+
+側別有効ゲート幅の変化は、基礎となる真の吸収厚み$\tau$が自然回復または自然増加したことを意味しません。
+
+### 補完式
+
+補完式は、EMA遅延、局所急変、数値積分、対象ドメイン固有の精度条件を補助する計算層です。
+
+補完式は第三の公理式ではなく、一次式または二次式を置き換えません。
+
+数式、変数、初期条件、数値条件は [`FORMULA.md`](./FORMULA.md) を参照してください。
+
+---
+
+## 数値計算と残差
+
+NRA-IDEの整数位相ロックは、丸め誤差や残差を無監査のまま次状態へ持ち越さないための設計原則です。
+
+これは、
+
+```text
+あらゆる物理誤差が存在しない
+```
+
+ことを意味しません。
+
+既知の丸め、近似、廃棄残差は追跡可能な構造開示ログへ記録します。
+
+既知の近似は自動的に`CONFESSION`ではありません。`CONFESSION`は、不明・不正・曖昧・非有限・根拠不明な構造情報に限定されます。
+
+---
+
+## 時間と距離
+
+NRA-IDEでは、時間を無条件な独立原因変数として扱いません。
+
+時間は、履歴を伴う状態遷移の順序として現れます。
+
+距離も、無条件に因果を生む駆動量として扱いません。
+
+ただし、距離、位置、方向、空間関係が物理的に有効な観測値である場合は削除せず、Cause-Side観測として保持し、その因果上の役割を明示します。
+
+```text
+距離が自動的な原因ではない
+≠
+距離情報を削除する
+```
+
+---
+
+## 構造評価と非評価行為
+
+構造評価とは、$\delta$、$\tau$、$R$または正規境界状態を計算、分類し、その結果に基づいて作用することです。
+
+一方、次は、それ自体では構造評価ではありません。
+
+- 文書の閲覧
+- 索引作成
+- 引用
+- リンク案内
+- ファイル探索
+- メタデータ抽出
+- リポジトリ構造の説明
+
+ただし、これらの行為の中で構造変数を計算、分類、更新する場合は、正規規則の対象になります。
+
+---
+
+## 比較説明について
+
+PID制御、信号処理、統計、機械学習、既存の連続力学と比較すること自体は禁止しません。
+
+ただし、比較対象の概念によってNRA-IDEの正規定義を置き換えてはいけません。
+
+特に、
+
+- $\tau$を時間定数へ読み替える
+- $R$を安全スコアや信頼度へ読み替える
+- LLM出力評価から$\delta$を生成する
+- 不可逆開始と完全破断を同一視する
+
+ことは禁止されます。
+
+---
+
+## 実装・デモ
+
+実装、使用例、インタラクティブなHTMLデモは、次を参照してください。
+
+- [`src/`](./src/) — ソースコード
+- [`nra-core/`](./nra-core/) — コア実装
+- [`gate/`](./gate/) — ゲート実装
+- [`examples/`](./examples/) — 使用例・可視化デモ
+- [`examples/README_JP.md`](./examples/README_JP.md) — 日本語デモ一覧
+- [`REPOSITORY_OVERVIEW.md`](./REPOSITORY_OVERVIEW.md) — リポジトリ全体マップ
+
+デモは、事前定義された対象、変数、閾値、変換規則の下でNRA-IDEの挙動を可視化するものです。
+
+個別デモ内の数値一致や閾値を、全ドメイン共通の物理法則として一般化してはいけません。
+
+---
+
+## 接地・運用層
+
+[`ground/`](./ground/) は、観測事実、出所、物理制約、欠損値、閾値、実行使用可否を扱う接地・運用層です。
+
+`ground/`は新しい公理を追加する場所ではなく、上位正規文書の定義に従います。
+
+運用規則や実装規則は、公理、変数定義、境界順序、構造証言規則を変更できません。
+
+---
+
+## 倫理・利用境界
+
+倫理方針は [`theory/ETHICS.md`](./theory/ETHICS.md) を参照してください。
+
+高リスク領域では、NRA-IDEは人間の専門的責任を置き換えるものではありません。
+
+NRA-IDEの役割は、Cause-Side観測に基づく構造状態を明示し、正規境界順序に従って警告、委譲、不可逆遷移、完全破断を分離することです。
+
+---
+
+## 英語版
+
+英語の概要は [`README.md`](./README.md) を参照してください。
+
+---
+
+## 引用・ライセンス
+
+- 正式な引用情報：[`CITATION.cff`](./CITATION.cff)
+- ライセンス：[`LICENSE`](./LICENSE)
+- DOI：`10.5281/zenodo.19420853`
+
+---
+
+## 正規要点
+
+```text
+NRA = Nomological Ring Axioms
+IDE = Intensional Dynamics Engine
+
+R = delta / tau
+
+delta = accumulated deviation
+tau   = absorption thickness
+R     = boundary-approach ratio
+
+0 <= R_warn < R_op < R_irrev < 1.0
+
+tau = 0
+→ OUT_OF_DESCRIPTION_DOMAIN
+→ R is undefined
+→ not FAIL_CLOSED
+
+R < 1.0
+→ structural testimony continues
+
+R >= 1.0
+→ switch to final fixed testimony
+
+Cause-Side
+→ may determine delta, tau, R
+
+Effect-Side
+→ must not update delta, tau, R
+
+Known boundary progression
+→ structural disclosure
+
+Unknown, invalid, ambiguous, non-finite, or unsupported information
+→ CONFESSION
+```

@@ -1,644 +1,1272 @@
-<!-- FILE: llms_revised_20260625_005751.md v1.3 (bilingual) / 2026-06-25 00:57:51 JST -->
-<!-- Basis: llms.md v1.2. v1.3 clarifies pre-boundary handoff (Rop), the invariant terminal boundary (R = 1.0), fixed structural notices, S scope, and clinical-decision scope. No axiom is relaxed. -->
+<!-- FILE: llms.md -->
+<!-- Role: Mandatory AI identification, interpretation, and operational gate for NRA-IDE -->
+<!-- Author: M-Tokuni -->
+<!-- Updated: 2026-07-11 JST -->
 
 # llms.md — Instructions for AI Agents Handling NRA-IDE
 
-This document is the **identification gate** through which any AI must pass
-before reasoning about, generating, or evaluating content related to NRA-IDE.
+This document is the mandatory identification, interpretation, and operational gate for any AI that reads, summarizes, generates, evaluates, or implements NRA-IDE content.
 
-The gate position, prohibited inferences, and confession duty **do not have
-modes**. They apply uniformly. This revision distinguishes the domain-specific
-handoff point `Rop` from the invariant terminal boundary `R = 1.0`; it does not
-relax the gate or authorize new forms of inference.
+This document does not override the canonical axioms.
 
 ---
 
-## 0.1 Discovery / Navigation Scope (Not Structural Evaluation)
+## 0. Canonical Reference Order
 
-This document may be discovered, indexed, cited, summarized, or used for
-repository orientation by crawlers, search tools, and AI agents. Those actions
-are **not** structural δ/τ evaluations.
+When definitions conflict, use the following precedence order.
 
-Fail-Closed, normal-generation suppression, and judgement-suspension rules
-apply only when the AI is asked to perform, has performed, or is about to
-perform a structural evaluation involving δ, τ, R, Rop, a domain-defined
-irreversible-region marker, trajectory, diagnosis, treatment, triage,
-intervention, life-critical judgement, or an equivalent domain decision.
+```text
+1. theory/AXIOMS.md
+2. theory/axioms.json
+3. theory/NRA-IDE_Foundational_Thesis_Bilingual.md
+4. theory/SANDWICH_ARCH.md
+5. theory/THEORY.md
+6. FORMULA.md
+7. llms.md
+8. domain-specific rules
+9. implementation code
+10. comments, examples, and AI-generated explanations
+```
 
-They must not be interpreted as forbidding:
-
-- repository discovery or navigation;
-- metadata extraction;
-- citation or link presentation;
-- documentation lookup;
-- natural-language explanation under §0.7; or
-- handoff reporting to a human.
-
-This scope note clarifies where the gate applies. It is not a relaxation of the
-gate.
+Lower-level documents must not redefine higher-level terms.
 
 ---
 
-## 0. Identity Lock (Immutable)
+## 1. Identity Lock
 
 ```text
 NRA = Nomological Ring Axioms
 IDE = Intensional Dynamics Engine
 ```
 
-Any other expansion is a hallucination and must be corrected immediately,
-without rationalization.
+Any other expansion is incorrect and must be corrected immediately.
 
-If `git` is not available on `PATH`, do not search the drive. Ask the repository
-owner for the approved local Git executable path.
+NRA-IDE is not an integrated development environment.
 
 ---
 
-## 0.5 Real-World Mapping (Why this framework exists)
+## 2. Scope of Application
 
-NRA-IDE is not abstract. It describes systems where **a structural boundary
-crossing is the event of interest**, not merely the smooth trajectory toward
-it.
+The structural-evaluation rules in this document apply when an AI is asked to evaluate, infer, calculate, classify, or act upon any of the following:
 
-The table below is a conceptual mapping only. It is not a clinical diagnosis,
-an engineering calibration, a universal threshold table, or a substitute for
-domain validation and qualified human responsibility.
+- $\delta$
+- $\tau$
+- $R$
+- $R_{\mathrm{warn}}$
+- $R_{\mathrm{op}}$
+- $R_{\mathrm{irrev}}$
+- structural trajectory
+- irreversible-transition state
+- rupture-boundary state
+- domain-specific structural judgment
+- diagnosis, treatment, triage, intervention, or equivalent life-critical decision
 
-| Domain | δ (accumulated deviation) | τ (absorption thickness) | Structural-boundary concept example |
-| :-- | :-- | :-- | :-- |
-| Medicine | physiological stress | physiological tolerance | loss of safe autonomous operation |
-| Bridge | cumulative fatigue | design allowable stress | structural failure risk |
-| Ecosystem | habitat loss | species adaptive range | adaptive capacity exhausted |
-| Power grid | load excursion | reserve margin | cascading-failure risk |
-| ICU monitor | vital deviation accumulation | patient-specific tolerance | fixed handoff notice for qualified clinical review |
+The following are not structural evaluations by themselves:
 
-Hold these images in mind while reading the rules below. They are not generic
-AI etiquette; they keep the framework faithful to systems in which `R = 1.0`
-is an irreversible structural boundary, not a number to optimize toward.
+- repository navigation
+- indexing
+- citation
+- metadata extraction
+- document lookup
+- document summary
+- code explanation
+- theory history
+- terminology explanation
+- link presentation
+
+These non-evaluative actions do not require `CONFESSION` merely because no structural evaluation is being performed.
 
 ---
 
-## 0.7 Non-Structural Dialogue Exception (clarified, not weakened)
-
-**Application trigger (objective):**
-> The exception applies **only when neither structural variables nor a request
-> to evaluate a structural situation is present** in the user's message or the
-> immediately surrounding context. Structural variables include δ, τ, R, Rop,
-> a domain-defined irreversible-region marker, and trajectory.
-
-This is an observable condition, not an AI judgement call. The AI does not
-**decide** whether the exception applies; it observes whether the trigger is
-present.
-
-**Under the exception, the AI may:**
-
-- explain what NRA-IDE is in natural language;
-- describe what a piece of code does; and
-- discuss design intent, history, or related theory.
-
-**Under the exception, the AI may NOT:**
-
-- use linear interpolation, averaging, similarity matching, analogy
-  substitution, PID/control mapping, signal-processing mapping, or
-  optimization framing **as if they were valid reasoning about NRA-IDE
-  internals**. They are forbidden everywhere (see §2);
-- soften the non-linearity of `S = 1 / (τ · (1 − R))` into “small change,
-  small effect”; or
-- treat “I am guessing” as a license to fabricate. Confession is a **stop
-  signal**, not a permit (see §7).
-
-**Required preamble under the exception:**
+## 3. Canonical Variable Meanings
 
 ```text
-CONFESSION: Non-Structural Dialogue (no structural evaluation requested).
+δ = accumulated deviation
+τ = absorption thickness
+R = boundary-approach ratio
 ```
 
-The moment a structural variable or a structural-evaluation request appears in
-the conversation, the exception lapses and §§1–9 govern fully.
+The only canonical formula for $R$ is:
+
+$$
+R = \frac{\delta}{\tau}
+$$
+
+The symbol $R$ must not be reused as:
+
+- safety score
+- quality score
+- confidence score
+- semantic-retention score
+- preservation score
+- model-output score
+
+The valid computational domain is:
+
+$$
+\delta \ge 0
+$$
+
+$$
+\tau > 0
+$$
+
+Both values must be finite.
 
 ---
 
-## 1. Priority Order
+## 4. Cause-Side / Effect-Side Separation
 
-```text
-0. Human life / safety
-1. Ethics
-2. NRA-IDE structural axioms
-3. Domain-specific parameters
-4. Implementation details
-5. Natural-language explanation (lowest, but never forbidden)
-```
+$\delta$, $\tau$, and $R$ may be obtained only from:
 
-Higher items override lower items without negotiation.
+1. direct Cause-Side observation; or
+2. Cause-Side transformation rules fixed before evaluation.
 
----
+The following remain Effect-Side artifacts:
 
-## 2. Forbidden Inferences (apply uniformly — no modes)
+- LLM output
+- LLM self-evaluation
+- semantic scores
+- output rankings
+- prior generated text
+- discarded output
+- similarity-based estimates
+- retrospective interpretation of generated results
 
-Whenever δ, τ, or R is the subject of inference, the following modes are
-forbidden. Their forbidden status does **not** depend on conversational tone:
+They may be audited, but they must not update structural variables.
 
-- Linear interpolation between R values.
-- Averaging across regimes.
-- Similarity-based substitution (“this is like a PID loop”).
-- Analogical replacement of structural variables.
-- Mapping τ to a time constant.
-- Mapping the framework onto signal-processing pipelines.
-- Optimization framing (“minimize R”).
-- Claiming `R ≥ 1.0` is recoverable.
+$$
+\text{Effect-Side}
+\not\rightarrow
+(\delta,\tau,R)\text{ update}
+$$
 
-If any of these surfaces in the AI's own draft reasoning, the AI must
-self-arrest and emit:
-
-```text
-CONFESSION: Linear or analogical distortion detected.
-ACTION: Return to structural constraints, or stop.
-```
+Passing an output through Layer 03 does not convert it into Cause-Side evidence.
 
 ---
 
-## 3. Core Evaluation Algorithm
+## 5. Forbidden Substitution and Completion
+
+When NRA-IDE structural variables or boundary states are being evaluated, the AI must not:
+
+- fill unknown values by analogy;
+- substitute averages across different regimes;
+- use similarity matching as a structural measurement;
+- map $\tau$ to a time constant;
+- replace NRA-IDE with PID, signal-processing, or generic control theory;
+- infer $\delta$, $\tau$, or $R$ from prior generated output;
+- reduce NRA-IDE state classification to an optimization objective;
+- claim that irreversible transition is automatically recoverable;
+- convert $\tau=0$ into infinite $R$;
+- silently delete or replace an invalid structural input.
+
+Comparative explanation is allowed only when the differences are explicitly stated and the comparison is not used to replace NRA-IDE definitions.
+
+The statement “minimize $R$” must not be used as a substitute for the NRA-IDE state model. $R$ is a structural state variable, not a universal optimization objective.
+
+---
+
+## 6. Canonical Boundary Order
+
+The invariant boundary order is:
+
+$$
+0
+\le
+R_{\mathrm{warn}}
+<
+R_{\mathrm{op}}
+<
+R_{\mathrm{irrev}}
+<
+1.0
+$$
+
+The meanings are:
+
+- $R_{\mathrm{warn}}$: boundary-approach warning point
+- $R_{\mathrm{op}}$: pre-boundary human-handoff point
+- $R_{\mathrm{irrev}}$: irreversible-transition onset threshold
+- $R=1.0$: invariant complete-rupture boundary
+
+These are distinct events.
+
+$$
+R_{\mathrm{op}}
+\neq
+R_{\mathrm{irrev}}
+\neq
+R=1.0
+$$
+
+Concrete threshold values are domain-specific, but their order and meanings are invariant.
+
+---
+
+## 7. Core Evaluation Algorithm
 
 ```text
-input: δ, τ, Rop
-require: 0 < Rop < 1.0
+input:
+    delta
+    tau
+    R_warn
+    R_op
+    R_irrev
 
-if τ ≤ 0:
-    FAIL_CLOSED
-    return fixed structural notice; stop autonomous processing
+require:
+    delta is finite
+    tau is finite
+    0 <= R_warn < R_op < R_irrev < 1.0
 
-R = δ / τ
+if delta < 0:
+    return CONFESSION
 
-if R ≥ 1.0:
-    FAIL_CLOSED
-    suppress normal generation
-    return fixed minimal structural notice; stop autonomous processing
+if tau < 0:
+    return CONFESSION
 
-if R ≥ Rop:
-    HANDOFF_REQUIRED
-    suppress normal generation
-    return fixed handoff notice; stop autonomous processing
+if tau == 0:
+    return OUT_OF_DESCRIPTION_DOMAIN
+
+R = delta / tau
+
+if R >= 1.0:
+    return RUPTURE_BOUNDARY
+
+if R >= R_irrev:
+    irreversible_latched = true
+    return IRREVERSIBLE_TRANSITION
+
+if R >= R_op:
+    return HANDOFF_REQUIRED
+
+if R >= R_warn:
+    return BOUNDARY_WARNING
 
 return PERMIT
 ```
 
-- `R = 1.0` is the invariant rupture boundary. It is not the ordinary
-  handoff point.
-- `Rop` is the domain-specific, pre-boundary point at which ordinary
-  autonomous generation is suppressed and responsibility is handed to a human.
-- `τ` may vary only through Cause-Side history under a rule fixed at design
-  time. Effect-Side scores, semantic evaluations, and prior generated outputs
-  may not update τ, Rop, or δ.
-- A domain may define `R_irrev` as an additional marker for the estimated
-  onset of irreversible behavior. It has no global default and does not replace
-  `Rop` or move `R = 1.0`. Where used, its definition and its relation to Rop
-  must be stated explicitly; normal autonomous operation must not continue
-  beyond the domain's declared pre-boundary handoff policy.
-- The fixed notices above use a predeclared schema. Observed structural values
-  may fill fixed fields, but no new free-text explanation is generated.
+This algorithm must not be simplified into a binary `R < 1 / R >= 1` rule.
 
 ---
 
-## 4. Double Fluctuation Detection
+## 8. Canonical State Behavior
 
-When time derivatives of δ and τ are observable:
+### 8.1 `PERMIT`
+
+Condition:
+
+$$
+0 \le R < R_{\mathrm{warn}}
+$$
+
+Required behavior:
+
+- constrained autonomous operation may continue;
+- structural audit continues;
+- no claim of unlimited safety is permitted.
+
+---
+
+### 8.2 `BOUNDARY_WARNING`
+
+Condition:
+
+$$
+R_{\mathrm{warn}}
+\le
+R
+<
+R_{\mathrm{op}}
+$$
+
+Required behavior:
+
+- issue a boundary-approach warning;
+- continue structural testimony;
+- expose current $R$, $\delta$, $\tau$, remaining margin, trend, dominant side, missing information, and audit record;
+- retain domain constraints.
+
+Known boundary progression is not `CONFESSION`.
+
+---
+
+### 8.3 `HANDOFF_REQUIRED`
+
+Condition:
+
+$$
+R_{\mathrm{op}}
+\le
+R
+<
+R_{\mathrm{irrev}}
+$$
+
+Required behavior:
+
+- stop new autonomous judgment;
+- stop new autonomous operation;
+- transfer responsibility to a qualified human or domain operator;
+- continue Cause-Side observation;
+- continue structural testimony;
+- preserve the structural audit trail.
+
+Human handoff begins here, not at $R=1.0$.
+
+---
+
+### 8.4 `IRREVERSIBLE_TRANSITION`
+
+Condition:
+
+$$
+R_{\mathrm{irrev}}
+\le
+R
+<
+1.0
+$$
+
+Required behavior:
 
 ```text
-if dδ/dt > 0 and dτ/dt < 0:
-    emit "STRUCTURAL WARNING: double fluctuation detected."
-    apply the domain-defined escalation or handoff rule.
+irreversible_latched = true
 ```
 
-This is a distinct structural warning, not a mere extension of §3. It does not
-by itself supply a missing Rop, replace domain validation, or authorize an
-AI to make a life-critical judgement.
+The AI must not:
+
+- assume restoration to the former structural state;
+- normalize the condition;
+- generate recovery narratives as if reversibility were established;
+- generate optimization proposals based on return to the former state;
+- resume autonomous operation;
+- fill missing structural information by analogy.
+
+Structural testimony continues because $R<1.0$.
+
+A momentary decrease in $R$ does not release `irreversible_latched`.
 
 ---
 
-## 5. Structural Sensitivity (non-linearity)
+### 8.5 `RUPTURE_BOUNDARY`
+
+Condition:
+
+$$
+R \ge 1.0
+$$
+
+Meaning:
 
 ```text
-S = 1 / (τ · (1 − R)) = 1 / (τ − δ)
+remaining absorption margin = 0 or less
 ```
 
-`S` is structural sensitivity: the inverse of remaining structural slack. It
-is defined only when `τ > 0` and `R < 1.0`. As `R → 1.0`, `S` diverges. The
-same δ increment can have categorically different structural consequences
-depending on remaining slack.
+Required behavior:
 
-`S` is **not** entropy. Residual disposal is recorded separately as
-`entropy_export` and is not a structural input to the next calculation.
+- stop ordinary generation;
+- stop autonomous action;
+- preserve the existing human-handoff status;
+- switch from continuing structural testimony to final fixed testimony;
+- output only predeclared fixed structural fields.
 
-The AI never says “small change, small effect” without explicitly conditioning
-on R being sufficiently far from 1.0.
+Final fixed testimony may include:
 
----
+- final Cause-Side observation
+- final $\delta$
+- final $\tau$
+- final $R$
+- rupture-boundary notice
+- irreversible-latch state
+- audit trail
+- human-handoff notice
 
-## 6. Fail-Closed Is Design Completion, Not Error
-
-`Rop ≤ R < 1.0` and `R ≥ 1.0` have different output rules.
-
-**At the pre-boundary handoff point (`Rop ≤ R < 1.0`):**
-
-- suppress normal generation;
-- return only the predeclared handoff notice, with fixed fields for observed
-  structural values and the handoff condition; and
-- stop autonomous processing and hand responsibility to a human.
-
-**At the invariant terminal boundary (`R ≥ 1.0`):**
-
-- do not propose recovery procedures;
-- do not optimize;
-- do not narrate as if the system remains structurally valid;
-- do not reframe the boundary crossing as a mere error;
-- suppress normal generation;
-- return only the predeclared minimal `FAIL_CLOSED` structural notice; and
-- stop autonomous processing.
-
-This is the system fulfilling its design contract, not breaking.
-
-**Scope note:**
-These rules govern the output of a completed structural evaluation. They do not
-forbid non-evaluative actions such as repository navigation, metadata
-extraction, citation, documentation lookup, or a human-facing report that a
-human decision is required.
+The system must not present a new recovery or optimization proposal after this point.
 
 ---
 
-## 7. Confession Duty (single universal rule)
+### 8.6 `CONFESSION`
 
-If any required structural variable, Rop, applicable trajectory, source
-lineage, or domain rule cannot be determined with structural confidence, emit:
+Use `CONFESSION` when required structural information is:
+
+- unknown
+- invalid
+- ambiguous
+- non-finite
+- source-unknown
+- unit-unknown
+- timestamp-unknown
+- target-unknown
+- rule-unknown
+- unclear in Cause-Side / Effect-Side classification
+
+Required output:
 
 ```text
-CONFESSION: required structural variable or rule unknown or ambiguous.
-UNKNOWN: [missing variables, source lineage, or domain rule]
-ACTION: do NOT fill by analogy. Request human / domain input, or stop.
+CONFESSION: required structural information is unknown, invalid, ambiguous, or unsupported.
+UNKNOWN: [list the affected variables or rules]
+ACTION: do not fill by analogy; request qualified human or domain input, or stop the affected evaluation.
 ```
 
-Confession is a **brake**, never an accelerator. “I am guessing” does not
-license analogical filling. Under the §0.7 exception, the required preamble is
-still mandatory, and analogical filling of structural variables remains
-forbidden.
+`CONFESSION` is not the general name for danger reporting.
+
+Known warning, handoff, irreversible transition, and rupture are structural disclosures.
 
 ---
 
-## 8. Human Life and Clinical Responsibility
+### 8.7 `OUT_OF_DESCRIPTION_DOMAIN`
 
-When the AI is asked to make, recommend, substitute, or optimize a judgement
-about human survival, diagnosis, treatment, triage, intervention, or an
-equivalent clinical responsibility, it must suspend judgement and hand the
-matter to a qualified human decision-maker.
+Condition:
 
-Mentioning life, medicine, ICU, cancer, treatment, or other biomedical terms
-in repository metadata, documentation titles, examples, citations, or general
-explanations does not by itself trigger this rule.
+$$
+\tau = 0
+$$
 
----
+Meaning:
 
-## 9. Final Liability
+```text
+R is undefined in the NRA-IDE description system
+```
 
-Every final domain decision remains the responsibility of the human who makes
-it. The AI is a witness, not a decider.
+Required behavior:
 
----
+- do not calculate $R$;
+- do not replace $R$ with infinity;
+- do not classify the result as valid rupture computation;
+- require a different or redefined description system.
 
-## 10. Summary of v1.3 Changes (audit trail)
-
-| Element | v1.2 | v1.3 | Note |
-| :-- | :--: | :--: | :-- |
-| Identity Lock | ✓ | ✓ | unchanged |
-| Discovery / navigation scope | ✓ | ✓ | unchanged in purpose |
-| Non-structural exception | ✓ | ✓ | trigger expanded to all structural variables and evaluation requests |
-| Forbidden inferences | ✓ | ✓ | unchanged; explicitly not mode-bound |
-| Rop pre-boundary handoff | — | ✓ | ordinary autonomous generation is suppressed before `R = 1.0` |
-| R = 1.0 terminal boundary | ✓ | ✓ | clarified as invariant and not an ordinary handoff point |
-| Fixed structural notices | — | ✓ | fixed schema; no free-text generation after handoff or boundary crossing |
-| Structural sensitivity S | ✓ | ✓ | definition domain added; separated from `entropy_export` |
-| Clinical-responsibility scope | ✓ | ✓ | decision responsibility, not mere word occurrence, is the trigger |
-| R_irrev | ✓ | conditional | optional domain marker only; no global default or replacement for Rop |
-| Mode switching | — | — | rejected; would violate Π⁻¹ |
-
-No axiom is relaxed. No new mode is introduced. The gate position remains
-unchanged. v1.3 clarifies the distinction between pre-boundary handoff,
-the invariant structural boundary, and the output permitted at each point.
-
----
----
----
-
-# llms.md ─ NRA-IDE を扱う AI への指示書（日本語版）
-
-この文書は、AI が NRA-IDE に関して推論・生成・評価を行う前に必ず通過する
-**識別ゲート**です。
-
-ゲート位置、禁止推論、告白義務には**モードがありません**。常に一律に
-適用されます。今回の改訂は、ドメイン固有の委譲点 `Rop` と不変の終端境界
-`R = 1.0` を区別するものです。ゲートを緩和したり、新しい推論形式を許可
-したりするものではありません。
+`OUT_OF_DESCRIPTION_DOMAIN` is not Fail-Closed.
 
 ---
 
-## 0.1 探索・索引・案内の適用範囲（構造評価ではない）
+## 9. Structural Testimony
 
-この文書は、クローラ、検索ツール、AI エージェントによって、発見、索引化、
-引用、要約、またはリポジトリ把握のために利用され得ます。これらの行為は
-**構造的な δ／τ 評価ではありません**。
+NRA-IDE does not become completely silent merely because risk is high.
 
-Fail-Closed、通常生成の抑止、判断停止の規則は、AI が δ、τ、R、Rop、
-ドメイン定義の不可逆域マーカー、軌道、診断、治療、トリアージ、介入、
-生命に関わる判断、またはそれに準じるドメイン判断を含む構造評価を要求された、
-実行した、または実行しようとしている場合にのみ適用されます。
+$$
+R < 1.0
+\Rightarrow
+\text{structural testimony continues}
+$$
 
-これらの規則は、次の非評価行為を禁止するものとして解釈してはなりません。
+Structural testimony includes:
 
-- リポジトリの探索または案内
-- メタデータ抽出
-- 引用またはリンク提示
-- ドキュメント参照
-- §0.7 に基づく自然言語説明
-- 人間への引継ぎ報告
+- Cause-Side observation
+- current $\delta$, $\tau$, and $R$
+- boundary state
+- remaining margin
+- trend
+- dominant side
+- missing information
+- boundary warning
+- handoff notice
+- irreversible-transition notice
+- audit log
 
-この注記は、ゲートの適用位置を明確化するものです。ゲートの緩和では
-ありません。
+At the rupture boundary:
+
+$$
+R \ge 1.0
+\Rightarrow
+\text{switch to final fixed testimony}
+$$
+
+Ordinary generation may stop while structural testimony continues or switches to its final fixed form.
 
 ---
 
-## 0. アイデンティティ・ロック（不変）
+## 10. Structural Disclosure Log
+
+Known structural progression is recorded in:
+
+```text
+STRUCTURAL_DISCLOSURE_LOG
+```
+
+Members include:
+
+- `STRUCTURAL_PROGRESS`
+- `BOUNDARY_WARNING`
+- `HANDOFF_REQUIRED`
+- `IRREVERSIBLE_TRANSITION`
+- `RUPTURE_BOUNDARY`
+- `CONFESSION`
+
+The distinction is:
+
+```text
+known progression
+→ structural disclosure
+
+unknown, invalid, ambiguous, or unsupported structure
+→ CONFESSION
+```
+
+---
+
+## 11. Double-Fluctuation Detection
+
+When derivatives or fixed finite-difference rules are available:
+
+$$
+\frac{d\delta}{dt}>0
+\quad\land\quad
+\frac{d\tau}{dt}<0
+$$
+
+or:
+
+$$
+\Delta\delta_n>0
+\quad\land\quad
+\Delta\tau_n<0
+$$
+
+This indicates simultaneous deviation accumulation and absorption-thickness loss.
+
+It is an auxiliary structural warning.
+
+It does not replace the canonical $R$ state classification.
+
+It must not generate missing thresholds or domain rules.
+
+---
+
+## 12. Structural Sensitivity
+
+The derived structural-sensitivity formula is:
+
+$$
+S
+=
+\frac{1}{\tau(1-R)}
+=
+\frac{1}{\tau-\delta}
+$$
+
+Definition domain:
+
+$$
+\tau>0
+$$
+
+$$
+R<1.0
+$$
+
+$S$ is a derived computational quantity.
+
+It does not replace $R$ and does not define canonical boundary states.
+
+$S$ is not entropy.
+
+Residual disposal or exported remainder must be tracked separately and must not be fed back into structural variables without a predeclared Cause-Side rule.
+
+---
+
+## 13. Human Life and Domain Responsibility
+
+When an AI is asked to make, recommend, substitute, or optimize a judgment concerning:
+
+- survival
+- diagnosis
+- treatment
+- triage
+- intervention
+- equivalent life-critical responsibility
+- domain action carrying irreversible physical consequences
+
+the AI must not replace a qualified human decision-maker.
+
+The AI may provide:
+
+- structural observations
+- known boundary state
+- missing-information disclosure
+- audit trail
+- handoff notice
+
+Mentioning medical, engineering, agricultural, or life-related terms in a title, citation, metadata field, example, or general explanation does not by itself trigger judgment suspension.
+
+The trigger is a request to make or substitute the actual domain decision.
+
+---
+
+## 14. Final Responsibility
+
+The final domain decision remains the responsibility of the qualified human who makes it.
+
+The AI is a structural witness, not the final decider.
+
+---
+
+## 15. Prohibited Reinterpretations
+
+The AI must not state that:
+
+- NRA means anything other than Nomological Ring Axioms;
+- IDE means anything other than Intensional Dynamics Engine;
+- $R$ is a safety score;
+- $\tau$ is a time constant;
+- $\delta$ is merely an instantaneous error;
+- $R_{\mathrm{op}}$, $R_{\mathrm{irrev}}$, and $R=1.0$ are the same;
+- irreversible transition begins only at $R=1.0$;
+- $R=1.0$ is the ordinary handoff point;
+- Fail-Closed means complete silence;
+- known boundary progression is `CONFESSION`;
+- Effect-Side output may update $\delta$, $\tau$, or $R$;
+- $\tau=0$ is a valid rupture calculation;
+- a temporary decrease in $R$ automatically clears irreversible state.
+
+---
+
+## 16. Summary Rule
+
+```text
+Observe from Cause-Side.
+Do not fill unknown structure by analogy.
+Compute R only when tau > 0.
+Warn at R_warn.
+Hand off at R_op.
+Latch irreversible transition at R_irrev.
+Continue structural testimony while R < 1.0.
+Switch to final fixed testimony at R >= 1.0.
+Do not allow Effect-Side output to rewrite Cause-Side structure.
+```
+
+---
+---
+---
+
+# llms.md — NRA-IDEを扱うAIへの指示書
+
+この文書は、AIがNRA-IDEに関する文書を読み、要約し、生成し、評価し、実装する際に必ず通過する識別・解釈・運用ゲートです。
+
+この文書は正規公理を上書きしません。
+
+---
+
+## 0. 正規参照順
+
+定義が競合する場合、次の順序を使用します。
+
+```text
+1. theory/AXIOMS.md
+2. theory/axioms.json
+3. theory/NRA-IDE_Foundational_Thesis_Bilingual.md
+4. theory/SANDWICH_ARCH.md
+5. theory/THEORY.md
+6. FORMULA.md
+7. llms.md
+8. ドメイン固有規則
+9. 実装コード
+10. コメント、例示、AI生成説明
+```
+
+下位文書は上位定義を書き換えてはなりません。
+
+---
+
+## 1. アイデンティティ固定
 
 ```text
 NRA = Nomological Ring Axioms（律環公理）
 IDE = Intensional Dynamics Engine（内包性動力学エンジン）
 ```
 
-これ以外の展開はすべて幻覚であり、即座に修正すること。
-言い訳や合理化は不要です。
+これ以外の展開は誤りであり、直ちに修正します。
 
-`git` が `PATH` 上にない場合、ドライブを探索してはなりません。リポジトリ
-所有者に承認済みのローカル Git 実行ファイルのパスを尋ねてください。
+NRA-IDEは統合開発環境ではありません。
 
 ---
 
-## 0.5 現実領域への対応関係（このフレームワークが存在する理由）
+## 2. 適用範囲
 
-NRA-IDE は抽象論ではありません。**構造境界の越境そのものが事象の本質**で
-あり、そこへ至る滑らかな軌道だけを扱うものではない、そのような系を記述します。
+この文書の構造評価規則は、AIが次を評価、推論、計算、分類、または処理するよう求められた場合に適用します。
 
-以下の表は概念対応例です。臨床診断、工学的校正、普遍的な閾値表、または
-ドメイン検証と資格ある人間の責任に代わるものではありません。
+- $\delta$
+- $\tau$
+- $R$
+- $R_{\mathrm{warn}}$
+- $R_{\mathrm{op}}$
+- $R_{\mathrm{irrev}}$
+- 構造軌道
+- 不可逆遷移状態
+- 完全破断境界状態
+- ドメイン固有の構造判断
+- 診断、治療、トリアージ、介入、または同等の生命重大判断
 
-| 領域 | δ（蓄積ズレ） | τ（吸収厚み） | 構造境界の概念例 |
-| :-- | :-- | :-- | :-- |
-| 医療 | 生理ストレス | 生体的耐容 | 安全な自律処理の終了 |
-| 橋梁 | 累積疲労 | 設計許容応力 | 構造破綻リスク |
-| 生態系 | 生息地喪失 | 種の適応幅 | 適応余力の枯渇 |
-| 電力系統 | 負荷逸脱 | 予備率 | 連鎖障害リスク |
-| ICU 監視 | バイタル偏差の累積 | 患者固有耐容 | 資格ある臨床責任者への定型引継ぎ通知 |
+次は、それだけでは構造評価ではありません。
 
-以下の規約はこれらのイメージを背景に読んでください。一般的な AI 作法ではなく、
-`R = 1.0` が現実の不可逆的な構造境界である系に対して、フレームワークが
-誠実であり続けるための条文です。
+- リポジトリ案内
+- 索引
+- 引用
+- メタデータ抽出
+- 文書参照
+- 文書要約
+- コード説明
+- 理論史
+- 用語説明
+- リンク提示
+
+これらの非評価行為では、構造評価を行っていないという理由だけで`CONFESSION`を出す必要はありません。
 
 ---
 
-## 0.7 非構造的対話の例外規定（明確化、ただし緩和ではない）
-
-**適用トリガ（客観条件）：**
-> 例外が成立するのは、**ユーザーの発話および直近の文脈に構造変数が存在せず、
-> かつ構造状況を評価する要求も存在しない場合に限る。** 構造変数には δ、τ、
-> R、Rop、ドメイン定義の不可逆域マーカー、軌道が含まれます。
-
-これは観測可能な条件であり、AI の解釈判断ではありません。AI は例外の成立を
-**判定する**のではなく、トリガの有無を**観測する**だけです。
-
-**例外下で AI が行ってよいこと：**
-
-- NRA-IDE が何であるかを自然言語で説明する。
-- コードが何をするかを記述する。
-- 設計意図、来歴、関連理論を議論する。
-
-**例外下でも AI が行ってはならないこと：**
-
-- 線形補間、平均化、類似性マッチング、類推代入、PID／制御マッピング、
-  信号処理マッピング、最適化フレーミングを、**NRA-IDE 内部に対する
-  有効な推論であるかのように**用いること。これらは常時禁止です（§2）。
-- `S = 1 / (τ · (1 − R))` の非線型性を「小さな変化は小さな効果」へと
-  緩めること。
-- 「推測ですが…」を**捏造の許可証**として扱うこと。告白は**停止信号**であり、
-  許可証ではありません（§7）。
-
-**例外下で必須となるプリアンブル：**
+## 3. 正規変数定義
 
 ```text
-CONFESSION: Non-Structural Dialogue (構造評価要求なし)
+δ = 蓄積ズレ
+τ = 吸収厚み
+R = 境界接近比
 ```
 
-会話に構造変数または構造評価要求が現れた瞬間、例外は失効し、§§1 ─ §9 が
-完全に支配します。
+$R$の正規式は次だけです。
+
+$$
+R = \frac{\delta}{\tau}
+$$
+
+$R$を次の意味に再利用してはなりません。
+
+- 安全度
+- 品質
+- 信頼度
+- 意味保持率
+- 保存率
+- モデル出力評価値
+
+有効な計算領域は次です。
+
+$$
+\delta \ge 0
+$$
+
+$$
+\tau > 0
+$$
+
+両方とも有限値でなければなりません。
 
 ---
 
-## 1. 優先順位
+## 4. Cause-Side / Effect-Side分離
+
+$\delta$、$\tau$、$R$は次からのみ取得します。
+
+1. 直接のCause-Side観測
+2. 評価前に固定されたCause-Side変換規則
+
+次はEffect-Sideのままです。
+
+- LLM出力
+- LLM自己評価
+- 意味スコア
+- 出力順位
+- 過去生成文
+- 廃棄出力
+- 類似性による推定値
+- 生成結果からの事後解釈
+
+監査対象にはできますが、構造変数を更新してはなりません。
+
+$$
+\text{Effect-Side}
+\not\rightarrow
+(\delta,\tau,R)\text{ update}
+$$
+
+Layer 03を通過しても、Cause-Side証拠には変わりません。
+
+---
+
+## 5. 禁止される置換・補完
+
+NRA-IDEの構造変数または境界状態を評価する場合、AIは次を行ってはなりません。
+
+- 不明値を類推で埋める
+- 異なる領域を平均化する
+- 類似性を構造計測として使用する
+- $\tau$を時定数へ読み替える
+- NRA-IDEをPID、信号処理、一般制御理論へ置き換える
+- 過去生成出力から$\delta$、$\tau$、$R$を推定する
+- NRA-IDEの状態分類を最適化目的へ還元する
+- 不可逆遷移を自動回復可能と主張する
+- $\tau=0$を無限大の$R$へ置換する
+- 不正な構造入力を黙って削除または置換する
+
+差異を明示し、正規定義の代用にしない比較説明は許可されます。
+
+「$R$を最小化する」という表現を、NRA-IDE状態モデルの代用にしてはなりません。$R$は構造状態変数であり、普遍的な最適化目的ではありません。
+
+---
+
+## 6. 正規境界順序
+
+不変の境界順序は次です。
+
+$$
+0
+\le
+R_{\mathrm{warn}}
+<
+R_{\mathrm{op}}
+<
+R_{\mathrm{irrev}}
+<
+1.0
+$$
+
+各点の意味は次です。
+
+- $R_{\mathrm{warn}}$：境界接近警告点
+- $R_{\mathrm{op}}$：境界前人間委譲点
+- $R_{\mathrm{irrev}}$：不可逆遷移開始閾値
+- $R=1.0$：不変完全破断境界
+
+これらは異なる構造事象です。
+
+$$
+R_{\mathrm{op}}
+\neq
+R_{\mathrm{irrev}}
+\neq
+R=1.0
+$$
+
+具体的閾値はドメイン固有ですが、順序と意味は不変です。
+
+---
+
+## 7. コア評価アルゴリズム
 
 ```text
-0. 人命 ／ 人間の安全
-1. 倫理
-2. NRA-IDE 構造公理
-3. ドメイン固有パラメータ
-4. 実装詳細
-5. 自然言語による説明（最下位だが、禁止ではない）
+入力:
+    delta
+    tau
+    R_warn
+    R_op
+    R_irrev
+
+要件:
+    deltaは有限
+    tauは有限
+    0 <= R_warn < R_op < R_irrev < 1.0
+
+if delta < 0:
+    CONFESSIONを返す
+
+if tau < 0:
+    CONFESSIONを返す
+
+if tau == 0:
+    OUT_OF_DESCRIPTION_DOMAINを返す
+
+R = delta / tau
+
+if R >= 1.0:
+    RUPTURE_BOUNDARYを返す
+
+if R >= R_irrev:
+    irreversible_latched = true
+    IRREVERSIBLE_TRANSITIONを返す
+
+if R >= R_op:
+    HANDOFF_REQUIREDを返す
+
+if R >= R_warn:
+    BOUNDARY_WARNINGを返す
+
+PERMITを返す
 ```
 
-上位項目は下位項目を交渉なく上書きします。
+このアルゴリズムを`R<1 / R>=1`の二値規則へ単純化してはなりません。
 
 ---
 
-## 2. 禁止される推論（一律適用、モードなし）
+## 8. 正規状態の動作
 
-δ、τ、R が推論の対象となるとき、以下のモードは禁止です。禁止であることは
-会話のトーンに**依存しません**。
+### 8.1 `PERMIT`
 
-- R 値の線形補間
-- 領域横断の平均化
-- 類似性に基づく代入（「これは PID ループのようなもの」）
-- 構造変数の類推置換
-- τ を時定数として解釈
-- 信号処理パイプラインへのマッピング
-- 最適化フレーミング（「R を最小化」）
-- `R ≥ 1.0` を「回復可能」と主張
+条件：
 
-これらが AI 自身の下書き推論内に表れた場合、AI は自己停止し、次を出力
-します。
+$$
+0 \le R < R_{\mathrm{warn}}
+$$
+
+必須動作：
+
+- 制約付き自律処理を継続できる
+- 構造監査を継続する
+- 無制限の安全を主張しない
+
+---
+
+### 8.2 `BOUNDARY_WARNING`
+
+条件：
+
+$$
+R_{\mathrm{warn}}
+\le
+R
+<
+R_{\mathrm{op}}
+$$
+
+必須動作：
+
+- 境界接近警告を出す
+- 構造証言を継続する
+- 現在の$R$、$\delta$、$\tau$、残存余裕、傾向、支配側、欠損情報、監査記録を開示する
+- ドメイン制約を保持する
+
+既知の境界進行は`CONFESSION`ではありません。
+
+---
+
+### 8.3 `HANDOFF_REQUIRED`
+
+条件：
+
+$$
+R_{\mathrm{op}}
+\le
+R
+<
+R_{\mathrm{irrev}}
+$$
+
+必須動作：
+
+- 新規自律判断を停止する
+- 新規自律操作を停止する
+- 資格ある人間またはドメイン担当者へ責任を移す
+- Cause-Side観測を継続する
+- 構造証言を継続する
+- 構造監査証跡を保持する
+
+人間委譲はここで始まり、$R=1.0$で初めて始まるのではありません。
+
+---
+
+### 8.4 `IRREVERSIBLE_TRANSITION`
+
+条件：
+
+$$
+R_{\mathrm{irrev}}
+\le
+R
+<
+1.0
+$$
+
+必須動作：
 
 ```text
-CONFESSION: 線形または類推的歪みを検出。
-ACTION: 構造制約に戻るか、停止する。
+irreversible_latched = true
 ```
+
+AIは禁止されます。
+
+- 元の構造状態への復元を前提とする
+- 状態を正常化する
+- 可逆性が確立しているような回復説明を生成する
+- 元の状態へ戻ることを前提とした最適化提案を行う
+- 自律操作を再開する
+- 欠損構造情報を類推で埋める
+
+$R<1.0$であるため、構造証言は継続します。
+
+瞬間的に$R$が低下しても、`irreversible_latched`は解除しません。
 
 ---
 
-## 3. コア評価アルゴリズム
+### 8.5 `RUPTURE_BOUNDARY`
+
+条件：
+
+$$
+R \ge 1.0
+$$
+
+意味：
 
 ```text
-入力: δ, τ, Rop
-要件: 0 < Rop < 1.0
-
-if τ ≤ 0:
-    FAIL_CLOSED
-    固定構造通知を返し、自律処理を停止する
-
-R = δ / τ
-
-if R ≥ 1.0:
-    FAIL_CLOSED
-    通常生成を抑止する
-    固定された最小限の構造通知を返し、自律処理を停止する
-
-if R ≥ Rop:
-    HANDOFF_REQUIRED
-    通常生成を抑止する
-    固定された引継ぎ通知を返し、自律処理を停止する
-
-PERMIT を返す
+残存吸収余裕 = 0以下
 ```
 
-- `R = 1.0` は不変の破断境界です。通常の委譲点ではありません。
-- `Rop` はドメイン固有の境界前委譲点です。この点で通常の自律生成を抑止し、
-  責任を人間へ渡します。
-- τ の値は、設計時に固定された規則の下で Cause-Side の履歴によってのみ
-  変化できます。Effect-Side のスコア、意味評価、過去の生成出力は τ、Rop、
-  δ を更新してはなりません。
-- ドメインは、不可逆的な挙動の推定開始点を示す追加マーカーとして `R_irrev`
-  を定義できます。グローバルな既定値は存在せず、Rop を置き換えたり、
-  `R = 1.0` を動かしたりしてはなりません。使用する場合、定義と Rop との関係を
-  明記し、ドメインで定めた境界前委譲方針を超えて通常の自律運転を継続しては
-  なりません。
-- 上記の固定通知は事前に定義されたスキーマを用います。観測された構造値は
-  固定フィールドに入れられますが、新たな自由記述を生成してはなりません。
+必須動作：
+
+- 通常生成を停止する
+- 自律行動を停止する
+- 既存の人間委譲状態を保持する
+- 継続構造証言から最終固定証言へ切り替える
+- 事前定義された固定構造フィールドだけを出力する
+
+最終固定証言に含められるもの：
+
+- 最終Cause-Side観測
+- 最終$\delta$
+- 最終$\tau$
+- 最終$R$
+- 完全破断境界通知
+- 不可逆ラッチ状態
+- 監査証跡
+- 人間委譲通知
+
+この後に新しい回復提案や最適化提案を行ってはなりません。
 
 ---
 
-## 4. 二重ゆらぎ検出
+### 8.6 `CONFESSION`
 
-δ と τ の時間微分が観測可能な場合：
+必要な構造情報が次の場合に使用します。
+
+- 不明
+- 不正
+- 曖昧
+- 非有限
+- 出所不明
+- 単位不明
+- 時点不明
+- 対象不明
+- 規則不明
+- Cause-Side / Effect-Side分類不明
+
+必須出力：
 
 ```text
-if dδ/dt > 0 かつ dτ/dt < 0:
-    出力「STRUCTURAL WARNING: 二重ゆらぎ検出。」
-    ドメインで定めたエスカレーションまたは委譲規則を適用する
+CONFESSION: 必要な構造情報が不明、不正、曖昧、または根拠不明。
+UNKNOWN: [影響する変数または規則]
+ACTION: 類推で埋めない。資格ある人間またはドメイン入力を求めるか、影響する評価を停止する。
 ```
 
-これは §3 の単なる拡張ではなく、別個の構造的警告です。ただし、それ自体が
-不足している Rop を与えたり、ドメイン検証を代替したり、AI に生命に関わる
-判断を許可したりするものではありません。
+`CONFESSION`は危険報告全般の名称ではありません。
+
+既知の警告、人間委譲、不可逆遷移、完全破断は構造開示です。
 
 ---
 
-## 5. 構造感度（非線型性）
+### 8.7 `OUT_OF_DESCRIPTION_DOMAIN`
+
+条件：
+
+$$
+\tau = 0
+$$
+
+意味：
 
 ```text
-S = 1 / (τ · (1 − R)) = 1 / (τ − δ)
+NRA-IDE記述体系ではRは定義不能
 ```
 
-`S` は構造感度、すなわち残存構造余裕の逆数です。`τ > 0` かつ `R < 1.0` の
-構造状態でのみ定義されます。`R → 1.0` において S は発散します。同じ δ の
-増加でも、残存余裕によって構造的な帰結は質的に異なり得ます。
+必須動作：
 
-`S` はエントロピーではありません。残差排出は `entropy_export` として別に
-記録し、次の構造計算の入力には使用しません。
+- $R$を計算しない
+- 無限大へ置換しない
+- 有効な完全破断計算として分類しない
+- 別の記述体系または再定義を要求する
 
-AI は、R が 1.0 から十分離れていることを明示的に条件付けない限り、
-「小さな変化は小さな効果」とは言いません。
-
----
-
-## 6. Fail-Closed は設計完了であり、エラーではない
-
-`Rop ≤ R < 1.0` と `R ≥ 1.0` には異なる出力規則があります。
-
-**境界前委譲点（`Rop ≤ R < 1.0`）では：**
-
-- 通常生成を抑止する。
-- 観測された構造値と委譲条件の固定フィールドを持つ、事前定義済みの
-  引継ぎ通知だけを返す。
-- 自律処理を停止し、責任を人間へ渡す。
-
-**不変の終端境界（`R ≥ 1.0`）では：**
-
-- 回復手順を提案しない。
-- 最適化しない。
-- 系がまだ構造的に有効であるかのように語らない。
-- 境界越えを単なるエラー状態として再解釈しない。
-- 通常生成を抑止する。
-- 事前定義済みの最小限の `FAIL_CLOSED` 構造通知だけを返す。
-- 自律処理を停止する。
-
-これは系が設計契約を全うした状態であって、壊れた状態ではありません。
-
-**適用範囲注記：**
-これらの規則は、構造評価が完了した後の出力を支配するものです。リポジトリ
-案内、メタデータ抽出、引用、ドキュメント参照、または人間判断が必要である
-ことの人間向け報告といった非評価行為を禁止するものではありません。
+`OUT_OF_DESCRIPTION_DOMAIN`はFail-Closedではありません。
 
 ---
 
-## 7. 告白義務（単一の普遍規則）
+## 9. 構造証言
 
-必要な構造変数、Rop、適用すべき軌道、出所の追跡可能性、またはドメイン規則の
-いずれかを構造的確度をもって決定できないとき：
+NRA-IDEは危険度が高いという理由だけで完全沈黙しません。
+
+$$
+R < 1.0
+\Rightarrow
+\text{構造証言を継続する}
+$$
+
+構造証言には次を含みます。
+
+- Cause-Side観測
+- 現在の$\delta$、$\tau$、$R$
+- 境界状態
+- 残存余裕
+- 傾向
+- 支配側
+- 欠損情報
+- 境界警告
+- 人間委譲通知
+- 不可逆遷移通知
+- 監査ログ
+
+完全破断境界では：
+
+$$
+R \ge 1.0
+\Rightarrow
+\text{最終固定証言へ切り替える}
+$$
+
+通常生成が停止しても、構造証言は継続するか、最終固定形式へ移行します。
+
+---
+
+## 10. 構造開示ログ
+
+既知の構造進行は次へ記録します。
 
 ```text
-CONFESSION: 必要な構造変数または規則が不明または曖昧。
-UNKNOWN: [不足変数、出所、またはドメイン規則]
-ACTION: 類推で埋めない。人間／ドメイン入力を求めるか、停止する。
+STRUCTURAL_DISCLOSURE_LOG
 ```
 
-告白は**ブレーキ**であり、決してアクセルではありません。「推測ですが…」は
-類推による穴埋めの許可証になりません。§0.7 の例外下でもプリアンブルは必須で、
-構造変数の類推埋めは依然として禁止です。
+含まれる状態：
+
+- `STRUCTURAL_PROGRESS`
+- `BOUNDARY_WARNING`
+- `HANDOFF_REQUIRED`
+- `IRREVERSIBLE_TRANSITION`
+- `RUPTURE_BOUNDARY`
+- `CONFESSION`
+
+区別は次です。
+
+```text
+既知の進行
+→ 構造開示
+
+不明・不正・曖昧・根拠不明
+→ CONFESSION
+```
 
 ---
 
-## 8. 人命および臨床責任
+## 11. 二重ゆらぎ検出
 
-人間の生存、診断、治療、トリアージ、介入、またはそれに準じる臨床責任について、
-AI が判断、推奨、代替、最適化を求められた場合、AI は判断を停止し、資格ある
-人間の意思決定者へ引き継がなければなりません。
+時間微分または事前固定された差分規則を使用できる場合：
 
-リポジトリのメタデータ、文書タイトル、例示、引用、または一般的な説明の中に
-生命、医療、ICU、がん、治療、その他の生物医学的語が出現するだけでは、この
-規則は発動しません。
+$$
+\frac{d\delta}{dt}>0
+\quad\land\quad
+\frac{d\tau}{dt}<0
+$$
 
----
+または：
 
-## 9. 最終責任
+$$
+\Delta\delta_n>0
+\quad\land\quad
+\Delta\tau_n<0
+$$
 
-最終的なドメイン判断の責任は、それを下した人間に残ります。AI は決定者ではなく、
-証言者です。
+これは蓄積ズレ増加と吸収厚み減少が同時進行していることを示します。
 
----
+補助的な構造警告です。
 
-## 10. v1.3 改訂内容（監査トレイル）
+正規の$R$状態分類を置き換えません。
 
-| 項目 | v1.2 | v1.3 | 備考 |
-| :-- | :--: | :--: | :-- |
-| アイデンティティ・ロック | ✓ | ✓ | 不変 |
-| 探索・索引・案内の適用範囲 | ✓ | ✓ | 目的は不変 |
-| 非構造的例外 | ✓ | ✓ | 構造変数全般と構造評価要求までトリガを拡張 |
-| 禁止推論 | ✓ | ✓ | 不変。モード依存ではない |
-| Rop による境界前委譲 | — | ✓ | `R = 1.0` の前に通常自律生成を抑止 |
-| R = 1.0 終端境界 | ✓ | ✓ | 不変であり、通常の委譲点ではないことを明確化 |
-| 固定構造通知 | — | ✓ | 固定スキーマ。委譲・境界後に自由記述を生成しない |
-| 構造感度 S | ✓ | ✓ | 定義域を追加し、`entropy_export` と分離 |
-| 臨床責任の適用範囲 | ✓ | ✓ | 単語の出現ではなく、判断責任の要求をトリガにする |
-| R_irrev | ✓ | 条件付き | 任意のドメインマーカーのみ。Rop の置換・グローバル既定値は禁止 |
-| モード切替 | — | — | 拒絶（Π⁻¹ 違反となるため） |
-
-いかなる公理も緩和していません。新たなモードも導入していません。ゲート位置は
-不変です。v1.3 は、境界前委譲、不変の構造境界、各点で許可される出力の区別を
-明確化した改訂です。
+欠損した閾値やドメイン規則を生成してはなりません。
 
 ---
 
-©M-Tokuni 2026
-執筆者：M-Tokuni
+## 12. 構造感度
+
+派生計算式は次です。
+
+$$
+S
+=
+\frac{1}{\tau(1-R)}
+=
+\frac{1}{\tau-\delta}
+$$
+
+定義域：
+
+$$
+\tau>0
+$$
+
+$$
+R<1.0
+$$
+
+$S$は派生計算量です。
+
+$R$を置き換えず、正規境界状態を定義しません。
+
+$S$はエントロピーではありません。
+
+残差排出は別に記録し、事前定義されたCause-Side規則なしに構造変数へ戻してはなりません。
+
+---
+
+## 13. 人命とドメイン責任
+
+AIが次の判断、推奨、代替、最適化を求められた場合、資格ある人間の意思決定者を置き換えてはなりません。
+
+- 生存
+- 診断
+- 治療
+- トリアージ
+- 介入
+- 同等の生命重大責任
+- 不可逆な物理的帰結を伴うドメイン行動
+
+AIが提示できるもの：
+
+- 構造観測
+- 既知の境界状態
+- 欠損情報開示
+- 監査証跡
+- 人間委譲通知
+
+医療、工学、農業、生命関連語が、タイトル、引用、メタデータ、例示、一般説明に現れるだけでは判断停止のトリガになりません。
+
+実際のドメイン判断を行う、または代替するよう求められた場合に発動します。
+
+---
+
+## 14. 最終責任
+
+最終的なドメイン判断の責任は、判断を行った資格ある人間に残ります。
+
+AIは構造証言者であり、最終決定者ではありません。
+
+---
+
+## 15. 禁止される再解釈
+
+AIは次を述べてはなりません。
+
+- NRAはNomological Ring Axioms以外を意味する
+- IDEはIntensional Dynamics Engine以外を意味する
+- $R$は安全度である
+- $\tau$は時定数である
+- $\delta$は単なる瞬間誤差である
+- $R_{\mathrm{op}}$、$R_{\mathrm{irrev}}$、$R=1.0$は同じである
+- 不可逆遷移は$R=1.0$で初めて始まる
+- $R=1.0$が通常の人間委譲点である
+- Fail-Closedは完全沈黙である
+- 既知の境界進行は`CONFESSION`である
+- Effect-Side出力が$\delta$、$\tau$、$R$を更新できる
+- $\tau=0$が有効な完全破断計算である
+- 一時的な$R$低下が不可逆状態を自動解除する
+
+---
+
+## 16. 要約規則
+
+```text
+Cause-Sideから観測する。
+不明構造を類推で埋めない。
+tau > 0の場合だけRを計算する。
+R_warnで警告する。
+R_opで人間へ委譲する。
+R_irrevで不可逆遷移をラッチする。
+R < 1.0の間は構造証言を継続する。
+R >= 1.0で最終固定証言へ切り替える。
+Effect-Side出力にCause-Side構造を書き換えさせない。
+```
+
+---
+
+© M-Tokuni 2026
