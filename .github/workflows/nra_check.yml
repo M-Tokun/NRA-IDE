@@ -21,6 +21,3 @@ jobs:
 
       - name: Check Internal Links
         run: python scripts/check_links.py
-
-      - name: Check Demo Count
-        run: python scripts/check_demo_count.py

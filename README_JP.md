@@ -187,7 +187,7 @@ $$
 $$
 \tau=0
 \Rightarrow
-\text{OUT\_OF\_DESCRIPTION\_DOMAIN}
+\text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
 $$
 
 これはFail-Closedではありません。
