@@ -182,7 +182,7 @@
 <body>
     <div class="container">
         <h1>DOMAIN TUNING: STRUCTURAL BOUNDARY ADJUSTMENT</h1>
-        <div class="subtitle">τ (Thickness) and R_op (Operational Threshold) Calibration Only</div>
+        <div class="subtitle">Illustrative domain values for τ and the invariant threshold order: R_warn &lt; R_handoff &lt; R_irrev &lt; 1</div>
         
         <!-- R軸の可視化 -->
         <div class="r-axis">
@@ -222,12 +222,12 @@
                         <span class="param-value">20</span>
                     </div>
                     <div class="param-row">
-                        <span class="param-label">R_op (Threshold)</span>
-                        <span class="param-value">0.90</span>
+                        <span class="param-label">R_warn &lt; R_handoff &lt; R_irrev &lt; 1</span>
+                        <span class="param-value">0.40 &lt; 0.70 &lt; 0.90 &lt; 1</span>
                     </div>
                     <div class="param-row">
                         <span class="param-label">Structural Characteristic</span>
-                        <span class="param-value">Narrow tolerance width</span>
+                        <span class="param-value">Narrow absorption thickness</span>
                     </div>
                 </div>
                 
@@ -239,12 +239,12 @@
                         <span class="param-value">30</span>
                     </div>
                     <div class="param-row">
-                        <span class="param-label">R_op (Threshold)</span>
-                        <span class="param-value">1.00</span>
+                        <span class="param-label">R_warn &lt; R_handoff &lt; R_irrev &lt; 1</span>
+                        <span class="param-value">0.50 &lt; 0.75 &lt; 0.92 &lt; 1</span>
                     </div>
                     <div class="param-row">
                         <span class="param-label">Structural Characteristic</span>
-                        <span class="param-value">Medium tolerance width</span>
+                        <span class="param-value">Medium absorption thickness</span>
                     </div>
                 </div>
                 
@@ -256,31 +256,31 @@
                         <span class="param-value">40</span>
                     </div>
                     <div class="param-row">
-                        <span class="param-label">R_op (Threshold)</span>
-                        <span class="param-value">1.00</span>
+                        <span class="param-label">R_warn &lt; R_handoff &lt; R_irrev &lt; 1</span>
+                        <span class="param-value">0.60 &lt; 0.80 &lt; 0.95 &lt; 1</span>
                     </div>
                     <div class="param-row">
                         <span class="param-label">Structural Characteristic</span>
-                        <span class="param-value">Wide tolerance width</span>
+                        <span class="param-value">Wide absorption thickness</span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Fail-Closed条件 -->
+        <!-- Canonical state conditions -->
         <div class="failclosed-box">
-            <div class="failclosed-title">FAIL-CLOSED TRIGGER CONDITIONS</div>
+            <div class="failclosed-title">CANONICAL STATE CONDITIONS</div>
             <div class="failclosed-condition">
-                <strong>Condition 1:</strong> R ≥ R_op → Operational fracture detected
+                <strong>HANDOFF_REQUIRED:</strong> R_handoff ≤ R &lt; R_irrev → fixed Handoff testimony for external human audit
             </div>
             <div class="failclosed-condition">
-                <strong>Condition 2:</strong> R ≥ 1.00 → Theoretical fracture (immediate)
+                <strong>IRREVERSIBLE_TRANSITION:</strong> R_irrev ≤ R &lt; 1 → latch and continue testimony
             </div>
             <div class="failclosed-condition">
-                <strong>Condition 3:</strong> ω = 0 → Structural death (forbidden state)
+                <strong>RUPTURE_BOUNDARY:</strong> R ≥ 1 → final fixed testimony
             </div>
             <div class="failclosed-condition">
-                <strong>Action:</strong> Silence (no output, no alternatives, wait for human)
+                <strong>Invalid input:</strong> τ=0 → OUT_OF_DESCRIPTION_DOMAIN; negative/non-finite/invalid → CONFESSION
             </div>
         </div>
         
@@ -290,9 +290,9 @@
             
             <h4 style="color: #00ff88; margin-top: 20px;">✓ What Domain Tuning IS:</h4>
             <ul>
-                <li>Adjustment of boundary width (τ) and fracture threshold (R_op)</li>
+                <li>Adjustment of τ and concrete values satisfying R_warn &lt; R_handoff &lt; R_irrev &lt; 1</li>
                 <li>Structural calibration based on domain characteristics</li>
-                <li>Configuration of tolerance ranges (not performance optimization)</li>
+                <li>Configuration of absorption-thickness ranges (not performance optimization)</li>
                 <li>Human-only adjustment (AI cannot modify)</li>
             </ul>
             
@@ -305,11 +305,13 @@
                 <li class="forbidden">History-based learning (past performance data)</li>
             </ul>
             
-            <h4 style="color: #00ff88; margin-top: 20px;">Zone Structure (No Semantic Value):</h4>
+            <h4 style="color: #00ff88; margin-top: 20px;">Canonical Example State Order:</h4>
             <ul>
-                <li><strong>Zone A:</strong> R &lt; 0.40 → PERMIT (structural stability)</li>
-                <li><strong>Zone B:</strong> 0.40 ≤ R &lt; 1.00 → PERMIT_WITH_CAVEAT (elastic fluctuation)</li>
-                <li><strong>Zone C:</strong> R ≥ 1.00 → FAIL-CLOSED (fracture point)</li>
+                <li><strong>PERMIT:</strong> 0 ≤ R &lt; R_warn</li>
+                <li><strong>BOUNDARY_WARNING:</strong> R_warn ≤ R &lt; R_handoff</li>
+                <li><strong>HANDOFF_REQUIRED:</strong> R_handoff ≤ R &lt; R_irrev</li>
+                <li><strong>IRREVERSIBLE_TRANSITION:</strong> R_irrev ≤ R &lt; 1</li>
+                <li><strong>RUPTURE_BOUNDARY:</strong> R ≥ 1</li>
             </ul>
             <p style="margin-top: 10px;">
                 Zones are <strong>structural classifications</strong>, not value judgments.<br>
@@ -320,24 +322,24 @@
             <h4 style="color: #00ff88; margin-top: 20px;">Domain Independence:</h4>
             <ul>
                 <li>All DOMAINs can traverse all Zones (A/B/C)</li>
-                <li>DOMAIN parameters (τ, R_op) determine boundary width only</li>
+                <li>DOMAIN parameters define τ and concrete threshold values without changing their order or meaning</li>
                 <li>No fixed correspondence: DOMAIN_A ≠ Zone A</li>
                 <li>A DOMAIN with narrow τ may still operate in Zone A if δ is small</li>
             </ul>
             
-            <h4 style="color: #00ff88; margin-top: 20px;">Fail-Closed ≠ Failure:</h4>
+            <h4 style="color: #00ff88; margin-top: 20px;">Auxiliary observation and fixed testimony:</h4>
             <ul>
-                <li>Fail-Closed is <strong>structural correctness</strong>, not error</li>
-                <li>When R ≥ R_op or ω = 0: system maintains integrity by silence</li>
-                <li>ω &gt; 0 during Fail-Closed → system is alive (structurally continuous)</li>
-                <li>ω = 0 → system death (strictly forbidden in NRA-IDE)</li>
+                <li>Fail-closed is an implementation principle, not a canonical state name or proof of correctness</li>
+                <li>ω reports observed transition continuity only and does not replace the canonical state</li>
+                <li>ω = 0 does not mean safe stop, structural death, or recovery</li>
+                <li>Effect-Side output cannot rewrite δ, τ, thresholds, latch state, or fixed testimony</li>
             </ul>
         </div>
         
         <!-- フッター -->
         <div style="text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #333; color: #666; font-size: 12px;">
-            NRA-IDE: Structure-Pure Definition v1.0 | Domain Tuning = Boundary Width Adjustment Only<br>
-            No meaning, no optimization, no semantic value, no history
+            NRA-IDE illustrative domain-tuning diagram | Not a normative implementation<br>
+            Concrete values require domain evidence, approval, versioning, and validation
         </div>
     </div>
 </body>

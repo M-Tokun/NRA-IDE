@@ -11,7 +11,8 @@
   --------------------------------------------------
   上限側EMAが蓄積されると τ が拡大 → ピークを丸める（慎重）
   下限側EMAが蓄積されると τ が縮小 → 検知を早める（敏感）
-  R = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  R_dirは上限・下限それぞれ独立したR=δ/τ評価の集約値であり、正典のRを再定義するものではない。
   心臓弁・サスペンション・調圧弁と同じ非対称構造。
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
@@ -346,7 +347,7 @@ footer a { color: var(--lower); text-decoration: none; }
     <h1>非対称ダンパー構造<br>上限・下限 Band Gate Live</h1>
     <p>
       上限突破（過負荷・過電流・高圧）と下限割れ（漏電・断線・枯渇）を<br>
-      同一の R = δ/τ で検知します。上下のτは逆向きに動きます。
+      それぞれ独立した R = δ/τ で検知し、表示するR_dirは両者の最大値です。上下のτは逆向きに動きます。
     </p>
   </div>
   <div class="live-row">

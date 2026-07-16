@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE ダム管理比較 + τ劣化曲線</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
 
   :root {
     --bg: #060c12;
@@ -76,7 +75,7 @@
 
 <div class="page-title">
   <h1>ダム管理比較 — 従来の水位管理 vs NRA-IDE + τ劣化曲線</h1>
-  <p>負荷の積算がτを縮小させる。耐用年数ではなく実際の構造限界を計算する。</p>
+  <p>例示モデル：宣言した累積負荷規則でτを縮小し、Rの変化を示す。検証済みのダムモデルでも、完全な正規状態機械でもない。</p>
 </div>
 
 <div class="scenario-bar">
@@ -103,7 +102,7 @@
     <div class="side-status">
       <div class="status-metric">R = δ / τ（ゆらぎ / 現在の厚み）</div>
       <div class="status-big" id="right-r" style="color:var(--green);">0.000</div>
-      <div class="status-metric" id="right-zone">NIRVANA — 安定</div>
+      <div class="status-metric" id="right-zone">PERMIT — 例示安定域</div>
       <div class="judgment-box" id="right-judgment" style="border-color:var(--green);color:var(--green);">待機中</div>
     </div>
   </div>
@@ -443,15 +442,15 @@ function updateUI(R, delta) {
     rj.style.borderColor = '#ff3d00'; rj.style.color = '#ff3d00';
     rj.textContent = `⚡ R ≥ 1.0 — 超過。τ劣化 ${degRate.toFixed(1)}% が影響しています。`;
   } else if (R >= 0.7) {
-    rEl.style.color = '#ff9100'; zn.textContent = 'CRITICAL — 限界接近';
+    rEl.style.color = '#ff9100'; zn.textContent = 'BOUNDARY_WARNING — 限界接近';
     rj.style.borderColor = '#ff9100'; rj.style.color = '#ff9100';
     rj.textContent = `⚠ R ≥ 0.7 — 水位に関わらず今すぐ対応が必要です。τ = ${tauCurrent.toFixed(3)}`;
   } else if (R >= 0.4) {
-    rEl.style.color = '#ffd740'; zn.textContent = 'ELASTIC — 監視中';
+    rEl.style.color = '#ffd740'; zn.textContent = 'BOUNDARY_WARNING — 監視中';
     rj.style.borderColor = '#ffd740'; rj.style.color = '#ffd740';
     rj.textContent = `〜 R ≥ 0.4 — 余裕はあります。τ劣化 ${degRate.toFixed(1)}% を注視します。`;
   } else {
-    rEl.style.color = '#00e676'; zn.textContent = 'NIRVANA — 安定';
+    rEl.style.color = '#00e676'; zn.textContent = 'PERMIT — 例示安定域';
     rj.style.borderColor = '#00e676'; rj.style.color = '#00e676';
     rj.textContent = `✓ R < 0.4 — 安定。現在τ = ${tauCurrent.toFixed(3)}（初期比 ${(100 - degRate).toFixed(1)}%）`;
   }

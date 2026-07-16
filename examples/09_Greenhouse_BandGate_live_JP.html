@@ -13,7 +13,8 @@
   各指標に独立した上限EMA・下限EMA・τ_dynamicを持つ。
   水圧/EC: α_lower 高め → 枯渇・断水の早期検知
   水圧:    α_upper 低め → 配管衝撃を避ける慎重設定
-  R = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  R_dirは上限・下限それぞれ独立したR=δ/τ評価の集約値であり、正典のRを再定義するものではない。
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
 <style>
@@ -304,7 +305,7 @@ footer a { color:var(--co2); text-decoration:none; }
     <h1>温室農業 4指標 同時監視<br>Band Gate ライブデモ</h1>
     <p>
       水圧・気温・CO₂濃度・養液ECを Band Gate で同時監視します。<br>
-      「適正範囲を外れる勢い」をEMAで記憶し、上限超過も下限割れも同じ R = δ/τ で検知。<br>
+      「適正範囲を外れる勢い」をEMAで記憶し、上限超過も下限割れもそれぞれ独立した R = δ/τ で検知（表示するR_dirは両者の最大値）。<br>
       スパイクが来る前に予兆を捉えます。
     </p>
   </div>

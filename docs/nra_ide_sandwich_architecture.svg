@@ -7,7 +7,7 @@ Note: SVG-safe text uses escaped entities where required.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" role="img" aria-labelledby="title desc">
   <title id="title">NRA-IDE Architecture — Sandwich Pattern</title>
-  <desc id="desc">A high-level NRA-IDE sandwich architecture showing User input, Pre-NRA gate, stateless LLM, Post-NRA gate, output, and Fail-Closed isolation into DiscardVault.</desc>
+  <desc id="desc">A high-level deployment diagram. Cause-Side structural state is evaluated before the Effect-Side output gate; handoff, irreversible transition, and rupture testimony are fixed and audited.</desc>
 
   <defs>
     <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
@@ -51,7 +51,7 @@ Note: SVG-safe text uses escaped entities where required.
   <rect x="295" y="605" width="610" height="190" rx="18" fill="#eff6ff" stroke="#2563eb" stroke-width="4" filter="url(#softShadow)"/>
   <text x="330" y="656" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e3a8a">Post-NRA Gate / CleanContext</text>
   <text x="330" y="697" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Validate structural safety using R = δ / τ</text>
-  <text x="330" y="731" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Permit valid output or enforce FAIL-CLOSED</text>
+  <text x="330" y="731" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#0f172a">Enforce canonical state and fixed testimony</text>
 
   <!-- Formula core -->
   <rect x="980" y="240" width="455" height="190" rx="18" fill="#ffffff" stroke="#334155" stroke-width="3" filter="url(#softShadow)"/>
@@ -67,7 +67,7 @@ Note: SVG-safe text uses escaped entities where required.
   <!-- DiscardVault -->
   <rect x="980" y="735" width="455" height="125" rx="18" fill="#fff1f2" stroke="#be123c" stroke-width="4" filter="url(#softShadow)"/>
   <text x="1018" y="786" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#9f1239">DiscardVault / CleanContext</text>
-  <text x="1018" y="826" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#9f1239">FAIL-CLOSED outputs are isolated</text>
+  <text x="1018" y="826" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#9f1239">Handoff / irreversible / rupture audit records</text>
   <text x="1018" y="855" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#9f1239">Never reintroduced into LLM context</text>
 
   <!-- Arrows -->

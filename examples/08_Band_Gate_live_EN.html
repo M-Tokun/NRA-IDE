@@ -11,7 +11,8 @@
   --------------------------------------------------
   Upper-side EMA accumulates → τ expands → peak is rounded (conservative).
   Lower-side EMA accumulates → τ shrinks → detection sharpens (sensitive).
-  R = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
+  R_dir is an aggregate of two independent R = δ/τ evaluations (upper/lower), not a redefinition of canonical R.
   Same asymmetric structure as heart valves, car suspension, pressure regulators.
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
@@ -145,7 +146,7 @@ footer a { color: var(--lower); text-decoration: none; }
   <div class="h-left">
     <div class="h-label">NRA-IDE / Band Gate — 08 / EN</div>
     <h1>ASYMMETRIC DAMPER STRUCTURE<br>Upper &amp; Lower Band Gate — Live</h1>
-    <p>Over-threshold (surge) and under-threshold (dropout) are both detected by the same formula R = δ/τ. Upper and lower τ move in <em>opposite</em> directions — this is the asymmetric damper.</p>
+    <p>Over-threshold (surge) and under-threshold (dropout) are each detected by an independent R = δ/τ evaluation; the displayed R_dir is the max of the two. Upper and lower τ move in <em>opposite</em> directions — this is the asymmetric damper.</p>
   </div>
   <div class="live-row">
     <div class="live-badge"><div class="live-dot"></div>LIVE</div>

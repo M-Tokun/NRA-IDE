@@ -13,7 +13,8 @@
   Each sensor has independent upper/lower EMA and τ_dynamic.
   α_lower higher for water/EC → detect depletion/cutoff early.
   α_upper lower  for water    → avoid pipe shock on pressure surge.
-  R = max(δ_upper / τ_dyn_upper,  δ_lower / τ_dyn_lower)
+  R_dir = max(δ_upper / τ_dyn_upper,  δ_lower / τ_dyn_lower)
+  R_dir is an aggregate of two independent R = δ/τ evaluations (upper/lower), not a redefinition of canonical R.
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
 <style>
@@ -145,7 +146,7 @@ footer a{color:var(--co2);text-decoration:none;}
     <div class="h-tag">NRA-IDE / Band Gate — 09 / EN / GREENHOUSE</div>
     <h1>Greenhouse 4-Sensor<br>Simultaneous Band Gate Monitor</h1>
     <p>Irrigation Pressure · Temperature · CO₂ · Nutrient EC monitored simultaneously.<br>
-    Both over-range (upper breach) and under-range (lower breach) are detected by R = δ/τ with asymmetric EMA sensitivity per sensor.</p>
+    Both over-range (upper breach) and under-range (lower breach) are each detected by an independent R = δ/τ evaluation (displayed R_dir is the max of the two), with asymmetric EMA sensitivity per sensor.</p>
   </div>
   <div class="live-wrap">
     <div class="live-badge"><div class="ldot"></div>GREENHOUSE LIVE</div>
