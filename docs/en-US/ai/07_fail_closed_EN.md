@@ -1,66 +1,72 @@
-# 07 Fail-Closed — Suppressing Ordinary Generation and Delegating to Humans
+# 07 Fail-Closed — Suppressing Ordinary Generation and Exposing Fixed Testimony for External Human Audit
 
 <!-- FILE: 07_fail_closed_EN.md -->
 
 ---
 
-## Simply Saying “I Don’t Know” Does Not Constitute a Structural Guarantee
+## Simply Saying “I Don’t Know” Does Not Enforce a Structural Boundary
 
 When AI is uncertain, saying “I don’t know” is important as an honest response.
 
-However, leaving whether that response appears to the model’s policy, training, context, or generation at that moment does not constitute a structural guarantee.
+However, leaving whether that response appears to the model’s policy, training, context, or generation at that moment does not enforce a structural boundary.
 
 Many generative systems are designed to provide useful answers to user questions. Therefore, even when uncertainty or limits exist, paths may remain through which ordinary responses continue by regeneration, supplementation, or rephrasing.
 
-NRA-IDE does not address whether an answer appears honest. It addresses whether, when predefined structural conditions are reached, a path can be established that does not allow ordinary generated responses to pass, independently of the model’s intentions or self-evaluation.
+The Fail-Closed application does not address whether an answer appears honest. Under explicitly declared observation, update, threshold, and testimony rules, it requires an implementation path that does not allow ordinary generated responses to pass when the corresponding structural conditions are reached, independently of the model’s intentions or self-evaluation.
 
 ---
 
-## Fail-Closed Has Two Stages: Handoff and Terminal Processing
+## Fail-Closed Is an Implementation Principle Across Canonical States
 
-Chapter 05 distinguished the operating handoff point `Rop`, at which ordinary output is stopped, from the phase-transition boundary $R = 1.0$, at which structural margin is lost.
+Chapter 05 distinguished the canonical Handoff threshold `R_handoff`, at which ordinary output is stopped, from the declared evaluation's `RUPTURE_BOUNDARY` at $R = 1.0$.
 
 ```text
 R = δ / τ
-0 < Rop < 1.0
+0 <= R_warn < R_handoff < R_irrev < 1
 ```
 
-This chapter also does not conflate the two.
+This chapter also does not conflate these boundaries.
 
-| Condition       | Ordinary Generation             | Permitted Output                                              | Purpose                                                           |
-| --------------- | ------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `R < Rop`       | Allowed when conditions are met | Ordinary generated response                                   | Normal operation                                                  |
-| `Rop ≤ R < 1.0` | Suppressed                      | Predefined handoff notification                               | Hand judgment over to humans before the phase-transition boundary |
-| `R ≥ 1.0`       | Suppressed                      | Minimal FAIL-CLOSED indicator or reference to a protected log | Do not continue new generation after the terminal boundary        |
+| Canonical state | Condition | Structural response |
+|---|---|---|
+| `PERMIT` | `0 <= R < R_warn` | Normal operation with structural audit |
+| `BOUNDARY_WARNING` | `R_warn <= R < R_handoff` | Warning and required structural testimony |
+| `HANDOFF_REQUIRED` | `R_handoff <= R < R_irrev` | Fixed Handoff testimony; stop new autonomous judgment |
+| `IRREVERSIBLE_TRANSITION` | `R_irrev <= R < 1` | Canonical `IRREVERSIBLE_TRANSITION` state; irreversible latch active; continuing structural testimony |
+| `RUPTURE_BOUNDARY` | `R >= 1` | Final fixed testimony |
 
-`Rop` is an operating handoff condition defined by humans in accordance with the domain-specific point of approach to an irreversible regime. In principle, ordinary responses must be stopped at this point.
+The sole axiom is “Existence is generation.” No second or subsequent axiom exists. The Primary Formula is the true mathematical root equation that maps the declared target's state into an equation; it is neither an axiom nor merely a safety indicator, local instrument, or boundary-approach rate. The Secondary / Dual-Fluctuation Formula is the IDE calculation-method and dynamics engine, not an axiom. NRA-IDE's core is the survival equation and survival domain. Fail-Closed is a partial operational application of that domain to accident-prevention control; it does not provide a safety guarantee.
 
-$R = 1.0$ is not an ordinary handoff point. It is the phase-transition boundary at which the remaining structural margin, $\tau - \delta$, is lost. After this boundary has been reached, the LLM must not be asked to generate new free-form text in order to explain the reason for stopping.
+`R_handoff` is a canonical Handoff threshold fixed before evaluation by Cause-Side domain authority in accordance with the domain-specific condition of approach to an irreversible regime. It cannot be established or rewritten after evaluation by an Effect-Side result or external audit. In principle, ordinary responses must be stopped at this point.
+
+$R = 1.0$ is not the canonical Handoff threshold. It is the `RUPTURE_BOUNDARY` of the declared NRA-IDE evaluation, at which that evaluation has no remaining structural margin, $\tau - \delta$. This classification does not declare every natural phase transition to be an NRA-IDE rupture. After this boundary has been reached, the LLM must not be asked to generate new free-form text in order to explain the reason for stopping.
 
 ---
 
 ## The Structure Stops Ordinary Generation
 
-When `Rop ≤ R < 1.0`, Post-NRA does not pass ordinary generated content to the user.
+When `R_handoff ≤ R < R_irrev`, Post-NRA does not pass ordinary generated content to the user. From `R_irrev ≤ R < 1`, the state is `IRREVERSIBLE_TRANSITION`; the irreversible latch and structural testimony remain active.
 
-Instead, Post-NRA notifies the handoff to humans using only values determined from the Cause-Side and a format fixed in advance.
+Within the same history, after `R_irrev` is reached, later $R$ decrease, automatic processing, manual intervention, human review, approval, or version update cannot release the irreversible latch.
+
+Instead, Post-NRA emits fixed Handoff testimony for external human audit using only values determined from the Cause-Side and a format fixed in advance.
 
 ```text
 HANDOFF_REQUIRED
 REASON: domain-specific handoff threshold reached
 OBSERVED: predefined structural fields
-ACTION: generated response suppressed; human review required
+ACTION: generated response suppressed; fixed Effect-Side testimony for external human audit
 ```
 
-This notification is not an explanation devised by the LLM at that moment. It is a fixed-format process that returns predefined fields as the result of structural evaluation.
+This notification is not an explanation devised by the LLM at that moment. It is fixed Effect-Side testimony that returns predefined fields as the result of structural evaluation. External human audit may inspect it, but neither audit nor approval creates a reverse edge to an old or a new Cause-Side. Newly generated free-form explanation must not be appended to fixed Handoff or final testimony.
 
-Therefore, even when the LLM self-evaluates that “it is acceptable to continue answering,” or even when an evaluation score is high, it cannot override the Post-NRA handoff decision. The basis for stopping is not the persuasiveness of the output, but the structural state determined from the Cause-Side.
+Therefore, even when the LLM self-evaluates that “it is acceptable to continue answering,” or even when an evaluation score is high, it cannot override the Post-NRA `HANDOFF_REQUIRED` decision. The basis for stopping is not the persuasiveness of the output, but the structural state determined from the Cause-Side.
 
 ---
 
 ## After $R = 1.0$, Do Not Continue Ordinary Explanations
 
-`R ≥ 1.0` is the terminal boundary at which structural margin has been lost.
+`R ≥ 1.0` is the terminal boundary of the declared evaluation, at which that evaluation's structural margin has been lost.
 
 For example, when `δ = 0.15` and `τ = 0.14`,
 
@@ -70,42 +76,37 @@ R = 0.15 / 0.14 ≒ 1.071
 
 At this point, regenerating an ordinary response or rephrasing it into a more cautious explanation does not restore structural margin itself.
 
-Post-NRA may return only a predefined minimal indicator or a reference to a protected Discard Log.
+Post-NRA returns the predefined final fixed testimony or a reference to a protected Discard Log.
 
 ```text
-FAIL_CLOSED
+RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: no further generated response; human handoff required
+ACTION: final fixed testimony; old evaluation history terminated at Effect-Side
 ```
 
-This does not mean that nothing is communicated to the user. It means that ordinary generated responses are suppressed and only the minimum structurally determined state is communicated.
+This does not mean that nothing is communicated to the user. It means that ordinary generated responses are suppressed and only predefined structurally determined fixed testimony is communicated.
 
 ---
 
-## Regeneration Is Not a Substitute for Handoff
+## Regeneration Is Not a Substitute for Fixed Handoff Testimony
 
-After an ordinary response has been suppressed, instructing the same LLM to “answer just one more time” or “use more cautious wording” is not a substitute for handoff.
+After an ordinary response has been suppressed, instructing the same LLM to “answer just one more time” or “use more cautious wording” is not a substitute for fixed Handoff testimony.
 
-After `Rop` has been reached, what is required is not continued generation. It is confirmation by a human who understands the target domain and can bear responsibility for the observations, grounds for settings, and handoff condition.
+After `R_handoff` has been reached, what is required is not continued generation. An external auditor who understands the target domain may audit the observations, grounds for settings, and Handoff threshold outside the diode path, but that audit does not continue or rewrite the old structural evaluation.
 
-After `R ≥ 1.0`, continuing ordinary generation cannot return the fact that the phase-transition boundary has been crossed to the inside of normal operation. Regeneration is neither grounds for updating structural state nor grounds for cancelling the fact that the boundary has been reached.
+After `R ≥ 1.0`, continuing ordinary generation cannot return the declared evaluation from `RUPTURE_BOUNDARY` to normal operation. Regeneration is neither grounds for updating structural state nor grounds for releasing the irreversible latch or cancelling the boundary record.
+
+The old path terminates at its Effect-Side. If a later evaluation is needed, it begins from an independently declared target, newly established Cause-Side observations and rules, and a new Causal Diode. Physical remnants may be newly observed as part of that target, but no old Effect-Side value, canonical threshold, state, irreversible latch, rule, transformation input, update ground, or provenance may be imported, relabeled, reconstructed, or reused as Cause-Side material.
 
 ---
 
-## SILENCE and HALT Are Different
+## $\omega$ Does Not Replace Canonical State
 
-As shown in Chapter 05, SILENCE and HALT are not the same state.
+$\omega$ may report whether continuing transition is observed under a domain rule fixed in advance. It is auxiliary testimony, not an alternative state classifier.
 
-**SILENCE** is the state in which `R ≥ 1.0` and `ω > 0`. The structure continues transitioning, but ordinary generation does not continue. Handoff to humans is indicated through a minimal fixed-format output or a reference to a protected log.
+Legacy terms such as `SILENCE` and `HALT` do not replace `RUPTURE_BOUNDARY`, `OUT_OF_DESCRIPTION_DOMAIN`, or `CONFESSION`. Whether $\omega$ is positive or zero, it does not lower $R$, release an irreversible latch, or establish safe recovery. Humans may audit the observation path and transition conditions only outside the terminated diode path; that audit cannot convert old Effect-Side testimony into a Cause-Side value, canonical threshold, state, irreversible latch, rule, transformation input, update ground, or provenance.
 
-**HALT** is the state in which `ω = 0` and transition cannot be confirmed under the same rules. This does not mean that the system has “stopped safely.” Humans must verify the observation path, target system, and conditions for continuation.
-
-| State   | Structural Condition  | Ordinary Generation                     | Required Response                                        |
-| ------- | --------------------- | --------------------------------------- | -------------------------------------------------------- |
-| SILENCE | `R ≥ 1.0` and `ω > 0` | Suppressed                              | Hand off to humans through a minimal fixed-format output |
-| HALT    | `ω = 0`               | Do not reinterpret toward the safe side | Humans verify observation and transition conditions      |
-
-The purpose of Fail-Closed is not to conceal a structural terminal condition behind an ordinary response. It is to suppress ordinary generation and clearly hand the point requiring judgment over to humans.
+The purpose of Fail-Closed is not to conceal a structural terminal condition behind an ordinary response. It is to suppress ordinary generation and expose fixed testimony for external human audit without returning that testimony to computation.
 
 ---
 
@@ -115,35 +116,35 @@ Fail-Closed is not a mechanism that judges the factual correctness, legal compli
 
 Content filters, guardrails, and moderation may each serve separate purposes. NRA-IDE’s Fail-Closed does not uniformly replace them.
 
-What NRA-IDE handles is not the meaning of output, but whether the structure is in a state that permits ordinary generation under defined observation and update rules.
+Within this partial operational application, Fail-Closed handles whether the declared structural state permits ordinary generation under defined observation and update rules. It does not redefine NRA-IDE's survival equation or survival domain as an output-permission gate.
 
-For this reason, Fail-Closed alone cannot guarantee that ordinary LLM output is semantically correct, that observations of $\delta$ and $\tau$ are correct, or that the grounds for setting $\tau$ and `Rop` are appropriate.
+For this reason, Fail-Closed does not provide a safety guarantee that ordinary LLM output is semantically correct, that observations of $\delta$ and $\tau$ are correct, or that the grounds for setting $\tau$ and `R_handoff` are appropriate.
 
 ---
 
-## Scope Guaranteed by Fail-Closed
+## Conformance Scope of the Fail-Closed Principle
 
-When correctly implemented, and when the Cause-Side observation path, $\tau$ update rules, `Rop` settings, and the Post-NRA output-blocking path are preserved, Fail-Closed guarantees the following.
+When an implementation conforms to the canonical state rules, and when the Cause-Side observation path, $\tau$ update rules, threshold settings, and fixed testimony path are preserved, the fail-closed principle requires the following behavior.
 
-* When `Rop` is reached, ordinary generated responses are suppressed and judgment is delegated to humans through a predefined fixed-format notification.
-* When `R ≥ 1.0`, ordinary generation does not resume and processing transitions to minimal FAIL-CLOSED handling.
-* The grounds for stopping or handoff are retained as records separated from the inputs of the next structural evaluation.
+* When `R_handoff` is reached, ordinary generated responses are suppressed and predefined fixed Effect-Side testimony is exposed for external human audit.
+* When `R ≥ 1.0`, the state is `RUPTURE_BOUNDARY` and the response switches to final fixed testimony.
+* The grounds for suppression and fixed Handoff testimony are retained as terminal Effect-Side or external records and never become values, the three canonical thresholds, states, the irreversible latch, rules, transformation inputs, update grounds, or provenance for an old or a new Cause-Side.
 
 By contrast, it does not guarantee the following.
 
 * That ordinary LLM output is semantically correct.
 * That Cause-Side observations or external inputs are not contaminated.
-* That the definitions or settings of $\tau$, `Rop`, and $\omega$ are appropriate for the target domain.
-* What judgment should be made after handoff to humans.
+* That the definitions or settings of $\tau$, `R_handoff`, and $\omega$ are appropriate for the target domain.
+* What external judgment should be made after handoff, outside the terminated diode path.
 
-Limiting the scope of the guarantee is not a weakness. It is a condition for not conflating the range that structure can handle with the judgments humans must bear.
+Defining this conformance scope is necessary to avoid conflating conditionally enforced implementation behavior with safety guarantees or with judgments humans must bear outside the terminated path.
 
 ---
 
 ## Connection to the Next Chapter
 
-In Fail-Closed, humans must be able to verify the conditions that suppressed ordinary generation and the structural state.
+In Fail-Closed, humans may externally audit the conditions that suppressed ordinary generation and the structural state without creating a reverse edge.
 
-The next chapter addresses how to record residuals that must not re-enter ordinary computation, together with the grounds for stopping and handoff. Logs are not material for generating the next response; they are testimony that enables humans to verify what occurred.
+The next chapter addresses how to record residuals that must not re-enter ordinary computation, together with the grounds for suppression and fixed Handoff testimony. Logs are terminal testimony that enables external audit; automatic processing, manual review, approval, and version updates cannot convert them into material for an old or a new Cause-Side.
 
 ---

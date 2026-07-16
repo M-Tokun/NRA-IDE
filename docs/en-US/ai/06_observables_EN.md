@@ -1,4 +1,3 @@
-
 # 06 Observable Quantities — Verifying the Provenance and Update Path of Values
 
 <!-- FILE: 06_observables_EN.md -->
@@ -7,19 +6,21 @@
 
 ## “Observable” Does Not Mean Only Raw Sensor Values
 
-Chapter 05 confirmed that structural state is read through the following computational principle.
+Chapter 05 presented the Primary Formula, the true mathematical root equation that maps the declared target's state into an equation.
 
 ```text
 R = δ / τ
 ```
 
+The sole axiom is “Existence is generation.” The Primary Formula is neither an axiom nor merely a safety indicator, local instrument, or boundary-approach rate. The dual-fluctuation equation is the IDE calculation-method and dynamics engine, not an axiom. NRA-IDE's core is the survival equation and survival domain. Operational observation controls are a partial application of that domain to accident prevention; they do not provide a safety guarantee.
+
 The important point here is that values usable for structural evaluation must not be divided simply into “directly measured values” and “calculated values.”
 
 Raw sensor values are not the only values that may be used. Structural variables obtained by transforming or accumulating Cause-Side observations according to rules defined in advance also exist. $\tau$, $\omega$, $\varphi$, and $R$ are representative examples.
 
-Conversely, not every calculated value may be used. When LLM output, evaluation scores, past logs, or estimates made after examining results become grounds for updating $\delta$ or $\tau$, the $\Pi^{-1}$ path discussed in Chapter 03 arises.
+Conversely, not every calculated value may be used. When LLM output, evaluation scores, old Effect-Side logs, or estimates made after examining results become Cause-Side values, thresholds, states, rules, transformation inputs, update grounds, or provenance, the $\Pi^{-1}$ path discussed in Chapter 03 arises.
 
-What NRA-IDE asks is not whether a value “has been calculated,” but **where it originated, under which rules it was updated, and whether it cannot be rewritten from the Effect-Side**.
+The observation discipline asks not whether a value “has been calculated,” but **where it originated, under which rules it was updated, and whether it is insulated from all Effect-Side rewriting**.
 
 ---
 
@@ -29,21 +30,21 @@ For a value to be treated as a Cause-Side structural input, it must satisfy at l
 
 1. **Its provenance can be traced**
 
-   * It originates from observations of the target system, physical loads, or records of those observations or loads.
+   * It originates from observations of the target system, physical loads, or same-history Cause-Side records of those observations or loads. An old Effect-Side record is not Cause-Side history.
 2. **Observation, transformation, and update rules are defined in advance**
 
-   * Rules must not be altered opportunistically after examining outputs or evaluations produced during execution.
+   * Rules must not be altered after examining Effect-Side outputs or evaluations, whether automatically, manually, through human review or approval, or through a version update.
 3. **The path to the current value can be verified**
 
    * It must be possible to trace which observations and rules produced the current value.
 4. **The Effect-Side is not granted update authority**
 
-   * LLMs, evaluators, scores, previous generated text, and logs must not be able to modify $\delta$, $\tau$, or the handoff point.
+   * LLMs, evaluators, scores, previous generated text, and logs must not modify or establish any Cause-Side value, threshold, state, rule, transformation input, update ground, or provenance.
 5. **Missing values are not filled through Effect-Side estimation**
 
    * When required observations or update histories are missing, they must not be supplemented through inference, averaging, or past outputs.
 
-A value that does not satisfy these conditions has not been established as a structural input. The system must not proceed to ordinary structural evaluation. It transitions instead to predefined invalid-state handling or human handoff.
+A value that does not satisfy these conditions has not been established as a structural input. The system must not proceed to ordinary structural evaluation. It emits predefined fixed Effect-Side testimony for invalid-state handling and external human audit; that testimony does not continue the old path.
 
 ---
 
@@ -60,10 +61,10 @@ The following quantities do not have the same role. Raw observations, structural
 | **$C$ (constraint)**                   | Load or constraint applied externally to the target system             | Determined from sensor values, verified load records, or fixed physical conversions                           | Prohibited                                          |
 | **$W$ (work)**                         | Auxiliary quantity used only when required by the domain               | Used only when its definition, unit, and observation procedure are specified in the domain specification      | Prohibited                                          |
 | **entropy**                            | Auxiliary quantity used only when required by the domain               | Used only when its definition, calculation rule, and purpose of use are specified in the domain specification | Prohibited                                          |
-| **$R$ (structural ratio)**             | Structural state inside the gate derived from $\delta$ and $\tau$      | Calculated through `R = δ / τ`                                                                                | Not used as grounds for updating $\delta$ or $\tau$ |
-| **`Rop` (handoff point)**              | Operating condition for suppressing ordinary output                    | Defined in advance by humans as a domain specification, with grounds for changes recorded                     | Prohibited                                          |
+| **$R$ (structural relation)**          | Value of the Primary Formula for the declared target state              | Calculated through `R = δ / τ`                                                                                | Not Cause-Side authority                            |
+| **`R_warn`, `R_handoff`, `R_irrev`**   | Canonical operating thresholds for warning, handoff, and irreversible transition | Independently defined before the evaluation as part of the domain specification                       | Prohibited                                          |
 
-“Prohibited” in this table does not mean that the values themselves may not be read. For example, humans may refer to $R$ or logs in order to verify the state. What is prohibited is automatically or arbitrarily rewriting the next $\delta$, $\tau$, or `Rop` on the basis of Effect-Side values.
+“Prohibited” in this table does not mean that the values themselves may not be read. Humans may externally audit $R$ or logs outside the terminated diode path. What is prohibited is converting Effect-Side material into an old or a new Cause-Side value, threshold, state, rule, transformation input, update ground, or provenance, whether automatically, manually, through review or approval, or through a version update.
 
 ---
 
@@ -88,11 +89,17 @@ $\tau$ has two layers.
 
 Through this distinction, $\tau$ may change dynamically, but LLMs and evaluation scores cannot enlarge it in order to make the system appear safe.
 
+This dynamic update is legitimate only within the same Cause-Side history under a rule fixed before the relevant evaluation. It does not authorize transfer from an old Effect-Side to a later Cause-Side across Causal Diodes.
+
 ### $\omega$ Indicates Whether Transition Continues
 
 $\omega$ is a quantity that indicates whether the structure continues its state transition. It is not determined from the impression of a single point in time.
 
 When transition can be confirmed on the basis of continuous observations or phase-update rules defined for the target domain, it is treated as $\omega > 0$. Missing observations and $\omega = 0$ are not the same. When the observation path is unknown, $\omega$ must not be filled with a value assumed to be safe; it is treated as an unknown input.
+
+Inability to quantify precisely is not the same as inability to observe. In a nonlinear phase-transition region, numerical accuracy may decline while physical signs of the elapsed path and approach to an irreversible threshold remain observable. Those signs require declared provenance and observation rules; they must not be replaced by invented precision or reclassified as no observation.
+
+Linear computation is human survival wisdom where constants can be approximated in a local, static region; it is not nature as a whole. In large coupled recursive systems, errors multiply. If the observation axis or model itself changes, the change is not treated as an ordinary error correction but as generation of new structure and history under a newly declared observation context.
 
 ### $\varphi$ Is Not a Spatial Coordinate
 
@@ -108,13 +115,13 @@ $W$ and entropy are not common inputs required in every implementation. Only whe
 
 In this document set, $S = 1 / (\tau \cdot (1 - R))$ is used as the reciprocal of remaining structural margin. Therefore, representing entropy with the same symbol $S$ would create a notation conflict. This chapter denotes entropy as `entropy`. The glossary in Chapter 12 must maintain this notation consistently.
 
-### $R$ and `Rop` Are Not Inputs
+### $R$ and the Canonical Thresholds Are Not Cause-Side Inputs
 
-$R$ is the structural ratio derived from $\delta$ and $\tau$. $R$ itself is used to read structural state, but a low value of $R$ must not be used as grounds to enlarge $\tau$ or redefine $\delta$ as smaller.
+$R$ is the value of the Primary Formula determined from $\delta$ and $\tau$ for the declared target. A low value of $R$ must not be used as grounds to enlarge $\tau$ or redefine $\delta$ as smaller.
 
-`Rop` is the handoff condition placed at a domain-specific point of approach to an irreversible regime. It is not a value obtained naturally through observation, but a design and operating parameter. When `Rop` is changed, the grounds for change, time of application, approver, and related records must be retained.
+`R_warn`, `R_handoff`, and `R_irrev` are canonical design and operating thresholds, not values obtained naturally through observation. They are independently established before the evaluation. A later evaluation may use a newly declared specification fixed before that new evaluation, but no threshold or rule may be derived from, imported from, or justified by an old Effect-Side record.
 
-$R = 1.0$ is an invariant boundary distinct from `Rop`. Ordinary handoff occurs at `Rop`; after $R = 1.0$ has been reached or exceeded, ordinary generated content does not continue.
+$R = 1.0$ is the `RUPTURE_BOUNDARY` of the declared NRA-IDE evaluation and is distinct from `R_handoff`. This classification does not declare every natural phase transition to be an NRA-IDE rupture. After $R = 1.0$ has been reached or exceeded in that evaluation, ordinary generated content does not continue and the old evaluation terminates at Effect-Side.
 
 ---
 
@@ -132,7 +139,7 @@ These are interpretations or generated results in natural language. They must no
 
 **Log contents**
 
-Logs are retained as testimony. Humans may examine them, but they are not used as inputs to the next structural evaluation.
+Logs are retained as terminal Effect-Side or external testimony. Humans may audit them outside the terminated path, but automatic processing, manual review, approval, and version updates cannot convert them into values, thresholds, states, rules, transformation inputs, update grounds, or provenance for an old or a new Cause-Side.
 
 **$\delta$ or $\tau$ inferred backward from results**
 
@@ -153,10 +160,10 @@ When the provenance, current value, update history, unit, or applicable rules of
 ```text
 CONFESSION: structural input provenance unknown or ambiguous.
 UNKNOWN: [missing observation, update rule, unit, or history]
-ACTION: do NOT derive from Effect-Side; use predefined invalid-state handling or human handoff.
+ACTION: do NOT derive from Effect-Side; emit predefined fixed Effect-Side testimony for external audit.
 ```
 
-This stop does not reinterpret insufficient observation as “safe.” It records that the prerequisites for structural evaluation have not been established and hands the matter over to humans.
+This stop does not reinterpret insufficient observation as “safe.” It records that the prerequisites for structural evaluation have not been established and terminates the old path at Effect-Side. External human audit may read the testimony but cannot convert it into Cause-Side authority.
 
 ---
 
@@ -169,12 +176,12 @@ At minimum, the following must be recorded.
 * Provenance, acquisition time, and units of observations
 * Identifiers of the rules used to determine $\delta$, $\tau$, $\omega$, $\varphi$, and related quantities
 * Cause-Side load history used to update $\tau$
-* Grounds for setting `Rop` and its change history
+* Grounds and rule version fixed in advance for `R_warn`, `R_handoff`, and `R_irrev`
 * Conditions under which ordinary output was suppressed
 * Discarded residuals and the storage location of the Discard Log
 * Reasons why an input was unknown or an invalid state occurred
 
-This record is testimony that enables humans to verify the grounds for stopping or handoff. It must be protected as write-only and must not become grounds for updating the next $\delta$, $\tau$, or `Rop`.
+This record is terminal testimony that enables external human audit of the grounds for suppression and fixed Handoff testimony. It must be protected as write-only and must never become a Cause-Side value, threshold, state, rule, transformation input, update ground, or provenance through automatic processing, manual review, approval, or version update.
 
 ---
 
@@ -186,10 +193,10 @@ When the provenance and update rules for $\delta$, $\tau$, $\omega$, and $\varph
 * From which Cause-Side load history the current thickness was determined.
 * Whether the structure continues transitioning.
 * Under which state-transition rules the phase is advancing.
-* Whether the handoff condition for stopping ordinary output has been reached.
+* Which canonical threshold or state condition has been reached.
 
 This is not about selecting an answer that appears semantically plausible. It is about verifying that the grounds for structural evaluation have not been contaminated by Effect-Side values.
 
-The next chapter explains how, once the observation path has been established, Fail-Closed operates as suppression of ordinary generation, fixed-format notification, and human handoff.
+The next chapter explains how, once the observation path has been established, Fail-Closed suppresses ordinary generation and emits fixed Effect-Side testimony for external human audit. If a later evaluation is required, it begins from an independently declared target, newly established Cause-Side observations and rules, and a new Causal Diode. Physical remnants may be newly observed as part of that target, but old Effect-Side values, canonical thresholds, states, an irreversible latch, rules, transformation inputs, update grounds, and provenance are not imported, relabeled, reconstructed, or reused.
 
 ---
