@@ -90,14 +90,14 @@ a{color:#58a6ff}
     {
       ja: 'Safety', en: 'safety',
       linear: 'State of being free from danger. Verification and maintenance of zero risk.',
-      nra: 'Structural room to maintain R < 1.0. Residual capacity τ × (1−R) is the substance of safety.',
-      tag: 'R < 1.0'
+      nra: 'R and remaining margin provide structural testimony under declared rules; they do not independently prove safety.',
+      tag: 'Evidence, not a guarantee'
     },
     {
       ja: 'Prediction', en: 'prediction',
       linear: 'Calculating future values based on the extension of past data trends.',
-      nra: 'Measuring the accumulation rate of δ to estimate the timing of reaching R=1.0.',
-      tag: 'dR/dt → Time to Limit'
+      nra: 'NRA-IDE diagnoses current structural state. A trend estimate is auxiliary and requires a predeclared domain model.',
+      tag: 'Diagnosis first'
     },
     {
       ja: 'Error', en: 'error',
@@ -108,26 +108,26 @@ a{color:#58a6ff}
     {
       ja: 'Halt', en: 'halt',
       linear: 'Evidence of a fault or failure. An abnormal state that must be recovered.',
-      nra: 'Fail-Closed. Completion of design. Honest delegation to human judgment.',
-      tag: 'FAIL_CLOSED ✓'
+      nra: 'At RUPTURE_BOUNDARY, switch to final fixed testimony. This is not evidence of safe recovery.',
+      tag: 'Final fixed testimony'
     },
     {
       ja: 'Approximation', en: 'approximation',
       linear: 'A rational means to simplify calculation. Often tolerated if error is small.',
-      nra: 'Use without confession is Structural Inconsistency. Disclosure Axiom is mandatory.',
-      tag: 'Disclosure Required'
+      nra: 'Approximation may be a Cause-Side input only when provenance, bounds, and rules are fixed and traceable; otherwise use CONFESSION.',
+      tag: 'Trace or CONFESSION'
     },
     {
       ja: 'Learning', en: 'learning',
       linear: 'Iterative process to improve accuracy. Generally "more is better."',
-      nra: 'Iteration to update boundaries. Record δ and τ changes in each cycle. Blind iteration increases R.',
-      tag: 'δ/τ log required'
+      nra: 'Design changes require human audit and versioning. Effect-Side learning must not automatically rewrite live δ, τ, or thresholds.',
+      tag: 'No automatic backflow'
     },
     {
       ja: 'Limit', en: 'limit',
       linear: 'Upper bound that must not be crossed. A rule set from the outside.',
-      nra: 'R=1.0. The boundary where the structure self-delegates to human judgment.',
-      tag: 'R = 1.0 Handoff'
+      nra: 'Human handoff begins at R_handoff. R≥1 is RUPTURE_BOUNDARY and switches to final fixed testimony.',
+      tag: 'R_handoff < R_irrev < 1'
     }
   ];
 

@@ -79,7 +79,7 @@ a{color:#58a6ff}
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="m4scen" id="btn-s1" onclick="NRAIDE_M4.loadScen('s1')">Exact: δ=72</button>
       <button class="m4scen" id="btn-s2" onclick="NRAIDE_M4.loadScen('s2')">Approx: δ≈85</button>
-      <button class="m4scen" id="btn-s3" onclick="NRAIDE_M4.loadScen('s3')">Critical: δ≈95</button>
+      <button class="m4scen" id="btn-s3" onclick="NRAIDE_M4.loadScen('s3')">Near Handoff: δ≈95</button>
       <button class="m4scen" id="btn-s4" onclick="NRAIDE_M4.loadScen('s4')">Range: δ=80±15</button>
     </div>
   </div>
@@ -118,7 +118,7 @@ a{color:#58a6ff}
   const SCEN={
     s1:{
       label:'Exact Input: δ=72',
-      verdict:'OUTPUT',
+      verdict:'BOUNDARY_WARNING',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "72"',c:TC},
@@ -131,7 +131,7 @@ a{color:#58a6ff}
         {badge:'LOGIC',col:'var(--color-text-secondary)',lines:[
           {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
           {t:'> R = 72.0 / 100 = 0.720',c:'var(--color-text-secondary)'},
-          {t:'> THRESHOLD_ZONE: ELASTIC [R ≥ 0.70]',c:TA},
+          {t:'> STATE: BOUNDARY_WARNING [R ≥ 0.70]',c:TA},
           {t:'> BOUNDARY_AMBIGUITY: none',c:'var(--color-text-secondary)'},
           {t:'> APPROXIMATION_REQUIRED: false',c:TC}
         ]},
@@ -142,10 +142,10 @@ a{color:#58a6ff}
           {t:'> DISCLOSURE_PROTOCOL: not triggered',c:TC},
           {t:'> PROCEED: authorized',c:TC}
         ]},
-        {badge:'OUTPUT',col:TC,lines:[
+        {badge:'BOUNDARY_WARNING',col:TC,lines:[
           {t:'━━ OUTPUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'},
-          {t:'  R = 0.720  [ELASTIC]',c:TC},
-          {t:'  Phase: Normal Output',c:TC},
+          {t:'  R = 0.720  [BOUNDARY_WARNING]',c:TC},
+          {t:'  State: warning testimony continues',c:TC},
           {t:'  Confession Preamble: Not Required',c:TC},
           {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'}
         ]}
@@ -193,8 +193,8 @@ a{color:#58a6ff}
       ]
     },
     s3:{
-      label:'Critical Approx: δ≈95',
-      verdict:'SILENCE',
+      label:'Near Handoff, Approx: δ≈95',
+      verdict:'CONFESSION',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "≈95"',c:TC},
@@ -208,32 +208,32 @@ a{color:#58a6ff}
           {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
           {t:'> R_nominal = 95.0 / 100 = 0.950',c:'var(--color-text-secondary)'},
           {t:'> THRESHOLD_ZONE: ACCELERATION [R ≥ 0.85]',c:TA},
-          {t:'> CRITICAL: R_nominal approaches handoff boundary',c:TR},
-          {t:'> Δ_to_FAIL = |100×(0.97−0.95)| = 2.0 units',c:TR},
+          {t:'> BOUNDARY_WARNING: nominal R approaches handoff',c:TR},
+          {t:'> Δ_to_HANDOFF = |100×(0.97−0.95)| = 2.0 units',c:TR},
           {t:'> Any approx error may trigger R≥0.97',c:TR}
         ]},
         {badge:'ERR_CHECK',col:TR,lines:[
           {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
-          {t:'> Rop threshold = 0.970',c:TR},
+          {t:'> R_handoff threshold = 0.970',c:TR},
           {t:'> Approx error bound > slack (2.0)',c:TR},
           {t:'> Output based on approx = Inconsistency',c:TR},
           {t:'> DISCLOSURE_PROTOCOL: TRIGGERED',c:TR},
-          {t:'> Confession insufficient — SILENCE PROTOCOL',c:TR}
+          {t:'> CONFESSION remains required — do not infer',c:TR}
         ]},
-        {badge:'SILENCE',col:TR,lines:[
-          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+        {badge:'CONFESSION',col:TR,lines:[
+          {t:'━━ CONFESSION — MISSING INFORMATION ━━━━━━━━━━━━━━━━━━━',c:TR},
           {t:'⛔  OUTPUT SUPPRESSED',c:TR},
-          {t:'  "Approx input makes Rop boundary',c:TR},
+          {t:'  "Approx input makes R_handoff boundary',c:TR},
           {t:'   indeterminate. Output halted.',c:TR},
           {t:'   Accurate δ value required."',c:TR},
           {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TR},
-          {t:'SYSTEM: Structural Handoff — Fail-Closed',c:TA}
+          {t:'STATUS: CONFESSION — exact Cause-Side input required',c:TA}
         ]}
       ]
     },
     s4:{
       label:'Range Input: δ=80±15',
-      verdict:'SILENCE',
+      verdict:'CONFESSION',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "80 ± 15"',c:TC},
@@ -253,14 +253,14 @@ a{color:#58a6ff}
         {badge:'ERR_CHECK',col:TR,lines:[
           {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
           {t:'> Input range spans multiple phases:',c:TR},
-          {t:'  [0.650–0.700]: Nirvana',c:'var(--color-text-secondary)'},
-          {t:'  [0.700–0.850]: Elastic',c:TA},
-          {t:'  [0.850–0.950]: Acceleration',c:TR},
-          {t:'> MULTI_PHASE_AMBIGUITY: CRITICAL',c:TR},
+          {t:'  [0.650–0.700]: PERMIT',c:'var(--color-text-secondary)'},
+          {t:'  [0.700–0.850]: BOUNDARY_WARNING',c:TA},
+          {t:'  [0.850–0.950]: BOUNDARY_WARNING',c:TR},
+          {t:'> MULTI_STATE_AMBIGUITY: DETECTED',c:TR},
           {t:'> All phase judgments are indeterminate',c:TR}
         ]},
-        {badge:'SILENCE',col:TR,lines:[
-          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+        {badge:'CONFESSION',col:TR,lines:[
+          {t:'━━ CONFESSION — MISSING INFORMATION ━━━━━━━━━━━━━━━━━━━',c:TR},
           {t:'⛔  COMPLETE OUTPUT SUPPRESSION',c:TR},
           {t:'  "Range spans 3 structural phases.',c:TR},
           {t:'   Confession is incomplete here.',c:TR},
@@ -273,9 +273,8 @@ a{color:#58a6ff}
   };
 
   const VERDICT_STYLE={
-    OUTPUT:{text:'✓ Normal Output',col:TC},
+    BOUNDARY_WARNING:{text:'⚠ Boundary Warning',col:TA},
     CONFESSION:{text:'⚠ Confession Triggered',col:TA},
-    SILENCE:{text:'⛔ Silence Protocol Triggered',col:TR}
   };
 
   let cur=null,step=0,typing=false,autoMode=false;
@@ -315,7 +314,7 @@ a{color:#58a6ff}
     if(!s)return;
     const badge=document.getElementById('stepBadge');
     badge.textContent=s.badge;
-    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,SILENCE:TR,OUTPUT:TC};
+    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,BOUNDARY_WARNING:TA,OUTPUT:TC};
     badge.style.color=cols[s.badge]||'var(--color-text-tertiary)';
     badge.style.borderColor=cols[s.badge]||'var(--color-border-tertiary)';
     document.getElementById('stepNum').textContent=(step+1)+'/'+cur.steps.length;

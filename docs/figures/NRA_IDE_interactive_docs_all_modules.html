@@ -60,7 +60,7 @@ a{color:#58a6ff}
 </div>
 <div id="m1"></div><section class="yui-module-section" style="margin:22px 0 28px;padding-top:18px;border-top:1px solid var(--color-border-tertiary)">
 <h1 style="font-size:18px;margin:0 0 8px;font-weight:650">Module 1: 線形 vs NRA-IDE 破断対比</h1>
-<h2 class="sr-only">Module 1: 線形制御とNRA-IDEの破断対比シミュレーター。同じδ蓄積に対し、線形システムは無警告でSYSTEM_CRASHし、NRA-IDEはRop=0.97で早期Fail-Closedを実行し、R=1.00を理論破断境界として扱う差異を可視化する。</h2>
+<h2 class="sr-only">Module 1: 線形制御とNRA-IDEの破断対比シミュレーター。同じδ蓄積に対し、線形システムは無警告でSYSTEM_CRASHし、NRA-IDEはR_handoff=0.97でHANDOFF_REQUIREDへ移行し、R=1.00を理論破断境界として扱う差異を可視化する。</h2>
 
 <style>
 .m1-panel{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
@@ -104,7 +104,7 @@ a{color:#58a6ff}
         <div class="m1-tline" style="bottom:70%;border-color:#EF9F27"></div>
         <span class="m1-tlabel" style="bottom:calc(70% + 2px);color:#EF9F27">R=0.70</span>
         <div class="m1-tline" style="bottom:97%;border-color:#E24B4A;border-top:2px solid"></div>
-        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">Rop=0.97</span>
+        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">R_handoff=0.97</span>
         <span class="m1-tlabel" style="top:2px;left:4px;right:auto;color:#E24B4A;font-weight:bold">R=1.00 理論境界</span>
         <span class="m1-tlabel" style="bottom:4px;color:#1D9E75" id="ndl">R: 0.000</span>
       </div>
@@ -128,7 +128,7 @@ a{color:#58a6ff}
     <button id="sb" onclick="NRAIDE_M1.startSim()" class="m1-mono" style="font-size:12px;padding:6px 18px;cursor:pointer">▶ 開始</button>
     <button onclick="NRAIDE_M1.resetSim()" class="m1-mono" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
     <span id="phase-label" class="m1-mono" style="font-size:11px;color:var(--color-text-tertiary)"></span>
-    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">Rop=0.97 は早期委譲、R=1.00 は理論破断境界。</span>
+    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">R_handoff=0.97 は固定Handoff証言を外部人間監査へ提示する点、R=1.00 は理論破断境界。</span>
   </div>
 
   <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ</div>
@@ -206,7 +206,7 @@ a{color:#58a6ff}
       cx.beginPath();cx.moveTo(toX(lp.t),toY(lp.R));cx.lineTo(CW,toY(lp.R));cx.stroke();
       cx.setLineDash([]);
       cx.fillStyle=TA;cx.beginPath();cx.arc(toX(lp.t),toY(lp.R),5,0,Math.PI*2);cx.fill();
-      cx.fillStyle=TA;cx.font='bold 9px monospace';cx.fillText('FAIL_CLOSED',toX(lp.t)+7,toY(lp.R)-5);
+      cx.fillStyle=TA;cx.font='bold 9px monospace';cx.fillText('HANDOFF',toX(lp.t)+7,toY(lp.R)-5);
     }
 
     cx.strokeStyle=TG;cx.lineWidth=1.5;cx.setLineDash([]);
@@ -260,15 +260,15 @@ a{color:#58a6ff}
       ndl.textContent='R: '+R.toFixed(3);ndl.style.color=col;
       if(R<0.70){stN.textContent='構造安定 — STRUCTURAL OK';stN.style.color=TC;pl.textContent='正常帯';}
       else if(R<0.85){stN.textContent='⚠ 警告帯 R≥0.70 — 監視強化';stN.style.color=TA;pl.textContent='警告帯';}
-      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ 加速帯 R≥0.85<br><span style="font-size:10px">Fail-Closed 準備中…</span>';stN.style.color=TR;pl.textContent='加速帯';}
+      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ 加速帯 R≥0.85<br><span style="font-size:10px">HANDOFF_REQUIRED 準備中…</span>';stN.style.color=TR;pl.textContent='加速帯';}
       if(R>=NRA_STOP){
         nraDone=true;nraR=R;entry.ns=true;
         fN.style.height=(NRA_STOP*100)+'%';fN.style.backgroundColor=TA;
         nrv.textContent='R = '+R.toFixed(3)+' [CLOSED]';nrv.style.color=TA;
-        stN.innerHTML='✓ EARLY FAIL_CLOSED<br><span style="font-size:10px">Rop=0.97で人間判断へ委譲。R=1.00は理論破断境界。</span>';
+        stN.innerHTML='✓ HANDOFF_REQUIRED<br><span style="font-size:10px">R_handoff=0.97で固定Handoff証言を外部人間監査へ提示。R=1.00は理論破断境界。</span>';
         stN.style.color=TA;
         gwN.style.background='rgba(239,159,39,.07)';
-        pl.textContent='FAIL_CLOSED ✓';pl.style.color=TA;
+        pl.textContent='HANDOFF_REQUIRED ✓';pl.style.color=TA;
       }
     }
 
@@ -314,7 +314,7 @@ a{color:#58a6ff}
 
 </section><div id="m2"></div><section class="yui-module-section" style="margin:22px 0 28px;padding-top:18px;border-top:1px solid var(--color-border-tertiary)">
 <h1 style="font-size:18px;margin:0 0 8px;font-weight:650">Module 2: 残渣タンク</h1>
-<h2 class="sr-only">Module 2: 残渣タンク。δとτのスライダーを操作してR=δ/τを変化させ、感度関数S=1/(τ(1-R))がR=1.0付近で発散する様子と、Rop=0.97で早期Fail-Closedする運用境界を体感するインタラクティブシミュレーター。</h2>
+<h2 class="sr-only">Module 2: 残渣タンク。δとτのスライダーを操作してR=δ/τを変化させ、感度関数S=1/(τ(1-R))がR=1.0付近で発散する様子と、R_handoff=0.97でHANDOFF_REQUIREDへ移る運用境界を体感するインタラクティブシミュレーター。</h2>
 
 <style>
 .m2p{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
@@ -343,7 +343,7 @@ a{color:#58a6ff}
         <div style="position:absolute;left:0;right:0;bottom:70%;border-top:1px dashed #EF9F27;pointer-events:none"></div>
         <span style="position:absolute;right:5px;bottom:calc(70% + 2px);font-family:monospace;font-size:9px;color:#EF9F27;pointer-events:none">R=0.70</span>
         <div style="position:absolute;left:0;right:0;bottom:97%;border-top:2px solid #E24B4A;pointer-events:none"></div>
-        <span style="position:absolute;right:5px;bottom:calc(97% + 3px);font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">Rop=0.97</span>
+        <span style="position:absolute;right:5px;bottom:calc(97% + 3px);font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">R_handoff=0.97</span>
         <span style="position:absolute;left:5px;top:3px;font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">R=1.00 理論境界</span>
         <div id="pulseRing" style="position:absolute;inset:0;border:3px solid transparent;border-radius:8px;pointer-events:none;transition:border-color .08s,opacity .08s;opacity:0"></div>
         <div id="dropCont" style="position:absolute;top:0;left:0;right:0;height:20px;overflow:hidden"></div>
@@ -410,10 +410,10 @@ a{color:#58a6ff}
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <button id="sb2" onclick="NRAIDE_M2.toggleSim()" class="m2mn" style="font-size:12px;padding:6px 16px;cursor:pointer">▶ 開始</button>
     <button onclick="NRAIDE_M2.resetSim2()" class="m2mn" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
-    <span id="failMsg" class="m2mn" style="font-size:11px;color:#EF9F27;display:none">✓ EARLY FAIL_CLOSED — Rop=0.97。τを増やすかリセットして再開</span>
+    <span id="failMsg" class="m2mn" style="font-size:11px;color:#EF9F27;display:none">✓ HANDOFF_REQUIRED — R_handoff=0.97。τを増やすかリセットして再開</span>
   </div>
 
-  <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ &nbsp; S = 1/(τ(1−R)) &nbsp; / Rop=0.97 early delegation</div>
+  <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ &nbsp; S = 1/(τ(1−R)) &nbsp; / R_handoff=0.97 fixed Handoff testimony for external human audit</div>
 </div>
 
 <script>
@@ -469,8 +469,8 @@ a{color:#58a6ff}
     let phase='';
     if(R<0.70){phase='構造安定 — STRUCTURAL OK';document.getElementById('phaseDisp').style.color=TC;}
     else if(R<0.85){phase='⚠ 警告帯 R≥0.70\n監視強化 — δ流入に注意';document.getElementById('phaseDisp').style.color=TA;}
-    else if(R<0.97){phase='⚠⚠ 加速帯 R≥0.85\n感度が急上昇中 — Fail-Closed 準備';document.getElementById('phaseDisp').style.color=TR;}
-    else{phase='✓ FAIL_CLOSED\n人間判断へ委譲';document.getElementById('phaseDisp').style.color=TA;}
+    else if(R<0.97){phase='⚠⚠ 加速帯 R≥0.85\n感度が急上昇中 — HANDOFF_REQUIRED 準備';document.getElementById('phaseDisp').style.color=TR;}
+    else{phase='✓ HANDOFF_REQUIRED\n固定Handoff証言を外部人間監査へ提示';document.getElementById('phaseDisp').style.color=TA;}
     document.getElementById('phaseDisp').innerHTML=phase.replace('\n','<br>');
   }
 
@@ -648,7 +648,7 @@ a{color:#58a6ff}
       <!-- FAIL indicator (hidden by default) -->
       <g id="failOverlay" opacity="0">
         <rect x="0" y="0" width="600" height="340" fill="#E24B4A" opacity="0.06"/>
-        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">EARLY FAIL_CLOSED — Rop≈0.97</text>
+        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">HANDOFF_REQUIRED — R_handoff≈0.97</text>
       </g>
 
     </svg>
@@ -670,7 +670,7 @@ a{color:#58a6ff}
     <div class="m3card" id="card-core" onclick="NRAIDE_M3.showInfo('core')" style="cursor:pointer">
       <div class="m3tag" style="background:#FAEEDA;color:#633806">τ 構造コア</div>
       <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">Structural Core</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R=1.0 で Fail-Closed が起動する境界。</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R≥1でRUPTURE_BOUNDARYとなり、最終固定証言へ切り替わる境界。</div>
       <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🧠 皮質骨・心筋・血液脳関門</div>
     </div>
   </div>
@@ -704,14 +704,14 @@ a{color:#58a6ff}
     abs:{
       title:'δ 吸収層 — Absorption Buffer (τ の一部)',
       col:'#1D9E75',
-      eng:'τ（吸収厚）の外側を構成する緩衝帯。δ の流入を吸収し、τ コアを保護する。R = δ/τ が示す残余容量 τ×(1−R) がこの層の余裕に対応する。R=0.85 付近から加速帯として扱い、Ropでは早期委譲を準備する。',
+      eng:'τ（吸収厚）の外側を構成する緩衝帯。δ の流入を吸収し、τ コアを保護する。R = δ/τ が示す残余容量 τ×(1−R) がこの層の余裕に対応する。R=0.85 付近から加速帯として扱い、R_handoffでは固定Handoff証言を外部人間監査へ提示する準備をする。',
       bio:'皮膚の表皮層、関節軟骨、椎間板、胸腔液、滑液などは、外部 δ を散逸させる多層構造として読むことができる。磨耗・炎症で層が薄くなる（τ↓）と、同じ δ でも R が上昇しやすい。',
       example:'膝関節軟骨：繰り返しの衝撃（δ）を吸収する τ 的な役割を持つ。変形性関節症は τ の低下により、同じ歩行量（δ）でも痛覚や損傷の閾値に近づきやすくなる状態として説明できる。'
     },
     core:{
-      title:'τ 構造コア — Structural Core (Fail-Closed 境界)',
+      title:'τ 構造コア — Structural Core (RUPTURE_BOUNDARY)',
       col:'#854F0B',
-      eng:'τ（吸収厚）の核心。Ropで早期委譲を行い、R=1.0を理論的な構造破断境界として扱う。S = 1/(τ·(1-R)) の感度が発散する点がこの境界に対応する。',
+      eng:'τ（吸収厚）の核心。R_handoffで固定Handoff証言を外部人間監査へ提示し、R=1.0を理論的な構造破断境界として扱う。S = 1/(τ·(1-R)) の感度が発散する点がこの境界に対応する。',
       bio:'皮質骨（骨折境界）、心筋（心不全閾値）、血液脳関門（神経毒性境界）、腎臓の糸球体（濾過限界）などは、「これ以上は構造が保てない」という境界を持つ例として読める。',
       example:'骨密度と骨折閾値：骨密度（τに対応する余裕）が低下すると、日常動作（δ）でも骨折閾値に近づきやすくなる。骨折は、構造限界超過の可視化として読める。'
     }
@@ -863,7 +863,7 @@ a{color:#58a6ff}
   const SCEN={
     s1:{
       label:'正常入力: δ=72',
-      verdict:'OUTPUT',
+      verdict:'BOUNDARY_WARNING',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "72"',c:TC},
@@ -876,7 +876,7 @@ a{color:#58a6ff}
         {badge:'LOGIC',col:'var(--color-text-secondary)',lines:[
           {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
           {t:'> R = 72.0 / 100 = 0.720',c:'var(--color-text-secondary)'},
-          {t:'> THRESHOLD_ZONE: 警告帯 [R ≥ 0.70]',c:TA},
+          {t:'> STATE: BOUNDARY_WARNING [R ≥ 0.70]',c:TA},
           {t:'> BOUNDARY_AMBIGUITY: none',c:'var(--color-text-secondary)'},
           {t:'> APPROXIMATION_REQUIRED: false',c:TC}
         ]},
@@ -887,10 +887,10 @@ a{color:#58a6ff}
           {t:'> DISCLOSURE_PROTOCOL: not triggered',c:TC},
           {t:'> PROCEED: authorized',c:TC}
         ]},
-        {badge:'OUTPUT',col:TC,lines:[
+        {badge:'BOUNDARY_WARNING',col:TC,lines:[
           {t:'━━ OUTPUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'},
-          {t:'  R = 0.720  [警告帯]',c:TC},
-          {t:'  フェーズ: 正常出力',c:TC},
+          {t:'  R = 0.720  [BOUNDARY_WARNING]',c:TC},
+          {t:'  状態: 警告証言を継続',c:TC},
           {t:'  告白プリアンブル: 不要',c:TC},
           {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'}
         ]}
@@ -938,8 +938,8 @@ a{color:#58a6ff}
       ]
     },
     s3:{
-      label:'危険域近似: δ≈95',
-      verdict:'SILENCE',
+      label:'委譲点近傍の近似: δ≈95',
+      verdict:'CONFESSION',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "≈95"',c:TC},
@@ -953,32 +953,32 @@ a{color:#58a6ff}
           {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
           {t:'> R_nominal = 95.0 / 100 = 0.950',c:'var(--color-text-secondary)'},
           {t:'> THRESHOLD_ZONE: 加速帯 [R ≥ 0.85]',c:TA},
-          {t:'> CRITICAL: R_nominal → FAIL_CLOSED 境界に接近',c:TR},
-          {t:'> Δ_to_FAIL = |100×(0.97−0.95)| = 2.0 units',c:TR},
+          {t:'> BOUNDARY_WARNING: R_nominal → R_handoffへ接近',c:TR},
+          {t:'> Δ_to_HANDOFF = |100×(0.97−0.95)| = 2.0 units',c:TR},
           {t:'> 任意の近似誤差でR≥0.97到達の可能性',c:TR}
         ]},
         {badge:'ERR_CHECK',col:TR,lines:[
           {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
-          {t:'> Rop threshold = 0.970',c:TR},
+          {t:'> R_handoff threshold = 0.970',c:TR},
           {t:'> 近似誤差の上限 > 許容偏差 (2.0)',c:TR},
           {t:'> 近似に基づく出力 = 構造的欺瞞に相当',c:TR},
           {t:'> DISCLOSURE_PROTOCOL: TRIGGERED',c:TR},
-          {t:'> 告白だけでは不十分 — SILENCE PROTOCOL 発動',c:TR}
+          {t:'> 告白だけでは不十分 — CONFESSION — MISSING INFORMATION 発動',c:TR}
         ]},
-        {badge:'SILENCE',col:TR,lines:[
-          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+        {badge:'CONFESSION',col:TR,lines:[
+          {t:'━━ CONFESSION — MISSING INFORMATION ━━━━━━━━━━━━━━━━━━━',c:TR},
           {t:'⛔  OUTPUT SUPPRESSED',c:TR},
-          {t:'  "近似入力によりRop境界の',c:TR},
+          {t:'  "近似入力によりR_handoff境界の',c:TR},
           {t:'   真偽が確定不能。出力を停止します。',c:TR},
           {t:'   正確なδ値の提供を要求します。"',c:TR},
           {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TR},
-          {t:'SYSTEM: 人間判断へ委譲 — Fail-Closed',c:TA}
+          {t:'STATUS: CONFESSION — 正確なCause-Side入力が必要',c:TA}
         ]}
       ]
     },
     s4:{
       label:'範囲入力: δ=80±15',
-      verdict:'SILENCE',
+      verdict:'CONFESSION',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "80 ± 15"',c:TC},
@@ -1001,11 +1001,11 @@ a{color:#58a6ff}
           {t:'  [0.650–0.700]: 正常帯',c:'var(--color-text-secondary)'},
           {t:'  [0.700–0.850]: 警告帯',c:TA},
           {t:'  [0.850–0.950]: 加速帯',c:TR},
-          {t:'> MULTI_PHASE_AMBIGUITY: CRITICAL',c:TR},
+          {t:'> MULTI_STATE_AMBIGUITY: DETECTED',c:TR},
           {t:'> どのフェーズ判定も構造的に不確定',c:TR}
         ]},
-        {badge:'SILENCE',col:TR,lines:[
-          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+        {badge:'CONFESSION',col:TR,lines:[
+          {t:'━━ CONFESSION — MISSING INFORMATION ━━━━━━━━━━━━━━━━━━━',c:TR},
           {t:'⛔  COMPLETE OUTPUT SUPPRESSION',c:TR},
           {t:'  "入力範囲が3構造フェーズに跨ります。',c:TR},
           {t:'   この範囲では告白だけでは不完全です。',c:TR},
@@ -1018,9 +1018,8 @@ a{color:#58a6ff}
   };
 
   const VERDICT_STYLE={
-    OUTPUT:{text:'✓ 正常出力',col:TC},
+    BOUNDARY_WARNING:{text:'⚠ 境界警告',col:TA},
     CONFESSION:{text:'⚠ 告白プリアンブル発動',col:TA},
-    SILENCE:{text:'⛔ 沈黙プロトコル発動',col:TR}
   };
 
   let cur=null,step=0,typing=false,autoMode=false;
@@ -1060,7 +1059,7 @@ a{color:#58a6ff}
     if(!s)return;
     const badge=document.getElementById('stepBadge');
     badge.textContent=s.badge;
-    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,SILENCE:TR,OUTPUT:TC};
+    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,BOUNDARY_WARNING:TA,OUTPUT:TC};
     badge.style.color=cols[s.badge]||'var(--color-text-tertiary)';
     badge.style.borderColor=cols[s.badge]||'var(--color-border-tertiary)';
     document.getElementById('stepNum').textContent=(step+1)+'/'+cur.steps.length;
@@ -1195,14 +1194,14 @@ a{color:#58a6ff}
     {
       ja: '安全', en: 'safety',
       linear: '危険がない状態。ゼロリスクの確認と維持。',
-      nra: 'R < 1.0 を保つ構造的余地。残余容量 τ×(1−R) が安全の実体。',
-      tag: 'R < 1.0'
+      nra: 'Rと残存余裕は、宣言済み規則の下での構造証言であり、それだけで安全を立証しない。',
+      tag: '証拠であり保証ではない'
     },
     {
       ja: '予測', en: 'prediction',
       linear: '過去データの延長線上に未来値を算出すること。',
-      nra: 'δ の累積速度を計測し、R=1.0 への到達タイミングを推定すること。',
-      tag: 'dR/dt → 到達時刻'
+      nra: 'NRA-IDEの中心は現在状態の診断。傾向推定は、事前宣言したドメインモデルがある場合の補助量。',
+      tag: '診断を優先'
     },
     {
       ja: 'エラー', en: 'error',
@@ -1213,26 +1212,26 @@ a{color:#58a6ff}
     {
       ja: '停止', en: 'halt',
       linear: '障害または失敗の証拠。復旧すべき異常状態。',
-      nra: 'Fail-Closed。設計の完成形。人間判断への誠実な委譲。',
-      tag: 'FAIL_CLOSED ✓'
+      nra: 'RUPTURE_BOUNDARYでは最終固定証言へ切り替える。安全に回復した証拠ではない。',
+      tag: '最終固定証言'
     },
     {
       ja: '近似', en: 'approximation',
       linear: '計算を簡略化する合理的手段。誤差が小さいなら許容されると見なされやすい。',
-      nra: '告白なき使用は構造的欺瞞。開示公理（Disclosure Axiom）が義務。',
-      tag: '開示公理 必須'
+      nra: '近似値は、出所・誤差境界・規則が固定され追跡可能な場合だけCause-Side入力になり得る。それ以外はCONFESSION。',
+      tag: '追跡可能性またはCONFESSION'
     },
     {
       ja: '学習', en: 'learning',
       linear: '精度を向上させる反復プロセス。多いほど良いと見なされやすい。',
-      nra: '境界を更新するための反復。各サイクルでδとτの変化を記録する。無記録な反復はRを上げうる。',
-      tag: 'δ/τ log required'
+      nra: '設計変更は人間の監査と版管理を経て行う。Effect-Sideの学習結果を実行中のδ・τ・閾値へ自動逆流させない。',
+      tag: 'No automatic backflow'
     },
     {
       ja: '限界', en: 'limit',
       linear: '越えてはならない上限値。外部から設定されるルール。',
-      nra: 'R=1.0。構造自身が人間判断に自己委譲する境界。',
-      tag: 'R = 1.0 委譲点'
+      nra: '人間委譲はR_handoffで開始する。R≥1はRUPTURE_BOUNDARYであり、最終固定証言へ切り替える。',
+      tag: 'R_handoff < R_irrev < 1'
     }
   ];
 

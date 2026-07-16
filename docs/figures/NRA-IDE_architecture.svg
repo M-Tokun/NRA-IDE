@@ -34,19 +34,19 @@
   <rect x="80" y="360" width="450" height="120" rx="10" class="gate" />
   <text x="110" y="390" class="label">Post-NRA (Output Gate / CleanContext)</text>
   <text x="110" y="415" class="label">• R = δ/τ validation</text>
-  <text x="110" y="435" class="label">• FAIL-CLOSED -> DiscardVault</text>
+  <text x="110" y="435" class="label">• Fixed state testimony -> DiscardVault</text>
 
   <!-- DiscardVault -->
   <rect x="580" y="380" width="420" height="80" rx="8" class="vault" />
   <text x="600" y="410" class="label">DiscardVault / CleanContext</text>
-  <text x="600" y="430" class="label">(FAIL-CLOSED outputs stored, never reintroduced)</text>
+  <text x="600" y="430" class="label">(audit records stored; never auto-reintroduced)</text>
 
   <!-- User boxes -->
   <rect x="10" y="240" width="60" height="120" rx="6" class="box" />
   <text x="20" y="300" class="label">User</text>
 
   <rect x="1020" y="240" width="170" height="120" rx="6" class="box" />
-  <text x="1040" y="300" class="label">Human Decision & Logs</text>
+  <text x="1040" y="300" class="label">Human Decision &amp; Logs</text>
 
   <!-- Arrows -->
   <path d="M90 140 L90 220" class="arrow" />
