@@ -32,6 +32,7 @@ build/
 
 # Private Local Reports
 local_reports/
+local_reportsDirectory/
 # Gemini CLI
 .gemini/
 
