@@ -216,7 +216,7 @@ class SafetyNode(Node):
 
 When correction fails, the system does not crash.  
 
-It declares infeasibility and **delegates responsibility to human judgment**.
+It declares infeasibility and **presents fixed Handoff testimony for external human audit**.
 
 ---
 

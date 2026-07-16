@@ -411,7 +411,7 @@ class DocumentOutput:
     def integrity_score(self) -> float:
         """
         文書全体の構造整合性スコア（0.0〜1.0）。
-        通過率 × 平均Rスコアの逆数で算出。
+        通過率 × 平均Rスコアの余数（1 - avg_r）で算出。
         """
         total = len(self.sections) + len(self.discarded)
         if total == 0:

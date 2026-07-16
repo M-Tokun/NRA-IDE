@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 # ── ここを変えると要約の厳しさが変わります ──(AIの注目度合い判定)
-BASE_TAU = 0.41          # 基本の「許容の広さ」。小さいほど厳しくなる（おすすめ: 0.35〜0.50）
+BASE_TAU = 0.41          # 基本の「吸収厚み（許容度合い）」。小さいほど厳しくなる（おすすめ: 0.35〜0.50）
 MOMENTUM_STEP = 0.2      # 良い部分を見つけたらどれだけ「集中モード」になるか
 DECAY_STEP = 0.1        # つまらない部分が続くとどれだけ集中が戻るか
 MAX_MOMENTUM = 0.8       # 集中モードの最大値（1.0で止まる）
@@ -28,8 +28,8 @@ IMPORTANT_WORDS = ["結論", "しかし", "重要", "核心", "特異点", "つ�
 class CrystalPoint:
     content: str     # 残した文章
     delta: float     # この行の「濃さ」（数字が大きいほど濃い）
-    tau: float       # 今の「許容の広さ」
-    r_ratio: float   # 濃さ ÷ 許容の広さ（これが大きいと通過しやすい）
+    tau: float       # 今の「吸収厚み（許容度合い）」
+    r_ratio: float   # 濃さ ÷ 吸収厚み（許容度合い）（これが大きいと通過しやすい）
     is_spark: bool   # 「これは大事！」と特別に思った行か？
 class NRACore:
     def __init__(self):
@@ -73,10 +73,10 @@ class NRACore:
         if is_spark:
             delta *= SPARK_WEIGHT
 
-        # 今の許容の広さ
+        # 今の吸収厚み（許容度合い）
         current_tau = self.base_tau * (1.0 + self.momentum)
 
-        # 濃さ ÷ 許容の広さ
+        # 濃さ ÷ 吸収厚み（許容度合い）
         r = delta / current_tau
 
         self.prev_deltas.append(delta)

@@ -575,6 +575,11 @@ class NRALLMPipeline:
 
     def status(self) -> str:
         """パイプラインの現在状態"""
+        vault_body = (
+            "\n".join(f"  {log}" for log in self._context.vault.audit_log())
+            if not self._context.vault.is_empty
+            else "  (no discarded outputs)"
+        )
         return (
             f"\n{'='*50}\n"
             f"NRA LLM Pipeline Status\n"
@@ -582,10 +587,7 @@ class NRALLMPipeline:
             f"Provider: {self._bridge.provider.value} / {self._bridge.model}\n"
             f"{self._context.context_summary()}\n"
             f"Vault audit:\n"
-            + "\n".join(
-                f"  {log}" for log in self._context.vault.audit_log()
-            ) if not self._context.vault.is_empty
-            else f"  (no discarded outputs)"
+            + vault_body
             + f"\n{'='*50}"
         )
 

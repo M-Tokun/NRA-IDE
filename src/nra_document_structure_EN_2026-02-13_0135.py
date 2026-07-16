@@ -416,7 +416,7 @@ class DocumentOutput:
     def integrity_score(self) -> float:
         """
         Overall structural integrity score (0.0 – 1.0).
-        Calculated as pass_rate × inverse of average R score.
+        Calculated as pass_rate × complement of average R score (1 - avg_r).
         """
         total = len(self.sections) + len(self.discarded)
         if total == 0:

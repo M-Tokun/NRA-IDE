@@ -32,13 +32,13 @@ $\tau_{\text{upper}} = \tau \cdot f(\mathrm{EMA}_{\text{upper}})$
 
 $\tau_{\text{lower}} = \tau \cdot g(\mathrm{EMA}_{\text{lower}})$
 
-$R = \max\!\left( \frac{\delta_{\text{upper}}}{\tau_{\text{upper}}}, \frac{\delta_{\text{lower}}}{\tau_{\text{lower}}} \right)$
+$R_{\text{dir}} = \max\!\left( \frac{\delta_{\text{upper}}}{\tau_{\text{upper}}}, \frac{\delta_{\text{lower}}}{\tau_{\text{lower}}} \right)$（側別評価の補助集約量であり、正規Rを再定義しない）
 
 **設計原則**
 
 1. **Integer Phase Lock**: 残差εを熱として排出、キャリーオーバー禁止
 
-2. **Fail-Closed**: R≥1で出力抑制、人間判断委譲
+2. **Fail-Closed**: R≥1で出力抑制、固定Handoff証言を外部人間監査へ提示
 
 3. **Axiom of Confession**: 近似使用時に開示義務
 
