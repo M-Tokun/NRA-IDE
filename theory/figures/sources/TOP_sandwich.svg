@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1536" viewBox="0 0 1024 1536">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#071426"/>
+      <stop offset="1" stop-color="#0d2032"/>
+    </linearGradient>
+    <linearGradient id="cause" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#103957"/>
+      <stop offset="1" stop-color="#174c67"/>
+    </linearGradient>
+    <linearGradient id="ide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#373069"/>
+      <stop offset="1" stop-color="#573c73"/>
+    </linearGradient>
+    <linearGradient id="llm" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#174833"/>
+      <stop offset="1" stop-color="#1d6048"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity=".35"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "Yu Gothic UI", "Yu Gothic", sans-serif; fill: #edf6ff; }
+      .title { font-size: 38px; font-weight: 700; letter-spacing: 1px; }
+      .sub { font-size: 19px; fill: #a9c2d8; }
+      .layer { font-size: 29px; font-weight: 700; }
+      .jp { font-size: 18px; fill: #c7d9e8; }
+      .body { font-size: 21px; }
+      .small { font-size: 17px; fill: #bfd1df; }
+      .mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: 21px; }
+      .state { font-family: "Cascadia Mono", Consolas, monospace; font-size: 17px; font-weight: 600; }
+    </style>
+  </defs>
+
+  <rect width="1024" height="1536" fill="url(#bg)"/>
+  <circle cx="885" cy="80" r="170" fill="#1b6a8c" opacity=".10"/>
+  <circle cx="105" cy="1450" r="220" fill="#73569a" opacity=".08"/>
+
+  <text x="512" y="68" text-anchor="middle" class="title">NRA-IDE BOX SANDWICH ARCHITECTURE</text>
+  <text x="512" y="102" text-anchor="middle" class="sub">Cause-Side authority → deterministic structural evaluation → explanation</text>
+
+  <rect x="62" y="132" width="900" height="82" rx="16" fill="#10283d" stroke="#3d718d"/>
+  <text x="512" y="163" text-anchor="middle" class="small">CANONICAL PRECEDENCE / 正典優先順位（上位3文書）</text>
+  <text x="512" y="193" text-anchor="middle" class="small">theory/AXIOMS.md  &gt;  theory/axioms.json  &gt;  Foundational Thesis</text>
+
+  <g filter="url(#shadow)">
+    <rect x="62" y="250" width="900" height="248" rx="22" fill="url(#cause)" stroke="#48a1c5" stroke-width="2"/>
+    <text x="96" y="299" class="layer">LAYER 01 — CAUSE SIDE</text>
+    <text x="96" y="329" class="jp">原因側：物理制約と観測値の唯一の権威</text>
+    <line x1="96" y1="350" x2="928" y2="350" stroke="#6bb9d7" opacity=".55"/>
+    <text x="96" y="390" class="body">Inputs: δ, τ, R_warn, R_handoff, R_irrev, observations</text>
+    <text x="96" y="427" class="body">Canonical ratio: <tspan class="mono">R = δ / τ</tspan></text>
+    <text x="96" y="465" class="small">Effect-Side output cannot rewrite δ, τ, thresholds, or state.</text>
+  </g>
+
+  <path d="M512 500 V545" stroke="#71c3e1" stroke-width="5"/>
+  <path d="M500 535 L512 551 L524 535" fill="none" stroke="#71c3e1" stroke-width="5"/>
+  <text x="540" y="532" class="small">one-way causal flow / 逆流禁止</text>
+
+  <g filter="url(#shadow)">
+    <rect x="62" y="558" width="900" height="550" rx="22" fill="url(#ide)" stroke="#a78bd0" stroke-width="2"/>
+    <text x="96" y="607" class="layer">LAYER 02 — IDE STRUCTURAL EVALUATION</text>
+    <text x="96" y="637" class="jp">決定論的な状態分類・構造証言（LLMは変更不可）</text>
+    <line x1="96" y1="658" x2="928" y2="658" stroke="#b59cda" opacity=".55"/>
+
+    <rect x="94" y="681" width="836" height="249" rx="14" fill="#161b33" opacity=".72"/>
+    <text x="120" y="718" class="state">R &lt; R_warn                         → PERMIT</text>
+    <text x="120" y="757" class="state">R_warn ≤ R &lt; R_handoff             → BOUNDARY_WARNING</text>
+    <text x="120" y="796" class="state">R_handoff ≤ R &lt; R_irrev            → HANDOFF_REQUIRED</text>
+    <text x="120" y="835" class="state">R_irrev ≤ R &lt; 1                    → IRREVERSIBLE_TRANSITION</text>
+    <text x="120" y="874" class="state">R ≥ 1                               → RUPTURE_BOUNDARY</text>
+    <text x="120" y="913" class="state">τ = 0 → OUT_OF_DESCRIPTION_DOMAIN   invalid → CONFESSION</text>
+
+    <text x="96" y="973" class="body">Irreversible latch persists even if a later R decreases.</text>
+    <text x="96" y="1010" class="body">Double-fluctuation field is always present:</text>
+    <text x="120" y="1044" class="small">result when observable; otherwise NOT_OBSERVABLE + reason</text>
+    <text x="120" y="1072" class="small">Non-observability alone is not CONFESSION.</text>
+  </g>
+
+  <path d="M512 1110 V1155" stroke="#b59cda" stroke-width="5"/>
+  <path d="M500 1145 L512 1161 L524 1145" fill="none" stroke="#b59cda" stroke-width="5"/>
+
+  <g filter="url(#shadow)">
+    <rect x="62" y="1168" width="900" height="224" rx="22" fill="url(#llm)" stroke="#58b986" stroke-width="2"/>
+    <text x="96" y="1217" class="layer">LAYER 03 — EFFECT SIDE / LLM</text>
+    <text x="96" y="1247" class="jp">説明・翻訳・提示のみ。構造状態を弱めず、上書きしない。</text>
+    <line x1="96" y1="1268" x2="928" y2="1268" stroke="#6fc99a" opacity=".55"/>
+    <text x="96" y="1307" class="body">R &lt; 1: ongoing structural testimony</text>
+    <text x="96" y="1344" class="body">R ≥ 1: final fixed testimony</text>
+  </g>
+
+  <rect x="62" y="1423" width="900" height="65" rx="14" fill="#0c1724" stroke="#385166"/>
+  <text x="512" y="1452" text-anchor="middle" class="small">NRA-LLM-ISO-01 · Generated from current canonical state rules</text>
+  <text x="512" y="1477" text-anchor="middle" class="small">Canonical sync: 2026-07-14 · R means δ/τ only</text>
+</svg>

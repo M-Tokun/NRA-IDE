@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1408" height="768" viewBox="0 0 1408 768">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071725"/>
+      <stop offset="1" stop-color="#102d3b"/>
+    </linearGradient>
+    <style>
+      text { font-family: "Segoe UI", "Yu Gothic UI", "Yu Gothic", sans-serif; fill: #edf7fb; }
+      .title { font-size: 34px; font-weight: 750; }
+      .sub { font-size: 16px; fill: #a8c4d2; }
+      .head { font-size: 20px; font-weight: 700; fill: #86d8ef; }
+      .body { font-size: 17px; fill: #d8e9f0; }
+      .small { font-size: 14px; fill: #b5ccd6; }
+      .formula { font-family: "Cambria Math", "Segoe UI Symbol", serif; font-size: 27px; fill: #ffffff; }
+      .mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: 15px; fill: #edf7fb; }
+    </style>
+  </defs>
+
+  <rect width="1408" height="768" fill="url(#bg)"/>
+  <circle cx="1310" cy="20" r="190" fill="#2c86a0" opacity=".10"/>
+  <text x="54" y="57" class="title">NRA-IDE CANONICAL CORE FORMULAS / 基礎式</text>
+  <text x="54" y="84" class="sub">Canonical sync 2026-07-14 · Cause-Side quantities determine state; Effect-Side output has no authority over them.</text>
+
+  <rect x="46" y="112" width="430" height="276" rx="16" fill="#102b3b" stroke="#367791"/>
+  <text x="70" y="148" class="head">1 · Canonical structural ratio / 正規R</text>
+  <text x="70" y="199" class="formula">R = δ / τ</text>
+  <text x="70" y="234" class="body">δ ≥ 0 : structural displacement / 構造変位</text>
+  <text x="70" y="265" class="body">τ &gt; 0 : remaining allowance / 残存許容量</text>
+  <text x="70" y="308" class="small">τ = 0 → OUT_OF_DESCRIPTION_DOMAIN</text>
+  <text x="70" y="334" class="small">negative, NaN, Infinity, invalid thresholds → CONFESSION</text>
+  <text x="70" y="359" class="small">Only δ/τ is canonical R.</text>
+  <text x="70" y="380" class="small">File location alone does not confer conformance.</text>
+
+  <rect x="496" y="112" width="866" height="276" rx="16" fill="#182540" stroke="#6e6ca9"/>
+  <text x="520" y="148" class="head">2 · Canonical state thresholds / 状態境界</text>
+  <text x="520" y="181" class="mono">R &lt; R_warn                    PERMIT</text>
+  <text x="520" y="213" class="mono">R_warn ≤ R &lt; R_handoff         BOUNDARY_WARNING</text>
+  <text x="520" y="245" class="mono">R_handoff ≤ R &lt; R_irrev        HANDOFF_REQUIRED</text>
+  <text x="520" y="277" class="mono">R_irrev ≤ R &lt; 1               IRREVERSIBLE_TRANSITION</text>
+  <text x="520" y="309" class="mono">R ≥ 1                           RUPTURE_BOUNDARY</text>
+  <line x1="1004" y1="171" x2="1004" y2="347" stroke="#6e6ca9" opacity=".55"/>
+  <text x="1028" y="194" class="body">R &lt; 1</text>
+  <text x="1028" y="220" class="small">ongoing testimony</text>
+  <text x="1028" y="263" class="body">R ≥ 1</text>
+  <text x="1028" y="289" class="small">final fixed testimony</text>
+  <text x="1028" y="330" class="small">Irreversible latch persists.</text>
+  <text x="1028" y="354" class="small">不可逆状態はR低下後も解除しない。</text>
+
+  <rect x="46" y="408" width="430" height="304" rx="16" fill="#19332f" stroke="#4b987c"/>
+  <text x="70" y="444" class="head">3 · Directional auxiliary / 側別補助量</text>
+  <text x="70" y="488" class="formula">R_upper = δ_upper / τ_upper</text>
+  <text x="70" y="526" class="formula">R_lower = δ_lower / τ_lower</text>
+  <text x="70" y="564" class="formula">R_dir = max(R_upper, R_lower)</text>
+  <text x="70" y="602" class="body">R_dir is audit-only and is not canonical R.</text>
+  <text x="70" y="630" class="small">正規状態へ使うには、評価前に固定したCause-Side変換で</text>
+  <text x="70" y="654" class="small">単一のδとτへ写像する。dominant sideは監査情報。</text>
+  <text x="70" y="685" class="small">Effect-Side feedback cannot alter structural variables.</text>
+
+  <rect x="496" y="408" width="420" height="304" rx="16" fill="#322848" stroke="#8e77b7"/>
+  <text x="520" y="444" class="head">4 · Dynamic allowance / 動的τ</text>
+  <text x="520" y="489" class="formula">τ(t) = τ₀ − ∫₀ᵗ f(δ(s)) ds</text>
+  <text x="520" y="530" class="body">On every finite evaluation interval:</text>
+  <text x="542" y="560" class="body">f(δ(s)) is finite, non-negative, integrable.</text>
+  <text x="520" y="601" class="small">τ is non-increasing. It strictly decreases only where</text>
+  <text x="520" y="626" class="small">the accumulated depletion integral is positive.</text>
+  <text x="520" y="663" class="small">各有限評価区間で有限・非負・可積分。</text>
+  <text x="520" y="687" class="small">累積消耗が正の区間だけ厳密に減少。</text>
+
+  <rect x="936" y="408" width="426" height="304" rx="16" fill="#3b2929" stroke="#a67868"/>
+  <text x="960" y="444" class="head">5 · Residual response &amp; observation</text>
+  <text x="960" y="489" class="formula">G(r) = r|r| / (k + |r|),  k &gt; 0</text>
+  <text x="960" y="529" class="body">|r| ≪ k : G(r) ≈ r|r|/k</text>
+  <text x="960" y="562" class="body">|r| ≫ k : G(r)/r → 1, so G(r) ~ r</text>
+  <text x="960" y="598" class="small">Odd · sign-preserving · unbounded · asymptotically linear</text>
+  <line x1="960" y1="620" x2="1338" y2="620" stroke="#a67868" opacity=".55"/>
+  <text x="960" y="649" class="small">Double-fluctuation status is always present.</text>
+  <text x="960" y="674" class="small">If unavailable: NOT_OBSERVABLE + missing-data reason.</text>
+  <text x="960" y="698" class="small">Non-observability alone does not imply CONFESSION.</text>
+
+  <text x="1370" y="746" text-anchor="end" class="small">NRA-IDE · deterministic reference diagram</text>
+</svg>
