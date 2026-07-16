@@ -879,7 +879,7 @@ function updateUI(){
   document.getElementById('chain-note').innerHTML = `load=${p.load.toFixed(3)}<br>cooling=${p.cooling.toFixed(3)}`;
 
   if(rTotal >= 1.0){
-    st.textContent = 'FAIL-CLOSED — 自動判断停止・人間確認へ委譲';
+    st.textContent = 'FAIL-CLOSED — 自動判断停止・固定Handoff証言を外部人間監査へ提示';
     st.style.color = 'var(--fail)';
     truckSt.textContent = '✕ FAIL_CLOSED COLD CHAIN';
     truckSt.style.color = 'var(--fail)';

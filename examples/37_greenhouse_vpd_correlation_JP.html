@@ -917,7 +917,7 @@ function updateUI(){
   document.getElementById('vpd-box').innerHTML = `VPD ${vals.vpd.toFixed(2)} kPa<br>R_vpd=${cp.vpd.toFixed(3)}`;
 
   if(rTotal >= 1.0){
-    st.textContent = 'FAIL-CLOSED — 自動判断停止・人間確認へ委譲';
+    st.textContent = 'FAIL-CLOSED — 自動判断停止・固定Handoff証言を外部人間監査へ提示';
     st.style.color = 'var(--fail)';
     pack.textContent = '✕ FAIL_CLOSED GREENHOUSE';
     pack.style.color = 'var(--fail)';
