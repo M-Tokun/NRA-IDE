@@ -1,5 +1,29 @@
 # AXIOMS.md — 律環公理・公理群定義書
 
+> [!CAUTION]
+> **2026-04-24履歴版 / Historical revision dated 2026-04-24 — 非正規 / Noncanonical**
+>
+> この文書は改訂経過を保存する履歴資料であり、現行正典ではない。旧状態名、旧終端動作、現行正典と異なる公理構成を含み得る。現行規則はリポジトリルートの`theory/AXIOMS.md`と`theory/axioms.json`を参照すること。履歴証拠を保つため、以下の本文は遡及修正しない。
+>
+> This document preserves revision history and is not the current canonical source. It may contain superseded state names, terminal behavior, and an axiom structure that differs from the current canon. Consult root `theory/AXIOMS.md` and `theory/axioms.json`. The body below is not retroactively rewritten so that historical evidence remains intact.
+>
+> **現行分類:** 律環公理は「存在は生成である。」の一つだけであり、第二公理以降は存在しない。以下の`Axiom 0`～`Axiom 13`は2026-04-24時点の失効した旧分類であり、現行公理番号ではない。一次式と二次式（二重ゆらぎ式）は、公理ではなくIDEの二つの正典計算系である。旧`Axiom 4`等のその他の式は、現行では派生式、補助式または補完式としてのみ評価する。
+>
+> **現行状態:** `PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`の7状態を使用する。以下の旧状態語、`tau=0`の存在否定、`R>=1`の単純なOutput Halt、停止だけに限定した旧Fail-Closed説明を現行実装または運用へ適用してはならない。
+>
+> **使用禁止:** 以下の履歴本文を、現行仕様、正規実装要件、適合証拠、安全証明、測定結果、または特定ドメインでの運用判断根拠として使用してはならない。対応PDFの存在はこのMarkdown履歴の有効性または完全性の条件ではない。
+>
+> **Current classification:** There is exactly one Nomological Ring Axiom: “Existence is Generation.” No second or subsequent axiom exists. `Axiom 0` through `Axiom 13` below are a superseded classification dated 2026-04-24, not current axiom numbers. The Primary and Secondary / Dual-Fluctuation Formulas are the two canonical IDE calculation systems, not axioms. Other equations, including former `Axiom 4`, are evaluated only as derived, auxiliary, or complementary formulas under the current canon.
+>
+> **Current states:** Use the seven states `PERMIT`, `BOUNDARY_WARNING`, `HANDOFF_REQUIRED`, `IRREVERSIBLE_TRANSITION`, `RUPTURE_BOUNDARY`, `CONFESSION`, and `OUT_OF_DESCRIPTION_DOMAIN`. Do not apply the historical state terms, the denial of existence at `tau=0`, simple Output Halt at `R>=1`, or the halt-only historical Fail-Closed description to current implementation or operation.
+>
+> **Do not use:** The historical body below must not be used as a current specification, normative implementation requirement, conformance evidence, safety proof, measurement result, or basis for operational decisions in any domain. A corresponding PDF is not required for this Markdown record to remain valid or complete as historical evidence.
+
+---
+
+> [!NOTE]
+> **以下は凍結した履歴本文です。正典同期を目的とする文言修正を行いません。 / The body below is a frozen historical record and is not rewritten for canonical synchronization.**
+
 ## Nomological Ring Axioms — Formal Axiom Set
 
 **著者 / Author：** M-Tokuni

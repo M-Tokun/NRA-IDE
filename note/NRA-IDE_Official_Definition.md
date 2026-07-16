@@ -2,6 +2,30 @@
 
 # 律環公理 (Nomological Ring Axioms: NRA) 定義・解説・反証集
 
+> [!CAUTION]
+> **履歴資料 / Historical working record — 非正規 / Noncanonical**
+>
+> この文書名の`Official`は作成時点の名称であり、現在の正典性を意味しない。本文は2026-03-03時点の複数AIセッション統合記録として、当時の主張・過大表現・旧語彙を含めて保存する。現行の定義、状態、閾値、権威順位は`theory/AXIOMS.md`および`theory/axioms.json`を参照すること。
+>
+> `Official` in the filename reflects its historical working title, not current authority. The body is preserved as a 2026-03-03 multi-AI session record and may contain superseded terms, overclaims, and earlier formulations. Consult `theory/AXIOMS.md` and `theory/axioms.json` for current definitions, states, thresholds, and precedence.
+>
+> **現行分類:** 律環公理は「存在は生成である。」の一つだけであり、第二公理以降は存在しない。本文冒頭の「第一条～第三条」は当時の説明展開であって、三つの現行公理ではない。一次式と二次式（二重ゆらぎ式）は、公理ではなくIDEの二つの正典計算系である。それ以外の式は派生式、補助式または補完式として扱う。
+>
+> **使用禁止:** 以下の履歴本文を、現行仕様、正規実装要件、適合証拠、安全証明、測定結果、医学的判断、法的助言、知財成立の証明、または特定ドメインでの有効性根拠として使用してはならない。コードやHTMLが動作すること、GitHubに記録があること、旧資料で「確定」「完全」「Official」と表記されていることは、それらを立証しない。
+>
+> **現行参照順:** `theory/AXIOMS.md` > `theory/axioms.json` > `theory/NRA-IDE_Foundational_Thesis_Bilingual.md` > `theory/SANDWICH_ARCH.md` > `theory/THEORY.md` > `FORMULA.md` > `llms.md` > ドメイン固有規則 > 正典適合試験に合格した正規参照実装 > その他の実装 > コメント・例示・AI生成説明。
+>
+> **Current classification:** There is exactly one Nomological Ring Axiom: “Existence is Generation.” No second or subsequent axiom exists. The “First–Third Articles” near the beginning of the preserved body are historical explanatory expansions, not three current axioms. The Primary and Secondary / Dual-Fluctuation Formulas are the two canonical IDE calculation systems, not axioms. Every other equation is derived, auxiliary, or complementary.
+>
+> **Do not use:** The historical body below must not be used as a current specification, normative implementation requirement, conformance evidence, safety proof, measurement result, medical judgment, legal advice, proof of intellectual-property status, or evidence of effectiveness in a particular domain. Executable code or HTML, a GitHub record, or historical labels such as “final,” “complete,” or “Official” do not establish those claims.
+>
+> **Current precedence:** `theory/AXIOMS.md` > `theory/axioms.json` > `theory/NRA-IDE_Foundational_Thesis_Bilingual.md` > `theory/SANDWICH_ARCH.md` > `theory/THEORY.md` > `FORMULA.md` > `llms.md` > domain-specific rules > normative reference implementation passing canonical conformance tests > other implementation > comments, examples, and AI-generated explanations.
+
+---
+
+> [!NOTE]
+> **以下は凍結した履歴本文です。正典同期を目的とする文言修正を行いません。 / The body below is a frozen historical record and is not rewritten for canonical synchronization.**
+
 ## 1. 律環公理の定言的定義（公理）
 
 律環公理は、世界を「滑らかな連続体」ではなく、「構造的な間隙（ズレ）」によって駆動される「不連続な位相の連鎖」として定義します。

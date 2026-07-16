@@ -8,6 +8,19 @@ The core repository for NRA-IDE (Nomological Ring Axioms — Intensional Dynamic
 
 Files are organized into five categories: theoretical foundations, papers, implementation, visualization, and quantum extension.
 
+> [!IMPORTANT]
+> **権威区分 / Authority classification**
+>
+> `nra-core`は、NRA-IDEの研究経過、日付付き論文、例示実装、可視化、実験的拡張を保存する資産領域であり、ディレクトリ名だけでは正典性・現行性・適合性を付与しません。
+>
+> 現行の正典順位はリポジトリルートの`theory/AXIOMS.md`に従います。実装については、`foundations/NRA-IDE_Architecture_public.py`だけが正規参照実装のソースです。それ以外の文書・コード・可視化は、個別に正典へ昇格した記録がない限り、研究、説明、例示、または履歴資料です。
+>
+> 現行の律環公理は「存在は生成である。」の一つだけであり、第二公理以降は存在しません。一次式と二次式（二重ゆらぎ式）は公理ではなく、IDEの二つの正典計算系です。旧資料にある「公理1」「Axiom 4/5」等は、当時の研究分類を保存する歴史的ラベルであり、現行公理番号ではありません。
+>
+> `nra-core` preserves research history, dated papers, example implementations, visualizations, and experimental extensions. The directory name alone does not make an artifact canonical, current, or conforming. Canonical precedence is defined by root `theory/AXIOMS.md`. For implementation, only `foundations/NRA-IDE_Architecture_public.py` is the normative reference source. Other artifacts remain research, explanatory, illustrative, or historical unless explicitly promoted by a canonical record.
+>
+> The sole current Nomological Ring Axiom is “Existence is Generation.” No second or subsequent axiom exists. The Primary and Secondary / Dual-Fluctuation Formulas are the two canonical IDE calculation systems, not axioms. Labels such as “Axiom 1” and “Axiom 4/5” in older artifacts preserve historical research classification; they are not current axiom numbers.
+
 ---
 
 ## ディレクトリ構成 / Directory Structure
@@ -36,15 +49,15 @@ NRA（律環公理）および IDE（内包動力学エンジン）の概念的�
 
 システム全体の設計思想と数理構造の出発点となります。
 
-Documents describing the conceptual and axiomatic foundations of NRA (Nomological Ring Axioms) and IDE (Intensional Dynamics Engine).
+Documents preserving conceptual and axiomatic development of NRA (Nomological Ring Axioms) and IDE (Intensional Dynamics Engine).
 
-These form the starting point for the system's design philosophy and mathematical structure.
+These provide development history and explanatory context; current authority remains in root `theory/`.
 
 | ファイル | 内容 |
 
 |---|---|
 
-| `AXIOMS_rewritten_2026-04-24_011508.md` / `.pdf` | **律環公理 公理群定義書 v1.2** — Axiom 0〜10 正式定義（二言語） |
+| `AXIOMS_rewritten_2026-04-24_011508.md` | **2026-04-24時点の履歴版** — 複数公理を提案した旧分類 v1.2。現行正典ではなく、現在の公理は一つだけ |
 
 | `Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md` | 律環公理コード付き解説（二重ゆらぎ安定版・EN） |
 
@@ -52,11 +65,11 @@ These form the starting point for the system's design philosophy and mathematica
 
 | `Nomological_Ring_AxiomsとIntensional_Dynamics_Engine.md` | NRAとIDEの統合概念記述（会話記録・完全版） |
 
-| `NRA-IDE_の応用分野_汎用性の全体像.md` | NRA-IDEの応用領域と汎用性の概観 |
+| `NRA-IDE_の応用分野_汎用性の全体像.md` | NRA-IDEの応用領域と汎用性に関する研究概観 |
 
-> 原本は `theory/AXIOMS_rewritten_2026-04-24_011508.md`。nra-core の自己完結性のため本ディレクトリにも収録。
-
-> The canonical source is `theory/AXIOMS_rewritten_2026-04-24_011508.md`. Copied here for nra-core self-containment.
+> 現行正典はルート`theory/AXIOMS.md`である。日付付き`AXIOMS_rewritten_...`は改訂経過を保存する履歴資料であり、対応PDFが存在することを要求しない。
+>
+> The current canonical source is root `theory/AXIOMS.md`. The dated `AXIOMS_rewritten_...` file is historical revision evidence and does not require a corresponding PDF to be present.
 
 ---
 
@@ -74,7 +87,7 @@ Covers formalization of theory, extension proposals, and architectural design.
 
 |---|---|
 
-| `NRA_IDE_Paper_v3_rev2_20260409_2130.md` / `.pdf` | NRA-IDE論文 v3 rev2（最新版） |
+| `NRA_IDE_Paper_v3_rev2_20260409_2130.md` / `.pdf` | NRA-IDE論文 v3 rev2（2026-04-09時点の版） |
 
 | `NRA_IDE_Paper_JP_Chapter2_final_20260412_2219.md` | NRA-IDE論文 JP 第2章（確定版） |
 
@@ -96,13 +109,21 @@ Covers formalization of theory, extension proposals, and architectural design.
 
 ## implementation/ — 実装コード / Implementation
 
-NRAおよびIDEの動作を実現するPythonスクリプト群。
+NRAおよびIDEを探索・説明するPythonスクリプト群。
 
 基盤実装・適応ゲート拡張・センサー系応用コードを含みます。
 
-Python scripts that realize the behavior of NRA and IDE.
+Python scripts that explore and illustrate NRA and IDE behavior.
 
 Includes foundation implementations, adaptive gate extension, and applied sensor-system examples.
+
+> 正規参照実装は`../foundations/NRA-IDE_Architecture_public.py`である。この節のスクリプトは日付付き例示・プロトタイプであり、旧状態名や旧閾値を含み得る。
+>
+> The normative reference implementation is `../foundations/NRA-IDE_Architecture_public.py`. Scripts in this section are dated examples or prototypes and may retain legacy states or thresholds.
+>
+> 正規参照実装の適合性は配置名だけでなく、`../tests/test_nra_ide_reference.py`の現行17試験への合格で確認する。docs版は正規ソースとSHA-256が一致する同期ミラーである。
+>
+> Conformance of the normative reference implementation depends on passing the current 17 tests in `../tests/test_nra_ide_reference.py`, not on its location or name alone. The docs copy is a synchronized mirror whose SHA-256 must match the normative source.
 
 | ファイル | 内容 |
 
@@ -132,11 +153,15 @@ NRAダイナミクスのインタラクティブシミュレーション（HTML�
 
 Interactive simulations (HTML) of NRA dynamics and plot images of analysis results.
 
+> これらは説明・研究用可視化であり、正規状態機械、実測器、安全証明、運用判断器ではない。
+>
+> These are explanatory or research visualizations, not the canonical state machine, measuring instruments, safety proofs, or operational decision systems.
+
 | ファイル | 内容 |
 
 |---|---|
 
-| `NRA_IDE_Axiom1_RigidityPlay_20260425.html` | **公理1「遊びのない厳密さは崩壊する」直接可視化** — τ≈0 vs τ適切 比較 |
+| `NRA_IDE_Axiom1_RigidityPlay_20260425.html` | **旧「公理1」ラベルを持つ履歴可視化** — 「遊びのない厳密さは崩壊する」は現在は構造持続原則であり公理ではない。τ≈0 vs τ適切 比較 |
 
 | `NRA_IDE_AdaptiveGate_20260425.html` | **適応ゲート拡張 — 固定k vs 動的k_eff** — 3提案統合・ゼリー比喩 |
 
@@ -154,7 +179,7 @@ Interactive simulations (HTML) of NRA dynamics and plot images of analysis resul
 
 | `NRA_IDE_Battery_Comparison_20260412_2054.html` | スマートフォンバッテリー比較シミュレーション |
 
-| `NRA_IDE_v2b_deg_v2_20260408.html` | τ劣化モデル — ダム・サンゴ（Axiom 4/5） |
+| `NRA_IDE_v2b_deg_v2_20260408.html` | τ劣化モデル — ダム・サンゴ。`Axiom 4/5`は旧分類であり、現在はIDE補助モデル・構造原則として扱う |
 
 | `NRA_IDE_v2a_basic_20260408.html` | 基本シナリオ — 作業者・橋・電池 |
 
@@ -180,6 +205,10 @@ Python scripts and session records connecting NRA-IDE to quantum computing.
 
 Implementations of quantum error control using Lindblad equations, NISQ, and FMO models.
 
+> 量子拡張は研究仮説・実験デモであり、正典NRA-IDEへの適合や量子装置上の有効性を主張しない。
+>
+> Quantum extensions are research hypotheses and experimental demonstrations; they do not by themselves claim canonical NRA-IDE conformance or effectiveness on quantum hardware.
+
 | ファイル | 内容 |
 
 |---|---|
@@ -202,4 +231,4 @@ Implementations of quantum error control using Lindblad equations, NISQ, and FMO
 
 ---
 
-*Last updated: 2026-04-25*
+*Authority classification updated: 2026-07-15*

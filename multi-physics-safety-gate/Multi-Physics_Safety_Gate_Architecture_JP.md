@@ -46,7 +46,7 @@ $$R_{em} = \frac{\delta_{SNR}}{\tau_{SNR}}$$
 
 | $\tau_{SNR}$ | 計測値を信頼できる最低SNR閾値 |
 
-> **注記：** $\delta_{SNR}$・$\tau_{SNR}$ は SNR 劣化量を監視対象パラメータとして $R = \delta/\tau$ に適用したものである。$R_{em} \neq \text{SNR}$。R は構造比率（偏差対許容幅）であり、SNR（信号対雑音比）とは別概念である。
+> **注記：** $\delta_{SNR}$・$\tau_{SNR}$ は SNR 劣化量を監視対象パラメータとして $R = \delta/\tau$ に適用したものである。$R_{em} \neq \text{SNR}$。R は構造比率（偏差対吸収厚み）であり、SNR（信号対雑音比）とは別概念である。
 
 ### 境界条件
 

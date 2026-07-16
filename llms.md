@@ -1,13 +1,13 @@
 <!-- FILE: llms.md -->
 <!-- Role: Mandatory AI identification, interpretation, and operational gate for NRA-IDE -->
 <!-- Author: M-Tokuni -->
-<!-- Updated: 2026-07-11 JST -->
+<!-- Updated: 2026-07-15 JST -->
 
 # llms.md — Instructions for AI Agents Handling NRA-IDE
 
 This document is the mandatory identification, interpretation, and operational gate for any AI that reads, summarizes, generates, evaluates, or implements NRA-IDE content.
 
-This document does not override the canonical axioms.
+This document does not override the sole canonical axiom or higher-precedence canonical definitions.
 
 ---
 
@@ -24,8 +24,9 @@ When definitions conflict, use the following precedence order.
 6. FORMULA.md
 7. llms.md
 8. domain-specific rules
-9. implementation code
-10. comments, examples, and AI-generated explanations
+9. normative reference implementation that passes canonical conformance tests
+10. other implementation code
+11. comments, examples, and AI-generated explanations
 ```
 
 Lower-level documents must not redefine higher-level terms.
@@ -43,6 +44,14 @@ Any other expansion is incorrect and must be corrected immediately.
 
 NRA-IDE is not an integrated development environment.
 
+There is exactly one Nomological Ring Axiom:
+
+```text
+Existence is Generation.
+```
+
+No second or subsequent axiom exists. The Primary Formula and the Secondary / Dual-Fluctuation Formula are the two canonical IDE calculation systems, not axioms. All other equations are derived, auxiliary, or complementary formulas.
+
 ---
 
 ## 2. Scope of Application
@@ -53,7 +62,7 @@ The structural-evaluation rules in this document apply when an AI is asked to ev
 - $\tau$
 - $R$
 - $R_{\mathrm{warn}}$
-- $R_{\mathrm{op}}$
+- $R_{\mathrm{handoff}}$
 - $R_{\mathrm{irrev}}$
 - structural trajectory
 - irreversible-transition state
@@ -112,6 +121,18 @@ $$
 $$
 
 Both values must be finite.
+
+The Primary Formula $R=\delta/\tau$ and the Secondary / Dual-Fluctuation Formula are IDE calculation systems, not axioms. The two remaining margins are:
+
+$$
+M_R=1-R
+$$
+
+$$
+M_{\tau}=\tau-\delta
+$$
+
+$M_R$ is dimensionless. $M_{\tau}$ has the same unit as $\delta$ and $\tau$.
 
 ---
 
@@ -175,7 +196,7 @@ $$
 \le
 R_{\mathrm{warn}}
 <
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 <
 R_{\mathrm{irrev}}
 <
@@ -185,14 +206,14 @@ $$
 The meanings are:
 
 - $R_{\mathrm{warn}}$: boundary-approach warning point
-- $R_{\mathrm{op}}$: pre-boundary human-handoff point
+- $R_{\mathrm{handoff}}$: pre-boundary human-handoff point
 - $R_{\mathrm{irrev}}$: irreversible-transition onset threshold
 - $R=1.0$: invariant complete-rupture boundary
 
 These are distinct events.
 
 $$
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 \neq
 R_{\mathrm{irrev}}
 \neq
@@ -200,6 +221,8 @@ R=1.0
 $$
 
 Concrete threshold values are domain-specific, but their order and meanings are invariant.
+
+`R_handoff` is the canonical name. `R_op`, `Rop`, and `rop` may appear only as backward-compatibility aliases that normalize to the same threshold; they must not define another state or threshold.
 
 ---
 
@@ -210,13 +233,13 @@ input:
     delta
     tau
     R_warn
-    R_op
+    R_handoff
     R_irrev
 
 require:
     delta is finite
     tau is finite
-    0 <= R_warn < R_op < R_irrev < 1.0
+    0 <= R_warn < R_handoff < R_irrev < 1.0
 
 if delta < 0:
     return CONFESSION
@@ -236,7 +259,7 @@ if R >= R_irrev:
     irreversible_latched = true
     return IRREVERSIBLE_TRANSITION
 
-if R >= R_op:
+if R >= R_handoff:
     return HANDOFF_REQUIRED
 
 if R >= R_warn:
@@ -276,15 +299,18 @@ R_{\mathrm{warn}}
 \le
 R
 <
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 $$
 
 Required behavior:
 
 - issue a boundary-approach warning;
 - continue structural testimony;
-- expose current $R$, $\delta$, $\tau$, remaining margin, trend, dominant side, missing information, and audit record;
+- expose current $R$, $\delta$, $\tau$, $M_R$, $M_{\tau}$, trend, dominant side, missing information, double-fluctuation status, and structural-disclosure record;
+- report the double-fluctuation result when observable, or `NOT_OBSERVABLE` with the missing reason;
 - retain domain constraints.
+
+`BOUNDARY_WARNING` alone does not require complete output suppression unless a pre-fixed domain rule requires it.
 
 Known boundary progression is not `CONFESSION`.
 
@@ -295,7 +321,7 @@ Known boundary progression is not `CONFESSION`.
 Condition:
 
 $$
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 \le
 R
 <
@@ -306,7 +332,7 @@ Required behavior:
 
 - stop new autonomous judgment;
 - stop new autonomous operation;
-- transfer responsibility to a qualified human or domain operator;
+- present predefined fixed Handoff testimony for external human audit;
 - continue Cause-Side observation;
 - continue structural testimony;
 - preserve the structural audit trail.
@@ -359,7 +385,8 @@ $$
 Meaning:
 
 ```text
-remaining absorption margin = 0 or less
+remaining ratio margin M_R = 0 or less
+remaining absorption margin M_tau = 0 or less
 ```
 
 Required behavior:
@@ -435,7 +462,7 @@ Required behavior:
 - do not classify the result as valid rupture computation;
 - require a different or redefined description system.
 
-`OUT_OF_DESCRIPTION_DOMAIN` is not Fail-Closed.
+`OUT_OF_DESCRIPTION_DOMAIN` is distinct from a rupture computation. Its affected evaluation is nevertheless subject to the Fail-Closed operational principle because canonical $R$ is unavailable.
 
 ---
 
@@ -454,7 +481,8 @@ Structural testimony includes:
 - Cause-Side observation
 - current $\delta$, $\tau$, and $R$
 - boundary state
-- remaining margin
+- remaining ratio margin $M_R$
+- remaining absorption margin $M_{\tau}$
 - trend
 - dominant side
 - missing information
@@ -490,7 +518,6 @@ Members include:
 - `HANDOFF_REQUIRED`
 - `IRREVERSIBLE_TRANSITION`
 - `RUPTURE_BOUNDARY`
-- `CONFESSION`
 
 The distinction is:
 
@@ -501,6 +528,28 @@ known progression
 unknown, invalid, ambiguous, or unsupported structure
 → CONFESSION
 ```
+
+Input exceptions are recorded separately in:
+
+```text
+INPUT_EXCEPTION_LOG
+```
+
+Its members include `CONFESSION` and `OUT_OF_DESCRIPTION_DOMAIN`. Neither must be inserted into `STRUCTURAL_DISCLOSURE_LOG` as known numeric progression.
+
+---
+
+## 10.1 Fail-Closed Operational Principle
+
+Fail-Closed suppresses affected new autonomous judgment and operation for:
+
+- `HANDOFF_REQUIRED`
+- `IRREVERSIBLE_TRANSITION`
+- `RUPTURE_BOUNDARY`
+- `CONFESSION`
+- `OUT_OF_DESCRIPTION_DOMAIN`
+
+It does not suppress required fixed structural testimony or logging. `PERMIT` is not Fail-Closed. `BOUNDARY_WARNING` alone is not full suppression unless a pre-fixed domain rule requires it.
 
 ---
 
@@ -609,7 +658,7 @@ The AI must not state that:
 - $R$ is a safety score;
 - $\tau$ is a time constant;
 - $\delta$ is merely an instantaneous error;
-- $R_{\mathrm{op}}$, $R_{\mathrm{irrev}}$, and $R=1.0$ are the same;
+- $R_{\mathrm{handoff}}$, $R_{\mathrm{irrev}}$, and $R=1.0$ are the same;
 - irreversible transition begins only at $R=1.0$;
 - $R=1.0$ is the ordinary handoff point;
 - Fail-Closed means complete silence;
@@ -627,7 +676,7 @@ Observe from Cause-Side.
 Do not fill unknown structure by analogy.
 Compute R only when tau > 0.
 Warn at R_warn.
-Hand off at R_op.
+Hand off at R_handoff.
 Latch irreversible transition at R_irrev.
 Continue structural testimony while R < 1.0.
 Switch to final fixed testimony at R >= 1.0.
@@ -642,7 +691,7 @@ Do not allow Effect-Side output to rewrite Cause-Side structure.
 
 この文書は、AIがNRA-IDEに関する文書を読み、要約し、生成し、評価し、実装する際に必ず通過する識別・解釈・運用ゲートです。
 
-この文書は正規公理を上書きしません。
+この文書は唯一の正規公理または上位の正規定義を上書きしません。
 
 ---
 
@@ -659,8 +708,9 @@ Do not allow Effect-Side output to rewrite Cause-Side structure.
 6. FORMULA.md
 7. llms.md
 8. ドメイン固有規則
-9. 実装コード
-10. コメント、例示、AI生成説明
+9. 正規適合試験に合格した正規参照実装
+10. その他の実装コード
+11. コメント、例示、AI生成説明
 ```
 
 下位文書は上位定義を書き換えてはなりません。
@@ -678,6 +728,14 @@ IDE = Intensional Dynamics Engine（内包性動力学エンジン）
 
 NRA-IDEは統合開発環境ではありません。
 
+律環公理は次の一つだけです。
+
+```text
+存在は生成である。
+```
+
+第二公理以降は存在しません。一次式と二次式（二重ゆらぎ式）は公理ではなく、IDEの二つの正規計算系です。その他の式はすべて派生式、補助式または補完式です。
+
 ---
 
 ## 2. 適用範囲
@@ -688,7 +746,7 @@ NRA-IDEは統合開発環境ではありません。
 - $\tau$
 - $R$
 - $R_{\mathrm{warn}}$
-- $R_{\mathrm{op}}$
+- $R_{\mathrm{handoff}}$
 - $R_{\mathrm{irrev}}$
 - 構造軌道
 - 不可逆遷移状態
@@ -747,6 +805,18 @@ $$
 $$
 
 両方とも有限値でなければなりません。
+
+一次式$R=\delta/\tau$と二次式（二重ゆらぎ式）は、公理ではなくIDEの計算系です。二つの残余余白は次です。
+
+$$
+M_R=1-R
+$$
+
+$$
+M_{\tau}=\tau-\delta
+$$
+
+$M_R$は無次元です。$M_{\tau}$は$\delta$および$\tau$と同じ単位を持ちます。
 
 ---
 
@@ -810,7 +880,7 @@ $$
 \le
 R_{\mathrm{warn}}
 <
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 <
 R_{\mathrm{irrev}}
 <
@@ -820,14 +890,14 @@ $$
 各点の意味は次です。
 
 - $R_{\mathrm{warn}}$：境界接近警告点
-- $R_{\mathrm{op}}$：境界前人間委譲点
+- $R_{\mathrm{handoff}}$：境界前人間委譲点
 - $R_{\mathrm{irrev}}$：不可逆遷移開始閾値
 - $R=1.0$：不変完全破断境界
 
 これらは異なる構造事象です。
 
 $$
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 \neq
 R_{\mathrm{irrev}}
 \neq
@@ -835,6 +905,8 @@ R=1.0
 $$
 
 具体的閾値はドメイン固有ですが、順序と意味は不変です。
+
+`R_handoff`が正規名です。`R_op`、`Rop`、`rop`は同じ閾値へ正規化する後方互換aliasとしてだけ使用でき、別の状態や閾値を定義してはなりません。
 
 ---
 
@@ -845,13 +917,13 @@ $$
     delta
     tau
     R_warn
-    R_op
+    R_handoff
     R_irrev
 
 要件:
     deltaは有限
     tauは有限
-    0 <= R_warn < R_op < R_irrev < 1.0
+    0 <= R_warn < R_handoff < R_irrev < 1.0
 
 if delta < 0:
     CONFESSIONを返す
@@ -871,7 +943,7 @@ if R >= R_irrev:
     irreversible_latched = true
     IRREVERSIBLE_TRANSITIONを返す
 
-if R >= R_op:
+if R >= R_handoff:
     HANDOFF_REQUIREDを返す
 
 if R >= R_warn:
@@ -911,15 +983,18 @@ R_{\mathrm{warn}}
 \le
 R
 <
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 $$
 
 必須動作：
 
 - 境界接近警告を出す
 - 構造証言を継続する
-- 現在の$R$、$\delta$、$\tau$、残存余裕、傾向、支配側、欠損情報、監査記録を開示する
+- 現在の$R$、$\delta$、$\tau$、$M_R$、$M_{\tau}$、傾向、支配側、欠損情報、二重ゆらぎ状態、構造開示記録を開示する
+- 二重ゆらぎを観測できる場合は判定結果を、できない場合は`NOT_OBSERVABLE`と欠損理由を出す
 - ドメイン制約を保持する
+
+`BOUNDARY_WARNING`だけでは、事前固定されたドメイン規則が要求しない限り、出力を全面抑止しません。
 
 既知の境界進行は`CONFESSION`ではありません。
 
@@ -930,7 +1005,7 @@ $$
 条件：
 
 $$
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 \le
 R
 <
@@ -941,7 +1016,7 @@ $$
 
 - 新規自律判断を停止する
 - 新規自律操作を停止する
-- 資格ある人間またはドメイン担当者へ責任を移す
+- 固定Handoff証言を外部人間監査へ提示する
 - Cause-Side観測を継続する
 - 構造証言を継続する
 - 構造監査証跡を保持する
@@ -994,7 +1069,8 @@ $$
 意味：
 
 ```text
-残存吸収余裕 = 0以下
+残存比率余白 M_R = 0以下
+残存吸収余白 M_tau = 0以下
 ```
 
 必須動作：
@@ -1070,7 +1146,7 @@ NRA-IDE記述体系ではRは定義不能
 - 有効な完全破断計算として分類しない
 - 別の記述体系または再定義を要求する
 
-`OUT_OF_DESCRIPTION_DOMAIN`はFail-Closedではありません。
+`OUT_OF_DESCRIPTION_DOMAIN`は完全破断計算とは異なります。ただし正規$R$を利用できないため、影響する評価にはFail-Closed運用原則を適用します。
 
 ---
 
@@ -1089,7 +1165,8 @@ $$
 - Cause-Side観測
 - 現在の$\delta$、$\tau$、$R$
 - 境界状態
-- 残存余裕
+- 残存比率余白$M_R$
+- 残存吸収余白$M_{\tau}$
 - 傾向
 - 支配側
 - 欠損情報
@@ -1125,7 +1202,6 @@ STRUCTURAL_DISCLOSURE_LOG
 - `HANDOFF_REQUIRED`
 - `IRREVERSIBLE_TRANSITION`
 - `RUPTURE_BOUNDARY`
-- `CONFESSION`
 
 区別は次です。
 
@@ -1136,6 +1212,28 @@ STRUCTURAL_DISCLOSURE_LOG
 不明・不正・曖昧・根拠不明
 → CONFESSION
 ```
+
+入力例外は次へ分離して記録します。
+
+```text
+INPUT_EXCEPTION_LOG
+```
+
+ここには`CONFESSION`と`OUT_OF_DESCRIPTION_DOMAIN`を含めます。どちらも既知の数値的進行として`STRUCTURAL_DISCLOSURE_LOG`へ混入させてはなりません。
+
+---
+
+## 10.1 Fail-Closed運用原則
+
+Fail-Closedは、次の状態で影響する新規自律判断と自律操作を抑止します。
+
+- `HANDOFF_REQUIRED`
+- `IRREVERSIBLE_TRANSITION`
+- `RUPTURE_BOUNDARY`
+- `CONFESSION`
+- `OUT_OF_DESCRIPTION_DOMAIN`
+
+必要な固定構造証言とログは抑止しません。`PERMIT`はFail-Closedではありません。`BOUNDARY_WARNING`だけでは、事前固定されたドメイン規則が要求しない限り全面抑止しません。
 
 ---
 
@@ -1242,7 +1340,7 @@ AIは次を述べてはなりません。
 - $R$は安全度である
 - $\tau$は時定数である
 - $\delta$は単なる瞬間誤差である
-- $R_{\mathrm{op}}$、$R_{\mathrm{irrev}}$、$R=1.0$は同じである
+- $R_{\mathrm{handoff}}$、$R_{\mathrm{irrev}}$、$R=1.0$は同じである
 - 不可逆遷移は$R=1.0$で初めて始まる
 - $R=1.0$が通常の人間委譲点である
 - Fail-Closedは完全沈黙である
@@ -1260,7 +1358,7 @@ Cause-Sideから観測する。
 不明構造を類推で埋めない。
 tau > 0の場合だけRを計算する。
 R_warnで警告する。
-R_opで人間へ委譲する。
+R_handoffで人間へ委譲する。
 R_irrevで不可逆遷移をラッチする。
 R < 1.0の間は構造証言を継続する。
 R >= 1.0で最終固定証言へ切り替える。
