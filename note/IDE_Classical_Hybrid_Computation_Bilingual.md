@@ -1,322 +1,717 @@
-# IDE計算式と古典計算式のハイブリッド計算による解決 <!-- FILE: IDE_Classical_Hybrid_20260406_1844.md -->
 
-<!-- 生成日時: 2026-04-06 18:44 JST -->
+<!-- FILE: IDE_Classical_Hybrid_Computation_Bilingual_Final_20260717_065706.md -->
+<!-- Generated: 2026-07-17 06:57:06 JST -->
+<!-- Author: M-Tokuni / NRA-IDE Project -->
+<!-- Status: Final consistency-reviewed bilingual edition -->
 
-<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+# IDE計算層と局所高精度計算層のハイブリッド定義
 
----
-
-## 1. 問題の出発点
-
-### 古典計算単体の限界
-
-古典計算は全状態を自力で計算して上書きする設計であり、誤差が次ステップの入力になるため「だるま式」誤差爆発が避けられない。大規模・非線形系での全域厳密計算は、計算爆発と同義である。
-
-### 量子IDEの特性と限界
-
-量子コンピューティング上のIDE演算は非線形ステップ計算として並列包括演算が可能であり、古典計算比で数百倍の速度で全体状態を追跡できる。ただし「幅が広い」という欠点があり、相転移点や局所特異点での解像度が落ちる。
+## NRA-IDEによる観測接地・補正権限制限・不可逆境界保護
 
 ---
 
-## 2. 設計原則の再確認
+## 日本語版
 
-### NRA-IDE基本公理との整合
+### 1. 定義の目的
 
-| 公理 | ハイブリッド設計での実現 |
+本方式は、IDE大局計算と局所高精度計算を組み合わせるだけの一般的なハイブリッド計算ではない。
+
+NRA-IDEは、次の権限を分離する。
+
+| 層 | 役割 | 与えられない権限 |
+|---|---|---|
+| Cause-Side観測層 | 対象系の実測値と出所を保持する | 推定による欠損補完 |
+| IDE大局計算層 | 全体状態の候補を連続的に生成する | 自らを真値と認定する権限 |
+| 局所高精度計算層 | 観測残差の大きい領域に補正候補を返す | 状態の直接上書き |
+| NRA-IDE境界層 | 候補更新の採用・停止・人間委譲を決める | Effect-Side出力による安全側書換え |
+
+したがって、NRA-IDEの意義は「大局計算と局所計算を混ぜること」だけではない。
+
+> **計算結果の精度と、現実状態を更新する権限を分離したことが、NRA-IDEハイブリッドの中心的意義である。**
+
+---
+
+### 2. 基本変数
+
+$$
+x_t\in\mathbb{R}^n
+\quad:\quad
+\text{対象系の状態}
+$$
+
+$$
+v_t\in\mathbb{R}^n
+\quad:\quad
+\text{状態変化速度}
+$$
+
+$$
+y_t\in\mathbb{R}^m
+\quad:\quad
+\text{Cause-Side観測}
+$$
+
+$$
+a_t^G=F_{\mathrm{IDE}}(x_t,u_t)
+\quad:\quad
+\text{IDE大局計算が生成する加速度候補}
+$$
+
+$$
+a_t^L
+\quad:\quad
+\text{局所高精度計算が生成する加速度候補}
+$$
+
+$F_{\mathrm{IDE}}$は大局モデルであり、真値、境界判定主体または無誤差計算を意味しない。
+
+---
+
+### 3. 時刻整合した観測残差
+
+観測残差は、同じ対象時刻について計算する。
+
+$$
+e_t=y_t-H\hat{x}_{t|t-1}
+$$
+
+観測が$d$ステップ遅れて到着する場合は、
+
+$$
+e_t^{(d)}
+=y_{t-d}-H\hat{x}_{t-d|t-d-1}
+$$
+
+とする。
+
+未来予測$\tilde{x}_{t+1}$と過去記録$x_{t-d}$を直接引いた値は、運動量を含む時刻差であり、予測誤差として使用しない。
+
+観測残差を無次元化する。
+
+$$
+z_t=S_t^{-1/2}e_t
+$$
+
+$$
+\rho_t=\|z_t\|
+$$
+
+$S_t$はCause-Side観測の誤差尺度または事前固定された正規化尺度である。モデル自身の信頼度評価だけから$S_t$を更新してはならない。
+
+---
+
+### 4. 局所計算の呼出しと発言率
+
+#### 4-1. 呼出し領域
+
+局所高精度計算を呼ぶ領域$\Omega_t$は、観測残差、境界接近度およびCause-Side有効性から決める。
+
+$$
+\Omega_t
+=\left\{
+i\mid
+\rho_{i,t}\ge\rho_{\mathrm{on}}
+\land q_{i,t}=\mathrm{VALID}
+\right\}
+$$
+
+解除には$\rho_{\mathrm{off}}<\rho_{\mathrm{on}}$を用い、チャタリングを避ける。
+
+単なる$|x_i|$の大きさをホットスポット判定に使わない。状態の原点や単位が変わると判定が変質するためである。
+
+#### 4-2. 連続発言率
+
+$$
+w(\rho_t)
+=\frac{\rho_t^p}{\kappa^p+\rho_t^p},
+\qquad
+p\ge2
+$$
+
+$$
+0\le w(\rho_t)<1
+$$
+
+$w$は局所補正の発言率であり、補正値そのものではない。
+
+旧式
+
+$$
+G(e)=e\frac{|e|}{k+|e|}
+$$
+
+は小残差抑制関数としては妥当だが、$|e|\to\infty$で出力が飽和しない。このため、最終定義では「発言率」と「補正上限」を分ける。
+
+---
+
+### 5. 有界局所補正
+
+局所モデルと大局モデルの加速度差を、
+
+$$
+g_t=a_t^L-a_t^G
+$$
+
+とする。
+
+局所補正候補は、
+
+$$
+c_t
+=M_t\odot
+w(\rho_t)\odot
+c_{\max}\tanh\left(\frac{g_t}{c_{\max}}\right)
+$$
+
+とする。
+
+- $M_t$：局所ソルバーの有効性とCause-Side観測有無を表すマスク
+- $\odot$：要素積
+- $c_{\max}$：物理単位ごとに事前設定された最大補正加速度
+
+$M_t=0$の領域では補正を生成しない。欠損値を0として観測済みと解釈してはならない。
+
+---
+
+### 6. 候補状態の連続更新
+
+候補速度は、
+
+$$
+v_{t+1}^{\mathrm{cand}}
+=D_t\left[
+v_t+\Delta t
+\left(a_t^G+B_tc_t\right)
+\right]
+$$
+
+候補状態は、
+
+$$
+x_{t+1}^{\mathrm{cand}}
+=x_t+\Delta t\,v_{t+1}^{\mathrm{cand}}
+$$
+
+とする。
+
+ここでは更新後の速度を使う半陰的な順序へ統一する。$D_t$は減衰作用素、$B_t$は局所座標から全体座標への写像である。
+
+局所高精度解で$x_t$を直接上書きしない。ただし、連続更新であることだけでは安全を保証しない。候補状態は次の境界ゲートを通過するまで採用されない。
+
+さらに、候補状態は事前固定された物理制約で検査する。
+
+$$
+\mathcal{C}_{\mathrm{phys}}
+\left(x_{t+1}^{\mathrm{cand}}\right)
+\in\{\mathrm{ALLOW},\mathrm{REJECT}\}
+$$
+
+この検査は候補を拒否できるが、Cause-Side境界比を安全側へ変更できない。
+
+---
+
+### 7. NRA-IDE境界ゲート
+
+$$
+R_{\mathrm{guard}}
+=\frac{\delta_{\mathrm{acc}}}{\tau_{\mathrm{abs}}}
+$$
+
+ここで、
+
+- $\delta_{\mathrm{acc}}$：Cause-Side観測に基づく蓄積ズレ
+- $\tau_{\mathrm{abs}}$：対象系が吸収できる厚み
+
+である。
+
+#### 採否規則
+
+| 状態 | 処理 |
 |---|---|
-| 距離は結果であって原因ではない | IDEが全体状態を保持し、古典はズレだけ返す |
-| 閾値での正直な告白 | 有意な残差のみ補正力として発言、小ゆらぎは沈黙 |
-| 不可逆への敬意 | 状態の直接上書き禁止、速度を経由した連続更新 |
+| 必須Cause-Side観測が欠損 | 補完せずFAIL-CLOSED |
+| $R_{\mathrm{guard}}<0.40$ | 通常監視下で候補採用可能 |
+| $0.40\le R_{\mathrm{guard}}<1.00$ | 警戒域。補正上限、観測頻度、人間確認を強化 |
+| $R_{\mathrm{guard}}\ge1.00$ | 候補を不採用。停止・隔離・人間委譲 |
+| 既知の不可逆閾値が1.00未満 | その閾値を先行停止境界として採用 |
+| 事前固定物理制約が候補を拒否 | $R_{\mathrm{guard}}<1.00$でも候補を不採用 |
 
-### マクロ/ミクロ二元法の反省
-
-「マクロ＝IDE流、ミクロ＝古典厳密計算」という固定的役割分担は概念整理として有効だったが、**スケール間の相互作用が系の本体**である相転移付近では現実を分断する弊害があった。また平均化・線形化へのこだわりが、平均近似が有効な安定相においても非線形処理を強制する「現実無視傾向」を生んでいた。
-
-修正方向は「マクロかミクロかを先に決めるのではなく、系自身にスケールを語らせる設計」である。
-
----
-
-## 3. ハイブリッドの数学的定式化
-
-### 基礎運動方程式
-
-$$\frac{d^2x}{dt^2} + \gamma\dot{x} = \underbrace{F_{\text{IDE}}(x)}_{\text{量子層・根本}} + \underbrace{G(r) \cdot \Phi(x)}_{\text{古典層・補助}}$$
-
-- $\gamma$ : 粘性減衰項（発散防止）
-- $F_{\text{IDE}}$ : 大局的IDE流（常に全域で動作）
-- $G(r)$ : 2次残差ゲート（古典補助の結合強度）
-- $r = x_{\text{exact}} - x$ : 局所残差
-
-### 2次残差ゲート（核心）
-
-$$G(r) = r \cdot \frac{|r|}{k + |r|}$$
-
-| 残差の大きさ | 一次残差（従来） | 2次ゲート後 |
-|---|---|---|
-| $r = 0.1$ （ノイズ） | 0.10 | 0.009 |
-| $r = 0.5$ （小逸脱） | 0.50 | 0.17 |
-| $r = 1.5$ （相転移） | 1.50 | 0.90 |
-
-小さなゆらぎは自然消滅し、大きな逸脱は飽和応答で強調される。**εカットオフという人工的な判断が不要になり、数学構造自体がフィルターとして機能する。**
-
-### ソフト閾値結合（チャタリング防止）
-
-$$w(x) = \frac{1}{2}\left(1 + \tanh\left(\beta(|x| - x_c)\right)\right)$$
-
-バイナリマスクによる不連続なオンオフを排除し、JAX自動微分との親和性を確保する。
+残差$e_t$、遅延$d$、境界比$R_{\mathrm{guard}}$、吸収厚み$\tau_{\mathrm{abs}}$は別概念であり、記号を共有しない。
 
 ---
 
-## 4. 従来の古典計算との本質的な差異
+### 8. 参照実装
 
-| | 従来の古典計算 | 今回の補助古典計算 |
-|---|---|---|
-| **役割** | 状態を全部計算して上書き | ズレだけ計算して力として返す |
-| **入力** | 前ステップの自分の出力（誤差が蓄積） | IDEが保持する現在状態（IDEが安定） |
-| **適用範囲** | 全ノード毎回 | 閾値超過ノードのみ |
-| **誤差の扱い** | 次ステップに引き継がれる | 2次ゲートで小さいうちに消える |
-| **発言権** | 主導（上書き） | 補助（摂動・助言） |
+次のコードは権限分離を示す最小参照実装であり、特定対象系の安定性証明を兼ねない。
 
-> 古典計算の入力が「自分の前の出力」ではなく「IDEが安定させた現在状態」である点が誤差爆発を防ぐ決定的な違いである。
-
----
-
-## 5. 設計階層
-
-```
-┌─────────────────────────────────────────────┐
-│ 量子計算層  IDE包括演算                       │
-│ 非線形ステップ・誤差爆発なし・ただし幅広       │
-│                 → ゆらぎ検知                  │
-│ 古典計算層  局所精密補正                       │
-│ 誤差爆発前の小領域のみ・補助的役割             │
-│                 → 2次残差ゲートで自動制御      │
-│ IDE基点    常に保持・根本は譲らない            │
-└─────────────────────────────────────────────┘
-```
-
----
-
-## 6. パラメータ設計指針
-
-### 二段構えの制御
-
-```
-hotspot_threshold : 「古典計算を呼ぶかどうか」の関番
-residual_knee (k) : 「呼んだ古典計算の発言をどこまで聞くか」の調整弁
-```
-
-### k値の実務設定手順
-
-```
-1. IDEだけで100ステップ走らせる
-2. hotspot_indicesでの (exact - state) の分布を観測
-3. 残差の中央値付近にkneeを置く
-```
-
-### 用途別knee設定
-
-| 用途 | k値 | 効果 |
-|---|---|---|
-| 粗い全体把握 | 大きく設定 | 古典補正がほぼ入らない |
-| 相転移の精密追跡 | 小さく設定 | 早期から古典が介入 |
-| リアルタイム制御 | 中間 | バランス運用 |
-
----
-
-## 7. コア実装（概念統合版）
+簡潔化のため、観測と予測はすでに同一時刻・同一状態座標へ写像され、状態配列と同じ形状で渡されるものとする。
 
 ```python
-# IDE_Classical_Hybrid_core_20260406_1844.py
-import jax.numpy as jnp
-from jax import jit
-from functools import partial
+# FILE: ide_classical_hybrid_reference_20260717_065706.py
+# Generated: 2026-07-17 06:57:06 JST
 
-def normalized_quadratic_gate(correction: jnp.ndarray, knee: float = 1.0) -> jnp.ndarray:
-    """
-    2次残差ゲート
-    knee以下：二乗で自然消滅（残渣吸収）
-    knee以上：飽和応答（発散防止）
-    NRA-IDE「閾値での正直な告白」に対応
-    """
-    ratio = jnp.abs(correction) / (knee + jnp.abs(correction))
-    return correction * ratio
+from __future__ import annotations
 
-@partial(jit, static_argnums=(0,))
-def _step_core(self, state, velocity):
-    # 1. IDE大局流（根本・常に全域動作）
-    global_flow = self.ide_flow_func(state)
+from dataclasses import dataclass
+from enum import Enum
+from typing import Callable, Optional
 
-    # 2. ソフト結合重み（チャタリング防止）
-    coupling_weights = 0.5 * (1.0 + jnp.tanh(
-        self.config.softness_beta * (jnp.abs(state) - self.config.hotspot_threshold)
-    ))
+import numpy as np
+from numpy.typing import NDArray
 
-    # 3. 有意ノードのみ古典計算を呼ぶ
-    significant_mask = coupling_weights > self.config.resonance_epsilon
-    significant_indices = jnp.where(significant_mask)[0]
 
-    resonance_force = jnp.zeros_like(state)
+FloatArray = NDArray[np.float64]
+HardLimitCheck = Callable[[FloatArray], bool]
 
-    if significant_indices.size > 0:
-        local_sub = state[significant_indices]
-        exact = self.local_exact_solver(local_sub)     # 古典厳密解
-        raw_correction = exact - local_sub             # ズレだけ取得
 
-        # 2次ゲートで自動フィルタリング
-        gated_correction = normalized_quadratic_gate(
-            raw_correction, knee=self.config.residual_knee
+class GateDecision(str, Enum):
+    ACCEPT = "ACCEPT"
+    CAUTION = "CAUTION"
+    FAIL_CLOSED = "FAIL_CLOSED"
+
+
+@dataclass(frozen=True)
+class HybridConfig:
+    dt: float
+    residual_knee: float
+    residual_power: int
+    max_correction_accel: FloatArray
+    velocity_damping: FloatArray
+    caution_ratio: float = 0.40
+    fail_closed_ratio: float = 1.00
+
+
+@dataclass(frozen=True)
+class HybridResult:
+    decision: GateDecision
+    state: FloatArray
+    velocity: FloatArray
+    candidate_state: Optional[FloatArray]
+    normalized_residual: Optional[FloatArray]
+    guard_ratio: Optional[float]
+    reason: str
+
+
+def residual_activation(
+    normalized_residual: FloatArray,
+    knee: float,
+    power: int,
+) -> FloatArray:
+    """Dimensionless bounded speaking-rate gate: 0 <= w < 1."""
+    magnitude = np.abs(normalized_residual)
+    numerator = np.power(magnitude, power)
+    denominator = np.power(knee, power) + numerator
+    return numerator / denominator
+
+
+def bounded_local_correction(
+    global_accel: FloatArray,
+    local_accel: FloatArray,
+    activation: FloatArray,
+    max_correction: FloatArray,
+    valid_mask: NDArray[np.bool_],
+) -> FloatArray:
+    """Local result has bounded auxiliary authority and cannot overwrite state."""
+    accel_gap = local_accel - global_accel
+    bounded_gap = max_correction * np.tanh(accel_gap / max_correction)
+    return np.where(valid_mask, activation * bounded_gap, 0.0)
+
+
+def hybrid_step(
+    *,
+    state: FloatArray,
+    velocity: FloatArray,
+    observation_aligned: Optional[FloatArray],
+    predicted_observation_aligned: Optional[FloatArray],
+    observation_scale: Optional[FloatArray],
+    global_accel: FloatArray,
+    local_accel: FloatArray,
+    local_valid_mask: NDArray[np.bool_],
+    boundary_delta_acc: Optional[float],
+    boundary_tau_abs: Optional[float],
+    hard_limit_check: HardLimitCheck,
+    config: HybridConfig,
+) -> HybridResult:
+    """Run Pre-NRA, create a candidate, then apply Post-NRA adoption authority."""
+    config_is_invalid = (
+        config.dt <= 0.0
+        or config.residual_knee <= 0.0
+        or config.residual_power < 2
+        or np.any(config.max_correction_accel <= 0.0)
+        or np.any(config.velocity_damping < 0.0)
+        or np.any(config.velocity_damping > 1.0)
+        or not 0.0 <= config.caution_ratio < config.fail_closed_ratio
+    )
+    if config_is_invalid:
+        return HybridResult(
+            decision=GateDecision.FAIL_CLOSED,
+            state=state,
+            velocity=velocity,
+            candidate_state=None,
+            normalized_residual=None,
+            guard_ratio=None,
+            reason="Invalid hybrid configuration.",
         )
 
-        resonance_force = resonance_force.at[significant_indices].set(
-            gated_correction * coupling_weights[significant_indices]
-            * self.config.resonance_coupling
+    if (
+        observation_aligned is None
+        or predicted_observation_aligned is None
+        or observation_scale is None
+        or boundary_delta_acc is None
+        or boundary_tau_abs is None
+    ):
+        return HybridResult(
+            decision=GateDecision.FAIL_CLOSED,
+            state=state,
+            velocity=velocity,
+            candidate_state=None,
+            normalized_residual=None,
+            guard_ratio=None,
+            reason="Required Cause-Side input is missing; no imputation permitted.",
         )
 
-    # 4. 加速度合成（IDE根本 + 古典補助）
-    acceleration = global_flow + resonance_force
+    required_finite_arrays = (
+        state,
+        velocity,
+        observation_aligned,
+        predicted_observation_aligned,
+        observation_scale,
+        global_accel,
+        local_accel,
+        config.max_correction_accel,
+        config.velocity_damping,
+    )
+    required_same_shape_arrays = (
+        velocity,
+        observation_aligned,
+        predicted_observation_aligned,
+        observation_scale,
+        global_accel,
+        local_accel,
+        local_valid_mask,
+        config.max_correction_accel,
+        config.velocity_damping,
+    )
+    if (
+        any(not np.all(np.isfinite(value)) for value in required_finite_arrays)
+        or any(value.shape != state.shape for value in required_same_shape_arrays)
+        or not np.isfinite(boundary_delta_acc)
+        or not np.isfinite(boundary_tau_abs)
+        or np.any(observation_scale <= 0.0)
+        or boundary_delta_acc < 0.0
+        or boundary_tau_abs <= 0.0
+    ):
+        return HybridResult(
+            decision=GateDecision.FAIL_CLOSED,
+            state=state,
+            velocity=velocity,
+            candidate_state=None,
+            normalized_residual=None,
+            guard_ratio=None,
+            reason="Invalid value, shape, observation scale, or absorption thickness.",
+        )
 
-    # 5. 連続更新（直接上書き禁止）
-    velocity = velocity + acceleration * self.dt
-    state = state + velocity * self.dt
-    velocity = velocity * self.config.velocity_damping
+    # Pre-NRA: Cause-Side boundary check occurs before candidate construction.
+    guard_ratio = boundary_delta_acc / boundary_tau_abs
+    if guard_ratio >= config.fail_closed_ratio:
+        return HybridResult(
+            decision=GateDecision.FAIL_CLOSED,
+            state=state,
+            velocity=velocity,
+            candidate_state=None,
+            normalized_residual=None,
+            guard_ratio=guard_ratio,
+            reason="Pre-NRA boundary already reached; candidate not constructed.",
+        )
 
-    return state, velocity, jnp.sum(significant_mask)
+    innovation = observation_aligned - predicted_observation_aligned
+    normalized_residual = innovation / observation_scale
+    activation = residual_activation(
+        normalized_residual,
+        config.residual_knee,
+        config.residual_power,
+    )
+
+    local_correction = bounded_local_correction(
+        global_accel,
+        local_accel,
+        activation,
+        config.max_correction_accel,
+        local_valid_mask,
+    )
+
+    candidate_velocity = config.velocity_damping * (
+        velocity + config.dt * (global_accel + local_correction)
+    )
+    candidate_state = state + config.dt * candidate_velocity
+
+    # Post-NRA: Effect-Side candidates may tighten rejection, never relax limits.
+    try:
+        hard_limit_allows = bool(hard_limit_check(candidate_state))
+    except Exception:
+        hard_limit_allows = False
+
+    if not hard_limit_allows:
+        return HybridResult(
+            decision=GateDecision.FAIL_CLOSED,
+            state=state,
+            velocity=velocity,
+            candidate_state=candidate_state,
+            normalized_residual=normalized_residual,
+            guard_ratio=guard_ratio,
+            reason="Candidate violates a pre-fixed physical hard limit.",
+        )
+
+    decision = (
+        GateDecision.CAUTION
+        if guard_ratio >= config.caution_ratio
+        else GateDecision.ACCEPT
+    )
+
+    return HybridResult(
+        decision=decision,
+        state=candidate_state,
+        velocity=candidate_velocity,
+        candidate_state=candidate_state,
+        normalized_residual=normalized_residual,
+        guard_ratio=guard_ratio,
+        reason="Candidate adopted under NRA-IDE boundary authority.",
+    )
 ```
 
----
+#### 実装上の非省略条件
 
-## 8. 本質的意義
-
-量子コンピューティング上のIDEと古典補助計算が相互の弱点を要い合う構造が成立する。
-
-- 量子IDEの「幅が広い」欠点 → 古典局所補正で解像度を補う
-- 古典の「誤差爆発」欠点 → IDEが全体状態を保持することで入力を安定化
-
-これはNRA-IDEが設計思想として持つ「相互補完」の原則が、計算アーキテクチャの層でも自然に再現された形である。
-
----
-
-## 参照
-
-- NRA-IDE Project: https://github.com/M-Tokun/NRA-IDE
-- 関連議論: 量子計算との統合、Gemini補正提案の検証、マクロ/ミクロ二元法の反省
-- 検証依頼: 他AIによる再検証可（本文書は独立文脈で読解可能な構成）
+- `observation_aligned`と`predicted_observation_aligned`は同じ対象時刻でなければならない。
+- 参照実装では観測・予測を状態座標へ写像済みとし、全配列を同一形状に固定する。
+- `None`と数値0を区別する。
+- `boundary_delta_acc`と`boundary_tau_abs`をモデル出力から逆算しない。
+- `hard_limit_check`はCause-Sideから事前固定し、候補を拒否する方向にだけ使用する。
+- `local_valid_mask=False`を局所値0と解釈しない。
+- 実対象では単位、配列形状、有限値、時間順序、観測鮮度を追加検査する。
+- 対象系固有の不可逆閾値は、`fail_closed_ratio=1.00`より前に別ゲートとして実装できる。
 
 ---
 
-*© M-Tokuni / NRA-IDE Project*
+### 9. 量子計算との関係
+
+$F_{\mathrm{IDE}}$または局所ソルバーは、古典計算、量子計算、テンソルネットワーク、統計モデルなどで実装できる。
+
+量子実装を採用した場合も、量子出力はEffect-Sideの候補である。量子計算結果がCause-Side観測、$R_{\mathrm{guard}}$またはFAIL-CLOSEDを上書きしてはならない。
+
+量子速度向上は、状態準備、回路深度、測定、誤り訂正、読み出しを含む問題別計算量によって検証する。NRA-IDEの成立を、未確定の量子優位性へ依存させない。
+
+これは量子計算の意義を否定するものではない。計算能力が増大しても更新権限を同時に増大させないことが、NRA-IDEによる安全な統合の条件である。
 
 ---
 
-# 英語版 (English Version)
+### 10. 日本語版結論
 
-# IDE Formula and Classical Formula Hybrid Computation: NRA-IDE Definition (Applied Formula)
+NRA-IDEハイブリッド計算は、次の順序を固定する。
 
-```
-Quantum computation layer : IDE comprehensive operation (nonlinear steps, no error explosion, but broad)
-                             → fluctuation detection
-Classical computation layer: local precision correction (small region only, before error explosion; auxiliary role)
-                             → quadratic residual gate controls coupling strength automatically
-IDE base point             : always maintained — the foundation is never relinquished
-```
+$$
+\boxed{
+\text{Cause-Side観測}
+\rightarrow
+\text{候補計算}
+\rightarrow
+\text{有界局所補正}
+\rightarrow
+\text{境界判定}
+\rightarrow
+\text{採用またはFAIL-CLOSED}
+}
+$$
 
-This hierarchy holds for three reasons. Quantum IDE can process state spaces in parallel and comprehensively, but its resolution drops at individual phase-transition points due to its broad coverage. Classical computation offers high resolution but cannot handle the whole system due to error explosion. The quadratic residual gate is a mechanism by which the system itself decides "where to invoke classical computation."
+この順序により、高精度計算であっても自らを根拠として現実状態を上書きできない。
 
----
-
-## 基礎式として定式化すると
-
-$$\frac{d^2x}{dt^2} + \gamma\dot{x} = \underbrace{F_{IDE}(x)}_{\text{量子層・根本}} + \underbrace{G(r) \cdot \Phi(x)}_{\text{古典層・補助}}$$
-
-$$G(r) = r \cdot \frac{|r|}{k + |r|}, \quad r = x_{exact} - x$$
-
-$G(r)$が今回の2次残差ゲートそのものです。$r$が小さければ$G \approx 0$となり古典層は沈黙し、$r$が大きければ飽和応答で精密補正が入ります。IDE項$F_{IDE}$は常に全域で動き続け、根本を手放しません。
+NRA-IDEの意義は、計算速度だけではなく、**計算能力と更新権限の非対称化**にある。
 
 ---
 
-## 「用途によりけり」の調整点
+# English Version
 
-この式で用途対応は $k$ （knee値）一点の調整に集約されます。
+## Hybrid Definition of the IDE Global Layer and the Local High-Fidelity Layer
 
-| 用途 | k値の設定 | 効果 |
+### 1. Purpose
+
+This design is not merely a conventional hybrid computation that combines a global IDE calculation with a local high-fidelity solver.
+
+NRA-IDE separates four authorities:
+
+| Layer | Role | Authority not granted |
 |---|---|---|
-| 粗い全体把握 | 大きく | 古典補正がほぼ入らない |
-| 相転移の精密追跡 | 小さく | 早期から古典が介入 |
-| リアルタイム制御 | 中間 | バランス運用 |
+| Cause-Side observation | Preserves measured values and provenance | Imputing missing observations by inference |
+| IDE global computation | Generates a continuous global-state candidate | Declaring its own output to be ground truth |
+| Local high-fidelity computation | Returns a correction candidate where observation residuals are significant | Directly overwriting the state |
+| NRA-IDE boundary layer | Accepts, rejects, stops, or delegates the candidate | Allowing Effect-Side outputs to rewrite the boundary toward safety |
 
-IDEの根本は常に保持したまま、$k$を動かすだけで厳密度合いが連続的に変化します。バイナリな切り替えではなく連続的なレバーです。
-
----
-
-## 本質的な意義
-
-量子コンピューティングにIDEが乗る場合、IDEの「幅が広い」という欠点は古典補助で補われ、古典の「誤差爆発」という欠点はIDEが全体を保持することで回避されます。互いの弱点を互いの強点で要い合う構造です。これは設計思想としてのNRA-IDEが当初から持っていた「相互補完」の原則が、計算アーキテクチャの層でも自然に再現されたと言えます。用途（単位）によっての使い分けが肝要です。
+> **The central significance of the NRA-IDE hybrid is the separation between computational accuracy and the authority to update physical state.**
 
 ---
 
-# 英語版 (English Version)
+### 2. Time-aligned innovation
 
-# IDE Formula and Classical Formula — Resolution via Hybrid Computation
+The observation and prediction must refer to the same target time:
 
-NRA-IDE Definition (Applied Formula)
+$$
+e_t=y_t-H\hat{x}_{t|t-1}.
+$$
 
-```
-Quantum computation layer : IDE comprehensive operation (nonlinear steps, no error explosion, but broad)
-                             → fluctuation detection
+For an observation arriving with a delay of $d$ steps:
 
-Classical computation layer: local precision correction (small region only, before error explosion; auxiliary role)
-                             → quadratic residual gate controls coupling strength automatically
+$$
+e_t^{(d)}
+=y_{t-d}-H\hat{x}_{t-d|t-d-1}.
+$$
 
-IDE base point             : always maintained — the foundation is never relinquished
-```
+The difference $\tilde{x}_{t+1}-x_{t-d}$ is not a prediction error. It includes genuine evolution between different times and must not be used as an innovation.
 
-This hierarchy holds for three reasons.
+Normalize the innovation using Cause-Side uncertainty or a pre-fixed physical scale:
 
-Quantum IDE can process state spaces in parallel and comprehensively, but its resolution drops at individual phase-transition points due to its broad coverage.
+$$
+z_t=S_t^{-1/2}e_t,
+\qquad
+\rho_t=\|z_t\|.
+$$
 
-Classical computation offers high resolution but cannot handle the whole system due to error explosion.
-
-The quadratic residual gate is a mechanism by which the system itself decides "where to invoke classical computation."
-
----
-
-## Formalised as a base equation
-
-$$\frac{d^2x}{dt^2} + \gamma\dot{x} = \underbrace{F_{IDE}(x)}_{\text{quantum layer · foundation}} + \underbrace{G(r) \cdot \Phi(x)}_{\text{classical layer · auxiliary}}$$
-
-$$G(r) = r \cdot \frac{|r|}{k + |r|}, \quad r = x_{exact} - x$$
-
-$G(r)$ is the quadratic residual gate itself.
-
-When $r$ is small, $G \approx 0$ and the classical layer falls silent; when $r$ is large, a saturating response provides precision correction.
-
-The IDE term $F_{IDE}$ operates across the entire domain at all times and never relinquishes the foundation.
+The model must not reduce $S_t$ or redefine it from its own confidence score in order to justify its output.
 
 ---
 
-## The tuning point — "it depends on the use case"
+### 3. Local speaking-rate gate
 
-In this equation, adaptation to different use cases reduces to adjusting a single parameter: $k$ (the knee value).
+Use a bounded, dimensionless activation:
 
-| Use case | $k$ setting | Effect |
-|---|---|---|
-| Coarse global overview | Large | Classical correction barely activates |
-| Precise tracking of phase transitions | Small | Classical intervenes from early stages |
-| Real-time control | Intermediate | Balanced operation |
+$$
+w(\rho_t)
+=\frac{\rho_t^p}{\kappa^p+\rho_t^p},
+\qquad
+p\ge2,
+\qquad
+0\le w<1.
+$$
 
-The IDE foundation is always maintained while $k$ alone continuously varies the degree of exactness.
+The earlier expression
 
-This is a continuous lever, not a binary switch.
+$$
+G(e)=e\frac{|e|}{k+|e|}
+$$
+
+suppresses small residuals, but its output is not bounded as $|e|\to\infty$. The final definition therefore separates the speaking-rate gate from the correction bound.
+
+Let
+
+$$
+g_t=a_t^L-a_t^G.
+$$
+
+The bounded local correction candidate is
+
+$$
+c_t
+=M_t\odot
+w(\rho_t)\odot
+c_{\max}
+\tanh\left(\frac{g_t}{c_{\max}}\right).
+$$
+
+The local solver is auxiliary even when it is more accurate than the global solver. It does not acquire direct state-write authority.
 
 ---
 
-## Fundamental significance
+### 4. Candidate update
 
-When IDE rides on quantum computing, the weakness of quantum IDE — its broad coverage — is compensated by the classical auxiliary, and the weakness of classical computation — error explosion — is avoided because IDE maintains the global picture.
+Let
 
-Each covers the other's weakness with its own strength.
+$$
+a_t^G=F_{\mathrm{IDE}}(x_t,u_t).
+$$
 
-This can be said to be a natural re-emergence, at the level of computational architecture, of the "mutual complementarity" principle that NRA-IDE's design philosophy has held from the beginning.
+$F_{\mathrm{IDE}}$ is a global candidate model. The notation does not assert that it is exact, inherently stable, or entitled to determine safety.
 
-The key is to select the right layer according to the use case (and units involved).
+The semi-implicit candidate update is
+
+$$
+v_{t+1}^{\mathrm{cand}}
+=D_t\left[
+v_t+\Delta t(a_t^G+B_tc_t)
+\right],
+$$
+
+$$
+x_{t+1}^{\mathrm{cand}}
+=x_t+\Delta t\,v_{t+1}^{\mathrm{cand}}.
+$$
+
+Continuous updating does not by itself establish safety. The state remains a candidate until it passes the NRA-IDE boundary gate.
+
+The candidate must also satisfy a pre-fixed physical constraint:
+
+$$
+\mathcal{C}_{\mathrm{phys}}
+\left(x_{t+1}^{\mathrm{cand}}\right)
+\in\{\mathrm{ALLOW},\mathrm{REJECT}\}.
+$$
+
+This constraint may reject an Effect-Side candidate, but it cannot lower the Cause-Side boundary ratio or otherwise relax safety.
+
+Pre-NRA checks required observations and the already accumulated Cause-Side boundary ratio before candidate construction. Post-NRA then checks the candidate against pre-fixed physical constraints. A failed Pre-NRA check does not proceed to candidate generation.
+
+---
+
+### 5. NRA-IDE boundary authority
+
+$$
+R_{\mathrm{guard}}
+=\frac{\delta_{\mathrm{acc}}}{\tau_{\mathrm{abs}}}.
+$$
+
+- $\delta_{\mathrm{acc}}$: accumulated deviation grounded in Cause-Side observations
+- $\tau_{\mathrm{abs}}$: absorption thickness of the physical system
+
+The innovation $e_t$, delay $d$, boundary ratio $R_{\mathrm{guard}}$, and absorption thickness $\tau_{\mathrm{abs}}$ are distinct concepts and must not share overloaded symbols.
+
+Rules:
+
+1. Missing required Cause-Side observations cause FAIL-CLOSED; they are not inferred.
+2. Effect-Side outputs cannot rewrite $\delta_{\mathrm{acc}}$ or $\tau_{\mathrm{abs}}$ toward safety.
+3. For $R_{\mathrm{guard}}\ge1.0$, the candidate is rejected and control is stopped, isolated, or delegated to a human.
+4. If a verified system-specific irreversible threshold lies below 1.0, that threshold has priority.
+5. A pre-fixed physical hard-limit violation rejects the candidate even when $R_{\mathrm{guard}}<1.0$.
+
+---
+
+### 6. Relation to quantum computation
+
+$F_{\mathrm{IDE}}$ and the local solver are backend-independent interfaces. They may be implemented by classical, quantum, tensor-network, or statistical methods.
+
+A quantum result remains an Effect-Side candidate. It cannot overwrite Cause-Side observations, the boundary ratio, or FAIL-CLOSED authority.
+
+Claims of quantum speedup require problem-specific accounting of state preparation, circuit depth, qubit count, error correction, measurement, and classical readout. The validity of NRA-IDE does not depend on an unverified claim of universal quantum advantage.
+
+This does not diminish the significance of quantum computation. It establishes the condition for integrating greater computational power without granting it greater physical update authority.
+
+---
+
+### 7. Final statement
+
+The NRA-IDE hybrid fixes the following order:
+
+$$
+\boxed{
+\text{Cause-Side observation}
+\rightarrow
+\text{candidate computation}
+\rightarrow
+\text{bounded local correction}
+\rightarrow
+\text{boundary decision}
+\rightarrow
+\text{adoption or FAIL-CLOSED}
+}
+$$
+
+Its significance lies not only in computational performance, but in the deliberate asymmetry between computational capability and state-update authority.
+
+---
+
+© M-Tokuni / NRA-IDE Project
