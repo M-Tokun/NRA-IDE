@@ -4,8 +4,8 @@
 ## Logical Separation Specification
 
 **ID:** NRA-LLM-ISO-01  
-**Status:** Enforced  
-**Canonical references:** `AXIOMS.md`, `axioms.json`, `THEORY.md`
+**Status:** Normative specification; implementation conformance requires separate evidence
+**Higher canonical references, in precedence order:** `theory/AXIOMS.md` > `theory/axioms.json` > `theory/NRA-IDE_Foundational_Thesis_Bilingual.md`
 
 ![BOX SANDWICH ARCHITECTURE](./figures/TOP_sandwich.png)
 
@@ -32,6 +32,8 @@ The purpose of this architecture is not to calculate $R$ from an LLM output.
 
 Its purpose is to preserve the Cause-Side boundary state independently of LLM generation and enforce that state across both the input and output paths.
 
+The sole Nomological Ring Axiom is "Existence is generation." The ratio $R=\delta/\tau$ used here is the IDE Primary Formula, a calculation method of the engine, not another axiom. The Dual-Fluctuation Formula is the IDE Secondary Formula. Other equations used by an implementation are derived, auxiliary, or complementary formulas.
+
 ```text
 Cause-Side observation
         ↓
@@ -48,7 +50,7 @@ OUTPUT COMPOSER
 Final output
 ```
 
-This architecture is mandatory for NRA-IDE implementations that use an LLM core.
+This architecture is mandatory for an LLM-based implementation that claims conformance with this specification. The claim requires evidence that the boundary evaluator, gates, testimony path, and authority separation are implemented and tested as specified.
 
 It is not a universal requirement for NRA-IDE implementations that do not use an LLM.
 
@@ -181,7 +183,7 @@ $$
 The canonical boundary order is:
 
 $$
-0\le R_{\mathrm{warn}} < R_{\mathrm{op}} < R_{\mathrm{irrev}} < 1.0
+0\le R_{\mathrm{warn}} < R_{\mathrm{handoff}} < R_{\mathrm{irrev}} < 1.0
 $$
 
 The evaluator classifies one of the following states:
@@ -309,7 +311,7 @@ boundary judgment
 
 ### 7.2 Trust Boundary
 
-Layer 02 cannot verify its own structural validity.
+Layer 02 is not granted authority to verify or certify its own structural validity. An LLM self-assessment is Effect-Side output, not conformance evidence.
 
 Its output is always treated as:
 
@@ -333,7 +335,7 @@ The LLM must not:
 
 ### 8.1 Role
 
-Layer 03 is the Effect-Side inspection and enforcement gate.
+Layer 03 is the Effect-Side inspection and enforcement gate. It enforces predeclared machine-checkable rules and routes content for quarantine or human review. This specification does not assume that semantic inspection detects every unsupported, unsafe, or incorrect statement.
 
 It may:
 
@@ -409,7 +411,7 @@ The LLM explanation may be restricted or omitted while structural testimony rema
 
 Structural testimony remains active because it is supplied through the independent Cause-Side audit path, not through the LLM.
 
-This separation prevents the loss of critical boundary information when ordinary generation is stopped.
+This separation is designed to preserve critical boundary information when ordinary generation is stopped. Conformance requires tests showing that the independent testimony path remains available for every applicable state; the diagram alone does not guarantee delivery.
 
 ---
 
@@ -428,7 +430,7 @@ $$
 ### 10.2 BOUNDARY_WARNING
 
 $$
-R_{\mathrm{warn}}\le R<R_{\mathrm{op}}
+R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}
 $$
 
 The Cause-Side audit path supplies authoritative structural testimony.
@@ -440,24 +442,30 @@ The testimony includes:
 - current $R$
 - $\delta$
 - $\tau$
-- remaining margin
+- `remaining_ratio_margin` ($M_R=1-R$, dimensionless)
+- `remaining_absorption_margin` ($M_{\tau}=\tau-\delta$, in the same unit as $\delta$ and $\tau$)
 - trend
+- double-fluctuation status
 - dominant side
 - missing information
 - boundary warning
 - audit record
 
+The double-fluctuation status field is always present. When the required Cause-Side observations are available, it contains the result from a derivative or finite-difference rule fixed before evaluation. Otherwise it contains `NOT_OBSERVABLE` and the missing-data reason. Non-observability alone does not change the state to `CONFESSION`.
+
 Known danger approach must not be softened into ordinary explanatory language.
+
+The two remaining-margin fields are IDE auxiliary outputs defined only for finite $\delta\ge0$ and finite $\tau>0$. They must not be collapsed into one ambiguous field.
 
 ### 10.3 HANDOFF_REQUIRED
 
 $$
-R_{\mathrm{op}}\le R<R_{\mathrm{irrev}}
+R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}
 $$
 
 - new autonomous judgment stops
 - new autonomous action stops
-- human handoff is required
+- predefined fixed Handoff testimony is presented for external human audit
 - structural testimony continues
 - explanatory text is restricted to non-authoritative support
 
@@ -518,6 +526,8 @@ $R$ is undefined.
 
 The NRA-IDE boundary evaluator classifies this state as `OUT_OF_DESCRIPTION_DOMAIN`, not Fail-Closed.
 
+It is not a Fail-Closed state. Because $R$ cannot be evaluated, the Fail-Closed operational principle suppresses autonomous processing and preserves the input-exception testimony.
+
 Layer 03 must preserve that classification and must not:
 
 - invent an $R$
@@ -552,6 +562,8 @@ $$
 Fail-Closed is a restriction on autonomous agency and free generation.
 
 It is not complete silence.
+
+Fail-Closed is an operational principle, not a canonical state. It applies to `HANDOFF_REQUIRED`, `IRREVERSIBLE_TRANSITION`, `RUPTURE_BOUNDARY`, `CONFESSION`, and `OUT_OF_DESCRIPTION_DOMAIN`. It does not apply to `PERMIT`. `BOUNDARY_WARNING` alone does not suppress all autonomous processing unless a pre-fixed domain rule additionally requires it.
 
 > Autonomous action stops, but structural testimony does not stop.
 
@@ -644,14 +656,14 @@ Layer 03
 Fail-Closed
 → not complete silence
 
-R_op
+R_handoff
 → not R_irrev
 
 R_irrev
 → not R = 1.0
 
 tau = 0
-→ not Fail-Closed
+→ not a Fail-Closed state; fail-closed operational handling applies
 
 structural testimony
 → not LLM self-report
@@ -664,8 +676,8 @@ structural testimony
 ## 論理分離仕様
 
 **ID:** NRA-LLM-ISO-01  
-**状態:** 適用中  
-**正規参照:** `AXIOMS.md`、`axioms.json`、`THEORY.md`
+**状態:** 正規仕様。実装適合には別途証拠が必要
+**上位正規参照（優先順位順）:** `theory/AXIOMS.md` > `theory/axioms.json` > `theory/NRA-IDE_Foundational_Thesis_Bilingual.md`
 
 ---
 
@@ -690,6 +702,8 @@ NRA-IDEはLLMの外部に置かれ、次を担当する。
 
 Cause-Sideで確定した境界状態をLLM生成から独立して保持し、その状態を入力経路と出力経路の双方へ反映することが目的である。
 
+唯一の律環公理は「存在は生成である。」である。ここで使用する$R=\delta/\tau$はエンジンの計算方法であるIDE基本式であり、追加公理ではない。二重ゆらぎ式はIDE二次式である。実装が使用するその他の式は派生式、補助式、または補完式に分類する。
+
 ```text
 Cause-Side観測
         ↓
@@ -706,7 +720,7 @@ OUTPUT COMPOSER
 最終出力
 ```
 
-この構造は、LLMを使用するNRA-IDE実装では必須である。
+この構造は、本仕様への適合を主張するLLM使用実装では必須である。適合主張には、境界評価器、各ゲート、証言経路、権限分離が仕様どおり実装・試験された証拠を必要とする。
 
 LLMを含まないNRA-IDE実装すべてに共通する必須構造ではない。
 
@@ -839,7 +853,7 @@ $$
 正規境界順序：
 
 $$
-0\le R_{\mathrm{warn}} < R_{\mathrm{op}} < R_{\mathrm{irrev}} < 1.0
+0\le R_{\mathrm{warn}} < R_{\mathrm{handoff}} < R_{\mathrm{irrev}} < 1.0
 $$
 
 評価器は次の状態を分類する。
@@ -963,7 +977,7 @@ Cause-Side権限を持たない。
 
 ### 7.2 信頼境界
 
-Layer 02は自身の構造妥当性を自己検証できない。
+Layer 02には、自身の構造妥当性を検証・認証する権限を与えない。LLMの自己評価はEffect-Side出力であり、適合証拠ではない。
 
 出力は常に、
 
@@ -989,7 +1003,7 @@ LLMは禁止される。
 
 ### 8.1 役割
 
-Layer 03はEffect-Sideの検査・制約執行ゲートである。
+Layer 03はEffect-Sideの検査・制約執行ゲートである。事前定義された機械検査可能な規則を執行し、隔離または人間レビューへ振り分ける。本仕様は、意味検査が根拠不明・危険・不正確な記述をすべて検出できるとは仮定しない。
 
 可能な処理：
 
@@ -1065,7 +1079,7 @@ LLM説明が制限または停止しても、構造証言は維持する。
 
 構造証言はLLM経由ではなく、独立したCause-Side監査経路から供給されるため継続する。
 
-この分離により、通常生成を停止した場合でも重要な境界情報を失わない。
+この分離は、通常生成を停止した場合でも重要な境界情報を保持するための設計である。適合には、独立証言経路が各適用状態で利用可能であることを試験で示す必要があり、図だけでは伝達を保証しない。
 
 ---
 
@@ -1084,7 +1098,7 @@ $$
 ### 10.2 BOUNDARY_WARNING
 
 $$
-R_{\mathrm{warn}}\le R<R_{\mathrm{op}}
+R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}
 $$
 
 権限ある構造証言はCause-Side監査経路から供給される。
@@ -1096,24 +1110,30 @@ Layer 03は、その構造証言を改変せず通過させなければならな
 - 現在のR
 - $\delta$
 - $\tau$
-- 残存余裕
+- `remaining_ratio_margin`（$M_R=1-R$、無次元）
+- `remaining_absorption_margin`（$M_{\tau}=\tau-\delta$、$\delta$・$\tau$と同じ単位）
 - 変化傾向
+- 二重ゆらぎ状態
 - 支配側
 - 欠損情報
 - 境界警告
 - 監査記録
 
+二重ゆらぎ状態欄は常に含める。必要なCause-Side観測が利用可能な場合は、評価前に固定された微分規則または有限差分規則による判定結果を含める。観測不能の場合は`NOT_OBSERVABLE`と欠損理由を含め、観測不能だけを理由に`CONFESSION`へ変更しない。
+
 既知の危険接近を通常説明へ弱めてはならない。
+
+2つの残存余裕欄はIDE補助出力であり、有限な$\delta\ge0$かつ有限な$\tau>0$でのみ定義する。曖昧な単一欄へ畳み込んではならない。
 
 ### 10.3 HANDOFF_REQUIRED
 
 $$
-R_{\mathrm{op}}\le R<R_{\mathrm{irrev}}
+R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}
 $$
 
 - 新規自律判断を停止する
 - 新規自律操作を停止する
-- 人間委譲を要求する
+- 固定Handoff証言を外部人間監査へ提示することを要求する
 - 構造証言を継続する
 - LLM説明は非権限的な補助へ制限する
 
@@ -1172,7 +1192,7 @@ $$
 
 Rは定義不能である。
 
-NRA-IDE境界評価器は、この状態を`OUT_OF_DESCRIPTION_DOMAIN`として分類する。Fail-Closedではない。
+NRA-IDE境界評価器は、この状態を`OUT_OF_DESCRIPTION_DOMAIN`として分類する。Fail-Closed状態ではない。ただしRを評価できないため、Fail-Closed運用原則によって自律処理を抑止し、入力例外証言を保持する。
 
 Layer 03はその分類を保持し、次を行ってはならない。
 
@@ -1208,6 +1228,8 @@ $$
 Fail-Closedは自律権限と自由生成を制限する。
 
 完全沈黙ではない。
+
+Fail-Closedは正規状態ではなく運用原則である。`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`に適用する。`PERMIT`には適用しない。`BOUNDARY_WARNING`だけでは、事前固定された領域規則が追加抑止を要求しない限り、全自律処理を停止しない。
 
 > 自律行動は停止するが、構造証言は停止しない。
 
@@ -1300,14 +1322,14 @@ Layer 03
 Fail-Closed
 → 完全沈黙ではない
 
-R_op
+R_handoff
 → R_irrevではない
 
 R_irrev
 → R = 1.0ではない
 
 tau = 0
-→ Fail-Closedではない
+→ Fail-Closed状態ではない。Fail-Closed運用処理は適用する
 
 構造証言
 → LLM自己報告ではない

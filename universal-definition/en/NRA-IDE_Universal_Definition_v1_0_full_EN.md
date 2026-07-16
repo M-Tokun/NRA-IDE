@@ -1856,7 +1856,7 @@ class ThresholdManager:
 
 
 
-**Thickness**: Width of tolerance range
+**Thickness**: Width of the absorption margin
 
 **Fluctuation**: Allowance for temporary deviation
 
@@ -1900,7 +1900,7 @@ class FieldAdjustment:
 
         self.base_threshold = 0.3  # Base value
 
-        self.thickness = 0.1       # Tolerance width
+        self.thickness = 0.1       # Absorption thickness
 
         self.fluctuation = 0.05    # Temporary fluctuation
 
@@ -1926,7 +1926,7 @@ class FieldAdjustment:
 
         if value <= effective_threshold + self.fluctuation:
 
-            return "within_tolerance"
+            return "within_absorption_margin"
 
         else:
 

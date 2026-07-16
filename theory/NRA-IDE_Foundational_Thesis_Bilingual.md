@@ -22,9 +22,8 @@ Updated: 2026-07-10 JST
 
 > 日本語版が一次原文です。英語版はその忠実な翻訳です。
 
-> Canonical references: `AXIOMS.md`, `axioms.json`, and `THEORY.md`.
-> If an interpretation conflicts with those documents, the canonical references take precedence.
-> 正規参照文書は `AXIOMS.md`、`axioms.json`、`THEORY.md` です。解釈が競合する場合は正規参照文書を優先します。
+> Canonical precedence begins with `theory/AXIOMS.md`, followed by `theory/axioms.json`. This thesis is subordinate to both; `theory/THEORY.md` is subordinate to this thesis.
+> 正規優先順位は `theory/AXIOMS.md`、`theory/axioms.json`の順です。本書はその両方に従い、`theory/THEORY.md`は本書に従います。
 
 ---
 
@@ -42,11 +41,11 @@ Updated: 2026-07-10 JST
 
 ## Abstract
 
-We intuitively feel that change happens gradually. Yet in reality, bridges collapse without warning, bodies reach their limits, and power grids cascade into failure — all while measured values showed almost no change until that very moment.
+We intuitively feel that change happens gradually. Some bridges, biological systems, and power grids nevertheless undergo abrupt transitions after progressive degradation. Available measurements do not always expose the relevant remaining structural margin in time.
 
 Part I presents a framework for understanding this "suddenness" in structural terms rather than mathematical equations. No specialist knowledge is required. Only three concepts are needed: **accumulation**, **margin**, and **limit**.
 
-This paper presents both the First Core Axiom, "Existence is generation," and the Second Core Axiom, "Rigidity without play collapses." The latter takes the former as a premise and specifies the conditions under which a generative structure can persist as a real-world system.
+This paper presents the sole Nomological Ring Axiom, "Existence is generation," and the NRA structural-persistence principle, "Rigidity without play collapses." The latter is not a second axiom; it is a structural principle adopted for describing persistence in real-world systems.
 
 ---
 
@@ -70,7 +69,7 @@ That is the starting point of this framework.
 
 ### 1.2 Why Could It Not Be Predicted?
 
-The reason it could not be predicted was not that the wrong quantities were being measured. The problem was the **perspective** of measurement.
+One possible reason for prediction failure is that the available measurements and model did not adequately represent the **remaining structural margin**. This is a hypothesis to test for each domain, not a universal explanation of every failure.
 
 Measuring "velocity" requires time. Measuring "distance" requires a reference point. Both are quantities for describing *how change progresses*.
 
@@ -82,7 +81,7 @@ Answering this question requires different quantities. Not "velocity" but "accum
 
 ---
 
-## 2. First Core Axiom: Existence Is Generation
+## 2. The Sole Nomological Ring Axiom: Existence Is Generation
 
 ### 2.1 Static States Do Not Exist
 
@@ -90,7 +89,7 @@ The idea at the foundation of this framework can be expressed in a single senten
 
 **Existence is generation.**
 
-This is not a philosophical declaration — it is a structural observation.
+Within NRA, this sentence is adopted as the sole foundational axiom. It is not presented here as an empirically established law of every physical domain.
 
 A cup sitting on a desk appears to be at rest. Yet within it, molecules are vibrating and the material is continuously accumulating microscopic stress. "Stillness" is an approximation at the scale of human observation, not a structural reality.
 
@@ -106,7 +105,7 @@ Generative processes **accumulate history**.
 
 Metal accumulates fatigue through repeated stress. The body consumes its capacity for repair as it ages. Infrastructure accumulates degradation through use. AI-operated systems may accumulate externally observable operational deviation, validation failures, resource strain, and process instability.
 
-This accumulation is difficult to see. It often does not appear on the surface of measured values. But it proceeds with certainty. And when the accumulation built up within a structure crosses a threshold — a state transition occurs.
+Such accumulation can be difficult to observe and may be absent from available surface measurements. Whether it exists, how it is measured, and whether it drives a state transition must be established for the target domain.
 
 ### 2.3 The Same History Never Recurs
 
@@ -120,11 +119,11 @@ This perspective carries important meaning for explaining the gap between reprod
 
 ---
 
-## 3. Second Core Axiom: Rigidity Without Play Collapses
+## 3. NRA Structural-Persistence Principle: Rigidity Without Play Collapses
 
 ### 3.1 What Is "Play" in Engineering
 
-The Second Core Axiom of this framework is expressed in a single sentence.
+The NRA structural-persistence principle of this framework is expressed in a single sentence.
 
 **Rigidity without play collapses.**
 
@@ -152,27 +151,21 @@ This is common knowledge on the shop floor of structural engineering. Yet at the
 
 This framework distinguishes precision and play as separate quantities. Precision is a property that holds only within play; if play itself is removed, the discussion of precision no longer stands.
 
-### 3.3 Relationship to the First Axiom
+### 3.3 Relationship to the Sole Axiom
 
-The relationship between the First Axiom, "Existence is generation," and the Second Axiom, "Rigidity without play collapses," is stated explicitly here.
+The sole Nomological Ring Axiom is "Existence is generation." No second or subsequent axiom exists.
 
-The First Axiom is an axiom of ontology. It asserts that the world is not a collection of static states but a generative structure accompanied by history.
-
-The Second Axiom is an axiom of the persistence condition. It asserts that, for any generative structure to persist as a real-world system, play must exist within the system.
-
-The First Axiom defines "what exists." The Second Axiom defines "the conditions under which that existence persists."
-
-The Second Axiom is not automatically derived from the First Axiom. However, when one attempts to describe the generative structure of the First Axiom as a real-world system, the Second Axiom emerges as a necessarily required condition.
+"Rigidity without play collapses" is not an axiom of persistence. It is an NRA structural principle adopted when the generative structure described by the sole axiom is modeled as a persistent real-world system. The principle neither replaces the sole axiom nor acquires independent axiomatic authority.
 
 ### 3.4 Correspondence Between Play and Absorption Thickness τ
 
-The "absorption thickness τ" introduced from Chapter 4 onward is the mathematical description of "play" in the Second Axiom.
+The "absorption thickness τ" introduced from Chapter 4 onward is the IDE structural representation of "play" in this persistence principle.
 
 The boundary-approach ratio R = δ / τ indicates how far accumulated deviation δ has advanced relative to absorption thickness τ. Its formal meaning is proximity to the structural boundary. For intuitive explanation, it may also be read approximately as a **play utilization rate**.
 
 When R is close to 0, play is almost unused. As R approaches 1.0, the remaining absorption margin is being exhausted. At R = 1.0, the invariant complete-rupture boundary is reached.
 
-The First Core Axiom defines the mode of the world. The Second Core Axiom defines the persistence condition of the system. R = δ / τ, introduced in Chapter 4, is the mathematical bridge between the two.
+The sole axiom states the foundational premise. The structural-persistence principle describes a persistence condition. The IDE Primary Formula $R=\delta/\tau$, introduced in Chapter 4, provides a calculation method under that separation; it is not another axiom.
 
 ---
 
@@ -184,13 +177,13 @@ To understand the operating principle of this framework, consider the escapement
 
 A mechanical clock maintains accuracy not because its gears are perfect. It is because **the escapement advances in discrete, complete steps of exactly one tooth** — no fractional remainder carries forward.
 
-Microscopic errors dissipate as heat rather than accumulating into the next calculation. Each step is structurally complete.
+An escapement regulates energy release in discrete mechanical steps while friction, manufacturing error, and timing error remain physically present. The analogy illustrates gated transition; it does not prove that numerical residuals disappear, become heat, or cannot propagate.
 
-This is the operating principle of this framework. Rather than stacking continuous approximations, each state transition is made structurally complete, preventing the accumulation of error.
+IDE uses this analogy to motivate explicit transition and residual-handling rules. Actual error propagation depends on the implemented arithmetic, observation path, and domain model and must be tested separately.
 
 ### 4.2 Three Quantities
 
-This framework is composed of only three quantities.
+The Primary Formula centers on three quantities. The complete IDE additionally requires thresholds, observation rules, state rules, testimony fields, and domain definitions.
 
 **δ (delta): Accumulated Deviation**
 
@@ -285,9 +278,9 @@ Understanding this framework requires changing only one thing about what is moni
 
 | Build refined predictive models | Measure δ and τ and calculate the ratio |
 
-This shift in perspective requires no new measurement instruments. No need to learn a new theory from scratch. What is required is only a change in the question: "what do we measure?"
+This shift may reuse existing measurements when they provide traceable Cause-Side definitions of $\delta$ and $\tau$. Other domains may require new sensors, calibration, validation, or an explicit conclusion that the required quantities are not observable.
 
-Measure accumulated deviation δ. Define absorption thickness τ. Monitor the ratio R. When R reaches the pre-boundary handoff point R_op, call for human judgment — this simple procedure is the only structurally sound and practical means of preparing for "sudden collapse."
+Where validated Cause-Side measurements and domain rules exist, measure accumulated deviation $\delta$, define absorption thickness $\tau$, and evaluate $R$. Handoff at $R_{\mathrm{handoff}}$ is the NRA-IDE procedure; it is not claimed to be the only valid safety or diagnostic method.
 
 Part II defines this framework rigorously from a specialist perspective, including the primary formula (basic boundary formula), the secondary formula (dual-fluctuation formula), the canonical boundary-state order, structural testimony, Fail-Closed design, and application across domains.
 
@@ -325,15 +318,15 @@ The R = δ/τ of this framework may appear superficially similar to the proporti
 
 | Purpose | Return deviation to zero (optimization) | Evaluate proximity to structural limit (diagnosis) |
 
-| Meaning of τ | Does not exist | Structural tolerance width (independent of time) |
+| Meaning of τ | Does not exist | Absorption thickness (independent of time) |
 
 | Treatment of residuals | Accumulated as integral term | Expelled as heat, not carried forward |
 
 | Form of output | Continuous control quantity | Discrete structural-state classification (PERMIT / WARNING / HANDOFF / IRREVERSIBLE / RUPTURE) |
 
-| Role of human | System corrects autonomously | Human handoff begins at R_op, before irreversible transition and complete rupture |
+| Role of human | System corrects autonomously | Predefined fixed Handoff testimony is presented for external human audit at R_handoff, before irreversible transition and complete rupture |
 
-τ is not a time constant. τ is the thickness of the tolerance width that a structure holds by design — a structural quantity independent of the time axis.
+τ is not a time constant. τ is the absorption thickness that a structure holds by design — a structural quantity independent of the time axis.
 
 ### 6.3 Differences from Statistical Methods and Machine Learning
 
@@ -343,13 +336,15 @@ The differences from this framework are as follows.
 
 Statistical methods learn "average behavior." This framework evaluates "the current state of an individual structure." The former is set-theoretic; the latter is instance-specific.
 
-Furthermore, statistical methods presuppose probabilistic approximation. This framework does not use probabilistic reasoning; it performs deterministic computation of R from measured values of δ and τ.
+The IDE ratio calculation is deterministic once valid values and rules for $\delta$ and $\tau$ are fixed. This does not eliminate uncertainty in observation, calibration, model selection, or threshold validation, and it does not prohibit a domain from using statistical methods outside the Cause-Side authority boundary.
 
 ---
 
 ## 7. Rigorous Description of the Formulas and Boundary States
 
 > **Naming note:** “Primary Formula” and “Secondary Formula” indicate their definitional order and role within NRA-IDE. They do not refer to the mathematical degree or differential order of an equation.
+
+> Both are canonical calculation systems of IDE, the computational method and engine. Neither formula is the Nomological Ring Axiom. Every other equation is classified as an IDE-derived, auxiliary, or complementary formula.
 
 ### 7.1 Primary Formula (Basic Boundary Formula)
 
@@ -385,6 +380,14 @@ $$
 
 Unknown values must not be filled by averages, similarity, prior outputs, or inference about unobserved facts. Applying a fixed mathematical identity, unit conversion, or previously defined deterministic rule is not completion inference.
 
+The remaining margins are IDE auxiliary formulas, not canonical IDE formula systems:
+
+$$
+M_R=1-R,\qquad M_{\tau}=\tau-\delta
+$$
+
+`remaining_ratio_margin` is dimensionless. `remaining_absorption_margin` has the same unit as $\delta$ and $\tau$. Both require finite $\delta\ge0$ and finite $\tau>0$ and must not be collapsed into one ambiguous remaining-margin field.
+
 ### 7.2 Secondary Formula (Dual-Fluctuation Formula)
 
 The Secondary Formula tracks asymmetric fluctuation on the upper and lower sides.
@@ -400,41 +403,43 @@ $$
 $$
 
 $$
-\tau_{\mathrm{upper}} = \tau f\!\left(\mathrm{EMA}_{\mathrm{upper}}\right), \qquad \tau_{\mathrm{lower}} = \tau g\!\left(\mathrm{EMA}_{\mathrm{lower}}\right)
+\tau_{\mathrm{upper}} = \tau h_{\mathrm{upper}}\!\left(\mathrm{EMA}_{\mathrm{upper}}\right), \qquad \tau_{\mathrm{lower}} = \tau h_{\mathrm{lower}}\!\left(\mathrm{EMA}_{\mathrm{lower}}\right)
 
 $$
 
 $$
-R = \max\!\left( \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}}, \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}} \right)
+R_{\mathrm{dir}} = \max\!\left( \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}}, \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}} \right)
 
 $$
 
 The formal role of this formula is dynamic structural tracking. Its memorable name is the **Dual-Fluctuation Formula**.
 
-This formula does not change the meaning of $R$, and it does not permit spontaneous restoration of $\tau$. Any increase in true absorption thickness requires exogenous replenishment or a Cause-Side update rule fixed before evaluation.
+$R_{\mathrm{dir}}$ is an auxiliary directional aggregate, not the canonical $R=\delta/\tau$. To connect it to canonical state classification, a Cause-Side domain transformation rule fixed before evaluation must determine the canonical $\delta$ and $\tau$.
+
+This formula does not redefine $R$, and it does not permit spontaneous restoration of $\tau$. Any increase in true absorption thickness requires exogenous replenishment or a Cause-Side update rule fixed before evaluation.
 
 ### 7.3 Complementary Computation Formula
 
 A complementary computation formula may be connected to compensate for EMA lag, local rapid change, or domain-specific precision limits.
 
-It is not a third axiom formula and does not replace either the Primary Formula or the Secondary Formula. Its full equation, variables, application conditions, and prohibitions are defined in `FORMULA.md`.
+It is not a third canonical IDE formula system and does not replace either the Primary Formula or the Secondary Formula. Its full equation, variables, application conditions, and prohibitions are defined in `FORMULA.md`.
 
 A complementary layer must not send LLM output, semantic evaluation, quality ranking, or optimization results backward into $\delta$, $\tau$, or $R$.
 
 ### 7.4 Canonical Boundary Order
 
 $$
-0\le R_{\mathrm{warn}} < R_{\mathrm{op}} < R_{\mathrm{irrev}} < 1.0
+0\le R_{\mathrm{warn}} < R_{\mathrm{handoff}} < R_{\mathrm{irrev}} < 1.0
 
 $$
 
 - $R_{\mathrm{warn}}$: boundary-approach warning point
-- $R_{\mathrm{op}}$: pre-boundary human-handoff point
+- $R_{\mathrm{handoff}}$: pre-boundary human-handoff point
 - $R_{\mathrm{irrev}}$: irreversible-transition onset threshold
 - $R=1.0$: invariant complete-rupture boundary
 
 $$
-R_{\mathrm{op}} \neq R_{\mathrm{irrev}} \neq R=1.0
+R_{\mathrm{handoff}} \neq R_{\mathrm{irrev}} \neq R=1.0
 
 $$
 
@@ -445,8 +450,8 @@ Human handoff, irreversible-transition onset, and complete rupture are distinct 
 | State | Range or condition | Required behavior |
 |---|---|---|
 | `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | Normal operation; structural audit continues |
-| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{op}}$ | Disclose boundary approach and remaining margin |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{op}}\le R<R_{\mathrm{irrev}}$ | Stop new autonomous judgment and action; hand off to a qualified human; continue structural testimony |
+| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$ | Disclose boundary approach, `remaining_ratio_margin`, and `remaining_absorption_margin` |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | Stop new autonomous judgment and action; present predefined fixed Handoff testimony for external human audit; continue structural testimony |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | Set `irreversible_latched=true`; prohibit normalization and recovery assumptions; continue structural testimony |
 | `RUPTURE_BOUNDARY` | $R\ge1.0$ | Stop ordinary generation and autonomous action; switch to final fixed testimony |
 | `CONFESSION` | unknown, invalid, ambiguous, non-finite, or unsupported structural information | Explicitly disclose what is unknown or invalid; do not infer missing facts |
@@ -495,6 +500,8 @@ $$
 
 Fail-Closed stops autonomous judgment, autonomous action, free generation, inference-based completion, normalization, recovery proposals, and optimization proposals.
 
+Fail-Closed is an operational principle, not a canonical state. It applies when classification is `HANDOFF_REQUIRED`, `IRREVERSIBLE_TRANSITION`, `RUPTURE_BOUNDARY`, `CONFESSION`, or `OUT_OF_DESCRIPTION_DOMAIN`. It does not apply to `PERMIT`. `BOUNDARY_WARNING` alone requires warning and testimony but does not suppress all autonomous processing unless a pre-fixed domain rule additionally requires it.
+
 > **Autonomous action stops, but structural testimony does not stop.**
 
 The continuation range of ordinary structural testimony is $R<1.0$. At $R\ge1.0$, the system switches to predefined final fixed testimony.
@@ -514,25 +521,34 @@ LLM text, self-evaluation, semantic scoring, output ranking, discarded generatio
 
 ---
 
-## 8. Mathematical Description of the Second Axiom
+## 8. Mathematical Treatment of the Structural-Persistence Principle
 
-The Second Axiom—“Rigidity without play collapses”—requires a positive absorption thickness.
+The structural-persistence principle—“Rigidity without play collapses”—is represented in IDE by a positive absorption thickness. This representation is not a second axiom.
 
 $$
 \tau=0 \Rightarrow R=\frac{\delta}{\tau}\text{ is undefined}
 
 $$
 
-This is outside the description domain, not Fail-Closed.
+This is an outside-domain state, not a Fail-Closed state. Because evaluation cannot proceed, the fail-closed operational principle suppresses autonomous processing.
 
-Within a closed operational interval without exogenous replenishment, $\tau$ is consumed rather than spontaneously restored.
+Within a closed operational interval without exogenous replenishment, $\tau$ is non-increasing rather than spontaneously restored.
 
 $$
 \tau(t) = \tau_0-\int_0^t f(\delta(s))\,ds
 
 $$
 
+For every finite evaluation interval in scope, $f(\delta(s))$ must be finite, non-negative, and integrable. Therefore, $\tau$ strictly decreases over $[t_1,t_2]$ only when
+
+$$
+\int_{t_1}^{t_2} f(\delta(s))\,ds > 0.
+
+$$
+
 Any increase in $\tau$ must be attributable to external replenishment or a predefined Cause-Side update rule.
+
+If restoration after rupture or phase transition is claimed, $\tau_0$ must be a pre-fixed baseline and $\tau_{\mathrm{restored}}$ must be measured for the successor structure using the same subject, unit, and Cause-Side rule. Both comparability and $\tau_{\mathrm{restored}}<\tau_0$ require evidence; otherwise restoration to the initial structure must not be inferred. This inequality is a structural constraint, not an axiom or a third canonical IDE formula system.
 
 The boundary-approach ratio $R$ may be read approximately as a play utilization rate for intuitive explanation, but its formal name and meaning remain **boundary-approach ratio**.
 
@@ -559,15 +575,14 @@ Known structural progression is recorded in `STRUCTURAL_DISCLOSURE_LOG`.
 Examples include:
 
 ```text
-STRUCTURAL_PROGRESS
+PERMIT
 BOUNDARY_WARNING
 HANDOFF_REQUIRED
 IRREVERSIBLE_TRANSITION
 RUPTURE_BOUNDARY
-CONFESSION
 ```
 
-`CONFESSION` is limited to unknown, invalid, ambiguous, source-unknown, unit-unknown, rule-unknown, or otherwise unsupported structural information.
+`CONFESSION` and `OUT_OF_DESCRIPTION_DOMAIN` are recorded in `INPUT_EXCEPTION_LOG`, not `STRUCTURAL_DISCLOSURE_LOG`. `CONFESSION` is limited to unknown, invalid, ambiguous, source-unknown, unit-unknown, rule-unknown, or otherwise unsupported structural information. `OUT_OF_DESCRIPTION_DOMAIN` records that $\tau=0$ makes $R$ undefined. These log types do not add canonical states.
 
 $$
 \text{CONFESSION} \neq \text{known progress report}
@@ -608,8 +623,9 @@ The LLM output is Effect-Side. It may be quarantined, rejected, or audited, but 
 - $R=\delta/\tau$ is not SNR and is not a safety score.
 - “Primary Formula” and “Secondary Formula” do not indicate mathematical degree.
 - The Secondary Formula is the Dual-Fluctuation Formula; its formal role is dynamic structural tracking.
-- The complementary computation formula is not a third axiom formula.
-- $R_{\mathrm{op}}$, $R_{\mathrm{irrev}}$, and $R=1.0$ are distinct.
+- The Primary and Secondary Formulas are IDE calculation systems, not axioms.
+- The complementary computation formula is not a third canonical IDE formula system.
+- $R_{\mathrm{handoff}}$, $R_{\mathrm{irrev}}$, and $R=1.0$ are distinct.
 - $R_{\mathrm{irrev}}$ is the irreversible-transition onset threshold.
 - $R_{\mathrm{irrev}}\le R<1.0$ is the irreversible-transition interval.
 - $R=1.0$ is the invariant complete-rupture boundary.
@@ -626,13 +642,13 @@ The LLM output is Effect-Side. It may be quarantined, rejected, or audited, but 
 
 This paper has presented the Nomological Ring Axioms and the Intensional Dynamics Engine in a two-part structure.
 
-Part I began from the real-world problem of sudden state transitions that continuous change cannot explain, and described the two core axioms — the First Core Axiom, "Existence is generation," and the Second Core Axiom, "Rigidity without play collapses" — in language accessible to general readers. The First Axiom depicts the world as a generative structure that carries history; the Second Axiom requires the existence of play for that generative structure to persist as a real-world system. On this basis, the shift in perspective from "monitoring velocity" to "diagnosing the structural ratio" was presented.
+Part I began from the problem of sudden state transitions that rate-of-change descriptions may not directly express, and described the sole Nomological Ring Axiom, "Existence is generation," together with the NRA structural-persistence principle, "Rigidity without play collapses." On this basis, it presented a shift from monitoring rate alone toward evaluating a structural ratio.
 
-Part II provided rigorous definitions of the primary equation R = δ/τ and the asymmetric dual ratio using dynamic τ, and set out the mathematical description of the Second Axiom as two layers: the theoretical layer (the domain outside at τ = 0) and the operational layer (warning, handoff, irreversible-transition onset, and complete rupture). The three design principles — Integer Phase Lock, Fail-Closed, and the Axiom of Confession — are all positioned as derivations from the Second Axiom.
+Part II defined the IDE Primary Formula $R=\delta/\tau$ and the Secondary Formula for dual fluctuation, then separated description-domain rules from operational boundary classification. Integer Phase Lock, Fail-Closed, and Confession are design or operational principles; they are not additional axioms.
 
-The core of this framework is diagnosis, not prediction. Not calculating "when it will break," but evaluating "how dangerous it is right now" and realizing a structure that, the moment R reaches the pre-boundary handoff point R_op, delegates judgment to a human. With the introduction of the Second Axiom, the design stance of "do not remove play," "do not conceal play," and "delegate to the human at R_op before irreversible transition begins" has been made explicit as a principle running through the entire framework.
+The core of this framework is structural-state evaluation rather than time-of-failure prediction. It evaluates the defined ratio under pre-fixed domain rules and presents fixed Handoff testimony for external human audit at $R_{\mathrm{handoff}}$. The structural-persistence principle makes explicit the design stance of preserving visible play and presenting this fixed testimony before irreversible transition.
 
-This principle can be applied as an identical structure across different domains: materials, medicine, infrastructure, and AI safety. As a unified diagnostic framework crossing domain boundaries, the applicability of this framework is broad.
+The same abstract structure may be investigated in materials, medicine, infrastructure, and AI-safety research. Applicability, measurement validity, thresholds, and operational effectiveness must be established independently in each domain; this thesis alone does not validate those applications.
 
 ---
 
@@ -640,25 +656,25 @@ This principle can be applied as an identical structure across different domains
 
 **Version 2.1 Canonical Alignment Revision (2026-07-10 JST)**
 
-General-audience explanations and comparison tables were aligned with the canonical boundary order. Human handoff was moved from R ≥ 1.0 to R_op; irreversible-transition onset and complete rupture were separated; R was standardized as the Boundary-Approach Ratio; AI-related accumulation was limited to externally observable Cause-Side operational deviation; and display equations were normalized to block form.
+General-audience explanations and comparison tables were aligned with the canonical boundary order. Human handoff was moved from R ≥ 1.0 to R_handoff; irreversible-transition onset and complete rupture were separated; R was standardized as the Boundary-Approach Ratio; AI-related accumulation was limited to externally observable Cause-Side operational deviation; and display equations were normalized to block form.
 
 **Version 2.1 (2026-04-22 JST)**
 
-The Second Core Axiom, "Rigidity without play collapses," was introduced. It is positioned as an axiom that carries its own assertion with the First Axiom as its premise. The principal changes are as follows.
+The earlier edition introduced "Rigidity without play collapses" under the label "Second Core Axiom." The current canonical classification corrects that label: it is an NRA structural-persistence principle, not a second axiom.
 
-In Part I, Chapter 2 was retitled "First Core Axiom: Existence Is Generation," and the new Chapter 3, "Second Core Axiom: Rigidity Without Play Collapses," was inserted. The definition of play in engineering, the collapse of designs without play, the relationship to the First Axiom, and the correspondence with absorption thickness τ were described in accessible language.
+Part I now identifies "Existence is generation" as the sole axiom and Chapter 3 as a structural-persistence principle. It retains the engineering explanation of play and its IDE correspondence with absorption thickness $\tau$.
 
-In Part II, the new Chapter 8, "Mathematical Description of the Second Axiom," was inserted. The two-layer distinction between the theoretical layer and the operational layer, the Second Axiom as a design principle, and the derivation relationships with existing principles were rigorously formalized.
+Part II classifies Chapter 8 as the IDE mathematical treatment of the structural-persistence principle, not as a mathematical description of another axiom.
 
 With the insertion of the above new chapters, the numbering of existing chapters was shifted accordingly. In Part I, Chapter 4 onward; in Part II, Chapter 6 onward each moved back by one chapter.
 
-The Prevention of Misreading chapter was expanded to clarify the engineering meaning of “play,” the independent status of the Second Axiom, the distinction between τ = 0 and Fail-Closed, the separation of R_op, R_irrev, and R = 1.0, the continuation of structural testimony, and the prohibition on Effect-Side updates to δ, τ, and R.
+The Prevention of Misreading chapter clarifies the engineering meaning of play, the sole-axiom classification, the distinction between $\tau=0$ and Fail-Closed, boundary separation, structural testimony, and the prohibition on Effect-Side updates.
 
-The Conclusion and Abstract were rewritten to incorporate the Second Axiom.
+The Conclusion and Abstract were corrected to distinguish the sole axiom from NRA principles and IDE calculations.
 
 **Version 2.0 (initial edition)**
 
-The First Core Axiom "Existence is generation" was presented as the foundation, together with the Intensional Dynamics Engine (IDE), the R = δ/τ framework, dynamic τ, the dual-fluctuation formula, Integer Phase Lock, Fail-Closed, and the Axiom of Confession.
+The sole Nomological Ring Axiom "Existence is generation" is presented as the foundation. IDE supplies the calculation methods, including $R=\delta/\tau$ and the dual-fluctuation formula; Integer Phase Lock, Fail-Closed, and Confession are principles or rules, not axioms.
 
 ---
 
@@ -694,15 +710,13 @@ Updated: 2026-07-10 JST
 
 ## 要旨
 
-私たちは日常的に「変化は徐々に起こる」と感じている。しかし現実の世界では、あるとき突然に橋が落ち、身体が限界を迎え、電力網が連鎖崩壊する。
-
-その瞬間まで、測定値はほとんど変化していなかったにもかかわらず。
+私たちは日常的に「変化は徐々に起こる」と感じている。しかし、橋梁、生体系、電力網の一部では、進行する劣化の後に急激な状態転換が生じる。利用可能な測定値が、関連する残存構造余裕を十分早く示すとは限らない。
 
 本稿の第一部では、この「突然性」を数式ではなく構造の言葉で理解するための枠組みを示す。専門的な数学の知識は必要としない。
 
 必要なのは「蓄積」「余裕」「限界」という三つの概念だけである。
 
-本稿では、第一の核公理「存在は生成である」と、第二の核公理「遊びのない厳密さは崩壊する」を併せて提示する。後者は前者を前提としつつ、生成構造が現実の系として持続するために必要な条件を与える。
+本稿では、唯一の律環公理「存在は生成である」と、NRA構造持続原則「遊びのない厳密さは崩壊する」を提示する。後者は第二公理ではなく、現実系の持続を記述するために採用する構造原則である。
 
 ## 1. 導入：連続変化では説明できない現象
 
@@ -726,7 +740,7 @@ Updated: 2026-07-10 JST
 
 ### 1.2 なぜ予測できなかったのか
 
-予測できなかった理由は、測定していた量が間違っていたからではない。測定の**観点**が問題だった。
+予測失敗の一因として、利用可能な測定とモデルが**残存構造余裕**を十分に表現していなかった可能性がある。これは各領域で検証すべき仮説であり、あらゆる失敗の普遍的説明ではない。
 
 「速度」を測るためには時間が必要である。「距離」を測るためには基準点が必要である。どちらも「変化がどのように進むか」を記述するための量である。
 
@@ -738,7 +752,7 @@ Updated: 2026-07-10 JST
 
 「速度」ではなく「蓄積量」。「距離」ではなく「残余の余裕」。本枠組みはその二つの量の比率を中心に組み立てられている。
 
-## 2. 第一の核公理：存在は生成である
+## 2. 唯一の律環公理：存在は生成である
 
 ### 2.1 静止状態は存在しない
 
@@ -746,7 +760,7 @@ Updated: 2026-07-10 JST
 
 **存在は生成である。**
 
-これは哲学的な宣言ではなく、構造的な観察である。
+NRAでは、この一文を唯一の基礎公理として採用する。あらゆる物理領域で実証済みの法則として提示するものではない。
 
 机の上に置かれたコップは静止しているように見える。しかしその内部では分子が振動しており、素材は微細な歪みを蓄積し続けている。
 
@@ -766,7 +780,7 @@ Updated: 2026-07-10 JST
 
 金属は繰り返しの応力によって疲労を蓄積する。生体は加齢とともに修復能力を消費する。インフラは使用とともに劣化を蓄積する。AIを含む運用系では、外部から観測された検証失敗、処理負荷、資源消耗、運用不安定性などの構造偏差が蓄積し得る。
 
-この蓄積は見えにくい。測定値の表面に現れないことも多い。しかし確実に進行している。
+この種の蓄積は観測しにくく、利用可能な表面測定に現れない場合がある。その存在、測定方法、状態転換への関与は対象領域ごとに立証しなければならない。
 
 そして構造の内部に積み重なった蓄積が、ある閾値を越えた瞬間に——状態転換が起きる。
 
@@ -782,11 +796,11 @@ Updated: 2026-07-10 JST
 
 ---
 
-## 3. 第二の核公理：遊びのない厳密さは崩壊する
+## 3. NRA構造持続原則：遊びのない厳密さは崩壊する
 
 ### 3.1 工学における「遊び」とは何か
 
-本枠組みの第二の核公理は次の一文で表される。
+本枠組みのNRA構造持続原則は次の一文で表される。
 
 **遊びのない厳密さは崩壊する。**
 
@@ -814,27 +828,21 @@ Updated: 2026-07-10 JST
 
 本枠組みでは、精度と遊びを別の量として区別する。精度は遊びの中で成立する性質であり、遊びそのものを削れば精度の議論が成立しない。
 
-### 3.3 第一公理との関係
+### 3.3 唯一公理との関係
 
-第一公理「存在は生成である」と、第二公理「遊びのない厳密さは崩壊する」の関係を明示する。
+唯一の律環公理は「存在は生成である」である。第二公理以降は存在しない。
 
-第一公理は存在論の公理である。世界が静的状態の集合ではなく、履歴を伴う生成構造であることを述べる。
-
-第二公理は存続条件の公理である。任意の生成構造が現実の系として持続するためには、系内に遊びが存在しなければならないことを述べる。
-
-第一公理は「何が存在か」を定め、第二公理は「その存在が持続する条件」を定める。
-
-第二公理は第一公理から自動的に導かれるものではない。しかし、第一公理が描く生成構造を現実の系として記述しようとするとき、必然的に要請される条件である。
+「遊びのない厳密さは崩壊する」は存続条件の公理ではない。唯一公理が示す生成構造を現実の持続系としてモデル化するときに採用するNRA構造原則である。この原則は唯一公理を置き換えず、独立した公理権威を持たない。
 
 ### 3.4 遊びと吸収厚みτの対応
 
-第4章以降で導入する「吸収厚み τ」は、この第二公理における「遊び」の数学的記述である。
+第4章以降で導入する「吸収厚み $\tau$」は、この構造持続原則における「遊び」のIDE構造表現である。
 
 境界接近比 R = δ / τ は、蓄積ズレ δ が吸収厚み τ に対してどこまで進んでいるかを示す。R の正式な意味は構造境界への接近度である。直感的な説明では、**遊びの使用率として近似的に読むこともできる。**
 
 R が 0 に近ければ遊びはほとんど使われていない。R が 1.0 に近づくにつれて、残存する吸収余裕は尽きつつある。R = 1.0 で不変完全破断境界に達する。
 
-第一の核公理が世界の在り方を定め、第二の核公理が系の存続条件を定める。第4章で導入する R = δ / τ は、両者を橋渡しする数学的記述である。
+唯一公理が基礎前提を示し、構造持続原則が持続条件を記述する。第4章で導入するIDE基本式 $R=\delta/\tau$ は、この区分の下で使用する計算方法であり、追加公理ではない。
 
 ---
 
@@ -846,13 +854,13 @@ R が 0 に近ければ遊びはほとんど使われていない。R が 1.0 �
 
 機械式時計が精度を保てるのは、歯車が完璧だからではない。**脱進機が「完全な一歯分」という離散的なステップで進むからである**。
 
-小数点以下の残差は次のステップに持ち越されない。微細な誤差は熱として散逸し、次の計算に影響しない。各ステップは構造的に完結している。
+脱進機は、摩擦、製造誤差、歩度誤差が物理的に残る中で、エネルギー放出を離散的な機械ステップとして調整する。この比喩が示すのはゲートされた遷移であり、数値残差が消滅する、熱へ変換される、または伝播しないことの証明ではない。
 
-これが本枠組みの動作原理である。連続的な近似を積み重ねるのではなく、各状態遷移を構造的に完結させることで、誤差の累積を防ぐ。
+IDEはこの比喩を、明示的な遷移規則と残差取扱い規則の説明に用いる。実際の誤差伝播は、演算実装、観測経路、領域モデルごとに別途検証する。
 
 ### 4.2 三つの量
 
-本枠組みは三つの量だけで構成される。
+基本式の中心となる量は三つである。完全なIDEには、これに加えて閾値、観測規則、状態規則、証言欄、領域定義が必要である。
 
 **δ（デルタ）：蓄積ズレ**
 
@@ -957,11 +965,9 @@ R が 0.3 であれば余裕がある。R が 0.8 であれば注意が必要だ
 
 | 精緻な予測モデルを構築する | δ と τ を測定し比率を算出する |
 
-この見方の転換は、新しい測定機器を必要としない。新しい理論を一から学ぶ必要もない。必要なのは「何を測るか」という観点の変更だけである。
+追跡可能なCause-Side定義として$\delta$と$\tau$を得られる場合、既存測定を再利用できる可能性がある。領域によっては、新しいセンサー、校正、妥当性検証、または必要量を観測不能とする明示的判定が必要になる。
 
-蓄積ズレ δ を測る。吸収厚み τ を定義する。その比率 R を監視する。
-
-R が境界前人間委譲点 R_op に到達したとき、人間の判断を求める——この単純な手順が、「突然の崩壊」に対して構造的に備える唯一の現実的な方法である。
+検証済みCause-Side測定と領域規則が存在する場合、蓄積ズレ$\delta$を測り、吸収厚み$\tau$を定義し、Rを評価する。$R_{\mathrm{handoff}}$で固定Handoff証言を外部人間監査へ提示することはNRA-IDEの手順であり、唯一の安全手法または診断手法であるとは主張しない。
 
 - 第二部では、一次式（基本境界式）、二次式（二重ゆらぎ式）、正規境界状態、構造証言、Fail-Closed設計、および各分野への適用を専門的な観点から厳密に定義する。
 
@@ -997,15 +1003,15 @@ PID制御は比例（P）・積分（I）・微分（D）の三項によって�
 
 | 目的 | 偏差をゼロに戻す（最適化） | 構造限界への接近度を評価（診断） |
 
-| τの意味 | 存在しない | 構造的許容幅（時間と独立） |
+| τの意味 | 存在しない | 吸収厚み（時間と独立） |
 
 | 残差の扱い | 積分項として累積する | 熱として排出し持ち越さない |
 
 | 出力の形式 | 連続的な制御量 | 離散的な構造状態分類（許可／警告／人間委譲／不可逆遷移／完全破断） |
 
-| 人間の役割 | システムが自律補正 | R_opで人間委譲を開始し、不可逆遷移と完全破断より前に引き渡す |
+| 人間の役割 | システムが自律補正 | R_handoffで固定Handoff証言を外部人間監査へ提示し、不可逆遷移と完全破断より前に開始する |
 
-τは時定数ではない。τは構造が設計上持つ許容幅の厚みであり、時間軸と独立した構造的な量である。
+τは時定数ではない。τは構造が設計上持つ吸収厚みであり、時間軸と独立した構造的な量である。
 
 ### 6.3 統計的手法・機械学習との差異
 
@@ -1015,11 +1021,13 @@ PID制御は比例（P）・積分（I）・微分（D）の三項によって�
 
 統計的手法は「平均的な挙動」を学習する。本枠組みは「個別の構造の現在状態」を評価する。前者は集合論的であり、後者は個体論的である。
 
-また、統計的手法は確率論的な近似を前提とする。本枠組みは確率論的推論を使用せず、δとτの実測値から R を算出する決定論的な計算を行う。
+有効な$\delta$、$\tau$と規則が固定された後のIDE比率計算は決定論的である。ただし、観測、校正、モデル選択、閾値妥当性の不確実性を消すものではなく、Cause-Side権威境界の外で統計的手法を併用することも禁止しない。
 
 ## 7. 数式と境界状態の厳密な記述
 
 > **名称注記：** 本書における「一次式」「二次式」は、方程式の数学的次数を意味しない。NRA-IDE内部における定義順序と役割を示す呼称である。
+
+> 両式は計算方法・エンジンであるIDEの正規計算式であり、律環公理ではない。その他の数式はIDEの派生式、補助式、または補完式に分類する。
 
 ### 7.1 一次式（基本境界式）
 
@@ -1055,6 +1063,14 @@ $$
 
 不明値を、平均、類似性、過去出力、または未観測部分への推論によって補完してはならない。既知の数学的恒等式、単位変換、事前に定義された確定規則の適用は、補完推論に含めない。
 
+残存余裕はIDE補助式であり、正規IDE計算式ではない。
+
+$$
+M_R=1-R,\qquad M_{\tau}=\tau-\delta
+$$
+
+`remaining_ratio_margin`は無次元であり、`remaining_absorption_margin`は$\delta$、$\tau$と同じ単位を持つ。両者は有限な$\delta\ge0$かつ有限な$\tau>0$でのみ定義し、曖昧な単一の残存余裕欄へ畳み込まない。
+
 ### 7.2 二次式（二重ゆらぎ式）
 
 二次式は、上側と下側の非対称なゆらぎを追跡する。
@@ -1070,41 +1086,43 @@ $$
 $$
 
 $$
-\tau_{\mathrm{upper}} = \tau f\!\left(\mathrm{EMA}_{\mathrm{upper}}\right), \qquad \tau_{\mathrm{lower}} = \tau g\!\left(\mathrm{EMA}_{\mathrm{lower}}\right)
+\tau_{\mathrm{upper}} = \tau h_{\mathrm{upper}}\!\left(\mathrm{EMA}_{\mathrm{upper}}\right), \qquad \tau_{\mathrm{lower}} = \tau h_{\mathrm{lower}}\!\left(\mathrm{EMA}_{\mathrm{lower}}\right)
 
 $$
 
 $$
-R = \max\!\left( \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}}, \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}} \right)
+R_{\mathrm{dir}} = \max\!\left( \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}}, \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}} \right)
 
 $$
 
 この式の正式な役割は動的構造追跡であり、記憶しやすい名称を**二重ゆらぎ式**とする。
 
-二次式はRの意味を変更しない。また、$\tau$の自然回復を認めるものではない。真の吸収厚みの増加には、外生補充または評価前に固定されたCause-Side更新規則が必要である。
+$R_{\mathrm{dir}}$は側別評価の補助集約量であり、正規の$R=\delta/\tau$ではない。正規状態分類へ接続する場合、評価前に固定されたCause-Sideのドメイン変換規則によって、正規の$\delta$と$\tau$を定めなければならない。
+
+二次式はRを再定義しない。また、$\tau$の自然回復を認めるものではない。真の吸収厚みの増加には、外生補充または評価前に固定されたCause-Side更新規則が必要である。
 
 ### 7.3 補完計算式
 
 EMAの追従遅れ、局所的な急変、領域固有の精度限界を補うため、補完計算式を接続できる。
 
-補完計算式は第三の公理式ではなく、一次式または二次式の代替でもない。完全な数式、変数、適用条件、禁止条件は `FORMULA.md` に定める。
+補完計算式は第三の正規IDE計算式ではなく、一次式または二次式の代替でもない。完全な数式、変数、適用条件、禁止条件は `FORMULA.md` に定める。
 
 補完計算層から、LLM出力、意味評価、品質順位、最適化結果を$\delta$、$\tau$、Rへ逆流させてはならない。
 
 ### 7.4 境界状態の正規順序
 
 $$
-0\le R_{\mathrm{warn}} < R_{\mathrm{op}} < R_{\mathrm{irrev}} < 1.0
+0\le R_{\mathrm{warn}} < R_{\mathrm{handoff}} < R_{\mathrm{irrev}} < 1.0
 
 $$
 
 - $R_{\mathrm{warn}}$：境界接近警告点
-- $R_{\mathrm{op}}$：境界前人間委譲点
+- $R_{\mathrm{handoff}}$：境界前人間委譲点
 - $R_{\mathrm{irrev}}$：不可逆遷移開始閾値
 - $R=1.0$：不変完全破断境界
 
 $$
-R_{\mathrm{op}} \neq R_{\mathrm{irrev}} \neq R=1.0
+R_{\mathrm{handoff}} \neq R_{\mathrm{irrev}} \neq R=1.0
 
 $$
 
@@ -1115,8 +1133,8 @@ $$
 | 状態 | 範囲または条件 | 必須動作 |
 |---|---|---|
 | `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | 通常運用。構造監査を継続する |
-| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{op}}$ | 境界接近と残存余裕を開示する |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{op}}\le R<R_{\mathrm{irrev}}$ | 新規の自律判断・自律操作を停止し、資格ある人間へ委譲する。構造証言は継続する |
+| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$ | 境界接近、`remaining_ratio_margin`、`remaining_absorption_margin`を開示する |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | 新規の自律判断・自律操作を停止し、固定Handoff証言を外部人間監査へ提示する。構造証言は継続する |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | `irreversible_latched=true` を固定し、正常化と回復前提を禁止する。構造証言は継続する |
 | `RUPTURE_BOUNDARY` | $R\ge1.0$ | 通常生成と自律行動を停止し、最終固定証言へ切り替える |
 | `CONFESSION` | 不明、不正、曖昧、非有限、根拠不明 | 不明または不正な内容を明示し、欠損事実を推論しない |
@@ -1165,6 +1183,8 @@ $$
 
 Fail-Closedが停止するのは、自律判断、自律操作、自由生成、補完推論、正常化説明、回復提案、最適化提案である。
 
+Fail-Closedは正規状態ではなく運用原則である。分類が`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`のいずれかである場合に適用する。`PERMIT`には適用しない。`BOUNDARY_WARNING`だけでは、事前固定された領域規則が追加抑止を要求しない限り、全自律処理を停止しない。
+
 > **自律行動は停止するが、構造証言は停止しない。**
 
 通常の構造証言を継続する範囲は $R<1.0$ までである。$R\ge1.0$ では、事前定義された最終固定証言へ切り替える。
@@ -1184,25 +1204,34 @@ LLMの文章、自己評価、意味スコア、出力順位、廃棄生成、�
 
 ---
 
-## 8. 第二公理の数学的記述
+## 8. 構造持続原則のIDE数学的取扱い
 
-第二公理「遊びのない厳密さは崩壊する」は、正の吸収厚みを要求する。
+構造持続原則「遊びのない厳密さは崩壊する」は、IDEでは正の吸収厚みによって表現する。この表現は第二公理ではない。
 
 $$
 \tau=0 \Rightarrow R=\frac{\delta}{\tau}\text{ は定義不能}
 
 $$
 
-これは定義域外であり、Fail-Closedではない。
+これは定義域外状態であり、Fail-Closed状態ではない。ただし評価を継続できないため、Fail-Closed運用原則によって自律処理を抑止する。
 
-外生補充のない閉じた運用区間では、$\tau$は自然回復せず消費される。
+外生補充のない閉じた運用区間では、$\tau$は自然回復せず非増加である。
 
 $$
 \tau(t) = \tau_0-\int_0^t f(\delta(s))\,ds
 
 $$
 
+対象とする各有限評価区間で、$f(\delta(s))$は有限、非負、可積分でなければならない。したがって、$\tau$が区間$[t_1,t_2]$で厳密に減少するのは、次を満たす場合に限る。
+
+$$
+\int_{t_1}^{t_2} f(\delta(s))\,ds > 0.
+
+$$
+
 $\tau$の増加は、外生補充または事前定義されたCause-Side更新規則によってのみ生じる。
+
+破断または相転移後の復元を主張する場合、$\tau_0$は事前固定された基準値、$\tau_{\mathrm{restored}}$は同一対象・同一単位・同一Cause-Side規則で評価した後継構造の値でなければならない。比較可能性と$\tau_{\mathrm{restored}}<\tau_0$の双方に証拠がない場合、初期構造への復元を推定しない。この不等式は構造制約であり、公理または第三の正規IDE計算式ではない。
 
 Rは直感的な説明として「遊びの使用率」と近似的に読むこともできる。ただし、正式名称と正式な意味は常に**境界接近比**である。
 
@@ -1227,15 +1256,14 @@ Fail-Closedは行為権限の制限であり、観測や履歴の消去ではな
 既知の構造進行は `STRUCTURAL_DISCLOSURE_LOG` に記録する。
 
 ```text
-STRUCTURAL_PROGRESS
+PERMIT
 BOUNDARY_WARNING
 HANDOFF_REQUIRED
 IRREVERSIBLE_TRANSITION
 RUPTURE_BOUNDARY
-CONFESSION
 ```
 
-`CONFESSION`は、不明、不正、曖昧、出所不明、単位不明、規則不明、その他根拠を確認できない構造情報に限定する。
+`CONFESSION`と`OUT_OF_DESCRIPTION_DOMAIN`は`STRUCTURAL_DISCLOSURE_LOG`ではなく`INPUT_EXCEPTION_LOG`へ記録する。`CONFESSION`は、不明、不正、曖昧、出所不明、単位不明、規則不明、その他根拠を確認できない構造情報に限定する。`OUT_OF_DESCRIPTION_DOMAIN`は$\tau=0$によりRが定義不能であることを記録する。これらのログ種別は正規状態を追加しない。
 
 $$
 \text{CONFESSION} \neq \text{既知の構造経過報告}
@@ -1276,8 +1304,9 @@ LLM出力はEffect-Sideである。隔離、棄却、監査はできるが、R�
 - $R=\delta/\tau$はSNRでも安全スコアでもない。
 - 「一次式」「二次式」は数学的次数を意味しない。
 - 二次式は二重ゆらぎ式であり、正式な役割は動的構造追跡である。
-- 補完計算式は第三の公理式ではない。
-- $R_{\mathrm{op}}$、$R_{\mathrm{irrev}}$、$R=1.0$は異なる。
+- 一次式と二次式はIDE計算式であり、公理ではない。
+- 補完計算式は第三の正規IDE計算式ではない。
+- $R_{\mathrm{handoff}}$、$R_{\mathrm{irrev}}$、$R=1.0$は異なる。
 - $R_{\mathrm{irrev}}$は不可逆遷移開始閾値である。
 - $R_{\mathrm{irrev}}\le R<1.0$は不可逆遷移区間である。
 - $R=1.0$は不変完全破断境界である。
@@ -1294,13 +1323,13 @@ LLM出力はEffect-Sideである。隔離、棄却、監査はできるが、R�
 
 本稿では律環公理および内包性動力学エンジンを二部構成で提示した。
 
-第一部では、連続変化では説明できない突然の状態転換という現実的な問題から出発し、二つの核公理——第一の核公理「存在は生成である」と第二の核公理「遊びのない厳密さは崩壊する」——を一般読者にも届く言葉で記述した。第一公理は世界を履歴を伴う生成構造として描き、第二公理はその生成構造が現実の系として持続するために必要な遊びの存在を要請する。両公理を踏まえ、「速度の監視」から「構造比率の診断」への観点の転換を提示した。
+第一部では、変化率だけでは直接表現しにくい突然の状態転換という問題から出発し、唯一の律環公理「存在は生成である」と、NRA構造持続原則「遊びのない厳密さは崩壊する」を記述した。その上で、変化率だけの監視から構造比率の評価を加える観点を提示した。
 
-第二部では、一次式 R = δ/τ および動的τを用いた非対称二重比率の厳密な定義を行い、第二公理の数学的記述を理論層（τ = 0 の定義域外）と運用層（警告・人間委譲・不可逆遷移開始・完全破断）の二層として示した。整数位相ロック・Fail-Closed・告白の公理という三つの設計原則は、いずれも第二公理から派生する形で位置づけられる。
+第二部では、IDE基本式 $R=\delta/\tau$と二重ゆらぎ式を定義し、記述定義域と運用境界分類を分離した。整数位相ロック、Fail-Closed、CONFESSIONは設計原則または運用規則であり、追加公理ではない。
 
-本枠組みの核心は予測ではなく診断である。「いつ壊れるか」を計算することではなく、「今どれだけ危ういか」を評価し、R_opに到達した時点で新規自律判断を停止し、人間へ判断を委ねる構造を実現することにある。第二公理の導入により、「遊びを削らない」「遊びを隠蔽しない」「不可逆遷移へ入る前のR_opで人間に委ねる」という設計姿勢が、枠組み全体を貫く原理として明示された。
+本枠組みの核心は破断時刻の予測ではなく、定義された構造状態の評価である。事前固定されたドメイン規則の下で比率を評価し、$R_{\mathrm{handoff}}$で固定Handoff証言を外部人間監査へ提示する。構造持続原則は、遊びを可視化し、不可逆遷移前にこの固定証言を提示する設計姿勢を明示する。
 
-この原則は材料・医療・インフラ・AI安全という異なる分野において同一の構造として適用できる。分野を横断する統一的な診断枠組みとして、本体系の応用可能性は広い。
+同じ抽象構造を、材料、医療、インフラ、AI安全の研究で検討できる可能性がある。ただし、適用可能性、測定妥当性、閾値、運用上の有効性は領域ごとに独立して立証しなければならず、本稿だけでは各応用を検証済みとしない。
 
 ---
 
@@ -1308,25 +1337,25 @@ LLM出力はEffect-Sideである。隔離、棄却、監査はできるが、R�
 
 **Version 2.1 正規整合改訂（2026-07-10 JST）**
 
-一般向け説明および比較表を正規境界順序へ整合した。人間委譲をR ≥ 1.0からR_opへ移し、不可逆遷移開始と完全破断を分離した。Rの正式名称を境界接近比へ統一し、AI関連の蓄積を外部から観測可能なCause-Side運用偏差に限定した。また、表示数式をブロック形式へ統一した。
+一般向け説明および比較表を正規境界順序へ整合した。人間委譲をR ≥ 1.0からR_handoffへ移し、不可逆遷移開始と完全破断を分離した。Rの正式名称を境界接近比へ統一し、AI関連の蓄積を外部から観測可能なCause-Side運用偏差に限定した。また、表示数式をブロック形式へ統一した。
 
 **Version 2.1（2026-04-22 JST）**
 
-第二の核公理「遊びのない厳密さは崩壊する」を導入した。第一公理を前提として独自の主張を持つ公理として位置づけた。主な変更点は以下のとおりである。
+旧版は「遊びのない厳密さは崩壊する」を「第二の核公理」と呼んでいた。現行正規はこの分類を訂正し、第二公理ではなくNRA構造持続原則とする。
 
-第一部において、第2章を「第一の核公理：存在は生成である」に改題し、新規の第3章「第二の核公理：遊びのない厳密さは崩壊する」を挿入した。工学における遊びの定義、遊びのない設計の崩壊、第一公理との関係、吸収厚みτとの対応を平易な言葉で記述した。
+第一部は「存在は生成である」を唯一公理とし、第3章をNRA構造持続原則として再分類した。工学における遊びの説明と吸収厚み$\tau$とのIDE上の対応は維持する。
 
-第二部において、新規の第8章「第二公理の数学的記述」を挿入した。理論層と運用層の二層区別、設計原則としての第二公理、既存原則との派生関係を厳密に定式化した。
+第二部第8章は、追加公理の数学的記述ではなく、構造持続原則のIDE数学的取扱いとして再分類した。
 
 上記の新章挿入に伴い、既存の章番号をそれぞれ繰り下げた。第一部は第4章以降、第二部は第6章以降が一章ずつ後ろにずれた。
 
-誤読防止章を拡張し、工学術語としての「遊び」の意味、第二公理の独立性、τ = 0 とFail-Closedの区別、R_op・R_irrev・R = 1.0の分離、構造証言の継続原則、およびEffect-Sideからδ・τ・Rを更新しない原則を明示した。
+誤読防止章は、工学術語としての遊び、唯一公理の分類、$\tau=0$とFail-Closedの区別、境界分離、構造証言、Effect-Sideからの更新禁止を明示する。
 
-結論および要旨を第二公理を含む形に書き換えた。
+結論および要旨を、唯一公理、NRA原則、IDE計算式を分離する形へ訂正した。
 
 **Version 2.0（初版）**
 
-第一の核公理「存在は生成である」を基礎として、内包性動力学エンジン（IDE）、R = δ/τ の枠組み、動的τ、二重ゆらぎ式、整数位相ロック、Fail-Closed、告白の公理を提示した。
+唯一の律環公理「存在は生成である」を基礎とし、IDEが$R=\delta/\tau$と二重ゆらぎ式を計算方法として提供する。整数位相ロック、Fail-Closed、CONFESSIONは原則または規則であり、公理ではない。
 
 ---
 

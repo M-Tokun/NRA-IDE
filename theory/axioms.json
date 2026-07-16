@@ -1,13 +1,13 @@
 {
   "file_metadata": {
     "file": "theory/axioms.json",
-    "document_role": "canonical_axiom_and_boundary_definition",
+    "document_role": "canonical_sole_axiom_nra_principles_ide_calculation_and_boundary_definition",
     "version": "2.1",
     "status": "canonical",
     "base": "AXIOMS_v1.2_20260424.md",
-    "updated": "2026-07-11 JST",
+    "updated": "2026-07-14 JST",
     "author": "M-Tokuni",
-    "precedence_note": "This file defines the canonical axioms, variable meanings, description domain, boundary-state invariants, irreversible-transition principles, and structural-testimony rules of NRA-IDE. Implementation code, comments, examples, and AI-generated explanations must not override it."
+    "precedence_note": "This file defines the sole Nomological Ring Axiom, NRA structural principles, IDE calculation definitions, variable meanings, description domain, boundary-state invariants, irreversible-transition principles, and structural-testimony rules. Implementation code, comments, examples, and AI-generated explanations must not override it."
   },
   "theory": {
     "name": "Nomological Ring Axioms",
@@ -20,26 +20,28 @@
     "description": "A structural framework describing existence as continuous generation and state transition, with structural play as the persistence condition and boundary approach as a historical process."
   },
   "precedence_order": [
-    "AXIOMS.md",
-    "axioms.json",
-    "NRA-IDE_Foundational_Thesis_Bilingual.md",
-    "SANDWICH_ARCH.md",
-    "THEORY.md",
+    "theory/AXIOMS.md",
+    "theory/axioms.json",
+    "theory/NRA-IDE_Foundational_Thesis_Bilingual.md",
+    "theory/SANDWICH_ARCH.md",
+    "theory/THEORY.md",
     "FORMULA.md",
-    "canonical_boundary_state_rules",
+    "llms.md",
     "domain_specific_rules",
-    "implementation_code",
+    "normative_reference_implementation",
+    "other_implementation_code",
     "comments",
     "examples",
     "ai_explanations"
   ],
   "axioms": {
-    "axiom_0_state_generation": {
-      "id": "AX0",
+    "sole_nomological_ring_axiom": {
+      "id": "NRA",
       "jp_original": "存在は生成である。",
       "en_reference": "Existence is Generation.",
-      "type": "foundational",
+      "type": "sole_axiom",
       "category": "ontology",
+      "additional_axioms_allowed": false,
       "note": "Existence is not a static entity but a continuous generation with history. Rest is only a temporary slice of an ongoing generative process; absolute stoppage does not exist within the structure.",
       "corollaries": [
         "No absolute rest state exists.",
@@ -47,55 +49,107 @@
         "The world is a generative structure with accumulated history, not a set of static states.",
         "Stopping autonomous action does not mean disappearance of the structure or cessation of observation."
       ],
-      "_boundary_note": "Fail-Closed, Handoff, and Irreversible Transition do not override Axiom 0. Fail-Closed must not be interpreted as absolute stoppage of the whole structure or complete silence."
-    },
-    "axiom_1_rigidity_without_play_collapses": {
-      "id": "AX1",
-      "jp_original": "遊びのない厳密さは崩壊する。",
-      "en_reference": "Rigidity Without Play Collapses.",
-      "type": "dependent",
+      "_boundary_note": "This is the only Nomological Ring Axiom. No second or subsequent axiom exists. Fail-Closed, Handoff, and Irreversible Transition do not override it."
+    }
+  },
+  "nra_structural_principles": {
+    "rigidity_without_play_collapses": {
+      "id": "NRA-PRINCIPLE-PERSISTENCE",
+      "jp": "遊びのない厳密さは崩壊する。",
+      "en": "Rigidity Without Play Collapses.",
+      "type": "structural_principle_not_axiom",
+      "premise": "NRA",
       "category": "persistence_condition",
-      "depends_on": [
-        "AX0"
-      ],
-      "derivation_from_prerequisite": false,
-      "note": "For a generative structure to persist as a real system, absorption margin is necessary. This axiom presupposes AX0 but does not replace it.",
-      "_boundary_note": "AX1 is not a replacement for AX0 and is not a mere corollary. AX0 defines existence as generation; AX1 defines the persistence condition of that generative structure."
+      "note": "For a generative structure to persist as a real system, absorption margin is necessary.",
+      "_boundary_note": "This is not a second axiom, independent axiom, or replacement for the sole Nomological Ring Axiom."
     },
-    "axiom_2_historical_accumulation_and_absorption_thickness": {
-      "id": "AX2",
-      "jp_original": "履歴蓄積と吸収厚み",
-      "en_reference": "Historical Accumulation and Absorption Thickness.",
-      "type": "structural",
-      "category": "state_description",
+    "tau_non_spontaneous_recovery": {
+      "id": "NRA-IDE-PRINCIPLE-TAU",
+      "type": "structural_principle_not_axiom",
+      "closed_interval_rule": "Within a closed operational interval without external replenishment, tau is non-increasing.",
+      "replenishment_rule": "Increase of tau arises only through exogenous replenishment, not spontaneous reversal."
+    },
+    "restoration_degradation": {
+      "id": "NRA-IDE-PRINCIPLE-RESTORATION",
+      "type": "structural_principle_not_axiom",
+      "constraint": "tau_restored < tau_0",
+      "constraint_role": "canonical constraint, not an axiom and not a third canonical IDE formula system",
+      "baseline_definition": "tau_0 is the pre-transition baseline fixed in advance.",
+      "restored_definition": "tau_restored is the successor structure's absorption thickness evaluated after an exogenous restoration operation using the same subject, unit, and Cause-Side measurement rule.",
+      "evidence_rule": "A restoration claim requires evidence of both comparability and tau_restored < tau_0. Without that evidence, restoration to the initial structure must not be inferred."
+    }
+  },
+  "ide_structural_definitions": {
+    "historical_accumulation_and_absorption_thickness": {
+      "id": "IDE-DEF-DELTA-TAU",
+      "type": "ide_structural_definition_not_axiom",
       "note": "As long as generation continues, history accumulates within the structure. That accumulation is delta, and the structural margin that receives it is tau.",
-      "_boundary_note": "Delta is not a mere instantaneous value. Tau is not a time constant, semantic tolerance, quality score, or similarity width. Tau is the structural thickness that absorbs accumulated deviation."
-    },
-    "axiom_3_structural_state_tracking_formula": {
-      "id": "AX3",
-      "jp_original": "構造状態追跡式",
-      "en_reference": "Structural State Tracking Formula.",
+      "_boundary_note": "Delta is not a mere instantaneous value. Tau is not a time constant, semantic tolerance, quality score, or similarity width."
+    }
+  },
+  "ide_canonical_formula_systems": {
+    "authority": "These are canonical calculation systems of IDE, the computational method and engine. They are not additional axioms.",
+    "primary_formula": {
+      "id": "IDE-FORMULA-PRIMARY",
+      "name": "Basic Boundary Formula",
       "formula": "R = delta / tau",
       "direction": "higher_R_means_closer_to_structural_danger",
-      "_boundary_note": "R is reserved only for R = delta / tau. Higher R means closer to structural danger. Do not reuse R for safety, preservation, confidence, quality, or semantic-retention scores."
+      "_boundary_note": "R is reserved only for R = delta / tau. Do not reuse R for safety, preservation, confidence, quality, or semantic-retention scores."
     },
-    "axiom_4_tau_state_transition": {
-      "id": "AX4",
-      "jp_original": "τ状態遷移式",
-      "en_reference": "Tau State Transition Formula.",
-      "formula": "tau(t) = tau_0 - integral_0^t f(delta(s)) ds",
-      "closed_interval_rule": "Within a closed operational interval without external replenishment, tau decreases with time.",
-      "replenishment_rule": "Increase of tau arises only through exogenous replenishment, not spontaneous reversal.",
-      "_boundary_note": "Do not interpret tau as naturally recovering within a closed operational interval. If dynamic tau is used, state whether the increase is true absorption-thickness replenishment, an effective gate-width operation, or another externally defined rule."
-    },
-    "axiom_5_restoration_degradation": {
-      "id": "AX5",
-      "jp_original": "復元劣化",
-      "en_reference": "Restoration Degradation.",
-      "formula": "tau_restored < tau_0",
-      "note": "A structure that has once reached rupture or phase transition does not automatically recover its initial tau_0, even with external replenishment.",
-      "_boundary_note": "Restoration does not mean complete return to the initial state. A later decrease in instantaneous R after irreversible transition does not automatically restore the former normal domain."
+    "secondary_formula": {
+      "id": "IDE-FORMULA-SECONDARY",
+      "name": "Dual-Fluctuation Formula",
+      "role": "Track asymmetric Cause-Side fluctuation under rules fixed before evaluation.",
+      "directional_quantities": {
+        "upper": "R_upper = delta_upper / tau_upper",
+        "lower": "R_lower = delta_lower / tau_lower",
+        "aggregate": "R_dir = max(R_upper, R_lower)",
+        "status": "secondary_formula_output_not_canonical_R",
+        "canonical_connection_rule": "A Cause-Side domain transformation rule fixed before evaluation must determine canonical delta and tau before canonical state classification."
+      },
+      "detection_rules": {
+        "continuous": "d(delta)/dt > 0 and d(tau)/dt < 0",
+        "discrete": "Delta(delta)_n > 0 and Delta(tau)_n < 0",
+        "rule_source": "direct Cause-Side observations and a derivative or finite-difference rule fixed before evaluation"
+      },
+      "_boundary_note": "Primary and Secondary indicate IDE definitional order and role, not mathematical degree. The Secondary Formula does not redefine canonical R or directly classify canonical state."
     }
+  },
+  "ide_auxiliary_models": {
+    "authority": "Derived, auxiliary, and complementary formulas support IDE but are neither axioms nor a third canonical IDE formula system.",
+    "remaining_margins": {
+      "remaining_ratio_margin": {
+        "symbol": "M_R",
+        "formula": "M_R = 1 - R",
+        "unit": "dimensionless"
+      },
+      "remaining_absorption_margin": {
+        "symbol": "M_tau",
+        "formula": "M_tau = tau - delta",
+        "unit": "same unit as delta and tau"
+      },
+      "domain": "delta is finite and non-negative and tau is finite and positive",
+      "field_rule": "Do not use one ambiguous remaining margin or remaining slack field. Keep the ratio and absorption margins distinct."
+    },
+    "tau_state_transition": {
+      "formula": "tau(t) = tau_0 - integral_0^t f(delta(s)) ds",
+      "role": "domain-specific auxiliary model, not an axiom or canonical IDE formula system",
+      "depletion_rate_conditions": [
+        "f(delta(s)) is finite on every finite evaluation interval in scope",
+        "f(delta(s)) >= 0",
+        "f(delta(s)) is integrable on every finite evaluation interval in scope"
+      ],
+      "strict_decrease_condition": "tau(t2) < tau(t1) exactly when integral_t1^t2 f(delta(s)) ds > 0."
+    }
+  },
+  "legacy_classification_map": {
+    "purpose": "Historical lookup only. These legacy labels do not define additional axioms.",
+    "AX0": "NRA",
+    "AX1": "NRA-PRINCIPLE-PERSISTENCE",
+    "AX2": "IDE-DEF-DELTA-TAU",
+    "AX3": "IDE-FORMULA-PRIMARY",
+    "AX4": "NRA-IDE-PRINCIPLE-TAU plus ide_auxiliary_models.tau_state_transition",
+    "AX5": "NRA-IDE-PRINCIPLE-RESTORATION"
   },
   "canonical_variable_definitions": {
     "delta": {
@@ -134,7 +188,8 @@
       "formula": "R = delta / tau",
       "direction": "higher_is_more_dangerous",
       "reserved_meaning": "R is reserved exclusively for the NRA-IDE boundary approach ratio. It must not be reused for safety scores, preservation scores, confidence scores, or quality metrics.",
-      "_boundary_note": "R = delta / tau only. Higher R means closer to danger."
+      "directional_auxiliary_aggregate": "R_dir = max(R_upper, R_lower); R_dir is not canonical R.",
+      "_boundary_note": "R = delta / tau only. Higher R means closer to danger. Directional ratios require distinct subscripted symbols and their aggregate is R_dir."
     }
   },
   "domain_constraints": {
@@ -150,7 +205,7 @@
       "condition": "tau = 0",
       "state": "OUT_OF_DESCRIPTION_DOMAIN",
       "meaning": "R is undefined in the NRA-IDE description system.",
-      "_boundary_note": "tau = 0 is outside the NRA-IDE description domain. It is not Fail-Closed. Fail-Closed is an operational judgment only when tau > 0 and R is defined."
+      "_boundary_note": "tau = 0 is outside the NRA-IDE description domain and is not a Fail-Closed state. The fail-closed operational principle still suppresses autonomous processing when this classification prevents evaluation."
     },
     "confession_inputs": {
       "conditions": [
@@ -171,8 +226,14 @@
   },
   "canonical_boundary_state_rules": {
     "_comment": "This section defines invariant boundary-state meanings. Domain documents may set concrete threshold values, but must not change the order or meaning of these states.",
-    "required_order": "0 <= R_warn < R_op < R_irrev < 1.0",
-    "_boundary_note": "R_op, R_irrev, and R = 1.0 are distinct. R_op is human handoff, R_irrev is irreversible onset, and R = 1.0 is invariant rupture. They must not be collapsed into one state.",
+    "required_order": "0 <= R_warn < R_handoff < R_irrev < 1.0",
+    "_boundary_note": "R_handoff, R_irrev, and R = 1.0 are distinct. R_handoff is human handoff, R_irrev is irreversible onset, and R = 1.0 is invariant rupture. They must not be collapsed into one state.",
+    "legacy_aliases": {
+      "R_op": "R_handoff",
+      "Rop": "R_handoff",
+      "rop": "R_handoff",
+      "constraint": "Aliases are accepted only for backward-compatible normalization and do not define a separate threshold or state. New canonical documents, testimony, and APIs use R_handoff."
+    },
     "states": {
       "PERMIT": {
         "condition": "0 <= R < R_warn",
@@ -180,28 +241,35 @@
         "structural_reporting": "continuous"
       },
       "BOUNDARY_WARNING": {
-        "condition": "R_warn <= R < R_op",
+        "condition": "R_warn <= R < R_handoff",
         "autonomous_action": "permitted_with_domain_constraints",
         "required_output": [
           "current R",
           "delta",
           "tau",
-          "remaining slack",
+          "remaining_ratio_margin",
+          "remaining_absorption_margin",
           "trend",
-          "double fluctuation when observable",
+          "double fluctuation status",
           "dominant side",
           "missing information",
           "audit log"
         ],
+        "double_fluctuation_output_rule": {
+          "field_presence": "always_required",
+          "when_observable": "output the detection result using a pre-fixed derivative or finite-difference rule and Cause-Side observations",
+          "when_not_observable": "output NOT_OBSERVABLE and the missing-data reason",
+          "confession_rule": "Do not enter CONFESSION solely because double fluctuation is not observable."
+        },
         "_comment": "Boundary warning is known structural progression, not CONFESSION."
       },
       "HANDOFF_REQUIRED": {
-        "condition": "R_op <= R < R_irrev",
+        "condition": "R_handoff <= R < R_irrev",
         "autonomous_new_judgment": "stopped",
         "autonomous_new_operation": "stopped",
-        "responsibility": "transferred_to_qualified_human_or_domain_operator",
+        "responsibility": "present_predefined_fixed_handoff_testimony_for_external_human_audit",
         "structural_reporting": "continues",
-        "_comment": "Autonomous judgment and operation stop here, but structural testimony continues because R < 1.0."
+        "_comment": "Autonomous judgment and operation stop here, but structural testimony continues because R < 1.0. The external human audit is outside the old Causal Diode and does not create a reverse edge to Cause-Side."
       },
       "IRREVERSIBLE_TRANSITION": {
         "condition": "R_irrev <= R < 1.0",
@@ -260,7 +328,8 @@
       "boundary warning",
       "human handoff notice",
       "irreversible-transition notice",
-      "remaining slack",
+      "remaining_ratio_margin",
+      "remaining_absorption_margin",
       "dominant side",
       "missing information",
       "audit logging"
@@ -268,8 +337,20 @@
     "_boundary_note": "Fail-Closed does not mean complete silence. Structural testimony continues until the invariant rupture boundary is reached."
   },
   "fail_closed_principle": {
+    "type": "operational_principle_not_canonical_state",
     "canonical_statement_jp": "自律行動は停止するが、構造証言は停止しない。",
     "canonical_statement_en": "Autonomous action stops; structural testimony does not.",
+    "applies_when_classification_is": [
+      "HANDOFF_REQUIRED",
+      "IRREVERSIBLE_TRANSITION",
+      "RUPTURE_BOUNDARY",
+      "CONFESSION",
+      "OUT_OF_DESCRIPTION_DOMAIN"
+    ],
+    "does_not_apply_when_classification_is": [
+      "PERMIT"
+    ],
+    "boundary_warning_rule": "BOUNDARY_WARNING requires warning and mandatory structural testimony but does not, by that state alone, suppress all autonomous processing unless a pre-fixed domain rule additionally requires suppression.",
     "stopped": [
       "autonomous judgment",
       "autonomous operation",
@@ -296,17 +377,24 @@
     "_boundary_note": "Fail-Closed stops unauthorized autonomous action and free generation. It does not erase the structure, stop observation, or suppress required structural disclosure."
   },
   "structural_disclosure_log": {
-    "role": "Upper-level category for non-free-form structural reporting",
+    "role": "Audit-record type for known structural states classified from finite delta >= 0, finite tau > 0, and valid threshold rules",
     "members": [
-      "STRUCTURAL_PROGRESS",
+      "PERMIT",
       "BOUNDARY_WARNING",
       "HANDOFF_REQUIRED",
       "IRREVERSIBLE_TRANSITION",
-      "RUPTURE_BOUNDARY",
-      "CONFESSION"
+      "RUPTURE_BOUNDARY"
     ],
-    "distinction": "CONFESSION is reserved for unknown, ambiguous, invalid, or unsupported structural information. Known structural progression must not be mislabeled as CONFESSION.",
-    "_boundary_note": "CONFESSION is not the general name for danger reporting. Known boundary progression is structural disclosure."
+    "distinction": "CONFESSION and OUT_OF_DESCRIPTION_DOMAIN are not known R progression and are recorded as INPUT_EXCEPTION_LOG instead.",
+    "_boundary_note": "This audit-record type does not add or replace a canonical state. CONFESSION is not the general name for danger reporting."
+  },
+  "input_exception_log": {
+    "role": "Audit-record type for inputs that cannot produce known canonical R progression",
+    "members": {
+      "CONFESSION": "unknown, invalid, ambiguous, unsupported, or missing structural input",
+      "OUT_OF_DESCRIPTION_DOMAIN": "R is undefined because tau = 0"
+    },
+    "_boundary_note": "This audit-record type does not add or replace a canonical state."
   },
   "cause_effect_separation": {
     "rule": "Cause-Side observations and design-fixed transformations may determine delta, tau, and R. Effect-Side semantic evaluation, output ranking, generated text, and prior discarded output must not update them.",
@@ -316,7 +404,7 @@
   "domain_specific_freedom": {
     "may_change": [
       "concrete R_warn value",
-      "concrete R_op value",
+      "concrete R_handoff value",
       "concrete R_irrev value",
       "observation interval",
       "warning frequency",
@@ -326,8 +414,9 @@
     ],
     "must_not_change": [
       "R = delta / tau",
+      "directional auxiliary ratios and R_dir do not redefine canonical R",
       "R increases toward danger",
-      "R_op precedes R_irrev",
+      "R_handoff precedes R_irrev",
       "R_irrev is distinct from R = 1.0",
       "irreversible latch does not auto-reset",
       "structural reporting continues while R < 1.0",
@@ -335,14 +424,25 @@
       "unknown values are not filled by analogy",
       "CONFESSION is not known progress reporting"
     ],
-    "_boundary_note": "Concrete threshold values are domain-specific. The order R_warn < R_op < R_irrev < 1.0 and the meaning of each state are invariant."
+    "_boundary_note": "Concrete threshold values are domain-specific. The order R_warn < R_handoff < R_irrev < 1.0 and the meaning of each state are invariant."
+  },
+  "normative_reference_implementation": {
+    "source": "nra-core/foundations/NRA-IDE_Architecture_public.py",
+    "public_mirror": "docs/NRA-IDE_Architecture_public.py",
+    "public_mirror_role": "generated synchronized copy, not an independent normative source",
+    "synchronization": [
+      "generate the public mirror from the normative source",
+      "verify SHA-256 equality",
+      "do not edit the two copies independently"
+    ],
+    "conformance_gate": "Location alone does not confer normative status. The implementation must pass conformance tests against theory/AXIOMS.md and theory/axioms.json before it is treated as normative."
   },
   "revision_history": {
     "v2.1": {
       "date": "2026-07-10 JST",
       "base": "AXIOMS_v1.2_20260424.md",
       "changes": [
-        "Separated R_warn, R_op, R_irrev, and R = 1.0",
+        "Separated R_warn, R_handoff, R_irrev, and R = 1.0",
         "Defined irreversible transition as distinct from complete rupture",
         "Added irreversible latch rule",
         "Clarified that structural testimony must not stop while R < 1.0",
@@ -358,9 +458,9 @@
   },
   "complementary_formula_boundary": {
     "role": "auxiliary computation only",
-    "meaning": "A complementary formula may compensate for EMA lag, local rapid change, or domain-specific precision limits. It does not acquire independent axiomatic authority.",
+    "meaning": "A complementary formula may compensate for EMA lag, local rapid change, or domain-specific precision limits. It does not become an axiom or a canonical IDE formula system.",
     "not": [
-      "third axiom formula",
+      "third canonical IDE formula system",
       "replacement for the primary formula",
       "replacement for the dual-fluctuation formula",
       "source of Cause-Side authority"
