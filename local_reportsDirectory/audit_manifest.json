@@ -1,0 +1,450 @@
+{
+  "manifest_metadata": {
+    "manifest_id": "NRA-IDE-AUDIT-MANIFEST-2026-07-14-CLI-SECOND-PASS",
+    "created_at": "2026-07-14 JST",
+    "repository_branch": "master",
+    "status": "cli_second_pass_complete",
+    "reporting_policy": "Do not create per-change checkpoints. Aggregate review, alignment, and validation results into phase-level reports.",
+    "raw_reports_policy": "Do not edit reports 01 through 17. Record corrections and decisions separately.",
+    "repository_read_policy": "The user authorized repository-internal reads without per-operation confirmation on 2026-07-14 JST.",
+    "repository_file_count_rg": 528,
+    "report_count": 17
+  },
+  "git_state_at_second_pass_start": [
+    "D nra-core/foundations/AXIOMS_rewritten_2026-04-24_011508.pdf",
+    "?? CODEX_CLI_BROWSER_WORKFLOW.md",
+    "?? local_reportsDirectory/"
+  ],
+  "reports": [
+    {"report_id":"01","file":"01_root_review.md","sha256":"EE34240D5D126051862E93BE5F1282E23FB8FDBCF32CE9BA95440F7890CEF85A"},
+    {"report_id":"02","file":"02_theory_review.md","sha256":"C9A4E9D9F08CD2C485F5DF2B87BED32003287AED88D390E647BC220E1AE91A68"},
+    {"report_id":"03","file":"03_nra_core_papers_review.md","sha256":"FAE29B3562847FD090FA91158184B67EBFC5F384E39897770360A94B53AC80B7"},
+    {"report_id":"04","file":"04_nra_core_implementation_review.md","sha256":"71CDF92CAA7D2D184750111A4DEB43F4249014D5B882D0D7FC7825EA6E1181A9"},
+    {"report_id":"05","file":"05_nra_core_quantum_review.md","sha256":"0A79C8C5620191413851FF6E64B453755160472AFD1810431F3AF550CBB65DC2"},
+    {"report_id":"06","file":"06_nra_core_visualization_review.md","sha256":"D1378F59E5CCFF2EDBDB405941BF703F6009732EB3709EB0142463422AF87565"},
+    {"report_id":"07","file":"07_nra_core_overall_review.md","sha256":"53249C9C6B6CAB436BF8A7044907B9075CDCBDA1235C0A3266FB02CA03662DD5"},
+    {"report_id":"08","file":"08_note_hybridcalc_quantum_architecture_next_ver_review.md","sha256":"FB8B8053313CEE6BD95E0C003783EDA247FDC2F199CC1D5999496BD5B859F0FE"},
+    {"report_id":"09","file":"09_note_correlated_error_review.md","sha256":"3BD5E5FD683DC31E3B006267373AEB68B746FBF30BBE4C34D81F38A187662CD8"},
+    {"report_id":"10","file":"10_note_direct_review.md","sha256":"CA9F9436780E2E82491ECDF852191814AC51961615E4A10F5D614E3782A30518"},
+    {"report_id":"11","file":"11_note_overall_review.md","sha256":"BA9176C37415322A5C07E8218AFC89AA847D29E82A6586D16313B737B96D62AD"},
+    {"report_id":"12","file":"12_global_consistency_review.md","sha256":"6A53A91AC4239E5F37F1B85D937BBF7729C88494988D6193207C2AB4304ECD3C"},
+    {"report_id":"13","file":"13_docs_root_review.md","sha256":"A268567F9E82F61B180E0EABA78AAE3EF23EEDBD10EED63E0C810F22E118E176"},
+    {"report_id":"14","file":"14_docs_ai_bilingual_review.md","sha256":"762A9B9B813E077250FBA56B84311926F45D8093B364AB36F25C11A0C9625E6F"},
+    {"report_id":"15","file":"15_docs_figures_review.md","sha256":"06A270CB482AD5D25B979DA3CD8FF5108665F009DD5EDFF1D5B3CF695D139070"},
+    {"report_id":"16","file":"16_docs_overall_review.md","sha256":"EC012C1948DE5F6EDCA80DB7C5C87DC15BF2E2CDB30790D46DCEAFBB8876ABCF"},
+    {"report_id":"17","file":"17_global_consistency_including_docs.md","sha256":"12DECE5604577EB0423E7F959F67C80F5720784F33C3CE61F02C99766BE06153"}
+  ],
+  "second_pass_findings": [
+    {
+      "finding_id": "CLI-VALID-001",
+      "finding_class": "HARD_CONFLICT",
+      "decision_status": "RESOLVED_BY_CANON_001",
+      "subject": "Canonical precedence differs between AXIOMS.md and axioms.json/llms documents",
+      "source_files": ["theory/AXIOMS.md", "theory/axioms.json", "llms.md", "llms.txt"],
+      "decision_reason": "The precedence lists are not identical and resolve lower-document conflicts differently.",
+      "applied_files": ["theory/AXIOMS.md", "theory/axioms.json"],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    },
+    {
+      "finding_id": "CLI-VALID-002",
+      "finding_class": "HARD_CONFLICT",
+      "decision_status": "RESOLVED",
+      "subject": "G(r) large-residual approximation and saturation wording",
+      "source_files": ["FORMULA.md", "theory/THEORY.md"],
+      "decision_reason": "G(r)=r|r|/(k+|r|) is asymptotic to r and is not bounded saturation.",
+      "applied_files": ["FORMULA.md", "theory/THEORY.md"],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    },
+    {
+      "finding_id": "CLI-CORRECT-001",
+      "finding_class": "SEMANTIC_DRIFT",
+      "decision_status": "CORRECTED_BY_SEPARATE_REPORT",
+      "subject": "Report 12 combines all non-positive tau values as out of description domain",
+      "source_files": ["local_reportsDirectory/12_global_consistency_review.md", "theory/AXIOMS.md", "theory/axioms.json"],
+      "decision_reason": "Canonical rules classify tau=0 as OUT_OF_DESCRIPTION_DOMAIN and tau<0 as CONFESSION.",
+      "applied_files": ["local_reportsDirectory/18_cli_second_pass_validation.md"],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    },
+    {
+      "finding_id": "CLI-VALID-006",
+      "finding_class": "HARD_CONFLICT",
+      "decision_status": "RESOLVED_BY_NORMATIVE_REFERENCE_IMPLEMENTATION",
+      "subject": "Public Python implementation does not implement canonical invalid-input and boundary states",
+      "source_files": ["nra-core/foundations/NRA-IDE_Architecture_public.py", "docs/NRA-IDE_Architecture_public.py", "theory/axioms.json"],
+      "decision_reason": "The source and generated docs mirror now implement the canonical state table, invalid-input separation, irreversible latch, structural testimony, and directional-auxiliary separation; the conformance suite passes.",
+      "applied_files": [
+        "nra-core/foundations/NRA-IDE_Architecture_public.py",
+        "docs/NRA-IDE_Architecture_public.py",
+        "tests/test_nra_ide_reference.py"
+      ],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    },
+    {
+      "finding_id": "CLI-CORRECT-002",
+      "finding_class": "FALSE_POSITIVE",
+      "decision_status": "CORRECTED_BY_SEPARATE_REPORT",
+      "subject": "Docs visualization scope counts",
+      "source_files": ["local_reportsDirectory/15_docs_figures_review.md", "local_reportsDirectory/16_docs_overall_review.md"],
+      "decision_reason": "Actual counts are common=12, ja-JP=12, en-US=13; reported counts are common=11, ja-JP=13, en-US=13.",
+      "applied_files": ["local_reportsDirectory/18_cli_second_pass_validation.md"],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    },
+    {
+      "finding_id": "CLI-VALID-008",
+      "finding_class": "HARD_CONFLICT",
+      "decision_status": "RESOLVED",
+      "subject": "Broken local docs link",
+      "source_files": ["docs/en-US/ai/08_discard_logs_EN.md"],
+      "decision_reason": "The referenced JP HTML does not exist at the path resolved from the EN document.",
+      "applied_files": ["docs/en-US/ai/08_discard_logs_EN.md"],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    },
+    {
+      "finding_id": "CLI-VALID-007",
+      "finding_class": "DUPLICATE_MIRROR",
+      "decision_status": "RESOLVED_FOR_CURRENT_CORE_VISUALS",
+      "subject": "Current core visual assets require synchronized source and docs mirrors",
+      "source_files": [
+        "theory/figures/TOP_sandwich.png",
+        "docs/TOP_sandwich.png",
+        "theory/figures/NRA-IDE定義式（基礎式）.jpg",
+        "docs/nra_ide_formula_basic.jpg"
+      ],
+      "decision_reason": "Both current visual pairs were regenerated from deterministic SVG sources and verified byte-identical within each mirror pair.",
+      "applied_files": [
+        "theory/figures/sources/TOP_sandwich.svg",
+        "theory/figures/sources/NRA-IDE_core_formula.svg",
+        "theory/figures/TOP_sandwich.png",
+        "docs/TOP_sandwich.png",
+        "theory/figures/NRA-IDE定義式（基礎式）.jpg",
+        "docs/nra_ide_formula_basic.jpg"
+      ],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    },
+    {
+      "finding_id": "CLI-VALID-009",
+      "finding_class": "AUTHORITY_AMBIGUITY",
+      "decision_status": "RESOLVED_BY_CLASSIFICATION",
+      "subject": "Dated nra-core and note artifacts can be mistaken for current canonical or conforming material",
+      "source_files": [
+        "nra-core/README.md",
+        "nra-core/foundations/AXIOMS_rewritten_2026-04-24_011508.md",
+        "nra-core/foundations/NRA-IDE_SecondAxiom_Journey_2026-04-22_0039_v2.md",
+        "note/NRA-IDE_Official_Definition.md",
+        "note/README.md"
+      ],
+      "decision_reason": "Central authority notices now identify the root theory canon and normative reference implementation while preserving dated research and historical bodies without retroactive rewriting.",
+      "applied_files": [
+        "nra-core/README.md",
+        "nra-core/foundations/AXIOMS_rewritten_2026-04-24_011508.md",
+        "nra-core/foundations/NRA-IDE_SecondAxiom_Journey_2026-04-22_0039_v2.md",
+        "note/NRA-IDE_Official_Definition.md",
+        "note/README.md"
+      ],
+      "applied_commit": null,
+      "reviewed_at": "2026-07-14 JST"
+    }
+  ],
+  "canonical_decisions": [
+    {
+      "decision_id": "CANON-001",
+      "subject": "Formal canonical precedence order",
+      "selected_option": "1A",
+      "decision": "AXIOMS.md > axioms.json > Foundational Thesis > SANDWICH_ARCH > THEORY > FORMULA > llms.md > domain rules > normative reference implementation > other implementation > comments > examples > AI explanations",
+      "applied_files": ["theory/AXIOMS.md", "theory/axioms.json"],
+      "decided_at": "2026-07-14 JST"
+    },
+    {
+      "decision_id": "CANON-002",
+      "subject": "Conditions for f(delta)",
+      "selected_option": "2A",
+      "decision": "f(delta(s)) is finite, non-negative, and integrable on every finite evaluation interval in scope; tau is non-increasing and strictly decreases where accumulated depletion is positive.",
+      "applied_files": ["theory/AXIOMS.md", "theory/axioms.json"],
+      "decided_at": "2026-07-14 JST"
+    },
+    {
+      "decision_id": "CANON-003",
+      "subject": "Mandatory double-fluctuation output",
+      "selected_option": "3A",
+      "decision": "The status field is always required; output a result when observable, otherwise NOT_OBSERVABLE and the missing-data reason without entering CONFESSION solely for non-observability.",
+      "applied_files": ["theory/AXIOMS.md", "theory/axioms.json"],
+      "decided_at": "2026-07-14 JST"
+    },
+    {
+      "decision_id": "CANON-004",
+      "subject": "Directional maximum ratio and canonical R",
+      "selected_option": "4A",
+      "decision": "Canonical R remains R = delta / tau. Directional ratios are R_upper and R_lower, and their auxiliary aggregate is R_dir, not R.",
+      "applied_files": ["theory/AXIOMS.md", "theory/axioms.json"],
+      "decided_at": "2026-07-14 JST"
+    },
+    {
+      "decision_id": "CANON-005",
+      "subject": "Normative reference implementation location and synchronization",
+      "selected_option": "5A",
+      "decision": "Use nra-core/foundations/NRA-IDE_Architecture_public.py as the normative source location and docs/NRA-IDE_Architecture_public.py as a generated SHA-256-verified mirror; location alone does not confer conformance.",
+      "applied_files": ["theory/AXIOMS.md", "theory/axioms.json"],
+      "decided_at": "2026-07-14 JST"
+    },
+    {
+      "decision_id": "CANON-006",
+      "subject": "Canonical human-handoff threshold name",
+      "selected_option": "recommended",
+      "decision": "Use R_handoff as the canonical threshold name. Accept R_op, Rop, and rop only as backward-compatibility aliases that normalize to R_handoff and do not define another threshold or state.",
+      "applied_files": [
+        "theory/AXIOMS.md",
+        "theory/axioms.json",
+        "theory/NRA-IDE_Foundational_Thesis_Bilingual.md",
+        "theory/SANDWICH_ARCH.md",
+        "nra-core/foundations/NRA-IDE_Architecture_public.py",
+        "docs/NRA-IDE_Architecture_public.py",
+        "tests/test_nra_ide_reference.py"
+      ],
+      "decided_at": "2026-07-14 JST"
+    }
+  ],
+  "canonical_decisions_pending": [],
+  "change_units": [
+    {
+      "change_unit_id": "PHASE-1-CANONICAL-SYNC",
+      "status": "completed",
+      "files": ["theory/AXIOMS.md", "theory/axioms.json"],
+      "validation": {
+        "semantic_sync_checks": "5/5 passed",
+        "json_parse": "passed",
+        "git_diff_check": "passed"
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-2-DIRECTIONAL-AUXILIARY-RATIO-SYNC",
+      "status": "completed",
+      "files": [
+        "FORMULA.md",
+        "theory/NRA-IDE_Foundational_Thesis_Bilingual.md",
+        "theory/THEORY.md"
+      ],
+      "canonical_decision": "CANON-004",
+      "change": "Replaced directional maximum redefinitions of canonical R with auxiliary R_dir and required a pre-fixed Cause-Side domain transformation before canonical state classification.",
+      "validation": {
+        "remaining_R_equals_max": 0,
+        "canonical_R_present_in_each_target": true,
+        "git_diff_check": "passed"
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-2-TAU-DEPLETION-CONDITIONS-SYNC",
+      "status": "completed",
+      "files": [
+        "theory/NRA-IDE_Foundational_Thesis_Bilingual.md",
+        "theory/THEORY.md"
+      ],
+      "canonical_decision": "CANON-002",
+      "change": "Added finite, non-negative, and integrable conditions for f(delta(s)); specified non-increasing tau and strict decrease only over intervals with positive accumulated depletion.",
+      "validation": {
+        "english_condition_occurrences": 2,
+        "japanese_condition_occurrences": 2,
+        "dynamic_tau_shape_function_names_changed": false,
+        "git_diff_check": "passed"
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-2-DYNAMIC-TAU-SHAPE-SYMBOL-SEPARATION",
+      "status": "completed",
+      "files": [
+        "FORMULA.md",
+        "theory/NRA-IDE_Foundational_Thesis_Bilingual.md",
+        "theory/THEORY.md",
+        "nra-core/foundations/NRA-IDE_Architecture_public.py",
+        "docs/NRA-IDE_Architecture_public.py"
+      ],
+      "change": "Renamed dynamic-tau shape functions f/g to h_upper/h_lower, preserving the canonical depletion-rate symbol f(delta).",
+      "validation": {
+        "old_dynamic_shape_names_remaining": 0,
+        "python_mirror_sha256": "F26428F8B63BD84DB585C399FA0A2B60197C342E94728E1B6CF199513C1E4432",
+        "python_mirror_hash_match": true,
+        "python_ast_parse_count": 2,
+        "calculation_behavior_changed": false,
+        "public_api_changed": false,
+        "git_diff_check": "passed"
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-2-G-RESIDUAL-ASYMPTOTICS-CORRECTION",
+      "status": "completed",
+      "files": ["FORMULA.md", "theory/THEORY.md"],
+      "finding_id": "CLI-VALID-002",
+      "change": "Corrected the large-residual approximation to G(r) ~ r, removed bounded-saturation wording, retained the quadratic small-residual approximation, and documented odd sign-preserving unbounded behavior.",
+      "validation": {
+        "old_G_wording_remaining": 0,
+        "odd_symmetry": "passed",
+        "zero": "passed",
+        "knee_G_at_abs_r_equals_k": "G = r/2",
+        "small_residual": "passed",
+        "large_residual_ratio_at_abs_r_200_k_2": 0.990099009901,
+        "git_diff_check": "passed",
+        "initial_test_command_issue": "PowerShell-to-Python quoting caused a pre-evaluation syntax error; corrected command rerun passed."
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-3-NORMATIVE-REFERENCE-IMPLEMENTATION",
+      "status": "completed",
+      "files": [
+        "nra-core/foundations/NRA-IDE_Architecture_public.py",
+        "docs/NRA-IDE_Architecture_public.py",
+        "tests/test_nra_ide_reference.py"
+      ],
+      "finding_id": "CLI-VALID-006",
+      "change": "Rebuilt the canonical state machine from the v2.1 state table and added a standard-library conformance suite.",
+      "validation": {
+        "canonical_states_implemented": 7,
+        "unittest_count": 10,
+        "unittest_result": "passed",
+        "python_ast_parse_count": 3,
+        "source_mirror_sha256": "8DEAC0DAB361EA8FC2731A781B893C09D6CDB295F1D4AC095CEB153BB5D57C38",
+        "source_mirror_hash_match": true,
+        "axioms_json_parse": "passed",
+        "git_diff_check": "passed",
+        "pycache_generated": false
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-4-CURRENT-THEORY-AND-CORE-VISUALS",
+      "status": "completed",
+      "files": [
+        "theory/SANDWICH_ARCH.md",
+        "theory/GOVERNANCE.md",
+        "theory/ETHICS.md",
+        "theory/figures/sources/TOP_sandwich.svg",
+        "theory/figures/sources/NRA-IDE_core_formula.svg",
+        "theory/figures/TOP_sandwich.png",
+        "docs/TOP_sandwich.png",
+        "theory/figures/NRA-IDE定義式（基礎式）.jpg",
+        "docs/nra_ide_formula_basic.jpg"
+      ],
+      "change": "Aligned current theory governance, ethics, sandwich testimony, and core visual assets with the selected canonical decisions; added deterministic SVG sources for reproducible raster mirrors.",
+      "validation": {
+        "raw_report_hashes_01_17": "passed",
+        "top_visual_sha256": "89ACEB3CDC8B38CE6A298200DBB45B501C05F268D9443DD87C92FE86B0DA3B8B",
+        "top_visual_mirror_match": true,
+        "formula_visual_sha256": "66A99F58DE91A642E7D1AFB0056A2E8F3980B0114FC73AC5FFFFC16A9D72CD65",
+        "formula_visual_mirror_match": true,
+        "svg_xml_parse_count": 2,
+        "visual_inspection": "passed at original dimensions",
+        "unittest_count": 10,
+        "unittest_result": "passed",
+        "python_source_mirror_match": true,
+        "axioms_json_parse": "passed",
+        "git_diff_check": "passed"
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-5-DOCS-AND-CURRENT-VISUALIZATIONS",
+      "status": "completed",
+      "files": [
+        "docs/README.md",
+        "docs/README_JP.md",
+        "docs/Sandwich-ARCHITECTURE.md",
+        "docs/en-US/ai/",
+        "docs/ja-JP/ai/",
+        "docs/figures/",
+        "docs/en-US/figures/",
+        "docs/ja-JP/figures/",
+        "theory/AXIOMS.md",
+        "theory/axioms.json",
+        "theory/NRA-IDE_Foundational_Thesis_Bilingual.md",
+        "theory/SANDWICH_ARCH.md",
+        "nra-core/foundations/NRA-IDE_Architecture_public.py",
+        "docs/NRA-IDE_Architecture_public.py",
+        "tests/test_nra_ide_reference.py"
+      ],
+      "canonical_decision": "CANON-006",
+      "change": "Aligned root docs, bilingual AI explanations, current HTML/SVG visualizations, and the normative Python API with canonical states, thresholds, testimony, one-way authority, and conditional conformance claims; repaired the known local link and removed external font dependencies from the current HTML scope.",
+      "validation": {
+        "raw_report_hashes_01_17": "passed",
+        "markdown_local_broken_links": 0,
+        "html_parse_count": 18,
+        "html_parse_errors": 0,
+        "inline_script_count": 21,
+        "inline_script_syntax_errors": 0,
+        "svg_xml_parse_count": 4,
+        "svg_xml_errors_after_repair": 0,
+        "external_font_dependencies_remaining": 0,
+        "unittest_count": 10,
+        "unittest_result": "passed",
+        "python_source_mirror_sha256": "E100B6A546A6C62F3438CEA1B32B5B729A99CAAE50AF47CD03DBBE3FB249A35C",
+        "python_source_mirror_match": true,
+        "axioms_json_parse": "passed",
+        "git_diff_check": "passed",
+        "browser_render_validation": "not available: the configured Browser plugin module could not be resolved by the in-app Node runtime"
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-6-LEGACY-AND-RESEARCH-AUTHORITY-CLASSIFICATION",
+      "status": "completed",
+      "files": [
+        "nra-core/README.md",
+        "nra-core/foundations/AXIOMS_rewritten_2026-04-24_011508.md",
+        "nra-core/foundations/NRA-IDE_SecondAxiom_Journey_2026-04-22_0039_v2.md",
+        "note/NRA-IDE_Official_Definition.md",
+        "note/README.md"
+      ],
+      "finding_id": "CLI-VALID-009",
+      "change": "Classified nra-core and note as research, illustrative, draft, or historical asset areas except for the explicitly named normative reference implementation; added direct warnings to misleadingly final or official dated records without rewriting their provenance.",
+      "validation": {
+        "raw_report_hashes_01_17": "passed",
+        "historical_body_rewrite": false,
+        "python_ast_parse_count": 17,
+        "python_ast_errors": 0,
+        "html_count": 24,
+        "inline_script_count": 23,
+        "inline_script_syntax_errors": 0,
+        "markdown_count": 56,
+        "markdown_local_broken_links": 0,
+        "git_diff_check": "passed"
+      },
+      "completed_at": "2026-07-14 JST"
+    },
+    {
+      "change_unit_id": "PHASE-7-FINAL-RECONCILIATION",
+      "status": "completed",
+      "files": [
+        "local_reportsDirectory/18_cli_second_pass_validation.md",
+        "local_reportsDirectory/audit_manifest.json"
+      ],
+      "change": "Reconciled every second-pass finding with the completed change units, retained RAW reports 01 through 17 unchanged, and closed the second-pass audit with repository-wide residual, conformance, mirror, syntax, link, and Git-diff validation.",
+      "validation": {
+        "second_pass_findings_total": 8,
+        "unresolved_findings": 0,
+        "canonical_decisions_pending": 0,
+        "raw_report_hashes_01_17": "passed",
+        "unittest_count": 10,
+        "unittest_result": "passed",
+        "python_source_mirror_sha256": "E100B6A546A6C62F3438CEA1B32B5B729A99CAAE50AF47CD03DBBE3FB249A35C",
+        "python_source_mirror_match": true,
+        "top_visual_sha256": "89ACEB3CDC8B38CE6A298200DBB45B501C05F268D9443DD87C92FE86B0DA3B8B",
+        "top_visual_mirror_match": true,
+        "formula_visual_sha256": "66A99F58DE91A642E7D1AFB0056A2E8F3980B0114FC73AC5FFFFC16A9D72CD65",
+        "formula_visual_mirror_match": true,
+        "git_diff_check": "passed",
+        "browser_evidence_limitation": "In-app Browser plugin module unavailable; no browser-specific layout pass is claimed."
+      },
+      "completed_at": "2026-07-14 JST"
+    }
+  ],
+  "resume_from": "Second-pass CLI audit complete. No unresolved canonical decisions or second-pass findings remain. If the in-app Browser plugin becomes available, an optional browser-specific rendering pass may be added without reopening the completed semantic alignment."
+}
