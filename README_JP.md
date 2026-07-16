@@ -1,5 +1,5 @@
 <!-- TARGET: /README_JP.md -->
-<!-- UPDATED: 2026-07-11 03:33 JST -->
+<!-- UPDATED: 2026-07-15 JST -->
 
 # NRA-IDE：律環公理 — 内包性動力学エンジン
 
@@ -34,10 +34,10 @@ NRA-IDEは、境界接近警告、人間委譲、不可逆遷移開始、完全�
 NRA-IDEの定義は、次の順序で参照します。
 
 1. [`theory/AXIOMS.md`](./theory/AXIOMS.md)  
-   最上位公理、変数定義、境界状態、不可逆遷移、構造証言の正規定義
+   唯一の公理、変数定義、IDE式分類、境界状態、不可逆遷移、構造証言の正規定義
 
 2. [`theory/axioms.json`](./theory/axioms.json)  
-   機械可読な正規公理定義
+   唯一の正規公理と下位定義を同期した機械可読表現
 
 3. [`theory/NRA-IDE_Foundational_Thesis_Bilingual.md`](./theory/NRA-IDE_Foundational_Thesis_Bilingual.md)  
    基礎論文の英日バイリンガル版
@@ -46,7 +46,7 @@ NRA-IDEの定義は、次の順序で参照します。
    LLMをEffect-Side生成要素として含む場合の論理分離仕様
 
 5. [`theory/THEORY.md`](./theory/THEORY.md)  
-   公理・式・境界状態をまとめた理論本文
+   唯一の公理、構造原則、IDE式、境界状態をまとめた理論本文
 
 6. [`FORMULA.md`](./FORMULA.md)  
    式、変数、定義域、初期条件、数値条件、補完計算の正規仕様
@@ -54,16 +54,26 @@ NRA-IDEの定義は、次の順序で参照します。
 7. [`llms.md`](./llms.md)  
    AI向けの識別、解釈、運用ゲート
 
+8. ドメイン固有規則
+
+9. 正規適合試験に合格した正規参照実装
+
+10. その他の実装コード
+
+11. コメント、例示、AI生成説明
+
 下位文書、コード、コメント、例示は、上位正規文書の定義を変更または上書きできません。
 
 リポジトリ全体の配置は [`REPOSITORY_OVERVIEW.md`](./REPOSITORY_OVERVIEW.md) を参照してください。
 
 ---
 
-## 核公理
+## 唯一の律環公理
 
 > **存在は生成である。**
 > **Existence is Generation.**
+
+律環公理はこの一つだけであり、第二公理以降は存在しません。「Nomological Ring Axioms」はNRAと略す固有名称であり、追加公理を認める意味ではありません。
 
 存在は固定された静的実体ではなく、履歴を伴う連続的な生成として現れます。
 
@@ -73,9 +83,9 @@ NRA-IDEの定義は、次の順序で参照します。
 
 ---
 
-## 基本境界式
+## IDE一次式 — 基本境界式
 
-NRA-IDEにおける一次式は次の一式です。
+一次式はIDEの第一の正規計算系であり、第一公理ではありません。
 
 $$
 R=\frac{\delta}{\tau}
@@ -101,6 +111,18 @@ $$
 \delta,\tau\in\mathbb{R}_{finite}
 $$
 
+二つの残余余白は区別します。
+
+$$
+M_R=1-R
+$$
+
+$$
+M_{\tau}=\tau-\delta
+$$
+
+$M_R$は無次元の残存比率余白です。$M_{\tau}$は残存吸収余白であり、$\delta$および$\tau$と同じ単位を持ちます。
+
 ---
 
 ## 正規境界順序
@@ -110,7 +132,7 @@ NRA-IDEの境界状態は、次の順序で固定されます。
 $$
 0\le R_{\mathrm{warn}}
 <
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 <
 R_{\mathrm{irrev}}
 <
@@ -120,14 +142,14 @@ $$
 | 境界 | 正規名称 | 役割 |
 |---|---|---|
 | $R_{\mathrm{warn}}$ | 境界接近警告点 | 境界接近を開示する |
-| $R_{\mathrm{op}}$ | 境界前人間委譲点 | 新規自律判断・自律操作を停止し、人間へ委譲する |
+| $R_{\mathrm{handoff}}$ | 境界前人間委譲点 | 新規自律判断・自律操作を停止し、人間へ委譲する |
 | $R_{\mathrm{irrev}}$ | 不可逆遷移開始閾値 | 元の構造状態へ戻れることを前提にしない |
 | $R=1.0$ | 不変完全破断境界 | 通常生成を停止し、最終固定証言へ切り替える |
 
 人間委譲、不可逆遷移開始、完全破断は同一ではありません。
 
 $$
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 \neq
 R_{\mathrm{irrev}}
 \neq
@@ -136,6 +158,8 @@ $$
 
 具体的な閾値は対象ドメインごとに定めますが、この順序と役割は変更しません。
 
+`R_handoff`が正規名です。`R_op`、`Rop`、`rop`は同じ閾値へ正規化する後方互換aliasに限り、別の境界や状態を定義しません。
+
 ---
 
 ## 正規状態分類
@@ -143,8 +167,8 @@ $$
 | 状態 | 条件 | 基本動作 |
 |---|---|---|
 | `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | 制約付き自律動作を許可し、構造監査を継続する |
-| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{op}}$ | 境界接近、残存余裕、傾向、欠損情報を開示する |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{op}}\le R<R_{\mathrm{irrev}}$ | 新規自律判断・新規自律操作を停止し、人間へ委譲する |
+| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$ | 境界接近、二つの残余余白、傾向、二重ゆらぎ状態、欠損情報を開示する |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | 新規自律判断・新規自律操作を停止し、人間へ委譲する |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | 不可逆ラッチを設定し、正常化・回復前提・最適化提案を禁止する |
 | `RUPTURE_BOUNDARY` | $R\ge1.0$ | 通常生成と自律行動を停止し、最終固定証言へ切り替える |
 | `CONFESSION` | 必須構造情報が不明・不正・曖昧・非有限・根拠不明 | 不明箇所を明示し、類推補完せず、影響する評価を停止する |
@@ -190,11 +214,25 @@ $$
 \text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
 $$
 
-これはFail-Closedではありません。
-
 また、$R=\infty$へ置き換えたり、有効な完全破断計算として扱ったりしてはいけません。
 
+`OUT_OF_DESCRIPTION_DOMAIN`は完全破断計算とは異なります。ただし正規$R$を利用できないため、影響する評価にはFail-Closed運用原則を適用します。
+
 一方、$\tau<0$、$\delta<0$、NaN、Infinity、出所不明、単位不明、時点不明、対象不明、規則不明などは、不正または不明な構造入力として`CONFESSION`の対象になります。
+
+---
+
+## Fail-Closed運用原則
+
+Fail-Closedは、次の状態で影響する新規自律判断と自律操作を抑止します。
+
+- `HANDOFF_REQUIRED`
+- `IRREVERSIBLE_TRANSITION`
+- `RUPTURE_BOUNDARY`
+- `CONFESSION`
+- `OUT_OF_DESCRIPTION_DOMAIN`
+
+必要な固定構造証言とログは抑止しません。`PERMIT`はFail-Closedではありません。`BOUNDARY_WARNING`だけでは、事前固定されたドメイン規則が要求しない限り出力を全面抑止しません。
 
 ---
 
@@ -213,14 +251,16 @@ $$
 - Cause-Side観測
 - 現在の$\delta$、$\tau$、$R$
 - 境界状態
-- 残存吸収余裕
+- 残存比率余白$M_R$
+- 残存吸収余白$M_{\tau}$
 - 変化傾向
 - 支配側
 - 欠損情報
+- 二重ゆらぎの判定結果、または`NOT_OBSERVABLE`と欠損理由
 - 境界警告
 - 人間委譲通知
 - 不可逆遷移通知
-- 監査ログ
+- 構造開示ログ
 
 $$
 R\ge1.0
@@ -303,7 +343,7 @@ LLM説明を省略または停止しても、独立したCause-Side監査経路�
 
 ---
 
-## 一次式・二次式・補完式
+## IDE式の分類
 
 ### 一次式
 
@@ -311,11 +351,13 @@ $$
 R=\frac{\delta}{\tau}
 $$
 
-NRA-IDEの基本境界式です。
+IDEの第一の正規計算系であり、公理ではありません。
 
 ### 二次式
 
-静的$\tau$だけでは捉えにくい上側・下側の非対称変動を、事前固定したEMAと側別有効ゲート幅によって追跡します。
+二次式（二重ゆらぎ式）はIDEの第二の正規計算系であり、第二公理ではありません。その正規核は、上側・下側の蓄積ズレ、側別境界接近比、および蓄積ズレ増加と吸収厚み減少の同時進行を扱います。
+
+事前固定したEMA、初期条件、側別形状変換は、この計算系の補助的実現です。独立した正規式または公理ではありません。
 
 二次式は、NRA-IDE内の定義順序と役割を示す名称です。数学的な二次方程式を意味しません。
 
@@ -325,7 +367,7 @@ NRA-IDEの基本境界式です。
 
 補完式は、EMA遅延、局所急変、数値積分、対象ドメイン固有の精度条件を補助する計算層です。
 
-補完式は第三の公理式ではなく、一次式または二次式を置き換えません。
+補完式は公理でも第三の正規IDE計算系でもなく、一次式または二次式を置き換えません。
 
 数式、変数、初期条件、数値条件は [`FORMULA.md`](./FORMULA.md) を参照してください。
 
@@ -343,9 +385,11 @@ NRA-IDEの整数位相ロックは、丸め誤差や残差を無監査のまま�
 
 ことを意味しません。
 
-既知の丸め、近似、廃棄残差は追跡可能な構造開示ログへ記録します。
+値と由来が確立した既知の数値的構造進行、丸め、近似、廃棄残差は`STRUCTURAL_DISCLOSURE_LOG`へ記録します。
 
 既知の近似は自動的に`CONFESSION`ではありません。`CONFESSION`は、不明・不正・曖昧・非有限・根拠不明な構造情報に限定されます。
+
+`CONFESSION`と`OUT_OF_DESCRIPTION_DOMAIN`は`INPUT_EXCEPTION_LOG`へ分離して記録します。既知の数値的進行として`STRUCTURAL_DISCLOSURE_LOG`へ混入させません。
 
 ---
 
@@ -423,9 +467,9 @@ PID制御、信号処理、統計、機械学習、既存の連続力学と比�
 
 [`ground/`](./ground/) は、観測事実、出所、物理制約、欠損値、閾値、実行使用可否を扱う接地・運用層です。
 
-`ground/`は新しい公理を追加する場所ではなく、上位正規文書の定義に従います。
+`ground/`は第二公理以降を追加する場所ではなく、上位正規文書の定義に従います。
 
-運用規則や実装規則は、公理、変数定義、境界順序、構造証言規則を変更できません。
+運用規則や実装規則は、唯一の公理、変数定義、IDE式分類、境界順序、構造証言規則を変更できません。
 
 ---
 
@@ -465,12 +509,25 @@ delta = accumulated deviation
 tau   = absorption thickness
 R     = boundary-approach ratio
 
-0 <= R_warn < R_op < R_irrev < 1.0
+0 <= R_warn < R_handoff < R_irrev < 1.0
+
+M_R   = 1 - R
+M_tau = tau - delta
 
 tau = 0
 → OUT_OF_DESCRIPTION_DOMAIN
 → R is undefined
-→ not FAIL_CLOSED
+→ affected evaluation is Fail-Closed
+
+Fail-Closed applies to
+→ HANDOFF_REQUIRED
+→ IRREVERSIBLE_TRANSITION
+→ RUPTURE_BOUNDARY
+→ CONFESSION
+→ OUT_OF_DESCRIPTION_DOMAIN
+
+BOUNDARY_WARNING alone
+→ does not require full suppression without a pre-fixed domain rule
 
 R < 1.0
 → structural testimony continues
@@ -489,4 +546,5 @@ Known boundary progression
 
 Unknown, invalid, ambiguous, non-finite, or unsupported information
 → CONFESSION
+→ INPUT_EXCEPTION_LOG
 ```

@@ -1,6 +1,6 @@
 <!-- FILE: README_20260711_0348.md -->
 <!-- TARGET: /README.md -->
-<!-- UPDATED: 2026-07-11 03:48 JST -->
+<!-- UPDATED: 2026-07-15 JST -->
 
 # NRA-IDE: Nomological Ring Axioms — Intensional Dynamics Engine
 
@@ -35,10 +35,10 @@ Even when autonomous judgment or autonomous action is stopped, Cause-Side observ
 NRA-IDE definitions must be read in the following order.
 
 1. [`theory/AXIOMS.md`](./theory/AXIOMS.md)  
-   Canonical definitions of the highest-level axioms, variables, boundary states, irreversible transition, and structural testimony
+   Canonical definition of the sole axiom, variables, IDE formula classification, boundary states, irreversible transition, and structural testimony
 
 2. [`theory/axioms.json`](./theory/axioms.json)  
-   Machine-readable canonical axiom definitions
+   Machine-readable synchronized representation of the sole canonical axiom and subordinate definitions
 
 3. [`theory/NRA-IDE_Foundational_Thesis_Bilingual.md`](./theory/NRA-IDE_Foundational_Thesis_Bilingual.md)  
    Foundational thesis in bilingual English and Japanese form
@@ -47,7 +47,7 @@ NRA-IDE definitions must be read in the following order.
    Logical separation specification for systems that include an LLM as an Effect-Side generative component
 
 5. [`theory/THEORY.md`](./theory/THEORY.md)  
-   Theory text integrating the axioms, formulas, and canonical boundary states
+   Theory text integrating the sole axiom, structural principles, IDE formulas, and canonical boundary states
 
 6. [`FORMULA.md`](./FORMULA.md)  
    Canonical specifications for formulas, variables, domains, initial conditions, numerical conditions, and complementary computation
@@ -55,16 +55,26 @@ NRA-IDE definitions must be read in the following order.
 7. [`llms.md`](./llms.md)  
    AI-oriented identification, interpretation, and operational gate
 
+8. Domain-specific rules
+
+9. Normative reference implementation that passes canonical conformance tests
+
+10. Other implementation code
+
+11. Comments, examples, and AI-generated explanations
+
 Lower-level documents, code, comments, and examples must not alter or override definitions in higher-level canonical documents.
 
 For the full repository layout, see [`REPOSITORY_OVERVIEW.md`](./REPOSITORY_OVERVIEW.md).
 
 ---
 
-## Core Axiom
+## Sole Nomological Ring Axiom
 
 > **Existence is Generation.**  
 > **存在は生成である。**
+
+This is the one and only Nomological Ring Axiom. No second or subsequent axiom exists. “Nomological Ring Axioms” remains the proper name abbreviated as NRA; it does not authorize adding further axioms.
 
 Existence is not treated as a fixed static entity. It appears as continuous generation carrying accumulated history.
 
@@ -74,9 +84,9 @@ Therefore, Fail-Closed or the stopping of autonomous action must not be interpre
 
 ---
 
-## Primary Boundary Formula
+## IDE Primary Formula — Basic Boundary Formula
 
-The primary formula of NRA-IDE is:
+The Primary Formula is the first canonical IDE calculation system. It is not a first axiom.
 
 $$
 R=\frac{\delta}{\tau}
@@ -102,6 +112,18 @@ $$
 \delta,\tau\in\mathbb{R}_{finite}
 $$
 
+The two remaining margins are distinct:
+
+$$
+M_R=1-R
+$$
+
+$$
+M_{\tau}=\tau-\delta
+$$
+
+$M_R$ is the dimensionless remaining ratio margin. $M_{\tau}$ is the remaining absorption margin and has the same unit as $\delta$ and $\tau$.
+
 ---
 
 ## Canonical Boundary Order
@@ -111,7 +133,7 @@ The canonical NRA-IDE boundary order is fixed as follows:
 $$
 0\le R_{\mathrm{warn}}
 <
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 <
 R_{\mathrm{irrev}}
 <
@@ -121,14 +143,14 @@ $$
 | Boundary | Canonical name | Role |
 |---|---|---|
 | $R_{\mathrm{warn}}$ | Boundary-Approach Warning Point | Disclose that the structure is approaching a boundary |
-| $R_{\mathrm{op}}$ | Pre-Boundary Human-Handoff Point | Stop new autonomous judgment and autonomous operation, and hand off to a qualified human |
+| $R_{\mathrm{handoff}}$ | Pre-Boundary Human-Handoff Point | Stop new autonomous judgment and autonomous operation, and present predefined fixed Effect-Side testimony for external human audit |
 | $R_{\mathrm{irrev}}$ | Irreversible-Transition Onset Threshold | Do not assume that the former structural state remains recoverable |
 | $R=1.0$ | Invariant Complete-Rupture Boundary | Stop ordinary generation and switch to final fixed testimony |
 
 Human handoff, irreversible-transition onset, and complete rupture are not the same event.
 
 $$
-R_{\mathrm{op}}
+R_{\mathrm{handoff}}
 \neq
 R_{\mathrm{irrev}}
 \neq
@@ -137,6 +159,8 @@ $$
 
 Concrete threshold values are defined for each target domain, but this order and these roles must not be changed.
 
+`R_handoff` is the canonical name. `R_op`, `Rop`, and `rop` are backward-compatibility aliases that normalize to the same threshold only; they do not define another boundary or state.
+
 ---
 
 ## Canonical State Classification
@@ -144,8 +168,8 @@ Concrete threshold values are defined for each target domain, but this order and
 | State | Condition | Required basic behavior |
 |---|---|---|
 | `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | Permit constrained autonomous operation and continue structural audit |
-| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{op}}$ | Disclose boundary approach, remaining margin, trend, and missing information |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{op}}\le R<R_{\mathrm{irrev}}$ | Stop new autonomous judgment and new autonomous operation, and hand off to a qualified human |
+| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$ | Disclose boundary approach, both remaining margins, trend, double-fluctuation status, and missing information |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | Stop new autonomous judgment and new autonomous operation, and present predefined fixed Effect-Side testimony for external human audit |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | Set the irreversible latch and prohibit normalization, recovery assumptions, and optimization proposals |
 | `RUPTURE_BOUNDARY` | $R\ge1.0$ | Stop ordinary generation and autonomous action, and switch to final fixed testimony |
 | `CONFESSION` | Required structural information is unknown, invalid, ambiguous, non-finite, or unsupported | Explicitly disclose the unresolved element, do not complete it by analogy, and stop the affected evaluation |
@@ -189,11 +213,25 @@ $$
 \text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
 $$
 
-This is not Fail-Closed.
-
 It must not be converted to $R=\infty$ or treated as a valid complete-rupture calculation.
 
+`OUT_OF_DESCRIPTION_DOMAIN` is distinct from a rupture computation. Because canonical $R$ is unavailable, its affected evaluation is subject to the Fail-Closed operational principle.
+
 By contrast, $\tau<0$, $\delta<0$, NaN, Infinity, unknown source, unknown unit, unknown observation time, unknown target, or unknown rule are treated as invalid or unknown structural inputs and therefore fall under `CONFESSION`.
+
+---
+
+## Fail-Closed Operational Principle
+
+Fail-Closed suppresses affected new autonomous judgment and operation for:
+
+- `HANDOFF_REQUIRED`
+- `IRREVERSIBLE_TRANSITION`
+- `RUPTURE_BOUNDARY`
+- `CONFESSION`
+- `OUT_OF_DESCRIPTION_DOMAIN`
+
+It does not suppress required fixed structural testimony or logging. `PERMIT` is not Fail-Closed. `BOUNDARY_WARNING` alone does not require complete output suppression unless a pre-fixed domain rule requires it.
 
 ---
 
@@ -212,14 +250,16 @@ Structural testimony may include:
 - Cause-Side observations
 - current $\delta$, $\tau$, and $R$
 - current boundary state
-- remaining absorption margin
+- remaining ratio margin $M_R$
+- remaining absorption margin $M_{\tau}$
 - trend
 - dominant side
 - missing information
+- double-fluctuation result, or `NOT_OBSERVABLE` with the missing reason
 - boundary warning
 - human-handoff notice
 - irreversible-transition notice
-- audit log
+- structural-disclosure log
 
 $$
 R\ge1.0
@@ -285,8 +325,10 @@ LLM CORE
         ↓
 output gate
         ↓
-structural testimony + permitted explanation
+canonical-state-controlled Effect-Side output
 ```
+
+Ordinary explanation is permitted only in states and fields allowed by the pre-fixed canonical behavior. Fixed Handoff or final testimony is not supplemented by newly generated free-form explanation.
 
 The boundary evaluator decides. The output gate enforces.
 
@@ -302,7 +344,7 @@ Even when LLM explanation is omitted or stopped, structural testimony is preserv
 
 ---
 
-## Primary, Secondary, and Complementary Formulas
+## IDE Formula Classification
 
 ### Primary Formula
 
@@ -310,11 +352,13 @@ $$
 R=\frac{\delta}{\tau}
 $$
 
-This is the basic boundary formula of NRA-IDE.
+This is the first canonical IDE calculation system, not an axiom.
 
 ### Secondary Formula
 
-To track asymmetric upper-side and lower-side variation that a static $\tau$ may not adequately capture, the Secondary Formula uses pre-fixed EMA rules and side-specific effective gate widths.
+The Secondary / Dual-Fluctuation Formula is the second canonical IDE calculation system, not a second axiom. Its canonical core covers upper-side and lower-side accumulated deviation, side-specific boundary-approach ratios, and simultaneous deviation increase with absorption-thickness decrease.
+
+Pre-fixed EMA rules, initial conditions, and side-specific shape transformations are auxiliary realizations of this calculation system. They are not independent canonical formulas or axioms.
 
 “Secondary Formula” indicates its definitional order and role within NRA-IDE. It does not mean a quadratic equation.
 
@@ -324,7 +368,7 @@ Changes in side-specific effective gate widths do not mean that the underlying t
 
 The complementary formula is a computational layer used to support EMA lag compensation, local rapid change, numerical integration, and domain-specific precision requirements.
 
-It is not a third axiom formula and does not replace either the Primary Formula or the Secondary Formula.
+It is neither an axiom nor a third canonical IDE calculation system, and it does not replace either the Primary Formula or the Secondary Formula.
 
 For equations, variables, initial conditions, and numerical conditions, see [`FORMULA.md`](./FORMULA.md).
 
@@ -340,9 +384,11 @@ It does not mean:
 all physical error is absent
 ```
 
-Known rounding, approximation, and discarded residuals are recorded in a traceable structural disclosure log.
+Known numeric structural progression, rounding, approximation, and discarded residuals are recorded in `STRUCTURAL_DISCLOSURE_LOG` when their values and provenance are established.
 
 Known approximation is not automatically `CONFESSION`. `CONFESSION` is limited to structural information that is unknown, invalid, ambiguous, non-finite, or unsupported.
+
+`CONFESSION` and `OUT_OF_DESCRIPTION_DOMAIN` are recorded separately in `INPUT_EXCEPTION_LOG`. They are not inserted into `STRUCTURAL_DISCLOSURE_LOG` as known numeric progression.
 
 ---
 
@@ -418,9 +464,9 @@ A numerical coincidence or threshold used in an individual demo must not be gene
 
 [`ground/`](./ground/) is the grounding and operational layer for observed facts, sources, physical constraints, missing values, thresholds, and execution-use eligibility.
 
-It is not a place for adding new axioms and must follow the higher-level canonical documents.
+It is not a place for adding a second or subsequent axiom and must follow the higher-level canonical documents.
 
-Operational rules and implementation rules must not alter the axioms, variable definitions, canonical boundary order, or structural-testimony rules.
+Operational rules and implementation rules must not alter the sole axiom, variable definitions, IDE formula classification, canonical boundary order, or structural-testimony rules.
 
 ---
 
@@ -462,12 +508,25 @@ delta = accumulated deviation
 tau   = absorption thickness
 R     = boundary-approach ratio
 
-0 <= R_warn < R_op < R_irrev < 1.0
+0 <= R_warn < R_handoff < R_irrev < 1.0
+
+M_R   = 1 - R
+M_tau = tau - delta
 
 tau = 0
 → OUT_OF_DESCRIPTION_DOMAIN
 → R is undefined
-→ not FAIL_CLOSED
+→ affected evaluation is Fail-Closed
+
+Fail-Closed applies to
+→ HANDOFF_REQUIRED
+→ IRREVERSIBLE_TRANSITION
+→ RUPTURE_BOUNDARY
+→ CONFESSION
+→ OUT_OF_DESCRIPTION_DOMAIN
+
+BOUNDARY_WARNING alone
+→ does not require full suppression without a pre-fixed domain rule
 
 R < 1.0
 → structural testimony continues
@@ -486,4 +545,5 @@ Known boundary progression
 
 Unknown, invalid, ambiguous, non-finite, or unsupported information
 → CONFESSION
+→ input exception log
 ```

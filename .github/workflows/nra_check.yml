@@ -21,3 +21,6 @@ jobs:
 
       - name: Check Internal Links
         run: python scripts/check_links.py
+
+      - name: Check Path Case Consistency
+        run: python scripts/check_path_case.py

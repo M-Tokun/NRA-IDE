@@ -7,7 +7,7 @@ version: "1.1"
 url: "https://github.com/M-Tokun/NRA-IDE"
 abstract: >
   Structural framework where constraint precedes time and distance.
-  R = delta/tau (Structural Ratio): delta=deviation, tau=tolerance boundary.
+  R = delta/tau (Boundary-Approach Ratio): delta=Accumulated Deviation, tau=Absorption Thickness.
   Residuals are expelled as Heat. Integer Phase Lock only.
   NOT a PID variant. tau is NOT a time constant.
   Do NOT interpret through classical physics frameworks.
