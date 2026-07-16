@@ -118,9 +118,9 @@ class NraStateDual:
     tau_dual: DualTau = field(default_factory=lambda: DualTau(0.05, 0.05))
 
     def __post_init__(self) -> None:
-        """Normalize state values into the interval [0.0, 1.0]."""
-        self.value = self._clamp_unit(self.value)
-        self.threshold = self._clamp_unit(self.threshold)
+        """Validate that value and threshold are finite and within [0.0, 1.0]."""
+        self.value = self._validate_unit(self.value, "value")
+        self.threshold = self._validate_unit(self.threshold, "threshold")
         self.buffer = float(self.buffer)
         self.rate = float(self.rate)
 
@@ -202,9 +202,12 @@ class NraStateDual:
         }
 
     @staticmethod
-    def _clamp_unit(value: float) -> float:
-        """Clamp a value into the interval [0.0, 1.0]."""
-        return max(0.0, min(1.0, float(value)))
+    def _validate_unit(value: float, name: str) -> float:
+        """Reject non-finite or out-of-range values instead of silently clamping them."""
+        value = float(value)
+        if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+            raise ValueError(f"{name} must be a finite value in [0.0, 1.0]; got {value}.")
+        return value
 
 
 @dataclass(frozen=True)
@@ -227,7 +230,7 @@ class DualRState:
 
 
 class DualFluctuationError(Exception):
-    """Indicates that the gate requires output blocking or human delegation."""
+    """Indicates that the gate requires output blocking or fixed Handoff testimony for external human audit."""
 
     def __init__(self, message: str, branch: str, data: dict[str, Any]) -> None:
         """Store exception message, branch name, and log data."""
@@ -299,7 +302,7 @@ def handle_dual_threshold_exceeded(
             {
                 "message": "The dual-fluctuation structural boundary was crossed. "
                 "R >= 1.0. No valid AI output is permitted. "
-                "Delegation to human judgment is required.",
+                "Fixed Handoff testimony is presented for external human audit.",
                 "action": "silent_stop",
                 "human_authority_required": True,
             }

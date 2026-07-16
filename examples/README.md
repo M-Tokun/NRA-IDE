@@ -38,7 +38,7 @@ $$R = \frac{\delta}{\tau}$$
 
 | **δ (delta)** | Deviation / fluctuation from constraint | Physically observed displacement or deviation |
 
-| **τ (tau)** | Tolerance thickness / allowable margin | Structurally defined threshold width |
+| **τ (tau)** | Absorption thickness / allowable margin | Structurally defined threshold width |
 
 | **R** | Structural ratio | Judgment value calculated as δ ÷ τ |
 

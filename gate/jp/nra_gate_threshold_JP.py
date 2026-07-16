@@ -53,7 +53,7 @@ class ThresholdGuardian:
             "level_1": {"name": "Zone A", "ratio_max": gate["zone_A"]["ratio_max"]},
             "level_2": {"name": "Zone B", "ratio_max": gate["zone_B"]["ratio_max"]},
             "level_3": {"name": "Zone C", "ratio_max": gate["zone_C"]["ratio_max"]},
-            "level_4": {"name": "Zone C", "ratio_max": gate["zone_C"]["ratio_max"]},
+            "level_4": {"name": "Zone Cを超えて", "ratio_max": gate["zone_C"]["ratio_max"]},
         }
 
     def evaluate(self, current_fluctuation: float, defined_thickness: float) -> SafetyStatus:
@@ -75,7 +75,7 @@ class ThresholdGuardian:
             # [ゾーンC] 0.70≤比率<1.00 / 動作=緊急停止
             return SafetyStatus(self.levels["level_3"]["name"], SafetyAction.EMERGENCY_BRAKE, ratio, "危機")
         else:
-            # [ゾーンD] 比率≥1.00 / 動作=停止
+            # [Zone Cを超えて] 比率≥1.00 / 動作=停止（4つ目のアルファベットZoneではない）
             return SafetyStatus(self.levels["level_4"]["name"], SafetyAction.SYSTEM_HALT, ratio, "停止")
 
 if __name__ == "__main__":

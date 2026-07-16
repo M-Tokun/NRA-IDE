@@ -14,7 +14,7 @@ import sys
 class NRAGateKernel:
     def __init__(self):
         # [不変] 権限=人間
-        self._AUTHORITY = "HUMAN_DOCTOR_OF_AGRICULTURE"
+        self._AUTHORITY = "QUALIFIED_HUMAN_DOMAIN_OPERATOR"
         # [不変] AI=分析のみ / 決定=禁止
         self._ROLE_LIMIT = "ANALYSIS_ONLY_NO_DECISION"
         # [動作] 謙虚=真 / 質問を待つ

@@ -117,9 +117,9 @@ class NraStateDual:
     tau_dual: DualTau = field(default_factory=lambda: DualTau(0.05, 0.05))
 
     def __post_init__(self) -> None:
-        """状態値を 0.0 から 1.0 の範囲へ正規化します。"""
-        self.value = self._clamp_unit(self.value)
-        self.threshold = self._clamp_unit(self.threshold)
+        """value と threshold が有限かつ 0.0〜1.0 の範囲内であることを検証します。"""
+        self.value = self._validate_unit(self.value, "value")
+        self.threshold = self._validate_unit(self.threshold, "threshold")
         self.buffer = float(self.buffer)
         self.rate = float(self.rate)
 
@@ -201,9 +201,12 @@ class NraStateDual:
         }
 
     @staticmethod
-    def _clamp_unit(value: float) -> float:
-        """値を 0.0 から 1.0 の範囲へ丸めます。"""
-        return max(0.0, min(1.0, float(value)))
+    def _validate_unit(value: float, name: str) -> float:
+        """非有限値や範囲外の値を、沈黙のうちに丸めず明示的に拒否します。"""
+        value = float(value)
+        if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+            raise ValueError(f"{name} must be a finite value in [0.0, 1.0]; got {value}.")
+        return value
 
 
 @dataclass(frozen=True)
@@ -226,7 +229,7 @@ class DualRState:
 
 
 class DualFluctuationError(Exception):
-    """二重ゆらぎゲートが出力停止または人間委譲を要求したことを表します。"""
+    """二重ゆらぎゲートが出力停止、または固定Handoff証言の外部人間監査への提示を要求したことを表します。"""
 
     def __init__(self, message: str, branch: str, data: dict[str, Any]) -> None:
         """例外メッセージ、分岐名、ログ用データを保持します。"""
@@ -296,7 +299,7 @@ def handle_dual_threshold_exceeded(
         error_data.update(
             {
                 "message": "二重ゆらぎの構造境界を超過しました。R >= 1.0。"
-                "有効な AI 出力は許可されません。人間判断へ委譲します。",
+                "有効な AI 出力は許可されません。固定Handoff証言を外部人間監査へ提示します。",
                 "action": "silent_stop",
                 "human_authority_required": True,
             }

@@ -53,7 +53,7 @@ class ThresholdGuardian:
             "level_1": {"name": "Zone A", "ratio_max": gate["zone_A"]["ratio_max"]},
             "level_2": {"name": "Zone B", "ratio_max": gate["zone_B"]["ratio_max"]},
             "level_3": {"name": "Zone C", "ratio_max": gate["zone_C"]["ratio_max"]},
-            "level_4": {"name": "Zone C", "ratio_max": gate["zone_C"]["ratio_max"]},
+            "level_4": {"name": "Beyond Zone C", "ratio_max": gate["zone_C"]["ratio_max"]},
         }
 
     def evaluate(self, current_fluctuation: float, defined_thickness: float) -> SafetyStatus:
@@ -75,7 +75,7 @@ class ThresholdGuardian:
             # [ZONE-C] 0.70≤RATIO<1.00 / ACTION=BRAKE
             return SafetyStatus(self.levels["level_3"]["name"], SafetyAction.EMERGENCY_BRAKE, ratio, "CRITICAL")
         else:
-            # [ZONE-D] RATIO≥1.00 / ACTION=HALT
+            # [BEYOND_ZONE_C] RATIO≥1.00 / ACTION=HALT (not a fourth lettered zone)
             return SafetyStatus(self.levels["level_4"]["name"], SafetyAction.SYSTEM_HALT, ratio, "HALT")
 
 if __name__ == "__main__":

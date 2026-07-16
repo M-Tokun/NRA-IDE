@@ -20,7 +20,7 @@ class SpatialContext:
 
     def measure_distortion(self) -> float:
         # [CRITICAL] DISTANCE_CALC=ALLOWED_HERE_ONLY
-        current_radius = (self.x**2 + self.y**2)**0.5
+        current_radius = (self.x**2 + self.y**2 + self.z**2)**0.5
         gap = current_radius - self.boundary_radius
         # [QUANTIZATION] NEGATIVE=ZERO
         return max(0.0, gap)
