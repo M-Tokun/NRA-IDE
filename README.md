@@ -210,7 +210,7 @@ $$
 $$
 \tau=0
 \Rightarrow
-\text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
+\text{OUT\_OF\_DESCRIPTION\_DOMAIN}
 $$
 
 It must not be converted to $R=\infty$ or treated as a valid complete-rupture calculation.

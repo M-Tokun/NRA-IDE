@@ -211,7 +211,7 @@ $$
 $$
 \tau=0
 \Rightarrow
-\text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
+\text{OUT\_OF\_DESCRIPTION\_DOMAIN}
 $$
 
 また、$R=\infty$へ置き換えたり、有効な完全破断計算として扱ったりしてはいけません。
