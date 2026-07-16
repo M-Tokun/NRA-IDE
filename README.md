@@ -207,11 +207,7 @@ $$
 R\text{ is undefined}
 $$
 
-$$
-\tau=0
-\Rightarrow
-\text{OUT\_OF\_DESCRIPTION\_DOMAIN}
-$$
+$\tau=0$ → `OUT_OF_DESCRIPTION_DOMAIN`
 
 It must not be converted to $R=\infty$ or treated as a valid complete-rupture calculation.
 

@@ -208,11 +208,7 @@ $$
 R\text{は定義不能}
 $$
 
-$$
-\tau=0
-\Rightarrow
-\text{OUT\_OF\_DESCRIPTION\_DOMAIN}
-$$
+$\tau=0$ → `OUT_OF_DESCRIPTION_DOMAIN`
 
 また、$R=\infty$へ置き換えたり、有効な完全破断計算として扱ったりしてはいけません。
 
