@@ -55,8 +55,8 @@ $$
 ![NRA-IDE 基礎式](./nra_ide_formula_basic.jpg)
 
 - **$\delta$ (Delta):** 宣言されたCause-Side観測または事前固定されたCause-Side変換から導く非負の蓄積ズレ。
-- **$\tau$ (Tau):** 正の吸収厚み。時定数ではない。$\tau=0$は`OUT_OF_DESCRIPTION_DOMAIN`。
-- **$R$:** 正規比$\delta/\tau$。残渣そのものではない。$R \ge 1$は`RUPTURE_BOUNDARY`であり、構造証言は最終固定となる。不正値・非有限値は`CONFESSION`。
+- **$\tau$ (Tau):** 正の吸収厚み。時定数ではない。$\tau=0$ は`OUT_OF_DESCRIPTION_DOMAIN`。
+- **$R$:** 正規比 $\delta/\tau$。残渣そのものではない。$R \ge 1$ は`RUPTURE_BOUNDARY`であり、構造証言は最終固定となる。不正値・非有限値は`CONFESSION`。
 
 二つの残余余白は次です。
 
@@ -68,7 +68,7 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-$M_R$は無次元です。$M_{\tau}$は$\delta$および$\tau$と同じ単位を持ちます。
+$M_R$ は無次元です。$M_{\tau}$ は $\delta$ および $\tau$ と同じ単位を持ちます。
 
 破断境界より前は、運用閾値によって`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`を区別します。Effect-SideまたはLLM出力は、$\delta$、$\tau$、閾値、判定状態を書き換えられません。
 

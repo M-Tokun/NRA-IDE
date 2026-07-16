@@ -1,4 +1,4 @@
-﻿# NRA-IDE and Quantum Computing / Methods for Describing Existence
+# NRA-IDE and Quantum Computing / Methods for Describing Existence
 
 ## Complete Conversation Record — O1 to O83
 

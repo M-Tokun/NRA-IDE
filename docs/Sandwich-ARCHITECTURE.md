@@ -12,7 +12,7 @@ NRA-IDEを実装へ配置するとき、Cause-Sideの構造権威、決定論的
 
 ## 1. 構造の必然：なぜ分離するのか
 
-構造観測、状態分類、自然言語生成を一つの変更可能なロジックへまとめると、Effect-Sideの評価や生成結果がCause-Sideの$\delta$、$\tau$、閾値へ逆流する経路を作り得ます。そこで、権威とデータ経路を三つに分離します。
+構造観測、状態分類、自然言語生成を一つの変更可能なロジックへまとめると、Effect-Sideの評価や生成結果がCause-Sideの $\delta$、$\tau$、閾値へ逆流する経路を作り得ます。そこで、権威とデータ経路を三つに分離します。
 
 ![NRA-IDE Sandwich Architecture](./TOP_sandwich.png)
 
@@ -28,27 +28,27 @@ NRA-IDEを実装へ配置するとき、Cause-Sideの構造権威、決定論的
 
 ### 2.2 IDE Structural Evaluation
 
-- **役割:** 正規比$R=\delta/\tau$と固定済み閾値から正規状態を決定し、構造証言を作る。
+- **役割:** 正規比 $R=\delta/\tau$ と固定済み閾値から正規状態を決定し、構造証言を作る。
 - **境界:** `PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`を境界同値込みで分類する。
-- **例外:** $\tau=0$は`OUT_OF_DESCRIPTION_DOMAIN`、負値・非有限値・閾値不正は`CONFESSION`。
-- **余白:** 無次元の残存比率余白$M_R=1-R$と、$\delta$・$\tau$と同じ単位の残存吸収余白$M_{\tau}=\tau-\delta$を区別する。
+- **例外:** $\tau=0$ は`OUT_OF_DESCRIPTION_DOMAIN`、負値・非有限値・閾値不正は`CONFESSION`。
+- **余白:** 無次元の残存比率余白 $M_R=1-R$ と、$\delta$ ・ $\tau$ と同じ単位の残存吸収余白 $M_{\tau}=\tau-\delta$ を区別する。
 - **証言:** 二重ゆらぎ欄は常時存在し、観測不能なら`NOT_OBSERVABLE`と理由を返す。不可逆ラッチは後のR低下で解除しない。
 - **ログ:** 既知の数値的進行は`STRUCTURAL_DISCLOSURE_LOG`へ、`CONFESSION`と`OUT_OF_DESCRIPTION_DOMAIN`は`INPUT_EXCEPTION_LOG`へ分離して記録する。
 
 ### 2.3 Effect-Side / LLM and Delivery Gate
 
 - **役割:** IDEが決定した状態と構造証言を、説明・翻訳・提示へ反映する。
-- **制約:** 生成済みテキストの意味評価から$\delta$、$\tau$、閾値、状態を再計算しない。既知の警告や委譲を通常説明へ弱めない。
-- **証言切替:** $R<1$は継続構造証言、$R\ge1$は最終固定証言。`RUPTURE_BOUNDARY`は自由形式生成で上書きしない。
+- **制約:** 生成済みテキストの意味評価から $\delta$、$\tau$、閾値、状態を再計算しない。既知の警告や委譲を通常説明へ弱めない。
+- **証言切替:** $R<1$は継続構造証言、$R\ge1$ は最終固定証言。`RUPTURE_BOUNDARY`は自由形式生成で上書きしない。
 - **警告:** `BOUNDARY_WARNING`だけでは、事前固定されたドメイン規則が要求しない限り、Effect-Side出力を全面抑止しない。
 
 ---
 
 ## 3. 配置上の注意
 
-- `HANDOFF_REQUIRED`は$R\ge R_{\mathrm{handoff}}$かつ$R<R_{\mathrm{irrev}}$の運用状態であり、$R=1$の別名ではない。
-- `IRREVERSIBLE_TRANSITION`は$R\ge R_{\mathrm{irrev}}$かつ$R<1$でラッチされる。
-- `RUPTURE_BOUNDARY`は$R\ge1$であり、最終固定証言へ切り替える。
+- `HANDOFF_REQUIRED`は $R\ge R_{\mathrm{handoff}}$ かつ $R<R_{\mathrm{irrev}}$ の運用状態であり、$R=1$ の別名ではない。
+- `IRREVERSIBLE_TRANSITION`は $R\ge R_{\mathrm{irrev}}$ かつ$R<1$でラッチされる。
+- `RUPTURE_BOUNDARY`は $R\ge1$ であり、最終固定証言へ切り替える。
 - Fail-Closedは状態名ではない。`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`で、影響する新規自律判断と自律操作を抑止する運用原則である。
 - Fail-Closedは完全沈黙を意味せず、必要な固定構造証言とログを抑止しない。`PERMIT`には適用せず、`BOUNDARY_WARNING`だけでは全面抑止しない。
 - 多層配置は安全性を単独で保証しない。対象領域の観測、閾値根拠、故障経路、人間委譲を別途検証する。

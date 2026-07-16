@@ -57,7 +57,7 @@ $$
 \delta,\tau \in \mathbb{R}
 $$
 
-かつ、$\delta$と$\tau$は有限値でなければならない。
+かつ、$\delta$ と $\tau$ は有限値でなければならない。
 
 Both $\delta$ and $\tau$ must be finite.
 
@@ -67,7 +67,7 @@ $$
 R\ \text{is undefined}
 $$
 
-$\tau=0$を無限大の$R$へ置換してはならない。
+$\tau=0$ を無限大の $R$ へ置換してはならない。
 
 When $\tau=0$, $R$ must not be replaced by infinity.
 
@@ -87,7 +87,7 @@ $$
 M_{\tau} = \tau - \delta
 $$
 
-- $M_{\tau}$：残存吸収余白（$\delta$および$\tau$と同じ単位）
+- $M_{\tau}$：残存吸収余白（$\delta$ および $\tau$ と同じ単位）
 - $M_{\tau}$: remaining absorption margin (same unit as $\delta$ and $\tau$)
 
 一次式との関係は次である。
@@ -157,7 +157,7 @@ R \to 1.0^{-}
 S \to \infty
 $$
 
-$S$は単位付きの残存吸収余白$M_{\tau}$の逆数である。無次元の$M_R$の逆数ではない。
+$S$ は単位付きの残存吸収余白 $M_{\tau}$ の逆数である。無次元の $M_R$ の逆数ではない。
 
 $S$ is the inverse of the dimensional remaining absorption margin $M_{\tau}$, not the inverse of dimensionless $M_R$.
 
@@ -181,9 +181,9 @@ $$
 \delta_{\mathrm{lower}}(n) \ge 0
 $$
 
-$\delta_{\mathrm{upper}}$は、基準から上側方向へ生じたCause-Side蓄積ズレ成分である。
+$\delta_{\mathrm{upper}}$ は、基準から上側方向へ生じたCause-Side蓄積ズレ成分である。
 
-$\delta_{\mathrm{lower}}$は、基準から下側方向へ生じたCause-Side蓄積ズレ成分である。
+$\delta_{\mathrm{lower}}$ は、基準から下側方向へ生じたCause-Side蓄積ズレ成分である。
 
 $\delta_{\mathrm{upper}}$ is the Cause-Side accumulated-deviation component in the upper direction from the reference state.
 
@@ -224,7 +224,7 @@ $$
 0 < \alpha_l \le 1
 $$
 
-$\alpha_u$と$\alpha_l$は独立に設定できる。
+$\alpha_u$ と $\alpha_l$ は独立に設定できる。
 
 $\alpha_u$ and $\alpha_l$ may be set independently.
 
@@ -274,7 +274,7 @@ h_{\mathrm{lower}}\!\left(
 \right)
 $$
 
-$h_{\mathrm{upper}}$と$h_{\mathrm{lower}}$は、評価開始前に固定された側別形状変換関数である。
+$h_{\mathrm{upper}}$ と $h_{\mathrm{lower}}$ は、評価開始前に固定された側別形状変換関数である。
 
 $h_{\mathrm{upper}}$ and $h_{\mathrm{lower}}$ are directional shape-transformation functions fixed before evaluation begins.
 
@@ -298,9 +298,9 @@ $$
 \tau_{\mathrm{lower}} > 0
 $$
 
-$\tau_{\mathrm{upper}}$と$\tau_{\mathrm{lower}}$は、動的評価に用いる側別有効ゲート幅である。
+$\tau_{\mathrm{upper}}$ と $\tau_{\mathrm{lower}}$ は、動的評価に用いる側別有効ゲート幅である。
 
-これらは、基礎吸収厚み$\tau$そのものの自然回復を意味しない。
+これらは、基礎吸収厚み $\tau$ そのものの自然回復を意味しない。
 
 $\tau_{\mathrm{upper}}$ and $\tau_{\mathrm{lower}}$ are side-specific effective gate widths used for dynamic evaluation.
 
@@ -366,9 +366,9 @@ R_{\mathrm{dir}}
 \right)
 $$
 
-$R_{\mathrm{dir}}$は側別評価の補助集約量であり、正規の境界接近比$R=\delta/\tau$ではない。
+$R_{\mathrm{dir}}$ は側別評価の補助集約量であり、正規の境界接近比 $R=\delta/\tau$ ではない。
 
-$R_{\mathrm{dir}}$を正規状態分類へ接続する場合、評価前に固定されたCause-Sideのドメイン変換規則によって、正規の$\delta$と$\tau$を定めなければならない。
+$R_{\mathrm{dir}}$ を正規状態分類へ接続する場合、評価前に固定されたCause-Sideのドメイン変換規則によって、正規の $\delta$ と $\tau$ を定めなければならない。
 
 $R_{\mathrm{dir}}$ is an auxiliary aggregate for directional evaluation, not the canonical boundary-approach ratio $R=\delta/\tau$.
 
@@ -502,11 +502,11 @@ $$
 k > 0
 $$
 
-$x$、$x_{\mathrm{exact}}$、$r$、$F_{\mathrm{IDE}}(x)$、$\Phi(x)$は有限値でなければならない。
+$x$、$x_{\mathrm{exact}}$、$r$、$F_{\mathrm{IDE}}(x)$、$\Phi(x)$ は有限値でなければならない。
 
 $x$, $x_{\mathrm{exact}}$, $r$, $F_{\mathrm{IDE}}(x)$, and $\Phi(x)$ must be finite.
 
-$x_{\mathrm{exact}}$、$F_{\mathrm{IDE}}(x)$、$\Phi(x)$および各パラメータは、領域固有の根拠、適用範囲、不確かさ、検証方法を計算開始前に固定し、追跡可能にしなければならない。
+$x_{\mathrm{exact}}$、$F_{\mathrm{IDE}}(x)$、$\Phi(x)$ および各パラメータは、領域固有の根拠、適用範囲、不確かさ、検証方法を計算開始前に固定し、追跡可能にしなければならない。
 
 For $x_{\mathrm{exact}}$, $F_{\mathrm{IDE}}(x)$, $\Phi(x)$, and each parameter, domain-specific evidence, applicability, uncertainty, and validation method must be fixed before computation and remain traceable.
 
@@ -527,7 +527,7 @@ G(r)
 \frac{r|r|}{k}
 $$
 
-したがって、$G(r)$は$r$に対して二次的に小さくなる。
+したがって、$G(r)$は $r$ に対して二次的に小さくなる。
 
 Therefore, $G(r)$ becomes second-order small with respect to $r$.
 
@@ -560,7 +560,7 @@ $$
 G(r)\sim r
 $$
 
-$G(r)$は奇関数であり、$r$の符号を保持する。大残差で有界値へ飽和せず、漸近的に線形かつ非有界である。
+$G(r)$は奇関数であり、$r$ の符号を保持する。大残差で有界値へ飽和せず、漸近的に線形かつ非有界である。
 
 $G(r)$ is odd and preserves the sign of $r$. For large residuals it is asymptotically linear and unbounded; it does not saturate to a bounded value.
 
@@ -592,7 +592,7 @@ $$
 \dot{x}(0)=v_0
 $$
 
-$x_0$と$v_0$は計算開始前に固定する。
+$x_0$ と $v_0$ は計算開始前に固定する。
 
 $x_0$ and $v_0$ must be fixed before computation begins.
 
@@ -604,7 +604,7 @@ $x_0$ and $v_0$ must be fixed before computation begins.
 数値積分を用いる場合、次を事前固定する。
 
 - 積分法  
-- 時間刻み$\Delta t$  
+- 時間刻み $\Delta t$  
 - 最大反復回数  
 - 収束判定  
 - 発散判定  
@@ -659,12 +659,12 @@ A computation producing non-finite values must not be propagated to the next ste
 # 6. 計算入力規則  
 # 6. Computational Input Rules
 
-$\delta$、$\tau$、$\delta_{\mathrm{upper}}$、$\delta_{\mathrm{lower}}$、$x_{\mathrm{exact}}$は、次のいずれかから取得する。
+$\delta$、$\tau$、$\delta_{\mathrm{upper}}$、$\delta_{\mathrm{lower}}$、$x_{\mathrm{exact}}$ は、次のいずれかから取得する。
 
 1. 直接のCause-Side観測  
 2. 計算開始前に固定されたCause-Side変換規則  
 
-各入力には、取得元、取得時刻または版、単位、不確かさ、適用範囲および変換履歴を結び付ける。$x_{\mathrm{exact}}$という記号名は真値保証を意味せず、参照状態としての妥当性を領域固有の証拠で検証しなければならない。
+各入力には、取得元、取得時刻または版、単位、不確かさ、適用範囲および変換履歴を結び付ける。$x_{\mathrm{exact}}$ という記号名は真値保証を意味せず、参照状態としての妥当性を領域固有の証拠で検証しなければならない。
 
 $\delta$, $\tau$, $\delta_{\mathrm{upper}}$, $\delta_{\mathrm{lower}}$, and $x_{\mathrm{exact}}$ must be obtained from either:
 

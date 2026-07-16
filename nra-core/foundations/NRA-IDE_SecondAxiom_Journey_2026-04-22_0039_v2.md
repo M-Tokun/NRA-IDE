@@ -9,7 +9,7 @@
 >
 > **現行分類:** 第二公理は存在しない。律環公理は「存在は生成である。」の一つだけである。本稿が「第二公理」と呼ぶ「遊びのない厳密さは崩壊する」は、現行正典ではNRAの構造持続原則であり、公理ではない。一次式と二次式（二重ゆらぎ式）は公理ではなく、IDEの二つの正典計算系である。
 >
-> **旧仕様:** 本文にある二公理体系、`axioms.json`への第二公理追加計画、$R$を「遊びの使用率」とする説明、`tau=0`をFail-Closed対象外とする分類、`R>=1`だけでFail-Closedを説明する記述は失効している。現行状態は`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`の7状態である。
+> **旧仕様:** 本文にある二公理体系、`axioms.json`への第二公理追加計画、$R$ を「遊びの使用率」とする説明、`tau=0`をFail-Closed対象外とする分類、`R>=1`だけでFail-Closedを説明する記述は失効している。現行状態は`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`の7状態である。
 >
 > **使用禁止:** 以下の量子、構造、生物、機械学習等に関する主張を、実証済み法則、現行仕様、正規実装要件、適合証拠、安全証明、測定結果、または特定ドメインでの有効性根拠として使用してはならない。`SecondAxiom`というファイル名、本文中の「確定」「最終版」、実行可能なコードやHTML、GitHub記録は、それらを立証しない。
 >

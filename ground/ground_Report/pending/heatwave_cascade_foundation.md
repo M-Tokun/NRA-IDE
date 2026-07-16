@@ -75,7 +75,7 @@ $$\delta_{water,shared}(t) = Q_{river}(t) - Q_{eco,min} - \sum_i q_i(t)$$
 
 $Q_{eco,min}$（環境基準流量）は法定固定値。差し引き後の残量に複数需要が競合する。
 
-熱波下では $q_{nuclear}$・$q_{agri}$・$q_{city}$ が全項目同時に増加する。
+熱波下では $q_{nuclear}$ ・ $q_{agri}$ ・ $q_{city}$ が全項目同時に増加する。
 
 $$x_{15} = \text{上下流位置} \quad \text{[構造変数・固定]}$$
 

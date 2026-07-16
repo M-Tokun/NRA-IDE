@@ -1,4 +1,4 @@
-﻿
+
 
 # 律環公理 (Nomological Ring Axioms: NRA) 定義・解説・反証集
 

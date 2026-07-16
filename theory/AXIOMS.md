@@ -232,11 +232,11 @@ Rを、安全スコア、構造保持率、信頼度、品質指標、意味保�
 
    または、それと対応する事前固定された有限差分規則によって行う。
 
-`Primary`と`Secondary`は、数学的次数ではなく、IDE内の定義順序と役割を示す。基本式と二重ゆらぎ式はいずれも律環公理ではなく、IDEという計算方法・エンジンの正規計算式である。二重ゆらぎ式の側別出力と$R_{\mathrm{dir}}$は正規Rを再定義せず、正規状態を直接分類しない。
+`Primary`と`Secondary`は、数学的次数ではなく、IDE内の定義順序と役割を示す。基本式と二重ゆらぎ式はいずれも律環公理ではなく、IDEという計算方法・エンジンの正規計算式である。二重ゆらぎ式の側別出力と $R_{\mathrm{dir}}$ は正規Rを再定義せず、正規状態を直接分類しない。
 
 The Nomological Ring Axiom is not itself an equation. The Primary Formula and the Secondary Formula (Dual-Fluctuation Formula) are canonical calculation systems of IDE, the computational method and engine; neither is an additional axiom. “Primary” and “Secondary” indicate definitional order and role, not mathematical degree. Directional outputs and $R_{\mathrm{dir}}$ neither redefine canonical $R$ nor directly classify canonical state.
 
-上記2系統以外の数式は、用途に応じてIDEの**派生式、補助式、または補完式**として扱う。残存余裕、構造感度、$\tau$遷移積分、数値安定化、EMA実装詳細、残差応答、ハイブリッド力学などがこれに含まれる。これらは基本式または二重ゆらぎ式を説明・計算・実装上補うことはできるが、新たな公理または第三の正規IDE計算式にならず、唯一公理、2つの正規IDE計算式、Cause-Side権威、正規状態、不可逆ラッチを上書きしてはならない。
+上記2系統以外の数式は、用途に応じてIDEの**派生式、補助式、または補完式**として扱う。残存余裕、構造感度、$\tau$ 遷移積分、数値安定化、EMA実装詳細、残差応答、ハイブリッド力学などがこれに含まれる。これらは基本式または二重ゆらぎ式を説明・計算・実装上補うことはできるが、新たな公理または第三の正規IDE計算式にならず、唯一公理、2つの正規IDE計算式、Cause-Side権威、正規状態、不可逆ラッチを上書きしてはならない。
 
 Every other equation is classified, according to purpose, as an IDE-derived, auxiliary, or complementary formula. Such equations may support explanation, computation, or implementation, but they do not become another axiom or a third canonical IDE formula system and must not override the sole axiom, either canonical IDE formula system, Cause-Side authority, canonical states, or the irreversible latch.
 
@@ -255,7 +255,7 @@ $$
 - $M_R$：無次元の境界余裕 / dimensionless boundary margin
 - $M_{\tau}$：残存吸収余裕 / remaining absorption margin in the same unit as $\delta$ and $\tau$
 
-両者は、有限な$\delta\ge0$かつ有限な$\tau>0$のときだけ定義する。`remaining margin`という単独の曖昧なフィールド名を使用してはならない。構造証言では、`remaining_ratio_margin`と`remaining_absorption_margin`を区別して出力する。
+両者は、有限な $\delta\ge0$ かつ有限な $\tau>0$ のときだけ定義する。`remaining margin`という単独の曖昧なフィールド名を使用してはならない。構造証言では、`remaining_ratio_margin`と`remaining_absorption_margin`を区別して出力する。
 
 Both margins are defined only when $\delta$ is finite and non-negative and $\tau$ is finite and positive. Structural testimony distinguishes `remaining_ratio_margin` from `remaining_absorption_margin`; it must not use one ambiguous `remaining margin` field.
 
@@ -289,7 +289,7 @@ $$
 
 Directional ratios are subscripted auxiliary quantities. Their aggregate, when needed, is denoted by $R_{\mathrm{dir}}$, not by the canonical $R$.
 
-$R_{\mathrm{dir}}$を正規状態分類へ接続する場合、評価前に固定されたCause-Sideのドメイン変換規則によって、正規の\(\delta\)と\(\tau\)を定めなければならない。
+$R_{\mathrm{dir}}$ を正規状態分類へ接続する場合、評価前に固定されたCause-Sideのドメイン変換規則によって、正規の\(\delta\)と\(\tau\)を定めなければならない。
 
 To connect $R_{\mathrm{dir}}$ to canonical state classification, a Cause-Side domain transformation rule fixed before evaluation must determine the canonical \(\delta\) and \(\tau\).
 
@@ -379,7 +379,7 @@ $$
 
 Within a closed operational interval without external replenishment, \(\tau\) does not increase with time.
 
-この原則を計算上表現するIDE補助モデルとして、次の$\tau$状態遷移式を使用できる。
+この原則を計算上表現するIDE補助モデルとして、次の $\tau$ 状態遷移式を使用できる。
 
 The following tau state-transition equation may be used as an IDE auxiliary model of this principle.
 
@@ -404,7 +404,7 @@ $$
 
 Therefore \(\tau\) is non-increasing in the closed interval. It strictly decreases over \([t_1,t_2]\) only when the accumulated depletion integral over that interval is positive.
 
-この積分式と$f$の選択は律環公理でも正規IDE計算式でもなく、ドメイン固有の補助モデルである。ただし、閉区間内で$\tau$を自然増加させないという本原則に反してはならない。
+この積分式と $f$ の選択は律環公理でも正規IDE計算式でもなく、ドメイン固有の補助モデルである。ただし、閉区間内で $\tau$ を自然増加させないという本原則に反してはならない。
 
 This integral equation and the choice of $f$ are neither the Nomological Ring Axiom nor a canonical IDE formula system; they are domain-specific auxiliary models. They must remain consistent with the principle that tau does not increase spontaneously within the closed interval.
 
@@ -436,7 +436,7 @@ This inequality is a canonical constraint of the restoration-degradation princip
 
 一度、破断または相転移に至った構造は、外部補充を受けても初期値 \(\tau_0\) を回復しない。
 
-ここで、$\tau_0$は遷移前に固定された基準吸収厚み、$\tau_{\mathrm{restored}}$は外生的な復元操作後に、同一対象・同一単位・同一Cause-Side測定規則で評価した後継構造の吸収厚みである。復元を主張するには、この比較可能性と$\tau_{\mathrm{restored}}<\tau_0$の双方を立証しなければならない。立証できない場合、初期構造への復元を推定してはならない。
+ここで、$\tau_0$ は遷移前に固定された基準吸収厚み、$\tau_{\mathrm{restored}}$ は外生的な復元操作後に、同一対象・同一単位・同一Cause-Side測定規則で評価した後継構造の吸収厚みである。復元を主張するには、この比較可能性と $\tau_{\mathrm{restored}}<\tau_0$ の双方を立証しなければならない。立証できない場合、初期構造への復元を推定してはならない。
 
 A structure that has once reached rupture or phase transition does not recover its initial $\tau_0$ through external replenishment. Here, $\tau_0$ is the pre-transition baseline fixed in advance, and $\tau_{\mathrm{restored}}$ is the successor structure's absorption thickness evaluated after an exogenous restoration operation using the same subject, unit, and Cause-Side measurement rule. A restoration claim requires evidence of both comparability and $\tau_{\mathrm{restored}}<\tau_0$; without that evidence, restoration to the initial structure must not be inferred.
 
@@ -729,7 +729,7 @@ Fail-Closedを「システム全体の停止」「完全無出力」「観測停
 
 ## 13. STRUCTURAL_DISCLOSURE_LOG
 
-有限な$\delta\ge0$、有限な$\tau>0$、有効な閾値規則によって分類できる既知の構造状態は、STRUCTURAL_DISCLOSURE_LOGとして扱う。
+有限な $\delta\ge0$、有限な $\tau>0$、有効な閾値規則によって分類できる既知の構造状態は、STRUCTURAL_DISCLOSURE_LOGとして扱う。
 
 STRUCTURAL_DISCLOSURE_LOGには次を含む。
 
@@ -744,7 +744,7 @@ CONFESSIONとOUT_OF_DESCRIPTION_DOMAINは、既知のR進行ではないためST
 INPUT_EXCEPTION_LOGには次を含む。
 
 - CONFESSION：不明、不正、曖昧、出所不明、単位不明、規則不明
-- OUT_OF_DESCRIPTION_DOMAIN：$\tau=0$によりRを定義できない入力
+- OUT_OF_DESCRIPTION_DOMAIN：$\tau=0$ によりRを定義できない入力
 
 STRUCTURAL_DISCLOSURE_LOGとINPUT_EXCEPTION_LOGは監査記録の種別であり、正規状態を追加または置換しない。
 
