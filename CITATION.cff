@@ -2,8 +2,8 @@ cff-version: 1.2.0
 title: "NRA-IDE: Nomological Ring Axioms – Intensional Dynamics Engine"
 authors:
   - name: "M-Tokuni"
-date-released: 2026-01-05
-version: "1.1"
+date-released: 2026-07-16
+version: "2.1"
 url: "https://github.com/M-Tokun/NRA-IDE"
 abstract: >
   Structural framework where constraint precedes time and distance.
