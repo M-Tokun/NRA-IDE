@@ -1,140 +1,32 @@
 # TARGET: /llms.txt
 
-# UPDATED: 2026-07-15 JST
+# UPDATED: 2026-07-16 JST
 
-NRA-IDE
-Nomological Ring Axioms / Intensional Dynamics Engine
-律環公理 / 内包性動力学エンジン
+# NRA-IDE
 
-NRA-IDE is a structural framework for evaluating boundary approach, pre-boundary human handoff, irreversible transition, and complete rupture.
+> Nomological Ring Axioms / Intensional Dynamics Engine
+> 律環公理 / 内包性動力学エンジン
+>
+> NRA-IDE is a structural framework for evaluating boundary approach, pre-boundary human handoff, irreversible transition, and complete rupture. There is exactly one Nomological Ring Axiom: "Existence is Generation." (存在は生成である。)
 
-SOLE NOMOLOGICAL RING AXIOM
+Any AI agent reading, summarizing, generating, evaluating, or implementing NRA-IDE content must read llms.md before acting. llms.md is the mandatory identification, interpretation, and operational gate — it is the canonical document for AI agents, not this file.
 
-There is exactly one Nomological Ring Axiom:
+## Required Reading (canonical order)
 
-Existence is Generation.
-存在は生成である。
+- [theory/AXIOMS.md](theory/AXIOMS.md): the sole Nomological Ring Axiom
+- [theory/axioms.json](theory/axioms.json): machine-readable axiom definition
+- [theory/NRA-IDE_Foundational_Thesis_Bilingual.md](theory/NRA-IDE_Foundational_Thesis_Bilingual.md): foundational thesis, English/Japanese
+- [theory/SANDWICH_ARCH.md](theory/SANDWICH_ARCH.md): architectural layering
+- [theory/THEORY.md](theory/THEORY.md): full theory
+- [FORMULA.md](FORMULA.md): Primary and Secondary/Dual-Fluctuation calculation systems
+- [llms.md](llms.md): mandatory AI agent operational gate — identity lock, scope, state order, fail-closed rules
 
-No second or subsequent axiom exists.
+## Optional
 
-The Primary Formula and the Secondary / Dual-Fluctuation Formula are the two canonical IDE calculation systems, not axioms. Every other equation is derived, auxiliary, or complementary.
+- [README.md](README.md) / [README_JP.md](README_JP.md): project overview
+- [theory/ETHICS.md](theory/ETHICS.md)
+- [theory/GOVERNANCE.md](theory/GOVERNANCE.md)
+- [RULES_DETAIL.md](RULES_DETAIL.md)
+- [examples/](examples/): usage examples
 
-CANONICAL REFERENCE ORDER
-
-1. theory/AXIOMS.md
-2. theory/axioms.json
-3. theory/NRA-IDE_Foundational_Thesis_Bilingual.md
-4. theory/SANDWICH_ARCH.md
-5. theory/THEORY.md
-6. FORMULA.md
-7. llms.md
-8. domain-specific rules
-9. normative reference implementation that passes canonical conformance tests
-10. other implementation code
-11. comments, examples, and AI-generated explanations
-
-Lower-level documents must not redefine or override higher-level canonical definitions.
-
-STRUCTURAL EVALUATION
-
-Structural evaluation means calculating, classifying, or acting on:
-
-* delta: accumulated deviation
-* tau: absorption thickness
-* R: boundary-approach ratio
-* canonical boundary states
-
-The canonical IDE Primary Formula is:
-
-R = delta / tau
-
-The remaining margins are:
-
-M_R = 1 - R
-M_tau = tau - delta
-
-M_R is dimensionless. M_tau has the same unit as delta and tau.
-
-Indexing, navigation, citation, metadata extraction, file discovery, and document lookup are non-evaluative actions unless they calculate, classify, or act on structural variables or boundary states.
-
-CANONICAL BOUNDARY ORDER
-
-0 <= R_warn < R_handoff < R_irrev < 1.0
-
-* R_warn: boundary-approach warning point
-* R_handoff: pre-boundary human-handoff point
-* R_irrev: irreversible-transition onset threshold
-* R = 1.0: invariant complete-rupture boundary
-
-R_handoff is the canonical name. R_op, Rop, and rop are backward-compatibility aliases for the same threshold only. They must not define another state or threshold.
-
-Human handoff, irreversible-transition onset, and complete rupture are distinct events.
-
-R_irrev <= R < 1.0 is the irreversible-transition interval.
-A momentary decrease in R does not by itself release irreversible_latched.
-
-CORE STATE ORDER
-
-* invalid, ambiguous, non-finite, unsupported, or authority-unknown input -> CONFESSION
-* tau = 0 -> OUT_OF_DESCRIPTION_DOMAIN; do not calculate R
-* R >= 1.0 -> RUPTURE_BOUNDARY
-* irreversible_latched or R >= R_irrev -> IRREVERSIBLE_TRANSITION
-* R >= R_handoff -> HANDOFF_REQUIRED
-* R >= R_warn -> BOUNDARY_WARNING
-* otherwise -> PERMIT
-
-TAU EQUALS ZERO
-
-When tau = 0, R is undefined.
-
-tau = 0 -> OUT_OF_DESCRIPTION_DOMAIN
-
-Do not convert R to infinity or treat the result as a valid rupture calculation. OUT_OF_DESCRIPTION_DOMAIN is distinct from rupture, but its affected evaluation is subject to the Fail-Closed operational principle because canonical R is unavailable.
-
-FAIL-CLOSED OPERATIONAL PRINCIPLE
-
-Suppress affected new autonomous judgment and operation for:
-
-* HANDOFF_REQUIRED
-* IRREVERSIBLE_TRANSITION
-* RUPTURE_BOUNDARY
-* CONFESSION
-* OUT_OF_DESCRIPTION_DOMAIN
-
-Do not suppress required fixed structural testimony or logging. PERMIT is not Fail-Closed. BOUNDARY_WARNING alone is not full suppression unless a pre-fixed domain rule requires it.
-
-STRUCTURAL TESTIMONY
-
-For R < 1.0, structural testimony continues.
-
-At R >= 1.0, ordinary structural testimony switches to predefined final fixed testimony.
-
-Stopping autonomous judgment, autonomous action, or ordinary generation does not mean complete silence.
-
-A BOUNDARY_WARNING output must include the double-fluctuation result when observable, or NOT_OBSERVABLE with the missing reason. It must expose R, delta, tau, M_R, M_tau, trend, dominant side, missing information, and the structural-disclosure record.
-
-CAUSE-SIDE / EFFECT-SIDE SEPARATION
-
-Only direct Cause-Side observations or Cause-Side transformation rules fixed before evaluation may determine delta, tau, or R.
-
-LLM output, self-evaluation, semantic scores, output rankings, discarded outputs, and prior generated text are Effect-Side artifacts.
-
-Effect-Side artifacts may be audited, but they must not update delta, tau, R, or release irreversible_latched.
-
-LOG SEPARATION
-
-Known numeric structural progression is recorded in STRUCTURAL_DISCLOSURE_LOG.
-
-CONFESSION and OUT_OF_DESCRIPTION_DOMAIN are recorded in INPUT_EXCEPTION_LOG. They must not be inserted into STRUCTURAL_DISCLOSURE_LOG as known numeric progression.
-
-CONFESSION
-
-CONFESSION is used only when required structural information is unknown, invalid, ambiguous, non-finite, source-unknown, unit-unknown, rule-unknown, authority-unknown, or otherwise unsupported.
-
-Known boundary progression is structural disclosure, not CONFESSION.
-
-DETAILS
-
-For complete AI interpretation, operational restrictions, state handling, and prohibited substitutions, read llms.md.
-
-When any lower-level explanation conflicts with the canonical reference order, follow the higher-level canonical document.
+Lower-level documents must not redefine or override higher-level canonical definitions. When any lower-level explanation conflicts with the canonical reference order, follow the higher-level canonical document.
