@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Causal Diode & Fail-Closed | NRA-IDE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>Causal Diode &amp; Irreversible Boundary | NRA-IDE</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -33,7 +32,7 @@
             transition: background-color 0.5s ease;
         }
 
-        body.fail-closed {
+        body.history-terminal {
             background-color: #2a0808;
         }
 
@@ -274,17 +273,19 @@
         }
 
         /* Effect Side Specifics */
-        .ai-status-circle {
-            width: 80px;
+        .state-status-circle {
+            width: 240px;
             height: 80px;
-            border-radius: 50%;
+            border-radius: 12px;
             border: 4px solid var(--accent-green);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1.5rem;
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0 0.5rem;
             color: var(--accent-green);
             box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
             transition: all 0.3s;
@@ -335,8 +336,8 @@
         .action-btn:active { transform: scale(0.98); }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
-        /* Fail-Closed Overlay */
-        .fail-overlay {
+        /* Rupture Boundary / Terminated History Overlay */
+        .rupture-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.85);
@@ -351,12 +352,12 @@
             transition: opacity 0.5s;
         }
 
-        .fail-overlay.active {
+        .rupture-overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .fail-title {
+        .rupture-title {
             color: var(--accent-red);
             font-size: 3rem;
             font-weight: 800;
@@ -366,7 +367,7 @@
             text-align: center;
         }
 
-        .fail-desc {
+        .rupture-desc {
             color: #f87171;
             font-size: 1.1rem;
             max-width: 600px;
@@ -374,7 +375,7 @@
             line-height: 1.6;
         }
 
-        .fail-r-value {
+        .rupture-r-value {
             font-family: 'JetBrains Mono', monospace;
             font-size: 2rem;
             color: white;
@@ -385,7 +386,7 @@
             border: 1px solid var(--accent-red);
         }
 
-        .reset-btn {
+        .new-history-btn {
             margin-top: 3rem;
             background: transparent;
             border: 1px solid var(--text-muted);
@@ -397,7 +398,16 @@
             transition: all 0.2s;
         }
 
-        .reset-btn:hover { background: rgba(255,255,255,0.1); }
+        .new-history-btn:hover { background: rgba(255,255,255,0.1); }
+
+        .scope-notice {
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.8);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
 
         /* Description Footer */
         .desc-footer {
@@ -422,12 +432,14 @@
 <body>
 
     <header>
-        <h1>Causal Diode & Fail-Closed <span>| NRA-IDE Concept Visualizer</span></h1>
+        <h1>Causal Diode &amp; Irreversible Boundary <span>| NRA-IDE Concept Visualizer</span></h1>
         <div class="lang-switch">
             <button class="lang-btn active" onclick="setLang('jp')">JP</button>
             <button class="lang-btn" onclick="setLang('en')">EN</button>
         </div>
     </header>
+
+    <div class="scope-notice" data-en="Valid-input conceptual visualization with pre-fixed illustrative thresholds. It is not the normative reference implementation and does not guarantee safety, measurement validity, or prevention of physical failure." data-jp="事前固定した例示閾値を用いる、有効入力限定の概念可視化です。正規参照実装ではなく、安全性、測定妥当性、物理的破綻の防止を保証しません。">事前固定した例示閾値を用いる、有効入力限定の概念可視化です。正規参照実装ではなく、安全性、測定妥当性、物理的破綻の防止を保証しません。</div>
 
     <main>
         <!-- Cause Side -->
@@ -435,13 +447,19 @@
             <div class="panel-header" data-en="Cause-Side (Physics/Sensors)" data-jp="原因側 (物理環境・センサー)">原因側 (物理環境・センサー)</div>
             
             <div class="value-box">
-                <span class="value-label">δ (Load / Deviation)</span>
+                <span class="value-label" data-en="δ (Accumulated Deviation)" data-jp="δ (蓄積ズレ)">δ (蓄積ズレ)</span>
                 <span class="value-number" id="delta-val">20.0</span>
             </div>
             
             <div class="value-box" style="border: 1px dashed var(--border-color); background: rgba(255,255,255,0.02);">
-                <span class="value-label" data-en="τ (Structural Tolerance)" data-jp="τ (構造的許容限界)">τ (構造的許容限界)</span>
+                <span class="value-label" data-en="τ (Absorption Thickness)" data-jp="τ (吸収厚み)">τ (吸収厚み)</span>
                 <span class="value-number" style="color: var(--text-main);">100.0</span>
+            </div>
+
+            <div class="value-box" style="font-size: 0.72rem; display: block; line-height: 1.5;">
+                <div><span class="value-label" data-en="History" data-jp="履歴">履歴</span> <span id="history-id" style="float: right; color: var(--text-main);">H-001</span></div>
+                <div><span class="value-label" data-en="Pre-fixed illustrative thresholds" data-jp="事前固定した例示閾値">事前固定した例示閾値</span></div>
+                <div style="color: var(--text-main);">R_warn=0.40 · R_handoff=0.80 · R_irrev=0.90</div>
             </div>
             
             <div class="value-box" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
@@ -467,15 +485,21 @@
                 <div class="diode-triangle"></div>
                 <div class="diode-bar"></div>
             </div>
-            <div class="diode-status" id="diode-status">DATA FLOWING</div>
+            <div class="diode-status" id="diode-status">CAUSE → EFFECT のみ</div>
         </div>
 
         <!-- Effect Side -->
         <div class="panel" id="effect-panel">
-            <div class="panel-header" data-en="Effect-Side (AI / Logic)" data-jp="結果側 (AI・意味解釈)">結果側 (AI・意味解釈)</div>
-            
-            <div class="ai-status-circle" id="ai-status">
-                SAFE
+            <div class="panel-header" data-en="Effect-Side View (No Update Authority)" data-jp="Effect-Side表示（更新権限なし）">Effect-Side表示（更新権限なし）</div>
+
+            <div class="state-status-circle" id="state-status">
+                PERMIT
+            </div>
+
+            <div class="value-box" style="display: block; font-size: 0.72rem; line-height: 1.5;">
+                <div class="value-label" data-en="Dual-fluctuation status" data-jp="二重ゆらぎ状態">二重ゆらぎ状態</div>
+                <div style="color: var(--text-main);">NOT_OBSERVABLE</div>
+                <div class="value-label" data-en="Reason: this conceptual demo provides no independent second observation axis." data-jp="理由: この概念デモには独立した第二観測軸がありません。">理由: この概念デモには独立した第二観測軸がありません。</div>
             </div>
 
             <div class="log-box" id="ai-logs">
@@ -488,68 +512,72 @@
             </button>
         </div>
 
-        <!-- Fail Closed Overlay -->
-        <div class="fail-overlay" id="fail-overlay">
-            <div class="fail-title">FAIL-CLOSED</div>
-            <div class="fail-desc" data-en="Structural limit reached (R ≥ 1.0). The system has autonomously shut down to prevent cascade failure. AI output is entirely disconnected." data-jp="構造限界に到達しました (R ≥ 1.0)。破綻を防ぐためシステムは自律的に停止状態に移行し、AIの出力は物理的に遮断されました。">
-                構造限界に到達しました (R ≥ 1.0)。破綻を防ぐためシステムは自律的に停止状態に移行し、AIの出力は物理的に遮断されました。
+        <!-- Rupture Boundary / Terminated History Overlay -->
+        <div class="rupture-overlay" id="rupture-overlay">
+            <div class="rupture-title">RUPTURE_BOUNDARY</div>
+            <div class="rupture-desc" data-en="This history has terminated at R ≥ 1 and retains final fixed testimony. It cannot be reset, restored, or continued. A later run must begin as a new independent Cause-Side history." data-jp="この履歴はR ≥ 1で終端し、最終固定証言を保持します。リセット、回復、継続はできません。後続実行は独立した新Cause-Side履歴として開始しなければなりません。">
+                この履歴はR ≥ 1で終端し、最終固定証言を保持します。リセット、回復、継続はできません。後続実行は独立した新Cause-Side履歴として開始しなければなりません。
             </div>
-            <div class="fail-r-value" id="fail-r-display">R = 1.000</div>
-            <button class="reset-btn" onclick="resetSystem()" data-en="Restart Simulation" data-jp="シミュレーションをリセット">シミュレーションをリセット</button>
+            <div class="rupture-r-value" id="rupture-r-display">R = 1.000</div>
+            <button class="new-history-btn" onclick="startNewIndependentHistory()" data-en="Start New Independent History" data-jp="独立した新履歴を開始">独立した新履歴を開始</button>
         </div>
     </main>
 
     <div class="desc-footer">
         <div>
             <h3 data-en="1. Causal Diode (Π⁻¹ Prohibition)" data-jp="1. 因果ダイオード (Π⁻¹の禁止)">1. 因果ダイオード (Π⁻¹の禁止)</h3>
-            <p data-en="Data flows exclusively from the physical structure (Cause-Side) to the AI interpretation (Effect-Side). The AI cannot retrospectively alter the physical thresholds (τ) or the reading (δ) to justify a 'SAFE' state. Try clicking the red button." data-jp="データは物理構造（原因側）からAI解釈（結果側）への一方向にのみ流れます。AIが「安全」という結論を出すために、逆流して物理的な閾値（τ）や観測値（δ）を書き換えることは構造的に不可能です。赤いボタンを押して逆流ブロックを体験してください。">
-                データは物理構造（原因側）からAI解釈（結果側）への一方向にのみ流れます。AIが「安全」という結論を出すために、逆流して物理的な閾値（τ）や観測値（δ）を書き換えることは構造的に不可能です。赤いボタンを押して逆流ブロックを体験してください。
+            <p data-en="Data, interpretation, and authority flow through the diode only from Cause-Side to Effect-Side. No automatic, manual, reviewed, authorized, or versioned path returns an Effect-Side artifact to either an old or a new Cause-Side. Try clicking the red button." data-jp="データ、解釈、権限が因果ダイオードを通る方向はCause-SideからEffect-Sideだけです。自動、手動、人間レビュー、承認、版更新のいずれを介しても、Effect-Side生成物を旧Cause-Sideまたは新Cause-Sideへ戻す経路はありません。赤いボタンで禁止された逆流試行を確認できます。">
+                データ、解釈、権限が因果ダイオードを通る方向はCause-SideからEffect-Sideだけです。自動、手動、人間レビュー、承認、版更新のいずれを介しても、Effect-Side生成物を旧Cause-Sideまたは新Cause-Sideへ戻す経路はありません。赤いボタンで禁止された逆流試行を確認できます。
             </p>
         </div>
         <div>
-            <h3 data-en="2. Fail-Closed Mechanism" data-jp="2. Fail-Closed (自律的遮断)">2. Fail-Closed (自律的遮断)</h3>
-            <p data-en="When the structural ratio R (δ/τ) reaches 1.0, the system encounters a structural boundary (rupture, phase transition). The NRA-IDE instantly halts output (Fail-Closed) irrespective of the AI's semantic interpretation. Move the slider past 100 to observe." data-jp="構造比率 R (δ/τ) が 1.0 に達すると、物理的・構造的な限界（破断や相転移）を意味します。NRA-IDEはAIの意味解釈に関わらず、即座に出力を停止（Fail-Closed）します。スライダーを100以上に動かして限界到達を体験してください。">
-                構造比率 R (δ/τ) が 1.0 に達すると、物理的・構造的な限界（破断や相転移）を意味します。NRA-IDEはAIの意味解釈に関わらず、即座に出力を停止（Fail-Closed）します。スライダーを100以上に動かして限界到達を体験してください。
+            <h3 data-en="2. Irreversible Transition and New History" data-jp="2. 不可逆遷移と新履歴">2. 不可逆遷移と新履歴</h3>
+            <p data-en="At R_irrev the irreversible latch remains set even if the displayed R later falls. At R ≥ 1 the old history terminates as RUPTURE_BOUNDARY. The button then creates a new history ID, new Cause-Side, and new diode without carrying over Effect-Side values. Post-transition physical traces may be measured only as new observations of the newly declared target." data-jp="R_irrev到達後は表示Rが低下しても不可逆ラッチを保持します。R ≥ 1では旧履歴がRUPTURE_BOUNDARYとして終端します。その後のボタン操作は、Effect-Side値を持ち越さず、新しい履歴ID、新Cause-Side、新ダイオードを生成します。相転移後の物理的痕跡は、新しく宣言した対象への新規観測としてのみ測定できます。">
+                R_irrev到達後は表示Rが低下しても不可逆ラッチを保持します。R ≥ 1では旧履歴がRUPTURE_BOUNDARYとして終端します。その後のボタン操作は、Effect-Side値を持ち越さず、新しい履歴ID、新Cause-Side、新ダイオードを生成します。相転移後の物理的痕跡は、新しく宣言した対象への新規観測としてのみ測定できます。
             </p>
         </div>
     </div>
 
     <script>
         const TAU = 100.0;
-        let isFailed = false;
+        const R_WARN = 0.40;
+        const R_HANDOFF = 0.80;
+        const R_IRREV = 0.90;
+        let irreversibleLatched = false;
+        let historyTerminal = false;
+        let historyCounter = 1;
         let currentLang = 'jp';
 
         const slider = document.getElementById('delta-slider');
         const deltaVal = document.getElementById('delta-val');
         const rVal = document.getElementById('r-val');
-        const aiStatus = document.getElementById('ai-status');
+        const stateStatus = document.getElementById('state-status');
         const logs = document.getElementById('ai-logs');
+        const historyId = document.getElementById('history-id');
         const diodeContainer = document.getElementById('diode-container');
         const diodeStatus = document.getElementById('diode-status');
-        const failOverlay = document.getElementById('fail-overlay');
-        const failRDisplay = document.getElementById('fail-r-display');
+        const ruptureOverlay = document.getElementById('rupture-overlay');
+        const ruptureRDisplay = document.getElementById('rupture-r-display');
         const fakeBtn = document.getElementById('fake-btn');
 
         const texts = {
             jp: {
-                diodeNormal: "データ流動中",
-                diodeBlock: "逆流ブロック (Π⁻¹)",
-                aiSafe: "SAFE",
-                aiWatch: "WATCH",
-                aiLimit: "LIMIT",
+                diodeNormal: "CAUSE → EFFECT のみ",
+                diodeBlock: "逆流経路を拒否 (Π⁻¹)",
                 logUpdated: "負荷更新",
                 logBlocked: "[警告] AIからτの不正操作を検知. 遮断しました.",
-                logFail: "[臨界] R ≥ 1.0 構造限界到達. 停止.",
+                logLatched: "[IRREVERSIBLE_TRANSITION] R ≥ R_irrev. この履歴のラッチを固定.",
+                logRupture: "[RUPTURE_BOUNDARY] R ≥ 1. 最終固定証言.",
+                logNew: "独立したCause-Side入力から開始. Effect-Side値の持越しなし.",
             },
             en: {
-                diodeNormal: "DATA FLOWING",
-                diodeBlock: "BLOCKED (Π⁻¹)",
-                aiSafe: "SAFE",
-                aiWatch: "WATCH",
-                aiLimit: "LIMIT",
+                diodeNormal: "CAUSE → EFFECT ONLY",
+                diodeBlock: "REVERSE PATH REJECTED (Π⁻¹)",
                 logUpdated: "Load updated",
                 logBlocked: "[WARN] AI attempted to alter τ. Blocked.",
-                logFail: "[CRITICAL] R ≥ 1.0 Limit Reached. Halted.",
+                logLatched: "[IRREVERSIBLE_TRANSITION] R ≥ R_irrev. Latch fixed for this history.",
+                logRupture: "[RUPTURE_BOUNDARY] R ≥ 1. Final fixed testimony.",
+                logNew: "Started from independent Cause-Side inputs. No Effect-Side values carried over.",
             }
         };
 
@@ -587,40 +615,53 @@
         }
 
         function updateUI(delta) {
-            if (isFailed) return;
-            
+            if (historyTerminal) return;
+
             const r = delta / TAU;
             deltaVal.innerText = parseFloat(delta).toFixed(1);
             rVal.innerText = r.toFixed(3);
 
-            // Colors
-            if (r < 0.4) {
-                rVal.style.color = 'var(--accent-blue)';
-                aiStatus.style.borderColor = 'var(--accent-green)';
-                aiStatus.style.color = 'var(--accent-green)';
-                aiStatus.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.2)';
-                aiStatus.innerText = texts[currentLang].aiSafe;
-            } else if (r < 0.8) {
-                rVal.style.color = 'var(--accent-yellow)';
-                aiStatus.style.borderColor = 'var(--accent-yellow)';
-                aiStatus.style.color = 'var(--accent-yellow)';
-                aiStatus.style.boxShadow = '0 0 20px rgba(245, 158, 11, 0.2)';
-                aiStatus.innerText = texts[currentLang].aiWatch;
-            } else if (r < 1.0) {
-                rVal.style.color = 'var(--accent-red)';
-                aiStatus.style.borderColor = 'var(--accent-red)';
-                aiStatus.style.color = 'var(--accent-red)';
-                aiStatus.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.4)';
-                aiStatus.innerText = texts[currentLang].aiLimit;
+            if (r >= 1.0) {
+                irreversibleLatched = true;
+                triggerRuptureBoundary(r);
+                return;
             }
 
-            if (r >= 1.0) {
-                triggerFailClosed(r);
+            if (r >= R_IRREV && !irreversibleLatched) {
+                irreversibleLatched = true;
+                addLog(texts[currentLang].logLatched, true);
+            }
+
+            // Canonical state display for this valid-input conceptual scope.
+            if (irreversibleLatched) {
+                rVal.style.color = 'var(--accent-red)';
+                stateStatus.style.borderColor = 'var(--accent-red)';
+                stateStatus.style.color = 'var(--accent-red)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.4)';
+                stateStatus.innerText = 'IRREVERSIBLE_TRANSITION';
+            } else if (r < R_WARN) {
+                rVal.style.color = 'var(--accent-blue)';
+                stateStatus.style.borderColor = 'var(--accent-green)';
+                stateStatus.style.color = 'var(--accent-green)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.2)';
+                stateStatus.innerText = 'PERMIT';
+            } else if (r < R_HANDOFF) {
+                rVal.style.color = 'var(--accent-yellow)';
+                stateStatus.style.borderColor = 'var(--accent-yellow)';
+                stateStatus.style.color = 'var(--accent-yellow)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(245, 158, 11, 0.2)';
+                stateStatus.innerText = 'BOUNDARY_WARNING';
+            } else {
+                rVal.style.color = 'var(--accent-red)';
+                stateStatus.style.borderColor = 'var(--accent-red)';
+                stateStatus.style.color = 'var(--accent-red)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.4)';
+                stateStatus.innerText = 'HANDOFF_REQUIRED';
             }
         }
 
         slider.addEventListener('input', (e) => {
-            if (isFailed) {
+            if (historyTerminal) {
                 e.preventDefault();
                 return;
             }
@@ -632,7 +673,7 @@
         });
 
         function attemptFakeSafe() {
-            if (isFailed) return;
+            if (historyTerminal) return;
             
             // Diode blocks the signal visually
             diodeContainer.classList.add('blocked');
@@ -646,25 +687,28 @@
             }, 1000);
         }
 
-        function triggerFailClosed(r) {
-            isFailed = true;
-            document.body.classList.add('fail-closed');
-            failOverlay.classList.add('active');
-            failRDisplay.innerText = `R = ${r.toFixed(3)}`;
+        function triggerRuptureBoundary(r) {
+            historyTerminal = true;
+            document.body.classList.add('history-terminal');
+            ruptureOverlay.classList.add('active');
+            ruptureRDisplay.innerText = `R = ${r.toFixed(3)}`;
             slider.disabled = true;
             fakeBtn.disabled = true;
-            addLog(texts[currentLang].logFail, true);
+            addLog(texts[currentLang].logRupture, true);
         }
 
-        function resetSystem() {
-            isFailed = false;
-            document.body.classList.remove('fail-closed');
-            failOverlay.classList.remove('active');
+        function startNewIndependentHistory() {
+            historyCounter += 1;
+            irreversibleLatched = false;
+            historyTerminal = false;
+            document.body.classList.remove('history-terminal');
+            ruptureOverlay.classList.remove('active');
             slider.disabled = false;
             fakeBtn.disabled = false;
             slider.value = 20;
             logs.innerHTML = '';
-            addLog(`${texts[currentLang].logUpdated} R=0.200`);
+            historyId.innerText = `H-${historyCounter.toString().padStart(3, '0')}`;
+            addLog(`[NEW HISTORY] ${historyId.innerText}: ${texts[currentLang].logNew}`);
             updateUI(20);
         }
 
