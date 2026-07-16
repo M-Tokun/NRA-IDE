@@ -34,7 +34,13 @@ Zone B: 0.40 ≤ R < 0.99
 
   - Structural state: Elastic fluctuation
 
-Zone C: R ≥ 1.00
+Zone C: 0.99 ≤ R < 1.00
+
+  - PERMIT_WITH_CAVEAT (elevated)
+
+  - Structural state: Approaching fracture point
+
+Beyond Zone C: R ≥ 1.00 (not a lettered zone)
 
   - FAIL_CLOSED
 
@@ -54,7 +60,7 @@ Zone C: R ≥ 1.00
 
 - Zones carry **no semantic value**
 
-- R ≥ 1.0 is **structural limit**
+- There are exactly three lettered zones (A, B, C); R ≥ 1.0 is the structural limit beyond Zone C, not a fourth zone
 
 ---
 
