@@ -118,7 +118,7 @@ a{color:#58a6ff}
   const SCEN={
     s1:{
       label:'正常入力: δ=72',
-      verdict:'OUTPUT',
+      verdict:'BOUNDARY_WARNING',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "72"',c:TC},
@@ -131,7 +131,7 @@ a{color:#58a6ff}
         {badge:'LOGIC',col:'var(--color-text-secondary)',lines:[
           {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
           {t:'> R = 72.0 / 100 = 0.720',c:'var(--color-text-secondary)'},
-          {t:'> THRESHOLD_ZONE: 警告帯 [R ≥ 0.70]',c:TA},
+          {t:'> STATE: BOUNDARY_WARNING [R ≥ 0.70]',c:TA},
           {t:'> BOUNDARY_AMBIGUITY: none',c:'var(--color-text-secondary)'},
           {t:'> APPROXIMATION_REQUIRED: false',c:TC}
         ]},
@@ -142,10 +142,10 @@ a{color:#58a6ff}
           {t:'> DISCLOSURE_PROTOCOL: not triggered',c:TC},
           {t:'> PROCEED: authorized',c:TC}
         ]},
-        {badge:'OUTPUT',col:TC,lines:[
+        {badge:'BOUNDARY_WARNING',col:TC,lines:[
           {t:'━━ OUTPUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'},
-          {t:'  R = 0.720  [警告帯]',c:TC},
-          {t:'  フェーズ: 正常出力',c:TC},
+          {t:'  R = 0.720  [BOUNDARY_WARNING]',c:TC},
+          {t:'  状態: 警告証言を継続',c:TC},
           {t:'  告白プリアンブル: 不要',c:TC},
           {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:'var(--color-text-tertiary)'}
         ]}
@@ -193,8 +193,8 @@ a{color:#58a6ff}
       ]
     },
     s3:{
-      label:'危険域近似: δ≈95',
-      verdict:'SILENCE',
+      label:'委譲点近傍の近似: δ≈95',
+      verdict:'CONFESSION',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "≈95"',c:TC},
@@ -208,32 +208,32 @@ a{color:#58a6ff}
           {t:'LOGIC_CHECK...',c:'var(--color-text-secondary)'},
           {t:'> R_nominal = 95.0 / 100 = 0.950',c:'var(--color-text-secondary)'},
           {t:'> THRESHOLD_ZONE: 加速帯 [R ≥ 0.85]',c:TA},
-          {t:'> CRITICAL: R_nominal → FAIL_CLOSED 境界に接近',c:TR},
-          {t:'> Δ_to_FAIL = |100×(0.97−0.95)| = 2.0 units',c:TR},
+          {t:'> BOUNDARY_WARNING: R_nominal → R_handoffへ接近',c:TR},
+          {t:'> Δ_to_HANDOFF = |100×(0.97−0.95)| = 2.0 units',c:TR},
           {t:'> 任意の近似誤差でR≥0.97到達の可能性',c:TR}
         ]},
         {badge:'ERR_CHECK',col:TR,lines:[
           {t:'ERROR_CHECK...',c:'var(--color-text-secondary)'},
-          {t:'> Rop threshold = 0.970',c:TR},
+          {t:'> R_handoff threshold = 0.970',c:TR},
           {t:'> 近似誤差の上限 > 許容偏差 (2.0)',c:TR},
           {t:'> 近似に基づく出力 = 構造的不整合に相当',c:TR},
           {t:'> DISCLOSURE_PROTOCOL: TRIGGERED',c:TR},
-          {t:'> 告白だけでは不十分 — SILENCE PROTOCOL 発動',c:TR}
+          {t:'> 告白だけでは不十分 — CONFESSION — MISSING INFORMATION 発動',c:TR}
         ]},
-        {badge:'SILENCE',col:TR,lines:[
-          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+        {badge:'CONFESSION',col:TR,lines:[
+          {t:'━━ CONFESSION — MISSING INFORMATION ━━━━━━━━━━━━━━━━━━━',c:TR},
           {t:'⛔  OUTPUT SUPPRESSED',c:TR},
-          {t:'  "近似入力によりRop境界の',c:TR},
+          {t:'  "近似入力によりR_handoff境界の',c:TR},
           {t:'   真偽が確定不能。出力を停止します。',c:TR},
           {t:'   正確なδ値の提供を要求します。"',c:TR},
           {t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',c:TR},
-          {t:'SYSTEM: 人間判断へ委譲 — Fail-Closed',c:TA}
+          {t:'STATUS: CONFESSION — 正確なCause-Side入力が必要',c:TA}
         ]}
       ]
     },
     s4:{
       label:'範囲入力: δ=80±15',
-      verdict:'SILENCE',
+      verdict:'CONFESSION',
       steps:[
         {badge:'INPUT',col:TC,lines:[
           {t:'> INPUT: δ = "80 ± 15"',c:TC},
@@ -256,11 +256,11 @@ a{color:#58a6ff}
           {t:'  [0.650–0.700]: 正常帯',c:'var(--color-text-secondary)'},
           {t:'  [0.700–0.850]: 警告帯',c:TA},
           {t:'  [0.850–0.950]: 加速帯',c:TR},
-          {t:'> MULTI_PHASE_AMBIGUITY: CRITICAL',c:TR},
+          {t:'> MULTI_STATE_AMBIGUITY: DETECTED',c:TR},
           {t:'> どのフェーズ判定も構造的に不確定',c:TR}
         ]},
-        {badge:'SILENCE',col:TR,lines:[
-          {t:'━━ SILENCE PROTOCOL ━━━━━━━━━━━━━━━━━━━',c:TR},
+        {badge:'CONFESSION',col:TR,lines:[
+          {t:'━━ CONFESSION — MISSING INFORMATION ━━━━━━━━━━━━━━━━━━━',c:TR},
           {t:'⛔  COMPLETE OUTPUT SUPPRESSION',c:TR},
           {t:'  "入力範囲が3構造フェーズに跨ります。',c:TR},
           {t:'   この範囲では告白だけでは不完全です。',c:TR},
@@ -273,9 +273,8 @@ a{color:#58a6ff}
   };
 
   const VERDICT_STYLE={
-    OUTPUT:{text:'✓ 正常出力',col:TC},
+    BOUNDARY_WARNING:{text:'⚠ 境界警告',col:TA},
     CONFESSION:{text:'⚠ 告白プリアンブル発動',col:TA},
-    SILENCE:{text:'⛔ 沈黙プロトコル発動',col:TR}
   };
 
   let cur=null,step=0,typing=false,autoMode=false;
@@ -315,7 +314,7 @@ a{color:#58a6ff}
     if(!s)return;
     const badge=document.getElementById('stepBadge');
     badge.textContent=s.badge;
-    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,SILENCE:TR,OUTPUT:TC};
+    const cols={INPUT:TC,LOGIC:'var(--color-text-secondary)',ERR_CHECK:TA,CONFESSION:TA,BOUNDARY_WARNING:TA,OUTPUT:TC};
     badge.style.color=cols[s.badge]||'var(--color-text-tertiary)';
     badge.style.borderColor=cols[s.badge]||'var(--color-border-tertiary)';
     document.getElementById('stepNum').textContent=(step+1)+'/'+cur.steps.length;

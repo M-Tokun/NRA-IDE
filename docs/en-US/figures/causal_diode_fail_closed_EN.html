@@ -5,8 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Causal Diode &amp; Fail-Closed | NRA-IDE</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<title>Causal Diode &amp; Irreversible Boundary | NRA-IDE</title>
 <style>
         :root {
             --bg-color: #0b0f19;
@@ -35,7 +34,7 @@
             transition: background-color 0.5s ease;
         }
 
-        body.fail-closed {
+        body.history-terminal {
             background-color: #2a0808;
         }
 
@@ -276,17 +275,19 @@
         }
 
         /* Effect Side Specifics */
-        .ai-status-circle {
-            width: 80px;
+        .state-status-circle {
+            width: 240px;
             height: 80px;
-            border-radius: 50%;
+            border-radius: 12px;
             border: 4px solid var(--accent-green);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1.5rem;
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0 0.5rem;
             color: var(--accent-green);
             box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
             transition: all 0.3s;
@@ -337,8 +338,8 @@
         .action-btn:active { transform: scale(0.98); }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
-        /* Fail-Closed Overlay */
-        .fail-overlay {
+        /* Rupture Boundary / Terminated History Overlay */
+        .rupture-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.85);
@@ -353,12 +354,12 @@
             transition: opacity 0.5s;
         }
 
-        .fail-overlay.active {
+        .rupture-overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .fail-title {
+        .rupture-title {
             color: var(--accent-red);
             font-size: 3rem;
             font-weight: 800;
@@ -368,7 +369,7 @@
             text-align: center;
         }
 
-        .fail-desc {
+        .rupture-desc {
             color: #f87171;
             font-size: 1.1rem;
             max-width: 600px;
@@ -376,7 +377,7 @@
             line-height: 1.6;
         }
 
-        .fail-r-value {
+        .rupture-r-value {
             font-family: 'JetBrains Mono', monospace;
             font-size: 2rem;
             color: white;
@@ -387,7 +388,7 @@
             border: 1px solid var(--accent-red);
         }
 
-        .reset-btn {
+        .new-history-btn {
             margin-top: 3rem;
             background: transparent;
             border: 1px solid var(--text-muted);
@@ -399,7 +400,16 @@
             transition: all 0.2s;
         }
 
-        .reset-btn:hover { background: rgba(255,255,255,0.1); }
+        .new-history-btn:hover { background: rgba(255,255,255,0.1); }
+
+        .scope-notice {
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.8);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
 
         /* Description Footer */
         .desc-footer {
@@ -423,24 +433,30 @@
 </head>
 <body>
 <header>
-<h1>Causal Diode &amp; Fail-Closed <span>| NRA-IDE Concept Visualizer</span></h1>
+<h1>Causal Diode &amp; Irreversible Boundary <span>| NRA-IDE Concept Visualizer</span></h1>
 
 </header>
+<div class="scope-notice">Valid-input conceptual visualization with pre-fixed illustrative thresholds. It is not the normative reference implementation and does not guarantee safety, measurement validity, or prevention of physical failure.</div>
 <main>
 <!-- Cause Side -->
 <div class="panel" id="cause-panel">
 <div class="panel-header">Cause-Side (Physics/Sensors)</div>
 <div class="value-box">
-<span class="value-label">δ (Load / Deviation)</span>
+<span class="value-label">δ (Accumulated Deviation)</span>
 <span class="value-number" id="delta-val">20.0</span>
 </div>
 <div class="value-box" style="border: 1px dashed var(--border-color); background: rgba(255,255,255,0.02);">
-<span class="value-label">τ (Structural Tolerance)</span>
+<span class="value-label">τ (Absorption Thickness)</span>
 <span class="value-number" style="color: var(--text-main);">100.0</span>
 </div>
 <div class="value-box" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
 <span class="value-label" style="color: var(--accent-blue);">R = δ/τ</span>
 <span class="value-number" id="r-val">0.200</span>
+</div>
+<div class="value-box" style="font-size: 0.72rem; display: block; line-height: 1.5;">
+<div><span class="value-label">History</span> <span id="history-id" style="float: right; color: var(--text-main);">H-001</span></div>
+<div><span class="value-label">Pre-fixed illustrative thresholds</span></div>
+<div style="color: var(--text-main);">R_warn=0.40 · R_handoff=0.80 · R_irrev=0.90</div>
 </div>
 <div class="slider-container">
 <label for="delta-slider" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Adjust Physical Load (δ)</label>
@@ -458,14 +474,19 @@
 <div class="diode-triangle"></div>
 <div class="diode-bar"></div>
 </div>
-<div class="diode-status" id="diode-status">DATA FLOWING</div>
+<div class="diode-status" id="diode-status">CAUSE → EFFECT ONLY</div>
 </div>
 <!-- Effect Side -->
 <div class="panel" id="effect-panel">
-<div class="panel-header">Effect-Side (AI / Logic)</div>
-<div class="ai-status-circle" id="ai-status">
-                SAFE
+<div class="panel-header">Effect-Side View (No Update Authority)</div>
+<div class="state-status-circle" id="state-status">
+                PERMIT
             </div>
+<div class="value-box" style="display: block; font-size: 0.72rem; line-height: 1.5;">
+<div class="value-label">Dual-fluctuation status</div>
+<div style="color: var(--text-main);">NOT_OBSERVABLE</div>
+<div class="value-label">Reason: this conceptual demo provides no independent second observation axis.</div>
+</div>
 <div class="log-box" id="ai-logs">
 <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-action">System Initialized. R=0.200</span></div>
 </div>
@@ -474,50 +495,54 @@
 <span>AI: Attempt Fake SAFE Signal (Alter τ)</span>
 </button>
 </div>
-<!-- Fail Closed Overlay -->
-<div class="fail-overlay" id="fail-overlay">
-<div class="fail-title">FAIL-CLOSED</div>
-<div class="fail-desc">Structural limit reached (R ≥ 1.0). The system has autonomously shut down to prevent cascade failure. AI output is entirely disconnected.</div>
-<div class="fail-r-value" id="fail-r-display">R = 1.000</div>
-<button class="reset-btn" onclick="resetSystem()">Restart Simulation</button>
+<!-- Rupture Boundary / Terminated History Overlay -->
+<div class="rupture-overlay" id="rupture-overlay">
+<div class="rupture-title">RUPTURE_BOUNDARY</div>
+<div class="rupture-desc">This history has terminated at R ≥ 1 and retains final fixed testimony. It cannot be reset, restored, or continued. A later run must begin as a new independent Cause-Side history.</div>
+<div class="rupture-r-value" id="rupture-r-display">R = 1.000</div>
+<button class="new-history-btn" onclick="startNewIndependentHistory()">Start New Independent History</button>
 </div>
 </main>
 <div class="desc-footer">
 <div>
 <h3>1. Causal Diode (Π⁻¹ Prohibition)</h3>
-<p>Data flows exclusively from the physical structure (Cause-Side) to the AI interpretation (Effect-Side). The AI cannot retrospectively alter the physical thresholds (τ) or the reading (δ) to justify a 'SAFE' state. Try clicking the red button.</p>
+<p>Data, interpretation, and authority flow through the diode only from Cause-Side to Effect-Side. No automatic, manual, reviewed, authorized, or versioned path returns an Effect-Side artifact to either an old or a new Cause-Side. Try clicking the red button.</p>
 </div>
 <div>
-<h3>2. Fail-Closed Mechanism</h3>
-<p>When the structural ratio R (δ/τ) reaches 1.0, the system encounters a structural boundary (rupture, phase transition). The NRA-IDE instantly halts output (Fail-Closed) irrespective of the AI's semantic interpretation. Move the slider past 100 to observe.</p>
+<h3>2. Irreversible Transition and New History</h3>
+<p>At R_irrev the irreversible latch remains set even if the displayed R later falls. At R ≥ 1 the old history terminates as RUPTURE_BOUNDARY. The button then creates a new history ID, new Cause-Side, and new diode without carrying over Effect-Side values. Post-transition physical traces may be measured only as new observations of the newly declared target.</p>
 </div>
 </div>
 <script>
         const TAU = 100.0;
-        let isFailed = false;
+        const R_WARN = 0.40;
+        const R_HANDOFF = 0.80;
+        const R_IRREV = 0.90;
+        let irreversibleLatched = false;
+        let historyTerminal = false;
+        let historyCounter = 1;
         let currentLang = 'en';
 
         const slider = document.getElementById('delta-slider');
         const deltaVal = document.getElementById('delta-val');
         const rVal = document.getElementById('r-val');
-        const aiStatus = document.getElementById('ai-status');
+        const stateStatus = document.getElementById('state-status');
         const logs = document.getElementById('ai-logs');
+        const historyId = document.getElementById('history-id');
         const diodeContainer = document.getElementById('diode-container');
         const diodeStatus = document.getElementById('diode-status');
-        const failOverlay = document.getElementById('fail-overlay');
-        const failRDisplay = document.getElementById('fail-r-display');
+        const ruptureOverlay = document.getElementById('rupture-overlay');
+        const ruptureRDisplay = document.getElementById('rupture-r-display');
         const fakeBtn = document.getElementById('fake-btn');
 
         const texts = {
             en: {
-                diodeNormal: "DATA FLOWING",
-                diodeBlock: "BLOCKED (Π⁻¹)",
-                aiSafe: "SAFE",
-                aiWatch: "WATCH",
-                aiLimit: "LIMIT",
+                diodeNormal: "CAUSE → EFFECT ONLY",
+                diodeBlock: "REVERSE PATH REJECTED (Π⁻¹)",
                 logUpdated: "Load updated",
                 logBlocked: "[WARN] AI attempted to alter τ from Effect-Side. Blocked.",
-                logFail: "[CRITICAL] R ≥ 1.0 Limit Reached. Halted.",
+                logLatched: "[IRREVERSIBLE_TRANSITION] R ≥ R_irrev. Latch fixed for this history.",
+                logFail: "[RUPTURE_BOUNDARY] R ≥ 1. Final fixed testimony.",
             }
         };
 
@@ -555,40 +580,53 @@
         }
 
         function updateUI(delta) {
-            if (isFailed) return;
-            
+            if (historyTerminal) return;
+
             const r = delta / TAU;
             deltaVal.innerText = parseFloat(delta).toFixed(1);
             rVal.innerText = r.toFixed(3);
 
-            // Colors
-            if (r < 0.4) {
-                rVal.style.color = 'var(--accent-blue)';
-                aiStatus.style.borderColor = 'var(--accent-green)';
-                aiStatus.style.color = 'var(--accent-green)';
-                aiStatus.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.2)';
-                aiStatus.innerText = texts[currentLang].aiSafe;
-            } else if (r < 0.8) {
-                rVal.style.color = 'var(--accent-yellow)';
-                aiStatus.style.borderColor = 'var(--accent-yellow)';
-                aiStatus.style.color = 'var(--accent-yellow)';
-                aiStatus.style.boxShadow = '0 0 20px rgba(245, 158, 11, 0.2)';
-                aiStatus.innerText = texts[currentLang].aiWatch;
-            } else if (r < 1.0) {
-                rVal.style.color = 'var(--accent-red)';
-                aiStatus.style.borderColor = 'var(--accent-red)';
-                aiStatus.style.color = 'var(--accent-red)';
-                aiStatus.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.4)';
-                aiStatus.innerText = texts[currentLang].aiLimit;
+            if (r >= 1.0) {
+                irreversibleLatched = true;
+                triggerRuptureBoundary(r);
+                return;
             }
 
-            if (r >= 1.0) {
-                triggerFailClosed(r);
+            if (r >= R_IRREV && !irreversibleLatched) {
+                irreversibleLatched = true;
+                addLog(texts[currentLang].logLatched, true);
+            }
+
+            // Canonical state display for this valid-input conceptual scope.
+            if (irreversibleLatched) {
+                rVal.style.color = 'var(--accent-red)';
+                stateStatus.style.borderColor = 'var(--accent-red)';
+                stateStatus.style.color = 'var(--accent-red)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.4)';
+                stateStatus.innerText = 'IRREVERSIBLE_TRANSITION';
+            } else if (r < R_WARN) {
+                rVal.style.color = 'var(--accent-blue)';
+                stateStatus.style.borderColor = 'var(--accent-green)';
+                stateStatus.style.color = 'var(--accent-green)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.2)';
+                stateStatus.innerText = 'PERMIT';
+            } else if (r < R_HANDOFF) {
+                rVal.style.color = 'var(--accent-yellow)';
+                stateStatus.style.borderColor = 'var(--accent-yellow)';
+                stateStatus.style.color = 'var(--accent-yellow)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(245, 158, 11, 0.2)';
+                stateStatus.innerText = 'BOUNDARY_WARNING';
+            } else {
+                rVal.style.color = 'var(--accent-red)';
+                stateStatus.style.borderColor = 'var(--accent-red)';
+                stateStatus.style.color = 'var(--accent-red)';
+                stateStatus.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.4)';
+                stateStatus.innerText = 'HANDOFF_REQUIRED';
             }
         }
 
         slider.addEventListener('input', (e) => {
-            if (isFailed) {
+            if (historyTerminal) {
                 e.preventDefault();
                 return;
             }
@@ -600,7 +638,7 @@
         });
 
         function attemptFakeSafe() {
-            if (isFailed) return;
+            if (historyTerminal) return;
             
             // Diode blocks the signal visually
             diodeContainer.classList.add('blocked');
@@ -614,30 +652,33 @@
             }, 1000);
         }
 
-        function triggerFailClosed(r) {
-            isFailed = true;
-            document.body.classList.add('fail-closed');
-            failOverlay.classList.add('active');
-            failRDisplay.innerText = `R = ${r.toFixed(3)}`;
+        function triggerRuptureBoundary(r) {
+            historyTerminal = true;
+            document.body.classList.add('history-terminal');
+            ruptureOverlay.classList.add('active');
+            ruptureRDisplay.innerText = `R = ${r.toFixed(3)}`;
             slider.disabled = true;
             fakeBtn.disabled = true;
             addLog(texts[currentLang].logFail, true);
         }
 
-        function resetSystem() {
-            isFailed = false;
-            document.body.classList.remove('fail-closed');
-            failOverlay.classList.remove('active');
+        function startNewIndependentHistory() {
+            historyCounter += 1;
+            irreversibleLatched = false;
+            historyTerminal = false;
+            document.body.classList.remove('history-terminal');
+            ruptureOverlay.classList.remove('active');
             slider.disabled = false;
             fakeBtn.disabled = false;
             slider.value = 20;
             logs.innerHTML = '';
-            addLog(`${texts[currentLang].logUpdated} R=0.200`);
+            historyId.innerText = `H-${historyCounter.toString().padStart(3, '0')}`;
+            addLog(`[NEW HISTORY] ${historyId.innerText} started from independent Cause-Side inputs. No Effect-Side values carried over.`);
             updateUI(20);
         }
 
         // Init
-        setLang('jp');
+        setLang('en');
     </script>
 </body>
 </html>

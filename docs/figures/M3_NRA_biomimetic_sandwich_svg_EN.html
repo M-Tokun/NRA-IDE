@@ -155,7 +155,7 @@ a{color:#58a6ff}
       <!-- FAIL indicator -->
       <g id="failOverlay" opacity="0">
         <rect x="0" y="0" width="600" height="340" fill="#E24B4A" opacity="0.06"/>
-        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">STRUCTURAL_HANDOFF — Rop≈0.97</text>
+        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">HANDOFF_REQUIRED — R_handoff≈0.97</text>
       </g>
 
     </svg>
@@ -177,7 +177,7 @@ a{color:#58a6ff}
     <div class="m3card" id="card-core" onclick="NRAIDE_M3.showInfo('core')" style="cursor:pointer">
       <div class="m3tag" style="background:#FAEEDA;color:#633806">Core</div>
       <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">τ Structural Core</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">The body of τ. The boundary where Fail-Closed triggers at R=1.0.</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">The body of τ. At R ≥ 1, the state is RUPTURE_BOUNDARY and testimony becomes final and fixed.</div>
       <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🧠 Cortical bone, myocardium, BBB</div>
     </div>
   </div>
@@ -211,14 +211,14 @@ a{color:#58a6ff}
     abs:{
       title:'δ Absorption Layer — Absorption Buffer (Part of τ)',
       col:'#1D9E75',
-      eng:'A buffer zone constituting the outer part of τ (absorption thickness). It absorbs the inflow of δ and protects the τ core. The residual capacity τ × (1−R) corresponds to the margin of this layer. It is treated as an acceleration zone near R=0.85, and Rop prepares for early handoff.',
+      eng:'A buffer zone constituting the outer part of τ (absorption thickness). It absorbs the inflow of δ and protects the τ core. The residual capacity τ × (1−R) corresponds to the margin of this layer. It is treated as an acceleration zone near R=0.85, and R_handoff prepares for early handoff.',
       bio:'The epidermal layer of the skin, articular cartilage, intervertebral discs, pleural fluid, and synovial fluid can be read as multi-layer structures that dissipate external δ. If the layer thins (τ↓) due to wear or inflammation, R rises more easily for the same δ.',
       example:'Knee joint cartilage: Acts like τ to absorb repeated shocks (δ). Osteoarthritis can be described as a state where the threshold for pain or damage is approached more easily due to a decrease in τ, even for the same walking distance (δ).'
     },
     core:{
-      title:'τ Structural Core — Structural Core (Fail-Closed Boundary)',
+      title:'τ Structural Core — Structural Core (RUPTURE_BOUNDARY)',
       col:'#854F0B',
-      eng:'The core of τ (absorption thickness). Executes early handoff at Rop and treats R=1.0 as the theoretical structural rupture boundary. The point where the sensitivity S = 1/(τ·(1-R)) diverges corresponds to this boundary.',
+      eng:'The core of τ (absorption thickness). Executes early handoff at R_handoff and treats R=1.0 as the theoretical structural rupture boundary. The point where the sensitivity S = 1/(τ·(1-R)) diverges corresponds to this boundary.',
       bio:'Cortical bone (fracture boundary), myocardium (heart failure threshold), blood-brain barrier (neurotoxicity boundary), and renal glomeruli (filtration limit) are examples of having boundaries where the structure can no longer be maintained.',
       example:'Bone density and fracture threshold: When bone density (the margin corresponding to τ) decreases, the fracture threshold is approached more easily even in daily activities (δ). A fracture can be viewed as the visualization of structural limit exceedance.'
     }

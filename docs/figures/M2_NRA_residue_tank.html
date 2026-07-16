@@ -52,7 +52,7 @@ a{color:#58a6ff}
     </div>
     <div class="yui-meta">generated_jst: 20260510_000453_JST<br>© M-Tokuni 2026</div>
   </header>
-<h2 class="sr-only">Module 2: 残渣タンク。δとτのスライダーを操作してR=δ/τを変化させ、感度関数S=1/(τ(1-R))がR=1.0付近で発散する様子と、Rop=0.97で早期Fail-Closedする運用境界を体感するインタラクティブシミュレーター。</h2>
+<h2 class="sr-only">Module 2: 残渣タンク。δとτのスライダーを操作してR=δ/τを変化させ、感度関数S=1/(τ(1-R))がR=1.0付近で発散する様子と、R_handoff=0.97でHANDOFF_REQUIREDへ移る運用境界を体感するインタラクティブシミュレーター。</h2>
 
 <style>
 .m2p{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
@@ -81,7 +81,7 @@ a{color:#58a6ff}
         <div style="position:absolute;left:0;right:0;bottom:70%;border-top:1px dashed #EF9F27;pointer-events:none"></div>
         <span style="position:absolute;right:5px;bottom:calc(70% + 2px);font-family:monospace;font-size:9px;color:#EF9F27;pointer-events:none">R=0.70</span>
         <div style="position:absolute;left:0;right:0;bottom:97%;border-top:2px solid #E24B4A;pointer-events:none"></div>
-        <span style="position:absolute;right:5px;bottom:calc(97% + 3px);font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">Rop=0.97</span>
+        <span style="position:absolute;right:5px;bottom:calc(97% + 3px);font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">R_handoff=0.97</span>
         <span style="position:absolute;left:5px;top:3px;font-family:monospace;font-size:9px;color:#E24B4A;font-weight:bold;pointer-events:none">R=1.00 理論境界</span>
         <div id="pulseRing" style="position:absolute;inset:0;border:3px solid transparent;border-radius:8px;pointer-events:none;transition:border-color .08s,opacity .08s;opacity:0"></div>
         <div id="dropCont" style="position:absolute;top:0;left:0;right:0;height:20px;overflow:hidden"></div>
@@ -148,10 +148,10 @@ a{color:#58a6ff}
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <button id="sb2" onclick="NRAIDE_M2.toggleSim()" class="m2mn" style="font-size:12px;padding:6px 16px;cursor:pointer">▶ 開始</button>
     <button onclick="NRAIDE_M2.resetSim2()" class="m2mn" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
-    <span id="failMsg" class="m2mn" style="font-size:11px;color:#EF9F27;display:none">✓ EARLY FAIL_CLOSED — Rop=0.97。τを増やすかリセットして再開</span>
+    <span id="failMsg" class="m2mn" style="font-size:11px;color:#EF9F27;display:none">✓ HANDOFF_REQUIRED — R_handoff=0.97。τを増やすかリセットして再開</span>
   </div>
 
-  <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ &nbsp; S = 1/(τ(1−R)) &nbsp; / Rop=0.97 early delegation</div>
+  <div class="m2mn" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ &nbsp; S = 1/(τ(1−R)) &nbsp; / R_handoff=0.97 fixed Handoff testimony for external human audit</div>
 </div>
 
 <script>
@@ -207,8 +207,8 @@ a{color:#58a6ff}
     let phase='';
     if(R<0.70){phase='構造安定 — STRUCTURAL OK';document.getElementById('phaseDisp').style.color=TC;}
     else if(R<0.85){phase='⚠ 警告帯 R≥0.70\n監視強化 — δ蓄積による感度変動を観測';document.getElementById('phaseDisp').style.color=TA;}
-    else if(R<0.97){phase='⚠⚠ 加速帯 R≥0.85\n感度の非線形上昇を検知 — Fail-Closed 準備';document.getElementById('phaseDisp').style.color=TR;}
-    else{phase='✓ STRUCTURAL_HANDOFF\n設計通りの停止と人間判断への委譲';document.getElementById('phaseDisp').style.color=TA;}
+    else if(R<0.97){phase='⚠⚠ 加速帯 R≥0.85\n感度の非線形上昇を検知 — HANDOFF_REQUIRED 準備';document.getElementById('phaseDisp').style.color=TR;}
+    else{phase='✓ HANDOFF_REQUIRED\n設計通りの停止と固定Handoff証言の外部人間監査への提示';document.getElementById('phaseDisp').style.color=TA;}
     document.getElementById('phaseDisp').innerHTML=phase.replace('\n','<br>');
   }
 

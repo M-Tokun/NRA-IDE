@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE Dam Management + τ Degradation</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
 
   :root {
     --bg: #060c12;
@@ -77,7 +76,7 @@
 
 <div class="page-title">
   <h1>Dam Management Comparison — Conventional vs. NRA-IDE + τ Degradation</h1>
-  <p>Cumulative load shrinks τ. We calculate the actual structural limit, not a fixed service life.</p>
+  <p>Illustrative model: a declared cumulative-load rule shrinks τ and changes R. This is not a validated dam model or a complete canonical state machine.</p>
 </div>
 
 <div class="scenario-bar">
@@ -104,7 +103,7 @@
     <div class="side-status">
       <div class="status-metric">R = δ / τ (Fluctuation / Current Thickness)</div>
       <div class="status-big" id="right-r" style="color:var(--green);">0.000</div>
-      <div class="status-metric" id="right-zone">NIRVANA — Stable</div>
+      <div class="status-metric" id="right-zone">PERMIT — Illustrative Stable Zone</div>
       <div class="judgment-box" id="right-judgment" style="border-color:var(--green);color:var(--green);">Standby</div>
     </div>
   </div>
@@ -427,15 +426,15 @@ function updateUI(R, delta) {
     rj.style.borderColor = '#ff3d00'; rj.style.color = '#ff3d00';
     rj.textContent = `⚡ R ≥ 1.0 — Exceeded. Influenced by τ degradation of ${degRate.toFixed(1)}%.`;
   } else if (R >= 0.7) {
-    rEl.style.color = '#ff9100'; zn.textContent = 'CRITICAL — Approaching Limit';
+    rEl.style.color = '#ff9100'; zn.textContent = 'BOUNDARY_WARNING — Approaching Limit';
     rj.style.borderColor = '#ff9100'; rj.style.color = '#ff9100';
     rj.textContent = `⚠ R ≥ 0.7 — Immediate action required regardless of water level. τ = ${tauCurrent.toFixed(3)}`;
   } else if (R >= 0.4) {
-    rEl.style.color = '#ffd740'; zn.textContent = 'ELASTIC — Monitoring';
+    rEl.style.color = '#ffd740'; zn.textContent = 'BOUNDARY_WARNING — Monitoring';
     rj.style.borderColor = '#ffd740'; rj.style.color = '#ffd740';
     rj.textContent = `〜 R ≥ 0.4 — Margin exists. Closely watching τ degradation of ${degRate.toFixed(1)}%.`;
   } else {
-    rEl.style.color = '#00e676'; zn.textContent = 'NIRVANA — Stable';
+    rEl.style.color = '#00e676'; zn.textContent = 'PERMIT — Illustrative Stable Zone';
     rj.style.borderColor = '#00e676'; rj.style.color = '#00e676';
     rj.textContent = `✓ R < 0.4 — Stable. Current τ = ${tauCurrent.toFixed(3)} (${(100 - degRate).toFixed(1)}% of init)`;
   }

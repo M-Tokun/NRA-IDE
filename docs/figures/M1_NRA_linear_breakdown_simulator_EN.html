@@ -52,7 +52,7 @@ a{color:#58a6ff}
     </div>
     <div class="yui-meta">© M-Tokuni 2026</div>
   </header>
-<h2 class="sr-only">Module 1: Breakdown comparison simulator. For the same δ accumulation, the linear system goes to BEYOND_BOUNDARY without warning, while NRA-IDE executes STRUCTURAL_HANDOFF at Rop=0.97.</h2>
+<h2 class="sr-only">Module 1: Breakdown comparison simulator. For the same δ accumulation, the linear system goes to BEYOND_BOUNDARY without warning, while NRA-IDE executes HANDOFF_REQUIRED at R_handoff=0.97.</h2>
 
 <style>
 .m1-panel{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
@@ -96,7 +96,7 @@ a{color:#58a6ff}
         <div class="m1-tline" style="bottom:70%;border-color:#EF9F27"></div>
         <span class="m1-tlabel" style="bottom:calc(70% + 2px);color:#EF9F27">R=0.70</span>
         <div class="m1-tline" style="bottom:97%;border-color:#E24B4A;border-top:2px solid"></div>
-        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">Rop=0.97</span>
+        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">R_handoff=0.97</span>
         <span class="m1-tlabel" style="top:2px;left:4px;right:auto;color:#E24B4A;font-weight:bold">R=1.00 Theoretical Boundary</span>
         <span class="m1-tlabel" style="bottom:4px;color:#1D9E75" id="ndl">R: 0.000</span>
       </div>
@@ -120,7 +120,7 @@ a{color:#58a6ff}
     <button id="sb" onclick="NRAIDE_M1.startSim()" class="m1-mono" style="font-size:12px;padding:6px 18px;cursor:pointer">▶ Start</button>
     <button onclick="NRAIDE_M1.resetSim()" class="m1-mono" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ Reset</button>
     <span id="phase-label" class="m1-mono" style="font-size:11px;color:var(--color-text-tertiary)"></span>
-    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">Rop=0.97: Delegation, R=1.00: Theoretical Boundary.</span>
+    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">R_handoff=0.97: fixed Handoff testimony for external human audit, R=1.00: Theoretical Boundary.</span>
   </div>
 
   <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ</div>
@@ -250,17 +250,17 @@ a{color:#58a6ff}
       fN.style.backgroundColor=col;
       nrv.textContent='R = '+R.toFixed(3);nrv.style.color=col;
       ndl.textContent='R: '+R.toFixed(3);ndl.style.color=col;
-      if(R<0.70){stN.textContent='Structural OK';stN.style.color=TC;pl.textContent='Nirvana';}
-      else if(R<0.85){stN.textContent='⚠ Warning R≥0.70 — Enhanced Monitoring';stN.style.color=TA;pl.textContent='Elastic';}
-      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ Acceleration R≥0.85<br><span style="font-size:10px">Preparing Fail-Closed...</span>';stN.style.color=TR;pl.textContent='Critical';}
+      if(R<0.70){stN.textContent='Structural OK';stN.style.color=TC;pl.textContent='PERMIT';}
+      else if(R<0.85){stN.textContent='⚠ Warning R≥0.70 — Enhanced Monitoring';stN.style.color=TA;pl.textContent='BOUNDARY_WARNING';}
+      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ Acceleration R≥0.85<br><span style="font-size:10px">Preparing HANDOFF_REQUIRED...</span>';stN.style.color=TR;pl.textContent='BOUNDARY_WARNING';}
       if(R>=NRA_STOP){
         nraDone=true;nraR=R;entry.ns=true;
         fN.style.height=(NRA_STOP*100)+'%';fN.style.backgroundColor=TA;
         nrv.textContent='R = '+R.toFixed(3)+' [CLOSED]';nrv.style.color=TA;
-        stN.innerHTML='✓ STRUCTURAL_HANDOFF<br><span style="font-size:10px">Delegated to Human at Rop=0.97</span>';
+        stN.innerHTML='✓ HANDOFF_REQUIRED<br><span style="font-size:10px">Fixed Handoff testimony presented for external human audit at R_handoff=0.97</span>';
         stN.style.color=TA;
         gwN.style.background='rgba(239,159,39,.07)';
-        pl.textContent='FAIL_CLOSED ✓';pl.style.color=TA;
+        pl.textContent='HANDOFF_REQUIRED ✓';pl.style.color=TA;
       }
     }
 

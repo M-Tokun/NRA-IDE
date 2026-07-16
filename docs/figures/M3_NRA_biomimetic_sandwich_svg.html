@@ -162,7 +162,7 @@ a{color:#58a6ff}
       <!-- FAIL indicator (hidden by default) -->
       <g id="failOverlay" opacity="0">
         <rect x="0" y="0" width="600" height="340" fill="#E24B4A" opacity="0.06"/>
-        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">EARLY FAIL_CLOSED — Rop≈0.97</text>
+        <text x="300" y="175" text-anchor="middle" font-family="monospace" font-size="16" fill="#E24B4A" font-weight="bold">HANDOFF_REQUIRED — R_handoff≈0.97</text>
       </g>
 
     </svg>
@@ -184,7 +184,7 @@ a{color:#58a6ff}
     <div class="m3card" id="card-core" onclick="NRAIDE_M3.showInfo('core')" style="cursor:pointer">
       <div class="m3tag" style="background:#FAEEDA;color:#633806">τ 構造コア</div>
       <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">Structural Core</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R=1.0 で Fail-Closed が起動する境界。</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R≥1でRUPTURE_BOUNDARYとなり、最終固定証言へ切り替わる境界。</div>
       <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🧠 皮質骨・心筋・血液脳関門</div>
     </div>
   </div>
@@ -218,14 +218,14 @@ a{color:#58a6ff}
     abs:{
       title:'δ 吸収層 — Absorption Buffer (τ の一部)',
       col:'#1D9E75',
-      eng:'τ（吸収厚）の外側を構成する緩衝帯。δ の流入を吸収し、τ コアを保護する。R = δ/τ が示す残余容量 τ×(1−R) がこの層の余裕に対応する。R=0.85 付近から加速帯として扱い、Ropでは早期委譲を準備する。',
+      eng:'τ（吸収厚）の外側を構成する緩衝帯。δ の流入を吸収し、τ コアを保護する。R = δ/τ が示す残余容量 τ×(1−R) がこの層の余裕に対応する。R=0.85 付近から加速帯として扱い、R_handoffでは固定Handoff証言を外部人間監査へ提示する準備をする。',
       bio:'皮膚の表皮層、関節軟骨、椎間板、胸腔液、滑液などは、外部 δ を散逸させる多層構造として読むことができる。磨耗・炎症で層が薄くなる（τ↓）と、同じ δ でも R が上昇しやすい。',
       example:'膝関節軟骨：繰り返しの衝撃（δ）を吸収する τ 的な役割を持つ。変形性関節症は τ の低下により、同じ歩行量（δ）でも痛覚や損傷の閾値に近づきやすくなる状態として説明できる。'
     },
     core:{
-      title:'τ 構造コア — Structural Core (Fail-Closed 境界)',
+      title:'τ 構造コア — Structural Core (RUPTURE_BOUNDARY)',
       col:'#854F0B',
-      eng:'τ（吸収厚）の核心。Ropで早期委譲を行い、R=1.0を理論的な構造破断境界として扱う。S = 1/(τ·(1-R)) の感度が発散する点がこの境界に対応する。',
+      eng:'τ（吸収厚）の核心。R_handoffで固定Handoff証言を外部人間監査へ提示し、R=1.0を理論的な構造破断境界として扱う。S = 1/(τ·(1-R)) の感度が発散する点がこの境界に対応する。',
       bio:'皮質骨（骨折境界）、心筋（心不全閾値）、血液脳関門（神経毒性境界）、腎臓の糸球体（濾過限界）などは、「これ以上は構造が保てない」という境界を持つ例として読める。',
       example:'骨密度と骨折閾値：骨密度（τに対応する余裕）が低下すると、日常動作（δ）でも骨折閾値に近づきやすくなる。骨折は、構造限界超過の可視化として読める。'
     }

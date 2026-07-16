@@ -52,7 +52,7 @@ a{color:#58a6ff}
     </div>
     <div class="yui-meta">generated_jst: 20260510_000453_JST<br>© M-Tokuni 2026</div>
   </header>
-<h2 class="sr-only">Module 1: 線形制御とNRA-IDEの破断対比シミュレーター。同じδ蓄積に対し、線形システムは無警告でSYSTEM_CRASHし、NRA-IDEはRop=0.97で早期Fail-Closedを実行し、R=1.00を理論破断境界として扱う差異を可視化する。</h2>
+<h2 class="sr-only">Module 1: 線形制御とNRA-IDEの破断対比シミュレーター。同じδ蓄積に対し、線形システムは無警告でSYSTEM_CRASHし、NRA-IDEはR_handoff=0.97でHANDOFF_REQUIREDへ移行し、R=1.00を理論破断境界として扱う差異を可視化する。</h2>
 
 <style>
 .m1-panel{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem}
@@ -96,7 +96,7 @@ a{color:#58a6ff}
         <div class="m1-tline" style="bottom:70%;border-color:#EF9F27"></div>
         <span class="m1-tlabel" style="bottom:calc(70% + 2px);color:#EF9F27">R=0.70</span>
         <div class="m1-tline" style="bottom:97%;border-color:#E24B4A;border-top:2px solid"></div>
-        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">Rop=0.97</span>
+        <span class="m1-tlabel" style="bottom:calc(97% + 3px);color:#E24B4A;font-weight:bold">R_handoff=0.97</span>
         <span class="m1-tlabel" style="top:2px;left:4px;right:auto;color:#E24B4A;font-weight:bold">R=1.00 理論境界</span>
         <span class="m1-tlabel" style="bottom:4px;color:#1D9E75" id="ndl">R: 0.000</span>
       </div>
@@ -120,7 +120,7 @@ a{color:#58a6ff}
     <button id="sb" onclick="NRAIDE_M1.startSim()" class="m1-mono" style="font-size:12px;padding:6px 18px;cursor:pointer">▶ 開始</button>
     <button onclick="NRAIDE_M1.resetSim()" class="m1-mono" style="font-size:12px;padding:6px 14px;cursor:pointer">↺ リセット</button>
     <span id="phase-label" class="m1-mono" style="font-size:11px;color:var(--color-text-tertiary)"></span>
-    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">Rop=0.97 は早期委譲、R=1.00 は理論破断境界。</span>
+    <span class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary)">R_handoff=0.97 は固定Handoff証言を外部人間監査へ提示する点、R=1.00 は理論破断境界。</span>
   </div>
 
   <div class="m1-mono" style="font-size:10px;color:var(--color-text-tertiary);margin-top:1rem;text-align:right">© M-Tokuni 2026 — NRA-IDE / R = δ/τ</div>
@@ -198,7 +198,7 @@ a{color:#58a6ff}
       cx.beginPath();cx.moveTo(toX(lp.t),toY(lp.R));cx.lineTo(CW,toY(lp.R));cx.stroke();
       cx.setLineDash([]);
       cx.fillStyle=TA;cx.beginPath();cx.arc(toX(lp.t),toY(lp.R),5,0,Math.PI*2);cx.fill();
-      cx.fillStyle=TA;cx.font='bold 9px monospace';cx.fillText('FAIL_CLOSED',toX(lp.t)+7,toY(lp.R)-5);
+      cx.fillStyle=TA;cx.font='bold 9px monospace';cx.fillText('HANDOFF',toX(lp.t)+7,toY(lp.R)-5);
     }
 
     cx.strokeStyle=TG;cx.lineWidth=1.5;cx.setLineDash([]);
@@ -252,15 +252,15 @@ a{color:#58a6ff}
       ndl.textContent='R: '+R.toFixed(3);ndl.style.color=col;
       if(R<0.70){stN.textContent='構造安定 — STRUCTURAL OK';stN.style.color=TC;pl.textContent='正常帯';}
       else if(R<0.85){stN.textContent='⚠ 警告帯 R≥0.70 — 監視強化';stN.style.color=TA;pl.textContent='警告帯';}
-      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ 加速帯 R≥0.85<br><span style="font-size:10px">Fail-Closed 準備中…</span>';stN.style.color=TR;pl.textContent='加速帯';}
+      else if(R<NRA_STOP){stN.innerHTML='⚠⚠ 加速帯 R≥0.85<br><span style="font-size:10px">HANDOFF_REQUIRED 準備中…</span>';stN.style.color=TR;pl.textContent='加速帯';}
       if(R>=NRA_STOP){
         nraDone=true;nraR=R;entry.ns=true;
         fN.style.height=(NRA_STOP*100)+'%';fN.style.backgroundColor=TA;
         nrv.textContent='R = '+R.toFixed(3)+' [CLOSED]';nrv.style.color=TA;
-        stN.innerHTML='✓ STRUCTURAL_HANDOFF<br><span style="font-size:10px">Rop=0.97で人間判断へ委譲。R=1.00は理論破断境界。</span>';
+        stN.innerHTML='✓ HANDOFF_REQUIRED<br><span style="font-size:10px">R_handoff=0.97で固定Handoff証言を外部人間監査へ提示。R=1.00は理論破断境界。</span>';
         stN.style.color=TA;
         gwN.style.background='rgba(239,159,39,.07)';
-        pl.textContent='FAIL_CLOSED ✓';pl.style.color=TA;
+        pl.textContent='HANDOFF_REQUIRED ✓';pl.style.color=TA;
       }
     }
 
