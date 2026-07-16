@@ -1836,7 +1836,7 @@ class ThresholdManager:
 
 
 
-**厚み (Thickness)**: 許容範囲の幅
+**厚み (Thickness)**: 吸収余裕の幅
 
 **ゆらぎ (Fluctuation)**: 一時的な逸脱の許容
 
@@ -1880,7 +1880,7 @@ class FieldAdjustment:
 
         self.base_threshold = 0.3  # 基準値
 
-        self.thickness = 0.1       # 許容幅
+        self.thickness = 0.1       # 吸収厚み
 
         self.fluctuation = 0.05    # 一時的ゆらぎ
 
@@ -1906,7 +1906,7 @@ class FieldAdjustment:
 
         if value <= effective_threshold + self.fluctuation:
 
-            return "許容範囲内"
+            return "吸収余裕内"
 
         else:
 
