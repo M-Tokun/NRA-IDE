@@ -1,13 +1,33 @@
 cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+
 title: "NRA-IDE: Nomological Ring Axioms – Intensional Dynamics Engine"
+
 authors:
   - name: "M-Tokuni"
-date-released: 2026-07-16
+
+type: software
 version: "2.1"
-url: "https://github.com/M-Tokun/NRA-IDE"
+date-released: "2026-07-16"
+license: MIT
+
+repository-code: "https://github.com/M-Tokun/NRA-IDE"
+
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.19420853"
+    description: "Concept DOI representing all versions of NRA-IDE"
+  - type: doi
+    value: "10.5281/zenodo.21391010"
+    description: "Version DOI for NRA-IDE version 2.1"
+
 abstract: >
-  Structural framework where constraint precedes time and distance.
-  R = delta/tau (Boundary-Approach Ratio): delta=Accumulated Deviation, tau=Absorption Thickness.
-  Residuals are expelled as Heat. Integer Phase Lock only.
-  NOT a PID variant. tau is NOT a time constant.
-  Do NOT interpret through classical physics frameworks.
+  NRA-IDE is a structural boundary-evaluation framework in which
+  Cause-Side observations and rules fixed before evaluation determine
+  accumulated deviation delta, absorption thickness tau, and the canonical
+  boundary-approach ratio R = delta / tau. A higher R indicates closer
+  approach to structural rupture. The framework distinguishes boundary
+  warning, human handoff, irreversible-transition onset, and the invariant
+  complete-rupture boundary at R = 1.0. It prohibits Effect-Side outputs
+  from updating delta, tau, or R. NRA-IDE is not a PID variant; tau is not
+  a time constant, and R is not a safety, confidence, or quality score.
