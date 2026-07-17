@@ -324,9 +324,7 @@ $$
 
 したがって、\(\tau=0\) はFAIL-CLOSEDではない。
 
-$$
-\tau=0 \Rightarrow \text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
-$$
+$\tau=0$ → `OUT_OF_DESCRIPTION_DOMAIN`
 
 これは、NRA-IDEの記述体系の定義域外である。
 
@@ -362,9 +360,7 @@ Fail-Closedは、\(\tau>0\) でRが定義可能な運用層において発生す
 
 したがって、
 
-$$
-\tau=0 \neq \text{FAIL}\_\text{CLOSED}
-$$
+$\tau=0 \neq$ `FAIL_CLOSED`
 
 である。
 

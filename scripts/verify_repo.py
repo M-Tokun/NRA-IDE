@@ -41,6 +41,7 @@ def check_file(file_path):
         'bom': False,
         'katex_adjacent': [],
         'katex_text_underscore': [],
+        'katex_double_subscript': [],
         'katex_setext': [],
         'html_tags': [],
     }
@@ -110,6 +111,16 @@ def check_file(file_path):
                     f"Found underscore inside \\text{{}} in inline math: '\\text{{{text_match.group(1)}}}'"
                 )
 
+        # Check for chained `\_\text{...}\_` subscripts (2+ underscores
+        # joining bare \text{} groups outside of \text{}): GitHub's KaTeX
+        # reads this as "double subscript" (x_y_z without grouping braces)
+        # and refuses to render, even though a single `\_` between two
+        # \text{} groups is fine.
+        for match in re.finditer(r'\\_\\text\{[^}]*\}\\_', content):
+            file_errors['katex_double_subscript'].append(
+                f"Chained \\_\\text{{}}\\_ (double subscript): '{match.group(0)}'"
+            )
+
         # Check for a bare '=' or '-' line inside a $$ block, immediately
         # after a non-blank line: CommonMark reads this as a Setext heading
         # underline, hijacking the paragraph before the math delimiters are
@@ -152,6 +163,7 @@ def main():
     encoding_errors = []
     katex_adjacent_errors = []
     katex_underscore_errors = []
+    katex_double_subscript_errors = []
     katex_setext_errors = []
     html_tag_errors = []
 
@@ -179,6 +191,9 @@ def main():
                     has_error = True
                 if res['katex_text_underscore']:
                     katex_underscore_errors.append((file_path, res['katex_text_underscore']))
+                    has_error = True
+                if res['katex_double_subscript']:
+                    katex_double_subscript_errors.append((file_path, res['katex_double_subscript']))
                     has_error = True
                 if res['katex_setext']:
                     katex_setext_errors.append((file_path, res['katex_setext']))
@@ -218,6 +233,14 @@ def main():
     if katex_underscore_errors:
         print("=== Files with KaTeX Underscore inside \\text{} ===")
         for f, errs in katex_underscore_errors:
+            print(f"  {f}:")
+            for e in errs:
+                print(f"    {e}")
+        print()
+
+    if katex_double_subscript_errors:
+        print("=== Files with Chained \\_\\text{}\\_ (Double Subscript) ===")
+        for f, errs in katex_double_subscript_errors:
             print(f"  {f}:")
             for e in errs:
                 print(f"    {e}")

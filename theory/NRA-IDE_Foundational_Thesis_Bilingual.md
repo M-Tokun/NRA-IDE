@@ -368,15 +368,9 @@ $$
 
 When $\tau=0$, $R$ is undefined.
 
-$$
-\tau=0 \Rightarrow \text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
+$\tau=0$ → `OUT_OF_DESCRIPTION_DOMAIN`
 
-$$
-
-$$
-\tau=0\neq\text{FAIL}\_\text{CLOSED}
-
-$$
+$\tau=0 \neq$ `FAIL_CLOSED`
 
 Unknown values must not be filled by averages, similarity, prior outputs, or inference about unobserved facts. Applying a fixed mathematical identity, unit conversion, or previously defined deterministic rule is not completion inference.
 
@@ -1051,15 +1045,9 @@ $$
 
 $\tau=0$ ではRを定義できない。
 
-$$
-\tau=0 \Rightarrow \text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
+$\tau=0$ → `OUT_OF_DESCRIPTION_DOMAIN`
 
-$$
-
-$$
-\tau=0\neq\text{FAIL}\_\text{CLOSED}
-
-$$
+$\tau=0 \neq$ `FAIL_CLOSED`
 
 不明値を、平均、類似性、過去出力、または未観測部分への推論によって補完してはならない。既知の数学的恒等式、単位変換、事前に定義された確定規則の適用は、補完推論に含めない。
 
