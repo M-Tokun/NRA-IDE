@@ -26,9 +26,9 @@
 
 ## 2. Pipeline Stages
 
-* **Stage 1:** 入力ラッチ & 幾何学的判定（$D < d$ ?）
+* **Stage 1:** 入力ラッチ & 幾何学的判定（ $D < d$ ?）
 
-* **Stage 2:** 変形量計算（$\Delta x = D - d$）
+* **Stage 2:** 変形量計算（ $\Delta x = D - d$ ）
 
 * **Stage 3:** 弾性力・粘性力の並列計算
 

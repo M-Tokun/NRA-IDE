@@ -168,7 +168,7 @@ $$R = \frac{\delta_f}{\tau}$$
 
 $$\delta_f = |f_{current} - f_{nominal}|$$
 
-$$\text{residual\_debt}(t) = \int_0^t (R - R \cdot k_{recovery}) \, dt$$
+$$\text{residual}\_\text{debt}(t) = \int_0^t (R - R \cdot k_{recovery}) \, dt$$
 
 $$R \geq 1.0 \Rightarrow \text{FAIL-CLOSED}$$
 

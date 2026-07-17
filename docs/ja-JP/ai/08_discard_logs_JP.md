@@ -95,9 +95,9 @@ S = 1 / (τ · (1 − R)) = 1 / (τ − δ)
 
 05・07で区別した既知の数値進行内で、この節が扱う通常出力の抑止状態は三つです。
 
-- **`HANDOFF_REQUIRED`**：$R_{\mathrm{handoff}} \le R < R_{\mathrm{irrev}}$、外部人間監査へ提示する固定Handoff証言
-- **`IRREVERSIBLE_TRANSITION`**：$R_{\mathrm{irrev}} \le R < 1$、不可逆ラッチと継続する構造証言
-- **`RUPTURE_BOUNDARY`**：$R \ge 1$、宣言済み評価の最終固定証言
+- **`HANDOFF_REQUIRED`**： $R_{\mathrm{handoff}} \le R < R_{\mathrm{irrev}}$ 、外部人間監査へ提示する固定Handoff証言
+- **`IRREVERSIBLE_TRANSITION`**： $R_{\mathrm{irrev}} \le R < 1$ 、不可逆ラッチと継続する構造証言
+- **`RUPTURE_BOUNDARY`**： $R \ge 1$ 、宣言済み評価の最終固定証言
 
 `CONFESSION`と`OUT_OF_DESCRIPTION_DOMAIN`も、Fail-Closed処理によって対象となる通常出力を抑止します。これらは数値進行の状態ではなく入力例外であり、数値進行と混同せず`INPUT_EXCEPTION_LOG`へ分離して記録します。
 

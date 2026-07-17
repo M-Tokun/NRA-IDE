@@ -236,7 +236,7 @@ Rを、安全スコア、構造保持率、信頼度、品質指標、意味保�
 
 The Nomological Ring Axiom is not itself an equation. The Primary Formula and the Secondary Formula (Dual-Fluctuation Formula) are canonical calculation systems of IDE, the computational method and engine; neither is an additional axiom. “Primary” and “Secondary” indicate definitional order and role, not mathematical degree. Directional outputs and $R_{\mathrm{dir}}$ neither redefine canonical $R$ nor directly classify canonical state.
 
-上記2系統以外の数式は、用途に応じてIDEの**派生式、補助式、または補完式**として扱う。残存余裕、構造感度、$\tau$ 遷移積分、数値安定化、EMA実装詳細、残差応答、ハイブリッド力学などがこれに含まれる。これらは基本式または二重ゆらぎ式を説明・計算・実装上補うことはできるが、新たな公理または第三の正規IDE計算式にならず、唯一公理、2つの正規IDE計算式、Cause-Side権威、正規状態、不可逆ラッチを上書きしてはならない。
+上記2系統以外の数式は、用途に応じてIDEの**派生式、補助式、または補完式**として扱う。残存余裕、構造感度、 $\tau$ 遷移積分、数値安定化、EMA実装詳細、残差応答、ハイブリッド力学などがこれに含まれる。これらは基本式または二重ゆらぎ式を説明・計算・実装上補うことはできるが、新たな公理または第三の正規IDE計算式にならず、唯一公理、2つの正規IDE計算式、Cause-Side権威、正規状態、不可逆ラッチを上書きしてはならない。
 
 Every other equation is classified, according to purpose, as an IDE-derived, auxiliary, or complementary formula. Such equations may support explanation, computation, or implementation, but they do not become another axiom or a third canonical IDE formula system and must not override the sole axiom, either canonical IDE formula system, Cause-Side authority, canonical states, or the irreversible latch.
 
@@ -252,8 +252,8 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-- $M_R$：無次元の境界余裕 / dimensionless boundary margin
-- $M_{\tau}$：残存吸収余裕 / remaining absorption margin in the same unit as $\delta$ and $\tau$
+- $M_R$ ：無次元の境界余裕 / dimensionless boundary margin
+- $M_{\tau}$ ：残存吸収余裕 / remaining absorption margin in the same unit as $\delta$ and $\tau$
 
 両者は、有限な $\delta\ge0$ かつ有限な $\tau>0$ のときだけ定義する。`remaining margin`という単独の曖昧なフィールド名を使用してはならない。構造証言では、`remaining_ratio_margin`と`remaining_absorption_margin`を区別して出力する。
 
@@ -328,7 +328,7 @@ $$
 したがって、\(\tau=0\) はFAIL-CLOSEDではない。
 
 $$
-\tau=0 \Rightarrow \text{OUT\_OF\_DESCRIPTION\_DOMAIN}
+\tau=0 \Rightarrow \text{OUT}\_\text{OF}\_\text{DESCRIPTION}\_\text{DOMAIN}
 $$
 
 これは、NRA-IDEの記述体系の定義域外である。
@@ -366,7 +366,7 @@ Fail-Closedは、\(\tau>0\) でRが定義可能な運用層において発生す
 したがって、
 
 $$
-\tau=0 \neq \text{FAIL\_CLOSED}
+\tau=0 \neq \text{FAIL}\_\text{CLOSED}
 $$
 
 である。
@@ -436,7 +436,7 @@ This inequality is a canonical constraint of the restoration-degradation princip
 
 一度、破断または相転移に至った構造は、外部補充を受けても初期値 \(\tau_0\) を回復しない。
 
-ここで、$\tau_0$ は遷移前に固定された基準吸収厚み、$\tau_{\mathrm{restored}}$ は外生的な復元操作後に、同一対象・同一単位・同一Cause-Side測定規則で評価した後継構造の吸収厚みである。復元を主張するには、この比較可能性と $\tau_{\mathrm{restored}}<\tau_0$ の双方を立証しなければならない。立証できない場合、初期構造への復元を推定してはならない。
+ここで、 $\tau_0$ は遷移前に固定された基準吸収厚み、 $\tau_{\mathrm{restored}}$ は外生的な復元操作後に、同一対象・同一単位・同一Cause-Side測定規則で評価した後継構造の吸収厚みである。復元を主張するには、この比較可能性と $\tau_{\mathrm{restored}}<\tau_0$ の双方を立証しなければならない。立証できない場合、初期構造への復元を推定してはならない。
 
 A structure that has once reached rupture or phase transition does not recover its initial $\tau_0$ through external replenishment. Here, $\tau_0$ is the pre-transition baseline fixed in advance, and $\tau_{\mathrm{restored}}$ is the successor structure's absorption thickness evaluated after an exogenous restoration operation using the same subject, unit, and Cause-Side measurement rule. A restoration claim requires evidence of both comparability and $\tau_{\mathrm{restored}}<\tau_0$; without that evidence, restoration to the initial structure must not be inferred.
 
@@ -518,8 +518,8 @@ $$
 - 現在のR
 - \(\delta\)
 - \(\tau\)
-- `remaining_ratio_margin`（$M_R=1-R$）
-- `remaining_absorption_margin`（$M_{\tau}=\tau-\delta$）
+- `remaining_ratio_margin`（ $M_R=1-R$ ）
+- `remaining_absorption_margin`（ $M_{\tau}=\tau-\delta$ ）
 - 変化傾向
 - 二重ゆらぎ状態
 - 支配側
@@ -568,7 +568,7 @@ $$
 ただし、構造証言は継続する。
 
 $$
-\text{irreversible\_latched}=true
+\text{irreversible}\_\text{latched}=true
 $$
 
 一度不可逆遷移へ到達した場合、後続の瞬間的R値が低下しても、自動的に通常域へ戻してはならない。
@@ -729,7 +729,7 @@ Fail-Closedを「システム全体の停止」「完全無出力」「観測停
 
 ## 13. STRUCTURAL_DISCLOSURE_LOG
 
-有限な $\delta\ge0$、有限な $\tau>0$、有効な閾値規則によって分類できる既知の構造状態は、STRUCTURAL_DISCLOSURE_LOGとして扱う。
+有限な $\delta\ge0$ 、有限な $\tau>0$ 、有効な閾値規則によって分類できる既知の構造状態は、STRUCTURAL_DISCLOSURE_LOGとして扱う。
 
 STRUCTURAL_DISCLOSURE_LOGには次を含む。
 
@@ -744,7 +744,7 @@ CONFESSIONとOUT_OF_DESCRIPTION_DOMAINは、既知のR進行ではないためST
 INPUT_EXCEPTION_LOGには次を含む。
 
 - CONFESSION：不明、不正、曖昧、出所不明、単位不明、規則不明
-- OUT_OF_DESCRIPTION_DOMAIN：$\tau=0$ によりRを定義できない入力
+- OUT_OF_DESCRIPTION_DOMAIN： $\tau=0$ によりRを定義できない入力
 
 STRUCTURAL_DISCLOSURE_LOGとINPUT_EXCEPTION_LOGは監査記録の種別であり、正規状態を追加または置換しない。
 

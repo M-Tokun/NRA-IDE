@@ -34,7 +34,7 @@
 
 * 幾何学的矛盾（直径 < 隙間） → DANGER (Error 0x01)
 
-* 粘性ゼロ（$\eta=0$） → DANGER (Error 0x03)
+* 粘性ゼロ（ $\eta=0$ ） → DANGER (Error 0x03)
 
 
 

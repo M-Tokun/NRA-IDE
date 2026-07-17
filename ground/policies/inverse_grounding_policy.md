@@ -21,9 +21,9 @@ $$e_i = 1 \Rightarrow x_i \in \mathcal{X}_i$$
 
 $$e_i = 0 \Rightarrow x_i = \bot$$
 
-- $e_i$：接地フラグ（変数 $i$ の観測・定義・出所が実行文脈で使用可能か）
-- $x_i$：実際の物理値
-- $\bot$：未観測・未定義・検証不能・未使用可能（数値補完を許さない状態）
+- $e_i$ ：接地フラグ（変数 $i$ の観測・定義・出所が実行文脈で使用可能か）
+- $x_i$ ：実際の物理値
+- $\bot$ ：未観測・未定義・検証不能・未使用可能（数値補完を許さない状態）
 
 **型の原則：二値性は物理値そのものではなく接地フラグに適用する。**
 
@@ -33,8 +33,8 @@ $$i \notin \Omega_{\mathrm{declared}} \Rightarrow x_i = \bot$$
 
 $$\exists i \in M_{\mathrm{required}},\ x_i = \bot \Rightarrow \mathrm{FAIL\text{-}CLOSED}$$
 
-- $M_{\mathrm{required}}$：当該逆算・行動判断に不可欠な必須変数集合
-- $\Omega_{\mathrm{declared}}$：宣言済み変数空間
+- $M_{\mathrm{required}}$ ：当該逆算・行動判断に不可欠な必須変数集合
+- $\Omega_{\mathrm{declared}}$ ：宣言済み変数空間
 
 **FAIL-CLOSEDの意味：未知変数を不存在と断定しない。
 ただし未知を含んだまま行動決定へ進む実行権限を停止する。**
@@ -51,15 +51,15 @@ $$\mathcal{A} = \left\{x \mid x \in \mathcal{C}_{phys},\ \forall i \in M_{\mathr
 
 $$\mathcal{A} = \varnothing \Rightarrow \mathrm{FAIL\text{-}CLOSED}$$
 
-- $\mathcal{C}_{phys}$：保存則・境界条件・因果順序を満たす物理的許容集合
+- $\mathcal{C}_{phys}$ ：保存則・境界条件・因果順序を満たす物理的許容集合
 - **$\mathcal{C}_{phys}$ はペナルティではなくハードゲート。最低限の物理制約に反する候補は実行候補外。**
 
-### 逆算実行（$\mathcal{A} \neq \varnothing$ の場合のみ）
+### 逆算実行（ $\mathcal{A} \neq \varnothing$ の場合のみ）
 
 $$\hat{x} = \arg\min_{x \in \mathcal{A}}\ \mathcal{L}(F(x),\ R)$$
 
-- $R$：現実観察値（物理直接計測値のみ有効）
-- $\hat{x}$：物理制約内で観測値に最も近い原因状態
+- $R$ ：現実観察値（物理直接計測値のみ有効）
+- $\hat{x}$ ：物理制約内で観測値に最も近い原因状態
 
 ### 横軸スコア $\delta_{inv}$
 
@@ -67,8 +67,8 @@ $$\mathcal{I}_{phys}(R) = \left\{x \mid x \in \mathcal{C}_{phys},\ F(x) \approx 
 
 $$\delta_{inv} = \inf_{x \in \mathcal{I}_{phys}(R)}\ d(\hat{x}_{AI},\ x)$$
 
-- $\hat{x}_{AI}$：AIが提案する原因状態
-- $\delta_{inv}$：AI案が物理的許容集合からどれだけ外れているか
+- $\hat{x}_{AI}$ ：AIが提案する原因状態
+- $\delta_{inv}$ ：AI案が物理的許容集合からどれだけ外れているか
 
 **「もっともらしい説明」ではなく「物理的許容集合への距離」が横軸スコアの実体。**
 
@@ -130,10 +130,10 @@ $\mathcal{C}_{phys}$ が定義可能なドメイン。
 
 $$P_{ground} = \frac{A_{valid} \cdot C_{trace}}{\kappa_{compute}}$$
 
-- $A_{valid}$：必須変数の有効観測率
-- $C_{trace}$：観測→制約→式→結論の追跡可能率
-- $\kappa_{compute}$：計算・探索コスト
-- **注：$\tau$ は NRA-IDE既存構造の吸収厚みと衝突するため $\kappa$ に変更**
+- $A_{valid}$ ：必須変数の有効観測率
+- $C_{trace}$ ：観測→制約→式→結論の追跡可能率
+- $\kappa_{compute}$ ：計算・探索コスト
+- **注： $\tau$ は NRA-IDE既存構造の吸収厚みと衝突するため $\kappa$ に変更**
 - **$P_{ground}$ は $R=\delta/\tau$ と同型ではない。接地品質の運用指標として扱う。**
 
 ---

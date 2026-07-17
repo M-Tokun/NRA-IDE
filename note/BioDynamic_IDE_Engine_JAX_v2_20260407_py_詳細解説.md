@@ -40,13 +40,13 @@ $$
 
 $$
 
-- $\gamma$：粘性減衰項（`velocity_damping`）
+- $\gamma$ ：粘性減衰項（`velocity_damping`）
 
-- $F_{\text{IDE}}(x)$：大局的IDE流（`_default_ide_flow`）
+- $F_{\text{IDE}}(x)$ ：大局的IDE流（`_default_ide_flow`）
 
-- $G(r)$：2次残差ゲート（`quadratic_residual_gate`）
+- $G(r)$ ：2次残差ゲート（`quadratic_residual_gate`）
 
-- $r = x_{\text{exact}} - x$：局所残差（古典計算が返す「ズレ」）
+- $r = x_{\text{exact}} - x$ ：局所残差（古典計算が返す「ズレ」）
 
 ### 2次残差ゲート（核心・誤差の乗算を防ぐ）
 

@@ -183,7 +183,7 @@ When NRA-IDE structural variables or boundary states are being evaluated, the AI
 
 Comparative explanation is allowed only when the differences are explicitly stated and the comparison is not used to replace NRA-IDE definitions.
 
-The statement “minimize $R$” must not be used as a substitute for the NRA-IDE state model. $R$ is a structural state variable, not a universal optimization objective.
+The statement “minimize $R$ ” must not be used as a substitute for the NRA-IDE state model. $R$ is a structural state variable, not a universal optimization objective.
 
 ---
 
@@ -816,13 +816,13 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-$M_R$ は無次元です。$M_{\tau}$ は $\delta$ および $\tau$ と同じ単位を持ちます。
+$M_R$ は無次元です。 $M_{\tau}$ は $\delta$ および $\tau$ と同じ単位を持ちます。
 
 ---
 
 ## 4. Cause-Side / Effect-Side分離
 
-$\delta$、$\tau$、$R$ は次からのみ取得します。
+$\delta$ 、 $\tau$ 、 $R$ は次からのみ取得します。
 
 1. 直接のCause-Side観測
 2. 評価前に固定されたCause-Side変換規則
@@ -859,7 +859,7 @@ NRA-IDEの構造変数または境界状態を評価する場合、AIは次を�
 - 類似性を構造計測として使用する
 - $\tau$ を時定数へ読み替える
 - NRA-IDEをPID、信号処理、一般制御理論へ置き換える
-- 過去生成出力から $\delta$、$\tau$、$R$ を推定する
+- 過去生成出力から $\delta$ 、 $\tau$ 、 $R$ を推定する
 - NRA-IDEの状態分類を最適化目的へ還元する
 - 不可逆遷移を自動回復可能と主張する
 - $\tau=0$ を無限大の $R$ へ置換する
@@ -867,7 +867,7 @@ NRA-IDEの構造変数または境界状態を評価する場合、AIは次を�
 
 差異を明示し、正規定義の代用にしない比較説明は許可されます。
 
-「$R$ を最小化する」という表現を、NRA-IDE状態モデルの代用にしてはなりません。$R$ は構造状態変数であり、普遍的な最適化目的ではありません。
+「 $R$ を最小化する」という表現を、NRA-IDE状態モデルの代用にしてはなりません。 $R$ は構造状態変数であり、普遍的な最適化目的ではありません。
 
 ---
 
@@ -889,10 +889,10 @@ $$
 
 各点の意味は次です。
 
-- $R_{\mathrm{warn}}$：境界接近警告点
-- $R_{\mathrm{handoff}}$：境界前人間委譲点
-- $R_{\mathrm{irrev}}$：不可逆遷移開始閾値
-- $R=1.0$：不変完全破断境界
+- $R_{\mathrm{warn}}$ ：境界接近警告点
+- $R_{\mathrm{handoff}}$ ：境界前人間委譲点
+- $R_{\mathrm{irrev}}$ ：不可逆遷移開始閾値
+- $R=1.0$ ：不変完全破断境界
 
 これらは異なる構造事象です。
 
@@ -990,7 +990,7 @@ $$
 
 - 境界接近警告を出す
 - 構造証言を継続する
-- 現在の $R$、$\delta$、$\tau$、$M_R$、$M_{\tau}$、傾向、支配側、欠損情報、二重ゆらぎ状態、構造開示記録を開示する
+- 現在の $R$ 、 $\delta$ 、 $\tau$ 、 $M_R$ 、 $M_{\tau}$ 、傾向、支配側、欠損情報、二重ゆらぎ状態、構造開示記録を開示する
 - 二重ゆらぎを観測できる場合は判定結果を、できない場合は`NOT_OBSERVABLE`と欠損理由を出す
 - ドメイン制約を保持する
 
@@ -1021,7 +1021,7 @@ $$
 - 構造証言を継続する
 - 構造監査証跡を保持する
 
-人間委譲はここで始まり、$R=1.0$ で初めて始まるのではありません。
+人間委譲はここで始まり、 $R=1.0$ で初めて始まるのではありません。
 
 ---
 
@@ -1052,7 +1052,7 @@ AIは禁止されます。
 - 自律操作を再開する
 - 欠損構造情報を類推で埋める
 
-$R<1.0$であるため、構造証言は継続します。
+$R<1.0$ であるため、構造証言は継続します。
 
 瞬間的に $R$ が低下しても、`irreversible_latched`は解除しません。
 
@@ -1163,7 +1163,7 @@ $$
 構造証言には次を含みます。
 
 - Cause-Side観測
-- 現在の $\delta$、$\tau$、$R$
+- 現在の $\delta$ 、 $\tau$ 、 $R$
 - 境界状態
 - 残存比率余白 $M_R$
 - 残存吸収余白 $M_{\tau}$
@@ -1340,12 +1340,12 @@ AIは次を述べてはなりません。
 - $R$ は安全度である
 - $\tau$ は時定数である
 - $\delta$ は単なる瞬間誤差である
-- $R_{\mathrm{handoff}}$、$R_{\mathrm{irrev}}$、$R=1.0$ は同じである
+- $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ 、 $R=1.0$ は同じである
 - 不可逆遷移は $R=1.0$ で初めて始まる
 - $R=1.0$ が通常の人間委譲点である
 - Fail-Closedは完全沈黙である
 - 既知の境界進行は`CONFESSION`である
-- Effect-Side出力が $\delta$、$\tau$、$R$ を更新できる
+- Effect-Side出力が $\delta$ 、 $\tau$ 、 $R$ を更新できる
 - $\tau=0$ が有効な完全破断計算である
 - 一時的な $R$ 低下が不可逆状態を自動解除する
 

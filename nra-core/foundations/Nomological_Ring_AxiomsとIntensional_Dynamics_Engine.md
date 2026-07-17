@@ -32,7 +32,7 @@ $\tau_{\text{upper}} = \tau \cdot f(\mathrm{EMA}_{\text{upper}})$
 
 $\tau_{\text{lower}} = \tau \cdot g(\mathrm{EMA}_{\text{lower}})$
 
-$R_{\text{dir}} = \max\!\left( \frac{\delta_{\text{upper}}}{\tau_{\text{upper}}}, \frac{\delta_{\text{lower}}}{\tau_{\text{lower}}} \right)$（側別評価の補助集約量であり、正規Rを再定義しない）
+$R_{\text{dir}} = \max\!\left( \frac{\delta_{\text{upper}}}{\tau_{\text{upper}}}, \frac{\delta_{\text{lower}}}{\tau_{\text{lower}}} \right)$ （側別評価の補助集約量であり、正規Rを再定義しない）
 
 **設計原則**
 
@@ -162,6 +162,6 @@ $R_{\text{global}} = \max( R_{\text{climate}}, R_{\text{biosphere}} )$
 
 | 多様性 | 生息地喪失 | 遺伝多様性 | 種絶滅 |
 
-**本質**：連続変化が閾値で不連続転換する普遍構造を、$R = \delta / \tau$ で診断。
+**本質**：連続変化が閾値で不連続転換する普遍構造を、 $R = \delta / \tau$ で診断。
 
 ***

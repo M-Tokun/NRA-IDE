@@ -66,9 +66,9 @@ $$
 R = \frac{\delta}{\tau}
 $$
 
-- $\delta$：蓄積ズレ
-- $\tau$：吸収厚み
-- $R$：境界接近比
+- $\delta$ ：蓄積ズレ
+- $\tau$ ：吸収厚み
+- $R$ ：境界接近比
 
 $R$ は、NRA-IDEにおける境界接近比のみに使用する。
 
@@ -118,8 +118,8 @@ $$
 M_R=1-R,qquad M_{\tau}=\tau-\delta
 $$
 
-- `remaining_ratio_margin`：$M_R$、無次元
-- `remaining_absorption_margin`：$M_{\tau}$、$\delta$ ・ $\tau$ と同じ単位
+- `remaining_ratio_margin`： $M_R$ 、無次元
+- `remaining_absorption_margin`： $M_{\tau}$ 、 $\delta$ ・ $\tau$ と同じ単位
 
 Both margins require finite $\delta\ge0$ and finite $\tau>0$. They must not be collapsed into one ambiguous remaining-margin field.
 
@@ -141,10 +141,10 @@ R_{\mathrm{irrev}}
 1.0
 $$
 
-- $R_{\mathrm{warn}}$：境界接近警告点
-- $R_{\mathrm{handoff}}$：境界前人間委譲点
-- $R_{\mathrm{irrev}}$：不可逆遷移開始閾値
-- $R=1.0$：不変完全破断境界
+- $R_{\mathrm{warn}}$ ：境界接近警告点
+- $R_{\mathrm{handoff}}$ ：境界前人間委譲点
+- $R_{\mathrm{irrev}}$ ：不可逆遷移開始閾値
+- $R=1.0$ ：不変完全破断境界
 
 $$
 R_{\mathrm{handoff}}
@@ -276,7 +276,7 @@ $$
 構造証言には次を含む。
 
 - Cause-Side観測
-- 現在の $\delta$、$\tau$、$R$
+- 現在の $\delta$ 、 $\tau$ 、 $R$
 - 境界状態
 - `remaining_ratio_margin`
 - `remaining_absorption_margin`
@@ -355,14 +355,14 @@ Final fixed testimony contains only predefined items:
 
 ### 日本語
 
-$\delta$、$\tau$、$R$ は、次のいずれかからのみ得る。
+$\delta$ 、 $\tau$ 、 $R$ は、次のいずれかからのみ得る。
 
 1. 直接のCause-Side観測
 2. 評価前に固定されたCause-Side変換規則
 
 LLM出力、自己評価、意味スコア、出力順位、廃棄出力、過去生成物はEffect-Sideである。
 
-これらは監査対象にはできるが、$\delta$、$\tau$、$R$ を更新してはならない。
+これらは監査対象にはできるが、 $\delta$ 、 $\tau$ 、 $R$ を更新してはならない。
 
 $$
 \text{Effect-Side}
@@ -401,7 +401,7 @@ Even an LLM output that has been validated, selected, or permitted by Layer 03 r
 
 静的 $\tau$ では捉えにくい非対称変動を追跡するため、上側・下側を分離した動的評価を行う。
 
-二重ゆらぎ式はIDEの第二の正規計算式であり、公理ではない。側別比と、事前固定された連続時間または有限差分の二重ゆらぎ検出規則が正規核を構成する。以下のEMA、$h_{\mathrm{upper}}$、$h_{\mathrm{lower}}$ は、その核に従う事前固定の補助実装であり、独立した公理または第三の正規IDE計算式ではない。
+二重ゆらぎ式はIDEの第二の正規計算式であり、公理ではない。側別比と、事前固定された連続時間または有限差分の二重ゆらぎ検出規則が正規核を構成する。以下のEMA、 $h_{\mathrm{upper}}$ 、 $h_{\mathrm{lower}}$ は、その核に従う事前固定の補助実装であり、独立した公理または第三の正規IDE計算式ではない。
 
 $$
 \mathrm{EMA}_{\mathrm{upper}}(n)
@@ -450,7 +450,7 @@ $\tau_{\mathrm{upper}}$ と $\tau_{\mathrm{lower}}$ は、動的評価に使用�
 
 閉じた運用区間における真の $\tau$ は、外生補充なしに自発的増加しない。
 
-この再帰計算は、$\alpha_u$、$\alpha_l$、$h_{\mathrm{upper}}$、$h_{\mathrm{lower}}$、初期EMA、領域規則を事前固定した後、評価区間内で閉じる。
+この再帰計算は、 $\alpha_u$ 、 $\alpha_l$ 、 $h_{\mathrm{upper}}$ 、 $h_{\mathrm{lower}}$ 、初期EMA、領域規則を事前固定した後、評価区間内で閉じる。
 
 ---
 
@@ -535,11 +535,11 @@ r\frac{|r|}{k+|r|}
 r=x_{\mathrm{exact}}-x
 $$
 
-$G(r)$は二次残差ゲートである。
+$G(r)$ は二次残差ゲートである。
 
-$r$ が小さい場合、$G(r)\approx r|r|/k$ となり、$r$ に対して二次的に小さい。
+$r$ が小さい場合、 $G(r)\approx r|r|/k$ となり、 $r$ に対して二次的に小さい。
 
-$r$ が大きい場合、$G(r)\sim r$ となる。応答は $r$ の符号を保持し、漸近的に線形かつ非有界であり、有界値へ飽和しない。
+$r$ が大きい場合、 $G(r)\sim r$ となる。応答は $r$ の符号を保持し、漸近的に線形かつ非有界であり、有界値へ飽和しない。
 
 IDE項 $F_{\mathrm{IDE}}$ は全域で動作し、補助計算層は追従精度を補う。
 
@@ -707,7 +707,7 @@ $\tau$ は時間定数ではない。
 
 $\tau$ は、蓄積ズレを受け止める構造的な遊びの厚みである。
 
-閉じた運用区間では、外生補充なしに自然回復せず、$\tau$ は非増加である。
+閉じた運用区間では、外生補充なしに自然回復せず、 $\tau$ は非増加である。
 
 次の積分式は、この原則を表すドメイン固有のIDE補助モデルであり、公理または正規IDE計算式ではない。
 
@@ -719,15 +719,15 @@ $$
 \int_0^t f(\delta(s))\,ds
 $$
 
-対象とする各有限評価区間で、$f(\delta(s))$ は有限、非負、可積分でなければならない。
+対象とする各有限評価区間で、 $f(\delta(s))$ は有限、非負、可積分でなければならない。
 
-区間$[t_1,t_2]$において
+区間 $[t_1,t_2]$ において
 
 $$
 \int_{t_1}^{t_2} f(\delta(s))\,ds > 0
 $$
 
-の場合に限り、$\tau(t_2)<\tau(t_1)$ となる。
+の場合に限り、 $\tau(t_2)<\tau(t_1)$ となる。
 
 一度破断または不可逆遷移へ達した構造は、外部補充があっても初期構造へ戻ったと推定しない。
 
@@ -735,7 +735,7 @@ $$
 \tau_{\mathrm{restored}} < \tau_0
 $$
 
-$\tau_0$ は事前固定された遷移前基準、$\tau_{\mathrm{restored}}$ は同一対象・同一単位・同一Cause-Side規則で測定した後継構造の値とする。復元主張には、比較可能性と上記不等式の双方の証拠を必要とする。この不等式は構造制約であり、公理または第三の正規IDE計算式ではない。
+$\tau_0$ は事前固定された遷移前基準、 $\tau_{\mathrm{restored}}$ は同一対象・同一単位・同一Cause-Side規則で測定した後継構造の値とする。復元主張には、比較可能性と上記不等式の双方の証拠を必要とする。この不等式は構造制約であり、公理または第三の正規IDE計算式ではない。
 
 ---
 
@@ -909,7 +909,7 @@ $$
 \tau=0
 $$
 
-の場合、$R$ は定義不能である。
+の場合、 $R$ は定義不能である。
 
 $$
 \tau=0
@@ -972,15 +972,15 @@ It must not be treated as a valid rupture calculation.
 - 一次式・二次式はIDEの正規計算式であり、公理ではない。名称は数学的次数ではなくIDE内の定義順序と役割を示す。
 - 二次式は二重ゆらぎ式であり、正式な役割は動的構造追跡である。
 - その他の式はIDEの派生式、補助式、または補完式であり、第三の正規IDE計算式にならない。
-- $R_{\mathrm{handoff}}$、$R_{\mathrm{irrev}}$、$R=1.0$ は異なる。
+- $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ 、 $R=1.0$ は異なる。
 - $R_{\mathrm{irrev}} \le R < 1.0$ は不可逆遷移区間である。
 - $R=1.0$ は不変完全破断境界である。
 - Fail-Closedは完全沈黙ではない。
-- $R<1.0$では構造証言を継続する。
+- $R<1.0$ では構造証言を継続する。
 - $R\ge1.0$ では最終固定証言へ切り替える。
 - $\tau=0$ はFail-Closed状態ではなく`OUT_OF_DESCRIPTION_DOMAIN`である。Fail-Closed運用原則による抑止は適用する。
 - 既知の境界進行は`CONFESSION`ではない。
-- Effect-Side出力は $\delta$、$\tau$、$R$ を更新しない。
+- Effect-Side出力は $\delta$ 、 $\tau$ 、 $R$ を更新しない。
 
 ---
 

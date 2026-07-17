@@ -46,7 +46,7 @@ $$R_{em} = \frac{\delta_{SNR}}{\tau_{SNR}}$$
 
 | $\tau_{SNR}$ | 計測値を信頼できる最低SNR閾値 |
 
-> **注記：** $\delta_{SNR}$ ・ $\tau_{SNR}$ は SNR 劣化量を監視対象パラメータとして $R = \delta/\tau$ に適用したものである。$R_{em} \neq \text{SNR}$。R は構造比率（偏差対吸収厚み）であり、SNR（信号対雑音比）とは別概念である。
+> **注記：** $\delta_{SNR}$ ・ $\tau_{SNR}$ は SNR 劣化量を監視対象パラメータとして $R = \delta/\tau$ に適用したものである。 $R_{em} \neq \text{SNR}$ 。R は構造比率（偏差対吸収厚み）であり、SNR（信号対雑音比）とは別概念である。
 
 ### 境界条件
 
@@ -80,11 +80,11 @@ $$R_{nuke} \geq 1.0 \implies \text{SCRAM（緊急停止）即時発令}$$
 
 ## 4. 層C：独立基礎力学モジュール (Orthogonal Dimensions)
 
-各センサーデータは物理単位を剥ぎ取られ、3つの独立した接近比（$R$）へ変換される。
+各センサーデータは物理単位を剥ぎ取られ、3つの独立した接近比（ $R$ ）へ変換される。
 
 ### 定義
 
-**$R_{heat}$（熱力学テンション）**
+**$R_{heat}$ （熱力学テンション）**
 
 $$R_{heat} = \frac{\delta T}{\tau_T}$$
 
@@ -96,7 +96,7 @@ $$R_{heat} = \frac{\delta T}{\tau_T}$$
 
 | $\tau_T$ | 構造材の熱変性限界（時間ラグを静的に控除した実効閾値） |
 
-**$R_{pressure}$（流体力学テンション）**
+**$R_{pressure}$ （流体力学テンション）**
 
 $$R_{pressure} = \frac{\delta P}{\tau_P}$$
 
@@ -108,7 +108,7 @@ $$R_{pressure} = \frac{\delta P}{\tau_P}$$
 
 | $\tau_P$ | 容器の設計耐圧限界 |
 
-**$R_{stress}$（構造力学テンション）**
+**$R_{stress}$ （構造力学テンション）**
 
 $$R_{stress} = \frac{\delta\sigma}{\tau_{\sigma}}$$
 

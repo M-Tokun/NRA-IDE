@@ -154,7 +154,7 @@ This reduces the burden on $G(r)$ to "forcibly pull back", maintaining smooth tr
 
 ### Proposal 2: Explosion-Suppression $k$ (Dynamic Sensitivity Control)
 
-### 案2：計算爆発抑制型 $k$（動的感度制御）
+### 案2：計算爆発抑制型 $k$ （動的感度制御）
 
 **Use case:** Preventing divergence when transition velocity is very high.
 
@@ -174,9 +174,9 @@ $$k_{\text{eff}} = k_0 \cdot (1 + \beta |\dot{r}|)$$
 
 |---|---|---|
 
-| 高速遷移時（$|\dot{r}|$ 大） | 自動的に増大 | 古典層の介入が弱まり IDE の慣性が優先 |
+| 高速遷移時（ $|\dot{r}|$ 大） | 自動的に増大 | 古典層の介入が弱まり IDE の慣性が優先 |
 
-| 低速・収束時（$|\dot{r}|$ 小） | 小さくなる | 古典層の精度補正がフルに機能 |
+| 低速・収束時（ $|\dot{r}|$ 小） | 小さくなる | 古典層の精度補正がフルに機能 |
 
 "Safety (transition preservation) at high speed; precision at low speed" — dynamic allocation of computational resources.
 
@@ -190,7 +190,7 @@ This is not external adjustment of $k$, but the gate structure autonomously vary
 
 ### Proposal 3: High-Precision Convergence $\Phi(x)$ (PD Element)
 
-### 案3：高精度追い込み型 $\Phi(x)$（PD 要素の導入）
+### 案3：高精度追い込み型 $\Phi(x)$ （PD 要素の導入）
 
 **Use case:** Improving convergence precision when computational capacity allows.
 
@@ -204,7 +204,7 @@ By enclosing it inside $G(r)$, it acts as **a high-precision damper that activat
 
 Preservation of property error is handled by the IDE layer; "snap-to" precision at convergence is handled by the classical differential term.
 
-通常の PD 制御を全域に適用すると計算爆発の原因になりますが、$G(r)$ の内側に封じ込めることで**「誤差が大きいときだけ働く高精度ダンパー」**として機能します。
+通常の PD 制御を全域に適用すると計算爆発の原因になりますが、 $G(r)$ の内側に封じ込めることで**「誤差が大きいときだけ働く高精度ダンパー」**として機能します。
 
 性質誤差の保持は IDE 層が担保し、収束時の「ピタッと止まる精度」は古典層の微分項が受け持ちます。
 

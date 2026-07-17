@@ -35,9 +35,9 @@ $$
 
 ### 変数定義 / Variable Definitions
 
-- $\delta$：蓄積ズレ  
-- $\tau$：吸収厚み  
-- $R$：境界接近比  
+- $\delta$ ：蓄積ズレ  
+- $\tau$ ：吸収厚み  
+- $R$ ：境界接近比  
 
 - $\delta$: accumulated deviation  
 - $\tau$: absorption thickness  
@@ -57,7 +57,7 @@ $$
 \delta,\tau \in \mathbb{R}
 $$
 
-かつ、$\delta$ と $\tau$ は有限値でなければならない。
+かつ、 $\delta$ と $\tau$ は有限値でなければならない。
 
 Both $\delta$ and $\tau$ must be finite.
 
@@ -80,14 +80,14 @@ $$
 M_R = 1-R
 $$
 
-- $M_R$：残存比率余白（無次元）
+- $M_R$ ：残存比率余白（無次元）
 - $M_R$: remaining ratio margin (dimensionless)
 
 $$
 M_{\tau} = \tau - \delta
 $$
 
-- $M_{\tau}$：残存吸収余白（$\delta$ および $\tau$ と同じ単位）
+- $M_{\tau}$ ：残存吸収余白（ $\delta$ および $\tau$ と同じ単位）
 - $M_{\tau}$: remaining absorption margin (same unit as $\delta$ and $\tau$)
 
 一次式との関係は次である。
@@ -386,9 +386,9 @@ R_{\mathrm{lower}}
 \right\}
 $$
 
-- $D=\mathrm{upper}$：上側が支配  
-- $D=\mathrm{lower}$：下側が支配  
-- $R_{\mathrm{upper}}=R_{\mathrm{lower}}$：同率支配  
+- $D=\mathrm{upper}$ ：上側が支配  
+- $D=\mathrm{lower}$ ：下側が支配  
+- $R_{\mathrm{upper}}=R_{\mathrm{lower}}$ ：同率支配  
 
 ---
 
@@ -471,14 +471,14 @@ $$
 ## 5.1 変数定義  
 ## 5.1 Variable Definitions
 
-- $x$：現在の計算状態  
-- $x_{\mathrm{exact}}$：由来と不確かさを記録した事前定義の高精度参照状態（絶対的真値を意味しない）
-- $r$：参照状態との差  
-- $\gamma$：減衰係数  
-- $k$：knee値  
-- $F_{\mathrm{IDE}}(x)$：領域固有の基礎動力学項（IDE一次式ではない）
-- $\Phi(x)$：補助計算項  
-- $G(r)$：二次残差ゲート  
+- $x$ ：現在の計算状態  
+- $x_{\mathrm{exact}}$ ：由来と不確かさを記録した事前定義の高精度参照状態（絶対的真値を意味しない）
+- $r$ ：参照状態との差  
+- $\gamma$ ：減衰係数  
+- $k$ ：knee値  
+- $F_{\mathrm{IDE}}(x)$ ：領域固有の基礎動力学項（IDE一次式ではない）
+- $\Phi(x)$ ：補助計算項  
+- $G(r)$ ：二次残差ゲート  
 
 - $x$: current computational state  
 - $x_{\mathrm{exact}}$: predefined high-precision reference state with recorded provenance and uncertainty (not guaranteed absolute ground truth)
@@ -502,11 +502,11 @@ $$
 k > 0
 $$
 
-$x$、$x_{\mathrm{exact}}$、$r$、$F_{\mathrm{IDE}}(x)$、$\Phi(x)$ は有限値でなければならない。
+$x$ 、 $x_{\mathrm{exact}}$ 、 $r$ 、 $F_{\mathrm{IDE}}(x)$ 、 $\Phi(x)$ は有限値でなければならない。
 
 $x$, $x_{\mathrm{exact}}$, $r$, $F_{\mathrm{IDE}}(x)$, and $\Phi(x)$ must be finite.
 
-$x_{\mathrm{exact}}$、$F_{\mathrm{IDE}}(x)$、$\Phi(x)$ および各パラメータは、領域固有の根拠、適用範囲、不確かさ、検証方法を計算開始前に固定し、追跡可能にしなければならない。
+$x_{\mathrm{exact}}$ 、 $F_{\mathrm{IDE}}(x)$ 、 $\Phi(x)$ および各パラメータは、領域固有の根拠、適用範囲、不確かさ、検証方法を計算開始前に固定し、追跡可能にしなければならない。
 
 For $x_{\mathrm{exact}}$, $F_{\mathrm{IDE}}(x)$, $\Phi(x)$, and each parameter, domain-specific evidence, applicability, uncertainty, and validation method must be fixed before computation and remain traceable.
 
@@ -527,7 +527,7 @@ G(r)
 \frac{r|r|}{k}
 $$
 
-したがって、$G(r)$は $r$ に対して二次的に小さくなる。
+したがって、 $G(r)$ は $r$ に対して二次的に小さくなる。
 
 Therefore, $G(r)$ becomes second-order small with respect to $r$.
 
@@ -560,7 +560,7 @@ $$
 G(r)\sim r
 $$
 
-$G(r)$は奇関数であり、$r$ の符号を保持する。大残差で有界値へ飽和せず、漸近的に線形かつ非有界である。
+$G(r)$ は奇関数であり、 $r$ の符号を保持する。大残差で有界値へ飽和せず、漸近的に線形かつ非有界である。
 
 $G(r)$ is odd and preserves the sign of $r$. For large residuals it is asymptotically linear and unbounded; it does not saturate to a bounded value.
 
@@ -659,12 +659,12 @@ A computation producing non-finite values must not be propagated to the next ste
 # 6. 計算入力規則  
 # 6. Computational Input Rules
 
-$\delta$、$\tau$、$\delta_{\mathrm{upper}}$、$\delta_{\mathrm{lower}}$、$x_{\mathrm{exact}}$ は、次のいずれかから取得する。
+$\delta$ 、 $\tau$ 、 $\delta_{\mathrm{upper}}$ 、 $\delta_{\mathrm{lower}}$ 、 $x_{\mathrm{exact}}$ は、次のいずれかから取得する。
 
 1. 直接のCause-Side観測  
 2. 計算開始前に固定されたCause-Side変換規則  
 
-各入力には、取得元、取得時刻または版、単位、不確かさ、適用範囲および変換履歴を結び付ける。$x_{\mathrm{exact}}$ という記号名は真値保証を意味せず、参照状態としての妥当性を領域固有の証拠で検証しなければならない。
+各入力には、取得元、取得時刻または版、単位、不確かさ、適用範囲および変換履歴を結び付ける。 $x_{\mathrm{exact}}$ という記号名は真値保証を意味せず、参照状態としての妥当性を領域固有の証拠で検証しなければならない。
 
 $\delta$, $\tau$, $\delta_{\mathrm{upper}}$, $\delta_{\mathrm{lower}}$, and $x_{\mathrm{exact}}$ must be obtained from either:
 
@@ -698,12 +698,12 @@ The following must not be used as computational inputs:
 # 7. 記号予約  
 # 7. Reserved Symbols
 
-- $R$：境界接近比のみ  
-- $S$：構造感度のみ  
-- $M_R$：残存比率余白のみ
-- $M_{\tau}$：残存吸収余白のみ
-- $\delta$：蓄積ズレのみ  
-- $\tau$：吸収厚みのみ  
+- $R$ ：境界接近比のみ  
+- $S$ ：構造感度のみ  
+- $M_R$ ：残存比率余白のみ
+- $M_{\tau}$ ：残存吸収余白のみ
+- $\delta$ ：蓄積ズレのみ  
+- $\tau$ ：吸収厚みのみ  
 
 - $R$: boundary-approach ratio only  
 - $S$: structural sensitivity only  

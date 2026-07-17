@@ -362,11 +362,11 @@ $$R_i = \frac{\delta_i}{\tau_i}, \quad i \in \{HR, SpO_2, RR, BP\}$$
 
 $$R_{total} = \sqrt{\sum_i R_i^2}$$
 
-$$\text{residual\_debt}(t) = \int_0^t (R_{total} - R_{total} \cdot k_{rec}) \, dt \cdot w_f$$
+$$\text{residual}\_\text{debt}(t) = \int_0^t (R_{total} - R_{total} \cdot k_{rec}) \, dt \cdot w_f$$
 
 $$w_f = \frac{\text{warmupPct}}{100} \quad \text{(accuracy weight)}$$
 
-$$R_{eff} = R_{total} + 0.4 \cdot \text{residual\_debt}$$
+$$R_{eff} = R_{total} + 0.4 \cdot \text{residual}\_\text{debt}$$
 
 $$R_{eff} \geq 1.0 \Rightarrow \text{FAIL-CLOSED}$$
 

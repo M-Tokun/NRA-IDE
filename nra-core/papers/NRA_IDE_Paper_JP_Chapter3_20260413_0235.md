@@ -112,7 +112,7 @@ $$\mathrm{EMA_{upper}}(n) = \alpha_u \cdot \delta_u + (1 - \alpha_u) \cdot \math
 
 拡大方向の偏差 $\delta_u$ を平滑化する。
 
-$\alpha_u$ は上側の平滑化係数（$0 < \alpha_u \leq 1$）。
+$\alpha_u$ は上側の平滑化係数（ $0 < \alpha_u \leq 1$ ）。
 
 **下側EMA（縮小方向のゆらぎ）**
 
@@ -120,7 +120,7 @@ $$\mathrm{EMA_{lower}}(n) = \alpha_l \cdot \delta_l + (1 - \alpha_l) \cdot \math
 
 縮小方向の偏差 $\delta_l$ を平滑化する。
 
-$\alpha_l$ は下側の平滑化係数（$0 < \alpha_l \leq 1$）。
+$\alpha_l$ は下側の平滑化係数（ $0 < \alpha_l \leq 1$ ）。
 
 **動的τの非対称定義**
 
@@ -128,7 +128,7 @@ $$\tau_{upper} = \tau \cdot (1 + \beta_u \cdot \mathrm{EMA_{upper}})$$
 
 $$\tau_{lower} = \tau \cdot (1 - \beta_l \cdot \mathrm{EMA_{lower}})$$
 
-$\beta_u$、$\beta_l$ は非対称調整係数。
+$\beta_u$ 、 $\beta_l$ は非対称調整係数。
 
 **この定義が意味すること**
 

@@ -106,7 +106,7 @@ R_{\mathrm{track}} = \frac{\delta_{\mathrm{track}}}{\theta_{\mathrm{track}}}
 
 $$
 
-$R_{\mathrm{corr}}$ が超過した場合は対象側の危険。$R_{\mathrm{track}}$ が超過した場合は追跡側の不能。この二つは混ぜてはいけない。
+$R_{\mathrm{corr}}$ が超過した場合は対象側の危険。 $R_{\mathrm{track}}$ が超過した場合は追跡側の不能。この二つは混ぜてはいけない。
 
 ---
 

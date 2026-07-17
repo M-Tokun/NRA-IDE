@@ -10,7 +10,7 @@
 >
 > このページと各体験モジュールは公開用の説明資料です。正規文書を上書きせず、測定器、適合証拠、安全証明、または特定ドメインでの有効性保証にはなりません。
 
-> 「構造余裕を消耗する最適化は、不可逆な破断境界（$R \ge 1$）へ接近し得る」
+> 「構造余裕を消耗する最適化は、不可逆な破断境界（ $R \ge 1$ ）へ接近し得る」
 
 現代の安全設計の多くは、一つの重要な構造的見落としを抱えています。それは、「効率」の向上や「予測」の精密化が、必ずしもシステムの堅牢性に直結しないという事実です。むしろ、特定の境界条件下では、これらの努力が系の「残渣（Residue）」を削り取り、微小な変動に対していかにも脆弱な構造を作り出してしまうことがあります。
 
@@ -55,8 +55,8 @@ $$
 ![NRA-IDE 基礎式](./nra_ide_formula_basic.jpg)
 
 - **$\delta$ (Delta):** 宣言されたCause-Side観測または事前固定されたCause-Side変換から導く非負の蓄積ズレ。
-- **$\tau$ (Tau):** 正の吸収厚み。時定数ではない。$\tau=0$ は`OUT_OF_DESCRIPTION_DOMAIN`。
-- **$R$:** 正規比 $\delta/\tau$。残渣そのものではない。$R \ge 1$ は`RUPTURE_BOUNDARY`であり、構造証言は最終固定となる。不正値・非有限値は`CONFESSION`。
+- **$\tau$ (Tau):** 正の吸収厚み。時定数ではない。 $\tau=0$ は`OUT_OF_DESCRIPTION_DOMAIN`。
+- **$R$:** 正規比 $\delta/\tau$ 。残渣そのものではない。 $R \ge 1$ は`RUPTURE_BOUNDARY`であり、構造証言は最終固定となる。不正値・非有限値は`CONFESSION`。
 
 二つの残余余白は次です。
 
@@ -68,9 +68,9 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-$M_R$ は無次元です。$M_{\tau}$ は $\delta$ および $\tau$ と同じ単位を持ちます。
+$M_R$ は無次元です。 $M_{\tau}$ は $\delta$ および $\tau$ と同じ単位を持ちます。
 
-破断境界より前は、運用閾値によって`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`を区別します。Effect-SideまたはLLM出力は、$\delta$、$\tau$、閾値、判定状態を書き換えられません。
+破断境界より前は、運用閾値によって`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`を区別します。Effect-SideまたはLLM出力は、 $\delta$ 、 $\tau$ 、閾値、判定状態を書き換えられません。
 
 正規7状態は、`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`です。
 

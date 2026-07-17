@@ -846,9 +846,9 @@ $$
 R=\frac{\delta}{\tau}
 $$
 
-- $\delta$：蓄積ズレ
-- $\tau$：吸収厚み
-- $R$：境界接近比
+- $\delta$ ：蓄積ズレ
+- $\tau$ ：吸収厚み
+- $R$ ：境界接近比
 
 正規境界順序：
 
@@ -878,7 +878,7 @@ irreversible_latched
 
 境界評価器はLLM外部で動作する。
 
-LLMは権限ある $\delta$、$\tau$、Rを計算しない。
+LLMは権限ある $\delta$ 、 $\tau$ 、Rを計算しない。
 
 ---
 
@@ -1017,7 +1017,7 @@ Layer 03はEffect-Sideの検査・制約執行ゲートである。事前定義�
 - 自由生成の制限
 - 現在の境界状態で許可された出力種別だけを通過させる
 
-Layer 03は $\delta$、$\tau$、Rを計算しない。
+Layer 03は $\delta$ 、 $\tau$ 、Rを計算しない。
 
 Layer 03は境界状態を決定しない。
 
@@ -1110,8 +1110,8 @@ Layer 03は、その構造証言を改変せず通過させなければならな
 - 現在のR
 - $\delta$
 - $\tau$
-- `remaining_ratio_margin`（$M_R=1-R$、無次元）
-- `remaining_absorption_margin`（$M_{\tau}=\tau-\delta$、$\delta$ ・ $\tau$ と同じ単位）
+- `remaining_ratio_margin`（ $M_R=1-R$ 、無次元）
+- `remaining_absorption_margin`（ $M_{\tau}=\tau-\delta$ 、 $\delta$ ・ $\tau$ と同じ単位）
 - 変化傾向
 - 二重ゆらぎ状態
 - 支配側
@@ -1163,7 +1163,7 @@ $$
 最終固定証言は、事前定義された次の項目だけを含む。
 
 - 最終Cause-Side観測
-- 最終 $\delta$、$\tau$、R
+- 最終 $\delta$ 、 $\tau$ 、R
 - 完全破断境界通知
 - 不可逆ラッチ状態
 - 監査証跡
@@ -1213,7 +1213,7 @@ $$
 構造証言には次を含む。
 
 - Cause-Side観測
-- $\delta$、$\tau$、R
+- $\delta$ 、 $\tau$ 、R
 - 境界状態
 - 警告・人間委譲通知
 - 不可逆遷移通知

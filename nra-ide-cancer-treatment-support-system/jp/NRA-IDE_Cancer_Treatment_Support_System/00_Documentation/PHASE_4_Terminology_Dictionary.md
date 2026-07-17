@@ -46,7 +46,7 @@
 
 | `0x00` | ERR_NONE | 正常（SAFE/DANGER判定有効） | - |
 
-| `0x01` | ERR_GEOMETRIC | すり抜け（$D < d$） | 手術検討 |
+| `0x01` | ERR_GEOMETRIC | すり抜け（ $D < d$ ） | 手術検討 |
 
 | `0x02` | ERR_NEGATIVE | 負の物理量 | 再測定 |
 
