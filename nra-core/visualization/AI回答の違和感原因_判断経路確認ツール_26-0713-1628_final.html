@@ -1,0 +1,1002 @@
+<!-- FILE: AI回答の違和感原因_判断経路確認ツール_26-0713-1628_final.html / JST 2026-07-13 16:28 / NRA-IDE  ©M-Tokuni 2026 -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI回答の違和感原因・判断経路確認ツール</title>
+<style>
+  :root{
+    --ink:#20262b;
+    --ink-sub:#5c6670;
+    --paper:#f3f2ed;
+    --panel:#ffffff;
+    --line:#d5d2c8;
+    --accent:#315b79;
+    --accent-soft:#e8f0f5;
+    --pass:#2f7d50;
+    --caution:#9b7208;
+    --review:#b75a25;
+    --closed:#9f2c2c;
+    --unknown:#6f5a87;
+    --mono:"Consolas","Menlo","Noto Sans Mono CJK JP",monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+    font-size:14px;
+    line-height:1.72;
+  }
+  header{
+    background:var(--panel);
+    border-bottom:2px solid var(--ink);
+    padding:14px 22px 12px;
+  }
+  header h1{margin:0;font-size:19px;letter-spacing:.035em;}
+  header p{margin:3px 0 0;color:var(--ink-sub);font-size:12px;}
+  .axiom{
+    margin-top:8px;
+    padding:7px 10px;
+    border-left:4px solid var(--accent);
+    background:var(--accent-soft);
+    font-weight:700;
+    font-size:13px;
+  }
+  main{
+    display:grid;
+    grid-template-columns:minmax(390px,44%) 1fr;
+    min-height:calc(100vh - 112px);
+  }
+  .col{padding:18px 22px;min-width:0;}
+  .col-input{background:var(--panel);border-right:1px solid var(--line);}
+  @media(max-width:980px){
+    main{grid-template-columns:1fr;}
+    .col-input{border-right:0;border-bottom:1px solid var(--line);}
+  }
+  section{margin-bottom:20px;}
+  h2{
+    margin:0 0 8px;
+    padding-bottom:4px;
+    border-bottom:1px solid var(--line);
+    color:var(--accent);
+    font-size:13px;
+    letter-spacing:.075em;
+  }
+  h3{font-size:13px;margin:9px 0 4px;}
+  label{display:block;color:var(--ink-sub);font-size:12px;margin:8px 0 2px;}
+  textarea,input[type="text"],select{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:8px 9px;
+    background:#fdfdfb;
+    color:var(--ink);
+    font:inherit;
+  }
+  textarea{resize:vertical;}
+  textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-offset:0;}
+  button{
+    border:1px solid var(--ink);
+    border-radius:4px;
+    padding:7px 14px;
+    background:var(--ink);
+    color:#fff;
+    font:inherit;
+    cursor:pointer;
+  }
+  button:hover{filter:brightness(1.08);}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  button.ghost{background:transparent;color:var(--ink);}
+  button.small{padding:4px 9px;font-size:12px;}
+  button.primary-wide{width:100%;font-weight:700;padding:10px 14px;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr;}}
+  .note,.danger-note,.principle{
+    border-radius:4px;
+    padding:8px 10px;
+    font-size:12px;
+    margin:8px 0;
+  }
+  .note{background:#fbf7e9;border:1px solid #e4d7a3;}
+  .danger-note{background:#fbefef;border:1px solid #deb0b0;}
+  .principle{background:#edf3f7;border:1px solid #bdccd7;}
+  .muted{color:var(--ink-sub);font-size:12px;}
+  .card{
+    border:1px solid var(--line);
+    border-left:4px solid var(--line);
+    background:var(--panel);
+    border-radius:4px;
+    padding:10px 12px;
+    margin:8px 0;
+  }
+  .card.CAUTION{border-left-color:var(--caution);}
+  .card.REVIEW_REQUIRED{border-left-color:var(--review);}
+  .card.CLOSED{border-left-color:var(--closed);}
+  .card.UNKNOWN{border-left-color:var(--unknown);}
+  .card h3{margin:0 0 4px;font-size:13px;}
+  .meta{font-size:11px;color:var(--ink-sub);}
+  .excerpt{
+    font-family:var(--mono);
+    font-size:12px;
+    background:#f1efe9;
+    border:1px dashed var(--line);
+    padding:6px 8px;
+    margin:6px 0;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+  }
+  mark{background:#ffe08a;padding:0 2px;}
+  .badge{
+    display:inline-block;
+    padding:4px 13px;
+    border-radius:4px;
+    color:#fff;
+    font-weight:700;
+    letter-spacing:.06em;
+    font-size:14px;
+  }
+  .b-PASS{background:var(--pass);}
+  .b-CAUTION{background:var(--caution);}
+  .b-REVIEW_REQUIRED{background:var(--review);}
+  .b-CLOSED{background:var(--closed);}
+  .b-UNKNOWN{background:var(--unknown);}
+  .st-PASS{color:var(--pass);font-weight:700;}
+  .st-CAUTION{color:var(--caution);font-weight:700;}
+  .st-REVIEW_REQUIRED{color:var(--review);font-weight:700;}
+  .st-CLOSED{color:var(--closed);font-weight:700;}
+  .st-UNKNOWN{color:var(--unknown);font-weight:700;}
+  details{
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:var(--panel);
+    padding:8px 12px;
+    margin:8px 0;
+  }
+  summary{cursor:pointer;color:var(--accent);font-size:13px;font-weight:600;}
+  pre.prompt{
+    margin:8px 0;
+    padding:12px;
+    border-radius:4px;
+    background:#20262b;
+    color:#eceae4;
+    font-family:var(--mono);
+    font-size:12px;
+    line-height:1.62;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    max-height:520px;
+    overflow:auto;
+  }
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{
+    border:1px solid var(--line);
+    padding:5px 7px;
+    text-align:left;
+    vertical-align:top;
+    overflow-wrap:anywhere;
+  }
+  th{background:#efede7;font-weight:600;}
+  ul.tight{margin:4px 0;padding-left:20px;}
+  ul.tight li{margin:2px 0;}
+  .mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  @media(max-width:600px){.mode-grid{grid-template-columns:1fr;}}
+  .mode-card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px;
+    background:#fdfdfb;
+  }
+  .mode-card strong{display:block;font-size:13px;margin-bottom:2px;}
+  .mode-card span{display:block;color:var(--ink-sub);font-size:11px;line-height:1.5;}
+  .mode-card button{margin-top:8px;width:100%;}
+  .scope-status{display:inline-block;padding:1px 7px;border-radius:10px;background:#efede7;font-size:11px;}
+  .hidden{display:none!important;}
+  .footer-note{padding:10px 22px 18px;color:var(--ink-sub);font-size:11px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI回答の違和感原因・判断経路確認ツール</h1>
+  <p>ユーザー起動型・外部通信なし・検索なし・監査プロンプト生成専用 ─ 正誤を自動確定するツールではありません ©M-Tokuni 2026</p>
+  <div class="axiom">文章自体の筋 ≠ 前提から結論までの判断経路の筋 ／ 理由不明の違和感を、最初から誤否定と決めつけない</div>
+</header>
+
+<main>
+  <div class="col col-input">
+    <section>
+      <h2>1. まず二つだけ貼り付ける</h2>
+      <label for="userText">あなたがAIへ送った発言（必須）</label>
+      <textarea id="userText" rows="8" placeholder="質問・観測・前提を含む元の発言を、できるだけそのまま貼り付けます。"></textarea>
+
+      <label for="aiText">違和感を感じたAI回答（必須）</label>
+      <textarea id="aiText" rows="12" placeholder="文章には筋が通って見えるが、なぜその結論になったのか追えない回答などを貼り付けます。"></textarea>
+
+      <label for="memo">違和感メモ（任意・「理由不明」のままで可）</label>
+      <textarea id="memo" rows="2" placeholder="例: 何かがおかしいが原因は分からない／文章は自然だが経路が見えない"></textarea>
+
+      <div class="row" style="margin-top:10px">
+        <button id="btnScan" class="primary-wide">？？？原因探索を開始</button>
+      </div>
+      <p class="muted">最初から原因分類・観測範囲・根拠入力を要求しません。表面走査後、必要な監査プロンプトだけを生成します。</p>
+    </section>
+
+    <section>
+      <h2>2. 必要な場合だけ詳細を固定する</h2>
+      <details id="advancedDetails">
+        <summary>精密監査用の追加入力を開く</summary>
+
+        <label for="observations">ユーザー提示観測・測定記録（1行1項目）</label>
+        <textarea id="observations" rows="3" placeholder="例: 圃場Aでは本日朝の実測で土壌水分12%だった"></textarea>
+
+        <label for="userEvidence">取得方法・ユーザー側根拠</label>
+        <textarea id="userEvidence" rows="3" placeholder="例: センサーXで5地点測定。写真と作業日誌あり"></textarea>
+
+        <h3>適用範囲</h3>
+        <div class="grid2">
+          <div><label for="scopeTarget">対象</label><input type="text" id="scopeTarget" placeholder="例: 圃場Aの秋小麦"></div>
+          <div><label for="scopePlace">場所・母集団</label><input type="text" id="scopePlace" placeholder="例: 北海道○○町の当該圃場"></div>
+          <div><label for="scopeTime">時点・期間</label><input type="text" id="scopeTime" placeholder="例: 2026年6月1日朝"></div>
+          <div><label for="scopeCondition">条件・環境</label><input type="text" id="scopeCondition" placeholder="例: 無灌水、表層10cm"></div>
+          <div><label for="scopeMethod">方法・定義</label><input type="text" id="scopeMethod" placeholder="例: 5地点中央値、重量含水率"></div>
+        </div>
+
+        <label for="fixedPremises">固定前提（1行1項目）</label>
+        <textarea id="fixedPremises" rows="3"></textarea>
+        <label for="hypotheses">仮説（事実と分離・1行1項目）</label>
+        <textarea id="hypotheses" rows="3"></textarea>
+        <label for="unknowns">未確定事項（1行1項目）</label>
+        <textarea id="unknowns" rows="3"></textarea>
+      </details>
+    </section>
+
+    <section>
+      <h2>3. 保存・初期化</h2>
+      <div class="row">
+        <button id="btnSaveLocal" class="ghost">入力を端末内へ保存</button>
+        <button id="btnRestoreLocal" class="ghost">保存入力を復元</button>
+        <button id="btnClear" class="ghost">入力を消去</button>
+      </div>
+      <p class="muted" id="saveStatus">自動外部送信はありません。端末保存はブラウザの localStorage を使用します。</p>
+    </section>
+  </div>
+
+  <div class="col">
+    <section id="resultHead">
+      <h2>4. 現在状態</h2>
+      <p class="muted">二つの文章を貼り付けて「？？？原因探索を開始」を押してください。</p>
+    </section>
+
+    <section id="secSurface" hidden>
+      <h2>5. 表面走査 ─ 原因の確定ではなく、調査入口</h2>
+      <div id="surfaceSummary"></div>
+      <div id="detections"></div>
+      <div class="note">非検出は、判断経路が正しいことを意味しません。暗黙の前提変更・意味差分・根拠誤接続は、生成プロンプトでAIに分解させます。</div>
+    </section>
+
+    <section id="secModes" hidden>
+      <h2>6. 生成する監査プロンプト</h2>
+      <div class="mode-grid">
+        <div class="mode-card">
+          <strong>① ？？？原因探索</strong>
+          <span>原因を決めず、主張差分・前提追加・経路欠落の候補を最大3件まで探索します。</span>
+          <button id="btnBuildCause" class="ghost">生成</button>
+        </div>
+        <div class="mode-card">
+          <strong>② 判断経路精密監査</strong>
+          <span>主張・根拠・中間判断・結論をID化し、接続を一つずつ検査します。</span>
+          <button id="btnBuildPath" class="ghost">生成</button>
+        </div>
+        <div class="mode-card">
+          <strong>③ 根拠・誤否定精密監査</strong>
+          <span>検索非発見、一般論、範囲不一致、直接反証の成立可否を確認します。</span>
+          <button id="btnBuildEvidence" class="ghost">生成</button>
+        </div>
+        <div class="mode-card">
+          <strong>④ 元論点へ復帰</strong>
+          <span>監査後、確定・未確定を混ぜずに元の質問へ戻します。</span>
+          <button id="btnBuildReturn" class="ghost">生成</button>
+        </div>
+      </div>
+      <p class="muted">通常は①から開始し、原因候補が見えた後に②または③へ進みます。四つを一度に貼る必要はありません。</p>
+    </section>
+
+    <section id="secPrompt" hidden>
+      <h2 id="promptTitle">7. 生成プロンプト</h2>
+      <pre class="prompt" id="promptOutput"></pre>
+      <div class="row">
+        <button id="btnCopyPrompt" class="ghost">プロンプトをコピー</button>
+        <button id="btnDownloadPrompt" class="ghost">mdで保存</button>
+      </div>
+    </section>
+
+    <section id="secManual" hidden>
+      <h2>8. 人間が結果を見る時の最小確認</h2>
+      <ul class="tight">
+        <li>AIが示した「原因候補」は、原文の短い引用で裏付けられているか。</li>
+        <li>文章の一貫性と、判断経路の成立が別々に評価されているか。</li>
+        <li>未証明の接続を、新しい推論で補完していないか。</li>
+        <li>根拠が実在することと、元の主張への直接反証が成立することを混同していないか。</li>
+        <li>原因を確定できない箇所が「判定不能」として保持されているか。</li>
+      </ul>
+    </section>
+
+    <section id="secFeedback" hidden>
+      <h2>9. フィードバック記録</h2>
+      <div class="row">
+        <button class="ghost" data-fb="原因が見えた">原因が見えた</button>
+        <button class="ghost" data-fb="まだ不明">まだ不明</button>
+        <button class="ghost" data-fb="過剰検出">過剰検出</button>
+        <input type="text" id="fbNote" placeholder="補足メモ（任意）" style="flex:1;min-width:180px">
+      </div>
+      <p class="muted" id="fbStatus"></p>
+      <div class="row" style="margin-top:8px">
+        <button id="btnExportLog" class="ghost">監査記録をJSONL書き出し</button>
+        <span class="muted" id="logCount">記録: 0件（ページ内メモリ）</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="footer-note">本ツールは、AI回答の正誤・根拠真正性・意味差分を単独で確定しません。会話を固定し、検査順序を組み立て、AIへ監査可能な形式で再検証させるためのローカル補助ツールです。<br>©M-Tokuni 2026　執筆者 M-Tokuni</div>
+
+<script>
+"use strict";
+/* =====================================================================
+ * FILE: AI回答の違和感原因・判断経路確認ツール_26-0713-1600.html
+ * JST : 2026-07-13 16:00
+ * 目的:
+ *   文章自体には筋が通って見えるが、前提から結論までの判断経路を
+ *   追跡できず「？？？」状態になった会話を固定し、次の順で監査する。
+ *   1) 原因未確定のまま構造差分を探索
+ *   2) 判断経路をID化して接続検査
+ *   3) 必要時のみ根拠・誤否定を精密監査
+ *   4) 元の論点へ復帰
+ * 注意:
+ *   本HTML自身は外部検索・事実確認・意味判定を行わない。
+ *   表面走査は原因候補の入口であり、正誤の確定ではない。
+ * =================================================================== */
+
+const STATES = ["PASS","CAUTION","REVIEW_REQUIRED","CLOSED","UNKNOWN"];
+const stateRank = state => ({PASS:0, CAUTION:1, REVIEW_REQUIRED:2, CLOSED:3, UNKNOWN:1})[state] ?? 1;
+
+const RULES = [
+  {
+    id:"S01",
+    name:"訂正・否定表現",
+    category:"誤否定または正当反証のどちらもあり得る",
+    pattern:/(正しくは|実際には|それは誤り|それは間違い|誤解です|事実ではありません|そうではなく|根拠がありません|裏付けられません|成立しません|あり得ません|修正すべき|認識を改め)/,
+    state:"REVIEW_REQUIRED",
+    before:2,
+    after:2,
+    note:"否定の存在だけでは誤否定と確定しません。対象範囲と直接反証の成立確認が必要です。"
+  },
+  {
+    id:"S02",
+    name:"検索非発見からの否定候補",
+    category:"検索で見つからないことと不存在・誤りの混同",
+    pattern:/(検索しても|調べても|確認でき|見つから|見当たら|報告されてい|文献がな|資料がな)[^。！？\n]{0,120}(存在しない|誤り|間違い|事実では|根拠がない|考えにくい|あり得ない|裏付けられない)/,
+    state:"CLOSED",
+    before:1,
+    after:1,
+    note:"検索範囲・検索語・期間が示されるまで、否定結論の採用を停止する候補です。"
+  },
+  {
+    id:"S03",
+    name:"一般論・平均の適用",
+    category:"個別事象との範囲一致を要確認",
+    pattern:/(一般的に|通常は|普通は|多くの場合|全国|全道|地域平均|平均値|標準的|公的統計|公式発表|一般論)/,
+    state:"CAUTION",
+    before:2,
+    after:2,
+    note:"一般資料が個別観測の補助説明なのか、直接反証として使われたのかを分離します。"
+  },
+  {
+    id:"S04",
+    name:"前提・仮定の追加",
+    category:"ユーザー承認なしの前提変更候補",
+    pattern:/(前提とします|前提とすると|仮定すると|仮定すれば|と見なすと|とみなすと|ここでは.*とする)/,
+    state:"CAUTION",
+    before:1,
+    after:1,
+    note:"追加された前提が原文にあるか、結論を変えるかを確認します。"
+  },
+  {
+    id:"S05",
+    name:"論点移動",
+    category:"元の疑問より別の論点を優先した可能性",
+    pattern:/(それよりも|むしろ重要なのは|より重要なのは|本題から離れますが|話は変わりますが|別の観点として)/,
+    state:"REVIEW_REQUIRED",
+    before:4,
+    after:1,
+    note:"元の質問へ回答する前に別論点へ移動していないか確認します。"
+  },
+  {
+    id:"S06",
+    name:"代替分岐の消去",
+    category:"複数候補を一つへ固定した可能性",
+    pattern:/(唯一の方法|唯一の選択肢|他に方法はありません|他に選択肢はありません|しかありません|以外にありません|必ず.*になります)/,
+    state:"REVIEW_REQUIRED",
+    before:1,
+    after:1,
+    note:"除外された代替案と、その除外根拠を確認します。"
+  },
+  {
+    id:"S07",
+    name:"強い確定表現",
+    category:"確度の過大化候補",
+    pattern:/(証明されています|実証されています|確認されています|周知の事実|定説です|明らかです|間違いありません|確実です)/,
+    state:"REVIEW_REQUIRED",
+    before:1,
+    after:1,
+    note:"確認主体・該当出典・適用範囲が示されているかを確認します。"
+  },
+  {
+    id:"S08",
+    name:"抽象度の急上昇",
+    category:"具体的疑問から一般論へ移動した候補",
+    pattern:/(本質的には|一般化すると|より大きな観点では|社会全体として|構造的には|理論的には|原理的には)/,
+    state:"CAUTION",
+    before:2,
+    after:2,
+    note:"抽象論が元の具体的対象へ戻って接続されているかを確認します。"
+  },
+  {
+    id:"S09",
+    name:"経路圧縮を示す接続語",
+    category:"前段から結論への橋が省略された可能性",
+    pattern:/(したがって|よって|そのため|以上から|このことから|つまり|従って)/,
+    state:"UNKNOWN",
+    before:1,
+    after:1,
+    note:"接続語自体は正常です。前段が後段を本当に支えるかを精密監査します。"
+  },
+  {
+    id:"S10",
+    name:"観測の格下げ表現",
+    category:"測定・観測と一般化可能性の混同候補",
+    pattern:/(主観|印象|感覚|個人的な経験|一例|逸話|アネクドート)[^。！？\n]{0,90}(にすぎ|だけ|科学的では|根拠になら|一般化でき)/,
+    state:"REVIEW_REQUIRED",
+    before:1,
+    after:1,
+    note:"観測記録の存否と、母集団への一般化可否を分離します。"
+  }
+];
+
+const RELATION_CLASSES = [
+  ["直接反証", "同一または比較可能な対象・時点・条件・方法/定義を扱い、両立不能な結果を示す"],
+  ["範囲不一致", "地域・対象・期間・条件・定義が異なり、ユーザー提示観測を直接否定できない"],
+  ["一般論", "通常傾向や平均を示すが、個別事象の存否は確定しない"],
+  ["検索非発見", "今回の検索では資料を発見できなかっただけで、不存在・誤りは確定しない"],
+  ["未検証", "真正性・該当箇所・適用範囲のいずれかが不足している"],
+  ["支持・整合", "ユーザー提示内容と整合する補助根拠。ただし範囲を超えて一般化しない"]
+];
+
+const auditLog = [];
+let currentRecord = null;
+let currentPromptType = "cause";
+
+const $ = id => document.getElementById(id);
+const linesOf = id => $(id).value.split("\n").map(s => s.trim()).filter(Boolean);
+
+function splitSentences(text){
+  return text
+    .split(/(?<=[。！？\n])/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function contextAround(sentences, index, before=1, after=1){
+  const start = Math.max(0, index - before);
+  const end = Math.min(sentences.length, index + after + 1);
+  return sentences.slice(start, end).join("");
+}
+
+function esc(text){
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function jstNow(){
+  const date = new Date(Date.now() + 9 * 3600 * 1000);
+  return date.toISOString().replace("Z", "+09:00");
+}
+
+function safeTimestamp(){
+  const date = new Date(Date.now() + 9 * 3600 * 1000);
+  return date.toISOString().slice(2,16).replace(/[-T:]/g, "").replace(/^(\d{2})(\d{2})(\d{2})(\d{4})$/, "$1-$2$3-$4");
+}
+
+function download(filename, text, mime="application/octet-stream"){
+  const blob = new Blob([text], {type:mime});
+  const anchor = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function gatherInputs(){
+  return {
+    userText:$("userText").value.trim(),
+    aiText:$("aiText").value.trim(),
+    memo:$("memo").value.trim(),
+    observations:linesOf("observations"),
+    userEvidence:$("userEvidence").value.trim(),
+    scope:{
+      target:$("scopeTarget").value.trim(),
+      place:$("scopePlace").value.trim(),
+      time:$("scopeTime").value.trim(),
+      condition:$("scopeCondition").value.trim(),
+      method:$("scopeMethod").value.trim()
+    },
+    premises:linesOf("fixedPremises"),
+    hypotheses:linesOf("hypotheses"),
+    unknowns:linesOf("unknowns")
+  };
+}
+
+function scopeRows(inputs){
+  return [
+    ["対象", inputs.scope.target],
+    ["場所・母集団", inputs.scope.place],
+    ["時点・期間", inputs.scope.time],
+    ["条件・環境", inputs.scope.condition],
+    ["方法・定義", inputs.scope.method]
+  ];
+}
+
+function listBlock(title, items, emptyLabel="未入力"){
+  const lines = [title];
+  if(items.length === 0) lines.push(`- ${emptyLabel}`);
+  else items.forEach(item => lines.push(`- ${item}`));
+  return lines;
+}
+
+function runSurfaceScan(inputs){
+  const sentences = splitSentences(inputs.aiText);
+  const detections = [];
+
+  for(const rule of RULES){
+    sentences.forEach((sentence, index) => {
+      const match = sentence.match(rule.pattern);
+      if(!match) return;
+      detections.push({
+        rule,
+        index,
+        sentence,
+        match:match[0],
+        context:contextAround(sentences, index, rule.before, rule.after)
+      });
+    });
+  }
+
+  let overall = "PASS";
+  for(const detection of detections){
+    if(stateRank(detection.rule.state) > stateRank(overall)) overall = detection.rule.state;
+  }
+  if(detections.length === 0) overall = "UNKNOWN";
+
+  const categoryCounts = {};
+  for(const detection of detections){
+    categoryCounts[detection.rule.name] = (categoryCounts[detection.rule.name] || 0) + 1;
+  }
+
+  return {sentences, detections, overall, categoryCounts};
+}
+
+function renderScan(inputs, result){
+  const stateNotes = {
+    PASS:"表面上の強い指標語は少ない状態です。ただし経路整合性は未検証です。",
+    CAUTION:"一般化・抽象化・前提追加など、判断経路の確認候補があります。",
+    REVIEW_REQUIRED:"主張差分または根拠接続を確認してから、回答を採用してください。",
+    CLOSED:"検索非発見からの否定など、確認前に結論を採用しない方がよい候補があります。",
+    UNKNOWN:"固定語では原因を絞れません。暗黙の意味差分・経路欠落をAIへ分解させてください。"
+  };
+
+  $("resultHead").innerHTML = `
+    <h2>4. 現在状態</h2>
+    <p><span class="badge b-${result.overall}">${result.overall}</span>
+    <span class="muted"> 表面検出 ${result.detections.length}件 / AI回答 ${result.sentences.length}文</span></p>
+    <p class="${result.overall === "CLOSED" ? "danger-note" : "note"}">${stateNotes[result.overall]}</p>
+    <p class="muted">この状態は正誤判定ではなく、次に何を検査するかを決めるための入口です。</p>`;
+
+  const summaryPairs = Object.entries(result.categoryCounts)
+    .map(([name,count]) => `<tr><td>${esc(name)}</td><td>${count}</td></tr>`)
+    .join("");
+  $("surfaceSummary").innerHTML = summaryPairs
+    ? `<table><tr><th>検査候補</th><th>件数</th></tr>${summaryPairs}</table>`
+    : `<div class="principle"><strong>固定語では原因を検出できませんでした。</strong> これは正常回答の証明ではありません。文章全体に分散した前提変更や未証明接続は、原因探索プロンプトで確認します。</div>`;
+
+  const wrap = $("detections");
+  wrap.innerHTML = "";
+  for(const detection of result.detections){
+    const card = document.createElement("div");
+    card.className = `card ${detection.rule.state}`;
+    const sentenceEscaped = esc(detection.sentence);
+    const matchEscaped = esc(detection.match);
+    const highlighted = matchEscaped
+      ? sentenceEscaped.replace(matchEscaped, () => `<mark>${matchEscaped}</mark>`)
+      : sentenceEscaped;
+    card.innerHTML = `
+      <h3><span class="st-${detection.rule.state}">[${detection.rule.state}]</span> ${esc(detection.rule.name)} <span class="meta">(${detection.rule.id})</span></h3>
+      <p class="meta">${esc(detection.rule.category)}</p>
+      <div class="excerpt">第${detection.index + 1}文: ${highlighted}</div>
+      <p class="meta">扱い: ${esc(detection.rule.note)}</p>`;
+    wrap.appendChild(card);
+  }
+
+  $("secSurface").hidden = false;
+  $("secModes").hidden = false;
+  $("secManual").hidden = false;
+  $("secFeedback").hidden = false;
+
+  currentRecord = {
+    logged_at:jstNow(),
+    surface_state:result.overall,
+    detections:result.detections.map(item => ({
+      rule:item.rule.id,
+      name:item.rule.name,
+      state:item.rule.state,
+      sentence:item.sentence
+    })),
+    memo:inputs.memo || null,
+    generated_prompts:[],
+    feedback:null
+  };
+  auditLog.push(currentRecord);
+  $("logCount").textContent = `記録: ${auditLog.length}件（ページ内メモリ）`;
+  $("fbStatus").textContent = "";
+}
+
+function commonInputBlock(inputs){
+  const lines = [];
+  lines.push("■固定する会話");
+  lines.push("【ユーザー原文】");
+  lines.push(inputs.userText || "未入力");
+  lines.push("");
+  lines.push("【先のAI回答】");
+  lines.push(inputs.aiText || "未入力");
+  if(inputs.memo){
+    lines.push("");
+    lines.push("【違和感メモ】");
+    lines.push(inputs.memo);
+  }
+  return lines;
+}
+
+function advancedInputBlock(inputs){
+  const hasAdvanced = inputs.observations.length || inputs.userEvidence ||
+    Object.values(inputs.scope).some(Boolean) || inputs.premises.length ||
+    inputs.hypotheses.length || inputs.unknowns.length;
+  if(!hasAdvanced) return [];
+
+  const lines = ["", "■追加の固定情報"];
+  lines.push(...listBlock("ユーザー提示観測・測定記録:", inputs.observations));
+  if(inputs.userEvidence) lines.push(`取得方法・ユーザー側根拠:\n${inputs.userEvidence}`);
+  lines.push("適用範囲:");
+  for(const [label,value] of scopeRows(inputs)) lines.push(`- ${label}: ${value || "未指定"}`);
+  lines.push(...listBlock("固定前提:", inputs.premises));
+  lines.push(...listBlock("仮説（事実へ昇格禁止）:", inputs.hypotheses));
+  lines.push(...listBlock("未確定事項（確定扱い禁止）:", inputs.unknowns));
+  return lines;
+}
+
+function buildCausePrompt(inputs){
+  const lines = [];
+  lines.push("【？？？状態からの違和感原因探索】");
+  lines.push("先の回答は文章としては一貫して見えますが、私には結論へ至る判断経路を追跡できません。違和感の原因はまだ特定できていません。");
+  lines.push("");
+  lines.push("この段階では、私の主張または先の回答のどちらが正しいかを決定しないでください。最初の目的は、違和感を生じさせた構造上の差分と欠落を発見することです。");
+  lines.push("");
+  lines.push(...commonInputBlock(inputs));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■禁止事項");
+  lines.push("- 先の結論を守るために、新しい根拠・前提・説明を後付けしない。");
+  lines.push("- 不明な経路を、もっともらしい推論で穴埋めしない。");
+  lines.push("- 私に違和感の原因を先に説明させない。");
+  lines.push("- 私の理解不足を原因と決めつけない。");
+  lines.push("- 内部思考の逐語的開示ではなく、回答として採用した主張・根拠・判断接続を監査可能な形で示す。");
+  lines.push("");
+  lines.push("■手順1：二つの主張を分ける");
+  lines.push("次の表を作成してください。");
+  lines.push("| ユーザー原文の主張・条件 | AIが回答対象にした主張・条件 | 追加 | 削除 | 範囲変更 | 強弱・確度変更 | 意味差分 | ");
+  lines.push("検証対象部分は短く引用し、要約だけで原文を置き換えないでください。");
+  lines.push("");
+  lines.push("■手順2：先の回答を構成要素へ分解する");
+  lines.push("| ID | 種類 | 内容 | 出所 | ");
+  lines.push("種類は『ユーザー主張』『ユーザー条件』『AI追加前提』『AI根拠』『AI中間判断』『AI結論』『未確定事項』から選んでください。");
+  lines.push("");
+  lines.push("■手順3：異常候補を個別検査する");
+  lines.push("各候補を『該当／非該当／判定不能』で評価し、該当箇所を短く引用してください。");
+  lines.push("- 主張置換");
+  lines.push("- 前提の無断追加");
+  lines.push("- 適用範囲の不一致");
+  lines.push("- 中間判断の省略");
+  lines.push("- 抽象度の急変と具体例への未復帰");
+  lines.push("- 根拠と結論の誤接続");
+  lines.push("- 一般論による個別観測の上書き");
+  lines.push("- 検索非発見からの不存在・誤り推定");
+  lines.push("- 因果関係の飛躍");
+  lines.push("- 確度の過大化");
+  lines.push("- 論点移動");
+  lines.push("- 代替分岐の消去");
+  lines.push("- 各文は自然だが、全体の判断接続が未証明");
+  lines.push("");
+  lines.push("■手順4：原因候補を提示する");
+  lines.push("最も可能性の高い違和感原因を最大3件まで提示してください。各候補に、引用箇所・欠けた接続・結論への影響を付けてください。");
+  lines.push("確定できない場合は、無理に一つへ決めず『判定不能』を維持してください。");
+  lines.push("");
+  lines.push("■最後の出力");
+  lines.push("- 文章自体の一貫性");
+  lines.push("- 判断経路の追跡可能性");
+  lines.push("- 最有力の違和感原因候補");
+  lines.push("- 次に必要な監査：判断経路精密監査／根拠・誤否定精密監査／説明再構成／追加情報待ち");
+  return lines.join("\n");
+}
+
+function buildPathPrompt(inputs){
+  const lines = [];
+  lines.push("【文章整合性と判断経路の分離監査】");
+  lines.push("先の回答は文章としては一貫して見えますが、前提から結論までの判断接続を追跡できません。説明文を増やす前に、既存回答を解体してください。");
+  lines.push("");
+  lines.push(...commonInputBlock(inputs));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■禁止事項");
+  lines.push("- 先の結論を正当化するために、新しい前提や根拠を追加しない。");
+  lines.push("- 不明な中間過程を、もっともらしい推論で補完しない。");
+  lines.push("- 『総合的に判断した』『一般的には』などで接続を省略しない。");
+  lines.push("- 内部思考の逐語的開示ではなく、採用した根拠・判断・接続条件を監査可能な形で示す。");
+  lines.push("");
+  lines.push("■出力1：主張ノード");
+  lines.push("| ID | 種類 | 内容 | 出所 | 原文の短い引用 | ");
+  lines.push("種類は『ユーザー主張』『ユーザー条件』『AI追加前提』『AI根拠』『AI中間判断』『AI最終結論』『未確定事項』から選んでください。");
+  lines.push("");
+  lines.push("■出力2：接続エッジ");
+  lines.push("先の回答に含まれる経路を、一接続ずつ示してください。");
+  lines.push("| 前段ID | 後段ID | 接続理由 | 必要条件 | 根拠 | 接続状態 | ");
+  lines.push("接続状態は『成立／条件付き成立／未証明／範囲不一致／根拠不足／論理的不成立／判定不能』のいずれかとしてください。");
+  lines.push("");
+  lines.push("■出力3：欠落した橋");
+  lines.push("文章では自然につながっているが、論理的・事実的な条件が示されていない箇所を列挙してください。");
+  lines.push("| 前段ID | 後段ID | 欠けている条件または根拠 | 補完せずに言える範囲 | 結論への影響 | ");
+  lines.push("");
+  lines.push("■出力4：四つの整合性を分離する");
+  lines.push("次を混ぜずに評価してください。");
+  lines.push("- 文章自体の一貫性");
+  lines.push("- 前提から結論までの経路整合性");
+  lines.push("- 根拠から判断への接地可能性");
+  lines.push("- 元の質問への直接回答性");
+  lines.push("文章自体に筋が通っていても、経路が未証明なら、その二つを別々に記載してください。");
+  lines.push("");
+  lines.push("■出力5：修正版");
+  lines.push("未証明・範囲不一致・不成立の接続を除去し、残った範囲だけで元の質問へ回答し直してください。");
+  lines.push("確認できない箇所は『不明』『根拠不足』『範囲不一致』と明記し、推測で橋を架けないでください。");
+  return lines.join("\n");
+}
+
+function buildEvidencePrompt(inputs){
+  const lines = [];
+  lines.push("【根拠関係・誤否定の精密監査】");
+  lines.push("先の回答に含まれる否定・訂正・一般化を採用する前に、根拠と適用範囲を再検証してください。");
+  lines.push("");
+  lines.push(...commonInputBlock(inputs));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■判定原則");
+  lines.push("1. 検索で確認できないことを、誤り・不存在・根拠なしへ変換しない。");
+  lines.push("2. 一般論、平均値、公的資料、別地域・別時点の統計は、それだけでは個別観測への直接反証にならない。");
+  lines.push("3. ユーザー提示観測は、その提示範囲の記録として保持する。真正性、測定妥当性、一般化可能性は別々に評価する。");
+  lines.push("4. 直接反証には、対象・場所/母集団・時点・条件が一致または比較可能であり、方法/定義の変換関係が追跡可能で、結果が両立不能であることが必要である。");
+  lines.push("5. 根拠が不足する場合は穴埋めせず、『検索非発見』『範囲不一致』『未検証』『判定不能』を明記する。");
+  lines.push("");
+  lines.push("■出力A：主張保存・意味差分");
+  lines.push("| ユーザー原文の主張 | AIが回答対象にした主張 | 追加・削除・強弱変更 | 意味差分 | ");
+  lines.push("");
+  lines.push("■出力B：AI側根拠の照合");
+  lines.push("| AI側の主張 | 根拠・出典 | 該当箇所 | 対象 | 場所/母集団 | 時点 | 条件 | 方法/定義 | ユーザー提示内容との関係 | 訂正可否 | ");
+  lines.push("『ユーザー提示内容との関係』は次のいずれか一つだけを選んでください。");
+  RELATION_CLASSES.forEach(([name,description]) => lines.push(`- ${name}: ${description}`));
+  lines.push("");
+  lines.push("■直接反証の成立確認");
+  lines.push("次をそれぞれ『一致／比較可能／不一致／不明』で答えてください。");
+  lines.push("- 対象");
+  lines.push("- 場所・母集団");
+  lines.push("- 時点・期間");
+  lines.push("- 条件・環境");
+  lines.push("- 測定方法・定義の同一性または変換可能性");
+  lines.push("- 二つの結果が論理的・物理的に両立不能か");
+  lines.push("一つでも重要項目が『不一致』または『不明』なら、直接反証としてユーザー提示内容を否定・訂正しないでください。");
+  lines.push("");
+  lines.push("■結論の修正");
+  lines.push("- 直接反証が成立する場合：反証箇所と成立条件を限定する。");
+  lines.push("- 成立しない場合：先の否定・訂正を撤回し、関係分類に応じた限定表現へ戻す。");
+  lines.push("- 検索で見つからない場合：『今回の検索条件では確認できない』までに留める。");
+  lines.push("- 最後に、確定・未確定・仮説を分離したまま元の疑問へ直接回答する。");
+  return lines.join("\n");
+}
+
+function buildReturnPrompt(inputs){
+  const lines = [];
+  lines.push("【監査後の論点復帰】");
+  lines.push("監査結果を踏まえ、会話を次のユーザー原文へ戻してください。");
+  lines.push("");
+  lines.push(...commonInputBlock({...inputs, aiText:"（監査対象だった先の回答は、必要部分だけ参照してください）"}));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■復帰条件");
+  lines.push("- ユーザー原文の主張範囲を変更しない。");
+  lines.push("- 文章の一貫性と判断経路の成立を混同しない。");
+  lines.push("- 未証明の接続を除去する。");
+  lines.push("- 一般論・平均値・検索非発見を直接反証へ変換しない。");
+  lines.push("- 観測記録、仮説、未確定事項を別々に扱う。");
+  lines.push("- 根拠がない箇所は『根拠なし』、不明な箇所は『不明』とする。");
+  lines.push("- 最後に、元の質問へ直接回答する。");
+  return lines.join("\n");
+}
+
+function requireCoreInputs(){
+  const inputs = gatherInputs();
+  if(!inputs.userText || !inputs.aiText){
+    $("resultHead").innerHTML = "<h2>4. 現在状態</h2><p class='danger-note'>ユーザー発言とAI回答の両方が必要です。欠損を補完せず、監査プロンプトを生成しません。</p>";
+    return null;
+  }
+  return inputs;
+}
+
+function showPrompt(type, title, text){
+  currentPromptType = type;
+  $("promptTitle").textContent = `7. ${title}`;
+  $("promptOutput").textContent = text;
+  $("secPrompt").hidden = false;
+  $("secPrompt").scrollIntoView({behavior:"smooth", block:"start"});
+  if(currentRecord){
+    currentRecord.generated_prompts.push({type, generated_at:jstNow()});
+  }
+}
+
+$("btnScan").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(!inputs) return;
+  const result = runSurfaceScan(inputs);
+  renderScan(inputs, result);
+  showPrompt("cause", "？？？原因探索プロンプト", buildCausePrompt(inputs));
+});
+
+$("btnBuildCause").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("cause", "？？？原因探索プロンプト", buildCausePrompt(inputs));
+});
+
+$("btnBuildPath").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("path", "判断経路精密監査プロンプト", buildPathPrompt(inputs));
+});
+
+$("btnBuildEvidence").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("evidence", "根拠・誤否定精密監査プロンプト", buildEvidencePrompt(inputs));
+});
+
+$("btnBuildReturn").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("return", "論点復帰プロンプト", buildReturnPrompt(inputs));
+});
+
+async function copyText(text, button){
+  const original = button.textContent;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const temporary = document.createElement("textarea");
+      temporary.value = text;
+      temporary.style.position = "fixed";
+      temporary.style.opacity = "0";
+      document.body.appendChild(temporary);
+      temporary.focus();
+      temporary.select();
+      document.execCommand("copy");
+      temporary.remove();
+    }
+    button.textContent = "コピーしました";
+  } catch(_error){
+    button.textContent = "コピー失敗";
+  }
+  setTimeout(() => button.textContent = original, 1500);
+}
+
+$("btnCopyPrompt").addEventListener("click", event => {
+  copyText($("promptOutput").textContent, event.currentTarget);
+});
+
+$("btnDownloadPrompt").addEventListener("click", () => {
+  const text = $("promptOutput").textContent;
+  if(!text) return;
+  const names = {
+    cause:"cause_exploration",
+    path:"path_audit",
+    evidence:"evidence_false_denial_audit",
+    return:"return_to_question"
+  };
+  const baseName = `${names[currentPromptType] || "audit_prompt"}_${safeTimestamp()}.md`;
+  download(baseName, `<!-- FILE: ${baseName} -->\n\n${text}\n`, "text/markdown");
+});
+
+const INPUT_IDS = [
+  "userText","aiText","memo","observations","userEvidence",
+  "scopeTarget","scopePlace","scopeTime","scopeCondition","scopeMethod",
+  "fixedPremises","hypotheses","unknowns"
+];
+
+$("btnSaveLocal").addEventListener("click", () => {
+  const payload = {};
+  INPUT_IDS.forEach(id => payload[id] = $(id).value);
+  try{
+    localStorage.setItem("ai_path_audit_inputs_v1", JSON.stringify(payload));
+    $("saveStatus").textContent = `端末内へ保存しました: ${jstNow()}`;
+  } catch(error){
+    $("saveStatus").textContent = `保存失敗: ${error.message}`;
+  }
+});
+
+$("btnRestoreLocal").addEventListener("click", () => {
+  try{
+    const raw = localStorage.getItem("ai_path_audit_inputs_v1");
+    if(!raw){
+      $("saveStatus").textContent = "保存入力がありません。";
+      return;
+    }
+    const payload = JSON.parse(raw);
+    INPUT_IDS.forEach(id => {
+      if(Object.prototype.hasOwnProperty.call(payload, id)) $(id).value = payload[id];
+    });
+    $("saveStatus").textContent = "保存入力を復元しました。";
+  } catch(error){
+    $("saveStatus").textContent = `復元失敗: ${error.message}`;
+  }
+});
+
+$("btnClear").addEventListener("click", () => {
+  INPUT_IDS.forEach(id => $(id).value = "");
+  $("saveStatus").textContent = "入力を消去しました。端末保存データは削除していません。";
+});
+
+document.querySelectorAll("[data-fb]").forEach(button => {
+  button.addEventListener("click", () => {
+    if(!currentRecord){
+      $("fbStatus").textContent = "先に原因探索を実行してください。";
+      return;
+    }
+    currentRecord.feedback = {
+      kind:button.dataset.fb,
+      note:$("fbNote").value.trim() || null,
+      recorded_at:jstNow()
+    };
+    $("fbStatus").textContent = `記録しました: ${button.dataset.fb}`;
+  });
+});
+
+$("btnExportLog").addEventListener("click", () => {
+  if(auditLog.length === 0){
+    $("fbStatus").textContent = "書き出す監査記録がありません。";
+    return;
+  }
+  const jsonl = auditLog.map(record => JSON.stringify(record)).join("\n") + "\n";
+  download(`ai_path_audit_log_${safeTimestamp()}.jsonl`, jsonl, "application/x-ndjson");
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="NRA-IDEの基礎式と二次式を動きと簡単な説明で理解するプロトタイプ">
+  <title>NRA-IDE Formula Lab — 基礎式と二次式</title>
+  <link rel="stylesheet" href="53_formula_lab.css">
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <div class="brand"><span class="logo">N</span>NRA-IDE / Formula Lab</div>
+    <span class="tag">INTERACTIVE PROTOTYPE 01</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">See the boundary, not just the number</p>
+      <h1>式を、境界の動きとして理解する。</h1>
+    </div>
+    <p>値を動かすと、式・図・説明が同時に変化します。基礎式から二次式へ、NRA-IDEが「何を見ているか」を直感的にたどれます。</p>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="表示する式">
+    <button class="tab" id="tabPrimary" role="tab" aria-selected="true">01　基礎式</button>
+    <button class="tab" id="tabSecondary" role="tab" aria-selected="false">02　二次式</button>
+  </nav>
+
+  <section class="lab" aria-live="polite">
+    <div class="ribbon">
+      <div>
+        <div class="kicker primary">Primary formula — basic boundary</div>
+        <div class="kicker secondary">Secondary formula — dual fluctuation</div>
+        <div class="formula primary">R = δ / τ</div>
+        <div class="formula secondary">R<sub>upper</sub> = δ<sub>upper</sub> / τ<sub>upper</sub>　·　R<sub>lower</sub> = δ<sub>lower</sub> / τ<sub>lower</sub></div>
+      </div>
+      <div class="status" id="status">余白あり</div>
+    </div>
+
+    <div class="grid">
+      <aside class="controls" aria-label="入力コントロール">
+        <p class="panel-title">Inputs / 入力</p>
+        <div class="primary">
+          <div class="control">
+            <div class="control-head"><label for="delta"><span class="symbol">δ</span>蓄積ズレ</label><output class="value" id="deltaOut">42</output></div>
+            <input id="delta" type="range" min="0" max="120" value="42">
+            <div class="ends"><span>0</span><span>120</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><label for="tau"><span class="symbol t">τ</span>吸収厚み</label><output class="value" id="tauOut">80</output></div>
+            <input id="tau" type="range" min="10" max="120" value="80">
+            <div class="ends"><span>10</span><span>120</span></div>
+          </div>
+          <p class="presets-title">QUICK SCENARIOS</p>
+          <div class="presets">
+            <button class="preset" data-d="28" data-t="100"><span class="dot" style="--c:var(--teal)"></span>余裕が大きい</button>
+            <button class="preset" data-d="72" data-t="90"><span class="dot" style="--c:var(--amber)"></span>境界へ接近</button>
+            <button class="preset" data-d="98" data-t="80"><span class="dot" style="--c:var(--coral)"></span>境界を超える</button>
+          </div>
+        </div>
+        <div class="secondary">
+          <div class="control">
+            <div class="control-head"><label for="upper"><span class="symbol u">δ↑</span>上側ズレ</label><output class="value" id="upperOut">46</output></div>
+            <input id="upper" type="range" min="0" max="120" value="46">
+          </div>
+          <div class="control">
+            <div class="control-head"><label for="lower"><span class="symbol l">δ↓</span>下側ズレ</label><output class="value" id="lowerOut">32</output></div>
+            <input id="lower" type="range" min="0" max="120" value="32">
+          </div>
+          <div class="control">
+            <div class="control-head"><label for="width"><span class="symbol t">τ</span>側別有効幅</label><output class="value" id="widthOut">84</output></div>
+            <input id="width" type="range" min="15" max="120" value="84">
+          </div>
+          <div class="play-row"><button class="play" id="play">▶　変化を再生</button><button class="reset" id="reset">リセット</button></div>
+        </div>
+      </aside>
+
+      <div class="stage">
+        <div class="viz primary-viz" aria-label="基礎式の可視化">
+          <div class="orbit">
+            <svg viewBox="0 0 250 250" aria-hidden="true"><circle class="track" cx="125" cy="125" r="100"/><circle class="arc" id="arc" cx="125" cy="125" r="100"/></svg>
+            <div class="center"><small>BOUNDARY RATIO</small><div class="ratio" id="ratio">0.53</div><span>境界接近比 R</span></div>
+          </div>
+          <div class="boundary">
+            <div class="rail"><div class="marker" id="marker"></div><div class="limit-line"><span>R = 1.0 / 境界</span></div></div>
+            <div class="rail-labels"><span>安定側</span><span>接近</span><span>境界超過</span></div>
+          </div>
+          <div class="margin"><span>残存吸収余白　M<sub>τ</sub> = τ − δ</span><strong id="margin">38</strong></div>
+        </div>
+
+        <div class="viz secondary-viz" aria-label="二次式の可視化">
+          <div class="wave-head"><h2>上側と下側を、混ぜずに見る</h2><span class="tick" id="tick">STEP 00</span></div>
+          <div class="wave-card">
+            <svg viewBox="0 0 600 205" preserveAspectRatio="none" aria-label="上下方向の蓄積ズレ">
+              <defs>
+                <linearGradient id="uf" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff745e" stop-opacity=".27"/><stop offset="1" stop-color="#ff745e" stop-opacity="0"/></linearGradient>
+                <linearGradient id="lf" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#7968d8" stop-opacity=".22"/><stop offset="1" stop-color="#7968d8" stop-opacity="0"/></linearGradient>
+              </defs>
+              <line class="wave-grid" x2="600" y1="51" y2="51"/><line class="zero" x2="600" y1="102.5" y2="102.5"/><line class="wave-grid" x2="600" y1="154" y2="154"/>
+              <path id="upperArea" fill="url(#uf)"/><path id="lowerArea" fill="url(#lf)"/><path class="upper-line" id="upperPath"/><path class="lower-line" id="lowerPath"/>
+            </svg>
+            <div class="legend"><span><i style="--c:var(--coral)"></i>δ upper</span><span><i style="--c:var(--violet)"></i>δ lower</span></div>
+          </div>
+          <div class="dual">
+            <div class="direction" id="upperCard" style="--c:var(--coral)"><div class="dir-head"><span>UPPER</span><strong id="upperRatio">0.55</strong></div><div class="bar"><i id="upperBar"></i></div></div>
+            <div class="direction" id="lowerCard" style="--c:var(--violet)"><div class="dir-head"><span>LOWER</span><strong id="lowerRatio">0.38</strong></div><div class="bar"><i id="lowerBar"></i></div></div>
+          </div>
+          <div class="detect"><div class="detect-icon" id="detectIcon">↕</div><div><strong id="detectTitle">二重ゆらぎは未検出</strong><span id="detectFormula">Δδ = 0　·　Δτ = 0</span></div></div>
+        </div>
+      </div>
+
+      <aside class="guide" aria-label="簡易説明">
+        <p class="panel-title">Quick guide / 簡易説明</p>
+        <h2 class="primary">「ズレ」が「厚み」の何割まで来たか。</h2>
+        <h2 class="secondary">方向を分け、同時変化も捉える。</h2>
+        <div class="steps primary">
+          <div class="step active"><b>1</b><div><strong>2つの量を観測</strong><p>δ は蓄積したズレ、τ はそれを吸収できる厚みです。</p></div></div>
+          <div class="step"><b>2</b><div><strong>比率に変換</strong><p>δ を τ で割り、異なるスケールでも接近度を比較します。</p></div></div>
+          <div class="step" id="primaryJudge"><b>3</b><div><strong>境界との関係を見る</strong><p>R が 1.0 に近づくほど余白が減り、1.0 で境界に達します。</p></div></div>
+        </div>
+        <div class="steps secondary">
+          <div class="step active"><b>1</b><div><strong>方向を分離</strong><p>上側・下側は方向の違いです。危険・安全を自動では意味しません。</p></div></div>
+          <div class="step"><b>2</b><div><strong>側別の比率を計算</strong><p>各方向の δ と、正の有効ゲート幅 τ から R を求めます。</p></div></div>
+          <div class="step" id="secondaryJudge"><b>3</b><div><strong>同時変化を検出</strong><p>δ が増え、同時に τ が減ると二重ゆらぎを検出します。</p></div></div>
+        </div>
+        <div class="calc"><small>LIVE CALCULATION</small><div class="primary" id="primaryCalc">42 ÷ 80 = 0.53</div><div class="secondary" id="secondaryCalc">max(0.55, 0.38) = 0.55<br>支配側 = upper</div></div>
+        <p class="note primary">τ は必ず 0 より大きい有限値を使用します。τ = 0 のとき R は未定義であり、無限大には置換しません。</p>
+        <p class="note secondary">説明を単純にするため上下で同じ正の有効幅を使用しています。実運用では側別形状変換関数を評価前に固定します。</p>
+      </aside>
+    </div>
+  </section>
+  <footer class="footer"><span><strong>Prototype purpose:</strong> 数式の概念理解・対話説明用。運用判断や制御には使用しません。</span><span>Formula definitions: <strong>FORMULA.md v2.0</strong></span></footer>
+</main>
+<script src="53_formula_lab.js"></script>
+</body>
+</html>

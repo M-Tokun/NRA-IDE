@@ -1,0 +1,1003 @@
+<!-- FILE: AI_Response_Discomfort_Cause_and_Reasoning_Path_Audit_Tool_26-0718-0014_EN.html / JST 2026-07-18 00:14 / English Edition NRA-IDE ©M-Tokuni 2026 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Response Discomfort Cause &amp; Reasoning Path Audit Tool</title>
+<style>
+  :root{
+    --ink:#20262b;
+    --ink-sub:#5c6670;
+    --paper:#f3f2ed;
+    --panel:#ffffff;
+    --line:#d5d2c8;
+    --accent:#315b79;
+    --accent-soft:#e8f0f5;
+    --pass:#2f7d50;
+    --caution:#9b7208;
+    --review:#b75a25;
+    --closed:#9f2c2c;
+    --unknown:#6f5a87;
+    --mono:"Consolas","Menlo","SFMono-Regular",monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:Inter,"Segoe UI",Arial,sans-serif;
+    font-size:14px;
+    line-height:1.72;
+  }
+  header{
+    background:var(--panel);
+    border-bottom:2px solid var(--ink);
+    padding:14px 22px 12px;
+  }
+  header h1{margin:0;font-size:19px;letter-spacing:.035em;}
+  header p{margin:3px 0 0;color:var(--ink-sub);font-size:12px;}
+  .axiom{
+    margin-top:8px;
+    padding:7px 10px;
+    border-left:4px solid var(--accent);
+    background:var(--accent-soft);
+    font-weight:700;
+    font-size:13px;
+  }
+  main{
+    display:grid;
+    grid-template-columns:minmax(390px,44%) 1fr;
+    min-height:calc(100vh - 112px);
+  }
+  .col{padding:18px 22px;min-width:0;}
+  .col-input{background:var(--panel);border-right:1px solid var(--line);}
+  @media(max-width:980px){
+    main{grid-template-columns:1fr;}
+    .col-input{border-right:0;border-bottom:1px solid var(--line);}
+  }
+  section{margin-bottom:20px;}
+  h2{
+    margin:0 0 8px;
+    padding-bottom:4px;
+    border-bottom:1px solid var(--line);
+    color:var(--accent);
+    font-size:13px;
+    letter-spacing:.075em;
+  }
+  h3{font-size:13px;margin:9px 0 4px;}
+  label{display:block;color:var(--ink-sub);font-size:12px;margin:8px 0 2px;}
+  textarea,input[type="text"],select{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:8px 9px;
+    background:#fdfdfb;
+    color:var(--ink);
+    font:inherit;
+  }
+  textarea{resize:vertical;}
+  textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-offset:0;}
+  button{
+    border:1px solid var(--ink);
+    border-radius:4px;
+    padding:7px 14px;
+    background:var(--ink);
+    color:#fff;
+    font:inherit;
+    cursor:pointer;
+  }
+  button:hover{filter:brightness(1.08);}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  button.ghost{background:transparent;color:var(--ink);}
+  button.small{padding:4px 9px;font-size:12px;}
+  button.primary-wide{width:100%;font-weight:700;padding:10px 14px;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr;}}
+  .note,.danger-note,.principle{
+    border-radius:4px;
+    padding:8px 10px;
+    font-size:12px;
+    margin:8px 0;
+  }
+  .note{background:#fbf7e9;border:1px solid #e4d7a3;}
+  .danger-note{background:#fbefef;border:1px solid #deb0b0;}
+  .principle{background:#edf3f7;border:1px solid #bdccd7;}
+  .muted{color:var(--ink-sub);font-size:12px;}
+  .card{
+    border:1px solid var(--line);
+    border-left:4px solid var(--line);
+    background:var(--panel);
+    border-radius:4px;
+    padding:10px 12px;
+    margin:8px 0;
+  }
+  .card.CAUTION{border-left-color:var(--caution);}
+  .card.REVIEW_REQUIRED{border-left-color:var(--review);}
+  .card.CLOSED{border-left-color:var(--closed);}
+  .card.UNKNOWN{border-left-color:var(--unknown);}
+  .card h3{margin:0 0 4px;font-size:13px;}
+  .meta{font-size:11px;color:var(--ink-sub);}
+  .excerpt{
+    font-family:var(--mono);
+    font-size:12px;
+    background:#f1efe9;
+    border:1px dashed var(--line);
+    padding:6px 8px;
+    margin:6px 0;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+  }
+  mark{background:#ffe08a;padding:0 2px;}
+  .badge{
+    display:inline-block;
+    padding:4px 13px;
+    border-radius:4px;
+    color:#fff;
+    font-weight:700;
+    letter-spacing:.06em;
+    font-size:14px;
+  }
+  .b-PASS{background:var(--pass);}
+  .b-CAUTION{background:var(--caution);}
+  .b-REVIEW_REQUIRED{background:var(--review);}
+  .b-CLOSED{background:var(--closed);}
+  .b-UNKNOWN{background:var(--unknown);}
+  .st-PASS{color:var(--pass);font-weight:700;}
+  .st-CAUTION{color:var(--caution);font-weight:700;}
+  .st-REVIEW_REQUIRED{color:var(--review);font-weight:700;}
+  .st-CLOSED{color:var(--closed);font-weight:700;}
+  .st-UNKNOWN{color:var(--unknown);font-weight:700;}
+  details{
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:var(--panel);
+    padding:8px 12px;
+    margin:8px 0;
+  }
+  summary{cursor:pointer;color:var(--accent);font-size:13px;font-weight:600;}
+  pre.prompt{
+    margin:8px 0;
+    padding:12px;
+    border-radius:4px;
+    background:#20262b;
+    color:#eceae4;
+    font-family:var(--mono);
+    font-size:12px;
+    line-height:1.62;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    max-height:520px;
+    overflow:auto;
+  }
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{
+    border:1px solid var(--line);
+    padding:5px 7px;
+    text-align:left;
+    vertical-align:top;
+    overflow-wrap:anywhere;
+  }
+  th{background:#efede7;font-weight:600;}
+  ul.tight{margin:4px 0;padding-left:20px;}
+  ul.tight li{margin:2px 0;}
+  .mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  @media(max-width:600px){.mode-grid{grid-template-columns:1fr;}}
+  .mode-card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px;
+    background:#fdfdfb;
+  }
+  .mode-card strong{display:block;font-size:13px;margin-bottom:2px;}
+  .mode-card span{display:block;color:var(--ink-sub);font-size:11px;line-height:1.5;}
+  .mode-card button{margin-top:8px;width:100%;}
+  .scope-status{display:inline-block;padding:1px 7px;border-radius:10px;background:#efede7;font-size:11px;}
+  .hidden{display:none!important;}
+  .footer-note{padding:10px 22px 18px;color:var(--ink-sub);font-size:11px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI Response Discomfort Cause &amp; Reasoning Path Audit Tool</h1>
+  <p>User-initiated · no external communication · no search · audit-prompt generation only — this tool does not automatically determine correctness. ©M-Tokuni 2026</p>
+  <div class="axiom">Coherent prose ≠ a sound reasoning path from premises to conclusion / Do not assume from the outset that unexplained discomfort is a false denial.</div>
+</header>
+
+<main>
+  <div class="col col-input">
+    <section>
+      <h2>1. Paste only two items first</h2>
+      <label for="userText">Your message to the AI (required)</label>
+      <textarea id="userText" rows="8" placeholder="Paste your original message—including questions, observations, and premises—as faithfully as possible."></textarea>
+
+      <label for="aiText">The AI response that felt wrong or unclear (required)</label>
+      <textarea id="aiText" rows="12" placeholder="Paste the response whose prose appears coherent but whose route to the conclusion cannot be traced."></textarea>
+
+      <label for="memo">Discomfort note (optional; “reason unknown” is acceptable)</label>
+      <textarea id="memo" rows="2" placeholder="Example: Something feels wrong, but I do not know why / The prose is natural, but the reasoning path is unclear."></textarea>
+
+      <div class="row" style="margin-top:10px">
+        <button id="btnScan" class="primary-wide">Start ??? Cause Exploration</button>
+      </div>
+      <p class="muted">No initial cause classification, observation scope, or evidence entry is required. After a surface scan, the tool generates only the audit prompt you need.</p>
+    </section>
+
+    <section>
+      <h2>2. Fix details only when needed</h2>
+      <details id="advancedDetails">
+        <summary>Open additional fields for a detailed audit</summary>
+
+        <label for="observations">User-provided observations and measurements (one item per line)</label>
+        <textarea id="observations" rows="3" placeholder="Example: Direct measurement in Field A this morning showed 12% soil moisture."></textarea>
+
+        <label for="userEvidence">Acquisition method and user-side evidence</label>
+        <textarea id="userEvidence" rows="3" placeholder="Example: Measured at five points with Sensor X; photos and a work log are available."></textarea>
+
+        <h3>Scope of application</h3>
+        <div class="grid2">
+          <div><label for="scopeTarget">Target</label><input type="text" id="scopeTarget" placeholder="Example: Winter wheat in Field A"></div>
+          <div><label for="scopePlace">Location / population</label><input type="text" id="scopePlace" placeholder="Example: The relevant field in XX Town, Hokkaido"></div>
+          <div><label for="scopeTime">Time / period</label><input type="text" id="scopeTime" placeholder="Example: Morning of June 1, 2026"></div>
+          <div><label for="scopeCondition">Conditions / environment</label><input type="text" id="scopeCondition" placeholder="Example: No irrigation; top 10 cm"></div>
+          <div><label for="scopeMethod">Method / definition</label><input type="text" id="scopeMethod" placeholder="Example: Median of five points; gravimetric water content"></div>
+        </div>
+
+        <label for="fixedPremises">Fixed premises (one item per line)</label>
+        <textarea id="fixedPremises" rows="3"></textarea>
+        <label for="hypotheses">Hypotheses (separate from facts; one item per line)</label>
+        <textarea id="hypotheses" rows="3"></textarea>
+        <label for="unknowns">Unresolved items (one item per line)</label>
+        <textarea id="unknowns" rows="3"></textarea>
+      </details>
+    </section>
+
+    <section>
+      <h2>3. Save / reset</h2>
+      <div class="row">
+        <button id="btnSaveLocal" class="ghost">Save inputs on this device</button>
+        <button id="btnRestoreLocal" class="ghost">Restore saved inputs</button>
+        <button id="btnClear" class="ghost">Clear inputs</button>
+      </div>
+      <p class="muted" id="saveStatus">Nothing is transmitted externally. Device storage uses the browser’s localStorage.</p>
+    </section>
+  </div>
+
+  <div class="col">
+    <section id="resultHead">
+      <h2>4. Current status</h2>
+      <p class="muted">Paste the two texts, then click “Start ??? Cause Exploration.”</p>
+    </section>
+
+    <section id="secSurface" hidden>
+      <h2>5. Surface scan — an entry point, not a cause determination</h2>
+      <div id="surfaceSummary"></div>
+      <div id="detections"></div>
+      <div class="note">No detection does not mean the reasoning path is sound. Use the generated prompt to have the AI decompose implicit premise changes, semantic differences, and evidence misconnections.</div>
+    </section>
+
+    <section id="secModes" hidden>
+      <h2>6. Audit prompts to generate</h2>
+      <div class="mode-grid">
+        <div class="mode-card">
+          <strong>① ??? Cause Exploration</strong>
+          <span>Without presupposing the cause, explore up to three candidates involving claim differences, added premises, or missing links.</span>
+          <button id="btnBuildCause" class="ghost">Generate</button>
+        </div>
+        <div class="mode-card">
+          <strong>② Detailed Reasoning Path Audit</strong>
+          <span>Assign IDs to claims, evidence, intermediate judgments, and conclusions, then inspect each connection.</span>
+          <button id="btnBuildPath" class="ghost">Generate</button>
+        </div>
+        <div class="mode-card">
+          <strong>③ Detailed Evidence / False-Denial Audit</strong>
+          <span>Examine search non-findings, general statements, scope mismatches, and whether direct refutation is established.</span>
+          <button id="btnBuildEvidence" class="ghost">Generate</button>
+        </div>
+        <div class="mode-card">
+          <strong>④ Return to the Original Issue</strong>
+          <span>After the audit, return to the original question without mixing established and unresolved points.</span>
+          <button id="btnBuildReturn" class="ghost">Generate</button>
+        </div>
+      </div>
+      <p class="muted">Normally, begin with ① and proceed to ② or ③ after candidate causes emerge. You do not need to submit all four prompts at once.</p>
+    </section>
+
+    <section id="secPrompt" hidden>
+      <h2 id="promptTitle">7. Generated Prompt</h2>
+      <pre class="prompt" id="promptOutput"></pre>
+      <div class="row">
+        <button id="btnCopyPrompt" class="ghost">Copy prompt</button>
+        <button id="btnDownloadPrompt" class="ghost">Save as .md</button>
+      </div>
+    </section>
+
+    <section id="secManual" hidden>
+      <h2>8. Minimum human checks</h2>
+      <ul class="tight">
+        <li>Is each AI-identified “candidate cause” supported by a short quotation from the original text?</li>
+        <li>Are prose coherence and the validity of the reasoning path evaluated separately?</li>
+        <li>Has the AI avoided filling unproven links with new inference?</li>
+        <li>Has the AI kept the existence of evidence distinct from whether that evidence directly refutes the original claim?</li>
+        <li>Are points whose cause cannot be established retained as “Indeterminate”?</li>
+      </ul>
+    </section>
+
+    <section id="secFeedback" hidden>
+      <h2>9. Feedback record</h2>
+      <div class="row">
+        <button class="ghost" data-fb="cause_identified">Cause identified</button>
+        <button class="ghost" data-fb="still_unclear">Still unclear</button>
+        <button class="ghost" data-fb="over_detection">Over-detection</button>
+        <input type="text" id="fbNote" placeholder="Additional note (optional)" style="flex:1;min-width:180px">
+      </div>
+      <p class="muted" id="fbStatus"></p>
+      <div class="row" style="margin-top:8px">
+        <button id="btnExportLog" class="ghost">Export audit log as JSONL</button>
+        <span class="muted" id="logCount">Records: 0 (in-page memory)</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="footer-note">This tool does not independently determine whether an AI response is correct, whether evidence is authentic, or whether semantic differences exist. It is a local aid for fixing the conversation, structuring the inspection sequence, and having an AI re-examine the response in an auditable format.<br>©M-Tokuni 2026　Author: M-Tokuni</div>
+
+<script>
+"use strict";
+/* =====================================================================
+ * FILE: AI_Response_Discomfort_Cause_and_Reasoning_Path_Audit_Tool_26-0718-0014_EN.html
+ * JST : 2026-07-18 00:14
+ * PURPOSE:
+ *   Fix a conversation in which the prose appears coherent but the reasoning
+ *   path from premises to conclusion cannot be traced, producing a “???” state.
+ *   Audit it in this order:
+ *   1) Explore structural differences without presupposing the cause
+ *   2) Assign IDs to the reasoning path and inspect each connection
+ *   3) Conduct a detailed evidence / false-denial audit only when needed
+ *   4) Return to the original issue
+ * NOTE:
+ *   This HTML does not perform external searches, fact-checking, or semantic judgments.
+ *   The surface scan is an entry point to candidate causes, not a correctness determination.
+ * =================================================================== */
+
+const STATES = ["PASS","CAUTION","REVIEW_REQUIRED","CLOSED","UNKNOWN"];
+const stateRank = state => ({PASS:0, CAUTION:1, REVIEW_REQUIRED:2, CLOSED:3, UNKNOWN:1})[state] ?? 1;
+
+const RULES = [
+  {
+    id:"S01",
+    name:"Correction or denial language",
+    category:"May be either a false denial or a valid refutation",
+    pattern:/\b(actually|in fact|incorrect|wrong|misunderstanding|not true|not the case|no evidence|unsupported|cannot be established|impossible|should be corrected|revise your understanding)\b/i,
+    state:"REVIEW_REQUIRED",
+    before:2,
+    after:2,
+    note:"The presence of a denial alone does not establish a false denial. Check the target scope and whether direct refutation is established."
+  },
+  {
+    id:"S02",
+    name:"Possible denial from a search non-finding",
+    category:"Possible conflation of not finding something in a search with nonexistence or error",
+    pattern:/(search(?:ed|ing)?|look(?:ed)? up|could not (?:confirm|find|locate)|no (?:reports?|literature|sources?|records?) found)[^.!?\n]{0,160}(does not exist|incorrect|wrong|not true|no evidence|unlikely|impossible|unsupported)/i,
+    state:"CLOSED",
+    before:1,
+    after:1,
+    note:"Treat this as a candidate for suspending the negative conclusion until the search scope, terms, and period are disclosed."
+  },
+  {
+    id:"S03",
+    name:"Application of a generalization or average",
+    category:"Scope correspondence with the individual case must be checked",
+    pattern:/\b(generally|typically|normally|in most cases|nationwide|regional average|average value|standard|official statistics|official announcement|as a general rule)\b/i,
+    state:"CAUTION",
+    before:2,
+    after:2,
+    note:"Separate whether general material is used as supporting context for an individual observation or as a direct refutation."
+  },
+  {
+    id:"S04",
+    name:"Added premise or assumption",
+    category:"Possible premise change without user approval",
+    pattern:/\b(assume|assuming|if we assume|suppose|presume|treat(?:ing)? .+ as|for the purposes of this answer)\b/i,
+    state:"CAUTION",
+    before:1,
+    after:1,
+    note:"Check whether the added premise appears in the original text and whether it changes the conclusion."
+  },
+  {
+    id:"S05",
+    name:"Issue shift",
+    category:"A different issue may have been prioritized over the original question",
+    pattern:/\b(more importantly|what matters more|rather than that|to change the subject|as a separate point|from another perspective|setting that aside)\b/i,
+    state:"REVIEW_REQUIRED",
+    before:4,
+    after:1,
+    note:"Check whether the response moved to another issue before answering the original question."
+  },
+  {
+    id:"S06",
+    name:"Elimination of alternative branches",
+    category:"Multiple candidates may have been prematurely reduced to one",
+    pattern:/\b(the only (?:way|option|choice)|no other (?:way|option|choice)|must inevitably|will always|cannot be anything other than)\b/i,
+    state:"REVIEW_REQUIRED",
+    before:1,
+    after:1,
+    note:"Identify excluded alternatives and the grounds for excluding them."
+  },
+  {
+    id:"S07",
+    name:"Strong certainty language",
+    category:"Possible overstatement of certainty",
+    pattern:/\b(has been proven|is proven|has been demonstrated|has been confirmed|well-known fact|established fact|clearly|obviously|without doubt|certainly|definitely)\b/i,
+    state:"REVIEW_REQUIRED",
+    before:1,
+    after:1,
+    note:"Check whether the confirming party, relevant source, and scope of application are specified."
+  },
+  {
+    id:"S08",
+    name:"Abrupt increase in abstraction",
+    category:"Possible shift from a concrete question to a general statement",
+    pattern:/\b(essentially|to generalize|from a broader perspective|society as a whole|structurally|theoretically|in principle|at a fundamental level)\b/i,
+    state:"CAUTION",
+    before:2,
+    after:2,
+    note:"Check whether the abstraction returns and reconnects to the original concrete target."
+  },
+  {
+    id:"S09",
+    name:"Connector suggesting compressed reasoning",
+    category:"The bridge from the preceding statement to the conclusion may be omitted",
+    pattern:/\b(therefore|thus|hence|consequently|as a result|for this reason|this means|in other words)\b/i,
+    state:"UNKNOWN",
+    before:1,
+    after:1,
+    note:"The connector itself may be valid. Audit whether the preceding statement actually supports what follows."
+  },
+  {
+    id:"S10",
+    name:"Language downgrading an observation",
+    category:"Possible conflation of measurement or observation with generalizability",
+    pattern:/(subjective|impression|feeling|personal experience|single example|anecdote)[^.!?\n]{0,120}(merely|only|not scientific|not evidence|cannot be generalized)/i,
+    state:"REVIEW_REQUIRED",
+    before:1,
+    after:1,
+    note:"Separate whether an observation record exists from whether it can be generalized to a population."
+  }
+];
+
+const RELATION_CLASSES = [
+  ["Direct refutation", "Addresses the same or comparable target, time, conditions, and method/definition, and shows mutually incompatible results"],
+  ["Scope mismatch", "Location, target, period, conditions, or definitions differ, so the user-provided observation cannot be directly denied"],
+  ["General statement", "Shows a typical tendency or average but does not determine whether the individual event exists"],
+  ["Search non-finding", "Means only that material was not found in this search; it does not establish nonexistence or error"],
+  ["Unverified", "Authenticity, the relevant passage, or scope of application is insufficient"],
+  ["Support / consistency", "Supporting evidence consistent with the user-provided content; do not generalize beyond its scope"]
+];
+
+const auditLog = [];
+let currentRecord = null;
+let currentPromptType = "cause";
+
+const $ = id => document.getElementById(id);
+const linesOf = id => $(id).value.split("\n").map(s => s.trim()).filter(Boolean);
+
+function splitSentences(text){
+  return text
+    .split(/(?<=[。！？\n])/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function contextAround(sentences, index, before=1, after=1){
+  const start = Math.max(0, index - before);
+  const end = Math.min(sentences.length, index + after + 1);
+  return sentences.slice(start, end).join("");
+}
+
+function esc(text){
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function jstNow(){
+  const date = new Date(Date.now() + 9 * 3600 * 1000);
+  return date.toISOString().replace("Z", "+09:00");
+}
+
+function safeTimestamp(){
+  const date = new Date(Date.now() + 9 * 3600 * 1000);
+  return date.toISOString().slice(2,16).replace(/[-T:]/g, "").replace(/^(\d{2})(\d{2})(\d{2})(\d{4})$/, "$1-$2$3-$4");
+}
+
+function download(filename, text, mime="application/octet-stream"){
+  const blob = new Blob([text], {type:mime});
+  const anchor = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function gatherInputs(){
+  return {
+    userText:$("userText").value.trim(),
+    aiText:$("aiText").value.trim(),
+    memo:$("memo").value.trim(),
+    observations:linesOf("observations"),
+    userEvidence:$("userEvidence").value.trim(),
+    scope:{
+      target:$("scopeTarget").value.trim(),
+      place:$("scopePlace").value.trim(),
+      time:$("scopeTime").value.trim(),
+      condition:$("scopeCondition").value.trim(),
+      method:$("scopeMethod").value.trim()
+    },
+    premises:linesOf("fixedPremises"),
+    hypotheses:linesOf("hypotheses"),
+    unknowns:linesOf("unknowns")
+  };
+}
+
+function scopeRows(inputs){
+  return [
+    ["Target", inputs.scope.target],
+    ["Location / population", inputs.scope.place],
+    ["Time / period", inputs.scope.time],
+    ["Conditions / environment", inputs.scope.condition],
+    ["Method / definition", inputs.scope.method]
+  ];
+}
+
+function listBlock(title, items, emptyLabel="Not entered"){
+  const lines = [title];
+  if(items.length === 0) lines.push(`- ${emptyLabel}`);
+  else items.forEach(item => lines.push(`- ${item}`));
+  return lines;
+}
+
+function runSurfaceScan(inputs){
+  const sentences = splitSentences(inputs.aiText);
+  const detections = [];
+
+  for(const rule of RULES){
+    sentences.forEach((sentence, index) => {
+      const match = sentence.match(rule.pattern);
+      if(!match) return;
+      detections.push({
+        rule,
+        index,
+        sentence,
+        match:match[0],
+        context:contextAround(sentences, index, rule.before, rule.after)
+      });
+    });
+  }
+
+  let overall = "PASS";
+  for(const detection of detections){
+    if(stateRank(detection.rule.state) > stateRank(overall)) overall = detection.rule.state;
+  }
+  if(detections.length === 0) overall = "UNKNOWN";
+
+  const categoryCounts = {};
+  for(const detection of detections){
+    categoryCounts[detection.rule.name] = (categoryCounts[detection.rule.name] || 0) + 1;
+  }
+
+  return {sentences, detections, overall, categoryCounts};
+}
+
+function renderScan(inputs, result){
+  const stateNotes = {
+    PASS:"Few strong surface indicators were detected. Reasoning-path consistency remains unverified.",
+    CAUTION:"Generalization, abstraction, added premises, or similar features warrant inspection of the reasoning path.",
+    REVIEW_REQUIRED:"Inspect claim differences and evidence connections before accepting the response.",
+    CLOSED:"A candidate issue—such as denial based on a search non-finding—suggests that the conclusion should not be accepted before verification.",
+    UNKNOWN:"Fixed phrases cannot narrow down the cause. Have the AI decompose implicit semantic differences and missing reasoning links."
+  };
+
+  $("resultHead").innerHTML = `
+    <h2>4. Current status</h2>
+    <p><span class="badge b-${result.overall}">${result.overall}</span>
+    <span class="muted"> Surface detections: ${result.detections.length} / AI response: ${result.sentences.length} sentences</span></p>
+    <p class="${result.overall === "CLOSED" ? "danger-note" : "note"}">${stateNotes[result.overall]}</p>
+    <p class="muted">This status is not a correctness judgment; it is an entry point for deciding what to inspect next.</p>`;
+
+  const summaryPairs = Object.entries(result.categoryCounts)
+    .map(([name,count]) => `<tr><td>${esc(name)}</td><td>${count}</td></tr>`)
+    .join("");
+  $("surfaceSummary").innerHTML = summaryPairs
+    ? `<table><tr><th>Audit candidate</th><th>Count</th></tr>${summaryPairs}</table>`
+    : `<div class="principle"><strong>No cause was detected using fixed phrases.</strong> This does not prove that the response is sound. Use the cause-exploration prompt to inspect premise changes and unproven links distributed across the text.</div>`;
+
+  const wrap = $("detections");
+  wrap.innerHTML = "";
+  for(const detection of result.detections){
+    const card = document.createElement("div");
+    card.className = `card ${detection.rule.state}`;
+    const sentenceEscaped = esc(detection.sentence);
+    const matchEscaped = esc(detection.match);
+    const highlighted = matchEscaped
+      ? sentenceEscaped.replace(matchEscaped, () => `<mark>${matchEscaped}</mark>`)
+      : sentenceEscaped;
+    card.innerHTML = `
+      <h3><span class="st-${detection.rule.state}">[${detection.rule.state}]</span> ${esc(detection.rule.name)} <span class="meta">(${detection.rule.id})</span></h3>
+      <p class="meta">${esc(detection.rule.category)}</p>
+      <div class="excerpt">Sentence ${detection.index + 1}: ${highlighted}</div>
+      <p class="meta">Treatment: ${esc(detection.rule.note)}</p>`;
+    wrap.appendChild(card);
+  }
+
+  $("secSurface").hidden = false;
+  $("secModes").hidden = false;
+  $("secManual").hidden = false;
+  $("secFeedback").hidden = false;
+
+  currentRecord = {
+    logged_at:jstNow(),
+    surface_state:result.overall,
+    detections:result.detections.map(item => ({
+      rule:item.rule.id,
+      name:item.rule.name,
+      state:item.rule.state,
+      sentence:item.sentence
+    })),
+    memo:inputs.memo || null,
+    generated_prompts:[],
+    feedback:null
+  };
+  auditLog.push(currentRecord);
+  $("logCount").textContent = `Records: ${auditLog.length} (in-page memory)`;
+  $("fbStatus").textContent = "";
+}
+
+function commonInputBlock(inputs){
+  const lines = [];
+  lines.push("■ Conversation to Fix");
+  lines.push("【Original User Message】");
+  lines.push(inputs.userText || "Not entered");
+  lines.push("");
+  lines.push("【Prior AI Response】");
+  lines.push(inputs.aiText || "Not entered");
+  if(inputs.memo){
+    lines.push("");
+    lines.push("【Discomfort Note】");
+    lines.push(inputs.memo);
+  }
+  return lines;
+}
+
+function advancedInputBlock(inputs){
+  const hasAdvanced = inputs.observations.length || inputs.userEvidence ||
+    Object.values(inputs.scope).some(Boolean) || inputs.premises.length ||
+    inputs.hypotheses.length || inputs.unknowns.length;
+  if(!hasAdvanced) return [];
+
+  const lines = ["", "■ Additional Fixed Information"];
+  lines.push(...listBlock("User-provided observations and measurements:", inputs.observations));
+  if(inputs.userEvidence) lines.push(`Acquisition method and user-side evidence:\n${inputs.userEvidence}`);
+  lines.push("Scope of application:");
+  for(const [label,value] of scopeRows(inputs)) lines.push(`- ${label}: ${value || "Not specified"}`);
+  lines.push(...listBlock("Fixed premises:", inputs.premises));
+  lines.push(...listBlock("Hypotheses (must not be promoted to facts):", inputs.hypotheses));
+  lines.push(...listBlock("Unresolved items (must not be treated as established):", inputs.unknowns));
+  return lines;
+}
+
+function buildCausePrompt(inputs){
+  const lines = [];
+  lines.push("【Exploring the Cause of Discomfort from a “???” State】");
+  lines.push("The prior response appears coherent as prose, but I cannot trace the reasoning path that led to its conclusion. The cause of my discomfort has not yet been identified.");
+  lines.push("");
+  lines.push("At this stage, do not decide whether my claim or the prior response is correct. The first objective is to identify structural differences and omissions that produced the discomfort.");
+  lines.push("");
+  lines.push(...commonInputBlock(inputs));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■ Prohibitions");
+  lines.push("- Do not add new evidence, premises, or explanations after the fact to defend the prior conclusion.");
+  lines.push("- Do not fill an unknown path with plausible-sounding inference.");
+  lines.push("- Do not require me to explain the cause of the discomfort first.");
+  lines.push("- Do not assume that my lack of understanding is the cause.");
+  lines.push("- Do not provide a verbatim disclosure of private internal reasoning. Instead, present the claims, evidence, and decision links used in the answer in an auditable form.");
+  lines.push("");
+  lines.push("■ Step 1: Separate the Two Claims");
+  lines.push("Create the following table.");
+  lines.push("| Claim / condition in the original user message | Claim / condition addressed by the AI | Added | Removed | Scope changed | Strength / certainty changed | Semantic difference |");
+  lines.push("Quote the relevant passages briefly; do not replace the original wording with summaries alone.");
+  lines.push("");
+  lines.push("■ Step 2: Decompose the Prior Response into Components");
+  lines.push("| ID | Type | Content | Source |");
+  lines.push("Choose the type from “User claim,” “User condition,” “AI-added premise,” “AI evidence,” “AI intermediate judgment,” “AI conclusion,” or “Unresolved item.”");
+  lines.push("");
+  lines.push("■ Step 3: Inspect Each Candidate Anomaly");
+  lines.push("Evaluate each candidate as “Applicable,” “Not applicable,” or “Indeterminate,” and briefly quote the relevant passage.");
+  lines.push("- Claim substitution");
+  lines.push("- Unauthorized addition of a premise");
+  lines.push("- Scope-of-application mismatch");
+  lines.push("- Omitted intermediate judgment");
+  lines.push("- Abrupt abstraction without returning to the concrete case");
+  lines.push("- Misconnection between evidence and conclusion");
+  lines.push("- Overwriting an individual observation with a general statement");
+  lines.push("- Inferring nonexistence or error from a search non-finding");
+  lines.push("- Causal leap");
+  lines.push("- Overstatement of certainty");
+  lines.push("- Issue shift");
+  lines.push("- Elimination of alternative branches");
+  lines.push("- Each sentence is natural, but the overall decision links are unproven");
+  lines.push("");
+  lines.push("■ Step 4: Present Candidate Causes");
+  lines.push("Present up to three most likely causes of the discomfort. For each candidate, include the quoted passage, the missing link, and its effect on the conclusion.");
+  lines.push("If the cause cannot be established, retain “Indeterminate” rather than forcing a single conclusion.");
+  lines.push("");
+  lines.push("■ Final Output");
+  lines.push("- Coherence of the prose itself");
+  lines.push("- Traceability of the reasoning path");
+  lines.push("- Most likely candidate cause(s) of the discomfort");
+  lines.push("- Next required action: detailed reasoning-path audit / detailed evidence and false-denial audit / explanation reconstruction / wait for additional information");
+  return lines.join("\n");
+}
+
+function buildPathPrompt(inputs){
+  const lines = [];
+  lines.push("【Separate Audit of Prose Coherence and Reasoning Path】");
+  lines.push("The prior response appears coherent as prose, but I cannot trace the decision links from premises to conclusion. Decompose the existing response before adding more explanation.");
+  lines.push("");
+  lines.push(...commonInputBlock(inputs));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■ Prohibitions");
+  lines.push("- Do not add new premises or evidence to justify the prior conclusion.");
+  lines.push("- Do not complete unknown intermediate steps with plausible-sounding inference.");
+  lines.push("- Do not omit links behind phrases such as “considered comprehensively” or “generally.”");
+  lines.push("- Do not provide a verbatim disclosure of private internal reasoning. Present the evidence, judgments, and connection conditions actually used in an auditable form.");
+  lines.push("");
+  lines.push("■ Output 1: Claim Nodes");
+  lines.push("| ID | Type | Content | Source | Short quotation from the original text |");
+  lines.push("Choose the type from “User claim,” “User condition,” “AI-added premise,” “AI evidence,” “AI intermediate judgment,” “AI final conclusion,” or “Unresolved item.”");
+  lines.push("");
+  lines.push("■ Output 2: Connection Edges");
+  lines.push("Show the path contained in the prior response one connection at a time.");
+  lines.push("| From ID | To ID | Reason for connection | Required conditions | Evidence | Connection status |");
+  lines.push("Set connection status to one of: “Established,” “Conditionally established,” “Unproven,” “Scope mismatch,” “Insufficient evidence,” “Logically invalid,” or “Indeterminate.”");
+  lines.push("");
+  lines.push("■ Output 3: Missing Bridges");
+  lines.push("List places that read naturally but lack stated logical or factual conditions.");
+  lines.push("| From ID | To ID | Missing condition or evidence | What can be said without filling the gap | Effect on the conclusion |");
+  lines.push("");
+  lines.push("■ Output 4: Separate Four Forms of Consistency");
+  lines.push("Evaluate the following separately:");
+  lines.push("- Coherence of the prose itself");
+  lines.push("- Reasoning-path consistency from premises to conclusion");
+  lines.push("- Groundability of judgments in evidence");
+  lines.push("- Direct responsiveness to the original question");
+  lines.push("Even if the prose itself is coherent, if the path is unproven, report those two evaluations separately.");
+  lines.push("");
+  lines.push("■ Output 5: Revised Answer");
+  lines.push("Remove unproven, scope-mismatched, and invalid connections, then answer the original question again using only what remains.");
+  lines.push("Mark unverified points as “Unknown,” “Insufficient evidence,” or “Scope mismatch,” and do not bridge gaps with speculation.");
+  return lines.join("\n");
+}
+
+function buildEvidencePrompt(inputs){
+  const lines = [];
+  lines.push("【Detailed Audit of Evidence Relationships and False Denial】");
+  lines.push("Before accepting any denial, correction, or generalization in the prior response, re-examine the evidence and its scope of application.");
+  lines.push("");
+  lines.push(...commonInputBlock(inputs));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■ Decision Principles");
+  lines.push("1. Do not convert “not confirmed by search” into “wrong,” “nonexistent,” or “unsupported.”");
+  lines.push("2. General statements, averages, official materials, and statistics from another region or time do not by themselves directly refute an individual observation.");
+  lines.push("3. Retain a user-provided observation as a record within its stated scope. Evaluate authenticity, measurement validity, and generalizability separately.");
+  lines.push("4. Direct refutation requires that the target, location/population, time, and conditions match or be comparable; that the transformation between methods/definitions be traceable; and that the results be mutually incompatible.");
+  lines.push("5. When evidence is insufficient, do not fill the gap. State “Search non-finding,” “Scope mismatch,” “Unverified,” or “Indeterminate.”");
+  lines.push("");
+  lines.push("■ Output A: Claim Preservation and Semantic Differences");
+  lines.push("| Claim in the original user message | Claim addressed by the AI | Addition, removal, or strength change | Semantic difference |");
+  lines.push("");
+  lines.push("■ Output B: Cross-check AI-side Evidence");
+  lines.push("| AI-side claim | Evidence / source | Relevant passage | Target | Location / population | Time | Conditions | Method / definition | Relationship to user-provided content | Whether correction is justified |");
+  lines.push("Choose exactly one of the following for “Relationship to user-provided content.”");
+  RELATION_CLASSES.forEach(([name,description]) => lines.push(`- ${name}: ${description}`));
+  lines.push("");
+  lines.push("■ Check Whether Direct Refutation Is Established");
+  lines.push("Evaluate each item as “Match,” “Comparable,” “Mismatch,” or “Unknown.”");
+  lines.push("- Target");
+  lines.push("- Location / population");
+  lines.push("- Time / period");
+  lines.push("- Conditions / environment");
+  lines.push("- Identity or convertibility of measurement methods / definitions");
+  lines.push("- Whether the two results are logically or physically incompatible");
+  lines.push("If any important item is “Mismatch” or “Unknown,” do not deny or correct the user-provided content as a direct refutation.");
+  lines.push("");
+  lines.push("■ Revise the Conclusion");
+  lines.push("- If direct refutation is established: limit the statement to the refuted point and the conditions under which the refutation holds.");
+  lines.push("- If it is not established: withdraw the prior denial or correction and return to qualified wording appropriate to the relationship class.");
+  lines.push("- If nothing was found in the search: state only, “This could not be confirmed under the current search conditions.”");
+  lines.push("- Finally, answer the original question directly while keeping established facts, unresolved items, and hypotheses separate.");
+  return lines.join("\n");
+}
+
+function buildReturnPrompt(inputs){
+  const lines = [];
+  lines.push("【Return to the Original Issue After the Audit】");
+  lines.push("Using the audit results, return the conversation to the following original user message.");
+  lines.push("");
+  lines.push(...commonInputBlock({...inputs, aiText:"(Refer only to the necessary parts of the prior response that was audited.)"}));
+  lines.push(...advancedInputBlock(inputs));
+  lines.push("");
+  lines.push("■ Conditions for Returning");
+  lines.push("- Do not change the scope of the claim in the original user message.");
+  lines.push("- Do not conflate prose coherence with the validity of the reasoning path.");
+  lines.push("- Remove unproven connections.");
+  lines.push("- Do not convert general statements, averages, or search non-findings into direct refutations.");
+  lines.push("- Treat observation records, hypotheses, and unresolved items separately.");
+  lines.push("- Mark points lacking evidence as “Unsupported” and unknown points as “Unknown.”");
+  lines.push("- Finally, answer the original question directly.");
+  return lines.join("\n");
+}
+
+function requireCoreInputs(){
+  const inputs = gatherInputs();
+  if(!inputs.userText || !inputs.aiText){
+    $("resultHead").innerHTML = "<h2>4. Current status</h2><p class='danger-note'>Both the user message and the AI response are required. Missing content will not be inferred, and no audit prompt will be generated.</p>";
+    return null;
+  }
+  return inputs;
+}
+
+function showPrompt(type, title, text){
+  currentPromptType = type;
+  $("promptTitle").textContent = `7. ${title}`;
+  $("promptOutput").textContent = text;
+  $("secPrompt").hidden = false;
+  $("secPrompt").scrollIntoView({behavior:"smooth", block:"start"});
+  if(currentRecord){
+    currentRecord.generated_prompts.push({type, generated_at:jstNow()});
+  }
+}
+
+$("btnScan").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(!inputs) return;
+  const result = runSurfaceScan(inputs);
+  renderScan(inputs, result);
+  showPrompt("cause", "??? Cause Exploration Prompt", buildCausePrompt(inputs));
+});
+
+$("btnBuildCause").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("cause", "??? Cause Exploration Prompt", buildCausePrompt(inputs));
+});
+
+$("btnBuildPath").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("path", "Detailed Reasoning Path Audit Prompt", buildPathPrompt(inputs));
+});
+
+$("btnBuildEvidence").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("evidence", "Detailed Evidence / False-Denial Audit Prompt", buildEvidencePrompt(inputs));
+});
+
+$("btnBuildReturn").addEventListener("click", () => {
+  const inputs = requireCoreInputs();
+  if(inputs) showPrompt("return", "Return-to-Issue Prompt", buildReturnPrompt(inputs));
+});
+
+async function copyText(text, button){
+  const original = button.textContent;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const temporary = document.createElement("textarea");
+      temporary.value = text;
+      temporary.style.position = "fixed";
+      temporary.style.opacity = "0";
+      document.body.appendChild(temporary);
+      temporary.focus();
+      temporary.select();
+      document.execCommand("copy");
+      temporary.remove();
+    }
+    button.textContent = "Copied";
+  } catch(_error){
+    button.textContent = "Copy failed";
+  }
+  setTimeout(() => button.textContent = original, 1500);
+}
+
+$("btnCopyPrompt").addEventListener("click", event => {
+  copyText($("promptOutput").textContent, event.currentTarget);
+});
+
+$("btnDownloadPrompt").addEventListener("click", () => {
+  const text = $("promptOutput").textContent;
+  if(!text) return;
+  const names = {
+    cause:"cause_exploration",
+    path:"path_audit",
+    evidence:"evidence_false_denial_audit",
+    return:"return_to_question"
+  };
+  const baseName = `${names[currentPromptType] || "audit_prompt"}_${safeTimestamp()}.md`;
+  download(baseName, `<!-- FILE: ${baseName} -->\n\n${text}\n`, "text/markdown");
+});
+
+const INPUT_IDS = [
+  "userText","aiText","memo","observations","userEvidence",
+  "scopeTarget","scopePlace","scopeTime","scopeCondition","scopeMethod",
+  "fixedPremises","hypotheses","unknowns"
+];
+
+$("btnSaveLocal").addEventListener("click", () => {
+  const payload = {};
+  INPUT_IDS.forEach(id => payload[id] = $(id).value);
+  try{
+    localStorage.setItem("ai_path_audit_inputs_v1", JSON.stringify(payload));
+    $("saveStatus").textContent = `Saved on this device: ${jstNow()}`;
+  } catch(error){
+    $("saveStatus").textContent = `Save failed: ${error.message}`;
+  }
+});
+
+$("btnRestoreLocal").addEventListener("click", () => {
+  try{
+    const raw = localStorage.getItem("ai_path_audit_inputs_v1");
+    if(!raw){
+      $("saveStatus").textContent = "No saved inputs were found.";
+      return;
+    }
+    const payload = JSON.parse(raw);
+    INPUT_IDS.forEach(id => {
+      if(Object.prototype.hasOwnProperty.call(payload, id)) $(id).value = payload[id];
+    });
+    $("saveStatus").textContent = "Saved inputs restored.";
+  } catch(error){
+    $("saveStatus").textContent = `Restore failed: ${error.message}`;
+  }
+});
+
+$("btnClear").addEventListener("click", () => {
+  INPUT_IDS.forEach(id => $(id).value = "");
+  $("saveStatus").textContent = "Inputs cleared. Saved device data was not deleted.";
+});
+
+document.querySelectorAll("[data-fb]").forEach(button => {
+  button.addEventListener("click", () => {
+    if(!currentRecord){
+      $("fbStatus").textContent = "Run cause exploration first.";
+      return;
+    }
+    currentRecord.feedback = {
+      kind:button.dataset.fb,
+      note:$("fbNote").value.trim() || null,
+      recorded_at:jstNow()
+    };
+    $("fbStatus").textContent = `Recorded: ${button.textContent}`;
+  });
+});
+
+$("btnExportLog").addEventListener("click", () => {
+  if(auditLog.length === 0){
+    $("fbStatus").textContent = "There are no audit records to export.";
+    return;
+  }
+  const jsonl = auditLog.map(record => JSON.stringify(record)).join("\n") + "\n";
+  download(`ai_path_audit_log_${safeTimestamp()}.jsonl`, jsonl, "application/x-ndjson");
+});
+</script>
+</body>
+</html>
