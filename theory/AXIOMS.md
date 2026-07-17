@@ -264,14 +264,12 @@ Both margins are defined only when $\delta$ is finite and non-negative and $\tau
 上側・下側などの方向別評価が必要な場合、側別比は
 
 $$
-R_{\mathrm{upper}}
-=
+R_{\mathrm{upper}} =
 \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}}
 $$
 
 $$
-R_{\mathrm{lower}}
-=
+R_{\mathrm{lower}} =
 \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}}
 $$
 
@@ -280,8 +278,7 @@ $$
 その最大値を集約する場合は、
 
 $$
-R_{\mathrm{dir}}
-=
+R_{\mathrm{dir}} =
 \max\left(R_{\mathrm{upper}},R_{\mathrm{lower}}\right)
 $$
 

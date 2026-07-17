@@ -404,36 +404,31 @@ Even an LLM output that has been validated, selected, or permitted by Layer 03 r
 二重ゆらぎ式はIDEの第二の正規計算式であり、公理ではない。側別比と、事前固定された連続時間または有限差分の二重ゆらぎ検出規則が正規核を構成する。以下のEMA、 $h_{\mathrm{upper}}$ 、 $h_{\mathrm{lower}}$ は、その核に従う事前固定の補助実装であり、独立した公理または第三の正規IDE計算式ではない。
 
 $$
-\mathrm{EMA}_{\mathrm{upper}}(n)
-=
+\mathrm{EMA}_{\mathrm{upper}}(n) =
 \alpha_u \delta_u
 +
 (1-\alpha_u)\mathrm{EMA}_{\mathrm{upper}}(n-1)
 $$
 
 $$
-\mathrm{EMA}_{\mathrm{lower}}(n)
-=
+\mathrm{EMA}_{\mathrm{lower}}(n) =
 \alpha_l \delta_l
 +
 (1-\alpha_l)\mathrm{EMA}_{\mathrm{lower}}(n-1)
 $$
 
 $$
-\tau_{\mathrm{upper}}
-=
+\tau_{\mathrm{upper}} =
 \tau h_{\mathrm{upper}}\!\left(\mathrm{EMA}_{\mathrm{upper}}\right)
 $$
 
 $$
-\tau_{\mathrm{lower}}
-=
+\tau_{\mathrm{lower}} =
 \tau h_{\mathrm{lower}}\!\left(\mathrm{EMA}_{\mathrm{lower}}\right)
 $$
 
 $$
-R_{\mathrm{dir}}
-=
+R_{\mathrm{dir}} =
 \max\!\left(
 \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}},
 \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}}
@@ -461,36 +456,31 @@ To track asymmetric fluctuation that a static $\tau$ cannot adequately represent
 The Dual-Fluctuation Formula is IDE's Secondary canonical calculation system, not an axiom. Directional ratios and a pre-fixed continuous-time or finite-difference detection rule form its canonical core. The EMA and $h_{\mathrm{upper}}$ / $h_{\mathrm{lower}}$ definitions below are pre-fixed auxiliary realizations of that core, not independent axioms or a third canonical IDE formula system.
 
 $$
-\mathrm{EMA}_{\mathrm{upper}}(n)
-=
+\mathrm{EMA}_{\mathrm{upper}}(n) =
 \alpha_u \delta_u
 +
 (1-\alpha_u)\mathrm{EMA}_{\mathrm{upper}}(n-1)
 $$
 
 $$
-\mathrm{EMA}_{\mathrm{lower}}(n)
-=
+\mathrm{EMA}_{\mathrm{lower}}(n) =
 \alpha_l \delta_l
 +
 (1-\alpha_l)\mathrm{EMA}_{\mathrm{lower}}(n-1)
 $$
 
 $$
-\tau_{\mathrm{upper}}
-=
+\tau_{\mathrm{upper}} =
 \tau h_{\mathrm{upper}}\!\left(\mathrm{EMA}_{\mathrm{upper}}\right)
 $$
 
 $$
-\tau_{\mathrm{lower}}
-=
+\tau_{\mathrm{lower}} =
 \tau h_{\mathrm{lower}}\!\left(\mathrm{EMA}_{\mathrm{lower}}\right)
 $$
 
 $$
-R_{\mathrm{dir}}
-=
+R_{\mathrm{dir}} =
 \max\!\left(
 \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}},
 \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}}
@@ -520,16 +510,14 @@ The recurrence is computationally closed within an evaluation interval only afte
 $$
 \frac{d^2x}{dt^2}
 +
-\gamma\dot{x}
-=
+\gamma\dot{x} =
 \underbrace{F_{\mathrm{IDE}}(x)}_{\text{基礎・全域}}
 +
 \underbrace{G(r)\Phi(x)}_{\text{補助計算}}
 $$
 
 $$
-G(r)
-=
+G(r) =
 r\frac{|r|}{k+|r|}
 ,\qquad
 r=x_{\mathrm{exact}}-x
@@ -560,16 +548,14 @@ To compensate for EMA lag, delayed response to local rapid change, and domain-sp
 $$
 \frac{d^2x}{dt^2}
 +
-\gamma\dot{x}
-=
+\gamma\dot{x} =
 \underbrace{F_{\mathrm{IDE}}(x)}_{\text{base / full domain}}
 +
 \underbrace{G(r)\Phi(x)}_{\text{auxiliary computation}}
 $$
 
 $$
-G(r)
-=
+G(r) =
 r\frac{|r|}{k+|r|}
 ,\qquad
 r=x_{\mathrm{exact}}-x
@@ -712,10 +698,8 @@ $\tau$ は、蓄積ズレを受け止める構造的な遊びの厚みである�
 次の積分式は、この原則を表すドメイン固有のIDE補助モデルであり、公理または正規IDE計算式ではない。
 
 $$
-\tau(t)
-=
-\tau_0
--
+\tau(t) =
+\tau_0 -
 \int_0^t f(\delta(s))\,ds
 $$
 
@@ -750,10 +734,8 @@ Within a closed operational interval, it does not naturally recover without exog
 The following integral equation is a domain-specific IDE auxiliary model of this principle, not an axiom or canonical IDE formula system.
 
 $$
-\tau(t)
-=
-\tau_0
--
+\tau(t) =
+\tau_0 -
 \int_0^t f(\delta(s))\,ds
 $$
 

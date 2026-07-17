@@ -586,10 +586,8 @@ It must not generate missing thresholds or domain rules.
 The derived structural-sensitivity formula is:
 
 $$
-S
-=
-\frac{1}{\tau(1-R)}
-=
+S =
+\frac{1}{\tau(1-R)} =
 \frac{1}{\tau-\delta}
 $$
 
@@ -1270,10 +1268,8 @@ $$
 派生計算式は次です。
 
 $$
-S
-=
-\frac{1}{\tau(1-R)}
-=
+S =
+\frac{1}{\tau(1-R)} =
 \frac{1}{\tau-\delta}
 $$
 

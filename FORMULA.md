@@ -114,24 +114,21 @@ $$
 # 3. Derived Formula — Structural Sensitivity
 
 $$
-S
-=
+S =
 \frac{1}{M_{\tau}}
 $$
 
 したがって、
 
 $$
-S
-=
+S =
 \frac{1}{\tau-\delta}
 $$
 
 一次式を用いると、
 
 $$
-S
-=
+S =
 \frac{1}{\tau(1-R)}
 $$
 
@@ -199,16 +196,14 @@ The labels upper and lower indicate direction only. They do not automatically me
 ## 4.2 Asymmetric EMA
 
 $$
-\mathrm{EMA}_{\mathrm{upper}}(n)
-=
+\mathrm{EMA}_{\mathrm{upper}}(n) =
 \alpha_u\delta_{\mathrm{upper}}(n)
 +
 (1-\alpha_u)\mathrm{EMA}_{\mathrm{upper}}(n-1)
 $$
 
 $$
-\mathrm{EMA}_{\mathrm{lower}}(n)
-=
+\mathrm{EMA}_{\mathrm{lower}}(n) =
 \alpha_l\delta_{\mathrm{lower}}(n)
 +
 (1-\alpha_l)\mathrm{EMA}_{\mathrm{lower}}(n-1)
@@ -236,14 +231,12 @@ $\alpha_u$ and $\alpha_l$ may be set independently.
 標準初期条件は次とする。
 
 $$
-\mathrm{EMA}_{\mathrm{upper}}(0)
-=
+\mathrm{EMA}_{\mathrm{upper}}(0) =
 \delta_{\mathrm{upper}}(0)
 $$
 
 $$
-\mathrm{EMA}_{\mathrm{lower}}(0)
-=
+\mathrm{EMA}_{\mathrm{lower}}(0) =
 \delta_{\mathrm{lower}}(0)
 $$
 
@@ -257,8 +250,7 @@ When domain-specific initial values are used, both the values and their acquisit
 ## 4.4 Side-Specific Effective Gate Widths
 
 $$
-\tau_{\mathrm{upper}}(n)
-=
+\tau_{\mathrm{upper}}(n) =
 \tau(n)
 h_{\mathrm{upper}}\!\left(
 \mathrm{EMA}_{\mathrm{upper}}(n)
@@ -266,8 +258,7 @@ h_{\mathrm{upper}}\!\left(
 $$
 
 $$
-\tau_{\mathrm{lower}}(n)
-=
+\tau_{\mathrm{lower}}(n) =
 \tau(n)
 h_{\mathrm{lower}}\!\left(
 \mathrm{EMA}_{\mathrm{lower}}(n)
@@ -312,15 +303,13 @@ They do not mean that the underlying absorption thickness $\tau$ has naturally r
 ## 4.5 Side-Specific Boundary-Approach Ratios
 
 $$
-R_{\mathrm{upper}}
-=
+R_{\mathrm{upper}} =
 \frac{\delta_{\mathrm{upper}}}
 {\tau_{\mathrm{upper}}}
 $$
 
 $$
-R_{\mathrm{lower}}
-=
+R_{\mathrm{lower}} =
 \frac{\delta_{\mathrm{lower}}}
 {\tau_{\mathrm{lower}}}
 $$
@@ -345,8 +334,7 @@ All input and intermediate values must be finite.
 ## 4.6 Directional Auxiliary Aggregate
 
 $$
-R_{\mathrm{dir}}
-=
+R_{\mathrm{dir}} =
 \max
 \left(
 R_{\mathrm{upper}},
@@ -357,8 +345,7 @@ $$
 展開形：
 
 $$
-R_{\mathrm{dir}}
-=
+R_{\mathrm{dir}} =
 \max
 \left(
 \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}},
@@ -377,8 +364,7 @@ To connect $R_{\mathrm{dir}}$ to canonical state classification, a Cause-Side do
 支配側は次で定義する。
 
 $$
-D
-=
+D =
 \operatorname*{arg\,max}
 \left\{
 R_{\mathrm{upper}},
@@ -406,14 +392,12 @@ $$
 離散時間表現：
 
 $$
-\Delta\delta_n
-=
+\Delta\delta_n =
 \delta_n-\delta_{n-1}
 $$
 
 $$
-\Delta\tau_n
-=
+\Delta\tau_n =
 \tau_n-\tau_{n-1}
 $$
 
@@ -443,8 +427,7 @@ This complementary formula is neither an axiom nor a third canonical IDE calcula
 $$
 \frac{d^2x}{dt^2}
 +
-\gamma\frac{dx}{dt}
-=
+\gamma\frac{dx}{dt} =
 F_{\mathrm{IDE}}(x)
 +
 G(r)\Phi(x)
@@ -453,16 +436,14 @@ $$
 残差：
 
 $$
-r
-=
+r =
 x_{\mathrm{exact}}-x
 $$
 
 二次残差ゲート：
 
 $$
-G(r)
-=
+G(r) =
 r\frac{|r|}{k+|r|}
 $$
 
@@ -543,8 +524,7 @@ $$
 このとき、
 
 $$
-G(r)
-=
+G(r) =
 \frac{r}{1+k/|r|}
 $$
 

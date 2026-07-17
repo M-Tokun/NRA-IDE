@@ -41,6 +41,7 @@ def check_file(file_path):
         'bom': False,
         'katex_adjacent': [],
         'katex_text_underscore': [],
+        'katex_setext': [],
         'html_tags': [],
     }
     
@@ -109,6 +110,25 @@ def check_file(file_path):
                     f"Found underscore inside \\text{{}} in inline math: '\\text{{{text_match.group(1)}}}'"
                 )
 
+        # Check for a bare '=' or '-' line inside a $$ block, immediately
+        # after a non-blank line: CommonMark reads this as a Setext heading
+        # underline, hijacking the paragraph before the math delimiters are
+        # ever recognized, which breaks the rendering.
+        in_block = False
+        prev_line = None
+        for idx, line in enumerate(lines, 1):
+            stripped = line.strip()
+            if stripped == '$$':
+                in_block = not in_block
+                prev_line = None
+                continue
+            if in_block:
+                if re.match(r'^(=+|-+)$', stripped) and prev_line:
+                    file_errors['katex_setext'].append(
+                        f"Line {idx}: bare '{stripped}' after '{prev_line}' is parsed as a Setext heading underline"
+                    )
+                prev_line = stripped if stripped else None
+
     # Check for HTML tag balance in .html files
     if ext == '.html':
         checker = HTMLTagChecker()
@@ -132,6 +152,7 @@ def main():
     encoding_errors = []
     katex_adjacent_errors = []
     katex_underscore_errors = []
+    katex_setext_errors = []
     html_tag_errors = []
 
     for root, dirs, files in os.walk('.'):
@@ -158,6 +179,9 @@ def main():
                     has_error = True
                 if res['katex_text_underscore']:
                     katex_underscore_errors.append((file_path, res['katex_text_underscore']))
+                    has_error = True
+                if res['katex_setext']:
+                    katex_setext_errors.append((file_path, res['katex_setext']))
                     has_error = True
                 if res['html_tags']:
                     html_tag_errors.append((file_path, res['html_tags']))
@@ -194,6 +218,14 @@ def main():
     if katex_underscore_errors:
         print("=== Files with KaTeX Underscore inside \\text{} ===")
         for f, errs in katex_underscore_errors:
+            print(f"  {f}:")
+            for e in errs:
+                print(f"    {e}")
+        print()
+
+    if katex_setext_errors:
+        print("=== Files with Bare '=' / '-' Lines Inside $$ Blocks (Setext heading hijack) ===")
+        for f, errs in katex_setext_errors:
             print(f"  {f}:")
             for e in errs:
                 print(f"    {e}")

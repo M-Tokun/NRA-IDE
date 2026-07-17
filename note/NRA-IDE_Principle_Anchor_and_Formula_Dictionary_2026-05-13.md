@@ -249,8 +249,7 @@ $$
 ### 静的相関
 
 $$
-R_{ij}^{\mathrm{static}}(t)
-=
+R_{ij}^{\mathrm{static}}(t) =
 \frac{\delta_{ij}(t)}{\tau_{ij}}
 $$
 
@@ -259,8 +258,7 @@ $$
 ### 変化率相関
 
 $$
-R_{ij}^{\mathrm{rate}}(t)
-=
+R_{ij}^{\mathrm{rate}}(t) =
 \frac{|\Delta \delta_{ij}(t)|}{\tau_{ij}^{\mathrm{rate}}}
 $$
 
@@ -269,8 +267,7 @@ $$
 ### 位相相関
 
 $$
-R_{ij}^{\mathrm{phase}}(t)
-=
+R_{ij}^{\mathrm{phase}}(t) =
 \frac{|\phi_i(t)-\phi_j(t)-\phi_{ij}^{\mathrm{ref}}|}{\tau_{ij}^{\mathrm{phase}}}
 $$
 
@@ -279,8 +276,7 @@ $$
 ### 履歴相関
 
 $$
-R_{ij}^{\mathrm{history}}(t)
-=
+R_{ij}^{\mathrm{history}}(t) =
 \frac{\delta_{ij}^{\mathrm{history}}(t)}{\tau_{ij}^{\mathrm{history}}}
 $$
 
@@ -289,8 +285,7 @@ $$
 ### 相関枝の運用判定
 
 $$
-R_{ij}^{\mathrm{op}}
-=
+R_{ij}^{\mathrm{op}} =
 \max
 \left(
 R_{ij}^{\mathrm{static}},
@@ -437,8 +432,7 @@ $$
 ### 式
 
 $$
-\Pi_{\mathrm{NRA}}(P_i)
-=
+\Pi_{\mathrm{NRA}}(P_i) =
 (\delta_i,\tau_i,R_i,\mathrm{boundary}_i,\mathrm{status}_i)
 $$
 
@@ -490,8 +484,7 @@ $$
 ### 式
 
 $$
-R_{\mathrm{op}}
-=
+R_{\mathrm{op}} =
 \max
 \left(
 R_i,
