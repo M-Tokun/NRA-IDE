@@ -4,6 +4,22 @@
 
 ---
 
+## Canonical Reference Quick Demo
+
+Run the current normative reference implementation from the repository root:
+
+```powershell
+python examples/nra_ide_reference_quick_demo.py
+```
+
+The demo calls [`nra-core/foundations/NRA-IDE_Architecture_public.py`](../nra-core/foundations/NRA-IDE_Architecture_public.py) directly and checks seven canonical outcomes: `PERMIT`, `BOUNDARY_WARNING`, `HANDOFF_REQUIRED`, `IRREVERSIBLE_TRANSITION`, `RUPTURE_BOUNDARY`, `CONFESSION`, and `OUT_OF_DESCRIPTION_DOMAIN`.
+
+Its thresholds are explicit demonstration values, not inferred defaults. The demo is not a separate canonical evaluator and must not be used for medical, autonomous-control, or other operational decisions.
+
+Other examples in this directory preserve research, explanatory, illustrative, domain-specific, or historical work and may use legacy state names.
+
+---
+
 ## What is NRA-IDE?
 
 **Nomological Ring Axioms — Intensional Dynamics Engine**
@@ -379,4 +395,3 @@ This project is provided under the **MIT License**. It may be used, modified, an
 For the latest information, see the official repository:
 
 - **GitHub:** https://github.com/M-Tokun/NRA-IDE
-

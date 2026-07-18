@@ -4,6 +4,22 @@
 
 ---
 
+## 正規参照 Quick Demo
+
+リポジトリルートで、現行の正規参照実装を実行します。
+
+```powershell
+python examples/nra_ide_reference_quick_demo.py
+```
+
+このデモは[`nra-core/foundations/NRA-IDE_Architecture_public.py`](../nra-core/foundations/NRA-IDE_Architecture_public.py)を直接呼び出し、`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`の7状態を確認します。
+
+閾値は説明用に明示した値であり、推論された既定値ではありません。このデモは独立した正規判定器ではなく、医療、自律制御、その他の運用判断には使用できません。
+
+このディレクトリのその他の例は、研究・説明・例示・ドメイン固有・履歴資料を保存しており、旧状態名を使用する場合があります。
+
+---
+
 ## NRA-IDE とは
 
 **律環公理 — 内包性動力学エンジン（Nomological Ring Axioms — Intensional Dynamics Engine）**
@@ -417,4 +433,3 @@ if (deliveryStatus === "STOP") {
 - **GitHub:** https://github.com/M-Tokun/NRA-IDE
 
 ---
-
