@@ -68,6 +68,30 @@ NRA-IDEの定義は、次の順序で参照します。
 
 ---
 
+## クイック検証
+
+正規参照実装のソースは次です。
+
+- [`nra-core/foundations/NRA-IDE_Architecture_public.py`](./nra-core/foundations/NRA-IDE_Architecture_public.py)
+
+正規適合試験は次です。
+
+- [`tests/test_nra_ide_reference.py`](./tests/test_nra_ide_reference.py)
+
+リポジトリルートで次を実行します。
+
+```powershell
+python -m unittest discover -v
+```
+
+期待結果は、`Ran 27 tests`に続いて`OK`と表示されることです。
+
+[NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)は、pushおよびPull Requestで試験を実行し、line coverageとbranch coverageをGitHub Actionsログへ表示します。
+
+`nra-core/`配下のその他のコード、可視化、論文、量子拡張は、正規記録によって明示的に昇格されない限り、研究・説明・例示・履歴資料です。
+
+---
+
 ## 唯一の律環公理
 
 > **存在は生成である。**

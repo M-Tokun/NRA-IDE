@@ -69,6 +69,30 @@ For the full repository layout, see [`REPOSITORY_OVERVIEW.md`](./REPOSITORY_OVER
 
 ---
 
+## Quick Verification
+
+The normative reference implementation source is:
+
+- [`nra-core/foundations/NRA-IDE_Architecture_public.py`](./nra-core/foundations/NRA-IDE_Architecture_public.py)
+
+Its canonical conformance tests are:
+
+- [`tests/test_nra_ide_reference.py`](./tests/test_nra_ide_reference.py)
+
+From the repository root, run:
+
+```powershell
+python -m unittest discover -v
+```
+
+The expected result is `Ran 27 tests` followed by `OK`.
+
+The [NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml) runs these tests on pushes and pull requests and reports line and branch coverage in the GitHub Actions log.
+
+Other code, visualizations, papers, and quantum extensions under `nra-core/` remain research, explanatory, illustrative, or historical unless a canonical record explicitly promotes them.
+
+---
+
 ## Sole Nomological Ring Axiom
 
 > **Existence is Generation.**  
