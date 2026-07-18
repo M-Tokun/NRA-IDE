@@ -21,6 +21,9 @@ jobs:
       - name: Energy Balance Check
         run: python nra-core/implementation/nra_ide_foundation_fixed_JP.py
 
+      - name: Run Normative Reference Quick Demo
+        run: python examples/nra_ide_reference_quick_demo.py
+
       - name: Run Reference Conformance Tests with Coverage
         run: |
           python -m coverage run --branch -m unittest discover -v
