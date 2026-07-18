@@ -467,7 +467,7 @@ def pre_nra_input_gate(raw_input: Any) -> Dict[str, Any]:
         return _confession("Pre-NRA input is missing required variables.", missing=missing)
     if raw_input.get("input_side", "CAUSE_SIDE") != "CAUSE_SIDE":
         return _confession("Pre-NRA rejected Effect-Side structural authority.")
-    return {"status": "SANITIZED_INPUT", **raw_input}
+    return {**raw_input, "status": "SANITIZED_INPUT"}
 
 
 def llm_generation_device(context: str, instruction: str) -> str:

@@ -121,9 +121,9 @@ Includes foundation implementations, adaptive gate extension, and applied sensor
 >
 > The normative reference implementation is `../foundations/NRA-IDE_Architecture_public.py`. Scripts in this section are dated examples or prototypes and may retain legacy states or thresholds.
 >
-> 正規参照実装の適合性は配置名だけでなく、`../tests/test_nra_ide_reference.py`の現行17試験への合格で確認する。docs版は正規ソースとSHA-256が一致する同期ミラーである。
+> 正規参照実装の適合性は配置名だけでなく、`../tests/test_nra_ide_reference.py`の現行22試験への合格で確認する。docs版は正規ソースとSHA-256が一致する同期ミラーである。
 >
-> Conformance of the normative reference implementation depends on passing the current 17 tests in `../tests/test_nra_ide_reference.py`, not on its location or name alone. The docs copy is a synchronized mirror whose SHA-256 must match the normative source.
+> Conformance of the normative reference implementation depends on passing the current 22 tests in `../tests/test_nra_ide_reference.py`, not on its location or name alone. The docs copy is a synchronized mirror whose SHA-256 must match the normative source.
 
 | ファイル | 内容 |
 

@@ -222,6 +222,83 @@ class CanonicalStateMachineTests(unittest.TestCase):
         self.assertEqual(suppressed["status"], "IRREVERSIBLE_TRANSITION")
         self.assertNotIn("validated_output", suppressed)
 
+    def test_pre_gate_rejects_invalid_and_effect_side_inputs(self):
+        not_a_dictionary = NRA.pre_nra_input_gate("invalid")
+        self.assertEqual(not_a_dictionary["status"], "CONFESSION")
+
+        missing_tau = NRA.pre_nra_input_gate({"delta": 0.1})
+        self.assertEqual(missing_tau["status"], "CONFESSION")
+        self.assertIn("tau", missing_tau["missing_information"])
+
+        effect_side = NRA.pre_nra_input_gate(
+            {"delta": 0.1, "tau": 1.0, "input_side": "EFFECT_SIDE"}
+        )
+        self.assertEqual(effect_side["status"], "CONFESSION")
+
+    def test_pre_gate_preserves_valid_cause_side_input(self):
+        raw_input = {
+            "delta": 0.1,
+            "tau": 1.0,
+            "input_side": "CAUSE_SIDE",
+            "status": "PERMIT",
+            "evidence": "fixed observation",
+        }
+        sanitized = NRA.pre_nra_input_gate(raw_input)
+        self.assertEqual(sanitized["status"], "SANITIZED_INPUT")
+        self.assertEqual(sanitized["delta"], raw_input["delta"])
+        self.assertEqual(sanitized["tau"], raw_input["tau"])
+        self.assertEqual(sanitized["evidence"], raw_input["evidence"])
+
+    def test_pipeline_permits_only_validated_low_ratio_output(self):
+        raw_input = {
+            "delta": 0.1,
+            "tau": 1.0,
+            "input_side": "CAUSE_SIDE",
+            **self.thresholds,
+        }
+        result = NRA.simulate_nra_ide_pipeline(raw_input, "prepare candidate")
+        self.assertEqual(result["status"], "PERMIT")
+        self.assertIn("validated_output", result)
+        self.assertIn("[UNVALIDATED EFFECT-SIDE OUTPUT]", result["validated_output"])
+        self.assertIn("prepare candidate", result["validated_output"])
+
+    def test_pipeline_suppresses_output_at_handoff_and_invalid_input(self):
+        invalid = NRA.simulate_nra_ide_pipeline({"delta": 0.1}, "must not run")
+        self.assertEqual(invalid["status"], "CONFESSION")
+        self.assertNotIn("validated_output", invalid)
+
+        for delta, expected in (
+            (0.6, "HANDOFF_REQUIRED"),
+            (0.8, "IRREVERSIBLE_TRANSITION"),
+        ):
+            with self.subTest(delta=delta):
+                raw_input = {
+                    "delta": delta,
+                    "tau": 1.0,
+                    "input_side": "CAUSE_SIDE",
+                    **self.thresholds,
+                }
+                result = NRA.simulate_nra_ide_pipeline(raw_input, "must be suppressed")
+                self.assertEqual(result["status"], expected)
+                self.assertNotIn("validated_output", result)
+
+    def test_llm_marker_and_discard_vault_copy_behavior(self):
+        generated = NRA.llm_generation_device("observed context", "candidate instruction")
+        self.assertIn("[UNVALIDATED EFFECT-SIDE OUTPUT]", generated)
+        self.assertIn("observed context", generated)
+        self.assertIn("candidate instruction", generated)
+
+        original_vault = NRA.DiscardVault.retrieve_all()
+        sentinel = object()
+        try:
+            NRA.DiscardVault.store(sentinel)
+            retrieved = NRA.DiscardVault.retrieve_all()
+            self.assertIn(sentinel, retrieved)
+            retrieved.clear()
+            self.assertIn(sentinel, NRA.DiscardVault.retrieve_all())
+        finally:
+            NRA.DiscardVault._vault[:] = original_vault
+
     def test_source_and_docs_mirror_are_identical(self):
         self.assertEqual(hashlib.sha256(SOURCE.read_bytes()).digest(), hashlib.sha256(MIRROR.read_bytes()).digest())
 

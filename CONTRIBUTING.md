@@ -55,7 +55,7 @@ $env:PYTHONDONTWRITEBYTECODE='1'
 python -m unittest tests.test_nra_ide_reference -v
 ```
 
-The current suite contains 17 tests covering boundary states, invalid inputs, threshold aliases, irreversible latching, testimony, double fluctuation, two remaining margins, log separation, warning behavior, directional auxiliary calculation, extreme numeric inputs, and source/mirror identity.
+The current suite contains 22 tests covering boundary states, invalid inputs, threshold aliases, irreversible latching, testimony, double fluctuation, two remaining margins, log separation, warning behavior, directional auxiliary calculation, extreme numeric inputs, the Pre-NRA input gate, end-to-end pipeline output suppression, Effect-Side output marking, DiscardVault copy behavior, reserved-status protection, and source/mirror identity.
 
 Add focused regression tests when changing behavior. Do not introduce an external dependency unless its need, scope, licensing, and reproducibility impact have been reviewed.
 
