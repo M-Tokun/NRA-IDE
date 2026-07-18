@@ -299,6 +299,73 @@ class CanonicalStateMachineTests(unittest.TestCase):
         finally:
             NRA.DiscardVault._vault[:] = original_vault
 
+    def test_core_rejects_invalid_latch_trend_and_threshold_types(self):
+        invalid_latch = self.evaluate(0.1, irreversible_latched="yes")
+        self.assertEqual(invalid_latch["status"], "CONFESSION")
+
+        invalid_trend = self.evaluate(0.1, trend=1)
+        self.assertEqual(invalid_trend["status"], "CONFESSION")
+
+        invalid_threshold = self.evaluate(0.1, r_warn="invalid")
+        self.assertEqual(invalid_threshold["status"], "CONFESSION")
+
+    def test_dynamic_engine_rejects_invalid_configuration(self):
+        invalid_configurations = (
+            ((math.inf, 0.2, 0.1), {}),
+            ((0.0, 0.2, 0.1), {}),
+            ((1.0, 0.2, 0.1), {"max_tau_factor": 1.0}),
+        )
+        for arguments, options in invalid_configurations:
+            with self.subTest(arguments=arguments, options=options):
+                with self.assertRaises(ValueError):
+                    NRA.DynamicTauEngine(*arguments, **options)
+
+    def test_directional_auxiliary_rejects_invalid_deviations(self):
+        engine = NRA.DynamicTauEngine(1.0, 0.2, 0.1)
+        for upper, lower in ((math.inf, 0.1), (-0.1, 0.1)):
+            with self.subTest(upper=upper, lower=lower):
+                self.assertEqual(
+                    engine.calculate_directional_auxiliary(upper, lower)["status"],
+                    "CONFESSION",
+                )
+
+        upper_dominant = engine.calculate_directional_auxiliary(0.1, 0.0)
+        self.assertEqual(upper_dominant["dominant_side"], "upper")
+
+    def test_output_gate_attaches_directional_auxiliary(self):
+        structural_data = {
+            **self.thresholds,
+            "delta_upper": 0.2,
+            "delta_lower": 0.1,
+        }
+        engine = NRA.DynamicTauEngine(1.0, 0.2, 0.1)
+        result = NRA.post_nra_output_gate(
+            "candidate output",
+            structural_data,
+            current_delta=0.1,
+            current_tau=1.0,
+            dynamic_engine=engine,
+        )
+        auxiliary = result["nra_status"]["directional_auxiliary"]
+        self.assertEqual(auxiliary["status"], "DIRECTIONAL_AUXILIARY_ONLY")
+        self.assertFalse(auxiliary["canonical_state_classified"])
+
+    def test_public_helpers_and_legacy_dynamic_alias(self):
+        detected = NRA.detect_double_fluctuation(0.2, -0.1)
+        self.assertEqual(detected["status"], "DETECTED")
+
+        self.assertIsNone(NRA.calculate_structural_sensitivity("invalid", 1.0))
+        self.assertIsNone(NRA.calculate_structural_sensitivity(1.0, 1.0))
+        self.assertAlmostEqual(NRA.calculate_structural_sensitivity(0.25, 1.0), 4.0 / 3.0)
+
+        engine = NRA.DynamicTauEngine(1.0, 0.2, 0.1)
+        self.assertEqual(engine.initial_tau, 1.0)
+        legacy = engine.calculate_r_dynamic(0.1, 0.0, rop=0.6)
+        self.assertEqual(legacy["status"], "DIRECTIONAL_AUXILIARY_ONLY")
+        self.assertTrue(legacy["legacy_rop_ignored"])
+        current = engine.calculate_r_dynamic(0.1, 0.0)
+        self.assertFalse(current["legacy_rop_ignored"])
+
     def test_source_and_docs_mirror_are_identical(self):
         self.assertEqual(hashlib.sha256(SOURCE.read_bytes()).digest(), hashlib.sha256(MIRROR.read_bytes()).digest())
 
