@@ -19,6 +19,9 @@ jobs:
       - name: Energy Balance Check
         run: python nra-core/implementation/nra_ide_foundation_fixed_JP.py
 
+      - name: Run Reference Conformance Tests
+        run: python -m unittest tests.test_nra_ide_reference -v
+
       - name: Check Internal Links
         run: python scripts/check_links.py
 
