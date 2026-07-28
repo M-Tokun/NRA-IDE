@@ -42,7 +42,7 @@ module Testbench_BruteForce;
         diam  = 16'h0C00; // 12.0
         pore  = 16'h0800; // 8.0
         flow  = 16'h0099; // 0.6
-        vel   = 16'h3200; // 200.0
+        vel   = 16'hC800; // 200.0 um/s (Q8.8)。旧版の 0x3200 は 50.0 であり誤り
         boost = 16'h0000; // Start from 0.0
         
         #20 rst_n = 1; #20;

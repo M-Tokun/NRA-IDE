@@ -6,7 +6,7 @@
 
 # File:    00_Documentation/Master_Index.md
 
-# Author:  M-Tokun & AI Architects
+# Author:  M-Tokuni & AI Architects
 
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -18,7 +18,7 @@
 
 **Version:** 1.0
 
-**Architects:** M-Tokun, AI
+**Architects:** M-Tokuni, AI
 
 
 

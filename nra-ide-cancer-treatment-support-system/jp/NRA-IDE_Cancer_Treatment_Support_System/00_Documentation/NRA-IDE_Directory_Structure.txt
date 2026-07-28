@@ -1,55 +1,92 @@
-NRA-IDE_CancerTreatmentSupport_System/
+NRA-IDE Cancer Treatment Support System — Structure Audit
+Rev 2.0 (2026-07-28)  ※実体との突き合わせ済み
+
+凡例: [DONE] 完了 / [WIP] 作業中 / [BROKEN] 現状で動作しない / [N/A] 未着手
+
+jp/NRA-IDE_Cancer_Treatment_Support_System/
 │
-├── 📜 README.md                     # [DONE] Project Genesis
-├── ⚖️ LICENSE.txt                    # [DONE] MIT License
-└── 🗺️ NRA-IDE_Directory_Structure.txt # [ACTIVE] This File (Structure Audit)
+├── README.md                          [DONE] 統合README（PHASE_2 Rev 2.0 同期済）
+├── LICENSE_JP.txt                     [DONE] MIT + 医療特約（非医療機器宣言・SOUP）
+├── medical_ai_solution.md             [DONE] 医療AI論（律環公理の思想的背景）
+├── 免責事項_研究用途限定.md              [DONE] 研究用途限定の明示
+├── 検証プロトコル_マイクロ流路試験.md     [DONE] 実験による反証手続き（Rev 2.0）
 │
-├── 📚 00_Documentation/             # [90% DONE] Philosophical Foundations
-│   ├── Master_Index.md              # [DONE] Roadmap
-│   ├── PHASE_1_Philosophy_Protocol  # [DONE] Axioms
-│   ├── PHASE_2_Mesoscale_Physics    # [DONE] Governing Equations
-│   ├── PHASE_3_Ritsukan_Axiom       # [DONE] Safety Rules
-│   ├── PHASE_4_Terminology_Dict     # [DONE] Q8.8 Specs
-│   ├── PHASE_5_System_Architecture  # [DONE] Diagram
-│   ├── PHASE_6_FPGA_Spec            # [DONE] Hardware Specs
-│   ├── PHASE_7_Implementation_Ref   # [DONE] Snippets
-│   ├── PHASE_8_Technical_Manual     # [DONE] Synthesis Guide
-│   └── PHASE_9_Operational_Guide    # [DONE] Workflow
+├── 00_Documentation/                  [DONE] 理論・仕様
+│   ├── 00_DocumentationMaster_Index.md   [DONE] 読み順ガイド
+│   ├── NRA-IDE_Directory_Structure.txt   [ACTIVE] 本ファイル
+│   ├── PHASE_1_Philosophy_Protocol.md    [DONE] 公理
+│   ├── PHASE_2_Mesoscale_Physics.md      [DONE] 支配方程式（Rev 2.0 応力比較形）
+│   ├── PHASE_3_Ritsukan_Axiom.md         [DONE] 安全規則
+│   ├── PHASE_4_Terminology_Dictionary.md [DONE] パラメータ・エラーコード（Rev 2.0）
+│   ├── PHASE_5_System_Architecture.md    [DONE] プロトコル定義（Rev 2.0）
+│   ├── PHASE_6_FPGA_Spec.md              [DONE] 演算形式・パイプライン（Rev 2.0）
+│   ├── PHASE_7_Implementation_Code.md    [DONE] 実装スニペット（Rev 2.0）
+│   ├── PHASE_8_Technical_Manual.md       [DONE] 合成手順
+│   └── PHASE_9_Operational_Guide.md      [DONE] 運用フロー
 │
-├── ⚙️ 10_Hardware_Design/            # [70% DONE] HDL Core logic
+├── 10_Hardware_Design/                [BROKEN] トップが断片のため合成不可
 │   ├── src/
-│   │   ├── Top_Module.v             # [FIXED] 3-Byte Response & CS logic
-│   │   ├── Cancer_Selector.v        # [UPDATE REQ] Add UART control for Type Selection
-│   │   ├── BioCalibrator_TypeA.v    # [DONE] Single-Cell Core
-│   │   ├── BioCalibrator_TypeB.v    # [FIXED] Non-Linear LUT implemented
-│   │   └── UART_Interface.v         # [DONE] Binary Link
-│   ├── simulation/                  # [WIP] Need full integration simulation
-│   └── constraints/                 # [DONE] Multi-vendor pinouts & Timing
+│   │   ├── README.md                     [DONE] 構成・既知の不具合一覧（Rev 2.0）
+│   │   ├── 10_Top_Module.v               [BROKEN] module/endmodule を欠く断片
+│   │   ├── 10_Cancer_Treatment_Selector.v [BROKEN] [cite:] マーカー4箇所が残存
+│   │   ├── 10_BioCalibrator_TypeA.v      [DONE] 応力比較形・5段（Rev 2.0）
+│   │   ├── 10_BioCalibrator_TypeB.v      [BROKEN] ポート定義・比較ロジックを欠く
+│   │   ├── 10_UART_Interface.v           [WIP]  フレーミング検証なし
+│   │   └── 10_Testbench_Integration.v    [BROKEN] チェックサム 0x00（正: 0x11）
+│   ├── simulation/
+│   │   ├── 10_Testbench_BruteForce.v     [DONE] Boost 探索（vel の Q8.8 値を訂正）
+│   │   ├── 10_Testbench_TypeA.v          [BROKEN] TBではなくTypeAの複製。二重定義
+│   │   └── 10_wave_config.do             [DONE] 波形設定
+│   ├── constraints/                      [DONE] Multi-vendor pinouts & Timing
+│   │   ├── 10_timing.sdc
+│   │   ├── 10_pinout_cyclone_v.qsf
+│   │   └── 10_pinout_artix_7.xdc
+│   └── 10_Hardware_Design物理演算の…テストベンチ.txt  [DONE] Rev 2.0 の値へ更新
 │
-├── 💻 20_Software_Host/              # [40% DONE] Host Intelligence
-│   ├── main.py                      # [WIP] Full integration script needed
-│   ├── fpga_interface.py            # [FIXED] 3-Byte Parity & Retry
-│   ├── data_validator.py            # [DONE] Range Guards
-│   ├── report_generator.py          # [FIXED] Timestamp & Precision
-│   ├── map_visualizer.py            # [DONE] Contour Plot
-│   └── requirements.txt             # [DONE] Dependencies
+├── 20_Software_Host/                  [DONE] ホスト実装。全経路が動作する
+│   ├── nra_core_model.py                 [DONE] 参照実装。判定の唯一の根拠
+│   ├── main.py                           [DONE] --test / --data / --out
+│   ├── fpga_interface.py                 [DONE] 14B送信・3B受信・非接続時は参照実装
+│   ├── patient_data_validator.py         [DONE] Phase 4 範囲検証
+│   ├── clinical_report_generator.py      [DONE] 判定根拠と不一致検出を含む
+│   ├── safety_map_visualizer.py          [DONE] 判定境界の描画（参照実装に集約）
+│   └── requirements.txt                  [DONE] pyserial / numpy / matplotlib
 │
-├── 🧪 30_Test_Data/                  # [60% DONE] Verification Sets
-│   ├── README_TestData.md           # [DONE] Methodology
-│   ├── sample_patient.json          # [DONE] Ref Case
-│   ├── validation_cases.csv         # [DONE] Suite
-│   └── expected_results.json        # [FIXED] Sync with 3-byte protocol
+├── 30_Test_Data/                      [DONE] 7ケース。ハードウェアなしで完走
+│   ├── README.md                         [DONE] 仕様（Rev 2.0）
+│   ├── validation_test_cases.csv         [DONE] 7件。UTF-8 BOM 付き
+│   ├── expected_results.json             [DONE] 7件（TC003/006/007 追加済）
+│   ├── sample_patient_data.json          [DONE] 標準入力例
+│   └── run_validation.py                 [DONE] 一括検証。7/7 PASS
 │
-├── 📊 40_Output_Reports/             # [60% DONE] Artifact Templates
-│   ├── NRA_Report_Sample.txt        # [DONE] Ver. 1.1 Template
-│   └── SafetyMap_Sample.png         # [DONE] Description
+├── 40_Output_Reports/                 [DONE] 成果物の書式
+│   ├── README.md                         [DONE] 読み方（Rev 2.0）
+│   ├── NRA_IDE_Report_Template.txt       [DONE] プレースホルダ版
+│   ├── NRA_IDE_Report_Sample.txt         [DONE] コードで生成した実物
+│   └── SafetyMap_Description.md          [DONE] マップの読み方（Rev 2.0）
 │
-├── 🚀 50_Deployment/                 # [0% DONE] Placeholder only
-│   ├── install_guide.md             # [EMPTY] Need content for Clinical Setup
-│   ├── deployment_checklist.md      # [EMPTY] Need content for HW validation
-│   ├── system_requirements.md       # [EMPTY] Need content for FPGA/OS specs
-│   └── bitstreams/                  # [EMPTY] Ready for Synthesis result
+├── 50_Deployment/                     [DONE] 導入・事業・規制
+│   ├── installation_guide.md             [DONE] 設置手順
+│   ├── deployment_checklist.md           [DONE] HW検証チェックリスト
+│   ├── system_requirements.md            [DONE] FPGA/OS要件
+│   ├── PHASE_51_Business_Plan_Draft.md   [DONE] 事業計画草案
+│   ├── PHASE_52_Regulatory_Reality.md    [DONE] 薬事の時間と費用
+│   └── PHASE_53_Provider_Disclaimer.md   [DONE] 提供者免責
 │
-└── 🔬 60_Research/                   # [100% DONE] Empirical Evidence
-    ├── Practical_Resources.md       # [DONE] Cell constants
-    └── references.md                # [DONE] Literature
+├── 60_Research/                       [DONE] 根拠
+│   ├── PHASE_60_Practical_Resources.md   [DONE] 物理定数データブック
+│   └── references.md                     [DONE] 文献と適用箇所の対応
+│
+└── src/                               [DONE] 参考画像
+    ├── おおまかな単なる概要参考図*.png       （概念図。正確な図ではない）
+    └── 正確性のない画像.txt                 上記の注意書き
+
+────────────────────────────────────────────────────────────
+未着手・未検証の事項
+
+* 薬剤到達モデル（Darcy則）           [N/A] 未着手。判定対象外
+* Type B（集団）モデルの検証           [N/A] 現象論モデルのまま
+* RTL の合成・シミュレーション         [N/A] 未実施。環境にシミュレータなし
+* マイクロ流路による実験検証           [N/A] プロトコルのみ策定済
+* deform_velocity / cell_count の伝送  [N/A] プロトコル未対応
+────────────────────────────────────────────────────────────

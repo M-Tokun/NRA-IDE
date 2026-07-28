@@ -1,45 +1,114 @@
- 物理演算の論理エミュレーション結果テストベンチ
- 10_Testbench_Integration.v で設定された入力値（Q8.8形式）を元に、内部レジスタの挙動を 1ns 単位で再現。
- パラメータ設定値 (Hex)物理値 (Dec)演算結果 (Q16.16)細胞硬度 ($k$)0x01801.5-細胞粘性 ($\eta$)0x000D0.05-細胞径 ($d$)0x0C0012.0-孔径 ($p$)0x08008.0-流路圧差 ($\Delta P$)0x00990.597$Flow Force = 39,168$変形速度 ($v$)0x3200200.0-Stage 1 ($\Delta x$)-4.0-Stage 2 ($F_{elastic}$)-6.0$393,216$Stage 2 ($F_{viscous}$)-10.0$166,400$Stage 3 ($F_{total}$)-16.0$559,616$
+物理演算の論理エミュレーション結果
+Rev 2.0 (2026-07-28)
+
+═══════════════════════════════════════════════════════════════════
+【重要】Rev 1.0 の記録は破棄した
+
+旧版は F_elastic = (k + B) * (D - d) を直接 flow_dp と比較しており、
+次元が閉じていなかった（応力 kPa に変位 μm を乗じていた）。
+そのため F_total = 559,616 が Flow Force = 39,168 を大幅に上回り、
+常に JAMMED と判定されていた。これはモデルの結論ではなく、式の誤りである。
+
+PHASE_2 Rev 2.0 では応力比較形に改めた。応力に乗じるのは変位ではなく
+歪み (D-d)/D（無次元）である。以下は改訂後の値である。
+═══════════════════════════════════════════════════════════════════
+
+
+入力値（Q8.8）
+  細胞硬度   E   = 0x0180  (1.500 kPa)
+  細胞粘性   eta = 0x000C  (0.047 Pa·s)   ※ 0.05 の切り捨て量子化
+  細胞径     D   = 0x0C00  (12.000 um)
+  孔径       d   = 0x0800  ( 8.000 um)
+  流路圧差   dP  = 0x0099  ( 0.598 kPa)   ※ 0.6 の切り捨て量子化
+  変形速度   v   = 0xC800  (200.000 um/s) ※ 下記の訂正を参照
+  薬剤硬化   B   = 0x0000  ( 0.000 kPa)
+
+  【訂正】Rev 1.0 は変形速度を 0x3200 と記し「200.0」と対応づけていたが、
+          0x3200 は Q8.8 で 50.0 である。200.0 の正しい表現は 0xC800。
+          同じ誤りが 10_Testbench_BruteForce.v にもあった（修正済）。
+
+定数ROM（PHASE_6 §3）
+  rom_recip[D>>6 = 48] = 5461   (1/12.0 を Q0.16)
+  rom_kvisc[d>>6 = 32] = 3145   (0.012/8.0^2 を Q0.24)
+
+パイプライン各段の値
+  Stage 1  dx = D - d                    = 0x0400  (4.000 um)
+  Stage 3  strain = (dx * recip) >> 16   = 85      (0.332 — 無次元)
+  Stage 3  q1 = (eta*v * kvisc) >> 24    = 115     (Q0.16)
+  Stage 4  sigma_el = ((E+B)*strain)>>8  = 127     (0.496 kPa)
+  Stage 4  sigma_v  = (q1 * D) >> 16     = 5       (0.020 kPa)
+  Stage 5  sigma_total                   = 132     (0.516 kPa)
+           flow_dp                       = 153     (0.598 kPa)
+
+判定  132 > 153 は偽  ->  PASSABLE（細胞は変形して通過しうる）
+
+BLOCKED を成立させるのに必要な最小 Boost: +0.25 kPa
+
 
 ---
 
-同期タイミングの検証
-10_Top_Module.v と 10_UART_Interface.v の連動性をプロトコルレベルで確認しました。
-UART受信完了 (T=0): 14バイト目の受信完了と共に rx_valid が立ち上がり、内部レジスタにパラメータがロードされます。
-計算開始 (T+1): calc_trigger が立ち上がり、演算パイプラインの Stage 1 が開始されます。
-パイプライン完了 (T+4): 3クロック後、o_out_valid が立ち上がります。
-送信開始 (T+5): Top_Module が tx_start を発行し、最新の判定結果 0xFF が UART TX ピンから出力されます。
-結論: クロック間のレースコンディション（競合）はなく、データは常に安定した状態で次段へ渡されます。
+同期タイミング
+
+  UART受信完了 (T=0)  : 14バイト目の受信完了と共に rx_valid が立ち上がり、
+                        内部レジスタにパラメータがロードされる。
+  計算開始   (T+1)    : calc_trigger が立ち上がり Stage 1 が開始する。
+  完了       (T+6)    : 5段パイプラインを経て o_out_valid が立ち上がる。
+  送信開始   (T+7)    : Top_Module が tx_start を発行し、3バイトの応答
+                        （Header / (Error<<1)|Jammed / Checksum）を返す。
+
+  ※ Rev 1.0 は「3クロック後」「判定結果 0xFF を出力」と記していたが、
+     パイプラインは5段であり、応答は3バイト形式である。0xFF を返す
+     プロトコルは存在しない。
+
+  ※ 本タイミングは論理上の想定である。10_Top_Module.v が断片のため、
+     シミュレータによる実測は行っていない。
+
 
 ---
 
 このロジックを再検証するための Python スクリプト
 
-# Phase 10 Logic Verification Script
-# 26-0203-1650 JST
+# Phase 10 Logic Verification Script (Rev 2.0)
+# 20_Software_Host/nra_core_model.py と同一の演算
 
 def verify_nra_logic():
+    ROM_RECIP = [0 if n < 20 else 262144 // n for n in range(128)]
+    ROM_KVISC = [0 if n < 20 else 3221225 // (n * n) for n in range(128)]
+
     # 入力値 (Q8.8 固定小数点)
-    stiff = 0x0180; visc = 0x000D; diam = 0x0C00
-    pore = 0x0800; flow = 0x0099; boost = 0x0000; vel = 0x3200
+    E = 0x0180; eta = 0x000C; D = 0x0C00
+    d = 0x0800; dP = 0x0099; B = 0x0000; v = 0xC800
 
     # Stage 1: Geometry
-    dx = (diam - pore) if diam >= pore else 0
+    if D < d:
+        print("ERR_GEOMETRIC (0x01)"); return
+    dx = D - d
 
-    # Stage 2: Multipliers (Result is Q16.16)
-    f_elastic = (stiff + boost) * dx
-    f_viscous = visc * vel
+    # Stage 3: 歪み（無次元）と粘性係数
+    strain = (dx * ROM_RECIP[D >> 6]) >> 16      # Q0.8
+    q1     = ((eta * v) * ROM_KVISC[d >> 6]) >> 24  # Q0.16
 
-    # Stage 3: Comparison
-    total_resist = f_elastic + f_viscous
-    flow_force = flow << 8 # Q8.8 to Q16.16 scaling
+    # Stage 4: 応力の各項（Q8.8）
+    sigma_el = ((E + B) * strain) >> 8
+    sigma_v  = (q1 * D) >> 16
 
-    is_jammed = 1 if total_resist > flow_force else 0
+    # Stage 5: 合算と比較
+    total = sigma_el + sigma_v
+    jammed = total > dP
 
-    print(f"Total Resistance (Q16.16): {total_resist}")
-    print(f"Flow Force (Q16.16):       {flow_force}")
-    print(f"Verification Result:       {'JAMMED' if is_jammed else 'SAFE'}")
+    print(f"strain      (Q0.8) : {strain}  ({strain/256:.3f})")
+    print(f"sigma_el    (Q8.8) : {sigma_el}  ({sigma_el/256:.3f} kPa)")
+    print(f"sigma_v     (Q8.8) : {sigma_v}  ({sigma_v/256:.3f} kPa)")
+    print(f"sigma_total (Q8.8) : {total}  ({total/256:.3f} kPa)")
+    print(f"flow_dp     (Q8.8) : {dP}  ({dP/256:.3f} kPa)")
+    print(f"Result             : {'BLOCKED' if jammed else 'PASSABLE'}")
 
 verify_nra_logic()
 
+実行結果:
+  strain      (Q0.8) : 85  (0.332)
+  sigma_el    (Q8.8) : 127  (0.496 kPa)
+  sigma_v     (Q8.8) : 5  (0.020 kPa)
+  sigma_total (Q8.8) : 132  (0.516 kPa)
+  flow_dp     (Q8.8) : 153  (0.598 kPa)
+  Result             : PASSABLE
