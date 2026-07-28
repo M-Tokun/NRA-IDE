@@ -1,14 +1,23 @@
 {
-  "_meta": { "version": "1.2", "sync": "Phase 10/20 Protocol" },
+  "_meta": {
+    "version": "2.0",
+    "sync": "Phase 10/20 Protocol (PHASE_2 Rev 2.0 応力比較形)",
+    "note": "expected_binary = (error_code << 1) | is_jammed"
+  },
   "test_case_expectations": {
     "TC001": {
       "test_id": "TC001",
-      "description": "Normal Danger (Passable)",
-      "expected_binary": "0x00" 
+      "description": "Normal Passable (sigma_total 132 <= dP 154)",
+      "expected_binary": "0x00"
     },
     "TC002": {
       "test_id": "TC002",
-      "description": "Normal Safe (Jammed by Boost)",
+      "description": "Blocked by Boost (sigma_total 387 > dP 154)",
+      "expected_binary": "0x01"
+    },
+    "TC003": {
+      "test_id": "TC003",
+      "description": "Blocked by stiff cell (sigma_total 260 > dP 154)",
       "expected_binary": "0x01"
     },
     "TC004": {
@@ -20,6 +29,16 @@
       "test_id": "TC005",
       "description": "Geometric Violation (Error 0x01)",
       "expected_binary": "0x02"
+    },
+    "TC006": {
+      "test_id": "TC006",
+      "description": "Passable: soft cell under high pressure (47 <= 512)",
+      "expected_binary": "0x00"
+    },
+    "TC007": {
+      "test_id": "TC007",
+      "description": "Blocked at maximum boost (982 > 154)",
+      "expected_binary": "0x01"
     }
   }
 }

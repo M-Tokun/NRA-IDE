@@ -67,3 +67,6 @@ env/
 
 # Local Codex skills
 /skills/
+
+# NRA-IDE clinical session outputs
+output/

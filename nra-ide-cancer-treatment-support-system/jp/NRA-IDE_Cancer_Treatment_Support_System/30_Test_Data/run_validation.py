@@ -8,6 +8,12 @@ import csv
 import json
 import sys
 import os
+
+# Windows(cp932)コンソールでの UnicodeEncodeError を防ぐ
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+    sys.stderr.reconfigure(errors="replace")
+
 sys.path.append('../20_Software_Host')
 from fpga_interface import FPGAInterface
 
@@ -16,10 +22,10 @@ def run_automated_test():
 
     # 1. Load Expected Oracle
     try:
-        with open('expected_results.json', 'r') as f:
+        with open('expected_results.json', 'r', encoding='utf-8') as f:
             oracle = json.load(f)['test_case_expectations']
     except Exception as e:
-        print(f"❌ Oracle Load Error: {e}")
+        print(f"[ERR] Oracle Load Error: {e}")
         return
 
     # 2. Initialize Interface
@@ -29,7 +35,8 @@ def run_automated_test():
     results = []
     passed_count = 0
 
-    with open('validation_test_cases.csv', 'r', encoding='utf-8') as f:
+    # utf-8-sig: CSV に UTF-8 BOM があり、utf-8 だと先頭列名が '﻿test_id' になる
+    with open('validation_test_cases.csv', 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         for row in reader:
             tid = row['test_id']
@@ -54,17 +61,17 @@ def run_automated_test():
             expected_hex = int(oracle[tid]['expected_binary'], 16)
 
             if actual_hex == expected_hex:
-                print("✅ PASS")
+                print("[PASS]")
                 passed_count += 1
             else:
-                print(f"❌ FAIL (Actual: 0x{actual_hex:02X}, Expected: 0x{expected_hex:02X})")
+                print(f"[FAIL] (Actual: 0x{actual_hex:02X}, Expected: 0x{expected_hex:02X})")
 
     # 4. Final Summary
     print(f"\nSummary: {passed_count} / {len(oracle)} cases passed.")
     if passed_count == len(oracle):
-        print("✓ SYSTEM INTEGRITY VERIFIED (Ritsukan Level 1)")
+        print("[OK] SYSTEM INTEGRITY VERIFIED (Ritsukan Level 1)")
     else:
-        print("⚠ SYSTEM INTEGRITY COMPROMISED")
+        print("[WARN] SYSTEM INTEGRITY COMPROMISED")
 
 if __name__ == "__main__":
     run_automated_test()

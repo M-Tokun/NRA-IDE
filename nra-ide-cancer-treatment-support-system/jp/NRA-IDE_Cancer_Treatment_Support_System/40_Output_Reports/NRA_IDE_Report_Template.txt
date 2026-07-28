@@ -1,25 +1,57 @@
-══════════════════════════════════════════════════
-NRA-IDE Clinical Report (Bio-Calibrator v1.0)
-══════════════════════════════════════════════════
-Date: 2026-02-01 14:30
-Patient ID: P001_SAMPLE
+══════════════════════════════════════════════════════════
+NRA-IDE Computation Report (Bio-Calibrator v2.0)
+══════════════════════════════════════════════════════════
+Report ID : NRA-{YY-MMDD-HHMM}-{PATIENT_ID}
+Date      : {YY-MMDD-HHMM} JST
+Patient   : {PATIENT_ID}
+Model     : Type A (Single-Cell Jamming) / PHASE_2 Rev 2.0
+Source    : {FPGA | Reference model (FPGA not connected)}
 
-[Input Parameters]
-  Stiffness (k) : 1.50 kPa
-  Viscosity (η) : 0.05 Pa·s
-  Diameter  (D) : 12.00 μm
-  Pore Size (d) : 8.00 μm
-  Flow Press(ΔP): 0.60 kPa
+[Input Parameters]  (Q8.8 quantized)
+  Young's modulus (E) : {E:8.3f} kPa
+  Viscosity       (eta): {eta:8.3f} Pa*s
+  Cell diameter   (D) : {D:8.3f} um
+  Pore size       (d) : {d:8.3f} um
+  Flow pressure   (dP): {dP:8.3f} kPa
+  Drug boost      (B) : {B:8.3f} kPa
+  Deform velocity (v) : {v:8.3f} um/s{  [system default] if not measured}
 
-[Analysis Result]
-  Status: SAFE (Blocked)
-  Code  : 0x00
+[Computation]  sigma_resist > dP  =>  BLOCKED
+  Strain (D-d)/D        : {strain:8.3f}
+  Elastic stress sig_el : {sigma_el:8.3f} kPa
+  Viscous stress sig_v  : {sigma_v:8.3f} kPa
+  Total resistance      : {sigma_total:8.3f} kPa
+  Driving pressure dP   : {dP:8.3f} kPa
 
-[Recommendation]
-  Optimal Boost: +3.00 kPa
-  (Drug concentration required for physical jamming)
+[Result]
+  Judgement : {BLOCKED | PASSABLE | INVALID}
+  Error code: 0x{NN} ({ERR_NAME})
+  Meaning   : {判定の物理的意味、またはエラーの意味}
+
+[Reference]
+  Minimum boost for BLOCKED: {+X.XX kPa | 0.00 kPa (already BLOCKED) | 算出不能}
+
+[!] DISCREPANCY: FPGA と参照実装の判定が一致しない
+    FPGA      : jammed={...}, err=0x{NN}
+    Reference : jammed={...}, err=0x{NN}
+    本レポートを臨床判断に用いてはならない。
+    ※ この節は不一致が生じた場合のみ出力される
 
 [Physician's Gate]
-  Warning: This is a computational prediction.
-  Clinical decision requires human oversight.
-══════════════════════════════════════════════════
+  本判定は物理的封鎖の可否のみを示す。投薬の可否を意味しない。
+  最終的な治療方針は、倫理的責任を負う医師が決定する。
+  研究用途限定。薬機法上の医療機器ではない。
+══════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────
+【本テンプレートについて】
+
+* 生成元: 20_Software_Host/clinical_report_generator.py
+* 実際の出力例: NRA_IDE_Report_Sample.txt（コードで生成した実物）
+* 入力値は Q8.8 量子化後の値を表示する。判定はこの値で行われるため、
+  入力した 0.05 が 0.047 と表示されることがある。これは誤りではなく、
+  ハードウェアが実際に用いた値である。
+* [Computation] 節は必須である。判定の根拠を示さないレポートは
+  Physics First（ブラックボックスの排除）に反する。
+* エラー時は [Computation] と [Reference] を出力せず、判定を INVALID とする。
+────────────────────────────────────────────────────────────

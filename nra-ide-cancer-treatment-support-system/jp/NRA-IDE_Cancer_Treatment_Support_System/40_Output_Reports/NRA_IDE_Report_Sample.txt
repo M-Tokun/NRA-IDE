@@ -1,25 +1,38 @@
-══════════════════════════════════════════════════
-NRA-IDE Clinical Report (Bio-Calibrator v1.0)
-══════════════════════════════════════════════════
-Date: 2026-02-01 14:30
-Patient ID: P001_SAMPLE
+══════════════════════════════════════════════════════════
+NRA-IDE Computation Report (Bio-Calibrator v2.0)
+══════════════════════════════════════════════════════════
+Report ID : NRA-26-0728-2020-P001_SAM
+Date      : 26-0728-2020 JST
+Patient   : P001_SAMPLE
+Model     : Type A (Single-Cell Jamming) / PHASE_2 Rev 2.0
+Source    : Reference model (FPGA not connected)
 
-[Input Parameters]
-  Stiffness (k) : 1.50 kPa
-  Viscosity (η) : 0.05 Pa·s
-  Diameter  (D) : 12.00 μm
-  Pore Size (d) : 8.00 μm
-  Flow Press(ΔP): 0.60 kPa
+[Input Parameters]  (Q8.8 quantized)
+  Young's modulus (E) :    1.500 kPa
+  Viscosity       (eta):    0.047 Pa*s
+  Cell diameter   (D) :   12.000 um
+  Pore size       (d) :    8.000 um
+  Flow pressure   (dP):    0.598 kPa
+  Drug boost      (B) :    0.000 kPa
+  Deform velocity (v) :  200.000 um/s  [system default]
 
-[Analysis Result]
-  Status: SAFE (Blocked)
-  Code  : 0x00
+[Computation]  sigma_resist > dP  =>  BLOCKED
+  Strain (D-d)/D        :    0.332
+  Elastic stress sig_el :    0.496 kPa
+  Viscous stress sig_v  :    0.020 kPa
+  Total resistance      :    0.516 kPa
+  Driving pressure dP   :    0.598 kPa
 
-[Recommendation]
-  Optimal Boost: +3.00 kPa
-  (Drug concentration required for physical jamming)
+[Result]
+  Judgement : PASSABLE
+  Error code: 0x00 (ERR_NONE)
+  Meaning   : 細胞は変形して通過しうる（転移経路が開いている）
+
+[Reference]  (reference model)
+  Minimum boost for BLOCKED: +0.25 kPa
 
 [Physician's Gate]
-  Warning: This is a computational prediction.
-  Clinical decision requires human oversight.
-══════════════════════════════════════════════════
+  本判定は物理的封鎖の可否のみを示す。投薬の可否を意味しない。
+  最終的な治療方針は、倫理的責任を負う医師が決定する。
+  研究用途限定。薬機法上の医療機器ではない。
+══════════════════════════════════════════════════════════

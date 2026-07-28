@@ -6,6 +6,8 @@
 
 # File:    README.md (English Gateway Version)
 
+# Rev:     2.0 (2026-07-28) Synced with PHASE_2 Rev 2.0
+
 # ═══════════════════════════════════════════════════════════════════════
 
 
@@ -15,15 +17,21 @@
 
 
 **The original Japanese text takes precedence.**  
+
 If any nuance differences arise from translation, the Japanese version (`README_JP.md` and documents under `jp/`) is authoritative.
 
+
+
 **This is a gateway document for non-Japanese speakers.**  
+
 **For detailed technical documentation, please translate the original Japanese files into your native language.**
 
 
 
 日本語原文が優先です。翻訳によるニュアンスの違いが生じた場合は、日本語版（`README_JP.md` および `jp/` 配下の文書）が正となります。
+
 本文書は非日本語話者向けのゲートウェイドキュメントです。  
+
 詳細な技術文書は、オリジナルの日本語ファイルをあなたの母国語に翻訳してお使いください。
 
 
@@ -36,7 +44,7 @@ If any nuance differences arise from translation, the Japanese version (`README_
 
 
 
-**NRA-IDE** ( Nomological Ring Axioms - Intensional Dynamics Engine) is a next-generation cancer treatment support system that analyzes the physical properties of cancer cells and deterministically evaluates metastasis risk.
+**NRA-IDE** (Nomological Ring Axioms - Intensional Dynamics Engine) is a research-purpose computation engine that analyzes the physical properties of cancer cells and deterministically evaluates metastasis risk.
 
 
 
@@ -56,7 +64,9 @@ If any nuance differences arise from translation, the Japanese version (`README_
 
 
 
-The system identifies **conditions under which metastasis is physically impossible** through structural mechanics calculations.
+> **Determinism guarantees reproducibility, not correctness.**
+
+> The system returns the same output for the same input, but if the model or its parameters are wrong, it will be reliably wrong. Validity must be established experimentally per `検証プロトコル_マイクロ流路試験.md` (microfluidic jamming protocol), which has **not yet been carried out**.
 
 
 
@@ -64,11 +74,55 @@ The system identifies **conditions under which metastasis is physically impossib
 
 
 
-## 2. Core Philosophy: Nomological Ring Axioms
+## 2. Scope of Judgement
 
 
 
-All design decisions in this system follow three foundational axioms:
+The system answers exactly one question:
+
+
+
+> **Can a cancer cell pass through a gap (pore) in the vascular endothelium?**
+
+
+
+| Question | This system |
+
+|:---|:---|
+
+| Can the cancer cell escape through the vessel gap? | **Judged** |
+
+| Can the drug penetrate the tumor interstitium? | **Not judged** — see §5, motivation only |
+
+
+
+Drug penetration is fluid transport through a porous medium (Darcy flow, diffusion). Its governing law and parameters differ entirely from this model. The two must never share one equation or one output vocabulary.
+
+
+
+### Output Vocabulary
+
+
+
+| Output | Physical meaning |
+
+|:---|:---|
+
+| `BLOCKED` | Resisting stress exceeds driving pressure; the cell cannot pass |
+
+| `PASSABLE` | The cell can deform and pass through (escape route is open) |
+
+
+
+**The words `SAFE` and `DANGER` are not used.** "The cell is physically contained" and "it is safe to administer treatment" are different propositions. Collapsing them into one word turns a computation into a treatment authorization, violating the Gate Axiom.
+
+
+
+---
+
+
+
+## 3. Core Philosophy: Nomological Ring Axioms
 
 
 
@@ -86,6 +140,8 @@ All design decisions in this system follow three foundational axioms:
 
 - The system **fails to the safe side** and issues an **Error warning**
 
+- Here the safe side means **assuming metastasis risk exists** (`PASSABLE`)
+
 
 
 ### 3. **Gate Axiom (ゲート公理)**
@@ -100,15 +156,7 @@ All design decisions in this system follow three foundational axioms:
 
 
 
-## 3. Technical Architecture
-
-
-
-The system adopts a **hybrid hardware-software configuration** to guarantee high reproducibility and real-time performance.
-
-
-
-### Architecture Layers
+## 4. Technical Architecture
 
 
 
@@ -136,7 +184,7 @@ The system adopts a **hybrid hardware-software configuration** to guarantee high
 
 │  - Clinical Report Generation           │
 
-│  - Safety Map Visualization             │
+│  - Jamming Map Visualization            │
 
 └─────────────────────────────────────────┘
 
@@ -156,23 +204,7 @@ The system adopts a **hybrid hardware-software configuration** to guarantee high
 
 
 
----
-
-
-
-## 4. Quick Start
-
-
-
-For installation and operation details, please refer to the following documents **after translating them into your native language:**
-
-
-
-1. **Installation:** `50_Deployment/installation_guide.md`
-
-2. **Startup Test:** `python main.py --test`
-
-3. **Clinical Operation:** `python main.py --data patient.json`
+The decision logic in `20_Software_Host/nra_core_model.py` (reference model) and `10_Hardware_Design/src/10_BioCalibrator_TypeA.v` (FPGA) are **bit-identical**. The visualizer derives its boundary from that same reference model and holds no approximation of its own.
 
 
 
@@ -180,57 +212,21 @@ For installation and operation details, please refer to the following documents 
 
 
 
-## 5. Physical Approach: "Unreachable" vs "Ineffective"
+## 5. Background: "Not Reaching" vs "Not Working"
 
 
 
-### ⚠️ Core Problem
+> **This section states the project's motivation. It is NOT what the current system judges.**
+
+> No drug-penetration model is implemented.
 
 
 
-Conventional cancer treatment evaluates **"whether the drug is effective"**  
-
-NRA-IDE evaluates **"whether the drug physically reaches the target"**
+Conventional evaluation asks whether a drug is effective. In practice, high interstitial fluid pressure (IFP) inside tumor tissue impedes drug delivery to the core, and low-perfusion regions become sites of local invasion and recurrence. There has been little means of evaluating "unreached regions" numerically.
 
 
 
-### Physical Resistance Model
-
-
-
-$$
-
-F_{\text{resist}} = (k_{\text{cell}} + B_{\text{drug}}) \cdot \Delta x + \eta \cdot \frac{dv}{dt}
-
-$$
-
-
-
-Where:
-
-- $k_{\text{cell}}$: Tumor cell stiffness (Young's modulus)
-
-- $\eta$: Viscosity (cytoplasm, plasma, matrix fluid)
-
-- $\Delta x$: Drug deformation penetration (mismatch with tumor interstitium)
-
-- $\frac{dv}{dt}$: Administration rate variation
-
-
-
-### Decision Criterion
-
-
-
-$$
-
-F_{\text{resist}} > \Delta P \cdot A \Rightarrow \text{STOP (Drug Cannot Reach)}
-
-$$
-
-
-
-If administration pressure cannot overcome structural resistance → **"Unreachable Zone"**
+Starting from that problem, NRA-IDE first formalizes the part where the physics is well-defined: **whether a cell can escape through a gap.** Modelling drug penetration remains future work.
 
 
 
@@ -238,23 +234,47 @@ If administration pressure cannot overcome structural resistance → **"Unreacha
 
 
 
-## 6. Application: SAFE / BORDER / DANGER Zone Definition
+## 6. Physical Model
 
 
 
-NRA-IDE processes input parameters **(cell stiffness, viscosity, blood flow pressure, tumor thickness)** in real-time using FPGA, separating the tumor region into three zones:
+$$\sigma_{\text{resist}} = (E + B)\cdot\frac{D-d}{D} \;+\; \frac{12\,\eta\,v\,D}{1000\,d^{2}} \;>\; \Delta P \implies \text{BLOCKED}$$
 
 
 
-| Zone | Condition | Treatment Policy |
+| Symbol | Meaning | Unit |
 
-|------|-----------|------------------|
+|:---:|:---|:---:|
 
-| ✅ SAFE | Resistance < Administration Pressure | Normal dosing permitted |
+| $E$ | Young's modulus of the cell | kPa |
 
-| ⚠️ BORDER | Resistance ≈ Administration Pressure | Viscosity/speed adjustment recommended |
+| $B$ | Stiffening contribution from the drug | kPa |
 
-| ❌ DANGER | Resistance > Administration Pressure | Stop dosing / Change route |
+| $D$ | Cell diameter | μm |
+
+| $d$ | Pore size | μm |
+
+| $(D-d)/D$ | **Compressive strain (dimensionless)** | – |
+
+| $\eta$ | Viscosity (cytoplasm, surrounding fluid) | Pa·s |
+
+| $v$ | Deformation velocity | μm/s |
+
+| $\Delta P$ | Blood flow driving pressure | kPa |
+
+
+
+The first term is elastic resistance, the second is viscous resistance inside the pore. **All terms are in kPa; both sides are dimensionally consistent.**
+
+
+
+- Zero viscosity input → **Error 0x03** (physically impossible in tissue; indicates instrument fault)
+
+- Cell diameter smaller than the pore → **Error 0x01** (passes without deforming)
+
+
+
+See `jp/.../00_Documentation/PHASE_2_Mesoscale_Physics.md` for the derivation.
 
 
 
@@ -262,19 +282,111 @@ NRA-IDE processes input parameters **(cell stiffness, viscosity, blood flow pres
 
 
 
-## 7. Disclaimer
+## 7. Jamming Map
 
 
 
-**This system is a non-commercial support template tool that presents "physical calculation results."**
+Input parameters are processed in Q8.8 fixed point, and the decision boundary is drawn on the plane of drug boost $B$ against flow pressure $\Delta P$.
 
 
 
-- **For research use, not clinical use**
+| Zone | Condition | Meaning |
 
-- **Final treatment decisions must be made by qualified physicians**
+|:---|:---|:---|
 
-- **Translation accuracy is the responsibility of the user**
+| 🟩 BLOCKED | $\sigma_{resist} > \Delta P$ | The cell cannot pass through the gap |
+
+| 🟥 PASSABLE | $\sigma_{resist} \le \Delta P$ | The cell may deform and pass |
+
+
+
+The plotted boundary is not an approximation — it is **the FPGA decision boundary itself**, computed with identical Q8.8 arithmetic.
+
+
+
+> **Margin evaluation near the boundary (the former "BORDER" zone) is not implemented.** The current output is binary and carries no measure of how close a case sits to the boundary. Clinically this margin matters most, and it remains future work.
+
+
+
+---
+
+
+
+## 8. Quick Start
+
+
+
+```bash
+
+cd jp/NRA-IDE_Cancer_Treatment_Support_System/20_Software_Host
+
+pip install -r requirements.txt
+
+
+
+# Self-diagnostic (works without FPGA, via the reference model)
+
+python main.py --test
+
+
+
+# Full validation suite (7 cases)
+
+cd ../30_Test_Data && python run_validation.py
+
+
+
+# Clinical session (emits report and jamming map)
+
+cd ../20_Software_Host
+
+python main.py --data ../30_Test_Data/sample_patient_data.json --out ./output
+
+```
+
+
+
+| Command | Status |
+
+|:---|:---|
+
+| `python main.py --test` | **Working** (falls back to the reference model when no FPGA is attached) |
+
+| `python run_validation.py` | **Working** (7/7 PASS) |
+
+| `python main.py --data <path> [--out <dir>]` | **Working** (emits a `.txt` report and a `.png` map) |
+
+
+
+If the input falls outside the Phase 4 ranges, no computation is performed; only a `_REJECTED.txt` record is written (Fail-Closed).
+
+
+
+---
+
+
+
+## 9. Current State and Open Items
+
+
+
+This repository is a research template. The following are **incomplete**, stated without embellishment:
+
+
+
+| Item | Status |
+
+|:---|:---|
+
+| Type A (single cell) decision model | Formalized, reference implementation, 7 verification cases — complete |
+
+| Type B (cell cluster) model | **Unvalidated phenomenological model.** The $\sqrt{N}$ law is not supported by the cited literature |
+
+| FPGA RTL | `Top_Module.v` is a fragment. **Never synthesized or simulated** |
+
+| Drug penetration model | **Not started** |
+
+| Microfluidic experimental validation | **Not performed** (protocol drafted only) |
 
 
 
@@ -302,7 +414,7 @@ NRA-IDE_CancerTreatmentSupport_System/
 
         ├── 10_Hardware_Design/   # FPGA design files
 
-        ├── 20_Software_Host/     # Python implementation
+        ├── 20_Software_Host/     # Python (nra_core_model.py is the single source of decisions)
 
         ├── 30_Test_Data/         # Test data & validation
 
@@ -322,11 +434,29 @@ NRA-IDE_CancerTreatmentSupport_System/
 
 
 
+## ⚠️ Disclaimer
+
+
+
+**This system is a non-commercial support template tool that presents "physical calculation results."**
+
+
+
+- **For research use, not clinical use**
+
+- **Not a medical device** under Japanese pharmaceutical and medical device law
+
+- **Final treatment decisions must be made by qualified physicians**
+
+- **Translation accuracy is the responsibility of the user**
+
+
+
+---
+
+
+
 ## ⚠️ Critical Translation Notice
-
-
-
-**For detailed understanding of this system:**
 
 
 
@@ -351,5 +481,5 @@ NRA-IDE_CancerTreatmentSupport_System/
 
 
 ---
-*All descriptions in this repository were generated by an AI assistant implementing the NRA-IDE framework.*
 
+*All descriptions in this repository were generated by an AI assistant implementing the NRA-IDE framework.*
