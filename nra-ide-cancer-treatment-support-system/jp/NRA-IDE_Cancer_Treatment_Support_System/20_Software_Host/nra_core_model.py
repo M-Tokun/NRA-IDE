@@ -19,6 +19,27 @@
 
 from typing import Dict, Optional, Tuple
 
+# ── 来歴表記（生成物に転記される） ─────────────────────────────────
+#
+# 本テンプレートは配布物である。生成されたレポートはリポジトリから切り離され、
+# 単独で流通する。したがって成果物自身が、どのモデルで・検証済みか否かを
+# 名乗らなければならない。
+#
+# 【フォークする者への指示】
+#   * 物理式を改変した場合、MODEL_VERSION を必ず変更すること。
+#     変更しなければ、改変版が本テンプレートの検証状態を騙ることになる。
+#   * 実験検証を経ていない状態で VALIDATION_STATUS を書き換えてはならない。
+#   * LICENSE_JP.txt は、特約事項を「すべての複製または重要な部分」に
+#     記載することを求めている。COPYRIGHT / LICENSE_NOTE を削除してはならない。
+#
+MODEL_NAME = "NRA-IDE Type A Jamming"
+MODEL_VERSION = "PHASE_2 Rev 2.0"
+VALIDATION_STATUS = "未検証（マイクロ流路試験プロトコル 未実施）"
+TEMPLATE_NAME = "NRA-IDE Cancer Treatment Support System"
+TEMPLATE_URL = "https://github.com/M-Tokun/NRA-IDE"
+COPYRIGHT = "Copyright (c) 2026 M-Tokuni / MIT License with Medical Disclaimer"
+LICENSE_NOTE = "詳細は LICENSE_JP.txt の特約事項1〜3を参照のこと。"
+
 # ── Phase 4 §2 エラーコード ────────────────────────────────────────────
 ERR_NONE = 0x00
 ERR_GEOM = 0x01         # D < d           すり抜け

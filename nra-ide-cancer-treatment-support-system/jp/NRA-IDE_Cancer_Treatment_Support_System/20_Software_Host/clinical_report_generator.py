@@ -69,8 +69,6 @@ class ClinicalReportGenerator:
             f"Report ID : NRA-{timestamp}-{p_id[:8]}",
             f"Date      : {timestamp} JST",
             f"Patient   : {p_id}",
-            f"Model     : Type A (Single-Cell Jamming) / PHASE_2 Rev 2.0",
-            f"Source    : {source}",
             "",
             "[Input Parameters]  (Q8.8 quantized)",
             f"  Young's modulus (E) : {q['cell_stiffness'] / 256:8.3f} kPa",
@@ -152,11 +150,30 @@ class ClinicalReportGenerator:
                     "",
                 ]
 
+        # ── 来歴 ──
+        # 本レポートはリポジトリから切り離されて単独で流通しうる。
+        # どのモデルで・検証済みか否かを、成果物自身が名乗る必要がある。
         lines += [
+            "[Provenance]",
+            f"  Model      : {core.MODEL_NAME} / {core.MODEL_VERSION}",
+            f"  Validation : {core.VALIDATION_STATUS}",
+            f"  Source     : {source}",
+            f"  Template   : {core.TEMPLATE_NAME}",
+            f"               {core.TEMPLATE_URL}",
+            "",
             "[Physician's Gate]",
             "  本判定は物理的封鎖の可否のみを示す。投薬の可否を意味しない。",
             "  最終的な治療方針は、倫理的責任を負う医師が決定する。",
-            "  研究用途限定。薬機法上の医療機器ではない。",
+            "",
+            "  表示された数値は物理モデルの計算結果であり、実測値ではない。",
+            "  本モデルは実験による検証を経ていない。",
+            "",
+            "  本テンプレートは薬機法上の医療機器ではなく、研究・教育目的に限る。",
+            "  IEC 62304 の文脈では SOUP（由来不明ソフトウェア）に分類される。",
+            "  医療機器開発に用いる場合、V&V・リスク管理・規制申請は",
+            "  利用者の責任に属する。",
+            f"  {core.COPYRIGHT}",
+            f"  {core.LICENSE_NOTE}",
             SEP,
         ]
         return "\n".join(lines) + "\n"
