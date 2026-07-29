@@ -20,14 +20,21 @@
 | :--- | :--- | :--- | :--- |
 | **Top** | `10_Top_Module.v` | システム統合、通信/演算シーケンス制御 | **断片。module/endmodule を欠く** |
 | **I/O** | `10_UART_Interface.v` | 115200bps 8N1 全二重シリアル通信 | 実装済 |
-| **Core** | `10_Cancer_Treatment_Selector.v` | 癌腫別（Type A/B）演算器の選択と統合 | `[cite:]` マーカーが残存 |
+| **Core** | `10_Cancer_Treatment_Selector.v` | 癌腫別（Type A/B）演算器の選択と統合 | 実装済 |
 | **Logic** | `10_BioCalibrator_TypeA.v` | 単一細胞ジャミング判定（5段パイプライン） | 実装済（Rev 2.0） |
 | **Logic** | `10_BioCalibrator_TypeB.v` | 集団力学封鎖判定（40bit演算） | **断片。ポート定義・比較ロジックを欠く** |
 | **Sim** | `10_Testbench_Integration.v` | 全系統合検証用テストベンチ | チェックサム値が誤り（下記 §5） |
 
-`../simulation/` には `10_Testbench_BruteForce.v`、`10_wave_config.do`、`10_Testbench_TypeA.v` がある。
-このうち `10_Testbench_TypeA.v` は**テストベンチではなく TypeA モジュールの複製**であり、
-本フォルダの `10_BioCalibrator_TypeA.v` と同名モジュールの二重定義になる。整理を要する。
+`../simulation/` には `10_Testbench_BruteForce.v` と `10_wave_config.do` がある。
+
+> **削除記録（2026-07-29）:** `../simulation/10_Testbench_TypeA.v` を削除した。
+> 名前に反してテストベンチではなく `10_BioCalibrator_TypeA.v` の複製であり、
+> 同名モジュール `BioCalibrator_TypeA_Jamming` の二重定義になっていた。
+> さらに複製元が Rev 1.0（次元不整合のあった旧式）のままだったため、
+> コンパイル順序によっては旧式が採用され、警告もなく誤判定に戻る危険があった。
+>
+> **TypeA の単体テストベンチは未整備である。** 現状 `simulation/` にあるのは
+> Boost 探索用の BruteForce のみで、7ケースを網羅する単体検証は存在しない。
 
 制約ファイルは `../constraints/` にある（`10_timing.sdc`、`10_pinout_cyclone_v.qsf`、`10_pinout_artix_7.xdc`）。
 
@@ -79,7 +86,7 @@ FPGA → ホストは 3バイト（Header / `(Error << 1) | Jammed` / `Header ^ 
 
 1. **`10_Top_Module.v` が断片。** 合成もシミュレーションもできない。トップが無いため `10_Testbench_Integration.v` も動作しない。
 2. **`10_Testbench_Integration.v` のチェックサムが誤り。** `0x00` を送出しているが、当該ペイロードの XOR は `0x11` である。Fail-Closed が正しく動作すれば必ず弾かれる。
-3. **`[cite:]` マーカーの残存。** `10_Cancer_Treatment_Selector.v` に4箇所、`../simulation/10_Testbench_TypeA.v` に6箇所。Verilog の構文エラーとなる。
+3. ~~**`[cite:]` マーカーの残存。**~~ 解消済（2026-07-29）。`10_Cancer_Treatment_Selector.v` の4箇所を除去した。なお当該4箇所はいずれも `//` コメント内にあり、**構文エラーではなかった**（旧記載を訂正）。コード行に混入して実害があったのは削除済の `10_Testbench_TypeA.v` の方である。
 4. **`10_BioCalibrator_TypeB.v` が断片。** ポート定義と比較ロジックを欠く。
 5. **UART にフレーミング検証が無い。** ストップビットを確認せずに `rx_valid` を立てている。
 

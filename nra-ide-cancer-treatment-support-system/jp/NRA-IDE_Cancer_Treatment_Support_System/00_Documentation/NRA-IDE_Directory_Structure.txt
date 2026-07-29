@@ -28,15 +28,16 @@ jp/NRA-IDE_Cancer_Treatment_Support_System/
 │   ├── src/
 │   │   ├── README.md                     [DONE] 構成・既知の不具合一覧（Rev 2.0）
 │   │   ├── 10_Top_Module.v               [BROKEN] module/endmodule を欠く断片
-│   │   ├── 10_Cancer_Treatment_Selector.v [BROKEN] [cite:] マーカー4箇所が残存
+│   │   ├── 10_Cancer_Treatment_Selector.v [DONE] Type A/B のMUX
 │   │   ├── 10_BioCalibrator_TypeA.v      [DONE] 応力比較形・5段（Rev 2.0）
 │   │   ├── 10_BioCalibrator_TypeB.v      [BROKEN] ポート定義・比較ロジックを欠く
 │   │   ├── 10_UART_Interface.v           [WIP]  フレーミング検証なし
 │   │   └── 10_Testbench_Integration.v    [BROKEN] チェックサム 0x00（正: 0x11）
 │   ├── simulation/
 │   │   ├── 10_Testbench_BruteForce.v     [DONE] Boost 探索（vel の Q8.8 値を訂正）
-│   │   ├── 10_Testbench_TypeA.v          [BROKEN] TBではなくTypeAの複製。二重定義
 │   │   └── 10_wave_config.do             [DONE] 波形設定
+│   │      ※ 10_Testbench_TypeA.v は削除済（2026-07-29）。TBではなく
+│   │        TypeA の複製で、Rev 1.0 の旧式を同名モジュールで保持していた
 │   ├── constraints/                      [DONE] Multi-vendor pinouts & Timing
 │   │   ├── 10_timing.sdc
 │   │   ├── 10_pinout_cyclone_v.qsf
