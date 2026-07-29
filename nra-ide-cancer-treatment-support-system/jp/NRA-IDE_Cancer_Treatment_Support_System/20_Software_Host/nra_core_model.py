@@ -81,7 +81,7 @@ ROM_KVISC = [0 if n < 20 else 3221225 // (n * n) for n in range(128)]  # 0.012/d
 
 
 def to_q88(value: float) -> int:
-    """fpga_interface._float_to_q8_8 と同一の量子化（クランプ＋切り捨て）"""
+    """Q8.8 への量子化（クランプ＋切り捨て）。全ファイルはこの関数のみを使うこと。"""
     return int(max(0.0, min(255.99, value)) * 256)
 
 

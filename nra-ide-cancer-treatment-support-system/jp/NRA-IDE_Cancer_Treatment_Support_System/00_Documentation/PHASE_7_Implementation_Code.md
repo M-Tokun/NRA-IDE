@@ -20,6 +20,8 @@
 
 本書は実装の要点を抜粋したものである。**実際のコードは `10_Hardware_Design/` および `20_Software_Host/` を参照すること。** 本書と実コードが食い違った場合、実コードが正である。
 
+**本書のスニペットは手動転記であり、実コードの変更に自動追従しない。** 実際、`fixed_terms()` のシグネチャ変更（Rev 2.0.1）や `_float_to_q8_8()` の削除（Rev 2.0）は、いずれも一度は本書への反映が漏れた。数式・演算の正典は `20_Software_Host/nra_core_model.py`（判定式は `00_Documentation/PHASE_2_Mesoscale_Physics.md`）である。本書は「読み物」として維持するに留め、正確性の検証は正典側で行うこと。
+
 
 
 ---
@@ -84,12 +86,12 @@ else                           o_is_jammed <= 0;  // PASSABLE
 header = b'\xA5' if is_type_a else b'\xA6'
 
 payload = struct.pack('>6H',
-    self._float_to_q8_8(p['cell_stiffness']),
-    self._float_to_q8_8(p['cell_viscosity']),
-    self._float_to_q8_8(p['cell_diameter']),
-    self._float_to_q8_8(p['pore_size']),
-    self._float_to_q8_8(p['flow_dp']),
-    self._float_to_q8_8(p['drug_boost']))
+    core.to_q88(p['cell_stiffness']),
+    core.to_q88(p['cell_viscosity']),
+    core.to_q88(p['cell_diameter']),
+    core.to_q88(p['pore_size']),
+    core.to_q88(p['flow_dp']),
+    core.to_q88(p['drug_boost']))
 
 checksum = 0
 for b in payload:
@@ -101,7 +103,7 @@ packet = header + payload + struct.pack('B', checksum)
 
 
 
-Q8.8 への変換は**切り捨て**である。`int(max(0.0, min(255.99, value)) * 256)`。ホスト・FPGA・可視化のすべてがこの量子化で一致していなければならない。
+Q8.8 への変換は**切り捨て**である（`nra_core_model.to_q88`: `int(max(0.0, min(255.99, value)) * 256)`）。ホスト・FPGA・可視化のすべてがこの量子化で一致していなければならない。独自に再実装しないこと（Rev 2.0.1 で `fpga_interface.py` の重複実装を除去した経緯を参照）。
 
 
 

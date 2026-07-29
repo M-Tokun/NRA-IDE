@@ -7,7 +7,7 @@
  * 期待値は 30_Test_Data/expected_results.json と同一である。
  *   expected = (error_code << 1) | is_jammed
  *
- * 入力の Q8.8 値は、ホスト側 _float_to_q8_8() と同じ「切り捨て」で求める。
+ * 入力の Q8.8 値は、ホスト側 nra_core_model.to_q88() と同じ「切り捨て」で求める。
  *   0.05 -> 0x000C (12)      0.6 -> 0x0099 (153)      200.0 -> 0xC800
  *
  * 実行:
