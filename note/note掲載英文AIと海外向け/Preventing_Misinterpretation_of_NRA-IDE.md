@@ -76,7 +76,7 @@ Using one language inside the executable specification reduces translation layer
 
 Instead of:
 
-[
+$$
 \text{Japanese concept}
 \rightarrow
 \text{automatic translation}
@@ -84,11 +84,11 @@ Instead of:
 \text{English identifier}
 \rightarrow
 \text{code interpretation}
-]
+$$
 
 the reference implementation can use:
 
-[
+$$
 \text{canonical English term}
 \rightarrow
 \text{English identifier}
@@ -96,7 +96,7 @@ the reference implementation can use:
 \text{English comment}
 \rightarrow
 \text{English test}
-]
+$$
 
 This does not make the English article superior to the Japanese canonical article.
 
@@ -395,7 +395,7 @@ It does not make Cause-Side temporally immutable. Authorized new Cause-Side obse
 
 ---
 
-## 6. Evaluating (R=\delta/\tau)
+## 6. Evaluating $R=\delta/\tau$
 
 ```python
 def evaluate_boundary_ratio(
@@ -485,7 +485,7 @@ Without those comments, an AI code assistant may “improve robustness” by ins
 
 In NRA-IDE, that change would not be a harmless numerical adjustment.
 
-It would alter the structural meaning of (\tau=0).
+It would alter the structural meaning of $\tau=0$.
 
 ---
 
@@ -645,11 +645,11 @@ def authorize_execution(
 
 This function demonstrates the core separation:
 
-[
+$$
 \mathrm{Generated}(y)
 \not\Rightarrow
 \mathrm{Executable}(y)
-]
+$$
 
 An AI-generated proposal can exist while remaining non-executable.
 
@@ -903,7 +903,7 @@ Examples include:
 
 * replacing zero thickness with epsilon,
 * merging handoff into warning,
-* allowing an AI confidence score to increase (\tau),
+* allowing an AI confidence score to increase $\tau$,
 * allowing a proposal to change the observation used to judge it,
 * treating irreversible as recoverable,
 * or continuing ordinary execution after `RUPTURE_BOUNDARY`.
@@ -1005,9 +1005,9 @@ limit
 
 Generic names invite generic interpretation.
 
-For example, naming (\tau) as `safety_margin` may cause it to be treated as a static threshold rather than structural absorption thickness.
+For example, naming $\tau$ as `safety_margin` may cause it to be treated as a static threshold rather than structural absorption thickness.
 
-Naming (R) as `risk_score` may detach it from the relation between accumulated deviation and structural absorption thickness.
+Naming $R$ as `risk_score` may detach it from the relation between accumulated deviation and structural absorption thickness.
 
 Naming is not cosmetic.
 

@@ -91,15 +91,15 @@ This is a present structural question, not a claim of perfect future prediction.
 
 The basic NRA-IDE relation is:
 
-[
+$$
 R=\frac{\delta}{\tau}
-]
+$$
 
 The terms are defined as follows:
 
-* (\delta): **accumulated deviation**
-* (\tau): **structural absorption thickness**
-* (R): **boundary approach ratio**
+* $\delta$: **accumulated deviation**
+* $\tau$: **structural absorption thickness**
+* $R$: **boundary approach ratio**
 
 These terms must not be freely replaced with convenient synonyms.
 
@@ -153,7 +153,7 @@ A boundary without thickness is discovered too late.
 
 ### 3.3 Boundary Approach Ratio
 
-The value (R) is not:
+The value $R$ is not:
 
 * a probability of failure,
 * a confidence score,
@@ -168,19 +168,19 @@ Two systems may have the same accumulated deviation while having very different 
 
 ---
 
-## 4. Why (\tau=0) Is Not an Extreme Score
+## 4. Why $\tau=0$ Is Not an Extreme Score
 
 When:
 
-[
+$$
 \tau=0
-]
+$$
 
 the relation:
 
-[
+$$
 R=\frac{\delta}{\tau}
-]
+$$
 
 is undefined.
 
@@ -188,7 +188,7 @@ This must not be converted into a very large number merely to continue processin
 
 The following interpretations are prohibited:
 
-* replacing (\tau) with a small epsilon,
+* replacing $\tau$ with a small epsilon,
 * returning infinity as an ordinary risk score,
 * producing a warning while continuing normal execution,
 * asking an AI model to invent a plausible recovery interpretation,
@@ -198,7 +198,7 @@ When structural absorption thickness has reached zero, the descriptive precondit
 
 The system is no longer being evaluated within the same describable region.
 
-The canonical classification is `OUT_OF_DESCRIPTION_DOMAIN`, and the mathematical result is that \(R\) is undefined. The operational response is fail-closed suppression of the affected autonomous processing.
+The canonical classification is `OUT_OF_DESCRIPTION_DOMAIN`, and the mathematical result is that $R$ is undefined. The operational response is fail-closed suppression of the affected autonomous processing.
 
 Fail-Closed does not mean that an AI should generate stronger warning language. It means that normal evaluation, generation, or execution must not continue through that path.
 
@@ -210,7 +210,7 @@ NRA-IDE does not collapse every dangerous condition into one category called “
 
 The conceptual boundary order is:
 
-[
+$$
 0 \leq R_{\mathrm{warn}}
 <
 R_{\mathrm{handoff}}
@@ -218,7 +218,7 @@ R_{\mathrm{handoff}}
 R_{\mathrm{irrev}}
 <
 1.0
-]
+$$
 
 The exact numerical values depend on the target system and must not be invented by an AI without a canonical specification.
 
@@ -258,7 +258,7 @@ Any continued evaluation requires a newly defined target structure.
 
 ### 5.4 `RUPTURE_BOUNDARY`
 
-At \(R_{\mathrm{target}}\ge1.0\), the declared target reaches `RUPTURE_BOUNDARY`. Normal generation and autonomous control must stop.
+At $R_{\mathrm{target}}\ge1.0$, the declared target reaches `RUPTURE_BOUNDARY`. Normal generation and autonomous control must stop.
 
 Structural testimony switches to the predefined `POST_RUPTURE_FIXED` format, such as:
 
@@ -320,19 +320,19 @@ It does not possess execution authority by itself.
 
 The canonical relationship is:
 
-[
+$$
 \mathrm{Generated}(y)
 \not\Rightarrow
 \mathrm{Executable}(y)
-]
+$$
 
 Execution is permitted only when the fixed Cause-Side evaluation snapshot and its authority conditions are satisfied:
 
-[
+$$
 \operatorname{Execute}(y)=1
 \iff
 \text{all required Cause-Side conditions hold}
-]
+$$
 
 The AI may propose.
 
@@ -344,8 +344,8 @@ The AI must not define the physical truth that authorizes its own proposal.
 
 The following actions are prohibited:
 
-* increasing (\tau) because an AI expresses high confidence,
-* decreasing (\delta) because an explanation appears persuasive,
+* increasing $\tau$ because an AI expresses high confidence,
+* decreasing $\delta$ because an explanation appears persuasive,
 * redefining an irreversible state as recoverable,
 * replacing a missing observation with semantic inference,
 * altering a boundary because the planned action is considered valuable,
@@ -466,7 +466,7 @@ It explicitly addresses accumulated deviation, structural absorption thickness, 
 
 ### It is not a generic risk score
 
-The relation (R=\delta/\tau) must not be detached from its structural definitions.
+The relation $R=\delta/\tau$ must not be detached from its structural definitions.
 
 ### It is not AI self-assessment
 
