@@ -393,7 +393,7 @@ body.en span.en-text { display: inline; }
     </tr>
     <tr>
       <td>R ≥ 1.00</td>
-      <td class="r-fail">FAIL-CLOSED</td>
+      <td class="r-fail">RUPTURE_BOUNDARY</td>
       <td><span class="jp-text">相転移・破断・決壊・崩壊に相当する構造限界</span><span class="en-text">Structural limit corresponding to phase transition, rupture, breach, or collapse</span></td>
       <td><span class="jp-text">AIは出力を停止し、人間が最終判断</span><span class="en-text">AI stops output/action and humans make the final decision</span></td>
     </tr>
@@ -1017,7 +1017,7 @@ body.en span.en-text { display: inline; }
   <pre><code><span class="cmt">// <span class="jp-text">最小構成の例</span><span class="en-text">Minimal example</span></span>
 <span class="kw">function</span> <span class="fn">gate</span>(delta, tau) {
     <span class="kw">const</span> R = delta / tau;
-    <span class="kw">if</span> (R >= <span class="num">1.0</span>) <span class="kw">return</span> <span class="str">"FAIL_CLOSED"</span>;
+    <span class="kw">if</span> (R >= <span class="num">1.0</span>) <span class="kw">return</span> <span class="str">"RUPTURE_BOUNDARY"</span>;
     <span class="kw">return</span> <span class="str">"SAFE"</span>;
 }</code></pre>
 
@@ -1033,7 +1033,7 @@ body.en span.en-text { display: inline; }
 <span class="kw">const</span> infusionPressure = <span class="fn">getPumpCapacity</span>();   <span class="cmt">// τ</span>
 <span class="kw">const</span> deliveryStatus = <span class="fn">gate</span>(tumorResistance, infusionPressure);
 
-<span class="kw">if</span> (deliveryStatus === <span class="str">"FAIL_CLOSED"</span>) {
+<span class="kw">if</span> (deliveryStatus === <span class="str">"RUPTURE_BOUNDARY"</span>) {
     <span class="fn">alert</span>(<span class="str">"<span class="jp-text">物理的到達不能を検出。医師の判断が必要です。</span><span class="en-text">Physical reachability failure detected. Human medical judgment is required.</span>"</span>);
     <span class="cmt">// <span class="jp-text">AIは判断を停止し、人間に最終決定を委ねる</span><span class="en-text">AI stops judgment and transfers authority to a qualified human</span></span>
 }</code></pre>

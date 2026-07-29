@@ -112,7 +112,7 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
 let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
 let tauBase=1.0, delta=0, R_hi=0, R_lo=0;
 let status='safe';
-const R_FAIL=1.0, R_WARN=0.75;
+const R_RUPTURE=1.0, R_WARN=0.75;
 
 // ── Dynamic τ (scales with temperature & blood flow) + dual-fluctuation ──
 function calcIDE(){
@@ -132,7 +132,7 @@ function calcIDE(){
   R_lo = Math.max(0, (1-Adh) / (tau*0.8)); // lower side (thrombosis risk)
 
   let st = 'safe', act='Normal';
-  if(R_hi >= R_FAIL || R_lo >= R_FAIL){ st='fail-hi'; act='FAIL_CLOSED — Emergency Stop (Rupture/Thrombosis)'; }
+  if(R_hi >= R_RUPTURE || R_lo >= R_RUPTURE){ st='fail-hi'; act='RUPTURE_BOUNDARY — Emergency Stop (Rupture/Thrombosis)'; }
   else if(R_hi >= R_WARN || R_lo >= R_WARN){ st='warn-hi'; act='WARNING — Wall tension/shear reinforcement'; }
   status = st;
   return {R_hi, R_lo, status:st, action:act};
@@ -191,7 +191,7 @@ document.getElementById('tSlider').oninput = v=> {T=Number(v);};
 // Remaining sliders follow the same pattern (Shear, Tension, Adh, Flow)
 
 // Example surgical button (partial implementation)
-// "Balloon deployment" button: Tension spikes → R_hi spike → FAIL_CLOSED
+// "Balloon deployment" button: Tension spikes → R_hi spike → RUPTURE_BOUNDARY
 </script>
 </body>
 </html>

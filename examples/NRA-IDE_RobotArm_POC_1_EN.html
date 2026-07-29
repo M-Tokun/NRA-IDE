@@ -406,7 +406,7 @@
     <div id="faultBox">
         <div class="panel-title panel-title-fault">▶ Fault Count</div>
         <div class="fault-item">
-            <span class="fault-key">FAIL_CLOSED Events</span>
+            <span class="fault-key">RUPTURE_BOUNDARY Events</span>
             <span id="fc-count" class="c-red">0</span>
         </div>
         <div class="fault-item">
@@ -837,7 +837,7 @@ function doTick() {
     if (globalFail && !prevGlobalFail) {
         failCount++;
         document.getElementById('fc-count').textContent = failCount;
-        addLog('★ FAIL_CLOSED ALL AXES HALTED  maxR=' + maxR.toFixed(3), 'log-fail');
+        addLog('★ RUPTURE_BOUNDARY ALL AXES HALTED  maxR=' + maxR.toFixed(3), 'log-fail');
         flash();
     }
     prevGlobalFail = globalFail;

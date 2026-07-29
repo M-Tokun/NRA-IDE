@@ -312,7 +312,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <span class="set-val set-val-warn">0.75</span>
       </div>
       <div class="setting-row">
-        <span class="set-lbl">R_FAIL</span>
+        <span class="set-lbl">R_RUPTURE</span>
         <span class="set-val set-val-fail">1.00</span>
       </div>
     </div>
@@ -328,7 +328,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clk">--:--:--</span>
-  <span>R≥1.0 → FAIL_CLOSED</span>
+  <span>R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -338,7 +338,7 @@ const L_MAX = 50000;  // lx : 過照射限界（熱ストレス・葉焼け）
 const L_MIN =  5000;  // lx : 照度不足限界（光合成停止）
 const TAU_HI = L_MAX - L_OPT;  // 30000 lx
 const TAU_LO = L_OPT - L_MIN;  // 15000 lx
-const R_WARN = 0.75, R_FAIL = 1.0;
+const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── 状態 ──
 let running   = true;
@@ -443,10 +443,10 @@ function calcIDE(lux){
   const rHi = delta > 0 ? delta / TAU_HI : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_FAIL){
-    status = 'fail-hi'; action = '過照射：FAIL_CLOSED — 遮光パネル最大展開';
-  } else if(rLo >= R_FAIL){
-    status = 'fail-lo'; action = '照度不足：FAIL_CLOSED — 補助照明 ON';
+  if(rHi >= R_RUPTURE){
+    status = 'fail-hi'; action = '過照射：RUPTURE_BOUNDARY — 遮光パネル最大展開';
+  } else if(rLo >= R_RUPTURE){
+    status = 'fail-lo'; action = '照度不足：RUPTURE_BOUNDARY — 補助照明 ON';
   } else if(rHi >= R_WARN){
     status = 'warn-hi'; action = '過照射警告：遮光パネル展開推奨';
   } else if(rLo >= R_WARN){
@@ -463,7 +463,7 @@ function calcShadeTarget(ide){
   if(ide.status === 'fail-hi') return 90;
   if(ide.status === 'warn-hi'){
     // R_hi比例で遮光率を上げる
-    const ratio = (ide.rHi - R_WARN) / (R_FAIL - R_WARN);
+    const ratio = (ide.rHi - R_WARN) / (R_RUPTURE - R_WARN);
     return Math.min(80, 30 + ratio * 50);
   }
   if(ide.status === 'fail-lo' || ide.status === 'warn-lo') return 0;
@@ -538,8 +538,8 @@ function tick(dt){
 // ── UI更新 ──
 function updateUI(ide, fluctAmp){
   const col = statusColor(ide.status);
-  const rHiCol = ide.rHi >= R_FAIL ? '#ff3b5c' : ide.rHi >= R_WARN ? '#ff9030' : '#ff903088';
-  const rLoCol = ide.rLo >= R_FAIL ? '#4488ff' : ide.rLo >= R_WARN ? '#88aaff' : '#4488ff88';
+  const rHiCol = ide.rHi >= R_RUPTURE ? '#ff3b5c' : ide.rHi >= R_WARN ? '#ff9030' : '#ff903088';
+  const rLoCol = ide.rLo >= R_RUPTURE ? '#4488ff' : ide.rLo >= R_WARN ? '#88aaff' : '#4488ff88';
 
   document.getElementById('luxBig').innerHTML =
     formatLux(luxRaw) + '<span class="lux-unit"> lux</span>';
@@ -550,18 +550,18 @@ function updateUI(ide, fluctAmp){
   document.getElementById('luxScene').style.color = col;
 
   document.getElementById('rHiNum').textContent = Math.min(ide.rHi,9.999).toFixed(3);
-  document.getElementById('rHiNum').style.color  = ide.rHi >= R_FAIL ? '#ff3b5c' : '#ff9030';
+  document.getElementById('rHiNum').style.color  = ide.rHi >= R_RUPTURE ? '#ff3b5c' : '#ff9030';
   document.getElementById('rLoNum').textContent = Math.min(ide.rLo,9.999).toFixed(3);
-  document.getElementById('rLoNum').style.color  = ide.rLo >= R_FAIL ? '#4488ff' : '#88aaff';
-  setArc('arcHi', ide.rHi, ide.rHi>=R_FAIL?'#ff3b5c':'#ff9030');
-  setArc('arcLo', ide.rLo, ide.rLo>=R_FAIL?'#4488ff':'#88aaff');
+  document.getElementById('rLoNum').style.color  = ide.rLo >= R_RUPTURE ? '#4488ff' : '#88aaff';
+  setArc('arcHi', ide.rHi, ide.rHi>=R_RUPTURE?'#ff3b5c':'#ff9030');
+  setArc('arcLo', ide.rLo, ide.rLo>=R_RUPTURE?'#4488ff':'#88aaff');
   setMarkPair('wMarkHi','fMarkHi');
   setMarkPair('wMarkLo','fMarkLo');
 
   const badge = document.getElementById('badge');
   badge.className = 'badge ' + ide.status;
   const lblMap = { safe:'SAFE', 'warn-hi':'WARNING ↑ 過照射', 'warn-lo':'WARNING ↓ 照度不足',
-                   'fail-hi':'FAIL_CLOSED ↑ 過照射', 'fail-lo':'FAIL_CLOSED ↓ 照度不足' };
+                   'fail-hi':'RUPTURE_BOUNDARY ↑ 過照射', 'fail-lo':'RUPTURE_BOUNDARY ↓ 照度不足' };
   badge.textContent = lblMap[ide.status];
   document.getElementById('actTxt').textContent = ide.action;
 

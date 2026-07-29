@@ -16,7 +16,7 @@
 #   - R = δf / τ で構造的接近比を計算
 #   - 二重ゆらぎ（micro + macro + spike）の物理モデル
 #   - 発電機脱落・需要急増イベントの構造的影響
-#   - FAIL-CLOSED → 人間操作（系統復旧）でのみ復帰
+#   - RUPTURE_BOUNDARY は同一履歴内で解除せず、後続は新評価履歴として開始
 # ============================================================
 
 import math
@@ -56,7 +56,7 @@ class PowerGridNRA:
       - τ は系統慣性エネルギーに基づく設計値（スライダーで調整可）
       - δ = |f_current - 50.0Hz|
       - residual_debt: スパイク後も消えない構造的負債
-      - FAIL-CLOSED 後の復旧は trigger_recover()（人間操作）のみ
+      - RUPTURE_BOUNDARY 後は start_new_evaluation() で独立した新履歴を開始
 
     Parameters
     ----------
@@ -68,7 +68,7 @@ class PowerGridNRA:
 
     # FSM 遷移閾値
     TH_CAVEAT      = 0.40
-    TH_FAIL_CLOSED = 1.00
+    TH_RUPTURE_BOUNDARY = 1.00
 
     def __init__(self, tau: float = 0.50):
         self.channel = NRAChannel(
@@ -89,6 +89,7 @@ class PowerGridNRA:
 
         # 出力ログ
         self.history: List[dict] = []
+        self.archived_histories: List[dict] = []
 
     # ── プロパティ ──
 
@@ -181,18 +182,18 @@ class PowerGridNRA:
 
     def _update_fsm(self):
         """FSM 遷移ロジック（組み合わせ回路相当）"""
+        if self.fsm == FSMState.RUPTURE_BOUNDARY:
+            return
         if self._recover and self.R < 0.8:
             self.fsm = FSMState.CRITICAL
             return
 
-        if self.R >= self.TH_FAIL_CLOSED or self.residual_debt > 0.8:
-            self.fsm = FSMState.FAIL_CLOSED
+        if self.R >= self.TH_RUPTURE_BOUNDARY or self.residual_debt > 0.8:
+            self.fsm = FSMState.RUPTURE_BOUNDARY
         elif self.R >= self.TH_CAVEAT:
             self.fsm = FSMState.CAVEAT
         else:
-            # FAIL_CLOSED からは自動復帰しない（Π⁻¹禁止）
-            if self.fsm != FSMState.FAIL_CLOSED:
-                self.fsm = FSMState.PERMIT
+            self.fsm = FSMState.PERMIT
 
     # ── イベントトリガー（Cause-Side 入力）──
 
@@ -200,9 +201,9 @@ class PowerGridNRA:
         """
         発電機脱落イベント。
         周波数偏差 δ を急増させる（Cause-Side）。
-        FAIL-CLOSED 中は受け付けない。
+        RUPTURE_BOUNDARY 中は受け付けない。
         """
-        if self.fsm == FSMState.FAIL_CLOSED:
+        if self.fsm == FSMState.RUPTURE_BOUNDARY:
             return
         self._trip_decay = magnitude + random.random() * 0.8
 
@@ -210,23 +211,30 @@ class PowerGridNRA:
         """
         需要急増イベント。
         """
-        if self.fsm == FSMState.FAIL_CLOSED:
+        if self.fsm == FSMState.RUPTURE_BOUNDARY:
             return
         self._surge_decay = magnitude + random.random() * 0.6
 
-    def trigger_recover(self):
+    def start_new_evaluation(self):
         """
-        系統復旧（人間操作）。
-        FAIL-CLOSED からの唯一の脱出経路。
-        Effect-Side の波形回復では復旧しない。
+        系統再検査後、独立した新しい評価履歴を開始する。
+        旧RUPTURE_BOUNDARYを解除せず、新しいCause-Side履歴を生成する。
         """
-        self._recover = True
-        self._trip_decay  = 0.0
-        self._surge_decay = 0.0
+        tau = self.tau
+        archives = list(self.archived_histories)
+        archives.append(
+            {
+                "final_state": self.fsm.value,
+                "final_R": self.R,
+                "history": list(self.history),
+            }
+        )
+        self.__init__(tau)
+        self.archived_histories = archives
 
     def reset(self):
-        """完全リセット。新患状態（経過なし）に相当。"""
-        self.__init__(self.tau)
+        """独立した新評価履歴を開始する後方互換入口。"""
+        self.start_new_evaluation()
 
 
 # ============================================================
@@ -238,7 +246,7 @@ def main():
     print("NRA-IDE Demo #14 — Power Grid Transition (Python Core)")
     print("電力系統 遷移点解析")
     print("=" * 65)
-    print(f"F_nom = {PowerGridNRA.F_NOM} Hz  |  τ = 0.50  |  FAIL-CLOSED 閾値 R ≥ 1.00")
+    print(f"F_nom = {PowerGridNRA.F_NOM} Hz  |  τ = 0.50  |  RUPTURE_BOUNDARY 閾値 R ≥ 1.00")
     print()
 
     grid = PowerGridNRA(tau=0.50)
@@ -246,7 +254,7 @@ def main():
     events = {
         80:  ("trigger_trip",    "⚡ 発電機脱落"),
         200: ("trigger_surge",   "📈 需要急増"),
-        350: ("trigger_recover", "🔄 系統復旧（人間操作）"),
+        350: ("start_new_evaluation", "🔄 系統再検査後の新評価開始"),
     }
     prev_fsm = grid.fsm
 
@@ -280,7 +288,7 @@ def main():
     print()
     print("=== 構造設計のポイント ===")
     print("  residual_debt: スパイク後も消えない構造的負債")
-    print("  FAIL-CLOSED : trigger_recover()（人間操作）でのみ復帰")
+    print("  RUPTURE_BOUNDARY : 同一履歴では解除せず、start_new_evaluation()で新履歴を開始")
     print("  波形が正常に見えても debt が残れば構造は回復していない")
 
 

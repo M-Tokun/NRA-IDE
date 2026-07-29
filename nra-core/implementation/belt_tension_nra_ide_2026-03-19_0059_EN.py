@@ -56,7 +56,7 @@ class IDEResult:
     delta:  float   # accumulated deviation δ [N]
     tau:    float   # absorption margin τ [N]
     R:      float   # approach ratio R = δ/τ
-    status: str     # SAFE / WARNING / FAIL_CLOSED
+    status: str     # SAFE / WARNING / RUPTURE_BOUNDARY
     action: str     # recommended action
 
 # -------------------------------------------------------
@@ -99,7 +99,7 @@ def evaluate_belt(state: BeltState) -> IDEResult:
 
     R < 0.75  : SAFE (continue normal operation)
     R >= 0.75 : WARNING (precursor detected, advance inspection)
-    R >= 1.0  : FAIL_CLOSED (immediate stop — cannot proceed without coherence)
+    R >= 1.0  : RUPTURE_BOUNDARY (immediate stop — cannot proceed without coherence)
     """
     delta = calc_delta(state.t_current, state.t_optimal)
     tau   = calc_tau(state.t_current, state.t_optimal,
@@ -110,14 +110,14 @@ def evaluate_belt(state: BeltState) -> IDEResult:
         R = delta / tau
         return IDEResult(
             delta=delta, tau=tau, R=R,
-            status="FAIL_CLOSED",
+            status="RUPTURE_BOUNDARY",
             action="Immediate stop: tension outside tolerance zone (replace tensioner)"
         )
 
     R = delta / tau
 
     if R >= R_CRITICAL:
-        status = "FAIL_CLOSED"
+        status = "RUPTURE_BOUNDARY"
         action = "Immediate stop: adjust or replace tensioner"
     elif R >= R_WARNING:
         status = "WARNING"

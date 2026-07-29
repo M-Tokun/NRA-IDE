@@ -297,7 +297,7 @@
     
     <span class="code-comment">// 4. 閾値判定（1.0以上なら構造破断）</span>
     <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
-        <span class="code-keyword">return</span> <span class="code-string">"FAIL_CLOSED"</span>; <span class="code-comment">// システム停止</span>
+        <span class="code-keyword">return</span> <span class="code-string">"RUPTURE_BOUNDARY"</span>; <span class="code-comment">// システム停止</span>
     }
     <span class="code-keyword">return</span> <span class="code-string">"SAFE"</span>;
 }
@@ -591,7 +591,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
     
     <span class="code-comment">// 判定</span>
     <span class="code-keyword">if</span> (R < <span class="code-number">1.0</span>) {
-        <span class="code-keyword">return</span> <span class="code-string">"緊急ブレーキ作動"</span>;  <span class="code-comment">// FAIL_CLOSED</span>
+        <span class="code-keyword">return</span> <span class="code-string">"緊急ブレーキ作動"</span>;  <span class="code-comment">// RUPTURE_BOUNDARY</span>
     }
     <span class="code-keyword">return</span> <span class="code-string">"安全継続"</span>;
 }

@@ -283,7 +283,7 @@ function getColor(R){
   return 'var(--ok)';
 }
 function getBadge(R){
-  if(R >= 1.0) return ['FAIL-CLOSED','badge-fail'];
+  if(R >= 1.0) return ['RUPTURE_BOUNDARY','badge-fail'];
   if(R >= 0.7) return ['WARNING','badge-warn'];
   return ['SAFE','badge-ok'];
 }
@@ -494,7 +494,7 @@ function update(){
     // zone change log
     const zone = R>=1.0?'fail':R>=0.7?'warn':'ok';
     if(zone !== prevZones[i]){
-      if(zone==='fail') addLog(`FAIL-CLOSED発動: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`, 'fail');
+      if(zone==='fail') addLog(`RUPTURE_BOUNDARY発動: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`, 'fail');
       else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`, 'warn');
       else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
       prevZones[i] = zone;
@@ -529,7 +529,7 @@ function update(){
   oEl.textContent = Rcomp.toFixed(3);
   oEl.style.color = getColor(Rcomp);
   const oSt = document.getElementById('overall-status');
-  if(Rcomp >= 1.0){ oSt.textContent='FAIL-CLOSED — システム停止'; oSt.style.color='var(--f)'; }
+  if(Rcomp >= 1.0){ oSt.textContent='RUPTURE_BOUNDARY — システム停止'; oSt.style.color='var(--f)'; }
   else if(Rcomp >= 0.7){ oSt.textContent='WARNING — 監視強化'; oSt.style.color='var(--w)'; }
   else { oSt.textContent='SAFE — 全要素正常'; oSt.style.color='var(--ok)'; }
 

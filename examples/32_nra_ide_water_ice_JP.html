@@ -207,7 +207,7 @@
     <div class="legend">
       <div class="legend-item">
         <div class="legend-line border-dashed-fail"></div>
-        <span>FAIL-CLOSED (R = 1.0) = 融解確定</span>
+        <span>RUPTURE_BOUNDARY (R = 1.0) = 融解確定</span>
       </div>
       <div class="legend-item">
         <div class="legend-line border-dashed-warn"></div>
@@ -309,7 +309,7 @@ function initChart() {
           }
         },
         {
-          label: 'FAIL-CLOSED (R=1.0)',
+          label: 'RUPTURE_BOUNDARY (R=1.0)',
           data: new Array(temps.length).fill(1.0),
           borderColor: '#E24B4A',
           borderDash: [6, 4],

@@ -207,7 +207,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
       </div>
       <div class="legend-row">
         <div class="legend-swatch bg-fail"></div>
-        <span class="color-fail">R ≥ 1.0  FAIL_CLOSED</span>
+        <span class="color-fail">R ≥ 1.0  RUPTURE_BOUNDARY</span>
       </div>
       <div class="legend-row legend-row-mt6">
         <div class="legend-swatch bg-thresh"></div>
@@ -216,7 +216,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;
       <div class="legend-note">
         Surface relief = fluctuation<br>
         Surface touches threshold plane<br>
-        = FAIL_CLOSED
+        = RUPTURE_BOUNDARY
       </div>
     </div>
 
@@ -534,7 +534,7 @@ function drawThresholdPlane(W, H, elevRad, rotRad, hScale){
   ctx.font = '9px JetBrains Mono';
   ctx.fillStyle = 'rgba(255,100,120,0.6)';
   ctx.textAlign = 'left';
-  ctx.fillText('R=1.0 FAIL_CLOSED', lp.px + 6, lp.py + 4);
+  ctx.fillText('R=1.0 RUPTURE_BOUNDARY', lp.px + 6, lp.py + 4);
 }
 
 function drawLayer(grid, L, idx, zOffset, W, H, elevRad, rotRad, hScale, alpha){

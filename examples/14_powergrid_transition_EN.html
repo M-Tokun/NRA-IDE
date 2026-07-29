@@ -108,7 +108,7 @@
   }
   .fsm-PERMIT       { color: #00ff88; background: #00ff1108; border-color: #00ff4430; }
   .fsm-CAVEAT       { color: #ffcc00; background: #ffcc0008; border-color: #ffcc0030; }
-  .fsm-FAIL_CLOSED  { color: #ff3333; background: #ff000015; border-color: #ff333350;
+  .fsm-RUPTURE_BOUNDARY  { color: #ff3333; background: #ff000015; border-color: #ff333350;
                       animation: alarm-pulse 0.4s infinite; }
   .fsm-RECOVERING   { color: #44aaff; background: #0044ff08; border-color: #44aaff30; }
   @keyframes alarm-pulse {
@@ -239,7 +239,7 @@
   <h1>NRA-IDE Demo #14</h1>
   <span>Power Grid Transition Point Analysis</span>
   <span class="tag">R = δ/τ</span>
-  <span class="tag">FAIL-CLOSED</span>
+  <span class="tag">RUPTURE_BOUNDARY</span>
   <span class="footer-copy">M-Tokuni © NRA-IDE Project</span>
 </header>
 
@@ -318,8 +318,8 @@
 <footer>
   <button class="btn-event" id="btn-trip" onclick="triggerTrip()">⚡ Generator Trip</button>
   <button class="btn-event" id="btn-surge" onclick="triggerSurge()">📈 Demand Surge</button>
-  <button class="btn-recover" onclick="triggerRecover()">🔄 Grid Recovery</button>
-  <button class="btn-normal" onclick="resetSim()">■ Reset</button>
+  <button class="btn-recover" onclick="triggerRecover()">🔄 Grid Recovery / New Evaluation</button>
+  <button class="btn-normal" onclick="startNewIndependentEvaluation()">■ New Independent Evaluation</button>
 
   <div class="ctrl-group">
     <span class="ctrl-label">SPEED</span>
@@ -332,7 +332,7 @@
     <span class="ctrl-val" id="val-tau-ctrl">0.50</span>
   </div>
 
-  <span class="footer-formula">R = <span>δ</span>/<span>τ</span> → R≥1.0 : <span>FAIL-CLOSED</span></span>
+  <span class="footer-formula">R = <span>δ</span>/<span>τ</span> → R≥1.0 : <span>RUPTURE_BOUNDARY</span></span>
 </footer>
 
 <script>
@@ -353,7 +353,7 @@ let state = {
   freq: F_NOM,
   delta: 0,
   R: 0,
-  fsm: 'PERMIT',       // PERMIT / CAVEAT / FAIL_CLOSED / RECOVERING
+  fsm: 'PERMIT',       // PERMIT / CAVEAT / RUPTURE_BOUNDARY / RECOVERING
   microDelta: 0,
   macroDelta: 0,
   spikeDelta: 0,
@@ -364,6 +364,7 @@ let state = {
   tripDecay: 0,
   surgeDecay: 0,
 };
+const archivedHistories = [];
 
 // ── Generator units ──
 const generators = [
@@ -421,7 +422,7 @@ let transCount = 0;
 function addTransitionLog(from, to, R) {
   const el = document.getElementById('transition-log');
   transCount++;
-  const col = to === 'FAIL_CLOSED' ? '#ff4444' : to === 'RECOVERING' ? '#44aaff' : '#00ff88';
+  const col = to === 'RUPTURE_BOUNDARY' ? '#ff4444' : to === 'RECOVERING' ? '#44aaff' : '#00ff88';
   el.innerHTML = `<div style="color:${col}">◯${transCount} ${from}→${to} R=${R.toFixed(3)}</div>` + el.innerHTML;
 }
 
@@ -480,15 +481,17 @@ function physicsStep() {
 
   // FSM transition
   const prevFsm = state.fsm;
-  if (state.recoverActive && state.R < 0.8) {
+  if (prevFsm === 'RUPTURE_BOUNDARY') {
+    state.fsm = 'RUPTURE_BOUNDARY';
+  } else if (state.recoverActive && state.R < 0.8) {
     state.fsm = 'RECOVERING';
   } else if (state.R >= 1.0 || state.residualDebt > 0.8) {
-    state.fsm = 'FAIL_CLOSED';
+    state.fsm = 'RUPTURE_BOUNDARY';
   } else if (state.R >= 0.4) {
     state.fsm = 'CAVEAT';
   } else {
-    if (state.fsm === 'FAIL_CLOSED' || state.fsm === 'RECOVERING') {
-      // Automatic recovery from FAIL_CLOSED is forbidden → wait for human operation
+    if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'RECOVERING') {
+      // Automatic recovery from RUPTURE_BOUNDARY is forbidden → wait for human operation
     } else {
       state.fsm = 'PERMIT';
     }
@@ -496,8 +499,8 @@ function physicsStep() {
 
   if (state.fsm !== prevFsm) {
     addTransitionLog(prevFsm, state.fsm, state.R);
-    if (state.fsm === 'FAIL_CLOSED') {
-      addLog('⛔ FAIL-CLOSED triggered R=' + state.R.toFixed(3), 'ev-crit');
+    if (state.fsm === 'RUPTURE_BOUNDARY') {
+      addLog('⛔ RUPTURE_BOUNDARY triggered R=' + state.R.toFixed(3), 'ev-crit');
       flashTransition();
       document.getElementById('btn-trip').disabled = true;
       document.getElementById('btn-surge').disabled = true;
@@ -550,7 +553,7 @@ function drawFreqCanvas() {
   ctxF.fillText('FREQ', W-36, 14);
 
   // Waveform
-  const zoneColors = { PERMIT: '#00ff88', CAVEAT: '#ffcc00', FAIL_CLOSED: '#ff3333', RECOVERING: '#44aaff' };
+  const zoneColors = { PERMIT: '#00ff88', CAVEAT: '#ffcc00', RUPTURE_BOUNDARY: '#ff3333', RECOVERING: '#44aaff' };
   ctxF.lineWidth = 1.5;
   ctxF.beginPath();
   for (let i = 0; i < BUF; i++) {
@@ -560,7 +563,7 @@ function drawFreqCanvas() {
     i === 0 ? ctxF.moveTo(x,y) : ctxF.lineTo(x,y);
   }
   ctxF.strokeStyle = zoneColors[state.fsm] || '#00ff88';
-  ctxF.shadowColor = ctxF.strokeStyle; ctxF.shadowBlur = state.fsm === 'FAIL_CLOSED' ? 8 : 3;
+  ctxF.shadowColor = ctxF.strokeStyle; ctxF.shadowBlur = state.fsm === 'RUPTURE_BOUNDARY' ? 8 : 3;
   ctxF.stroke(); ctxF.shadowBlur = 0;
 
   // Current value display
@@ -580,7 +583,7 @@ function drawRCanvas() {
   ctxR.beginPath(); ctxR.moveTo(0,yTau); ctxR.lineTo(W,yTau); ctxR.stroke();
   ctxR.setLineDash([]);
   ctxR.fillStyle = '#ff4444'; ctxR.font = '9px Courier New';
-  ctxR.fillText('τ = 1.0  FAIL-CLOSED', 6, yTau - 3);
+  ctxR.fillText('τ = 1.0  RUPTURE_BOUNDARY', 6, yTau - 3);
 
   // ZONE-B line (0.4)
   const yB = H - (0.4 / 2.0) * H;
@@ -609,7 +612,7 @@ function drawRCanvas() {
   ctxR.shadowColor = rCol; ctxR.shadowBlur = state.R >= 1.0 ? 10 : 3;
   ctxR.stroke(); ctxR.shadowBlur = 0;
 
-  // Transition-point marker at the FAIL-CLOSED moment
+  // Transition-point marker at the RUPTURE_BOUNDARY moment
   ctxR.fillStyle = rCol; ctxR.font = 'bold 11px Courier New';
   ctxR.fillText(`R = ${state.R.toFixed(4)}`, W-100, 14);
 }
@@ -630,7 +633,7 @@ function updateUI() {
   // FSM
   const fsmEl = document.getElementById('fsm-box');
   fsmEl.className = 'fsm-box fsm-' + state.fsm;
-  const fsmLabels = { PERMIT:'PERMIT', CAVEAT:'CAVEAT ⚠', FAIL_CLOSED:'FAIL-CLOSED ⛔', RECOVERING:'RECOVERING ↻' };
+  const fsmLabels = { PERMIT:'PERMIT', CAVEAT:'CAVEAT ⚠', RUPTURE_BOUNDARY:'RUPTURE_BOUNDARY ⛔', RECOVERING:'RECOVERING ↻' };
   fsmEl.textContent = fsmLabels[state.fsm] || state.fsm;
 
   document.getElementById('val-R').style.color =
@@ -644,7 +647,7 @@ function updateUI() {
 
 // ── Event triggers ──
 function triggerTrip() {
-  if (state.fsm === 'FAIL_CLOSED') return;
+  if (state.fsm === 'RUPTURE_BOUNDARY') return;
   // Randomly trip one generator
   const online = generators.filter(g => g.online);
   if (online.length <= 1) return;
@@ -657,13 +660,18 @@ function triggerTrip() {
 }
 
 function triggerSurge() {
-  if (state.fsm === 'FAIL_CLOSED') return;
+  if (state.fsm === 'RUPTURE_BOUNDARY') return;
   state.surgeActive = true;
   state.surgeDecay  = 0.9 + Math.random() * 0.6;
   addLog('📈 Demand surge event occurred', 'ev-warn');
 }
 
 function triggerRecover() {
+  if (state.fsm === 'RUPTURE_BOUNDARY') {
+    startNewIndependentEvaluation();
+    addLog('🔄 New independent Cause-Side evaluation started after external grid inspection', 'ev-ok');
+    return;
+  }
   generators.forEach(g => g.online = true);
   state.recoverActive = true;
   state.tripActive    = false;
@@ -676,7 +684,14 @@ function triggerRecover() {
   addLog('🔄 Grid recovery operation started (human decision)', 'ev-ok');
 }
 
-function resetSim() {
+function startNewIndependentEvaluation() {
+  if (t > 0 || logCount > 0 || transCount > 0) {
+    archivedHistories.push({
+      finalState: {...state},
+      eventLog: document.getElementById('event-log').innerHTML,
+      transitionLog: document.getElementById('transition-log').innerHTML,
+    });
+  }
   state = {
     freq:F_NOM, delta:0, R:0, fsm:'PERMIT',
     microDelta:0, macroDelta:0, spikeDelta:0, residualDebt:0,
@@ -691,7 +706,7 @@ function resetSim() {
   document.getElementById('transition-log').innerHTML = '';
   transCount = 0; logCount = 0;
   renderGenList();
-  addLog('■ System reset', 'ev-info');
+  addLog(`■ New independent Cause-Side evaluation; archived histories=${archivedHistories.length}`, 'ev-info');
 }
 
 function updateSpeed(v) {

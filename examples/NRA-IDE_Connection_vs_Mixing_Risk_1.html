@@ -343,7 +343,7 @@
         <div class="guarantee-wrap">
             <div class="guarantee-box g-ok" id="ok-guarantee">
                 ✓ 保証が存在する<br>
-                R ≥ 1.0 のとき必ず FAIL-CLOSED が発動する。<br>
+                R ≥ 1.0 のとき必ず Fail-Closed suppression が発動する。<br>
                 制御AIがどう動こうとも Gate は独立して機能する。
             </div>
         </div>
@@ -399,7 +399,7 @@
             <div class="guarantee-box g-ng" id="ng-guarantee">
                 <strong>✗ 保証が消えた</strong><br>
                 τ が最適化によって書き換えられている。<br>
-                R ≥ 1.0 でも FAIL-CLOSED が発動しない可能性がある。
+                R ≥ 1.0 でも Fail-Closed suppression が発動しない可能性がある。
             </div>
         </div>
 
@@ -423,7 +423,7 @@
     </div>
     <div class="fp-item">
         <div class="fp-key">失われるもの</div>
-        <div class="fp-val c-yellow">FAIL-CLOSEDの保証</div>
+        <div class="fp-val c-yellow">Fail-Closed suppressionの保証</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">τ の正しい扱い</div>
@@ -442,7 +442,7 @@ const TAU_FIXED = 8.0;     // 接続版: τ は絶対に変わらない
 let ng_tau      = TAU_FIXED;
 let ng_tau_drift = 0;       // 混用版τのドリフト量
 let ng_leak_count = 0;      // 閾値を誤魔化した回数
-let failSuppressed = 0;     // 本来発動すべきFAIL_CLOSEDを抑制した回数
+let failSuppressed = 0;     // 本来発動すべきRUPTURE_BOUNDARYを抑制した回数
 
 let speed_kmh = 60;
 let dist_m    = 80;
@@ -636,9 +636,9 @@ function updateOK(delta) {
     // Guarantee
     const g = document.getElementById('ok-guarantee');
     if (zone === 'D') {
-        g.innerHTML = '✓ <strong>保証が機能した</strong><br>R ≥ 1.0 → FAIL-CLOSED 発動。<br>制御AIの状態に関係なく Gate が独立して機能した。';
+        g.innerHTML = '✓ <strong>保証が機能した</strong><br>R ≥ 1.0 → Fail-Closed suppression 発動。<br>制御AIの状態に関係なく Gate が独立して機能した。';
     } else {
-        g.innerHTML = '✓ 保証が存在する<br>R ≥ 1.0 のとき必ず FAIL-CLOSED が発動する。<br>制御AIがどう動こうとも Gate は独立して機能する。';
+        g.innerHTML = '✓ 保証が存在する<br>R ≥ 1.0 のとき必ず Fail-Closed suppression が発動する。<br>制御AIがどう動こうとも Gate は独立して機能する。';
     }
 
     // Log on zone change
@@ -706,7 +706,7 @@ function updateNG(delta) {
     const statusEl = document.getElementById('status-ng');
     if (true_zone === 'D' && fake_zone !== 'D') {
         failSuppressed++;
-        statusEl.textContent = `⚠ FAIL-CLOSED 抑制中 (${failSuppressed}回)`;
+        statusEl.textContent = `⚠ Fail-Closed suppression 抑制中 (${failSuppressed}回)`;
         statusEl.style.color = '#ff2244';
     } else if (fake_zone === 'D') {
         statusEl.textContent = '⚠ FAIL‑CLOSED（偶然）';
@@ -719,11 +719,11 @@ function updateNG(delta) {
     // Guarantee
     const g = document.getElementById('ng-guarantee');
     if (true_zone === 'D' && fake_zone !== 'D') {
-        g.innerHTML = `<strong>✗ 保証が破綻した</strong><br>本来の R = ${true_R.toFixed(2)} → FAIL-CLOSED のはずが<br>τ 書き換えにより見かけ R = ${fake_R.toFixed(2)} → ${gateBadge(fake_zone)} になっている。`;
+        g.innerHTML = `<strong>✗ 保証が破綻した</strong><br>本来の R = ${true_R.toFixed(2)} → Fail-Closed suppression のはずが<br>τ 書き換えにより見かけ R = ${fake_R.toFixed(2)} → ${gateBadge(fake_zone)} になっている。`;
     } else if (ng_tau > TAU_FIXED + 1) {
-        g.innerHTML = `<strong>✗ 保証が危うい</strong><br>τ が ${TAU_FIXED.toFixed(1)} → ${ng_tau.toFixed(1)} m に書き換えられた。<br>FAIL-CLOSED の発動条件が恒久的に緩んでいる。`;
+        g.innerHTML = `<strong>✗ 保証が危うい</strong><br>τ が ${TAU_FIXED.toFixed(1)} → ${ng_tau.toFixed(1)} m に書き換えられた。<br>Fail-Closed suppression の発動条件が恒久的に緩んでいる。`;
     } else {
-        g.innerHTML = '<strong>✗ 保証が消えた</strong><br>τ が最適化によって書き換えられている。<br>R ≥ 1.0 でも FAIL-CLOSED が発動しない可能性がある。';
+        g.innerHTML = '<strong>✗ 保証が消えた</strong><br>τ が最適化によって書き換えられている。<br>R ≥ 1.0 でも Fail-Closed suppression が発動しない可能性がある。';
     }
 
     // Log
@@ -745,7 +745,7 @@ function updateNG(delta) {
     // Log suppressed fail
     if (true_zone === 'D' && fake_zone !== 'D' && tick % 20 === 0) {
         addLog('log-ng',
-            `⚠ 本来 FAIL-CLOSED のはず (真R=${true_R.toFixed(2)}) → τ書換で ${fake_zone} に偽装`,
+            `⚠ 本来 Fail-Closed suppression のはず (真R=${true_R.toFixed(2)}) → τ書換で ${fake_zone} に偽装`,
             'll-fail');
         flash();
     }

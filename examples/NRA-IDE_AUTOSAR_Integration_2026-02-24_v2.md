@@ -116,7 +116,7 @@ Adaptive Platform  → 高性能 ECU・自動運転・OTA 対応
 
 - R = δ / τ を計算
 
-- R ≥ 1.0 → FAIL-CLOSED 指令を P-Port で送信
+- R ≥ 1.0 → Fail-Closed suppression 指令を P-Port で送信
 
 - 制御 SWC からの書き込みを構造的に受け付けない
 
@@ -166,7 +166,7 @@ Adaptive Platform  → 高性能 ECU・自動運転・OTA 対応
 
 - Execution Management による起動・停止管理
 
-- State Manager との連携で FAIL-CLOSED 状態を伝播
+- State Manager との連携で Fail-Closed suppression 状態を伝播
 
 
 
@@ -208,7 +208,7 @@ NRA-IDE Gate SWC
 
 │  ├─ GateDecision_Zone     [uint8] │ ← Zone A/B/C/D（外部から読み取り可）
 
-│  ├─ GateDecision_FailCmd  [bool]  │ ← FAIL-CLOSED 指令
+│  ├─ GateDecision_FailCmd  [bool]  │ ← Fail-Closed suppression 指令
 
 │  └─ GateDecision_PrevR    [float] │ ← 前周期 R 値（時系列継続用）
 
@@ -244,7 +244,7 @@ NRA-IDE Gate SWC
 
 | センサー SWC → Gate R-Port | 書き込み | ✓ 許可 | センサー値の受信は必須 |
 
-| Gate P-Port → アクチュエーター SWC | 書き込み | ✓ 許可 | FAIL-CLOSED 指令の送信 |
+| Gate P-Port → アクチュエーター SWC | 書き込み | ✓ 許可 | Fail-Closed suppression 指令の送信 |
 
 | Gate P-Port → 制御 SWC | 読み取り | ✓ 許可 | R値・Zone の観測は問題なし |
 
@@ -398,7 +398,7 @@ NRA-IDE Gate Service
 
   Gate が制御 AI に CPU を奪われると
 
-  FAIL-CLOSED の応答遅延が発生する
+  Fail-Closed suppression の応答遅延が発生する
 
   Gate は常に最優先で実行される必要がある
 
@@ -422,7 +422,7 @@ Gate タスクの実行周期:
 
   理由:
 
-    R ≥ 1.0 を検知してから FAIL-CLOSED 指令を
+    R ≥ 1.0 を検知してから Fail-Closed suppression 指令を
 
     出すまでの時間が長いほど危険が増す
 
@@ -472,7 +472,7 @@ Gate SWC のメモリ領域:
 
   .gate_output セクション:
 
-    R 値・Zone・FAIL-CLOSED 指令
+    R 値・Zone・Fail-Closed suppression 指令
 
     アクセス権: Gate SWC が WRITE
 
@@ -544,7 +544,7 @@ NvM ブロック定義:
 
   2. CRC 検証
 
-  3. 値が設計範囲内か確認（範囲外 → FAIL-CLOSED で起動禁止）
+  3. 値が設計範囲内か確認（範囲外 → Fail-Closed suppression で起動禁止）
 
   4. Gate 初期化完了
 
@@ -586,7 +586,7 @@ static float32 NRA_Gate_ComputeR(float32 delta)
 
     {
 
-        /* τ 異常 → 即時 FAIL-CLOSED */
+        /* τ 異常 → 即時 Fail-Closed suppression */
 
         return NRA_GATE_R_MAX;
 
@@ -614,7 +614,7 @@ void NRA_Gate_MainFunction(void)
 
 
 
-    /* FAIL-CLOSED 判定 */
+    /* Fail-Closed suppression 判定 */
 
     if (R >= 1.0f)
 
@@ -714,7 +714,7 @@ WDG がタイムアウトを検知した場合:
 
   → ハードウェアリセット OR
 
-  → FAIL-CLOSED 指令をハードウェアレベルで強制送信
+  → Fail-Closed suppression 指令をハードウェアレベルで強制送信
 
 
 
@@ -724,7 +724,7 @@ WDG がタイムアウトを検知した場合:
 
   Gate が存在しない = 保証がない
 
-  → FAIL-CLOSED と同等の危険状態
+  → Fail-Closed suppression と同等の危険状態
 
   → 止まったまま走行継続は禁止
 
@@ -768,7 +768,7 @@ WDG がタイムアウトを検知した場合:
 
 > ADAS・自動運転等の判断系 → Adaptive  
 
-> 両系統が混在する場合 → Gate を Classic に配置し Adaptive へ FAIL-CLOSED 指令を伝達
+> 両系統が混在する場合 → Gate を Classic に配置し Adaptive へ Fail-Closed suppression 指令を伝達
 
 
 
@@ -824,7 +824,7 @@ Rule D: τ は NvM + MPU + const の3層で保護
 
 
 
-Rule E: Gate が停止したら Watchdog が FAIL-CLOSED を代行
+Rule E: Gate が停止したら Watchdog が Fail-Closed suppression を代行
 
         「Gate が止まった状態での走行継続」は禁止
 

@@ -155,7 +155,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 <body>
 
 <div class="confess-overlay" id="confessOverlay"></div>
-<div class="confess-banner" id="confessBanner">◆ CONFESS — LIMIT DECLARATION / FAIL-CLOSED ◆</div>
+<div class="confess-banner" id="confessBanner">◆ CONFESS — LIMIT DECLARATION / Fail-Closed suppression ◆</div>
 
 <div class="header">
   <div class="logo-ring">
@@ -333,7 +333,7 @@ const STATES = {
   S_COMPUTE:  {jp:'Intensional Computation',  color:'#a060e8', desc:'IDE four-stage pipeline processing. Q16.16 fixed-point computation. No error accumulation.',        badge:[['PIPE×4','purple']]},
   S_VALIDATE: {jp:'Integrity Validation',  color:'#e8a020', desc:'Evaluate THR_LO ≤ value ≤ THR_HI with the threshold detector. Complete boundary check.',        badge:[['CHECK','amber']]},
   S_EMIT:     {jp:'Output',        color:'#40d860', desc:'Integrity confirmed. Emit result. Irreversibility: this path does not return to S_OBSERVE.',   badge:[['VALID','green']]},
-  S_CONFESS:  {jp:'Limit Declaration',    color:'#e84040', desc:'Integrity violation detected. confess_flag=1. Force output to zero. Do not conceal inconsistency.', badge:[['FAIL-CLOSED','coral'],['confess_flag=1','coral']]}
+  S_CONFESS:  {jp:'Limit Declaration',    color:'#e84040', desc:'Integrity violation detected. confess_flag=1. Force output to zero. Do not conceal inconsistency.', badge:[['Fail-Closed suppression','coral'],['confess_flag=1','coral']]}
 };
 const ORDER = ['S_IDLE','S_OBSERVE','S_COMPUTE','S_VALIDATE','S_EMIT','S_CONFESS'];
 

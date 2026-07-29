@@ -295,7 +295,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clk">--:--:--</span>
-  <span>圧縮性流体：τ=f(T,V) 動的計算 ｜ R≥1.0 → FAIL_CLOSED</span>
+  <span>圧縮性流体：τ=f(T,V) 動的計算 ｜ R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -304,7 +304,7 @@ const P_OPT   = 0.50;   // MPa 設計圧力
 const P_MAX_BASE = 0.80; // MPa 基準温度での破裂限界
 const P_MIN   = 0.20;   // MPa 動作不能限界（真空接近）
 const T_REF   = 298.15; // K  基準温度 (25°C)
-const R_WARN  = 0.75, R_FAIL = 1.0;
+const R_WARN  = 0.75, R_RUPTURE = 1.0;
 
 // τの動的計算（ボイル・シャルル則）
 // 温度上昇 → 気体膨張 → 破裂圧力が実効的に低下 → τ_hi が縮む
@@ -377,8 +377,8 @@ function calcIDE(p, tauHi, tauLo){
   const rHi = delta > 0 ? delta / Math.max(tauHi, 0.01) : 0;
   const rLo = delta < 0 ? absDelta / Math.max(tauLo, 0.01) : 0;
   let status, action;
-  if(rHi >= R_FAIL)       { status='fail-hi'; action='過圧FAIL_CLOSED — 安全弁・コンプレッサー停止'; }
-  else if(rLo >= R_FAIL)  { status='fail-lo'; action='減圧FAIL_CLOSED — コンプレッサー最大出力'; }
+  if(rHi >= R_RUPTURE)       { status='fail-hi'; action='過圧RUPTURE_BOUNDARY — 安全弁・コンプレッサー停止'; }
+  else if(rLo >= R_RUPTURE)  { status='fail-lo'; action='減圧RUPTURE_BOUNDARY — コンプレッサー最大出力'; }
   else if(rHi >= R_WARN)  { status='warn-hi'; action='過圧警告：排気または加熱停止推奨'; }
   else if(rLo >= R_WARN)  { status='warn-lo'; action='減圧警告：コンプレッサー出力増加推奨'; }
   else                    { status='safe';    action='正常稼働継続'; }
@@ -488,17 +488,17 @@ function updateUI(ide, T_kelvin, tauHi, tauLo, fluctAmp, tauFluctAmp){
     tFactor < 0.85 ? '#ff4060' : tFactor < 0.95 ? '#ffcc00' : '#ffaa44';
 
   document.getElementById('rHiN').textContent = Math.min(ide.rHi,9.999).toFixed(3);
-  document.getElementById('rHiN').style.color  = ide.rHi>=R_FAIL?'#ff4060':'#ff6080';
+  document.getElementById('rHiN').style.color  = ide.rHi>=R_RUPTURE?'#ff4060':'#ff6080';
   document.getElementById('rLoN').textContent = Math.min(ide.rLo,9.999).toFixed(3);
-  document.getElementById('rLoN').style.color  = ide.rLo>=R_FAIL?'#6688ff':'#99aaff';
-  setArc('arcHi',ide.rHi,ide.rHi>=R_FAIL?'#ff4060':'#ff6080');
-  setArc('arcLo',ide.rLo,ide.rLo>=R_FAIL?'#6688ff':'#99aaff');
+  document.getElementById('rLoN').style.color  = ide.rLo>=R_RUPTURE?'#6688ff':'#99aaff';
+  setArc('arcHi',ide.rHi,ide.rHi>=R_RUPTURE?'#ff4060':'#ff6080');
+  setArc('arcLo',ide.rLo,ide.rLo>=R_RUPTURE?'#6688ff':'#99aaff');
   setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
 
   const badge=document.getElementById('badge');
   badge.className='badge '+ide.status;
   const lm={safe:'SAFE','warn-hi':'WARNING over-pressure','warn-lo':'WARNING low-pressure',
-    'fail-hi':'FAIL_CLOSED over-pressure','fail-lo':'FAIL_CLOSED low-pressure'};
+    'fail-hi':'RUPTURE_BOUNDARY over-pressure','fail-lo':'RUPTURE_BOUNDARY low-pressure'};
   badge.textContent=lm[ide.status];
   document.getElementById('actTxt').textContent=ide.action;
 

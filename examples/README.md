@@ -68,7 +68,7 @@ $$R = \frac{\delta}{\tau}$$
 
 | R_J ≤ R < 1.00 | **JUDGMENT LIMIT** | Under the actual operating conditions, further progression may reach R = 1.0 due to delay, inertia, or residual fluctuation | Stop or strongly restrict automatic judgment and transfer authority to humans |
 
-| R ≥ 1.00 | **FAIL-CLOSED** | Structural limit corresponding to phase transition, rupture, breach, or collapse | AI stops output/action and humans make the final decision |
+| R_target ≥ 1.00 | **RUPTURE_BOUNDARY** | The declared target reaches its complete rupture boundary | Stop free-form generation and autonomous action; continue predefined post-rupture fixed testimony over surviving channels |
 
 > **Important:** R = 1.0 is not a warning value.  
 
@@ -312,9 +312,9 @@ function gate(delta, tau) {
 
     const R = delta / tau;
 
-    if (R >= 1.0) return "FAIL_CLOSED";
+    if (R >= 1.0) return "RUPTURE_BOUNDARY";
 
-    return "SAFE";
+    return "PERMIT";
 
 }
 
@@ -332,7 +332,7 @@ const infusionPressure = getPumpCapacity();   // τ: available pump pressure
 
 const deliveryStatus = gate(tumorResistance, infusionPressure);
 
-if (deliveryStatus === "FAIL_CLOSED") {
+if (deliveryStatus === "RUPTURE_BOUNDARY") {
 
     alert("Physical reachability failure detected. Human medical judgment is required.");
 

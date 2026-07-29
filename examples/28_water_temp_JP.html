@@ -317,7 +317,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <span class="set-val set-val-warn">0.75</span>
       </div>
       <div class="setting-row">
-        <span class="set-lbl">R_FAIL</span>
+        <span class="set-lbl">R_RUPTURE</span>
         <span class="set-val set-val-fail">1.00</span>
       </div>
     </div>
@@ -334,7 +334,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clk">--:--:--</span>
-  <span>R≥1.0 → FAIL_CLOSED</span>
+  <span>R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -344,7 +344,7 @@ const T_RANGE = 35; // 上下限は最適値から±で自動計算
 // τ_hi = T_MAX - T_OPT = 15℃, τ_lo = T_OPT - T_MIN = 20℃
 function T_MAX(){ return T_OPT + 15; }
 function T_MIN(){ return T_OPT - 20; }
-const R_WARN = 0.75, R_FAIL = 1.0;
+const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── 状態 ──
 let running = true;
@@ -430,10 +430,10 @@ function calcIDE(t){
   // 総合状態判定
   const rMax = Math.max(rHi, rLo);
   let status, action;
-  if(rHi >= R_FAIL){
-    status = 'fail-hi'; action = '上限超過：FAIL_CLOSED — 緊急冷却 / 加熱停止';
-  } else if(rLo >= R_FAIL){
-    status = 'fail-lo'; action = '下限超過：FAIL_CLOSED — 緊急加熱 / 冷却停止';
+  if(rHi >= R_RUPTURE){
+    status = 'fail-hi'; action = '上限超過：RUPTURE_BOUNDARY — 緊急冷却 / 加熱停止';
+  } else if(rLo >= R_RUPTURE){
+    status = 'fail-lo'; action = '下限超過：RUPTURE_BOUNDARY — 緊急加熱 / 冷却停止';
   } else if(rHi >= R_WARN){
     status = 'warn-hi'; action = '上限接近：冷却強化を推奨';
   } else if(rLo >= R_WARN){
@@ -503,8 +503,8 @@ function getTankBottom(){ return tankC.height - 30; }
 // ── UI更新 ──
 function updateUI(ide){
   const col = statusColor(ide.status);
-  const rHiCol = ide.rHi >= R_FAIL ? '#ff3b5c' : ide.rHi >= R_WARN ? '#f0a500' : '#ff6030';
-  const rLoCol = ide.rLo >= R_FAIL ? '#7b6cff' : ide.rLo >= R_WARN ? '#f0a500' : '#7b6cff';
+  const rHiCol = ide.rHi >= R_RUPTURE ? '#ff3b5c' : ide.rHi >= R_WARN ? '#f0a500' : '#ff6030';
+  const rLoCol = ide.rLo >= R_RUPTURE ? '#7b6cff' : ide.rLo >= R_WARN ? '#f0a500' : '#7b6cff';
 
   // 温度表示（ゆらぎ込み生値を表示）
   document.getElementById('tempBig').innerHTML =
@@ -527,8 +527,8 @@ function updateUI(ide){
   const badge = document.getElementById('badge');
   badge.className = 'badge ' + ide.status;
   const lblMap = { safe:'SAFE', 'warn-hi':'WARNING ↑ 上限接近',
-    'warn-lo':'WARNING ↓ 下限接近', 'fail-hi':'FAIL_CLOSED ↑ 上限超過',
-    'fail-lo':'FAIL_CLOSED ↓ 下限超過' };
+    'warn-lo':'WARNING ↓ 下限接近', 'fail-hi':'RUPTURE_BOUNDARY ↑ 上限超過',
+    'fail-lo':'RUPTURE_BOUNDARY ↓ 下限超過' };
   badge.textContent = lblMap[ide.status];
   document.getElementById('actTxt').textContent = ide.action;
 

@@ -25,15 +25,16 @@ if hasattr(sys.stdout, "reconfigure"):
 class FSMState(Enum):
     """
     NRA-IDE ゲートFSM状態
-    WARMUP → PERMIT → CAVEAT → CRITICAL → FAIL_CLOSED
+    WARMUP → PERMIT → CAVEAT → CRITICAL → RUPTURE_BOUNDARY
 
-    FAIL_CLOSED からの復帰は人間操作のみ（Π⁻¹禁止）
+    RUPTURE_BOUNDARY は同一履歴内で解除しない。
+    後続処理は、独立した新対象・新Cause-Side履歴として開始する。
     """
     WARMUP      = "WARMUP"       # τ未確立（経過なし・新患相当）
     PERMIT      = "PERMIT"       # R < 0.35〜0.40 　安定
     CAVEAT      = "CAVEAT"       # 0.35〜0.40 ≤ R < 0.60  警告
     CRITICAL    = "CRITICAL"     # 0.60 ≤ R < 1.00  臨界接近
-    FAIL_CLOSED = "FAIL_CLOSED"  # R ≥ 1.00 → 人間判断を要請
+    RUPTURE_BOUNDARY = "RUPTURE_BOUNDARY"  # R_target ≥ 1.00 → 破断後固定証言
 
 
 # ============================================================

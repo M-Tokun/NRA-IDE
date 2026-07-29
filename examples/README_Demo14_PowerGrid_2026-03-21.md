@@ -42,13 +42,13 @@ NRA-IDEが答える問いは「どの速さで閾値に近づいているか、�
 
 ### Lower Waveform — R = δ/τ
 
-- **τ = 1.0 line (red dashed)**: the FAIL-CLOSED threshold
+- **τ = 1.0 line (red dashed)**: the RUPTURE_BOUNDARY threshold
 
 - **0.4 line (yellow dashed)**: ZONE-B entry point
 
 - The shaded region to the left of the τ line is the safe operating zone
 
-- When R crosses 1.0, a red flash fires and the FSM transitions to FAIL-CLOSED
+- When R crosses 1.0, a red flash fires and the FSM transitions to RUPTURE_BOUNDARY
 
 ### Left Panel
 
@@ -86,17 +86,17 @@ When a unit trips, its bar goes dark and spike-δ is injected.
 
 | 📈 需要急増 | Injects a demand surge event. Sustained δ increase. |
 
-| 🔄 系統復旧 | **Human-operated recovery only.** Activates recoverForce. FAIL-CLOSED does not self-reset. |
+| 🔄 系統復旧／新評価 | Before rupture, applies human-operated grid recovery. After `RUPTURE_BOUNDARY`, starts an independent Cause-Side evaluation following external inspection. |
 
-| ■ リセット | Full reset. |
+| ■ 独立した新評価 | Starts a new evaluation history without releasing the prior rupture record. |
 
 | SPEED slider | Simulation speed ×1–×5 |
 
 | τ slider | Adjust absorption thickness. Observe how threshold sensitivity changes. |
 
-**Important**: After FAIL-CLOSED activates, the event buttons are disabled.  
+**Important**: After RUPTURE_BOUNDARY activates, the event buttons are disabled.
 
-Recovery requires explicit human action (`🔄 系統復旧`). This is the Π⁻¹ prohibition in practice — the gate does not reverse automatically.
+The prior rupture classification is never reversed. After external inspection, `🔄 系統復旧／新評価` starts a separate Cause-Side history; it does not modify the old Effect-Side record.
 
 ---
 
@@ -150,11 +150,11 @@ NRA-IDE τ: the point at which the system **will inevitably reach** if δ accumu
 
 The engineering question is not "did we cross the wall?" but "how long until we reach τ, and what is our residual capacity?"
 
-### 4. Human authority over recovery — 復旧は人間の権限
+### 4. Human authority and new evaluation — 人間権限と新規評価
 
-FAIL-CLOSED does not self-reset. This is not a limitation — it is a structural guarantee.  
+RUPTURE_BOUNDARY does not self-reset. This is not a limitation — it is a structural guarantee.
 
-No automatic re-energization without a human operator confirming the cause.
+No automatic re-energization occurs. Human inspection may authorize a separate new evaluation, but cannot release the prior rupture latch.
 
 This implements the principle: **Cause-Side authority belongs to the human operator.**  
 
@@ -170,7 +170,7 @@ $$\delta_f = |f_{current} - f_{nominal}|$$
 
 $$\text{residual}\_\text{debt}(t) = \int_0^t (R - R \cdot k_{recovery}) \, dt$$
 
-$$R \geq 1.0 \Rightarrow \text{FAIL-CLOSED}$$
+$$R_{\mathrm{target}} \geq 1.0 \Rightarrow \mathrm{RUPTURE\_BOUNDARY}$$
 
 ---
 

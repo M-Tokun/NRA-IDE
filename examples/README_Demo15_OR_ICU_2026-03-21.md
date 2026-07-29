@@ -146,7 +146,7 @@ Waveform brightness increases while fail-closed operational suppression is activ
 
 ### Lower Canvas — R_total
 
-- **τ = 1.0 line** (red dashed): FAIL-CLOSED threshold
+- **τ = 1.0 line** (red dashed): RUPTURE_BOUNDARY threshold
 
 - **0.6 line** (orange dashed): CRITICAL zone entry
 
@@ -202,9 +202,9 @@ Waveform brightness increases while fail-closed operational suppression is activ
 
 | CRITICAL 🔴 | 0.6 ≤ R_eff < 1.0 | Approaching threshold. Pre-intervention zone. |
 
-| FAIL-CLOSED ⛔ | R_eff ≥ 1.0 or debt > 1.2 | Structural limit reached. **Human judgment required.** |
+| RUPTURE_BOUNDARY ⛔ | R_eff ≥ 1.0 or debt > 1.2 | Structural limit reached. **Human judgment required.** |
 
-FAIL-CLOSED does not self-reset. Only `✚ 医師介入` can initiate recovery.  
+`RUPTURE_BOUNDARY` remains fixed in the current history. `✚ 医師介入` starts external treatment but does not downgrade that classification.
 
 Even after intervention, `residual_debt` persists — reflecting accumulated structural stress.
 
@@ -224,9 +224,9 @@ Even after intervention, `residual_debt` persists — reflecting accumulated str
 
 | ⚡ 血管攣縮 | Vasospasm. Acute BP spike. Short duration. |
 
-| ✚ 医師介入 | **Human-operated only.** Activates recovery force. Unlocks events. |
+| ✚ 医師介入 | **Human-operated only.** Starts external treatment. At rupture, the old classification and fixed testimony remain. |
 
-| ■ リセット | Full reset to new-patient state. |
+| ■ 新患者評価 | Starts an independent new-patient Cause-Side history. |
 
 | SPEED slider | ×1–×6 simulation speed |
 
@@ -242,7 +242,7 @@ Even after intervention, `residual_debt` persists — reflecting accumulated str
 
 5. Note that residual_debt persists even after the waveform appears to recover
 
-6. If FAIL-CLOSED activates, use `✚ 医師介入` — observe that debt remains
+6. If `RUPTURE_BOUNDARY` activates, use `✚ 医師介入` and confirm that the classification and residual debt remain
 
 ---
 
@@ -320,9 +320,9 @@ NRA-IDE treats epistemic uncertainty as a first-class structural condition.
 
 ### 5. Human authority is structurally enforced / 人間権限の構造的保証
 
-FAIL-CLOSED cannot be exited by the system.  
+RUPTURE_BOUNDARY cannot be exited by the system.
 
-Recovery requires `✚ 医師介入` — a human decision.
+`✚ 医師介入` is a human external action; it does not release the old rupture state. A later patient evaluation starts as an independent Cause-Side history.
 
 This is not a UI restriction. It is a structural statement:  
 
@@ -368,7 +368,7 @@ $$w_f = \frac{\text{warmupPct}}{100} \quad \text{(accuracy weight)}$$
 
 $$R_{eff} = R_{total} + 0.4 \cdot \text{residual}\_\text{debt}$$
 
-$$R_{eff} \geq 1.0 \Rightarrow \text{FAIL-CLOSED}$$
+$$R_{\mathrm{target}} \geq 1.0 \Rightarrow \mathrm{RUPTURE\_BOUNDARY}$$
 
 ---
 

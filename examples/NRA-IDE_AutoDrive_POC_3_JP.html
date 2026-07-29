@@ -168,7 +168,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
 <script>
 // FILE: NRA-IDE_AutoDrive_POC_03_JP.html  2026-02-28
 // NRA-IDE AutoDrive Safety Gate v0.3
-// 5-Zone: A=PERMIT B=CAVEAT C=HANDOFF-WARNING D=EMERGENCY E=FAIL-CLOSED
+// 5-Zone: A=PERMIT B=CAVEAT C=HANDOFF-WARNING D=EMERGENCY E=RUPTURE_BOUNDARY
 
 const MU={dry:{summer:0.80,studs:0.70},wet:{summer:0.55,studs:0.50},snow:{summer:0.20,studs:0.45},ice:{summer:0.10,studs:0.30}};
 const ROAD_COLOR={dry:'#888',wet:'#4488ff',snow:'#aaddff',ice:'#88eeff'};
@@ -178,7 +178,7 @@ const G=9.8, REACT=1.0;
 // Zone thresholds — v0.3 key change
 // C threshold = 0.85 (human handoff warning, well before physical limit)
 // D threshold = 1.00 (emergency: human must act now)
-// E = R>=1.00 (FAIL-CLOSED: physical limit exceeded)
+// E = R>=1.00 (RUPTURE_BOUNDARY: physical limit exceeded)
 const TH={A:0.40,B:0.70,C:0.85,D:1.00};
 
 let speed_kmh=60,dist_m=80,tau_m=8,road='dry',tire='summer',prevZone='',roadOffset=0;
@@ -317,7 +317,7 @@ function drawRoad(delta,R,sd,dist){
   ctx.fillStyle=TIRE_COLOR[tire];ctx.font='10px Courier New';ctx.textAlign='left';
   ctx.fillText((true?['夏タイヤ','スタッドレス']:['Summer','Winter'])[tire==='summer'?0:1]+'  μ='+getMu().toFixed(2),12,h-10);
 
-  // Zone E FAIL-CLOSED overlay
+  // Zone E RUPTURE_BOUNDARY overlay
   if(R>=TH.D){
     ctx.fillStyle='rgba(255,34,68,0.06)';ctx.fillRect(0,0,w,h);
     ctx.fillStyle='#ff2244';ctx.font='bold 12px Courier New';ctx.textAlign='center';
@@ -345,7 +345,7 @@ function updateZoneUI(zone,R){
     B:{color:'#ffd600',name:"ゾーン B — 注意付き許可",gate:"注意付き許可"},
     C:{color:'#ff8c00',name:"ゾーン C — 引き渡し警告",gate:"⚠ これ以上は無理です。引き継いでください"},
     D:{color:'#ff4400',name:"ゾーン D — 緊急介入要求",gate:"🚨 緊急介入要求"},
-    E:{color:'#ff2244',name:"ゾーン E — フェイルクローズド",gate:"🛑 緊急停止 FAIL-CLOSED"},
+    E:{color:'#ff2244',name:"ゾーン E — フェイルクローズド",gate:"🛑 緊急停止 RUPTURE_BOUNDARY"},
   };
   const z=zData[zone];
   rEl.style.color=z.color;rEl.textContent=Math.min(R,9.99).toFixed(2);

@@ -72,7 +72,7 @@ and clarifies the critical distinction between **connection (permitted)** and **
 
   R = δ / τ
 
-  R ≥ 1.0 → FAIL-CLOSED
+  R ≥ 1.0 → RUPTURE_BOUNDARY
 
         ↓
 
@@ -110,7 +110,7 @@ NRA-IDE が行うのは **「制約からのズレ（δ）が吸収厚み（τ�
 
 
 
-| システム | δ（制約からのズレ）| τ（吸収厚み）| FAIL-CLOSED の意味 |
+| システム | δ（制約からのズレ）| τ（吸収厚み）| RUPTURE_BOUNDARY の意味 |
 
 |----------|-------------------|-----------|-------------------|
 
@@ -132,7 +132,7 @@ NRA-IDE が行うのは **「制約からのズレ（δ）が吸収厚み（τ�
 
 | エアバッグ展開電流 | 必要電流 − 供給電流 | 許容誤差 | 不展開防止 → 警報 |
 
-| 路面μ×停止距離（本POC） | 停止距離 − 車間距離 | τ = margin | FAIL-CLOSED → 緊急停止 |
+| 路面μ×停止距離（本POC） | 停止距離 − 車間距離 | τ = margin | RUPTURE_BOUNDARY → 緊急停止 |
 
 
 
@@ -244,7 +244,7 @@ Reversing this arrow breaks the structure
 
 [NRA-IDE Gate]
 
-   停止距離 > 車間距離 → R ≥ 1.0 → FAIL-CLOSED
+   停止距離 > 車間距離 → R ≥ 1.0 → RUPTURE_BOUNDARY
 
    AI の判断には一切関与しない
 
@@ -304,7 +304,7 @@ Reversing this arrow breaks the structure
 
 = 安全装置が「賢く」なろうとする
 
-= FAIL-CLOSED の保証が消える
+= RUPTURE_BOUNDARY の保証が消える
 
 ```
 
@@ -416,7 +416,7 @@ NRA-IDE を正しく理解していない設計者が陥りやすい誤用を以
 
 誤り:
 
-  FAIL-CLOSED が発動したログを
+  RUPTURE_BOUNDARY が発動したログを
 
   AI の訓練データとして使用する
 
@@ -584,7 +584,7 @@ Rule 5: 意味判断が必要な箇所にNRA-IDEを配置しない
 
 
 
-ロボットアームPOCでは「1軸でも FAIL-CLOSED → 全軸停止」を示した。  
+ロボットアームPOCでは「1軸でも RUPTURE_BOUNDARY → 全軸停止」を示した。
 
 自動車においても**複数 Gate の連鎖構造**は必須設計要件である。
 
@@ -596,7 +596,7 @@ Rule 5: 意味判断が必要な箇所にNRA-IDEを配置しない
 
 
 
-  油圧 Gate : R=1.2 → FAIL-CLOSED
+  油圧 Gate : R=1.2 → RUPTURE_BOUNDARY
 
   速度 Gate : R=0.6 → PERMIT
 
@@ -632,7 +632,7 @@ Gate P: 総合電源電流  R ≥ 1.0
 
     ↓
 
-FAIL-CLOSED（全系統停止指令）
+RUPTURE_BOUNDARY（全系統停止指令）
 
 
 
@@ -718,7 +718,7 @@ FAIL-CLOSED（全系統停止指令）
 
 | 実行タイミング | 設計・検証フェーズ | リアルタイム実行時 |
 
-| 出力 | ASIL レベルの認証 | FAIL-CLOSED / PERMIT の二値 |
+| 出力 | ASIL レベルの認証 | RUPTURE_BOUNDARY / PERMIT の二値 |
 
 | 説明可能性 | プロセス準拠の証明 | 数値と因果の完全トレース |
 
@@ -784,7 +784,7 @@ R = δ / τ
 
 
 
-R ≥ 1.0 → FAIL-CLOSED（緊急停止）
+R ≥ 1.0 → RUPTURE_BOUNDARY（緊急停止）
 
 ```
 
@@ -901,4 +901,3 @@ HYBRID は
 *FILE: NRA-IDE_Automotive_Scope_0224_v02.md*  
 
 *© M-Tokuni — MIT License (非商用・教育・研究目的)*
-

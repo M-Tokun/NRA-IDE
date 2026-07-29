@@ -291,7 +291,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clk">--:--:--</span>
-  <span>P = V × I ｜ R≥1.0 → FAIL_CLOSED</span>
+  <span>P = V × I ｜ R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -301,7 +301,7 @@ const P_MAX  = 6000;  // W 過電力限界（熱焼損）
 const P_MIN  = 1000;  // W 電力不足限界（動作不安定）
 const TAU_HI = P_MAX - P_OPT;  // 4000W
 const TAU_LO = P_OPT - P_MIN;  // 1000W
-const R_WARN = 0.75, R_FAIL = 1.0;
+const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── 状態 ──
 let running = true, loadOn = false;
@@ -346,8 +346,8 @@ function calcIDE(p){
   const rHi = delta > 0 ? delta / TAU_HI : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_FAIL)      { status='fail-hi'; action='過電力：FAIL_CLOSED — 遮断器トリップ'; }
-  else if(rLo >= R_FAIL) { status='fail-lo'; action='電力不足：FAIL_CLOSED — 電源確認'; }
+  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='過電力：RUPTURE_BOUNDARY — 遮断器トリップ'; }
+  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='電力不足：RUPTURE_BOUNDARY — 電源確認'; }
   else if(rHi >= R_WARN) { status='warn-hi'; action='過電力警告：負荷低減推奨'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='電力不足警告：電圧・電流確認'; }
   else                   { status='safe';    action='正常稼働継続'; }
@@ -422,17 +422,17 @@ function updateUI(ide, fluctAmp){
   document.getElementById('deltaDisp').textContent = (ide.delta>=0?'+':'')+Math.round(ide.delta).toLocaleString();
 
   document.getElementById('rHiN').textContent = Math.min(ide.rHi,9.999).toFixed(3);
-  document.getElementById('rHiN').style.color  = ide.rHi>=R_FAIL?'#ff3060':'#ff6080';
+  document.getElementById('rHiN').style.color  = ide.rHi>=R_RUPTURE?'#ff3060':'#ff6080';
   document.getElementById('rLoN').textContent = Math.min(ide.rLo,9.999).toFixed(3);
-  document.getElementById('rLoN').style.color  = ide.rLo>=R_FAIL?'#6688ff':'#88aaff';
-  setArc('arcHi',ide.rHi,ide.rHi>=R_FAIL?'#ff3060':'#ff6080');
-  setArc('arcLo',ide.rLo,ide.rLo>=R_FAIL?'#6688ff':'#88aaff');
+  document.getElementById('rLoN').style.color  = ide.rLo>=R_RUPTURE?'#6688ff':'#88aaff';
+  setArc('arcHi',ide.rHi,ide.rHi>=R_RUPTURE?'#ff3060':'#ff6080');
+  setArc('arcLo',ide.rLo,ide.rLo>=R_RUPTURE?'#6688ff':'#88aaff');
   setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
 
   const badge=document.getElementById('badge');
   badge.className='badge '+ide.status;
   const lm={safe:'SAFE','warn-hi':'WARNING ↑ 過電力','warn-lo':'WARNING ↓ 電力不足',
-             'fail-hi':'FAIL_CLOSED ↑ 過電力','fail-lo':'FAIL_CLOSED ↓ 電力不足'};
+             'fail-hi':'RUPTURE_BOUNDARY ↑ 過電力','fail-lo':'RUPTURE_BOUNDARY ↓ 電力不足'};
   badge.textContent=lm[ide.status];
   document.getElementById('actTxt').textContent=ide.action;
 
