@@ -142,7 +142,7 @@ Four simultaneous channels:
 
 | BP systolic | Purple | 90–140 mmHg |
 
-Waveform brightness increases during FAIL-CLOSED state.
+Waveform brightness increases while fail-closed operational suppression is active; Fail-Closed is not a canonical state.
 
 ### Lower Canvas — R_total
 

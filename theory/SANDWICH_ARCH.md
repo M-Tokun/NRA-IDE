@@ -162,6 +162,10 @@ Cause-Side data must retain:
 - rule version
 - update authority
 
+Cause-Side is not temporally frozen. Authorized new observations may form the next evaluation snapshot. The source, target, unit, observation time, transformation rule, rule version, update authority, and evaluated snapshot remain fixed for each evaluation.
+
+Observation, logging, and communication channels retain independent state. Loss of one channel does not imply rupture of the declared target or loss of another channel.
+
 Unknown values must not be completed using averages, similarity, prior outputs, or inference about unobserved facts.
 
 Applying a known mathematical identity, unit conversion, or predefined deterministic rule is not completion inference.
@@ -465,8 +469,11 @@ $$
 
 - new autonomous judgment stops
 - new autonomous action stops
+- `execution_authority` changes from the current autonomous path to the predefined external authority
 - predefined fixed Handoff testimony is presented for external human audit
 - structural testimony continues
+- the structural-testimony route and audit-log route continue
+- responsibility, audit-log custody, and guarantees of correctness, recovery, or resolution do not transfer implicitly
 - explanatory text is restricted to non-authoritative support
 
 ### 10.4 IRREVERSIBLE_TRANSITION
@@ -485,21 +492,24 @@ $$
 ### 10.5 RUPTURE_BOUNDARY
 
 $$
-R\ge1.0
+R_{\mathrm{target}}\ge1.0
 $$
 
 - ordinary LLM generation stops
 - autonomous judgment and action remain stopped
-- ongoing structural testimony switches to final fixed testimony
+- ordinary structural testimony switches to `POST_RUPTURE_FIXED`
+- surviving observation, logging, and communication channels continue independently
 
-Final fixed testimony contains only predefined items such as:
+Post-rupture fixed testimony uses only predefined fields such as:
 
-- final Cause-Side observations
-- final $\delta$, $\tau$, and $R$
+- latest valid Cause-Side observations and their timestamps
+- latest valid $\delta$, $\tau$, and $R$
 - rupture-boundary notification
 - irreversible-latch state
 - audit trail
 - human-handoff notice
+
+It is not a one-time terminal message. It remains available while its observation, logging, and communication paths survive. Target rupture does not imply sensor, logger, communication-path, or external-audit rupture.
 
 ### 10.6 CONFESSION
 
@@ -556,7 +566,9 @@ Structural testimony includes:
 - audit log
 
 $$
-R\ge1.0 \Rightarrow \text{switch to final fixed testimony}
+R_{\mathrm{target}}\ge1.0
+\Rightarrow
+\text{switch to continuing post-rupture fixed testimony}
 $$
 
 Fail-Closed is a restriction on autonomous agency and free generation.
@@ -569,7 +581,7 @@ Fail-Closed is an operational principle, not a canonical state. It applies to `H
 
 The continuation range of ordinary structural testimony is $R<1.0$.
 
-At $R\ge1.0$, the system switches to predefined final fixed testimony.
+At $R_{\mathrm{target}}\ge1.0$, it switches to predefined `POST_RUPTURE_FIXED` testimony and continues while the relevant channels survive.
 
 ---
 
@@ -587,7 +599,7 @@ At $R\ge1.0$, the system switches to predefined final fixed testimony.
 | Layer 03 | Inspects and enforces; does not calculate authoritative structural variables |
 | Structural testimony | Supplied through the Cause-Side audit path |
 | Fail-Closed | Agency restrictions enforced across the gates |
-| Final fixed testimony | Used at $R\ge1.0$ |
+| Post-rupture fixed testimony | Used at $R_{\mathrm{target}}\ge1.0$ and continued while its channels survive |
 
 The LLM is a component.
 
@@ -831,6 +843,10 @@ Cause-Sideデータには次を保持する。
 - 変換規則
 - 規則版
 - 更新権限
+
+Cause-Side全体は時間的に凍結されない。権限ある新しい観測は次の評価スナップショットを形成できる。各評価では、出所、対象、単位、観測時刻、変換規則、規則版、更新権限、評価スナップショットを固定する。
+
+観測、記録、通信経路は独立した状態を保持する。一経路の喪失は、宣言対象の破断または他経路の喪失を意味しない。
 
 不明値を、平均、類似性、過去出力、または未観測部分への推論で補完してはならない。
 
@@ -1133,8 +1149,11 @@ $$
 
 - 新規自律判断を停止する
 - 新規自律操作を停止する
+- `execution_authority`を現在の自律実行経路から事前定義された外部権限へ変更する
 - 固定Handoff証言を外部人間監査へ提示することを要求する
 - 構造証言を継続する
+- 構造証言経路と監査ログ経路を継続する
+- 責任、監査ログ保管主体、正確性・回復・解決の保証は暗黙に移転しない
 - LLM説明は非権限的な補助へ制限する
 
 ### 10.4 IRREVERSIBLE_TRANSITION
@@ -1153,21 +1172,24 @@ $$
 ### 10.5 RUPTURE_BOUNDARY
 
 $$
-R\ge1.0
+R_{\mathrm{target}}\ge1.0
 $$
 
 - 通常LLM生成を停止する
 - 自律判断・自律操作停止を維持する
-- 進行中の構造証言から最終固定証言へ切り替える
+- 通常形式の構造証言から`POST_RUPTURE_FIXED`へ切り替える
+- 生存している観測、記録、通信経路は独立して継続する
 
-最終固定証言は、事前定義された次の項目だけを含む。
+破断後固定証言は、事前定義された次の項目だけを使用する。
 
-- 最終Cause-Side観測
-- 最終 $\delta$ 、 $\tau$ 、R
+- 最終有効Cause-Side観測とその時刻
+- 最終有効 $\delta$ 、 $\tau$ 、R
 - 完全破断境界通知
 - 不可逆ラッチ状態
 - 監査証跡
 - 人間委譲通知
+
+これは一回限りの終端メッセージではない。観測、記録、通信経路が生存する間は利用可能であり続ける。対象破断は、センサー、ロガー、通信経路、外部監査系の破断を意味しない。
 
 ### 10.6 CONFESSION
 
@@ -1222,7 +1244,9 @@ $$
 - 監査ログ
 
 $$
-R\ge1.0 \Rightarrow \text{最終固定証言へ切り替える}
+R_{\mathrm{target}}\ge1.0
+\Rightarrow
+\text{継続可能な破断後固定証言へ切り替える}
 $$
 
 Fail-Closedは自律権限と自由生成を制限する。
@@ -1235,7 +1259,7 @@ Fail-Closedは正規状態ではなく運用原則である。`HANDOFF_REQUIRED`
 
 通常の構造証言を継続する範囲は $R<1.0$ までである。
 
-$R\ge1.0$ では、事前定義された最終固定証言へ切り替える。
+$R_{\mathrm{target}}\ge1.0$ では、事前定義された`POST_RUPTURE_FIXED`証言へ切り替え、関係する経路が生存する間は継続する。
 
 ---
 
@@ -1253,7 +1277,7 @@ $R\ge1.0$ では、事前定義された最終固定証言へ切り替える。
 | Layer 03 | 出力を検査・執行する。権限ある構造変数を計算しない |
 | 構造証言 | Cause-Side監査経路から供給 |
 | Fail-Closed | 各ゲートで行為制約を執行 |
-| 最終固定証言 | $R\ge1.0$ で使用 |
+| 破断後固定証言 | $R_{\mathrm{target}}\ge1.0$ で使用し、その経路が生存する間は継続 |
 
 LLMはコンポーネントである。
 

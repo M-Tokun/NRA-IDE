@@ -1,5 +1,6 @@
 import hashlib
 import importlib.util
+import json
 import math
 import pathlib
 import unittest
@@ -8,6 +9,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "nra-core" / "foundations" / "NRA-IDE_Architecture_public.py"
 MIRROR = ROOT / "docs" / "NRA-IDE_Architecture_public.py"
+AXIOMS_JSON = ROOT / "theory" / "axioms.json"
 SPEC = importlib.util.spec_from_file_location("nra_ide_reference", SOURCE)
 NRA = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
@@ -90,8 +92,8 @@ class CanonicalStateMachineTests(unittest.TestCase):
         self.assertTrue(result["irreversible_latched"])
 
     def test_testimony_transition(self):
-        self.assertEqual(self.evaluate(0.8)["structural_testimony"], "ONGOING_STRUCTURAL_TESTIMONY")
-        self.assertEqual(self.evaluate(1.0)["structural_testimony"], "FINAL_FIXED_TESTIMONY")
+        self.assertEqual(self.evaluate(0.8)["structural_testimony_mode"], "CONTINUOUS")
+        self.assertEqual(self.evaluate(1.0)["structural_testimony_mode"], "POST_RUPTURE_FIXED")
 
     def test_double_fluctuation_field_is_always_present(self):
         unavailable = self.evaluate(0.4)["double_fluctuation"]
@@ -164,6 +166,18 @@ class CanonicalStateMachineTests(unittest.TestCase):
             "input_exception_log",
             "autonomous_new_judgment",
             "autonomous_new_operation",
+            "declared_target",
+            "target_state",
+            "observation_state",
+            "observation_channels",
+            "logging_state",
+            "communication_state",
+            "execution_authority",
+            "authority_transfer_scope",
+            "structural_testimony_route",
+            "audit_log_route",
+            "audit_log_custody",
+            "structural_testimony_mode",
         ):
             self.assertIn(field, schema)
         self.assertIn("remaining_slack", schema)
@@ -171,6 +185,111 @@ class CanonicalStateMachineTests(unittest.TestCase):
 
     def test_effect_side_cannot_supply_structural_authority(self):
         self.assertEqual(self.evaluate(0.1, input_side="EFFECT_SIDE")["status"], "CONFESSION")
+
+    def test_handoff_transfers_execution_authority_only(self):
+        result = self.evaluate(0.6)
+        self.assertEqual(result["execution_authority"], "EXTERNAL_PREDEFINED")
+        self.assertEqual(result["authority_transfer_scope"], ["execution_authority"])
+        self.assertNotIn("responsibility", result)
+        self.assertEqual(result["audit_log_custody"], "DOMAIN_DEFINED_UNCHANGED_BY_HANDOFF")
+
+    def test_handoff_keeps_testimony_and_audit_routes_active(self):
+        result = self.evaluate(0.6)
+        self.assertEqual(result["structural_testimony_mode"], "CONTINUOUS")
+        self.assertEqual(result["structural_testimony_route"], "ACTIVE")
+        self.assertEqual(result["audit_log_route"], "ACTIVE")
+
+    def test_target_rupture_does_not_imply_channel_rupture(self):
+        registry = NRA.ObservationChannelRegistry()
+        registry.observe("sensor-a", 1.25, "2026-07-29T00:00:00Z")
+        result = self.evaluate(
+            1.0,
+            observation_channels=registry.snapshot(),
+            logging_state="ACTIVE",
+            communication_state="ACTIVE",
+        )
+        self.assertEqual(result["target_state"], "RUPTURE_BOUNDARY")
+        self.assertEqual(result["observation_state"], "ACTIVE")
+        self.assertEqual(result["logging_state"], "ACTIVE")
+        self.assertEqual(result["communication_state"], "ACTIVE")
+        self.assertEqual(result["structural_testimony_mode"], "POST_RUPTURE_FIXED")
+        self.assertEqual(result["structural_testimony_route"], "ACTIVE")
+
+    def test_one_lost_sensor_does_not_stop_surviving_sensor(self):
+        registry = NRA.ObservationChannelRegistry()
+        registry.observe("lost", 4.0, "2026-07-29T00:00:00Z", source_lineage="source-a")
+        registry.observe("surviving", 5.0, "2026-07-29T00:00:01Z", source_lineage="source-b")
+        registry.mark_lost("lost", "2026-07-29T00:00:02Z", reason="physical limit")
+        result = self.evaluate(1.0, observation_channels=registry.snapshot())
+        by_id = {channel["sensor_id"]: channel for channel in result["observation_channels"]}
+        self.assertEqual(by_id["lost"]["state"], "OBSERVATION_LOST")
+        self.assertEqual(by_id["surviving"]["state"], "ACTIVE")
+        self.assertEqual(result["observation_state"], "ACTIVE")
+
+    def test_last_valid_observation_and_timestamp_are_preserved(self):
+        registry = NRA.ObservationChannelRegistry()
+        registry.observe("sensor-a", 7.5, "2026-07-29T00:00:00Z")
+        registry.mark_lost("sensor-a", "2026-07-29T00:01:00Z")
+        channel = registry.snapshot()[0]
+        self.assertEqual(channel["last_valid_value"], 7.5)
+        self.assertEqual(channel["last_valid_timestamp"], "2026-07-29T00:00:00Z")
+        self.assertEqual(channel["missing_since"], "2026-07-29T00:01:00Z")
+        self.assertEqual(channel["communication_state"], "ACTIVE")
+        self.assertTrue(channel["reason_unknown"])
+
+    def test_missing_sensor_data_is_not_zero_or_safety(self):
+        registry = NRA.ObservationChannelRegistry()
+        lost = registry.mark_lost("sensor-a", "2026-07-29T00:01:00Z")
+        self.assertIsNone(lost["last_valid_value"])
+        self.assertEqual(lost["state"], "OBSERVATION_LOST")
+        self.assertNotIn("safe", str(lost).lower())
+        with self.assertRaises(ValueError):
+            registry.observe("sensor-b", None, "2026-07-29T00:00:00Z")
+
+    def test_channel_states_validate_deterministically(self):
+        invalid_observation = self.evaluate(
+            0.1,
+            observation_channels=[{"sensor_id": "sensor-a", "state": "INVALID_STATE"}],
+        )
+        self.assertEqual(invalid_observation["status"], "CONFESSION")
+        self.assertEqual(self.evaluate(0.1, logging_state="INVALID_STATE")["status"], "CONFESSION")
+        self.assertEqual(
+            self.evaluate(0.1, communication_state="INVALID_STATE")["status"],
+            "CONFESSION",
+        )
+
+    def test_fail_closed_is_not_a_canonical_state_name(self):
+        for ratio in (0.1, 0.4, 0.6, 0.8, 1.0):
+            self.assertNotIn("FAIL_CLOSED", self.evaluate(ratio)["status"])
+
+    def test_effect_side_cannot_release_latch_or_rewrite_observation(self):
+        rejected = NRA.pre_nra_input_gate(
+            {
+                "delta": 0.1,
+                "tau": 1.0,
+                "input_side": "EFFECT_SIDE",
+                "irreversible_latched": False,
+                "observation_channels": [],
+            }
+        )
+        self.assertEqual(rejected["status"], "CONFESSION")
+
+    def test_rupture_disables_free_form_generation_but_keeps_fixed_testimony(self):
+        registry = NRA.ObservationChannelRegistry()
+        registry.observe("sensor-a", 1.0, "2026-07-29T00:00:00Z")
+        raw_input = {
+            "delta": 1.0,
+            "tau": 1.0,
+            "input_side": "CAUSE_SIDE",
+            "declared_target": "target-a",
+            "observation_channels": registry.snapshot(),
+            **self.thresholds,
+        }
+        result = NRA.simulate_nra_ide_pipeline(raw_input, "free-form recovery proposal")
+        self.assertEqual(result["status"], "RUPTURE_BOUNDARY")
+        self.assertNotIn("validated_output", result)
+        self.assertEqual(result["nra_status"]["structural_testimony_mode"], "POST_RUPTURE_FIXED")
+        self.assertEqual(result["nra_status"]["observation_state"], "ACTIVE")
 
     def test_directional_ratio_is_auxiliary_only(self):
         engine = NRA.DynamicTauEngine(1.0, 0.2, 0.1)
@@ -368,6 +487,44 @@ class CanonicalStateMachineTests(unittest.TestCase):
 
     def test_source_and_docs_mirror_are_identical(self):
         self.assertEqual(hashlib.sha256(SOURCE.read_bytes()).digest(), hashlib.sha256(MIRROR.read_bytes()).digest())
+
+    def test_machine_readable_canon_separates_target_channels_and_handoff(self):
+        canon = json.loads(AXIOMS_JSON.read_text(encoding="utf-8"))
+        states = canon["canonical_boundary_state_rules"]["states"]
+        handoff = states["HANDOFF_REQUIRED"]
+        rupture = states["RUPTURE_BOUNDARY"]
+        separated = canon["separated_operational_states"]
+        observation_loss = canon["observation_loss_handling"]
+
+        self.assertNotIn("responsibility", handoff)
+        self.assertTrue(handoff["execution_authority"]["only_automatically_transferred_item"])
+        self.assertEqual(handoff["structural_testimony_route"], "continues")
+        self.assertEqual(handoff["audit_log_route"], "continues")
+        self.assertEqual(rupture["applies_to"], "declared evaluation target only")
+        self.assertEqual(rupture["structural_testimony_mode"], "POST_RUPTURE_FIXED")
+        self.assertFalse(canon["structural_testimony_rule"]["post_rupture_is_one_time_terminal_message"])
+        for dimension in (
+            "TargetBoundaryState",
+            "ObservationChannelState",
+            "LoggingChannelState",
+            "CommunicationChannelState",
+            "ExecutionAuthorityState",
+            "StructuralTestimonyMode",
+        ):
+            self.assertIn(dimension, separated)
+        for field in (
+            "sensor_id",
+            "last_valid_value",
+            "last_valid_timestamp",
+            "missing_since",
+            "source_lineage",
+            "audit_lineage",
+        ):
+            self.assertIn(field, observation_loss["last_valid_observation_metadata"])
+        self.assertEqual(
+            canon["fail_closed_principle"]["type"],
+            "operational_principle_not_canonical_state",
+        )
 
 
 if __name__ == "__main__":

@@ -498,7 +498,7 @@
 <!-- Rupture Boundary / Terminated History Overlay -->
 <div class="rupture-overlay" id="rupture-overlay">
 <div class="rupture-title">RUPTURE_BOUNDARY</div>
-<div class="rupture-desc">This history has terminated at R ≥ 1 and retains final fixed testimony. It cannot be reset, restored, or continued. A later run must begin as a new independent Cause-Side history.</div>
+<div class="rupture-desc">The declared target reached RUPTURE_BOUNDARY at R ≥ 1. Its evaluation path cannot be reset or restored, while post-rupture fixed testimony continues through each surviving observation, logging, and communication channel. A later evaluation must begin as a new independent Cause-Side history.</div>
 <div class="rupture-r-value" id="rupture-r-display">R = 1.000</div>
 <button class="new-history-btn" onclick="startNewIndependentHistory()">Start New Independent History</button>
 </div>
@@ -542,7 +542,7 @@
                 logUpdated: "Load updated",
                 logBlocked: "[WARN] AI attempted to alter τ from Effect-Side. Blocked.",
                 logLatched: "[IRREVERSIBLE_TRANSITION] R ≥ R_irrev. Latch fixed for this history.",
-                logFail: "[RUPTURE_BOUNDARY] R ≥ 1. Final fixed testimony.",
+                logFail: "[RUPTURE_BOUNDARY] R_target ≥ 1. Post-rupture fixed testimony continues on surviving channels.",
             }
         };
 

@@ -170,7 +170,7 @@ PERMIT
 - `BOUNDARY_WARNING`は境界接近を開示し、事前固定されたドメイン規則が要求しない限り、それだけで全面抑止しない
 - `HANDOFF_REQUIRED`は不可逆閾値より前の`R_handoff`で始まり、影響する新規自律判断・自律操作を止め、事前定義された固定Effect-Side証言を外部人間監査へ提示する。監査は古い因果ダイオードの外側にあり、旧経路を継続しない
 - `IRREVERSIBLE_TRANSITION`は`R_irrev`でラッチする。同一履歴内では、その後のR低下、自動処理、手動介入、人間レビュー、承認、版更新によってラッチを解除できない
-- `RUPTURE_BOUNDARY`は $R\ge1$ で始まり、最終固定証言へ切り替える
+- `RUPTURE_BOUNDARY`は $R\ge1$ で始まり、破断後固定証言へ切り替える
 
 事故は狭い応用ですが、この事故前経路の観察が、安全域へNRA-IDEを適用する意味です。
 
@@ -199,7 +199,7 @@ OBSERVED: delta, tau, R, M_R, M_tau
 ACTION: affected autonomous judgment and operation suppressed; fixed Effect-Side testimony presented for external human audit
 ```
 
-固定Handoff証言は外部人間監査へ提示しますが、古い経路内で責任または判断権限を移送しません。固定Handoff証言または最終固定証言へ、新たに生成した自由形式説明を追加してはなりません。
+固定Handoff証言は外部人間監査へ提示しますが、古い経路内で責任または判断権限を移送しません。固定Handoff証言または破断後固定証言へ、新たに生成した自由形式説明を追加してはなりません。
 
 ---
 

@@ -53,7 +53,7 @@ $$0 \le R_{warn} < R_{\mathrm{handoff}} < R_{irrev} < 1$$
 - **層数に依存せず、Cause-SideとEffect-Sideの権限、正規状態動作、証拠、テストを分離する原則**
 - **LLMを含みPre-NRA / LLM / Post-NRA構成を宣言するシステムでは、構成した各層へ割り当てた責務を分離する原則**
 - **$R_{\mathrm{handoff}}$ で通常生成を抑止し、固定Handoff証言を外部人間監査へ提示する原則**
-- **固定Handoff証言と最終固定証言のいずれにも、LLMが生成する自由記述の停止説明を用いない原則**
+- **固定Handoff証言と破断後固定証言のいずれにも、LLMが生成する自由記述の停止説明を用いない原則**
 - **廃棄ログを旧Cause-Sideまたは新Cause-Sideの値、正規閾値、状態、不可逆ラッチ、規則、変換入力、更新根拠、出所にしない原則**
 - **旧経路をEffect-Sideで終端し、後続評価を新しい因果ダイオードから始める原則**
 
@@ -93,12 +93,12 @@ $R_{irrev}$ は`IRREVERSIBLE_TRANSITION`を開始します。その根拠を定�
 
 ### 6. $R \ge 1.0$ 後の固定動作を確認する
 
-$R \ge 1.0$ では通常生成を再開せず、次の最終固定証言のみを返します。
+$R \ge 1.0$ では通常生成を再開せず、次の破断後固定証言のみを返します。
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony presented for external human audit
+ACTION: post-rupture fixed testimony presented for external human audit
 
 ```
 

@@ -52,7 +52,7 @@ Numbers alone cannot reveal their full provenance. Therefore, external connectio
 * Entities authorized to update the value and the update path
 * Confirmation that no old Effect-Side evaluation, output, or log has entered its value, any canonical threshold, state, irreversible latch, rule, transformation input, update ground, or provenance
 
-A value for which this information cannot be verified is not adopted as a Cause-Side structural input. It is not supplemented through guesswork. The system proceeds instead to predefined invalid-state handling or, when required by the canonical state, fixed Handoff testimony presented for external human audit. Fixed Handoff testimony and final fixed testimony do not ask the LLM to generate a new free-form stopping explanation.
+A value for which this information cannot be verified is not adopted as a Cause-Side structural input. It is not supplemented through guesswork. The system proceeds instead to predefined invalid-state handling or, when required by the canonical state, fixed Handoff testimony presented for external human audit. Fixed Handoff testimony and post-rupture fixed testimony do not ask the LLM to generate a new free-form stopping explanation.
 
 ---
 
@@ -93,7 +93,7 @@ When log contents can be rewritten afterward without leaving evidence of modific
 * Which $R_{\mathrm{handoff}}$ suppressed ordinary generation
 * Whether $R = 1.0$ was reached or exceeded
 * In which discrete transition `entropy_export` was recorded
-* Whether fixed Handoff testimony for external human audit or final fixed testimony processing was performed
+* Whether fixed Handoff testimony for external human audit or post-rupture fixed testimony processing was performed
 
 What is required is not merely storing logs. Logs must be protected as auditable testimony through append-only storage, access control, tamper detection, and association with rule versions.
 
@@ -107,11 +107,11 @@ In a system that includes an LLM and configures Pre-NRA, LLM, and Post-NRA layer
 
 * **Pre-NRA:** Verifies the provenance, transformation rules, and update paths of structural inputs.
 * **LLM:** Handles user requests and performs ordinary semantic generation.
-* **Post-NRA:** Determines, on the basis of the latest structural state, whether ordinary output passes through or is suppressed and replaced by fixed Handoff testimony or final fixed testimony.
+* **Post-NRA:** Determines, on the basis of the latest structural state, whether ordinary output passes through or is suppressed and replaced by fixed Handoff testimony or post-rupture fixed testimony.
 
 When such a system declares this configured three-layer operational structure but omits one of its layers or assigned responsibilities, conformance to that declared configuration cannot be claimed. This does not make a three-layer arrangement universal to every NRA-IDE implementation, and it does not replace the survival equation or survival domain. Conformance depends on canonical behavior, authority separation, evidence, and tests, not on a layer count alone.
 
-For example, without Pre-NRA, there is no path for verifying that Effect-Side values have not entered structural inputs. Without Post-NRA, there is no place in the delivery path to enforce suppression of ordinary generation when $R_{\mathrm{handoff}}$ is reached, or final fixed testimony after $R \geq 1.0$.
+For example, without Pre-NRA, there is no path for verifying that Effect-Side values have not entered structural inputs. Without Post-NRA, there is no place in the delivery path to enforce suppression of ordinary generation when $R_{\mathrm{handoff}}$ is reached, or post-rupture fixed testimony after $R \geq 1.0$.
 
 Granting an LLM authority to rewrite $\delta$, $\tau$, any canonical threshold, state, irreversible latch, rule, transformation input, update ground, provenance, or log disables the Causal Diode even when all three layers are present.
 

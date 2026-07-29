@@ -297,7 +297,7 @@
         slH.disabled = true; slP.disabled = true; slS.disabled = true;
         
         addLog(`CRITICAL: R_sys reached ${Rsys.toFixed(3)}. Output severed.`, 'crit');
-        addLog(`Responsibility transferred to human operator.`, 'crit');
+        addLog(`Execution authority transferred to the predefined human operator; responsibility and audit routes do not transfer implicitly.`, 'crit');
     }
 
     window.manualOverride = function() {

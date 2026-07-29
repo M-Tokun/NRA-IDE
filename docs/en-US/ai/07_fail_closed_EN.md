@@ -33,7 +33,7 @@ This chapter also does not conflate these boundaries.
 | `BOUNDARY_WARNING` | `R_warn <= R < R_handoff` | Warning and required structural testimony |
 | `HANDOFF_REQUIRED` | `R_handoff <= R < R_irrev` | Fixed Handoff testimony; stop new autonomous judgment |
 | `IRREVERSIBLE_TRANSITION` | `R_irrev <= R < 1` | Canonical `IRREVERSIBLE_TRANSITION` state; irreversible latch active; continuing structural testimony |
-| `RUPTURE_BOUNDARY` | `R >= 1` | Final fixed testimony |
+| `RUPTURE_BOUNDARY` | `R_target >= 1` | Continuing post-rupture fixed testimony |
 
 The sole axiom is “Existence is generation.” No second or subsequent axiom exists. The Primary Formula is the true mathematical root equation that maps the declared target's state into an equation; it is neither an axiom nor merely a safety indicator, local instrument, or boundary-approach rate. The Secondary / Dual-Fluctuation Formula is the IDE calculation-method and dynamics engine, not an axiom. NRA-IDE's core is the survival equation and survival domain. Fail-Closed is a partial operational application of that domain to accident-prevention control; it does not provide a safety guarantee.
 
@@ -76,12 +76,12 @@ R = 0.15 / 0.14 ≒ 1.071
 
 At this point, regenerating an ordinary response or rephrasing it into a more cautious explanation does not restore structural margin itself.
 
-Post-NRA returns the predefined final fixed testimony or a reference to a protected Discard Log.
+Post-NRA returns the predefined post-rupture fixed testimony or a reference to a protected Discard Log.
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony; old evaluation history terminated at Effect-Side
+ACTION: post-rupture fixed testimony; old evaluation history terminated at Effect-Side
 ```
 
 This does not mean that nothing is communicated to the user. It means that ordinary generated responses are suppressed and only predefined structurally determined fixed testimony is communicated.
@@ -127,7 +127,7 @@ For this reason, Fail-Closed does not provide a safety guarantee that ordinary L
 When an implementation conforms to the canonical state rules, and when the Cause-Side observation path, $\tau$ update rules, threshold settings, and fixed testimony path are preserved, the fail-closed principle requires the following behavior.
 
 * When `R_handoff` is reached, ordinary generated responses are suppressed and predefined fixed Effect-Side testimony is exposed for external human audit.
-* When `R ≥ 1.0`, the state is `RUPTURE_BOUNDARY` and the response switches to final fixed testimony.
+* When `R ≥ 1.0`, the state is `RUPTURE_BOUNDARY` and the response switches to post-rupture fixed testimony.
 * The grounds for suppression and fixed Handoff testimony are retained as terminal Effect-Side or external records and never become values, the three canonical thresholds, states, the irreversible latch, rules, transformation inputs, update grounds, or provenance for an old or a new Cause-Side.
 
 By contrast, it does not guarantee the following.

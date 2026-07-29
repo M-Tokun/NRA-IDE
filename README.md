@@ -85,7 +85,7 @@ From the repository root, run:
 python -m unittest discover -v
 ```
 
-The expected result is `Ran 27 tests` followed by `OK`.
+The expected result is `Ran 38 tests` followed by `OK`.
 
 The [NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml) runs these tests on pushes and pull requests and reports line and branch coverage in the GitHub Actions log.
 
@@ -167,9 +167,9 @@ $$
 | Boundary | Canonical name | Role |
 |---|---|---|
 | $R_{\mathrm{warn}}$ | Boundary-Approach Warning Point | Disclose that the structure is approaching a boundary |
-| $R_{\mathrm{handoff}}$ | Pre-Boundary Human-Handoff Point | Stop new autonomous judgment and autonomous operation, and present predefined fixed Effect-Side testimony for external human audit |
+| $R_{\mathrm{handoff}}$ | Pre-Boundary Human-Handoff Point | Transfer execution authority only to the predefined external authority, stop new autonomous judgment and operation, and keep testimony and audit routes active |
 | $R_{\mathrm{irrev}}$ | Irreversible-Transition Onset Threshold | Do not assume that the former structural state remains recoverable |
-| $R=1.0$ | Invariant Complete-Rupture Boundary | Stop ordinary generation and switch to final fixed testimony |
+| $R=1.0$ | Invariant Complete-Rupture Boundary | Stop ordinary generation and switch the declared target to post-rupture fixed testimony |
 
 Human handoff, irreversible-transition onset, and complete rupture are not the same event.
 
@@ -193,9 +193,9 @@ Concrete threshold values are defined for each target domain, but this order and
 |---|---|---|
 | `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | Permit constrained autonomous operation and continue structural audit |
 | `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$ | Disclose boundary approach, both remaining margins, trend, double-fluctuation status, and missing information |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | Stop new autonomous judgment and new autonomous operation, and present predefined fixed Effect-Side testimony for external human audit |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | Transfer execution authority only, stop new autonomous judgment and operation, and keep structural testimony and audit logging active |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | Set the irreversible latch and prohibit normalization, recovery assumptions, and optimization proposals |
-| `RUPTURE_BOUNDARY` | $R\ge1.0$ | Stop ordinary generation and autonomous action, and switch to final fixed testimony |
+| `RUPTURE_BOUNDARY` | $R_{\mathrm{target}}\ge1.0$ | Stop ordinary generation and autonomous action, and switch to post-rupture fixed testimony through surviving channels |
 | `CONFESSION` | Required structural information is unknown, invalid, ambiguous, non-finite, or unsupported | Explicitly disclose the unresolved element, do not complete it by analogy, and stop the affected evaluation |
 | `OUT_OF_DESCRIPTION_DOMAIN` | $\tau=0$ | Declare $R$ undefined and require a change of description system |
 
@@ -253,6 +253,8 @@ Fail-Closed suppresses affected new autonomous judgment and operation for:
 
 It does not suppress required fixed structural testimony or logging. `PERMIT` is not Fail-Closed. `BOUNDARY_WARNING` alone does not require complete output suppression unless a pre-fixed domain rule requires it.
 
+Handoff changes `execution_authority` only. It does not implicitly transfer responsibility, legal or outcome responsibility, testimony routing, audit-log routing, audit-log custody, knowledge, or any guarantee of correctness, recovery, or resolution.
+
 ---
 
 ## Structural Testimony
@@ -282,12 +284,24 @@ Structural testimony may include:
 - structural-disclosure log
 
 $$
-R\ge1.0
+R_{\mathrm{target}}\ge1.0
 \Rightarrow
-\text{switch to final fixed testimony}
+\text{switch to post-rupture fixed testimony}
 $$
 
-Final fixed testimony is limited to predefined items such as the final Cause-Side observations, final $\delta$, final $\tau$, final $R$, complete-rupture notice, irreversible-latch state, audit trail, and human-handoff notice.
+Post-rupture fixed testimony is a repeatable predefined format, not a one-time terminal message. It is limited to fields such as latest valid Cause-Side observations and timestamps, latest valid $\delta$, $\tau$, and $R$, complete-rupture notice, irreversible-latch state, audit trail, and human-handoff notice.
+
+Target rupture does not imply sensor, logger, communication-path, or external-audit rupture. Surviving Cause-Side observation, logging, and communication channels continue until each becomes physically unavailable.
+
+```text
+target_state = RUPTURE_BOUNDARY
+observation_state = ACTIVE
+logging_state = ACTIVE
+communication_state = ACTIVE
+testimony_mode = POST_RUPTURE_FIXED
+```
+
+This is a valid combined state.
 
 > **Autonomous action stops. Structural testimony does not disappear.**
 
@@ -301,6 +315,8 @@ Only the following may determine $\delta$, $\tau$, and $R$:
 2. Cause-Side transformation rules fixed before evaluation
 
 Cause-Side inputs must preserve traceability of source, target, unit, observation time, transformation rule, rule version, and update authority.
+
+Cause-Side is not frozen across time. Authorized new observations may form the next evaluation snapshot. For each evaluation, its update authority, route, provenance, target, unit, observation time, transformation rule, threshold rule, and snapshot are fixed.
 
 The following remain Effect-Side:
 
@@ -321,6 +337,8 @@ $$
 $$
 
 Even an LLM output that has been validated, selected, or passed through an output gate remains Effect-Side.
+
+Observation loss is independent of target rupture. Missing sensor data is not converted to zero, stability, safety, recovery, or rupture. Implementations preserve last-valid observation metadata and do not stop surviving sensors because another sensor is lost.
 
 ---
 
@@ -348,7 +366,7 @@ output gate
 canonical-state-controlled Effect-Side output
 ```
 
-Ordinary explanation is permitted only in states and fields allowed by the pre-fixed canonical behavior. Fixed Handoff or final testimony is not supplemented by newly generated free-form explanation.
+Ordinary explanation is permitted only in states and fields allowed by the pre-fixed canonical behavior. Fixed Handoff or post-rupture testimony is not supplemented by newly generated free-form explanation.
 
 The boundary evaluator decides. The output gate enforces.
 
@@ -551,8 +569,10 @@ BOUNDARY_WARNING alone
 R < 1.0
 → structural testimony continues
 
-R >= 1.0
-→ switch to final fixed testimony
+R_target >= 1.0
+→ target reaches RUPTURE_BOUNDARY
+→ switch to continuing POST_RUPTURE_FIXED testimony
+→ surviving observation, logging, and communication channels continue
 
 Cause-Side
 → may determine delta, tau, R

@@ -33,7 +33,7 @@ R = δ / τ
 | `BOUNDARY_WARNING` | `R_warn <= R < R_handoff` | 警告と必須構造証言 |
 | `HANDOFF_REQUIRED` | `R_handoff <= R < R_irrev` | 固定Handoff証言。新規自律判断を停止 |
 | `IRREVERSIBLE_TRANSITION` | `R_irrev <= R < 1` | 不可逆ラッチを保持し、構造証言を継続 |
-| `RUPTURE_BOUNDARY` | `R >= 1` | 最終固定証言 |
+| `RUPTURE_BOUNDARY` | `R >= 1` | 破断後固定証言 |
 
 唯一の公理は「存在は生成である。」です。第二公理以降は存在しません。基礎式は、宣言対象の状態を式へ落とした本当の数学的根本式であり、公理でも、安全指標・局所計器・単なる境界接近率でもありません。第二次式／二重ゆらぎ式はIDEという計算方法・動力学エンジンであり、公理ではありません。NRA-IDEの本体は生存式・生存領域です。Fail-Closedは、その領域を事故防止運用制御へ適用した部分応用であり、安全保証を与えません。
 
@@ -58,7 +58,7 @@ OBSERVED: predefined structural fields
 ACTION: generated response suppressed; fixed Effect-Side testimony for external human audit
 ```
 
-この通知は、LLMがその場で考えた説明ではありません。構造判定の結果として、あらかじめ定めた項目を返す固定Effect-Side証言です。外部人間監査はこれを調査できますが、監査や承認によって旧Cause-Sideまたは新Cause-Sideへの逆向きの辺は生じません。固定Handoff証言または最終固定証言へ、新たに生成した自由形式説明を追加してはなりません。
+この通知は、LLMがその場で考えた説明ではありません。構造判定の結果として、あらかじめ定めた項目を返す固定Effect-Side証言です。外部人間監査はこれを調査できますが、監査や承認によって旧Cause-Sideまたは新Cause-Sideへの逆向きの辺は生じません。固定Handoff証言または破断後固定証言へ、新たに生成した自由形式説明を追加してはなりません。
 
 したがって、LLMが「このまま答えてよい」と自己評価しても、評価スコアが高くても、Post-NRAの`HANDOFF_REQUIRED`判定を上書きできません。止める根拠は、出力の説得力ではなく、Cause-Sideから確定した構造状態です。
 
@@ -76,15 +76,15 @@ R = 0.15 / 0.14 ≒ 1.071
 
 となります。このとき、通常の生成回答を作り直したり、より慎重な説明へ言い換えたりしても、構造余裕そのものは回復しません。
 
-Post-NRAが返すのは、事前に定めた最終固定証言、または保護された廃棄ログへの参照です。
+Post-NRAが返すのは、事前に定めた破断後固定証言、または保護された廃棄ログへの参照です。
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony; old evaluation history terminated at Effect-Side
+ACTION: post-rupture fixed testimony; old evaluation history terminated at Effect-Side
 ```
 
-これは、利用者へ何も伝えないことではありません。通常の生成回答を抑止し、事前に定めた構造上の最終固定証言だけを伝えることです。
+これは、利用者へ何も伝えないことではありません。通常の生成回答を抑止し、事前に定めた構造上の破断後固定証言だけを伝えることです。
 
 ---
 
@@ -127,7 +127,7 @@ Fail-Closedは、出力内容の正しさ、法令適合性、倫理性、また
 実装が正規状態規則へ適合し、Cause-Sideの観測経路、τの更新規則、閾値設定、固定証言経路が保たれている場合、Fail-Closed原則は次の動作を要求します。
 
 - `R_handoff`に到達したとき、通常の生成回答を抑止し、事前確定の固定Effect-Side証言を外部人間監査へ提示すること。
-- `R ≥ 1.0` で`RUPTURE_BOUNDARY`となり、最終固定証言へ切り替えること。
+- `R ≥ 1.0` で`RUPTURE_BOUNDARY`となり、破断後固定証言へ切り替えること。
 - 停止・固定Handoff証言の判定根拠を終端Effect-Sideまたは外部記録として残し、旧Cause-Sideにも新Cause-Sideにも、値、三閾値、状態、不可逆ラッチ、規則、変換入力、更新根拠、出所として戻さないこと。
 
 一方で、次のことは保証しません。

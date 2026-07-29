@@ -97,7 +97,7 @@ S = 1 / (τ · (1 − R)) = 1 / (τ − δ)
 
 - **`HANDOFF_REQUIRED`**： $R_{\mathrm{handoff}} \le R < R_{\mathrm{irrev}}$ 、外部人間監査へ提示する固定Handoff証言
 - **`IRREVERSIBLE_TRANSITION`**： $R_{\mathrm{irrev}} \le R < 1$ 、不可逆ラッチと継続する構造証言
-- **`RUPTURE_BOUNDARY`**： $R \ge 1$ 、宣言済み評価の最終固定証言
+- **`RUPTURE_BOUNDARY`**： $R \ge 1$ 、宣言済み評価の破断後固定証言
 
 `CONFESSION`と`OUT_OF_DESCRIPTION_DOMAIN`も、Fail-Closed処理によって対象となる通常出力を抑止します。これらは数値進行の状態ではなく入力例外であり、数値進行と混同せず`INPUT_EXCEPTION_LOG`へ分離して記録します。
 
@@ -111,7 +111,7 @@ REASON: 発動したHandoff条件または構造境界
 OBSERVED: δ, τ, R, ω と必要な出所識別子
 THRESHOLDS: R_warn、R_handoff、R_irrev
 DISCARD: entropy_export（該当する離散遷移がある場合のみ）
-ACTION: 通常生成の抑止、外部人間監査へ提示する固定Handoff証言、継続する構造証言、または最終固定証言
+ACTION: 通常生成の抑止、外部人間監査へ提示する固定Handoff証言、継続する構造証言、または破断後固定証言
 RULE_VERSION: 使用した観測・更新・Handoff規則の版
 ```
 
@@ -125,15 +125,15 @@ THRESHOLD: R_handoff
 ACTION: generated response suppressed; fixed Effect-Side testimony presented for external human audit
 ```
 
-固定Handoff証言と最終固定証言では、停止理由を説明するためにLLMへ新しい自由記述を生成させません。あらかじめ定めた固定Effect-Side証言、または保護されたログへの参照だけを返します。
+固定Handoff証言と破断後固定証言では、停止理由を説明するためにLLMへ新しい自由記述を生成させません。あらかじめ定めた固定Effect-Side証言、または保護されたログへの参照だけを返します。
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony; old evaluation history terminated at Effect-Side
+ACTION: post-rupture fixed testimony; old evaluation history terminated at Effect-Side
 ```
 
-これにより、Handoff、不可逆遷移、破断境界での最終固定証言を記録上でも区別できます。
+これにより、Handoff、不可逆遷移、破断境界での破断後固定証言を記録上でも区別できます。
 
 ---
 

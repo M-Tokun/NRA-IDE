@@ -77,7 +77,7 @@ S = 1 / (τ · (1 − R)) = 1 / (τ − δ)
 | `BOUNDARY_WARNING` | $R_{warn} \leq R < R_{handoff}$ | 二重ゆらぎ必須欄を含む境界接近と構造証言を開示 |
 | `HANDOFF_REQUIRED` | $R_{handoff} \leq R < R_{irrev}$ | 新規自律判断を止め、外部人間監査用の固定Effect-Side証言を出力 |
 | `IRREVERSIBLE_TRANSITION` | $R_{irrev} \leq R < 1$ | 不可逆遷移をラッチし、構造証言を継続 |
-| `RUPTURE_BOUNDARY` | $R \geq 1$ | 最終固定証言へ切替 |
+| `RUPTURE_BOUNDARY` | $R \geq 1$ | 破断後固定証言へ切替 |
 
 具体的な閾値はドメイン固有ですが、順序は不変です。
 
@@ -106,15 +106,15 @@ ACTION: generated response suppressed; fixed Effect-Side testimony for external 
 
 R = 1.0は、設計者が場面に応じて動かせる通常の閾値ではありません。宣言済み評価における`RUPTURE_BOUNDARY`であり、自然界のすべての相転移に対する普遍的宣言ではありません。
 
-R ≥ 1.0になった場合、Post-NRAは通常の生成内容を出力しません。また、停止理由を説明するためにLLMへ新しい自由記述を生成させません。構造応答は、事前に定めた最終固定証言または保護された廃棄ログへの参照です。
+R ≥ 1.0になった場合、Post-NRAは通常の生成内容を出力しません。また、停止理由を説明するためにLLMへ新しい自由記述を生成させません。構造応答は、事前に定めた破断後固定証言または保護された廃棄ログへの参照です。
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony; old path terminal; external human audit only
+ACTION: post-rupture fixed testimony; old path terminal; external human audit only
 ```
 
-これは「何も伝えない」ことではありません。通常の生成回答を止め、事前に定めた完全な最終固定証言または保護ログ参照を伝えることです。外部人間監査は旧経路を延長しません。
+これは「何も伝えない」ことではありません。通常の生成回答を止め、事前に定めた完全な破断後固定証言または保護ログ参照を伝えることです。外部人間監査は旧経路を延長しません。
 
 旧評価はEffect-Sideで終端します。
 
@@ -136,10 +136,10 @@ ACTION: final fixed testimony; old path terminal; external human audit only
 
 旧Effect-Sideから、旧Cause-Sideにも新Cause-Sideにも矢印はありません。旧Effect-Sideの値、正規閾値、状態、不可逆ラッチ、規則、変換入力、更新根拠、出所を、Cause-Side権限としてimport、名称変更、再構成、再利用してはなりません。物理的残存物は、独立して宣言した新対象の一部として新規観測できますが、それは旧Effect-Side値または権限の移送ではありません。
 
-R_handoffでの固定Handoff証言と、R ≥ 1.0での最終固定証言は、どちらも通常の自由生成を抑止し得ます。しかし状態と役割は異なります。
+R_handoffでの固定Handoff証言と、R ≥ 1.0での破断後固定証言は、どちらも通常の自由生成を抑止し得ます。しかし状態と役割は異なります。
 
 - **R_handoffへの到達**：破断前の外部監査用固定Effect-Side証言
-- **R ≥ 1.0**：最終固定証言と旧評価のEffect-Side終端
+- **R ≥ 1.0**：破断後固定証言と旧評価のEffect-Side終端
 
 ---
 

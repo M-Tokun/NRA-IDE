@@ -28,7 +28,7 @@ The following conditions are not guarantees themselves. They are prerequisites f
 * Humans can audit records of fixed Handoff testimony, irreversible transition, rupture, and residual export outside the terminated diode path.
 * External human auditors, contact paths, and audit or on-site response procedures are operationally secured.
 
-When these prerequisites are unknown, NRA-IDE does not conclude that the system is “safe.” The operational application treats the conditions required for structural evaluation as undetermined and transitions to predefined invalid-state handling or, when required by the canonical state, fixed Handoff testimony presented for external human audit. Fixed Handoff testimony and final fixed testimony do not ask the LLM to generate a new free-form stopping explanation.
+When these prerequisites are unknown, NRA-IDE does not conclude that the system is “safe.” The operational application treats the conditions required for structural evaluation as undetermined and transitions to predefined invalid-state handling or, when required by the canonical state, fixed Handoff testimony presented for external human audit. Fixed Handoff testimony and post-rupture fixed testimony do not ask the LLM to generate a new free-form stopping explanation.
 
 ---
 
@@ -43,7 +43,7 @@ Correctly implemented Post-NRA determines whether ordinary generated responses m
 R_warn <= R < R_handoff         : BOUNDARY_WARNING
 R_handoff <= R < R_irrev        : HANDOFF_REQUIRED; fixed Handoff testimony for external human audit
 R_irrev <= R < 1                : IRREVERSIBLE_TRANSITION; latch and continue testimony
-R >= 1                          : RUPTURE_BOUNDARY; switch to final fixed testimony
+R >= 1                          : RUPTURE_BOUNDARY; switch to post-rupture fixed testimony
 ```
 
 The required conformance property is that **when the defined Handoff threshold is reached, LLM self-evaluation or apparent plausibility cannot resume new autonomous judgment**.
@@ -78,7 +78,7 @@ This does not mean that every LLM produces the same quality. The factual accurac
 
 Handoff at $R_{\mathrm{handoff}}$ and the `RUPTURE_BOUNDARY` state at or beyond $R = 1.0$ are not the same classification. Fail-Closed is an operational enforcement action, not a replacement state name.
 
-Discard Logs retain, at minimum, the versions of observation and update rules used, $\delta$, $\tau$, $R$, and $\omega$, the condition triggered, suppression of ordinary generation, applicable `entropy_export`, and either fixed Handoff testimony for external human audit or final fixed testimony.
+Discard Logs retain, at minimum, the versions of observation and update rules used, $\delta$, $\tau$, $R$, and $\omega$, the condition triggered, suppression of ordinary generation, applicable `entropy_export`, and either fixed Handoff testimony for external human audit or post-rupture fixed testimony.
 
 These records remain Effect-Side or external records. Humans may read them for audit only outside the terminated diode path, but neither manual nor automatic handling turns them into a Cause-Side value, any canonical threshold, state, irreversible latch, rule, transformation input, update ground, or provenance for an old or a new Cause-Side.
 
@@ -116,7 +116,7 @@ However, it does not determine who conducts the external audit, which informatio
 
 $R = 1.0$ begins `RUPTURE_BOUNDARY` for the declared evaluation. The operational application is designed to present fixed Handoff testimony for external human audit at $R_{\mathrm{handoff}}$ before irreversible transition and rupture.
 
-At $R \geq 1$, a conforming implementation switches to final fixed testimony and the old evaluation history terminates at its Effect-Side. This does not provide procedures for restoring the same physical, social, or operational state. Physical remnants, surrounding structures, or later generations may be independently declared and newly observed as a new target through their own Cause-Side and a new Causal Diode, but no old Effect-Side value, canonical threshold, state, irreversible latch, rule, transformation input, update ground, provenance, or structural authority is imported, relabeled, reconstructed, or reused in that history.
+At $R \geq 1$, a conforming implementation switches to post-rupture fixed testimony and the old evaluation history terminates at its Effect-Side. This does not provide procedures for restoring the same physical, social, or operational state. Physical remnants, surrounding structures, or later generations may be independently declared and newly observed as a new target through their own Cause-Side and a new Causal Diode, but no old Effect-Side value, canonical threshold, state, irreversible latch, rule, transformation input, update ground, provenance, or structural authority is imported, relabeled, reconstructed, or reused in that history.
 
 ### Ethical Validity, Legal Compliance, and Appropriateness of Purpose
 
