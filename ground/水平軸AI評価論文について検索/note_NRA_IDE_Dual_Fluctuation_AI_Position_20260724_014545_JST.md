@@ -63,7 +63,7 @@ $$
 R=\frac{\delta}{\tau}
 $$
 
-$R\ge1.0$で構造余裕が失われ、通常生成を止め、事前定義済みの最小限の構造通知のみを返して自律処理を停止します。
+$R\ge1.0$ で構造余裕が失われ、通常生成を止め、事前定義済みの最小限の構造通知のみを返して自律処理を停止します。
 
 二重ゆらぎ式（FORMULA.md 定義式2）は、上側（拡大方向）と下側（縮小方向）のEMAを別々に持ちます。
 
@@ -93,11 +93,11 @@ $$
 公開実装（NRA-IDE_Architecture_public.py）では、f・gは上限・下限付きロジスティック関数として実装されています。
 
 $$
-f(x)=1+(\text{max\_tau\_factor}-1)\left(\frac{2}{1+e^{-k_u x}}-1\right)
+f(x)=1+(\mathrm{max\_tau\_factor}-1)\left(\frac{2}{1+e^{-k_u x}}-1\right)
 $$
 
 $$
-g(x)=\text{min\_tau\_factor}+(1-\text{min\_tau\_factor})\cdot\frac{2}{1+e^{k_l x}}
+g(x)=\mathrm{min\_tau\_factor}+(1-\mathrm{min\_tau\_factor})\cdot\frac{2}{1+e^{k_l x}}
 $$
 
 拡大方向は1.0からmax_tau_factorへ緩やかに漸近し、縮小方向は1.0からmin_tau_factorへ漸近しますが、いずれも到達しません（発散もゼロ突入も構造的に禁止されています）。
@@ -108,7 +108,7 @@ $$
 \frac{d\delta}{dt}>0 \ \land\ \frac{d\tau}{dt}<0 \ \Rightarrow\ \text{STRUCTURAL WARNING: double fluctuation detected}
 $$
 
-静的τモデルではτが不変であるため$d\tau/dt$という概念自体が存在せず、「偏差が増えながら許容幅そのものが失われていく」という複合的な悪化を表現できません。動的τ・二重ゆらぎ構造は、この複合悪化を式の内部に持ち込むための設計です。
+静的τモデルではτが不変であるため $d\tau/dt$ という概念自体が存在せず、「偏差が増えながら許容幅そのものが失われていく」という複合的な悪化を表現できません。動的τ・二重ゆらぎ構造は、この複合悪化を式の内部に持ち込むための設計です。
 
 ## 3. 実測比較：線形静的τモデル vs 二重ゆらぎ動的τモデル
 
