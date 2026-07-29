@@ -1,7 +1,7 @@
 # ═══════════════════════════════════════════════════════════════════════
 # File: patient_data_validator.py
 # Phase: 20
-# Date: 2026-02-01
+# Rev:  2.0 (2026-07-29) RANGES を nra_core_model.RANGES_Q88 と同期確認
 # Author: M-Tokuni & AI Architects
 #
 # 目的: Phase 4 辞書に基づく厳格なデータ検証

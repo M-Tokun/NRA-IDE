@@ -49,6 +49,17 @@ ERR_OVF = 0x04          # 演算オーバーフロー
 ERR_COMM = 0x05         # 通信異常（ホストのみ）
 ERR_UNSUPPORTED = 0x06  # 未実装の癌腫タイプ（ホストのみ）
 
+# エラーコード名。レポート・可視化とも本辞書のみを参照し、独自に持たない。
+ERR_NAME = {
+    ERR_NONE:        "ERR_NONE",
+    ERR_GEOM:        "ERR_GEOMETRIC",
+    ERR_RANGE:       "ERR_RANGE",
+    ERR_VISC0:       "ERR_ZERO_VISC",
+    ERR_OVF:         "ERR_OVERFLOW",
+    ERR_COMM:        "ERR_COMM",
+    ERR_UNSUPPORTED: "ERR_UNSUPPORTED",
+}
+
 # ── Phase 4 §1 入力範囲 (Q8.8) ─────────────────────────────────────────
 RANGES_Q88 = {
     'cell_stiffness': (0x0019, 0x0A00),   # E    0.1  - 10.0  kPa
@@ -79,9 +90,9 @@ def normalize_type(cancer_type: str) -> str:
     return (cancer_type or '').replace(' ', '').replace('_', '').lower()
 
 
-def fixed_terms(E_q: int, eta_q: int, D_q: int, d_q: int, v_q: int) -> Tuple[int, int]:
+def fixed_terms(eta_q: int, D_q: int, d_q: int, v_q: int) -> Tuple[int, int]:
     """
-    患者ごとに固定される項を求める。
+    患者ごとに固定される項を求める。E（ヤング率）には依存しない。
       strain  : (D-d)/D            Q0.8
       sigma_v : 粘性抵抗応力 [kPa]  Q8.8
     """
@@ -122,8 +133,7 @@ def evaluate(params: Dict[str, float], cancer_type: str = "Type A") -> Dict:
         return {'is_jammed': False, 'error_code': err}
 
     strain, sigma_v = fixed_terms(
-        q['cell_stiffness'], q['cell_viscosity'],
-        q['cell_diameter'], q['pore_size'], v_q)
+        q['cell_viscosity'], q['cell_diameter'], q['pore_size'], v_q)
 
     el_mul = (q['cell_stiffness'] + q['drug_boost']) * strain
     if el_mul >> 24:                      # el_mul[32:24] != 0
@@ -149,8 +159,7 @@ def required_boost(params: Dict[str, float]) -> Optional[float]:
         return None
 
     strain, sigma_v = fixed_terms(
-        q['cell_stiffness'], q['cell_viscosity'],
-        q['cell_diameter'], q['pore_size'], v_q)
+        q['cell_viscosity'], q['cell_diameter'], q['pore_size'], v_q)
     if strain == 0:
         return None
 

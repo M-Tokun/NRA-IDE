@@ -18,9 +18,11 @@
 
 ## 1. Synthesis Guide
 
-* **Intel Quartus:** `50_Deployment/bitstreams/` の `.qpf` を開き、"Compile Design" を実行。
+> **注意:** 本テンプレートは合成・タイミング解析を実施していない（未実施。CHANGELOG.md 参照）。`50_Deployment/bitstreams/` 以下の `.qpf`/`.xpr` は既存の成果物ではなく、利用者が自身の合成環境で新規作成するプロジェクトの想定配置場所である。
 
-* **Xilinx Vivado:** `.xpr` を開き、"Generate Bitstream" を実行。
+* **Intel Quartus:** `50_Deployment/bitstreams/` に新規プロジェクトを作成し、`10_Hardware_Design/src/` の全 `.v` を追加、`constraints/` のピン配置・タイミング制約を適用して "Compile Design" を実行。
+
+* **Xilinx Vivado:** 同様に新規プロジェクトを作成し、`.xpr` に対して "Generate Bitstream" を実行。
 
 * **Timing Constraint:** `timing.sdc` が正しく読み込まれているか確認すること（100MHz）。
 

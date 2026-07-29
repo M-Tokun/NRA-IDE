@@ -6,7 +6,7 @@
 
 # File:    README.md (English Gateway Version)
 
-# Rev:     2.0 (2026-07-28) Synced with PHASE_2 Rev 2.0
+# Rev:     2.0 (2026-07-28 - 07-29) Synced with PHASE_2 Rev 2.0
 
 # ═══════════════════════════════════════════════════════════════════════
 

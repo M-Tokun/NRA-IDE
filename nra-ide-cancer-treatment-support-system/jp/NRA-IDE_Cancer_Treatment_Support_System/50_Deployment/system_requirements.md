@@ -110,7 +110,7 @@
 
 * **Humidity:** 30% 〜 75% (非結露)
 
-* **Rationale:** 熱によるゲート遅延の変化を STA (Static Timing Analysis) の範囲内に収めるため。
+* **Rationale:** 熱によるゲート遅延の変化を、実施予定の STA (Static Timing Analysis) の許容範囲内に収めるため（現時点で STA は未実施。CHANGELOG.md 参照）。
 
 
 

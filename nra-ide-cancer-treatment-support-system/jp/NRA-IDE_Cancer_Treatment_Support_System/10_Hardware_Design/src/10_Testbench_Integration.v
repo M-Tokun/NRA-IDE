@@ -6,7 +6,7 @@
  *
  * 14バイトを送信し、3バイトの応答を受信して照合する。
  * チェックサムはタスク内で計算する（Rev 1.0 は 0x00 を直書きしており、
- * 正しくは 0x11 であった。Fail-Closed が働けば必ず破棄される値だった）。
+ * 正しくは 0x10 であった。Fail-Closed が働けば必ず破棄される値だった）。
  *
  * 実行:
  *   iverilog -o itb.vvp 10_Top_Module.v 10_Cancer_Treatment_Selector.v \

@@ -1,7 +1,7 @@
 # ═══════════════════════════════════════════════════════════════════════
 # File: fpga_interface.py
 # Phase: 20 (Master Integration)
-# Date: 26-0203-1740 JST
+# Rev:  2.0 (2026-07-29) シミュレーション判定を参照実装へ接続
 # ═══════════════════════════════════════════════════════════════════════
 
 import serial
@@ -21,9 +21,6 @@ class FPGAInterface:
             print(f"[WARN] FPGA Offline (SIMULATION MODE ACTIVE): {e}")
             self.serial = None
 
-    def _float_to_q8_8(self, value: float) -> int:
-        return int(max(0.0, min(255.99, value)) * 256)
-
     def send_query(self, p: Dict[str, float], c_type: str = "Type A") -> Optional[Dict]:
         """
         14-byte Protocol with Dynamic Type Selection
@@ -41,13 +38,14 @@ class FPGAInterface:
         header = b'\xA5' if is_type_a else b'\xA6'
 
         # 2. Construct Payload
+        # 量子化は core.to_q88 に一本化する（本ファイルに独自の近似式を持たせない）
         payload = struct.pack('>6H',
-            self._float_to_q8_8(p['cell_stiffness']),
-            self._float_to_q8_8(p['cell_viscosity']),
-            self._float_to_q8_8(p['cell_diameter']),
-            self._float_to_q8_8(p['pore_size']),
-            self._float_to_q8_8(p['flow_dp']),
-            self._float_to_q8_8(p['drug_boost'])
+            core.to_q88(p['cell_stiffness']),
+            core.to_q88(p['cell_viscosity']),
+            core.to_q88(p['cell_diameter']),
+            core.to_q88(p['pore_size']),
+            core.to_q88(p['flow_dp']),
+            core.to_q88(p['drug_boost'])
         )
 
         # 3. Checksum (XOR)

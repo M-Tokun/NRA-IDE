@@ -1,6 +1,7 @@
 # ═══════════════════════════════════════════════════════════════════════
 # File: wave_config.do
 # Phase: 10 (Synchronous Update)
+# Rev:  2.0 (2026-07-29) 5段パイプラインの実信号名へ更新
 # 目的: パイプライン同期（Valid/Ready）の可視化
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -20,9 +21,9 @@ add wave -noupdate -radix hexadecimal /Testbench_BruteForce/stiff
 add wave -noupdate -radix hexadecimal /Testbench_BruteForce/boost
 add wave -noupdate -radix hexadecimal /Testbench_BruteForce/visc
 
-add wave -noupdate -divider "Internal Multipliers (Q16.16)"
-add wave -noupdate -radix decimal /Testbench_BruteForce/dut/r_elastic_s2
-add wave -noupdate -radix decimal /Testbench_BruteForce/dut/r_viscous_s2
+add wave -noupdate -divider "Stage 4: Stress Terms (Q8.8)"
+add wave -noupdate -radix decimal /Testbench_BruteForce/dut/sig_el4
+add wave -noupdate -radix decimal /Testbench_BruteForce/dut/sig_v4
 
 add wave -noupdate -divider "Final Decision"
 add wave -noupdate -color {Green} /Testbench_BruteForce/jammed

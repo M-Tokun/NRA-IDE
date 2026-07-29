@@ -13,15 +13,8 @@ import os
 
 import nra_core_model as core
 
-_ERR_NAME = {
-    core.ERR_NONE:        "ERR_NONE",
-    core.ERR_GEOM:        "ERR_GEOMETRIC",
-    core.ERR_RANGE:       "ERR_RANGE",
-    core.ERR_VISC0:       "ERR_ZERO_VISC",
-    core.ERR_OVF:         "ERR_OVERFLOW",
-    core.ERR_COMM:        "ERR_COMM",
-    core.ERR_UNSUPPORTED: "ERR_UNSUPPORTED",
-}
+# エラーコード名は nra_core_model.ERR_NAME を参照する（本ファイルに複製しない）
+_ERR_NAME = core.ERR_NAME
 
 _ERR_MEANING = {
     core.ERR_GEOM:        "細胞直径が隙間より小さく、変形せずに通過する",
@@ -84,8 +77,7 @@ class ClinicalReportGenerator:
         # ── 判定根拠（計算可能な場合のみ） ──
         if err == core.ERR_NONE:
             strain, sigma_v = core.fixed_terms(
-                q['cell_stiffness'], q['cell_viscosity'],
-                q['cell_diameter'], q['pore_size'], v_q)
+                q['cell_viscosity'], q['cell_diameter'], q['pore_size'], v_q)
             sigma_el = ((q['cell_stiffness'] + q['drug_boost']) * strain) >> 8
             total = sigma_el + sigma_v
             lines += [

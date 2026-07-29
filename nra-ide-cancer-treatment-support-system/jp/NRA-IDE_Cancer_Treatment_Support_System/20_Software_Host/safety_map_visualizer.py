@@ -17,7 +17,7 @@ from nra_core_model import (
     check_inputs as _check_inputs,
     required_boost as _required_boost,
     DEFAULT_DEFORM_VELOCITY,
-    ERR_VISC0, ERR_GEOM, ERR_RANGE,
+    ERR_VISC0, ERR_GEOM, ERR_RANGE, ERR_NAME,
 )
 
 
@@ -61,16 +61,16 @@ class SafetyMapVisualizer:
         F_q = (flow_axis * 256).astype(np.int64)
 
         # 妥当性判定も参照実装に委譲する（Boost は軸なので 0 で評価）
+        # エラー名は nra_core_model.ERR_NAME を参照する（本ファイルに複製しない）
         err_code = _check_inputs(dict(q, drug_boost=0))
-        err = {ERR_VISC0: '0x03 ERR_ZERO_VISC',
-               ERR_RANGE: '0x02 ERR_RANGE',
-               ERR_GEOM:  '0x01 ERR_GEOMETRIC'}.get(err_code)
+        err = (f'0x{err_code:02X} {ERR_NAME[err_code]}'
+               if err_code in (ERR_VISC0, ERR_RANGE, ERR_GEOM) else None)
 
         if err:
             # 異常時は転移リスク側（全面 PASSABLE）へ倒す＝Fail-Closed
             is_blocked = np.zeros((len(F_q), len(B_q)), dtype=float)
         else:
-            strain, sigma_v = _fixed_terms(E_q, eta_q, D_q, d_q, v_q)
+            strain, sigma_v = _fixed_terms(eta_q, D_q, d_q, v_q)
             sigma_el = ((E_q + B_q) * strain) >> 8          # (1, nB)
             sigma_tot = sigma_el + sigma_v
             is_blocked = (sigma_tot[None, :] > F_q[:, None]).astype(float)

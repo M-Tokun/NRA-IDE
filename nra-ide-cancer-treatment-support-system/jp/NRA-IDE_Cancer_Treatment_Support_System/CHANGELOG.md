@@ -8,6 +8,77 @@ Rev 1.0 の判定式には次元不整合があり、判定が機能していな
 
 ---
 
+## Rev 2.0.1 (2026-07-29) 全文精査による残存不整合の是正
+
+Rev 2.0 の一括修正・作成から漏れていた項目を、全66ファイルを対象とした
+並列精査（5系統・全文読み）で洗い出し、是正した。
+
+**旧語彙・旧値の残存で最も重大だったもの:**
+
+* `30_Test_Data/validation_test_cases.csv` — `expected`/`err_code` 列が
+  全7行とも旧語彙（SAFE/DANGER）かつ値が逆転したまま放置されていた
+  （例: TC001 は本来 PASSABLE だが CSV は DANGER と記載）。判定ロジックは
+  `expected_results.json` のみを参照するため実害はなかったが、正しい
+  オラクルの隣に矛盾したデータが並ぶ状態だった。BLOCKED/PASSABLE/ERR へ
+  修正し、TC001 備考欄の重複表記（「標準標準」）も訂正した。
+
+**RTL の実質的な不整合:**
+
+* `10_Testbench_BruteForce.v` — 「3段パイプライン」という表記が2箇所残存
+  （実際は Rev 2.0 で5段化済み）。粘性の Q8.8 値 `0x000D`(13) が他の全
+  ファイルで使われる `0x000C`(12, 0.05の正しい切り捨て量子化)と不一致
+  だった。いずれも修正（Boost探索結果は不変: 0x0042）。
+* `10_wave_config.do` — 存在しないレジスタ名（Rev 1.0 の
+  `r_elastic_s2`/`r_viscous_s2`）を波形観測対象にしていた。現行の
+  `sig_el4`/`sig_v4`（Q8.8）へ更新。
+* `10_Testbench_Integration.v` — ファイル冒頭のコメントが「正しいチェック
+  サムは 0x11」としていたが、同ファイル内のタスク本体および
+  `src/README.md` は正しく `0x10` としていた（自己矛盾）。XOR を手計算で
+  再検証し `0x10` に統一。
+
+**思想文書での旧語彙残存（6ファイル）:**
+
+PHASE_1・PHASE_3・PHASE_8・PHASE_9・PHASE_53・references.md に
+SAFE/DANGER が判定ラベルとして残っていた（Rev 2.0 の一括置換時、
+README/Phase 2/4/6 以外の思想・運用文書が対象から漏れていた）。
+BLOCKED/PASSABLE へ統一。
+
+**ポリシー違反（モデルの二重化）:**
+
+* `fpga_interface.py` が `core.to_q88()` と同じ量子化式を独自に
+  再実装していた（`_float_to_q8_8`）。削除して `core.to_q88` を直接使用。
+* `safety_map_visualizer.py` がエラーコード名の辞書を独自に持っていた
+  （`clinical_report_generator.py` の `_ERR_NAME` と別に）。
+  `nra_core_model.ERR_NAME` を新設し、両ファイルとも参照する形に一本化。
+* `nra_core_model.fixed_terms()` が未使用の引数 `E_q` を受け取っていた
+  （粘性応力は E に依存しないため）。シグネチャから除去し、全呼び出し元
+  （`evaluate`, `required_boost`, `clinical_report_generator.py`,
+  `safety_map_visualizer.py`）を追従させた。
+
+**軽微な是正:**
+
+* README 3種のヘッダー日付（2026-07-28）が CHANGELOG の Rev 2.0 日付
+  （2026-07-29）および文書内で言及する RTL 検証日と食い違っていた。
+  「2026-07-28 〜 07-29」の範囲表記に統一。
+* `deployment_checklist.md` が「Type B非線形LUT」を含む正式リリースと
+  記載していたが、Type B は未実装スタブ（`0x06`）である。訂正。
+* `fpga_interface.py`・`patient_data_validator.py`・
+  `10_UART_Interface.v`・`10_Cancer_Treatment_Selector.v` のヘッダーが
+  Rev 2.0 の日付・変更内容を反映していなかった。更新。
+* `references.md` の引用文献値（毛細血管間隙 3-8 μm）と、システムが
+  採用する下限値（5.0 μm）の差について、意図的な保守側マージンである
+  旨を注記。
+* `PHASE_8_Technical_Manual.md` が `50_Deployment/bitstreams/` を既存の
+  成果物であるかのように参照していた。利用者が自身の合成環境で新規
+  作成する想定配置場所である旨を明記。
+* `system_requirements.md` の温度条件根拠が STA 実施済みを前提とした
+  書きぶりだった。STA は未実施である旨を明記。
+
+回帰確認: `run_validation.py` 7/7 PASS、RTL単体シミュレーション 7/7 PASS
+（Icarus Verilog 11.0、visc 修正後も Boost探索解は不変）。
+
+---
+
 ## Rev 2.0 (2026-07-29)
 
 ### 1. 判定式の次元不整合を是正（最重要）
