@@ -6,6 +6,7 @@ Rev 2.0 (2026-07-28)  ※実体との突き合わせ済み
 jp/NRA-IDE_Cancer_Treatment_Support_System/
 │
 ├── README.md                          [DONE] 統合README（PHASE_2 Rev 2.0 同期済）
+├── CHANGELOG.md                       [DONE] 改訂履歴。Rev 1.0 からの訂正一覧を含む
 ├── LICENSE_JP.txt                     [DONE] MIT + 医療特約（非医療機器宣言・SOUP）
 ├── medical_ai_solution.md             [DONE] 医療AI論（律環公理の思想的背景）
 ├── 免責事項_研究用途限定.md              [DONE] 研究用途限定の明示

@@ -370,6 +370,11 @@ If the input falls outside the Phase 4 ranges, no computation is performed; only
 
 
 
+> **Revision history: [jp/.../CHANGELOG.md](./jp/NRA-IDE_Cancer_Treatment_Support_System/CHANGELOG.md)** (Japanese).
+> **If you obtained Rev 1.0, please read it.** The Rev 1.0 governing equation was dimensionally inconsistent and the decision engine did not function. That file lists every corrected claim.
+
+
+
 This repository is a research template. The following are **incomplete**, stated without embellishment:
 
 

@@ -390,6 +390,11 @@ python main.py --data ../30_Test_Data/sample_patient_data.json --out ./output
 
 
 
+> **改訂履歴は [jp/.../CHANGELOG.md](./jp/NRA-IDE_Cancer_Treatment_Support_System/CHANGELOG.md) にあります。**
+> **Rev 1.0 を入手済みの方は必ずご確認ください。** Rev 1.0 の判定式には次元不整合があり、判定が機能していませんでした。訂正箇所の一覧を同ファイルに掲載しています。
+
+
+
 本リポジトリは研究用テンプレートであり、以下は**未完了**です。実装状況を偽らずに記します。
 
 
