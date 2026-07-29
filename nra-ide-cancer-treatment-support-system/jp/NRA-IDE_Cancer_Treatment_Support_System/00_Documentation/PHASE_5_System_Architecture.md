@@ -110,9 +110,9 @@ FPGA が接続されていない場合、手順3〜5は参照実装 `20_Software
 
 
 
-* $v$ は Type A の粘性項に必要。ホストは標準値 200 μm/s を仮定している。
+* $v$ は Type A の粘性項に必要。ホスト・FPGA とも標準値 200 μm/s (`0xC800`) を定数として用いる。
 
-* $N$ は Type B の必須入力であり、**このため Type B は原理的に動作しない。**
+* $N$ は Type B の必須入力であり、**このため Type B は原理的に動作しない。** FPGA 側の `BioCalibrator_TypeB_Collective` は未実装スタブであり、`0x06 ERR_UNSUPPORTED` を返す。ホスト側 `nra_core_model.evaluate()` も同じ挙動である。
 
 
 

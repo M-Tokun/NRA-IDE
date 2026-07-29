@@ -94,7 +94,7 @@
 
 | `0x05` | ERR_COMM | 3回再送後も応答不正 | Host のみ | 結線・電源点検 |
 
-| `0x06` | ERR_UNSUPPORTED | 未実装の癌腫タイプ（Type B） | Host のみ | Type A で再評価 |
+| `0x06` | ERR_UNSUPPORTED | 未実装の癌腫タイプ（Type B） | FPGA / Host | Type A で再評価 |
 
 
 

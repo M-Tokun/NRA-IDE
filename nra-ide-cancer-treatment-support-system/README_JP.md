@@ -400,9 +400,11 @@ python main.py --data ../30_Test_Data/sample_patient_data.json --out ./output
 
 | Type A（単一細胞）判定式 | 定式化・参照実装・検証ケース7件 完了 |
 
-| Type B（細胞集団）モデル | **未検証の現象論モデル。** $\sqrt{N}$ 則の根拠は文献で裏付けられていない |
+| Type B（細胞集団）モデル | **未実装。** $\sqrt{N}$ 則の根拠が文献で裏付けられていないため、回路は `0x06 ERR_UNSUPPORTED` を返すスタブとした |
 
-| FPGA RTL | `Top_Module.v` が断片。**合成・シミュレーション未実施** |
+| FPGA RTL（シミュレーション） | **検証済**（2026-07-29, Icarus Verilog 11.0）。演算コア単体 7/7、全系統合 8/8。実機ボーレート 115200 でも確認 |
+
+| FPGA RTL（合成・タイミング解析） | **未実施**（Vivado / Quartus 未使用） |
 
 | 薬剤到達モデル | **未着手** |
 

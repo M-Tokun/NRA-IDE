@@ -18,12 +18,12 @@
 
 | 分類 | ファイル名 | 役割 | 状態 |
 | :--- | :--- | :--- | :--- |
-| **Top** | `10_Top_Module.v` | システム統合、通信/演算シーケンス制御 | **断片。module/endmodule を欠く** |
-| **I/O** | `10_UART_Interface.v` | 115200bps 8N1 全二重シリアル通信 | 実装済 |
+| **Top** | `10_Top_Module.v` | システム統合、通信/演算シーケンス制御 | 実装済（Rev 2.0） |
+| **I/O** | `10_UART_Interface.v` | 115200bps 8N1 全二重シリアル通信 | 実装済（Rev 2.0 でビット周期を修正） |
 | **Core** | `10_Cancer_Treatment_Selector.v` | 癌腫別（Type A/B）演算器の選択と統合 | 実装済 |
 | **Logic** | `10_BioCalibrator_TypeA.v` | 単一細胞ジャミング判定（5段パイプライン） | 実装済（Rev 2.0） |
-| **Logic** | `10_BioCalibrator_TypeB.v` | 集団力学封鎖判定（40bit演算） | **断片。ポート定義・比較ロジックを欠く** |
-| **Sim** | `10_Testbench_Integration.v` | 全系統合検証用テストベンチ | チェックサム値が誤り（下記 §5） |
+| **Logic** | `10_BioCalibrator_TypeB.v` | 集団力学封鎖判定 | **未実装スタブ。`0x06` を返す** |
+| **Sim** | `10_Testbench_Integration.v` | 全系統合検証（7ケース＋チェックサム異常） | 実装済（Rev 2.0） |
 
 `../simulation/` には `10_Testbench_BruteForce.v` と `10_wave_config.do` がある。
 
@@ -84,20 +84,38 @@ FPGA → ホストは 3バイト（Header / `(Error << 1) | Jammed` / `Header ^ 
 
 ## 5. 既知の不具合 (Known Issues)
 
-1. **`10_Top_Module.v` が断片。** 合成もシミュレーションもできない。トップが無いため `10_Testbench_Integration.v` も動作しない。
-2. **`10_Testbench_Integration.v` のチェックサムが誤り。** `0x00` を送出しているが、当該ペイロードの XOR は `0x11` である。Fail-Closed が正しく動作すれば必ず弾かれる。
-3. ~~**`[cite:]` マーカーの残存。**~~ 解消済（2026-07-29）。`10_Cancer_Treatment_Selector.v` の4箇所を除去した。なお当該4箇所はいずれも `//` コメント内にあり、**構文エラーではなかった**（旧記載を訂正）。コード行に混入して実害があったのは削除済の `10_Testbench_TypeA.v` の方である。
-4. **`10_BioCalibrator_TypeB.v` が断片。** ポート定義と比較ロジックを欠く。
-5. **UART にフレーミング検証が無い。** ストップビットを確認せずに `rx_valid` を立てている。
+### 解消済（2026-07-29）
+
+1. ~~**`10_Top_Module.v` が断片。**~~ Rev 2.0 で実装した。
+2. ~~**統合テストベンチのチェックサムが誤り。**~~ Rev 2.0 でタスク内計算に変更。旧版は `0x00` を直書きしており、正しくは `0x10` であった（Fail-Closed が働けば必ず破棄される値）。
+3. ~~**`[cite:]` マーカーの残存。**~~ `10_Cancer_Treatment_Selector.v` の4箇所を除去した。なお当該4箇所はいずれも `//` コメント内にあり、**構文エラーではなかった**（旧記載を訂正）。コード行に混入して実害があったのは削除済の `10_Testbench_TypeA.v` の方である。
+4. ~~**`10_BioCalibrator_TypeB.v` が断片。**~~ 未実装を明示するスタブに置き換えた（`0x06 ERR_UNSUPPORTED` を返す）。§6 参照。
+5. **UART のビット周期に off-by-one があった。** `rx_cnt == BIT_PERIOD` は0から数えて `BIT_PERIOD+1` クロック待つため、実効ボーレートが `CLK_FREQ/(BIT_PERIOD+1)` になっていた。115200 では誤差 0.115% で顕在化しないが、シミュレーションでボーレートを上げると8ビット目で隣のビットを読む。`BIT_PERIOD - 1` に修正済。
+
+### 未解消
+
+6. **UART にフレーミング検証が無い。** ストップビットを確認せずに `rx_valid` を立てている。Fail-Closed の観点では、フレーミングエラーを検出してパケットを破棄すべきである。
+7. **`deform_velocity` と `cell_count` がプロトコルに無い。** §4 参照。
+8. **合成は未実施。** シミュレーションは通るが、Vivado / Quartus での合成・タイミング解析は行っていない。
 
 ## 6. 修正履歴 (Major Fixes)
 
-### Rev 2.0 (2026-07-28)
+### Rev 2.0 (2026-07-28 〜 07-29)
+
+**演算コア**
 
 * **判定式の次元不整合を是正。** 旧版は `(E+B)*(D-d)` を `dP` と直接比較しており、次元が閉じていなかった。応力に乗じるべきは変位ではなく歪み `(D-d)/D`（無次元）である。この誤りにより、幾何エラー以外は常に BLOCKED へ張り付いていた。
 * **パイプラインのラッチ漏れを是正。** 旧版は Stage 2 で `i_cell_stiffness` 等を入力ポートから直接読んでおり、1クロック遅延した `r_delta_x` と食い違っていた。
 * パイプラインを3段から5段へ。全段をリセット同期に変更。
 * エラーコード `0x02`（範囲外）、`0x03`（粘性ゼロ）、`0x04`（オーバーフロー）を実装。
+
+**統合（2026-07-29）**
+
+* `10_Top_Module.v` を新規実装。UART 受信 → チェックサム検証 → 演算 → 3バイト応答のシーケンス制御。チェックサム不一致時は破棄し応答しない（ホストが再送し、3回失敗で `0x05 ERR_COMM`）。
+* `10_BioCalibrator_TypeB.v` を未実装スタブに置換。未検証の現象論モデルを回路にすると判定が出てしまい、出た判定は読まれる。根拠のない数値を出すより出さない方が安全側であるという判断による。ホスト側 `nra_core_model.evaluate()` も Type B に `0x06` を返しており、挙動を一致させてある。
+* `10_UART_Interface.v` のビット周期 off-by-one を修正（§5-5）。
+* `10_Testbench_Integration.v` を書き直し。チェックサム自動計算、3バイト応答の照合、チェックサム異常時の無応答確認を追加。
+* `../simulation/10_Testbench_TypeA_Cases.v` を新規作成。演算コア単体で7ケースを検証する。
 
 ### Rev 1.0 まで
 
@@ -108,12 +126,42 @@ FPGA → ホストは 3バイト（Header / `(Error << 1) | Jammed` / `Header ^ 
 
 ## 7. 実行方法 (How to Run)
 
-> **注意: 現状ではシミュレーションを実行できない。** §5-1 の通りトップモジュールが断片であり、§5-3 の構文エラーも残っている。以下は修正完了後の手順である。
+Icarus Verilog での検証手順。両テストベンチとも Phase 30 の7ケースを検証する。
 
-1. `10_Testbench_Integration.v` を読み込み、`../simulation/10_wave_config.do` を適用する。
-2. 14バイトパケットを供給し、`uart_tx` から3バイトの応答が返ることを確認する。
-3. 応答2バイト目が `(Error << 1) | Jammed` である。`0x01` なら BLOCKED、`0x00` なら PASSABLE、`0x06` なら粘性ゼロエラー。
+```bash
+# 演算コア単体（高速。数秒で完了する）
+iverilog -Wall -o tb.vvp 10_BioCalibrator_TypeA.v \
+    ../simulation/10_Testbench_TypeA_Cases.v
+vvp tb.vvp
 
-期待値は `30_Test_Data/expected_results.json` の7ケースと一致しなければならない。
-参照実装 `20_Software_Host/nra_core_model.py` が同じ演算をビット単位で再現しているため、
+# 全系統合（UART を含む）
+iverilog -Wall -o itb.vvp 10_Top_Module.v 10_Cancer_Treatment_Selector.v \
+    10_BioCalibrator_TypeA.v 10_BioCalibrator_TypeB.v \
+    10_UART_Interface.v 10_Testbench_Integration.v
+vvp itb.vvp
+
+# 実機ボーレート(115200)で確認する場合（数分かかる）
+iverilog -PTestbench_Integration.BAUD_RATE=115200 -o itb.vvp <同じソース>
+vvp itb.vvp
+```
+
+統合テストベンチは既定でボーレートを 1 Mbps に上げてある。115200 では1ビットが
+8681 ns となり、8ケースで約12 ms・100MHz で240万クロックエッジを要して現実的
+でないためである。ビット周期は `CLK_FREQ / BAUD_RATE` で決まるので、比を保てば
+論理の検証としては等価である。**115200 でも 8/8 通過することは確認済み。**
+
+### 検証結果（2026-07-29, Icarus Verilog 11.0）
+
+| テストベンチ | 結果 |
+|:---|:---|
+| `10_Testbench_TypeA_Cases.v`（演算コア単体） | **7 / 7 PASS** |
+| `10_Testbench_Integration.v`（全系, 1 Mbps） | **8 / 8 PASS** |
+| `10_Testbench_Integration.v`（全系, 115200 bps） | **8 / 8 PASS** |
+
+期待値は `30_Test_Data/expected_results.json` と同一である。参照実装
+`20_Software_Host/nra_core_model.py` が同じ演算をビット単位で再現しているため、
 段ごとの中間値の突き合わせにも使える。
+
+**ただし、これはモデルの妥当性を示すものではない。** RTL と参照実装が同じ式を
+実装していることの確認までである。式が現実の細胞挙動を記述しているかは
+`検証プロトコル_マイクロ流路試験.md` による実験で検証されるべきものであり、未実施である。

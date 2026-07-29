@@ -380,9 +380,11 @@ This repository is a research template. The following are **incomplete**, stated
 
 | Type A (single cell) decision model | Formalized, reference implementation, 7 verification cases — complete |
 
-| Type B (cell cluster) model | **Unvalidated phenomenological model.** The $\sqrt{N}$ law is not supported by the cited literature |
+| Type B (cell cluster) model | **Not implemented.** The $\sqrt{N}$ law is not supported by the cited literature, so the RTL is a stub returning `0x06 ERR_UNSUPPORTED` |
 
-| FPGA RTL | `Top_Module.v` is a fragment. **Never synthesized or simulated** |
+| FPGA RTL (simulation) | **Verified** (2026-07-29, Icarus Verilog 11.0). Core unit 7/7, full integration 8/8, also confirmed at the real 115200 baud |
+
+| FPGA RTL (synthesis / timing) | **Not performed** (no Vivado / Quartus run) |
 
 | Drug penetration model | **Not started** |
 

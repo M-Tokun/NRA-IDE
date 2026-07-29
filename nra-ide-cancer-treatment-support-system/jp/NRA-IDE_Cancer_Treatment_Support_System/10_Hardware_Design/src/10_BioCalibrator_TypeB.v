@@ -1,25 +1,63 @@
-/* 10_BioCalibrator_TypeB.v (Non-Linear SCRUM Version) 26-0203-1714 */
+/* ═══════════════════════════════════════════════════════════════════════
+ * File:  10_BioCalibrator_TypeB.v
+ * Phase: 10 (Compute Core)
+ * Rev:   2.0  未実装を明示するスタブ (2026-07-29)
+ *
+ * Type B（細胞集団のスクラム効果）は実装しない。ERR_UNSUPPORTED (0x06) を
+ * 返し、判定は行わない。理由は3つある。
+ *
+ *   1. モデルが未検証である。PHASE_2 §3 の sqrt(N) 則は現象論であり、
+ *      増幅係数 alpha も 60_Research の文献では裏付けられていない。
+ *      検証プロトコル（マイクロ流路試験）も Type A のみを対象としている。
+ *
+ *   2. 入力が届かない。現行の14バイトプロトコルは cell_count (N) を
+ *      搬送しない（PHASE_5 §3.3）。N なしにクラスター判定はできない。
+ *
+ *   3. 未検証の物理式を回路にすると、判定が出てしまう。出た判定は
+ *      読まれる。根拠のない数値を出すより、出さない方が安全側である。
+ *
+ * ホスト側 nra_core_model.evaluate() も Type B に対して同じ 0x06 を返す。
+ * ハードウェアとホストで挙動を一致させてある。
+ *
+ * 【実装する場合】
+ *   PHASE_2 §3 の検証を先に済ませること。式を実装した時点で
+ *   nra_core_model.py の MODEL_VERSION と VALIDATION_STATUS、および
+ *   本ファイルの Rev を必ず更新すること。
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+`timescale 1ns / 1ps
 
 module BioCalibrator_TypeB_Collective (
-    // ... (ポート定義は前回同様)
+    input  wire        clk, rst_n,
+    input  wire        i_in_valid,
+    input  wire [15:0] i_cell_stiffness, i_cell_viscosity,
+    input  wire [15:0] i_cell_diameter, i_pore_size,
+    input  wire [15:0] i_flow_dp, i_drug_boost,
+    input  wire [15:0] i_deform_velocity,
+    input  wire [7:0]  i_cell_count,
+    output reg         o_is_jammed,
+    output reg  [7:0]  o_error_code,
+    output reg         o_out_valid
 );
-    // スクラム効果係数 (1 + alpha * sqrt(N)) Q8.8形式
-    // alpha = 0.5 と仮定した LUT (N=1..8)
-    reg [15:0] r_scrum_lut;
-    always @(*) begin
-        case (i_cell_count)
-            8'd1:    r_scrum_lut = 16'h0100; // 1.00
-            8'd2:    r_scrum_lut = 16'h016A; // 1.00 + 0.5*1.41 = 1.70
-            8'd3:    r_scrum_lut = 16'h01BB; // 1.00 + 0.5*1.73 = 1.86
-            8'd4:    r_scrum_lut = 16'h0200; // 1.00 + 0.5*2.00 = 2.00
-            default: r_scrum_lut = 16'h0280; // N>4 は 2.50 で飽和
-        endcase
+
+    localparam [7:0] ERR_UNSUPPORTED = 8'h06;
+
+    // Type A と同じ5段の遅延で応答する（上位のシーケンスを共通化するため）
+    reg [4:0] v_pipe;
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            v_pipe      <= 5'b0;
+            o_is_jammed <= 1'b0;
+            o_error_code<= 8'h00;
+            o_out_valid <= 1'b0;
+        end else begin
+            v_pipe      <= {v_pipe[3:0], i_in_valid};
+            o_out_valid <= v_pipe[4];
+            // Fail-Closed: 判定せず、転移リスク側（PASSABLE）へ倒す
+            o_is_jammed <= 1'b0;
+            o_error_code<= ERR_UNSUPPORTED;
+        end
     end
 
-    // Stage 3: 非線形スケーリング演算 (40bit)
-    always @(posedge clk) begin
-        // F_total = (F_single * N) * Scrum_Factor / 256
-        r_f_total_s3 <= (r_f_single_s2 * r_n_s1 * r_scrum_lut) >> 8;
-    end
-    // ... (以下比較ロジック)
 endmodule

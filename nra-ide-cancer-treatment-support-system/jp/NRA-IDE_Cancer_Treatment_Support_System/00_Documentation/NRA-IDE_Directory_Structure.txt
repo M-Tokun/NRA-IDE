@@ -24,16 +24,17 @@ jp/NRA-IDE_Cancer_Treatment_Support_System/
 │   ├── PHASE_8_Technical_Manual.md       [DONE] 合成手順
 │   └── PHASE_9_Operational_Guide.md      [DONE] 運用フロー
 │
-├── 10_Hardware_Design/                [BROKEN] トップが断片のため合成不可
+├── 10_Hardware_Design/                [DONE] シミュレーション検証済。合成は未実施
 │   ├── src/
 │   │   ├── README.md                     [DONE] 構成・既知の不具合一覧（Rev 2.0）
-│   │   ├── 10_Top_Module.v               [BROKEN] module/endmodule を欠く断片
+│   │   ├── 10_Top_Module.v               [DONE] 通信/演算シーケンス（Rev 2.0 新規）
 │   │   ├── 10_Cancer_Treatment_Selector.v [DONE] Type A/B のMUX
 │   │   ├── 10_BioCalibrator_TypeA.v      [DONE] 応力比較形・5段（Rev 2.0）
-│   │   ├── 10_BioCalibrator_TypeB.v      [BROKEN] ポート定義・比較ロジックを欠く
-│   │   ├── 10_UART_Interface.v           [WIP]  フレーミング検証なし
-│   │   └── 10_Testbench_Integration.v    [BROKEN] チェックサム 0x00（正: 0x11）
+│   │   ├── 10_BioCalibrator_TypeB.v      [DONE] 未実装スタブ。0x06 を返す
+│   │   ├── 10_UART_Interface.v           [WIP]  フレーミング検証なし（周期は修正済）
+│   │   └── 10_Testbench_Integration.v    [DONE] 全系7ケース＋CS異常（8/8 PASS）
 │   ├── simulation/
+│   │   ├── 10_Testbench_TypeA_Cases.v    [DONE] 演算コア単体7ケース（7/7 PASS）
 │   │   ├── 10_Testbench_BruteForce.v     [DONE] Boost 探索（vel の Q8.8 値を訂正）
 │   │   └── 10_wave_config.do             [DONE] 波形設定
 │   │      ※ 10_Testbench_TypeA.v は削除済（2026-07-29）。TBではなく
@@ -86,8 +87,11 @@ jp/NRA-IDE_Cancer_Treatment_Support_System/
 未着手・未検証の事項
 
 * 薬剤到達モデル（Darcy則）           [N/A] 未着手。判定対象外
-* Type B（集団）モデルの検証           [N/A] 現象論モデルのまま
-* RTL の合成・シミュレーション         [N/A] 未実施。環境にシミュレータなし
+* Type B（集団）モデルの検証           [N/A] 未実装スタブのまま
+* RTL のシミュレーション               [DONE] 2026-07-29, Icarus Verilog 11.0
+                                              単体 7/7、統合 8/8（115200 でも確認）
+* RTL の合成・タイミング解析           [N/A] 未実施。Vivado / Quartus なし
+* UART のフレーミング検証              [N/A] ストップビット未確認
 * マイクロ流路による実験検証           [N/A] プロトコルのみ策定済
 * deform_velocity / cell_count の伝送  [N/A] プロトコル未対応
 ────────────────────────────────────────────────────────────
