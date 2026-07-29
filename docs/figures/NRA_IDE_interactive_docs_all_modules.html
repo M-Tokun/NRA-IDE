@@ -670,7 +670,7 @@ a{color:#58a6ff}
     <div class="m3card" id="card-core" onclick="NRAIDE_M3.showInfo('core')" style="cursor:pointer">
       <div class="m3tag" style="background:#FAEEDA;color:#633806">τ 構造コア</div>
       <div class="m3mn" style="font-size:12px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">Structural Core</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R≥1でRUPTURE_BOUNDARYとなり、最終固定証言へ切り替わる境界。</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.6">τ の本体。R≥1でRUPTURE_BOUNDARYとなり、破断後固定証言へ切り替わる境界。</div>
       <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px;font-family:monospace">🧠 皮質骨・心筋・血液脳関門</div>
     </div>
   </div>
@@ -1212,8 +1212,8 @@ a{color:#58a6ff}
     {
       ja: '停止', en: 'halt',
       linear: '障害または失敗の証拠。復旧すべき異常状態。',
-      nra: 'RUPTURE_BOUNDARYでは最終固定証言へ切り替える。安全に回復した証拠ではない。',
-      tag: '最終固定証言'
+      nra: 'RUPTURE_BOUNDARYでは破断後固定証言へ切り替える。安全に回復した証拠ではない。',
+      tag: '破断後固定証言'
     },
     {
       ja: '近似', en: 'approximation',
@@ -1230,7 +1230,7 @@ a{color:#58a6ff}
     {
       ja: '限界', en: 'limit',
       linear: '越えてはならない上限値。外部から設定されるルール。',
-      nra: '人間委譲はR_handoffで開始する。R≥1はRUPTURE_BOUNDARYであり、最終固定証言へ切り替える。',
+      nra: '人間委譲はR_handoffで開始する。R≥1はRUPTURE_BOUNDARYであり、破断後固定証言へ切り替える。',
       tag: 'R_handoff < R_irrev < 1'
     }
   ];

@@ -77,7 +77,7 @@ The five canonical states over valid $R$ ranges and their invariant ordering are
 | `BOUNDARY_WARNING` | $R_{warn} \leq R < R_{handoff}$ | Disclose boundary approach and required testimony, including the mandatory dual-fluctuation field |
 | `HANDOFF_REQUIRED` | $R_{handoff} \leq R < R_{irrev}$ | Stop new autonomous judgment and issue fixed Effect-Side testimony for external human audit |
 | `IRREVERSIBLE_TRANSITION` | $R_{irrev} \leq R < 1$ | Latch irreversible transition and continue structural testimony |
-| `RUPTURE_BOUNDARY` | $R \geq 1$ | Switch to final fixed testimony |
+| `RUPTURE_BOUNDARY` | $R \geq 1$ | Switch to post-rupture fixed testimony |
 
 Concrete threshold values are domain-specific, but their order is invariant.
 
@@ -106,15 +106,15 @@ ACTION: generated response suppressed; fixed Effect-Side testimony for external 
 
 $R = 1.0$ is not an ordinary threshold that a designer may move according to the situation. It is `RUPTURE_BOUNDARY` for the declared evaluation, not a universal declaration about every natural phase transition.
 
-When $R \geq 1.0$, Post-NRA does not output ordinary generated content. It also does not ask the LLM to generate new free-form text in order to explain the reason for stopping. The structural response is the predefined final fixed testimony or a reference to a protected Discard Log.
+When $R \geq 1.0$, Post-NRA does not output ordinary generated content. It also does not ask the LLM to generate new free-form text in order to explain the reason for stopping. The structural response is the predefined post-rupture fixed testimony or a reference to a protected Discard Log.
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony; old path terminal; external human audit only
+ACTION: post-rupture fixed testimony; old path terminal; external human audit only
 ```
 
-This does not mean that nothing is communicated. It means that ordinary generated responses are stopped and the complete predefined final fixed testimony or protected log reference is communicated. External human audit does not extend the old path.
+This does not mean that nothing is communicated. It means that ordinary generated responses are stopped and the complete predefined post-rupture fixed testimony or protected log reference is communicated. External human audit does not extend the old path.
 
 The old evaluation terminates at its Effect-Side:
 
@@ -136,10 +136,10 @@ independently declared new target
 
 There is no arrow from Old Effect-Side to either the old or new Cause-Side. Old Effect-Side values, canonical thresholds, states, the irreversible latch, rules, transformation inputs, update grounds, or provenance must not be imported, relabeled, reconstructed, or reused as Cause-Side authority. Physical remnants may be observed anew as part of an independently declared target, but that new observation is not a transfer of old Effect-Side values or authority.
 
-Fixed Handoff testimony at `R_handoff` and final fixed testimony at $R \geq 1.0$ may both suppress ordinary free-form generation. However, their states and roles are different.
+Fixed Handoff testimony at `R_handoff` and post-rupture fixed testimony at $R \geq 1.0$ may both suppress ordinary free-form generation. However, their states and roles are different.
 
 * **Reaching `R_handoff`:** Fixed Effect-Side Handoff testimony for external audit before rupture
-* **$R \geq 1.0$:** Final fixed testimony and termination of the old evaluation at its Effect-Side
+* **$R_{\mathrm{target}} \geq 1.0$:** Continuing post-rupture fixed testimony and termination of the old target evaluation at its Effect-Side; surviving observation, logging, and communication channels remain independent
 
 ---
 

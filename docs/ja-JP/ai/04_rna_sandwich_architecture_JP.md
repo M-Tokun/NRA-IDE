@@ -130,7 +130,7 @@ ACTION: generated response suppressed; fixed Effect-Side testimony for external 
 
 `IRREVERSIBLE_TRANSITION`では、後に表示Rが低下しても、同一履歴内の不可逆ラッチを保持します。自動処理、手動介入、人間レビュー、承認、版更新のいずれによっても解除しません。
 
-宣言済み評価では、R ≥ 1.0は`RUPTURE_BOUNDARY`です。この分類は、自然界のすべての相転移をNRA-IDEの破断と宣言するものではありません。Post-NRAは新たな説明をLLMに生成させず、事前に定めた完全な最終固定証言または保護ログ参照を返し、旧評価をEffect-Sideで終端します。
+宣言済み評価では、R ≥ 1.0は`RUPTURE_BOUNDARY`です。この分類は、自然界のすべての相転移をNRA-IDEの破断と宣言するものではありません。Post-NRAは新たな説明をLLMに生成させず、事前に定めた完全な破断後固定証言または保護ログ参照を返し、旧評価をEffect-Sideで終端します。
 
 ```text
 旧Cause-Side

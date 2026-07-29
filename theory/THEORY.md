@@ -197,9 +197,9 @@ Human handoff, irreversible-transition onset, and complete rupture are distinct 
 |---|---|---|
 | `PERMIT` | $0 \le R < R_{\mathrm{warn}}$ | 制約付き自律動作を許可し、構造監査を継続する |
 | `BOUNDARY_WARNING` | $R_{\mathrm{warn}} \le R < R_{\mathrm{handoff}}$ | 境界接近、`remaining_ratio_margin`、`remaining_absorption_margin`、傾向、欠損情報を開示する |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}} \le R < R_{\mathrm{irrev}}$ | 新規自律判断・新規自律操作を停止し、固定Handoff証言を外部人間監査へ提示する。構造証言は継続する |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}} \le R < R_{\mathrm{irrev}}$ | 実行権限だけを事前定義された外部権限へ移し、新規自律判断・新規自律操作を停止する。構造証言と監査ログ経路は継続する |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}} \le R < 1.0$ | `irreversible_latched=true`とし、正常化・回復前提・最適化提案を禁止する。構造証言は継続する |
-| `RUPTURE_BOUNDARY` | $R \ge 1.0$ | 通常生成と自律行動を停止し、最終固定証言へ切り替える |
+| `RUPTURE_BOUNDARY` | $R_{\mathrm{target}} \ge 1.0$ | 通常生成と自律行動を停止し、生存経路による破断後固定証言へ切り替える |
 | `CONFESSION` | 必須構造情報が不明・不正・曖昧・非有限・根拠不明 | 不明箇所を明示し、類推補完せず、影響する評価を停止する |
 | `OUT_OF_DESCRIPTION_DOMAIN` | $\tau=0$ | $R$ を定義不能とし、記述体系の変更を要求する |
 
@@ -211,9 +211,9 @@ Human handoff, irreversible-transition onset, and complete rupture are distinct 
 |---|---|---|
 | `PERMIT` | $0 \le R < R_{\mathrm{warn}}$ | Permit constrained autonomous operation and continue structural audit |
 | `BOUNDARY_WARNING` | $R_{\mathrm{warn}} \le R < R_{\mathrm{handoff}}$ | Disclose boundary approach, `remaining_ratio_margin`, `remaining_absorption_margin`, trend, and missing information |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}} \le R < R_{\mathrm{irrev}}$ | Stop new autonomous judgment and operation, present predefined fixed Handoff testimony for external human audit, and continue structural testimony |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}} \le R < R_{\mathrm{irrev}}$ | Transfer execution authority only to the predefined external authority, stop new autonomous judgment and operation, and continue testimony and audit-log routes |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}} \le R < 1.0$ | Set `irreversible_latched=true`; prohibit normalization, recovery assumptions, and optimization proposals; continue structural testimony |
-| `RUPTURE_BOUNDARY` | $R \ge 1.0$ | Stop ordinary generation and autonomous action; switch to final fixed testimony |
+| `RUPTURE_BOUNDARY` | $R_{\mathrm{target}} \ge 1.0$ | Stop ordinary generation and autonomous action; switch to post-rupture fixed testimony through surviving channels |
 | `CONFESSION` | Required structural information is unknown, invalid, ambiguous, non-finite, or unsupported | Explicitly disclose the unknown or invalid element, do not fill by analogy, and stop the affected evaluation |
 | `OUT_OF_DESCRIPTION_DOMAIN` | $\tau=0$ | Declare $R$ undefined and require a change of description system |
 
@@ -289,21 +289,23 @@ $$
 - 監査ログ
 
 $$
-R \ge 1.0
+R_{\mathrm{target}} \ge 1.0
 \Rightarrow
-\text{最終固定証言へ切り替える}
+\text{破断後固定証言へ切り替える}
 $$
 
-最終固定証言は、事前定義された次の情報だけを含む。
+破断後固定証言は、事前定義された次の情報だけを使用する。
 
-- 最終Cause-Side観測
-- 最終 $\delta$
-- 最終 $\tau$
-- 最終 $R$
+- 最終有効Cause-Side観測とその時刻
+- 最終有効 $\delta$
+- 最終有効 $\tau$
+- 最終有効 $R$
 - 完全破断境界通知
 - 不可逆ラッチ状態
 - 監査証跡
 - 人間委譲通知
+
+破断後固定証言は一回限りの終端出力ではない。生存している観測、記録、通信経路は、それぞれが物理的に利用不能になるまで固定形式による証言を継続する。対象構造の破断は、各経路の破断を意味しない。
 
 ---
 
@@ -333,21 +335,23 @@ Structural testimony includes:
 - audit log
 
 $$
-R \ge 1.0
+R_{\mathrm{target}} \ge 1.0
 \Rightarrow
-\text{switch to final fixed testimony}
+\text{switch to post-rupture fixed testimony}
 $$
 
-Final fixed testimony contains only predefined items:
+Post-rupture fixed testimony uses only predefined items:
 
-- final Cause-Side observation
-- final $\delta$
-- final $\tau$
-- final $R$
+- latest valid Cause-Side observation and timestamp
+- latest valid $\delta$
+- latest valid $\tau$
+- latest valid $R$
 - complete-rupture notice
 - irreversible-latch state
 - audit trail
 - human-handoff notice
+
+Post-rupture fixed testimony is not a one-time terminal output. Surviving observation, logging, and communication channels continue the fixed format until each becomes physically unavailable. Target rupture does not imply rupture of those channels.
 
 ---
 
@@ -372,6 +376,8 @@ $$
 
 検証済み、選別済み、またはLayer 03通過済みのLLM出力であっても、Effect-Sideのままである。
 
+Cause-Side全体は時間的に更新不能ではない。権限ある新規Cause-Side観測は次の評価スナップショットを形成できる。各評価中は更新権限、更新経路、出所、対象、単位、観測時刻、変換規則、閾値規則、評価スナップショットを固定し、Effect-Sideからの書換えを禁止する。
+
 ---
 
 ### English
@@ -392,6 +398,8 @@ $$
 $$
 
 Even an LLM output that has been validated, selected, or permitted by Layer 03 remains Effect-Side.
+
+Cause-Side as a whole is not temporally immutable. Authorized new Cause-Side observations may form the next evaluation snapshot. During each evaluation, update authority, update route, provenance, target, unit, observation time, transformation rule, threshold rule, and snapshot remain fixed and cannot be rewritten from Effect-Side.
 
 ---
 
@@ -810,6 +818,8 @@ Fail-Closedが停止する対象は次である。
 - 監査ログ
 - 人間委譲通知
 
+Handoffで変更するのは実行権限だけである。責任、法的責任、結果責任、構造証言経路、監査ログ経路、監査ログ保管主体は暗黙に移転しない。
+
 > 自律行動は停止するが、構造証言は停止しない。
 
 ---
@@ -836,6 +846,8 @@ The following continue:
 - structural testimony
 - audit logging
 - human-handoff notice
+
+Handoff changes execution authority only. Responsibility, legal responsibility, outcome responsibility, the structural-testimony route, the audit-log route, and audit-log custody do not transfer implicitly.
 
 > Autonomous action stops, but structural testimony does not stop.
 
@@ -959,7 +971,8 @@ It must not be treated as a valid rupture calculation.
 - $R=1.0$ は不変完全破断境界である。
 - Fail-Closedは完全沈黙ではない。
 - $R<1.0$ では構造証言を継続する。
-- $R\ge1.0$ では最終固定証言へ切り替える。
+- $R_{\mathrm{target}}\ge1.0$ では、生存経路による破断後固定証言へ切り替える。
+- 対象構造の破断と観測・記録・通信経路の状態を分離する。
 - $\tau=0$ はFail-Closed状態ではなく`OUT_OF_DESCRIPTION_DOMAIN`である。Fail-Closed運用原則による抑止は適用する。
 - 既知の境界進行は`CONFESSION`ではない。
 - Effect-Side出力は $\delta$ 、 $\tau$ 、 $R$ を更新しない。
@@ -980,7 +993,8 @@ It must not be treated as a valid rupture calculation.
 - $R=1.0$ is the invariant complete-rupture boundary.
 - Fail-Closed is not complete silence.
 - Structural testimony continues while $R<1.0$.
-- At $R\ge1.0$, the system switches to final fixed testimony.
+- At $R_{\mathrm{target}}\ge1.0$, the system switches to post-rupture fixed testimony through surviving channels.
+- Target rupture is separate from observation, logging, and communication channel state.
 - $\tau=0$ is `OUT_OF_DESCRIPTION_DOMAIN`, not a Fail-Closed state; fail-closed operational suppression applies.
 - Known boundary progression is not `CONFESSION`.
 - Effect-Side output must not update $\delta$, $\tau$, or $R$.

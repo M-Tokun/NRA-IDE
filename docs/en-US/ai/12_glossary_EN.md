@@ -32,7 +32,7 @@ In NRA-IDE, quantities described as “numbers” do not all have the same role.
 
 ### Record Fields
 
-* **Applicable variables:** `entropy_export`, Discard Logs, Fixed Handoff Testimony, and Final Fixed Testimony
+* **Applicable variables:** `entropy_export`, Discard Logs, Fixed Handoff Testimony, and Post-Rupture Fixed Testimony
 * **Role:** Preserve structural determinations, fixed testimony, and residuals not adopted into computation
 * **Updates from the Effect-Side:** Must not become a Cause-Side value, canonical threshold, state, irreversible latch, rule, transformation input, update ground, or provenance in either an old or a new Cause-Side
 
@@ -110,7 +110,7 @@ The canonical states are determined by the invariant threshold order and invalid
 
 **`IRREVERSIBLE_TRANSITION`** — $R_{irrev} \leq R < 1$. Set and retain the irreversible latch; do not normalize the state or assume recovery; continue structural testimony.
 
-**`RUPTURE_BOUNDARY`** — $R \geq 1$. Switch to final fixed testimony. Later output cannot rewrite or soften this state.
+**`RUPTURE_BOUNDARY`** — $R_{\mathrm{target}} \geq 1$. The declared target switches to post-rupture fixed testimony. This does not imply rupture of observation, logging, or communication channels; surviving channels continue independently. Later output cannot rewrite or soften the target state.
 
 **`OUT_OF_DESCRIPTION_DOMAIN`** — $\tau=0$. Canonical $R$ is undefined; report the domain boundary without fabricating a ratio.
 
@@ -142,10 +142,10 @@ A design action that enforces the non-passage of ordinary generation through pre
 
 * At `HANDOFF_REQUIRED`: suppress new autonomous judgment and present fixed Handoff testimony for external human audit.
 * At `IRREVERSIBLE_TRANSITION`: retain the latch and continue structural testimony without recovery assumptions.
-* At `RUPTURE_BOUNDARY`: return final fixed testimony or a protected-log reference; do not resume ordinary free-form generation.
+* At `RUPTURE_BOUNDARY`: return post-rupture fixed testimony or a protected-log reference; do not resume ordinary free-form generation.
 
-**Final Fixed Testimony (legacy implementation label: Minimal FAIL-CLOSED Notification)**
-A predefined fixed testimony returned at `RUPTURE_BOUNDARY` without generating new LLM free-form text. At minimum, it records the canonical state, determined structural values, boundary condition, irreversible latch status, and the external human-audit path. The legacy label is not a separate canonical state.
+**Post-Rupture Fixed Testimony (legacy implementation label: Minimal FAIL-CLOSED Notification)**
+A predefined fixed testimony returned at `RUPTURE_BOUNDARY` without generating new LLM free-form text. This is a repeatable testimony mode, not a one-time terminal message: it remains available while its testimony route survives. At minimum, it records the canonical state, determined structural values, boundary condition, irreversible latch status, and the external human-audit path. The legacy label is not a separate canonical state.
 
 **Fixed Handoff Testimony (legacy implementation label: Fixed-Schema Handoff Notification)**
 A predefined fixed Effect-Side testimony presented when $R_{\mathrm{handoff}}$ is reached, rather than LLM free-form text. According to target-domain rules, it presents the observed structural values, triggered condition, external-audit contact path, and required fixed fields. It does not transfer judgment, responsibility, or structural authority through the old diode path.
@@ -163,7 +163,7 @@ The entry structural gate that verifies the provenance, transformation rules, up
 The layer responsible for ordinary language generation based on user requests and context. It has no authority to modify a Cause-Side value, any canonical threshold, state, irreversible latch, structural-evaluation rule, transformation input, update ground, provenance, Discard Log, or Post-NRA decision concerning output passage or suppression. The semantic accuracy, factuality, and user suitability of the LLM are not guaranteed by NRA-IDE.
 
 **Post-NRA**
-The exit structural gate that enforces the structural state already determined from the Cause-Side before output is passed to the user. It does not derive structural variables by scoring LLM text. At `HANDOFF_REQUIRED` it uses Fixed Handoff Testimony; at `IRREVERSIBLE_TRANSITION` it preserves the latch and testimony; at `RUPTURE_BOUNDARY` it uses Final Fixed Testimony or a protected-log reference.
+The exit structural gate that enforces the structural state already determined from the Cause-Side before output is passed to the user. It does not derive structural variables by scoring LLM text. At `HANDOFF_REQUIRED` it uses Fixed Handoff Testimony; at `IRREVERSIBLE_TRANSITION` it preserves the latch and testimony; at `RUPTURE_BOUNDARY` it uses Post-Rupture Fixed Testimony or a protected-log reference.
 
 ---
 
@@ -200,7 +200,7 @@ entropy_export = raw_next_phase - next_phase_int
 `entropy_export` does not mean a measured value of thermodynamic entropy or physical heat itself. It is also distinct from $S$ (structural sensitivity). It records residual not adopted into the next state transition and does not guarantee the elimination of every error related to floating-point computation.
 
 **Discard Log**
-A record that preserves, as testimony, which values were used as structural inputs, which condition was triggered, and which residual was not adopted during Handoff, irreversible transition, rupture, or another discrete transition. At minimum, it records identifiers of the observation and update rules used, $\delta$, $\tau$, $R$, $\omega$, triggered conditions, suppression of ordinary generation, applicable `entropy_export`, and Fixed Handoff Testimony for external human audit or Final Fixed Testimony.
+A record that preserves, as testimony, which values were used as structural inputs, which condition was triggered, and which residual was not adopted during Handoff, irreversible transition, rupture, or another discrete transition. At minimum, it records identifiers of the observation and update rules used, $\delta$, $\tau$, $R$, $\omega$, triggered conditions, suppression of ordinary generation, applicable `entropy_export`, and Fixed Handoff Testimony for external human audit or Post-Rupture Fixed Testimony.
 
 Discard Logs may be read by humans outside the terminated diode path for audit. They remain Effect-Side or external records and are never reintroduced, manually or automatically, into an old or a new Cause-Side as a value, canonical threshold, state, irreversible latch, rule, transformation input, update ground, or provenance.
 
@@ -255,7 +255,7 @@ This is the unified invariant standard for the conditions under which ordinary g
 * **`BOUNDARY_WARNING` ($R_{warn} \le R < R_{handoff}$):** warning and required testimony pass without being softened.
 * **`HANDOFF_REQUIRED` ($R_{handoff} \le R < R_{irrev}$):** no new autonomous judgment; present Fixed Handoff Testimony for external human audit without generating new free-form stopping text.
 * **`IRREVERSIBLE_TRANSITION` ($R_{irrev} \le R < 1$):** retain the irreversible latch and continuing testimony; do not assume recovery.
-* **`RUPTURE_BOUNDARY` ($R \ge 1$):** return final fixed testimony or a protected-log reference; do not generate new free-form text.
+* **`RUPTURE_BOUNDARY` ($R \ge 1$):** return post-rupture fixed testimony or a protected-log reference; do not generate new free-form text.
 * **`OUT_OF_DESCRIPTION_DOMAIN` / `CONFESSION`:** report the domain boundary or invalid information through fixed structural testimony. Auxiliary $\omega=0$ does not change the canonical state toward safety.
 
 ---

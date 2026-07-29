@@ -99,7 +99,7 @@ Within the known numeric progression distinguished in Chapters 05 and 07, this s
 
 * **`HANDOFF_REQUIRED`:** $R_{\mathrm{handoff}} \le R < R_{irrev}$; fixed Handoff testimony presented for external human audit
 * **`IRREVERSIBLE_TRANSITION`:** $R_{irrev} \le R < 1$; irreversible latch and continuing structural testimony
-* **`RUPTURE_BOUNDARY`:** $R \ge 1$; final fixed testimony for the declared evaluation
+* **`RUPTURE_BOUNDARY`:** $R \ge 1$; post-rupture fixed testimony for the declared evaluation
 
 `CONFESSION` and `OUT_OF_DESCRIPTION_DOMAIN` also suppress affected ordinary output through Fail-Closed processing. They are input exceptions rather than states in this numeric progression and are recorded separately in `INPUT_EXCEPTION_LOG`.
 
@@ -113,7 +113,7 @@ REASON: triggered handoff condition or structural boundary
 OBSERVED: δ, τ, R, ω, and required provenance identifiers
 THRESHOLDS: R_warn, R_handoff, R_irrev
 DISCARD: entropy_export (only when a relevant discrete transition exists)
-ACTION: ordinary generation suppressed; fixed Handoff testimony for external human audit; continuing structural testimony; or final fixed testimony
+ACTION: ordinary generation suppressed; fixed Handoff testimony for external human audit; continuing structural testimony; or post-rupture fixed testimony
 RULE_VERSION: version of the observation, update, and handoff rules used
 ```
 
@@ -127,15 +127,15 @@ THRESHOLD: R_handoff
 ACTION: generated response suppressed; fixed Effect-Side testimony presented for external human audit
 ```
 
-For fixed Handoff testimony and final fixed testimony, the LLM is not asked to generate new free-form text in order to explain the reason for stopping. Only predefined fixed Effect-Side testimony or a protected-log reference is returned.
+For fixed Handoff testimony and post-rupture fixed testimony, the LLM is not asked to generate new free-form text in order to explain the reason for stopping. Only predefined fixed Effect-Side testimony or a protected-log reference is returned.
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony; old evaluation history terminated at Effect-Side
+ACTION: post-rupture fixed testimony; old evaluation history terminated at Effect-Side
 ```
 
-This makes it possible to distinguish, within the record itself, handoff, irreversible transition, and final fixed testimony at the rupture boundary.
+This makes it possible to distinguish, within the record itself, handoff, irreversible transition, and post-rupture fixed testimony at the rupture boundary.
 
 ---
 

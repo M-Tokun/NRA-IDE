@@ -53,7 +53,7 @@ The three canonical operating thresholds have the invariant order:
 - At `R_warn`, boundary approach is disclosed.
 - At `R_handoff`, affected new autonomous judgment and operation stop, and predefined fixed Effect-Side testimony is presented for external human audit.
 - At `R_irrev`, irreversible transition is latched. Within the same history, later $R$ decrease, automatic processing, manual intervention, human review, approval, or version update cannot release the latch.
-- At $R\ge1$, the system reports `RUPTURE_BOUNDARY` and switches to final fixed testimony.
+- At $R\ge1$, the system reports `RUPTURE_BOUNDARY` and switches to post-rupture fixed testimony.
 
 Avoidance therefore has meaning before the accident result: observe the path, disclose increasing risk, and emit fixed Handoff testimony before the irreversible threshold rather than waiting for rupture and then reconstructing causes from the outcome. External audit does not continue or rewrite the old causal path.
 

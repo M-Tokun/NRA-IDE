@@ -20,6 +20,10 @@ There is exactly one Nomological Ring Axiom: “Existence is Generation.” No s
 
 Operational safety judgment, authority transfer, output control, and audit rules are outside the scope of this document.
 
+ただし、本式で評価する対象は計算開始前に一意に宣言する。`R_target >= 1.0` はその対象構造の完全破断境界を表し、センサー、ロガー、通信経路または外部監査系の破断を自動的には表さない。各経路の生存状態は本式とは別に記録する。
+
+The evaluation target must nevertheless be declared unambiguously before computation. `R_target >= 1.0` denotes the complete-rupture boundary of that target structure; it does not automatically denote rupture of a sensor, logger, communication path, or external audit system. Survival of each path is recorded separately from this formula.
+
 ---
 
 # 1. 一次式（基本境界式）  
@@ -646,12 +650,16 @@ $\delta$ 、 $\tau$ 、 $\delta_{\mathrm{upper}}$ 、 $\delta_{\mathrm{lower}}$ 
 
 各入力には、取得元、取得時刻または版、単位、不確かさ、適用範囲および変換履歴を結び付ける。 $x_{\mathrm{exact}}$ という記号名は真値保証を意味せず、参照状態としての妥当性を領域固有の証拠で検証しなければならない。
 
+新しい権限あるCause-Side観測は、次の評価スナップショットを更新できる。各評価中は、対象、更新権限、更新経路、出所、単位、観測時刻、変換規則、閾値規則、および当該評価スナップショットを固定する。Cause-Side全体を時間的に更新不能と解釈してはならない。
+
 $\delta$, $\tau$, $\delta_{\mathrm{upper}}$, $\delta_{\mathrm{lower}}$, and $x_{\mathrm{exact}}$ must be obtained from either:
 
 1. direct Cause-Side observation; or  
 2. a Cause-Side transformation rule fixed before computation begins.  
 
 Each input must be linked to its source, acquisition time or version, unit, uncertainty, applicability, and transformation history. The symbol name $x_{\mathrm{exact}}$ does not guarantee ground truth; its validity as a reference state must be supported by domain-specific evidence.
+
+New authorized Cause-Side observations may update the next evaluation snapshot. During each evaluation, the target, update authority, update route, provenance, unit, observation time, transformation rule, threshold rule, and evaluation snapshot remain fixed. Cause-Side as a whole must not be interpreted as temporally immutable.
 
 次の値を計算入力へ使用してはならない。
 

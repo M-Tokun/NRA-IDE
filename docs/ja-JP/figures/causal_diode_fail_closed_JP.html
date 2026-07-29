@@ -515,8 +515,8 @@
         <!-- Rupture Boundary / Terminated History Overlay -->
         <div class="rupture-overlay" id="rupture-overlay">
             <div class="rupture-title">RUPTURE_BOUNDARY</div>
-            <div class="rupture-desc" data-en="This history has terminated at R ≥ 1 and retains final fixed testimony. It cannot be reset, restored, or continued. A later run must begin as a new independent Cause-Side history." data-jp="この履歴はR ≥ 1で終端し、最終固定証言を保持します。リセット、回復、継続はできません。後続実行は独立した新Cause-Side履歴として開始しなければなりません。">
-                この履歴はR ≥ 1で終端し、最終固定証言を保持します。リセット、回復、継続はできません。後続実行は独立した新Cause-Side履歴として開始しなければなりません。
+            <div class="rupture-desc" data-en="The declared target reached RUPTURE_BOUNDARY at R ≥ 1. Its evaluation path cannot be reset or restored, while post-rupture fixed testimony continues through each surviving observation, logging, and communication channel. A later evaluation must begin as a new independent Cause-Side history." data-jp="宣言済み対象はR ≥ 1でRUPTURE_BOUNDARYへ到達しました。評価経路はリセットまたは回復できませんが、破断後固定証言は生存する観測・記録・通信チャネルを通じて継続します。後続評価は独立した新Cause-Side履歴として開始しなければなりません。">
+                宣言済み対象はR ≥ 1でRUPTURE_BOUNDARYへ到達しました。評価経路はリセットまたは回復できませんが、破断後固定証言は生存する観測・記録・通信チャネルを通じて継続します。後続評価は独立した新Cause-Side履歴として開始しなければなりません。
             </div>
             <div class="rupture-r-value" id="rupture-r-display">R = 1.000</div>
             <button class="new-history-btn" onclick="startNewIndependentHistory()" data-en="Start New Independent History" data-jp="独立した新履歴を開始">独立した新履歴を開始</button>
@@ -567,7 +567,7 @@
                 logUpdated: "負荷更新",
                 logBlocked: "[警告] AIからτの不正操作を検知. 遮断しました.",
                 logLatched: "[IRREVERSIBLE_TRANSITION] R ≥ R_irrev. この履歴のラッチを固定.",
-                logRupture: "[RUPTURE_BOUNDARY] R ≥ 1. 最終固定証言.",
+                logRupture: "[RUPTURE_BOUNDARY] R ≥ 1. 破断後固定証言.",
                 logNew: "独立したCause-Side入力から開始. Effect-Side値の持越しなし.",
             },
             en: {
@@ -576,7 +576,7 @@
                 logUpdated: "Load updated",
                 logBlocked: "[WARN] AI attempted to alter τ. Blocked.",
                 logLatched: "[IRREVERSIBLE_TRANSITION] R ≥ R_irrev. Latch fixed for this history.",
-                logRupture: "[RUPTURE_BOUNDARY] R ≥ 1. Final fixed testimony.",
+                logRupture: "[RUPTURE_BOUNDARY] R_target ≥ 1. Post-rupture fixed testimony continues on surviving channels.",
                 logNew: "Started from independent Cause-Side inputs. No Effect-Side values carried over.",
             }
         };

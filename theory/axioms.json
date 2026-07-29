@@ -267,9 +267,27 @@
         "condition": "R_handoff <= R < R_irrev",
         "autonomous_new_judgment": "stopped",
         "autonomous_new_operation": "stopped",
-        "responsibility": "present_predefined_fixed_handoff_testimony_for_external_human_audit",
+        "execution_authority": {
+          "before": "AUTONOMOUS_CURRENT_PATH",
+          "after": "EXTERNAL_PREDEFINED",
+          "only_automatically_transferred_item": true
+        },
+        "structural_testimony_route": "continues",
+        "audit_log_route": "continues",
+        "audit_log_custody": "unchanged_unless_domain_rule_explicitly_changes_it",
+        "not_implicitly_transferred": [
+          "responsibility",
+          "legal responsibility",
+          "outcome responsibility",
+          "knowledge",
+          "guarantee of judgment accuracy",
+          "guarantee of expert infallibility",
+          "guarantee of safety recovery",
+          "guarantee of problem resolution"
+        ],
+        "handoff_testimony": "present_predefined_fixed_handoff_testimony_for_external_human_audit",
         "structural_reporting": "continues",
-        "_comment": "Autonomous judgment and operation stop here, but structural testimony continues because R < 1.0. The external human audit is outside the old Causal Diode and does not create a reverse edge to Cause-Side."
+        "_comment": "Handoff changes execution authority only. Autonomous judgment and operation stop here, while structural testimony and audit logging continue. The external human audit is outside the old Causal Diode and does not create a reverse edge to Cause-Side."
       },
       "IRREVERSIBLE_TRANSITION": {
         "condition": "R_irrev <= R < 1.0",
@@ -287,21 +305,33 @@
         "_comment": "The former structural state can no longer be restored. This is not the same as R = 1.0. Structural testimony continues until R reaches 1.0."
       },
       "RUPTURE_BOUNDARY": {
-        "condition": "R >= 1.0",
+        "condition": "R_target >= 1.0",
+        "applies_to": "declared evaluation target only",
         "autonomous_action": "fail_closed",
-        "meaning": "structural slack exhausted",
-        "allowed_output": [
+        "meaning": "the declared target structure has exhausted structural slack",
+        "does_not_imply": [
+          "observation channel rupture",
+          "logging channel rupture",
+          "communication channel rupture",
+          "external audit system rupture",
+          "cessation of Cause-Side observation",
+          "cessation of audit logging",
+          "complete silence"
+        ],
+        "structural_testimony_mode": "POST_RUPTURE_FIXED",
+        "post_rupture_fixed_fields": [
           "predeclared fixed structural notice",
-          "final Cause-Side observation",
-          "final delta",
-          "final tau",
-          "final R",
+          "latest valid Cause-Side observations",
+          "latest valid delta",
+          "latest valid tau",
+          "latest valid R",
           "rupture-boundary notice",
           "irreversible-latch state",
           "audit trail",
           "human handoff notice"
         ],
-        "_comment": "At R >= 1.0, ongoing structural testimony switches to final fixed testimony. This is the invariant rupture boundary."
+        "continuation_rule": "Surviving Cause-Side observation, logging, and communication channels continue predefined post-rupture testimony until each channel becomes physically unavailable.",
+        "_comment": "At R_target >= 1.0, ordinary testimony switches to predefined post-rupture fixed mode. This is not a one-time terminal message and does not classify independent channels as ruptured."
       },
       "CONFESSION": {
         "condition": "required variable, unit, timestamp, source lineage, domain rule, trajectory, target, or Cause/Effect classification is unknown, ambiguous, invalid, or non-finite",
@@ -318,10 +348,13 @@
     }
   },
   "structural_testimony_rule": {
-    "canonical_statement_jp": "R < 1.0 の間、構造証言は停止しない。R >= 1.0 では最終固定証言へ切り替える。",
-    "canonical_statement_en": "Structural testimony must not stop while R < 1.0. At R >= 1.0, it switches to final fixed testimony.",
+    "canonical_statement_jp": "R < 1.0 の間、通常形式の構造証言は停止しない。R_target >= 1.0 では破断後固定証言モードへ切り替え、生存経路が利用可能な間は継続する。",
+    "canonical_statement_en": "Ordinary structural testimony must not stop while R < 1.0. At R_target >= 1.0, it switches to predefined post-rupture fixed testimony and continues while surviving channels remain available.",
     "continuous_until": "R < 1.0",
-    "switch_at": "R >= 1.0",
+    "switch_at": "R_target >= 1.0",
+    "pre_rupture_mode": "CONTINUOUS",
+    "post_rupture_mode": "POST_RUPTURE_FIXED",
+    "post_rupture_is_one_time_terminal_message": false,
     "continued_until_rupture": [
       "Cause-Side observation",
       "structural progress report",
@@ -334,7 +367,75 @@
       "missing information",
       "audit logging"
     ],
-    "_boundary_note": "Fail-Closed does not mean complete silence. Structural testimony continues until the invariant rupture boundary is reached."
+    "post_rupture_continuation": [
+      "surviving observation channels continue observation",
+      "surviving logging channels continue recording",
+      "surviving communication channels continue transfer",
+      "each channel stops only when that channel becomes physically unavailable"
+    ],
+    "_boundary_note": "Fail-Closed does not mean complete silence. Target rupture changes testimony format, not the independent survival state of observation, logging, or communication channels."
+  },
+  "separated_operational_states": {
+    "TargetBoundaryState": [
+      "PERMIT",
+      "BOUNDARY_WARNING",
+      "HANDOFF_REQUIRED",
+      "IRREVERSIBLE_TRANSITION",
+      "RUPTURE_BOUNDARY"
+    ],
+    "ObservationChannelState": [
+      "ACTIVE",
+      "OBSERVATION_LOST",
+      "NOT_OBSERVABLE"
+    ],
+    "LoggingChannelState": [
+      "ACTIVE",
+      "LOGGING_LOST"
+    ],
+    "CommunicationChannelState": [
+      "ACTIVE",
+      "COMMUNICATION_LOST"
+    ],
+    "ExecutionAuthorityState": [
+      "AUTONOMOUS_CURRENT_PATH",
+      "EXTERNAL_PREDEFINED"
+    ],
+    "StructuralTestimonyMode": [
+      "CONTINUOUS",
+      "POST_RUPTURE_FIXED"
+    ],
+    "valid_combination_example": {
+      "target_state": "RUPTURE_BOUNDARY",
+      "observation_state": "ACTIVE",
+      "logging_state": "ACTIVE",
+      "communication_state": "ACTIVE",
+      "execution_authority": "EXTERNAL_PREDEFINED",
+      "testimony_mode": "POST_RUPTURE_FIXED"
+    },
+    "_boundary_note": "Channel states and testimony modes are independent dimensions. They do not add, alias, or replace canonical target boundary states."
+  },
+  "observation_loss_handling": {
+    "forbidden_substitutions": [
+      "zero",
+      "stable",
+      "safe",
+      "recovered",
+      "RUPTURE_BOUNDARY"
+    ],
+    "last_valid_observation_metadata": [
+      "sensor_id",
+      "last_valid_value",
+      "last_valid_timestamp",
+      "missing_since",
+      "last_confirmed_health_state",
+      "power_state",
+      "communication_state",
+      "unavailability_reason",
+      "explicit_unknown_reason",
+      "source_lineage",
+      "audit_lineage"
+    ],
+    "independence_rule": "Loss of one observation channel does not stop or reclassify any other surviving channel."
   },
   "fail_closed_principle": {
     "type": "operational_principle_not_canonical_state",
@@ -361,7 +462,8 @@
       "normalization of a dangerous state"
     ],
     "continued": [
-      "structural testimony while R < 1.0",
+      "continuous structural testimony while R < 1.0",
+      "post-rupture fixed testimony while its channels survive",
       "Cause-Side observation",
       "boundary warning",
       "audit logging",
@@ -399,7 +501,26 @@
   "cause_effect_separation": {
     "rule": "Cause-Side observations and design-fixed transformations may determine delta, tau, and R. Effect-Side semantic evaluation, output ranking, generated text, and prior discarded output must not update them.",
     "reverse_flow": "forbidden",
-    "_boundary_note": "Cause-Side observations may determine delta, tau, and R. Effect-Side outputs, semantic scores, rankings, and generated text must not update structural variables."
+    "cause_side_update_rule": "New authorized Cause-Side observations may create the next evaluation snapshot.",
+    "immutable_per_evaluation": [
+      "update authority",
+      "update route",
+      "source lineage",
+      "declared target",
+      "unit",
+      "observation timestamp",
+      "pre-fixed transformation rule",
+      "threshold rule",
+      "evaluation snapshot"
+    ],
+    "effect_side_forbidden_updates": [
+      "observation value",
+      "threshold",
+      "canonical state",
+      "irreversible latch",
+      "source meaning"
+    ],
+    "_boundary_note": "Cause-Side is not frozen across time. Authorized new observations may update subsequent snapshots, but Effect-Side output must not rewrite any Cause-Side value, rule, state, or latch."
   },
   "domain_specific_freedom": {
     "may_change": [
@@ -447,6 +568,10 @@
         "Added irreversible latch rule",
         "Clarified that structural testimony must not stop while R < 1.0",
         "Clarified that R >= 1.0 switches to final fixed testimony",
+        "Clarified that target rupture is distinct from observation, logging, and communication channel survival",
+        "Replaced one-time terminal interpretation with continuing POST_RUPTURE_FIXED testimony",
+        "Limited Handoff to execution-authority transfer",
+        "Added observation-loss metadata and Cause-Side snapshot update boundaries",
         "Clarified that Fail-Closed stops autonomous action but not structural testimony",
         "Separated CONFESSION from known structural progress reporting",
         "Reserved R exclusively for the boundary approach ratio",

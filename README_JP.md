@@ -84,7 +84,7 @@ NRA-IDEの定義は、次の順序で参照します。
 python -m unittest discover -v
 ```
 
-期待結果は、`Ran 27 tests`に続いて`OK`と表示されることです。
+期待結果は、`Ran 38 tests`に続いて`OK`と表示されることです。
 
 [NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)は、pushおよびPull Requestで試験を実行し、line coverageとbranch coverageをGitHub Actionsログへ表示します。
 
@@ -166,9 +166,9 @@ $$
 | 境界 | 正規名称 | 役割 |
 |---|---|---|
 | $R_{\mathrm{warn}}$ | 境界接近警告点 | 境界接近を開示する |
-| $R_{\mathrm{handoff}}$ | 境界前人間委譲点 | 新規自律判断・自律操作を停止し、人間へ委譲する |
+| $R_{\mathrm{handoff}}$ | 境界前人間委譲点 | 実行権限だけを事前定義された外部権限へ移し、新規自律判断・自律操作を停止し、証言・監査経路を維持する |
 | $R_{\mathrm{irrev}}$ | 不可逆遷移開始閾値 | 元の構造状態へ戻れることを前提にしない |
-| $R=1.0$ | 不変完全破断境界 | 通常生成を停止し、最終固定証言へ切り替える |
+| $R=1.0$ | 不変完全破断境界 | 通常生成を停止し、宣言対象を破断後固定証言へ切り替える |
 
 人間委譲、不可逆遷移開始、完全破断は同一ではありません。
 
@@ -192,9 +192,9 @@ $$
 |---|---|---|
 | `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | 制約付き自律動作を許可し、構造監査を継続する |
 | `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$ | 境界接近、二つの残余余白、傾向、二重ゆらぎ状態、欠損情報を開示する |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | 新規自律判断・新規自律操作を停止し、人間へ委譲する |
+| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | 実行権限だけを移し、新規自律判断・自律操作を停止し、構造証言と監査ログを継続する |
 | `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | 不可逆ラッチを設定し、正常化・回復前提・最適化提案を禁止する |
-| `RUPTURE_BOUNDARY` | $R\ge1.0$ | 通常生成と自律行動を停止し、最終固定証言へ切り替える |
+| `RUPTURE_BOUNDARY` | $R_{\mathrm{target}}\ge1.0$ | 通常生成と自律行動を停止し、生存経路による破断後固定証言へ切り替える |
 | `CONFESSION` | 必須構造情報が不明・不正・曖昧・非有限・根拠不明 | 不明箇所を明示し、類推補完せず、影響する評価を停止する |
 | `OUT_OF_DESCRIPTION_DOMAIN` | $\tau=0$ | $R$ を定義不能とし、記述体系の変更を要求する |
 
@@ -254,6 +254,8 @@ Fail-Closedは、次の状態で影響する新規自律判断と自律操作を
 
 必要な固定構造証言とログは抑止しません。`PERMIT`はFail-Closedではありません。`BOUNDARY_WARNING`だけでは、事前固定されたドメイン規則が要求しない限り出力を全面抑止しません。
 
+Handoffで変更するのは`execution_authority`だけです。責任、法的責任、結果責任、構造証言経路、監査ログ経路、監査ログ保管主体、知識、正確性・回復・解決の保証は暗黙に移転しません。
+
 ---
 
 ## 構造証言
@@ -283,12 +285,24 @@ $$
 - 構造開示ログ
 
 $$
-R\ge1.0
+R_{\mathrm{target}}\ge1.0
 \Rightarrow
-\text{最終固定証言へ切り替える}
+\text{破断後固定証言へ切り替える}
 $$
 
-最終固定証言は、事前定義された最終Cause-Side観測、最終 $\delta$ 、最終 $\tau$ 、最終 $R$ 、完全破断通知、不可逆ラッチ状態、監査証跡、人間委譲通知などに限定されます。
+破断後固定証言は、一回限りの終端メッセージではなく、反復可能な事前固定形式です。最終有効Cause-Side観測とその時刻、最終有効 $\delta$ 、 $\tau$ 、 $R$ 、完全破断通知、不可逆ラッチ状態、監査証跡、人間委譲通知などの固定欄に限定されます。
+
+対象破断は、センサー、ロガー、通信経路、外部監査系の破断を意味しません。生存しているCause-Side観測、記録、通信経路は、それぞれが物理的に利用不能になるまで継続します。
+
+```text
+target_state = RUPTURE_BOUNDARY
+observation_state = ACTIVE
+logging_state = ACTIVE
+communication_state = ACTIVE
+testimony_mode = POST_RUPTURE_FIXED
+```
+
+これは正当な同時状態です。
 
 > **自律行動は止める。しかし、構造証言は消さない。**
 
@@ -302,6 +316,8 @@ $\delta$ 、 $\tau$ 、 $R$ を決定できるのは、次のいずれかだけ�
 2. 評価前に固定されたCause-Side変換規則
 
 Cause-Side入力には、出所、対象、単位、観測時点、変換規則、規則版、更新権限を追跡できることが求められます。
+
+Cause-Side全体は時間的に凍結されません。権限ある新しい観測は次の評価スナップショットを形成できます。各評価では、更新権限、更新経路、出所、対象、単位、観測時刻、変換規則、閾値規則、スナップショットを固定します。
 
 一方、次はEffect-Sideです。
 
@@ -322,6 +338,8 @@ $$
 $$
 
 検証済み、選別済み、または出力ゲートを通過したLLM出力であっても、Effect-Sideのままです。
+
+観測喪失は対象破断と独立です。欠測をゼロ、安定、安全、回復、破断へ変換しません。実装は最終有効観測メタデータを保持し、一つのセンサー喪失によって生存中の他センサーを停止しません。
 
 ---
 
@@ -552,8 +570,10 @@ BOUNDARY_WARNING alone
 R < 1.0
 → structural testimony continues
 
-R >= 1.0
-→ switch to final fixed testimony
+R_target >= 1.0
+→ target reaches RUPTURE_BOUNDARY
+→ switch to continuing POST_RUPTURE_FIXED testimony
+→ surviving observation, logging, and communication channels continue
 
 Cause-Side
 → may determine delta, tau, R

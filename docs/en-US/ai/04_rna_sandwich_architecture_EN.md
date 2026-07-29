@@ -130,7 +130,7 @@ ACTION: generated response suppressed; fixed Effect-Side testimony for external 
 
 At `IRREVERSIBLE_TRANSITION`, the irreversible latch remains set within the same history even if displayed $R$ later decreases. Automatic processing, manual intervention, human review, approval, or version update cannot release it.
 
-For the declared evaluation, $R \geq 1.0$ is `RUPTURE_BOUNDARY`; this does not declare every phase transition in nature to be an NRA-IDE rupture. Post-NRA does not instruct the LLM to generate a new explanation. It returns the complete predefined final fixed testimony or a reference to a protected log, and the old evaluation terminates at its Effect-Side.
+For the declared evaluation, $R \geq 1.0$ is `RUPTURE_BOUNDARY`; this does not declare every phase transition in nature to be an NRA-IDE rupture. Post-NRA does not instruct the LLM to generate a new explanation. It returns the complete predefined post-rupture fixed testimony or a reference to a protected log, and the old evaluation terminates at its Effect-Side.
 
 ```text
 Old Cause-Side

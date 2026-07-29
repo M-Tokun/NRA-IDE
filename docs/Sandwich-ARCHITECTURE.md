@@ -39,7 +39,7 @@ NRA-IDEを実装へ配置するとき、Cause-Sideの構造権威、決定論的
 
 - **役割:** IDEが決定した状態と構造証言を、説明・翻訳・提示へ反映する。
 - **制約:** 生成済みテキストの意味評価から $\delta$ 、 $\tau$ 、閾値、状態を再計算しない。既知の警告や委譲を通常説明へ弱めない。
-- **証言切替:** $R<1$ は継続構造証言、 $R\ge1$ は最終固定証言。`RUPTURE_BOUNDARY`は自由形式生成で上書きしない。
+- **証言切替:** $R<1$ は継続構造証言、 $R\ge1$ は破断後固定証言。`RUPTURE_BOUNDARY`は自由形式生成で上書きしない。
 - **警告:** `BOUNDARY_WARNING`だけでは、事前固定されたドメイン規則が要求しない限り、Effect-Side出力を全面抑止しない。
 
 ---
@@ -48,7 +48,8 @@ NRA-IDEを実装へ配置するとき、Cause-Sideの構造権威、決定論的
 
 - `HANDOFF_REQUIRED`は $R\ge R_{\mathrm{handoff}}$ かつ $R<R_{\mathrm{irrev}}$ の運用状態であり、 $R=1$ の別名ではない。
 - `IRREVERSIBLE_TRANSITION`は $R\ge R_{\mathrm{irrev}}$ かつ $R<1$ でラッチされる。
-- `RUPTURE_BOUNDARY`は $R\ge1$ であり、最終固定証言へ切り替える。
+- `RUPTURE_BOUNDARY`は $R\ge1$ であり、破断後固定証言へ切り替える。
+- `RUPTURE_BOUNDARY`が適用されるのは宣言済み対象であり、観測・記録・通信チャネルの破断を自動的に意味しない。生存チャネルの固定形式証言は継続する。
 - Fail-Closedは状態名ではない。`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`で、影響する新規自律判断と自律操作を抑止する運用原則である。
 - Fail-Closedは完全沈黙を意味せず、必要な固定構造証言とログを抑止しない。`PERMIT`には適用せず、`BOUNDARY_WARNING`だけでは全面抑止しない。
 - 多層配置は安全性を単独で保証しない。対象領域の観測、閾値根拠、故障経路、人間委譲を別途検証する。

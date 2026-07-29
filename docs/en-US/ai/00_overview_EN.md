@@ -68,7 +68,7 @@ PERMIT
 - At `R_warn`, boundary approach is disclosed.
 - At `R_handoff`, affected new autonomous judgment and operation stop, and predefined fixed Effect-Side testimony is presented for external human audit.
 - At `R_irrev`, irreversible transition is latched. Within the same history, later $R$ decrease, automatic processing, manual intervention, human review, approval, or version update cannot release the latch.
-- At $R\ge1$, the declared evaluation reports `RUPTURE_BOUNDARY` and switches to final fixed testimony.
+- At $R\ge1$, the declared target reports `RUPTURE_BOUNDARY` and switches to post-rupture fixed testimony. Surviving observation, logging, and communication channels continue independently until each becomes unavailable.
 
 The threshold values and applicable state conditions are established by declared Cause-Side domain authority before evaluation. An Effect-Side result, including a low reported $R$, cannot authorize widening $\tau$, redefining $\delta$, changing a threshold, or rewriting a state condition.
 

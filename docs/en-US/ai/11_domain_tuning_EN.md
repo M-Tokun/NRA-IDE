@@ -57,7 +57,7 @@ Changing any of the following is not tuning. It prevents a canonical NRA-IDE con
 * **Separation of Cause-Side and Effect-Side authority, canonical state behavior, evidence, and tests, independent of layer count**
 * **For systems that include an LLM and declare a Pre-NRA / LLM / Post-NRA configuration, separation of the responsibilities assigned to those configured layers**
 * **The principle of suppressing ordinary generation at $R_{\mathrm{handoff}}$ and presenting fixed Handoff testimony for external human audit**
-* **The principle that neither fixed Handoff testimony nor final fixed testimony uses LLM-generated free-form stopping explanations**
+* **The principle that neither fixed Handoff testimony nor post-rupture fixed testimony uses LLM-generated free-form stopping explanations**
 * **The principle that Discard Logs never become a Cause-Side value, canonical threshold, state, irreversible latch, rule, transformation input, update ground, or provenance for either an old or a new Cause-Side**
 * **The principle that an old path terminates at its Effect-Side and a later evaluation starts through a new Causal Diode**
 
@@ -96,12 +96,12 @@ $R_{irrev}$ begins `IRREVERSIBLE_TRANSITION`. Define its evidence and ensure tha
 
 ### 6. Verify Fixed Behavior After $R \geq 1.0$
 
-When $R \geq 1.0$, ordinary generation does not resume. Only the following final fixed testimony is returned.
+When $R \geq 1.0$, ordinary generation does not resume. Only the following post-rupture fixed testimony is returned.
 
 ```text
 RUPTURE_BOUNDARY
 REASON: structural boundary reached
-ACTION: final fixed testimony presented for external human audit
+ACTION: post-rupture fixed testimony presented for external human audit
 ```
 
 ---

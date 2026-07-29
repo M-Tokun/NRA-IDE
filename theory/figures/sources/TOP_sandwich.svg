@@ -68,7 +68,7 @@
     <text x="120" y="757" class="state">R_warn ≤ R &lt; R_handoff             → BOUNDARY_WARNING</text>
     <text x="120" y="796" class="state">R_handoff ≤ R &lt; R_irrev            → HANDOFF_REQUIRED</text>
     <text x="120" y="835" class="state">R_irrev ≤ R &lt; 1                    → IRREVERSIBLE_TRANSITION</text>
-    <text x="120" y="874" class="state">R ≥ 1                               → RUPTURE_BOUNDARY</text>
+    <text x="120" y="874" class="state">R_target ≥ 1                        → RUPTURE_BOUNDARY</text>
     <text x="120" y="913" class="state">τ = 0 → OUT_OF_DESCRIPTION_DOMAIN   invalid → CONFESSION</text>
 
     <text x="96" y="973" class="body">Irreversible latch persists even if a later R decreases.</text>
@@ -86,7 +86,7 @@
     <text x="96" y="1247" class="jp">説明・翻訳・提示のみ。構造状態を弱めず、上書きしない。</text>
     <line x1="96" y1="1268" x2="928" y2="1268" stroke="#6fc99a" opacity=".55"/>
     <text x="96" y="1307" class="body">R &lt; 1: ongoing structural testimony</text>
-    <text x="96" y="1344" class="body">R ≥ 1: final fixed testimony</text>
+    <text x="96" y="1344" class="body">R_target ≥ 1: continuing post-rupture fixed testimony</text>
   </g>
 
   <rect x="62" y="1423" width="900" height="65" rx="14" fill="#0c1724" stroke="#385166"/>

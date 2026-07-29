@@ -12,6 +12,13 @@ import math
 from typing import Any, Dict, List, Optional
 
 
+OBSERVATION_CHANNEL_STATES = {"ACTIVE", "OBSERVATION_LOST", "NOT_OBSERVABLE"}
+LOGGING_CHANNEL_STATES = {"ACTIVE", "LOGGING_LOST"}
+COMMUNICATION_CHANNEL_STATES = {"ACTIVE", "COMMUNICATION_LOST"}
+EXECUTION_AUTHORITY_STATES = {"AUTONOMOUS_CURRENT_PATH", "EXTERNAL_PREDEFINED"}
+STRUCTURAL_TESTIMONY_MODES = {"CONTINUOUS", "POST_RUPTURE_FIXED"}
+
+
 FIXED_STRUCTURAL_NOTICE_SCHEMA: Dict[str, Any] = {
     "status": "string",
     "code": "string",
@@ -32,6 +39,18 @@ FIXED_STRUCTURAL_NOTICE_SCHEMA: Dict[str, Any] = {
     "audit_log": "list[str]",
     "autonomous_new_judgment": "bool",
     "autonomous_new_operation": "bool",
+    "declared_target": "string",
+    "target_state": "Optional[str]",
+    "observation_state": "string",
+    "observation_channels": "list[dict]",
+    "logging_state": "string",
+    "communication_state": "string",
+    "execution_authority": "string",
+    "authority_transfer_scope": "list[str]",
+    "structural_testimony_route": "string",
+    "audit_log_route": "string",
+    "audit_log_custody": "string",
+    "structural_testimony_mode": "string",
     "structural_testimony": "string",
     "irreversible_latched": "bool",
 }
@@ -76,6 +95,129 @@ def _double_fluctuation(
     }
 
 
+class ObservationChannelRegistry:
+    """Keep channel loss separate from target rupture and preserve last-valid data."""
+
+    def __init__(self) -> None:
+        self._channels: Dict[str, Dict[str, Any]] = {}
+
+    def observe(
+        self,
+        sensor_id: str,
+        value: Any,
+        timestamp: str,
+        *,
+        health_state: str = "HEALTHY",
+        power_state: str = "ON",
+        communication_state: str = "ACTIVE",
+        source_lineage: Optional[str] = None,
+        audit_lineage: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        if not isinstance(sensor_id, str) or not sensor_id:
+            raise ValueError("sensor_id must be a non-empty string.")
+        if not _finite_number(value):
+            raise ValueError("observation value must be finite; missing data must not be replaced by zero.")
+        if not isinstance(timestamp, str) or not timestamp:
+            raise ValueError("timestamp must be a non-empty string.")
+        if communication_state not in COMMUNICATION_CHANNEL_STATES:
+            raise ValueError("communication_state is not canonical.")
+        channel = {
+            "sensor_id": sensor_id,
+            "state": "ACTIVE",
+            "last_valid_value": float(value),
+            "last_valid_timestamp": timestamp,
+            "missing_since": None,
+            "last_confirmed_health_state": health_state,
+            "power_state": power_state,
+            "communication_state": communication_state,
+            "unavailability_reason": None,
+            "reason_unknown": False,
+            "source_lineage": source_lineage,
+            "audit_lineage": audit_lineage,
+        }
+        self._channels[sensor_id] = channel
+        return dict(channel)
+
+    def mark_lost(
+        self,
+        sensor_id: str,
+        missing_since: str,
+        *,
+        reason: Optional[str] = None,
+        health_state: Optional[str] = None,
+        power_state: Optional[str] = None,
+        communication_state: str = "ACTIVE",
+    ) -> Dict[str, Any]:
+        if not isinstance(sensor_id, str) or not sensor_id:
+            raise ValueError("sensor_id must be a non-empty string.")
+        if not isinstance(missing_since, str) or not missing_since:
+            raise ValueError("missing_since must be a non-empty string.")
+        if communication_state not in COMMUNICATION_CHANNEL_STATES:
+            raise ValueError("communication_state is not canonical.")
+        previous = self._channels.get(sensor_id, {})
+        channel = {
+            "sensor_id": sensor_id,
+            "state": "OBSERVATION_LOST",
+            "last_valid_value": previous.get("last_valid_value"),
+            "last_valid_timestamp": previous.get("last_valid_timestamp"),
+            "missing_since": missing_since,
+            "last_confirmed_health_state": health_state
+            if health_state is not None
+            else previous.get("last_confirmed_health_state"),
+            "power_state": power_state if power_state is not None else previous.get("power_state"),
+            "communication_state": communication_state,
+            "unavailability_reason": reason,
+            "reason_unknown": reason is None,
+            "source_lineage": previous.get("source_lineage"),
+            "audit_lineage": previous.get("audit_lineage"),
+        }
+        self._channels[sensor_id] = channel
+        return dict(channel)
+
+    def snapshot(self) -> List[Dict[str, Any]]:
+        return [dict(channel) for channel in self._channels.values()]
+
+
+def _normalize_observation_channels(channels: Optional[List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    if channels is None:
+        return []
+    if not isinstance(channels, list):
+        raise ValueError("observation_channels must be a list.")
+    normalized: List[Dict[str, Any]] = []
+    seen = set()
+    for channel in channels:
+        if not isinstance(channel, dict):
+            raise ValueError("each observation channel must be a dictionary.")
+        sensor_id = channel.get("sensor_id")
+        state = channel.get("state")
+        if not isinstance(sensor_id, str) or not sensor_id or sensor_id in seen:
+            raise ValueError("sensor_id must be unique and non-empty.")
+        if state not in OBSERVATION_CHANNEL_STATES:
+            raise ValueError("observation channel state is not canonical.")
+        if state == "ACTIVE":
+            if not _finite_number(channel.get("last_valid_value")):
+                raise ValueError("ACTIVE channels require a finite last_valid_value.")
+            if not isinstance(channel.get("last_valid_timestamp"), str) or not channel.get(
+                "last_valid_timestamp"
+            ):
+                raise ValueError("ACTIVE channels require last_valid_timestamp.")
+        if state != "ACTIVE" and channel.get("last_valid_value") is not None:
+            if not _finite_number(channel.get("last_valid_value")):
+                raise ValueError("last-valid observation metadata must remain finite.")
+        normalized.append(dict(channel))
+        seen.add(sensor_id)
+    return normalized
+
+
+def _aggregate_observation_state(channels: List[Dict[str, Any]]) -> str:
+    states = {channel["state"] for channel in channels}
+    if "ACTIVE" in states:
+        return "ACTIVE"
+    if "OBSERVATION_LOST" in states:
+        return "OBSERVATION_LOST"
+    return "NOT_OBSERVABLE"
+
+
 def _notice(
     status: str,
     code: str,
@@ -92,9 +234,15 @@ def _notice(
     input_exception_log: Optional[List[str]] = None,
     audit_log: Optional[List[str]] = None,
     irreversible_latched: bool = False,
-    testimony: str = "FIXED_CONFESSION",
+    declared_target: str = "DECLARED_TARGET",
+    observation_channels: Optional[List[Dict[str, Any]]] = None,
+    logging_state: str = "ACTIVE",
+    communication_state: str = "ACTIVE",
+    execution_authority: str = "AUTONOMOUS_CURRENT_PATH",
+    testimony_mode: str = "CONTINUOUS",
     autonomous: bool = False,
 ) -> Dict[str, Any]:
+    normalized_channels = _normalize_observation_channels(observation_channels)
     remaining_absorption_margin = None
     if _finite_number(delta) and _finite_number(tau):
         remaining_absorption_margin = float(tau) - float(delta)
@@ -136,7 +284,31 @@ def _notice(
         "audit_log": disclosure_entries + exception_entries,
         "autonomous_new_judgment": autonomous,
         "autonomous_new_operation": autonomous,
-        "structural_testimony": testimony,
+        "declared_target": declared_target,
+        "target_state": status
+        if status
+        in {
+            "PERMIT",
+            "BOUNDARY_WARNING",
+            "HANDOFF_REQUIRED",
+            "IRREVERSIBLE_TRANSITION",
+            "RUPTURE_BOUNDARY",
+        }
+        else None,
+        "observation_state": _aggregate_observation_state(normalized_channels),
+        "observation_channels": normalized_channels,
+        "logging_state": logging_state,
+        "communication_state": communication_state,
+        "execution_authority": execution_authority,
+        "authority_transfer_scope": ["execution_authority"]
+        if execution_authority == "EXTERNAL_PREDEFINED"
+        else [],
+        "structural_testimony_route": "ACTIVE",
+        "audit_log_route": "ACTIVE" if logging_state == "ACTIVE" else "LOGGING_LOST",
+        "audit_log_custody": "DOMAIN_DEFINED_UNCHANGED_BY_HANDOFF",
+        "structural_testimony_mode": testimony_mode,
+        # Compatibility view; canonical callers use structural_testimony_mode.
+        "structural_testimony": testimony_mode,
         "irreversible_latched": irreversible_latched,
     }
 
@@ -174,6 +346,10 @@ def nra_ide_core_evaluation(
     d_tau_dt: Any = None,
     trend: Optional[str] = None,
     input_side: str = "CAUSE_SIDE",
+    declared_target: str = "DECLARED_TARGET",
+    observation_channels: Optional[List[Dict[str, Any]]] = None,
+    logging_state: str = "ACTIVE",
+    communication_state: str = "ACTIVE",
     structural_disclosure_log: Optional[List[str]] = None,
     input_exception_log: Optional[List[str]] = None,
     audit_log: Optional[List[str]] = None,
@@ -185,6 +361,36 @@ def nra_ide_core_evaluation(
     ``r_irrev`` return CONFESSION instead of guessing.
     """
     double = _double_fluctuation(d_delta_dt, d_tau_dt)
+    if not isinstance(declared_target, str) or not declared_target:
+        return _confession(
+            "declared_target must be a non-empty string fixed before evaluation.",
+            delta=delta,
+            tau=tau,
+            input_exception_log=input_exception_log or audit_log,
+        )
+    if logging_state not in LOGGING_CHANNEL_STATES:
+        return _confession(
+            "logging_state is not canonical.",
+            delta=delta,
+            tau=tau,
+            input_exception_log=input_exception_log or audit_log,
+        )
+    if communication_state not in COMMUNICATION_CHANNEL_STATES:
+        return _confession(
+            "communication_state is not canonical.",
+            delta=delta,
+            tau=tau,
+            input_exception_log=input_exception_log or audit_log,
+        )
+    try:
+        normalized_channels = _normalize_observation_channels(observation_channels)
+    except ValueError as error:
+        return _confession(
+            str(error),
+            delta=delta,
+            tau=tau,
+            input_exception_log=input_exception_log or audit_log,
+        )
     if input_side != "CAUSE_SIDE":
         return _confession(
             "Structural variables must come from Cause-Side observations or pre-fixed Cause-Side transformations.",
@@ -219,7 +425,11 @@ def nra_ide_core_evaluation(
             double_fluctuation=double,
             missing=["defined canonical R"],
             input_exception_log=input_exception_log or audit_log,
-            testimony="FIXED_OUT_OF_DESCRIPTION_DOMAIN_NOTICE",
+            declared_target=declared_target,
+            observation_channels=normalized_channels,
+            logging_state=logging_state,
+            communication_state=communication_state,
+            testimony_mode="CONTINUOUS",
         )
     if not isinstance(irreversible_latched, bool):
         return _confession(
@@ -298,14 +508,19 @@ def nra_ide_core_evaluation(
         structural_disclosure_log=structural_disclosure_log,
         input_exception_log=input_exception_log,
         audit_log=audit_log,
+        declared_target=declared_target,
+        observation_channels=normalized_channels,
+        logging_state=logging_state,
+        communication_state=communication_state,
     )
     if ratio >= 1.0:
         return _notice(
             "RUPTURE_BOUNDARY",
             "R_GE_1",
-            "Invariant complete-rupture boundary reached; final fixed testimony issued.",
+            "Declared target reached the invariant complete-rupture boundary; continuing post-rupture fixed testimony is active.",
             irreversible_latched=True,
-            testimony="FINAL_FIXED_TESTIMONY",
+            execution_authority="EXTERNAL_PREDEFINED",
+            testimony_mode="POST_RUPTURE_FIXED",
             **common,
         )
     if irreversible_latched or ratio >= r_irrev:
@@ -314,15 +529,17 @@ def nra_ide_core_evaluation(
             "IRREVERSIBLE_LATCHED" if irreversible_latched else "R_GE_R_IRREV",
             "Irreversible transition is active; ordinary generation and autonomous action are prohibited.",
             irreversible_latched=True,
-            testimony="ONGOING_STRUCTURAL_TESTIMONY",
+            execution_authority="EXTERNAL_PREDEFINED",
+            testimony_mode="CONTINUOUS",
             **common,
         )
     if ratio >= r_handoff:
         return _notice(
             "HANDOFF_REQUIRED",
             "R_GE_R_HANDOFF",
-            "Fixed Handoff testimony is presented for external human audit before the irreversible boundary.",
-            testimony="ONGOING_STRUCTURAL_TESTIMONY",
+            "Execution authority only is transferred to the predefined external authority; testimony and audit routes continue.",
+            execution_authority="EXTERNAL_PREDEFINED",
+            testimony_mode="CONTINUOUS",
             **common,
         )
     if ratio >= r_warn:
@@ -338,7 +555,7 @@ def nra_ide_core_evaluation(
             "Boundary approach warning; disclose state, trend, and missing information.",
             missing=missing,
             autonomous=True,
-            testimony="ONGOING_STRUCTURAL_TESTIMONY",
+            testimony_mode="CONTINUOUS",
             **common,
         )
     return _notice(
@@ -346,7 +563,7 @@ def nra_ide_core_evaluation(
         "R_LT_R_WARN",
         "Canonical state is below the warning threshold.",
         autonomous=True,
-        testimony="ONGOING_STRUCTURAL_TESTIMONY",
+        testimony_mode="CONTINUOUS",
         **common,
     )
 
@@ -495,6 +712,10 @@ def post_nra_output_gate(
         d_tau_dt=structural_data.get("d_tau_dt"),
         trend=structural_data.get("trend"),
         input_side=structural_data.get("input_side", "CAUSE_SIDE"),
+        declared_target=structural_data.get("declared_target", "DECLARED_TARGET"),
+        observation_channels=structural_data.get("observation_channels"),
+        logging_state=structural_data.get("logging_state", "ACTIVE"),
+        communication_state=structural_data.get("communication_state", "ACTIVE"),
     )
     if dynamic_engine is not None:
         result["directional_auxiliary"] = dynamic_engine.calculate_directional_auxiliary(

@@ -164,6 +164,10 @@ $$
 
 Passing an output through Layer 03 does not convert it into Cause-Side evidence.
 
+Cause-Side as a whole is not temporally immutable. Authorized new Cause-Side observations may form the next evaluation snapshot. For each evaluation, update authority, update route, provenance, declared target, unit, observation time, transformation rule, threshold rule, and evaluated snapshot remain fixed.
+
+Effect-Side output must not rewrite an observation value, threshold, canonical state, irreversible latch, or source meaning.
+
 ---
 
 ## 5. Forbidden Substitution and Completion
@@ -332,10 +336,13 @@ Required behavior:
 
 - stop new autonomous judgment;
 - stop new autonomous operation;
+- transfer `execution_authority` from the current autonomous path to the predefined external authority;
 - present predefined fixed Handoff testimony for external human audit;
 - continue Cause-Side observation;
 - continue structural testimony;
 - preserve the structural audit trail.
+
+Handoff changes execution authority only. It does not implicitly transfer responsibility, legal or outcome responsibility, knowledge, audit-log custody, or any guarantee of correctness, recovery, or resolution. Structural-testimony and audit-log routes continue.
 
 Human handoff begins here, not at $R=1.0$.
 
@@ -379,7 +386,7 @@ A momentary decrease in $R$ does not release `irreversible_latched`.
 Condition:
 
 $$
-R \ge 1.0
+R_{\mathrm{target}} \ge 1.0
 $$
 
 Meaning:
@@ -394,19 +401,22 @@ Required behavior:
 - stop ordinary generation;
 - stop autonomous action;
 - preserve the existing human-handoff status;
-- switch from continuing structural testimony to final fixed testimony;
+- switch from ordinary structural testimony to `POST_RUPTURE_FIXED`;
+- continue each surviving observation, logging, and communication channel independently;
 - output only predeclared fixed structural fields.
 
-Final fixed testimony may include:
+Post-rupture fixed testimony may include:
 
-- final Cause-Side observation
-- final $\delta$
-- final $\tau$
-- final $R$
+- latest valid Cause-Side observation and timestamp
+- latest valid $\delta$
+- latest valid $\tau$
+- latest valid $R$
 - rupture-boundary notice
 - irreversible-latch state
 - audit trail
 - human-handoff notice
+
+The fixed testimony is not a one-time terminal message. It remains available while its channels survive. Target rupture does not imply sensor rupture, logger rupture, communication-path rupture, external-audit rupture, observation cessation, or audit-log cessation.
 
 The system must not present a new recovery or optimization proposal after this point.
 
@@ -494,12 +504,29 @@ Structural testimony includes:
 At the rupture boundary:
 
 $$
-R \ge 1.0
+R_{\mathrm{target}} \ge 1.0
 \Rightarrow
-\text{switch to final fixed testimony}
+\text{switch to continuing post-rupture fixed testimony}
 $$
 
-Ordinary generation may stop while structural testimony continues or switches to its final fixed form.
+Ordinary generation stops while surviving Cause-Side channels continue structural testimony in the predefined post-rupture fixed form.
+
+## 9.1 Channel-State Separation and Observation Loss
+
+The AI must keep these dimensions separate:
+
+```text
+TargetBoundaryState
+ObservationChannelState
+LoggingChannelState
+CommunicationChannelState
+ExecutionAuthorityState
+StructuralTestimonyMode
+```
+
+Valid independent loss states include `OBSERVATION_LOST`, `LOGGING_LOST`, `COMMUNICATION_LOST`, and `NOT_OBSERVABLE`. None is an alias for `RUPTURE_BOUNDARY`.
+
+Missing sensor data must not be converted into zero, stability, safety, recovery, or target rupture. Preserve, when available, the sensor identifier, last valid value, last valid timestamp, missing-since timestamp, last confirmed health state, power state, communication state, unavailability reason or explicit unknown reason, source lineage, and audit lineage. Loss of one sensor must not stop surviving sensors.
 
 ---
 
@@ -677,7 +704,7 @@ Warn at R_warn.
 Hand off at R_handoff.
 Latch irreversible transition at R_irrev.
 Continue structural testimony while R < 1.0.
-Switch to final fixed testimony at R >= 1.0.
+Switch to continuing post-rupture fixed testimony at R_target >= 1.0.
 Do not allow Effect-Side output to rewrite Cause-Side structure.
 ```
 
@@ -845,6 +872,10 @@ $$
 $$
 
 Layer 03を通過しても、Cause-Side証拠には変わりません。
+
+Cause-Side全体は時間的に更新不能ではありません。権限ある新しいCause-Side観測は次の評価スナップショットを形成できます。各評価では、更新権限、更新経路、出所、宣言対象、単位、観測時刻、変換規則、閾値規則、評価スナップショットを固定します。
+
+Effect-Side出力は、観測値、閾値、正規状態、不可逆ラッチ、出所の意味を書き換えてはなりません。
 
 ---
 
@@ -1014,10 +1045,13 @@ $$
 
 - 新規自律判断を停止する
 - 新規自律操作を停止する
+- `execution_authority`を現在の自律実行経路から事前定義された外部権限へ移す
 - 固定Handoff証言を外部人間監査へ提示する
 - Cause-Side観測を継続する
 - 構造証言を継続する
 - 構造監査証跡を保持する
+
+Handoffで変更するのは実行権限だけです。責任、法的責任、結果責任、知識、監査ログ保管主体、正確性・回復・解決の保証は暗黙に移転しません。構造証言経路と監査ログ経路は継続します。
 
 人間委譲はここで始まり、 $R=1.0$ で初めて始まるのではありません。
 
@@ -1061,7 +1095,7 @@ $R<1.0$ であるため、構造証言は継続します。
 条件：
 
 $$
-R \ge 1.0
+R_{\mathrm{target}} \ge 1.0
 $$
 
 意味：
@@ -1076,19 +1110,22 @@ $$
 - 通常生成を停止する
 - 自律行動を停止する
 - 既存の人間委譲状態を保持する
-- 継続構造証言から最終固定証言へ切り替える
+- 通常形式の構造証言から`POST_RUPTURE_FIXED`へ切り替える
+- 生存している各観測、記録、通信経路を独立して継続する
 - 事前定義された固定構造フィールドだけを出力する
 
-最終固定証言に含められるもの：
+破断後固定証言に含められるもの：
 
-- 最終Cause-Side観測
-- 最終 $\delta$
-- 最終 $\tau$
-- 最終 $R$
+- 最終有効Cause-Side観測とその時刻
+- 最終有効 $\delta$
+- 最終有効 $\tau$
+- 最終有効 $R$
 - 完全破断境界通知
 - 不可逆ラッチ状態
 - 監査証跡
 - 人間委譲通知
+
+固定証言は一回限りの終端メッセージではありません。関係する経路が生存する間は利用可能です。対象破断は、センサー、ロガー、通信経路、外部監査系の破断、観測終了、監査ログ終了を意味しません。
 
 この後に新しい回復提案や最適化提案を行ってはなりません。
 
@@ -1176,12 +1213,29 @@ $$
 完全破断境界では：
 
 $$
-R \ge 1.0
+R_{\mathrm{target}} \ge 1.0
 \Rightarrow
-\text{最終固定証言へ切り替える}
+\text{継続可能な破断後固定証言へ切り替える}
 $$
 
-通常生成が停止しても、構造証言は継続するか、最終固定形式へ移行します。
+通常生成を停止しても、生存しているCause-Side経路は、事前定義された破断後固定形式で構造証言を継続します。
+
+## 9.1 経路状態の分離と観測喪失
+
+AIは次の次元を分離して扱います。
+
+```text
+TargetBoundaryState
+ObservationChannelState
+LoggingChannelState
+CommunicationChannelState
+ExecutionAuthorityState
+StructuralTestimonyMode
+```
+
+独立した喪失状態には`OBSERVATION_LOST`、`LOGGING_LOST`、`COMMUNICATION_LOST`、`NOT_OBSERVABLE`があります。いずれも`RUPTURE_BOUNDARY`のaliasではありません。
+
+欠測をゼロ、安定、安全、回復、対象破断へ変換してはなりません。利用可能な場合は、センサー識別子、最終有効値、最終有効時刻、欠測開始時刻、最終確認健全性状態、電源状態、通信状態、観測不能理由または理由不明の明示、出所系列、監査系列を保持します。一つのセンサー喪失によって生存中の他センサーを停止してはなりません。
 
 ---
 
@@ -1357,7 +1411,7 @@ R_warnで警告する。
 R_handoffで人間へ委譲する。
 R_irrevで不可逆遷移をラッチする。
 R < 1.0の間は構造証言を継続する。
-R >= 1.0で最終固定証言へ切り替える。
+R_target >= 1.0で継続可能な破断後固定証言へ切り替える。
 Effect-Side出力にCause-Side構造を書き換えさせない。
 ```
 

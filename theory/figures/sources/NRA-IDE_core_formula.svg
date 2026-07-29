@@ -37,12 +37,12 @@
   <text x="520" y="213" class="mono">R_warn ≤ R &lt; R_handoff         BOUNDARY_WARNING</text>
   <text x="520" y="245" class="mono">R_handoff ≤ R &lt; R_irrev        HANDOFF_REQUIRED</text>
   <text x="520" y="277" class="mono">R_irrev ≤ R &lt; 1               IRREVERSIBLE_TRANSITION</text>
-  <text x="520" y="309" class="mono">R ≥ 1                           RUPTURE_BOUNDARY</text>
+  <text x="520" y="309" class="mono">R_target ≥ 1                    RUPTURE_BOUNDARY</text>
   <line x1="1004" y1="171" x2="1004" y2="347" stroke="#6e6ca9" opacity=".55"/>
   <text x="1028" y="194" class="body">R &lt; 1</text>
   <text x="1028" y="220" class="small">ongoing testimony</text>
-  <text x="1028" y="263" class="body">R ≥ 1</text>
-  <text x="1028" y="289" class="small">final fixed testimony</text>
+  <text x="1028" y="263" class="body">R_target ≥ 1</text>
+  <text x="1028" y="289" class="small">post-rupture fixed testimony</text>
   <text x="1028" y="330" class="small">Irreversible latch persists.</text>
   <text x="1028" y="354" class="small">不可逆状態はR低下後も解除しない。</text>
 

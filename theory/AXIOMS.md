@@ -539,6 +539,24 @@ $$
 
 ただし、構造証言は継続する。
 
+Handoffによって移るのは、現在の自律実行経路が保持する実行権限だけである。
+
+```text
+execution_authority
+AUTONOMOUS_CURRENT_PATH
+→ EXTERNAL_PREDEFINED
+```
+
+Handoffは、責任、法的責任、結果責任、知識、判断の正確性、安全回復、問題解決、または専門家の無謬性の移転を意味しない。構造証言の生成経路、監査ログ経路、および監査ログ保管主体もHandoffだけでは変更しない。
+
+```text
+Handoff
+→ execution_authority changes
+→ structural_testimony_route continues
+→ audit_log_route continues
+→ audit_log_custody does not change implicitly
+```
+
 ---
 
 ### 10.4 IRREVERSIBLE_TRANSITION
@@ -571,16 +589,35 @@ $$
 ### 10.5 RUPTURE_BOUNDARY
 
 $$
-R\ge1.0
+R_{\mathrm{target}}\ge1.0
 $$
 
-残存構造余裕が尽きた完全破断境界である。
+評価前に宣言された対象構造の残存構造余裕が尽きた完全破断境界である。添字を省略した正規Rを用いる場合も、評価対象は事前に一意に宣言されていなければならない。
 
 この状態では、通常生成、回復提案、最適化、自律判断を禁止する。
 
-進行中の構造証言は終了し、最終固定証言へ切り替える。
+通常形式の構造証言を終了し、事前定義された破断後固定証言モードへ切り替える。
 
-出力は、事前に定めた固定構造通知、最終観測値、監査証跡、人間委譲通知に限定する。
+破断後固定証言は一回限りの終端メッセージではない。生存しているCause-Side観測、記録、通信経路は、それぞれが物理的に利用不能になるまで、事前定義された固定形式で証言を継続する。
+
+```text
+target_state = RUPTURE_BOUNDARY
+observation_state = ACTIVE
+logging_state = ACTIVE
+communication_state = ACTIVE
+testimony_mode = POST_RUPTURE_FIXED
+```
+
+は正当な同時状態である。
+
+対象構造の完全破断は、センサー、ロガー、通信経路、外部監査系の完全破断、Cause-Side観測の終了、監査ログ義務の終了、または完全無出力を自動的には意味しない。
+
+```text
+対象構造の完全破断
+≠ 観測系の完全破断
+≠ 記録系の完全破断
+≠ 通信系の完全破断
+```
 
 ---
 
@@ -639,10 +676,14 @@ $$
 - 監査ログ
 
 $$
-R\ge1.0
+R_{\mathrm{target}}\ge1.0
 $$
 
-では、進行中の構造証言を終了し、完全破断境界到達の最終固定証言へ切り替える。
+では、通常形式の構造証言を終了し、完全破断境界到達の事前定義された破断後固定証言モードへ切り替える。
+
+破断後固定証言モードは、対象構造の状態を自由生成で再解釈せず、固定されたフィールドと形式で反復可能に証言するモードである。一回限りの最終メッセージを意味しない。
+
+生存しているCause-Sideセンサー、ロガー、通信経路は、それぞれの物理的限界まで独立して観測、記録、転送を継続する。一つの観測チャネル喪失を、他チャネルの喪失または対象構造の破断へ置換してはならない。
 
 ### 正規文
 
@@ -654,7 +695,7 @@ $$
 
 $$
 \boxed{
-R\ge1.0\text{ では、最終固定証言へ切り替える。}
+R_{\mathrm{target}}\ge1.0\text{ では、破断後固定証言モードへ切り替える。}
 }
 $$
 
@@ -664,7 +705,65 @@ Fail-Closedは、構造証言の完全停止を意味しない。
 
 停止するのは、自由生成、自律判断、自律操作、回復提案、最適化提案、類推補完である。
 
-構造証言は、Rが1.0へ到達するまで継続する。
+通常形式の構造証言はRが1.0へ到達するまで継続し、その後は生存経路を通じた破断後固定形式へ移行する。
+
+### 11.1 対象別状態の分離
+
+単一の境界状態で、評価対象と観測・記録・通信・実行権限・証言形式の全状態を表現してはならない。少なくとも次を論理的に分離する。
+
+```text
+TargetBoundaryState
+ObservationChannelState
+LoggingChannelState
+CommunicationChannelState
+ExecutionAuthorityState
+StructuralTestimonyMode
+```
+
+正規値は次を含む。
+
+```text
+TargetBoundaryState:
+  PERMIT
+  BOUNDARY_WARNING
+  HANDOFF_REQUIRED
+  IRREVERSIBLE_TRANSITION
+  RUPTURE_BOUNDARY
+
+ObservationChannelState:
+  ACTIVE
+  OBSERVATION_LOST
+  NOT_OBSERVABLE
+
+LoggingChannelState:
+  ACTIVE
+  LOGGING_LOST
+
+CommunicationChannelState:
+  ACTIVE
+  COMMUNICATION_LOST
+
+StructuralTestimonyMode:
+  CONTINUOUS
+  POST_RUPTURE_FIXED
+```
+
+チャネル状態は正規境界状態を追加または置換しない。
+
+### 11.2 観測経路喪失
+
+観測不能値をゼロ、安定、安全、回復または完全破断として補完してはならない。利用可能な範囲で、各観測チャネルについて次を固定記録する。
+
+- センサー識別子
+- 最終有効観測値
+- 最終有効観測時刻
+- 欠測開始時刻
+- 最終確認された健全性状態
+- 電源状態
+- 通信状態
+- 観測不能理由
+- 理由不明である場合の明示
+- 出所および監査系列
 
 ---
 
@@ -712,7 +811,7 @@ $$
 R\ge1.0
 $$
 
-では、構造証言は最終固定証言へ切り替わる。
+では、構造証言は破断後固定証言モードへ切り替わる。
 
 ### 解釈境界コメント
 
@@ -774,6 +873,10 @@ Effect-Sideは監査対象にはなり得る。
 
 しかし、\(\delta\)、\(\tau\)、Rを更新する入力にはならない。
 
+Cause-Side全体を時間的に更新不能な構造として扱ってはならない。固定するのは、更新権限、更新経路、出所、対象、単位、観測時刻、評価前に固定された変換規則、評価中の閾値規則、および評価に使用したスナップショットである。
+
+新しい正規Cause-Side観測による次の評価スナップショットへの更新は許される。Effect-Sideによる観測値、閾値、境界状態、不可逆ラッチ、意味の書換えまたは補完は禁止する。
+
 ### 解釈境界コメント
 
 Effect-Sideの出力評価を、Cause-Sideの構造変数へ逆流させてはならない。
@@ -802,7 +905,9 @@ Effect-Sideの出力評価を、Cause-Sideの構造変数へ逆流させては�
 - \(R_{\mathrm{handoff}}<R_{\mathrm{irrev}}<1.0\)
 - \(R_{\mathrm{irrev}}\neq R=1.0\)
 - 不可逆ラッチ
-- \(R<1.0\)の間、構造証言を停止しない
+- \(R<1.0\)の間は通常形式の構造証言を停止せず、対象破断後は生存経路で破断後固定証言を継続する
+- 対象構造の破断と観測・記録・通信経路の状態を分離する
+- Handoffで変更するのは実行権限だけである
 - Effect-Sideで\(\delta\)、\(\tau\)、Rを更新しない
 - 不明値を類推で補完しない
 - CONFESSIONと既知の経過報告を混同しない
