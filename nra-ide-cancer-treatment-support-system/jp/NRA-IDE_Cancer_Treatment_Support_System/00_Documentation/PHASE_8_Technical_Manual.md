@@ -28,9 +28,9 @@
 
 ## 2. Debugging
 
-* **LED 0 (Green):** SAFE判定時に点灯
+* **LED 0 (`led_status`):** BLOCKED判定時に点灯（PASSABLE時は消灯）
 
-* **LED 1 (Red):** エラー発生時に点滅
+* **LED 1 (`led_error`):** エラーコードが非ゼロの間、点灯
 
 * **UART Debug:** オシロスコープでTXピンを観測し、`0xA5` ヘッダが見えるか確認。
 

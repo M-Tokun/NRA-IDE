@@ -25,16 +25,15 @@
 | **Logic** | `10_BioCalibrator_TypeB.v` | 集団力学封鎖判定 | **未実装スタブ。`0x06` を返す** |
 | **Sim** | `10_Testbench_Integration.v` | 全系統合検証（7ケース＋チェックサム異常） | 実装済（Rev 2.0） |
 
-`../simulation/` には `10_Testbench_BruteForce.v` と `10_wave_config.do` がある。
+`../simulation/` には `10_Testbench_TypeA_Cases.v`（演算コア単体、7ケース）、`10_Testbench_BruteForce.v`、`10_wave_config.do` がある。
 
 > **削除記録（2026-07-29）:** `../simulation/10_Testbench_TypeA.v` を削除した。
 > 名前に反してテストベンチではなく `10_BioCalibrator_TypeA.v` の複製であり、
 > 同名モジュール `BioCalibrator_TypeA_Jamming` の二重定義になっていた。
 > さらに複製元が Rev 1.0（次元不整合のあった旧式）のままだったため、
 > コンパイル順序によっては旧式が採用され、警告もなく誤判定に戻る危険があった。
->
-> **TypeA の単体テストベンチは未整備である。** 現状 `simulation/` にあるのは
-> Boost 探索用の BruteForce のみで、7ケースを網羅する単体検証は存在しない。
+> 削除と同時に `10_Testbench_TypeA_Cases.v` を新設し、演算コア単体で
+> 7ケースを検証できるようにした（§7 参照。7/7 PASS）。
 
 制約ファイルは `../constraints/` にある（`10_timing.sdc`、`10_pinout_cyclone_v.qsf`、`10_pinout_artix_7.xdc`）。
 
