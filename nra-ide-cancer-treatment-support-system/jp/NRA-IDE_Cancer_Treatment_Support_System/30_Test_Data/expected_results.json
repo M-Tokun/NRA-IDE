@@ -7,17 +7,17 @@
   "test_case_expectations": {
     "TC001": {
       "test_id": "TC001",
-      "description": "Normal Passable (sigma_total 132 <= dP 154)",
+      "description": "Normal Passable (sigma_total 132 <= dP 153)",
       "expected_binary": "0x00"
     },
     "TC002": {
       "test_id": "TC002",
-      "description": "Blocked by Boost (sigma_total 387 > dP 154)",
+      "description": "Blocked by Boost (sigma_total 387 > dP 153)",
       "expected_binary": "0x01"
     },
     "TC003": {
       "test_id": "TC003",
-      "description": "Blocked by stiff cell (sigma_total 260 > dP 154)",
+      "description": "Blocked by stiff cell (sigma_total 260 > dP 153)",
       "expected_binary": "0x01"
     },
     "TC004": {
@@ -37,7 +37,7 @@
     },
     "TC007": {
       "test_id": "TC007",
-      "description": "Blocked at maximum boost (982 > 154)",
+      "description": "Blocked at maximum boost (982 > 153)",
       "expected_binary": "0x01"
     }
   }

@@ -132,7 +132,7 @@ Q8.8 への変換は**切り捨て**である。`int(max(0.0, min(255.99, value)
 ```python
 
 # 判定の中核（nra_core_model.evaluate より）
-strain, sigma_v = fixed_terms(E_q, eta_q, D_q, d_q, v_q)
+strain, sigma_v = fixed_terms(eta_q, D_q, d_q, v_q)  # E_q は粘性応力に不要
 el_mul = (E_q + B_q) * strain
 sigma_total = ((el_mul >> 8) & 0xFFFF) + sigma_v
 is_jammed = sigma_total > dP_q
