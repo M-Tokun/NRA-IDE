@@ -269,7 +269,7 @@
     
     <span class="code-comment">// 4. Evaluate (R >= 1.0 indicates Structural Rupture)</span>
     <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
-        <span class="code-keyword">return</span> <span class="code-string">"FAIL_CLOSED"</span>; <span class="code-comment">// System Shutdown</span>
+        <span class="code-keyword">return</span> <span class="code-string">"RUPTURE_BOUNDARY"</span>; <span class="code-comment">// System Shutdown</span>
     }
     <span class="code-keyword">return</span> <span class="code-string">"SAFE"</span>;
 }

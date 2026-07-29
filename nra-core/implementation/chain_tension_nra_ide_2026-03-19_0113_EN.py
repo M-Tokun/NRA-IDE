@@ -28,7 +28,7 @@ T_MIN       = 620.0    # N : lower tolerance limit (elongation / derailment risk
 T_MAX       = 1000.0   # N : upper tolerance limit (breakage / sprocket damage)
 
 R_WARN      = 0.75     # WARNING threshold
-R_FAIL      = 1.0      # Fail-Closed threshold
+R_RUPTURE      = 1.0      # Fail-Closed threshold
 
 # Polygon effect parameters
 SPROCKET_TEETH  = 17          # number of sprocket teeth
@@ -56,7 +56,7 @@ class ChainState:
     R:          float    # approach ratio R = δ/τ
     drdt:       float    # rate of change dR/dt
     polygon_amp: float   # detected fluctuation amplitude
-    status:     str      # SAFE / WARNING / FAIL_CLOSED
+    status:     str      # SAFE / WARNING / RUPTURE_BOUNDARY
     adj_output: float    # auto-adjustment output [N]
     adj_reason: str      # reason for adjustment
 
@@ -121,11 +121,11 @@ def calc_adjustment(R: float, drdt: float,
 
     R < 0.5               : no adjustment needed
     0.5 ≤ R < R_WARN     : fine adjustment (follow fluctuation direction)
-    R_WARN ≤ R < R_FAIL  : predictive adjustment (computed from arrival prediction)
-    R >= R_FAIL           : Fail-Closed (return authority to human operator)
+    R_WARN ≤ R < R_RUPTURE  : predictive adjustment (computed from arrival prediction)
+    R >= R_RUPTURE           : Fail-Closed (return authority to human operator)
     """
-    if R >= R_FAIL:
-        return 0.0, "FAIL_CLOSED: returning adjustment authority to human operator"
+    if R >= R_RUPTURE:
+        return 0.0, "RUPTURE_BOUNDARY: returning adjustment authority to human operator"
 
     # Abnormal fluctuation amplitude detection (>1.5× normal amplitude = precursor)
     amp_ratio = poly_amp / POLYGON_AMP if POLYGON_AMP > 0 else 1.0
@@ -150,7 +150,7 @@ def calc_adjustment(R: float, drdt: float,
         # Predictive adjustment: use dR/dt to estimate arrival time, apply lead control
         if drdt > 0.001:
             # R rising: predict arrival time and apply necessary adjustment in advance
-            eta = (R_FAIL - R) / drdt   # estimated time to Fail-Closed [s]
+            eta = (R_RUPTURE - R) / drdt   # estimated time to Fail-Closed [s]
             urgency = max(0.0, 1.0 - eta * 0.5)  # urgency factor
             gain    = ADJ_GAIN_AHEAD * (1.0 + urgency)
         else:
@@ -215,8 +215,8 @@ def run_simulation():
         poly_amp = raw_buf.amplitude()
 
         # Status determination
-        if R >= R_FAIL:
-            status = "FAIL_CLOSED"
+        if R >= R_RUPTURE:
+            status = "RUPTURE_BOUNDARY"
         elif R >= R_WARN:
             status = "WARNING"
         else:
@@ -226,7 +226,7 @@ def run_simulation():
         adj, reason = calc_adjustment(R, drdt, poly_amp, t_smooth)
 
         # Apply adjustment (not applied in Fail-Closed)
-        if status != "FAIL_CLOSED":
+        if status != "RUPTURE_BOUNDARY":
             t_current += adj
             t_current = max(min(t_current, T_MAX + 50), T_MIN - 50)
 
@@ -241,7 +241,7 @@ def run_simulation():
 
         # Display every 5 steps
         if i % 5 == 0:
-            st_sym = {'SAFE':'✓','WARNING':'▲','FAIL_CLOSED':'✕'}[status]
+            st_sym = {'SAFE':'✓','WARNING':'▲','RUPTURE_BOUNDARY':'✕'}[status]
             print(f"{t:5.2f} {t_raw:7.1f} {t_smooth:7.1f} "
                   f"{delta:6.1f} {tau:6.1f} {R:7.4f} "
                   f"{drdt:+8.4f} {st_sym+status:>13} {adj:+8.1f}")
@@ -250,11 +250,11 @@ def run_simulation():
     # Summary
     safe_n = sum(1 for s in history if s.status == "SAFE")
     warn_n = sum(1 for s in history if s.status == "WARNING")
-    fail_n = sum(1 for s in history if s.status == "FAIL_CLOSED")
+    fail_n = sum(1 for s in history if s.status == "RUPTURE_BOUNDARY")
     total  = len(history)
     print(f" SAFE       : {safe_n:3d} steps ({safe_n/total*100:.1f}%)")
     print(f" WARNING    : {warn_n:3d} steps ({warn_n/total*100:.1f}%)")
-    print(f" FAIL_CLOSED: {fail_n:3d} steps ({fail_n/total*100:.1f}%)")
+    print(f" RUPTURE_BOUNDARY: {fail_n:3d} steps ({fail_n/total*100:.1f}%)")
     adj_total = sum(abs(s.adj_output) for s in history)
     print(f" Total adj  : {adj_total:.1f} N")
     print("=" * 68)

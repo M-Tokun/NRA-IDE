@@ -98,7 +98,7 @@ class VitalSignNRA:
     # FSM 遷移閾値
     TH_CAVEAT      = 0.35
     TH_CRITICAL    = 0.60
-    TH_FAIL_CLOSED = 1.00
+    TH_RUPTURE_BOUNDARY = 1.00
 
     def __init__(self, warmup_sec: float = WARMUP_SEC):
         self.warmup_sec = warmup_sec
@@ -128,6 +128,7 @@ class VitalSignNRA:
         self._intervene:   bool  = False
 
         self.history: List[dict] = []
+        self.archived_histories: List[dict] = []
 
     # ── メインステップ ──
 
@@ -269,17 +270,18 @@ class VitalSignNRA:
         """FSM 遷移ロジック"""
         R_eff = self.R_total + self.residual_debt * 0.4
 
+        if self.fsm == FSMState.RUPTURE_BOUNDARY:
+            return
         if self.warmup_pct < 15.0:
             self.fsm = FSMState.WARMUP
-        elif R_eff >= self.TH_FAIL_CLOSED or self.residual_debt > 1.2:
-            self.fsm = FSMState.FAIL_CLOSED
+        elif R_eff >= self.TH_RUPTURE_BOUNDARY or self.residual_debt > 1.2:
+            self.fsm = FSMState.RUPTURE_BOUNDARY
         elif R_eff >= self.TH_CRITICAL:
             self.fsm = FSMState.CRITICAL
         elif R_eff >= self.TH_CAVEAT:
             self.fsm = FSMState.CAVEAT
         else:
-            if self.fsm != FSMState.FAIL_CLOSED:
-                self.fsm = FSMState.PERMIT
+            self.fsm = FSMState.PERMIT
 
     # ── イベントトリガー（Cause-Side 入力）──
 
@@ -293,35 +295,47 @@ class VitalSignNRA:
 
     def trigger_bleed(self, magnitude: float = 1.0):
         """出血イベント"""
-        if self.fsm == FSMState.FAIL_CLOSED:
+        if self.fsm == FSMState.RUPTURE_BOUNDARY:
             return
         self._bleed_decay = magnitude + random.random() * 0.8
 
     def trigger_anesthesia(self, magnitude: float = 1.2):
         """麻酔深度変化"""
-        if self.fsm == FSMState.FAIL_CLOSED:
+        if self.fsm == FSMState.RUPTURE_BOUNDARY:
             return
         self._anes_decay = magnitude + random.random() * 0.6
 
     def trigger_vasospasm(self, magnitude: float = 0.8):
         """血管攣縮"""
-        if self.fsm == FSMState.FAIL_CLOSED:
+        if self.fsm == FSMState.RUPTURE_BOUNDARY:
             return
         self._vaso_decay = magnitude + random.random() * 0.5
 
     def trigger_intervene(self):
         """
         医師介入（人間操作）。
-        FAIL-CLOSED からの唯一の脱出経路。
+        外部実行権限による処置を開始するが、旧RUPTURE_BOUNDARYは解除しない。
         residual_debt は介入後も残存する。
         """
         self._intervene = True
-        if self.fsm == FSMState.FAIL_CLOSED:
-            self.fsm = FSMState.CRITICAL
+
+    def start_new_patient_evaluation(self):
+        """旧履歴を保管し、独立した新患者・新Cause-Side評価履歴を開始する。"""
+        warmup_sec = self.warmup_sec
+        archives = list(self.archived_histories)
+        archives.append(
+            {
+                "final_state": self.fsm.value,
+                "final_R": self.R_total,
+                "history": list(self.history),
+            }
+        )
+        self.__init__(warmup_sec)
+        self.archived_histories = archives
 
     def reset(self):
-        """完全リセット。新患状態（経過なし）に戻る。"""
-        self.__init__(self.warmup_sec)
+        """新患者評価を開始する後方互換入口。"""
+        self.start_new_patient_evaluation()
 
 
 # ============================================================
@@ -333,7 +347,7 @@ def main():
     print("NRA-IDE Demo #15 — OR/ICU Continuum Monitor (Python Core)")
     print("経過蓄積型モニタリング")
     print("=" * 70)
-    print(f"WARMUP = {VitalSignNRA.WARMUP_SEC}s  |  4チャンネル合成  |  FAIL-CLOSED 閾値 R ≥ 1.00")
+    print(f"WARMUP = {VitalSignNRA.WARMUP_SEC}s  |  4チャンネル合成  |  RUPTURE_BOUNDARY 閾値 R ≥ 1.00")
     print()
     print("  新患・救急相当: ウォームアップ期間（経過なし → R 精度なし）")
     print("  経過あり:       τ確立後 → 時間が経つほど精度が上がる")
@@ -367,7 +381,7 @@ def main():
             getattr(vital, method)()
             print(f"  [{vital.elapsed:6.2f}s] *** {label} ***")
 
-        if vital.fsm == FSMState.FAIL_CLOSED and not intervened:
+        if vital.fsm == FSMState.RUPTURE_BOUNDARY and not intervened:
             vital.trigger_intervene()
             intervened = True
             print(f"  [{vital.elapsed:6.2f}s] *** ✚ 医師介入（人間操作）"
@@ -405,7 +419,7 @@ def main():
     print("  warmup_pct:    経過が積まれるほどτが確立 → R精度が上がる")
     print("  R_total:       √ΣR² 合成 — 各値が正常範囲内でも上昇しうる")
     print("  residual_debt: 介入後も消えない構造的負債")
-    print("  FAIL-CLOSED:   trigger_intervene()（人間操作）でのみ復帰")
+    print("  RUPTURE_BOUNDARY:   医師介入後も旧状態を保持。後続はstart_new_patient_evaluation()で開始")
 
 
 if __name__ == "__main__":

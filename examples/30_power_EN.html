@@ -291,7 +291,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clk">--:--:--</span>
-  <span>P = V × I | R≥1.0 → FAIL_CLOSED</span>
+  <span>P = V × I | R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -301,7 +301,7 @@ const P_MAX  = 6000;  // W overpower limit (thermal burnout)
 const P_MIN  = 1000;  // W underpower limit (unstable operation)
 const TAU_HI = P_MAX - P_OPT;  // 4000W
 const TAU_LO = P_OPT - P_MIN;  // 1000W
-const R_WARN = 0.75, R_FAIL = 1.0;
+const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── State ──
 let running = true, loadOn = false;
@@ -346,8 +346,8 @@ function calcIDE(p){
   const rHi = delta > 0 ? delta / TAU_HI : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_FAIL)      { status='fail-hi'; action='Overpower: FAIL_CLOSED — Breaker trip'; }
-  else if(rLo >= R_FAIL) { status='fail-lo'; action='Underpower: FAIL_CLOSED — Check power supply'; }
+  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='Overpower: RUPTURE_BOUNDARY — Breaker trip'; }
+  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='Underpower: RUPTURE_BOUNDARY — Check power supply'; }
   else if(rHi >= R_WARN) { status='warn-hi'; action='Overpower warning: Load reduction recommended'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='Underpower warning: Check voltage and current'; }
   else                   { status='safe';    action='Normal operation continues'; }
@@ -422,17 +422,17 @@ function updateUI(ide, fluctAmp){
   document.getElementById('deltaDisp').textContent = (ide.delta>=0?'+':'')+Math.round(ide.delta).toLocaleString();
 
   document.getElementById('rHiN').textContent = Math.min(ide.rHi,9.999).toFixed(3);
-  document.getElementById('rHiN').style.color  = ide.rHi>=R_FAIL?'#ff3060':'#ff6080';
+  document.getElementById('rHiN').style.color  = ide.rHi>=R_RUPTURE?'#ff3060':'#ff6080';
   document.getElementById('rLoN').textContent = Math.min(ide.rLo,9.999).toFixed(3);
-  document.getElementById('rLoN').style.color  = ide.rLo>=R_FAIL?'#6688ff':'#88aaff';
-  setArc('arcHi',ide.rHi,ide.rHi>=R_FAIL?'#ff3060':'#ff6080');
-  setArc('arcLo',ide.rLo,ide.rLo>=R_FAIL?'#6688ff':'#88aaff');
+  document.getElementById('rLoN').style.color  = ide.rLo>=R_RUPTURE?'#6688ff':'#88aaff';
+  setArc('arcHi',ide.rHi,ide.rHi>=R_RUPTURE?'#ff3060':'#ff6080');
+  setArc('arcLo',ide.rLo,ide.rLo>=R_RUPTURE?'#6688ff':'#88aaff');
   setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
 
   const badge=document.getElementById('badge');
   badge.className='badge '+ide.status;
   const lm={safe:'SAFE','warn-hi':'WARNING ↑ OVERPOWER','warn-lo':'WARNING ↓ UNDERPOWER',
-             'fail-hi':'FAIL_CLOSED ↑ OVERPOWER','fail-lo':'FAIL_CLOSED ↓ UNDERPOWER'};
+             'fail-hi':'RUPTURE_BOUNDARY ↑ OVERPOWER','fail-lo':'RUPTURE_BOUNDARY ↓ UNDERPOWER'};
   badge.textContent=lm[ide.status];
   document.getElementById('actTxt').textContent=ide.action;
 

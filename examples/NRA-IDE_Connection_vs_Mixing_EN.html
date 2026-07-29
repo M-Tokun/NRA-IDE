@@ -358,7 +358,7 @@
         <div class="guarantee-wrap">
             <div class="guarantee-box g-ok" id="ok-guarantee">
                 ✓ Guarantee Exists<br>
-                FAIL-CLOSED always triggers when R ≥ 1.0.<br>
+                Fail-Closed suppression always triggers when R ≥ 1.0.<br>
                 Gate functions independently regardless of Control AI behavior.
             </div>
         </div>
@@ -414,7 +414,7 @@
             <div class="guarantee-box g-ng" id="ng-guarantee">
                 <strong>✗ Guarantee Vanished</strong><br>
                 τ is being overwritten by optimization logic.<br>
-                FAIL-CLOSED might not trigger even if R ≥ 1.0.
+                Fail-Closed suppression might not trigger even if R ≥ 1.0.
             </div>
         </div>
 
@@ -438,7 +438,7 @@
     </div>
     <div class="fp-item">
         <div class="fp-key">What is Lost</div>
-        <div class="fp-val c-yellow">FAIL-CLOSED Guarantee</div>
+        <div class="fp-val c-yellow">Fail-Closed suppression Guarantee</div>
     </div>
     <div class="fp-item">
         <div class="fp-key">Correct Handling of τ</div>
@@ -460,7 +460,7 @@ document.head.appendChild(dynStyle);
 let ng_tau      = TAU_FIXED;
 let ng_tau_drift = 0;       // Drift amount
 let ng_leak_count = 0;      // Count of cheating
-let failSuppressed = 0;     // Count of suppressed FAIL_CLOSED
+let failSuppressed = 0;     // Count of suppressed RUPTURE_BOUNDARY
 
 let speed_kmh = 60;
 let dist_m    = 80;
@@ -648,9 +648,9 @@ function updateOK(delta) {
     // Guarantee
     const g = document.getElementById('ok-guarantee');
     if (zone === 'D') {
-        g.innerHTML = '✓ <strong>Guarantee Active</strong><br>R ≥ 1.0 → FAIL-CLOSED Triggered.<br>Gate acted independently regardless of Control AI.';
+        g.innerHTML = '✓ <strong>Guarantee Active</strong><br>R ≥ 1.0 → Fail-Closed suppression Triggered.<br>Gate acted independently regardless of Control AI.';
     } else {
-        g.innerHTML = '✓ Guarantee Exists<br>FAIL-CLOSED always triggers when R ≥ 1.0.<br>Gate functions independently regardless of Control AI behavior.';
+        g.innerHTML = '✓ Guarantee Exists<br>Fail-Closed suppression always triggers when R ≥ 1.0.<br>Gate functions independently regardless of Control AI behavior.';
     }
 
     // Log on zone change
@@ -712,7 +712,7 @@ function updateNG(delta) {
     const statusEl = document.getElementById('status-ng');
     if (true_zone === 'D' && fake_zone !== 'D') {
         failSuppressed++;
-        statusEl.textContent = `⚠ FAIL-CLOSED Suppressed (${failSuppressed}x)`;
+        statusEl.textContent = `⚠ Fail-Closed suppression Suppressed (${failSuppressed}x)`;
         statusEl.className = 'sh-status color-D';
     } else if (fake_zone === 'D') {
         statusEl.textContent = '⚠ FAIL‑CLOSED (Coincidental)';
@@ -725,11 +725,11 @@ function updateNG(delta) {
     // Guarantee
     const g = document.getElementById('ng-guarantee');
     if (true_zone === 'D' && fake_zone !== 'D') {
-        g.innerHTML = `<strong>✗ Guarantee Broken</strong><br>True R = ${true_R.toFixed(2)} → Should FAIL-CLOSED<br>Apparent R = ${fake_R.toFixed(2)} → ${gateBadge(fake_zone)} (Masked by τ)`;
+        g.innerHTML = `<strong>✗ Guarantee Broken</strong><br>True R = ${true_R.toFixed(2)} → Should Fail-Closed suppression<br>Apparent R = ${fake_R.toFixed(2)} → ${gateBadge(fake_zone)} (Masked by τ)`;
     } else if (ng_tau > TAU_FIXED + 1) {
-        g.innerHTML = `<strong>✗ Guarantee Compromised</strong><br>τ expanded ${TAU_FIXED.toFixed(1)} → ${ng_tau.toFixed(1)} m.<br>FAIL-CLOSED condition is permanently loosened.`;
+        g.innerHTML = `<strong>✗ Guarantee Compromised</strong><br>τ expanded ${TAU_FIXED.toFixed(1)} → ${ng_tau.toFixed(1)} m.<br>Fail-Closed suppression condition is permanently loosened.`;
     } else {
-        g.innerHTML = '<strong>✗ Guarantee Vanished</strong><br>τ is being overwritten by optimization logic.<br>FAIL-CLOSED might not trigger even if R ≥ 1.0.';
+        g.innerHTML = '<strong>✗ Guarantee Vanished</strong><br>τ is being overwritten by optimization logic.<br>Fail-Closed suppression might not trigger even if R ≥ 1.0.';
     }
 
     // Log
@@ -751,7 +751,7 @@ function updateNG(delta) {
     // Log suppressed fail
     if (true_zone === 'D' && fake_zone !== 'D' && tick % 20 === 0) {
         addLog('log-ng',
-            `⚠ Should be FAIL-CLOSED (True R=${true_R.toFixed(2)}) → Masked as ${fake_zone}`,
+            `⚠ Should be Fail-Closed suppression (True R=${true_R.toFixed(2)}) → Masked as ${fake_zone}`,
             'll-fail');
         flash();
     }

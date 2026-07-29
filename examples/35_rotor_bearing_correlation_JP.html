@@ -251,7 +251,7 @@ select{
   <span class="eq-c">R_i = δ_i / τ_i</span>：各物理量の個別構造比　|　
   <span class="eq-w">τ_eff = τ_base / (1 + coupling pressure)</span>：相関悪化で吸収余裕を圧縮　|　
   <span class="eq-o">R_total = max(R_i, R_corr)</span>：平均化禁止の安全側ゲート　|　
-  <span class="eq-f">R ≥ 1.0 → FAIL_CLOSED</span>
+  <span class="eq-f">R ≥ 1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <div class="main-grid">
@@ -323,7 +323,7 @@ select{
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span>35_rotor_bearing_correlation_JP_20260425_024602_JST.html</span>
-  <span>R_total = max(R_i, R_corr) ｜ R≥1.0 → FAIL_CLOSED</span>
+  <span>R_total = max(R_i, R_corr) ｜ R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 </div>
@@ -586,7 +586,7 @@ function getZone(R){
   return 'safe';
 }
 function badgeText(zone){
-  if(zone === 'fail') return ['FAIL-CLOSED','badge-fail'];
+  if(zone === 'fail') return ['RUPTURE_BOUNDARY','badge-fail'];
   if(zone === 'warn') return ['WARNING','badge-warn'];
   return ['SAFE','badge-ok'];
 }
@@ -835,7 +835,7 @@ function drawRotor(eff, rTotal){
   rc.fillText(`R_total = ${rTotal.toFixed(3)}`, 14, 22);
   rc.font = '10px JetBrains Mono';
   rc.textAlign = 'right';
-  const label = rTotal>=1 ? '✕ FAIL_CLOSED' : rTotal>=.70 ? '▲ WARNING' : '● SAFE';
+  const label = rTotal>=1 ? '✕ RUPTURE_BOUNDARY' : rTotal>=.70 ? '▲ WARNING' : '● SAFE';
   rc.fillText(label, W-14, 22);
 }
 function drawTimeSeries(){
@@ -912,7 +912,7 @@ function updateUI(eff, C, rCorr, corrAlerts){
     document.getElementById(`cval_${i}`).textContent = e.pressure.toFixed(2);
 
     if(zone !== prevZones[i]){
-      if(zone === 'fail') addLog(`FAIL-CLOSED: ${f.name} R=${R.toFixed(3)} δ=${fmtVal(e.delta,{...f,opt:0})}`, 'fail');
+      if(zone === 'fail') addLog(`RUPTURE_BOUNDARY: ${f.name} R=${R.toFixed(3)} δ=${fmtVal(e.delta,{...f,opt:0})}`, 'fail');
       else if(zone === 'warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} τ_eff=${fmtVal(e.tauEff,{...f,opt:0})}`, 'warn');
       else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
       prevZones[i] = zone;
@@ -973,7 +973,7 @@ function updateUI(eff, C, rCorr, corrAlerts){
 
   const st = document.getElementById('systemStatus');
   if(rTotal >= 1.0){
-    st.textContent = 'FAIL-CLOSED — 点検・停止判断へ';
+    st.textContent = 'RUPTURE_BOUNDARY — 点検・停止判断へ';
     st.style.color = 'var(--fail)';
   } else if(rTotal >= .70){
     st.textContent = 'WARNING — 相関と先行指標を監視';

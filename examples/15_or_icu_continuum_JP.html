@@ -307,7 +307,7 @@
   <button class="btn-event" id="btn-anesthesia" onclick="triggerAnesthesia()" disabled>💉 麻酔深度変化</button>
   <button class="btn-event" id="btn-vasospasm" onclick="triggerVasospasm()" disabled>⚡ 血管攣縮</button>
   <button class="btn-ok" id="btn-intervene" onclick="triggerIntervene()" disabled>✚ 医師介入</button>
-  <button class="btn-normal" onclick="resetSim()">■ リセット</button>
+  <button class="btn-normal" onclick="startNewPatientEvaluation()">■ 新患者評価</button>
 
   <div class="ctrl-group">
     <span class="ctrl-label">SPEED</span>
@@ -356,13 +356,14 @@ let st = {
   residualDebt: 0,
   warmupPct: 0,
   accuracyStars: 0,
-  phase: 'WARMUP',   // WARMUP / ACTIVE / CAVEAT / CRITICAL / CLOSED
+  phase: 'WARMUP',   // WARMUP / ACTIVE / CAVEAT / CRITICAL / RUPTURE_BOUNDARY
   // イベント
   bleedActive: false, bleedDecay: 0,
   anesActive:  false, anesDecay:  0,
   vasospasm:   false, vasoDecay:  0,
   intervene:   false,
 };
+const archivedHistories = [];
 
 // ── バッファ ──
 const hrBuf   = new Float32Array(BUF).fill(72);
@@ -398,7 +399,7 @@ function addLog(msg, cls='ev-info') {
 function addTransLog(from, to, R) {
   const el = document.getElementById('transition-log');
   transCount++;
-  const col = to==='CLOSED'?'#ff4444': to==='CRITICAL'?'#ff8800': to==='CAVEAT'?'#ffcc00': to==='ACTIVE'?'#00ff88':'#44aaff';
+  const col = to==='RUPTURE_BOUNDARY'?'#ff4444': to==='CRITICAL'?'#ff8800': to==='CAVEAT'?'#ffcc00': to==='ACTIVE'?'#00ff88':'#44aaff';
   const mm = String(Math.floor(simTime/60)).padStart(2,'0');
   const ss = String(Math.floor(simTime%60)).padStart(2,'0');
   el.innerHTML = `<div style="color:${col}">◯${transCount} ${mm}:${ss} ${from}→${to} R=${R.toFixed(3)}</div>` + el.innerHTML;
@@ -540,28 +541,26 @@ function physicsStep() {
   const prevPhase = st.phase;
   const Reff = st.Rtotal + st.residualDebt * 0.4;
 
-  if (st.warmupPct < 15) {
+  if (prevPhase === 'RUPTURE_BOUNDARY') {
+    st.phase = 'RUPTURE_BOUNDARY';
+  } else if (st.warmupPct < 15) {
     st.phase = 'WARMUP';
   } else if (st.intervene) {
     st.phase = 'CRITICAL';
   } else if (Reff >= 1.0 || st.residualDebt > 1.2) {
-    st.phase = 'CLOSED';
+    st.phase = 'RUPTURE_BOUNDARY';
   } else if (Reff >= 0.6 || st.residualDebt > 0.7) {
     st.phase = 'CRITICAL';
   } else if (Reff >= 0.35) {
     st.phase = 'CAVEAT';
   } else if (st.warmupPct >= 15) {
-    if (st.phase === 'CLOSED') {
-      // CLOSED からは医師介入でのみ復帰
-    } else {
-      st.phase = 'ACTIVE';
-    }
+    st.phase = 'ACTIVE';
   }
 
   if (st.phase !== prevPhase) {
     addTransLog(prevPhase, st.phase, st.Rtotal);
-    if (st.phase === 'CLOSED') {
-      addLog('⛔ FAIL-CLOSED — 医師判断を要請', 'ev-crit');
+    if (st.phase === 'RUPTURE_BOUNDARY') {
+      addLog('⛔ RUPTURE_BOUNDARY — 医師判断を要請', 'ev-crit');
       flashTransition();
       document.getElementById('btn-intervene').disabled = false;
       document.getElementById('btn-bleed').disabled = true;
@@ -600,7 +599,7 @@ function drawVitals() {
   ctV.fillText('VITALS', W-46, 13);
 
   vitalCfg.forEach(vc => {
-    const glow = st.phase === 'CLOSED' ? 5 : 2;
+    const glow = st.phase === 'RUPTURE_BOUNDARY' ? 5 : 2;
     ctV.lineWidth = 1.2;
     ctV.beginPath();
     for (let i = 0; i < BUF; i++) {
@@ -630,7 +629,7 @@ function drawR() {
   ctR.beginPath(); ctR.moveTo(0,yTau); ctR.lineTo(W,yTau); ctR.stroke();
   ctR.setLineDash([]);
   ctR.fillStyle = '#ff4444'; ctR.font = '9px Courier New';
-  ctR.fillText('τ = 1.0  FAIL-CLOSED', 6, yTau - 3);
+  ctR.fillText('τ = 1.0  RUPTURE_BOUNDARY', 6, yTau - 3);
 
   // CRITICAL ライン
   const yCrit = H - (0.6/2.0)*H;
@@ -731,7 +730,7 @@ function updateUI() {
     ACTIVE:   ['phase-active',   'ACTIVE  PERMIT'],
     CAVEAT:   ['phase-caveat',   'CAVEAT  ⚠'],
     CRITICAL: ['phase-critical', 'CRITICAL  🔴'],
-    CLOSED:   ['phase-closed',   'FAIL-CLOSED  ⛔'],
+    RUPTURE_BOUNDARY:   ['phase-closed',   'RUPTURE_BOUNDARY  ⛔'],
   };
   const [cls, label] = phaseMap[st.phase] || ['phase-warmup', st.phase];
   phaseEl.className = 'phase-box ' + cls;
@@ -782,32 +781,43 @@ function startProcedure() {
 }
 
 function triggerBleed() {
-  if (st.phase === 'CLOSED') return;
+  if (st.phase === 'RUPTURE_BOUNDARY') return;
   st.bleedActive = true; st.bleedDecay = 1.0 + Math.random() * 0.8;
   addLog('🩸 出血イベント — HR↑ BP↓ δ急増', 'ev-crit');
 }
 function triggerAnesthesia() {
-  if (st.phase === 'CLOSED') return;
+  if (st.phase === 'RUPTURE_BOUNDARY') return;
   st.anesActive = true; st.anesDecay = 1.2 + Math.random() * 0.6;
   addLog('💉 麻酔深度変化 — HR↓ BP↓ RR↓', 'ev-warn');
 }
 function triggerVasospasm() {
-  if (st.phase === 'CLOSED') return;
+  if (st.phase === 'RUPTURE_BOUNDARY') return;
   st.vasospasm = true; st.vasoDecay = 0.8 + Math.random() * 0.5;
   addLog('⚡ 血管攣縮 — BP急上昇スパイク', 'ev-crit');
 }
 function triggerIntervene() {
   st.intervene = true;
   document.getElementById('btn-intervene').disabled = true;
+  if (st.phase === 'RUPTURE_BOUNDARY') {
+    addLog('✚ 外部医師介入を開始。旧RUPTURE_BOUNDARYは固定保持', 'ev-ok');
+    addLog('  破断後固定証言を継続。別履歴は「新患者評価」から開始', 'ev-warn');
+    return;
+  }
   document.getElementById('btn-bleed').disabled = false;
   document.getElementById('btn-anesthesia').disabled = false;
   document.getElementById('btn-vasospasm').disabled = false;
-  if (st.phase === 'CLOSED') st.phase = 'CRITICAL';
   addLog('✚ 医師介入 — Cause-Side制御開始 (人間判断)', 'ev-ok');
   addLog('  ※ residual_debtは介入後も残存', 'ev-warn');
 }
 
-function resetSim() {
+function startNewPatientEvaluation() {
+  if (simTime > 0 || logCount > 0 || transCount > 0) {
+    archivedHistories.push({
+      finalState: JSON.parse(JSON.stringify(st)),
+      eventLog: document.getElementById('event-log').innerHTML,
+      transitionLog: document.getElementById('transition-log').innerHTML,
+    });
+  }
   procedureStarted = false;
   simTime = 0; bufIdx = 0;
   st = {
@@ -833,7 +843,7 @@ function resetSim() {
   document.getElementById('warmup-label').textContent = '⏳ ウォームアップ中 — R精度未確立';
   document.getElementById('warmup-label').style.color = '';
   logCount = 0; transCount = 0;
-  addLog('■ リセット — 新患状態に相当 (経過なし)', 'ev-info');
+  addLog(`■ 新患者Cause-Side評価。保管済み履歴=${archivedHistories.length}`, 'ev-info');
   addLog('  ▶ 執刀開始ボタンで経過蓄積を開始', 'ev-info');
 }
 
@@ -853,7 +863,7 @@ function loop() {
 
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
-resetSim();
+startNewPatientEvaluation();
 loop();
 </script>
 </body>

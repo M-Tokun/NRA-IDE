@@ -329,7 +329,7 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
   <span class="eq-a">R_i = δ_i / τ_i</span>：各物理量の構造比率　|　
   <span class="eq-b">τ_i(t) = τ_base × S_reserve × S_coupling</span>：内部抵抗・dT/dtで動的τ圧縮　|　
   <span class="eq-c">R_total = max(R_i, R_corr)</span>：平均で危険を薄めない　|　
-  <span class="eq-f">R ≥ 1.0 → FAIL_CLOSED</span>
+  <span class="eq-f">R ≥ 1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <div class="overall">
@@ -569,7 +569,7 @@ function getColor(R){
   return 'var(--ok)';
 }
 function getBadge(R){
-  if(R >= 1.0) return ['FAIL-CLOSED','badge-fail','fail'];
+  if(R >= 1.0) return ['RUPTURE_BOUNDARY','badge-fail','fail'];
   if(R >= 0.75) return ['WARNING','badge-warn','warn'];
   return ['SAFE','badge-ok','ok'];
 }
@@ -738,7 +738,7 @@ function updateUI(){
     if(R>=0.75) warnAny = true;
 
     if(zone !== prevZones[i]){
-      if(zone==='fail') addLog(`FAIL-CLOSED候補: ${f.name} R=${R.toFixed(3)} δ=${delta.toFixed(2)}${f.unit}`, 'fail');
+      if(zone==='fail') addLog(`RUPTURE_BOUNDARY候補: ${f.name} R=${R.toFixed(3)} δ=${delta.toFixed(2)}${f.unit}`, 'fail');
       else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
       else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
       prevZones[i] = zone;
@@ -798,9 +798,9 @@ function updateUI(){
   const ring = document.getElementById('thermal-ring');
 
   if(rTotal >= 1.0){
-    st.textContent = 'FAIL-CLOSED — 充放電停止・固定Handoff証言を外部人間監査へ提示';
+    st.textContent = 'RUPTURE_BOUNDARY — 充放電停止・生存経路で破断後固定証言を継続';
     st.style.color = 'var(--fail)';
-    packSt.textContent = '✕ FAIL_CLOSED PACK';
+    packSt.textContent = '✕ RUPTURE_BOUNDARY PACK';
     packSt.style.color = 'var(--fail)';
     ring.classList.add('active');
   } else if(rTotal >= 0.75){

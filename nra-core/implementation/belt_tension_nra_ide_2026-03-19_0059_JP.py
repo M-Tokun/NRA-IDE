@@ -55,7 +55,7 @@ class IDEResult:
     delta:  float   # 蓄積ズレ δ [N]
     tau:    float   # 吸収厚み τ [N]
     R:      float   # 接近比 R = δ/τ
-    status: str     # SAFE / WARNING / FAIL_CLOSED
+    status: str     # SAFE / WARNING / RUPTURE_BOUNDARY
     action: str     # 推奨アクション
 
 # -------------------------------------------------------
@@ -98,7 +98,7 @@ def evaluate_belt(state: BeltState) -> IDEResult:
 
     R < 0.75  : SAFE（正常稼働継続）
     R >= 0.75 : WARNING（予兆検出・点検前倒し）
-    R >= 1.0  : FAIL_CLOSED（即時停止・整合性なければ不能）
+    R >= 1.0  : RUPTURE_BOUNDARY（即時停止・整合性なければ不能）
     """
     delta = calc_delta(state.t_current, state.t_optimal)
     tau   = calc_tau(state.t_current, state.t_optimal,
@@ -109,14 +109,14 @@ def evaluate_belt(state: BeltState) -> IDEResult:
         R = delta / tau
         return IDEResult(
             delta=delta, tau=tau, R=R,
-            status="FAIL_CLOSED",
+            status="RUPTURE_BOUNDARY",
             action="即時停止：張力が許容域を逸脱（テンショナー交換）"
         )
 
     R = delta / tau
 
     if R >= R_CRITICAL:
-        status = "FAIL_CLOSED"
+        status = "RUPTURE_BOUNDARY"
         action = "即時停止：テンショナー調整または交換"
     elif R >= R_WARNING:
         status = "WARNING"

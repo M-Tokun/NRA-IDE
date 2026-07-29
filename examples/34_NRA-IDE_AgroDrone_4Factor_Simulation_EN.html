@@ -199,7 +199,7 @@ function calcR(val,f){ return Math.abs(val-f.opt)/f.tau; }
 function G(r,k){ return r*Math.abs(r)/(k+Math.abs(r)); }
 function gateOpen(r,k){ return Math.abs(r)/(k+Math.abs(r)); }
 function getColor(R){ return R>=1.0?'var(--f)':R>=0.7?'var(--w)':'var(--ok)'; }
-function getBadge(R){ return R>=1.0?['FAIL-CLOSED','badge-fail']:R>=0.7?['WARNING','badge-warn']:['SAFE','badge-ok']; }
+function getBadge(R){ return R>=1.0?['RUPTURE_BOUNDARY','badge-fail']:R>=0.7?['WARNING','badge-warn']:['SAFE','badge-ok']; }
 
 function calcCorr(){
   const C=[];
@@ -365,7 +365,7 @@ function update(){
     compositeR+=R;
     const zone=R>=1.0?'fail':R>=0.7?'warn':'ok';
     if(zone!==prevZones[i]){
-      if(zone==='fail') addLog(`FAIL-CLOSED: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'fail');
+      if(zone==='fail') addLog(`RUPTURE_BOUNDARY: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'fail');
       else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'warn');
       else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`,'ok');
       prevZones[i]=zone;
@@ -390,7 +390,7 @@ function update(){
   const oEl=document.getElementById('overall-r');
   oEl.textContent=Rcomp.toFixed(3); oEl.style.color=getColor(Rcomp);
   const oSt=document.getElementById('overall-status');
-  if(Rcomp>=1.0){ oSt.textContent='FAIL-CLOSED — System halted'; oSt.style.color='var(--f)'; }
+  if(Rcomp>=1.0){ oSt.textContent='RUPTURE_BOUNDARY — System halted'; oSt.style.color='var(--f)'; }
   else if(Rcomp>=0.7){ oSt.textContent='WARNING — Monitoring intensified'; oSt.style.color='var(--w)'; }
   else { oSt.textContent='SAFE — All factors normal'; oSt.style.color='var(--ok)'; }
   drawTimeSeries();

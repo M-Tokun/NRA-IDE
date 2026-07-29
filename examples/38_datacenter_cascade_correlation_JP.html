@@ -640,7 +640,7 @@ function getColor(R){
   return 'var(--ok)';
 }
 function getBadge(R){
-  if(R >= 1.0) return ['FAIL-CLOSED','badge-fail','fail'];
+  if(R >= 1.0) return ['RUPTURE_BOUNDARY','badge-fail','fail'];
   if(R >= 0.75) return ['WARNING','badge-warn','warn'];
   return ['SAFE','badge-ok','ok'];
 }
@@ -820,7 +820,7 @@ function updateUI(){
     if(R>=0.75) warnAny = true;
 
     if(zone !== prevZones[i]){
-      if(zone==='fail') addLog(`FAIL-CLOSED候補: ${f.name} R=${R.toFixed(3)}`, 'fail');
+      if(zone==='fail') addLog(`RUPTURE_BOUNDARY候補: ${f.name} R=${R.toFixed(3)}`, 'fail');
       else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
       else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
       prevZones[i] = zone;
@@ -896,9 +896,9 @@ function updateUI(){
   }
 
   if(rTotal >= 1.0){
-    st.textContent = 'FAIL-CLOSED — 自動判断停止・固定Handoff証言を外部人間監査へ提示';
+    st.textContent = 'RUPTURE_BOUNDARY — 自動判断停止・生存経路で破断後固定証言を継続';
     st.style.color = 'var(--fail)';
-    dc.textContent = '✕ FAIL_CLOSED DATACENTER';
+    dc.textContent = '✕ RUPTURE_BOUNDARY DATACENTER';
     dc.style.color = 'var(--fail)';
   } else if(rTotal >= 0.75){
     st.textContent = 'WARNING — カスケード予兆監視強化';

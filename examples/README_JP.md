@@ -78,7 +78,7 @@ $$R = \frac{\delta}{\tau}$$
 
 | R_J ≤ R < 1.00 | **JUDGMENT LIMIT** | 現場運用上、これ以上進むと遅延・慣性・残留変動により R=1.0 へ到達してしまう危険が高い領域 | 自動判断を停止または強く制限し、人間判断へ移行 |
 
-| R ≥ 1.00 | **FAIL-CLOSED** | 相転移・破断・決壊・崩壊に相当する構造限界 | AIは出力を停止し、人間が最終判断 |
+| R_target ≥ 1.00 | **RUPTURE_BOUNDARY** | 宣言済み対象の完全破断境界 | 自由生成と自律操作を停止し、生存経路上の破断後固定証言を継続 |
 
 > **重要：** R = 1.0 は警告値ではありません。  
 
@@ -346,9 +346,9 @@ function gate(delta, tau) {
 
     const R = delta / tau;
 
-    if (R >= 1.0) return "STOP";   // FAIL_CLOSED
+    if (R >= 1.0) return "STOP";   // RUPTURE_BOUNDARY
 
-    return "SAFE";
+    return "PERMIT";
 
 }
 

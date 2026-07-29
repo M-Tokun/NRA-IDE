@@ -74,7 +74,7 @@ input[type=range]{flex:1;}
 // 変数
 let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
 let GraftMGF=35, PI=2.8, DF=65;
-let PI_THRESH=5.0, MGF_THRESH=20, R_FAIL=1.0;
+let PI_THRESH=5.0, MGF_THRESH=20, R_RUPTURE=1.0;
 let lastStatus = 'SAFE';
 
 // DOM
@@ -118,8 +118,8 @@ function calcIDE() {
   const R = (deltaMGF + deltaPI + deltaDF) / tau;
 
   let st = 'SAFE', col = '#88ffcc', msg = '';
-  if (PI >= PI_THRESH || GraftMGF <= MGF_THRESH || R >= R_FAIL) {
-    st = 'FAIL_CLOSED'; col = '#ff4060'; msg = `FAIL — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)} R:${R.toFixed(3)}`;
+  if (PI >= PI_THRESH || GraftMGF <= MGF_THRESH || R >= R_RUPTURE) {
+    st = 'RUPTURE_BOUNDARY'; col = '#ff4060'; msg = `FAIL — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)} R:${R.toFixed(3)}`;
   } else if (PI >= PI_THRESH*0.8 || GraftMGF <= MGF_THRESH*1.2) {
     st = 'WARNING'; col = '#ffcc00'; msg = `WARN — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)}`;
   }
@@ -129,7 +129,7 @@ function calcIDE() {
 
   // 状態変化を検知してログ
   if (st !== lastStatus) {
-    const cls = st === 'FAIL_CLOSED' ? 'log-fail' : (st === 'WARNING' ? 'log-warn' : 'log-safe');
+    const cls = st === 'RUPTURE_BOUNDARY' ? 'log-fail' : (st === 'WARNING' ? 'log-warn' : 'log-safe');
     addLog(`状態変化 → ${st} (${msg})`, cls);
     lastStatus = st;
   }
@@ -144,7 +144,7 @@ function drawVessel() {
   tctx.clearRect(0,0,tc.width,tc.height);
   const ide = calcIDE();
   const r = 80 + (Tension-90)*0.4;
-  tctx.strokeStyle = ide.status==='FAIL_CLOSED'?'#ff4060':'#ff6b6b';
+  tctx.strokeStyle = ide.status==='RUPTURE_BOUNDARY'?'#ff4060':'#ff6b6b';
   tctx.lineWidth = 18;
   tctx.beginPath(); tctx.ellipse(400,140,r,80,0,0,Math.PI*2); tctx.stroke();
 
@@ -162,7 +162,7 @@ function drawTTFMWave() {
   fctx.clearRect(0,0,fc.width,fc.height);
   const ide = calcIDE();
 
-  fctx.strokeStyle = ide.status==='FAIL_CLOSED'?'#ff4060':(ide.status==='WARNING'?'#ffcc00':'#88ffcc');
+  fctx.strokeStyle = ide.status==='RUPTURE_BOUNDARY'?'#ff4060':(ide.status==='WARNING'?'#ffcc00':'#88ffcc');
   fctx.lineWidth = 3.5;
   fctx.beginPath();
   for(let x=0;x<fc.width;x+=3){
@@ -202,7 +202,7 @@ function updateAll() {
 
   PI_THRESH = parseFloat(document.getElementById('piThresh')?.value || 5);
   MGF_THRESH = parseFloat(document.getElementById('mgfThresh')?.value || 20);
-  R_FAIL = parseFloat(document.getElementById('rFail')?.value || 1.0);
+  R_RUPTURE = parseFloat(document.getElementById('rFail')?.value || 1.0);
 
   GraftMGF = Math.max(10, Math.min(80, GraftMGF + (Math.random()-0.5)*0.6));
   PI = Math.max(1, Math.min(7, PI + (Math.random()-0.5)*0.08));
@@ -210,7 +210,7 @@ function updateAll() {
 
   safeSet('piThreshVal', PI_THRESH.toFixed(1));
   safeSet('mgfThreshVal', MGF_THRESH);
-  safeSet('rFailVal', R_FAIL.toFixed(2));
+  safeSet('rFailVal', R_RUPTURE.toFixed(2));
 
   drawVessel();
   drawTTFMWave();

@@ -312,7 +312,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         <span class="set-val set-val-warn">0.75</span>
       </div>
       <div class="setting-row">
-        <span class="set-lbl">R_FAIL</span>
+        <span class="set-lbl">R_RUPTURE</span>
         <span class="set-val set-val-fail">1.00</span>
       </div>
     </div>
@@ -328,7 +328,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clk">--:--:--</span>
-  <span>R≥1.0 → FAIL_CLOSED</span>
+  <span>R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -338,7 +338,7 @@ const L_MAX = 50000;  // lx : over-illumination limit (heat stress / leaf scorch
 const L_MIN =  5000;  // lx : low-light limit (photosynthesis stops)
 const TAU_HI = L_MAX - L_OPT;  // 30000 lx
 const TAU_LO = L_OPT - L_MIN;  // 15000 lx
-const R_WARN = 0.75, R_FAIL = 1.0;
+const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── State ──
 let running   = true;
@@ -443,10 +443,10 @@ function calcIDE(lux){
   const rHi = delta > 0 ? delta / TAU_HI : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_FAIL){
-    status = 'fail-hi'; action = 'Over-illumination: FAIL_CLOSED — deploy shade panel to maximum';
-  } else if(rLo >= R_FAIL){
-    status = 'fail-lo'; action = 'Insufficient light: FAIL_CLOSED — switch auxiliary lighting ON';
+  if(rHi >= R_RUPTURE){
+    status = 'fail-hi'; action = 'Over-illumination: RUPTURE_BOUNDARY — deploy shade panel to maximum';
+  } else if(rLo >= R_RUPTURE){
+    status = 'fail-lo'; action = 'Insufficient light: RUPTURE_BOUNDARY — switch auxiliary lighting ON';
   } else if(rHi >= R_WARN){
     status = 'warn-hi'; action = 'Over-illumination warning: shade panel deployment recommended';
   } else if(rLo >= R_WARN){
@@ -463,7 +463,7 @@ function calcShadeTarget(ide){
   if(ide.status === 'fail-hi') return 90;
   if(ide.status === 'warn-hi'){
     // Increase shade ratio in proportion to R_hi
-    const ratio = (ide.rHi - R_WARN) / (R_FAIL - R_WARN);
+    const ratio = (ide.rHi - R_WARN) / (R_RUPTURE - R_WARN);
     return Math.min(80, 30 + ratio * 50);
   }
   if(ide.status === 'fail-lo' || ide.status === 'warn-lo') return 0;
@@ -538,8 +538,8 @@ function tick(dt){
 // ── UI update ──
 function updateUI(ide, fluctAmp){
   const col = statusColor(ide.status);
-  const rHiCol = ide.rHi >= R_FAIL ? '#ff3b5c' : ide.rHi >= R_WARN ? '#ff9030' : '#ff903088';
-  const rLoCol = ide.rLo >= R_FAIL ? '#4488ff' : ide.rLo >= R_WARN ? '#88aaff' : '#4488ff88';
+  const rHiCol = ide.rHi >= R_RUPTURE ? '#ff3b5c' : ide.rHi >= R_WARN ? '#ff9030' : '#ff903088';
+  const rLoCol = ide.rLo >= R_RUPTURE ? '#4488ff' : ide.rLo >= R_WARN ? '#88aaff' : '#4488ff88';
 
   document.getElementById('luxBig').innerHTML =
     formatLux(luxRaw) + '<span class="lux-unit"> lux</span>';
@@ -550,18 +550,18 @@ function updateUI(ide, fluctAmp){
   document.getElementById('luxScene').style.color = col;
 
   document.getElementById('rHiNum').textContent = Math.min(ide.rHi,9.999).toFixed(3);
-  document.getElementById('rHiNum').style.color  = ide.rHi >= R_FAIL ? '#ff3b5c' : '#ff9030';
+  document.getElementById('rHiNum').style.color  = ide.rHi >= R_RUPTURE ? '#ff3b5c' : '#ff9030';
   document.getElementById('rLoNum').textContent = Math.min(ide.rLo,9.999).toFixed(3);
-  document.getElementById('rLoNum').style.color  = ide.rLo >= R_FAIL ? '#4488ff' : '#88aaff';
-  setArc('arcHi', ide.rHi, ide.rHi>=R_FAIL?'#ff3b5c':'#ff9030');
-  setArc('arcLo', ide.rLo, ide.rLo>=R_FAIL?'#4488ff':'#88aaff');
+  document.getElementById('rLoNum').style.color  = ide.rLo >= R_RUPTURE ? '#4488ff' : '#88aaff';
+  setArc('arcHi', ide.rHi, ide.rHi>=R_RUPTURE?'#ff3b5c':'#ff9030');
+  setArc('arcLo', ide.rLo, ide.rLo>=R_RUPTURE?'#4488ff':'#88aaff');
   setMarkPair('wMarkHi','fMarkHi');
   setMarkPair('wMarkLo','fMarkLo');
 
   const badge = document.getElementById('badge');
   badge.className = 'badge ' + ide.status;
   const lblMap = { safe:'SAFE', 'warn-hi':'WARNING ↑ OVER-LIGHT', 'warn-lo':'WARNING ↓ LOW-LIGHT',
-                   'fail-hi':'FAIL_CLOSED ↑ OVER-LIGHT', 'fail-lo':'FAIL_CLOSED ↓ LOW-LIGHT' };
+                   'fail-hi':'RUPTURE_BOUNDARY ↑ OVER-LIGHT', 'fail-lo':'RUPTURE_BOUNDARY ↓ LOW-LIGHT' };
   badge.textContent = lblMap[ide.status];
   document.getElementById('actTxt').textContent = ide.action;
 

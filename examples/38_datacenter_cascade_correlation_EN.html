@@ -282,7 +282,7 @@ function calcCorr(){
 }
 function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
 
-function setStatusText(el,R,base){ el.textContent = R>=1?'FAIL-CLOSED — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
+function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
 function updateUI(){
   const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
   FACTORS.forEach((f,i)=>{
@@ -303,7 +303,7 @@ function updateUI(){
   document.getElementById('r-coupling').textContent=p.main.toFixed(3); document.getElementById('r-coupling').style.color=colorFor(p.main);
   document.getElementById('r-corr').textContent=cr.max.toFixed(3); document.getElementById('r-corr').style.color=colorFor(cr.max);
   document.getElementById('pressure-fill').style.width=Math.min(100,total*100).toFixed(1)+'%';
-  document.getElementById('visual-status').textContent=total>=1?'✕ FAIL_CLOSED':total>=.75?'▲ WARNING':total>=.4?'● WATCH':'● SAFE';
+  document.getElementById('visual-status').textContent=total>=1?'✕ RUPTURE_BOUNDARY':total>=.75?'▲ WARNING':total>=.4?'● WATCH':'● SAFE';
   document.getElementById('visual-status').style.color=colorFor(total);
   document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
   [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });

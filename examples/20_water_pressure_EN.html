@@ -282,7 +282,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clk">--:--:--</span>
-  <span>Incompressible Fluid: τ Fixed ｜ R≥1.0 → FAIL_CLOSED</span>
+  <span>Incompressible Fluid: τ Fixed ｜ R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -292,7 +292,7 @@ const P_MAX  = 0.80;  // MPa rupture / safety valve limit
 const P_MIN  = 0.30;  // MPa pump cavitation limit
 const TAU_HI = P_MAX - P_OPT;  // 0.30 MPa fixed
 const TAU_LO = P_OPT - P_MIN;  // 0.20 MPa fixed
-const R_WARN = 0.75, R_FAIL = 1.0;
+const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── State ──
 let running = true, pumpOn = false, valveOn = false;
@@ -352,8 +352,8 @@ function calcIDE(p){
   const rHi = delta > 0 ? delta / TAU_HI : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_FAIL)      { status='fail-hi'; action='Over-pressure: FAIL_CLOSED — Safety valve active / pump stop'; }
-  else if(rLo >= R_FAIL) { status='fail-lo'; action='Under-pressure: FAIL_CLOSED — Start pump / fully open valve'; }
+  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='Over-pressure: RUPTURE_BOUNDARY — Safety valve active / pump stop'; }
+  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='Under-pressure: RUPTURE_BOUNDARY — Start pump / fully open valve'; }
   else if(rHi >= R_WARN) { status='warn-hi'; action='Over-pressure warning: reduce flow or open valve'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='Under-pressure warning: increase pump output'; }
   else                   { status='safe';    action='Normal operation continues'; }
@@ -444,18 +444,18 @@ function updateUI(ide, pulseAmp){
   document.getElementById('pNote').style.color = col;
 
   document.getElementById('rHiN').textContent = Math.min(ide.rHi,9.999).toFixed(3);
-  document.getElementById('rHiN').style.color  = ide.rHi>=R_FAIL?'#ff3060':'#ff6080';
+  document.getElementById('rHiN').style.color  = ide.rHi>=R_RUPTURE?'#ff3060':'#ff6080';
   document.getElementById('rLoN').textContent = Math.min(ide.rLo,9.999).toFixed(3);
-  document.getElementById('rLoN').style.color  = ide.rLo>=R_FAIL?'#8866ff':'#aa88ff';
-  setArc('arcHi', ide.rHi, ide.rHi>=R_FAIL?'#ff3060':'#ff6080');
-  setArc('arcLo', ide.rLo, ide.rLo>=R_FAIL?'#8866ff':'#aa88ff');
+  document.getElementById('rLoN').style.color  = ide.rLo>=R_RUPTURE?'#8866ff':'#aa88ff';
+  setArc('arcHi', ide.rHi, ide.rHi>=R_RUPTURE?'#ff3060':'#ff6080');
+  setArc('arcLo', ide.rLo, ide.rLo>=R_RUPTURE?'#8866ff':'#aa88ff');
   setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
 
   const badge = document.getElementById('badge');
   badge.className = 'badge ' + ide.status;
   const lm = { safe:'SAFE','warn-hi':'WARNING over-pressure',
-    'warn-lo':'WARNING low-pressure','fail-hi':'FAIL_CLOSED over-pressure',
-    'fail-lo':'FAIL_CLOSED low-pressure' };
+    'warn-lo':'WARNING low-pressure','fail-hi':'RUPTURE_BOUNDARY over-pressure',
+    'fail-lo':'RUPTURE_BOUNDARY low-pressure' };
   badge.textContent = lm[ide.status];
   document.getElementById('actTxt').textContent = ide.action;
 

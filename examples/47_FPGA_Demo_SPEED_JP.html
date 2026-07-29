@@ -155,7 +155,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 <body>
 
 <div class="confess-overlay" id="confessOverlay"></div>
-<div class="confess-banner" id="confessBanner">◆ CONFESS — 限界告白 / FAIL-CLOSED ◆</div>
+<div class="confess-banner" id="confessBanner">◆ CONFESS — 限界告白 / Fail-Closed suppression ◆</div>
 
 <div class="header">
   <div class="logo-ring">
@@ -333,7 +333,7 @@ const STATES = {
   S_COMPUTE:  {jp:'内包性演算',  color:'#a060e8', desc:'IDEパイプライン4段処理中。Q16.16固定小数点演算。誤差蓄積なし。',        badge:[['PIPE×4','purple']]},
   S_VALIDATE: {jp:'整合性検証',  color:'#e8a020', desc:'閾値検出器でTHR_LO ≤ value ≤ THR_HIを判定。完全境界チェック。',        badge:[['CHECK','amber']]},
   S_EMIT:     {jp:'出力',        color:'#40d860', desc:'整合性確認済み。結果を出力。不可逆性：この後S_OBSERVEへは戻らない。',   badge:[['VALID','green']]},
-  S_CONFESS:  {jp:'限界告白',    color:'#e84040', desc:'整合性違反を検出。confess_flag=1。出力強制ゼロ。不整合を隠蔽しない。', badge:[['FAIL-CLOSED','coral'],['confess_flag=1','coral']]}
+  S_CONFESS:  {jp:'限界告白',    color:'#e84040', desc:'整合性違反を検出。confess_flag=1。出力強制ゼロ。不整合を隠蔽しない。', badge:[['Fail-Closed suppression','coral'],['confess_flag=1','coral']]}
 };
 const ORDER = ['S_IDLE','S_OBSERVE','S_COMPUTE','S_VALIDATE','S_EMIT','S_CONFESS'];
 

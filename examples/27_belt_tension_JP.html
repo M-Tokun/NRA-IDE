@@ -499,7 +499,7 @@ input[type=range]::-webkit-slider-thumb:hover {
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span id="clockDisp">--:--:--</span>
-  <span>R≥1.0 → FAIL_CLOSED</span>
+  <span>R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 <script>
@@ -511,7 +511,7 @@ const MODES = {
   vbelt:    { label:'Vベルト',    T_OPT:300, T_MIN:240, T_MAX:380, SLIDER_MIN:170, SLIDER_MAX:450 },
 };
 const R_WARN = 0.75;
-const R_FAIL = 1.0;
+const R_RUPTURE = 1.0;
 
 let mode      = 'conveyor';
 let T_CURRENT = 500;
@@ -528,7 +528,7 @@ function calcIDE(t, m) {
   const R     = delta / Math.max(tau, 0.01);
   const outOfRange = t < m.T_MIN || t > m.T_MAX;
   let status, action;
-  if (R >= R_FAIL || outOfRange) {
+  if (R >= R_RUPTURE || outOfRange) {
     status = 'fail';
     action = '即時停止：テンショナー調整または交換';
   } else if (R >= R_WARN) {
@@ -600,7 +600,7 @@ function updateUI() {
   // 状態バッジ
   const badge = document.getElementById('statusBadge');
   badge.className = 'status-badge ' + ide.status;
-  const stLabel = { safe:'SAFE', warning:'WARNING', fail:'FAIL_CLOSED' };
+  const stLabel = { safe:'SAFE', warning:'WARNING', fail:'RUPTURE_BOUNDARY' };
   badge.textContent = stLabel[ide.status];
 
   // アクションテキスト
@@ -658,7 +658,7 @@ function updateSliderGradient(pm) {
 function addLog(ide) {
   const now  = new Date();
   const time = now.toTimeString().slice(0,8);
-  const stLabel = { safe:'SAFE', warning:'WARNING', fail:'FAIL_CLOSED' };
+  const stLabel = { safe:'SAFE', warning:'WARNING', fail:'RUPTURE_BOUNDARY' };
   const list = document.getElementById('logList');
   const entry = document.createElement('div');
   entry.className = 'log-entry';
@@ -803,7 +803,7 @@ function drawConveyor(phase, ide) {
   ctx.font = '10px JetBrains Mono';
   ctx.fillStyle = col;
   ctx.textAlign = 'right';
-  const stLabel = { safe:'● SAFE', warning:'▲ WARNING', fail:'✕ FAIL_CLOSED' };
+  const stLabel = { safe:'● SAFE', warning:'▲ WARNING', fail:'✕ RUPTURE_BOUNDARY' };
   ctx.fillText(stLabel[ide.status], W - 12, 20);
 }
 
@@ -887,7 +887,7 @@ function drawVBelt(phase, ide) {
 
   ctx.font = '10px JetBrains Mono';
   ctx.textAlign = 'right';
-  const stLabel = { safe:'● SAFE', warning:'▲ WARNING', fail:'✕ FAIL_CLOSED' };
+  const stLabel = { safe:'● SAFE', warning:'▲ WARNING', fail:'✕ RUPTURE_BOUNDARY' };
   ctx.fillText(stLabel[ide.status], W - 12, 20);
 }
 

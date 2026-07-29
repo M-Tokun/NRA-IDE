@@ -28,7 +28,7 @@ T_MIN       = 620.0    # N : 許容下限（伸び・外れリスク）
 T_MAX       = 1000.0   # N : 許容上限（破断・スプロケット損傷）
 
 R_WARN      = 0.75     # WARNING 閾値
-R_FAIL      = 1.0      # Fail-Closed 閾値
+R_RUPTURE      = 1.0      # Fail-Closed 閾値
 
 # ポリゴン効果パラメータ
 SPROCKET_TEETH  = 17          # スプロケット歯数
@@ -56,7 +56,7 @@ class ChainState:
     R:          float    # 接近比 R = δ/τ
     drdt:       float    # R変化速度 dR/dt
     polygon_amp: float   # 検出ゆらぎ振幅
-    status:     str      # SAFE / WARNING / FAIL_CLOSED
+    status:     str      # SAFE / WARNING / RUPTURE_BOUNDARY
     adj_output: float    # 自動調整量 [N]
     adj_reason: str      # 調整理由
 
@@ -121,11 +121,11 @@ def calc_adjustment(R: float, drdt: float,
 
     R < 0.5               : 調整不要
     0.5 ≤ R < R_WARN     : 微調整（ゆらぎ方向追従）
-    R_WARN ≤ R < R_FAIL  : 先行調整（到達予測から算出）
-    R >= R_FAIL           : Fail-Closed（調整権限返却）
+    R_WARN ≤ R < R_RUPTURE  : 先行調整（到達予測から算出）
+    R >= R_RUPTURE           : Fail-Closed（調整権限返却）
     """
-    if R >= R_FAIL:
-        return 0.0, "FAIL_CLOSED：調整権限を人間に返却"
+    if R >= R_RUPTURE:
+        return 0.0, "RUPTURE_BOUNDARY：調整権限を人間に返却"
 
     # ゆらぎ振幅異常検出（正常振幅の1.5倍超で予兆）
     amp_ratio = poly_amp / POLYGON_AMP if POLYGON_AMP > 0 else 1.0
@@ -150,7 +150,7 @@ def calc_adjustment(R: float, drdt: float,
         # 先行調整：dR/dtから到達予測し先行制御
         if drdt > 0.001:
             # R上昇中：到達時間を予測して必要調整量を先行投入
-            eta = (R_FAIL - R) / drdt   # 到達予測時間 [s]
+            eta = (R_RUPTURE - R) / drdt   # 到達予測時間 [s]
             urgency = max(0.0, 1.0 - eta * 0.5)  # 切迫度
             gain    = ADJ_GAIN_AHEAD * (1.0 + urgency)
         else:
@@ -215,8 +215,8 @@ def run_simulation():
         poly_amp = raw_buf.amplitude()
 
         # 状態判定
-        if R >= R_FAIL:
-            status = "FAIL_CLOSED"
+        if R >= R_RUPTURE:
+            status = "RUPTURE_BOUNDARY"
         elif R >= R_WARN:
             status = "WARNING"
         else:
@@ -226,7 +226,7 @@ def run_simulation():
         adj, reason = calc_adjustment(R, drdt, poly_amp, t_smooth)
 
         # 調整適用（Fail-Closed時は適用しない）
-        if status != "FAIL_CLOSED":
+        if status != "RUPTURE_BOUNDARY":
             t_current += adj
             t_current = max(min(t_current, T_MAX + 50), T_MIN - 50)
 
@@ -241,7 +241,7 @@ def run_simulation():
 
         # 5ステップごとに表示
         if i % 5 == 0:
-            st_sym = {'SAFE':'✓','WARNING':'▲','FAIL_CLOSED':'✕'}[status]
+            st_sym = {'SAFE':'✓','WARNING':'▲','RUPTURE_BOUNDARY':'✕'}[status]
             print(f"{t:5.2f} {t_raw:7.1f} {t_smooth:7.1f} "
                   f"{delta:6.1f} {tau:6.1f} {R:7.4f} "
                   f"{drdt:+8.4f} {st_sym+status:>13} {adj:+8.1f}")
@@ -250,11 +250,11 @@ def run_simulation():
     # サマリー
     safe_n = sum(1 for s in history if s.status == "SAFE")
     warn_n = sum(1 for s in history if s.status == "WARNING")
-    fail_n = sum(1 for s in history if s.status == "FAIL_CLOSED")
+    fail_n = sum(1 for s in history if s.status == "RUPTURE_BOUNDARY")
     total  = len(history)
     print(f" SAFE       : {safe_n:3d} steps ({safe_n/total*100:.1f}%)")
     print(f" WARNING    : {warn_n:3d} steps ({warn_n/total*100:.1f}%)")
-    print(f" FAIL_CLOSED: {fail_n:3d} steps ({fail_n/total*100:.1f}%)")
+    print(f" RUPTURE_BOUNDARY: {fail_n:3d} steps ({fail_n/total*100:.1f}%)")
     adj_total = sum(abs(s.adj_output) for s in history)
     print(f" 総調整量   : {adj_total:.1f} N")
     print("=" * 68)
