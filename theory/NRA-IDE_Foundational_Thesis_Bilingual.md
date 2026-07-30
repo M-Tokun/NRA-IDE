@@ -167,6 +167,10 @@ When R is close to 0, play is almost unused. As R approaches 1.0, the remaining 
 
 The sole axiom states the foundational premise. The structural-persistence principle describes a persistence condition. The IDE Primary Formula $R=\delta/\tau$, introduced in Chapter 4, provides a calculation method under that separation; it is not another axiom.
 
+### 3.5 Scope of Application
+
+This thesis does not present a unified model that calculates different phenomena through a single physical equation. Each domain must separately define its governing equations, causal variables, and derivation rules for $\delta$ and $\tau$. What is shared is the IDE evaluation structure that connects those Cause-Side calculation results to boundary approach, human handoff, irreversible transition, and authority control. The detailed canonical boundary follows Chapter 15 of `theory/AXIOMS.md`.
+
 ---
 
 ## 4. Intuitive Explanation of the Primary Equation
@@ -845,6 +849,10 @@ NRAでは、この一文を唯一の基礎公理として採用する。あら�
 R が 0 に近ければ遊びはほとんど使われていない。R が 1.0 に近づくにつれて、残存する吸収余裕は尽きつつある。R = 1.0 で不変完全破断境界に達する。
 
 唯一公理が基礎前提を示し、構造持続原則が持続条件を記述する。第4章で導入するIDE基本式 $R=\delta/\tau$ は、この区分の下で使用する計算方法であり、追加公理ではない。
+
+### 3.5 適用範囲
+
+本論文が提示するのは、異なる現象を一つの物理方程式で計算する統一モデルではない。各領域の支配方程式、原因変数、$\delta$と$\tau$の算定規則は現場ごとに定義される。共通するのは、それらのCause-Side計算結果を境界接近、人間委譲、不可逆遷移および権限制御へ接続するIDE評価構造である。詳細な正規境界は `theory/AXIOMS.md` 第15章に従う。
 
 ---
 

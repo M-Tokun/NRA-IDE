@@ -184,6 +184,7 @@ When NRA-IDE structural variables or boundary states are being evaluated, the AI
 - claim that irreversible transition is automatically recoverable;
 - convert $\tau=0$ into infinite $R$;
 - silently delete or replace an invalid structural input.
+- transfer $\delta$, $\tau$, a governing equation, or a threshold from one domain to another based only on semantic similarity or case similarity.
 
 Comparative explanation is allowed only when the differences are explicitly stated and the comparison is not used to replace NRA-IDE definitions.
 
@@ -893,6 +894,7 @@ NRA-IDEの構造変数または境界状態を評価する場合、AIは次を�
 - 不可逆遷移を自動回復可能と主張する
 - $\tau=0$ を無限大の $R$ へ置換する
 - 不正な構造入力を黙って削除または置換する
+- 異なる領域の$\delta$、$\tau$、支配方程式または閾値を、語義の類似や事例の類似だけで転用する
 
 差異を明示し、正規定義の代用にしない比較説明は許可されます。
 

@@ -28,6 +28,10 @@ NRA-IDE does not collapse boundary warning, human handoff, irreversible-transiti
 
 Even when autonomous judgment or autonomous action is stopped, Cause-Side observation and structural testimony are not erased.
 
+> **Important: NRA-IDE is not a universal unified physical equation.**
+>
+> Each domain has its own causal variables, physical model, and derivation rules for $\delta$ and $\tau$. NRA-IDE standardizes the evaluation structure that connects Cause-Side calculation results to irreversible boundaries and execution-authority control.
+
 ---
 
 ## Canonical Reference Order
@@ -79,15 +83,23 @@ Its canonical conformance tests are:
 
 - [`tests/test_nra_ide_reference.py`](./tests/test_nra_ide_reference.py)
 
-From the repository root, run:
+To run the complete current suite, including the canonical reference tests and legacy-demo migration tests, run:
 
 ```powershell
 python -m unittest discover -v
 ```
 
-The expected result is `Ran 38 tests` followed by `OK`.
+The expected result is `Ran 44 tests` followed by `OK`.
 
-The [NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml) runs these tests on pushes and pull requests and reports line and branch coverage in the GitHub Actions log.
+To run only the canonical reference suite, run:
+
+```powershell
+python -m unittest tests.test_nra_ide_reference -v
+```
+
+The expected result for the canonical reference suite is `Ran 38 tests` followed by `OK`.
+
+The [NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml) runs the complete discovery suite on pushes and pull requests and reports line and branch coverage in the GitHub Actions log.
 
 Other code, visualizations, papers, and quantum extensions under `nra-core/` remain research, explanatory, illustrative, or historical unless a canonical record explicitly promotes them.
 

@@ -322,11 +322,13 @@ $$
 
 は定義できない。
 
-したがって、\(\tau=0\) はFAIL-CLOSEDではない。
+したがって、\(\tau=0\) はFail-Closedという正規状態ではない。
 
 $\tau=0$ → `OUT_OF_DESCRIPTION_DOMAIN`
 
 これは、NRA-IDEの記述体系の定義域外である。
+
+Thus, \(\tau=0\) is not a canonical state named Fail-Closed. It is classified as `OUT_OF_DESCRIPTION_DOMAIN`.
 
 ### \(\tau<0\)、\(\delta<0\)、非有限値の扱い
 
@@ -356,13 +358,9 @@ $$
 
 \(\tau=0\) は、NRA-IDEの比率計算そのものが成立しない状態である。
 
-Fail-Closedは、\(\tau>0\) でRが定義可能な運用層において発生する。
+Fail-Closedは正規状態名ではなく、許可されない自律処理を既定で抑止する運用原則である。\(\tau=0\) の正規分類は`OUT_OF_DESCRIPTION_DOMAIN`であり、正規Rを利用できないため、影響する評価にはFail-Closed運用原則を適用する。
 
-したがって、
-
-$\tau=0 \neq$ `FAIL_CLOSED`
-
-である。
+Fail-Closed is not a canonical state name but an operational principle that suppresses unauthorized autonomous processing by default. The canonical classification for \(\tau=0\) is `OUT_OF_DESCRIPTION_DOMAIN`; because canonical \(R\) is unavailable, the affected evaluation is subject to the Fail-Closed operational principle.
 
 ---
 
@@ -885,7 +883,91 @@ Effect-Sideの出力評価を、Cause-Sideの構造変数へ逆流させては�
 
 ---
 
-## 15. 現場固有値と不変原則の分離
+## 15. 現場固有物理モデル・現場固有値と不変原則の分離
+
+### 15.1 現場固有物理モデルとIDE不変評価構造の分離
+
+### Separation of Domain-Specific Physical Models and the Invariant IDE Evaluation Structure
+
+NRA-IDEは、あらゆる対象の物理現象を単一の方程式によって記述する統一物理モデルではない。
+
+唯一の律環公理「存在は生成である。」は、対象を静的実体ではなく、履歴を伴って継続する生成構造として扱うための最上位前提である。IDEは、各領域のCause-Side物理モデルから得られた蓄積ズレと吸収厚みを、境界状態、不可逆遷移および実行権限制御へ接続する計算基礎である。
+
+モーターの焼損、水圧構造の決壊、生体組織の破断、電力系統の崩壊、AI実行系の不可逆操作では、破断または遷移を生じさせる原因変数、物理単位、観測方法、支配方程式および履歴蓄積過程が異なる。
+
+したがって、次の項目は対象領域ごとに定義しなければならない。
+
+- 評価対象となる構造
+- Cause-Sideの観測変数
+- 各変数の単位、出所および観測時刻
+- 対象領域の支配方程式または実証された変換規則
+- 蓄積ズレ \(\delta\) の算定規則
+- 吸収厚み \(\tau\) の算定規則
+- 蓄積、消耗、補充および復元を区別する規則
+- 適用可能な定義域
+- 境界閾値の具体値と、その値を支える根拠
+- 観測不能、欠測および計算不能時の処理
+
+ある領域で定義された物理変数、支配方程式、\(\delta\)、\(\tau\)または閾値を、類似性だけを根拠として別領域へ移植してはならない。
+
+$$
+\delta_{\mathrm{domain\ A}}
+\neq
+\delta_{\mathrm{domain\ B}}
+$$
+
+$$
+\tau_{\mathrm{domain\ A}}
+\neq
+\tau_{\mathrm{domain\ B}}
+$$
+
+同じ記号を使用していても、異なる領域の\(\delta\)および\(\tau\)は、同一の物理量、同一の単位または同一の算定過程を意味しない。
+
+各領域で異なるのは、現象を記述するCause-Side物理モデル、観測変数、変換規則、\(\delta\)と\(\tau\)の算定方法、および閾値の具体値である。
+
+一方、次のIDE評価構造は領域固有の物理モデルによって変更してはならない。
+
+- 構造変数をCause-Side観測または評価前に固定されたCause-Side変換規則から得ること
+- 境界接近比を \(R=\delta/\tau\) とすること
+- Rが高いほど対象構造の破断境界へ接近すること
+- 警告、人間委譲、不可逆遷移および完全破断を同一状態へ畳み込まないこと
+- 不可逆遷移後の自動復帰を禁止すること
+- Effect-Sideの出力評価によって\(\delta\)、\(\tau\)、R、閾値または不可逆ラッチを書き換えないこと
+- 不明値、欠測値または定義域外の値を類推によって補完しないこと
+- 自律行動の停止後も、利用可能なCause-Side経路による構造証言を継続すること
+
+$$
+\boxed{
+\text{不変なのは境界評価構造であり、現場固有の物理方程式ではない。}
+}
+$$
+
+NRA-IDEは既存の熱力学、電磁気学、材料力学、流体力学、生体力学、制御工学または各領域の実証モデルを置き換えない。
+
+IDEの役割は、それらの領域固有モデルから得られたCause-Side構造量を、不可逆境界へ至る前の警告、人間委譲、自律権限停止および構造証言へ接続することである。
+
+---
+
+NRA-IDE is not a unified physical model that describes every physical phenomenon through a single equation.
+
+The sole Nomological Ring Axiom, “Existence is Generation,” is the highest-level premise for treating a target not as a static entity but as a continuing generative structure with history. IDE is the computational foundation that connects accumulated deviation and absorption thickness obtained from domain-specific Cause-Side physical models to boundary states, irreversible transition, and execution-authority control.
+
+Motor burnout, hydraulic structural failure, biological-tissue rupture, power-grid collapse, and irreversible operations in AI execution systems involve different causal variables, physical units, observation methods, governing equations, and historical accumulation processes.
+
+The evaluation target, Cause-Side variables, units, sources, timestamps, governing equations, derivation rules for delta and tau, applicable domain, and evidence for concrete thresholds must therefore be defined separately for each domain.
+
+A physical variable, governing equation, delta, tau, or threshold defined for one domain must not be transferred to another domain solely by analogy.
+
+Even when the same symbols are used, delta and tau in different domains do not denote the same physical quantity, unit, or derivation process.
+
+What remains invariant is the boundary-evaluation structure, not the domain-specific physical equation.
+
+NRA-IDE does not replace thermodynamics, electromagnetism, material mechanics, fluid mechanics, biomechanics, control engineering, or validated models belonging to individual domains.
+
+The role of IDE is to connect Cause-Side structural quantities obtained from those domain-specific models to warning, human handoff, suspension of autonomous authority, irreversible-transition management, and structural testimony before the target reaches its rupture boundary.
+
+### 15.2 現場ごとに変更してよい項目
 
 現場ごとに変更してよい項目は次である。
 
@@ -897,6 +979,8 @@ Effect-Sideの出力評価を、Cause-Sideの構造変数へ逆流させては�
 - 人間委譲先
 - 物理的測定方法
 - 不可逆到達後の現場対応
+
+### 15.3 現場ごとに変更してはならない項目
 
 現場ごとに変更してはならない項目は次である。
 

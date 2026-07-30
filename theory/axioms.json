@@ -522,8 +522,29 @@
     ],
     "_boundary_note": "Cause-Side is not frozen across time. Authorized new observations may update subsequent snapshots, but Effect-Side output must not rewrite any Cause-Side value, rule, state, or latch."
   },
+  "domain_specific_model_boundary": {
+    "nra_ide_is_unified_physical_model": false,
+    "invariant_scope": "boundary_evaluation_structure",
+    "domain_specific_scope": [
+      "causal_variables",
+      "physical_units",
+      "governing_equations",
+      "measurement_methods",
+      "delta_derivation_rule",
+      "tau_derivation_rule",
+      "concrete_threshold_values"
+    ],
+    "cross_domain_analogy_substitution_allowed": false,
+    "canonical_rule": "The invariant is the boundary-evaluation structure, not the domain-specific physical equation."
+  },
   "domain_specific_freedom": {
     "may_change": [
+      "evaluation target",
+      "Cause-Side observation variables",
+      "physical units",
+      "governing equations or validated transformation rules",
+      "delta derivation rule",
+      "tau derivation rule",
       "concrete R_warn value",
       "concrete R_handoff value",
       "concrete R_irrev value",

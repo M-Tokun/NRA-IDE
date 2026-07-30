@@ -10,11 +10,15 @@
 
 この文書は、NRA-IDEで使用する式、変数、定義域、初期条件、差分条件、数値安定条件を定める。
 
+本書の正規IDE計算系は、各領域の支配方程式を置き換えるものではない。Cause-Side観測から\(\delta\)および\(\tau\)を導出する物理式、単位、変換規則および具体的閾値は領域ごとに定義する。不変なのはIDEの境界評価構造であり、現場固有の物理方程式ではない。
+
 律環公理は「存在は生成である。」の一つだけであり、第二公理以降は存在しない。本書の一次式と二次式は、公理ではなくIDEの二つの正規計算系である。それ以外の式は、派生式、補助式または補完式として扱う。分類と意味が衝突する場合は、`theory/AXIOMS.md`および機械可読な同期表現`theory/axioms.json`を優先する。
 
 安全工学上の運用判断、権限移譲、出力制御、監査規則は本書の対象外とする。
 
 This document defines the equations, variables, domains, initial conditions, difference conditions, and numerical-stability requirements used in NRA-IDE.
+
+The canonical IDE calculation systems in this document do not replace the governing equations of individual domains. The physical equations, units, transformation rules, and concrete thresholds used to derive \(\delta\) and \(\tau\) from Cause-Side observations must be defined separately for each domain. The invariant is the IDE boundary-evaluation structure, not the domain-specific physical equation.
 
 There is exactly one Nomological Ring Axiom: “Existence is Generation.” No second or subsequent axiom exists. The Primary and Secondary Formulas in this document are the two canonical IDE calculation systems, not axioms. Every other equation is treated as a derived, auxiliary, or complementary formula. If classification or meaning conflicts, `theory/AXIOMS.md` and its machine-readable synchronized representation `theory/axioms.json` take precedence.
 
@@ -153,10 +157,32 @@ $$
 ### 極限 / Limit
 
 $$
-R \to 1.0^{-}
+M_{\tau}\to 0^{+}
 \Rightarrow
-S \to \infty
+S \to +\infty
 $$
+
+同値に、
+
+$$
+\tau-\delta\to0^{+}
+\Rightarrow
+S\to+\infty
+$$
+
+一次式を用いて極限をRで表す場合は、次の条件を確認しなければならない。
+
+$$
+R\to1.0^{-}
+\quad\land\quad
+\tau(1-R)\to0^{+}
+\Rightarrow
+S\to+\infty
+$$
+
+\(\tau\)が極限近傍で正かつ有限な上界を持つ場合、\(R\to1.0^{-}\)から\(\tau(1-R)\to0^{+}\)が従う。\(\tau\)がRとともに変化する一般の場合、\(R\to1.0^{-}\)だけでは\(S\to+\infty\)を保証しない。
+
+Equivalently, \(S\to+\infty\) when \(\tau-\delta\to0^{+}\). When the limit is expressed through the Primary Formula, \(R\to1.0^{-}\) implies divergence only when \(\tau(1-R)\to0^{+}\). This condition follows when \(\tau\) is positive and bounded above near the limit. If \(\tau\) varies with \(R\) without that condition, \(R\to1.0^{-}\) alone does not guarantee \(S\to+\infty\).
 
 $S$ は単位付きの残存吸収余白 $M_{\tau}$ の逆数である。無次元の $M_R$ の逆数ではない。
 
@@ -276,21 +302,45 @@ $h_{\mathrm{upper}}$ and $h_{\mathrm{lower}}$ are directional shape-transformati
 ### 必須条件 / Required Conditions
 
 $$
-h_{\mathrm{upper}}(x) > 0
+\tau(n)\in\mathbb{R}_{\mathrm{finite}},
+\qquad
+\tau(n)>0
 $$
 
 $$
-h_{\mathrm{lower}}(x) > 0
+\mathrm{EMA}_{\mathrm{upper}}(n),
+\mathrm{EMA}_{\mathrm{lower}}(n)
+\in\mathbb{R}_{\mathrm{finite}}
 $$
+
+$$
+h_{\mathrm{upper}}(x)\in\mathbb{R}_{\mathrm{finite}},
+\qquad
+h_{\mathrm{upper}}(x)>0
+$$
+
+$$
+h_{\mathrm{lower}}(x)\in\mathbb{R}_{\mathrm{finite}},
+\qquad
+h_{\mathrm{lower}}(x)>0
+$$
+
+形状変換関数の出力は無次元の倍率でなければならない。関数へ入力する量の単位と変換規則は、領域ごとに評価開始前に固定する。
+
+The shape-transformation functions must return finite, positive, dimensionless scale factors. The unit of each function input and its transformation rule must be fixed for the domain before evaluation begins.
 
 したがって、
 
 $$
-\tau_{\mathrm{upper}} > 0
+\tau_{\mathrm{upper}}(n)\in\mathbb{R}_{\mathrm{finite}},
+\qquad
+\tau_{\mathrm{upper}}(n)>0
 $$
 
 $$
-\tau_{\mathrm{lower}} > 0
+\tau_{\mathrm{lower}}(n)\in\mathbb{R}_{\mathrm{finite}},
+\qquad
+\tau_{\mathrm{lower}}(n)>0
 $$
 
 $\tau_{\mathrm{upper}}$ と $\tau_{\mathrm{lower}}$ は、動的評価に用いる側別有効ゲート幅である。
@@ -487,6 +537,10 @@ $$
 k > 0
 $$
 
+$$
+\gamma,k\in\mathbb{R}_{\mathrm{finite}}
+$$
+
 $x$ 、 $x_{\mathrm{exact}}$ 、 $r$ 、 $F_{\mathrm{IDE}}(x)$ 、 $\Phi(x)$ は有限値でなければならない。
 
 $x$, $x_{\mathrm{exact}}$, $r$, $F_{\mathrm{IDE}}(x)$, and $\Phi(x)$ must be finite.
@@ -494,6 +548,50 @@ $x$, $x_{\mathrm{exact}}$, $r$, $F_{\mathrm{IDE}}(x)$, and $\Phi(x)$ must be fin
 $x_{\mathrm{exact}}$ 、 $F_{\mathrm{IDE}}(x)$ 、 $\Phi(x)$ および各パラメータは、領域固有の根拠、適用範囲、不確かさ、検証方法を計算開始前に固定し、追跡可能にしなければならない。
 
 For $x_{\mathrm{exact}}$, $F_{\mathrm{IDE}}(x)$, $\Phi(x)$, and each parameter, domain-specific evidence, applicability, uncertainty, and validation method must be fixed before computation and remain traceable.
+
+### 次元整合条件 / Dimensional Consistency
+
+\([x]=X\)、\([t]=T\)とする。残差 \(r=x_{\mathrm{exact}}-x\) と残差ゲートの加算 \(k+|r|\) を成立させるため、次を満たさなければならない。
+
+$$
+[x_{\mathrm{exact}}]=[r]=[k]=X
+$$
+
+このとき、
+
+$$
+[G(r)]=X
+$$
+
+である。補完式の各項を同次元にするため、次を満たさなければならない。
+
+$$
+[\gamma]=T^{-1}
+$$
+
+$$
+[F_{\mathrm{IDE}}(x)]=XT^{-2}
+$$
+
+$$
+[\Phi(x)]=T^{-2}
+$$
+
+したがって、
+
+$$
+\left[\frac{d^2x}{dt^2}\right]
+=
+\left[\gamma\frac{dx}{dt}\right]
+=
+[F_{\mathrm{IDE}}(x)]
+=
+[G(r)\Phi(x)]
+=
+XT^{-2}
+$$
+
+Let \([x]=X\) and \([t]=T\). Dimensional validity of \(r=x_{\mathrm{exact}}-x\) and \(k+|r|\) requires \([x_{\mathrm{exact}}]=[r]=[k]=X\), which gives \([G(r)]=X\). The complementary equation is dimensionally homogeneous only when \([\gamma]=T^{-1}\), \([F_{\mathrm{IDE}}(x)]=XT^{-2}\), and \([\Phi(x)]=T^{-2}\). A domain may choose its own units, but it must establish these dimensional relations before computation.
 
 ---
 

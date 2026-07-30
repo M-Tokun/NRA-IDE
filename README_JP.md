@@ -27,6 +27,10 @@ NRA-IDEは、境界接近警告、人間委譲、不可逆遷移開始、完全�
 
 また、自律判断や自律行動を停止した場合も、Cause-Sideの観測と構造証言を失わせません。
 
+> **重要：NRA-IDEは万能な統一物理方程式ではありません。**
+>
+> 各領域の原因変数、物理モデル、$\delta$と$\tau$の算定式は現場ごとに異なります。NRA-IDEが共通化するのは、Cause-Sideの計算結果を不可逆境界と実行権限制御へ接続する評価構造です。
+
 ---
 
 ## 正規文書の参照順
@@ -78,15 +82,23 @@ NRA-IDEの定義は、次の順序で参照します。
 
 - [`tests/test_nra_ide_reference.py`](./tests/test_nra_ide_reference.py)
 
-リポジトリルートで次を実行します。
+正規参照試験と旧デモ移行試験を含む現行の全試験を実行するには、リポジトリルートで次を実行します。
 
 ```powershell
 python -m unittest discover -v
 ```
 
-期待結果は、`Ran 38 tests`に続いて`OK`と表示されることです。
+期待結果は、`Ran 44 tests`に続いて`OK`と表示されることです。
 
-[NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)は、pushおよびPull Requestで試験を実行し、line coverageとbranch coverageをGitHub Actionsログへ表示します。
+正規参照試験だけを実行するには、次を実行します。
+
+```powershell
+python -m unittest tests.test_nra_ide_reference -v
+```
+
+正規参照試験の期待結果は、`Ran 38 tests`に続いて`OK`と表示されることです。
+
+[NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)は、pushおよびPull Requestで全試験探索を実行し、line coverageとbranch coverageをGitHub Actionsログへ表示します。
 
 `nra-core/`配下のその他のコード、可視化、論文、量子拡張は、正規記録によって明示的に昇格されない限り、研究・説明・例示・履歴資料です。
 

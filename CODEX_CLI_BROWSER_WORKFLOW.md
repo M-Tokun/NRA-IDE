@@ -99,11 +99,11 @@ CLIとブラウザ版で同じファイルを同時に編集しない。
 ### 4.3 v2.1で照合する主要核
 
 - 正規比は`R = delta / tau`。
-- `tau <= 0`を無限大のRへ変換しない。
+- `tau = 0`は`OUT_OF_DESCRIPTION_DOMAIN`、`tau < 0`は不正入力として`CONFESSION`へ分離し、どちらも無限大のRへ変換しない。
 - 記述領域外と、既知の危険進行を分離する。
-- `R_warn`、`R_op`、`R_irrev`の役割を分離する。
-- WARNING、CONFESSION、OUT_OF_DESCRIPTION_DOMAIN、IRREVERSIBLE_BOUNDARY、RUPTUREを混同しない。
-- 不可逆境界到達後は、瞬間的なR低下だけでラッチを解除しない。
+- `R_warn`、`R_handoff`、`R_irrev`の役割を分離する。`R_op`、`Rop`、`rop`は`R_handoff`へ正規化する後方互換aliasに限る。
+- `PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`、`OUT_OF_DESCRIPTION_DOMAIN`を混同しない。
+- 不可逆遷移開始後は、瞬間的なR低下だけでラッチを解除しない。
 - 通常の自由生成を停止しても、独立したCause-Side構造証言は継続する。
 - Effect-Sideの評価や出力からCause-Sideのdelta、tau、境界を更新しない。
 
@@ -215,7 +215,7 @@ CLIで次を確認する。
 
 - 正典参照順位だけを同期する。
 - `G(r)`の大残差近似と飽和語彙だけを訂正する。
-- tau非正値の状態遷移だけを参照実装へ追加する。
+- `tau = 0`と`tau < 0`の正規分類分離だけを参照実装へ追加する。
 
 避ける例:
 
@@ -287,7 +287,8 @@ CLIで次を確認する。
 
 実装すべき最低条件:
 
-- tau非正値、NaN、非有限値を領域外へ分離する。
+- `tau = 0`を`OUT_OF_DESCRIPTION_DOMAIN`へ分離する。
+- `tau < 0`、`delta < 0`、NaN、正負のinfinityを不正または不明な構造入力として`CONFESSION`へ分離する。
 - infinityへの暗黙変換を行わない。
 - 三境界と現行状態語彙を実装する。
 - 不可逆ラッチを実装する。
@@ -378,7 +379,7 @@ noteは研究履歴として扱い、原文を無差別に現行化しない。
 - 旧状態名
 - 固定0.4、0.7、0.75、0.8等
 - 全面沈黙、空文字、出力ゼロ
-- tau非正値のinfinity化や小正数置換
+- `tau = 0`または`tau < 0`のinfinity化や小正数置換による正規分類の迂回
 - `R = max(...)`
 - `R`を残差関数や別の比へ使用する箇所
 - saturation、飽和応答
