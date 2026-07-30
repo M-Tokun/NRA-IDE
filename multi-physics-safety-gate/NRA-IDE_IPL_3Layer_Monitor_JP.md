@@ -1,6 +1,6 @@
 # NRA-IDE IPL 3-Layer Monitor — 設計思想と構造根拠
 
-<!-- FILE: NRA-IDE_IPL_3Layer_Monitor.md / 2026-03-06 21:44 -->
+<!-- FILE: NRA-IDE_IPL_3Layer_Monitor_JP.md / 2026-03-06 21:44 -->
 
 **バージョン:** 2.0.0  
 
@@ -8,29 +8,25 @@
 
 **位置づけ:** 本ファイルは設計思想・層構造の根拠を説明する **解説文書** である。  
 
-基礎式・センサー定義の正式定義は `Multi-Physics_Safety_Gate_Architecture.md` を参照すること。
+基礎式・センサー定義の正式定義は `Multi-Physics_Safety_Gate_Architecture_JP.md` を参照すること。
+
+本書および Architecture の式は構造式である。限界の位置は領域ごとに宣言し、数値の厳密一致を求めるものではない。詳細は `Multi-Physics_Safety_Gate_Architecture_JP.md` § 0 を参照。
 
 ---
 
-## 1. なぜ3次元から5層構造へ改訂したか
+## 1. なぜ3次元から3層5領域構造へ改訂したか
 
 初版（v1.0）は熱・圧力・応力の3次元直交合成のみで構成されていた。
 
 多重物理連成系の力学ドメインを精査すると合計5つが存在する。問題は「5つをすべて基礎式 $\sqrt{\sum R^2}$ に入れてよいか」であり、答えは否である。理由は構造的な因果関係にある。
 
 | # | 力学ドメイン | 基礎式への配置 | 理由 |
-
 |---|---|---|---|
-
 | ① | 熱力学 | ✅ 基礎式（直交合成） | 他と独立した物理次元 |
-
 | ② | 流体力学（圧力） | ✅ 基礎式（直交合成） | 他と独立した物理次元 |
-
 | ③ | 固体・構造力学（応力） | ✅ 基礎式（直交合成） | 他と独立した物理次元 |
-
-| ④ | 電磁気学 | ❌ 前段：データ完全性保証層 | 計測値そのものの信頼性問題 |
-
-| ⑤ | 核反応動特性（中性子） | ❌ 前段：ゲート許可判定層 | ①の原因側にあたる上流因果 |
+| ④ | 電磁気学 | ❌ 別層：観測完全性の判定 | 計測値そのものの信頼性問題 |
+| ⑤ | 核反応動特性（中性子） | ❌ 別層：独立SCRAM判定 | ①の原因側にあたる上流因果 |
 
 ---
 
@@ -40,9 +36,9 @@
 
 ```
 
-層A（電磁気） → 層B（核反応） → 層C（熱・圧・応力）
+層A（電磁気）　　層B（核反応）　　層C（熱・圧・応力）
 
-各層は完全独立。他層の判定を待たない。
+各層は完全独立。他層の判定を待たない。いずれかが単独でFail-Closedを発令できる。
 
 ```
 
@@ -66,9 +62,11 @@ NRA-IDEの基礎式 $R = \delta / \tau$ は $\delta$ （センサーが返す測
 
 電磁気層は「**観測値が正しいかどうか**」を表すメタレベルの判定である。
 
-これらを同じ次元として扱うことは因果の順序を無視した混同にあたる。したがって層Aは基礎式の外側、前提条件の保証層として独立させる。
+これらを同じ次元として扱うことは因果の順序を無視した混同にあたる。したがって層Aは基礎式の外側に独立させる。
 
-$R_{em}$ の定義は `Multi-Physics_Safety_Gate_Architecture.md` § 2 を参照。
+層Aは他層を許可も遮断もしない。計測値の信頼性が失われたとき、当該値を無効として扱うだけであり、他の観測、記録および通信は止めない。
+
+$R_{em}$ の定義は `Multi-Physics_Safety_Gate_Architecture_JP.md` § 2 を参照。
 
 ---
 
@@ -86,9 +84,9 @@ $R_{em}$ の定義は `Multi-Physics_Safety_Gate_Architecture.md` § 2 を参照
 
 熱・圧力・応力は互いに独立した物理次元であり直交合成が成立する。しかし核反応の増加は熱生成の直接原因である。 $R_{nuke}$ を $R_{heat}$ と同じ式に入れることは原因と結果を同一平面に並べることを意味し、構造的に誤りである。
 
-したがって層Bは基礎式の手前、ゲート許可判定として独立させる。 $R_{nuke} \geq 1.0$ の場合、層Cの演算を待たず直接SCRAMを発令する。
+したがって層Bは基礎式の手前に独立させる。層Bは層Cの演算を待たず、単独でSCRAMを発令する。 $R_{nuke} \geq 1.0$ の場合がこれにあたる。
 
-$R_{nuke}$ の定義は `Multi-Physics_Safety_Gate_Architecture.md` § 3 を参照。
+$R_{nuke}$ の定義は `Multi-Physics_Safety_Gate_Architecture_JP.md` § 3 を参照。
 
 ---
 
@@ -100,26 +98,21 @@ $R_{nuke}$ の定義は `Multi-Physics_Safety_Gate_Architecture.md` § 3 を参�
 
 いずれか1つが限界に達しても他が安全域にあることが現実に起こりうるため、3次元の直交合成はこの独立性を幾何学的に正確に表現している。
 
-基礎式・センサー定義は `Multi-Physics_Safety_Gate_Architecture.md` § 4・§ 5 を参照。
+基礎式・センサー定義は `Multi-Physics_Safety_Gate_Architecture_JP.md` § 4・§ 5 を参照。
 
 ---
 
 ## 6. 対応ファイル一覧
 
 | ファイル | 内容 | 性格 |
-
 |---|---|---|
-
-| `Multi-Physics_Safety_Gate_Architecture.md` | 基礎式・センサー定義・トポロジー | 実装仕様（Source of Truth） |
-
-| `NRA-IDE_IPL_3Layer_Monitor.md`（本文書） | 5層構造の根拠・平易な解説 | 設計思想・解説書 |
-
-| `NRA-IDE_08_Multi-Physics-Safety-Gate.html` | 層Cの動作POC | インタラクティブデモ |
-
-| `NRA-IDE_IPL_3Layer_Monitor.html` | 3層独立発報の可視化 | インタラクティブデモ |
+| `Multi-Physics_Safety_Gate_Architecture_JP.md` | 基礎式・センサー定義・トポロジー | 実装仕様（Source of Truth） |
+| `NRA-IDE_IPL_3Layer_Monitor_JP.md`（本文書） | 3層5領域構造の根拠・平易な解説 | 設計思想・解説書 |
+| `NRA-IDE_08_Multi-Physics-Safety-Gate_JP.html` | 層Cの動作POC | インタラクティブデモ |
+| `NRA-IDE_IPL_3Layer_Monitor_JP.html` | 3層独立発報の可視化 | インタラクティブデモ |
 
 ---
 
 *本ファイルは設計思想・根拠の解説文書である。基礎式の重複定義は行わない。*  
 
-*他AIによる再検証時は `Multi-Physics_Safety_Gate_Architecture.md` と合わせて参照すること。*
+*他AIによる再検証時は `Multi-Physics_Safety_Gate_Architecture_JP.md` と合わせて参照すること。*

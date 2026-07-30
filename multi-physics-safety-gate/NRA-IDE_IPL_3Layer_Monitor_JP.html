@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE | Multi-Physics Safety Gate — 3層独立監視</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+  /* 外部フォントを取得しない：閉域網でも描画をブロックさせないため。
+     元のフォント名を先頭に残すので、ローカル導入済みの環境では従来と同じ見た目になる。 */
 
   :root {
     --bg:       #080c10;
@@ -34,7 +35,8 @@
   body {
     background: var(--bg);
     color: #c8d8e0;
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: 'Zen Kaku Gothic New', 'Yu Gothic', YuGothic,
+                 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif;
     font-size: 13px;
     min-height: 100vh;
     padding: 20px;
@@ -48,7 +50,7 @@
     padding-bottom: 16px;
   }
   header h1 {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 1.1rem;
     letter-spacing: 0.2em;
     color: #7aa8c0;
@@ -112,7 +114,7 @@
     margin-bottom: 14px;
   }
   .layer-id {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: var(--col);
     letter-spacing: 0.15em;
@@ -170,7 +172,7 @@
     margin-bottom: 9px;
   }
   .param-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: #6a8a9a;
     width: 32px;
@@ -201,7 +203,7 @@
     box-shadow: 0 0 5px var(--col);
   }
   .param-val {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: var(--col);
     width: 36px;
@@ -221,12 +223,12 @@
     justify-content: space-between;
   }
   .r-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 11px;
     color: #9ab8c8;
   }
   .r-value {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 22px;
     color: var(--col);
     font-weight: 400;
@@ -284,7 +286,7 @@
   .status.safe  .status-dot { background: #00cc66; }
   .status.alarm .status-dot { background: var(--col); animation: beaconFlash 0.5s step-end infinite; }
   .status-text {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     letter-spacing: 0.12em;
     flex: 1;
@@ -306,7 +308,7 @@
     margin-top: 8px;
     font-size: 9px;
     color: #556677;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     letter-spacing: 0.1em;
   }
   .siren-row.active { color: var(--col); animation: sirenText 0.8s ease-in-out infinite alternate; }
@@ -319,7 +321,7 @@
   /* ─── 数式表示 ─── */
   .formula {
     margin-top: 10px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: #8aaabb;
     text-align: center;
@@ -334,7 +336,7 @@
     margin-top: 24px;
     padding-top: 14px;
     border-top: 1px solid var(--border);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: #2a3a48;
     letter-spacing: 0.1em;
@@ -350,7 +352,7 @@
     background: rgba(0,0,0,0.4);
     font-size: 10.5px;
     color: #445566;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     letter-spacing: 0.06em;
     text-align: center;
   }
@@ -366,7 +368,7 @@
 
 <div class="arch-note">
   <span>INDEPENDENT PROTECTION LAYERS</span>　　
-  層A（電磁気） → 層B（核反応） → 層C（熱・圧・応力）　　
+  層A（電磁気）　層B（核反応）　層C（熱・圧・応力）
   <span>各層は完全独立。他層の判定を待たない。</span>
 </div>
 
@@ -382,7 +384,7 @@
 
     <div class="desc">
       センサー信号がEMI（電磁干渉）で汚染されていないかを確認する。<br>
-      計測値の信頼性が失われた場合、下位層の演算はすべて無効となる。
+      信頼性が失われた場合、当該計測値を無効として扱う。他層・記録・通信は止めない。
     </div>
 
     <div class="params">
@@ -422,7 +424,7 @@
 
     <div class="formula">
       R_em = δ_SNR / τ_SNR<br>
-      R ≥ 1.0 → 全演算停止 / 下位層入力遮断
+      R ≥ 1.0 → 当該計測値を無効化 / 他経路と記録は継続
     </div>
   </div>
 
@@ -466,7 +468,7 @@
     <div class="status safe" id="status-b">
       <div class="status-dot"></div>
       <span class="status-text" id="status-text-b">NEUTRON FLUX STABLE</span>
-      <span class="status-action" id="status-action-b">層C許可</span>
+      <span class="status-action" id="status-action-b">単独判定</span>
     </div>
 
     <div class="siren-row" id="siren-b">
@@ -476,7 +478,7 @@
 
     <div class="formula">
       R_nuke = δΦ / τΦ<br>
-      R ≥ 1.0 → SCRAM即時発令 / 層C無関係
+      R ≥ 1.0 → SCRAM即時発令 / 層Cを待たない
     </div>
   </div>
 
@@ -593,7 +595,7 @@
     const r = d / t;
     setAlarm('a', r >= 1.0, r, r,
       'SIGNAL VALID',        'EMI DETECTED — REJECTED',
-      '計測継続',              '全演算停止'
+      '計測継続',              '当該値を無効化'
     );
   }
 
@@ -606,7 +608,7 @@
     const r = d / t;
     setAlarm('b', r >= 1.0, r, r,
       'NEUTRON FLUX STABLE', 'SCRAM — FLUX EXCEEDED',
-      '層C許可',               '即時緊急停止'
+      '単独判定',              '即時緊急停止'
     );
   }
 
@@ -619,8 +621,9 @@
     document.getElementById('c-pres-val').textContent = rp.toFixed(2);
     document.getElementById('c-str-val').textContent  = rs.toFixed(2);
     const r = Math.sqrt(rh*rh + rp*rp + rs*rs);
-    // プログレスバーは √3 = 1.732 が最大なのでスケール調整
-    setAlarm('c', r >= 1.0, r, r / Math.sqrt(3),
+    // バーは層A・Bと同じく「閾値1.0に対する割合」で表す。
+    // 理論最大 √3 でスケールすると発報点が57.7%になり、層間で読み方が変わるため。
+    setAlarm('c', r >= 1.0, r, r,
       'STRUCTURE STABLE',    'FAIL-CLOSED — LIMIT REACHED',
       '稼働維持',              '物理的強制遮断'
     );

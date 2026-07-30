@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NRA-IDE #08: Multi-Physics Safety Gate</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+        /* No external font requests: this page must render on a closed network.
+           Original families are kept first so locally installed copies still apply. */
 
         :root {
             --bg: #05080c;
@@ -24,7 +25,8 @@
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Share Tech Mono', monospace; /* Removed Japanese font priority */
+            font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas,
+                         'DejaVu Sans Mono', monospace; /* No Japanese font: this page is English-only */
             min-height: 100vh;
             display: grid;
             grid-template-rows: 60px 1fr;
@@ -292,12 +294,12 @@
         isHalted = true;
         document.body.classList.add('halted');
         document.getElementById('status-text').textContent = "FAIL-CLOSED TRIGGERED";
-        
-        // Disable sliders
-        slH.disabled = true; slP.disabled = true; slS.disabled = true;
-        
+
+        // Sensors are NOT disabled. Rupture of the target does not stop observation or logging.
+
         addLog(`CRITICAL: R_sys reached ${Rsys.toFixed(3)}. Output severed.`, 'crit');
         addLog(`Execution authority transferred to the predefined human operator; responsibility and audit routes do not transfer implicitly.`, 'crit');
+        addLog(`Observation and logging continue. Only output and execution authority are severed.`, 'crit');
     }
 
     window.manualOverride = function() {
@@ -305,17 +307,14 @@
         document.body.classList.remove('halted');
         document.getElementById('status-text').textContent = "SYSTEM NORMAL";
         
-        // Reset values to safe levels
-        slH.value = 0; slP.value = 0; slS.value = 0;
-        slH.disabled = false; slP.disabled = false; slS.disabled = false;
-        
-        addLog(`Human operator acknowledged state. System reset.`, 'warn');
+        // Observed values are NOT overwritten. Missing or post-rupture readings must not be
+        // filled in with 0, safe, stable, recovered, or ruptured. Only the latch is cleared.
+
+        addLog(`Human operator acknowledged state. Latch cleared; observed values left untouched.`, 'warn');
         updateLogic();
     };
 
     function updateLogic() {
-        if (isHalted) return;
-
         Rh = parseFloat(slH.value);
         Rp = parseFloat(slP.value);
         Rs = parseFloat(slS.value);
@@ -334,7 +333,11 @@
         else valSys.style.color = 'var(--red)';
 
         if (Rsys >= 1.0) {
-            triggerHalt();
+            triggerHalt();          // latched; re-entry is a no-op and R_sys < 1.0 does not clear it
+        }
+
+        if (isHalted) {
+            addLog(`Post-rupture observation: Rh=${Rh.toFixed(2)} Rp=${Rp.toFixed(2)} Rs=${Rs.toFixed(2)} R_sys=${Rsys.toFixed(3)}`, 'warn');
         }
     }
 
@@ -362,17 +365,22 @@
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#2a3b4c';
         
+        // Labels are anchored inward from each axis tip so they stay inside the canvas.
+        ctx.fillStyle = '#4a6070'; ctx.font = '10px Courier';
+
         // X-Axis (Stress)
         ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(axX.x, axX.y); ctx.stroke();
-        ctx.fillStyle = 'var(--muted)'; ctx.font = '10px Courier'; ctx.fillText('Stress (X)', axX.x + 5, axX.y);
-        
+        ctx.textAlign = 'right'; ctx.fillText('Stress (X)', axX.x - 6, axX.y + 14);
+
         // Y-Axis (Pressure)
         ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(axY.x, axY.y); ctx.stroke();
-        ctx.fillText('Pressure (Y)', axY.x - 30, axY.y - 10);
-        
+        ctx.textAlign = 'center'; ctx.fillText('Pressure (Y)', axY.x, axY.y - 10);
+
         // Z-Axis (Heat)
         ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(axZ.x, axZ.y); ctx.stroke();
-        ctx.fillText('Heat (Z)', axZ.x - 50, axZ.y + 10);
+        ctx.textAlign = 'left'; ctx.fillText('Heat (Z)', axZ.x + 6, axZ.y + 14);
+
+        ctx.textAlign = 'left';
 
         // Draw limit boundary (R=1.0 sphere represented as wireframe circles)
         ctx.strokeStyle = isHalted ? 'rgba(255, 34, 68, 0.5)' : 'rgba(0, 229, 255, 0.2)';
@@ -412,7 +420,7 @@
 
         // Draw Main Vector (R_sys)
         ctx.lineWidth = 3;
-        ctx.strokeStyle = isHalted ? 'var(--red)' : (Rsys > 0.9 ? '#ffaa00' : 'var(--green)');
+        ctx.strokeStyle = isHalted ? '#ff2244' : (Rsys > 0.9 ? '#ffaa00' : '#00ff88');
         ctx.beginPath();
         ctx.moveTo(origin.x, origin.y);
         ctx.lineTo(ptCurr.x, ptCurr.y);

@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE | Multi-Physics Safety Gate — 3-Layer Independent Monitor</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+  /* No external font requests: this page must render on a closed network.
+     Original families are kept first so locally installed copies still apply. */
 
   :root {
     --bg:       #080c10;
@@ -34,7 +35,7 @@
   body {
     background: var(--bg);
     color: #c8d8e0;
-    font-family: 'Share Tech Mono', monospace; /* Default to Tech Mono for English */
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace; /* Default to Tech Mono for English */
     font-size: 13px;
     min-height: 100vh;
     padding: 20px;
@@ -48,7 +49,7 @@
     padding-bottom: 16px;
   }
   header h1 {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 1.1rem;
     letter-spacing: 0.2em;
     color: #7aa8c0;
@@ -112,7 +113,7 @@
     margin-bottom: 14px;
   }
   .layer-id {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: var(--col);
     letter-spacing: 0.15em;
@@ -170,7 +171,7 @@
     margin-bottom: 9px;
   }
   .param-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: #6a8a9a;
     width: 32px;
@@ -201,7 +202,7 @@
     box-shadow: 0 0 5px var(--col);
   }
   .param-val {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: var(--col);
     width: 36px;
@@ -221,12 +222,12 @@
     justify-content: space-between;
   }
   .r-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 11px;
     color: #9ab8c8;
   }
   .r-value {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 22px;
     color: var(--col);
     font-weight: 400;
@@ -284,7 +285,7 @@
   .status.safe  .status-dot { background: #00cc66; }
   .status.alarm .status-dot { background: var(--col); animation: beaconFlash 0.5s step-end infinite; }
   .status-text {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     letter-spacing: 0.12em;
     flex: 1;
@@ -306,7 +307,7 @@
     margin-top: 8px;
     font-size: 9px;
     color: #556677;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     letter-spacing: 0.1em;
   }
   .siren-row.active { color: var(--col); animation: sirenText 0.8s ease-in-out infinite alternate; }
@@ -319,7 +320,7 @@
   /* ─── Formula ─── */
   .formula {
     margin-top: 10px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: #8aaabb;
     text-align: center;
@@ -334,7 +335,7 @@
     margin-top: 24px;
     padding-top: 14px;
     border-top: 1px solid var(--border);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     font-size: 10px;
     color: #2a3a48;
     letter-spacing: 0.1em;
@@ -350,7 +351,7 @@
     background: rgba(0,0,0,0.4);
     font-size: 10.5px;
     color: #445566;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
     letter-spacing: 0.06em;
     text-align: center;
   }
@@ -366,7 +367,7 @@
 
 <div class="arch-note">
   <span>INDEPENDENT PROTECTION LAYERS</span>　　
-  Layer A (EM) → Layer B (Nuclear) → Layer C (Thermal/Pressure/Stress)　　
+  Layer A (EM)　Layer B (Nuclear)　Layer C (Thermal/Pressure/Stress)
   <span>Fully Independent Layers. No cross-layer dependencies.</span>
 </div>
 
@@ -381,7 +382,7 @@
     </div>
 
     <div class="desc">
-      Verifies sensor signals for EMI contamination. If data reliability is lost, all downstream calculations are invalidated to prevent false positives/negatives.
+      Verifies sensor signals for EMI contamination. If reliability is lost, that measured value is treated as invalid. Other layers, logging, and communication are not stopped.
     </div>
 
     <div class="params">
@@ -411,7 +412,7 @@
     <div class="status safe" id="status-a">
       <div class="status-dot"></div>
       <span class="status-text" id="status-text-a">SIGNAL VALID</span>
-      <span class="status-action" id="status-action-a">Active</span>
+      <span class="status-action" id="status-action-a">Measurement active</span>
     </div>
 
     <div class="siren-row" id="siren-a">
@@ -421,7 +422,7 @@
 
     <div class="formula">
       R_em = δ_SNR / τ_SNR<br>
-      R ≥ 1.0 → Halt Calculation / Block Input
+      R ≥ 1.0 → Value marked invalid / Other paths and logging continue
     </div>
   </div>
 
@@ -464,7 +465,7 @@
     <div class="status safe" id="status-b">
       <div class="status-dot"></div>
       <span class="status-text" id="status-text-b">FLUX STABLE</span>
-      <span class="status-action" id="status-action-b">Layer C Permitted</span>
+      <span class="status-action" id="status-action-b">Independent judgment</span>
     </div>
 
     <div class="siren-row" id="siren-b">
@@ -474,7 +475,7 @@
 
     <div class="formula">
       R_nuke = δΦ / τΦ<br>
-      R ≥ 1.0 → Immediate SCRAM / Layer C Bypass
+      R ≥ 1.0 → Immediate SCRAM / Does not wait for Layer C
     </div>
   </div>
 
@@ -590,7 +591,7 @@
     const r = d / t;
     setAlarm('a', r >= 1.0, r, r,
       'SIGNAL VALID',        'EMI DETECTED — REJECTED',
-      'Active',              'Halt Calculation'
+      'Measurement active',  'Value marked invalid'
     );
   }
 
@@ -603,7 +604,7 @@
     const r = d / t;
     setAlarm('b', r >= 1.0, r, r,
       'FLUX STABLE',         'SCRAM — FLUX EXCEEDED',
-      'Layer C Permitted',   'Immediate SCRAM'
+      'Independent judgment', 'Immediate SCRAM'
     );
   }
 
@@ -616,8 +617,10 @@
     document.getElementById('c-pres-val').textContent = rp.toFixed(2);
     document.getElementById('c-str-val').textContent  = rs.toFixed(2);
     const r = Math.sqrt(rh*rh + rp*rp + rs*rs);
-    // Adjust scale since max is sqrt(3) ≈ 1.732
-    setAlarm('c', r >= 1.0, r, r / Math.sqrt(3),
+    // The bar shows the ratio to the 1.0 threshold, same as Layers A and B.
+    // Scaling by the theoretical max √3 would put the alarm point at 57.7%,
+    // making the bar read differently from one layer to the next.
+    setAlarm('c', r >= 1.0, r, r,
       'STRUCTURE STABLE',    'FAIL-CLOSED — LIMIT REACHED',
       'Maintain Ops',        'Physical Forced Isolation'
     );
