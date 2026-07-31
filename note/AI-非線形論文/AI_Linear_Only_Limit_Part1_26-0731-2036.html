@@ -1,0 +1,1077 @@
+<!-- FILE: AI_Linear_Only_Limit_Part1_26-0731-2036.html -->
+<!-- CREATED: 2026-07-31 20:36:00 JST -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="高校3年生向け：AIはなぜ線形演算だけでは足りないのかを、段階アニメーションで理解する教材。">
+  <title>第1部｜AIはなぜ線形演算だけでは足りないのか</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a31;
+      --panel-2: #18223e;
+      --text: #eef3ff;
+      --muted: #b8c2df;
+      --line: #7888b8;
+      --accent: #77e0c2;
+      --accent-2: #ffcf70;
+      --danger: #ff8f9c;
+      --ok: #8ee7a8;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .28);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(119, 224, 194, .09), transparent 32%),
+        radial-gradient(circle at 85% 20%, rgba(255, 207, 112, .08), transparent 34%),
+        var(--bg);
+      font-family:
+        "Yu Gothic UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+        system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.75;
+    }
+
+    button, input { font: inherit; }
+
+    .wrap {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 54px;
+    }
+
+    .hero {
+      padding: 34px clamp(22px, 5vw, 58px);
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(24,34,62,.96), rgba(13,20,39,.96));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -90px -110px auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(119,224,194,.14), transparent 70%);
+      pointer-events: none;
+    }
+
+    .series {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(119,224,194,.09);
+      border: 1px solid rgba(119,224,194,.22);
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2rem, 5vw, 4.2rem);
+      line-height: 1.15;
+      letter-spacing: -.03em;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 820px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.1vw, 1.22rem);
+    }
+
+    .one-message {
+      margin-top: 22px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--accent-2);
+      background: rgba(255,207,112,.08);
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    .lesson {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .stage-card, .explain-card, .quiz-card, .scope-card {
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(18,26,49,.94);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .stage-card {
+      min-height: 640px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .stage-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .stage-title {
+      margin: 0;
+      font-size: 1.08rem;
+      color: var(--muted);
+    }
+
+    .step-label {
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      color: var(--accent-2);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .visual {
+      position: relative;
+      flex: 1;
+      min-height: 500px;
+      border-radius: 18px;
+      background:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        #0c1429;
+      background-size: 28px 28px;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .45s ease;
+    }
+
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .scene-inner {
+      position: absolute;
+      inset: 0;
+      padding: 28px;
+    }
+
+    .center-copy {
+      display: grid;
+      place-items: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    .center-copy .big {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      line-height: 1.35;
+      font-weight: 800;
+      max-width: 720px;
+    }
+
+    .center-copy .small {
+      display: block;
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .flow-grid {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr .72fr 1fr .72fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .layer {
+      min-height: 330px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(24,34,62,.72);
+      border: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    .layer-name {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 700;
+    }
+
+    .node {
+      min-height: 70px;
+      padding: 10px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.045);
+      color: #dde6ff;
+      font-weight: 750;
+      transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+    }
+
+    .node.pulse {
+      animation: nodePulse 1.35s ease-in-out infinite;
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { transform: scale(1); box-shadow: none; }
+      50% {
+        transform: scale(1.035);
+        box-shadow: 0 0 0 7px rgba(119,224,194,.08), 0 0 26px rgba(119,224,194,.22);
+        background: rgba(119,224,194,.09);
+      }
+    }
+
+    .arrows {
+      height: 340px;
+      position: relative;
+    }
+
+    .arrow {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      opacity: .7;
+      transform-origin: center;
+      overflow: visible;
+    }
+
+    .arrow::after {
+      content: "";
+      position: absolute;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 14px rgba(119,224,194,.9);
+      animation: travel 1.8s linear infinite;
+    }
+
+    .arrow.a1 { top: 24%; transform: rotate(7deg); }
+    .arrow.a2 { top: 50%; transform: rotate(-9deg); }
+    .arrow.a3 { top: 76%; transform: rotate(5deg); }
+
+    .arrow.a2::after { animation-delay: .55s; }
+    .arrow.a3::after { animation-delay: 1.05s; }
+
+    @keyframes travel {
+      from { left: 0; }
+      to { left: calc(100% - 10px); }
+    }
+
+    .collapse-banner {
+      position: absolute;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      width: min(90%, 650px);
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: rgba(255,207,112,.1);
+      border: 1px solid rgba(255,207,112,.32);
+      text-align: center;
+      font-weight: 750;
+      box-shadow: 0 10px 30px rgba(0,0,0,.24);
+    }
+
+    .xor-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: minmax(260px, .95fr) minmax(280px, 1.05fr);
+      gap: 22px;
+      align-items: center;
+    }
+
+    .cases {
+      display: grid;
+      gap: 10px;
+    }
+
+    .case {
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+    }
+
+    .case strong { color: var(--text); }
+
+    .badge {
+      min-width: 76px;
+      padding: 5px 9px;
+      text-align: center;
+      border-radius: 999px;
+      font-weight: 800;
+    }
+
+    .badge.yes {
+      color: #07180f;
+      background: var(--ok);
+    }
+
+    .badge.no {
+      color: #26090e;
+      background: var(--danger);
+    }
+
+    .grid-box {
+      aspect-ratio: 1;
+      width: min(100%, 390px);
+      margin-inline: auto;
+      position: relative;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background:
+        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px),
+        rgba(7,12,26,.72);
+      background-size: 50% 50%;
+      overflow: hidden;
+    }
+
+    .axis-label {
+      position: absolute;
+      font-size: .8rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .axis-x { right: 10px; bottom: 7px; }
+    .axis-y { left: 9px; top: 7px; }
+
+    .point {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      margin: -27px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .8rem;
+      font-weight: 900;
+      box-shadow: 0 9px 22px rgba(0,0,0,.3);
+      border: 3px solid rgba(255,255,255,.72);
+      z-index: 3;
+    }
+
+    .point.yes { background: var(--ok); color: #0b2314; }
+    .point.no { background: var(--danger); color: #2b0810; }
+
+    .p00 { left: 25%; top: 75%; }
+    .p10 { left: 75%; top: 75%; }
+    .p01 { left: 25%; top: 25%; }
+    .p11 { left: 75%; top: 25%; }
+
+    .divider {
+      position: absolute;
+      left: -10%;
+      top: 50%;
+      width: 120%;
+      height: 4px;
+      background: var(--accent-2);
+      box-shadow: 0 0 18px rgba(255,207,112,.85);
+      transform-origin: center;
+      z-index: 2;
+      animation: dividerTry 4.6s ease-in-out infinite;
+    }
+
+    @keyframes dividerTry {
+      0%, 16% { transform: rotate(0deg) translateY(-30px); }
+      33%, 49% { transform: rotate(42deg); }
+      66%, 82% { transform: rotate(-42deg); }
+      100% { transform: rotate(90deg); }
+    }
+
+    .misfit {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .misfit::after {
+      content: "どの直線でも、少なくとも1点を取り違える";
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(7,12,26,.88);
+      border: 1px solid rgba(255,143,156,.35);
+      color: #ffd8dd;
+      text-align: center;
+      font-size: .84rem;
+      font-weight: 800;
+    }
+
+    .summary-stack {
+      display: grid;
+      gap: 14px;
+      max-width: 760px;
+      margin: auto;
+    }
+
+    .summary-item {
+      opacity: 0;
+      transform: translateY(12px);
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.09);
+      animation: riseIn .55s forwards;
+    }
+
+    .summary-item:nth-child(2) { animation-delay: .45s; }
+    .summary-item:nth-child(3) { animation-delay: .9s; }
+
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .summary-item strong { color: var(--accent-2); }
+
+    .controls {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid rgba(255,255,255,.11);
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+      border-radius: 12px;
+      padding: 9px 13px;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .btn:hover, .btn:focus-visible {
+      background: rgba(119,224,194,.12);
+      border-color: rgba(119,224,194,.45);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #071712;
+      border-color: transparent;
+      font-weight: 850;
+    }
+
+    .btn:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border: 0;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background: var(--accent-2);
+      box-shadow: 0 0 0 5px rgba(255,207,112,.1);
+    }
+
+    .explain-card {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-weight: 800;
+      font-size: .86rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .explain-card h2 {
+      margin: 7px 0 12px;
+      font-size: clamp(1.35rem, 2.7vw, 2rem);
+      line-height: 1.35;
+    }
+
+    .explain-text {
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .key-box {
+      margin-top: auto;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(119,224,194,.24);
+      background: rgba(119,224,194,.07);
+    }
+
+    .key-box strong {
+      display: block;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .below {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .quiz-card, .scope-card { padding: 22px; }
+
+    .quiz-card h2, .scope-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.28rem;
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .quiz-btn {
+      width: 100%;
+      text-align: left;
+      padding: 13px 14px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--text);
+      background: rgba(255,255,255,.045);
+      cursor: pointer;
+    }
+
+    .quiz-btn:hover, .quiz-btn:focus-visible {
+      border-color: rgba(119,224,194,.48);
+      outline: none;
+    }
+
+    .quiz-result {
+      min-height: 78px;
+      margin-top: 12px;
+      padding: 13px 14px;
+      border-radius: 13px;
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+
+    .scope-card ul {
+      margin: 10px 0 0;
+      padding-left: 1.25em;
+      color: var(--muted);
+    }
+
+    .scope-card li + li { margin-top: 7px; }
+
+    footer {
+      margin-top: 22px;
+      color: #8f9bbb;
+      text-align: center;
+      font-size: .88rem;
+    }
+
+    .reduced-note {
+      display: none;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    @media (max-width: 900px) {
+      .lesson, .below { grid-template-columns: 1fr; }
+      .stage-card { min-height: 720px; }
+      .visual { min-height: 570px; }
+      .xor-layout { grid-template-columns: 1fr; }
+      .grid-box { width: min(82vw, 340px); }
+    }
+
+    @media (max-width: 650px) {
+      .wrap { width: min(100% - 16px, 1120px); padding-top: 8px; }
+      .hero { border-radius: 20px; padding: 24px 18px; }
+      .stage-card, .explain-card, .quiz-card, .scope-card { border-radius: 18px; }
+      .stage-card { min-height: 760px; padding: 10px; }
+      .scene-inner { padding: 16px; }
+      .flow-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 50px auto 50px auto;
+      }
+      .layer { min-height: 116px; flex-direction: row; padding-top: 34px; }
+      .layer .node { flex: 1; min-height: 58px; font-size: .85rem; }
+      .arrows { height: 50px; transform: rotate(90deg); }
+      .collapse-banner { font-size: .85rem; }
+      .xor-layout { align-content: center; }
+      .cases { gap: 7px; }
+      .case { padding: 9px 10px; font-size: .88rem; }
+      .grid-box { width: min(78vw, 300px); }
+      .point { width: 46px; height: 46px; margin: -23px; font-size: .72rem; }
+      .controls { justify-content: center; }
+      .progress { width: 100%; justify-content: center; order: -1; margin-bottom: 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+      .reduced-note { display: inline; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <span class="series">AIの線形と非線形・三部作｜第1部</span>
+      <h1>AIはなぜ<br>線形演算だけでは足りないのか</h1>
+      <p class="lead">
+        線形演算はAIの計算を支える重要な土台です。しかし、それだけを何層重ねても、
+        複雑な条件によって反応を切り替える能力は生まれません。
+        この教材では、その理由だけを一段ずつ確認します。
+      </p>
+      <div class="one-message">
+        この第1部で覚えることは一つだけです。<br>
+        「線形演算は情報を効率よく混ぜられるが、線形演算だけでは複雑な分類境界を作れない」
+      </div>
+    </header>
+
+    <section class="lesson" aria-label="段階アニメーション教材">
+      <div class="stage-card">
+        <div class="stage-head">
+          <p class="stage-title">視線誘導アニメーション</p>
+          <span class="step-label" id="stepLabel">1 / 5</span>
+        </div>
+
+        <div class="visual" id="visual" aria-live="polite">
+          <section class="scene active" data-scene="0" aria-label="導入">
+            <div class="scene-inner center-copy">
+              <div class="big">
+                まず、線形演算が<br>得意なことを確認します。
+                <span class="small">再生ボタンを押すと、一段ずつ進みます。</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="1" aria-label="線形演算の流れ">
+            <div class="scene-inner">
+              <div class="flow-grid">
+                <div class="layer">
+                  <span class="layer-name">入力</span>
+                  <div class="node pulse">丸い形</div>
+                  <div class="node pulse">黒い点</div>
+                  <div class="node pulse">横線</div>
+                </div>
+
+                <div class="arrows" aria-hidden="true">
+                  <span class="arrow a1"></span>
+                  <span class="arrow a2"></span>
+                  <span class="arrow a3"></span>
+                </div>
+
+                <div class="layer">
+                  <span class="layer-name">線形層 1</span>
+                  <div class="node pulse">割合を変えて混ぜる</div>
+                  <div class="node pulse">強める・弱める</div>
+                  <div class="node pulse">別の並びへ移す</div>
+                </div>
+
+                <div class="arrows" aria-hidden="true">
+                  <span class="arrow a1"></span>
+                  <span class="arrow a2"></span>
+                  <span class="arrow a3"></span>
+                </div>
+
+                <div class="layer">
+                  <span class="layer-name">出力</span>
+                  <div class="node pulse">混合結果 A</div>
+                  <div class="node pulse">混合結果 B</div>
+                  <div class="node pulse">混合結果 C</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="2" aria-label="線形層を重ねる">
+            <div class="scene-inner">
+              <div class="flow-grid">
+                <div class="layer">
+                  <span class="layer-name">入力</span>
+                  <div class="node pulse">特徴 A</div>
+                  <div class="node pulse">特徴 B</div>
+                  <div class="node pulse">特徴 C</div>
+                </div>
+
+                <div class="arrows" aria-hidden="true">
+                  <span class="arrow a1"></span>
+                  <span class="arrow a2"></span>
+                  <span class="arrow a3"></span>
+                </div>
+
+                <div class="layer">
+                  <span class="layer-name">線形層を何段も重ねる</span>
+                  <div class="node pulse">混ぜ直す</div>
+                  <div class="node pulse">さらに混ぜ直す</div>
+                  <div class="node pulse">もう一度混ぜ直す</div>
+                </div>
+
+                <div class="arrows" aria-hidden="true">
+                  <span class="arrow a1"></span>
+                  <span class="arrow a2"></span>
+                  <span class="arrow a3"></span>
+                </div>
+
+                <div class="layer">
+                  <span class="layer-name">まとめられた結果</span>
+                  <div class="node pulse">一つの大きな混合</div>
+                  <div class="node pulse">固定された割合</div>
+                  <div class="node pulse">同じ種類の処理</div>
+                </div>
+              </div>
+              <div class="collapse-banner">
+                非線形変換を挟まなければ、何層重ねても、全体は一つの線形変換としてまとめられます。
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="3" aria-label="線形だけでは分けられない例">
+            <div class="scene-inner">
+              <div class="xor-layout">
+                <div>
+                  <h3 style="margin-top:0">次の規則を分けられるでしょうか</h3>
+                  <p style="color:var(--muted); margin-top:0">
+                    二つの特徴が「違うとき」だけ、答えを「はい」にします。
+                  </p>
+                  <div class="cases">
+                    <div class="case"><span><strong>Aなし・Bなし</strong><br>同じ状態</span><span class="badge no">いいえ</span></div>
+                    <div class="case"><span><strong>Aあり・Bなし</strong><br>違う状態</span><span class="badge yes">はい</span></div>
+                    <div class="case"><span><strong>Aなし・Bあり</strong><br>違う状態</span><span class="badge yes">はい</span></div>
+                    <div class="case"><span><strong>Aあり・Bあり</strong><br>同じ状態</span><span class="badge no">いいえ</span></div>
+                  </div>
+                </div>
+
+                <div class="grid-box" aria-label="直線で分離できない四つの点">
+                  <span class="axis-label axis-y">特徴 B</span>
+                  <span class="axis-label axis-x">特徴 A</span>
+                  <div class="point no p00">いいえ</div>
+                  <div class="point yes p10">はい</div>
+                  <div class="point yes p01">はい</div>
+                  <div class="point no p11">いいえ</div>
+                  <div class="divider" aria-hidden="true"></div>
+                  <div class="misfit" aria-hidden="true"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="4" aria-label="第一部のまとめ">
+            <div class="scene-inner center-copy">
+              <div class="summary-stack">
+                <div class="summary-item"><strong>線形演算の強み</strong><br>大量の情報を、決められた割合で高速に混ぜられます。</div>
+                <div class="summary-item"><strong>線形演算だけの限界</strong><br>何層重ねても、複雑な条件で曲がる分類境界は作れません。</div>
+                <div class="summary-item"><strong>次の問い</strong><br>では、AIは何を加えることで、この限界を越えるのでしょうか。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="controls" aria-label="アニメーション操作">
+          <div class="control-group">
+            <button class="btn" id="prevBtn" type="button">← 前へ</button>
+            <button class="btn primary" id="playBtn" type="button">▶ 再生</button>
+            <button class="btn" id="nextBtn" type="button">次へ →</button>
+            <button class="btn" id="resetBtn" type="button">最初から</button>
+          </div>
+          <div class="progress" id="progress" aria-label="進行状況"></div>
+        </div>
+        <span class="reduced-note">端末の設定により、動きを抑えて表示しています。</span>
+      </div>
+
+      <aside class="explain-card">
+        <span class="eyebrow">いま見るポイント</span>
+        <h2 id="explainTitle">線形演算の役割から始めます</h2>
+        <div class="explain-text" id="explainText">
+          「線形」は「簡単」「低性能」という意味ではありません。
+          AIが大量の情報を効率よく処理するための、非常に重要な計算方法です。
+        </div>
+        <div class="key-box">
+          <strong>言葉の境界</strong>
+          <span id="boundaryText">
+            この教材では、線形演算とAI全体の能力を同じものとして扱いません。
+          </span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="below">
+      <article class="quiz-card">
+        <h2>30秒確認</h2>
+        <p style="color:var(--muted); margin-top:0">
+          非線形変換を一度も挟まず、線形層だけを100層重ねた場合、モデル全体はどうなりますか。
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-btn" type="button" data-answer="wrong">A. 100層あるので、自動的に非線形になります</button>
+          <button class="quiz-btn" type="button" data-answer="correct">B. 一つの大きな線形変換としてまとめられます</button>
+        </div>
+        <div class="quiz-result" id="quizResult" aria-live="polite">
+          答えを選ぶと、理由が表示されます。
+        </div>
+      </article>
+
+      <article class="scope-card">
+        <h2>この第1部で扱わないこと</h2>
+        <ul>
+          <li>非線形変換の具体的な仕組み</li>
+          <li>活性化関数の種類</li>
+          <li>注意機構やトークン生成</li>
+          <li>AI安全やNRA-IDEへの接続</li>
+        </ul>
+        <p style="color:var(--muted); margin-bottom:0">
+          これらを一度に入れず、「線形演算だけでは何が不足するか」だけを確定します。
+        </p>
+      </article>
+    </section>
+
+    <footer>
+      第2部予定：「非線形変換はAIに何を与えるのか」<br>
+      外部通信・外部ライブラリ不使用／単一HTML教材
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const scenes = [...document.querySelectorAll(".scene")];
+      const stepLabel = document.getElementById("stepLabel");
+      const explainTitle = document.getElementById("explainTitle");
+      const explainText = document.getElementById("explainText");
+      const boundaryText = document.getElementById("boundaryText");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const playBtn = document.getElementById("playBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const progress = document.getElementById("progress");
+      const quizResult = document.getElementById("quizResult");
+      const quizButtons = [...document.querySelectorAll(".quiz-btn")];
+
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      const explanations = [
+        {
+          title: "線形演算の役割から始めます",
+          text: "「線形」は「簡単」「低性能」という意味ではありません。AIが大量の情報を効率よく処理するための、非常に重要な計算方法です。",
+          boundary: "この教材では、線形演算とAI全体の能力を同じものとして扱いません。"
+        },
+        {
+          title: "線形演算は情報を混ぜます",
+          text: "入力された特徴を、決められた割合で強めたり弱めたりしながら、新しい組み合わせへ移します。これはAIの計算基盤として非常に有効です。",
+          boundary: "線形演算ができることは、拡大・縮小・回転・混合です。「条件に応じた切り替え」とは別です。"
+        },
+        {
+          title: "線形層を増やしても種類は変わりません",
+          text: "線形変換の直後に別の線形変換を置いても、全体は一つの大きな線形変換としてまとめられます。層数だけでは、表現の質は変わりません。",
+          boundary: "「深い」ことと「非線形である」ことは同じではありません。"
+        },
+        {
+          title: "直線一本では分けられない規則があります",
+          text: "「二つの特徴が違うときだけ、はい」という規則では、同じ答えの点が斜めに離れて並びます。どの直線を置いても、少なくとも一つを取り違えます。",
+          boundary: "これは線形演算が無価値という意味ではなく、線形だけでは表現できない関係が存在する、という意味です。"
+        },
+        {
+          title: "第1部の結論",
+          text: "線形演算は高速で重要です。しかし線形演算だけでは、複雑な条件関係を表すための境界を作れません。次の部で、その不足を補う仕組みを扱います。",
+          boundary: "まだ「非線形性がすべてを解決する」とは結論しません。今回は必要性だけを確定しました。"
+        }
+      ];
+
+      let current = 0;
+      let timer = null;
+      let playing = false;
+
+      function buildProgress() {
+        scenes.forEach((_, index) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "dot";
+          dot.setAttribute("aria-label", `${index + 1}段目へ`);
+          dot.addEventListener("click", () => {
+            stop();
+            show(index);
+          });
+          progress.appendChild(dot);
+        });
+      }
+
+      function show(index) {
+        current = Math.max(0, Math.min(index, scenes.length - 1));
+
+        scenes.forEach((scene, i) => {
+          const active = i === current;
+          scene.classList.toggle("active", active);
+          scene.setAttribute("aria-hidden", active ? "false" : "true");
+        });
+
+        const dots = [...progress.children];
+        dots.forEach((dot, i) => dot.classList.toggle("active", i === current));
+
+        const info = explanations[current];
+        stepLabel.textContent = `${current + 1} / ${scenes.length}`;
+        explainTitle.textContent = info.title;
+        explainText.textContent = info.text;
+        boundaryText.textContent = info.boundary;
+
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === scenes.length - 1;
+
+        if (current === scenes.length - 1 && playing) stop();
+      }
+
+      function next() {
+        if (current < scenes.length - 1) show(current + 1);
+        else stop();
+      }
+
+      function start() {
+        if (playing) return;
+        playing = true;
+        playBtn.textContent = "⏸ 一時停止";
+
+        if (current === scenes.length - 1) show(0);
+
+        const interval = reducedMotion ? 5000 : 6500;
+        timer = window.setInterval(next, interval);
+      }
+
+      function stop() {
+        playing = false;
+        playBtn.textContent = "▶ 再生";
+        if (timer !== null) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      playBtn.addEventListener("click", () => playing ? stop() : start());
+      nextBtn.addEventListener("click", () => { stop(); next(); });
+      prevBtn.addEventListener("click", () => { stop(); show(current - 1); });
+      resetBtn.addEventListener("click", () => { stop(); show(0); });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight") {
+          stop();
+          next();
+        } else if (event.key === "ArrowLeft") {
+          stop();
+          show(current - 1);
+        } else if (event.key === " ") {
+          event.preventDefault();
+          playing ? stop() : start();
+        }
+      });
+
+      quizButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const correct = button.dataset.answer === "correct";
+          quizButtons.forEach((btn) => {
+            btn.style.borderColor = "";
+            btn.style.background = "";
+          });
+
+          if (correct) {
+            button.style.borderColor = "rgba(142,231,168,.85)";
+            button.style.background = "rgba(142,231,168,.10)";
+            quizResult.innerHTML =
+              "<strong style='color:var(--ok)'>正解です。</strong><br>" +
+              "線形変換を連続させても、最終的には一つの線形変換としてまとめられます。層を増やすだけでは、複雑な分類境界は作れません。";
+          } else {
+            button.style.borderColor = "rgba(255,143,156,.8)";
+            button.style.background = "rgba(255,143,156,.09)";
+            quizResult.innerHTML =
+              "<strong style='color:var(--danger)'>ここが重要です。</strong><br>" +
+              "層が多いことだけでは非線形になりません。線形変換の間に、別の種類の変換を挟む必要があります。";
+          }
+        });
+      });
+
+      buildProgress();
+      show(0);
+    })();
+  </script>
+</body>
+</html>

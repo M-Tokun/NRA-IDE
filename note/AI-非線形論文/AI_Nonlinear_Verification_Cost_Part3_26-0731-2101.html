@@ -1,0 +1,1404 @@
+<!-- FILE: AI_Nonlinear_Verification_Cost_Part3_26-0731-2101.html -->
+<!-- CREATED: 2026-07-31 21:01:00 JST -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="高校3年生向け：非線形な能力がなぜAIの検証を難しくするのかを段階アニメーションで理解する教材。">
+  <title>第3部｜非線形な能力はなぜ検証を難しくするのか</title>
+  <style>
+    :root {
+      --bg: #09101a;
+      --panel: #121b2b;
+      --panel-2: #18243a;
+      --text: #eef5ff;
+      --muted: #bac7dc;
+      --line: #7f91b2;
+      --accent: #80e3c6;
+      --accent-2: #ffd071;
+      --accent-3: #9da8ff;
+      --danger: #ff919d;
+      --ok: #92e9ad;
+      --safe: #75d7ff;
+      --shadow: 0 18px 54px rgba(0,0,0,.31);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 14% 9%, rgba(128,227,198,.10), transparent 33%),
+        radial-gradient(circle at 88% 17%, rgba(157,168,255,.09), transparent 34%),
+        var(--bg);
+      font-family:
+        "Yu Gothic UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+        system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.75;
+    }
+
+    button { font: inherit; }
+
+    .wrap {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 54px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px clamp(22px, 5vw, 58px);
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(24,36,58,.97), rgba(11,18,30,.97));
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 290px;
+      height: 290px;
+      right: -105px;
+      bottom: -125px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(117,215,255,.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .series {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(128,227,198,.08);
+      border: 1px solid rgba(128,227,198,.24);
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2rem, 5vw, 4.15rem);
+      line-height: 1.15;
+      letter-spacing: -.03em;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 870px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.1vw, 1.22rem);
+    }
+
+    .one-message {
+      margin-top: 22px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--accent-2);
+      background: rgba(255,208,113,.08);
+      border-radius: 12px;
+      font-weight: 800;
+    }
+
+    .lesson {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+      gap: 20px;
+    }
+
+    .stage-card, .explain-card, .quiz-card, .scope-card {
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(18,27,43,.96);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .stage-card {
+      min-height: 670px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .stage-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .stage-title {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .step-label {
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      color: var(--accent-2);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .visual {
+      position: relative;
+      flex: 1;
+      min-height: 530px;
+      border-radius: 18px;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+        #0a1321;
+      background-size: 28px 28px;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .45s ease;
+    }
+
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .scene-inner {
+      position: absolute;
+      inset: 0;
+      padding: 28px;
+    }
+
+    .center-copy {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .center-copy .big {
+      max-width: 780px;
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      line-height: 1.35;
+      font-weight: 850;
+    }
+
+    .center-copy .small {
+      display: block;
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .boundary-scene {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr .75fr 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .input-pair, .result-pair {
+      display: grid;
+      gap: 16px;
+    }
+
+    .input-card, .result-card {
+      min-height: 120px;
+      padding: 16px;
+      border-radius: 17px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.045);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-weight: 800;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .input-card small, .result-card small {
+      display: block;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .same-glow {
+      box-shadow: 0 0 0 7px rgba(146,233,173,.06), 0 0 26px rgba(146,233,173,.16);
+      border-color: rgba(146,233,173,.35);
+    }
+
+    .split-glow {
+      box-shadow: 0 0 0 7px rgba(255,145,157,.06), 0 0 26px rgba(255,145,157,.16);
+      border-color: rgba(255,145,157,.35);
+    }
+
+    .boundary-column {
+      min-height: 390px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.035);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .boundary-column::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 8%;
+      bottom: 8%;
+      width: 5px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: linear-gradient(var(--safe), var(--accent-2), var(--danger));
+      box-shadow: 0 0 22px rgba(255,208,113,.55);
+    }
+
+    .boundary-label {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 20px);
+      text-align: center;
+      font-size: .82rem;
+      font-weight: 800;
+    }
+
+    .boundary-label.top { top: 12px; color: var(--safe); }
+    .boundary-label.mid { top: 50%; transform: translate(-50%,-50%); color: var(--accent-2); }
+    .boundary-label.bottom { bottom: 12px; color: var(--danger); }
+
+    .traveler {
+      position: absolute;
+      left: calc(50% - 11px);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(128,227,198,.9);
+    }
+
+    .traveler.t1 {
+      animation: absorbMove 3.6s ease-in-out infinite;
+    }
+
+    .traveler.t2 {
+      animation: crossMove 3.6s ease-in-out infinite;
+      animation-delay: .4s;
+      background: var(--accent-3);
+      box-shadow: 0 0 18px rgba(157,168,255,.9);
+    }
+
+    @keyframes absorbMove {
+      0%,12% { top: 18%; }
+      55%,100% { top: 38%; }
+    }
+
+    @keyframes crossMove {
+      0%,12% { top: 44%; }
+      65%,100% { top: 77%; }
+    }
+
+    .paths-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: .78fr 1.42fr;
+      gap: 22px;
+      align-items: center;
+    }
+
+    .path-notes {
+      display: grid;
+      gap: 12px;
+    }
+
+    .note {
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+    }
+
+    .note strong { color: var(--text); }
+
+    .network {
+      min-height: 430px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(6,12,22,.68);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .column {
+      position: absolute;
+      top: 8%;
+      bottom: 8%;
+      width: 12%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      z-index: 3;
+    }
+
+    .c1 { left: 4%; }
+    .c2 { left: 28%; }
+    .c3 { left: 52%; }
+    .c4 { left: 78%; }
+
+    .node {
+      width: 42px;
+      height: 42px;
+      margin: auto;
+      border-radius: 50%;
+      background: rgba(255,255,255,.07);
+      border: 2px solid rgba(255,255,255,.18);
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+      animation: nodePulse 2.2s ease-in-out infinite;
+    }
+
+    .node.hot {
+      background: rgba(128,227,198,.22);
+      border-color: rgba(128,227,198,.75);
+      box-shadow: 0 0 20px rgba(128,227,198,.42);
+    }
+
+    .node.warm {
+      background: rgba(157,168,255,.19);
+      border-color: rgba(157,168,255,.72);
+      box-shadow: 0 0 18px rgba(157,168,255,.37);
+    }
+
+    @keyframes nodePulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .edge {
+      position: absolute;
+      height: 2px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, rgba(128,227,198,.08), rgba(128,227,198,.75), rgba(157,168,255,.15));
+      opacity: .65;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .edge::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 12px rgba(255,208,113,.85);
+      animation: edgeTravel 2.2s linear infinite;
+    }
+
+    @keyframes edgeTravel {
+      from { left: 0; }
+      to { left: calc(100% - 8px); }
+    }
+
+    .branch-label {
+      position: absolute;
+      right: 16px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.07);
+      font-size: .78rem;
+      font-weight: 800;
+      z-index: 5;
+    }
+
+    .branch-label.a { top: 24%; color: var(--accent); }
+    .branch-label.b { bottom: 24%; color: var(--accent-3); }
+
+    .generation-layout {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .generation-caption {
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .token-flow {
+      position: relative;
+      min-height: 390px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(6,12,22,.68);
+      overflow: hidden;
+    }
+
+    .token {
+      position: absolute;
+      min-width: 100px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      text-align: center;
+      font-weight: 850;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 9px 22px rgba(0,0,0,.25);
+      z-index: 4;
+    }
+
+    .t-start { left: 5%; top: 42%; }
+    .t-a1 { left: 31%; top: 21%; color: var(--accent); }
+    .t-b1 { left: 31%; top: 63%; color: var(--accent-3); }
+    .t-a2 { left: 60%; top: 12%; }
+    .t-b2 { left: 60%; top: 72%; }
+    .t-a3 { right: 4%; top: 18%; border-color: rgba(128,227,198,.5); }
+    .t-b3 { right: 4%; top: 67%; border-color: rgba(157,168,255,.5); }
+
+    .token-arrow {
+      position: absolute;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(255,255,255,.12), var(--accent-2));
+      transform-origin: left center;
+      z-index: 2;
+    }
+
+    .token-arrow::after {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: -4px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 14px rgba(255,208,113,.85);
+    }
+
+    .feedback {
+      position: absolute;
+      right: 11%;
+      top: 36%;
+      width: 52%;
+      height: 28%;
+      border: 3px dashed rgba(117,215,255,.5);
+      border-left-color: transparent;
+      border-radius: 50%;
+      transform: rotate(-8deg);
+      z-index: 1;
+      animation: feedbackPulse 2.6s ease-in-out infinite;
+    }
+
+    @keyframes feedbackPulse {
+      0%,100% { opacity: .35; }
+      50% { opacity: .9; }
+    }
+
+    .feedback-label {
+      position: absolute;
+      left: 43%;
+      top: 49%;
+      z-index: 5;
+      padding: 6px 9px;
+      border-radius: 999px;
+      color: var(--safe);
+      background: rgba(6,12,22,.86);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    .tradeoff-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .trade-column {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.04);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .trade-column h3 {
+      margin: 0 0 3px;
+      text-align: center;
+      font-size: 1.28rem;
+    }
+
+    .trade-item {
+      opacity: 0;
+      transform: translateY(10px);
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.045);
+      animation: reveal .55s forwards;
+    }
+
+    .trade-item:nth-child(3) { animation-delay: .35s; }
+    .trade-item:nth-child(4) { animation-delay: .7s; }
+    .trade-item:nth-child(5) { animation-delay: 1.05s; }
+
+    .trade-divider {
+      display: grid;
+      place-items: center;
+      font-size: 2rem;
+      color: var(--accent-2);
+      font-weight: 900;
+    }
+
+    @keyframes reveal {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .safety-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1.05fr .35fr 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .ai-core {
+      min-height: 350px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(157,168,255,.28);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(157,168,255,.18), transparent 50%),
+        rgba(255,255,255,.035);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .ai-core::before,
+    .ai-core::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border: 2px solid rgba(157,168,255,.22);
+      border-radius: 50%;
+      animation: spin 8s linear infinite;
+    }
+
+    .ai-core::after {
+      width: 170px;
+      height: 170px;
+      border-color: rgba(128,227,198,.22);
+      animation-direction: reverse;
+      animation-duration: 5.5s;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .ai-core strong {
+      position: relative;
+      z-index: 3;
+      font-size: 1.22rem;
+    }
+
+    .ai-core small {
+      display: block;
+      margin-top: 9px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .gate-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--accent-2);
+      font-size: 2.2rem;
+      font-weight: 900;
+    }
+
+    .safety-gate {
+      min-height: 350px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(117,215,255,.35);
+      background: rgba(117,215,255,.07);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .check {
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.045);
+      opacity: 0;
+      transform: translateX(12px);
+      animation: checkIn .55s forwards;
+    }
+
+    .check:nth-child(2) { animation-delay: .4s; }
+    .check:nth-child(3) { animation-delay: .8s; }
+    .check:nth-child(4) { animation-delay: 1.2s; }
+
+    @keyframes checkIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .check strong { color: var(--safe); }
+
+    .summary-stack {
+      display: grid;
+      gap: 14px;
+      max-width: 780px;
+      margin: auto;
+    }
+
+    .summary-item {
+      opacity: 0;
+      transform: translateY(12px);
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.09);
+      animation: riseIn .55s forwards;
+    }
+
+    .summary-item:nth-child(2) { animation-delay: .45s; }
+    .summary-item:nth-child(3) { animation-delay: .9s; }
+
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .summary-item strong { color: var(--accent-2); }
+
+    .controls {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid rgba(255,255,255,.11);
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+      border-radius: 12px;
+      padding: 9px 13px;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .btn:hover, .btn:focus-visible {
+      background: rgba(128,227,198,.12);
+      border-color: rgba(128,227,198,.45);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #071712;
+      border-color: transparent;
+      font-weight: 850;
+    }
+
+    .btn:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background: var(--accent-2);
+      box-shadow: 0 0 0 5px rgba(255,208,113,.1);
+    }
+
+    .explain-card {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-weight: 850;
+      font-size: .86rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .explain-card h2 {
+      margin: 7px 0 12px;
+      font-size: clamp(1.35rem, 2.7vw, 2rem);
+      line-height: 1.35;
+    }
+
+    .explain-text {
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .key-box {
+      margin-top: auto;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(128,227,198,.24);
+      background: rgba(128,227,198,.07);
+    }
+
+    .key-box strong {
+      display: block;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .below {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .quiz-card, .scope-card { padding: 22px; }
+
+    .quiz-card h2, .scope-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.28rem;
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .quiz-btn {
+      width: 100%;
+      text-align: left;
+      padding: 13px 14px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--text);
+      background: rgba(255,255,255,.045);
+      cursor: pointer;
+    }
+
+    .quiz-btn:hover, .quiz-btn:focus-visible {
+      border-color: rgba(128,227,198,.48);
+      outline: none;
+    }
+
+    .quiz-result {
+      min-height: 84px;
+      margin-top: 12px;
+      padding: 13px 14px;
+      border-radius: 13px;
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+
+    .scope-card ul {
+      margin: 10px 0 0;
+      padding-left: 1.25em;
+      color: var(--muted);
+    }
+
+    .scope-card li + li { margin-top: 7px; }
+
+    footer {
+      margin-top: 22px;
+      color: #8f9bbb;
+      text-align: center;
+      font-size: .88rem;
+    }
+
+    .reduced-note {
+      display: none;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    @media (max-width: 900px) {
+      .lesson, .below { grid-template-columns: 1fr; }
+      .stage-card { min-height: 790px; }
+      .visual { min-height: 660px; }
+      .boundary-scene, .paths-layout, .generation-layout, .tradeoff-layout, .safety-layout {
+        grid-template-columns: 1fr;
+      }
+      .trade-divider, .gate-arrow { transform: rotate(90deg); }
+      .boundary-column { min-height: 250px; }
+      .network { min-height: 450px; }
+    }
+
+    @media (max-width: 650px) {
+      .wrap { width: min(100% - 16px, 1120px); padding-top: 8px; }
+      .hero { border-radius: 20px; padding: 24px 18px; }
+      .stage-card, .explain-card, .quiz-card, .scope-card { border-radius: 18px; }
+      .stage-card { min-height: 920px; padding: 10px; }
+      .scene-inner { padding: 16px; }
+
+      .boundary-scene {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 220px auto;
+      }
+
+      .input-pair, .result-pair {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .input-card, .result-card {
+        min-height: 90px;
+        padding: 10px;
+        font-size: .86rem;
+      }
+
+      .paths-layout { align-content: center; }
+      .network { min-height: 430px; }
+
+      .token-flow { min-height: 500px; }
+      .token { min-width: 78px; padding: 9px 10px; font-size: .8rem; }
+      .t-start { left: 3%; top: 43%; }
+      .t-a1 { left: 31%; top: 18%; }
+      .t-b1 { left: 31%; top: 69%; }
+      .t-a2 { left: 58%; top: 8%; }
+      .t-b2 { left: 58%; top: 80%; }
+      .t-a3 { right: 2%; top: 14%; }
+      .t-b3 { right: 2%; top: 75%; }
+
+      .tradeoff-layout, .safety-layout {
+        align-content: center;
+      }
+
+      .ai-core, .safety-gate { min-height: 280px; }
+      .controls { justify-content: center; }
+      .progress {
+        width: 100%;
+        justify-content: center;
+        order: -1;
+        margin-bottom: 4px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reduced-note { display: inline; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <span class="series">AIの線形と非線形・三部作｜第3部</span>
+      <h1>非線形な能力は<br>なぜ検証を難しくするのか</h1>
+      <p class="lead">
+        第2部では、非線形変換によって入力状態や特徴の組み合わせに応じた反応が可能になることを確認しました。
+        第3部では、その能力が高まるほど、なぜ内部経路の追跡と検証が難しくなるのかを見ます。
+      </p>
+      <div class="one-message">
+        この第3部で覚えることは一つだけです。<br>
+        「非線形性はAIをランダムにするのではない。しかし、多層化・状態依存・離散選択・自己回帰と組み合わさると、個別経路の検証が難しくなる」
+      </div>
+    </header>
+
+    <section class="lesson" aria-label="段階アニメーション教材">
+      <div class="stage-card">
+        <div class="stage-head">
+          <p class="stage-title">視線誘導アニメーション</p>
+          <span class="step-label" id="stepLabel">1 / 7</span>
+        </div>
+
+        <div class="visual" id="visual" aria-live="polite">
+          <section class="scene active" data-scene="0" aria-label="導入">
+            <div class="scene-inner center-copy">
+              <div class="big">
+                能力が高まることと、<br>検証しやすくなることは同じでしょうか。
+                <span class="small">今回は「能力の代償」を一段ずつ確認します。</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="1" aria-label="小さな差の扱い">
+            <div class="scene-inner">
+              <div class="boundary-scene">
+                <div class="input-pair">
+                  <div class="input-card same-glow">
+                    入力A：少し変化
+                    <small>境界から離れている</small>
+                  </div>
+                  <div class="input-card split-glow">
+                    入力B：少し変化
+                    <small>境界の近くにいる</small>
+                  </div>
+                </div>
+
+                <div class="boundary-column">
+                  <span class="boundary-label top">同じ領域に残る</span>
+                  <span class="boundary-label mid">分類境界</span>
+                  <span class="boundary-label bottom">別の領域へ移る</span>
+                  <span class="traveler t1" aria-hidden="true"></span>
+                  <span class="traveler t2" aria-hidden="true"></span>
+                </div>
+
+                <div class="result-pair">
+                  <div class="result-card same-glow">
+                    差は吸収される
+                    <small>出力はほぼ変わらない</small>
+                  </div>
+                  <div class="result-card split-glow">
+                    経路が切り替わる
+                    <small>別の反応になる場合がある</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="2" aria-label="多層の経路">
+            <div class="scene-inner">
+              <div class="paths-layout">
+                <div class="path-notes">
+                  <div class="note"><strong>一つの変換なら</strong><br>入力の影響を比較的追いやすい。</div>
+                  <div class="note"><strong>多数の層では</strong><br>強調・抑制・組み合わせが連続する。</div>
+                  <div class="note"><strong>結果</strong><br>どの特徴が、どの段階で、どれだけ効いたかを一対一で説明しにくい。</div>
+                </div>
+
+                <div class="network" aria-label="多層ネットワークの経路">
+                  <div class="column c1">
+                    <span class="node hot"></span>
+                    <span class="node"></span>
+                    <span class="node warm"></span>
+                  </div>
+                  <div class="column c2">
+                    <span class="node"></span>
+                    <span class="node hot"></span>
+                    <span class="node"></span>
+                    <span class="node warm"></span>
+                  </div>
+                  <div class="column c3">
+                    <span class="node warm"></span>
+                    <span class="node"></span>
+                    <span class="node hot"></span>
+                    <span class="node"></span>
+                  </div>
+                  <div class="column c4">
+                    <span class="node hot"></span>
+                    <span class="node warm"></span>
+                    <span class="node"></span>
+                  </div>
+
+                  <span class="edge" style="left:12%;top:18%;width:22%;transform:rotate(18deg)"></span>
+                  <span class="edge" style="left:12%;top:18%;width:24%;transform:rotate(45deg)"></span>
+                  <span class="edge" style="left:12%;top:50%;width:22%;transform:rotate(-18deg)"></span>
+                  <span class="edge" style="left:12%;top:78%;width:24%;transform:rotate(-42deg)"></span>
+
+                  <span class="edge" style="left:36%;top:26%;width:23%;transform:rotate(28deg)"></span>
+                  <span class="edge" style="left:36%;top:52%;width:22%;transform:rotate(-20deg)"></span>
+                  <span class="edge" style="left:36%;top:78%;width:23%;transform:rotate(-36deg)"></span>
+
+                  <span class="edge" style="left:60%;top:22%;width:23%;transform:rotate(18deg)"></span>
+                  <span class="edge" style="left:60%;top:52%;width:23%;transform:rotate(-15deg)"></span>
+                  <span class="edge" style="left:60%;top:76%;width:22%;transform:rotate(-40deg)"></span>
+
+                  <span class="branch-label a">経路A</span>
+                  <span class="branch-label b">経路B</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="3" aria-label="生成経路">
+            <div class="scene-inner">
+              <div class="generation-layout">
+                <div class="generation-caption">
+                  非線形性だけで文章経路が分かれるのではありません。<br>
+                  候補から一つを選び、その出力を次の入力へ戻すことで差が続きます。
+                </div>
+
+                <div class="token-flow">
+                  <div class="token t-start">最初の文脈</div>
+                  <div class="token t-a1">候補Aを選択</div>
+                  <div class="token t-b1">候補Bを選択</div>
+                  <div class="token t-a2">Aに合う次語</div>
+                  <div class="token t-b2">Bに合う次語</div>
+                  <div class="token t-a3">文章経路A</div>
+                  <div class="token t-b3">文章経路B</div>
+
+                  <span class="token-arrow" style="left:19%;top:45%;width:16%;transform:rotate(-32deg)"></span>
+                  <span class="token-arrow" style="left:19%;top:47%;width:16%;transform:rotate(32deg)"></span>
+                  <span class="token-arrow" style="left:43%;top:25%;width:20%;transform:rotate(-18deg)"></span>
+                  <span class="token-arrow" style="left:43%;top:70%;width:20%;transform:rotate(18deg)"></span>
+                  <span class="token-arrow" style="left:70%;top:17%;width:17%;transform:rotate(8deg)"></span>
+                  <span class="token-arrow" style="left:70%;top:80%;width:17%;transform:rotate(-8deg)"></span>
+
+                  <div class="feedback" aria-hidden="true"></div>
+                  <div class="feedback-label">出力が次の入力になる</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="4" aria-label="利益と代償">
+            <div class="scene-inner">
+              <div class="tradeoff-layout">
+                <div class="trade-column">
+                  <h3 style="color:var(--accent)">得られる能力</h3>
+                  <div class="trade-item">複雑な特徴の組み合わせ</div>
+                  <div class="trade-item">文脈に応じた反応</div>
+                  <div class="trade-item">単純な直線では分けられない分類</div>
+                  <div class="trade-item">階層的な内部表現</div>
+                </div>
+
+                <div class="trade-divider">⇄</div>
+
+                <div class="trade-column">
+                  <h3 style="color:var(--danger)">検証上の代償</h3>
+                  <div class="trade-item">内部経路の追跡が難しい</div>
+                  <div class="trade-item">境界付近の試験が増える</div>
+                  <div class="trade-item">全入力の網羅が難しい</div>
+                  <div class="trade-item">理由を一つに単純化しにくい</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="5" aria-label="外部境界管理">
+            <div class="scene-inner">
+              <div class="safety-layout">
+                <div class="ai-core">
+                  <strong>
+                    AI内部
+                    <small>
+                      非線形な表現能力を保持<br>
+                      内部の意味経路を完全には固定しない
+                    </small>
+                  </strong>
+                </div>
+
+                <div class="gate-arrow">→</div>
+
+                <div class="safety-gate">
+                  <div class="check"><strong>入力条件</strong><br>必要な前提がそろっているか</div>
+                  <div class="check"><strong>観測可能な偏差</strong><br>許容範囲から外れていないか</div>
+                  <div class="check"><strong>境界接近</strong><br>不可逆な領域へ近づいていないか</div>
+                  <div class="check"><strong>FAIL-CLOSED</strong><br>超える前に停止・人間へ委譲する</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="scene" data-scene="6" aria-label="第三部のまとめ">
+            <div class="scene-inner center-copy">
+              <div class="summary-stack">
+                <div class="summary-item"><strong>誤解しないこと</strong><br>非線形だからランダム、非線形だから必ず予測不能、という関係ではありません。</div>
+                <div class="summary-item"><strong>検証が難しくなる理由</strong><br>非線形性が、多層化・状態依存・離散選択・自己回帰と結びつき、個別経路が増えるためです。</div>
+                <div class="summary-item"><strong>安全設計の方向</strong><br>内部能力を消すのではなく、外側に決定論的で観測可能な境界管理を置きます。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="controls" aria-label="アニメーション操作">
+          <div class="control-group">
+            <button class="btn" id="prevBtn" type="button">← 前へ</button>
+            <button class="btn primary" id="playBtn" type="button">▶ 再生</button>
+            <button class="btn" id="nextBtn" type="button">次へ →</button>
+            <button class="btn" id="resetBtn" type="button">最初から</button>
+          </div>
+          <div class="progress" id="progress" aria-label="進行状況"></div>
+        </div>
+        <span class="reduced-note">端末の設定により、動きを抑えて表示しています。</span>
+      </div>
+
+      <aside class="explain-card">
+        <span class="eyebrow">いま見るポイント</span>
+        <h2 id="explainTitle">能力と検証可能性を分けて考えます</h2>
+        <div class="explain-text" id="explainText">
+          非線形性は、複雑な現実を扱うために必要です。
+          しかし、能力が高いことと、内部経路を簡単に検証できることは別の性質です。
+        </div>
+        <div class="key-box">
+          <strong>言葉の境界</strong>
+          <span id="boundaryText">
+            「非線形」「ランダム」「予測不能」「不安定」は同じ意味ではありません。
+          </span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="below">
+      <article class="quiz-card">
+        <h2>30秒確認</h2>
+        <p style="color:var(--muted); margin-top:0">
+          AIの個別経路の検証が難しくなる理由として、最も正確なのはどれですか。
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-btn" type="button" data-answer="wrong1">A. 非線形変換は必ずランダムだから</button>
+          <button class="quiz-btn" type="button" data-answer="correct">B. 非線形性が多層化・状態依存・離散選択・自己回帰と結びつくから</button>
+          <button class="quiz-btn" type="button" data-answer="wrong2">C. 線形演算が一切使われなくなるから</button>
+        </div>
+        <div class="quiz-result" id="quizResult" aria-live="polite">
+          答えを選ぶと、理由が表示されます。
+        </div>
+      </article>
+
+      <article class="scope-card">
+        <h2>三部作の最終整理</h2>
+        <ul>
+          <li>第1部：線形演算だけでは何が不足するか</li>
+          <li>第2部：非線形変換は何を可能にするか</li>
+          <li>第3部：その能力がなぜ検証を難しくするか</li>
+        </ul>
+        <p style="color:var(--muted); margin-bottom:0">
+          三部を分けることで、「必要性」「作用」「代償」を混同せずに理解できます。
+        </p>
+      </article>
+    </section>
+
+    <footer>
+      三部作完結：「線形演算から非線形AIへ――能力の成立と検証可能性の代償」<br>
+      外部通信・外部ライブラリ不使用／単一HTML教材
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const scenes = [...document.querySelectorAll(".scene")];
+      const stepLabel = document.getElementById("stepLabel");
+      const explainTitle = document.getElementById("explainTitle");
+      const explainText = document.getElementById("explainText");
+      const boundaryText = document.getElementById("boundaryText");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const playBtn = document.getElementById("playBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const progress = document.getElementById("progress");
+      const quizResult = document.getElementById("quizResult");
+      const quizButtons = [...document.querySelectorAll(".quiz-btn")];
+
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      const explanations = [
+        {
+          title: "能力と検証可能性を分けて考えます",
+          text: "非線形性は、複雑な現実を扱うために必要です。しかし、能力が高いことと、内部経路を簡単に検証できることは別の性質です。",
+          boundary: "「非線形」「ランダム」「予測不能」「不安定」は同じ意味ではありません。"
+        },
+        {
+          title: "小さな差が必ず増幅されるわけではありません",
+          text: "境界から離れた変化は吸収されることがあります。一方、境界付近では、同程度の小さな差が別の領域への移動を引き起こす場合があります。",
+          boundary: "正確な表現は「小さな差が大きな変化につながることがある」であり、「必ず増幅される」ではありません。"
+        },
+        {
+          title: "多層化すると影響経路が増えます",
+          text: "一つの特徴は、多数の層で強調・抑制・再結合されます。そのため、最終出力を一つの単純な原因へ戻すことが難しくなります。",
+          boundary: "経路が複雑であることと、計算規則が存在しないことは別です。規則はあっても、人間が全経路を追うのが難しいのです。"
+        },
+        {
+          title: "文章生成では選択と自己回帰が加わります",
+          text: "候補から一つを選ぶと、その語が次の入力条件になります。初期の選択差が新しい文脈を作り、後続の候補分布まで変えます。",
+          boundary: "文章経路の分岐を、非線形変換だけの作用として説明してはいけません。離散選択と自己回帰も必要です。"
+        },
+        {
+          title: "能力と代償は同時に生じます",
+          text: "複雑な認識や文脈処理が可能になる一方で、境界条件の試験、内部経路の説明、全入力の網羅は難しくなります。",
+          boundary: "非線形性を減らせば必ず安全になるわけではありません。能力不足による誤認も別の危険になります。"
+        },
+        {
+          title: "内部能力と外部安全判定を分離します",
+          text: "AI内部の非線形性を無理に消すのではなく、外部で観測できる入力条件、偏差、境界接近、停止条件を決定論的に管理します。",
+          boundary: "これは内部を完全に説明する方法ではなく、説明できない部分が残っても安全境界を管理する設計です。"
+        },
+        {
+          title: "第3部の結論",
+          text: "検証困難性は非線形性単独から生じるのではありません。非線形性が大規模な多層構造、状態依存、離散選択、自己回帰と組み合わさることで、個別経路の追跡が難しくなります。",
+          boundary: "安全上の中心課題は、非線形性の除去ではなく、能力を保持したまま外部の境界管理を成立させることです。"
+        }
+      ];
+
+      let current = 0;
+      let timer = null;
+      let playing = false;
+
+      function buildProgress() {
+        scenes.forEach((_, index) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "dot";
+          dot.setAttribute("aria-label", `${index + 1}段目へ`);
+          dot.addEventListener("click", () => {
+            stop();
+            show(index);
+          });
+          progress.appendChild(dot);
+        });
+      }
+
+      function show(index) {
+        current = Math.max(0, Math.min(index, scenes.length - 1));
+
+        scenes.forEach((scene, i) => {
+          const active = i === current;
+          scene.classList.toggle("active", active);
+          scene.setAttribute("aria-hidden", active ? "false" : "true");
+        });
+
+        [...progress.children].forEach((dot, i) => {
+          dot.classList.toggle("active", i === current);
+        });
+
+        const info = explanations[current];
+        stepLabel.textContent = `${current + 1} / ${scenes.length}`;
+        explainTitle.textContent = info.title;
+        explainText.textContent = info.text;
+        boundaryText.textContent = info.boundary;
+
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === scenes.length - 1;
+
+        if (current === scenes.length - 1 && playing) stop();
+      }
+
+      function next() {
+        if (current < scenes.length - 1) show(current + 1);
+        else stop();
+      }
+
+      function start() {
+        if (playing) return;
+        playing = true;
+        playBtn.textContent = "⏸ 一時停止";
+
+        if (current === scenes.length - 1) show(0);
+
+        const interval = reducedMotion ? 5200 : 7000;
+        timer = window.setInterval(next, interval);
+      }
+
+      function stop() {
+        playing = false;
+        playBtn.textContent = "▶ 再生";
+        if (timer !== null) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      playBtn.addEventListener("click", () => playing ? stop() : start());
+      nextBtn.addEventListener("click", () => { stop(); next(); });
+      prevBtn.addEventListener("click", () => { stop(); show(current - 1); });
+      resetBtn.addEventListener("click", () => { stop(); show(0); });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight") {
+          stop();
+          next();
+        } else if (event.key === "ArrowLeft") {
+          stop();
+          show(current - 1);
+        } else if (event.key === " ") {
+          event.preventDefault();
+          playing ? stop() : start();
+        }
+      });
+
+      quizButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const answer = button.dataset.answer;
+
+          quizButtons.forEach((btn) => {
+            btn.style.borderColor = "";
+            btn.style.background = "";
+          });
+
+          if (answer === "correct") {
+            button.style.borderColor = "rgba(146,233,173,.85)";
+            button.style.background = "rgba(146,233,173,.10)";
+            quizResult.innerHTML =
+              "<strong style='color:var(--ok)'>正解です。</strong><br>" +
+              "非線形性だけではなく、多層化、入力状態への依存、候補からの離散選択、出力を次の入力へ戻す自己回帰が重なって、個別経路の追跡が難しくなります。";
+          } else if (answer === "wrong1") {
+            button.style.borderColor = "rgba(255,145,157,.8)";
+            button.style.background = "rgba(255,145,157,.09)";
+            quizResult.innerHTML =
+              "<strong style='color:var(--danger)'>非線形とランダムは別です。</strong><br>" +
+              "決定論的な非線形処理もあります。検証が難しい理由は、複数の構造が結びついて経路が増えることです。";
+          } else {
+            button.style.borderColor = "rgba(255,145,157,.8)";
+            button.style.background = "rgba(255,145,157,.09)";
+            quizResult.innerHTML =
+              "<strong style='color:var(--danger)'>線形演算は引き続き使われます。</strong><br>" +
+              "AIは大量の線形演算を計算基盤とし、その間に非線形変換を組み込みます。";
+          }
+        });
+      });
+
+      buildProgress();
+      show(0);
+    })();
+  </script>
+</body>
+</html>
