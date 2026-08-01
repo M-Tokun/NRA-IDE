@@ -89,7 +89,7 @@ To run the complete current suite, including the canonical reference tests and l
 python -m unittest discover -v
 ```
 
-The expected result is `Ran 44 tests` followed by `OK`.
+The expected result is `Ran 65 tests` followed by `OK`.
 
 To run only the canonical reference suite, run:
 

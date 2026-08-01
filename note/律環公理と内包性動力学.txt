@@ -7,6 +7,11 @@ Date: 2026-02-17
 Document Class: 技術的正論書（Technical Treatise）
 License: MIT（NRA-IDE準拠）
 
+【履歴注記（2026-08-01）】
+本書に記載されたregen_nra_pre_rna.py、regen_nra_longrun_guard.py、regen_nra_document_structure_v32.py、regen_nra_llm_pipeline.py、regen_initialize_nra_system.py、regen_nra_document_structure.jsonは、2026年2月時点の旧v33実験系を説明する歴史記録である。
+旧v33実験系は現行ツリーから削除済みであり、必要な場合はGit履歴から参照できる。以下の原文は当時の設計意図を保存するため変更していない。
+現行のnra-tcm-parserはテキスト候補抽出用のNRA-TCM Extractor 1.0であり、この旧v33実験系とは責務が異なる。また、本書および旧v33実験系は現行NRA-IDEの正典実装を定義しない。現行の正典順位と実装は、リポジトリルートのREADME.mdおよびREPOSITORY_OVERVIEW.mdを参照すること。
+
 
 本書の立場
 本書は批判書ではない。

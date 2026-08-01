@@ -24,7 +24,7 @@ jobs:
       - name: Run Normative Reference Quick Demo
         run: python examples/nra_ide_reference_quick_demo.py
 
-      - name: Run Reference Conformance Tests with Coverage
+      - name: Run Complete Test Suite with Reference Coverage
         run: |
           python -m coverage run --branch -m unittest discover -v
           python -m coverage report -m --include="*NRA-IDE_Architecture_public.py"
