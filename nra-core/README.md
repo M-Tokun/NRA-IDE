@@ -59,6 +59,12 @@ These provide development history and explanatory context; current authority rem
 
 | `AXIOMS_rewritten_2026-04-24_011508.md` | **2026-04-24時点の履歴版** — 複数公理を提案した旧分類 v1.2。現行正典ではなく、現在の公理は一つだけ |
 
+| `NRA-IDE_Architecture_public.py` | **正規参照実装のソース** — 現行正典の7状態、不可逆ラッチ、Cause-Side／Effect-Side分離、対象と各チャネルの分離、および構造証言を実装。適合性は現行試験で確認する |
+
+| `NRA-IDE_SecondAxiom_Journey_2026-04-22_0039_v2.md` | **思想形成の履歴資料・非正規** — 「第二公理」へ至った検討経過を保存。現行の律環公理は一つだけ |
+
+| `NRA-IDE_動的厚みと不可逆境界_会話統合_26-0802-1830.md` | **会話由来の応用理論草案・非正規** — 動的厚み、不可逆境界、有限観測近接を検討。派生式と候補閾値はドメイン固有の成立条件・校正を必要とする |
+
 | `Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md` | 律環公理コード付き解説（二重ゆらぎ安定版・EN） |
 
 | `律環公理_コード付き解説_二重ゆらぎ安定版.md` | 上記の日本語版 |
@@ -121,9 +127,9 @@ Includes foundation implementations, adaptive gate extension, and applied sensor
 >
 > The normative reference implementation is `../foundations/NRA-IDE_Architecture_public.py`. Scripts in this section are dated examples or prototypes and may retain legacy states or thresholds.
 >
-> 正規参照実装の適合性は配置名だけでなく、`../tests/test_nra_ide_reference.py`の現行27試験への合格で確認する。docs版は正規ソースとSHA-256が一致する同期ミラーである。
+> 正規参照実装の適合性は配置名だけでなく、`../tests/test_nra_ide_reference.py`の現行38試験への合格で確認する。docs版は正規ソースとSHA-256が一致する同期ミラーである。
 >
-> Conformance of the normative reference implementation depends on passing the current 27 tests in `../tests/test_nra_ide_reference.py`, not on its location or name alone. The docs copy is a synchronized mirror whose SHA-256 must match the normative source.
+> Conformance of the normative reference implementation depends on passing the current 38 tests in `../tests/test_nra_ide_reference.py`, not on its location or name alone. The docs copy is a synchronized mirror whose SHA-256 must match the normative source.
 
 | ファイル | 内容 |
 
@@ -231,4 +237,4 @@ Implementations of quantum error control using Lindblad equations, NISQ, and FMO
 
 ---
 
-*Authority classification updated: 2026-07-15*
+*Authority classification updated: 2026-08-03*

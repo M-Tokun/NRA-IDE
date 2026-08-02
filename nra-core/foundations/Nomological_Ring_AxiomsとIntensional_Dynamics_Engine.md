@@ -1,3 +1,16 @@
+> [!CAUTION]
+> **会話経過の履歴資料 / 非正規**
+>
+> 本文はNRA-IDE v2.0をめぐる会話と検討経過を保存した履歴資料であり、現行正典、正規実装要件、安全証明、測定結果または特定ドメインでの有効性根拠ではない。
+>
+> 現行の律環公理は「存在は生成である。」の一つだけである。本文中の`Axiom of Confession`は現行の追加公理ではない。
+>
+> 本文中の、τを時間独立とする説明、R≥1だけに限定したFail-Closed説明、および「全ての現象が同一構造で記述可能」という主張を、現行NRA-IDEへ適用してはならない。Fail-Closedは正規状態名ではなく、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`、`CONFESSION`および`OUT_OF_DESCRIPTION_DOMAIN`で許可されない自律処理を抑止する運用原則である。
+>
+> 生物、進化、地球システム等に関する本文中の式と対応表は、研究上の類推例である。各領域のCause-Side変数、単位、観測方法、支配方程式、δ・τの算定規則および閾値根拠が別途確立されない限り、領域固有モデル、適合証拠または運用判断根拠として使用してはならない。
+>
+> 現行規則はリポジトリルートの`theory/AXIOMS.md`および`theory/axioms.json`を参照すること。
+
 # Nomological Ring AxiomsとIntensional Dynamics Engineの会話記録（完全記述版）
 
 ## 冒頭文書：NRA-IDE v2.0（抜粋・要約）

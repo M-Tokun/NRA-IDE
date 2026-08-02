@@ -1,3 +1,14 @@
+> [!CAUTION]
+> **Historical code-annotated explanation containing superseded concepts — Noncanonical**
+>
+> This document preserves explanatory and implementation concepts dated 2026-02-21. It is not the current canon, a normative implementation requirement, a safety proof, or a basis for operational decisions.
+>
+> The sole current Nomological Ring Axiom is “Existence is Generation.” No second or subsequent axiom exists.
+>
+> Do not apply this document’s definitions of delta as “invariant meaning,” tau as “noise, redundancy, time,” or R as “causal reachability” to the current NRA-IDE canon. The Pre-RNA / Post-RNA construction in which an output-side stage computes structural R is also superseded. Current delta, tau, and R may be obtained only from domain-specific Cause-Side observations or Cause-Side transformation rules fixed before evaluation.
+>
+> Consult root `theory/AXIOMS.md` and `theory/axioms.json` for the current state classification, structural-testimony rules, and Cause-Side / Effect-Side boundary.
+
 Below is the **precise, faithful English translation** of  
 
 **「律環公理_コード付き解説_二重ゆらぎ安定版」**,  
