@@ -16,6 +16,18 @@
 - Every other equation is derived, auxiliary, or complementary.
 - Multiple axioms, historical axiom numbers, legacy states, legacy Fail-Closed descriptions, and unvalidated application claims inside `note/` preserve research provenance rather than current classification.
 
+## ディレクトリ構成 / Directory Structure
+
+`note/`配下は以下のカテゴリで整理されている。これらはすべて「非正規の検討覚書・草稿」である。
+The `note/` directory is organized into the following categories. All of these are "noncanonical memoranda and drafts."
+
+- **`01_理論・公理_検討覚書`**: 理論の着想、旧公理、数理定義の検討プロセス。
+- **`02_AI・ガバナンス検討`**: AIの非線形表現、ガバナンス、誤解防止策の検討。
+- **`03_実装・計算機アーキテクチャ`**: FPGA, JAX, 量子ハイブリッド等の実装試案・技術メモ。
+- **`04_思想・線形批判_草稿`**: 線形誤謬批判、人間とAIの進化に関する哲学的考察の草稿。
+- **`05_応用ドメイン・デモ補助`**: 医療、物理、社会システムへの適用案とデモ用補助メモ。
+- **`06_対話セッション記録`**: AIとの詳細な対話ログ、歴史的な執筆・推敲プロセス。
+
 ## 権威順位 / Authority
 
 - 正典参照順: `../theory/AXIOMS.md` > `../theory/axioms.json` > `../theory/NRA-IDE_Foundational_Thesis_Bilingual.md` > `../theory/SANDWICH_ARCH.md` > `../theory/THEORY.md` > `../FORMULA.md` > `../llms.md` > ドメイン固有規則 > 正典適合試験に合格した正規参照実装 > その他の実装 > コメント・例示・AI生成説明

@@ -193,7 +193,9 @@ class ReplacementTests(unittest.TestCase):
         self.assertFalse((PARSER_ROOT / "nra-crystallization-v33-full-fix").exists())
 
     def test_historical_note_identifies_removed_v33(self) -> None:
-        note = (REPO_ROOT / "note" / "律環公理と内包性動力学.txt").read_text(encoding="utf-8")
+        note = (
+            REPO_ROOT / "note" / "01_理論・公理_検討覚書" / "律環公理と内包性動力学.txt"
+        ).read_text(encoding="utf-8")
         self.assertIn("旧v33実験系を説明する歴史記録", note)
         self.assertIn("現行ツリーから削除済み", note)
 

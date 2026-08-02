@@ -1,20 +1,20 @@
-# Nomological Ring Axioms / Intensional Dynamics Engine
+## Nomological Ring Axioms / Intensional Dynamics Engine
 
-# 律環公理 / 内包性動力学エンジン
+## 律環公理 / 内包性動力学エンジン
 
 ---
 
-# Part I — Core Text（本文）
+## Part I — Core Text（本文）
 
 ## Sole Nomological Ring Axiom / 唯一の律環公理
 
 ### 日本語（原文）
 
-存在は生成である。
+# 存在は生成である。
 
 ### English
 
-Existence is Generation.
+# Existence is Generation.
 
 This is the only Nomological Ring Axiom. No second or subsequent axiom exists.
 
