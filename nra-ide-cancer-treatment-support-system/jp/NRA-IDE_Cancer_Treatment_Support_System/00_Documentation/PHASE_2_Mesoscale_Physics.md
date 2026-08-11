@@ -41,11 +41,8 @@
 
 
 | 出力 | 物理的意味 |
-
 |:---|:---|
-
 | `BLOCKED` | 抵抗応力が駆動圧を上回り、細胞は隙間を通過できない |
-
 | `PASSABLE` | 細胞は変形して通過しうる（転移経路が開いている） |
 
 
@@ -79,23 +76,14 @@ $$\sigma_{resist} = (E + B)\cdot\underbrace{\frac{D-d}{D}}_{\text{歪み}} \;+\;
 
 
 | 記号 | 意味 | 単位 |
-
 |:---:|:---|:---:|
-
 | $E$ | 細胞のヤング率（弾性率） | kPa |
-
 | $B$ | 薬剤による硬化補強分 | kPa |
-
 | $D$ | 細胞直径 | μm |
-
 | $d$ | 隙間サイズ（Pore） | μm |
-
 | $(D-d)/D$ | **圧縮歪み（無次元）** | – |
-
 | $\eta$ | 細胞質および周囲水分の粘性 | Pa·s |
-
 | $v$ | 変形速度 | μm/s |
-
 | $\Delta P$ | 血流駆動圧 | kPa |
 
 
@@ -181,15 +169,10 @@ $$\sigma_{collective} = \sigma_{single}\cdot N\cdot(1 + \alpha\sqrt{N})$$
 
 
 | 層 | ファイル | 備考 |
-
 |:---|:---|:---|
-
 | 演算コア | `10_Hardware_Design/src/10_BioCalibrator_TypeA.v` | 本式を Q8.8 固定小数点で実装 |
-
 | パラメータ定義 | `00_Documentation/PHASE_4_Terminology_Dictionary.md` | 範囲・単位・Q8.8 表現 |
-
 | 演算形式 | `00_Documentation/PHASE_6_FPGA_Spec.md` | パイプライン構成・ROM 定義 |
-
 | 実験検証 | `検証プロトコル_マイクロ流路試験.md` | 本式の反証手続き |
 
 

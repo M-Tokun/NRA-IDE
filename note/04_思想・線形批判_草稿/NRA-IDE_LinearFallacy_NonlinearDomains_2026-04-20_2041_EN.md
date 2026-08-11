@@ -427,17 +427,11 @@ The NRA-IDE Stance:
 ### 5-2. Retaining What Linear Computation Discards
 
 | Discarded by Linear Computation | Retained by NRA-IDE |
-
 |---|---|
-
 | Proximity to Thresholds | Continuous tracking of R-values |
-
 | Irreversibility of Time | One-way progress / No back-calculation |
-
 | Nature of Error | Detection of error mutation ($R_{quality}$) |
-
 | Changes in Correlation | $R_{correlation} = |C[i][j](t) - C[i][j](t_0)| / \tau_C$ |
-
 | Precursors to Phase Transition | Fail-Closed (Structural stop at $R \ge 1.0$) |
 
 ### 5-3. The Nonlinear Meaning of "Fail-Closed"

@@ -269,17 +269,11 @@ Even without prediction, diagnosis is possible. With diagnosis, the decision to 
 Understanding this framework requires changing only one thing about what is monitored.
 
 | Conventional perspective | This framework's perspective |
-
 |--------------------------|------------------------------|
-
 | Monitor the rate of change | Monitor the ratio of accumulation to margin (R) |
-
 | Feel reassured that values are "still within normal range" | Judge by "what is the value of R" |
-
 | Respond after an anomaly appears | Intervene when R approaches 1.0 |
-
 | Track change along a time axis | Read the current value of the structural ratio |
-
 | Build refined predictive models | Measure δ and τ and calculate the ratio |
 
 This shift may reuse existing measurements when they provide traceable Cause-Side definitions of $\delta$ and $\tau$. Other domains may require new sensors, calibration, validation, or an explicit conclusion that the required quantities are not observable.
@@ -317,17 +311,11 @@ PID control is a control theory that corrects deviation through three terms: pro
 The R = δ/τ of this framework may appear superficially similar to the proportional term of PID, but the two are fundamentally different.
 
 | Aspect | PID Control | This Framework (NRA-IDE) |
-
 |--------|-------------|--------------------------|
-
 | Purpose | Return deviation to zero (optimization) | Evaluate proximity to structural limit (diagnosis) |
-
 | Meaning of τ | Does not exist | Absorption thickness (independent of time) |
-
 | Treatment of residuals | Accumulated as integral term | Expelled as heat, not carried forward |
-
 | Form of output | Continuous control quantity | Discrete structural-state classification (`PERMIT` / `BOUNDARY_WARNING` / `HANDOFF_REQUIRED` / `IRREVERSIBLE_TRANSITION` / `RUPTURE_BOUNDARY`) |
-
 | Role of human | System corrects autonomously | Predefined fixed Handoff testimony is presented for external human audit at R_handoff, before irreversible transition and complete rupture |
 
 τ is not a time constant. τ is the absorption thickness that a structure holds by design — a structural quantity independent of the time axis.
@@ -962,17 +950,11 @@ R が 0.3 であれば余裕がある。R が 0.8 であれば注意が必要だ
 本枠組みを理解するには、監視の対象を一つ変えるだけでよい。
 
 | 従来の見方 | 本枠組みの見方 |
-
 |-----------|--------------|
-
 | 変化の速度を監視する | 蓄積と余裕の比率（R）を監視する |
-
 | 「まだ正常値内」で安心する | 「R がいくつか」で判断する |
-
 | 異常が現れてから対処する | R が 1.0 に近づいた時点で介入する |
-
 | 時間軸で変化を追う | 構造比率の現在値を診る |
-
 | 精緻な予測モデルを構築する | δ と τ を測定し比率を算出する |
 
 追跡可能なCause-Side定義として $\delta$ と $\tau$ を得られる場合、既存測定を再利用できる可能性がある。領域によっては、新しいセンサー、校正、妥当性検証、または必要量を観測不能とする明示的判定が必要になる。
@@ -1008,17 +990,11 @@ PID制御は比例（P）・積分（I）・微分（D）の三項によって�
 本枠組みの R = δ/τ は一見すると PID の比例項に類似して見えるが、本質的に異なる。
 
 | 観点 | PID制御 | 本枠組み（NRA-IDE） |
-
 |------|---------|------------------|
-
 | 目的 | 偏差をゼロに戻す（最適化） | 構造限界への接近度を評価（診断） |
-
 | τの意味 | 存在しない | 吸収厚み（時間と独立） |
-
 | 残差の扱い | 積分項として累積する | 熱として排出し持ち越さない |
-
 | 出力の形式 | 連続的な制御量 | 離散的な構造状態分類（許可／警告／人間委譲／不可逆遷移／完全破断） |
-
 | 人間の役割 | システムが自律補正 | R_handoffで固定Handoff証言を外部人間監査へ提示し、不可逆遷移と完全破断より前に開始する |
 
 τは時定数ではない。τは構造が設計上持つ吸収厚みであり、時間軸と独立した構造的な量である。

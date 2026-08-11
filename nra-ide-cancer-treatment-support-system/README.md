@@ -53,13 +53,9 @@ If any nuance differences arise from translation, the Japanese version (`README_
 
 
 | Traditional AI Approach | NRA-IDE Approach |
-
 |------------------------|------------------|
-
 | Statistical analysis of millions of patients | Physical analysis of **one patient** in front of you |
-
 | Relies on averages and probabilities | Relies on **measured physical values** |
-
 | Black-box predictions | **Transparent physical equations** |
 
 
@@ -87,11 +83,8 @@ The system answers exactly one question:
 
 
 | Question | This system |
-
 |:---|:---|
-
 | Can the cancer cell escape through the vessel gap? | **Judged** |
-
 | Can the drug penetrate the tumor interstitium? | **Not judged** — see §5, motivation only |
 
 
@@ -105,11 +98,8 @@ Drug penetration is fluid transport through a porous medium (Darcy flow, diffusi
 
 
 | Output | Physical meaning |
-
 |:---|:---|
-
 | `BLOCKED` | Resisting stress exceeds driving pressure; the cell cannot pass |
-
 | `PASSABLE` | The cell can deform and pass through (escape route is open) |
 
 
@@ -243,23 +233,14 @@ $$\sigma_{\text{resist}} = (E + B)\cdot\frac{D-d}{D} \;+\; \frac{12\,\eta\,v\,D}
 
 
 | Symbol | Meaning | Unit |
-
 |:---:|:---|:---:|
-
 | $E$ | Young's modulus of the cell | kPa |
-
 | $B$ | Stiffening contribution from the drug | kPa |
-
 | $D$ | Cell diameter | μm |
-
 | $d$ | Pore size | μm |
-
 | $(D-d)/D$ | **Compressive strain (dimensionless)** | – |
-
 | $\eta$ | Viscosity (cytoplasm, surrounding fluid) | Pa·s |
-
 | $v$ | Deformation velocity | μm/s |
-
 | $\Delta P$ | Blood flow driving pressure | kPa |
 
 
@@ -291,11 +272,8 @@ Input parameters are processed in Q8.8 fixed point, and the decision boundary is
 
 
 | Zone | Condition | Meaning |
-
 |:---|:---|:---|
-
 | 🟩 BLOCKED | $\sigma_{resist} > \Delta P$ | The cell cannot pass through the gap |
-
 | 🟥 PASSABLE | $\sigma_{resist} \le \Delta P$ | The cell may deform and pass |
 
 
@@ -347,13 +325,9 @@ python main.py --data ../30_Test_Data/sample_patient_data.json --out ./output
 
 
 | Command | Status |
-
 |:---|:---|
-
 | `python main.py --test` | **Working** (falls back to the reference model when no FPGA is attached) |
-
 | `python run_validation.py` | **Working** (7/7 PASS) |
-
 | `python main.py --data <path> [--out <dir>]` | **Working** (emits a `.txt` report and a `.png` map) |
 
 
@@ -380,19 +354,12 @@ This repository is a research template. The following are **incomplete**, stated
 
 
 | Item | Status |
-
 |:---|:---|
-
 | Type A (single cell) decision model | Formalized, reference implementation, 7 verification cases — complete |
-
 | Type B (cell cluster) model | **Not implemented.** The $\sqrt{N}$ law is not supported by the cited literature, so the RTL is a stub returning `0x06 ERR_UNSUPPORTED` |
-
 | FPGA RTL (simulation) | **Verified** (2026-07-29, Icarus Verilog 11.0). Core unit 7/7, full integration 8/8, also confirmed at the real 115200 baud |
-
 | FPGA RTL (synthesis / timing) | **Not performed** (no Vivado / Quartus run) |
-
 | Drug penetration model | **Not started** |
-
 | Microfluidic experimental validation | **Not performed** (protocol drafted only) |
 
 

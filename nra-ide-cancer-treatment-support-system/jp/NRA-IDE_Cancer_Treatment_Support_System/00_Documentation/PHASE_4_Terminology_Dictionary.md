@@ -21,21 +21,13 @@
 
 
 | Variable | Symbol | Unit | Range | Q8.8 Hex (Min-Max) | Note |
-
 |:---|:---:|:---:|:---:|:---:|:---|
-
 | `cell_stiffness` | $E$ | kPa | 0.1 - 10.0 | `0x0019` - `0x0A00` | **ヤング率（応力）**。ばね定数ではない |
-
 | `cell_viscosity` | $\eta$ | Pa·s | 0.01 - 1.0 | `0x0002` - `0x0100` | **0禁止** |
-
 | `cell_diameter` | $D$ | μm | 5.0 - 30.0 | `0x0500` - `0x1E00` | 大きさ |
-
 | `pore_size` | $d$ | μm | 5.0 - 15.0 | `0x0500` - `0x0F00` | 隙間 |
-
 | `flow_dp` | $\Delta P$ | kPa | 0.0 - 5.0 | `0x0000` - `0x0500` | 血圧差（駆動圧） |
-
 | `drug_boost` | $B$ | kPa | 0.0 - 10.0 | `0x0000` - `0x0A00` | 薬剤による硬化補強分（ $E$ と同次元） |
-
 | `deform_velocity` | $v$ | μm/s | 0.0 - 255.0 | `0x0000` - `0xFF00` | 変形速度。標準値 200.0 (`0xC800`) |
 
 
@@ -45,15 +37,10 @@
 
 
 | 量 | 定義 | 単位 | 備考 |
-
 |:---|:---|:---:|:---|
-
 | 歪み | $\varepsilon = (D-d)/D$ | **無次元** | 0 ≤ ε < 1。Q0.8 で保持 |
-
 | 弾性抵抗応力 | $\sigma_{el} = (E+B)\cdot\varepsilon$ | kPa | |
-
 | 粘性抵抗応力 | $\sigma_{v} = 12\eta v D/(1000 d^{2})$ | kPa | 係数 1/1000 は Pa→kPa 換算 |
-
 | 判定 | $\sigma_{el} + \sigma_{v} > \Delta P$ | – | 真なら `BLOCKED` |
 
 
@@ -79,21 +66,13 @@
 
 
 | Code | Name | Description | 生成元 | Action |
-
 |:---:|:---|:---|:---:|:---|
-
 | `0x00` | ERR_NONE | 正常（BLOCKED/PASSABLE 判定有効） | – | - |
-
 | `0x01` | ERR_GEOMETRIC | すり抜け（ $D < d$ ） | FPGA | 手術検討 |
-
 | `0x02` | ERR_RANGE | 入力が本表の範囲外 | FPGA / Host | 再測定 |
-
 | `0x03` | ERR_ZERO_VISC | 粘性ゼロ（律環公理違反） | FPGA / Host | 再測定 |
-
 | `0x04` | ERR_OVERFLOW | 演算オーバーフロー | FPGA | システム点検 |
-
 | `0x05` | ERR_COMM | 3回再送後も応答不正 | Host のみ | 結線・電源点検 |
-
 | `0x06` | ERR_UNSUPPORTED | 未実装の癌腫タイプ（Type B） | FPGA / Host | Type A で再評価 |
 
 ※ `0x04 ERR_OVERFLOW` について: Phase 4 の有効入力範囲内では理論最大でも
@@ -142,11 +121,8 @@ $\eta = 0$ は範囲外（0.01 未満）でもあるが、律環公理の明示�
 
 
 | 語 | 意味 | 使用箇所 |
-
 |:---|:---|:---|
-
 | `BLOCKED` | 抵抗応力 > 駆動圧。細胞は隙間を通過できない | FPGA 出力 `o_is_jammed = 1` |
-
 | `PASSABLE` | 抵抗応力 ≤ 駆動圧。細胞は変形通過しうる | FPGA 出力 `o_is_jammed = 0` |
 
 

@@ -31,25 +31,15 @@
 
 
 | Ph | Title | File Link | Target Audience |
-
-|:--:|:---|:---|:---|
-
+|:---:|:---|:---|:---|
 | 01 | Philosophy Protocol | [PHASE_1_Philosophy_Protocol.md](./PHASE_1_Philosophy_Protocol.md) | **Physicians** |
-
 | 02 | Mesoscale Physics | [PHASE_2_Mesoscale_Physics.md](./PHASE_2_Mesoscale_Physics.md) | **Physicians** |
-
 | 03 | Nomological Ring Axioms | [PHASE_3_Ritsukan_Axiom.md](./PHASE_3_Ritsukan_Axiom.md) | **Advanced** |
-
 | 04 | Complete Dictionary | [PHASE_4_Terminology_Dictionary.md](./PHASE_4_Terminology_Dictionary.md) | **All** |
-
 | 05 | System Architecture | [PHASE_5_System_Architecture.md](./PHASE_5_System_Architecture.md) | **Engineers** |
-
 | 06 | FPGA Spec | [PHASE_6_FPGA_Spec.md](./PHASE_6_FPGA_Spec.md) | **Engineers** |
-
 | 07 | Implementation Code | [PHASE_7_Implementation_Code.md](./PHASE_7_Implementation_Code.md) | **Engineers** |
-
 | 08 | Technical Manual | [PHASE_8_Technical_Manual.md](./PHASE_8_Technical_Manual.md) | **Technicians** |
-
 | 09 | Operational Guide | [PHASE_9_Operational_Guide.md](./PHASE_9_Operational_Guide.md) | **Operators** |
 
 

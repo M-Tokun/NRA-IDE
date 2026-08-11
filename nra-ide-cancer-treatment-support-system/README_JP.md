@@ -53,13 +53,9 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 | 従来の医療AI | NRA-IDE |
-
 |-------------|---------|
-
 | 数百万人の統計データに依存 | **目の前の一人の患者の物理データ** |
-
 | 確率的予測 | **決定論的判定** |
-
 | ブラックボックス | **透明な物理式** |
 
 
@@ -87,11 +83,8 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 | 問い | 本システム |
-
 |:---|:---|
-
 | 癌細胞が血管の隙間を脱出できるか | **判定する** |
-
 | 薬剤が腫瘍間質へ浸透できるか | **判定しない**（§5 の背景で述べる動機であり、判定対象ではない） |
 
 
@@ -105,11 +98,8 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 | 出力 | 物理的意味 |
-
 |:---|:---|
-
 | `BLOCKED` | 抵抗応力が駆動圧を上回り、細胞は隙間を通過できない |
-
 | `PASSABLE` | 細胞は変形して通過しうる（転移経路が開いている） |
 
 
@@ -259,23 +249,14 @@ $$\sigma_{resist} = (E + B)\cdot\frac{D-d}{D} \;+\; \frac{12\,\eta\,v\,D}{1000\,
 
 
 | 記号 | 意味 | 単位 |
-
 |:---:|:---|:---:|
-
 | $E$ | 細胞のヤング率（弾性率） | kPa |
-
 | $B$ | 薬剤による硬化補強分 | kPa |
-
 | $D$ | 細胞直径 | μm |
-
 | $d$ | 隙間サイズ（Pore） | μm |
-
 | $(D-d)/D$ | **圧縮歪み（無次元）** | – |
-
 | $\eta$ | 細胞質および周囲水分の粘性 | Pa·s |
-
 | $v$ | 変形速度 | μm/s |
-
 | $\Delta P$ | 血流駆動圧 | kPa |
 
 
@@ -307,11 +288,8 @@ NRA-IDEは、入力パラメータ（細胞硬度・粘性・血流圧・細胞�
 
 
 | 領域 | 条件 | 意味 |
-
 |:---|:---|:---|
-
 | 🟩 BLOCKED | $\sigma_{resist} > \Delta P$ | 細胞は隙間を通過できない |
-
 | 🟥 PASSABLE | $\sigma_{resist} \le \Delta P$ | 細胞は変形通過しうる |
 
 
@@ -367,13 +345,9 @@ python main.py --data ../30_Test_Data/sample_patient_data.json --out ./output
 
 
 | コマンド | 状態 |
-
 |:---|:---|
-
 | `python main.py --test` | **動作する**（FPGA 非接続時は参照実装で判定） |
-
 | `python run_validation.py` | **動作する**（7/7 PASS） |
-
 | `python main.py --data <path> [--out <dir>]` | **動作する**（レポート .txt とマップ .png を出力） |
 
 
@@ -400,19 +374,12 @@ python main.py --data ../30_Test_Data/sample_patient_data.json --out ./output
 
 
 | 項目 | 状態 |
-
 |:---|:---|
-
 | Type A（単一細胞）判定式 | 定式化・参照実装・検証ケース7件 完了 |
-
 | Type B（細胞集団）モデル | **未実装。** $\sqrt{N}$ 則の根拠が文献で裏付けられていないため、回路は `0x06 ERR_UNSUPPORTED` を返すスタブとした |
-
 | FPGA RTL（シミュレーション） | **検証済**（2026-07-29, Icarus Verilog 11.0）。演算コア単体 7/7、全系統合 8/8。実機ボーレート 115200 でも確認 |
-
 | FPGA RTL（合成・タイミング解析） | **未実施**（Vivado / Quartus 未使用） |
-
 | 薬剤到達モデル | **未着手** |
-
 | マイクロ流路による実験検証 | **未実施**（プロトコルのみ策定済み） |
 
 

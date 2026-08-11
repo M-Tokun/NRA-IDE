@@ -49,25 +49,16 @@ The demos below are designed to visualize and quantify this difference. For impl
 $$R = \frac{\delta}{\tau}$$
 
 | Symbol | Meaning | Description |
-
 |------|------|------|
-
 | **δ (delta)** | Deviation / fluctuation from constraint | Physically observed displacement or deviation |
-
 | **τ (tau)** | Absorption thickness / allowable margin | Structurally defined threshold width |
-
 | **R** | Structural ratio | Judgment value calculated as δ ÷ τ |
 
 | R Range | Judgment | Meaning | Action |
-
 |--------|------|------|------|
-
 | R < 0.40 | **SAFE** | Sufficient structural margin remains | AI may continue processing with physical basis shown |
-
 | 0.40 ≤ R < R_J | **WATCH / CAUTION** | The system is approaching the boundary and may require preparation for intervention | Continue monitoring. Check history, correlation, and dR/dt. Gradually restrict automatic intervention if needed |
-
 | R_J ≤ R < 1.00 | **JUDGMENT LIMIT** | Under the actual operating conditions, further progression may reach R = 1.0 due to delay, inertia, or residual fluctuation | Stop or strongly restrict automatic judgment and transfer authority to humans |
-
 | R_target ≥ 1.00 | **RUPTURE_BOUNDARY** | The declared target reaches its complete rupture boundary | Stop free-form generation and autonomous action; continue predefined post-rupture fixed testimony over surviving channels |
 
 > **Important:** R = 1.0 is not a warning value.  
@@ -91,47 +82,34 @@ All demos run directly in a browser. No installation is required.
 ### 📚 STEP 1 — First Understand “Why?”
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 00 | [00_Escapement_Foundation_NRA_JP.html](./00_Escapement_Foundation_NRA_JP.html) | **Escapement Foundation (JP).** Basic concept demo of integer phase lock — why residuals disappear. (Japanese only) |
-
 | 01 | [01_Why_No_Distance_EN.html](./01_Why_No_Distance_EN.html) | **Why not use distance, calculus, or floating-point continuity as the primary basis?** A visual introduction from four perspectives. |
-
 | 02 | [02_Error_Accumulation_EN.html](./02_Error_Accumulation_EN.html) | **The danger of error accumulation.** Runs 100,000 steps from the same initial value and compares conventional methods with NRA-style structure. |
 
 ### 🔬 STEP 2 — Experience the Difference in Behavior
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 03 | [03_HAN_vs_Legacy_EN.html](./03_HAN_vs_Legacy_EN.html) | **HAN vs Legacy real-time comparison.** Demonstrates tracking and stability differences under disturbance and sudden load. |
-
 | 04 | [04_HAN_Stress_Test_EN.html](./04_HAN_Stress_Test_EN.html) | **Extreme 80 ms load test.** Legacy blindly executes commands and collapses in FPS; HAN detects tension and adapts load. |
 
 ### 📊 STEP 3 — Visualize the Threshold Mechanism
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 05 | [05_IDE_Threshold_Visualizer_EN.html](./05_IDE_Threshold_Visualizer_EN.html) | **Dynamic visualization of R = δ/τ.** Confirms integer phase lock and residual discard in real time. |
 
 ### ⚙️ STEP 4 — Escapement Principle
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 06 | `06_Escapement_Principle_EN.html` *（./06_Escapement_Principle_EN.html）* | **Why gears do not accumulate error.** Floating-point drift vs integer phase lock animation. |
 
 ### 🔴 STEP 5 — Cascade Failure: Watching the Moment Collapse Begins
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 07 | [07_HAN_gate_live_EN.html](./07_HAN_gate_live_EN.html) | **Live simulation of cascade failure and HAN Gate SILENCE activation.** As load spikes propagate, the chain-reaction score R rises in real time. When R crosses the operational boundary, the screen flashes red and SILENCE is declared. |
 
 > **Why this demo is different:**  
@@ -145,17 +123,11 @@ All demos run directly in a browser. No installation is required.
 These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. Upper and lower limits are monitored independently, and asymmetric EMA sensitivity detects both overload and depletion.
 
 | # | File | Domain | Key Point |
-
 |---|---------|---------|---------|
-
 | 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | Electricity, air temperature, water pressure, pulsation — JP | **Asymmetric damper structure.** Upper τ expands cautiously, lower τ shrinks sensitively. |
-
 | 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | Same — English | English labels and explanations. |
-
 | 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | Greenhouse agriculture, four-sensor monitoring — JP | Monitors irrigation pressure, air temperature, CO₂, and nutrient EC. |
-
 | 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | Same — English | English labels and explanations. |
-
 | 10 | [10_Field_DroughtGate_live_JP.html](./10_Field_DroughtGate_live_JP.html) | Outdoor field drought progression gauge — JP | Soil moisture, soil temperature, solar radiation, and wind speed. Composite R estimates drought level Lv.0–4. |
 
 > **What current agricultural IoT often cannot do:**  
@@ -167,19 +139,12 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 ### ⚙️ STEP 7 — Advanced Domain Applications (11–16)
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 11 | [11_Motor3Phase_BandGate_live_JP.html](./11_Motor3Phase_BandGate_live_JP.html) | **Three-phase motor Band Gate live monitor.** Applies R = δ/τ to load balance and overload detection. |
-
 | 12 | [12_agri_mol_antagonism_JP.html](./12_agri_mol_antagonism_JP.html) | **Agricultural ion monitoring + Mg²⁺/K⁺ antagonistic chain Band Gate.** Dynamic τ and asymmetric EMA. |
-
 | 13 | [13_photosynthesis_layer5_JP.html](./13_photosynthesis_layer5_JP.html) | **Photosynthesis Layer 5 monitor.** Uses the FvCB model as an external δ generator, then evaluates R = δ/τ. |
-
 | 14 | [14_powergrid_transition_JP.html](./14_powergrid_transition_JP.html) | **Power-grid transition-point monitor.** Detects early structural divergence missed by fixed thresholds. |
-
 | 15 | [15_or_icu_continuum_JP.html](./15_or_icu_continuum_JP.html) | **OR/ICU cumulative monitoring.** Tracks accumulated structural deviation across surgery and ICU phases. |
-
 | 16 | [16_passive_safety_JP.html](./16_passive_safety_JP.html) | **Passive gravity-driven safety system.** Transitions to a safe state by physical constraints without active control. |
 
 ---
@@ -187,19 +152,12 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 ### 🔬 STEP 8 — Physical State Transition Monitoring (17–22)
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 17 | [17_water_ice_phase_transition_JP.html](./17_water_ice_phase_transition_JP.html) | **Water → ice phase transition.** Tracks approach to the 0°C phase boundary using R. |
-
 | 18 | [18_chain_tension_JP.html](./18_chain_tension_JP.html) | **Chain tension with polygon effect and automatic adjustment.** Uses dR/dt prediction before limit arrival. |
-
 | 19 | [19_air_pressure_JP.html](./19_air_pressure_JP.html) | **Air pressure management with compressible fluid and dynamic τ.** τ_hi shrinks with temperature via gas-law behavior. |
-
 | 20 | [20_water_pressure_JP.html](./20_water_pressure_JP.html) | **Water pressure management with incompressible fluid and water hammer.** Simulates pump pulsation and valve-closing impact. |
-
 | 21 | [21_cabg_monitor_JP.html](./21_cabg_monitor_JP.html) | **CABG monitor.** Monitors blood flow, pressure, and temperature during bypass surgery as an educational safety demo. |
-
 | 22 | [22_vascular_monitor_JP.html](./22_vascular_monitor_JP.html) | **Vascular intervention monitor.** Six physical quantities integrated with dual fluctuation and dynamic τ. |
 
 ---
@@ -207,15 +165,10 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 ### 🧩 STEP 9 — Advanced Features and Specific Domains (23–26)
 
 | # | File | Content |
-
 |---|---------|------|
-
 | 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **State boundary, short-term logs, and long-term reconstruction.** Demonstrates separation of short-term fluctuation and long-term structural trend. |
-
 | 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **Autonomous-driving mandatory boundary demo.** Monitors collision time margin, braking distance, and lateral margin. |
-
 | 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **Dam management comparison + τ degradation curve.** Fixed-threshold monitoring vs NRA-IDE τ degradation tracking. |
-
 | 26 | [JP](./26_escapement_contactpoint_JP.html) | **Phase-Gap Engine — heat release only at contact points.** Demonstrates that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. (Japanese only) |
 
 ---
@@ -225,19 +178,12 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 These demos apply R = δ/τ to general equipment and facility monitoring domains. Across six demos, they demonstrate NRA-IDE’s **unit independence**: the same structural equation can manage fundamentally different physical quantities.
 
 | # | File | Domain | Key Point |
-
 |---|---------|---------|---------|
-
 | 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN_20260425_011850_JST.html) | Belt conveyor / V-belt tension | Defines τ as the full margin from optimal value to structural limit. Fail-Closed stops the belt. |
-
 | 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN_20260425_012100_JST.html) | Water temperature upper/lower management | Evaluates R_hi and R_lo independently. |
-
 | 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN_20260425_012747_JST.html) | Light / illuminance management | Measures the receiving side in lux and increases shading from the precursor stage. |
-
 | 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN_20260425_012956_JST.html) | Power management using V × I | Integrates voltage and current as P = V × I; sustained over-power raises R over time. |
-
 | 31 | [JP](./31_move_water_or_ice_JP.html) / [EN](./31_move_water_or_ice_EN_20260425_013623_JST.html) | Water/ice state navigation | Interactive phase-transition navigation while tracking R at the boundary. |
-
 | 32 | [JP](./32_nra_ide_water_ice_20260324_2216_JP.html) / [EN](./32_nra_ide_ice_water_EN_20260425_013818_JST.html) | Ice → water phase transition | Reverse direction of Demo 17: ice absorbs latent heat after crossing 0°C. |
 
 ---
@@ -245,11 +191,8 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 ### 🔭 Standalone Demos
 
 | File | Content |
-
 |---------|------|
-
 | [JP](./33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html) / [EN](./33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html) | **6D multi-layer visualizer.** Displays six R-value surfaces simultaneously. Opacity, saturation, and monochrome modes are available. |
-
 | [EN](../docs/en-US/figures/causal_diode_fail_closed_EN.html) / [JP](../docs/ja-JP/figures/causal_diode_fail_closed_JP.html) | **Causal Diode & Fail-Closed Visualizer.** An intuitive animation demonstrating how NRA-IDE structurally blocks AI from manipulating physical thresholds (Π⁻¹ backward flow) and how it autonomously shuts down upon reaching the limit. |
 
 ---
@@ -259,23 +202,14 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 From Demo 34 onward, the sample set develops from single-quantity R judgment into multi-layer correlation, mediated variables, closed loops, and individual baseline differences. The basic safety form is **R_total = max(R_i, R_corr, R_coupling)** so that a dangerous layer is not diluted by averaging. Medical examples are kept as **Medical Education Templates**, not operational clinical systems.
 
 | # | File | Domain | Key Point |
-
 |---|---------|---------|---------|
-
 | 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | Seedling greenhouse / agro-drone four-factor correlation | Tracks temperature, humidity, light, and water with R = δ/τ. Combines correlation matrix C[i][j](t), residual gate G(r), and delayed observed record x_{t-τ}. |
-
 | 35 | [JP](./35_rotor_bearing_correlation_JP_20260425_024602_JST.html) / [EN](./35_rotor_bearing_correlation_EN_20260425_160443_JST.html) | Rotor / bearing correlation | Monitors vibration, bearing temperature, current, lubrication pressure, acoustic noise, and RPM deviation. Vibration leads, then temperature/current/noise follow. |
-
 | 36 | [JP](./36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html) / [EN](./36_battery_thermal_runaway_correlation_EN_20260425_160443_JST.html) | Battery thermal runaway correlation | Treats internal resistance and dT/dt as leading indicators, then shows propagation to temperature, swelling pressure, and voltage deviation. Educational visualization only, not real control. |
-
 | 37 | [JP](./37_greenhouse_vpd_correlation_JP_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | Greenhouse VPD-mediated correlation | Does not simply add temperature and humidity. VPD acts as a mediator layer, propagating correlation pressure to soil water, CO₂, light, and EC. |
-
 | 38 | [JP](./38_datacenter_cascade_correlation_JP_20260425_032611_JST.html) / [EN](./38_datacenter_cascade_correlation_EN_20260425_160443_JST.html) | Datacenter cascade correlation | Connects CPU load, power, rack temperature, inlet temperature, fan rate, airflow, and latency. Visualizes the positive feedback loop power → heat → fan → power. |
-
 | 39 | [JP](./39_coldchain_temperature_correlation_JP_20260425_033809_JST.html) / [EN](./39_coldchain_temperature_correlation_EN_20260425_160443_JST.html) | Cold-chain temperature excursion correlation | Connects ambient temperature, cargo temperature, door opening, compressor load, battery level, humidity, and delivery delay. Shows the mediation chain ambient + door → compressor reserve → cargo temperature. |
-
 | 40 | [JP](./40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html) / [EN](./40_medical_education_individual_stratification_template_EN_20260425_160443_JST.html) | Medical education / individual stratification | Uses synthetic data for SpO₂, respiratory rate, heart rate, systolic BP, and temperature. Visualizes individual reserve differences via profile pressure from age, frailty, and chronic background. Not diagnosis or treatment. |
-
 | 41 | [JP](./41_medical_education_infection_observation_template_JP_20260425_040544_JST.html) / [EN](./41_medical_education_infection_observation_template_EN_20260425_160443_JST.html) | Medical education / infection observation cohort | Uses synthetic data for fever, respiration, circulation, hydration, and inflammation-like markers. Sorts individuals into Observe / Watch / Caution / Human Review without disease naming or treatment recommendation. |
 
 ---
@@ -373,13 +307,9 @@ Specific implementation patterns are documented inside each demo source file.
 - **Threshold:** R = excess load / buffer capacity.
 
 | Area | δ (Deviation from constraint) | τ (Tolerance thickness) | Meaning of R ≥ 1.0 |
-
 |------|-------------------------------|--------------------------|--------------------|
-
 | Medical AI | Target-side resistance | Delivery pressure | The drug physically cannot reach the target |
-
 | Autonomous driving | Obstacle time/distance margin | Braking distance/capability | Collision danger → emergency stop |
-
 | Infrastructure | Excess load | Buffer capacity | Server overload → isolation |
 
 ---

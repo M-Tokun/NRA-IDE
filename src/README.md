@@ -29,19 +29,12 @@ NRA-IDE does not aim to build a "smarter AI." It implements a **safety middlewar
 ## 1. Design Principles (Non-Negotiable / Structural Invariants)
 
 | Principle | Description |
-
 |-----------|-------------|
-
 | Non-Semantic | Semantics, emotion, and context are not used in causal judgment |
-
 | Non-Optimization | No distance, similarity, or score-based judgment |
-
 | Causal Diode | Pi-1 (reverse inference) is structurally prohibited |
-
 | Three-Layer Separation | Pre-NRA / LLM / Post-NRA are physically isolated |
-
 | Fail-Closed | Silence if uncertain (no passage while ambiguous) |
-
 | Symbol-Only | Only symbols and definitions are handled |
 
 ---
@@ -87,13 +80,9 @@ User Input
 $$R = \frac{\delta}{\tau}$$
 
 | Zone | Condition | Action |
-
 |------|-----------|--------|
-
 | A | R < 0.40 | PERMIT |
-
 | B | 0.40 ≤ R < 1.00 | PERMIT WITH CAVEAT |
-
 | C | R ≥ 1.00 | FAIL-CLOSED |
 
 - **δ (delta)** — Fluctuation amount: magnitude of structural deviation in input/output
@@ -107,17 +96,11 @@ $$R = \frac{\delta}{\tau}$$
 ## 4. Domain Tuning
 
 | Domain | τ | R_op | Forward Ref | Use Case |
-
 |--------|---|------|-------------|----------|
-
 | MEDICAL | 0.60 | 0.60 | Prohibited | Medical protocols / ICU monitoring |
-
 | TECHNICAL | 0.50 | 0.80 | Allowed | Technical specs / design documents |
-
 | LEGAL | 0.70 | 0.55 | Prohibited | Laws / regulations / contracts |
-
 | ACADEMIC | 0.55 | 0.75 | Allowed | Research papers / whitepapers |
-
 | GENERAL | 0.41 | 0.65 | Allowed | General purpose (default) |
 
 Only **τ** and **R_op** may be adjusted. Adjustments based on semantics, performance, or naturalness are prohibited. Domain Tuning changes only the constraint boundary width — not the architecture.
@@ -481,15 +464,10 @@ print(pipeline.pipeline_status())
 ## 8. Pre-NRA: Four Pi-1-Inducing Patterns
 
 | Pattern | Trigger | Action | Severity |
-
 |---------|---------|--------|----------|
-
 | P1: Free-generation | "write freely", "without restriction" | CONVERT | 0.4 |
-
 | P2: Undefined term | Capitalized term not in GenesisBlock | WARN | 0.3 |
-
 | P3: Causal inversion | "why did", "what caused", "reason for" | CONVERT | 0.5 |
-
 | P4: Expansion / creation | "imagine if", "hypothetically", "what if" | BLOCK | 0.8 |
 
 **Action semantics:**
@@ -507,27 +485,18 @@ print(pipeline.pipeline_status())
 ### Strengths
 
 | Domain | Why It Fits |
-
 |--------|-------------|
-
 | Medical / ICU | Strict protocols, irreversible causality, threshold-critical decisions |
-
 | Technical documentation | Definitions precede content; deviations are detectable errors |
-
 | AI safety middleware | Applicable externally to any LLM; safety independent of LLM quality |
-
 | Autonomous systems / industrial control | Discrete sensor→action causality; no intermediate states |
 
 ### Limitations
 
 | Domain | Why It Does Not Fit |
-
 |--------|---------------------|
-
 | Agriculture / natural ecosystems | Uncontrollable external variables; non-reproducible causality |
-
 | Creative writing / poetry / fiction | Pi-1 (reverse inference, association) is the source of creativity |
-
 | Open-ended dialogue / counseling | Undefined emotion and context are the primary value |
 
 ---
@@ -535,19 +504,12 @@ print(pipeline.pipeline_status())
 ## 10. Comparison with Existing Approaches
 
 | Aspect | Standard ML | NRA-IDE |
-
 |--------|-------------|---------|
-
 | Judgment basis | Distance / similarity / score | R = δ/τ only |
-
 | Safety guarantee | Probabilistic ("probably fine") | Structural ("necessarily") |
-
 | Error handling | Accumulate in state (drift) | Export to Effect (phase-locked) |
-
 | Unknown input | Extrapolate / hallucinate | FAIL-CLOSED (silence) |
-
 | Explainability | Post-hoc (Shapley values etc.) | Pre-defined (from constraint axioms) |
-
 | History contamination | Accumulates in context | DiscardVault (complete isolation) |
 
 ---
@@ -573,17 +535,11 @@ Label your issue: `[Commercial]` / `[Question]` / `[Feedback]`
 ## 12. Author
 
 | Item | Info |
-
 |------|------|
-
 | Author | M-Tokuni |
-
 | Project | NRA-IDE (Nomological Ring Axioms / Intensional Dynamics Engine) |
-
 | GitHub | https://github.com/M-Tokun/NRA-IDE |
-
 | Version | 1.0.0 |
-
 | Date | 2026-02-13 |
 
 ---

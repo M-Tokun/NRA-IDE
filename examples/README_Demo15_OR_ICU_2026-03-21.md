@@ -131,15 +131,10 @@ This is the Fail-Closed principle applied to the system's own epistemic state.
 Four simultaneous channels:
 
 | Channel | Color | Normal Range |
-
 |---|---|---|
-
 | HR (heart rate) | Cyan | 60–100 bpm |
-
 | SpO₂ | Green | 96–100% |
-
 | RR (respiratory rate) | Orange | 12–20 /min |
-
 | BP systolic | Purple | 90–140 mmHg |
 
 Waveform brightness increases while fail-closed operational suppression is active; Fail-Closed is not a canonical state.
@@ -159,31 +154,20 @@ Waveform brightness increases while fail-closed operational suppression is activ
 ### Left Panel
 
 | Display | Meaning |
-
 |---|---|
-
 | 経過蓄積 / Baseline確立 | Warmup progress. τ is being established from observation history. |
-
 | Phase Box | Current FSM state |
-
 | HR / SpO₂ / RR / BP | Current vital values with individual R bars |
-
 | residual_debt | **Structural debt. Does not reset after recovery.** |
-
 | Event Log | Timestamped event and transition record |
 
 ### Right Panel
 
 | Display | Meaning |
-
 |---|---|
-
 | R_total | Composite structural approach ratio |
-
 | δ成分分解 | Individual δ values per channel |
-
 | 経過精度 ★ | Warmup quality. ★★★★★ = maximum structural reliability |
-
 | 遷移履歴 | Log of all FSM state transitions with R values |
 
 ---
@@ -191,17 +175,11 @@ Waveform brightness increases while fail-closed operational suppression is activ
 ## FSM States / FSM状態
 
 | State | Condition | Meaning |
-
 |---|---|---|
-
 | WARMING UP | warmupPct < 15% | τ not established. Observation phase. |
-
 | ACTIVE | R_eff < 0.35 | Structural stability confirmed. |
-
 | CAVEAT ⚠ | 0.35 ≤ R_eff < 0.6 | δ accumulation detected. Monitor closely. |
-
 | CRITICAL 🔴 | 0.6 ≤ R_eff < 1.0 | Approaching threshold. Pre-intervention zone. |
-
 | RUPTURE_BOUNDARY ⛔ | R_eff ≥ 1.0 or debt > 1.2 | Structural limit reached. **Human judgment required.** |
 
 `RUPTURE_BOUNDARY` remains fixed in the current history. `✚ 医師介入` starts external treatment but does not downgrade that classification.
@@ -213,21 +191,13 @@ Even after intervention, `residual_debt` persists — reflecting accumulated str
 ## How to Operate / 操作方法
 
 | Button | Action |
-
 |---|---|
-
 | ▶ 執刀開始 | Begin procedure. δ accumulation and τ establishment start. |
-
 | 🩸 出血イベント | Hemorrhage event. HR↑, BP↓, SpO₂↓, RR↑. Sustained δ injection. |
-
 | 💉 麻酔深度変化 | Anesthetic depth shift. HR↓, BP↓, RR↓ (respiratory depression). |
-
 | ⚡ 血管攣縮 | Vasospasm. Acute BP spike. Short duration. |
-
 | ✚ 医師介入 | **Human-operated only.** Starts external treatment. At rupture, the old classification and fixed testimony remain. |
-
 | ■ 新患者評価 | Starts an independent new-patient Cause-Side history. |
-
 | SPEED slider | ×1–×6 simulation speed |
 
 **Recommended sequence for demonstration:**
@@ -335,19 +305,12 @@ Effect-Side recovery (the waveform returning to normal) does not constitute Caus
 ## Applicable Range / 適用範囲
 
 | Context | NRA-IDE Applicable | Reason |
-
 |---|---|---|
-
 | New patient, first contact | ✗ No | No baseline. τ not established. |
-
 | Emergency arrival (first 15 min) | ✗ Limited | Warmup phase. Reference only. |
-
 | Intraoperative monitoring (after start) | ✓ Yes | δ accumulates from incision. τ established progressively. |
-
 | ICU continuous monitoring | ✓ Yes | Hours of history. Highest structural reliability. |
-
 | Post-op recovery room | ✓ Yes | Transition from intraoperative baseline. |
-
 | Chronic disease outpatient follow-up | ✓ Yes | Long history. residual_debt highly meaningful. |
 
 **This table is an honest declaration, not a limitation to hide.**  
@@ -375,13 +338,9 @@ $$R_{\mathrm{target}} \geq 1.0 \Rightarrow \mathrm{RUPTURE\_BOUNDARY}$$
 ## Relation to NRA-IDE Layer Structure / NRA-IDEレイヤーとの対応
 
 | Layer | This Demo |
-
 |---|---|
-
 | Layer 1 — Basic R = δ/τ | Per-channel R computation |
-
 | Layer 3 — Dynamic τ | τ established progressively from baseline history |
-
 | Layer 4 — Sensor Fusion | R_total = √ΣR² multi-channel composition |
 
 Demo #15 operates at **Layer 3–4**, with explicit modeling of the warmup phase as a structural precondition.

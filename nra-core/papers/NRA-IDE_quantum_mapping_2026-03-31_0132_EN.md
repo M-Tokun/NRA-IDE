@@ -11,13 +11,9 @@ coherence maintenance; and error-suppression structure.
 ## 1. Allocation of the Three Concepts within NRA-IDE
 
 | Quantum computing concept | Corresponding NRA-IDE structure | Notes |
-
 |---|---|---|
-
 | Fluctuation | Dynamic observation layer of δ (deviation) | τ = decoherence time T₂ |
-
 | Superposition | Pre-NRA structure (unconverged state space) | State in which the viable region is not yet determined |
-
 | Thresholding / Measurement | Escapement × Post-NRA convergence | Structural management of the contraction timing |
 
 ---
@@ -143,13 +139,9 @@ Their difference is the "width"
 ## 7. Case Comparison
 
 | | Medical AI (cancer diagnosis support) | Autonomous driving (obstacle avoidance) |
-
 |---|---|---|
-
 | Nature of loss | Miss is unacceptable (life-or-death) | Time constraint (within 100 ms) |
-
 | Nature of width | Fixed · extremely narrow | Dynamic · speed-dependent |
-
 | Placement of "backlash" | On the operational flow side (delegated to human judgment) | In the boundary band width itself |
 
 ---
@@ -191,15 +183,10 @@ Their difference is the "width"
 ## 9. Verification of Consistency with NRA-IDE Core Principles
 
 | Principle | Correspondence in this discussion |
-
 |---|---|
-
 | Distance is a result, not a cause | Boundary band width is defined as a downstream result of the use case |
-
 | No reverse inference (Causal Diode) | Direction of entanglement correlation is explicitly fixed |
-
 | Return "infeasible" when coherence is absent | Coherence check before Pre-NRA → Post-NRA transition |
-
 | Escapement principle | Concentrate verification cost only on detection of boundary band arrival |
 
 Under consideration:

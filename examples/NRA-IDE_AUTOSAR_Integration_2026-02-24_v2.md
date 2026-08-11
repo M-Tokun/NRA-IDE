@@ -239,23 +239,14 @@ NRA-IDE Gate SWC
 
 
 | 接続 | 方向 | 許可 / 禁止 | 理由 |
-
 |------|------|------------|------|
-
 | センサー SWC → Gate R-Port | 書き込み | ✓ 許可 | センサー値の受信は必須 |
-
 | Gate P-Port → アクチュエーター SWC | 書き込み | ✓ 許可 | Fail-Closed suppression 指令の送信 |
-
 | Gate P-Port → 制御 SWC | 読み取り | ✓ 許可 | R値・Zone の観測は問題なし |
-
 | Gate P-Port → OBD 診断 | 読み取り | ✓ 許可 | 診断に必要・推奨 |
-
 | Gate 前周期R → Gate 今周期計算 | 内部時系列 | ✓ 許可 | 逆流ではなく時系列継続 |
-
 | 制御 SWC → Gate τ 値 | **書き込み** | ✗ **禁止** | 保証の破壊 |
-
 | 制御 SWC → Gate ロジック | **書き込み** | ✗ **禁止** | 保証の破壊 |
-
 | 開発ツール → Gate τ 値 | **書き込み** | △ **条件付き** | 開発環境のみ・NvM経由・ログ必須 |
 
 
@@ -743,21 +734,13 @@ WDG がタイムアウトを検知した場合:
 
 
 | 観点 | Classic Platform | Adaptive Platform |
-
 |------|-----------------|------------------|
-
 | Gate 形態 | SWC（ソフトウェアコンポーネント） | Adaptive Application |
-
 | 接続方式 | RTE ポート | ARA Service Interface |
-
 | τ 保護 | NvM + MPU + const 宣言 | Persistent Storage + Access Control |
-
 | タスク管理 | OSEK/AUTOSAR OS（固定周期） | Execution Management（動的だが Gate は固定） |
-
 | OTA 対応 | NvM Manager 経由で制御 | Update & Config Management |
-
 | 推奨用途 | パワートレイン・ブレーキ系 | ADAS・自動運転判断系 |
-
 | リアルタイム性 | 1ms 以下対応 | 数 ms 程度（Classic より低い） |
 
 

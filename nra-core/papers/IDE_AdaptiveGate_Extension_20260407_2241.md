@@ -29,19 +29,13 @@ but defines a dynamic extension as an upper layer above it.
 `nra_ide_foundation_fixed_JP.py` の `normalized_quadratic_gate` を**差し替えるものではなく**、その上位層として動的拡張を定義します。
 
 | Existing | Position of This Document |
-
 |---|---|
-
 | `normalized_quadratic_gate` (fixed k) | Core — immutable |
-
 | Adaptive Gate Extension (dynamic k) | Upper extension of core |
 
 | 既存 | 本文書の位置 |
-
 |---|---|
-
 | `normalized_quadratic_gate`（固定 k） | コア・不変 |
-
 | 適応型ゲート拡張（動的 k） | コアの上位拡張 |
 
 ---
@@ -75,23 +69,15 @@ Think of the nomological ring as a **cylinder of jelly**.
 律環を**円柱状のゼリー**として想像してください。
 
 | Material | Behavior under force | Analogy |
-
 |---|---|---|
-
 | Steel cylinder | Reflects force rigidly — no deformation | Classical computation (rigid overwrite) |
-
 | Water | Cannot hold its shape — collapses | Unconstrained system (divergence) |
-
 | **Jelly cylinder** | **Deforms inside, disperses force, holds its shape** | **NRA-IDE adaptive gate** |
 
 | 素材 | 力に対する挙動 | 対応 |
-
 |---|---|---|
-
 | 鋼鉄の円柱 | 力をそのまま跳ね返す・変形なし | 古典計算（剛体的上書き） |
-
 | 水 | 形を保てない・崩壊 | 拘束のない系（発散） |
-
 | **ゼリーの円柱** | **内側で変形して力を分散・形は保つ** | **NRA-IDE 適応型ゲート** |
 
 When force is applied, the jelly does not break and does not bounce back — it deforms internally and absorbs.
@@ -163,19 +149,13 @@ This reduces the burden on $G(r)$ to "forcibly pull back", maintaining smooth tr
 $$k_{\text{eff}} = k_0 \cdot (1 + \beta |\dot{r}|)$$
 
 | State | Behavior of $k_{\text{eff}}$ | Effect |
-
 |---|---|---|
-
 | High-speed transition ($|\dot{r}|$ large) | Automatically increases | Classical layer suppressed; IDE inertia prioritized |
-
 | Low-speed / converging ($|\dot{r}|$ small) | Decreases | Classical precision correction fully active |
 
 | 状態 | $k_{\text{eff}}$ の挙動 | 効果 |
-
 |---|---|---|
-
 | 高速遷移時（ $|\dot{r}|$ 大） | 自動的に増大 | 古典層の介入が弱まり IDE の慣性が優先 |
-
 | 低速・収束時（ $|\dot{r}|$ 小） | 小さくなる | 古典層の精度補正がフルに機能 |
 
 "Safety (transition preservation) at high speed; precision at low speed" — dynamic allocation of computational resources.
@@ -313,23 +293,15 @@ It is positioned as an adapter layer that computes `k_eff` and passes it down.
 ## NRA-IDE 公理との対応
 
 | Axiom | Realization in This Extension |
-
 |---|---|
-
 | Distance is result, not cause | $r$ is computed as a response result, not used as direct input |
-
 | Honest confession at threshold | When $k_{\text{eff}}$ is large, the classical layer falls silent |
-
 | Respect for irreversibility | Continuous update via velocity; direct overwrite prohibited — inherited |
 
 | 公理 | 本拡張での実現 |
-
 |---|---|
-
 | 距離は結果であって原因ではない | $r$ は入力ではなく応答の結果として計算される |
-
 | 閾値での正直な告白 | $k_{\text{eff}}$ が大きいとき古典層は沈黙する |
-
 | 不可逆性への敬意 | 速度経由の連続更新・直接上書き禁止は継承 |
 
 ---

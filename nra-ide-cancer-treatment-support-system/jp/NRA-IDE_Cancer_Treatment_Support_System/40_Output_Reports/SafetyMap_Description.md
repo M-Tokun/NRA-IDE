@@ -53,11 +53,8 @@
 
 
 | 表示 | 条件 | 物理的意味 |
-
 |:---|:---|:---|
-
 | 🟩 **BLOCKED** (green) | $\sigma_{resist} > \Delta P$ | 細胞は隙間を通過できない |
-
 | 🟥 **PASSABLE** (red) | $\sigma_{resist} \le \Delta P$ | 細胞は変形して通過しうる |
 
 
@@ -91,13 +88,9 @@ $$\sigma_{resist} = (E + B)\cdot\frac{D-d}{D} + \frac{12\,\eta\,v\,D}{1000\,d^{2
 
 
 | コード | 表示 | 条件 |
-
 |:---|:---|:---|
-
 | `0x01` | ERR_GEOMETRIC | 細胞直径 < 隙間サイズ |
-
 | `0x02` | ERR_RANGE | 入力が Phase 4 の範囲外 |
-
 | `0x03` | ERR_ZERO_VISC | 粘性ゼロ |
 
 

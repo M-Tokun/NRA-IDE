@@ -100,15 +100,10 @@ and model phase transitions as **discontinuous jumps** that occur once a thresho
 ### 2.1 Comparison of Two Design Philosophies
 
 | Aspect | Static Correctness (Formal Verification) | Nomological Ring Axioms (Dynamic Viability) |
-
 |---|---|---|
-
 | **Goal** | Complete consistency within specification | Continuous operation in uncertain environments |
-
 | **World model** | Binary true/false | Viability region with width |
-
 | **Response to anomalies** | Stop via exception | Correct via feedback |
-
 | **Time axis** | Static, single‑point consistency | Dynamic, future‑oriented continuation |
 
 Formal verification is strongest in closed logical spaces.  
@@ -268,13 +263,9 @@ Hysteresis (`margin`) prevents chattering by giving width instead of a point thr
 ### 6.1 Three‑Layer Structure
 
 | Layer | Role | Function |
-
 |---|---|---|
-
 | Pre‑RNA | Causal extraction | Decompose input into \(\delta\) |
-
 | LLM | Meaning generation | No safety responsibility |
-
 | Post‑RNA | Causal evaluation | Compute structural stability \(R\) |
 
 Observation is strictly non‑intervening.

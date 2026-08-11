@@ -25,21 +25,13 @@ It monitors six physical quantities in real time — pressure, temperature, bloo
 ### 2. Appropriate Use Cases (Specific Surgical Scenarios)
 
 | Surgery / Procedure | Corresponding Risk Pattern | Why This Tool Is Optimal |
-
 |---|---|---|
-
 | **PTA / Balloon Angioplasty** | Sudden wall-tension surge · Shear stress spike | Confirm immediate R_hi rise via balloon-pressure slider. **Fail-Closed** when rupture threshold is exceeded. |
-
 | **Stent Placement (Self-expanding / Balloon-expandable)** | Thrombus formation from adhesiveness drop · Excessive shear | Adh slider visualizes thrombus particles + early R_lo rise detection. |
-
 | **Anastomosis Reconstruction (Bypass / Graft)** | Viscosity rise from cooling + pressure imbalance | Temperature slider reproduces τ shrinkage during local cooling. |
-
 | **Cryoablation / Cryotherapy** | Sudden temperature drop + blood flow stagnation | Below T=30°C: wall tension drops + thrombus risk R_lo spikes. |
-
 | **Endoscopic Thrombus Aspiration / Thrombolysis** | Shear-stress variation + adhesiveness change | Shear slider monitors local fluctuation during aspiration via Dual Fluctuation. |
-
 | **Emergency Hemostasis / Coil Embolization** | Sudden pressure change + rapid flow decrease | R_lo immediately transitions to Fail-Closed when Flow drops sharply. |
-
 | **Endovascular Stent-Graft (EVAR / TEVAR)** | Long-term wall-tension accumulation / degradation | Simulates long-term D_long-equivalent fluctuation accumulation. |
 
 **Particularly recommended for**:  
@@ -209,21 +201,13 @@ The table below compares it with major similar tools as of 2026 (extracted from 
 ### Comparison Table (Intraoperative Local Monitoring Perspective)
 
 | Tool / Type | Primary Monitored Quantities | Real-Time Performance | Risk Detection Method | Visualization / Animation | Safety Philosophy (Fail-Closed Equivalent) | Invasiveness | Suitability for Partial Surgery (PTA / Stent / Anastomosis) | Cost & Operability | Key Difference from NRA-IDE |
-
 |---|---|---|---|---|---|---|---|---|---|
-
 | **NRA-IDE Vascular Monitor** (Standalone Browser HTML) | Pressure · Shear · Tension · Flow · Temperature · Adhesion (6 integrated quantities) | ◎ (Browser, instant) | Dual Fluctuation + Dynamic τ → **Automatic Fail-Closed at R ≥ 1.0** | Flow particles + wall expansion + thrombus animation + Dual R arc + log | **Structural physical-boundary safety halt** (no semantic inference) | Non-invasive (support tool) | ★★★★★ (Local balloon / cryo / anastomosis specialized) | Free · Offline · Immediately usable for education | — |
-
 | **IVUS** (Philips Volcano / Boston OptiCross) | Vessel diameter · Plaque · Stent apposition · Dissection | ◎ (In-catheter) | Image visualization + physician judgment (MLA criteria) | Real-time cross-sectional ultrasound images | None (physician judgment dependent) | Invasive (catheter) | ★★★★ (Stent deployment optimization) | High cost (tens of thousands of yen/case) · Dedicated device | Relies on image semantic analysis. No integrated physical quantities. Higher resolution than NRA-IDE but no "automatic halt at boundary violation." |
-
 | **OCT** (Abbott Ultreon / Terumo) | Thrombus · Dissection · Intima · Stent detail | ◎ | Image + AI auto-analysis (Ultreon) | High-resolution cross-section + AI overlay | None (AI assist + physician) | Invasive (catheter) | ★★★★ (Best thrombus detection) | High cost · Dedicated device | High resolution but prioritizes "morphology" over "physical boundaries." NRA-IDE shear/tension integration absent. |
-
 | **FFR / iFR + PressureWire** (Abbott / Philips) | Pressure gradient (functional ischemia) | ○ | FFR < 0.80 triggers intervention decision | Pressure waveform graph | None (numeric threshold + physician) | Invasive (wire) | ★★★ (Functional assessment) | Medium cost · Wire consumables | Pressure only. Shear, tension, adhesion ignored. No NRA-IDE Dual Fluctuation. |
-
 | **Transonic Flowmeter** (Transit-time ultrasound) | Blood flow volume (graft patency) | ◎ (Direct surgical connection) | Flow drop triggers alert | Numeric + waveform | None (alarm only) | Minimally invasive (probe) | ★★★ (Bypass anastomosis confirmation) | Medium cost · Dedicated device | Single quantity (flow only). No NRA-IDE integrated 6-quantity + wall tension. |
-
 | **CFD / WSSNet / SimVascular** (AI + 4D Flow MRI) | Wall shear stress (WSS) only | △ (Post-computation) | CFD computation + AI prediction | 3D color WSS map | None (research use) | Non-invasive (MRI/CT) | ★ (Preoperative simulation) | Research use · High-spec PC required | Specialized in single quantity (shear). No real-time capability or Fail-Closed. Higher accuracy but heavier computation than NRA-IDE. |
-
 | **PiCCO / FloTrac** (Systemic hemodynamics) | Systemic cardiac output · Vascular resistance | ◎ | Systemic parameter anomaly alerts | Numeric dashboard | None (alarm) | Minimally invasive (arterial line) | ★ (Systemic management) | Medium cost · ICU use | Systemic monitoring. **Zero** local vascular physical quantities. A completely different axis from NRA-IDE. |
 
 ### Key Points Where NRA-IDE Vascular Monitor Has an Advantage (Summary)

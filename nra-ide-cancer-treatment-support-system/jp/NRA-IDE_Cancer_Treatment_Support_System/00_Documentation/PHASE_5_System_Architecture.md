@@ -63,13 +63,9 @@ FPGA が接続されていない場合、手順3〜5は参照実装 `20_Software
 
 
 | Offset | 内容 | 形式 |
-
 |:---|:---|:---|
-
 | `[00]` | Header | `0xA5`（Type A） / `0xA6`（Type B） |
-
 | `[01-12]` | Payload | 6 パラメータ × 2 バイト（Q8.8, Big Endian） |
-
 | `[13]` | Checksum | ペイロード12バイトの XOR |
 
 
@@ -83,13 +79,9 @@ FPGA が接続されていない場合、手順3〜5は参照実装 `20_Software
 
 
 | Offset | 内容 | 形式 |
-
 |:---|:---|:---|
-
 | `[00]` | Header | 受信したヘッダと同一（`0xA5` / `0xA6`） |
-
 | `[01]` | Data | `(Error << 1) \| Jammed` |
-
 | `[02]` | Checksum | `Header ^ Data` |
 
 

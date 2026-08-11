@@ -59,15 +59,10 @@ Envoy ext_authz（推奨）と Nginx auth_request に対応しています。
 スコープ（service / route / cluster）ごとのスナップショットを受け取ります。
 
 | フィールド | 説明 | 単位 |
-
 |---|---|---|
-
 | retry_rate | リトライ発生数 | req/s |
-
 | queue_depth | キュー滞留数 | 件数 |
-
 | dep_timeout_rate | 依存先タイムアウト数 | req/s |
-
 | error_rate | エラー率（参考値、判定には使用しない） | - |
 
 ---
@@ -75,21 +70,13 @@ Envoy ext_authz（推奨）と Nginx auth_request に対応しています。
 ## 3. 設定パラメータ
 
 | パラメータ | 既定値 | 説明 |
-
 |---|---|---|
-
 | R_OP | 1.0 | SILENCE 閾値。低いほど早く止まる（安全方向） |
-
 | TAU_DEFAULT | 1.5 | 吸収厚みの基底値。高いほど安全方向 |
-
 | TAU_EMA_ALPHA | 0.3 | 二重ゆらぎの感度。0〜1、大きいほど最近の変化を重視 |
-
 | TAU_AMPLIFY | 2.0 | τの最大増幅倍率の上限 |
-
 | HOLD_MS | 2000 | SILENCE 最短維持時間（ミリ秒） |
-
 | MAX_CACHE_SIZE | 5000 | スコープ記憶の上限数（メモリ保護） |
-
 | RECOVER_STEP | - | 段階的な再開（省略可能） |
 
 ---
@@ -139,17 +126,11 @@ R         = r_raw × τ_dynamic
 ## 6. 受入基準
 
 | ID | 内容 |
-
 |---|---|
-
 | A1 | 連鎖反応を誘発した状態で、システム全体への伝播が止まること |
-
 | A2 | SILENCE 判定がスナップショット更新から 100ms 以内に行われること |
-
 | A3 | テレメトリを意図的に欠損させると、保守的モード（SILENCE）になること |
-
 | A4 | R_OP / TAU は再デプロイなしに ConfigMap で変更できること |
-
 | A5 | TAU_EMA_ALPHA / TAU_AMPLIFY も再デプロイなしに変更できること |
 
 ---

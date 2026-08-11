@@ -25,13 +25,9 @@ IDE (Intensional Dynamics Engine) computation running on a quantum substrate can
 ### Alignment with NRA-IDE Core Axioms
 
 | Axiom | Realization in Hybrid Design |
-
 |---|---|
-
 | Distance is a result, not a cause | IDE holds global state; classical only returns the deviation |
-
 | Honest confession at threshold | Only significant residuals speak as correction forces; small fluctuations remain silent |
-
 | Respect for physical irreversibility | Direct state overwrite is forbidden; continuous update via velocity |
 
 ### Reflection on the Macro/Micro Dichotomy
@@ -63,13 +59,9 @@ $$\frac{d^2x}{dt^2} + \gamma\dot{x} = \underbrace{F_{\text{IDE}}(x)}_{\text{Quan
 $$G(r) = r \cdot \frac{|r|}{k + |r|}$$
 
 | Residual magnitude | Linear residual (conventional) | After quadratic gate |
-
 |---|---|---|
-
 | $r = 0.1$ (noise) | 0.10 | 0.009 |
-
 | $r = 0.5$ (minor deviation) | 0.50 | 0.17 |
-
 | $r = 1.5$ (phase transition) | 1.50 | 0.90 |
 
 Small fluctuations vanish naturally; large deviations are emphasized via saturating response. **The mathematical structure itself becomes the filter — no artificial ε-cutoff is required.**
@@ -85,17 +77,11 @@ Replaces the binary on/off mask with a smooth coupling weight, eliminating disco
 ## 4. Fundamental Difference from Conventional Classical Computation
 
 | | Conventional Classical | Auxiliary Classical (this design) |
-
 |---|---|---|
-
 | **Role** | Computes and overwrites entire state | Computes only the deviation, returns it as a force |
-
 | **Input** | Its own previous output (errors accumulate) | Current state held by IDE (stabilized by IDE) |
-
 | **Scope** | All nodes, every step | Only threshold-exceeding nodes |
-
 | **Error handling** | Carried forward to next step | Naturally dissipated by quadratic gate |
-
 | **Authority** | Principal (overwrite) | Auxiliary (perturbation / advisor) |
 
 > The decisive difference preventing error explosion: the classical computation's input is **the IDE-stabilized current state**, not its own previous output.
@@ -155,13 +141,9 @@ residual_knee (k) : Attenuator — controls how strongly the classical result is
 ### Knee Settings by Use Case
 
 | Use Case | k Setting | Effect |
-
 |---|---|---|
-
 | Coarse global overview | Large | Classical correction rarely activates |
-
 | Precise phase-transition tracking | Small | Classical intervenes early |
-
 | Real-time control | Intermediate | Balanced operation |
 
 ---

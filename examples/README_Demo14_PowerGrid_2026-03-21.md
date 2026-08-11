@@ -53,19 +53,12 @@ NRA-IDEが答える問いは「どの速さで閾値に近づいているか、�
 ### Left Panel
 
 | Display | Meaning |
-
 |---|---|
-
 | f [Hz] | Current frequency |
-
 | δf [Hz] | Absolute deviation from 50 Hz |
-
 | τ | Absorption thickness (adjustable via slider) |
-
 | R = δ/τ | Structural approach ratio |
-
 | FSM State | Current gate state |
-
 | residual_debt | Accumulated structural debt — **does not reset on recovery** |
 
 ### Right Panel — Generator Units
@@ -79,19 +72,12 @@ When a unit trips, its bar goes dark and spike-δ is injected.
 ## How to Operate / 操作方法
 
 | Button | Action |
-
 |---|---|
-
 | ⚡ 発電機脱落 | Trips a random online generator. HR↑, BP↓ type event. |
-
 | 📈 需要急増 | Injects a demand surge event. Sustained δ increase. |
-
 | 🔄 系統復旧／新評価 | Before rupture, applies human-operated grid recovery. After `RUPTURE_BOUNDARY`, starts an independent Cause-Side evaluation following external inspection. |
-
 | ■ 独立した新評価 | Starts a new evaluation history without releasing the prior rupture record. |
-
 | SPEED slider | Simulation speed ×1–×5 |
-
 | τ slider | Adjust absorption thickness. Observe how threshold sensitivity changes. |
 
 **Important**: After RUPTURE_BOUNDARY activates, the event buttons are disabled.
@@ -177,13 +163,9 @@ $$R_{\mathrm{target}} \geq 1.0 \Rightarrow \mathrm{RUPTURE\_BOUNDARY}$$
 ## Relation to NRA-IDE Layer Structure / NRA-IDEレイヤーとの対応
 
 | Layer | This Demo |
-
 |---|---|
-
 | Layer 1 — Basic R = δ/τ | Core formula |
-
 | Layer 3 — Dynamic τ / Damper | τ slider, spring recovery |
-
 | Layer 4 — Sensor Fusion | Multi-generator δ composition |
 
 Demo #14 operates primarily at **Layer 3–4**.

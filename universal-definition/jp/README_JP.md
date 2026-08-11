@@ -43,15 +43,10 @@ This directory contains the Universal Structural Definition for NRA-IDE (Non-Rev
 
 
 | ファイル名 | 説明 | 読了時間 | 対象読者 |
-
 |-----------|------|---------|---------|
-
 | [NRA-IDE_Universal_Definition_v1_0_full_JP.md](./NRA-IDE_Universal_Definition_v1_0_full_JP.md) | **完全版** - 全8章の詳細定義 | 30-40分 | 全員（必読） |
-
 | [NRA-IDE_Quick_Reference_JP.md](./NRA-IDE_Quick_Reference_JP.md) | **要点簡易版** - 核心のみ抽出 | 5分 | 意思決定者、初見者 |
-
 | [NRA-IDE_Implementation_Guide_JP.md](./NRA-IDE_Implementation_Guide_JP.md) | **実装ガイド** - コード例と実装パターン | 20-30分 | エンジニア、実装者 |
-
 | [NRA-IDE_Checklist_JP.md](./NRA-IDE_Checklist_JP.md) | **チェックリスト** - 100項目以上の検証項目 | 参照用 | 全員（運用時） |
 
 
@@ -65,15 +60,10 @@ This directory contains the Universal Structural Definition for NRA-IDE (Non-Rev
 
 
 | File Name | Description | Reading Time | Target Audience |
-
 |-----------|-------------|--------------|-----------------|
-
 | NRA-IDE_Universal_Definition_v1_0_full.md | **Full Version** - Complete 8-chapter definition | 30-40 min | Everyone (Required) |
-
 | NRA-IDE_Quick_Reference.md | **Quick Reference** - Core principles only | 5 min | Decision makers, First-time readers |
-
 | NRA-IDE_Implementation_Guide.md | **Implementation Guide** - Code examples and patterns | 20-30 min | Engineers, Implementers |
-
 | NRA-IDE_Checklist.md | **Checklist** - 100+ verification items | Reference | Everyone (During operation) |
 
 

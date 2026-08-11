@@ -35,15 +35,10 @@
 
 
 | ファイル | 内容 |
-
 |:---|:---|
-
 | `sample_patient_data.json` | システム入力用の標準JSONフォーマット（1件） |
-
 | `validation_test_cases.csv` | **7件**のテストケース（正常系・異常系・境界値） |
-
 | `expected_results.json` | 各ケースの期待値（`expected_binary = (error_code << 1) \| is_jammed`） |
-
 | `run_validation.py` | CSV と期待値を突き合わせる一括検証スクリプト |
 
 
@@ -53,21 +48,13 @@
 
 
 | ID | 内容 | 期待判定 | expected_binary |
-
 |:---|:---|:---|:---|
-
 | TC001 | 標準（薬なし） | PASSABLE | `0x00` |
-
 | TC002 | 標準（薬あり B=3.0） | BLOCKED | `0x01` |
-
 | TC003 | 硬い細胞 E=3.0 | BLOCKED | `0x01` |
-
 | TC004 | 粘性ゼロ（禁止入力） | ERR 0x03 | `0x06` |
-
 | TC005 | すり抜け（直径 < 隙間） | ERR 0x01 | `0x02` |
-
 | TC006 | 高血圧・軟細胞 | PASSABLE | `0x00` |
-
 | TC007 | 最大投与 B=10.0 | BLOCKED | `0x01` |
 
 

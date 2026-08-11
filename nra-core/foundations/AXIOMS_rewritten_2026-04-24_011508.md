@@ -39,19 +39,12 @@
 ## 凡例 / Notation
 
 | 記号 | 意味                 | Symbol  | Meaning                       |
-
 | ---- | -------------------- | ------- | ----------------------------- |
-
 | δ   | 蓄積ズレ             | delta   | Accumulated Deviation         |
-
 | τ   | 吸収厚み             | tau     | Absorption Thickness          |
-
 | R    | 接近比               | R       | Structural Approach Ratio     |
-
 | ω   | 構造連続性           | omega   | Structural Continuity         |
-
 | ε   | 最小閾値（ゼロ近傍） | epsilon | Minimum threshold (near-zero) |
-
 | ∅   | 定義域外             | ∅      | Out of domain                 |
 
 ---
