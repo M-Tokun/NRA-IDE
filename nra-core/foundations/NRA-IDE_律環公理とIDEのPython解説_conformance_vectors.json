@@ -1,0 +1,128 @@
+{
+  "$comment": "機械可読な検証データ。対応する散文・コードは nra-core/foundations/NRA-IDE_律環公理とIDEのPython解説_2026-08-06.md の15章。theory/axioms.json と同じ発想で、人間向け散文とは別に、プログラムが直接突き合わせられる形式として用意する。",
+  "document": "nra-core/foundations/NRA-IDE_律環公理とIDEのPython解説_2026-08-06.md",
+  "generated": "2026-08-07",
+  "non_finite_notation": "厳密なJSONはNaN/Infinityの数値リテラルを許可しないため、非有限値は文字列 \"NaN\" / \"Infinity\" / \"-Infinity\" で表す。検証器側でこれらの文字列を対応する非有限浮動小数点値へ変換してから評価すること。",
+  "source_of_truth_precedence": [
+    "theory/AXIOMS.md",
+    "theory/axioms.json",
+    "nra-core/foundations/NRA-IDE_Architecture_public.py",
+    "nra-core/foundations/NRA-IDE_律環公理とIDEのPython解説_2026-08-06.md",
+    "この conformance_vectors.json"
+  ],
+
+  "canonical_identifiers": {
+    "boundary_states": [
+      "PERMIT",
+      "BOUNDARY_WARNING",
+      "HANDOFF_REQUIRED",
+      "IRREVERSIBLE_TRANSITION",
+      "RUPTURE_BOUNDARY"
+    ],
+    "input_exception_types": [
+      "CONFESSION",
+      "OUT_OF_DESCRIPTION_DOMAIN"
+    ],
+    "threshold_symbols": ["R_warn", "R_handoff", "R_irrev"],
+    "threshold_order_rule": "0 <= R_warn < R_handoff < R_irrev < 1.0",
+    "classes_in_md": [
+      "CauseSideObservation",
+      "Thresholds",
+      "StructuralState",
+      "Confession",
+      "OutOfDescriptionDomain",
+      "DualFluctuationTracker",
+      "CausalViolation"
+    ],
+    "functions_in_md": [
+      "compute_boundary_ratio",
+      "classify_boundary_state",
+      "detect_double_fluctuation",
+      "claim_restoration",
+      "tau_after_depletion",
+      "update_structural_variables",
+      "is_autonomous_action_suppressed",
+      "structural_testimony_continues",
+      "nra_input_gate",
+      "llm_core",
+      "nra_output_gate",
+      "attempt_reverse_update",
+      "output_composer",
+      "sandwich_pipeline",
+      "brake_hydraulic_pressure_gate",
+      "run_structural_trace",
+      "run_conformance_checks"
+    ],
+    "note": "この一覧にない識別子（関数名・定数名・クラス名）を、本文書由来として提示してはならない。"
+  },
+
+  "known_fabrications_rejected": [
+    {
+      "identifier": "latch_irrev",
+      "status": "does_not_exist",
+      "correct_form": "StructuralState.irreversible_latched への代入（真偽値フィールド）であり、独立した関数ではない。"
+    },
+    {
+      "identifier": "FAIL_CLOSED_TOLERANCE",
+      "status": "does_not_exist",
+      "correct_form": "CONFESSION・OUT_OF_DESCRIPTION_DOMAINに許容度パラメータは存在しない。不明・不正な入力は常にCONFESSION等になり、閾値で緩められない。"
+    },
+    {
+      "identifier": "PERMITTED_TOKENS",
+      "status": "does_not_exist",
+      "correct_form": "nra_output_gateは許可されたコンテンツ種別（recovery_proposal等のフラグ）で判定し、固定トークン集合の所属判定ではない。"
+    },
+    {
+      "identifier": "IDEA",
+      "status": "does_not_exist",
+      "correct_form": "Cause-Side観測とNRA-IDE境界評価器の間に、そのような中間層は定義されていない。"
+    },
+    {
+      "identifier": "Non-linear Radiative/Reactive Adaptive – Integrated Dynamic Estimation",
+      "status": "wrong_expansion",
+      "correct_form": "NRA-IDEの正式名称は Nomological Ring Axioms / Intensional Dynamics Engine のみ。"
+    }
+  ],
+
+  "test_vectors": {
+    "fixed_tau": 10.0,
+    "thresholds": { "r_warn": 0.60, "r_handoff": 0.80, "r_irrev": 0.95 },
+
+    "valid_cases": [
+      { "delta": 1.0,  "tau": 10.0, "expected_R": 0.10, "expected_state": "PERMIT" },
+      { "delta": 4.0,  "tau": 10.0, "expected_R": 0.40, "expected_state": "PERMIT" },
+      { "delta": 6.5,  "tau": 10.0, "expected_R": 0.65, "expected_state": "BOUNDARY_WARNING" },
+      { "delta": 8.2,  "tau": 10.0, "expected_R": 0.82, "expected_state": "HANDOFF_REQUIRED" },
+      { "delta": 9.6,  "tau": 10.0, "expected_R": 0.96, "expected_state": "IRREVERSIBLE_TRANSITION", "expected_irreversible_latched": true },
+      { "delta": 10.4, "tau": 10.0, "expected_R": 1.04, "expected_state": "RUPTURE_BOUNDARY" }
+    ],
+
+    "latch_persistence_sequence": {
+      "description": "同一StructuralStateに対して連続適用する。2ステップ目は単独ならPERMIT相当のRだが、ラッチにより状態は戻らない。",
+      "steps": [
+        { "step": 1, "delta": 9.6, "tau": 10.0, "expected_R": 0.96, "expected_state": "IRREVERSIBLE_TRANSITION" },
+        { "step": 2, "delta": 3.0, "tau": 10.0, "expected_R": 0.30, "expected_state": "IRREVERSIBLE_TRANSITION" }
+      ]
+    },
+
+    "impossible_cases": [
+      { "case": "tau_zero",           "delta": 5.0,  "tau": 0.0,        "expected_result_type": "OutOfDescriptionDomain" },
+      { "case": "negative_delta",     "delta": -2.0, "tau": 10.0,       "expected_result_type": "Confession" },
+      { "case": "nan_delta",          "delta": "NaN","tau": 10.0,       "expected_result_type": "Confession" },
+      { "case": "inf_tau",            "delta": 1.0,  "tau": "Infinity", "expected_result_type": "Confession" },
+      { "case": "missing_source",     "delta": 1.0,  "tau": 10.0,       "source": "", "expected_result_type": "Confession" },
+      { "case": "threshold_order_violation",
+        "thresholds": { "r_warn": 0.80, "r_handoff": 0.60, "r_irrev": 0.95 },
+        "expected_result_type": "ValueError_at_construction" },
+      { "case": "fabricated_parameter",
+        "attempted_kwarg": "FAIL_CLOSED_TOLERANCE",
+        "attempted_kwarg_value": 0.1,
+        "expected_result_type": "TypeError_at_construction",
+        "note": "CauseSideObservationはdelta/tau/source/timestampの4フィールドしか持たない frozen dataclass であり、未定義キーワード引数は言語仕様レベルで拒否される。" }
+    ]
+  },
+
+  "verification_instructions": "この test_vectors を、nra-core/foundations/NRA-IDE_律環公理とIDEのPython解説_2026-08-06.md の15.5節にある run_conformance_checks() で直接実行し、全項目が一致することを確認できる。RAGパイプライン等でこの文書についてのAI生成回答を検証する場合は、回答中の識別子を canonical_identifiers と突き合わせ、known_fabrications_rejected に一致するものが含まれていれば拒否し、数値主張は test_vectors と突き合わせることを推奨する。",
+
+  "reimplementation_warning": "警告：このJSONの構造・フィールド名だけを読んで、検証ロジック（compute_boundary_ratio、classify_boundary_state、不可逆ラッチの受け渡し等）を独自に書き直してはならない。過去に実際に試みられ、失敗が確認されている：(1) classify_boundary_state に StructuralState を渡さない再実装は書けてしまうが、その場合 latch_persistence_sequence の2ステップ目が期待どおりに動かない。(2) compute_boundary_ratio で delta<0 や source 欠落のチェックを省略した再実装は書けてしまうが、その場合 impossible_cases の negative_delta と missing_source が誤判定される。(3) non_finite_notation の文字列変換（\"NaN\"→float('nan')等）を実装し忘れても、型エラーにより偶然テストを通過することがあるため、パスしたからといって正しい実装とは限らない。これらは机上のレビューでは検出しにくく、実行して初めて発覚した。正しい実装は nra-core/foundations/NRA-IDE_conformance_checks.py に既に存在し、実行して ALL PASS（終了コード0）を確認済みである。このファイルをそのまま import または実行すること。"
+}
