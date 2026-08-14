@@ -69,6 +69,39 @@ pushはファイル単位ではなくコミット単位で行われる。ファ�
 
 force-push、rebase、filter-repo、履歴削除は、利用者が対象範囲と目的を個別に明示した場合に限る。
 
+### Stage確認の推奨形式（External Horizontal Axis）
+
+不十分な確認例：
+
+> 精査が終わりました。Stageへ移ってよいですか。
+
+確認可能な形式の例：
+
+```text
+精査対象:
+  tracked Nファイル
+  今回変更対象 Mファイル
+
+snapshot:
+  worktree SHA-256: ...
+  policy SHA-256: ...
+
+機械検証:
+  (関連検査結果)
+
+人間承認対象:
+  file-a
+  file-b
+
+差異:
+  (あれば列挙)
+
+判定:
+  Stage可 / Stage不可
+```
+
+差異を解消した後に、人間承認対象 = AI検出対象 = 機械的Stage予定対象 を成立させてから固定snapshotをStageする。
+
 ## 4. 秘密情報
 
 password、token、秘密鍵、`.env`の値などを、出力、ログ、commit、メッセージへ含めてはならない。
