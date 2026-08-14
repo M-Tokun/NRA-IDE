@@ -59,7 +59,7 @@
 
 
 
-`validation_test_cases.csv` は **UTF-8 BOM 付き**である。読み込みには `utf-8-sig` を用いること。`utf-8` で開くと先頭列名が `﻿test_id` となり、1行目で KeyError になる。
+`validation_test_cases.csv` は **UTF-8 BOM 付き**である。読み込みには `utf-8-sig` を用いること。`utf-8` で開くと先頭列名が `\uFEFFtest_id` となり、1行目で KeyError になる。
 
 
 

@@ -61,6 +61,20 @@ Add focused regression tests when changing behavior. Do not introduce an externa
 
 Other scripts, demos, papers, and visualizations are research, explanatory, illustrative, domain-specific, or historical unless a higher-precedence canonical record explicitly promotes them.
 
+## Push Gate Setup (Malware / Unicode Boundary Gate)
+
+This repository ships a `pre-push` hook (`.githooks/pre-push`) that runs `scripts/malware_gate.ps1` — a deterministic Unicode boundary scan (`scripts/unicode_gate.py`) followed by a Microsoft Defender scan of outgoing blobs (`scripts/malware_gate.py`). It is not active by default; each clone must opt in:
+
+```powershell
+git config core.hooksPath .githooks
+```
+
+The hook depends on `pwsh` (PowerShell 7+) being on `PATH`, and on `unicode_gate_policy.json` and `unicode_gate_baseline.json` existing at the repository root — both are tracked files, not local state. `unicode_gate_baseline.json` records exact, hash-pinned exceptions (see `scripts/unicode_review.py`); a missing policy file fails the gate closed, and a missing baseline file is treated as "no exceptions yet" rather than an error.
+
+To review and update Unicode findings, use `scripts/unicode_review.py` (`scan`, `decide`, `apply`, `baseline`, `restore` subcommands). Never approve a finding without confirming the file hash, path, and codepoint match what was actually scanned.
+
+Known limitation: at push time, `scripts/malware_gate.py` materializes outgoing blobs under content-addressed temporary filenames before `unicode_gate.py` scans them, so the `PATH_*` rules (mixed-script or control characters in a real repository path) are not meaningfully evaluated against the pushed paths in that flow. Run `python scripts/unicode_gate.py --all` periodically (or in CI) to cover path-based checks against real tracked paths.
+
 ## Domain Rules and Thresholds
 
 The invariant order is:

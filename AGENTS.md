@@ -144,3 +144,11 @@ Git、外部通信、外部操作は、依頼された場合または実行し�
 `RULES_DETAIL.md`は、AGENTS.mdで確定した原則を実行するための手順だけを書く。
 
 `CODEX.md`、`CLAUDE.md`、`GEMINI.md`、`CLINE.md`、`.cursorrules`などのAI固有文書は、読込起点とAI固有の技術注意だけを書く。
+
+## 10. 共有Skill
+
+`skills/`配下は、Codex、Claude、GeminiなどNRA-IDEで作業する全AIエージェントが共有するSkill・補助ツールの置き場である。
+
+自律的な多段探索、繰り返しツール呼び出し、探索的なエージェントループを行う場合は、`skills/nra-depth-guard/`が提供する判定ロジック（`nra_depth_guard.py`の`validate_and_step()`）を各ツール呼び出しの直前に通すことを推奨する。詳細は`skills/nra-depth-guard/SKILL.md`を参照する。
+
+この判定ロジックは、呼び出し側が能動的に呼ばなければ機能しない協力的な自己申告型の機構であり、ツール呼び出しを強制的に横取りする機構ではない。呼び出しの省略自体を検出・強制する仕組みは別途必要である。

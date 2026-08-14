@@ -1,0 +1,3 @@
+# requirements.txt | Time-stamp: 26-0812-1939
+numpy>=2.0,<3.0
+torch>=2.3,<3.0

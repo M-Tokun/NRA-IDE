@@ -18,7 +18,8 @@ desktop.ini
 .claude/
 
 # Editors
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 .kilo/
 
@@ -65,8 +66,10 @@ env/
 *.swp
 *~
 
-# Local Codex skills
-/skills/
+# Local Codex skills (shared skills referenced by AGENTS.md are tracked exceptions)
+/skills/*
+!/skills/nra-depth-guard/
+!/skills/axis-boundary-reasoning/
 
 # NRA-IDE clinical session outputs
 output/

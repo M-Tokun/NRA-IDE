@@ -629,7 +629,7 @@ $$
 
 x≥x
 alarm
-	​
+
 
 ⇒赤ランプ点灯
 
@@ -653,27 +653,27 @@ alarm
 
 t
 damage
-	​
+
 
 −t
 alarm
-	​
+
 
 >t
 notice
-	​
+
 
 +t
 travel
-	​
+
 
 +t
 diagnosis
-	​
+
 
 +t
 action
-	​
+
 
 
 つまり、被害発生までの残り時間が、人間の対応時間より長い場合です。
@@ -684,15 +684,15 @@ NRA-IDEが必要になる地点
 
 t
 damage
-	​
+
 
 −t
 alarm
-	​
+
 
 ≤t
 human response
-	​
+
 
 
 この場合は、人間が点検する前に、

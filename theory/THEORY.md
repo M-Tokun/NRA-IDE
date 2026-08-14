@@ -861,7 +861,7 @@ Handoff changes execution authority only. Responsibility, legal responsibility, 
 
 欠損値を平均、類似性、過去出力、類推で補完してはならない。
 
-既知の境界進行、既知の近似、既知の警告、人間委譲、不​​可逆遷移、完全破断は`CONFESSION`ではない。
+既知の境界進行、既知の近似、既知の警告、人間委譲、不可逆遷移、完全破断は`CONFESSION`ではない。
 
 既知の正規状態`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`は`STRUCTURAL_DISCLOSURE_LOG`へ記録する。
 

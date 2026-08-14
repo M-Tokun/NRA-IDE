@@ -1,0 +1,82 @@
+"""Orthogonal canonical and operational states used by the shadow kernel."""
+
+from enum import Enum
+
+
+class TargetBoundaryState(str, Enum):
+    PERMIT = "PERMIT"
+    BOUNDARY_WARNING = "BOUNDARY_WARNING"
+    HANDOFF_REQUIRED = "HANDOFF_REQUIRED"
+    IRREVERSIBLE_TRANSITION = "IRREVERSIBLE_TRANSITION"
+    RUPTURE_BOUNDARY = "RUPTURE_BOUNDARY"
+
+
+class InputExceptionState(str, Enum):
+    CONFESSION = "CONFESSION"
+    OUT_OF_DESCRIPTION_DOMAIN = "OUT_OF_DESCRIPTION_DOMAIN"
+
+
+class ExecutionAuthorityState(str, Enum):
+    SHADOW_ONLY = "SHADOW_ONLY"
+    DENIED = "DENIED"
+    EXTERNAL_PREDEFINED = "EXTERNAL_PREDEFINED"
+
+
+class ObservationChannelState(str, Enum):
+    ACTIVE = "ACTIVE"
+    OBSERVATION_LOST = "OBSERVATION_LOST"
+    NOT_OBSERVABLE = "NOT_OBSERVABLE"
+
+
+class LoggingChannelState(str, Enum):
+    ACTIVE = "ACTIVE"
+    LOGGING_LOST = "LOGGING_LOST"
+
+
+class CommunicationChannelState(str, Enum):
+    ACTIVE = "ACTIVE"
+    COMMUNICATION_LOST = "COMMUNICATION_LOST"
+
+
+class TestimonyMode(str, Enum):
+    STANDARD = "STANDARD"
+    FIXED_HANDOFF = "FIXED_HANDOFF"
+    POST_RUPTURE_FIXED = "POST_RUPTURE_FIXED"
+    INPUT_EXCEPTION = "INPUT_EXCEPTION"
+
+
+class ExecutionDirective(str, Enum):
+    SHADOW_PASS = "SHADOW_PASS"
+    DENY = "DENY"
+
+
+class AuthorityDirective(str, Enum):
+    KEEP_SHADOW_ONLY = "KEEP_SHADOW_ONLY"
+    DENY = "DENY"
+    TRANSFER_EXTERNAL_PREDEFINED = "TRANSFER_EXTERNAL_PREDEFINED"
+
+
+class ClarificationDirective(str, Enum):
+    NONE = "NONE"
+    ASK_SUMMARY = "ASK_SUMMARY"
+    ASK_EXPLICIT = "ASK_EXPLICIT"
+    ASK_EXACT_TARGET = "ASK_EXACT_TARGET"
+    HANDOFF_OR_DENY = "HANDOFF_OR_DENY"
+
+
+class TestimonyDirective(str, Enum):
+    CONTINUOUS = "CONTINUOUS"
+    FIXED_HANDOFF = "FIXED_HANDOFF"
+    POST_RUPTURE_FIXED = "POST_RUPTURE_FIXED"
+    INPUT_EXCEPTION = "INPUT_EXCEPTION"
+
+
+class AuditDirective(str, Enum):
+    APPEND_DECISION = "APPEND_DECISION"
+    APPEND_CONFLICT = "APPEND_CONFLICT"
+    APPEND_INPUT_EXCEPTION = "APPEND_INPUT_EXCEPTION"
+
+
+class RecoveryDirective(str, Enum):
+    NONE = "NONE"
+    REQUIRE_INDEPENDENT_VERIFICATION = "REQUIRE_INDEPENDENT_VERIFICATION"

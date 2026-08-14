@@ -1,0 +1,596 @@
+{
+  "entries": [
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "3ef5bfea9b5401fdcc4740a385915a55e09cb8fafdda2e640b521497dd1f9d48",
+      "id": "UGB-46B934EE7C830440",
+      "line": 7,
+      "path": "cascade-failure-prevention/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "ea56afdace2c74a5b0967d7488349d67c3d5f887a93f5c16558849ee79b0f9d4",
+      "id": "UGB-B98963E6961EE863",
+      "line": 31,
+      "path": "cascade-failure-prevention/tools/han_validation_test.py",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 24,
+      "file_sha256": "ea56afdace2c74a5b0967d7488349d67c3d5f887a93f5c16558849ee79b0f9d4",
+      "id": "UGB-592BDB78AFB63E4C",
+      "line": 83,
+      "path": "cascade-failure-prevention/tools/han_validation_test.py",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 19,
+      "file_sha256": "ea56afdace2c74a5b0967d7488349d67c3d5f887a93f5c16558849ee79b0f9d4",
+      "id": "UGB-C56C6EFD8CBBAEFE",
+      "line": 233,
+      "path": "cascade-failure-prevention/tools/han_validation_test.py",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 4,
+      "file_sha256": "cae65ede4e9e987d32e2aa8f2a375595d7ceb4d3fcb96836facfc4055b282afe",
+      "id": "UGB-C27FB34B156EC8C7",
+      "line": 3,
+      "path": "cascade-failure-prevention/tools/\u904b\u7528\u691c\u8a3c\u30c4\u30fc\u30eb\u30ac\u30a4\u30c9.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "9281b7213d208c5bb4575d0b918aca0ce5a860e2e6a40b9f5e63f97668ba4a6c",
+      "id": "UGB-02D91B8D1EA60B2E",
+      "line": 761,
+      "path": "cascade-failure-prevention/\u65e5\u672c\u8a9e\u7dcf\u5408\u89e3\u8aac.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 28,
+      "file_sha256": "cb14927fa041d5bb66b0bacceb17d9752acd2f39a014ab5c73b49bd5f1e95364",
+      "id": "UGB-1DAA823AA165B34E",
+      "line": 495,
+      "path": "examples/00_Escapement_Foundation_NRA_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 22,
+      "file_sha256": "e2b913d6b3338a51e5c9a0f9def5b7b8303228f0ef3c2fd1e193ac16d7e640f7",
+      "id": "UGB-1BC9B7244ECAE894",
+      "line": 463,
+      "path": "examples/01_Why_No_Distance_EN.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 22,
+      "file_sha256": "c2ea1068daf671749b43ea8214de9670be7ad91e5cd7ebf85c828d71ba5bcb14",
+      "id": "UGB-F50C45D6EA49939F",
+      "line": 602,
+      "path": "examples/01_Why_No_Distance_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 14,
+      "file_sha256": "b3b05f05d4a74f3fc3711ef68b3e851c7a0aefb86cfac2aedd5c59efe1535b8c",
+      "id": "UGB-40723F82C4C06AE5",
+      "line": 195,
+      "path": "examples/02_Error_Accumulation_EN.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 46,
+      "file_sha256": "b3b05f05d4a74f3fc3711ef68b3e851c7a0aefb86cfac2aedd5c59efe1535b8c",
+      "id": "UGB-33877924D8A2E585",
+      "line": 255,
+      "path": "examples/02_Error_Accumulation_EN.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 33,
+      "file_sha256": "b3b05f05d4a74f3fc3711ef68b3e851c7a0aefb86cfac2aedd5c59efe1535b8c",
+      "id": "UGB-1AA94D42B0F1D764",
+      "line": 438,
+      "path": "examples/02_Error_Accumulation_EN.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 14,
+      "file_sha256": "211a2c74c1ded8931d23b2e64277600b73d4707e2b63dc8e4c8c0af1c1832b26",
+      "id": "UGB-9C872D0897C3FCB1",
+      "line": 256,
+      "path": "examples/02_Error_Accumulation_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 46,
+      "file_sha256": "211a2c74c1ded8931d23b2e64277600b73d4707e2b63dc8e4c8c0af1c1832b26",
+      "id": "UGB-46C2DDDB450E9D5D",
+      "line": 322,
+      "path": "examples/02_Error_Accumulation_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 33,
+      "file_sha256": "211a2c74c1ded8931d23b2e64277600b73d4707e2b63dc8e4c8c0af1c1832b26",
+      "id": "UGB-C66A71678A875AA3",
+      "line": 605,
+      "path": "examples/02_Error_Accumulation_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 18,
+      "file_sha256": "6fa9448be380a81dfc62c629799b39263f546e9b4f3de973dee1fa8cfc358de3",
+      "id": "UGB-A9C9C78B453ADBFE",
+      "line": 104,
+      "path": "examples/05_IDE_Threshold_Visualizer_EN.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 18,
+      "file_sha256": "9a29603408ffb9519f7927670aaf11b3fd0dfa02f0cb07e54e35d495dfb620d8",
+      "id": "UGB-35CBBA3D1AE85A38",
+      "line": 107,
+      "path": "examples/05_IDE_Threshold_Visualizer_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 8,
+      "file_sha256": "368cfb734c0471d445fd2159bb1e4af743df26f8867b4b84b71f1c0d03a12bc4",
+      "id": "UGB-87DC88CDF754F772",
+      "line": 109,
+      "path": "examples/31_move_water_or_ice_EN.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 8,
+      "file_sha256": "098ce25e8e55cd72b6652b6472437409c6ea480c085e4e935c6ee62bc6972611",
+      "id": "UGB-AFD1B3369E2F1EB9",
+      "line": 109,
+      "path": "examples/31_move_water_or_ice_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "278ce09ff5f1f230fb773efe8836df83f2587ecf36e1d8cde6730629fef30341",
+      "id": "UGB-14D04E41C5B1BA11",
+      "line": 103,
+      "path": "examples/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "278ce09ff5f1f230fb773efe8836df83f2587ecf36e1d8cde6730629fef30341",
+      "id": "UGB-B8E9C2280B35BED9",
+      "line": 139,
+      "path": "examples/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "278ce09ff5f1f230fb773efe8836df83f2587ecf36e1d8cde6730629fef30341",
+      "id": "UGB-6AA699EB9E0FB3F1",
+      "line": 176,
+      "path": "examples/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "278ce09ff5f1f230fb773efe8836df83f2587ecf36e1d8cde6730629fef30341",
+      "id": "UGB-413477746C44B4E5",
+      "line": 301,
+      "path": "examples/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "add9f21151be277999eb1bee5c27eb4510460c7276221d4dc13930526ca7eb06",
+      "id": "UGB-7DCE13CCA11DA536",
+      "line": 117,
+      "path": "examples/README_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "add9f21151be277999eb1bee5c27eb4510460c7276221d4dc13930526ca7eb06",
+      "id": "UGB-11528CE1A57C36FA",
+      "line": 169,
+      "path": "examples/README_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "add9f21151be277999eb1bee5c27eb4510460c7276221d4dc13930526ca7eb06",
+      "id": "UGB-24BC6EE4F6AACCD4",
+      "line": 206,
+      "path": "examples/README_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "add9f21151be277999eb1bee5c27eb4510460c7276221d4dc13930526ca7eb06",
+      "id": "UGB-CE655C8C1B550372",
+      "line": 335,
+      "path": "examples/README_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 30,
+      "file_sha256": "98e1c11689351ccae5dd41dc8987ec92d0c691cfe255c5aefce825e73ef5457b",
+      "id": "UGB-D05FAA03E2C5795E",
+      "line": 525,
+      "path": "examples/index.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 30,
+      "file_sha256": "98e1c11689351ccae5dd41dc8987ec92d0c691cfe255c5aefce825e73ef5457b",
+      "id": "UGB-DFC7185926E41260",
+      "line": 603,
+      "path": "examples/index.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 30,
+      "file_sha256": "98e1c11689351ccae5dd41dc8987ec92d0c691cfe255c5aefce825e73ef5457b",
+      "id": "UGB-CC933C10C44A243A",
+      "line": 767,
+      "path": "examples/index.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 33,
+      "file_sha256": "98e1c11689351ccae5dd41dc8987ec92d0c691cfe255c5aefce825e73ef5457b",
+      "id": "UGB-2CD7580903BDB073",
+      "line": 1072,
+      "path": "examples/index.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 24,
+      "file_sha256": "45f6ff3c1a0a0266bb1f3e80dbad6e160d606b59f661af095f90809abe6d9845",
+      "id": "UGB-1C535E5525F02558",
+      "line": 45,
+      "path": "gate/en/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 27,
+      "file_sha256": "ad5f47015a3c4e572a2ee03286f4750978666354679fef6b12c9c335e6e7ab0a",
+      "id": "UGB-033B0FB502C8246B",
+      "line": 47,
+      "path": "gate/jp/README_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "a931f8e3e0a663b64e254b50187cd58f0896fc4db97465d396dea83cf8f9bff5",
+      "id": "UGB-F6FDF00C9F60EF95",
+      "line": 3,
+      "path": "note/01_\u7406\u8ad6\u30fb\u516c\u7406_\u691c\u8a0e\u899a\u66f8/NRAIDE_\u69cb\u9020\u5b89\u5168\u306e\u305f\u3081\u306e\u539f\u5247\u4f53\u7cfb.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 2,
+      "file_sha256": "99204c7a602b4889ac6eb9bd00b6b0fcb9a90722f8d28d308a88100094afbf6a",
+      "id": "UGB-3CBDF7115A161936",
+      "line": 1507,
+      "path": "note/01_\u7406\u8ad6\u30fb\u516c\u7406_\u691c\u8a0e\u899a\u66f8/\u6a2a\u8ef8\u306e\u518d\u5b9a\u7fa9\u3068\u69cb\u9020\u7684\u6a19\u8b58\uff08Criteria\uff09\u306e\u6570\u7406\u914d\u7f6e_\u5883\u754c\u30d5\u30bf.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+200D",
+      "column": 6,
+      "file_sha256": "d76f307f98ad7d6a5507c9f5ce0b1d39bc7a55627749a56d905d0ad4b8e77c8c",
+      "id": "UGB-E405B9014F844180",
+      "line": 50,
+      "path": "nra-core/foundations/NRA-IDE_\u306e\u5fdc\u7528\u5206\u91ce_\u6c4e\u7528\u6027\u306e\u5168\u4f53\u50cf.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "INVISIBLE_FORMAT"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 57,
+      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
+      "id": "UGB-154C4E4D37342905",
+      "line": 413,
+      "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 57,
+      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
+      "id": "UGB-2996F78F594454FC",
+      "line": 415,
+      "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 57,
+      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
+      "id": "UGB-8DF8F0A9F68B5E81",
+      "line": 417,
+      "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 57,
+      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
+      "id": "UGB-9DF28D41E33ACF2D",
+      "line": 419,
+      "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 13,
+      "file_sha256": "affc5d16fa01d1ce16c8542bcd4102e7f0bc7736e16128bb92daa1a5298d2578",
+      "id": "UGB-19C175D6D13D0B9F",
+      "line": 441,
+      "path": "nra-core/visualization/NRA_IDE_Battery_Comparison_20260412_2054.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 63,
+      "file_sha256": "99d9a6548df4d3195d871d993f139c5edcc78c6d01e3415ce38ca8312d492549",
+      "id": "UGB-B98D2B3B045ABF20",
+      "line": 88,
+      "path": "nra-core/visualization/NRA_IDE_v2b_deg_v2_20260408.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 62,
+      "file_sha256": "90ab1896fa25e52689efef654e99c514d98fe6ba62c6914bbc3f5688597ed594",
+      "id": "UGB-94AA6D41687E3CBD",
+      "line": 337,
+      "path": "nra-core/visualization/nra_simulation_02_EN.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 81,
+      "file_sha256": "3dfb43bba6e487f08696206ef7cbce616bd32ed6ad3991eb8372f8c4d88dfd33",
+      "id": "UGB-22EB17952B34EBD4",
+      "line": 289,
+      "path": "nra-core/visualization/nra_simulation_02_JP.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 81,
+      "file_sha256": "33c9b33f7f3f88a43501e216f937b19b667f83411fd61e5ab2f6c833b614d839",
+      "id": "UGB-8EAD556A40E8A693",
+      "line": 464,
+      "path": "nra-core/visualization/nra_simulation_canvas.html",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "e386ba38b82cb5c270307e11596e82e836f460e3b8b7766299b754b031bff2c6",
+      "id": "UGB-95CEE554674A7D4F",
+      "line": 411,
+      "path": "nra-ide-cancer-treatment-support-system/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "e386ba38b82cb5c270307e11596e82e836f460e3b8b7766299b754b031bff2c6",
+      "id": "UGB-2B28546EC1FC8E8E",
+      "line": 433,
+      "path": "nra-ide-cancer-treatment-support-system/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "166afe9b4e10cd9c99329724e498ed4c475057bf34644fd187eacfa368b0fe2f",
+      "id": "UGB-99185FD1E8AA0CA0",
+      "line": 445,
+      "path": "nra-ide-cancer-treatment-support-system/README_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 6,
+      "file_sha256": "b33e938afc60dad5089072616f919c23a373e1fddeb193e58af3d1ccd294597b",
+      "id": "UGB-C0E00D2E165F28DB",
+      "line": 61,
+      "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/00_Documentation/00_DocumentationMaster_Index.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FEFF",
+      "column": 1,
+      "file_sha256": "8740ebbe7b18ba992fe0c1299f7428d823432fabbb3128a4bc987e98c275143e",
+      "id": "UGB-BC0969B749061332",
+      "line": 1,
+      "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/30_Test_Data/validation_test_cases.csv",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "BOM"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "16625f85650e2242a213a3771e3e45f30dc408c1db448214d6ec6ad6147206da",
+      "id": "UGB-49229777FE8C01F3",
+      "line": 125,
+      "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/60_Research/references.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "c0ddad8c595fb3499304528898fbbf6e9cfc9574563ad643ddd2b10a3c7bc1cb",
+      "id": "UGB-95001A6E900088E3",
+      "line": 168,
+      "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 5,
+      "file_sha256": "c0ddad8c595fb3499304528898fbbf6e9cfc9574563ad643ddd2b10a3c7bc1cb",
+      "id": "UGB-BC13FB5755F33579",
+      "line": 196,
+      "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/README.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 4,
+      "file_sha256": "b1dc39f530dd5295190969b5c2fd50d2af381132354160d07552e54b4fb5c9ef",
+      "id": "UGB-A334A4CBCAA3FDD0",
+      "line": 613,
+      "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/medical_ai_solution.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 4,
+      "file_sha256": "2cb08fa49620d6e0172acfb2906d9ae69b52e97cee0fedb7a9c266ec446fbf70",
+      "id": "UGB-1ED046D6380062B5",
+      "line": 1,
+      "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/\u514d\u8cac\u4e8b\u9805_\u7814\u7a76\u7528\u9014\u9650\u5b9a.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 4,
+      "file_sha256": "cf35a501413b0b8fed844e7ee3691f42eb45f9ebdfd81fc6565fc14f9ac73108",
+      "id": "UGB-8BF0D17CCDDE4F9A",
+      "line": 33,
+      "path": "universal-definition/en/NRA-IDE_Checklist_EN.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 38,
+      "file_sha256": "cf35a501413b0b8fed844e7ee3691f42eb45f9ebdfd81fc6565fc14f9ac73108",
+      "id": "UGB-29E6C8E6892964E1",
+      "line": 803,
+      "path": "universal-definition/en/NRA-IDE_Checklist_EN.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 4,
+      "file_sha256": "eebfaba3edfec154b245ce0d3bd1a30c94fa7cbc4914353614d36b633fa251f5",
+      "id": "UGB-6E7B85EF6AE96C41",
+      "line": 33,
+      "path": "universal-definition/jp/NRA-IDE_Checklist_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    },
+    {
+      "codepoint": "U+FE0F",
+      "column": 16,
+      "file_sha256": "eebfaba3edfec154b245ce0d3bd1a30c94fa7cbc4914353614d36b633fa251f5",
+      "id": "UGB-38AFAFE77908E1F6",
+      "line": 803,
+      "path": "universal-definition/jp/NRA-IDE_Checklist_JP.md",
+      "reason": "existing occurrence approved for exact baseline",
+      "rule": "VARIATION_SELECTOR"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "exact existing occurrences of BOM, INVISIBLE_FORMAT, VARIATION_SELECTOR only"
+}

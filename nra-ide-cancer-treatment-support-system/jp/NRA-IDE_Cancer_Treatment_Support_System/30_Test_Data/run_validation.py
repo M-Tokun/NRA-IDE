@@ -35,7 +35,7 @@ def run_automated_test():
     results = []
     passed_count = 0
 
-    # utf-8-sig: CSV に UTF-8 BOM があり、utf-8 だと先頭列名が '﻿test_id' になる
+    # utf-8-sig: CSV に UTF-8 BOM があり、utf-8 だと先頭列名が '\uFEFFtest_id' になる
     with open('validation_test_cases.csv', 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         for row in reader:
