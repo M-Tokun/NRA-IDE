@@ -15,13 +15,14 @@ When definitions conflict, use this order:
 2. [`theory/axioms.json`](./theory/axioms.json) — machine-readable synchronized canonical representation
 3. [`theory/NRA-IDE_Foundational_Thesis_Bilingual.md`](./theory/NRA-IDE_Foundational_Thesis_Bilingual.md) — bilingual foundational thesis
 4. [`theory/SANDWICH_ARCH.md`](./theory/SANDWICH_ARCH.md) — Cause-Side / Effect-Side separation specification
-5. [`theory/THEORY.md`](./theory/THEORY.md) — integrated theory text
-6. [`FORMULA.md`](./FORMULA.md) — mathematical and computational definitions
-7. [`llms.md`](./llms.md) — AI interpretation and operational gate
-8. Domain-specific rules
-9. Normative reference implementation that passes canonical conformance tests
-10. Other implementation code
-11. Comments, examples, and AI-generated explanations
+5. [`theory/HORIZONTAL_AXIS.md`](./theory/HORIZONTAL_AXIS.md) — External Horizontal Axis practice specification (evidence inheritance and multi-agent isolation)
+6. [`theory/THEORY.md`](./theory/THEORY.md) — integrated theory text
+7. [`FORMULA.md`](./FORMULA.md) — mathematical and computational definitions
+8. [`llms.md`](./llms.md) — AI interpretation and operational gate
+9. Domain-specific rules
+10. Normative reference implementation that passes canonical conformance tests
+11. Other implementation code
+12. Comments, examples, and AI-generated explanations
 
 Lower-precedence material must not redefine higher-precedence terms.
 

@@ -1,6 +1,6 @@
 # TARGET: /llms.txt
 
-# UPDATED: 2026-07-16 JST
+# UPDATED: 2026-08-14 JST
 
 # NRA-IDE
 
@@ -17,6 +17,7 @@ Any AI agent reading, summarizing, generating, evaluating, or implementing NRA-I
 - [theory/axioms.json](theory/axioms.json): machine-readable axiom definition
 - [theory/NRA-IDE_Foundational_Thesis_Bilingual.md](theory/NRA-IDE_Foundational_Thesis_Bilingual.md): foundational thesis, English/Japanese
 - [theory/SANDWICH_ARCH.md](theory/SANDWICH_ARCH.md): architectural layering
+- [theory/HORIZONTAL_AXIS.md](theory/HORIZONTAL_AXIS.md): External Horizontal Axis practice specification (evidence inheritance, multi-agent isolation, deterministic boundary control)
 - [theory/THEORY.md](theory/THEORY.md): full theory
 - [FORMULA.md](FORMULA.md): Primary and Secondary/Dual-Fluctuation calculation systems
 - [llms.md](llms.md): mandatory AI agent operational gate — identity lock, scope, state order, fail-closed rules
