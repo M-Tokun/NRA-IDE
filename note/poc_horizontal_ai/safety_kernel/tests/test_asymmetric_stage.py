@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -18,23 +19,26 @@ from note.poc_horizontal_ai.safety_kernel import (
     encode_observation_request,
 )
 from note.poc_horizontal_ai.trusted_runtime import (
+    AdmittedSigner,
     AuditAnchorStore,
     CreateOnlyWitnessStore,
     KeyRole,
     PersistentNonceStore,
     RuntimePlacement,
     TrustedKeySpec,
+    VerifiedTrustBundle,
     anchor_and_sign_bundle,
+    admit_boundary_runtime,
     assess_runtime_placement,
     assess_witness_quorum,
     create_checkpoint_attestation,
     create_signed_trust_bundle,
     process_signed_observation_request,
     sign_payload_ed25519,
-    verify_signed_anchor_receipt,
     verify_signed_observation,
     verify_signed_payload_ed25519,
     verify_signed_trust_bundle,
+    verify_trusted_anchor_receipt,
 )
 
 
@@ -77,13 +81,49 @@ def make_bundle() -> tuple[str, str]:
     return bundle, ledger.events[-1].digest
 
 
+def make_admitted_signer(
+    signer: Ed25519PrivateKey,
+    *,
+    key_id: str,
+    role: KeyRole,
+) -> tuple[AdmittedSigner, VerifiedTrustBundle]:
+    now = datetime.now(timezone.utc)
+    root = Ed25519PrivateKey.generate()
+    signed_bundle = create_signed_trust_bundle(
+        generation=1,
+        keys=(
+            TrustedKeySpec(
+                key_id,
+                f"{key_id}-principal",
+                role,
+                signer.public_key(),
+                now - timedelta(minutes=1),
+                now + timedelta(days=1),
+            ),
+        ),
+        root_key_id="offline-root-v1",
+        root_private_key=root,
+        issued_at=now,
+    )
+    verified = verify_signed_trust_bundle(
+        signed_bundle,
+        pinned_root_keys={"offline-root-v1": root.public_key()},
+        signature_max_age=timedelta(seconds=5),
+        now=now,
+    )
+    assert verified.bundle is not None
+    record = verified.bundle.record_for(key_id)
+    assert record is not None
+    return AdmittedSigner(record, verified.bundle, signer), verified.bundle
+
+
 def write_trust_material(
     directory: Path,
     *,
     signer: Ed25519PrivateKey,
     key_id: str,
     role: KeyRole,
-) -> tuple[Path, Path, tuple[Path, Path]]:
+) -> tuple[Path, Path, tuple[Path, Path], VerifiedTrustBundle]:
     now = datetime.now(timezone.utc)
     root = Ed25519PrivateKey.generate()
     witness_a = Ed25519PrivateKey.generate()
@@ -156,7 +196,12 @@ def write_trust_material(
         path = directory / f"{key_id}-checkpoint-{index}.json"
         path.write_text(attestation, encoding="utf-8")
         attestation_paths.append(path)
-    return bundle_path, root_public_path, tuple(attestation_paths)
+    return (
+        bundle_path,
+        root_public_path,
+        tuple(attestation_paths),
+        verified.bundle,
+    )
 
 
 class Ed25519AuthenticationTests(unittest.TestCase):
@@ -247,7 +292,7 @@ class SignedObservationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory)
             private, private_path, _ = write_keys(temporary)
-            trust_bundle, root_public, checkpoint_attestations = (
+            trust_bundle, root_public, checkpoint_attestations, _ = (
                 write_trust_material(
                 temporary,
                 signer=private,
@@ -312,9 +357,58 @@ class SignedObservationTests(unittest.TestCase):
 
 
 class SignedAnchorWitnessTests(unittest.TestCase):
+    def test_role_failure_rolls_back_anchor_record(self) -> None:
+        private = Ed25519PrivateKey.generate()
+        bundle, _ = make_bundle()
+        admitted_anchor, trust_bundle = make_admitted_signer(
+            private,
+            key_id="anchor-signing-v1",
+            role=KeyRole.ANCHOR_SIGNER,
+        )
+        admitted_observer, _ = make_admitted_signer(
+            private,
+            key_id="observer-signing-v1",
+            role=KeyRole.OBSERVER_SIGNER,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            with AuditAnchorStore(
+                Path(directory) / "anchor.sqlite3",
+                b"A" * 32,
+            ) as store:
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "ANCHOR_SIGNER_ROLE_MISMATCH",
+                ):
+                    anchor_and_sign_bundle(
+                        bundle,
+                        anchor_id="anchor-transaction-1",
+                        anchor_store=store,
+                        admitted_signer=admitted_observer,
+                    )
+                signed = anchor_and_sign_bundle(
+                    bundle,
+                    anchor_id="anchor-transaction-1",
+                    anchor_store=store,
+                    admitted_signer=admitted_anchor,
+                )
+
+            verified = verify_trusted_anchor_receipt(
+                signed,
+                trust_bundle=trust_bundle,
+                signature_max_age=timedelta(seconds=5),
+                expected_bundle_json=bundle,
+            )
+            assert verified.receipt is not None
+            self.assertEqual(verified.receipt.sequence, 1)
+
     def test_signed_anchor_reaches_two_witness_quorum(self) -> None:
         private = Ed25519PrivateKey.generate()
         bundle, head = make_bundle()
+        admitted_anchor, trust_bundle = make_admitted_signer(
+            private,
+            key_id="anchor-signing-v1",
+            role=KeyRole.ANCHOR_SIGNER,
+        )
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory)
             with AuditAnchorStore(temporary / "anchor.sqlite3", b"A" * 32) as store:
@@ -322,12 +416,11 @@ class SignedAnchorWitnessTests(unittest.TestCase):
                     bundle,
                     anchor_id="anchor-v2-1",
                     anchor_store=store,
-                    signing_key_id="anchor-signing-v1",
-                    signing_key=private,
+                    admitted_signer=admitted_anchor,
                 )
-            verified = verify_signed_anchor_receipt(
+            verified = verify_trusted_anchor_receipt(
                 signed,
-                trusted_public_keys={"anchor-signing-v1": private.public_key()},
+                trust_bundle=trust_bundle,
                 signature_max_age=timedelta(seconds=5),
                 expected_bundle_json=bundle,
             )
@@ -339,12 +432,12 @@ class SignedAnchorWitnessTests(unittest.TestCase):
             records = (
                 CreateOnlyWitnessStore(witness_a_root, "witness-a").record(
                     signed,
-                    trusted_public_keys={"anchor-signing-v1": private.public_key()},
+                    trust_bundle=trust_bundle,
                     signature_max_age=timedelta(seconds=5),
                 ),
                 CreateOnlyWitnessStore(witness_b_root, "witness-b").record(
                     signed,
-                    trusted_public_keys={"anchor-signing-v1": private.public_key()},
+                    trust_bundle=trust_bundle,
                     signature_max_age=timedelta(seconds=5),
                 ),
             )
@@ -372,12 +465,54 @@ class SignedAnchorWitnessTests(unittest.TestCase):
                 ("WITNESS_QUORUM_NOT_REACHED",),
             )
 
+            payload_json = json.loads(signed)["payload_json"]
+            observer_private = Ed25519PrivateKey.generate()
+            admitted_observer, observer_bundle = make_admitted_signer(
+                observer_private,
+                key_id="observer-signing-v1",
+                role=KeyRole.OBSERVER_SIGNER,
+            )
+            wrong_role_signed = admitted_observer.sign_payload(
+                payload_json,
+                issued_at=datetime.now(timezone.utc),
+            )
+            rejected_root = temporary / "rejected-witness"
+            rejected_root.mkdir()
+            rejected_store = CreateOnlyWitnessStore(
+                rejected_root,
+                "rejected-witness",
+            )
+            with self.assertRaisesRegex(ValueError, "SIGNATURE_ROLE_MISMATCH"):
+                rejected_store.record(
+                    wrong_role_signed,
+                    trust_bundle=observer_bundle,
+                    signature_max_age=timedelta(seconds=5),
+                )
+            raw_signed = sign_payload_ed25519(
+                payload_json,
+                key_id="anchor-signing-v1",
+                private_key=private,
+                issued_at=datetime.now(timezone.utc),
+            )
+            with self.assertRaisesRegex(ValueError, "TRUST_STATE_BINDING_REQUIRED"):
+                rejected_store.record(
+                    raw_signed,
+                    trust_bundle=trust_bundle,
+                    signature_max_age=timedelta(seconds=5),
+                )
+            self.assertEqual(tuple(rejected_root.iterdir()), ())
+
     def test_anchor_signer_runs_in_separate_process(self) -> None:
         bundle, _ = make_bundle()
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory)
             private, private_path, _ = write_keys(temporary)
-            trust_bundle, root_public, checkpoint_attestations = (
+            (
+                trust_bundle,
+                root_public,
+                checkpoint_attestations,
+                verified_trust_bundle,
+            ) = (
                 write_trust_material(
                 temporary,
                 signer=private,
@@ -426,9 +561,9 @@ class SignedAnchorWitnessTests(unittest.TestCase):
                 json.loads(completed.stdout)["schema_version"],
                 "signed-payload/1.1",
             )
-            verified = verify_signed_anchor_receipt(
+            verified = verify_trusted_anchor_receipt(
                 completed.stdout,
-                trusted_public_keys={"anchor-signing-v1": private.public_key()},
+                trust_bundle=verified_trust_bundle,
                 signature_max_age=timedelta(seconds=5),
                 expected_bundle_json=bundle,
             )
@@ -451,6 +586,7 @@ class DeploymentBoundaryTests(unittest.TestCase):
                     private_key_path=private_path,
                     nonce_database_path=temporary / "nonce.sqlite3",
                     anchor_database_path=temporary / "anchor.sqlite3",
+                    latch_database_path=temporary / "latch.sqlite3",
                     witness_roots=(witness_a, witness_b),
                 )
             )
@@ -468,11 +604,117 @@ class DeploymentBoundaryTests(unittest.TestCase):
                 private_key_path=Path.cwd() / "secret.pem",
                 nonce_database_path=Path.cwd() / "nonce.sqlite3",
                 anchor_database_path=Path.cwd() / "anchor.sqlite3",
+                latch_database_path=Path.cwd() / "latch.sqlite3",
                 witness_roots=(Path.cwd(), Path.cwd()),
             )
         )
         self.assertFalse(result.path_separated)
         self.assertIn("PLACEMENT_INSIDE_REPOSITORY", result.reason_codes)
+
+    def test_execution_authority_domain_overlap_is_rejected_at_admission(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            private_path = temporary / "signing.pem"
+            private_path.write_text("placeholder", encoding="utf-8")
+            witness_a = temporary / "witness-a"
+            witness_b = temporary / "witness-b"
+            witness_a.mkdir()
+            witness_b.mkdir()
+            placement = RuntimePlacement(
+                repository_root=Path.cwd(),
+                private_key_path=private_path,
+                nonce_database_path=temporary / "nonce.sqlite3",
+                anchor_database_path=temporary / "anchor.sqlite3",
+                latch_database_path=temporary / "latch.sqlite3",
+                witness_roots=(witness_a, witness_b),
+                execution_authorization_database_path=(
+                    temporary / "execution.sqlite3"
+                ),
+                root_policy_checkpoint_database_path=(
+                    temporary / "root-policy-checkpoint.sqlite3"
+                ),
+                execution_journal_authority_domain="shared-custodian",
+                execution_integrity_key_authority_domain="shared-custodian",
+                observer_trust_root_authority_domains=(
+                    "observer-root-a",
+                    "observer-root-b",
+                ),
+            )
+            result = assess_runtime_placement(placement)
+            self.assertFalse(result.execution_authority_domains_separated)
+            self.assertFalse(result.authority_domain_separation_verified)
+            self.assertIn(
+                "PLACEMENT_EXECUTION_AUTHORITY_DOMAIN_OVERLAP",
+                result.reason_codes,
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                "PLACEMENT_EXECUTION_AUTHORITY_DOMAIN_OVERLAP",
+            ):
+                admit_boundary_runtime(
+                    placement=placement,
+                    latch_integrity_key=b"L" * 32,
+                    latch_store_id="repo-latch-v1",
+                )
+            missing = assess_runtime_placement(
+                replace(
+                    placement,
+                    execution_journal_authority_domain=None,
+                    execution_integrity_key_authority_domain=None,
+                    observer_trust_root_authority_domains=(),
+                )
+            )
+            self.assertIn(
+                "PLACEMENT_EXECUTION_AUTHORITY_DOMAINS_REQUIRED",
+                missing.reason_codes,
+            )
+            insufficient = assess_runtime_placement(
+                replace(
+                    placement,
+                    execution_journal_authority_domain="journal-custodian",
+                    execution_integrity_key_authority_domain="key-custodian",
+                    observer_trust_root_authority_domains=("observer-root-a",),
+                )
+            )
+            self.assertIn(
+                "PLACEMENT_OBSERVER_ROOT_AUTHORITY_COUNT_INSUFFICIENT",
+                insufficient.reason_codes,
+            )
+            root_overlap = assess_runtime_placement(
+                replace(
+                    placement,
+                    execution_journal_authority_domain="journal-custodian",
+                    execution_integrity_key_authority_domain="key-custodian",
+                    observer_trust_root_authority_domains=(
+                        "journal-custodian",
+                        "observer-root-b",
+                    ),
+                )
+            )
+            self.assertIn(
+                "PLACEMENT_EXECUTION_AUTHORITY_DOMAIN_OVERLAP",
+                root_overlap.reason_codes,
+            )
+            separated = assess_runtime_placement(
+                replace(
+                    placement,
+                    execution_journal_authority_domain="journal-custodian",
+                    execution_integrity_key_authority_domain="key-custodian",
+                    observer_trust_root_authority_domains=(
+                        "observer-root-a",
+                        "observer-root-b",
+                    ),
+                )
+            )
+            self.assertTrue(separated.path_separated)
+            self.assertTrue(separated.execution_authority_domains_separated)
+            self.assertFalse(separated.authority_domain_separation_verified)
+            self.assertIn(
+                "AUTHORITY_DOMAIN_SEPARATION_NOT_ATTESTED",
+                separated.reason_codes,
+            )
 
 
 if __name__ == "__main__":

@@ -23,7 +23,10 @@ from .asymmetric_auth import sign_payload_ed25519, verify_signed_payload_ed25519
 class KeyRole(str, Enum):
     OBSERVER_SIGNER = "OBSERVER_SIGNER"
     ANCHOR_SIGNER = "ANCHOR_SIGNER"
+    LATCH_CHECKPOINT_SIGNER = "LATCH_CHECKPOINT_SIGNER"
     WITNESS_SIGNER = "WITNESS_SIGNER"
+    EXECUTION_AUTHORIZER = "EXECUTION_AUTHORIZER"
+    AUTHORITY_ATTESTER = "AUTHORITY_ATTESTER"
 
 
 @dataclass(frozen=True, slots=True)

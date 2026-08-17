@@ -10,9 +10,11 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Callable, TypeVar
 
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+_T = TypeVar("_T")
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +63,25 @@ class AuditAnchorStore:
         bundle_sha256: str,
         anchored_at: datetime,
     ) -> AnchorReceipt:
+        return self.append_finalized(
+            anchor_id=anchor_id,
+            audit_head_digest=audit_head_digest,
+            event_count=event_count,
+            bundle_sha256=bundle_sha256,
+            anchored_at=anchored_at,
+            finalizer=lambda receipt: receipt,
+        )
+
+    def append_finalized(
+        self,
+        *,
+        anchor_id: str,
+        audit_head_digest: str,
+        event_count: int,
+        bundle_sha256: str,
+        anchored_at: datetime,
+        finalizer: Callable[[AnchorReceipt], _T],
+    ) -> _T:
         if (
             not anchor_id
             or len(anchor_id) > 128
@@ -111,23 +132,25 @@ class AuditAnchorStore:
                     receipt_mac,
                 ),
             )
+            receipt = AnchorReceipt(
+                sequence,
+                anchor_id,
+                audit_head_digest,
+                event_count,
+                bundle_sha256,
+                fields["anchored_at"],
+                previous,
+                receipt_mac,
+            )
+            finalized = finalizer(receipt)
             self._connection.commit()
         except sqlite3.IntegrityError as error:
             self._connection.rollback()
             raise ValueError("anchor_id or audit_head_digest already anchored") from error
-        except sqlite3.DatabaseError:
+        except Exception:
             self._connection.rollback()
             raise
-        return AnchorReceipt(
-            sequence,
-            anchor_id,
-            audit_head_digest,
-            event_count,
-            bundle_sha256,
-            fields["anchored_at"],
-            previous,
-            receipt_mac,
-        )
+        return finalized
 
     def verify(self) -> tuple[str, ...]:
         previous = None

@@ -28,9 +28,14 @@ from note.poc_horizontal_ai.safety_kernel.observer_protocol import (
 )
 
 from .anchor_store import AnchorReceipt, AuditAnchorStore
-from .asymmetric_auth import sign_payload_ed25519, verify_signed_payload_ed25519
+from .asymmetric_auth import (
+    public_key_fingerprint,
+    sign_payload_ed25519,
+    verify_signed_payload_ed25519,
+)
 from .nonce_store import PersistentNonceStore
 from .runtime_admission import AdmittedSigner
+from .trust_bundle import KeyRole
 
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -133,44 +138,60 @@ def anchor_and_sign_bundle(
     *,
     anchor_id: str,
     anchor_store: AuditAnchorStore,
-    signing_key_id: str,
-    signing_key: Ed25519PrivateKey,
-    admitted_signer: AdmittedSigner | None = None,
+    admitted_signer: AdmittedSigner,
     now: datetime | None = None,
 ) -> str:
     current_time = _current_utc(now)
     verification = verify_audit_bundle(bundle_json)
     if verification.events is None or verification.head_digest is None:
         raise ValueError("invalid audit bundle")
-    receipt = anchor_store.append(
+    if not isinstance(admitted_signer, AdmittedSigner):
+        raise ValueError("ANCHOR_SIGNER_ADMISSION_REQUIRED")
+    record = admitted_signer.key_record
+    if record.role is not KeyRole.ANCHOR_SIGNER:
+        raise ValueError("ANCHOR_SIGNER_ROLE_MISMATCH")
+    trusted_record = admitted_signer.trust_bundle.record_for(record.key_id)
+    if (
+        trusted_record is None
+        or trusted_record.principal_id != record.principal_id
+        or trusted_record.role is not record.role
+        or trusted_record.valid_from != record.valid_from
+        or trusted_record.valid_until != record.valid_until
+        or trusted_record.revoked_at != record.revoked_at
+        or public_key_fingerprint(trusted_record.public_key)
+        != public_key_fingerprint(record.public_key)
+    ):
+        raise ValueError("ANCHOR_SIGNER_TRUST_RECORD_MISMATCH")
+    if not trusted_record.active_at(current_time):
+        raise ValueError("ANCHOR_SIGNER_KEY_NOT_ACTIVE")
+    if public_key_fingerprint(admitted_signer.private_key.public_key()) != (
+        public_key_fingerprint(trusted_record.public_key)
+    ):
+        raise ValueError("ANCHOR_SIGNER_PRIVATE_KEY_MISMATCH")
+
+    def sign_receipt(receipt: AnchorReceipt) -> str:
+        payload = _canonical_json(
+            {
+                **asdict(receipt),
+                "schema_version": "anchor-receipt/2.0",
+            }
+        )
+        return admitted_signer.sign_payload(
+            payload,
+            issued_at=current_time,
+        )
+
+    return anchor_store.append_finalized(
         anchor_id=anchor_id,
         audit_head_digest=verification.head_digest,
         event_count=len(verification.events),
         bundle_sha256=hashlib.sha256(bundle_json.encode("utf-8")).hexdigest(),
         anchored_at=current_time,
-    )
-    payload = _canonical_json(
-        {
-            **asdict(receipt),
-            "schema_version": "anchor-receipt/2.0",
-        }
-    )
-    if admitted_signer is not None:
-        if (
-            admitted_signer.key_record.key_id != signing_key_id
-            or admitted_signer.private_key is not signing_key
-        ):
-            raise ValueError("admitted signer does not match signing arguments")
-        return admitted_signer.sign_payload(payload, issued_at=current_time)
-    return sign_payload_ed25519(
-        payload,
-        key_id=signing_key_id,
-        private_key=signing_key,
-        issued_at=current_time,
+        finalizer=sign_receipt,
     )
 
 
-def verify_signed_anchor_receipt(
+def _verify_signed_anchor_receipt(
     signed_json: str,
     *,
     trusted_public_keys: Mapping[str, Ed25519PublicKey],

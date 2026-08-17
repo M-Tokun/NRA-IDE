@@ -7,11 +7,10 @@ import os
 from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Sequence
 
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-
-from .signed_boundary import verify_signed_anchor_receipt
+from .trust_bundle import VerifiedTrustBundle
+from .trusted_verification import verify_trusted_anchor_receipt
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,12 +41,12 @@ class CreateOnlyWitnessStore:
         self,
         signed_receipt_json: str,
         *,
-        trusted_public_keys: Mapping[str, Ed25519PublicKey],
+        trust_bundle: VerifiedTrustBundle,
         signature_max_age: timedelta,
     ) -> WitnessRecord:
-        verified = verify_signed_anchor_receipt(
+        verified = verify_trusted_anchor_receipt(
             signed_receipt_json,
-            trusted_public_keys=trusted_public_keys,
+            trust_bundle=trust_bundle,
             signature_max_age=signature_max_age,
         )
         if verified.receipt is None:

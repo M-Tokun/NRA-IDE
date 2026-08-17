@@ -13,7 +13,7 @@ from .role_verification import verify_role_signed_payload
 from .signed_boundary import (
     SignedAnchorReceiptResult,
     SignedObservationResult,
-    verify_signed_anchor_receipt,
+    _verify_signed_anchor_receipt,
     verify_signed_observation,
 )
 from .trust_bundle import KeyRole, VerifiedTrustBundle
@@ -72,7 +72,7 @@ def verify_trusted_anchor_receipt(
     )
     if role.payload_json is None or role.key_record is None:
         return SignedAnchorReceiptResult(None, role.reason_codes)
-    return verify_signed_anchor_receipt(
+    return _verify_signed_anchor_receipt(
         signed_json,
         trusted_public_keys={role.key_record.key_id: role.key_record.public_key},
         signature_max_age=signature_max_age,
