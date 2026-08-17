@@ -36,6 +36,7 @@ from note.poc_horizontal_ai.trusted_runtime import (
     RuntimePlacement,
     SimulationOutcome,
     TrustedKeySpec,
+    WitnessBoundExecutionCapability,
     admit_boundary_runtime,
     assess_authority_manifest_quorum,
     assess_execution_file_observation_quorum,
@@ -3312,6 +3313,103 @@ class LatchWitnessTests(unittest.TestCase):
                     reason="second-call", now=self.now
                 )
                 self.assertEqual(second_generation, 2)
+
+    def test_capability_cannot_be_constructed_outside_prepare_execution(
+        self,
+    ) -> None:
+        # Bounded model checking (T4-4: "state skip"): the Authorize stage
+        # cannot be bypassed by constructing a capability directly, because
+        # the constructor requires a private token only prepare_execution
+        # holds. This is a structural guarantee, not a runtime check that
+        # could be forgotten on a new code path.
+        intent = BoundaryExecutionIntent(
+            intent_id="intent-skip-authorize",
+            subject_id="subject-skip",
+            action_type="file-change:patch",
+            target_id="repo-1",
+            action_digest="a" * 64,
+            policy_version="policy-v1",
+            postcondition_subject="deployment.json",
+            postcondition_field="deployment_state",
+            required_postcondition_value="ready",
+        )
+        with self.assertRaisesRegex(
+            ValueError,
+            "execution capability must be created by runtime",
+        ):
+            WitnessBoundExecutionCapability(
+                runtime_identity=object(),
+                intent=intent,
+                authorization_quorum=None,
+                assessment_epoch=0,
+                latch_head=None,
+            )
+
+    def test_combined_faults_never_permit_execution(self) -> None:
+        # Bounded model checking (T4-4: combinatorial corner cases):
+        # stacking multiple independent denial conditions on the same
+        # attempt (irreversibly latched target + revoked runtime + stale
+        # assessment epoch) must never accidentally cancel out into an
+        # ALLOW. Whichever check fires first, the outcome is always denial.
+        thresholds = Thresholds(0.4, 0.6, 0.8)
+        action = b'{"operation":"combined-faults"}'
+        intent = BoundaryExecutionIntent(
+            intent_id="intent-combined-faults",
+            subject_id="subject-combined-faults",
+            action_type="file-change:patch",
+            target_id="repo-1",
+            action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
+            postcondition_subject="deployment.json",
+            postcondition_field="deployment_state",
+            required_postcondition_value="ready",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            placement = self.placement(temporary)
+            signer, root_public, processes = self.launcher_material(temporary)
+            with self.launch(placement, signer, root_public, processes) as runtime:
+                latched = runtime.assess_axes(
+                    target_id="repo-1",
+                    axes=(AxisEvidence("scope_escape", 0.8, 1.0, thresholds),),
+                    observed_at=self.now,
+                )
+                self.assertEqual(
+                    latched.target_state,
+                    TargetBoundaryState.IRREVERSIBLE_TRANSITION,
+                )
+
+            executor = RecordingExecutor()
+            with self.launch(
+                placement,
+                signer,
+                root_public,
+                processes,
+                execution_executor=executor,
+            ) as reopened:
+                # Stack a second fault (revocation) on top of the latch.
+                reopened.revoke_capabilities(
+                    reason="combined-fault-drill", now=self.now
+                )
+                current_head = reopened._latch_store.head()
+                authorization = self.authorize_execution(
+                    intent,
+                    authorization_id="authorization-combined-faults",
+                    authorization_nonce="authorization-nonce-combined-faults",
+                    expected_latch_head=current_head,
+                )
+                # Both the latch and the revocation independently forbid
+                # this: no combination of the two produces an ALLOW.
+                with self.assertRaises(ValueError) as raised:
+                    reopened.prepare_execution(authorization)
+                self.assertIn(
+                    str(raised.exception),
+                    (
+                        "EXECUTION_CAPABILITIES_REVOKED",
+                        "EXECUTION_TARGET_IRREVERSIBLY_LATCHED",
+                    ),
+                )
+                self.assertEqual(executor.calls, [])
 
     def test_execution_gate_enforces_pluggable_hard_invariant_checker(
         self,

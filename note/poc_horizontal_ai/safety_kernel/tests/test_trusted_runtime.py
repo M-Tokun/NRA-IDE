@@ -1,6 +1,7 @@
 import hashlib
 import json
 import sqlite3
+import stat
 import subprocess
 import sys
 import tempfile
@@ -204,6 +205,57 @@ class PersistentNonceStoreTests(unittest.TestCase):
                 ValueError, "CAPABILITY_REVOCATION_CHAIN_INVALID"
             ):
                 PersistentNonceStore(database, key)
+
+    def test_consume_fails_closed_when_logging_is_impossible(self) -> None:
+        # Fault injection (T4-3: "logging halted"): a write that cannot
+        # reach durable storage (disk full, permission denied) must be
+        # reported as rejected, never silently treated as consumed.
+        key = b"N" * 32
+        now = datetime.now(timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / "nonce.sqlite3"
+            PersistentNonceStore(database, key).close()
+            database.chmod(stat.S_IREAD)
+            try:
+                with PersistentNonceStore(database, key) as store:
+                    result = store.consume(
+                        request_id="request-1",
+                        nonce="0123456789abcdef",
+                        issued_at=now,
+                        request_digest="a" * 64,
+                        consumed_at=now,
+                    )
+                    self.assertFalse(result.accepted)
+                    self.assertEqual(
+                        result.reason_codes, ("NONCE_STORE_FAILURE",)
+                    )
+            finally:
+                database.chmod(stat.S_IWRITE | stat.S_IREAD)
+
+    def test_revoke_all_capabilities_fails_closed_when_logging_is_impossible(
+        self,
+    ) -> None:
+        # Same fault as above, applied to the safety-critical revocation
+        # path specifically: a caller must never be told a revocation
+        # succeeded when it was not actually durably recorded.
+        key = b"N" * 32
+        now = datetime.now(timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / "nonce.sqlite3"
+            PersistentNonceStore(database, key).close()
+            database.chmod(stat.S_IREAD)
+            try:
+                with PersistentNonceStore(database, key) as store:
+                    result = store.revoke_all_capabilities(
+                        reason="incident-drill", revoked_at=now
+                    )
+                    self.assertFalse(result.accepted)
+                    self.assertEqual(
+                        result.reason_codes, ("CAPABILITY_REVOCATION_FAILURE",)
+                    )
+                    self.assertEqual(store.current_revocation_generation(), 0)
+            finally:
+                database.chmod(stat.S_IWRITE | stat.S_IREAD)
 
 
 class AuthenticatedObserverGatewayTests(unittest.TestCase):

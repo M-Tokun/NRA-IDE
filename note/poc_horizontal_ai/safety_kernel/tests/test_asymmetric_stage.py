@@ -243,6 +243,46 @@ class Ed25519AuthenticationTests(unittest.TestCase):
         self.assertIn("SIGNATURE_KEY_FINGERPRINT_MISMATCH", wrong.reason_codes)
         self.assertIn("SIGNATURE_INVALID", wrong.reason_codes)
 
+    def test_clock_skew_beyond_max_age_is_rejected(self) -> None:
+        # Fault injection (T4-3): a verifier whose clock has drifted past
+        # max_age relative to issued_at must reject, not silently accept a
+        # stale signature. This is the freshness check every Ed25519-signed
+        # artifact in trusted_runtime (witness attestations, trust bundles,
+        # execution authorizations) relies on via this one primitive.
+        private = Ed25519PrivateKey.generate()
+        issued_at = datetime.now(timezone.utc)
+        signed = sign_payload_ed25519(
+            '{"value":1}',
+            key_id="signer-v1",
+            private_key=private,
+            issued_at=issued_at,
+        )
+        just_inside = verify_signed_payload_ed25519(
+            signed,
+            trusted_public_keys={"signer-v1": private.public_key()},
+            max_age=timedelta(seconds=5),
+            now=issued_at + timedelta(seconds=4),
+        )
+        self.assertEqual(just_inside.payload_json, '{"value":1}')
+
+        drifted = verify_signed_payload_ed25519(
+            signed,
+            trusted_public_keys={"signer-v1": private.public_key()},
+            max_age=timedelta(seconds=5),
+            now=issued_at + timedelta(seconds=6),
+        )
+        self.assertIsNone(drifted.payload_json)
+        self.assertIn("SIGNATURE_STALE", drifted.reason_codes)
+
+        far_future = verify_signed_payload_ed25519(
+            signed,
+            trusted_public_keys={"signer-v1": private.public_key()},
+            max_age=timedelta(seconds=5),
+            now=issued_at + timedelta(days=365),
+        )
+        self.assertIsNone(far_future.payload_json)
+        self.assertIn("SIGNATURE_STALE", far_future.reason_codes)
+
 
 class SignedObservationTests(unittest.TestCase):
     def test_observation_is_signed_and_replay_consumption_persists(self) -> None:

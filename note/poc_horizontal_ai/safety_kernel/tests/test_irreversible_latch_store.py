@@ -1,6 +1,7 @@
 import json
 import shutil
 import sqlite3
+import stat
 import tempfile
 import unittest
 from dataclasses import replace
@@ -152,6 +153,31 @@ class PersistentIrreversibleLatchStoreTests(unittest.TestCase):
                 "IRREVERSIBLE_LATCH_CHAIN_INVALID",
             ):
                 PersistentIrreversibleLatchStore(database, self.key)
+
+    def test_assess_axes_fails_closed_when_logging_is_impossible(self) -> None:
+        # Fault injection (T4-3: "logging halted"): if the underlying
+        # database cannot be written (disk full, permission denied), the
+        # axis assessment must not silently succeed without a durable
+        # record. It must raise, not return a PERMIT-shaped result.
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / "latch.sqlite3"
+            PersistentIrreversibleLatchStore(database, self.key).close()
+            database.chmod(stat.S_IREAD)
+            try:
+                with PersistentIrreversibleLatchStore(
+                    database, self.key
+                ) as store:
+                    with self.assertRaisesRegex(
+                        ValueError,
+                        "IRREVERSIBLE_LATCH_STORE_FAILURE",
+                    ):
+                        store.assess_axes(
+                            target_id="repo-1",
+                            axes=(self.axis(0.9),),
+                            observed_at=self.now,
+                        )
+            finally:
+                database.chmod(stat.S_IWRITE | stat.S_IREAD)
 
 
 class BoundaryRuntimeAdmissionTests(unittest.TestCase):

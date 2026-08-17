@@ -1893,3 +1893,73 @@ HMAC共有鍵では検証者も認証値を生成できるため、観察応答�
 - 修正前コードへ一時的に戻した場合、`test_adapter_rejects_non_nfc_resource_path`が実際に失敗すること：成功
 - `git diff --check`：成功
 - 監査報告§7優先順位のうちT1・T2・T3・T4-1・T4-2を完了とし、次点はT4-3（Fault Injection）
+
+---
+
+## 2026-08-18：T4-3完了（Fault Injection：時計ずれ・ログ不能）
+
+### 今回の背景
+
+- プランT4-3（センサー停止・時計ずれ・通信断・ログ不能）に対応した。着手前に既存試験を`grep`で確認したところ、`SIGNATURE_STALE`（Ed25519署名の鮮度検証、witness attestation・trust bundle・execution authorizationなど全ての署名検証が依存する共通プリミティブの鮮度チェック）が**一度も直接試験されていない**ことが判明した
+
+### 各項目の現状
+
+| 投入項目 | 対応 |
+|---|---|
+| **時計ずれ（鮮度違反）** | **未試験だった`SIGNATURE_STALE`の直接試験を追加**（下記） |
+| ログ不能 | `PersistentNonceStore`（nonce/実行認可/失効の永続store）と`PersistentIrreversibleLatchStore`（軸ラッチstore）双方について、DB書込み不能時（読み取り専用ファイルで模擬）にfail-closedであることを確認する試験を追加 |
+| センサー停止（観測不能） | 既存試験（`test_adapter_rejects_modify_target_missing`等）で部分的にカバー済みと判断 |
+| 通信断（観察経路喪失） | `CommunicationChannelState`/`LoggingChannelState`は`evidence.py`にフィールドとして定義されているが、実際にACTIVE以外の値を生成する検出ロジックがどこにも存在しない（`grep`で確認）。意味のある障害注入試験を書けるのは検出ロジックが実装されてから。既知の構造的限界として記録する |
+
+### 追加した試験
+
+- `test_asymmetric_stage.py`（`Ed25519AuthenticationTests`）：`test_clock_skew_beyond_max_age_is_rejected`——`max_age`ぎりぎり内側では受理、超過後・大幅未来時刻では`SIGNATURE_STALE`で拒否されることを確認
+- `test_trusted_runtime.py`（`PersistentNonceStoreTests`）：`test_consume_fails_closed_when_logging_is_impossible`・`test_revoke_all_capabilities_fails_closed_when_logging_is_impossible`——DBファイルを読み取り専用にした状態で`consume()`・`revoke_all_capabilities()`を呼び、`accepted=False`で拒否され、失効generationが偽って進んでいないことを確認
+- `test_irreversible_latch_store.py`（`PersistentIrreversibleLatchStoreTests`）：`test_assess_axes_fails_closed_when_logging_is_impossible`——同様にDB書込み不能時、`assess_axes()`が`IRREVERSIBLE_LATCH_STORE_FAILURE`で例外を送出し、PERMIT相当の結果を返さないことを確認
+
+### 結果
+
+- いずれも新規バグは発見しなかった——3ストア全てが期待通りfail-closedだった（実際にPythonから直接呼び出して動作を確認してから試験化した）。ただし`SIGNATURE_STALE`は今回まで**一度も試験されていなかった**ため、この試験追加自体が検証体制の実質的な穴を埋めるものである
+
+### この段階の境界
+
+- 「通信断（観察経路喪失）」は検出ロジック自体が存在しないため、意味のある試験を書けなかった。将来`ObservationChannelState`等を実際に生成する監視ロジックを実装する際は、この項目を再度Fault Injectionの対象として持ち出す必要がある
+- 「センサー停止」は既存試験による部分カバーで済ませており、専用の新規試験は追加していない
+
+### 検証結果
+
+- safety kernel試験：213件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規4件）
+- NRA-IDE正典参照試験：38件成功
+- `git diff --check`：成功
+- 監査報告§7優先順位のうちT1・T2・T3・T4-1・T4-2・T4-3を完了とし、次点はT4-4（Differential Testing / Model Checking）
+
+---
+
+## 2026-08-18：T4-4完了（Model Checkingのみ実施、Differential Testingは先送り）
+
+### 今回の背景
+
+- T4-4は本来Differential TestingとModel Checkingの2本立てだが、ユーザーと協議し「Differential Testingは正典参照実装（`nra-core/foundations/`）と`safety_kernel.boundary`の比較可能性調査が先に必要なため、今回はModel Checkingのみ進め、Differential Testingは先送りとする」方針で合意した
+- Model Checkingは形式ツール（TLA+等）を導入せず、`boundary_runtime`の実行ゲート状態遷移に対する境界ケースの組合せ試験というbounded検査で対応した
+
+### 追加した試験
+
+- `test_latch_witness.py`：`test_capability_cannot_be_constructed_outside_prepare_execution`——**状態飛越し**の検査。`WitnessBoundExecutionCapability`を`prepare_execution`を経由せず直接構築しようとすると、privateトークンによるガードで拒否されることを確認。これはランタイムチェックではなく構造的な保証であることを実証した
+- `test_latch_witness.py`：`test_combined_faults_never_permit_execution`——複数の拒否条件（不可逆ラッチ済み対象＋失効済みランタイム）を同時に成立させ、どちらのチェックが先に発火しても結果は常に拒否であり、条件の重なりが誤ってALLOWへ相殺されないことを確認
+
+### 既存カバレッジの確認（新規試験なし）
+
+- **許可後すり替え**：`EXECUTION_CAPABILITY_INTENT_MISMATCH`等の既存試験で確認済み
+- **デッドロック**：`unresolved_execution_attempt_ids()`が未解決のreconciliationがある限り新規実行を`EXECUTION_OUTCOME_RECONCILIATION_REQUIRED`で全てブロックする挙動は、既存試験（`test_latch_witness.py`内の複数箇所）で既にカバーされていることを確認した。これは意図的なfail-safe（安全側に倒すための一種の「詰み」状態）であり、新規試験は追加していない
+
+### この段階の境界
+
+- Differential Testing（正典参照実装との判定一致試験）は本エントリでは実施していない。着手する場合はまず`nra-core/foundations/NRA-IDE_Architecture_public.py`と`safety_kernel/boundary.py`の入出力意味論が実際に比較可能かを調査する必要がある
+- Model Checkingは`boundary_runtime`の実行ゲートに限定した。他のモジュール（root_policy rotation、latch witness quorum等）の状態遷移への同種の組合せ検査は今回対象外
+
+### 検証結果
+
+- safety kernel試験：215件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規2件）
+- NRA-IDE正典参照試験：38件成功
+- `git diff --check`：成功
+- 監査報告§7優先順位のうちT1・T2・T3・T4-1〜T4-3・T4-4（Model Checkingのみ）を完了。残るのはDifferential Testingのみ
