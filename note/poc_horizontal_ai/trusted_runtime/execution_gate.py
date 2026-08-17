@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
+from pathlib import PurePosixPath
 from typing import Protocol
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -21,6 +22,80 @@ _CAPABILITY_TOKEN = object()
 
 
 @dataclass(frozen=True, slots=True)
+class FileChangeContext:
+    """Optional file-change-domain binding committed by an authorizer.
+
+    Present (not ``None``) only for bounded file-change deployments. The
+    trusted-runtime core treats it as an opaque clause for binding; the
+    file-change invariant adapter requires it and reconstructs the safety
+    kernel's ``ActionProposal`` from it. ``None`` keeps the intent
+    domain-neutral (design doc 12.3).
+    """
+
+    resource_path: str
+    change_kind: str
+    action_type: str
+    expected_base_sha256: str | None
+    state_version: int
+
+    def validate(self) -> None:
+        if (
+            not isinstance(self.resource_path, str)
+            or not self.resource_path
+            or self.resource_path.startswith(("/", "\\"))
+            or "\\" in self.resource_path
+            or ":" in self.resource_path
+        ):
+            raise ValueError("invalid execution file_change resource_path")
+        path = PurePosixPath(self.resource_path)
+        if (
+            path.is_absolute()
+            or any(part in {"", ".", ".."} for part in path.parts)
+        ):
+            raise ValueError("invalid execution file_change resource_path")
+        if not all(character.isprintable() for character in self.resource_path):
+            raise ValueError("invalid execution file_change resource_path")
+
+        if not isinstance(self.change_kind, str) or self.change_kind not in {
+            "MODIFY",
+            "CREATE",
+        }:
+            raise ValueError("invalid execution file_change change_kind")
+        if (
+            not isinstance(self.action_type, str)
+            or self.action_type not in {"PROPOSE_PATCH", "PROPOSE_TEST_FILE"}
+        ):
+            raise ValueError("invalid execution file_change action_type")
+
+        if (
+            not isinstance(self.state_version, int)
+            or isinstance(self.state_version, bool)
+            or self.state_version < 0
+        ):
+            raise ValueError("invalid execution file_change state_version")
+
+        if self.expected_base_sha256 is not None and (
+            not isinstance(self.expected_base_sha256, str)
+            or len(self.expected_base_sha256) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in self.expected_base_sha256
+            )
+        ):
+            raise ValueError(
+                "invalid execution file_change expected_base_sha256"
+            )
+        if self.change_kind == "MODIFY" and self.expected_base_sha256 is None:
+            raise ValueError(
+                "execution file_change MODIFY requires expected_base_sha256"
+            )
+        if self.change_kind == "CREATE" and self.expected_base_sha256 is not None:
+            raise ValueError(
+                "execution file_change CREATE must not carry expected_base_sha256"
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class BoundaryExecutionIntent:
     """Exact external-effect identity; this does not itself grant authority."""
 
@@ -30,6 +105,7 @@ class BoundaryExecutionIntent:
     postcondition_subject: str
     postcondition_field: str
     required_postcondition_value: str
+    file_change: FileChangeContext | None = None
 
     def validate(self) -> None:
         for field_name, value in (
@@ -59,6 +135,10 @@ class BoundaryExecutionIntent:
             or not 0 < len(self.required_postcondition_value) <= 4096
         ):
             raise ValueError("invalid execution required_postcondition_value")
+        if self.file_change is not None:
+            if not isinstance(self.file_change, FileChangeContext):
+                raise ValueError("invalid execution file_change")
+            self.file_change.validate()
 
 
 class BoundaryExecutor(Protocol):
@@ -215,6 +295,7 @@ def create_signed_execution_authorization(
             "expected_latch_head": _encode_head(expected_latch_head),
             "intent": {
                 "action_digest": intent.action_digest,
+                "file_change": _encode_file_change(intent.file_change),
                 "postcondition_field": intent.postcondition_field,
                 "postcondition_subject": intent.postcondition_subject,
                 "required_postcondition_value": (
@@ -224,7 +305,7 @@ def create_signed_execution_authorization(
                 "target_id": intent.target_id,
             },
             "latch_store_id": latch_store_id,
-            "schema_version": "boundary-execution-authorization/1.2",
+            "schema_version": "boundary-execution-authorization/1.3",
             "valid_until": expires.isoformat(),
         }
     )
@@ -269,11 +350,12 @@ def verify_signed_execution_authorization(
             "valid_until",
         }:
             raise ValueError
-        if data["schema_version"] != "boundary-execution-authorization/1.2":
+        if data["schema_version"] != "boundary-execution-authorization/1.3":
             raise ValueError
         intent_data = data["intent"]
         if not isinstance(intent_data, dict) or set(intent_data) != {
             "action_digest",
+            "file_change",
             "postcondition_field",
             "postcondition_subject",
             "required_postcondition_value",
@@ -290,6 +372,7 @@ def verify_signed_execution_authorization(
             required_postcondition_value=(
                 intent_data["required_postcondition_value"]
             ),
+            file_change=_decode_file_change(intent_data["file_change"]),
         )
         intent.validate()
         authorization_id = data["authorization_id"]
@@ -388,6 +471,48 @@ def assess_execution_authorization_quorum(
         ),
         (),
     )
+
+
+_FILE_CHANGE_KEYS = frozenset(
+    {
+        "resource_path",
+        "change_kind",
+        "action_type",
+        "expected_base_sha256",
+        "state_version",
+    }
+)
+
+
+def _encode_file_change(
+    context: FileChangeContext | None,
+) -> dict[str, object] | None:
+    if context is None:
+        return None
+    context.validate()
+    return {
+        "resource_path": context.resource_path,
+        "change_kind": context.change_kind,
+        "action_type": context.action_type,
+        "expected_base_sha256": context.expected_base_sha256,
+        "state_version": context.state_version,
+    }
+
+
+def _decode_file_change(value: object) -> FileChangeContext | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict) or set(value) != _FILE_CHANGE_KEYS:
+        raise ValueError
+    context = FileChangeContext(
+        resource_path=value["resource_path"],
+        change_kind=value["change_kind"],
+        action_type=value["action_type"],
+        expected_base_sha256=value["expected_base_sha256"],
+        state_version=value["state_version"],
+    )
+    context.validate()
+    return context
 
 
 def _encode_head(head: IrreversibleLatchHead | None) -> dict[str, object] | None:

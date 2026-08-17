@@ -1625,3 +1625,65 @@ HMAC共有鍵では検証者も認証値を生成できるため、観察応答�
 - checkerが違反を返した場合にexecutorが一度も呼ばれないこと、クリーンな別intentでは正常に実行されること：成功
 - checkerの返り値が不正な形式の場合に既定PERMITへ倒れず拒否されること：成功
 - `git diff --check`：成功
+---
+
+## 2026-08-17：横軸残課題の実装プラン文書化
+
+### 今回の背景
+
+- 俯瞰監査（trusted_runtime俯瞰監査と是正、コミット`65f7f3f`）で洗い出した残課題を、順序・影響範囲・検証計画付きの実行可能なプランとして文書化した。併せて、正典（`theory/AXIOMS.md` v2.1）のIDE正規状態（§9・§10・§12・§14）と`safety_kernel`実装（`states.py`・`boundary.py`・`kernel.py`ほか）の対応をコードレベルで確認し、5境界状態・CONFESSION/τ=0分離・不可逆ラッチ・証言モード・Cause-Side分離が正典と整合していることを確認した
+
+### 作成物
+
+- `NRA-IDE_AI横軸機能_残課題実装プラン_20260817.md`（231行、§0〜§8）
+  - §0 位置付けと境界：実作用・Capability発行なし、正典非昇格、鍵/DBはリポジトリ外、据え置き事項（二重ゆらぎ式・OS identity分離・WORM固定・実測校正・LLM統合）
+  - §1 全体方針：設計文§18の導入順序＋監査報告§7の「根幹への近さ」優先
+  - §2〜§3 タスク分解と優先順序：T1（`hard_invariant_checker`への`FileChangePolicy`実接続）→T2（Recovery Drill／`revoke_capabilities`全失効）→T3（スキーマ統合・Simulate段階・E0-E4ゲーティング）→T4（検証体制NOT MET）。依存理由を明記
+  - §4 各課題の詳細：What・影響範囲・検証の3点セットで定義
+  - §5〜§6 影響範囲（既存123件＋正典参照38件を維持）と検証計画（共通コマンド・§11.2合格指標対応表）
+  - §7〜§8 リスク・据え置きと変更管理（T単位コミット分離、プラン変更時の追記手順）
+
+### この段階の境界
+
+- 本プランは文書であり、実装・検証結果の記録ではない。T1〜T4の着手は本プラン確定後に行う
+- 既存の残課題（Recovery Drill未実装、スキーマ統合未着手、検証NOT MET）は従来どおり未着手のまま。本プランで「先送り」から「予定」へ状態を変えただけである
+
+### 検証結果
+
+- 章立て（§0〜§8）の過不足なしを確認：成功
+- T1〜T4の各詳細（What・影響範囲・検証）の欠落なしを確認：成功
+- 整形（§4見出し前の空行・末尾の`---`重複）を修正：成功
+
+---
+
+## 2026-08-17：T1完了（hard_invariant_checkerへのFileChangePolicy実接続）
+
+### 今回の背景
+
+- プラン§9の詳細設計（intent拡張・adapter・注入経路）に沿って実装済みの状態を検証し、プラン§9.5・§6.2の完了基準を満たすことを確認した。既存試験123件・正典参照38件を壊さずに接続する、という制約を保った
+
+### 実装の要点（検証対象）
+
+- `BoundaryExecutionIntent`（`execution_gate.py`）へ`FileChangeContext`（`resource_path`／`change_kind`／`action_type`／`expected_base_sha256`／`state_version`）を追加し、認可署名がfile-change最小フィールドを明示束縛する。認可スキーマを`boundary-execution-authorization/1.2`から`1.3`へ進めた
+- `FileChangeInvariantAdapter`（新規`trusted_runtime/file_change_invariant_adapter.py`）が、intent＋action bytesから`ActionProposal`を復元し、`TrustedFileObserver`で実行直前に実ファイルを再観測（TOCTOU防止）してから`FileChangePolicy.violations()`を呼び、結果を`hard_invariant_checker`の契約`tuple[str, ...]`へそのまま渡す
+- trusted_runtime本体（`boundary_runtime.py`・`boundary_runtime_launcher.py`）は無変更。既存の`hard_invariant_checker`フックが汎用のまま、adapterだけがsafety_kernelへ一方向importする設計（§12.3のdomain非依存原則を維持）
+
+### 今回追加した是正
+
+- adapter試験に`FILE_TYPE_NOT_ALLOWED`（許可拡張子外のファイルへの変更拒否）のケースが欠けていたため追加した（`test_file_change_invariant_adapter.py`）。プラン§9.5が列挙した9項目のうち、これが唯一未網羅だった
+
+### この段階の境界
+
+- `FileChangeInvariantAdapter`を実際に`launch_boundary_runtime(..., hard_invariant_checker=...)`へ注入するのはデプロイ側の責務であり、trusted_runtime本体やlauncherのデフォルトにはしていない（プラン§9.3.4の方針通り、デフォルトNoneで全既存回帰を不変に保つ）
+- T3（`ActionProposal`↔`BoundaryExecutionIntent`のスキーマ完全統合）は本T1の前倒しではなく、file-changeドメインに必要な最小フィールドに限定した拡張である。統合は引き続き次段階の課題
+- T2（Recovery Drill相当）は未着手のまま
+
+### 検証結果
+
+- safety kernel試験：140件成功・1件skip（Windows環境でのsymlink作成権限なしによる環境起因のskipで実害なし）（新規17件：`test_file_change_invariant_adapter.py`）
+- NRA-IDE正典参照試験：38件成功
+- プラン§9.5の9試験区分（正常系MODIFY/CREATE、BASE_HASH_MISMATCH、SCOPE_ESCAPE、SYMLINK_TARGET_FORBIDDEN、MODIFY_TARGET_MISSING/CREATE_TARGET_EXISTS、PATCH_HEADER_PATH_MISMATCH、DEPENDENCY_CHANGE_FORBIDDEN/FILE_TYPE_NOT_ALLOWED、観測失敗時のfail-closed、既存フック試験のスキーマ1.3回帰）を全て確認：成功
+- 既存の`hard_invariant_checker`汎用フック試験2件（`test_execution_gate_enforces_pluggable_hard_invariant_checker`・`test_execution_gate_rejects_malformed_hard_invariant_checker_result`）がスキーマ1.3で回帰成功：成功
+- `git diff --check`：成功
+- 監査報告§7の優先順位（1. T1）を完了とし、次点はT2（Recovery Drill相当）
+- Git状態：新規文書は未追跡のまま（stage・commitは行っていない）。既存の未追跡ファイル（俯瞰監査報告書）とも分離した
