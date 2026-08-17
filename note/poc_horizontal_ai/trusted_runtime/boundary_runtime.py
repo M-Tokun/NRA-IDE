@@ -24,6 +24,7 @@ from .execution_gate import (
     BoundaryExecutionReport,
     BoundaryExecutor,
     BoundaryExecutionIntent,
+    SimulationOutcome,
     WitnessBoundExecutionCapability,
     _create_execution_capability,
     assess_execution_authorization_quorum,
@@ -115,6 +116,9 @@ class AdmittedBoundaryRuntime:
         hard_invariant_checker: (
             Callable[[BoundaryExecutionIntent, bytes], tuple[str, ...]] | None
         ) = None,
+        simulator: (
+            Callable[[BoundaryExecutionIntent, bytes], SimulationOutcome] | None
+        ) = None,
         _admission_token: object | None = None,
     ) -> None:
         if _admission_token is not _ADMISSION_TOKEN:
@@ -152,6 +156,9 @@ class AdmittedBoundaryRuntime:
         if hard_invariant_checker is not None and not callable(hard_invariant_checker):
             raise ValueError("EXECUTION_HARD_INVARIANT_CHECKER_INVALID")
         self._hard_invariant_checker = hard_invariant_checker
+        if simulator is not None and not callable(simulator):
+            raise ValueError("EXECUTION_SIMULATOR_INVALID")
+        self._simulator = simulator
         self._runtime_identity = object()
         self._assessment_epoch = 0
         self._closed = False
@@ -172,6 +179,42 @@ class AdmittedBoundaryRuntime:
             self._latch_store.close()
             if self._execution_authorization_store is not None:
                 self._execution_authorization_store.close()
+
+    def revoke_capabilities(
+        self,
+        *,
+        reason: str,
+        now: datetime | None = None,
+    ) -> int:
+        """Permanently stop issuing and executing capabilities (safe state).
+
+        Irreversible for this execution_authorization_database_path: there is
+        no un-revoke. Resuming execution requires a fresh deployment with a
+        new database. Testimony, audit, and observation (assess_axes) are
+        unaffected, per the design's fail-closed scope: only autonomous
+        execution stops.
+        """
+        self._ensure_open()
+        if self._execution_authorization_store is None:
+            raise ValueError("EXECUTION_AUTHORIZATION_STORE_REQUIRED")
+        current = now or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            raise ValueError(
+                "boundary runtime revocation time must be timezone-aware"
+            )
+        result = self._execution_authorization_store.revoke_all_capabilities(
+            reason=reason,
+            revoked_at=current,
+        )
+        if not result.accepted or result.generation is None:
+            raise ValueError(",".join(result.reason_codes))
+        return result.generation
+
+    def _ensure_not_revoked(self) -> None:
+        if self._execution_authorization_store is None:
+            return
+        if self._execution_authorization_store.current_revocation_generation() > 0:
+            raise ValueError("EXECUTION_CAPABILITIES_REVOKED")
 
     def assess_axes(
         self,
@@ -212,6 +255,7 @@ class AdmittedBoundaryRuntime:
             raise ValueError("EXTERNAL_LATCH_WITNESS_NOT_CURRENT")
         if self._execution_authorization_store is None:
             raise ValueError("EXECUTION_AUTHORIZATION_STORE_REQUIRED")
+        self._ensure_not_revoked()
         authorization_quorum, reasons = assess_execution_authorization_quorum(
             signed_authorization_jsons,
             trust_bundle=self._trust_bundle,
@@ -249,6 +293,7 @@ class AdmittedBoundaryRuntime:
             raise ValueError("invalid execution capability")
         if capability._runtime_identity is not self._runtime_identity:
             raise ValueError("EXECUTION_CAPABILITY_RUNTIME_MISMATCH")
+        self._ensure_not_revoked()
         capability.ensure_available()
         capability.consume()
         if not isinstance(intent, BoundaryExecutionIntent):
@@ -273,6 +318,34 @@ class AdmittedBoundaryRuntime:
             if violations:
                 raise ValueError(
                     "EXECUTION_HARD_INVARIANT_VIOLATION:" + ",".join(violations)
+                )
+        if self._simulator is not None:
+            simulated = self._simulator(intent, action)
+            if (
+                not isinstance(simulated, SimulationOutcome)
+                or not isinstance(simulated.predicted_success, bool)
+                or (
+                    simulated.predicted_result_digest is not None
+                    and (
+                        not isinstance(simulated.predicted_result_digest, str)
+                        or len(simulated.predicted_result_digest) != 64
+                        or any(
+                            character not in "0123456789abcdef"
+                            for character in simulated.predicted_result_digest
+                        )
+                    )
+                )
+                or not isinstance(simulated.reason_codes, tuple)
+                or not all(
+                    isinstance(reason, str) and reason
+                    for reason in simulated.reason_codes
+                )
+            ):
+                raise ValueError("EXECUTION_SIMULATOR_RESULT_INVALID")
+            if not simulated.predicted_success:
+                raise ValueError(
+                    "EXECUTION_SIMULATION_PREDICTS_FAILURE:"
+                    + ",".join(simulated.reason_codes)
                 )
         if self._execution_executor is None:
             raise ValueError("EXECUTION_EXECUTOR_NOT_CONFIGURED")
@@ -379,6 +452,9 @@ def admit_boundary_runtime(
     execution_executor: BoundaryExecutor | None = None,
     hard_invariant_checker: (
         Callable[[BoundaryExecutionIntent, bytes], tuple[str, ...]] | None
+    ) = None,
+    simulator: (
+        Callable[[BoundaryExecutionIntent, bytes], SimulationOutcome] | None
     ) = None,
     pinned_policy_roots: Mapping[str, PinnedPolicyRoot] | None = None,
     minimum_policy_root_principals: int = 2,
@@ -606,6 +682,7 @@ def admit_boundary_runtime(
             ),
             execution_executor=execution_executor,
             hard_invariant_checker=hard_invariant_checker,
+            simulator=simulator,
             _admission_token=_ADMISSION_TOKEN,
         )
     except Exception:

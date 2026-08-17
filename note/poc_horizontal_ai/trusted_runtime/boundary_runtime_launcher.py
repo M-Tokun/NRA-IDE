@@ -17,7 +17,11 @@ from .boundary_runtime import (
     admit_boundary_runtime,
     create_boundary_admission_challenge,
 )
-from .execution_gate import BoundaryExecutionIntent, BoundaryExecutor
+from .execution_gate import (
+    BoundaryExecutionIntent,
+    BoundaryExecutor,
+    SimulationOutcome,
+)
 from .deployment_boundary import RuntimePlacement, assess_runtime_placement
 from .irreversible_latch_store import PersistentIrreversibleLatchStore
 from .latch_witness import (
@@ -88,6 +92,9 @@ def launch_boundary_runtime(
     execution_executor: BoundaryExecutor | None = None,
     hard_invariant_checker: (
         Callable[[BoundaryExecutionIntent, bytes], tuple[str, ...]] | None
+    ) = None,
+    simulator: (
+        Callable[[BoundaryExecutionIntent, bytes], SimulationOutcome] | None
     ) = None,
     now: datetime | None = None,
 ) -> AdmittedBoundaryRuntime:
@@ -356,6 +363,7 @@ def launch_boundary_runtime(
         ),
         execution_executor=execution_executor,
         hard_invariant_checker=hard_invariant_checker,
+        simulator=simulator,
         pinned_policy_roots=pinned_policy_roots,
         minimum_policy_root_principals=minimum_policy_root_principals,
         root_policy_signature_max_age=root_policy_signature_max_age,

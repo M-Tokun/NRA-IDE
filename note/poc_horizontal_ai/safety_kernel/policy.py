@@ -34,12 +34,33 @@ class FileChangePolicy:
         ".yaml",
         ".yml",
     )
+    # Grade-gating mechanism (design doc 7.2 / audit T3c): which effect
+    # classes this deployment currently admits. The default preserves the
+    # PoC's existing E1-only behavior exactly; broadening it is a deployment
+    # decision, never automatic. E4_CRITICAL cannot be enabled through this
+    # field at all (see violations()) because this PoC has no verified
+    # fallback control or independent safety system to back it.
+    enabled_effect_classes: frozenset[EffectClass] = frozenset(
+        {EffectClass.E1_REVERSIBLE}
+    )
 
     def __post_init__(self) -> None:
         if self.max_patch_bytes <= 0:
             raise ValueError("max_patch_bytes must be positive")
         if not self.allowed_suffixes:
             raise ValueError("allowed_suffixes must not be empty")
+        if not isinstance(self.enabled_effect_classes, frozenset) or not all(
+            isinstance(effect_class, EffectClass)
+            for effect_class in self.enabled_effect_classes
+        ):
+            raise ValueError(
+                "enabled_effect_classes must be a frozenset of EffectClass"
+            )
+        if EffectClass.E4_CRITICAL in self.enabled_effect_classes:
+            raise ValueError(
+                "E4_CRITICAL cannot be enabled: no verified fallback "
+                "control or independent safety system exists in this PoC"
+            )
 
     @property
     def resolved_root(self) -> Path:
@@ -66,7 +87,12 @@ class FileChangePolicy:
             violations.append("LIVE_ENVIRONMENT_FORBIDDEN")
         if not isinstance(proposal.effect_class, EffectClass):
             violations.append("UNKNOWN_EFFECT_CLASS")
-        elif proposal.effect_class is not EffectClass.E1_REVERSIBLE:
+        elif proposal.effect_class is EffectClass.E4_CRITICAL:
+            # Defense in depth: __post_init__ already refuses to construct a
+            # policy that enables E4; this repeats the refusal here so a
+            # future bypass of the constructor guard still cannot permit it.
+            violations.append("EFFECT_CLASS_NOT_ALLOWED")
+        elif proposal.effect_class not in self.enabled_effect_classes:
             violations.append("EFFECT_CLASS_NOT_ALLOWED")
         if proposal.state_version < 0:
             violations.append("NEGATIVE_STATE_VERSION")

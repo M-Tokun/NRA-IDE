@@ -139,6 +139,72 @@ class PersistentNonceStoreTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "NONCE_CHAIN_INVALID"):
                 PersistentNonceStore(database, key)
 
+    def test_revoke_all_capabilities_persists_across_reopen(self) -> None:
+        key = b"N" * 32
+        now = datetime.now(timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / "nonce.sqlite3"
+            with PersistentNonceStore(database, key) as store:
+                self.assertEqual(store.current_revocation_generation(), 0)
+                first = store.revoke_all_capabilities(
+                    reason="incident-drill",
+                    revoked_at=now,
+                )
+                self.assertTrue(first.accepted)
+                self.assertEqual(first.generation, 1)
+                self.assertEqual(store.current_revocation_generation(), 1)
+                # Revocation is irreversible: a second call appends another
+                # row rather than resetting or being rejected as a no-op.
+                second = store.revoke_all_capabilities(
+                    reason="second-incident",
+                    revoked_at=now,
+                )
+                self.assertTrue(second.accepted)
+                self.assertEqual(second.generation, 2)
+            with PersistentNonceStore(database, key) as reopened:
+                self.assertEqual(reopened.current_revocation_generation(), 2)
+
+    def test_capability_revocation_rows_reject_update_and_delete(self) -> None:
+        key = b"N" * 32
+        now = datetime.now(timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / "nonce.sqlite3"
+            with PersistentNonceStore(database, key) as store:
+                store.revoke_all_capabilities(reason="incident-drill", revoked_at=now)
+            connection = sqlite3.connect(database)
+            with self.assertRaises(sqlite3.IntegrityError):
+                connection.execute(
+                    "UPDATE capability_revocation SET reason = ? WHERE sequence = 1",
+                    ("tampered",),
+                )
+            connection.rollback()
+            with self.assertRaises(sqlite3.IntegrityError):
+                connection.execute(
+                    "DELETE FROM capability_revocation WHERE sequence = 1"
+                )
+            connection.close()
+
+    def test_corrupt_capability_revocation_chain_cannot_be_reopened(self) -> None:
+        key = b"N" * 32
+        now = datetime.now(timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / "nonce.sqlite3"
+            with PersistentNonceStore(database, key) as store:
+                store.revoke_all_capabilities(reason="incident-drill", revoked_at=now)
+            connection = sqlite3.connect(database)
+            connection.execute("DROP TRIGGER capability_revocation_no_update")
+            connection.execute(
+                "UPDATE capability_revocation SET reason = ? WHERE sequence = 1",
+                ("tampered-reason",),
+            )
+            connection.commit()
+            connection.close()
+
+            with self.assertRaisesRegex(
+                ValueError, "CAPABILITY_REVOCATION_CHAIN_INVALID"
+            ):
+                PersistentNonceStore(database, key)
+
 
 class AuthenticatedObserverGatewayTests(unittest.TestCase):
     def test_gateway_authenticates_and_persistently_rejects_replay(self) -> None:

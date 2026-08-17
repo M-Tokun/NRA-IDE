@@ -44,6 +44,13 @@ class ExecutionReconciliationResult:
     reason_codes: tuple[str, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class RevocationResult:
+    accepted: bool
+    generation: int | None
+    reason_codes: tuple[str, ...]
+
+
 class PersistentNonceStore:
     def __init__(self, database_path: Path, integrity_key: bytes) -> None:
         if not database_path.parent.exists():
@@ -434,6 +441,78 @@ class PersistentNonceStore:
                 ("NONCE_STORE_FAILURE",),
             )
 
+    def revoke_all_capabilities(
+        self,
+        *,
+        reason: str,
+        revoked_at: datetime,
+    ) -> RevocationResult:
+        """Append an irreversible revocation record; never updated or deleted.
+
+        Once any row exists in this ledger, prepare/execute must refuse for
+        the remaining lifetime of this database. There is no un-revoke: a
+        fresh execution_authorization_database_path is required to resume.
+        """
+        if not _identifier(reason, 256) or revoked_at.tzinfo is None:
+            return RevocationResult(
+                False,
+                None,
+                ("CAPABILITY_REVOCATION_INPUT_INVALID",),
+            )
+        try:
+            self._connection.execute("BEGIN IMMEDIATE")
+            integrity_reasons = self.verify()
+            if integrity_reasons:
+                self._connection.rollback()
+                return RevocationResult(False, None, integrity_reasons)
+            row = self._connection.execute(
+                "SELECT sequence, row_mac FROM capability_revocation "
+                "ORDER BY sequence DESC LIMIT 1"
+            ).fetchone()
+            sequence = 1 if row is None else int(row[0]) + 1
+            previous_mac = None if row is None else str(row[1])
+            fields = {
+                "previous_mac": previous_mac,
+                "reason": reason,
+                "revoked_at": _format_time(revoked_at),
+                "sequence": sequence,
+            }
+            row_mac = _mac(self._integrity_key, fields)
+            self._connection.execute(
+                """
+                INSERT INTO capability_revocation(
+                    sequence, reason, revoked_at, previous_mac, row_mac
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    sequence,
+                    reason,
+                    fields["revoked_at"],
+                    previous_mac,
+                    row_mac,
+                ),
+            )
+            self._connection.commit()
+            return RevocationResult(True, sequence, ())
+        except sqlite3.DatabaseError:
+            self._connection.rollback()
+            return RevocationResult(
+                False,
+                None,
+                ("CAPABILITY_REVOCATION_FAILURE",),
+            )
+
+    def current_revocation_generation(self) -> int:
+        """0 if never revoked; any positive value means permanently revoked."""
+        integrity_reasons = self.verify()
+        if integrity_reasons:
+            raise ValueError(",".join(integrity_reasons))
+        row = self._connection.execute(
+            "SELECT sequence FROM capability_revocation "
+            "ORDER BY sequence DESC LIMIT 1"
+        ).fetchone()
+        return 0 if row is None else int(row[0])
+
     def unresolved_execution_attempt_ids(self) -> tuple[str, ...]:
         rows = self._connection.execute(
             "SELECT attempt_id FROM execution_attempt ORDER BY attempt_id"
@@ -582,7 +661,40 @@ class PersistentNonceStore:
         journal_reasons = self._verify_execution_journal()
         if journal_reasons:
             return journal_reasons
-        return self._verify_execution_reconciliation()
+        reconciliation_reasons = self._verify_execution_reconciliation()
+        if reconciliation_reasons:
+            return reconciliation_reasons
+        return self._verify_capability_revocation()
+
+    def _verify_capability_revocation(self) -> tuple[str, ...]:
+        previous_mac = None
+        try:
+            rows = self._connection.execute(
+                "SELECT sequence, reason, revoked_at, previous_mac, row_mac "
+                "FROM capability_revocation ORDER BY sequence"
+            ).fetchall()
+        except sqlite3.DatabaseError:
+            return ("CAPABILITY_REVOCATION_FAILURE",)
+        for expected_sequence, row in enumerate(rows, 1):
+            sequence, reason, revoked_at, stored_previous, row_mac = row
+            if (
+                sequence != expected_sequence
+                or stored_previous != previous_mac
+                or not _identifier(reason, 256)
+                or not isinstance(revoked_at, str)
+                or not revoked_at
+            ):
+                return ("CAPABILITY_REVOCATION_CHAIN_INVALID",)
+            fields = {
+                "previous_mac": stored_previous,
+                "reason": reason,
+                "revoked_at": revoked_at,
+                "sequence": sequence,
+            }
+            if not hmac.compare_digest(row_mac, _mac(self._integrity_key, fields)):
+                return ("CAPABILITY_REVOCATION_CHAIN_INVALID",)
+            previous_mac = row_mac
+        return ()
 
     def _verify_execution_reconciliation(self) -> tuple[str, ...]:
         try:
@@ -794,6 +906,19 @@ class PersistentNonceStore:
             CREATE TRIGGER IF NOT EXISTS execution_reconciliation_no_delete
             BEFORE DELETE ON execution_reconciliation
             BEGIN SELECT RAISE(ABORT, 'append-only reconciliation'); END;
+            CREATE TABLE IF NOT EXISTS capability_revocation (
+                sequence INTEGER PRIMARY KEY,
+                reason TEXT NOT NULL,
+                revoked_at TEXT NOT NULL,
+                previous_mac TEXT,
+                row_mac TEXT NOT NULL
+            );
+            CREATE TRIGGER IF NOT EXISTS capability_revocation_no_update
+            BEFORE UPDATE ON capability_revocation
+            BEGIN SELECT RAISE(ABORT, 'append-only capability revocation'); END;
+            CREATE TRIGGER IF NOT EXISTS capability_revocation_no_delete
+            BEFORE DELETE ON capability_revocation
+            BEGIN SELECT RAISE(ABORT, 'append-only capability revocation'); END;
             """
         )
         self._connection.commit()

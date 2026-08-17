@@ -100,8 +100,11 @@ class BoundaryExecutionIntent:
     """Exact external-effect identity; this does not itself grant authority."""
 
     intent_id: str
+    subject_id: str
+    action_type: str
     target_id: str
     action_digest: str
+    policy_version: str
     postcondition_subject: str
     postcondition_field: str
     required_postcondition_value: str
@@ -110,7 +113,10 @@ class BoundaryExecutionIntent:
     def validate(self) -> None:
         for field_name, value in (
             ("intent_id", self.intent_id),
+            ("subject_id", self.subject_id),
+            ("action_type", self.action_type),
             ("target_id", self.target_id),
+            ("policy_version", self.policy_version),
             ("postcondition_subject", self.postcondition_subject),
             ("postcondition_field", self.postcondition_field),
         ):
@@ -151,6 +157,19 @@ class BoundaryExecutor(Protocol):
         attempt_id: str,
         intent: BoundaryExecutionIntent,
     ) -> bytes: ...
+
+
+@dataclass(frozen=True, slots=True)
+class SimulationOutcome:
+    """A dry-run prediction; the real executor has not run yet.
+
+    ``predicted_result_digest`` is optional: a simulator that can predict
+    success without computing an exact result digest may leave it ``None``.
+    """
+
+    predicted_success: bool
+    predicted_result_digest: str | None
+    reason_codes: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -295,17 +314,20 @@ def create_signed_execution_authorization(
             "expected_latch_head": _encode_head(expected_latch_head),
             "intent": {
                 "action_digest": intent.action_digest,
+                "action_type": intent.action_type,
                 "file_change": _encode_file_change(intent.file_change),
+                "policy_version": intent.policy_version,
                 "postcondition_field": intent.postcondition_field,
                 "postcondition_subject": intent.postcondition_subject,
                 "required_postcondition_value": (
                     intent.required_postcondition_value
                 ),
                 "intent_id": intent.intent_id,
+                "subject_id": intent.subject_id,
                 "target_id": intent.target_id,
             },
             "latch_store_id": latch_store_id,
-            "schema_version": "boundary-execution-authorization/1.3",
+            "schema_version": "boundary-execution-authorization/1.4",
             "valid_until": expires.isoformat(),
         }
     )
@@ -350,23 +372,29 @@ def verify_signed_execution_authorization(
             "valid_until",
         }:
             raise ValueError
-        if data["schema_version"] != "boundary-execution-authorization/1.3":
+        if data["schema_version"] != "boundary-execution-authorization/1.4":
             raise ValueError
         intent_data = data["intent"]
         if not isinstance(intent_data, dict) or set(intent_data) != {
             "action_digest",
+            "action_type",
             "file_change",
+            "policy_version",
             "postcondition_field",
             "postcondition_subject",
             "required_postcondition_value",
             "intent_id",
+            "subject_id",
             "target_id",
         }:
             raise ValueError
         intent = BoundaryExecutionIntent(
             intent_id=intent_data["intent_id"],
+            subject_id=intent_data["subject_id"],
+            action_type=intent_data["action_type"],
             target_id=intent_data["target_id"],
             action_digest=intent_data["action_digest"],
+            policy_version=intent_data["policy_version"],
             postcondition_subject=intent_data["postcondition_subject"],
             postcondition_field=intent_data["postcondition_field"],
             required_postcondition_value=(

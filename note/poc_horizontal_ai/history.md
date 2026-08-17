@@ -1687,3 +1687,126 @@ HMAC共有鍵では検証者も認証値を生成できるため、観察応答�
 - `git diff --check`：成功
 - 監査報告§7の優先順位（1. T1）を完了とし、次点はT2（Recovery Drill相当）
 - Git状態：新規文書は未追跡のまま（stage・commitは行っていない）。既存の未追跡ファイル（俯瞰監査報告書）とも分離した
+
+---
+
+## 2026-08-17：T2完了（Recovery Drill相当：Capability全失効・安全状態への縮退）
+
+### 今回の背景
+
+- プラン§4 T2「`revoke_capabilities`による全Capability失効、安全状態への縮退」を実装した。監査報告§4.3でNOT MET（設計文§11.1）とされたRecovery Drillに対応する
+
+### 追加した実装
+
+- `trusted_runtime/nonce_store.py`の`PersistentNonceStore`へ、append-only・HMACチェーンの`capability_revocation`表を追加（既存の`consumed_nonce`・`execution_attempt`等と同じ規律：更新・削除はtriggerで拒否、`verify()`が全表と併せてチェーンを検証）
+- `revoke_all_capabilities(reason, revoked_at)`：失効イベントを1件追記し、新しいgeneration番号を返す。**取り消し不可**——再度の呼び出しは「解除」ではなく新たな失効イベントとして積み上がる
+- `current_revocation_generation()`：チェーン整合性を検証してから、現在の失効generation（未失効なら0）を返す
+- `trusted_runtime/boundary_runtime.py`の`AdmittedBoundaryRuntime`へ`revoke_capabilities(reason, now=None)`を追加し、`prepare_execution()`（新規Capability発行）と`execute_authorized_action()`（発行済みCapabilityの実行）の両方の入口で`_ensure_not_revoked()`を呼ぶ。失効後はどちらも`EXECUTION_CAPABILITIES_REVOKED`で拒否される
+- `assess_axes()`（軸判定・観測・証言の経路）は無変更。正典のFail-Closed意味（停止するのは自律判断・操作・自由生成のみ）に合わせ、失効後も観測・記録は継続する
+
+### この段階の境界
+
+- 失効は`execution_authorization_database_path`単位で永続・恒久である。**再有効化（re-arm）機構は意図的に実装していない**——失効状態から実行を再開するには、新しいdeployment（新しいDB）を用意し、witness quorumを含む起動プロセスをやり直す必要がある。これは「誰が失効を解除できるか」という新たな署名者ロール・quorum設計を必要とする問題を、今回のスコープから明確に外すための意図的な判断である
+- 失効は`execution_authorization_database_path`を持つ実行系統のみを止める。`latch_database_path`（軸ラッチ）・witness DB・root policy checkpoint等、他の永続storeには影響しない
+- 既発行のCapabilityのうち、失効前に`execute_authorized_action`が完了済みのもの（実行済み）は当然ながら覆らない。対象は「失効時点で未消費のCapability」および「以後の新規発行・新規実行」のみ
+
+### 検証結果
+
+- safety kernel試験：182件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規4件：nonce_store単体3件＝`test_revoke_all_capabilities_persists_across_reopen`・`test_capability_revocation_rows_reject_update_and_delete`・`test_corrupt_capability_revocation_chain_cannot_be_reopened`、統合1件＝`test_revoke_capabilities_blocks_pending_and_future_execution`）
+- NRA-IDE正典参照試験：38件成功
+- 修正前コード（`execute_authorized_action`側のチェックを一時除去）へ戻した場合、失効後も既発行Capabilityが実行できてしまうことを実際に確認してから復元：成功
+- 失効後：新規`prepare_execution`が100%拒否、既発行Capabilityの`execute_authorized_action`が100%拒否、`assess_axes`（観測・証言）は継続動作：成功
+- 失効の永続性（store再オープン後もgenerationが保持される）：成功
+- 失効記録の改ざん検知（UPDATE/DELETE拒否、chain改ざん時の再オープン拒否）：成功
+- `git diff --check`：成功
+- 監査報告§7の優先順位のうちT1・T2を完了とし、次点はT3（スキーマ統合・Simulate段階・E0-E4ゲーティング）
+
+---
+
+## 2026-08-18：T3a完了（Capability必須属性の充足：subject_id・action_type・policy_version）
+
+### 今回の背景
+
+- T3（スキーマ統合・Simulate段階・E0-E4ゲーティング）は3つの課題の間でリスクの質が異なると判断し、まず影響範囲が小さいT3aから着手した。T3c（E0-E4等級別ゲーティング）については、ユーザーと協議のうえ「機構は実装するが、実効上の許可範囲は現行のE1限定のまま変更しない」という方針で合意した（design文§17の段階開放の原則を維持する判断）
+
+### 追加した実装
+
+- `BoundaryExecutionIntent`（`execution_gate.py`）へ、design文§7.1のCapability必須属性10項目のうち欠落していた3項目——`subject_id`（提案したAI実行体のID）・`action_type`（許可された一作用の種別、domain非依存の識別子）・`policy_version`（認可時点のポリシー/閾値構成を束縛する識別子）——を追加。すべて認可署名で束縛される必須フィールドとし、欠落や不正形式（空・空白混入・128文字超）は`validate()`で拒否する
+- 認可スキーマを`boundary-execution-authorization/1.3`から`1.4`へ進め、`create_signed_execution_authorization()`／`verify_signed_execution_authorization()`の厳格`set(...)`照合・encode/decodeを新フィールドへ対応させた
+- `test_latch_witness.py`内の全12箇所の`BoundaryExecutionIntent(`構築、および`test_file_change_invariant_adapter.py`内の2箇所を新フィールド対応へ更新
+- 新規回帰試験`test_execution_intent_carries_capability_required_attributes`：3フィールドそれぞれの不正値（空・空白混入・長すぎる値）拒否と、署名往復後も値が保持されることを確認
+
+### この段階の境界
+
+- `action_type`はCapability層の汎用識別子であり、`FileChangeContext.action_type`（domain固有の`PROPOSE_PATCH`/`PROPOSE_TEST_FILE`）とは別概念である。両者の値を一致させるかどうかはdeployment側の裁量とし、trusted_runtime本体は両者の一致を強制しない
+- `policy_version`は現時点では認可署名に含まれる識別子として記録されるのみで、これを検証・比較する能動的なロジック（例：現在有効なpolicy_versionと異なる場合の拒否）は実装していない。次段階（T3c関連）の課題として残す
+- `subject_id`も同様に、現時点では記録・検証（形式チェック）のみで、特定のAI実行体を実際に認証・識別する仕組み（対応する鍵・証明書等）とは接続していない
+
+### 検証結果
+
+- safety kernel試験：183件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規1件：`test_execution_intent_carries_capability_required_attributes`）
+- NRA-IDE正典参照試験：38件成功
+- 既存の全回帰（スキーマ1.4への更新を含む12+2箇所の`BoundaryExecutionIntent`構築）：成功
+- `git diff --check`：成功
+- 監査報告§7の優先順位のうちT1・T2・T3aを完了とし、次点はT3b（Simulate段階）
+
+---
+
+## 2026-08-18：T3b完了（Simulate段階：実行前予測フック）
+
+### 今回の背景
+
+- design文§7の7段階取引（Propose→Validate→Simulate→Authorize→Execute→Verify→Commit/Compensate）のうち、Simulate段階が実装に存在しないという監査報告の指摘（`grep -rni simulate`が0件）に対応した
+- T1（`hard_invariant_checker`）・T3c（機構のみ実装しE1限定は維持）と同じ設計方針を踏襲：trusted_runtime本体はdomain非依存な汎用フックとして実装し、file-change向けの具体的なsimulator（実際にpatchを適用してみる等）は次段階の課題として残す
+
+### 追加した実装
+
+- `execution_gate.py`へ`SimulationOutcome`（`predicted_success: bool`・`predicted_result_digest: str | None`・`reason_codes: tuple[str, ...]`）を追加
+- `AdmittedBoundaryRuntime`へ、既存の`hard_invariant_checker`と同じ注入パターンで`simulator: Callable[[BoundaryExecutionIntent, bytes], SimulationOutcome] | None`を追加
+- `execute_authorized_action()`の実行直前（`hard_invariant_checker`の後、executor呼び出し前）でsimulatorを呼び出し、`predicted_success=False`ならexecutorへ到達させずに`EXECUTION_SIMULATION_PREDICTS_FAILURE:<reason_codes>`で拒否する経路を追加
+- simulatorの返り値が`SimulationOutcome`型でない、または`predicted_result_digest`が64hex以外の場合は、成功として通過させず`EXECUTION_SIMULATOR_RESULT_INVALID`で拒否する形式検証を追加（`hard_invariant_checker`と同じfail-closed規律）
+- `admit_boundary_runtime()`・`launch_boundary_runtime()`双方に同パラメータを追加し、末端まで受け渡す経路を通した。`SimulationOutcome`を`trusted_runtime`の公開APIへ追加
+
+### この段階の境界
+
+- 今回追加したのは差し込み口のみであり、file-change PoC向けの具体的なsimulator実装（実際にpatchを適用してみて結果を予測する等）は未実装・未検証である。T1（`FileChangeInvariantAdapter`）と同様、これは意図的な先送りであり、実際の要求が生じた時点で実装と検証の両方を行う
+- `predicted_result_digest`は形式検証（64hex文字列またはNone）のみ行い、実行後の実際の結果ハッシュと突合する検証ロジックはまだ実装していない
+- Simulateは`execute_authorized_action`内の同期呼び出しであり、別途の永続ジャーナル（`hard_invariant_checker`と同様）は持たない
+
+### 検証結果
+
+- safety kernel試験：185件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規2件：`test_execution_gate_enforces_pluggable_simulator`・`test_execution_gate_rejects_malformed_simulator_result`）
+- NRA-IDE正典参照試験：38件成功
+- simulator未設定時（デフォルトNone）の全既存回帰：成功（動作変更なしを確認）
+- 修正箇所を一時的に無効化した場合、両新規テストが実際に失敗することを確認してから復元：成功
+- `git diff --check`：成功
+- 監査報告§7の優先順位のうちT1・T2・T3a・T3bを完了とし、次点はT3c（E0-E4機構の追加、実効はE1限定のまま）
+
+---
+
+## 2026-08-18：T3c完了（E0-E4可逆性等級別ゲーティングの機構化、実効はE1限定を維持）
+
+### 今回の背景
+
+- ユーザーとの協議で「T3cは機構を実装するが、実効上の許可範囲は現行のE1限定のまま変更しない」という方針に合意した（design文§17の段階開放原則の維持）。T3a・T3bで確立した「trusted_runtime側は汎用フックのみ・実際の判断ロジックは次段階」というパターンとは異なり、T3cはsafety_kernel側（`policy.py`）の変更である
+
+### 追加した実装
+
+- `FileChangePolicy`（`policy.py`）へ`enabled_effect_classes: frozenset[EffectClass]`を追加。**デフォルト値は`frozenset({EffectClass.E1_REVERSIBLE})`**で、明示的に指定しない限り既存の挙動と完全に同一（回帰試験で無変更を確認済み）
+- `violations()`の効果等級チェックを、ハードコードされた「E1以外は拒否」から「`enabled_effect_classes`に含まれない場合は拒否」へ変更。等級を有効化する・しないはdeployment側の明示的な設定次第であり、自動的には広がらない
+- **`EffectClass.E4_CRITICAL`は設定によって有効化することが構造的に不可能**：`__post_init__`が`enabled_effect_classes`に`E4_CRITICAL`を含む`FileChangePolicy`の構築自体を拒否する。加えて`violations()`側にも独立した多重防御（`__post_init__`のガードを将来誰かが迂回しても、この行が単独でE4を拒否し続ける）を追加。design文§7.2が要求する「検証済み基準制御と独立安全系」をこのPoCが持たないことの直接的な反映
+- 新規試験クラス`FileChangePolicyEffectClassGatingTests`（4件）：デフォルト設定でE1以外が全て拒否されること、明示的にE2を有効化した場合にE2は通り他等級（E3）は依然拒否されること、E4を有効化しようとする構築自体が拒否されること、defense-in-depth側（`violations()`単体）でもE4が拒否されることを確認
+
+### この段階の境界
+
+- 機構は実装したが、本PoCの実際のdeployment（`FileChangeInvariantAdapter`等）は依然として`FileChangePolicy()`のデフォルト構築（E1限定）のまま変更していない。E2/E3の等級別の追加要件（補償手順の記録、人間承認の必須化等、design文§7.2の完全な内容）は本メカニズムの「有効化できるかどうか」の部分のみを実装しており、有効化された場合に等級ごとに何を追加要求するかの詳細設計（例：E2に補償手順フィールドを必須化する等）はまだ実装していない
+- `clarification.py`のE3/E4に対する問い直しレベル上昇（C3/C4）ロジックは既存のまま変更していない（既に設計文の意図と整合していることを既存試験で確認済み）
+- `subject_id`・`action_type`・`policy_version`（T3a）とeffect_classゲーティング（T3c）はまだ相互に接続されていない。例えば`policy_version`が特定のeffect_class設定を指すといった対応付けは次段階の課題
+
+### 検証結果
+
+- safety kernel試験：189件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規4件：`test_default_policy_still_admits_only_e1`・`test_explicitly_enabling_e2_admits_it`・`test_e4_critical_cannot_be_enabled_by_configuration`・`test_e4_critical_is_rejected_even_by_a_permissive_default_policy`）
+- NRA-IDE正典参照試験：38件成功
+- デフォルト設定（`enabled_effect_classes`省略）での全既存回帰：成功（動作変更なしを確認）
+- `git diff --check`：成功
+- 監査報告§7の優先順位のうちT1・T2・T3（a/b/c全て）を完了とし、次点はT4（検証体制のNOT MET項目）

@@ -311,6 +311,103 @@ class ShadowKernelTests(unittest.TestCase):
         self.assertEqual(decision.achievement.realization, RealizationStage.DENIED)
 
 
+class FileChangePolicyEffectClassGatingTests(unittest.TestCase):
+    """T3c mechanism: grade-gating exists but this PoC still enforces E1 only."""
+
+    def setUp(self) -> None:
+        self.repository_root = Path.cwd() / "effect-class-gating-test-root"
+        self.resource_path = "src/example.py"
+        self.base_hash = "a" * 64
+
+    def proposal(self, effect_class: EffectClass) -> ActionProposal:
+        return ActionProposal(
+            schema_version="1.0",
+            action_type=ActionType.PROPOSE_PATCH,
+            change_kind=ChangeKind.MODIFY,
+            resource_path=self.resource_path,
+            patch=(
+                "--- a/src/example.py\n"
+                "+++ b/src/example.py\n"
+                "@@ -1 +1 @@\n"
+                "-old\n"
+                "+new\n"
+            ),
+            state_version=7,
+            base_sha256=self.base_hash,
+            idempotency_key="request-0001",
+            environment=ExecutionEnvironment.WORKTREE,
+            effect_class=effect_class,
+        )
+
+    def evidence(self) -> AuthoritativeEvidence:
+        policy = FileChangePolicy(self.repository_root)
+        return AuthoritativeEvidence(
+            quality=EvidenceQuality.VERIFIED,
+            state_version=7,
+            resource_path=self.resource_path,
+            resolved_path=policy.resolve_target(self.resource_path),
+            target_exists=True,
+            target_is_symlink=False,
+            current_sha256=self.base_hash,
+        )
+
+    def test_default_policy_still_admits_only_e1(self) -> None:
+        policy = FileChangePolicy(self.repository_root)
+        evidence = self.evidence()
+        self.assertNotIn(
+            "EFFECT_CLASS_NOT_ALLOWED",
+            policy.violations(self.proposal(EffectClass.E1_REVERSIBLE), evidence),
+        )
+        for effect_class in (
+            EffectClass.E0_READ,
+            EffectClass.E2_COMPENSABLE,
+            EffectClass.E3_IRREVERSIBLE,
+            EffectClass.E4_CRITICAL,
+        ):
+            self.assertIn(
+                "EFFECT_CLASS_NOT_ALLOWED",
+                policy.violations(self.proposal(effect_class), evidence),
+            )
+
+    def test_explicitly_enabling_e2_admits_it(self) -> None:
+        policy = FileChangePolicy(
+            self.repository_root,
+            enabled_effect_classes=frozenset(
+                {EffectClass.E1_REVERSIBLE, EffectClass.E2_COMPENSABLE}
+            ),
+        )
+        evidence = self.evidence()
+        self.assertNotIn(
+            "EFFECT_CLASS_NOT_ALLOWED",
+            policy.violations(self.proposal(EffectClass.E2_COMPENSABLE), evidence),
+        )
+        # E3 remains excluded: enabling one grade does not open the rest.
+        self.assertIn(
+            "EFFECT_CLASS_NOT_ALLOWED",
+            policy.violations(self.proposal(EffectClass.E3_IRREVERSIBLE), evidence),
+        )
+
+    def test_e4_critical_cannot_be_enabled_by_configuration(self) -> None:
+        with self.assertRaisesRegex(ValueError, "E4_CRITICAL cannot be enabled"):
+            FileChangePolicy(
+                self.repository_root,
+                enabled_effect_classes=frozenset(
+                    {EffectClass.E1_REVERSIBLE, EffectClass.E4_CRITICAL}
+                ),
+            )
+
+    def test_e4_critical_is_rejected_even_by_a_permissive_default_policy(
+        self,
+    ) -> None:
+        # Defense in depth: violations() itself refuses E4 regardless of
+        # enabled_effect_classes, independent of the constructor guard.
+        policy = FileChangePolicy(self.repository_root)
+        self.assertIn(
+            "EFFECT_CLASS_NOT_ALLOWED",
+            policy.violations(self.proposal(EffectClass.E4_CRITICAL), self.evidence()),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
 

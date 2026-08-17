@@ -69,8 +69,11 @@ def make_intent(
     )
     return BoundaryExecutionIntent(
         intent_id=intent_id,
+        subject_id="subject-file-change-tests",
+        action_type=action_type,
         target_id=f"file:{resource_path}",
         action_digest=hashlib.sha256(action).hexdigest(),
+        policy_version="policy-v1",
         postcondition_subject=resource_path,
         postcondition_field="sha256",
         required_postcondition_value=("6" * 64),
@@ -97,8 +100,11 @@ class FileChangeInvariantAdapterTests(unittest.TestCase):
         action = modify_diff("src/app.py", 'print("old")', 'print("new")')
         generic = BoundaryExecutionIntent(
             intent_id="intent-generic-01",
+            subject_id="subject-generic",
+            action_type="generic:action",
             target_id="repo-1",
             action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
             postcondition_subject="deployment.json",
             postcondition_field="deployment_state",
             required_postcondition_value="ready",

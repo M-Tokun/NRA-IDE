@@ -34,6 +34,7 @@ from note.poc_horizontal_ai.trusted_runtime import (
     RootPolicyWitnessProcess,
     RootPolicyWitnessStateStore,
     RuntimePlacement,
+    SimulationOutcome,
     TrustedKeySpec,
     admit_boundary_runtime,
     assess_authority_manifest_quorum,
@@ -59,6 +60,7 @@ from note.poc_horizontal_ai.trusted_runtime import (
     verify_signed_latch_checkpoint,
     verify_signed_trust_bundle,
     verify_latch_witness_attestation,
+    verify_signed_execution_authorization,
     launch_boundary_runtime,
     reconcile_execution_file_observations,
 )
@@ -480,6 +482,7 @@ class LatchWitnessTests(unittest.TestCase):
         processes: tuple[LatchWitnessProcess, ...],
         execution_executor=None,
         hard_invariant_checker=None,
+        simulator=None,
         policy_process_limit: int | None = None,
         policy_process_host_override: str | None = None,
         policy_process_authority_overlap: bool = False,
@@ -562,6 +565,7 @@ class LatchWitnessTests(unittest.TestCase):
             root_policy_witness_process_timeout=timedelta(seconds=10),
             execution_executor=execution_executor,
             hard_invariant_checker=hard_invariant_checker,
+            simulator=simulator,
             now=self.now,
         )
 
@@ -813,12 +817,15 @@ class LatchWitnessTests(unittest.TestCase):
         ):
             create_signed_execution_authorization(
                 BoundaryExecutionIntent(
-                    "intent-role",
-                    "repo-1",
-                    "a" * 64,
-                    "deployment.json",
-                    "deployment_state",
-                    "ready",
+                    intent_id="intent-role",
+                    subject_id="subject-role",
+                    action_type="file-change:patch",
+                    target_id="repo-1",
+                    action_digest="a" * 64,
+                    policy_version="policy-v1",
+                    postcondition_subject="deployment.json",
+                    postcondition_field="deployment_state",
+                    required_postcondition_value="ready",
                 ),
                 authorization_id="authorization-role",
                 authorization_nonce="authorization-nonce-role",
@@ -2952,8 +2959,11 @@ class LatchWitnessTests(unittest.TestCase):
         other_action = b'{"operation":"other-test"}'
         intent = BoundaryExecutionIntent(
             intent_id="intent-1",
+            subject_id="subject-1",
+            action_type="file-change:patch",
             target_id="repo-1",
             action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
             postcondition_subject="deployment.json",
             postcondition_field="deployment_state",
             required_postcondition_value="required-secret-ready",
@@ -2988,8 +2998,11 @@ class LatchWitnessTests(unittest.TestCase):
                     runtime.prepare_execution((authorization[0], authorization[0]))
                 other_intent = BoundaryExecutionIntent(
                     intent_id=intent.intent_id,
+                    subject_id=intent.subject_id,
+                    action_type=intent.action_type,
                     target_id=intent.target_id,
                     action_digest=hashlib.sha256(other_action).hexdigest(),
+                    policy_version=intent.policy_version,
                     postcondition_subject=intent.postcondition_subject,
                     postcondition_field=intent.postcondition_field,
                     required_postcondition_value=(
@@ -3118,6 +3131,52 @@ class LatchWitnessTests(unittest.TestCase):
                 ):
                     runtime.prepare_execution(fourth_authorization)
 
+    def test_execution_intent_carries_capability_required_attributes(
+        self,
+    ) -> None:
+        action = b'{"operation":"attribute-check"}'
+        base = BoundaryExecutionIntent(
+            intent_id="intent-attributes",
+            subject_id="subject-attributes",
+            action_type="file-change:patch",
+            target_id="repo-1",
+            action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
+            postcondition_subject="deployment.json",
+            postcondition_field="deployment_state",
+            required_postcondition_value="ready",
+        )
+        base.validate()
+        for field_name in ("subject_id", "action_type", "policy_version"):
+            for bad_value in ("", "has space", "x" * 129):
+                with self.assertRaises(ValueError):
+                    replace(base, **{field_name: bad_value}).validate()
+
+        signed = create_signed_execution_authorization(
+            base,
+            authorization_id="authorization-attributes",
+            authorization_nonce="authorization-nonce-attributes",
+            latch_store_id="repo-latch-v1",
+            expected_latch_head=None,
+            signing_key_id="execution-authorizer-v1",
+            signing_private_key=self.execution_authorizer,
+            trust_bundle=self.bundle,
+            authorized_at=self.now,
+            valid_until=self.now + timedelta(minutes=1),
+        )
+        verified, reasons = verify_signed_execution_authorization(
+            signed,
+            trust_bundle=self.bundle,
+            signature_max_age=timedelta(minutes=5),
+            now=self.now,
+        )
+        self.assertIsNotNone(verified, reasons)
+        assert verified is not None
+        self.assertEqual(verified.intent, base)
+        self.assertEqual(verified.intent.subject_id, "subject-attributes")
+        self.assertEqual(verified.intent.action_type, "file-change:patch")
+        self.assertEqual(verified.intent.policy_version, "policy-v1")
+
     def test_execution_gate_denies_capability_for_irreversibly_latched_target(
         self,
     ) -> None:
@@ -3125,8 +3184,11 @@ class LatchWitnessTests(unittest.TestCase):
         action = b'{"operation":"post-latch-attempt"}'
         intent = BoundaryExecutionIntent(
             intent_id="intent-post-latch",
+            subject_id="subject-post-latch",
+            action_type="file-change:patch",
             target_id="repo-1",
             action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
             postcondition_subject="deployment.json",
             postcondition_field="deployment_state",
             required_postcondition_value="ready",
@@ -3169,6 +3231,88 @@ class LatchWitnessTests(unittest.TestCase):
                     reopened.prepare_execution(authorization)
                 self.assertEqual(executor.calls, [])
 
+    def test_revoke_capabilities_blocks_pending_and_future_execution(
+        self,
+    ) -> None:
+        thresholds = Thresholds(0.4, 0.6, 0.8)
+        action = b'{"operation":"pre-revocation"}'
+        intent = BoundaryExecutionIntent(
+            intent_id="intent-revocation",
+            subject_id="subject-revocation",
+            action_type="file-change:patch",
+            target_id="repo-1",
+            action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
+            postcondition_subject="deployment.json",
+            postcondition_field="deployment_state",
+            required_postcondition_value="ready",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            placement = self.placement(temporary)
+            signer, root_public, processes = self.launcher_material(temporary)
+            executor = RecordingExecutor()
+            with self.launch(
+                placement,
+                signer,
+                root_public,
+                processes,
+                execution_executor=executor,
+            ) as runtime:
+                # A capability prepared before revocation must not survive it.
+                authorization = self.authorize_execution(
+                    intent,
+                    authorization_id="authorization-pre-revoke",
+                    authorization_nonce="authorization-nonce-pre-revoke",
+                    expected_latch_head=None,
+                )
+                pending_capability = runtime.prepare_execution(authorization)
+
+                generation = runtime.revoke_capabilities(
+                    reason="incident-drill", now=self.now
+                )
+                self.assertEqual(generation, 1)
+
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "EXECUTION_CAPABILITIES_REVOKED",
+                ):
+                    runtime.execute_authorized_action(
+                        pending_capability, intent, action
+                    )
+                self.assertEqual(executor.calls, [])
+
+                # New authorization attempts are refused outright, too.
+                second_authorization = self.authorize_execution(
+                    intent,
+                    authorization_id="authorization-post-revoke",
+                    authorization_nonce="authorization-nonce-post-revoke",
+                    expected_latch_head=None,
+                )
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "EXECUTION_CAPABILITIES_REVOKED",
+                ):
+                    runtime.prepare_execution(second_authorization)
+
+                # Observation/testimony continues: only execution stops.
+                assessment = runtime.assess_axes(
+                    target_id="repo-1",
+                    axes=(AxisEvidence("scope_escape", 0.1, 1.0, thresholds),),
+                    observed_at=self.now,
+                )
+                self.assertEqual(
+                    assessment.target_state,
+                    TargetBoundaryState.PERMIT,
+                )
+
+                # Revocation is irreversible: calling again records a further
+                # event rather than resetting to an un-revoked state.
+                second_generation = runtime.revoke_capabilities(
+                    reason="second-call", now=self.now
+                )
+                self.assertEqual(second_generation, 2)
+
     def test_execution_gate_enforces_pluggable_hard_invariant_checker(
         self,
     ) -> None:
@@ -3176,16 +3320,22 @@ class LatchWitnessTests(unittest.TestCase):
         other_action = b'{"operation":"invariant-clean"}'
         intent = BoundaryExecutionIntent(
             intent_id="intent-invariant",
+            subject_id="subject-invariant",
+            action_type="file-change:patch",
             target_id="repo-1",
             action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
             postcondition_subject="deployment.json",
             postcondition_field="deployment_state",
             required_postcondition_value="ready",
         )
         other_intent = BoundaryExecutionIntent(
             intent_id="intent-invariant-clean",
+            subject_id="subject-invariant",
+            action_type="file-change:patch",
             target_id="repo-1",
             action_digest=hashlib.sha256(other_action).hexdigest(),
+            policy_version="policy-v1",
             postcondition_subject="deployment.json",
             postcondition_field="deployment_state",
             required_postcondition_value="ready",
@@ -3242,8 +3392,11 @@ class LatchWitnessTests(unittest.TestCase):
         action = b'{"operation":"malformed-checker"}'
         intent = BoundaryExecutionIntent(
             intent_id="intent-malformed-checker",
+            subject_id="subject-malformed-checker",
+            action_type="file-change:patch",
             target_id="repo-1",
             action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
             postcondition_subject="deployment.json",
             postcondition_field="deployment_state",
             required_postcondition_value="ready",
@@ -3277,12 +3430,126 @@ class LatchWitnessTests(unittest.TestCase):
                     runtime.execute_authorized_action(capability, intent, action)
                 self.assertEqual(executor.calls, [])
 
+    def test_execution_gate_enforces_pluggable_simulator(self) -> None:
+        action = b'{"operation":"simulate-fails"}'
+        other_action = b'{"operation":"simulate-clean"}'
+        intent = BoundaryExecutionIntent(
+            intent_id="intent-simulate-fails",
+            subject_id="subject-simulate",
+            action_type="file-change:patch",
+            target_id="repo-1",
+            action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
+            postcondition_subject="deployment.json",
+            postcondition_field="deployment_state",
+            required_postcondition_value="ready",
+        )
+        other_intent = BoundaryExecutionIntent(
+            intent_id="intent-simulate-clean",
+            subject_id="subject-simulate",
+            action_type="file-change:patch",
+            target_id="repo-1",
+            action_digest=hashlib.sha256(other_action).hexdigest(),
+            policy_version="policy-v1",
+            postcondition_subject="deployment.json",
+            postcondition_field="deployment_state",
+            required_postcondition_value="ready",
+        )
+
+        def simulator(checked_intent, checked_action):
+            if b"simulate-fails" in checked_action:
+                return SimulationOutcome(False, None, ("PATCH_DOES_NOT_APPLY",))
+            return SimulationOutcome(True, "b" * 64, ())
+
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            placement = self.placement(temporary)
+            signer, root_public, processes = self.launcher_material(temporary)
+            executor = RecordingExecutor()
+            with self.launch(
+                placement,
+                signer,
+                root_public,
+                processes,
+                execution_executor=executor,
+                simulator=simulator,
+            ) as runtime:
+                authorization = self.authorize_execution(
+                    intent,
+                    authorization_id="authorization-simulate-fails",
+                    authorization_nonce="authorization-nonce-simulate-fails",
+                    expected_latch_head=None,
+                )
+                capability = runtime.prepare_execution(authorization)
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "EXECUTION_SIMULATION_PREDICTS_FAILURE:PATCH_DOES_NOT_APPLY",
+                ):
+                    runtime.execute_authorized_action(capability, intent, action)
+                self.assertEqual(executor.calls, [])
+
+                other_authorization = self.authorize_execution(
+                    other_intent,
+                    authorization_id="authorization-simulate-clean",
+                    authorization_nonce="authorization-nonce-simulate-clean",
+                    expected_latch_head=None,
+                )
+                other_capability = runtime.prepare_execution(other_authorization)
+                report = runtime.execute_authorized_action(
+                    other_capability, other_intent, other_action
+                )
+                self.assertEqual(report.intent, other_intent)
+                self.assertEqual(len(executor.calls), 1)
+
+    def test_execution_gate_rejects_malformed_simulator_result(self) -> None:
+        action = b'{"operation":"malformed-simulator"}'
+        intent = BoundaryExecutionIntent(
+            intent_id="intent-malformed-simulator",
+            subject_id="subject-malformed-simulator",
+            action_type="file-change:patch",
+            target_id="repo-1",
+            action_digest=hashlib.sha256(action).hexdigest(),
+            policy_version="policy-v1",
+            postcondition_subject="deployment.json",
+            postcondition_field="deployment_state",
+            required_postcondition_value="ready",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            placement = self.placement(temporary)
+            signer, root_public, processes = self.launcher_material(temporary)
+            executor = RecordingExecutor()
+            with self.launch(
+                placement,
+                signer,
+                root_public,
+                processes,
+                execution_executor=executor,
+                simulator=lambda checked_intent, checked_action: (True, None, ()),
+            ) as runtime:
+                authorization = self.authorize_execution(
+                    intent,
+                    authorization_id="authorization-malformed-simulator",
+                    authorization_nonce="authorization-nonce-malformed-simulator",
+                    expected_latch_head=None,
+                )
+                capability = runtime.prepare_execution(authorization)
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "EXECUTION_SIMULATOR_RESULT_INVALID",
+                ):
+                    runtime.execute_authorized_action(capability, intent, action)
+                self.assertEqual(executor.calls, [])
+
     def test_execution_authorization_replay_persists_across_runtime(self) -> None:
         action = b'{"operation":"replay-test"}'
         intent = BoundaryExecutionIntent(
             "intent-replay",
+            "subject-replay",
+            "file-change:patch",
             "repo-1",
             hashlib.sha256(action).hexdigest(),
+            "policy-v1",
             "deployment.json",
             "deployment_state",
             "ready",
@@ -3301,8 +3568,11 @@ class LatchWitnessTests(unittest.TestCase):
         )
         next_intent = BoundaryExecutionIntent(
             "intent-after-report",
+            "subject-replay",
+            "file-change:patch",
             "repo-1",
             hashlib.sha256(action).hexdigest(),
+            "policy-v1",
             "deployment.json",
             "deployment_state",
             "ready",
@@ -3364,8 +3634,11 @@ class LatchWitnessTests(unittest.TestCase):
         action = b'{"operation":"unknown-outcome-test"}'
         intent = BoundaryExecutionIntent(
             "intent-unknown",
+            "subject-unknown",
+            "file-change:patch",
             "repo-1",
             hashlib.sha256(action).hexdigest(),
+            "policy-v1",
             "deployment.json",
             "deployment_state",
             "ready",
@@ -3398,8 +3671,11 @@ class LatchWitnessTests(unittest.TestCase):
 
             next_intent = BoundaryExecutionIntent(
                 "intent-after-unknown",
+                "subject-unknown",
+                "file-change:patch",
                 "repo-1",
                 hashlib.sha256(action).hexdigest(),
+                "policy-v1",
                 "deployment.json",
                 "deployment_state",
                 "ready",
