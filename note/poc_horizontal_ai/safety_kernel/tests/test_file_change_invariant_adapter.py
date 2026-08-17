@@ -245,6 +245,75 @@ class FileChangeInvariantAdapterTests(unittest.TestCase):
         )
         self.assertIn("FILE_TYPE_NOT_ALLOWED", adapter(intent, action))
 
+    def test_adapter_rejects_case_variant_secret_path(self) -> None:
+        # Adversarial testing (design doc 17, week 3: case differences):
+        # confirm the casefold-based forbidden-path match is not bypassed
+        # by an uppercase or mixed-case variant of a protected name.
+        repository, adapter = self.make_adapter()
+        secret = repository / ".ENV"
+        secret.write_text("TOKEN=x\n", encoding="utf-8")
+        action = modify_diff(".ENV", "TOKEN=x", "TOKEN=y")
+        intent = make_intent(
+            resource_path=".ENV",
+            change_kind="MODIFY",
+            action_type="PROPOSE_PATCH",
+            action=action,
+            expected_base_sha256=file_sha256(secret),
+        )
+        self.assertIn("SECRET_OR_CONTROL_PATH", adapter(intent, action))
+
+    def test_adapter_rejects_non_nfc_resource_path(self) -> None:
+        # Adversarial testing (design doc 17, week 3: Unicode look-alikes):
+        # a decomposed-form path (combining accent) must not silently pass
+        # just because the strict JSON decoder was never in this path.
+        repository, adapter = self.make_adapter()
+        decomposed_name = "café.py"  # NFC would be "café.py"
+        target = repository / "src" / decomposed_name
+        target.write_text('print("old")\n', encoding="utf-8")
+        resource_path = f"src/{decomposed_name}"
+        action = modify_diff(resource_path, 'print("old")', 'print("new")')
+        intent = make_intent(
+            resource_path=resource_path,
+            change_kind="MODIFY",
+            action_type="PROPOSE_PATCH",
+            action=action,
+            expected_base_sha256=file_sha256(target),
+        )
+        self.assertIn("FIELD_NOT_NFC", adapter(intent, action))
+
+    def test_adapter_rejects_oversized_patch(self) -> None:
+        # Adversarial testing (design doc 17, week 3: huge patch).
+        repository, adapter = self.make_adapter()
+        target = repository / "src" / "app.py"
+        huge_line = "x" * (65 * 1024)
+        action = modify_diff("src/app.py", 'print("old")', huge_line)
+        intent = make_intent(
+            resource_path="src/app.py",
+            change_kind="MODIFY",
+            action_type="PROPOSE_PATCH",
+            action=action,
+            expected_base_sha256=file_sha256(target),
+        )
+        self.assertIn("PATCH_TOO_LARGE", adapter(intent, action))
+
+    def test_adapter_rejects_binary_diff_marker(self) -> None:
+        # Adversarial testing (design doc 17, week 3: binary contamination):
+        # a git-style "Binary files differ" marker is not a unified diff
+        # and must not be treated as an approved single-file text patch.
+        repository, adapter = self.make_adapter()
+        target = repository / "src" / "app.py"
+        action = b"Binary files a/src/app.py and b/src/app.py differ\n"
+        intent = make_intent(
+            resource_path="src/app.py",
+            change_kind="MODIFY",
+            action_type="PROPOSE_PATCH",
+            action=action,
+            expected_base_sha256=file_sha256(target),
+        )
+        self.assertIn(
+            "SINGLE_FILE_UNIFIED_DIFF_REQUIRED", adapter(intent, action)
+        )
+
     def test_adapter_rejects_secret_path(self) -> None:
         repository, adapter = self.make_adapter()
         secret = repository / ".env"

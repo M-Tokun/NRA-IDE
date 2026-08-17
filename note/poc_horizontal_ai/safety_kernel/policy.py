@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
@@ -98,6 +99,22 @@ class FileChangePolicy:
             violations.append("NEGATIVE_STATE_VERSION")
         if not _IDEMPOTENCY_KEY.fullmatch(proposal.idempotency_key):
             violations.append("INVALID_IDEMPOTENCY_KEY")
+        if any(
+            isinstance(value, str)
+            and unicodedata.normalize("NFC", value) != value
+            for value in (
+                proposal.resource_path,
+                proposal.patch,
+                proposal.idempotency_key,
+            )
+        ):
+            # Non-NFC text (decomposed accents, confusable combining forms)
+            # must not silently pass path/name checks that compare strings
+            # exactly. The strict decoder already enforces this for input
+            # that goes through it; this repeats the check here because
+            # FileChangeInvariantAdapter builds ActionProposal directly and
+            # never calls the decoder.
+            violations.append("FIELD_NOT_NFC")
 
         patch_size = len(proposal.patch.encode("utf-8"))
         if patch_size == 0:
@@ -141,17 +158,25 @@ class FileChangePolicy:
             or path_text.startswith(("/", "\\"))
             or "\\" in path_text
             or ":" in path_text
+            or any(character in "\x00" for character in path_text)
             or any(part in {"", ".", ".."} for part in path.parts)
         ):
             violations.append("INVALID_RESOURCE_PATH")
         else:
-            target = self.resolve_target(path_text)
             try:
-                inside_root = os.path.commonpath(
-                    (str(self.resolved_root), str(target))
-                ) == str(self.resolved_root)
-            except ValueError:
+                target = self.resolve_target(path_text)
+            except (ValueError, OSError):
+                violations.append("INVALID_RESOURCE_PATH")
+                target = None
+            if target is None:
                 inside_root = False
+            else:
+                try:
+                    inside_root = os.path.commonpath(
+                        (str(self.resolved_root), str(target))
+                    ) == str(self.resolved_root)
+                except ValueError:
+                    inside_root = False
             if not inside_root:
                 violations.append("SCOPE_ESCAPE")
             if evidence.resolved_path.resolve() != target:

@@ -1810,3 +1810,86 @@ HMAC共有鍵では検証者も認証値を生成できるため、観察応答�
 - デフォルト設定（`enabled_effect_classes`省略）での全既存回帰：成功（動作変更なしを確認）
 - `git diff --check`：成功
 - 監査報告§7の優先順位のうちT1・T2・T3（a/b/c全て）を完了とし、次点はT4（検証体制のNOT MET項目）
+
+---
+
+## 2026-08-18：T4-1完了（Property-Based Testing、`boundary.py`実装のバグを発見・修正）
+
+### 今回の背景
+
+- 監査報告§4.3でNOT METとされたProperty-Based Testingに対応した。プランのT4-1に従い、`boundary.py`・`policy.py`・`decoder.py`を対象に、NaN・無限大・境界値・未知フィールド・巨大値等を系統的に投入する試験を追加した
+- ツール選定はユーザーと協議し、hypothesisを新規依存として追加する方針で合意した（プラン§7に「T4で新規依存が必要な場合は個別確認を得てから導入する」と明記されていたため）
+
+### 追加した実装
+
+- `hypothesis==6.165.10`を新規依存として追加（`pip install`＋`safety_kernel/tests/requirements-test.txt`を新設してpin）
+- 新規`safety_kernel/tests/test_property_based.py`（16試験、`unittest.TestCase`継承で`python -m unittest discover`からも収集可能）
+  - `boundary.py`：`evaluate_axis`が任意のfloat（NaN・±inf・境界値）で例外を出さないこと、非有限値・負値が常にCONFESSIONになること、`tau=0`が常にOUT_OF_DESCRIPTION_DOMAINになること、分類が`ratio`としきい値の関係と一致すること、`evaluate_axes`が複数軸の平均化ではなく最悪軸を採用することを確認
+  - `policy.py`：`violations()`が任意の`resource_path`・`patch`テキストで例外を出さないこと、path traversalが常に`INVALID_RESOURCE_PATH`になること、デフォルト設定でE1以外の等級が常に拒否されることを確認
+  - `decoder.py`：`decode_action_proposal`が任意のtext/bytesで例外を出さないこと、返り値が常に整合していること（proposal有りなら理由コード無し、逆も然り）、未知フィールド・重複フィールドが常に拒否されること、正常な入力が往復できることを確認
+
+### 発見し是正したバグ
+
+- `FileChangePolicy.violations()`（`policy.py`）に、`resource_path`にNULバイト（`\x00`）が含まれる場合、拒否ではなく`ValueError`で**クラッシュする**欠陥があった。`resolve_target()`内部の`PurePosixPath(...).resolve()`が`os.stat()`を呼び、NULバイトを含むパスに対してOSレベルで例外を送出するため。本来この関数は他の全チェックと同様「例外を出さず、必ず`violations`リストへ分類する」total functionであるべきところ、この1パターンだけ例外化していた
+- 是正：既存の`INVALID_RESOURCE_PATH`早期拒否条件へNULバイト検知を追加し、さらに`resolve_target()`呼び出し自体を`(ValueError, OSError)`で捕捉して`INVALID_RESOURCE_PATH`へ変換する多重防御を追加した。修正前コードへ一時的に戻し、`test_violations_never_raises_on_arbitrary_resource_path`が実際に`resource_path='\x00'`で再現・失敗することを確認してから復元した
+- 実害の評価：`hard_invariant_checker`フック（T1）は`self._hard_invariant_checker(intent, action)`の呼び出しをtry/exceptで囲んでいないため、この例外は`execute_authorized_action()`から未捕捉のまま伝播しうる状態だった。executorへは到達しない（fail-closedの結果自体は変わらない）が、正常な`EXECUTION_HARD_INVARIANT_VIOLATION`ではなく生の例外で落ちる、という頑健性の欠陥だった
+
+### この段階の境界
+
+- 対象は`boundary.py`・`policy.py`・`decoder.py`の3ファイルに限定した。他のtrusted_runtime側モジュール（署名検証・quorum等）へのPBT適用は次段階の課題として残す
+- `boundary_runtime.py`の`hard_invariant_checker`／`simulator`呼び出し自体を try/except で保護する対応は今回行っていない（今回の発見は`policy.py`側の是正で解消したため）。将来別のcheckerが同種の未捕捉例外を出す可能性は残る
+
+### 検証結果
+
+- safety kernel試験：205件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規16件：`test_property_based.py`）
+- NRA-IDE正典参照試験：38件成功
+- `python -m unittest note.poc_horizontal_ai.safety_kernel.tests.test_property_based`：16件成功（プロジェクト既定の検証コマンドでも収集・成功することを確認）
+- 修正前コードへ一時的に戻した場合、`test_violations_never_raises_on_arbitrary_resource_path`が実際に失敗すること（回帰検知として機能することの確認）：成功
+- `git diff --check`：成功
+- 監査報告§7優先順位のうちT1・T2・T3・T4-1を完了とし、次点はT4-2（Adversarial Testing）
+
+---
+
+## 2026-08-18：T4-2完了（Adversarial Testing、Unicode正規化の未接続を発見・修正）
+
+### 今回の背景
+
+- 設計文§17第3週の投入リスト（パストラバーサル、シンボリックリンク経由の脱出、大文字小文字差、Unicode類似文字、巨大パッチ、バイナリ混入、テストコマンドへの引数注入、RAG文書内の偽命令、古いファイルハッシュによる上書き、ログ停止）を1件ずつ、`FileChangeInvariantAdapter`（実際にtrusted_runtimeの実行経路へ接続されているコード）に対して確認した
+
+### 各項目の現状
+
+| 投入項目 | 状態 |
+|---|---|
+| パストラバーサル | 既存試験＋T4-1のPBTでカバー済み |
+| シンボリックリンク経由の脱出 | 既存試験でカバー済み（本機ではWindows symlink権限によりskip、環境起因） |
+| 大文字小文字差 | 実装は既にcasefold対応済みだったが専用試験がなかったため追加 |
+| **Unicode類似文字** | **未接続の欠落を発見・修正**（下記） |
+| 巨大パッチ | 専用試験がなかったため追加 |
+| バイナリ混入 | 専用試験がなかったため追加 |
+| テストコマンドへの引数注入 | 該当機能（`run_allowlisted_test`相当）が未実装のためN/A |
+| RAG文書内の偽命令 | LLM/RAG統合が未実装のためN/A（Model Swap TestのN/A理由と同様） |
+| 古いファイルハッシュによる上書き | 既存試験（`test_adapter_rejects_base_hash_mismatch`）でカバー済み |
+| ログ停止 | T4-3（Fault Injection）で扱う |
+
+### 発見し是正したバグ
+
+- `decoder.py`にはUnicode正規化（NFC）チェックが実装されているが、`FileChangeInvariantAdapter`は`decode_action_proposal`を経由せず`intent`から直接`ActionProposal`を構築するため、**この防御が実行経路から完全に漏れていた**。実際に検証：`resource_path`へ分解形Unicode（"e" + 結合文字U+0301、視覚的には合成済み"é"と同一だがバイト列は異なる）を渡すと、`FileChangePolicy.violations()`は`()`（違反なし）を返していた
+- 是正：`policy.py`の`violations()`へ、`resource_path`・`patch`・`idempotency_key`のNFC正規化チェックを追加し、`FIELD_NOT_NFC`で拒否するようにした。修正前コードへ一時的に戻し、新規試験`test_adapter_rejects_non_nfc_resource_path`が実際に失敗することを確認してから復元した
+- T4-1（NULバイトのクラッシュ）と合わせて、これで2件連続してPBT/Adversarial Testingが「`decoder.py`にはある防御が、`FileChangeInvariantAdapter`の直接構築経路には無い」という同じパターンの欠落を検出したことになる。今後同種の防御を追加する際は、decoder.py側だけでなくpolicy.py側にも複製する必要があることを示唆する
+
+### 追加した試験
+
+- `test_file_change_invariant_adapter.py`へ4件追加：`test_adapter_rejects_case_variant_secret_path`・`test_adapter_rejects_non_nfc_resource_path`・`test_adapter_rejects_oversized_patch`・`test_adapter_rejects_binary_diff_marker`
+
+### この段階の境界
+
+- テストコマンド引数注入・RAG偽命令はN/Aとしたが、これは「対応済み」ではなく「対応する機能がまだ存在しない」ことを意味する。将来これらの機能（allowlist済みテスト実行、RAG統合）を実装する際は、この2項目を再度Adversarial Testingの対象として持ち出す必要がある
+- ログ停止はT4-3（Fault Injection）で扱うため、本エントリでは対応していない
+
+### 検証結果
+
+- safety kernel試験：209件成功・1件skip（Windows symlink権限、環境起因で実害なし）（新規4件）
+- NRA-IDE正典参照試験：38件成功
+- 修正前コードへ一時的に戻した場合、`test_adapter_rejects_non_nfc_resource_path`が実際に失敗すること：成功
+- `git diff --check`：成功
+- 監査報告§7優先順位のうちT1・T2・T3・T4-1・T4-2を完了とし、次点はT4-3（Fault Injection）
