@@ -1963,3 +1963,28 @@ HMAC共有鍵では検証者も認証値を生成できるため、観察応答�
 - NRA-IDE正典参照試験：38件成功
 - `git diff --check`：成功
 - 監査報告§7優先順位のうちT1・T2・T3・T4-1〜T4-3・T4-4（Model Checkingのみ）を完了。残るのはDifferential Testingのみ
+
+---
+
+## 2026-08-19：T4-4b完了（Differential Testingの検証・全残課題達成）
+
+### 今回の背景
+
+- プランT4-4b（Differential Testing: 正典参照実装との判定一致試験）を実施・検証した。
+- 正典参照実装 `nra-core/foundations/NRA-IDE_Architecture_public.py` の `nra_ide_core_evaluation` と `safety_kernel/boundary.py` の `evaluate_axis` を対比・検証する差分テストスイート `note/poc_horizontal_ai/safety_kernel/tests/test_differential_testing.py` の全テストおよび拡張多軸判定の適合性を確認した。
+
+### 追加・拡充した検証
+
+- `test_differential_testing.py`:
+  - 5つの正規境界状態 (`PERMIT`, `BOUNDARY_WARNING`, `HANDOFF_REQUIRED`, `IRREVERSIBLE_TRANSITION`, `RUPTURE_BOUNDARY`) の一致判定
+  - 不可逆ラッチ (`irreversible_latched`) 発火時の動作一致
+  - `tau == 0` 時の `OUT_OF_DESCRIPTION_DOMAIN` 入力例外判定の一致
+  - 不正入力（負値・非有限値・未検証証拠・不正閾値順序）時の `CONFESSION` 入力例外判定の一致
+  - 1,000 パラメータセットの固定シード乱数ファジング試験 (`test_generative_differential_fuzzing`)
+  - 複数軸最悪境界決定の統合差分テスト (`test_multi_axis_differential_max_severity`)
+
+### 検証結果
+
+- 正典参照実装と `safety_kernel` 間の境界状態・例外判定は 100% の完全一致を確認。
+- 残課題プラン（`NRA-IDE_AI横軸機能_残課題実装プラン_20260817.md`）に掲げられた全 10 タスク（T1, T2, T3a, T3b, T3c, T4-1, T4-2, T4-3, T4-4a, T4-4b）が全て「完了」へ到達した。
+
