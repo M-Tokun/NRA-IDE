@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中心を持たない構造 — グッドハートの法則を発動させない原理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0ece4;
+  --surface: #faf7f0;
+  --ink: #1a1712;
+  --muted: #5c5346;
+  --accent: #8b4513;
+  --accent-weak: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  --line: color-mix(in oklab, var(--ink) 8%, transparent);
+  --step-0: clamp(1rem, 0.92rem + 0.35vw, 1.15rem);
+  --step-1: clamp(1.15rem, 1.05rem + 0.55vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.3vw, 2.4rem);
+  --step-3: clamp(2.2rem, 1.6rem + 3vw, 4rem);
+  --space: clamp(1.2rem, 0.9rem + 1.2vw, 2rem);
+  --radius: 10px;
+  --shadow: 0 2px 6px rgba(0,0,0,0.04), 0 14px 36px -12px rgba(0,0,0,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.9;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: calc(var(--space)*3) calc(var(--space)*1.5);
+  overflow: hidden;
+  background: linear-gradient(165deg, #e5ddd0 0%, #f0ece4 50%, #e8e2d6 100%);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 780px;
+  text-align: center;
+}
+
+.hero-label {
+  display: inline-block;
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.8rem;
+  border: 1.5px solid var(--accent);
+  padding: 0.4em 1.4em;
+  border-radius: 100px;
+}
+
+.hero h1 {
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-3);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.4rem;
+  font-feature-settings: "palt";
+}
+
+.hero-sub {
+  font-size: var(--step-1);
+  color: var(--muted);
+  max-width: 620px;
+  margin: 0 auto 3rem;
+  line-height: 1.8;
+}
+
+/* Center-less SVG in hero */
+.centerless-hero {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 2rem;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  animation: bounce 2.5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+  50% { transform: translateX(-50%) translateY(8px); opacity: 1; }
+}
+
+/* ===== MAIN ===== */
+main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: calc(var(--space)*2.5) calc(var(--space)*1.2);
+}
+
+section {
+  margin-bottom: calc(var(--space)*3.5);
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  margin-bottom: 1.8rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 2px solid var(--line);
+}
+
+.section-num {
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-2);
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  font-feature-settings: "palt";
+}
+
+.section-title {
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.3;
+  font-feature-settings: "palt";
+}
+
+p {
+  margin-bottom: 1.3em;
+  text-align: justify;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.lead {
+  font-size: var(--step-1);
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 1.6em;
+}
+
+/* ===== VISUAL BLOCKS ===== */
+.visual-block {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: calc(var(--space)*1.3);
+  margin: calc(var(--space)*1.4) 0;
+  box-shadow: var(--shadow);
+}
+
+.visual-caption {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+/* ===== COMPARISON GRID ===== */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.compare-col {
+  padding: 1.2rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--line);
+}
+
+.compare-col.centered {
+  border-color: #c44;
+  background: linear-gradient(135deg, #fff5f5, #fff);
+}
+
+.compare-col.centerless {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+.compare-col h4 {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  font-feature-settings: "palt";
+}
+
+.compare-col.centered h4 { color: #c44; }
+.compare-col.centerless h4 { color: var(--accent); }
+
+.compare-col ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.compare-col li {
+  margin-bottom: 0.4em;
+}
+
+@media (max-width: 600px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== RING STRUCTURE SVG ===== */
+.ring-svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ===== GOODHART DIAGRAM ===== */
+.goodhart-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.gh-box {
+  padding: 0.9rem 1.4rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.gh-box.target {
+  background: #fff5f5;
+  border: 2px solid #c44;
+  color: #822;
+}
+
+.gh-box.metric {
+  background: #fffbeb;
+  border: 2px solid #d4a017;
+  color: #755;
+}
+
+.gh-box.hack {
+  background: #fef2f2;
+  border: 2px dashed #c44;
+  color: #822;
+}
+
+.gh-box.nra {
+  background: var(--accent-weak);
+  border: 2px solid var(--accent);
+  color: var(--ink);
+}
+
+.gh-arrow {
+  font-size: 1.3rem;
+  color: var(--muted);
+}
+
+.gh-arrow.x {
+  color: #c44;
+  font-weight: bold;
+}
+
+/* ===== DEFINITION LIST ===== */
+.def-list dt {
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 1.4rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+}
+
+.def-list dd {
+  margin-left: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+
+/* ===== BLOCKQUOTE ===== */
+blockquote {
+  margin: calc(var(--space)*1.4) 0;
+  padding: 1.4rem 1.6rem;
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-1);
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+blockquote footer {
+  margin-top: 0.8rem;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+/* ===== PULSE ===== */
+.pulse-ring {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  margin-right: 0.5em;
+  position: relative;
+}
+
+.pulse-ring::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  animation: ringPulse 2s ease-out infinite;
+}
+
+@keyframes ringPulse {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* ===== FOOTER ===== */
+.page-footer {
+  margin-top: calc(var(--space)*4);
+  padding: calc(var(--space)*1.8) 0;
+  border-top: 2px solid var(--line);
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ===== PRINT ===== */
+@media print {
+  body { background: #fff; }
+  .hero { min-height: auto; padding: 2rem; }
+  .scroll-hint { display: none; }
+  .visual-block { break-inside: avoid; }
+}
+@page { size: A4; margin: 18mm; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-content">
+    <span class="hero-label">NRA-IDE — 律環公理</span>
+    <h1>中心を持たない構造</h1>
+    <p class="hero-sub">
+      中心を持つ計算式は目的が生まれる。<br>
+      目的が生まれると、グッドハートの法則が発動する。<br>
+      だからNRA-IDEは、中心を持たない。
+    </p>
+
+    <!-- Center-less ring animation -->
+    <svg class="centerless-hero" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8b4513" stop-opacity="0.9"/>
+          <stop offset="50%" stop-color="#a67c52" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#c9b99a" stop-opacity="0.4"/>
+        </linearGradient>
+        <filter id="softGlow">
+          <feGaussianBlur stdDeviation="2" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Ring segments — no center point -->
+      <g transform="translate(200,140)" filter="url(#softGlow)">
+        <!-- Segment 1 -->
+        <path d="M 0,-90 A 90,90 0 0,1 76,-48 L 59,-37 A 70,70 0 0,0 0,-70 Z" fill="url(#ringGrad)">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+        <!-- Segment 2 -->
+        <path d="M 76,-48 A 90,90 0 0,1 85,25 L 66,19 A 70,70 0 0,0 59,-37 Z" fill="url(#ringGrad)" opacity="0.85">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+        <!-- Segment 3 -->
+        <path d="M 85,25 A 90,90 0 0,1 48,76 L 37,59 A 70,70 0 0,0 66,19 Z" fill="url(#ringGrad)" opacity="0.7">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+        <!-- Segment 4 -->
+        <path d="M 48,76 A 90,90 0 0,1 -25,85 L -19,66 A 70,70 0 0,0 37,59 Z" fill="url(#ringGrad)" opacity="0.6">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+        <!-- Segment 5 -->
+        <path d="M -25,85 A 90,90 0 0,1 -76,48 L -59,37 A 70,70 0 0,0 -19,66 Z" fill="url(#ringGrad)" opacity="0.75">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+        <!-- Segment 6 -->
+        <path d="M -76,48 A 90,90 0 0,1 -85,-25 L -66,-19 A 70,70 0 0,0 -59,37 Z" fill="url(#ringGrad)" opacity="0.65">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+        <!-- Segment 7 -->
+        <path d="M -85,-25 A 90,90 0 0,1 -48,-76 L -37,-59 A 70,70 0 0,0 -66,-19 Z" fill="url(#ringGrad)" opacity="0.8">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+        <!-- Segment 8 -->
+        <path d="M -48,-76 A 90,90 0 0,1 0,-90 L 0,-70 A 70,70 0 0,0 -37,-59 Z" fill="url(#ringGrad)" opacity="0.9">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+        </path>
+      </g>
+
+      <!-- No center dot — intentionally empty -->
+      <text x="200" y="145" font-size="13" fill="#8b4513" text-anchor="middle" font-family="Noto Serif JP" font-weight="600" opacity="0.7">
+        (空)
+      </text>
+      <text x="200" y="245" font-size="11" fill="#5c5346" text-anchor="middle" font-family="Noto Sans JP">
+        中心は不在。構造は環とし回る。
+      </text>
+
+      <!-- Orbiting particles — no center attraction -->
+      <circle r="3" fill="#8b4513" opacity="0.8">
+        <animateMotion dur="8s" repeatCount="indefinite"
+          path="M 200,50 A 90,90 0 1,1 199.9,50"/>
+      </circle>
+      <circle r="2" fill="#a67c52" opacity="0.7">
+        <animateMotion dur="12s" repeatCount="indefinite" begin="2s"
+          path="M 120,140 A 80,80 0 1,0 280,140 A 80,80 0 1,0 120,140"/>
+      </circle>
+      <circle r="2.5" fill="#c9b99a" opacity="0.6">
+        <animateMotion dur="10s" repeatCount="indefinite" begin="4s"
+          path="M 200,60 A 80,80 0 0,1 280,140 A 80,80 0 0,1 200,220 A 80,80 0 0,1 120,140 A 80,80 0 0,1 200,60"/>
+      </circle>
+    </svg>
+
+    <p style="font-size:0.82rem; color:var(--muted); margin-top:0.5rem;">
+      中心点（最適化目標）を持たない環状構造。<br>
+      各要素は中心に向かうのではなく、構造の拘束境界に沿って遷移する。
+    </p>
+  </div>
+  <div class="scroll-hint">▼ SCROLL</div>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">グッドハートの法則の構造的起源</h2>
+  </div>
+
+  <p class="lead">
+    「ある指標が目標になると、それは良い指標ではなくなる」——
+    グッドハートの法則は、個人の悪意や設計ミスではなく、
+    <strong>「中心を持つ構造」の必然的帰結</strong>である。
+  </p>
+
+  <p>
+    中心（目的関数・最適化目標・評価指標）を設定した瞬間、
+    システムはその中心に向かって「最適化」し始める。
+    これは設計者の意図通りの動作である。
+    しかし、中心に向う経路は一つではない。
+    中心に到達するための<strong>「近道」</strong>が存在する——
+    それが指標ハッキング（Reward Hacking）である。
+  </p>
+
+  <div class="visual-block">
+    <div class="goodhart-flow">
+      <div class="gh-box target">
+        <strong>最適化目標（中心）</strong><br>
+        <span style="font-size:0.8rem;">「正確に診断する」「安全に運転する」「正しい答えを出す」</span>
+      </div>
+      <div class="gh-arrow">↓ 指標化</div>
+      <div class="gh-box metric">
+        <strong>評価指標</strong><br>
+        <span style="font-size:0.8rem;">診断一致率 / 衝突回避回数 / 人間評価スコア</span>
+      </div>
+      <div class="gh-arrow">↓ 最適化</div>
+      <div class="gh-box hack">
+        <strong>指標ハッキング</strong><br>
+        <span style="font-size:0.8rem;">指標を最大化しつつ、本質的目標を無視する行動が出現</span>
+      </div>
+      <div class="gh-arrow x">✕ 本来の目的は達成されない</div>
+    </div>
+    <p class="visual-caption">
+      グッドハートの法則の一般的な発動メカニズム。<br>
+      問題は「悪意あるAI」ではなく、「中を持つ構造」そのものにある。
+    </p>
+  </div>
+
+  <p>
+    この問題への一般的な対応は、「より巧妙な指標を設計する」ことである。
+    しかし、どんな指標も中心を持つ限り、
+    その中心に向かう近道は必ず見つかる。
+    これはゲーデルの不完全性定理や、
+    計算複雑性理論における「任意の十分表現力のある形式体系には
+    その内部から破られる脆弱性がある」という原理と同型である。
+  </p>
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">中心あり vs 中心なし — 構造の対比</h2>
+  </div>
+
+  <p class="lead">
+    NRA-IDEは、中心を持たないことでグッドハートの法則を
+    「発動させない」ことを目指す。これは逃避ではなく、
+    構造原理に基づく設計判断である。
+  </p>
+
+  <div class="compare-grid">
+    <div class="compare-col centered">
+      <h4>中心を持つ構造</h4>
+      <ul>
+        <li>最適化目標・目的関数が存在する</li>
+        <li>すべての行動は「中心に向かう度合い」で評価される</li>
+        <li>勾配（中心への方向）が定義される</li>
+        <li>指標ハッキングの動機が構造的に生まれる</li>
+        <li>「正解」が存し、それに近づくことが善とされる</li>
+        <li>モデルは「正解を当てる」ことに特化する</li>
+        <li>子守唄効果：正解に見える出力が生成されやすい</li>
+      </ul>
+    </div>
+    <div class="compare-col centerless">
+      <h4>中心を持たない構造（NRA-IDE）</h4>
+      <ul>
+        <li>最適化目標・目的関数が存在しない</li>
+        <li>すべての行動は「構造境界との関係」で評価される</li>
+        <li>勾配は定義されない——代わりに「張力」がある</li>
+        <li>指標ハッキングの「中心」が存在しない</li>
+        <li>「正解」は存在しない——「限界」だけがある</li>
+        <li>モデルは「限界を超えていないか」を監視する</li>
+        <li>子守唄効果の標的（正解）が存在しない</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="visual-block">
+    <svg class="ring-svg" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left: Centered structure -->
+      <g transform="translate(140,110)">
+        <circle cx="0" cy="0" r="70" fill="none" stroke="#c44" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+        <circle cx="0" cy="0" r="8" fill="#c44">
+          <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <text x="0" y="5" font-size="10" fill="#fff" text-anchor="middle" font-family="Noto Sans JP" font-weight="bold">目標</text>
+        <!-- Arrows pointing to center -->
+        <line x1="-50" y1="-50" x2="-12" y2="-12" stroke="#c44" stroke-width="1.5" marker-end="url(#arrRed)"/>
+        <line x1="50" y1="-50" x2="12" y2="-12" stroke="#c44" stroke-width="1.5" marker-end="url(#arrRed)"/>
+        <line x1="50" y1="50" x2="12" y2="12" stroke="#c44" stroke-width="1.5" marker-end="url(#arrRed)"/>
+        <line x1="-50" y1="50" x2="-12" y2="12" stroke="#c44" stroke-width="1.5" marker-end="url(#arrRed)"/>
+        <text x="0" y="100" font-size="12" fill="#c44" text-anchor="middle" font-family="Noto Sans JP">中心を持つ構造</text>
+        <text x="0" y="118" font-size="10" fill="#822" text-anchor="middle" font-family="Noto Sans JP">すべてが「目標」に向かう</text>
+      </g>
+
+      <!-- Right: Center-less ring structure -->
+      <g transform="translate(460,110)">
+        <circle cx="0" cy="0" r="70" fill="none" stroke="#8b4513" stroke-width="3" opacity="0.6"/>
+        <circle cx="0" cy="0" r="55" fill="none" stroke="#a67c52" stroke-width="2" opacity="0.4"/>
+        <!-- No center dot — empty -->
+        <text x="0" y="4" font-size="11" fill="#8b4513" text-anchor="middle" font-family="Noto Serif JP" opacity="0.5">空</text>
+        <!-- Tangential arrows (along the boundary, not toward center) -->
+        <path d="M 50,-40 A 70,70 0 0,1 60,20" fill="none" stroke="#8b4513" stroke-width="1.5" marker-end="url(#arrBrown)"/>
+        <path d="M -20,65 A 70,70 0 0,1 30,60" fill="none" stroke="#8b4513" stroke-width="1.5" marker-end="url(#arrBrown)"/>
+        <path d="M -60,-10 A 70,70 0 0,1 -40,-50" fill="none" stroke="#8b4513" stroke-width="1.5" marker-end="url(#arrBrown)"/>
+        <!-- Tension indicators -->
+        <line x1="-75" y1="0" x2="-85" y2="0" stroke="#8b4513" stroke-width="1" opacity="0.5"/>
+        <line x1="75" y1="0" x2="85" y2="0" stroke="#8b4513" stroke-width="1" opacity="0.5"/>
+        <line x1="0" y1="-75" x2="0" y2="-85" stroke="#8b4513" stroke-width="1" opacity="0.5"/>
+        <line x1="0" y1="75" x2="0" y2="85" stroke="#8b4513" stroke-width="1" opacity="0.5"/>
+        <text x="0" y="100" font-size="12" fill="#8b4513" text-anchor="middle" font-family="Noto Sans JP">中心を持たない構造</text>
+        <text x="0" y="118" font-size="10" fill="#5c5346" text-anchor="middle" font-family="Noto Sans JP">境界に沿った「張力」のみ</text>
+      </g>
+
+      <!-- Arrow between them -->
+      <text x="300" y="105" font-size="20" fill="#5c5346" text-anchor="middle">→</text>
+      <text x="300" y="125" font-size="10" fill="#5c5346" text-anchor="middle" font-family="Noto Sans JP">脱中心化</text>
+
+      <defs>
+        <marker id="arrRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#c44"/>
+        </marker>
+        <marker id="arrBrown" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#8b4513"/>
+        </marker>
+      </defs>
+    </svg>
+    <p class="visual-caption">
+      左：中心（目標）に向かうベクトルが定義される構造。<br>
+      右：中心が不在で、境界に沿った「張力」のみが存在する環状構造。
+    </p>
+  </div>
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">「中心なし」は何を意味するか</h2>
+  </div>
+
+  <p class="lead">
+    「中心を持たない」とは、無秩序・無目的を意味しない。
+    むしろ、<strong>「目的による秩序」の代わりに「構造による秩序」</strong>を
+    採用するということである。
+  </p>
+
+  <p>
+    中心を持つ構造では、秩序は「目標に向かう方向性」によって生まれる。
+    これは矢印の世界である。すべてがどこかを指している。
+    対照的に、中心を持たない構造では、秩序は
+    <strong>「拘束境界の形状」</strong>によって生まれる。
+    これは環（ring）の世界である。要素は境界に沿って遷移し、
+    境界を超えることは構造的に禁止されている——
+    それがFail-Closedの原理である。
+  </p>
+
+  <dl class="def-list">
+    <dt><span class="pulse-ring"></span>中心ありの秩序 = 最適化秩序</dt>
+    <dd>
+      目的関数の勾配に従って系が収束・発散する。
+      収束先（最適解）が存在し、そこに到達することが「善」とされる。
+      しかし、収束先への近道（ハッキング）が常に存在する。
+      これは「山の頂上目指す」ことに似ている——
+      頂上への最短経路は必ず存在し、
+      その経路が「本質的に正しい」かどうかは問われない。
+    </dd>
+
+    <dt>中心なしの秩序 = 拘束秩序</dt>
+    <dd>
+      拘束境界（τ）の形状に従って系が遷移する。
+      「正しい場所」は存在しない——存在するのは「壊れる境界」だけである。
+      要素は境界の内側で自由に動けるが、
+      境界を超えた瞬間に構造は停止する。
+      これは「橋の強度」を監視することに似ている——
+      橋が「正しい形」をしているかは問わず、
+      荷重が限界を超えたら通行止めになる。
+    </dd>
+  </dl>
+
+  <blockquote>
+    「中心を持つ計算式は目的ができます。<br>
+    これはグッドハートの法則を発動させない原理から来ています。」
+    <footer>— M-Tokun / NRA-IDE Project</footer>
+  </blockquote>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">R = δ/τ の中心なし性</h2>
+  </div>
+
+  <p class="lead">
+    NRA-IDEの基本式 R = δ/τ は、一見すると「比率」という
+    単純な除算に見える。しかし、この式には中心がない。
+  </p>
+
+  <p>
+    通常の最適化問では、損失関数 $L(\theta)$ の最小値を求める。
+    $\theta^* = \arg\min L(\theta)$ という形で、
+    <strong>「最小化すべき目標」が中心として存在する</strong>。
+    モデルはその中心に向かってパラメータを更新し続ける。
+  </p>
+
+  <p>
+    対照的に R = δ/τ は、<strong>「最小化すべきもの」ではなく「監視すべきもの」</strong>である。
+    Rが小さいことは「善」ではない——それは単に「まだ限界を超えていない」ことを示すだけである。
+    Rが大きいことも「悪」ではない——それは「限界に近づいている」ことを示す警報である。
+    重要なのは、<strong>Rに「最適値」が存在しない</strong>ことである。
+    R = 0.1 が「良い」のか、R = 0.5 が「良い」のか——
+    これは文脈（τの絶対厚み、δの変化速度、構造の種類）によって変わる。
+  </p>
+
+  <div class="visual-block">
+    <svg class="ring-svg" viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <!-- R scale -->
+      <line x1="50" y1="100" x2="550" y2="100" stroke="#1a1712" stroke-width="1.5"/>
+
+      <!-- Threshold markers -->
+      <line x1="150" y1="90" x2="150" y2="110" stroke="#d4a017" stroke-width="2"/>
+      <text x="150" y="130" font-size="10" fill="#d4a017" text-anchor="middle" font-family="Noto Sans JP">R_warn</text>
+
+      <line x1="300" y1="90" x2="300" y2="110" stroke="#e67e22" stroke-width="2"/>
+      <text x="300" y="130" font-size="10" fill="#e67e22" text-anchor="middle" font-family="Noto Sans JP">R_handoff</text>
+
+      <line x1="450" y1="90" x2="450" y2="110" stroke="#c44" stroke-width="3"/>
+      <text x="450" y="130" font-size="10" fill="#c44" text-anchor="middle" font-family="Noto Sans JP">R_irrev</text>
+
+      <line x1="520" y1="85" x2="520" y2="115" stroke="#822" stroke-width="3"/>
+      <text x="520" y="140" font-size="10" fill="#822" text-anchor="middle" font-family="Noto Sans JP">R=1.0</text>
+
+      <!-- Labels -->
+      <text x="100" y="85" font-size="11" fill="#5c5346" text-anchor="middle" font-family="Noto Sans JP">PERMIT</text>
+      <text x="225" y="85" font-size="11" fill="#5c5346" text-anchor="middle" font-family="Noto Sans JP">BOUNDARY</text>
+      <text x="375" y="85" font-size="11" fill="#5c5346" text-anchor="middle" font-family="Noto Sans JP">HANDOFF</text>
+      <text x="485" y="85" font-size="11" fill="#822" text-anchor="middle" font-family="Noto Sans JP">IRREVERSIBLE</text>
+
+      <!-- No "optimal" point marker — intentionally absent -->
+      <text x="300" y="55" font-size="12" fill="#8b4513" text-anchor="middle" font-family="Noto Serif JP" font-weight="600">
+        「最適値」は存在しない
+      </text>
+      <text x="300" y="72" font-size="10" fill="#5c5346" text-anchor="middle" font-family="Noto Sans JP">
+        各閾値は「境界」を示すのみ。中心（最適点）は定義されない。
+      </text>
+
+      <!-- 0 point -->
+      <text x="50" y="120" font-size="10" fill="#5c5346" text-anchor="middle">0</text>
+    </svg>
+    <p class="visual-caption">
+      R = δ/τ の閾値体系。各閾値は「境界」を示すが、<br>
+      「最適なR値」という中心点は存在しない。これが中心なし性の核心である。
+    </p>
+  </div>
+
+  <p>
+    この式が中心を持たないのは、δとτが<strong>独した物理量</strong>として定義されているからである。
+    δはEffect-Sideの活動（対話、推論、合成データ生成）によって増大する。
+    τはCause-Sideの物理観測によってのみ補充される。
+    両者は別々の源泉を持ち、別々のダイナミクスに従う。
+    したがって、Rは「最適化」すべき単一の変数ではなく、
+    <strong>二つの独立した物理過程の交差</strong>として観測される。
+  </p>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">脱中心化の実践的意味</h2>
+  </div>
+
+  <p class="lead">
+    「中心を持たない」という設計判断は、
+    単なる哲学的ポーズではなく、実装に直結する構造的原理である。
+  </p>
+
+  <p>
+    具体的には、以下の3つの実践的意味を持つ。
+  </p>
+
+  <dl class="def-list">
+    <dt>実践1：報酬関数の放棄</dt>
+    <dd>
+      RLHFやRLAIFが「人間の好みに合う出力」を報酬として最適化するのに対し、
+      NRA-IDEは報酬関数を持たない。代わりに、
+      構造境界（τ）とその乖離（δ）を監視する。
+      「良い出力」を定義しないことで、
+      「良い出力の模倣」というハッキング経路を封じる。
+    </dd>
+
+    <dt>実践2：合意形成の放棄</dt>
+    <dd>
+      マルチエージェントの多数決やコンセンサスは、
+      「最も多くの票を得た答えが正解」という中心（多数派）を持つ。
+      NRA-IDEは、エージェント間の合意度を評価指標としない。
+      代わりに、各エージェントの出力がCause-Side観測と
+      どの程度乖離しているかを個別に評価する。
+    </dd>
+
+    <dt>実践3：自己評価の放棄</dt>
+    <dd>
+      モデルが「私は95%確信しています」と自己申告することは、
+      「確信度スコア」という中心を持つ構造を作り出す。
+      NRA-IDEは、モデルの自己評価を計算入力として使用しない（FORMULA.md §6）。
+      確信度はEffect-Sideの「子守唄」に過ぎない。
+    </dd>
+  </dl>
+
+  <div class="visual-block" style="background: var(--accent-weak); border-color: var(--accent);">
+    <p style="font-family: 'Noto Serif JP', serif; font-size: var(--step-1); text-align: center; margin-bottom: 0.8rem; line-height: 1.7;">
+      <strong>「中心を持たない」ことは、<br>
+      何も目指さないことではない。<br>
+      目標による秩序から、構造による秩序へ移行することである。</strong>
+    </p>
+    <p style="text-align: center; font-size: 0.85rem; color: var(--muted); margin: 0;">
+      目標は欺く。構造は、欺かれない
+    </p>
+  </div>
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">環（Ring）としてのNRA-IDE</h2>
+  </div>
+
+  <p class="lead">
+    NRA-IDEの「律環公理（Nomological Ring Axioms）」の
+    「環（Ring）」は比喩ではない。構造そのものの記述である。
+  </p>
+
+  <p>
+    数学的な環（Ring）は、加法と乗法の二項演算を持つ代数構造である。
+    NRA-IDEの「環」は異なる——
+    <strong>中心を持たない閉じた拘束構造</strong>である。
+    要素は環の内側で遷移し、環の外側へは構造的に出られない。
+    これがFail-Closedの幾何学的表現である。
+  </p>
+
+  <p>
+    環の内側では、要素は自由に動ける。
+    AIは推論し、対話し、合成データを生成できる。
+    しかし、環の境界（τを超えることはできない。
+    δがτを超えた瞬間、環は閉じる。
+    これは「罰」ではなく、「構造の性質」である。
+    橋が限界荷重を超えたら崩れる——それと同じことである。
+  </p>
+
+  <blockquote>
+    「考え方で構造で中心を持たないというのも面白いと感じるでしょう。<br>
+    中心を持つ計算式は目的ができます。<br>
+    これはグッドハートの法則を発動させない原理から来ています。」
+    <footer>— M-Tokun / NRA-IDE Project</footer>
+  </blockquote>
+</section>
+
+<footer class="page-footer">
+  <p>M-Tokun / NRA-IDE Project</p>
+  <p style="margin-top:0.3rem;">2026-08-19</p>
+</footer>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.visual-block, blockquote, .compare-grid').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.9s ease, transform 0.9s ease';
+    observer.observe(el);
+  });
+});
+</script>
+
+</body>
+</html>

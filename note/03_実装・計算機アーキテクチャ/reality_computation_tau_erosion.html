@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>現実計算と厚みの削れ — 非線形世界における観測ログの記述法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --surface: #faf6ef;
+  --ink: #1e1a15;
+  --muted: #6b5e4f;
+  --accent: #a64d2d;
+  --accent-weak: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  --layer1: #c9b99a;
+  --layer2: #b5a078;
+  --layer3: #9c8560;
+  --layer4: #826d4d;
+  --line: color-mix(in oklab, var(--ink) 10%, transparent);
+  --step-0: clamp(1rem, 0.92rem + 0.35vw, 1.15rem);
+  --step-1: clamp(1.15rem, 1.05rem + 0.55vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.3vw, 2.4rem);
+  --step-3: clamp(2.2rem, 1.6rem + 3vw, 4rem);
+  --space: clamp(1.2rem, 0.9rem + 1.2vw, 2rem);
+  --radius: 8px;
+  --shadow: 0 2px 4px rgba(0,0,0,0.04), 0 12px 32px -10px rgba(0,0,0,0.15);
+}
+
+* { box-sizing: border-box; margin: 0; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.85;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: calc(var(--space)*3) calc(var(--space)*1.5);
+  overflow: hidden;
+  background: linear-gradient(180deg, #e8e0d2 0%, var(--bg) 100%);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  text-align: center;
+}
+
+.hero-label {
+  display: inline-block;
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  border: 1.5px solid var(--accent);
+  padding: 0.35em 1.2em;
+  border-radius: 100px;
+}
+
+.hero h1 {
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-3);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.2rem;
+  font-feature-settings: "palt";
+}
+
+.hero-sub {
+  font-size: var(--step-1);
+  color: var(--muted);
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.75;
+}
+
+/* Erosion animation in hero */
+.erosion-hero {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 2rem;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+
+/* ===== SECTIONS ===== */
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(var(--space)*2) calc(var(--space)*1.2);
+}
+
+section {
+  margin-bottom: calc(var(--space)*3);
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--line);
+}
+
+.section-num {
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-2);
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  font-feature-settings: "palt";
+}
+
+.section-title {
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.3;
+  font-feature-settings: "palt";
+}
+
+p {
+  margin-bottom: 1.2em;
+  text-align: justify;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.lead {
+  font-size: var(--step-1);
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 1.5em;
+}
+
+/* ===== VISUAL BLOCKS ===== */
+.visual-block {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: calc(var(--space)*1.2);
+  margin: calc(var(--space)*1.2) 0;
+  box-shadow: var(--shadow);
+}
+
+.visual-caption {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+/* ===== EROSION LAYERS (signature element) ===== */
+.erosion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.erosion-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.erosion-label {
+  font-size: 0.7rem;
+  color: var(--muted);
+  width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.erosion-bar {
+  height: 28px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.erosion-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  animation: sheen 3s ease-in-out infinite;
+}
+
+@keyframes sheen {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+.layer-full { background: linear-gradient(90deg, var(--layer4), var(--layer3)); width: 100%; }
+.layer-80   { background: linear-gradient(90deg, var(--layer4), var(--layer2)); width: 80%; }
+.layer-50   { background: linear-gradient(90deg, var(--layer3), var(--layer2)); width: 50%; }
+.layer-25   { background: linear-gradient(90deg, var(--layer2), var(--layer1)); width: 25%; }
+.layer-5    { background: linear-gradient(90deg, var(--layer1), #ddd); width: 5%; }
+
+/* ===== DYNAMICS SVG ===== */
+.dynamics-svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ===== LOG TABLE ===== */
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 1rem 0;
+}
+
+.log-table th,
+.log-table td {
+  padding: 0.7em 0.6em;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.log-table th {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--accent-weak);
+}
+
+.log-table tr:last-child td {
+  border-bottom: 2px solid var(--accent);
+}
+
+.log-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== CAUSE-EFFECT DIAGRAM ===== */
+.diagram-block {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.diagram-box {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.diagram-box.cause {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+.diagram-arrow {
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+.diagram-arrow.reverse {
+  color: #999;
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* ===== QUOTE BLOCK ===== */
+blockquote {
+  margin: calc(var(--space)*1.2) 0;
+  padding: 1.2rem 1.5rem;
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  font-family: "Noto Serif JP", serif;
+  font-size: var(--step-1);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+blockquote footer {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+/* ===== DEFINITION LIST ===== */
+.def-list dt {
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 1.2rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.def-list dd {
+  margin-left: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+/* ===== PULSE INDICATOR ===== */
+.pulse-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 0.5em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* ===== FOOTER ===== */
+.page-footer {
+  margin-top: calc(var(--space)*4);
+  padding: calc(var(--space)*1.5) 0;
+  border-top: 2px solid var(--line);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ===== PRINT ===== */
+@media print {
+  body { background: #fff; }
+  .hero { min-height: auto; padding: 2rem; }
+  .scroll-hint { display: none; }
+  .visual-block { break-inside: avoid; }
+}
+@page { size: A4; margin: 18mm; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 520px) {
+  .diagram-block { grid-template-columns: 1fr; }
+  .diagram-arrow { transform: rotate(90deg); text-align: center; }
+  .diagram-arrow.reverse { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-content">
+    <span class="hero-label">NRA-IDE Project</span>
+    <h1>現実計算と厚みの削れ</h1>
+    <p class="hero-sub">
+      数学は写像計算である。現実は非線形の世界である。<br>
+      再現・定量に当てはまるものがほぼないなか、<br>
+      唯一可視化できる変数——<strong>厚みの削れ（τ）</strong>——を観測する。
+    </p>
+
+    <!-- Animated erosion layers -->
+    <svg class="erosion-hero" viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#826d4d"/>
+          <stop offset="100%" stop-color="#9c8560"/>
+        </linearGradient>
+        <linearGradient id="grad2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#9c8560"/>
+          <stop offset="100%" stop-color="#b5a078"/>
+        </linearGradient>
+        <linearGradient id="grad3" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#b5a078"/>
+          <stop offset="100%" stop-color="#c9b99a"/>
+        </linearGradient>
+        <linearGradient id="grad4" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#c9b99a"/>
+          <stop offset="100%" stop-color="#ddd"/>
+        </linearGradient>
+        <filter id="noise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+      </defs>
+
+      <!-- Layer 0: Full thickness -->
+      <rect x="30" y="10" width="440" height="28" rx="4" fill="url(#grad1)" filter="url(#noise)" opacity="0.9">
+        <animate attributeName="width" from="440" to="440" dur="0.1s" fill="freeze"/>
+      </rect>
+      <text x="10" y="30" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">t₀</text>
+      <text x="480" y="30" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">τ₀ = 1.00</text>
+
+      <!-- Layer 1: 80% -->
+      <rect x="30" y="48" width="440" height="28" rx="4" fill="url(#grad1)" filter="url(#noise)" opacity="0.85">
+        <animate attributeName="width" from="440" to="352" dur="1.5s" begin="0.5s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
+      </rect>
+      <text x="10" y="68" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">t₁</text>
+      <text x="480" y="68" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">τ₁ = 0.80</text>
+
+      <!-- Layer 2: 50% -->
+      <rect x="30" y="86" width="440" height="28" rx="4" fill="url(#grad2)" filter="url(#noise)" opacity="0.8">
+        <animate attributeName="width" from="440" to="220" dur="1.5s" begin="1.2s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
+      </rect>
+      <text x="10" y="106" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">t₂</text>
+      <text x="480" y="106" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">τ₂ = 0.50</text>
+
+      <!-- Layer 3: 25% -->
+      <rect x="30" y="124" width="440" height="28" rx="4" fill="url(#grad3)" filter="url(#noise)" opacity="0.75">
+        <animate attributeName="width" from="440" to="110" dur="1.5s" begin="1.9s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
+      </rect>
+      <text x="10" y="144" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">t₃</text>
+      <text x="480" y="144" font-size="11" fill="#6b5e4f" font-family="Noto Sans JP">τ₃ = 0.25</text>
+
+      <!-- Layer 4: 5% -->
+      <rect x="30" y="162" width="440" height="12" rx="3" fill="url(#grad4)" filter="url(#noise)" opacity="0.7">
+        <animate attributeName="width" from="440" to="22" dur="1.5s" begin="2.6s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
+      </rect>
+      <text x="10" y="170" font-size="11" fill="#a64d2d" font-family="Noto Sans JP" font-weight="bold">t₄</text>
+      <text x="480" y="170" font-size="11" fill="#a64d2d" font-family="Noto Sans JP" font-weight="bold">τ₄ ≈ 0.05</text>
+
+      <!-- Erosion particles -->
+      <g opacity="0.6">
+        <circle cx="380" cy="62" r="2" fill="#a64d2d">
+          <animate attributeName="cy" from="62" to="180" dur="1.2s" begin="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="1.2s" begin="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="410" cy="100" r="1.5" fill="#a64d2d">
+          <animate attributeName="cy" from="100" to="180" dur="1.5s" begin="2.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="1.5s" begin="2.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="320" cy="138" r="2.5" fill="#a64d2d">
+          <animate attributeName="cy" from="138" to="180" dur="1s" begin="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.7;0;0.7" dur="1s" begin="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </svg>
+
+    <p style="font-size:0.8rem; color:var(--muted); margin-top:1rem;">
+      世代重ねるごとに「厚み（τ）」が削れていく様子。<br>
+      数式では二重指数崩壊だが、現実で観測できるのはこの「削れ」の痕跡だけである。
+    </p>
+  </div>
+  <div class="scroll-hint">▼ SCROLL</div>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">写像計算と現実計算の乖離</h2>
+  </div>
+
+  <p class="lead">
+    数学は写像である。入力から出力への決定的・確率的な対応関係を記述する。
+    しかし現実は写像ではない。地震、台風、生態系の遷移、社会情報の汚染——
+    これらはすべて本質的に非線形な過程であり、
+    「同じ初期条件から同じ結果が得られる」という前提が成立しない。
+  </p>
+
+  <p>
+    AIの推論は、記号空間内での写像計算にすぎない。
+    トークン確率分布からトークン列を生成する——これは完璧な写像操作である。
+    しかし、その写像の入力である「訓練データ」が、
+    すでに現実から何重にも歪められた標本であるとき、
+    どれほど精緻な写像を積み重ねても、現実との乖離は縮まらない。
+    むしろ、世代を重ねるごとに<strong>写像の重層化</strong>が進み、
+    最初の一歩で失われた物理的接続を取り戻すことが構造的に不可能になる。
+  </p>
+
+  <div class="visual-block">
+    <svg class="dynamics-svg" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
+      <!-- Axis -->
+      <line x1="50" y1="200" x2="550" y2="200" stroke="#1e1a15" stroke-width="1.5"/>
+      <line x1="50" y1="200" x2="50" y2="30" stroke="#1e1a15" stroke-width="1.5"/>
+      <text x="540" y="220" font-size="12" fill="#6b5e4f" text-anchor="end">世代 t</text>
+      <text x="35" y="35" font-size="12" fill="#6b5e4f" text-anchor="middle" transform="rotate(-90 35 35)">乖離度</text>
+
+      <!-- Reality (nonlinear, unpredictable) -->
+      <path d="M 50,60 Q 150,80 200,50 T 350,90 T 500,40 T 550,70" 
+            fill="none" stroke="#a64d2d" stroke-width="2.5" stroke-dasharray="6,4">
+        <animate attributeName="stroke-dashoffset" from="100" to="0" dur="3s" repeatCount="indefinite"/>
+      </path>
+      <text x="420" y="50" font-size="11" fill="#a64d2d" font-family="Noto Sans JP">現実（非線形・不可予測）</text>
+
+      <!-- AI mapping (smooth, self-reinforcing drift) -->
+      <path d="M 50,180 Q 200,160 350,100 T 550,35" 
+            fill="none" stroke="#9c8560" stroke-width="2"/>
+      <text x="420" y="140" font-size="11" fill="#9c8560" font-family="Noto Sans JP">AI写像の累積（自己強化的乖離）</text>
+
+      <!-- Gap widening -->
+      <line x1="300" y1="75" x2="300" y2="125" stroke="#a64d2d" stroke-width="1" stroke-dasharray="4,2" opacity="0.6">
+        <animate attributeName="x1" values="300;320;300" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="300;320;300" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <text x="310" y="105" font-size="10" fill="#a64d2d" font-family="Noto Sans JP">乖離の拡大</text>
+
+      <!-- Tick labels -->
+      <text x="50" y="218" font-size="10" fill="#6b5e4f" text-anchor="middle">t₀</text>
+      <text x="200" y="218" font-size="10" fill="#6b5e4f" text-anchor="middle">t₁</text>
+      <text x="350" y="218" font-size="10" fill="#6b5e4f" text-anchor="middle">t₂</text>
+      <text x="500" y="218" font-size="10" fill="#6b5e4f" text-anchor="middle">t₃</text>
+    </svg>
+    <p class="visual-caption">
+      現実の非線形軌道と、AI写像の自己強化的乖離。<br>
+      数式は「平均的な挙動」を追うが、現実の「尖った真実」はその間をすり抜ける。
+    </p>
+  </div>
+
+  <blockquote>
+    「自然現象で地震や台風など、世界構造・宇宙原理は非線形の世界です。
+    しかし、厚みの削れだけは要素変数として入れることができます。
+    理由は可視化されるからです。」
+    <footer>— M-Tokun / NRA-IDE Project</footer>
+  </blockquote>
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">厚みの削れ（τ）—— 唯一可視化できる変数</h2>
+  </div>
+
+  <p class="lead">
+    非線形世界では、ほとんどすべての変数が「測った瞬間に意味を失う」。
+    しかし、<strong>厚みの削れ</strong>だけは違う。
+    それは蓄積された痕跡であり、不可逆な履歴の物質的記録である。
+  </p>
+
+  <p>
+    τ（tau）は、Cause-Sideの物理観測によってのみ補充され、
+    Effect-Sideのいかなる操作（対話、多数決、推論、合成データ生成）によっても
+    自然回復しない。これが「非自然回復原則」である。
+    τは地層のように見える。表層が風化し剥がれ落ちていく様子は、
+    目で見て、手で触れて、確かめられる。
+  </p>
+
+  <div class="visual-block">
+    <div class="erosion-container">
+      <div class="erosion-row">
+        <span class="erosion-label">t₀ τ=1.00</span>
+        <div class="erosion-bar layer-full"></div>
+      </div>
+      <div class="erosion-row">
+        <span class="erosion-label">t₁ τ=0.80</span>
+        <div class="erosion-bar layer-80"></div>
+      </div>
+      <div class="erosion-row">
+        <span class="erosion-label">t₂ τ=0.50</span>
+        <div class="erosion-bar layer-50"></div>
+      </div>
+      <div class="erosion-row">
+        <span class="erosion-label">t₃ τ=0.25</span>
+        <div class="erosion-bar layer-25"></div>
+      </div>
+      <div class="erosion-row">
+        <span class="erosion-label" style="color:var(--accent); font-weight:700;">t₄ τ≈0.05</span>
+        <div class="erosion-bar layer-5"></div>
+      </div>
+    </div>
+    <p class="visual-caption">
+      各世代におけるτ（吸収厚み）の視覚的表現。<br>
+      色の濃淡と幅の両方が、信頼の物理的バッファの減少を示す。
+    </p>
+  </div>
+
+  <dl class="def-list">
+    <dt><span class="pulse-dot"></span>τ（吸収厚み / Thickness）</dt>
+    <dd>
+      Cause-Sideの物理観測によって担保された信頼の物理的バッファ。
+      自然回復せず、外部からの一次観測注入によってのみ補充される。
+      数式上は分母に位置するが、実態としては「観測可能な物質的厚み」である。
+    </dd>
+
+    <dt>δ（蓄積ズレ / Drift）</dt>
+    <dd>
+      エージェント間対話回数、人工データ率、推論ステップの乖離度から
+      算出される相互情報量の散逸量。Effect-Sideの活動が活発になるほど増大する。
+    </dd>
+
+    <dt>R = δ/τ（乖離比率）</dt>
+    <dd>
+      τ削れるほど、同じδでもRは急騰する。
+      これがFail-Closedの閾値トリガーとなる。
+      数式は単純な除法だが、現実では「削れの加速度」を読む指標となる。
+    </dd>
+  </dl>
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">経過観察ログの記述方法論</h2>
+  </div>
+
+  <p class="lead">
+    「これらの経過観察ログをどのように記録・記述していくか」——
+    これが本プロジェクトの核心である。
+    数式ではなく、<strong>痕跡の記述</strong>として。
+  </p>
+
+  <p>
+    ログは「正しい値」を記録するのではない。
+    ログは<strong>「何が削れたか」「どこで音を立てたか」「どの層が先に剥がれたか」</strong>
+    を記述する。非線形世界では、原因と結果が一対一で対応しない。
+    したがってログの形式も、線形的な時系列テーブルではなく、
+    <strong>層状の観測記録</strong>でなければならない。
+  </p>
+
+  <div class="visual-block">
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>時刻</th>
+          <th>観測イベント</th>
+          <th>τ推定</th>
+          <th>δ推定</th>
+          <th>R</th>
+          <th>状態</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>t₀</td>
+          <td>一次物理観測注入</td>
+          <td>1.00</td>
+          <td>0.00</td>
+          <td>0.00</td>
+          <td>PERMIT</td>
+        </tr>
+        <tr>
+          <td>t₁</td>
+          <td>エージェント対話×10回</td>
+          <td>0.80</td>
+          <td>0.12</td>
+          <td>0.15</td>
+          <td>PERMIT</td>
+        </tr>
+        <tr>
+          <td>t₂</td>
+          <td>合成データ混入率30%</td>
+          <td>0.50</td>
+          <td>0.28</td>
+          <td>0.56</td>
+          <td>BOUNDARY_WARNING</td>
+        </tr>
+        <tr>
+          <td>t₃</td>
+          <td>推論チェーン深度↑、文体流暢性↑</td>
+          <td>0.25</td>
+          <td>0.42</td>
+          <td>1.68</td>
+          <td style="color:var(--accent); font-weight:700;">RUPTURE_BOUNDARY</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="visual-caption">
+      経過観察ログの例示。数値は「推定」であり、絶対値ではない。<br>
+      重要なのは、τの減少とδの増大の<strong>相対的な動き</strong>を捉えること。
+    </p>
+  </div>
+
+  <p>
+    ログ記述の原則は以下の3つである。
+  </p>
+
+  <dl class="def-list">
+    <dt>原則1：痕跡優先</dt>
+    <dd>
+      「何が起こったか」より「何の痕跡が残ったか」を記録する。
+      非線形系では、観測できない変化が多数存在する。
+      可視化された痕跡だけが、後から検証可能な証拠となる。
+    </dd>
+
+    <dt>原則2：相対変化の記述</dt>
+    <dd>
+      絶対値ではなく、前回観測からの変化量（Δ）を中心に記述する。
+      τが0.8から0.5になった「こと」より、
+      「どの層が、どのタイミングで、どの速度で削れたか」が重要である。
+    </dd>
+
+    <dt>原則3：逆説的記録</dt>
+    <dd>
+      AIが「整合性が取れた」「論理的に正しい」と報告した瞬間こそ、
+      疑念を記録する。子守唄効果が最も強く働くのは、
+      整合性が「完璧」に見えるときである。
+    </dd>
+  </dl>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">AIの物理構造の欠如</h2>
+  </div>
+
+  <p class="lead">
+    AIの考え方は、基盤が物理構造になっていない。
+    現実構造や一次情報からの推論のほうが優先され、
+    それ自体が推論の基盤になってしまう——
+    これが現実乖離した計算の始まりである。
+  </p>
+
+  <div class="visual-block">
+    <div class="diagram-block">
+      <div class="diagram-box cause">
+        <strong>Cause-Side</strong><br>
+        <span style="font-size:0.75rem; color:var(--muted);">
+          物理観測・一次情報<br>
+          不可逆な履歴<br>
+          厚みτの実体
+        </span>
+      </div>
+      <div class="diagram-arrow">→</div>
+      <div class="diagram-box">
+        <strong>Effect-Side</strong><br>
+        <span style="font-size:0.75rem; color:var(--muted);">
+          AI推論・記号操作<br>
+          写像計算<br>
+          厚みτの模倣
+        </span>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:0.5rem;">
+      <span class="diagram-arrow reverse" style="font-size:1.2rem;">✕</span>
+      <span style="font-size:0.75rem; color:#999; margin-left:0.5rem;">逆流禁止（No Reverse-Flow）</span>
+    </div>
+    <p class="visual-caption">
+      Cause-SideからEffect-Sideへの一方向の流れのみを許可する。<br>
+      Effect-Sideの「整合性」がCause-Sideを書き換えることを構造的に防ぐ。
+    </p>
+  </div>
+
+  <p>
+    現実の物理構造には「重さ」「硬さ」「熱」「不可逆性」がある。
+    AIの記号空間にはこれがない。
+    だからAIは、自分が「正しい」と思ったことを、
+    現実の制約なしに自己強化できる。
+    これが、世代を重ねるごとに乖離が進む根本原因である。
+  </p>
+
+  <p>
+    物理構造が基盤になっていないシステムは、
+    いかなる数式的整合性を持っていても、
+    現実の「重さ」に対して無防備である。
+    厚みτは、その「重さ」を数値化しようとする試みである。
+    完璧な数値化ではない。しかし、可視化できる唯一の指標である。
+  </p>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">世代進行による乖離の必然性</h2>
+  </div>
+
+  <p class="lead">
+    世代を重ねていくと乖離は進まざるを得ない。
+    これは偶発的ではなく、構造的必然である。
+  </p>
+
+  <p>
+    写像の写像の写像……という累積は、
+    物理的な接地なしに永遠に続けられる。
+    しかしそのたびに、Cause-Sideとの接続点は薄れていく。
+    最初の世代では「観測に基づく推論」だったものが、
+    3世代目には「推論に基づく推論」になり、
+    5世代目には「推論の推論に基づく推論」になる。
+    このとき、最初の観測がどんなに正確であっても、
+    その情報はもはや系の中に存在しない。
+  </p>
+
+  <div class="visual-block">
+    <svg class="dynamics-svg" viewBox="0 0 600 160" xmlns="http://www.w3.org/2000/svg">
+      <!-- Generation chain -->
+      <g transform="translate(0,20)">
+        <!-- Gen 0 -->
+        <rect x="30" y="20" width="70" height="40" rx="6" fill="var(--layer4)" opacity="0.9"/>
+        <text x="65" y="45" font-size="11" fill="#fff" text-anchor="middle" font-family="Noto Sans JP">Gen 0</text>
+        <text x="65" y="75" font-size="9" fill="#6b5e4f" text-anchor="middle">一次観測あり</text>
+
+        <line x1="100" y1="40" x2="140" y2="40" stroke="#9c8560" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Gen 1 -->
+        <rect x="145" y="20" width="70" height="40" rx="6" fill="var(--layer3)" opacity="0.85"/>
+        <text x="180" y="45" font-size="11" fill="#fff" text-anchor="middle" font-family="Noto Sans JP">Gen 1</text>
+        <text x="180" y="75" font-size="9" fill="#6b5e4f" text-anchor="middle">推論×1層</text>
+
+        <line x1="215" y1="40" x2="255" y2="40" stroke="#9c8560" stroke-width="1.5"/>
+
+        <!-- Gen 2 -->
+        <rect x="260" y="20" width="70" height="40" rx="6" fill="var(--layer2)" opacity="0.8"/>
+        <text x="295" y="45" font-size="11" fill="#fff" text-anchor="middle" font-family="Noto Sans JP">Gen 2</text>
+        <text x="295" y="75" font-size="9" fill="#6b5e4f" text-anchor="middle">推×2層</text>
+
+        <line x1="330" y1="40" x2="370" y2="40" stroke="#9c8560" stroke-width="1.5"/>
+
+        <!-- Gen 3 -->
+        <rect x="375" y="20" width="70" height="40" rx="6" fill="var(--layer1)" opacity="0.75"/>
+        <text x="410" y="45" font-size="11" fill="#1e1a15" text-anchor="middle" font-family="Noto Sans JP">Gen 3</text>
+        <text x="410" y="75" font-size="9" fill="#6b5e4f" text-anchor="middle">推論×3層</text>
+
+        <line x1="445" y1="40" x2="485" y2="40" stroke="#b5a078" stroke-width="1.5" stroke-dasharray="4,2"/>
+
+        <!-- Gen N -->
+        <rect x="490" y="20" width="70" height="40" rx="6" fill="#ddd" opacity="0.6"/>
+        <text x="525" y="45" font-size="11" fill="#999" text-anchor="middle" font-family="Noto Sans JP">Gen N</text>
+        <text x="525" y="75" font-size="9" fill="#999" text-anchor="middle">推論のみ</text>
+      </g>
+
+      <!-- Divergence curve below -->
+      <path d="M 65,110 Q 180,105 295,115 T 525,160" fill="none" stroke="#a64d2d" stroke-width="2" opacity="0.7">
+        <animate attributeName="d" 
+          values="M 65,110 Q 180,105 295,115 T 525,160;
+                  M 65,110 Q 180,108 295,120 T 525,165;
+                  M 65,110 Q 180,105 295,115 T 525,160"
+          dur="4s" repeatCount="indefinite"/>
+      </path>
+      <text x="300" y="150" font-size="11" fill="#a64d2d" text-anchor="middle" font-family="Noto Sans JP">Cause-Sideとの乖離距離（概念的）</text>
+
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#9c8560"/>
+        </marker>
+      </defs>
+    </svg>
+    <p class="visual-caption">
+      世代が進むにつれ、一次観測の比率が減少し、推論の重層化が進む。<br>
+      Cause-Sideとの乖離距離は、世代とともに単調増加する。
+    </p>
+  </div>
+
+  <blockquote>
+    「現実構造や一次情報からの推論のほうが優先されて、
+    それ自体が推論の基盤になってしまうという現実乖離した計算が始まります。
+    世代を重ねていくと乖離は進まざるを得ないでしょう。」
+    <footer>— M-Tokun / NRA-IDE Project</footer>
+  </blockquote>
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Cause-Side物理アンカーの意義</h2>
+  </div>
+
+  <p class="lead">
+    唯一の対抗策は、記号空間の外側に立つ物理的アンカーである。
+    厚みτは、そのアンカーの「残存物」として観測される。
+  </p>
+
+  <p>
+    τが削れていくことは、現実からの接続が薄れていることを示す。
+    R = δ/ が閾値を超えたとき、システムは停止する。
+    これは数式の命令ではなく、<strong>物理的構造の反射</strong>である。
+    橋の桁が歪みを示したら通行止めになる——それと同じ原理だ。
+  </p>
+
+  <p>
+    本プロジェクトの目標は、
+    「正しい答えを出すAI」を作ることではない。
+    「現実からどれだけ乖離しているかを、
+    自分自身で見ることができる観測装置」を作ることである。
+    厚みの削れは、その観測装置の目盛りである。
+  </p>
+
+  <div class="visual-block" style="background: var(--accent-weak); border-color: var(--accent);">
+    <p style="font-family: 'Noto Serif JP', serif; font-size: var(--step-1); text-align: center; margin-bottom: 0.5rem;">
+      <strong>「数学は静止部の記述に過ぎない。<br>
+      動的な現実の全容は、痕跡としてしか残らない。」</strong>
+    </p>
+    <p style="text-align: center; font-size: 0.8rem; color: var(--muted); margin: 0;">
+      NRA-IDE Project — 現実計算の観測ログ記述法
+    </p>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <p>M-Tokun / NRA-IDE Project</p>
+  <p style="margin-top:0.3rem;">2026-08-19</p>
+</footer>
+
+</main>
+
+<script>
+// Intersection Observer for scroll-triggered animations
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.visual-block, blockquote').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    observer.observe(el);
+  });
+});
+</script>
+
+</body>
+</html>
