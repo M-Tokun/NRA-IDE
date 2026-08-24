@@ -1,4 +1,4 @@
-<!-- filename:MultiAgent_Truth_Exclusion_Paper_26-0821-2004.md -->
+<!-- filename:MultiAgent_Truth_Exclusion_Paper_26-0821-2004_JP.md -->
 <!-- generated: 2026-08-21 20:04 JST -->
 
 # マルチAGENTS探索における正解候補消失仮説
@@ -166,7 +166,7 @@ $$
 
 $a\ll b$、すなわち正解側より誤り側の方が合意フィルタを圧倒的に通過しやすい場合、$p_*=b/(a+b)\approx1$ となります。図1は、$a=0.05$、$b=0.95$（$p_*=0.95$）の場合の崩壊過程と、$(a,b)$ 平面上での $p_*$ の位相図を示します。
 
-![Figure 1](fig1_asymmetric_filter_readable_v2.png)
+![Figure 1](fig1_asymmetric_filter_readable_v2_JP.png)
 
 **図1. 非対称一致フィルタリング：条件付き力学と崩壊境界。** 左図は $a=0.05$、$b=0.95$ の同側二候補保持モデルを線形目盛で示します。$p_0<p_*=0.95$ の系列はゼロへ、$p_0>p_*$ の系列は1へ向かい、$p_0=p_*$ は不安定固定点に留まります。特に $p_0=0.90$ は、$p_1=0.81$、$p_2\approx0.4889$、$p_3\approx0.04595$、$p_4\approx1.22\times10^{-4}$ と推移します。右図は $(a,b)$ 平面上での $p_*=b/(a+b)$ の等高線図です。「正解が外れ値である」ことは、それ自体では $a\ll b$ を含意しません。
 
@@ -226,7 +226,7 @@ $$
 
 図2は、この構造を説明するため、単一の正解候補と共有誤り側に集まる候補群を一次元上へ配置した模式例を示します。この図はMonte Carlo実験または一般的な回復確率の推定ではありません。
 
-![Figure 2](fig2_truth_exclusion_schematic_v2.png)
+![Figure 2](fig2_truth_exclusion_schematic_v2_JP.png)
 
 **図2. 共有誤りクラスタと正解候補排除の模式例。** 正解候補を原点に置き、他の候補が共有誤り側の高一致領域へ集まっている一つの構成を示します。合議規則が高一致領域だけを採択し、正解候補を別経路で保持しない場合、正解候補は採択集合から外れます。この図は可能な幾何学的構成を示すものであり、発生確率、一般的な回復率、AGENT数による性能変化または現実のAGENT間誤差相関を測定したものではありません。
 
@@ -258,7 +258,7 @@ $$
 
 図3は、非単射性から必ず従う完全復元不能と、追加の非保存条件によって生じる三種類の損失を分けて図式化したものです。
 
-![Figure 3](fig3_noninjective_compression_conditional_v2.png)
+![Figure 3](fig3_noninjective_compression_conditional_v2_JP.png)
 
 **図3. 非単射な合議圧縮と条件付き損失。** $N$ 体のAGENT状態が合議関数 $G$ によって単一の決定 $C$ へ圧縮される過程を示します。$G$ が非単射であれば、$C$ のみからすべての元入力を一意復元する完全な逆写像は存在しません。一方、内容・由来・構造のどれが失われるかは、対応するフィールドが $C$ または別系統の保持記録へ符号化されているかに依存します。これは「$N\times d-1$ 次元が必ず失われる」という数値主張でも、三種類の損失が常に同時発生するという主張でもありません。
 
@@ -348,7 +348,7 @@ $$
 
 の組み合わせにあります。図4は、この機構と、確率的ドリフトモデルの飽和挙動を示します。
 
-![Figure 4](fig4_recursive_error_expectation_v2.png)
+![Figure 4](fig4_recursive_error_expectation_v2_JP.png)
 
 **図4. 再帰的前提汚染：機構と条件付き期待値モデル。** 上段はCause-Side観測からAGENT推論、合議、そして由来型を消去した前提化、次段への再利用という失敗経路を示します。この「Cause-Side事実としての扱い」はNRA-IDEが許可する型変換ではなく、境界違反の模式化です。構造的な回復不能性は、破棄された候補・消去されたprovenance・消去されたepistemic type・消去された依存経路から生じます。下段は $e_0=0$、$\alpha=0.7$、$\beta=0.15$、$\mu=2/7$ に対する期待値の理論曲線であり、乱数シミュレーション結果ではありません。このスカラー漸化式は、それ単体では情報消失の不可逆性を証明しません。
 
@@ -414,7 +414,7 @@ $$
 
 です。図5は、この境界構造を図式化したものです。
 
-![Figure 5](fig5_nra_ide_boundary_canonical_v2.png)
+![Figure 5](fig5_nra_ide_boundary_canonical_v2_JP.png)
 
 **図5. NRA-IDE境界アーキテクチャ：Cause-Side / Effect-Side分離。** 正規Cause-Side観測と事前固定された変換規則だけが、蓄積ズレ $\delta$、吸収厚み $\tau$、構造比 $R=\delta/\tau$ の評価入力になります。Effect-Side（多AGENT合議・推論出力・synthetic data等）はCause-Sideスナップショットを参照できますが、$\delta$、$\tau$、$R$、閾値、境界状態または不可逆ラッチを更新しません。既知の $R$ 進行は、`PERMIT`、`BOUNDARY_WARNING`、`HANDOFF_REQUIRED`、`IRREVERSIBLE_TRANSITION`、`RUPTURE_BOUNDARY`を分離します。これとは別に、$\tau=0$ は `OUT_OF_DESCRIPTION_DOMAIN`、不明・不正・曖昧・非有限などの構造入力は `CONFESSION` として扱い、既知の $R$ 進行と混同しません。`RUPTURE_BOUNDARY`でも生存している観測・記録・通信経路を対象破断と同一視しません。Fail-Closedはラッチまたは正規状態名ではなく、許可されない自律処理を既定で抑止する運用原則です。$R$ は失われた真実を再構成したり $p_t$ を回復させたりする量ではありません（本稿9.2節の保持集合 $\rho_t$ とは別の量です）。
 
@@ -431,7 +431,7 @@ $$
 
 図6は、この四つの条件付き結果と、その適用限界を一枚にまとめたものです。
 
-![Figure 6](fig6_conditional_results_summary_v2.png)
+![Figure 6](fig6_conditional_results_summary_v2_JP.png)
 
 **図6. 条件付きTruth-Exclusion機構の数理的要約。** 各結果が成立するモデル条件、特徴空間条件、非保存条件、収束条件を併記します。支持される主張は条件付きであり普遍的ではありません。一致選択が非対称であり、合議が検証済みの特徴空間で共有誤り部分空間に制限され、必要な候補・由来・経路が別系統にも保持されず、圧縮された決定が外部再検証なしに前提として再利用される場合に、正解候補の排除が起こり得ます。あらゆるマルチエージェント系が正解を消すという主張ではありません。
 

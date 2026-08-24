@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
 
-OUTPUT = Path(__file__).with_name("fig6_conditional_results_summary_v2.png")
+OUTPUT = Path(__file__).with_name("fig6_conditional_results_summary_v2_EN.png")
 
 
 def result_box(ax, x, y, width, height, title, text, face, edge):

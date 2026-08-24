@@ -3,8 +3,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams["font.family"] = "Meiryo"
+plt.rcParams["axes.unicode_minus"] = False
 
-OUTPUT = Path(__file__).with_name("fig1_asymmetric_filter_readable_v2.png")
+
+OUTPUT = Path(__file__).with_name("fig1_asymmetric_filter_readable_v2_JP.png")
 
 
 def update(p, truth_pass, error_pass):
@@ -29,7 +32,7 @@ def main():
 
     fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(18, 7.5))
     fig.suptitle(
-        "Figure 1. Asymmetric agreement filtering under an explicit two-sample model",
+        "図1. 明示的な二標本モデルにおける非対称合意フィルタリング",
         fontsize=21,
         fontweight="bold",
         y=0.98,
@@ -53,14 +56,14 @@ def main():
         color="black",
         linestyle="--",
         linewidth=2,
-        label=f"unstable fixed point $p_*={threshold:.2f}$",
+        label=f"不安定固定点 $p_*={threshold:.2f}$",
     )
     ax_left.set_xlim(0, rounds)
     ax_left.set_ylim(-0.02, 1.02)
-    ax_left.set_xlabel("Generation $t$", fontsize=13)
-    ax_left.set_ylabel("Truth-candidate retention share $p_t$", fontsize=13)
+    ax_left.set_xlabel("世代 $t$", fontsize=13)
+    ax_left.set_ylabel("真の候補の残存割合 $p_t$", fontsize=13)
     ax_left.set_title(
-        "$a=0.05$, $b=0.95$: both basins are visible on a linear scale",
+        "$a=0.05$, $b=0.95$：両方の吸引域が線形スケールで確認できる",
         fontsize=14,
         pad=12,
     )
@@ -98,24 +101,24 @@ def main():
         edgecolor="white",
         linewidth=1.5,
         zorder=3,
-        label="example $(a,b)=(0.05,0.95)$",
+        label="例 $(a,b)=(0.05,0.95)$",
     )
-    ax_right.set_xlabel("Truth-side effective pass rate $a$", fontsize=13)
-    ax_right.set_ylabel("Error-side effective pass rate $b$", fontsize=13)
+    ax_right.set_xlabel("真側の実効通過率 $a$", fontsize=13)
+    ax_right.set_ylabel("誤り側の実効通過率 $b$", fontsize=13)
     ax_right.set_title(
-        "Collapse boundary $p_*=b/(a+b)$ for the stated model",
+        "本モデルにおける崩壊境界 $p_*=b/(a+b)$",
         fontsize=14,
         pad=12,
     )
     ax_right.legend(loc="upper right", fontsize=10, framealpha=0.95)
     colorbar = fig.colorbar(contour, ax=ax_right, fraction=0.046, pad=0.04)
-    colorbar.set_label("Unstable fixed point $p_*$", fontsize=12)
+    colorbar.set_label("不安定固定点 $p_*$", fontsize=12)
 
     fig.text(
         0.5,
         0.02,
-        "Model assumptions: independent two-candidate sampling, same-side retention at rates $a$ and $b$, mixed-pair discard, then renormalization.  "
-        "Outlier status alone does not determine $a/b$.",
+        "モデルの前提：独立な二候補サンプリング、同側ペアのみを率$a$と$b$で残存させ、異側ペアは破棄した後に再正規化する。"
+        "外れ値であること自体は$a/b$を決定しない。",
         ha="center",
         va="bottom",
         fontsize=11.5,

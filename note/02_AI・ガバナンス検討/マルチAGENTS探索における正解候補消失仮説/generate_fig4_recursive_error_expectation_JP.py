@@ -3,8 +3,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
+plt.rcParams["font.family"] = "Meiryo"
+plt.rcParams["axes.unicode_minus"] = False
 
-OUTPUT = Path(__file__).with_name("fig4_recursive_error_expectation_v2.png")
+
+OUTPUT = Path(__file__).with_name("fig4_recursive_error_expectation_v2_JP.png")
 
 
 def box(ax, x, y, width, height, text, face, edge, fontsize=10.5):
@@ -47,7 +50,7 @@ def main():
     ax_flow = fig.add_subplot(grid[0])
     ax_plot = fig.add_subplot(grid[1])
     fig.suptitle(
-        "Figure 4. Recursive premise contamination and a conditional expectation model",
+        "図4. 再帰的な前提汚染と条件付き期待値モデル",
         fontsize=20,
         fontweight="bold",
     )
@@ -56,11 +59,11 @@ def main():
     ax_flow.set_ylim(0, 5)
     ax_flow.axis("off")
     flow = [
-        (0.3, "Cause-Side\nobservation / source", "#E6F2E3", "#4C8A48"),
-        (3.5, "Agent inference\nmultiple candidates", "#F7E6E6", "#B85C5C"),
-        (6.7, "Agreement selection\nand compression", "#FFF0C9", "#C6951A"),
-        (9.9, "BOUNDARY VIOLATION\noutput treated as if verified\nwhile type / provenance is erased", "#F9D9C8", "#C55B32"),
-        (13.1, "Next round\nreuses the premise", "#F2D4D7", "#A94E57"),
+        (0.3, "Cause-Side\n観測／情報源", "#E6F2E3", "#4C8A48"),
+        (3.5, "エージェント推論\n複数候補", "#F7E6E6", "#B85C5C"),
+        (6.7, "合意選択\nと圧縮", "#FFF0C9", "#C6951A"),
+        (9.9, "境界違反\n型／出所が消去されたまま\n出力が検証済みとして扱われる", "#F9D9C8", "#C55B32"),
+        (13.1, "次ラウンド\nで前提が再利用される", "#F2D4D7", "#A94E57"),
     ]
     for x, text, face, edge in flow:
         box(ax_flow, x, 2.4, 2.6, 1.5, text, face, edge, fontsize=9.5)
@@ -74,8 +77,8 @@ def main():
     ax_flow.text(
         8,
         1.25,
-        "The boundary violation is not a canonical Cause-Side update.\n"
-        "Information-structural loss comes from omitted candidates, provenance, type, and dependency paths.",
+        "この境界違反は正典的なCause-Side更新ではない。\n"
+        "情報構造上の損失は、省略された候補・出所・型・依存経路に起因する。",
         ha="center",
         va="center",
         fontsize=11,
@@ -90,12 +93,12 @@ def main():
         fontsize=12,
     )
 
-    ax_plot.plot(rounds, expected, marker="o", linewidth=2.5, label="theoretical expectation")
-    ax_plot.axhline(limit, color="#D97706", linestyle="--", linewidth=2.5, label=f"limit = {limit:.6f}")
-    ax_plot.set_xlabel("Recursive round $t$", fontsize=12)
-    ax_plot.set_ylabel(r"Expected error-strength proxy $E[e_t]$", fontsize=12)
+    ax_plot.plot(rounds, expected, marker="o", linewidth=2.5, label="理論的期待値")
+    ax_plot.axhline(limit, color="#D97706", linestyle="--", linewidth=2.5, label=f"極限値 = {limit:.6f}")
+    ax_plot.set_xlabel("再帰ラウンド $t$", fontsize=12)
+    ax_plot.set_ylabel(r"誤差強度プロキシの期待値 $E[e_t]$", fontsize=12)
     ax_plot.set_title(
-        r"Explicit example: $e_0=0$, $\alpha=0.7$, $\beta=0.15$, $\mu=2/7$",
+        r"具体例：$e_0=0$, $\alpha=0.7$, $\beta=0.15$, $\mu=2/7$",
         fontsize=14,
         fontweight="bold",
     )
@@ -106,8 +109,8 @@ def main():
     ax_plot.text(
         0.02,
         0.92,
-        "Expectation curve only; no random trials or confidence interval.\n"
-        "This scalar recurrence does not prove information irreversibility.",
+        "期待値曲線のみを示す。乱数試行や信頼区間は含まない。\n"
+        "このスカラー漸化式は情報の不可逆性を証明しない。",
         transform=ax_plot.transAxes,
         va="top",
         fontsize=11,

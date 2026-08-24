@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
 
-OUTPUT = Path(__file__).with_name("fig2_truth_exclusion_schematic_v2.png")
+OUTPUT = Path(__file__).with_name("fig2_truth_exclusion_schematic_v2_EN.png")
 
 
 def rounded_box(ax, x, y, width, height, text, face, edge, fontsize=11):

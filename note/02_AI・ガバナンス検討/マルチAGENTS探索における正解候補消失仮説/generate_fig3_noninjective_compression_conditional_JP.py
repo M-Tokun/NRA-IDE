@@ -3,8 +3,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
+plt.rcParams["font.family"] = "Meiryo"
+plt.rcParams["axes.unicode_minus"] = False
 
-OUTPUT = Path(__file__).with_name("fig3_noninjective_compression_conditional_v2.png")
+
+OUTPUT = Path(__file__).with_name("fig3_noninjective_compression_conditional_v2_JP.png")
 
 
 def box(ax, x, y, width, height, text, face, edge, fontsize=11, weight="normal"):
@@ -45,7 +48,7 @@ def main():
     ax.set_ylim(0, 10)
     ax.axis("off")
     ax.set_title(
-        "Figure 3. Non-injective consensus compression: guaranteed and conditional consequences",
+        "図3. 非単射な合意圧縮：保証される帰結と条件付きの帰結",
         fontsize=20,
         fontweight="bold",
         pad=18,
@@ -57,7 +60,7 @@ def main():
         6.5,
         4.1,
         2.3,
-        "STRUCTURED AGENT STATE\n\n$A=(A_1,\\ldots,A_N)$\ncontent $q$ | provenance $s$\nreasoning path $p$ | epistemic type $\\kappa$",
+        "構造化されたエージェント状態\n\n$A=(A_1,\\ldots,A_N)$\n内容 $q$ ｜ 出所 $s$\n推論経路 $p$ ｜ 認識論的型 $\\kappa$",
         "#EAF4E4",
         "#4F8A4C",
         fontsize=11,
@@ -69,7 +72,7 @@ def main():
         6.5,
         4.2,
         2.3,
-        "CONSENSUS / COMPRESSION\n\n$G:\\mathcal{D}\\rightarrow\\mathcal{C}$\n$C=G(A)$\n\nNon-injective if $A\\ne A'$ and $G(A)=G(A')$",
+        "合意／圧縮\n\n$G:\\mathcal{D}\\rightarrow\\mathcal{C}$\n$C=G(A)$\n\n$A\\ne A'$ かつ $G(A)=G(A')$ のとき非単射",
         "#FFF3CD",
         "#C99700",
         fontsize=11,
@@ -81,7 +84,7 @@ def main():
         6.5,
         4.1,
         2.3,
-        "GUARANTEED BY\nNON-INJECTIVITY\n\nAt least two distinct inputs share $C$\nNo global left inverse recovers every $A$",
+        "非単射性により\n保証される事項\n\n少なくとも2つの異なる入力が同一の$C$を共有する\nすべての$A$を復元する大域的な左逆写像は存在しない",
         "#E7F0FA",
         "#5B8DB8",
         fontsize=11,
@@ -93,7 +96,7 @@ def main():
     ax.text(
         8,
         5.8,
-        "Non-injectivity does not identify which semantic fields were omitted.\nAudit the saved output and every separate retention channel.",
+        "非単射性は、どの意味的フィールドが省略されたかを特定しない。\n保存された出力と、それとは別の全ての保持経路を監査すること。",
         ha="center",
         va="center",
         fontsize=12,
@@ -107,7 +110,7 @@ def main():
         2.5,
         4.1,
         2.2,
-        "CONDITIONAL CONTENT LOSS\n\nIf candidate content $q$ is encoded\nin neither $C$ nor a retained record,\nthe original candidate is unavailable downstream.",
+        "条件付き内容の損失\n\n候補内容$q$が$C$にも\n保持記録にも符号化されていない場合、\n元の候補は下流で利用できなくなる。",
         "#FBE7E7",
         "#C75B5B",
         fontsize=10.5,
@@ -119,7 +122,7 @@ def main():
         2.5,
         4.1,
         2.2,
-        "CONDITIONAL PROVENANCE LOSS\n\nIf source $s$ and type $\\kappa$ are encoded\nin neither $C$ nor a retained record,\norigin and epistemic type cannot be recovered.",
+        "条件付き出所の損失\n\n出所$s$と型$\\kappa$が$C$にも\n保持記録にも符号化されていない場合、\n起源と認識論的型は復元できない。",
         "#FFF0DD",
         "#C98434",
         fontsize=10.5,
@@ -131,7 +134,7 @@ def main():
         2.5,
         4.1,
         2.2,
-        "CONDITIONAL STRUCTURAL LOSS\n\nIf dependency path $p$ is encoded\nin neither $C$ nor a retained record,\nthe original support path cannot be recovered.",
+        "条件付き構造の損失\n\n依存経路$p$が$C$にも\n保持記録にも符号化されていない場合、\n元の裏付け経路は復元できない。",
         "#E8F3E5",
         "#5B9555",
         fontsize=10.5,
@@ -144,8 +147,8 @@ def main():
     ax.text(
         8,
         1.2,
-        "Exact conclusion: $G$ being non-injective proves non-unique recoverability of the full input.\n"
-        "A specific content, provenance, or path loss requires evidence that the corresponding field was not retained elsewhere.",
+        "厳密な結論：$G$が非単射であることは、完全な入力を一意に復元できないことを証明する。\n"
+        "特定の内容・出所・経路の損失を主張するには、当該フィールドが他の場所に保持されていないという証拠が必要である。",
         ha="center",
         va="center",
         fontsize=11.5,
