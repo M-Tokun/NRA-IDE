@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Cline PreToolUse hook. macOS/Linux only (Cline hooks do not run on Windows).
+# Delegates to the shared AGENTS.md-read guard (AGENTS.md 第11章 Layer 2).
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PY="$(command -v python3 || command -v python)"
+exec "$PY" "$DIR/../../skills/agents-md-guard/cline_guard.py"

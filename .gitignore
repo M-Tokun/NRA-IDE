@@ -17,6 +17,9 @@ desktop.ini
 # Claude Code local settings
 .claude/
 
+# AGENTS.md読了マーカー（Claude/Codex/Gemini共通、セッションごとの実行時状態）
+.agent_state/
+
 # Editors
 .vscode/*
 !.vscode/settings.json
@@ -35,7 +38,8 @@ build/
 local_reports/
 local_reportsDirectory/
 # Gemini CLI
-.gemini/
+.gemini/*
+!.gemini/settings.json
 
 # Node.js（Gemini CLI・各種ツール）
 node_modules/
@@ -70,6 +74,7 @@ env/
 /skills/*
 !/skills/nra-depth-guard/
 !/skills/axis-boundary-reasoning/
+!/skills/agents-md-guard/
 
 # NRA-IDE clinical session outputs
 output/

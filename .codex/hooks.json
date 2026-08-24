@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write|read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python skills/agents-md-guard/codex_mark.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python skills/agents-md-guard/codex_guard.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

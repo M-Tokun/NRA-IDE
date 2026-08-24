@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "AfterTool": [
+      {
+        "matcher": "read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python skills/agents-md-guard/gemini_mark.py",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command|write_file|edit|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python skills/agents-md-guard/gemini_guard.py",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}

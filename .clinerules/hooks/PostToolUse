@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Cline PostToolUse hook. macOS/Linux only (Cline hooks do not run on Windows).
+# NOTE: Cline's official hook reference (docs.cline.bot) confirms PreToolUse
+# explicitly; PostToolUse support for Cline is not independently confirmed at
+# the time this was written. If this event never fires, the failure mode is
+# fail-closed (PreToolUse keeps denying), not fail-open.
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PY="$(command -v python3 || command -v python)"
+exec "$PY" "$DIR/../../skills/agents-md-guard/cline_mark.py"
