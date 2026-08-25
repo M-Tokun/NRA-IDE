@@ -37,6 +37,8 @@ p_t の直接代理量）に適用し、ℓ_t = ln(-ln(κ_t)) の差分 Δℓ_t 
 要求する「領域固有の派生式」であり、律環公理・IDE一次式・二次式そのものではない。
 R = δ/τ の算出と境界順序（PERMIT/BOUNDARY_WARNING/HANDOFF_REQUIRED/
 IRREVERSIBLE_TRANSITION/RUPTURE_BOUNDARY）の判定だけが正典の権威区分に従う。
+
+本ファイルはプロトタイプであり、`poc_horizontal_ai/`（検証済み実装）には未編入。
 """
 
 from __future__ import annotations
