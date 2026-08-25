@@ -200,6 +200,9 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 
 <script>
 // ── Factor definitions ────────────────────────────────
+// opt/tauはR_i = δ_i / τ_i に使用（panel-title「FACTOR STATE — R_i = δ_i / τ_i」参照）。
+// tauは各カードのdesc欄が示す許容幅と一致（例：温度は±5°C ⇒ tau:5）。
+// corr_baseは想定した初期相関行列であり、外部根拠は見当たらない（デモ用チューニング値）。
 const FACTORS = [
   {
     id:'temp', name:'温度', unit:'°C', color:'var(--c1)',
@@ -243,7 +246,7 @@ let driftTarget = [0, 0, 0, 0];
 let scenario = 'normal';
 let prevZones = ['ok','ok','ok','ok'];
 const k_gate = 0.8;
-const tau_delay = 8; // τ steps
+const tau_delay = 8; // τ steps（G(r)ゲートが参照するx_{t-τ}の遅延段数）
 let valHistory = [[],[],[],[]]; // for x_{t-τ}
 let corrBase = [[],[],[],[]];
 let logLines = [];
@@ -252,6 +255,9 @@ let logLines = [];
 FACTORS.forEach((f,i) => { corrBase[i] = [...f.corr_base]; });
 
 // ── Scenarios ─────────────────────────────────────────
+// drift: update()内のtick/80ランプで段階的に適用される各要素[温度,湿度,光量,水分]の目標オフセット。
+// amp: 各要素のノイズ振幅。値はシナリオの説明文に大まかに対応させたデモ用チューニング値であり、
+// 数値の厳密な根拠は見当たらない。
 const SCENARIOS = {
   normal:   { desc:'正常範囲内で推移', drift:[0,0,0,0], amp:[0.8,2.0,300,2.0] },
   drought:  { desc:'水分急減（蒸散過多）→ 湿度低下連鎖', drift:[1.5,-8,0,-18], amp:[1.0,3.0,200,4.0] },
@@ -277,6 +283,8 @@ function calcR(val, factor){
 function G(r, k){ return r * Math.abs(r) / (k + Math.abs(r)); }
 function gateOpen(r, k){ return Math.abs(r) / (k + Math.abs(r)); }
 
+// Rに対するフラグ閾値（凡例・gate-noteの説明文に対応）：
+// R >= 1.0 -> RUPTURE_BOUNDARY / Fail-Closed、R >= 0.7 -> WARNING、それ以外 -> SAFE。
 function getColor(R){
   if(R >= 1.0) return 'var(--f)';
   if(R >= 0.7) return 'var(--w)';
@@ -298,16 +306,20 @@ function calcCorr(){
       if(i===j){ C[i][j]=1.0; continue; }
       // base + scenario-driven drift on cascade
       let drift = 0;
+      // 0.008・0.1の傾き係数と0.4の上限：根拠不明のデモ用チューニング値。
+      // tick>40はcascade発生を遅らせ、まず「normal」の基準状態を見せるための調整。
       if(scenario==='cascade'){
         drift = (tick > 40) ? (tick-40)*0.008 * (i+j)*0.1 : 0;
         drift = Math.min(drift, 0.4);
       }
-      C[i][j] = Math.min(1, Math.max(0, corrBase[i][j] + drift + (Math.random()-0.5)*0.04));
+      C[i][j] = Math.min(1, Math.max(0, corrBase[i][j] + drift + (Math.random()-0.5)*0.04)); // 0.04：デモ用ノイズ振幅
     }
   }
   return C;
 }
 
+// tauC=0.25のデフォルト値：corr-alert-txtに表示されるR_corrの式
+// （R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C）で使用するデモ用チューニング値。個別の根拠は見当たらない。
 function calcRCorr(C, C0, tauC=0.25){
   let maxR = 0;
   const alerts = [];
@@ -385,7 +397,7 @@ function drawTimeSeries(){
   // grid
   tsCtx.strokeStyle='#1a2e42'; tsCtx.lineWidth=1;
   [0.25,0.5,0.75,1.0].forEach(y=>{
-    const py = H - y*H*0.85 - 8;
+    const py = H - y*H*0.85 - 8; // 0.85／8：R∈[0,約1.18]をcanvas高さへ写像するデモ用レイアウト定数
     tsCtx.beginPath(); tsCtx.moveTo(0,py); tsCtx.lineTo(W,py); tsCtx.stroke();
   });
 
@@ -402,7 +414,7 @@ function drawTimeSeries(){
     tsCtx.beginPath();
     hist.forEach((v,x)=>{
       const px = (x / (HIST_LEN-1)) * W;
-      const py = H - Math.min(v,1.5) / 1.5 * H * 0.85 - 8;
+      const py = H - Math.min(v,1.5) / 1.5 * H * 0.85 - 8; // Rは表示用に1.5で上限クランプ（上のgrid線と同じレイアウト縮尺）
       x===0 ? tsCtx.moveTo(px,py) : tsCtx.lineTo(px,py);
     });
     tsCtx.stroke();
@@ -436,8 +448,8 @@ function update(){
   // update values with noise + drift
   vals = vals.map((v,i)=>{
     const noise = (Math.random()-0.5)*2*noiseAmp[i];
-    const drift = driftTarget[i] * Math.min(1, tick/80);
-    const nv = baseVals[i] + drift + noise + Math.sin(tick*0.05+i)*noiseAmp[i]*0.5;
+    const drift = driftTarget[i] * Math.min(1, tick/80); // シナリオの目標driftを80tickかけて線形に立ち上げる
+    const nv = baseVals[i] + drift + noise + Math.sin(tick*0.05+i)*noiseAmp[i]*0.5; // 加えた正弦波はデモ用の揺らぎであり、モデル化された物理効果ではない
     return Math.min(FACTORS[i].max, Math.max(FACTORS[i].min, nv));
   });
 
@@ -475,12 +487,13 @@ function update(){
     card.className = 'fc' + (R>=1.0?' fail': R>=0.7?' warn':'');
 
     // G(r) gate
-    const refVal = valHistory[i].length >= tau_delay ? valHistory[i][0] : vals[i];
+    const refVal = valHistory[i].length >= tau_delay ? valHistory[i][0] : vals[i]; // x_{t-τ}：tau_delayステップ前の記録（履歴が十分でない間は現在値で代用）
     const r_residual = (v - refVal) / f.tau; // normalized residual
     const gOpen = gateOpen(r_residual, k_gate) * 100;
     document.getElementById('gbar-'+i).style.width = gOpen.toFixed(1)+'%';
     document.getElementById('gval-'+i).textContent = gOpen.toFixed(1)+'%';
     const gStat = document.getElementById('gstat-'+i);
+    // ゲート状態の閾値（他に説明箇所のないデモ用チューニング値）：70%超で補正全開、30%超で補正中、それ以外は沈黙
     if(gOpen > 70){
       gStat.textContent='補正全開'; gStat.style.background='rgba(255,34,85,.1)'; gStat.style.color='var(--f)'; gStat.style.border='1px solid rgba(255,34,85,.3)';
     } else if(gOpen > 30){
@@ -506,7 +519,7 @@ function update(){
     for(let j=0;j<4;j++){
       const cell = document.getElementById(`cm-${i}-${j}`);
       const v = C[i][j];
-      const Rij = (i!==j) ? Math.abs(v - corrBase_snapshot[i][j]) / 0.25 : 0;
+      const Rij = (i!==j) ? Math.abs(v - corrBase_snapshot[i][j]) / 0.25 : 0; // calcRCorrのデフォルトtauC=0.25と同じ値（共有定数化はされておらず手動で一致させている）
       const intensity = Math.round(v*255);
       if(i===j){ cell.style.background=`rgba(0,229,255,0.15)`; cell.style.color='var(--t)'; cell.textContent='1.00'; }
       else if(Rij >= 1.0){ cell.style.background=`rgba(255,34,85,0.4)`; cell.style.color='#ff8aaa'; cell.textContent=v.toFixed(2); }

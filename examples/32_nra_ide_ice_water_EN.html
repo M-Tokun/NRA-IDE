@@ -250,41 +250,59 @@
 </div>
 
 <script>
-const T_ICE_BASE = -20;
-const T_MELT = 0;
+// Reference points for R = δ / τ (see card-label "Model Selection and Temperature Setting":
+// "Ice Reference: -20°C → Melting Point: 0°C").
+const T_ICE_BASE = -20; // fully-solid ice reference temperature (δ = 0 baseline)
+const T_MELT = 0;       // melting boundary; R = 1.0 is defined to coincide with this point (static model)
 let model = 'static';
 let myChart = null;
 
+// Core R = δ / τ calculation. See the "Definition of the Calculation Formula" card for the
+// static (linear) vs dynamic (hyperbolic) model definitions this mirrors.
 function calcR(T) {
-  const delta = Math.max(0, T - T_ICE_BASE);
+  const delta = Math.max(0, T - T_ICE_BASE); // δ = T − T_ICE_BASE, floored at 0 (no negative deviation below the ice reference)
   let tau, R;
   if (model === 'static') {
+    // Static τ model: fixed constant (T_MELT − T_ICE_BASE = 20) — the total margin the
+    // crystal lattice structure can maintain (per formula-box text).
     tau = T_MELT - T_ICE_BASE;
     R = delta / tau;
   } else {
+    // Dynamic τ model: τ = 0 − T, the remaining distance to the melting point (dynamic margin).
+    // 0.01 floor prevents division by zero as T → T_MELT; this is a demo-only guard value,
+    // not a physically derived constant.
     tau = Math.max(0.01, T_MELT - T);
     R = delta / tau;
   }
   return { delta, tau, R };
 }
 
+// Flag thresholds for R (see legend and modelNote text):
+// R >= 1.0  -> RUPTURE_BOUNDARY / Fail-Closed (melting confirmed)
+// R >= 0.75 -> WARNING zone (crystal structure begins to relax)
+// else      -> SAFE (stable as ice)
 function getColor(R) {
   if (R >= 1.0) return '#E24B4A';
   if (R >= 0.75) return '#EF9F27';
   return '#185FA5';
 }
 
+// State/phase judgment: the physical temperature check (T >= T_MELT) is evaluated before the
+// R-based warning threshold, so a temperature at or above the melting point is always reported
+// as water regardless of R.
 function getPhase(T, R) {
   if (T >= T_MELT) return { label: 'Water (liquid)', bg: '#9FE1CB', color: '#085041' };
   if (R >= 0.75) return { label: 'Critical Zone', bg: '#FAC775', color: '#633806' };
   return { label: 'Ice (solid)', bg: '#B5D4F4', color: '#0C447C' };
 }
 
+// Builds the R curve across the full slider range (-20°C..+5°C, same 0.5° step as #tempSlider)
+// for the R-Value Graph card.
 function buildChartData() {
   const temps = [], rVals = [];
   for (let T = -20; T <= 5; T += 0.5) {
     const { R } = calcR(T);
-    const capped = Math.min(R, 3.0);
+    const capped = Math.min(R, 3.0); // display-only cap (dynamic model's R diverges as T → T_MELT); does not affect calcR or the numeric R shown elsewhere
     temps.push(T.toFixed(1) + '℃');
     rVals.push(parseFloat(capped.toFixed(3)));
   }
@@ -312,6 +330,7 @@ function initChart() {
           }
         },
         {
+          // Static reference line at the R = 1.0 RUPTURE_BOUNDARY threshold (matches getColor's fail-closed cutoff)
           label: 'RUPTURE_BOUNDARY (R=1.0)',
           data: new Array(temps.length).fill(1.0),
           borderColor: '#E24B4A',
@@ -321,6 +340,7 @@ function initChart() {
           fill: false
         },
         {
+          // Static reference line at the R = 0.75 WARNING threshold (matches getColor's warning cutoff)
           label: 'WARNING (R=0.75)',
           data: new Array(temps.length).fill(0.75),
           borderColor: '#EF9F27',
@@ -354,7 +374,7 @@ function initChart() {
           grid: { color: 'rgba(55,138,221,0.07)' }
         },
         y: {
-          min: 0, max: 2.5,
+          min: 0, max: 2.5, // demo tuning value: chart y-axis cap; updateAll's rPct bar uses the same 2.5 divisor
           ticks: { stepSize: 0.25, font: { size: 11 }, color: '#7a9ab5' },
           grid: { color: 'rgba(55,138,221,0.07)' },
           title: {
@@ -377,7 +397,7 @@ function updateAll() {
 
   document.getElementById('mDelta').textContent = delta.toFixed(2);
   document.getElementById('mTau').textContent = tau.toFixed(model === 'static' ? 1 : 2);
-  document.getElementById('mR').textContent = R > 10 ? '>10' : R.toFixed(3);
+  document.getElementById('mR').textContent = R > 10 ? '>10' : R.toFixed(3); // display cap: dynamic model's R can grow unbounded as T → T_MELT; ">10" avoids printing huge/near-infinite numbers
   document.getElementById('mR').style.color = color;
 
   const badge = document.getElementById('phaseBadge');
@@ -385,9 +405,9 @@ function updateAll() {
   badge.style.background = phase.bg;
   badge.style.color = phase.color;
 
-  const dPct = Math.min(100, (delta / 20) * 100);
-  const tPct = model === 'static' ? 100 : Math.min(100, (tau / 20) * 100);
-  const rPct = Math.min(100, (R / 2.5) * 100);
+  const dPct = Math.min(100, (delta / 20) * 100); // δ bar: 20 is the full T_ICE_BASE..T_MELT span
+  const tPct = model === 'static' ? 100 : Math.min(100, (tau / 20) * 100); // static model's τ is always the fixed 20 → bar always shows 100%
+  const rPct = Math.min(100, (R / 2.5) * 100); // R bar scaled against the same 2.5 cap used by the chart's y-axis max
 
   document.getElementById('barDelta').style.width = dPct + '%';
   document.getElementById('barDeltaNum').textContent = delta.toFixed(1);
@@ -395,14 +415,14 @@ function updateAll() {
   document.getElementById('barTauNum').textContent = tau.toFixed(1);
   document.getElementById('barR').style.width = rPct + '%';
   document.getElementById('barR').style.background = color;
-  document.getElementById('barRNum').textContent = R > 10 ? '>10' : R.toFixed(2);
+  document.getElementById('barRNum').textContent = R > 10 ? '>10' : R.toFixed(2); // same display cap as mR above
 
   if (myChart) {
     const { temps, rVals } = buildChartData();
     myChart.data.datasets[0].data = rVals;
     myChart.data.labels = temps;
 
-    const idx = Math.round((T - (-20)) / 0.5);
+    const idx = Math.round((T - (-20)) / 0.5); // index of current T within buildChartData's -20..5 step-0.5 array, used to highlight the current point on the chart
     const radii = rVals.map((_, i) => i === idx ? 6 : 0);
     const ptColors = rVals.map((_, i) => i === idx ? color : 'transparent');
     myChart.data.datasets[0].pointRadius = radii;
@@ -411,6 +431,9 @@ function updateAll() {
   }
 }
 
+// Switches between the static (linear τ) and dynamic (hyperbolic τ) models used by calcR,
+// and rewrites the formula-box text to match (see the two <strong> blocks below, which mirror
+// the "Definition of the Calculation Formula" card's static/dynamic text).
 function setModel(m) {
   model = m;
   document.getElementById('btnStatic').classList.toggle('active', m === 'static');

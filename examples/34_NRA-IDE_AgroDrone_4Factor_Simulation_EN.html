@@ -169,6 +169,11 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 </div>
 
 <script>
+// ── Factor definitions ────────────────────────────────
+// opt/tau feed R_i = δ_i / τ_i (see panel-title "FACTOR STATE — R_i = δ_i / τ_i").
+// tau is the per-factor tolerance width shown in each card's desc (e.g. temp: ±5°C ⇒ tau:5).
+// corr_base is the assumed baseline correlation with [temp,hum,light,water] — an assumed
+// starting correlation matrix; no external source found, treat as demo tuning values.
 const FACTORS = [
   { id:'temp',    name:'Temperature', unit:'°C',  color:'var(--c1)', opt:20,   tau:5,    min:10,  max:35,  desc:'Optimum 20°C  ±5°C tolerance',   corr_base:[1.0,0.55,0.30,0.20] },
   { id:'hum',     name:'Humidity',    unit:'%',   color:'var(--c2)', opt:70,   tau:15,   min:30,  max:100, desc:'Optimum 70%   ±15% tolerance',   corr_base:[0.55,1.0,0.15,0.65] },
@@ -176,6 +181,11 @@ const FACTORS = [
   { id:'water',   name:'Moisture',    unit:'%',   color:'var(--c4)', opt:65,   tau:15,   min:20,  max:95,  desc:'Optimum 65%   ±15% tolerance',   corr_base:[0.20,0.65,0.10,1.0] },
 ];
 
+// ── Scenarios ─────────────────────────────────────────
+// drift: target offset per factor [temp,hum,light,water] applied gradually via update()'s
+// tick/80 ramp; amp: per-factor noise amplitude. Values are demo tuning constants matched
+// loosely to each scenario's narrative (e.g. drought → large negative water drift); no
+// external source found for the exact magnitudes.
 const SCENARIOS = {
   normal:   { desc:'All factors within normal range',               drift:[0,0,0,0],        amp:[0.8,2.0,300,2.0] },
   drought:  { desc:'Moisture deficit → humidity cascade drop',      drift:[1.5,-8,0,-18],   amp:[1.0,3.0,200,4.0] },
@@ -184,37 +194,48 @@ const SCENARIOS = {
   cascade:  { desc:'Correlation distortion → full cascade collapse',drift:[6,-12,-1500,-15],amp:[3.0,5.0,800,5.0] },
 };
 
+// ── State ─────────────────────────────────────────────
 let running=true, tick=0;
 const HIST_LEN=120;
 let rHistory=[[],[],[],[]];
 let vals=[20,70,4000,65], baseVals=[20,70,4000,65];
 let noiseAmp=[0.8,2.0,300,2.0], driftTarget=[0,0,0,0];
 let scenario='normal', prevZones=['ok','ok','ok','ok'];
-const k_gate=0.8, tau_delay=8;
-let valHistory=[[],[],[],[]];
-let corrBase=FACTORS.map(f=>[...f.corr_base]);
+const k_gate=0.8, tau_delay=8; // tau_delay: τ steps (delay depth for the x_{t-τ} residual reference used by the G(r) gate)
+let valHistory=[[],[],[],[]]; // for x_{t-τ}
+let corrBase=FACTORS.map(f=>[...f.corr_base]); // init corr base from each factor's corr_base
 let logLines=[];
 
+// ── Math ──────────────────────────────────────────────
 function calcR(val,f){ return Math.abs(val-f.opt)/f.tau; }
 function G(r,k){ return r*Math.abs(r)/(k+Math.abs(r)); }
 function gateOpen(r,k){ return Math.abs(r)/(k+Math.abs(r)); }
+// Flag thresholds for R (see legend / gate-note text):
+// R >= 1.0 -> RUPTURE_BOUNDARY / fail-closed; R >= 0.7 -> WARNING; else SAFE.
 function getColor(R){ return R>=1.0?'var(--f)':R>=0.7?'var(--w)':'var(--ok)'; }
 function getBadge(R){ return R>=1.0?['RUPTURE_BOUNDARY','badge-fail']:R>=0.7?['WARNING','badge-warn']:['SAFE','badge-ok']; }
 
+// ── Correlation ───────────────────────────────────────
 function calcCorr(){
+  // Current correlation estimated from R-value coupling
   const C=[];
   for(let i=0;i<4;i++){
     C[i]=[];
     for(let j=0;j<4;j++){
       if(i===j){C[i][j]=1.0;continue;}
+      // base + scenario-driven drift on cascade
       let drift=0;
+      // 0.008 / 0.1 slope factors and the 0.4 cap: demo tuning values, no documented derivation;
+      // tick>40 delays the cascade onset so the "normal" baseline is visible first.
       if(scenario==='cascade'){ drift=(tick>40)?(tick-40)*0.008*(i+j)*0.1:0; drift=Math.min(drift,0.4); }
-      C[i][j]=Math.min(1,Math.max(0,corrBase[i][j]+drift+(Math.random()-0.5)*0.04));
+      C[i][j]=Math.min(1,Math.max(0,corrBase[i][j]+drift+(Math.random()-0.5)*0.04)); // 0.04: demo noise amplitude
     }
   }
   return C;
 }
 
+// tauC=0.25 default: demo tuning value for the R_corr formula shown in corr-alert-txt
+// (R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C); no separate rationale documented.
 function calcRCorr(C,C0,tauC=0.25){
   let maxR=0; const alerts=[];
   for(let i=0;i<4;i++) for(let j=i+1;j<4;j++){
@@ -225,6 +246,7 @@ function calcRCorr(C,C0,tauC=0.25){
   return {maxR,alerts};
 }
 
+// ── DOM Setup ─────────────────────────────────────────
 function buildFactorCards(){
   const g=document.getElementById('factor-grid'); g.innerHTML='';
   FACTORS.forEach((f,i)=>{
@@ -244,6 +266,7 @@ function buildFactorCards(){
 function buildCorrMatrix(){
   const g=document.getElementById('corr-matrix'); g.innerHTML='';
   const grid=document.createElement('div'); grid.className='corr-grid';
+  // header row
   grid.innerHTML+=`<div class="corr-cell corr-head"></div>`;
   FACTORS.forEach(f=>grid.innerHTML+=`<div class="corr-cell corr-head">${f.name.substring(0,4)}</div>`);
   FACTORS.forEach((fi,i)=>{
@@ -265,6 +288,7 @@ function buildGateList(){
   });
 }
 
+// ── Time series canvas ────────────────────────────────
 const tsCanvas=document.getElementById('ts-canvas');
 const tsCtx=tsCanvas.getContext('2d');
 const TS_COLORS=['#00e5ff','#39ff85','#ffd700','#ff8c42'];
@@ -273,11 +297,13 @@ function drawTimeSeries(){
   const W=tsCanvas.width, H=tsCanvas.height;
   tsCtx.clearRect(0,0,W,H);
   tsCtx.fillStyle='#111d2a'; tsCtx.fillRect(0,0,W,H);
+  // grid
   tsCtx.strokeStyle='#1a2e42'; tsCtx.lineWidth=1;
   [0.25,0.5,0.75,1.0].forEach(y=>{
-    const py=H-y*H*0.85-8;
+    const py=H-y*H*0.85-8; // 0.85/8: demo layout constants mapping R∈[0,~1.18] onto the canvas height
     tsCtx.beginPath(); tsCtx.moveTo(0,py); tsCtx.lineTo(W,py); tsCtx.stroke();
   });
+  // fail line
   const failY=H-1.0*(H*0.85)-8;
   tsCtx.strokeStyle='rgba(255,34,85,0.4)'; tsCtx.lineWidth=1.5;
   tsCtx.setLineDash([4,3]);
@@ -289,16 +315,18 @@ function drawTimeSeries(){
     tsCtx.beginPath();
     hist.forEach((v,x)=>{
       const px=(x/(HIST_LEN-1))*W;
-      const py=H-Math.min(v,1.5)/1.5*H*0.85-8;
+      const py=H-Math.min(v,1.5)/1.5*H*0.85-8; // R capped at 1.5 for display only, same layout scale as the grid above
       x===0?tsCtx.moveTo(px,py):tsCtx.lineTo(px,py);
     });
     tsCtx.stroke();
   });
+  // labels
   tsCtx.fillStyle='rgba(255,34,85,0.6)';
   tsCtx.font='10px JetBrains Mono,monospace';
   tsCtx.fillText('R=1.0',4,failY-3);
 }
 
+// ── Log ───────────────────────────────────────────────
 function addLog(msg,type='info'){
   const area=document.getElementById('log-area');
   const t=(tick+'').padStart(4,'0');
@@ -309,6 +337,7 @@ function addLog(msg,type='info'){
   if(logLines.length>60){const old=logLines.shift();old.remove();}
 }
 
+// ── Main update ───────────────────────────────────────
 const corrBase_snapshot=corrBase.map(r=>[...r]);
 
 function applyScenario(){
@@ -322,18 +351,21 @@ function applyScenario(){
 function update(){
   if(!running) return;
   tick++;
+  // update values with noise + drift
   vals=vals.map((v,i)=>{
     const noise=(Math.random()-0.5)*2*noiseAmp[i];
-    const drift=driftTarget[i]*Math.min(1,tick/80);
-    const nv=baseVals[i]+drift+noise+Math.sin(tick*0.05+i)*noiseAmp[i]*0.5;
+    const drift=driftTarget[i]*Math.min(1,tick/80); // ramps the scenario's target drift in linearly over 80 ticks
+    const nv=baseVals[i]+drift+noise+Math.sin(tick*0.05+i)*noiseAmp[i]*0.5; // added sinusoid: demo wobble, not a modeled physical effect
     return Math.min(FACTORS[i].max,Math.max(FACTORS[i].min,nv));
   });
+  // store history for x_{t-τ}
   vals.forEach((v,i)=>{
     valHistory[i].push(v);
     if(valHistory[i].length>tau_delay+2) valHistory[i].shift();
   });
   const C=calcCorr();
   const {maxR:rCorrMax,alerts:corrAlerts}=calcRCorr(C,corrBase_snapshot);
+  // update factor cards
   let compositeR=0;
   vals.forEach((v,i)=>{
     const f=FACTORS[i];
@@ -353,16 +385,19 @@ function update(){
     badge.textContent=bText; badge.className='fc-badge '+bCls;
     const card=document.getElementById('fc-'+i);
     card.className='fc'+(R>=1.0?' fail':R>=0.7?' warn':'');
-    const refVal=valHistory[i].length>=tau_delay?valHistory[i][0]:vals[i];
-    const r_residual=(v-refVal)/f.tau;
+    // G(r) gate
+    const refVal=valHistory[i].length>=tau_delay?valHistory[i][0]:vals[i]; // x_{t-τ}: reference record from tau_delay steps ago (falls back to the current value until enough history exists)
+    const r_residual=(v-refVal)/f.tau; // normalized residual
     const gOpen=gateOpen(r_residual,k_gate)*100;
     document.getElementById('gbar-'+i).style.width=gOpen.toFixed(1)+'%';
     document.getElementById('gval-'+i).textContent=gOpen.toFixed(1)+'%';
     const gStat=document.getElementById('gstat-'+i);
+    // Gate status thresholds (demo tuning values; not documented elsewhere): >70% Full Corr., >30% Correcting, else Silent
     if(gOpen>70){ gStat.textContent='Full Corr.'; gStat.style.background='rgba(255,34,85,.1)'; gStat.style.color='var(--f)'; gStat.style.border='1px solid rgba(255,34,85,.3)'; }
     else if(gOpen>30){ gStat.textContent='Correcting'; gStat.style.background='rgba(255,215,0,.1)'; gStat.style.color='var(--w)'; gStat.style.border='1px solid rgba(255,215,0,.3)'; }
     else { gStat.textContent='Silent'; gStat.style.background='rgba(57,255,133,.1)'; gStat.style.color='var(--ok)'; gStat.style.border='1px solid rgba(57,255,133,.3)'; }
     compositeR+=R;
+    // zone change log
     const zone=R>=1.0?'fail':R>=0.7?'warn':'ok';
     if(zone!==prevZones[i]){
       if(zone==='fail') addLog(`RUPTURE_BOUNDARY: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'fail');
@@ -371,14 +406,16 @@ function update(){
       prevZones[i]=zone;
     }
   });
+  // correlation matrix
   for(let i=0;i<4;i++) for(let j=0;j<4;j++){
     const cell=document.getElementById(`cm-${i}-${j}`);
     const v=C[i][j];
-    const Rij=(i!==j)?Math.abs(v-corrBase_snapshot[i][j])/0.25:0;
+    const Rij=(i!==j)?Math.abs(v-corrBase_snapshot[i][j])/0.25:0; // same tauC=0.25 as calcRCorr's default (kept in sync manually, not shared as a named constant)
     if(i===j){ cell.style.background=`rgba(0,229,255,0.15)`; cell.style.color='var(--t)'; cell.textContent='1.00'; }
     else if(Rij>=1.0){ cell.style.background=`rgba(255,34,85,0.4)`; cell.style.color='#ff8aaa'; cell.textContent=v.toFixed(2); }
     else { cell.style.background=`rgba(57,255,133,${v*0.35})`; cell.style.color=`rgba(255,255,255,${0.4+v*0.5})`; cell.textContent=v.toFixed(2); }
   }
+  // corr alert
   const ca=document.getElementById('corr-alert');
   if(corrAlerts.length>0){
     ca.innerHTML=corrAlerts.map(a=>`<span class="corr-alert-fail">⚠ ${a}</span>`).join('<br>');
@@ -386,6 +423,7 @@ function update(){
   } else {
     ca.innerHTML=`<span class="corr-alert-ok">✓ Correlation normal  R_corr=${rCorrMax.toFixed(3)}</span>`;
   }
+  // overall
   const Rcomp=compositeR/4;
   const oEl=document.getElementById('overall-r');
   oEl.textContent=Rcomp.toFixed(3); oEl.style.color=getColor(Rcomp);
@@ -396,6 +434,7 @@ function update(){
   drawTimeSeries();
 }
 
+// ── Controls ──────────────────────────────────────────
 function toggleRun(){
   running=!running;
   const btn=document.getElementById('btn-run');
@@ -415,6 +454,7 @@ function resetSim(){
   addLog('System reset','info');
 }
 
+// ── Init & Loop ───────────────────────────────────────
 buildFactorCards(); buildCorrMatrix(); buildGateList();
 addLog('NRA-IDE Seedling House Simulation started','ok');
 addLog('R = δ/τ tracking active | G(r) gate on standby | Correlation monitoring active','info');

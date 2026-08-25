@@ -367,48 +367,67 @@
   }
 
   function update(now) {
-    const dt = Math.min((now - last) / 1000, 0.05);
+    const dt = Math.min((now - last) / 1000, 0.05); // フレーム時間差分。0.05秒（20fps相当）にクランプし、タブが停止/バックグラウンド化した際にtが一気に飛ぶのを防ぐ
     last = now;
     if (!running) return;
 
     t += dt;
     const tauBase = Number(sliders.tauBase.value);
-    const alphaUpper = Number(sliders.alphaUpper.value);
-    const alphaLower = Number(sliders.alphaLower.value);
+    const alphaUpper = Number(sliders.alphaUpper.value);   // 上限ダンパーのEMA平滑化係数（下のupperEMA参照）
+    const alphaLower = Number(sliders.alphaLower.value);   // 下限ダンパーのEMA平滑化係数（下のlowerEMA参照）
     const disturbance = Number(sliders.disturbance.value);
     const degradeRate = Number(sliders.degrade.value);
 
+    // 疑似デモ信号であり実測の物理データではない。緩やかな正弦波2本、速い「micro」正弦波、
+    // 外乱強度でスケールしたランダムノイズ、緩やかなドリフト項の合成。
+    // 下記の振幅・周波数係数（4.5, 0.37, 2.4, 9.0, 0.9, 2.8, 0.08, 2.0）はいずれも
+    // 根拠不明・デモ用チューニング値。
     const baseWave = Math.sin(t * 1.5) * 4.5 + Math.sin(t * 0.37) * 2.4;
     const micro = Math.sin(t * 9.0) * 0.9;
     const random = (Math.random() - 0.5) * 2.8 * disturbance;
     const drift = Math.sin(t * 0.08) * 2.0;
 
-    spike *= 0.94;
+    spike *= 0.94; // 手動の「外乱スパイク」インパルスは毎フレーム約6%ずつ0へ減衰（指数減衰、デモ用値）
     const raw = baseWave + micro + random + drift + spike;
 
-    const upperDev = Math.max(0, raw);
-    const lowerDev = Math.max(0, -raw);
+    const upperDev = Math.max(0, raw);   // 正側偏差のみ
+    const lowerDev = Math.max(0, -raw);  // 負側偏差のみ — この分割がコントロールパネルの「上限／下限ダンパー」に対応する
 
+    // 各側偏差の指数移動平均（EMA）— これ自体がダンパーの実体。
+    // alphaUpper/alphaLowerが大きいほど追従が速く、平滑化は弱くなる。
     upperEMA = upperEMA * (1 - alphaUpper) + upperDev * alphaUpper;
     lowerEMA = lowerEMA * (1 - alphaLower) + lowerDev * alphaLower;
 
+    // 動的境界（UIのτ_dyn_upper／τ_dyn_lower）: EMAで平滑化した偏差により、tauBaseを
+    // 基準に上限側は広がり下限側は狭まる。0.65・0.35の重み係数と2.0のフロア値は
+    // 根拠不明・デモ用チューニング値。
     const tauDynUpper = tauBase + upperEMA * 0.65;
     const tauDynLower = Math.max(2.0, tauBase - lowerEMA * 0.35);
 
-    const rUpper = upperDev / Math.max(tauDynUpper, 0.001);
-    const rLower = lowerDev / Math.max(tauDynLower, 0.001);
+    // R = δ/τ 境界接近比（FORMULA.md参照）を上限側・下限側それぞれで計算し、
+    // 大きい方（悪い方）を採用する — これがUIの「瞬間R」。
+    const rUpper = upperDev / Math.max(tauDynUpper, 0.001); // 0.001のフロアはゼロ除算防止のみ。物理的な値ではない
+    const rLower = lowerDev / Math.max(tauDynLower, 0.001); // 0.001のフロアはゼロ除算防止のみ。物理的な値ではない
     const rNow = Math.max(rUpper, rLower);
 
+    // 短期ログ再構成（UIのR_short）: 直近28件のrNowの単純移動平均。
+    // ウィンドウサイズ28は根拠不明・デモ用チューニング値。
     shortWindow.push(rNow);
     if (shortWindow.length > 28) shortWindow.shift();
     const rShort = shortWindow.reduce((a, b) => a + b, 0) / shortWindow.length;
 
+    // 長期劣化指数（UIのD_long）。rShortが0.58の「摩耗開始」閾値を超えた分だけ蓄積し、
+    // 外乱強度に応じて加重される。さらにrNow自体が1.0を超えると追加ペナルティが加わる。
+    // 毎フレーム約0.5%減衰（*0.995）し、1.8を上限にクランプされる。
+    // 0.58・0.8・0.35・0.995・0.02・1.8はいずれも根拠不明・デモ用チューニング値。
     const wearInput = Math.max(0, rShort - 0.58) * (0.8 + disturbance * 0.35);
     longDamage = Math.min(1.8, longDamage * 0.995 + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
 
+    // 状態フラグ — ここの閾値は上部の「判定ラダー」表（PASS/DAMP/SILENCE）と対応する。
+    // いずれもOR条件で結合されており、他の条件と独立に単独でトリガーする。
     let state = 'PASS';
-    if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE';
-    else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP';
+    if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE'; // 即時停止: 瞬間Rまたは長期劣化が1.0を超過
+    else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP'; // SILENCE前の予告・慎重化帯
 
     metrics.rNow.textContent = rNow.toFixed(2);
     metrics.rShort.textContent = rShort.toFixed(2);
@@ -452,7 +471,7 @@
       ctx.stroke();
     }
 
-    const safeTop = h * 0.28;
+    const safeTop = h * 0.28;    // 表示専用の「安全域」帯の境界（上述の緑帯に対応）。状態判定ロジックには使われない
     const safeBottom = h * 0.72;
     ctx.fillStyle = 'rgba(47,211,139,0.08)';
     ctx.fillRect(0, safeTop, w, safeBottom - safeTop);
@@ -478,6 +497,8 @@
       ctx.stroke();
     }
 
+    // 下記のy軸スケール定数（90, 0.78, 18, 0.9, 12）は画面上の描画比率調整のみに使われ、
+    // 物理的・臨床的な意味は持たない。
     drawSeries(rawHistory, '#ffffff', (v) => h / 2 - v * 90);
     drawSeries(shortHistory, '#ffbf47', (v) => h - v * h * 0.78 - 18);
     drawSeries(damageHistory, '#b48cff', (v) => h - v * h * 0.9 - 12);
@@ -495,7 +516,7 @@
     $('toggleRun').textContent = running ? '停止' : '再開';
   });
   $('spikeBtn').addEventListener('click', () => {
-    spike += (Math.random() > 0.5 ? 1 : -1) * (8 + Math.random() * 7);
+    spike += (Math.random() > 0.5 ? 1 : -1) * (8 + Math.random() * 7); // 手動外乱インパルス: 符号はランダム、大きさは[8,15)の範囲 — 根拠不明・デモ用チューニング値
   });
   $('resetBtn').addEventListener('click', () => {
     resetAll();

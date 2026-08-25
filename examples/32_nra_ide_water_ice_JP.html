@@ -247,41 +247,57 @@
 </div>
 
 <script>
-const T_ICE_BASE = -20;
-const T_MELT = 0;
+// R = δ / τ の基準点（card-label「モデル選択と温度設定」の
+// 「氷の基準：-20℃ → 融解点：0℃」に対応）。
+const T_ICE_BASE = -20; // 完全固体（氷）の基準温度（δ = 0 の起点）
+const T_MELT = 0;       // 融解境界。静的モデルではR = 1.0がこの点に一致するよう定義されている
 let model = 'static';
 let myChart = null;
 
+// R = δ / τ の中心計算。「計算式の定義」カードの静的（直線）／動的（双曲線）モデルの定義に対応する。
 function calcR(T) {
-  const delta = Math.max(0, T - T_ICE_BASE);
+  const delta = Math.max(0, T - T_ICE_BASE); // δ = T − T_ICE_BASE。0未満にはならないようクランプ（氷の基準より下のズレは扱わない）
   let tau, R;
   if (model === 'static') {
+    // 静的τモデル：固定定数（T_MELT − T_ICE_BASE = 20）。formula-boxの説明どおり
+    // 「結晶格子構造が保持できる総余裕」。
     tau = T_MELT - T_ICE_BASE;
     R = delta / tau;
   } else {
+    // 動的τモデル：τ = 0 − T（融解点までの残余距離＝動的余裕）。
+    // 0.01の下限は T → T_MELT でのゼロ除算を防ぐためのデモ用ガード値であり、
+    // 物理的根拠のある定数ではない。
     tau = Math.max(0.01, T_MELT - T);
     R = delta / tau;
   }
   return { delta, tau, R };
 }
 
+// Rに対するフラグ閾値（凡例およびmodelNoteの説明文に対応）：
+// R >= 1.0  -> RUPTURE_BOUNDARY / Fail-Closed（融解確定）
+// R >= 0.75 -> WARNING域（結晶構造の弛緩が始まる段階）
+// それ以外   -> SAFE（氷として安定）
 function getColor(R) {
   if (R >= 1.0) return '#E24B4A';
   if (R >= 0.75) return '#EF9F27';
   return '#185FA5';
 }
 
+// 状態判定：物理的な温度条件（T >= T_MELT）をRベースの警告閾値より先に評価するため、
+// 融解点以上の温度は R の値によらず常に「水」と判定される。
 function getPhase(T, R) {
   if (T >= T_MELT) return { label: '水（液体）', bg: '#9FE1CB', color: '#085041' };
   if (R >= 0.75) return { label: '臨界域', bg: '#FAC775', color: '#633806' };
   return { label: '氷（固体）', bg: '#B5D4F4', color: '#0C447C' };
 }
 
+// スライダー全域（-20℃..+5℃、#tempSliderと同じ0.5℃刻み）でRカーブを構築し、
+// 「R値グラフ」カードに使用する。
 function buildChartData() {
   const temps = [], rVals = [];
   for (let T = -20; T <= 5; T += 0.5) {
     const { R } = calcR(T);
-    const capped = Math.min(R, 3.0);
+    const capped = Math.min(R, 3.0); // 表示専用の上限（動的モデルはT → T_MELTで発散するため）。calcR自体や他箇所の数値表示には影響しない
     temps.push(T.toFixed(1) + '℃');
     rVals.push(parseFloat(capped.toFixed(3)));
   }
@@ -309,6 +325,7 @@ function initChart() {
           }
         },
         {
+          // R = 1.0 RUPTURE_BOUNDARY閾値の固定参照線（getColorのfail-closed境界と一致）
           label: 'RUPTURE_BOUNDARY (R=1.0)',
           data: new Array(temps.length).fill(1.0),
           borderColor: '#E24B4A',
@@ -318,6 +335,7 @@ function initChart() {
           fill: false
         },
         {
+          // R = 0.75 WARNING閾値の固定参照線（getColorの警告境界と一致）
           label: 'WARNING (R=0.75)',
           data: new Array(temps.length).fill(0.75),
           borderColor: '#EF9F27',
@@ -351,7 +369,7 @@ function initChart() {
           grid: { color: 'rgba(55,138,221,0.07)' }
         },
         y: {
-          min: 0, max: 2.5,
+          min: 0, max: 2.5, // デモ用チューニング値：グラフy軸の上限。updateAllのrPctバーも同じ2.5で除算している
           ticks: { stepSize: 0.25, font: { size: 11 }, color: '#7a9ab5' },
           grid: { color: 'rgba(55,138,221,0.07)' },
           title: {
@@ -374,7 +392,7 @@ function updateAll() {
 
   document.getElementById('mDelta').textContent = delta.toFixed(2);
   document.getElementById('mTau').textContent = tau.toFixed(model === 'static' ? 1 : 2);
-  document.getElementById('mR').textContent = R > 10 ? '>10' : R.toFixed(3);
+  document.getElementById('mR').textContent = R > 10 ? '>10' : R.toFixed(3); // 表示上限：動的モデルではT → T_MELTでRが際限なく増加しうるため、巨大な数値の代わりに">10"を表示
   document.getElementById('mR').style.color = color;
 
   const badge = document.getElementById('phaseBadge');
@@ -382,9 +400,9 @@ function updateAll() {
   badge.style.background = phase.bg;
   badge.style.color = phase.color;
 
-  const dPct = Math.min(100, (delta / 20) * 100);
-  const tPct = model === 'static' ? 100 : Math.min(100, (tau / 20) * 100);
-  const rPct = Math.min(100, (R / 2.5) * 100);
+  const dPct = Math.min(100, (delta / 20) * 100); // δバー：20はT_ICE_BASE..T_MELTの全区間幅
+  const tPct = model === 'static' ? 100 : Math.min(100, (tau / 20) * 100); // 静的モデルのτは常に固定値20のため、バーは常に100%表示
+  const rPct = Math.min(100, (R / 2.5) * 100); // Rバーはチャートy軸上限と同じ2.5を基準にスケーリング
 
   document.getElementById('barDelta').style.width = dPct + '%';
   document.getElementById('barDeltaNum').textContent = delta.toFixed(1);
@@ -392,14 +410,14 @@ function updateAll() {
   document.getElementById('barTauNum').textContent = tau.toFixed(1);
   document.getElementById('barR').style.width = rPct + '%';
   document.getElementById('barR').style.background = color;
-  document.getElementById('barRNum').textContent = R > 10 ? '>10' : R.toFixed(2);
+  document.getElementById('barRNum').textContent = R > 10 ? '>10' : R.toFixed(2); // 上のmRと同じ表示上限
 
   if (myChart) {
     const { temps, rVals } = buildChartData();
     myChart.data.datasets[0].data = rVals;
     myChart.data.labels = temps;
 
-    const idx = Math.round((T - (-20)) / 0.5);
+    const idx = Math.round((T - (-20)) / 0.5); // buildChartDataの-20..5（0.5刻み）配列中で現在Tに対応するインデックス。チャート上の現在点ハイライトに使用
     const radii = rVals.map((_, i) => i === idx ? 6 : 0);
     const ptColors = rVals.map((_, i) => i === idx ? color : 'transparent');
     myChart.data.datasets[0].pointRadius = radii;
@@ -408,6 +426,8 @@ function updateAll() {
   }
 }
 
+// calcRが使用する静的（直線τ）／動的（双曲線τ）モデルを切り替え、
+// formula-boxの文言（下の2つの<strong>ブロック。「計算式の定義」カードの静的／動的説明に対応）を書き換える。
 function setModel(m) {
   model = m;
   document.getElementById('btnStatic').classList.toggle('active', m === 'static');

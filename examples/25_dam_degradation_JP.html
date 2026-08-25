@@ -175,6 +175,8 @@
 </div>
 
 <script>
+// fill/delta/waterInitはシナリオボタン用の初期値。数値そのものの根拠は記載なし・デモ用チューニング値。
+// シナリオ３「水位60%・嵐発生」は水位を低く保ったままdeltaのみ大きくし、τ劣化の効果を際立たせる本デモの核心シナリオ（insight-boxの案内文が指すシナリオ）。
 const scenarios = [
   { fill: 0.3, delta: 1.0, label: '平常時' },
   { fill: 0.0, delta: 0.8, waterInit: 0.80, label: '水位80%・穏やか' },
@@ -363,6 +365,7 @@ function drawDegGraph(ctx, W, H, history, label, color, maxVal, minVal) {
   ctx.textAlign = 'left';
 
   // Danger threshold line (R graph: 1.0, tau graph: 0.5)
+  // Rグラフの1.0はupdateUIのABSTAIN境界(R>=1.0)と共通の定数。τグラフの0.5はtau-current表示の色分け閾値(tauCurrent<0.5で赤)と一致する固定値。
   const threshVal = label.includes('R') ? 1.0 : 0.5;
   if (threshVal >= minVal && threshVal <= maxVal) {
     const ty = PT + GH * (1 - (threshVal - minVal) / (maxVal - minVal));
@@ -439,6 +442,7 @@ function updateUI(R, delta) {
   const zn = document.getElementById('right-zone');
   const degRate = (1 - tauCurrent / TAU_INIT) * 100;
 
+  // R判定のゾーン閾値(1.0/0.7/0.4)は、drawDam内の壁色分岐(R>1.0, R>0.7)およびdrawDegGraphのRグラフ閾値線(1.0=LIMIT)と共通の定数。
   if (R >= 1.0) {
     rEl.style.color = '#ff3d00'; zn.textContent = 'ABSTAIN — 限界超過';
     rj.style.borderColor = '#ff3d00'; rj.style.color = '#ff3d00';
@@ -464,6 +468,9 @@ function updateUI(R, delta) {
   document.getElementById('deg-rate').textContent = degRate.toFixed(1) + '%';
   document.getElementById('deg-rate').style.color = degRate > 50 ? '#ff3d00' : degRate > 30 ? '#ff9100' : '#ffd740';
 
+  // 予測残余寿命: 累積負荷の平均積算速度(ratePerFrame)から、τが下限0.1に達するまでのフレーム数を逆算し、
+  // 3600フレーム=1「単位」として換算する。0.1(下限フロアと同値)・3600とも根拠不明・デモ用チューニング値。
+  // 表示ラベルは「年」ではなく「単位」としており、実時間換算ではないことを示している。
   // Remaining life estimate
   if (deltaAccum > 0.001) {
     const ratePerFrame = deltaAccum / frameCount;
@@ -496,19 +503,27 @@ function updateUI(R, delta) {
 }
 
 function loop() {
-  phase += 0.02;
+  phase += 0.02; // アニメーション位相の進行速度。固定値・根拠不明のデモ用チューニング値
   waterLevel += fillSpeed * 0.0002;
   if (waterLevel > 1.0) waterLevel = 1.0;
 
+  // ゆらぎδの元値: 3つの正弦波(周波数1.4/2.3/0.8, 重み0.5/0.3/0.2)を合成しdeltaStrengthで拡大。
+  // 周波数・重みとも根拠不明・デモ用チューニング値。
   const rawFluc = (Math.sin(phase * 1.4) * 0.5 + Math.sin(phase * 2.3) * 0.3 + Math.sin(phase * 0.8) * 0.2) * deltaStrength;
-  const delta = Math.abs(rawFluc) * 0.03;
+  const delta = Math.abs(rawFluc) * 0.03; // 0.03はδのスケール定数。根拠不明・デモ用チューニング値
 
+  // τ劣化式（本ファイルの中核ロジック）: δの積算が構造の実効厚みτを不可逆に縮小させる。
+  // deltaAccumは負荷の累積カウンタで、係数0.001*degSensitivity（degSensitivityはUIスライダー1〜20）で積算速度が決まる。
   // Tau degradation: δ accumulation erodes τ
   deltaAccum += delta * 0.001 * degSensitivity;
+  // tauCurrentはTAU_INIT(=1.0)からdeltaAccumに比例して減少し、下限0.1でフロアする。
+  // 係数0.0001*degSensitivity*10、および下限0.1はいずれも根拠不明・デモ用チューニング値。
   tauCurrent = Math.max(0.1, TAU_INIT - deltaAccum * 0.0001 * degSensitivity * 10);
 
+  // 判定・描画に使う実効τは、tauCurrentをそのまま使わず0.25倍+0.02のオフセットを掛けた値。
+  // 0.25・0.02とも根拠不明・デモ用チューニング値。
   const tau = tauCurrent * 0.25 + 0.02;
-  const R = delta / tau;
+  const R = delta / tau; // 右パネル見出し「R = δ/τ」の実装値。左パネル（従来管理）は水位のみを見る対比構造
 
   // History
   if (frameCount % 2 === 0) {

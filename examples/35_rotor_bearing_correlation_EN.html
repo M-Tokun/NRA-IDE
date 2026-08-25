@@ -179,10 +179,25 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 </div>
 
 <script>
+// FACTORS: 6-factor model, one object per physical signal (single-line literal for compactness).
+// weight   -> this factor's share of pressure().main (a weighted sum, not an explicit coupling matrix).
+// group    -> 'thermal' or 'supply'; pressure() averages R within each group to get p.thermal / p.supply.
+// shrink   -> which pressure term (main/thermal/supply) shrinks this factor's dynamic tau in dynamicTau().
+// coupledBy/coupledGain -> how much this factor's raw value is nudged by pressure() output each tick (updateValues()).
+// corr_base -> this factor's row of the baseline correlation matrix C(t0), consumed by calcCorr()/corrR().
+// opt/tau/amp values are demo tuning constants for this sample; not derived from a real bearing dataset.
+// Note: 'oilPressure' uses kPa here; the JP counterpart (35_..._JP.html) models the same physical signal in MPa — independent implementations, not a shared unit.
 const FACTORS = [{"id":"vibration","name":"Vibration","short":"VIB","unit":"mm/s","opt":2.5,"tau":3.0,"min":0,"max":14,"dir":"hi","amp":0.5,"weight":0.32,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.05,"fmt":"2","desc":"Leading indicator of imbalance or bearing damage.","corr_base":[1,0.55,0.35,0.25,0.3,0.2]},{"id":"bearingTemp","name":"Bearing Temp","short":"TEMP","unit":"℃","opt":58,"tau":22,"min":25,"max":115,"dir":"hi","amp":1.8,"weight":0.25,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.9,"desc":"Delayed heat response after vibration or lubrication stress.","corr_base":[0.55,1,0.5,0.3,0.4,0.25]},{"id":"current","name":"Motor Current","short":"AMP","unit":"A","opt":42,"tau":26,"min":10,"max":120,"dir":"hi","amp":2.2,"weight":0.2,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.6,"desc":"Load response from friction or mechanical resistance.","corr_base":[0.35,0.5,1,0.45,0.55,0.3]},{"id":"oilPressure","name":"Lubrication Pressure","short":"OIL","unit":"kPa","opt":420,"tau":95,"min":120,"max":650,"dir":"lo","amp":10,"weight":0.23,"group":"supply","shrink":"supply","coupledBy":"supply","coupledGain":-1.8,"fmt":"int","desc":"Low-side margin for lubrication loss.","corr_base":[0.25,0.3,0.45,1,0.5,0.42]},{"id":"acoustic","name":"Acoustic Noise","short":"NOISE","unit":"dB","opt":62,"tau":18,"min":40,"max":110,"dir":"hi","amp":2.4,"weight":0.18,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.4,"desc":"Secondary signature of vibration and contact instability.","corr_base":[0.3,0.4,0.55,0.5,1,0.48]},{"id":"rpmDev","name":"RPM Deviation","short":"RPM","unit":"%","opt":0,"tau":8,"min":-20,"max":25,"dir":"both","amp":1.0,"weight":0.16,"group":"supply","shrink":"main","coupledBy":"main","coupledGain":0.04,"desc":"Deviation from commanded rotation speed.","corr_base":[0.2,0.25,0.3,0.42,0.48,1]}];
+// SCENARIOS: per-scenario drift targets and boost constants (demo tuning values, no dataset behind them).
+// drift[id]      -> ramped (over ~90 ticks, see updateValues()) additive offset applied to that factor's optimum.
+// pressureBoost  -> added directly into pressure().main, i.e. raises R_coupling and shrinks every dynamic tau.
+// corrBoost      -> added into calcCorr()'s driftBase, i.e. raises the synthetic correlation drift directly.
 const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable operation within structural margin.","drift":{},"amp":{}},"imbalance":{"label":"Rotor imbalance","desc":"Vibration leads; noise and temperature follow.","drift":{"vibration":5,"acoustic":12,"bearingTemp":10,"current":8,"rpmDev":3},"pressureBoost":0.1,"corrBoost":0.08},"lubrication":{"label":"Lubrication loss","desc":"Oil pressure drops and bearing heat rises.","drift":{"oilPressure":-150,"bearingTemp":18,"vibration":3,"current":10,"acoustic":10},"pressureBoost":0.18,"corrBoost":0.1},"overload":{"label":"Overload","desc":"Current and heat rise with load.","drift":{"current":35,"bearingTemp":16,"vibration":2,"rpmDev":5},"pressureBoost":0.16,"corrBoost":0.08},"resonance":{"label":"Resonance","desc":"Vibration and acoustic noise couple strongly.","drift":{"vibration":7,"acoustic":24,"rpmDev":8,"bearingTemp":8},"pressureBoost":0.22,"corrBoost":0.12},"cascade":{"label":"Cascade","desc":"Multiple factors couple into a fail-closed path.","drift":{"vibration":8,"bearingTemp":32,"current":45,"oilPressure":-170,"acoustic":26,"rpmDev":11},"pressureBoost":0.35,"corrBoost":0.22}};
 const COLORS = ["#58d7ff","#ff7a1a","#ffd24a","#39ff85","#ff4fb0","#b58cff"];
-const HIST_LEN = 136;
+const HIST_LEN = 136; // time-series buffer length (ticks kept for the chart); demo tuning value.
+// tauC: normalizer for correlation-drift R in corrR() (R_corr = |C(t)-C(t0)| / tauC). Demo tuning value.
+// The JP counterpart (35_..._JP.html) uses a different constant (tauC=0.32, passed as a default function
+// parameter rather than a module-level constant) — independent tuning, not meant to match.
 const tauC = 0.24;
 let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
 let vals = {};
@@ -194,6 +209,9 @@ function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
 function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
 function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
+// Zone thresholds for this file: OK (R<0.4) -> WATCH (R>=0.4) -> WARN (R>=0.75) -> FAIL (R>=1.0).
+// This implementation keeps a WATCH tier at 0.4. The JP counterpart (35_..._JP.html) has no WATCH
+// tier and gates WARN at 0.70 instead of 0.75 — a separately tuned threshold set, not a shared spec.
 function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
 function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
 function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
@@ -240,12 +258,23 @@ function buildDots(){
   });
 }
 
+// pressure(): weighted-sum coupling model — this file's implementation of "R_coupling".
+// p.main    = Σ(factor.weight * rawR) + scenario.pressureBoost, clamped to [0,2.2].
+//             Used directly as one of the three terms in R_total's max() (see updateUI()),
+//             as an input to dynamicTau() below, and to nudge coupled factor values in updateValues().
+// p.thermal/p.supply = mean rawR within each 'group', each shrinking only that group's dynamic tau.
+// This is a weighted-sum design, not an explicit factor-to-factor matrix — contrast with the JP
+// counterpart (35_..._JP.html), which uses an explicit 6x6 COUPLING matrix gated at R>=0.70.
 function pressure(){
   let p=0, thermal=0, supply=0;
   FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
   const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
   return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
 }
+// dynamicTau(): shrinks a factor's tau under coupling pressure so its structural ratio R rises faster
+// as neighboring signals worsen. Each shrink term is capped (.58/.56/.50) and floored so tau never
+// drops below 35% of its base value (f.tau*.35) — both the caps and the .18/.20/.08 multipliers are
+// demo tuning constants with no external derivation.
 function dynamicTau(f){
   const p=pressure(); let shrink=1;
   if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
@@ -263,11 +292,6 @@ function updateValues(){
     let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
     vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
   });
-  // Optional derived VPD for greenhouse sample.
-  if(FACTORS.some(f=>f.id==='vpd') && vals.temp!==undefined && vals.humidity!==undefined){
-    const es = 0.6108 * Math.exp((17.27*vals.temp)/(vals.temp+237.3));
-    vals.vpd = clamp(es*(1-vals.humidity/100), 0, 4);
-  }
   const p=pressure();
   FACTORS.forEach(f=>{
     if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
@@ -275,15 +299,26 @@ function updateValues(){
     if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
   });
 }
+// calcCorr(): synthetic correlation matrix — NOT a measured statistical correlation.
+// Each off-diagonal cell drifts from its corrBase by driftBase (same 'group' pair) or driftBase*.55
+// (different-group pair), plus uniform random jitter (+/-0.017). driftBase itself scales with
+// coupling pressure (p.main*.14) and the active scenario's corrBoost.
+// Contrast: the JP counterpart (35_..._JP.html) computes a real Pearson correlation from R_eff
+// history (see pearson()/calcCorrMatrix() there) and blends it with its own baseline matrix.
 function calcCorr(){
   const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
   for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
   return C;
 }
+// corrR(): per-pair correlation-drift ratio R_corr = |C(t)-C(t0)| / tauC (tauC defined above).
+// Returns the worst pair's R plus a text list of pairs that individually crossed R_corr>=1.
 function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
 
 function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
 function updateUI(){
+  // R_total = max(R_corr, coupling pressure p.main, every per-factor R_i) — a 3-term max matching the
+  // footer/header formula "R_total=max(R_i,R_corr,R_coupling)". Fail-closed by construction: the worst
+  // single signal decides the system status, never a weighted average of all six factors.
   const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
   FACTORS.forEach((f,i)=>{
     const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();

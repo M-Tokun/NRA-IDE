@@ -174,6 +174,10 @@
 </div>
 
 <script>
+// fill/delta/waterInit are the per-scenario preset values. No basis is given for the specific figures;
+// basis unknown / demo tuning values.
+// Scenario 3 "Level 60%, Storm" keeps the water level low while raising only delta, making it the core
+// scenario this demo is built to highlight the effect of τ degradation (the scenario the insight-box text points to).
 const scenarios = [
   { fill: 0.3, delta: 1.0, label: 'Normal' },
   { fill: 0.0, delta: 0.8, waterInit: 0.80, label: 'Level 80%, Calm' },
@@ -350,6 +354,9 @@ function drawDegGraph(ctx, W, H, history, label, color, maxVal, minVal) {
   }
   ctx.textAlign = 'left';
 
+  // Danger threshold line (R graph: 1.0, tau graph: 0.5)
+  // The R graph's 1.0 is the same constant shared with updateUI's ABSTAIN boundary (R>=1.0). The tau graph's
+  // 0.5 matches the tau-current display's color threshold (red when tauCurrent < 0.5), a fixed value.
   const threshVal = label.includes('R') ? 1.0 : 0.5;
   if (threshVal >= minVal && threshVal <= maxVal) {
     const ty = PT + GH * (1 - (threshVal - minVal) / (maxVal - minVal));
@@ -422,6 +429,8 @@ function updateUI(R, delta) {
   const zn = document.getElementById('right-zone');
   const degRate = (1 - tauCurrent / TAU_INIT) * 100;
 
+  // The R zone thresholds (1.0/0.7/0.4) are the same constants shared with the wall-color branches in
+  // drawDam (R>1.0, R>0.7) and the R-graph threshold line in drawDegGraph (1.0 = LIMIT).
   if (R >= 1.0) {
     rEl.style.color = '#ff3d00'; zn.textContent = 'ABSTAIN — Limit Exceeded';
     rj.style.borderColor = '#ff3d00'; rj.style.color = '#ff3d00';
@@ -446,6 +455,10 @@ function updateUI(R, delta) {
   document.getElementById('deg-rate').textContent = degRate.toFixed(1) + '%';
   document.getElementById('deg-rate').style.color = degRate > 50 ? '#ff3d00' : degRate > 30 ? '#ff9100' : '#ffd740';
 
+  // Remaining-life estimate: back-calculates the number of frames until τ reaches the 0.1 floor from the
+  // average cumulative-load rate (ratePerFrame), then converts using 3600 frames = 1 "unit". Both the 0.1
+  // floor (matching the tauCurrent floor) and 3600 are basis unknown / demo tuning values.
+  // The display label reads "units", not "years", signaling this is not a real-time conversion.
   if (deltaAccum > 0.001) {
     const ratePerFrame = deltaAccum / frameCount;
     const framesLeft = (tauCurrent - 0.1) / (ratePerFrame * degSensitivity * 0.0001);
@@ -476,18 +489,27 @@ function updateUI(R, delta) {
 }
 
 function loop() {
-  phase += 0.02;
+  phase += 0.02; // Animation phase advance rate. Fixed; basis unknown / demo tuning value
   waterLevel += fillSpeed * 0.0002;
   if (waterLevel > 1.0) waterLevel = 1.0;
 
+  // Raw fluctuation δ source: combines three sine waves (frequencies 1.4/2.3/0.8, weights 0.5/0.3/0.2) then
+  // scales by deltaStrength. Both the frequencies and weights are basis unknown / demo tuning values.
   const rawFluc = (Math.sin(phase * 1.4) * 0.5 + Math.sin(phase * 2.3) * 0.3 + Math.sin(phase * 0.8) * 0.2) * deltaStrength;
-  const delta = Math.abs(rawFluc) * 0.03;
+  const delta = Math.abs(rawFluc) * 0.03; // 0.03 is δ's scale constant; basis unknown / demo tuning value
 
+  // τ degradation formula (the core logic of this file): the accumulation of δ irreversibly erodes the
+  // structure's effective thickness τ. deltaAccum is the cumulative load counter; the 0.001*degSensitivity
+  // factor (degSensitivity is the 1-20 UI slider) sets the accumulation rate.
   deltaAccum += delta * 0.001 * degSensitivity;
+  // tauCurrent decreases from TAU_INIT (=1.0) in proportion to deltaAccum, floored at 0.1.
+  // The 0.0001*degSensitivity*10 factor and the 0.1 floor are both basis unknown / demo tuning values.
   tauCurrent = Math.max(0.1, TAU_INIT - deltaAccum * 0.0001 * degSensitivity * 10);
 
+  // The effective τ used for judgment/drawing is not tauCurrent directly, but tauCurrent*0.25 + 0.02.
+  // Both 0.25 and 0.02 are basis unknown / demo tuning values.
   const tau = tauCurrent * 0.25 + 0.02;
-  const R = delta / tau;
+  const R = delta / tau; // Implements the right-panel heading "R = δ/τ"; the left panel (conventional management) watches water level only, as the point of contrast
 
   if (frameCount % 2 === 0) {
     tauHistory.push(tauCurrent);

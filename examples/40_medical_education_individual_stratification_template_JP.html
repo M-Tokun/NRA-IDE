@@ -480,12 +480,12 @@ function calcDelta(v, f){
 
 function profilePressure(person){
   let ageP = 0;
-  if(person.age >= 80) ageP = 0.44;
-  else if(person.age >= 70) ageP = 0.30;
-  else if(person.age >= 60) ageP = 0.18;
-  else if(person.age <= 15) ageP = 0.10;
+  if(person.age >= 80) ageP = 0.46;
+  else if(person.age >= 70) ageP = 0.32;
+  else if(person.age >= 60) ageP = 0.20;
+  else if(person.age <= 12) ageP = 0.12;
   const sc = SCENARIOS[scenario];
-  return clamp(ageP + person.frailty*0.45 + person.chronic*0.35 + (sc.profileBoost || 0), 0, 1.35);
+  return clamp(ageP + person.frailty*0.46 + person.chronic*0.35 + (sc.profileBoost || 0), 0, 1.4);
 }
 
 function makePatientState(person, i){

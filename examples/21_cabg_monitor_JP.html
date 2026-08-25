@@ -72,6 +72,10 @@ input[type=range]{flex:1;}
 
 <script>
 // 変数
+// 注意: P・Adh・Shearはスライダー（下のupdateAll参照）から取得されるが、
+// calcIDE()のR計算では一切参照されていない。R計算に使われるのはT・Flow（tau経由）と
+// GraftMGF・PI・DF（各delta項経由）のみ。Tensionは血管断面を描画するdrawVessel()で
+// 半径計算に使われるだけで、こちらもRには寄与しない。
 let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
 let GraftMGF=35, PI=2.8, DF=65;
 let PI_THRESH=5.0, MGF_THRESH=20, R_RUPTURE=1.0;
@@ -110,17 +114,26 @@ function safeSet(id, value) {
 }
 
 // 計算
+// 境界接近比の中核計算: R = (正規化偏差の合計) / tau（FORMULA.mdの一般形 R = δ/τ と同型）。
+// この式に使われるのはT・Flow・GraftMGF・PI・DFのみ。
 function calcIDE() {
+  // tau: 310は37℃をケルビン換算した値で、310/(T+273)は体温37℃ちょうどで1.0となり、
+  // Tが37℃からずれると増減する。Flow/200のスケーリング項はこのファイル内に臨床的根拠の
+  // 記載がなく、根拠不明・デモ用チューニング値として扱う。
   const tau = 1.0 * (310/(T+273)) * (1 + Flow/200);
-  const deltaMGF = Math.abs(GraftMGF - 35)/15;
-  const deltaPI = Math.max(0, PI - 2.8)/3;
-  const deltaDF = Math.max(0, 100 - DF)/30;
-  const R = (deltaMGF + deltaPI + deltaDF) / tau;
+  const deltaMGF = Math.abs(GraftMGF - 35)/15;   // 基準値35mL/minからの偏差を/15で正規化（根拠不明・デモ用チューニング値）
+  const deltaPI = Math.max(0, PI - 2.8)/3;        // 基準値2.8を超えた片側偏差を/3で正規化（根拠不明・デモ用チューニング値）
+  const deltaDF = Math.max(0, 100 - DF)/30;       // 100%からの片側不足分を/30で正規化（根拠不明・デモ用チューニング値）
+  const R = (deltaMGF + deltaPI + deltaDF) / tau; // R = 境界接近比。3つの正規化偏差を均等加重で合算しtauで除算
 
   let st = 'SAFE', col = '#88ffcc', msg = '';
   if (PI >= PI_THRESH || GraftMGF <= MGF_THRESH || R >= R_RUPTURE) {
+    // FAILフラグ: PI・MGF・RはOR条件で結合されており、いずれか1つでも自身の閾値を
+    // 超えればRUPTURE_BOUNDARYへ遷移する（他の2つとは独立）。
     st = 'RUPTURE_BOUNDARY'; col = '#ff4060'; msg = `FAIL — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)} R:${R.toFixed(3)}`;
   } else if (PI >= PI_THRESH*0.8 || GraftMGF <= MGF_THRESH*1.2) {
+    // WARNINGフラグ: PI閾値の80%／MGF閾値の120%で予告アラーム（FAILまでの余裕20%）。
+    // 0.8・1.2の倍率はこのファイル内に根拠の記載がなく、デモ用チューニング値。
     st = 'WARNING'; col = '#ffcc00'; msg = `WARN — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)}`;
   }
 
@@ -172,14 +185,14 @@ function drawTTFMWave() {
   }
   fctx.stroke();
 
-  const mgfY = 80 + (MGF_THRESH - 35) * 1.8;
+  const mgfY = 80 + (MGF_THRESH - 35) * 1.8; // 表示用のy座標変換のみ。1.8は画面スケール定数であり臨床的意味はない
   fctx.setLineDash([8,4]); fctx.strokeStyle = '#ff6688'; fctx.lineWidth = 2;
   fctx.beginPath(); fctx.moveTo(0,mgfY); fctx.lineTo(fc.width,mgfY); fctx.stroke();
   fctx.setLineDash([]);
   fctx.fillStyle = '#ff6688'; fctx.font = '11px monospace';
   fctx.fillText(`MGF下限 = ${MGF_THRESH}`, fc.width-160, mgfY-8);
 
-  const piY = 80 - PI_THRESH * 4.5;
+  const piY = 80 - PI_THRESH * 4.5; // 表示用のy座標変換のみ。4.5は画面スケール定数であり臨床的意味はない
   fctx.setLineDash([4,4]); fctx.strokeStyle = '#ffaa44';
   fctx.beginPath(); fctx.moveTo(0,piY); fctx.lineTo(fc.width,piY); fctx.stroke();
   fctx.setLineDash([]);
@@ -204,9 +217,11 @@ function updateAll() {
   MGF_THRESH = parseFloat(document.getElementById('mgfThresh')?.value || 20);
   R_RUPTURE = parseFloat(document.getElementById('rFail')?.value || 1.0);
 
-  GraftMGF = Math.max(10, Math.min(80, GraftMGF + (Math.random()-0.5)*0.6));
-  PI = Math.max(1, Math.min(7, PI + (Math.random()-0.5)*0.08));
-  DF = Math.max(30, Math.min(90, DF + (Math.random()-0.5)*0.4));
+  // 疑似ランダムウォーク（Math.random()-0.5を毎ティック加算）。下記の範囲にクランプ。
+  // 物理モデルに基づくものではなく、ライブデモのアニメーション用。
+  GraftMGF = Math.max(10, Math.min(80, GraftMGF + (Math.random()-0.5)*0.6));  // [10,80] mL/minにクランプ
+  PI = Math.max(1, Math.min(7, PI + (Math.random()-0.5)*0.08));               // [1,7]にクランプ
+  DF = Math.max(30, Math.min(90, DF + (Math.random()-0.5)*0.4));              // [30,90]%にクランプ
 
   safeSet('piThreshVal', PI_THRESH.toFixed(1));
   safeSet('mgfThreshVal', MGF_THRESH);

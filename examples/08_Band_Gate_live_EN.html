@@ -255,38 +255,91 @@ footer a { color: var(--lower); text-decoration: none; }
 </div>
 
 <script>
-/* Scenario definitions — 4 physical domains.
-   Each injects a realistic upper spike and lower drop on a repeating cycle. */
+/* ─────────────────────────────────────────────
+   Scenario definitions
+   ───────────────────────────────────────────── */
 const SCENARIOS = {
   elec:  { label:'Voltage (V)',          unit:'V',   th_default:70, tl_default:30, color:'#f0c040',
+    // Spike pattern: overvoltage (t=80), leakage drop (t=200)
     getValue(t){let v=50+Math.sin(t*.04)*4+Math.random()*2-1;const p=t%300;if(p>=80&&p<=110)v+=28*Math.sin((p-80)/30*Math.PI);if(p>=200&&p<=260)v-=26*Math.sin((p-200)/60*Math.PI);return v;}},
   temp:  { label:'Temperature (°C)',     unit:'°C',  th_default:38, tl_default:5,  color:'#ff6b35',
+    // Spike pattern: heat wave (t=60), sudden cooling (t=220)
     getValue(t){let v=22+Math.sin(t*.03)*5+Math.random()*1.5-.75;const p=t%320;if(p>=60&&p<=100)v+=20*Math.sin((p-60)/40*Math.PI);if(p>=220&&p<=270)v-=20*Math.sin((p-220)/50*Math.PI);return v;}},
   water: { label:'Water Pressure (kPa)', unit:'kPa', th_default:72, tl_default:25, color:'#00c9ff',
+    // Spike pattern: pressure surge (t=70), flow loss (t=190)
     getValue(t){let v=50+Math.sin(t*.05)*6+Math.random()*2-1;const p=t%280;if(p>=70&&p<=105)v+=30*Math.sin((p-70)/35*Math.PI);if(p>=190&&p<=240)v-=28*Math.sin((p-190)/50*Math.PI);return v;}},
   pulse: { label:'Heart Rate (bpm)',     unit:'bpm', th_default:110,tl_default:45, color:'#ff3d5a',
+    // Spike pattern: tachycardia (t=80), bradycardia (t=230)
     getValue(t){let v=70+Math.sin(t*.06)*8+Math.random()*3-1.5;const p=t%350;if(p>=80&&p<=120)v+=50*Math.sin((p-80)/40*Math.PI);if(p>=230&&p<=290)v-=35*Math.sin((p-230)/60*Math.PI);return v;}},
 };
 let scenario=SCENARIOS.elec;
 const HISTORY=200;
-let st={t:0,playing:true,ema_u:0,ema_l:0,holdUntil:0,silCount:0,lastDir:'',hist:[],lastFrameTime:0};
+let st={
+  t:0, playing:true,
+  ema_u:0, ema_l:0,
+  holdUntil:0,
+  silCount:0,
+  lastDir:'',
+  hist:[],
+  lastFrameTime:0
+};
 
-function gP(){return{th:+document.getElementById('sl-th').value,tl:+document.getElementById('sl-tl').value,au:+document.getElementById('sl-au').value,al:+document.getElementById('sl-al').value,amu:+document.getElementById('sl-amu').value,aml:+document.getElementById('sl-aml').value,spd:+document.getElementById('sl-spd').value|0,hold:+document.getElementById('sl-hold').value|0};}
+function gP(){
+  return{
+    th:+document.getElementById('sl-th').value,
+    tl:+document.getElementById('sl-tl').value,
+    au:+document.getElementById('sl-au').value,
+    al:+document.getElementById('sl-al').value,
+    amu:+document.getElementById('sl-amu').value,
+    aml:+document.getElementById('sl-aml').value,
+    spd:+document.getElementById('sl-spd').value|0,
+    hold:+document.getElementById('sl-hold').value|0
+  };
+}
 
 function stepSim(p){
-  st.t++; const v=scenario.getValue(st.t), nowMs=st.t*40, half=(p.th-p.tl)/2;
-  const d_u=Math.max(0,v-p.th), d_l=Math.max(0,p.tl-v);
-  st.ema_u=p.au*d_u+(1-p.au)*st.ema_u; st.ema_l=p.al*d_l+(1-p.al)*st.ema_l;
-  const tau_u=half*Math.min(1+st.ema_u/half,p.amu), tau_l=half*Math.max(1-st.ema_l/half,1/p.aml);
-  const R_u=d_u>0?d_u/tau_u:0, R_l=d_l>0?d_l/tau_l:0, R=Math.max(R_u,R_l);
-  const held=nowMs<st.holdUntil; let silence=held, dir=held?st.lastDir:'';
-  if(!held&&R>=1.0){st.holdUntil=nowMs+p.hold; silence=true; dir=R_u>=R_l?'upper':'lower'; st.lastDir=dir; st.silCount++;}
+  st.t++;
+  const v=scenario.getValue(st.t),
+        nowMs=st.t*40,
+        half=(p.th-p.tl)/2;
+
+  // Upper δ / lower δ
+  const d_u=Math.max(0,v-p.th),
+        d_l=Math.max(0,p.tl-v);
+
+  // Upper-side EMA (accumulates → τ grows); lower-side EMA (accumulates → τ shrinks)
+  st.ema_u=p.au*d_u+(1-p.au)*st.ema_u;
+  st.ema_l=p.al*d_l+(1-p.al)*st.ema_l;
+
+  const tau_u=half*Math.min(1+st.ema_u/half,p.amu),
+        tau_l=half*Math.max(1-st.ema_l/half,1/p.aml);
+
+  const R_u=d_u>0?d_u/tau_u:0,
+        R_l=d_l>0?d_l/tau_l:0,
+        R=Math.max(R_u,R_l);
+
+  // HOLD check
+  const held=nowMs<st.holdUntil;
+  let silence=held,
+      dir=held?st.lastDir:'';
+
+  if(!held&&R>=1.0){
+    st.holdUntil=nowMs+p.hold;
+    silence=true;
+    dir=R_u>=R_l?'upper':'lower';
+    st.lastDir=dir;
+    st.silCount++;
+  }
+
+  // history (also carries the dynamic band values, used for drawing)
   if(st.hist.length>=HISTORY) st.hist.shift();
   st.hist.push({v,upper_band:p.th+(tau_u-half),lower_band:p.tl-(half-tau_l),R,silence,dir});
   return{v,R,silence,dir};
 }
 
-/* Wave canvas */
+/* ─────────────────────────────────────────────
+   Wave canvas
+   ───────────────────────────────────────────── */
 const wc=document.getElementById('waveCanvas'),wctx=wc.getContext('2d');
 function resizeWave(){wc.width=wc.parentElement.clientWidth;}
 window.addEventListener('resize',resizeWave); resizeWave();
@@ -295,83 +348,242 @@ function drawWave(p){
   const W=wc.width,H=220,pad={t:16,r:46,b:28,l:46},pW=W-pad.l-pad.r,pH=H-pad.t-pad.b;
   wctx.clearRect(0,0,W,H);
   const h=st.hist,len=h.length; if(len<2)return;
-  const minV=Math.min(...h.map(x=>x.v),p.tl*.7),maxV=Math.max(...h.map(x=>x.v),p.th*1.3),rng=maxV-minV||1;
-  const xp=i=>pad.l+(i/(HISTORY-1))*pW, yp=v=>pad.t+pH-((v-minV)/rng)*pH;
+  const minV=Math.min(...h.map(x=>x.v),p.tl*.7),
+        maxV=Math.max(...h.map(x=>x.v),p.th*1.3),
+        rng=maxV-minV||1;
+  const xp=i=>pad.l+(i/(HISTORY-1))*pW,
+        yp=v=>pad.t+pH-((v-minV)/rng)*pH;
+
   /* grid */
-  wctx.strokeStyle='rgba(22,32,48,.8)'; wctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pad.t+(pH/4)*i;wctx.beginPath();wctx.moveTo(pad.l,y);wctx.lineTo(pad.l+pW,y);wctx.stroke();wctx.fillStyle='rgba(122,176,204,.7)';wctx.font='9px Orbitron';wctx.textAlign='right';wctx.fillText(((maxV-(rng/4)*i)).toFixed(1),pad.l-4,y+3);}
-  /* silence fill */
-  for(let i=1;i<len;i++){if(h[i].silence){wctx.fillStyle=h[i].dir==='upper'?'rgba(255,107,53,.08)':'rgba(0,201,255,.07)';wctx.fillRect(xp(i-1),pad.t,xp(i)-xp(i-1)+1,pH);}}
-  /* bands */
+  wctx.strokeStyle='rgba(22,32,48,.8)';
+  wctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+(pH/4)*i;
+    wctx.beginPath();
+    wctx.moveTo(pad.l,y);
+    wctx.lineTo(pad.l+pW,y);
+    wctx.stroke();
+    wctx.fillStyle='rgba(122,176,204,.7)';
+    wctx.font='9px Orbitron';
+    wctx.textAlign='right';
+    wctx.fillText(((maxV-(rng/4)*i)).toFixed(1),pad.l-4,y+3);
+  }
+
+  /* SILENCE fill */
+  for(let i=1;i<len;i++){
+    if(h[i].silence){
+      wctx.fillStyle=h[i].dir==='upper'?'rgba(255,107,53,.08)':'rgba(0,201,255,.07)';
+      wctx.fillRect(xp(i-1),pad.t,xp(i)-xp(i-1)+1,pH);
+    }
+  }
+
+  /* dynamic bands (upper τ / lower τ) */
   wctx.lineWidth=1; wctx.setLineDash([4,4]);
-  wctx.strokeStyle='rgba(255,107,53,.5)'; wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.upper_band)):wctx.lineTo(xp(i),yp(d.upper_band));}); wctx.stroke();
-  wctx.strokeStyle='rgba(0,201,255,.5)';  wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.lower_band)):wctx.lineTo(xp(i),yp(d.lower_band));}); wctx.stroke();
+  wctx.strokeStyle='rgba(255,107,53,.5)';
+  wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.upper_band)):wctx.lineTo(xp(i),yp(d.upper_band));}); wctx.stroke();
+  wctx.strokeStyle='rgba(0,201,255,.5)';
+  wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.lower_band)):wctx.lineTo(xp(i),yp(d.lower_band));}); wctx.stroke();
   wctx.setLineDash([]);
-  /* value glow */
-  wctx.strokeStyle='rgba(232,240,248,.12)'; wctx.lineWidth=6; wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.v)):wctx.lineTo(xp(i),yp(d.v));}); wctx.stroke();
-  wctx.strokeStyle='#e8f0f8'; wctx.lineWidth=1.8; wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.v)):wctx.lineTo(xp(i),yp(d.v));}); wctx.stroke();
-  const last=h[len-1], dc=last.silence?(last.dir==='upper'?'#ff6b35':'#00c9ff'):'#e8f0f8';
+
+  /* observed value — glow, then crisp line */
+  wctx.strokeStyle='rgba(232,240,248,.12)'; wctx.lineWidth=6;
+  wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.v)):wctx.lineTo(xp(i),yp(d.v));}); wctx.stroke();
+  wctx.strokeStyle='#e8f0f8'; wctx.lineWidth=1.8;
+  wctx.beginPath(); h.forEach((d,i)=>{i===0?wctx.moveTo(xp(i),yp(d.v)):wctx.lineTo(xp(i),yp(d.v));}); wctx.stroke();
+
+  /* latest point */
+  const last=h[len-1],
+        dc=last.silence?(last.dir==='upper'?'#ff6b35':'#00c9ff'):'#e8f0f8';
   wctx.fillStyle=dc; wctx.shadowColor=dc; wctx.shadowBlur=10;
   wctx.beginPath(); wctx.arc(xp(len-1),yp(last.v),4,0,Math.PI*2); wctx.fill(); wctx.shadowBlur=0;
-  wctx.fillStyle='rgba(122,176,204,.7)'; wctx.font='9px Orbitron'; wctx.textAlign='left'; wctx.fillText(scenario.unit,pad.l+pW+4,pad.t+pH/2);
+
+  /* unit label */
+  wctx.fillStyle='rgba(122,176,204,.7)'; wctx.font='9px Orbitron'; wctx.textAlign='left';
+  wctx.fillText(scenario.unit,pad.l+pW+4,pad.t+pH/2);
 }
 
-/* Damper canvas */
+/* ─────────────────────────────────────────────
+   Damper canvas animation
+   ───────────────────────────────────────────── */
 const dc=document.getElementById('damperCanvas'),dctx=dc.getContext('2d');
 dc.width=220; dc.height=260;
+
 function drawDamper(R,dir){
-  const W=220,H=260,cx=W/2,midY=H/2; dctx.clearRect(0,0,W,H); dctx.fillStyle='#040608'; dctx.fillRect(0,0,W,H);
-  dctx.fillStyle='rgba(122,176,204,.6)'; dctx.font='8px Orbitron'; dctx.textAlign='center'; dctx.fillText('ASYMMETRIC DAMPER',cx,16);
-  const isSil=R>=1.0,baseH=70,uc=Math.min(st.ema_u*20,baseH*.6),lc=Math.min(st.ema_l*20,baseH*.6);
-  const uy=midY-baseH+uc,ly=midY+baseH-lc,top=30,bot=H-30,cw=18,nc=7;
-  const spr=(fy,ty,col,glow)=>{const sh=ty-fy;dctx.strokeStyle=col;dctx.lineWidth=1.5;dctx.shadowColor=col;dctx.shadowBlur=glow?8:0;dctx.beginPath();dctx.moveTo(cx,fy);for(let i=1;i<=nc*2;i++){const sy=fy+(sh/(nc*2))*i;dctx.lineTo(cx+(i%2===0?cw:-cw),sy);}dctx.lineTo(cx,ty);dctx.stroke();dctx.shadowBlur=0;};
+  const W=220,H=260,cx=W/2,midY=H/2;
+  dctx.clearRect(0,0,W,H);
+  dctx.fillStyle='#040608'; dctx.fillRect(0,0,W,H);
+
+  dctx.fillStyle='rgba(122,176,204,.6)'; dctx.font='8px Orbitron'; dctx.textAlign='center';
+  dctx.fillText('ASYMMETRIC DAMPER',cx,16);
+
+  const isSil=R>=1.0,baseH=70,
+        uc=Math.min(st.ema_u*20,baseH*.6),
+        lc=Math.min(st.ema_l*20,baseH*.6);
+  const uy=midY-baseH+uc,
+        ly=midY+baseH-lc,
+        top=30,bot=H-30,cw=18,nc=7;
+
+  // shared spring-drawing helper (top and bottom springs)
+  const spr=(fy,ty,col,glow)=>{
+    const sh=ty-fy;
+    dctx.strokeStyle=col; dctx.lineWidth=1.5;
+    dctx.shadowColor=col; dctx.shadowBlur=glow?8:0;
+    dctx.beginPath();
+    dctx.moveTo(cx,fy);
+    for(let i=1;i<=nc*2;i++){
+      const sy=fy+(sh/(nc*2))*i;
+      dctx.lineTo(cx+(i%2===0?cw:-cw),sy);
+    }
+    dctx.lineTo(cx,ty);
+    dctx.stroke();
+    dctx.shadowBlur=0;
+  };
   spr(top,uy,isSil&&dir==='upper'?'rgba(255,107,53,1)':'rgba(255,107,53,.5)',isSil&&dir==='upper');
   spr(ly,bot,isSil&&dir==='lower'?'rgba(0,201,255,1)':'rgba(0,201,255,.5)',isSil&&dir==='lower');
+
+  // center piston
   const pc=isSil?(dir==='upper'?'rgba(255,107,53,.9)':'rgba(0,201,255,.9)'):'rgba(180,200,220,.5)';
   dctx.fillStyle=pc; dctx.shadowColor=pc; dctx.shadowBlur=isSil?12:0;
-  dctx.fillRect(cx-20,uy,40,ly-uy); dctx.strokeStyle=isSil?pc:'rgba(100,140,170,.4)'; dctx.lineWidth=1; dctx.strokeRect(cx-20,uy,40,ly-uy); dctx.shadowBlur=0;
-  dctx.strokeStyle='rgba(48,72,88,.5)'; dctx.lineWidth=1; dctx.setLineDash([3,4]); dctx.beginPath(); dctx.moveTo(cx-30,midY); dctx.lineTo(cx+30,midY); dctx.stroke(); dctx.setLineDash([]);
+  dctx.fillRect(cx-20,uy,40,ly-uy);
+  dctx.strokeStyle=isSil?pc:'rgba(100,140,170,.4)'; dctx.lineWidth=1;
+  dctx.strokeRect(cx-20,uy,40,ly-uy);
+  dctx.shadowBlur=0;
+
+  // center line
+  dctx.strokeStyle='rgba(48,72,88,.5)'; dctx.lineWidth=1; dctx.setLineDash([3,4]);
+  dctx.beginPath(); dctx.moveTo(cx-30,midY); dctx.lineTo(cx+30,midY); dctx.stroke();
+  dctx.setLineDash([]);
+
+  // R readout
   const rc=isSil?(dir==='upper'?'#ff6b35':'#00c9ff'):R>.6?'#f0c040':'#00e5a0';
-  dctx.fillStyle=rc; dctx.font='bold 15px Orbitron'; dctx.textAlign='center'; dctx.fillText('R = '+R.toFixed(3),cx,H-10);
+  dctx.fillStyle=rc; dctx.font='bold 15px Orbitron'; dctx.textAlign='center';
+  dctx.fillText('R = '+R.toFixed(3),cx,H-10);
+
+  // upper/lower labels
   dctx.fillStyle='rgba(255,107,53,.6)'; dctx.font='8px Orbitron'; dctx.fillText('UPPER ↑',cx,top+10);
   dctx.fillStyle='rgba(0,201,255,.6)'; dctx.fillText('LOWER ↓',cx,bot-4);
 }
 
-/* UI */
+/* ─────────────────────────────────────────────
+   UI update
+   ───────────────────────────────────────────── */
 let flashTimer=null,lastLogDec='PASS';
+
 function updateUI(v,R,silence,dir,p){
+  const valPct=Math.max(0,Math.min((v-p.tl*0.7)/((p.th*1.3-p.tl*0.7)),1));
   const col=silence?(dir==='upper'?'var(--upper)':'var(--lower)'):R>.7?'var(--warn)':'var(--safe)';
-  const dp=1; document.getElementById('mv-val').textContent=v.toFixed(dp)+' '+scenario.unit; document.getElementById('mv-val').style.color=col;
-  document.getElementById('mv-r').textContent=R.toFixed(4); document.getElementById('mv-r').style.color=col;
-  document.getElementById('mf-r').style.width=Math.min(R/1.5,1)*100+'%'; document.getElementById('mf-r').style.background=col;
-  document.getElementById('mv-dec').textContent=silence?'SILENCE':'PASS'; document.getElementById('mv-dec').style.color=silence?(dir==='upper'?'var(--upper)':'var(--lower)'):'var(--safe)';
-  document.getElementById('mf-dec').style.width=silence?'100%':'0%'; document.getElementById('mf-dec').style.background=dir==='upper'?'var(--upper)':'var(--lower)';
-  document.getElementById('mv-cnt').textContent=st.silCount; document.getElementById('mf-cnt').style.width=Math.min(st.silCount/30,1)*100+'%';
+  const dp=1;
+  document.getElementById('mv-val').textContent=v.toFixed(dp)+' '+scenario.unit;
+  document.getElementById('mv-val').style.color=col;
+  document.getElementById('mf-val').style.width=(valPct*100)+'%';
+  document.getElementById('mf-val').style.background=col;
+
+  document.getElementById('mv-r').textContent=R.toFixed(4);
+  document.getElementById('mv-r').style.color=col;
+  document.getElementById('mf-r').style.width=Math.min(R/1.5,1)*100+'%';
+  document.getElementById('mf-r').style.background=col;
+
+  document.getElementById('mv-dec').textContent=silence?'SILENCE':'PASS';
+  document.getElementById('mv-dec').style.color=silence?(dir==='upper'?'var(--upper)':'var(--lower)'):'var(--safe)';
+  document.getElementById('mf-dec').style.width=silence?'100%':'0%';
+  document.getElementById('mf-dec').style.background=dir==='upper'?'var(--upper)':'var(--lower)';
+
+  document.getElementById('mv-cnt').textContent=st.silCount;
+  document.getElementById('mf-cnt').style.width=Math.min(st.silCount/30,1)*100+'%';
+
+  // flash overlay + stamp on SILENCE
   const ov=document.getElementById('flashOverlay'),fs=document.getElementById('flashStamp');
-  if(silence){ov.className=dir; fs.textContent=dir==='upper'?'— UPPER SILENCE —':'— LOWER SILENCE —'; fs.style.color=dir==='upper'?'var(--upper)':'var(--lower)'; fs.classList.add('active'); clearTimeout(flashTimer); flashTimer=setTimeout(()=>{ov.className='';fs.classList.remove('active');},600);}
+  if(silence){
+    ov.className=dir;
+    fs.textContent=dir==='upper'?'— UPPER SILENCE —':'— LOWER SILENCE —';
+    fs.style.color=dir==='upper'?'var(--upper)':'var(--lower)';
+    fs.classList.add('active');
+    clearTimeout(flashTimer);
+    flashTimer=setTimeout(()=>{ov.className='';fs.classList.remove('active');},600);
+  }
+
+  // event log
   if(silence&&lastLogDec!=='SILENCE') addLog(dir==='upper'?`UPPER SILENCE  R=${R.toFixed(3)}`:`LOWER SILENCE  R=${R.toFixed(3)}`,dir);
   else if(!silence&&lastLogDec==='SILENCE') addLog('HOLD end → PASS','safe');
   else if(R>=.65&&R<1&&lastLogDec!=='warn') addLog(`WARN R=${R.toFixed(3)} approaching threshold`,'warn');
   lastLogDec=silence?'SILENCE':R>=.65?'warn':'PASS';
 }
-function addLog(msg,cls){const a=document.getElementById('logArea'),el=document.createElement('div');el.className='le '+cls;el.textContent=`[t=${String(st.t).padStart(5,'0')}] ${msg}`;a.appendChild(el);a.scrollTop=a.scrollHeight;while(a.children.length>80)a.removeChild(a.firstChild);}
 
-/* Main loop */
+function addLog(msg,cls){
+  const a=document.getElementById('logArea'),el=document.createElement('div');
+  el.className='le '+cls;
+  el.textContent=`[t=${String(st.t).padStart(5,'0')}] ${msg}`;
+  a.appendChild(el);
+  a.scrollTop=a.scrollHeight;
+  while(a.children.length>80) a.removeChild(a.firstChild);
+}
+
+/* ─────────────────────────────────────────────
+   Main loop
+   ───────────────────────────────────────────── */
 function tick(){
   if(!st.playing){requestAnimationFrame(tick);return;}
   const now=performance.now(),p=gP(),interval=Math.max(16,40-p.spd*7);
   if(now-st.lastFrameTime<interval){requestAnimationFrame(tick);return;}
   st.lastFrameTime=now;
-  let res; for(let s=0;s<p.spd;s++) res=stepSim(p);
-  drawWave(p); drawDamper(res.R,res.dir); updateUI(res.v,res.R,res.silence,res.dir,p);
+
+  let res;
+  for(let s=0;s<p.spd;s++) res=stepSim(p);
+
+  drawWave(p);
+  drawDamper(res.R,res.dir);
+  updateUI(res.v,res.R,res.silence,res.dir,p);
   requestAnimationFrame(tick);
 }
 
-function updateLabels(){const p=gP();document.getElementById('v-th').textContent=p.th.toFixed(0)+scenario.unit;document.getElementById('v-tl').textContent=p.tl.toFixed(0)+scenario.unit;document.getElementById('v-au').textContent=p.au.toFixed(2);document.getElementById('v-al').textContent=p.al.toFixed(2);document.getElementById('v-amu').textContent=p.amu.toFixed(1);document.getElementById('v-aml').textContent=p.aml.toFixed(1);document.getElementById('v-spd').textContent=p.spd+'×';document.getElementById('v-hold').textContent=p.hold;}
+/* ─────────────────────────────────────────────
+   Sliders / controls
+   ───────────────────────────────────────────── */
+function updateLabels(){
+  const p=gP();
+  document.getElementById('v-th').textContent=p.th.toFixed(0)+scenario.unit;
+  document.getElementById('v-tl').textContent=p.tl.toFixed(0)+scenario.unit;
+  document.getElementById('v-au').textContent=p.au.toFixed(2);
+  document.getElementById('v-al').textContent=p.al.toFixed(2);
+  document.getElementById('v-amu').textContent=p.amu.toFixed(1);
+  document.getElementById('v-aml').textContent=p.aml.toFixed(1);
+  document.getElementById('v-spd').textContent=p.spd+'×';
+  document.getElementById('v-hold').textContent=p.hold;
+}
 ['sl-th','sl-tl','sl-au','sl-al','sl-amu','sl-aml','sl-spd','sl-hold'].forEach(id=>document.getElementById(id).addEventListener('input',updateLabels));
-function setScenario(k){scenario=SCENARIOS[k];document.getElementById('sl-th').value=scenario.th_default;document.getElementById('sl-tl').value=scenario.tl_default;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+k).classList.add('active');resetSim();updateLabels();}
-function togglePlay(){st.playing=!st.playing;const btn=document.getElementById('btnPlay');btn.textContent=st.playing?'⏸ PAUSE':'▶ PLAY';btn.classList.toggle('play',st.playing);btn.classList.toggle('paused',!st.playing);}
-function resetSim(){st.t=0;st.ema_u=0;st.ema_l=0;st.holdUntil=0;st.silCount=0;st.hist=[];st.lastDir='';lastLogDec='PASS';document.getElementById('logArea').innerHTML='';document.getElementById('flashOverlay').className='';document.getElementById('flashStamp').classList.remove('active');addLog('Simulation started — '+scenario.label,'safe');}
+
+function setScenario(k){
+  scenario=SCENARIOS[k];
+  document.getElementById('sl-th').value=scenario.th_default;
+  document.getElementById('sl-tl').value=scenario.tl_default;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+k).classList.add('active');
+  resetSim();
+  updateLabels();
+}
+
+function togglePlay(){
+  st.playing=!st.playing;
+  const btn=document.getElementById('btnPlay');
+  btn.textContent=st.playing?'⏸ PAUSE':'▶ PLAY';
+  btn.classList.toggle('play',st.playing);
+  btn.classList.toggle('paused',!st.playing);
+}
+
+function resetSim(){
+  st.t=0; st.ema_u=0; st.ema_l=0;
+  st.holdUntil=0; st.silCount=0;
+  st.hist=[]; st.lastDir='';
+  lastLogDec='PASS';
+  document.getElementById('logArea').innerHTML='';
+  document.getElementById('flashOverlay').className='';
+  document.getElementById('flashStamp').classList.remove('active');
+  addLog('Simulation started — '+scenario.label,'safe');
+}
+
+/* ─────────────────────────────────────────────
+   Startup
+   ───────────────────────────────────────────── */
 window.addEventListener('resize',()=>{wc.width=wc.parentElement.clientWidth;});
 updateLabels(); resetSim(); requestAnimationFrame(tick);
 </script>

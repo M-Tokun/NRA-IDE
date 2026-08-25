@@ -336,6 +336,11 @@ select{
 //   "lo"   = 下限側のみ危険
 //   "band" = 基準から上下どちらも危険
 // ────────────────────────────────────────────────
+// FACTORS: 6要素モデル。tauHi/tauLoを個別に持ち、direction='band'（rpmのみ）では
+// signed(=value-opt)の符号でどちらのtauを使うか切り替える（calcRaw()参照）。
+// 'lube'（潤滑圧）はこの実装ではMPa単位。EN版（35_..._EN.html）の同一物理量'oilPressure'は
+// kPa単位・別のopt/tau値を持つ独立実装であり、単位・数値をそろえる意図はない。
+// opt/tauHi/tauLo等はデモ用チューニング値であり、外部データセットに基づく値ではない。
 const FACTORS = [
   {
     id:'vib', name:'振動', en:'VIB', unit:'mm/s', color:'#00e5ff',
@@ -371,6 +376,10 @@ const FACTORS = [
 
 // coupling[target][source]
 // sourceのRが0.70を超えると、targetのτを縮める。
+// 0.70はgetZone()のWARN閾値と同じ値（このファイル内で意図的に共通化）。
+// 行列は非対称（例: vib→noiseの重み0.55 と noise→vibの重み0.25は異なる値）。
+// EN版（35_..._EN.html）は明示的な行列を持たず、pressure()による重み付き合算（weighted-sum）で
+// 結合を表現する別設計であり、この行列と対応関係を持たせる意図はない。
 const COUPLING = [
   // from: vib temp curr lube noise rpm
   [0.00,0.10,0.05,0.70,0.25,0.42], // target vib
@@ -383,6 +392,8 @@ const COUPLING = [
 
 // 基準相関。運転が正常なときの設備プロファイル。
 // sampleでは合成値。実運用では設備ごとに学習ではなく「基準線として登録」する。
+// lube（潤滑圧）行/列が負値（例: lube-temp=-0.44）なのは、正常時は潤滑圧が高いほど
+// 温度上昇率Rが低い、という向きの相関を表現しているため（物理的に妥当な符号）。
 const CORR_BASE = [
   [1.00,0.30,0.28,-0.38,0.58,0.35],
   [0.30,1.00,0.42,-0.44,0.36,0.18],
@@ -430,8 +441,8 @@ let prevZones = FACTORS.map(()=> 'safe');
 let historyVals = FACTORS.map(()=> []);
 let historyR = FACTORS.map(()=> []);
 let historyREff = FACTORS.map(()=> []);
-const HIST_LEN = 150;
-const CORR_WIN = 44;
+const HIST_LEN = 150; // 時系列チャート用バッファ長（tick数）。デモ用チューニング値。
+const CORR_WIN = 44; // pearson()/lagCorr()が参照する直近履歴の窓幅。12未満はCORR_BASEにフォールバック（calcCorrMatrix()参照）。デモ用チューニング値。
 let logItems = [];
 
 // UI
@@ -493,6 +504,8 @@ function buildCouplingList(){
   });
 }
 function buildLagList(){
+  // 各ペアの数値（12,8,10,4,6）はlagCorr()に渡すlag tick数。根拠となる実測データはなく、
+  // 「振動が最も早く波及する」という教育的な物語に沿ったデモ用チューニング値。
   const pairs = [
     ['vib','temp',12,'振動 → 温度'],
     ['vib','curr',8,'振動 → 電流'],
@@ -538,6 +551,8 @@ function fmtVal(v, f){
   if(f.id === 'curr') return v.toFixed(1) + f.unit;
   return v.toFixed(1) + f.unit;
 }
+// calcRaw(): direction='band'（rpmのみ）はsignedの符号でtauHi/tauLoを切り替える非対称τ。
+// 'hi'/'lo'は片側のみdeltaが発生し、反対側は常に0（Math.max(0,...)でクランプ）。
 function calcRaw(f, value){
   let delta = 0, tauBase = f.tauHi, signed = value - f.opt;
   if(f.direction === 'hi'){
@@ -552,6 +567,9 @@ function calcRaw(f, value){
   }
   return {delta, tauBase, signed, R: delta / Math.max(tauBase, 0.0001)};
 }
+// calcCoupling(): 生のrawR（τ圧縮前のR）を結合圧の入力に使う。effのR_effを使うと
+// 「τが縮む→R_effが増える→pressureがさらに増える→τがさらに縮む」という循環参照になるため、
+// rawRを使うことでこの循環を避けている（calcAll()内での呼び出し順にも依存）。
 function calcCoupling(rawR){
   const pressure = [];
   for(let target=0; target<FACTORS.length; target++){
@@ -564,6 +582,9 @@ function calcCoupling(rawR){
   }
   return pressure;
 }
+// calcAll(): τ_eff = τ_base / (1 + pressure) という反比例形の圧縮式（formula-boxの表記どおり）。
+// EN版（35_..._EN.html）のdynamicTau()は「上限付き線形減算＋下限floor」という別形の式であり、
+// 同じ意図（結合圧でτを縮める）を異なる数式で実装している。
 function calcAll(){
   const raw = vals.map((v,i)=>calcRaw(FACTORS[i], v));
   const rawR = raw.map(r=>r.R);
@@ -575,6 +596,8 @@ function calcAll(){
   });
   return {raw, eff, pressure};
 }
+// このファイルの閾値: SAFE(R<0.70) -> WARNING(R>=0.70) -> RUPTURE_BOUNDARY(R>=1.0)。WATCH段階はない。
+// EN版（35_..._EN.html）はWATCH段階を持ち、WARN閾値も0.75と異なる（各ファイル独自のチューニング）。
 function getColor(R){
   if(R >= 1.0) return 'var(--fail)';
   if(R >= 0.70) return 'var(--warn)';
@@ -592,6 +615,8 @@ function badgeText(zone){
 }
 
 // Pearson correlation
+// 標本数n<8では計算せず0を返す（少数サンプルでの相関の暴れを防ぐガード）。
+// 引数a/bはR_eff履歴（historyREff）であり、物理量そのものの履歴ではない点に注意。
 function pearson(a,b){
   const n = Math.min(a.length,b.length);
   if(n < 8) return 0;
@@ -619,6 +644,7 @@ function calcCorrMatrix(){
         C[i][j] = CORR_BASE[i][j];
       } else {
         // 実測R相関を基準相関と少し混ぜて、過剰なランダム揺れを抑える
+        // 0.65/0.35はブレンド比率のデモ用チューニング値（実測側を優勢にしつつ基準線でならす）。
         const p = pearson(hi,hj);
         C[i][j] = 0.65 * p + 0.35 * CORR_BASE[i][j];
       }
@@ -626,6 +652,9 @@ function calcCorrMatrix(){
   }
   return C;
 }
+// tauC: R_corrの正規化定数。ここではトップレベル定数ではなく関数の既定引数として定義されている。
+// 呼び出し側（calcAll呼び出し後のupdate()内 `calcRCorr(C)`）は引数を渡していないため常に0.32が使われる。
+// EN版（35_..._EN.html）はモジュール直下の`const tauC = 0.24`を使う別実装であり、値をそろえる意図はない。
 function calcRCorr(C, tauC=0.32){
   let maxR = 0;
   const alerts = [];
@@ -640,6 +669,9 @@ function calcRCorr(C, tauC=0.32){
   }
   return {maxR, alerts};
 }
+// lagCorr(): sourceのR_eff履歴をlag tick分だけ過去にずらし、targetの現在のR_eff履歴と相関を取る。
+// 「振動が先に上がり、遅れて温度が上がる」といった先行・遅延関係を可視化するための指標で、
+// EN版（35_..._EN.html）には対応する機能はない（このJP実装固有のロジック）。
 function lagCorr(sourceId, targetId, lag){
   const si = FACTORS.findIndex(f=>f.id===sourceId);
   const ti = FACTORS.findIndex(f=>f.id===targetId);
@@ -879,6 +911,8 @@ function drawTimeSeries(){
 function updateUI(eff, C, rCorr, corrAlerts){
   let rMax = 0;
   eff.forEach(e=>{ if(e.R_eff > rMax) rMax = e.R_eff; });
+  // R_total = max(rMax, R_corr) — formula-boxの「R_total = max(R_i, R_corr)」どおり、
+  // 平均せず最悪値で決定するfail-closed設計。
   const rTotal = Math.max(rMax, rCorr.maxR);
   const systemColor = getColor(rTotal);
 

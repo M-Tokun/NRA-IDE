@@ -426,6 +426,10 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
 <script>
 // ── Factor definitions ─────────────────────────────────────────
 // dir: 'both' = optimum deviation, 'hi' = high-side risk, 'lo' = low-side risk
+// FACTORS: 6要素バッテリーモデル。dir:'both'はvoltのみ（過充電・急低下の両方向がリスク）で、
+// 他はdir:'hi'（上昇のみリスク）。tauはEN版と異なりtauHi/tauLoの分離がなく単一のtauを共有。
+// dtdt（温度上昇率, tau=1.2）が最短のtauを持ち、temp（tau=18）より速く反応する先行指標という設計。
+// opt/tau等はデモ用チューニング値であり、実セルの試験データに基づくものではない。
 const FACTORS = [
   {
     id:'volt', name:'セル電圧', short:'V', unit:'V', color:'var(--v)',
@@ -476,10 +480,16 @@ let noiseAmp = [0.025,2.8,0.8,0.10,0.8,0.7];
 let rHistory = FACTORS.map(()=>[]);
 let prevZones = FACTORS.map(()=>'ok');
 let logLines = [];
-const HIST_LEN = 130;
+const HIST_LEN = 130; // 時系列チャート用バッファ長（tick数）。デモ用チューニング値。
+// tauC: R_corrの正規化定数（モジュール直下の定数）。EN版（36_..._EN.html）はtauC=0.24を使う
+// 別実装であり、値をそろえる意図はない。
 const tauC = 0.23;
 let corrBase = FACTORS.map(f => [...f.corr_base]);
 
+// SCENARIOS: drift/ampは[volt,curr,temp,dtdt,rint,press]の順で各要素に対応する固定長配列
+// （FACTORSの並び順に依存。要素の順序を変えると対応が崩れる）。
+// drift -> updateValues()内でramp(0..1)を掛けて各値のBASE_VALSへ加算される目標オフセット。
+// amp   -> 乱数ノイズ振幅とsin波の振幅係数。値はすべてデモ用チューニング値。
 const SCENARIOS = {
   normal: {
     desc:'通常範囲内で推移',
@@ -524,6 +534,10 @@ function applyScenario(){
 
 function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
+// calcCouplingBase(): vals[4]=内部抵抗, vals[3]=dT/dt, vals[2]=表面温度の「生の」R相当量から
+// 結合圧を作る（配列インデックス直参照であり、FACTORSの並び順に強く依存する）。
+// thermal/gasの重み係数(0.45/0.65/0.35 と 0.25/0.35/0.50)はデモ用チューニング値で、
+// dT/dtがthermalに最も強く効き（0.65）、tempがgasに最も強く効く（0.50）という設計上の重みづけ。
 function calcCouplingBase(){
   // resistance and dT/dt pressure. 0..~1.5
   const rIntPressure = Math.max(0,(vals[4]-FACTORS[4].opt)/FACTORS[4].tau);
@@ -538,6 +552,9 @@ function calcCouplingBase(){
   };
 }
 
+// dynamicTau(): factor.idごとに個別のshrink式（EN版のような'shrink'グループ分類ではなくid直指定）。
+// 上限（0.55/0.35/0.60/0.25）と下限floor（f.tau*0.35）はデモ用チューニング値で根拠データはない。
+// currは結合による動的τ圧縮の対象外（このリストにcurr向けの分岐がない）。
 function dynamicTau(i){
   const f = FACTORS[i];
   const c = calcCouplingBase();
@@ -563,6 +580,8 @@ function calcR(val, i){
   return {delta, tau, R: delta / tau};
 }
 
+// このファイルの閾値: SAFE(R<0.75) -> WARNING(R>=0.75) -> RUPTURE_BOUNDARY(R>=1.0)。WATCH段階はない。
+// EN版（36_..._EN.html）はWATCH段階(R>=0.4)を追加で持つが、WARN/FAILの0.75/1.0自体は共通。
 function getColor(R){
   if(R >= 1.0) return 'var(--fail)';
   if(R >= 0.75) return 'var(--warn)';
@@ -629,6 +648,10 @@ function buildCouplingList(){
   `).join('');
 }
 
+// calcCorr(): 合成相関行列。id-idの組（アルファベット順にsortして作るキー）を熱暴走連鎖に
+// 関与するペア（dtdt-rint等6組）と、それ以外（volt/currを含むペア）とで扱いを分けている点が
+// この実装固有のロジック。volt-currのようなペアはthermal/gas由来のdriftを受けない。
+// EN版（36_..._EN.html）は 'group' 属性が同じか否かだけでdrift量を切り替える単純な設計。
 function calcCorr(){
   const C = [];
   const c = calcCouplingBase();
@@ -641,6 +664,8 @@ function calcCorr(){
       if(['dtdt-rint','rint-temp','dtdt-temp','press-temp','dtdt-press','press-rint'].includes(ids)){
         drift += c.thermal * 0.20 + c.gas * 0.08;
       }
+      // シナリオ別・tick経過に応じた追加drift。開始tick(35/30)と傾き(0.006/0.005)、上限(0.45/0.35)は
+      // いずれもデモ用チューニング値で、「時間とともに相関が崩れていく」演出を表現している。
       if(scenario === 'runaway' && tick > 35) drift += Math.min(0.45, (tick-35)*0.006);
       if(scenario === 'short' && tick > 30) drift += Math.min(0.35, (tick-30)*0.005);
       if(scenario === 'agedcell' && ['dtdt-rint','rint-temp'].includes(ids)) drift += 0.16;
@@ -674,6 +699,8 @@ function fmtVal(v,i){
 function updateValues(){
   tick++;
   const ramp = Math.min(1, tick/90);
+  // シナリオ固有の追加ランプ／脈動。開始tick(45/35)と傾き(1/70,1/65)、agedPulseの周期(0.11)は
+  // いずれもデモ用チューニング値で、SCENARIOS.driftによる基本ドリフトに上乗せされる演出項。
   const thermalRamp = scenario === 'runaway' ? Math.min(1, Math.max(0,(tick-45)/70)) : 0;
   const shortRamp = scenario === 'short' ? Math.min(1, Math.max(0,(tick-35)/65)) : 0;
   const agedPulse = scenario === 'agedcell' ? Math.sin(tick*0.11)*0.5+0.5 : 0;
@@ -695,6 +722,8 @@ function updateValues(){
   });
 
   // dT/dt has physical relation to temperature delta. Synthetic but coupled.
+  // 係数2.2は前tickからの温度差を増幅する倍率、0.55は前回dT/dt値の慣性項（平滑化）。
+  // どちらもデモ用チューニング値であり、実測の熱容量・熱抵抗から導いた値ではない。
   const tempNow = vals[2];
   const observedDtdt = (tempNow - prevTemp) * 2.2 + vals[3]*0.55;
   vals[3] = clamp(observedDtdt, FACTORS[3].min, FACTORS[3].max);
@@ -705,6 +734,8 @@ function updateUI(){
   const C = calcCorr();
   const {maxR:rCorr, alerts} = calcRCorr(C);
 
+  // R_total = max(R_corr, 各要素のR) — formula-boxの「R_total = max(R_i, R_corr)」どおり、
+  // 平均せず最悪値で決定するfail-closed設計。以下のFACTORS.forEach内でmaxFactorRと共に更新する。
   let rTotal = rCorr;
   let maxFactorR = 0;
   let failAny = false;

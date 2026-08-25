@@ -72,6 +72,10 @@ input[type=range]{flex:1;}
 
 <script>
 // Variables
+// NOTE: P, Adh and Shear are read from their sliders (see updateAll below) but are NOT
+// referenced anywhere inside calcIDE()'s R calculation. Only T and Flow (via tau) and
+// GraftMGF/PI/DF (via the delta terms) feed R. Tension is used only in drawVessel() to
+// size the drawn vessel radius; it does not affect R either.
 let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
 let GraftMGF=35, PI=2.8, DF=65;
 let PI_THRESH=5.0, MGF_THRESH=20, R_RUPTURE=1.0;
@@ -110,17 +114,27 @@ function safeSet(id, value) {
 }
 
 // Calculation
+// Core boundary-approach ratio: R = (sum of normalized deviations) / tau (cf. FORMULA.md's
+// general R = δ/τ pattern). Only T, Flow, GraftMGF, PI, DF feed this formula.
 function calcIDE() {
+  // tau: 310 = 37°C expressed in Kelvin, so 310/(T+273) = 1.0 exactly at normal body temp
+  // and grows/shrinks as T deviates from 37°C. The Flow/200 scaling term has no cited
+  // clinical basis in this file — treat as a demo tuning value.
   const tau = 1.0 * (310/(T+273)) * (1 + Flow/200);
-  const deltaMGF = Math.abs(GraftMGF - 35)/15;
-  const deltaPI = Math.max(0, PI - 2.8)/3;
-  const deltaDF = Math.max(0, 100 - DF)/30;
-  const R = (deltaMGF + deltaPI + deltaDF) / tau;
+  const deltaMGF = Math.abs(GraftMGF - 35)/15;   // deviation from 35 mL/min baseline MGF; /15 normalization has no documented basis (demo tuning)
+  const deltaPI = Math.max(0, PI - 2.8)/3;        // one-sided deviation above 2.8 baseline PI; /3 normalization has no documented basis (demo tuning)
+  const deltaDF = Math.max(0, 100 - DF)/30;       // one-sided deficit below 100% DF; /30 normalization has no documented basis (demo tuning)
+  const R = (deltaMGF + deltaPI + deltaDF) / tau; // R = boundary-approach ratio; the three deviations are summed with equal weight
 
   let st = 'SAFE', col = '#88ffcc', msg = '';
   if (PI >= PI_THRESH || GraftMGF <= MGF_THRESH || R >= R_RUPTURE) {
+    // FAIL flag: PI / MGF / R thresholds are OR-combined — any single one crossing its
+    // own threshold trips RUPTURE_BOUNDARY, independent of the other two.
     st = 'RUPTURE_BOUNDARY'; col = '#ff4060'; msg = `FAIL — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)} R:${R.toFixed(3)}`;
   } else if (PI >= PI_THRESH*0.8 || GraftMGF <= MGF_THRESH*1.2) {
+    // WARNING flag: pre-alarm at 80% of the PI fail threshold / 120% of the MGF fail
+    // threshold (i.e. a 20% margin before FAIL). The 0.8 / 1.2 margin ratios are not
+    // documented elsewhere in this file — demo tuning values.
     st = 'WARNING'; col = '#ffcc00'; msg = `WARN — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)}`;
   }
 
@@ -172,14 +186,14 @@ function drawTTFMWave() {
   }
   fctx.stroke();
 
-  const mgfY = 80 + (MGF_THRESH - 35) * 1.8;
+  const mgfY = 80 + (MGF_THRESH - 35) * 1.8; // canvas y-position mapping only; 1.8 px/unit is a display scale constant, not clinical
   fctx.setLineDash([8,4]); fctx.strokeStyle = '#ff6688'; fctx.lineWidth = 2;
   fctx.beginPath(); fctx.moveTo(0,mgfY); fctx.lineTo(fc.width,mgfY); fctx.stroke();
   fctx.setLineDash([]);
   fctx.fillStyle = '#ff6688'; fctx.font = '11px monospace';
   fctx.fillText(`MGF Lower = ${MGF_THRESH}`, fc.width-160, mgfY-8);
 
-  const piY = 80 - PI_THRESH * 4.5;
+  const piY = 80 - PI_THRESH * 4.5; // canvas y-position mapping only; 4.5 px/unit is a display scale constant, not clinical
   fctx.setLineDash([4,4]); fctx.strokeStyle = '#ffaa44';
   fctx.beginPath(); fctx.moveTo(0,piY); fctx.lineTo(fc.width,piY); fctx.stroke();
   fctx.setLineDash([]);
@@ -204,9 +218,11 @@ function updateAll() {
   MGF_THRESH = parseFloat(document.getElementById('mgfThresh')?.value || 20);
   R_RUPTURE = parseFloat(document.getElementById('rFail')?.value || 1.0);
 
-  GraftMGF = Math.max(10, Math.min(80, GraftMGF + (Math.random()-0.5)*0.6));
-  PI = Math.max(1, Math.min(7, PI + (Math.random()-0.5)*0.08));
-  DF = Math.max(30, Math.min(90, DF + (Math.random()-0.5)*0.4));
+  // Simulated random-walk steps (Math.random()-0.5 per tick), clamped to demo ranges below.
+  // Not driven by any physical model — purely for the live-demo animation.
+  GraftMGF = Math.max(10, Math.min(80, GraftMGF + (Math.random()-0.5)*0.6));  // clamped to [10,80] mL/min
+  PI = Math.max(1, Math.min(7, PI + (Math.random()-0.5)*0.08));               // clamped to [1,7]
+  DF = Math.max(30, Math.min(90, DF + (Math.random()-0.5)*0.4));              // clamped to [30,90]%
 
   safeSet('piThreshVal', PI_THRESH.toFixed(1));
   safeSet('mgfThreshVal', MGF_THRESH);

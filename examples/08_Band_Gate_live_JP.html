@@ -947,7 +947,7 @@ function updateUI(res, p) {
     );
   } else if (!silence && lastLogDec==='SILENCE') {
     addLog('HOLD END → PASS', 'safe');
-  } else if (R > 0.65 && R < 1.0 && lastLogDec !== 'warn') {
+  } else if (R >= 0.65 && R < 1.0 && lastLogDec !== 'warn') {
     addLog(`WARN  R=${R.toFixed(3)} 接近中`, 'warn');
   }
   lastLogDec = silence ? 'SILENCE' : (R>0.65?'warn':'PASS');

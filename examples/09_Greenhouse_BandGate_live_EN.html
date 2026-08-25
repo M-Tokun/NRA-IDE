@@ -266,22 +266,282 @@ footer a{color:var(--co2);text-decoration:none;}
 </footer>
 </div>
 <script>
-const SENSORS={water:{key:'water',label:'Irrigation Pressure',unit:'kPa',color:'#29d4ff',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},temp:{key:'temp',label:'Temperature',unit:'°C',color:'#ff7043',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},co2:{key:'co2',label:'CO₂',unit:'ppm',color:'#a8e063',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},ec:{key:'ec',label:'Nutrient EC',unit:'mS/cm',color:'#ffd740',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''}};
-const HIST=160;let t=0,playing=true,stressMode='normal',lastFrameTime=0;
-function getValues(t){const p=t%300,d=stressMode==='drought',h=stressMode==='heat';let w=50+Math.sin(t*.04)*5+(Math.random()-.5)*2,tp=22+Math.sin(t*.03)*4+(Math.random()-.5)*1.5,c=800+Math.sin(t*.05)*120+(Math.random()-.5)*40,e=2+Math.sin(t*.04)*.4+(Math.random()-.5)*.15;if(p>=70&&p<=100)w+=28*Math.sin((p-70)/30*Math.PI);if(p>=190&&p<=240)w-=25*Math.sin((p-190)/50*Math.PI);if(p>=80&&p<=115)tp+=18*Math.sin((p-80)/35*Math.PI);if(p>=210&&p<=250)tp-=16*Math.sin((p-210)/40*Math.PI);if(p>=60&&p<=90)c+=500*Math.sin((p-60)/30*Math.PI);if(p>=180&&p<=220)c-=450*Math.sin((p-180)/40*Math.PI);if(p>=90&&p<=120)e+=2.2*Math.sin((p-90)/30*Math.PI);if(p>=200&&p<=245)e-=1.6*Math.sin((p-200)/45*Math.PI);if(d){w-=18;c-=200;e-=.6;}if(h)tp+=14;return{water:Math.max(5,Math.min(130,w)),temp:Math.max(-5,Math.min(55,tp)),co2:Math.max(100,Math.min(3000,c)),ec:Math.max(.1,Math.min(8,e))};}
-function getParams(){const g=id=>parseFloat(document.getElementById(id).value);return{water:{th:g('sl-wh'),tl:g('sl-wl'),au:g('sl-wau'),al:g('sl-wal')},temp:{th:g('sl-th'),tl:g('sl-tl'),au:g('sl-tau'),al:g('sl-tal')},co2:{th:g('sl-ch'),tl:g('sl-cl'),au:g('sl-cau'),al:g('sl-cal')},ec:{th:g('sl-eh'),tl:g('sl-el'),au:g('sl-eau'),al:g('sl-eal')},spd:parseInt(document.getElementById('sl-spd').value),hold:parseInt(document.getElementById('sl-hold').value)};}
-function bandGate(s,v,p,nowMs){const half=Math.max((p.th-p.tl)/2,.001),d_u=Math.max(0,v-p.th),d_l=Math.max(0,p.tl-v);s.ema_u=p.au*d_u+(1-p.au)*s.ema_u;s.ema_l=p.al*d_l+(1-p.al)*s.ema_l;const tu=half*Math.min(1+s.ema_u/half,2.5),tl=half*Math.max(1-s.ema_l/half,.3);const R_u=d_u>0?d_u/tu:0,R_l=d_l>0?d_l/tl:0,R=Math.max(R_u,R_l);const held=nowMs<s.holdUntil;let silence=held,dir=held?(s.lastDir||''):'';if(!held&&R>=1){s.holdUntil=nowMs+parseInt(document.getElementById('sl-hold').value);silence=true;dir=R_u>=R_l?'upper':'lower';s.lastDir=dir;}return{v,R,silence,dir,upper_band:p.th+(tu-half),lower_band:p.tl-(half-tl)};}
-function drawMini(key,hist,color,silence){const cv=document.getElementById('cv-'+key),ctx=cv.getContext('2d');cv.width=cv.parentElement.clientWidth-28;cv.height=60;ctx.clearRect(0,0,cv.width,60);if(hist.length<2)return;const vals=hist.map(h=>h.v),minV=Math.min(...vals)-2,maxV=Math.max(...vals)+2,rng=maxV-minV||1;const xp=i=>(i/(HIST-1))*cv.width,yp=v=>58-((v-minV)/rng)*54;for(let i=1;i<hist.length;i++){if(hist[i].silence){ctx.fillStyle=hist[i].dir==='lower'?'rgba(41,212,255,.1)':'rgba(255,82,82,.1)';ctx.fillRect(xp(i-1),0,xp(i)-xp(i-1)+1,60);}}ctx.strokeStyle=color+'55';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.upper_band)):ctx.lineTo(xp(i),yp(h.upper_band));});ctx.stroke();ctx.beginPath();hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.lower_band)):ctx.lineTo(xp(i),yp(h.lower_band));});ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.shadowColor=color;ctx.shadowBlur=silence?5:0;ctx.beginPath();hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.v)):ctx.lineTo(xp(i),yp(h.v));});ctx.stroke();ctx.shadowBlur=0;}
-function updateCard(key,res,p){const s=SENSORS[key],{v,R,silence,dir,upper_band,lower_band}=res,col=s.color,dp=key==='ec'?2:key==='co2'?0:1;document.getElementById('val-'+key).textContent=v.toFixed(dp);document.getElementById('val-'+key).style.color=silence?(dir==='upper'?'var(--danger)':'var(--water)'):col;const de=document.getElementById('dec-'+key);de.textContent=silence?(dir==='upper'?'↑ UPPER':'↓ LOWER'):'PASS';de.className='card-decision '+(silence?dir:'pass');document.getElementById('card-'+key).style.boxShadow=silence?`0 0 20px -4px ${dir==='upper'?'#ff5252':'#29d4ff'}`:'none';const rc=silence?(dir==='upper'?'#ff5252':'#29d4ff'):R>.65?'#ffca28':col;document.getElementById('rf-'+key).style.width=Math.min(R/1.5,1)*100+'%';document.getElementById('rf-'+key).style.background=rc;document.getElementById('rv-'+key).textContent=R.toFixed(4);document.getElementById('rv-'+key).style.color=rc;const full=p.th*1.4-p.tl*.6,off=p.tl*.6;document.getElementById('safe-'+key).style.left=(p.tl-off)/full*100+'%';document.getElementById('safe-'+key).style.width=(p.th-p.tl)/full*100+'%';const np=Math.max(0,Math.min((v-off)/full*100,100));document.getElementById('needle-'+key).style.left=np+'%';document.getElementById('needle-'+key).style.background=silence?(dir==='upper'?'#ff5252':'#29d4ff'):col;document.getElementById('ll-'+key).textContent=p.tl.toFixed(key==='ec'?1:0);document.getElementById('lh-'+key).textContent=p.th.toFixed(key==='ec'?1:0);drawMini(key,s.hist,col,silence);if(silence&&s.lastDec!=='SILENCE')addLog(`[${s.label}] ${dir==='upper'?'↑ UPPER breach':'↓ LOWER breach'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`,key);else if(!silence&&s.lastDec==='SILENCE')addLog(`[${s.label}] HOLD end → PASS`,'safe');else if(R>.65&&R<1&&s.lastDec!=='warn')addLog(`[${s.label}] WARN R=${R.toFixed(3)} approaching`,'warn');s.lastDec=silence?'SILENCE':R>.65?'warn':'PASS';}
-function addLog(msg,cls){const a=document.getElementById('logArea'),el=document.createElement('div');el.className='le '+cls;el.textContent=`[t=${String(t).padStart(5,'0')}] ${msg}`;a.appendChild(el);a.scrollTop=a.scrollHeight;while(a.children.length>80)a.removeChild(a.firstChild);}
-function tick(){if(!playing){requestAnimationFrame(tick);return;}const now=performance.now(),p=getParams(),iv=Math.max(16,40-p.spd*7);if(now-lastFrameTime<iv){requestAnimationFrame(tick);return;}lastFrameTime=now;for(let s=0;s<p.spd;s++){t++;const nowMs=t*40,vals=getValues(t);['water','temp','co2','ec'].forEach(key=>{const sensor=SENSORS[key],res=bandGate(sensor,vals[key],p[key],nowMs);if(sensor.hist.length>=HIST)sensor.hist.shift();sensor.hist.push(res);if(s===p.spd-1)updateCard(key,res,p[key]);});}requestAnimationFrame(tick);}
-function setStress(m){stressMode=m;document.getElementById('stress-note').textContent={drought:'🏜 Drought active. Water/EC/CO₂ declining simultaneously.',heat:'🔥 Heat wave active. Temperature rising persistently.',normal:'🌱 Normal greenhouse environment. Periodic spikes occur.'}[m];}
-function updateLabels(){const g=id=>parseFloat(document.getElementById(id).value);document.getElementById('v-wh').textContent=g('sl-wh').toFixed(0);document.getElementById('v-wl').textContent=g('sl-wl').toFixed(0);document.getElementById('v-wa').textContent=g('sl-wau').toFixed(2)+'/'+g('sl-wal').toFixed(2);document.getElementById('v-th').textContent=g('sl-th').toFixed(0);document.getElementById('v-tl').textContent=g('sl-tl').toFixed(0);document.getElementById('v-ta').textContent=g('sl-tau').toFixed(2)+'/'+g('sl-tal').toFixed(2);document.getElementById('v-ch').textContent=g('sl-ch').toFixed(0);document.getElementById('v-cl').textContent=g('sl-cl').toFixed(0);document.getElementById('v-ca').textContent=g('sl-cau').toFixed(2)+'/'+g('sl-cal').toFixed(2);document.getElementById('v-eh').textContent=g('sl-eh').toFixed(1);document.getElementById('v-el').textContent=g('sl-el').toFixed(1);document.getElementById('v-ea').textContent=g('sl-eau').toFixed(2)+'/'+g('sl-eal').toFixed(2);document.getElementById('v-spd').textContent=document.getElementById('sl-spd').value+'×';document.getElementById('v-hold').textContent=document.getElementById('sl-hold').value;}
+/* ─────────────────────────────────────────────
+   4-sensor definitions
+   ───────────────────────────────────────────── */
+const SENSORS={
+  water:{key:'water',label:'Irrigation Pressure',unit:'kPa',color:'#29d4ff',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},
+  temp: {key:'temp', label:'Temperature',        unit:'°C',  color:'#ff7043',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},
+  co2:  {key:'co2',  label:'CO₂',                unit:'ppm', color:'#a8e063',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''},
+  ec:   {key:'ec',   label:'Nutrient EC',        unit:'mS/cm',color:'#ffd740',hist:[],ema_u:0,ema_l:0,holdUntil:0,lastDec:''}
+};
+const HIST=160;
+let t=0,playing=true,stressMode='normal',lastFrameTime=0;
+
+/* ─────────────────────────────────────────────
+   Telemetry generation
+   ───────────────────────────────────────────── */
+function getValues(t){
+  const p=t%300,
+        d=stressMode==='drought',
+        h=stressMode==='heat';
+  let w=50+Math.sin(t*.04)*5+(Math.random()-.5)*2,
+      tp=22+Math.sin(t*.03)*4+(Math.random()-.5)*1.5,
+      c=800+Math.sin(t*.05)*120+(Math.random()-.5)*40,
+      e=2+Math.sin(t*.04)*.4+(Math.random()-.5)*.15;
+
+  // Irrigation pressure: surge / drop
+  if(p>=70&&p<=100) w+=28*Math.sin((p-70)/30*Math.PI);
+  if(p>=190&&p<=240) w-=25*Math.sin((p-190)/50*Math.PI);
+
+  // Temperature: heat wave / sudden cooling
+  if(p>=80&&p<=115) tp+=18*Math.sin((p-80)/35*Math.PI);
+  if(p>=210&&p<=250) tp-=16*Math.sin((p-210)/40*Math.PI);
+
+  // CO2: surge / ventilation crash
+  if(p>=60&&p<=90) c+=500*Math.sin((p-60)/30*Math.PI);
+  if(p>=180&&p<=220) c-=450*Math.sin((p-180)/40*Math.PI);
+
+  // Nutrient EC: salt spike / depletion
+  if(p>=90&&p<=120) e+=2.2*Math.sin((p-90)/30*Math.PI);
+  if(p>=200&&p<=245) e-=1.6*Math.sin((p-200)/45*Math.PI);
+
+  // stress-mode overlays
+  if(d){w-=18;c-=200;e-=.6;}
+  if(h) tp+=14;
+
+  return{
+    water:Math.max(5,Math.min(130,w)),
+    temp:Math.max(-5,Math.min(55,tp)),
+    co2:Math.max(100,Math.min(3000,c)),
+    ec:Math.max(.1,Math.min(8,e))
+  };
+}
+
+/* ─────────────────────────────────────────────
+   Band Gate calculation
+   ───────────────────────────────────────────── */
+function getParams(){
+  const g=id=>parseFloat(document.getElementById(id).value);
+  return{
+    water:{th:g('sl-wh'),tl:g('sl-wl'),au:g('sl-wau'),al:g('sl-wal')},
+    temp: {th:g('sl-th'),tl:g('sl-tl'),au:g('sl-tau'),al:g('sl-tal')},
+    co2:  {th:g('sl-ch'),tl:g('sl-cl'),au:g('sl-cau'),al:g('sl-cal')},
+    ec:   {th:g('sl-eh'),tl:g('sl-el'),au:g('sl-eau'),al:g('sl-eal')},
+    spd:parseInt(document.getElementById('sl-spd').value),
+    hold:parseInt(document.getElementById('sl-hold').value)
+  };
+}
+
+function bandGate(s,v,p,nowMs){
+  const half=(p.th-p.tl)/2,
+        d_u=Math.max(0,v-p.th),
+        d_l=Math.max(0,p.tl-v);
+
+  s.ema_u=p.au*d_u+(1-p.au)*s.ema_u;
+  s.ema_l=p.al*d_l+(1-p.al)*s.ema_l;
+
+  const tu=half*Math.min(1+s.ema_u/(half+.001),2.5),
+        tl=half*Math.max(1-s.ema_l/(half+.001),.3);
+
+  const R_u=d_u>0?d_u/tu:0,
+        R_l=d_l>0?d_l/tl:0,
+        R=Math.max(R_u,R_l);
+
+  const held=nowMs<s.holdUntil;
+  let silence=held,
+      dir=held?(s.lastDir||''):'';
+
+  if(!held&&R>=1){
+    s.holdUntil=nowMs+parseInt(document.getElementById('sl-hold').value);
+    silence=true;
+    dir=R_u>=R_l?'upper':'lower';
+    s.lastDir=dir;
+  }
+
+  // dynamic bands (for drawing)
+  return{v,R,silence,dir,upper_band:p.th+(tu-half),lower_band:p.tl-(half-tl)};
+}
+
+/* ─────────────────────────────────────────────
+   Mini waveform drawing
+   ───────────────────────────────────────────── */
+function drawMini(key,hist,color,silence){
+  const cv=document.getElementById('cv-'+key),ctx=cv.getContext('2d');
+  cv.width=cv.parentElement.clientWidth-28; cv.height=60;
+  ctx.clearRect(0,0,cv.width,60);
+  if(hist.length<2) return;
+
+  const vals=hist.map(h=>h.v),
+        minV=Math.min(...vals)-2,
+        maxV=Math.max(...vals)+2,
+        rng=maxV-minV||1;
+  const xp=i=>(i/(HIST-1))*cv.width,
+        yp=v=>58-((v-minV)/rng)*54;
+
+  // SILENCE fill
+  for(let i=1;i<hist.length;i++){
+    if(hist[i].silence){
+      ctx.fillStyle=hist[i].dir==='lower'?'rgba(41,212,255,.1)':'rgba(255,82,82,.1)';
+      ctx.fillRect(xp(i-1),0,xp(i)-xp(i-1)+1,60);
+    }
+  }
+
+  // upper/lower band lines
+  ctx.strokeStyle=color+'55'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.upper_band)):ctx.lineTo(xp(i),yp(h.upper_band));}); ctx.stroke();
+  ctx.beginPath(); hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.lower_band)):ctx.lineTo(xp(i),yp(h.lower_band));}); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // observed value
+  ctx.strokeStyle=color; ctx.lineWidth=1.8;
+  ctx.shadowColor=color; ctx.shadowBlur=silence?5:0;
+  ctx.beginPath(); hist.forEach((h,i)=>{i===0?ctx.moveTo(xp(i),yp(h.v)):ctx.lineTo(xp(i),yp(h.v));}); ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+/* ─────────────────────────────────────────────
+   UI update
+   ───────────────────────────────────────────── */
+function updateCard(key,res,p){
+  const s=SENSORS[key],
+        {v,R,silence,dir,upper_band,lower_band}=res,
+        col=s.color,
+        dp=key==='ec'?2:key==='co2'?0:1;
+
+  // current value
+  document.getElementById('val-'+key).textContent=v.toFixed(dp);
+  document.getElementById('val-'+key).style.color=silence?(dir==='upper'?'var(--danger)':'var(--water)'):col;
+
+  // decision badge
+  const de=document.getElementById('dec-'+key);
+  de.textContent=silence?(dir==='upper'?'↑ UPPER':'↓ LOWER'):'PASS';
+  de.className='card-decision '+(silence?dir:'pass');
+
+  // card glow
+  document.getElementById('card-'+key).style.boxShadow=silence?`0 0 20px -4px ${dir==='upper'?'#ff5252':'#29d4ff'}`:'none';
+
+  // R bar
+  const rc=silence?(dir==='upper'?'#ff5252':'#29d4ff'):R>.65?'#ffca28':col;
+  document.getElementById('rf-'+key).style.width=Math.min(R/1.5,1)*100+'%';
+  document.getElementById('rf-'+key).style.background=rc;
+  document.getElementById('rv-'+key).textContent=R.toFixed(4);
+  document.getElementById('rv-'+key).style.color=rc;
+
+  // band bar
+  const full=p.th*1.4-p.tl*.6,
+        off=p.tl*.6;
+  document.getElementById('safe-'+key).style.left=(p.tl-off)/full*100+'%';
+  document.getElementById('safe-'+key).style.width=(p.th-p.tl)/full*100+'%';
+  const np=Math.max(0,Math.min((v-off)/full*100,100));
+  document.getElementById('needle-'+key).style.left=np+'%';
+  document.getElementById('needle-'+key).style.background=silence?(dir==='upper'?'#ff5252':'#29d4ff'):col;
+  document.getElementById('ll-'+key).textContent=p.tl.toFixed(key==='ec'?1:0);
+  document.getElementById('lh-'+key).textContent=p.th.toFixed(key==='ec'?1:0);
+
+  // mini waveform
+  drawMini(key,s.hist,col,silence);
+
+  // event log
+  if(silence&&s.lastDec!=='SILENCE') addLog(`[${s.label}] ${dir==='upper'?'↑ UPPER breach':'↓ LOWER breach'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`,key);
+  else if(!silence&&s.lastDec==='SILENCE') addLog(`[${s.label}] HOLD end → PASS`,'safe');
+  else if(R>.65&&R<1&&s.lastDec!=='warn') addLog(`[${s.label}] WARN R=${R.toFixed(3)} approaching`,'warn');
+  s.lastDec=silence?'SILENCE':R>.65?'warn':'PASS';
+}
+
+function addLog(msg,cls){
+  const a=document.getElementById('logArea'),el=document.createElement('div');
+  el.className='le '+cls;
+  el.textContent=`[t=${String(t).padStart(5,'0')}] ${msg}`;
+  a.appendChild(el);
+  a.scrollTop=a.scrollHeight;
+  while(a.children.length>80) a.removeChild(a.firstChild);
+}
+
+/* ─────────────────────────────────────────────
+   Main loop
+   ───────────────────────────────────────────── */
+function tick(){
+  if(!playing){requestAnimationFrame(tick);return;}
+  const now=performance.now(),p=getParams(),iv=Math.max(16,40-p.spd*7);
+  if(now-lastFrameTime<iv){requestAnimationFrame(tick);return;}
+  lastFrameTime=now;
+
+  for(let s=0;s<p.spd;s++){
+    t++;
+    const nowMs=t*40,vals=getValues(t);
+    ['water','temp','co2','ec'].forEach(key=>{
+      const sensor=SENSORS[key],
+            res=bandGate(sensor,vals[key],p[key],nowMs);
+      if(sensor.hist.length>=HIST) sensor.hist.shift();
+      sensor.hist.push(res);
+      if(s===p.spd-1) updateCard(key,res,p[key]);
+    });
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ─────────────────────────────────────────────
+   Stress mode
+   ───────────────────────────────────────────── */
+function setStress(m){
+  stressMode=m;
+  document.getElementById('stress-note').textContent={
+    drought:'🏜 Drought active. Water/EC/CO₂ declining simultaneously.',
+    heat:'🔥 Heat wave active. Temperature rising persistently.',
+    normal:'🌱 Normal greenhouse environment. Periodic spikes occur.'
+  }[m];
+}
+
+/* ─────────────────────────────────────────────
+   Slider label updates
+   ───────────────────────────────────────────── */
+function updateLabels(){
+  const g=id=>parseFloat(document.getElementById(id).value);
+  document.getElementById('v-wh').textContent=g('sl-wh').toFixed(0);
+  document.getElementById('v-wl').textContent=g('sl-wl').toFixed(0);
+  document.getElementById('v-wa').textContent=g('sl-wau').toFixed(2)+'/'+g('sl-wal').toFixed(2);
+  document.getElementById('v-th').textContent=g('sl-th').toFixed(0);
+  document.getElementById('v-tl').textContent=g('sl-tl').toFixed(0);
+  document.getElementById('v-ta').textContent=g('sl-tau').toFixed(2)+'/'+g('sl-tal').toFixed(2);
+  document.getElementById('v-ch').textContent=g('sl-ch').toFixed(0);
+  document.getElementById('v-cl').textContent=g('sl-cl').toFixed(0);
+  document.getElementById('v-ca').textContent=g('sl-cau').toFixed(2)+'/'+g('sl-cal').toFixed(2);
+  document.getElementById('v-eh').textContent=g('sl-eh').toFixed(1);
+  document.getElementById('v-el').textContent=g('sl-el').toFixed(1);
+  document.getElementById('v-ea').textContent=g('sl-eau').toFixed(2)+'/'+g('sl-eal').toFixed(2);
+  document.getElementById('v-spd').textContent=document.getElementById('sl-spd').value+'×';
+  document.getElementById('v-hold').textContent=document.getElementById('sl-hold').value;
+}
 document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',updateLabels));
-function togglePlay(){playing=!playing;const btn=document.getElementById('btnPlay');btn.textContent=playing?'⏸ PAUSE':'▶ PLAY';btn.classList.toggle('play',playing);btn.classList.toggle('paused',!playing);}
-function resetSim(){t=0;Object.values(SENSORS).forEach(s=>{s.hist=[];s.ema_u=0;s.ema_l=0;s.holdUntil=0;s.lastDec='';});document.getElementById('logArea').innerHTML='';addLog('Greenhouse monitoring started — 4-sensor simultaneous watch','safe');}
-window.addEventListener('resize',()=>['water','temp','co2','ec'].forEach(k=>{const cv=document.getElementById('cv-'+k);cv.width=cv.parentElement.clientWidth-28;}));
-updateLabels();resetSim();requestAnimationFrame(tick);
+
+function togglePlay(){
+  playing=!playing;
+  const btn=document.getElementById('btnPlay');
+  btn.textContent=playing?'⏸ PAUSE':'▶ PLAY';
+  btn.classList.toggle('play',playing);
+  btn.classList.toggle('paused',!playing);
+}
+
+function resetSim(){
+  t=0;
+  Object.values(SENSORS).forEach(s=>{
+    s.hist=[]; s.ema_u=0; s.ema_l=0;
+    s.holdUntil=0; s.lastDec='';
+  });
+  document.getElementById('logArea').innerHTML='';
+  addLog('Greenhouse monitoring started — 4-sensor simultaneous watch','safe');
+}
+
+window.addEventListener('resize',()=>['water','temp','co2','ec'].forEach(k=>{
+  const cv=document.getElementById('cv-'+k);
+  cv.width=cv.parentElement.clientWidth-28;
+}));
+
+/* ─────────────────────────────────────────────
+   Startup
+   ───────────────────────────────────────────── */
+updateLabels(); resetSim(); requestAnimationFrame(tick);
 </script>
 </body>
 </html>

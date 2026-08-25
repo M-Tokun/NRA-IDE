@@ -367,48 +367,69 @@
   }
 
   function update(now) {
-    const dt = Math.min((now - last) / 1000, 0.05);
+    const dt = Math.min((now - last) / 1000, 0.05); // frame-time delta, clamped to 0.05s (20fps floor) so a stalled/background tab can't produce one huge jump in t
     last = now;
     if (!running) return;
 
     t += dt;
     const tauBase = Number(sliders.tauBase.value);
-    const alphaUpper = Number(sliders.alphaUpper.value);
-    const alphaLower = Number(sliders.alphaLower.value);
+    const alphaUpper = Number(sliders.alphaUpper.value);   // EMA smoothing factor for the upper damper (see upperEMA below)
+    const alphaLower = Number(sliders.alphaLower.value);   // EMA smoothing factor for the lower damper (see lowerEMA below)
     const disturbance = Number(sliders.disturbance.value);
     const degradeRate = Number(sliders.degrade.value);
 
+    // Synthetic demo signal only — not measured physical data. Sum of two slow sine waves,
+    // one fast "micro" sine, disturbance-scaled random noise, and a slow drift term.
+    // All amplitude/frequency coefficients below (4.5, 0.37, 2.4, 9.0, 0.9, 2.8, 0.08, 2.0)
+    // are undocumented demo tuning values with no cited physical basis.
     const baseWave = Math.sin(t * 1.5) * 4.5 + Math.sin(t * 0.37) * 2.4;
     const micro = Math.sin(t * 9.0) * 0.9;
     const random = (Math.random() - 0.5) * 2.8 * disturbance;
     const drift = Math.sin(t * 0.08) * 2.0;
 
-    spike *= 0.94;
+    spike *= 0.94; // manual "Disturbance Spike" impulse decays ~6%/frame toward 0 (exponential decay, demo value)
     const raw = baseWave + micro + random + drift + spike;
 
-    const upperDev = Math.max(0, raw);
-    const lowerDev = Math.max(0, -raw);
+    const upperDev = Math.max(0, raw);   // positive-side deviation only
+    const lowerDev = Math.max(0, -raw);  // negative-side deviation only — this split is the "upper/lower damper" referred to in the control panel
 
+    // Exponential moving average (EMA) of each side's deviation — this IS the damper.
+    // Larger alphaUpper/alphaLower => faster response, less smoothing.
     upperEMA = upperEMA * (1 - alphaUpper) + upperDev * alphaUpper;
     lowerEMA = lowerEMA * (1 - alphaLower) + lowerDev * alphaLower;
 
+    // Dynamic boundary (tau_dyn_upper / tau_dyn_lower in the UI): the EMA-smoothed deviation
+    // widens the upper bound and narrows the lower bound around tauBase. The 0.65 / 0.35
+    // weighting coefficients and the 2.0 floor are undocumented demo tuning values.
     const tauDynUpper = tauBase + upperEMA * 0.65;
     const tauDynLower = Math.max(2.0, tauBase - lowerEMA * 0.35);
 
-    const rUpper = upperDev / Math.max(tauDynUpper, 0.001);
-    const rLower = lowerDev / Math.max(tauDynLower, 0.001);
+    // R = delta/tau boundary-approach ratio (cf. FORMULA.md), computed separately for each
+    // side then combined by taking the worse (larger) of the two — this is "Instantaneous R".
+    const rUpper = upperDev / Math.max(tauDynUpper, 0.001); // 0.001 floor avoids divide-by-zero only; not a physical value
+    const rLower = lowerDev / Math.max(tauDynLower, 0.001); // 0.001 floor avoids divide-by-zero only; not a physical value
     const rNow = Math.max(rUpper, rLower);
 
+    // Short-term log reconstruction (R_short in the UI): plain moving average of the last
+    // 28 rNow samples. The window size 28 is an undocumented demo tuning value.
     shortWindow.push(rNow);
     if (shortWindow.length > 28) shortWindow.shift();
     const rShort = shortWindow.reduce((a, b) => a + b, 0) / shortWindow.length;
 
+    // Long-term degradation index (D_long in the UI). Accumulates only once rShort exceeds
+    // a 0.58 "wear onset" threshold, weighted up by disturbance intensity; also gets a small
+    // extra penalty once rNow itself exceeds 1.0. Decays ~0.5%/frame (*0.995) and is capped
+    // at 1.8. The 0.58 / 0.8 / 0.35 / 0.995 / 0.02 / 1.8 constants are all undocumented
+    // demo tuning values with no cited basis.
     const wearInput = Math.max(0, rShort - 0.58) * (0.8 + disturbance * 0.35);
     longDamage = Math.min(1.8, longDamage * 0.995 + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
 
+    // State flags — thresholds here mirror the "Decision Ladder" table above (PASS/DAMP/
+    // SILENCE). Each condition is OR-combined: any single trigger is enough, independent
+    // of the others.
     let state = 'PASS';
-    if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE';
-    else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP';
+    if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE'; // hard stop: instantaneous R or long-term damage past 1.0
+    else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP'; // pre-alarm / cautious band before SILENCE
 
     metrics.rNow.textContent = rNow.toFixed(2);
     metrics.rShort.textContent = rShort.toFixed(2);
@@ -452,7 +473,7 @@
       ctx.stroke();
     }
 
-    const safeTop = h * 0.28;
+    const safeTop = h * 0.28;    // decorative "safe region" band boundaries for display only (the green band described above); not used in state logic
     const safeBottom = h * 0.72;
     ctx.fillStyle = 'rgba(47,211,139,0.08)';
     ctx.fillRect(0, safeTop, w, safeBottom - safeTop);
@@ -478,6 +499,8 @@
       ctx.stroke();
     }
 
+    // Canvas y-axis scaling constants below (90, 0.78, 18, 0.9, 12) are purely for on-screen
+    // plotting proportions; they carry no physical/clinical meaning.
     drawSeries(rawHistory, '#ffffff', (v) => h / 2 - v * 90);
     drawSeries(shortHistory, '#ffbf47', (v) => h - v * h * 0.78 - 18);
     drawSeries(damageHistory, '#b48cff', (v) => h - v * h * 0.9 - 12);
@@ -495,7 +518,7 @@
     $('toggleRun').textContent = running ? 'Pause' : 'Resume';
   });
   $('spikeBtn').addEventListener('click', () => {
-    spike += (Math.random() > 0.5 ? 1 : -1) * (8 + Math.random() * 7);
+    spike += (Math.random() > 0.5 ? 1 : -1) * (8 + Math.random() * 7); // manual disturbance impulse: random sign, magnitude in [8,15) — undocumented demo tuning values
   });
   $('resetBtn').addEventListener('click', () => {
     resetAll();

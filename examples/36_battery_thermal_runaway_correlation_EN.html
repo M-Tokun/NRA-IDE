@@ -179,10 +179,30 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 </div>
 
 <script>
+// FACTORS: 6-factor battery model, one object per signal (single-line literal for compactness).
+// dir:'both' (voltage only) means both directions count as risk (over-voltage AND sudden drop);
+// all other factors are dir:'hi' (only a rise above opt is risky).
+// weight   -> this factor's share of pressure().main (a weighted sum, not an explicit coupling matrix).
+// group    -> 'thermal' or 'supply'; pressure() averages R within each group to get p.thermal / p.supply.
+// shrink   -> which pressure term shrinks this factor's dynamic tau in dynamicTau().
+// coupledBy/coupledGain -> how much this factor's raw value is nudged by pressure() output each tick.
+// corr_base -> this factor's row of the baseline correlation matrix C(t0), used by calcCorr()/corrR().
+// dtdt (Temperature Rise Rate) has the shortest tau (1.2) of the set — modeled as the fastest-moving
+// leading precursor, ahead of surfaceTemp (tau 18) which lags behind it physically.
+// opt/tau/amp values are demo tuning constants for this sample; not derived from real cell test data.
 const FACTORS = [{"id":"voltage","name":"Cell Voltage","short":"V","unit":"V","opt":3.7,"tau":0.3,"min":2.8,"max":4.35,"dir":"both","amp":0.025,"weight":0.16,"group":"supply","shrink":"main","fmt":"3","desc":"Both over-voltage and sudden drop are watched.","corr_base":[1,0.55,0.35,0.25,0.3,0.2]},{"id":"current","name":"Current","short":"I","unit":"A","opt":35,"tau":25,"min":0,"max":130,"dir":"hi","amp":2.8,"weight":0.18,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.0,"desc":"High current pushes heat and stress.","corr_base":[0.55,1,0.5,0.3,0.4,0.25]},{"id":"surfaceTemp","name":"Surface Temp","short":"T","unit":"℃","opt":32,"tau":18,"min":10,"max":95,"dir":"hi","amp":0.8,"weight":0.22,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":2.2,"desc":"Thermal layer; τ shrinks under coupling pressure.","corr_base":[0.35,0.5,1,0.45,0.55,0.3]},{"id":"dtdt","name":"Temperature Rise Rate","short":"dT","unit":"℃/min","opt":0,"tau":1.2,"min":-1.5,"max":8,"dir":"hi","amp":0.1,"weight":0.3,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.3,"fmt":"2","desc":"Leading precursor before absolute temperature crosses limits.","corr_base":[0.25,0.3,0.45,1,0.5,0.42]},{"id":"rint","name":"Internal Resistance","short":"Rint","unit":"mΩ","opt":22,"tau":12,"min":12,"max":80,"dir":"hi","amp":0.8,"weight":0.31,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.1,"desc":"Aging or short-circuit precursor.","corr_base":[0.3,0.4,0.55,0.5,1,0.48]},{"id":"pressure","name":"Swelling Pressure","short":"P","unit":"kPa","opt":0,"tau":18,"min":0,"max":95,"dir":"hi","amp":0.7,"weight":0.23,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":1.8,"desc":"Synthetic gas/swelling indicator.","corr_base":[0.2,0.25,0.3,0.42,0.48,1]}];
+// SCENARIOS: per-scenario drift targets and boost constants (demo tuning values, no dataset behind them).
+// drift[id]      -> ramped (over ~90 ticks, see updateValues()) additive offset applied to that factor's optimum.
+// pressureBoost  -> added directly into pressure().main, i.e. raises R_coupling and shrinks every dynamic tau.
+// corrBoost      -> added into calcCorr()'s driftBase, i.e. raises the synthetic correlation drift directly.
+// Escalation across scenarios (fastcharge -> coolingloss -> agedcell -> short -> runaway) is a demo
+// narrative ordering, not a calibrated risk ranking.
 const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable synthetic pack state."},"fastcharge":{"label":"Fast charge stress","desc":"High current drives delayed thermal response.","drift":{"current":52,"surfaceTemp":9,"dtdt":1.1,"rint":5,"pressure":6},"pressureBoost":0.1,"corrBoost":0.08},"coolingloss":{"label":"Cooling loss","desc":"dT/dt and temperature rise first.","drift":{"current":10,"surfaceTemp":22,"dtdt":2.1,"rint":7,"pressure":11},"pressureBoost":0.2,"corrBoost":0.1},"agedcell":{"label":"Aged cell mix","desc":"Internal resistance rises and shrinks thermal margin.","drift":{"voltage":-0.06,"current":14,"surfaceTemp":12,"dtdt":1.4,"rint":24,"pressure":10},"pressureBoost":0.26,"corrBoost":0.12},"short":{"label":"Internal short precursor","desc":"Voltage drops while resistance, dT/dt, and pressure rise.","drift":{"voltage":-0.38,"current":46,"surfaceTemp":28,"dtdt":3.4,"rint":32,"pressure":24},"pressureBoost":0.35,"corrBoost":0.18},"runaway":{"label":"Runaway cascade","desc":"Resistance, dT/dt, pressure, and temperature couple together.","drift":{"voltage":-0.42,"current":72,"surfaceTemp":46,"dtdt":5.8,"rint":46,"pressure":55},"pressureBoost":0.48,"corrBoost":0.26}};
 const COLORS = ["#72a7ff","#ffd24a","#ff7a1a","#ff4f89","#c084fc","#39ff9b"];
-const HIST_LEN = 136;
+const HIST_LEN = 136; // time-series buffer length (ticks kept for the chart); demo tuning value.
+// tauC: normalizer for correlation-drift R in corrR() (R_corr = |C(t)-C(t0)| / tauC). Demo tuning value.
+// The JP counterpart (36_..._JP.html) uses tauC=0.23 (module-level constant there too) — a separately
+// tuned value, not meant to match.
 const tauC = 0.24;
 let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
 let vals = {};
@@ -194,6 +214,9 @@ function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
 function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
 function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
+// Zone thresholds for this file: OK (R<0.4) -> WATCH (R>=0.4) -> WARN (R>=0.75) -> FAIL (R>=1.0).
+// This implementation keeps a WATCH tier at 0.4; the JP counterpart (36_..._JP.html) has no WATCH
+// tier (only SAFE/WARNING/RUPTURE_BOUNDARY) but shares the same 0.75/1.0 WARN/FAIL cut points.
 function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
 function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
 function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
@@ -240,12 +263,25 @@ function buildDots(){
   });
 }
 
+// pressure(): weighted-sum coupling model — this file's implementation of "R_coupling".
+// p.main    = Σ(factor.weight * rawR) + scenario.pressureBoost, clamped to [0,2.2].
+//             Used as one of the three terms in R_total's max() (see updateUI()), as an input to
+//             dynamicTau() below, and to nudge coupled factor values in updateValues().
+// p.thermal/p.supply = mean rawR within each 'group' (5 of 6 factors are 'thermal'; only voltage is
+//             'supply'), each shrinking only that group's dynamic tau.
+// This is a weighted-sum design, not an explicit factor-to-factor matrix — contrast with the JP
+// counterpart (36_..._JP.html), which derives coupling pressure from rIntPressure/dtdtPressure/
+// tempPressure and blends them with fixed coefficients (calcCouplingBase()).
 function pressure(){
   let p=0, thermal=0, supply=0;
   FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
   const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
   return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
 }
+// dynamicTau(): shrinks a factor's tau under coupling pressure so its structural ratio R rises faster
+// as neighboring signals worsen. Each shrink term is capped (.58/.56/.50) and floored so tau never
+// drops below 35% of its base value (f.tau*.35) — both the caps and the .18/.20/.08 multipliers are
+// demo tuning constants with no external derivation.
 function dynamicTau(f){
   const p=pressure(); let shrink=1;
   if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
@@ -263,11 +299,6 @@ function updateValues(){
     let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
     vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
   });
-  // Optional derived VPD for greenhouse sample.
-  if(FACTORS.some(f=>f.id==='vpd') && vals.temp!==undefined && vals.humidity!==undefined){
-    const es = 0.6108 * Math.exp((17.27*vals.temp)/(vals.temp+237.3));
-    vals.vpd = clamp(es*(1-vals.humidity/100), 0, 4);
-  }
   const p=pressure();
   FACTORS.forEach(f=>{
     if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
@@ -275,15 +306,26 @@ function updateValues(){
     if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
   });
 }
+// calcCorr(): synthetic correlation matrix — NOT a measured statistical correlation.
+// Each off-diagonal cell drifts from its corrBase by driftBase (same 'group' pair) or driftBase*.55
+// (different-group pair), plus uniform random jitter (+/-0.017). driftBase itself scales with
+// coupling pressure (p.main*.14) and the active scenario's corrBoost.
+// Contrast: the JP counterpart (36_..._JP.html) drives drift from specific factor-id pairs tied to
+// the thermal runaway chain (e.g. 'dtdt-rint','rint-temp') plus scenario/tick-based ramps.
 function calcCorr(){
   const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
   for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
   return C;
 }
+// corrR(): per-pair correlation-drift ratio R_corr = |C(t)-C(t0)| / tauC (tauC defined above).
+// Returns the worst pair's R plus a text list of pairs that individually crossed R_corr>=1.
 function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
 
 function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
 function updateUI(){
+  // R_total = max(R_corr, coupling pressure p.main, every per-factor R_i) — a 3-term max matching the
+  // footer/header formula "R_total=max(R_i,R_corr,R_coupling)". Fail-closed by construction: the worst
+  // single signal decides the system status, never a weighted average of all six factors.
   const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
   FACTORS.forEach((f,i)=>{
     const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();
