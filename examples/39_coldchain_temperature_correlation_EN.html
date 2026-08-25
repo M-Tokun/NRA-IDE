@@ -179,10 +179,25 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 </div>
 
 <script>
+// NOTE: This EN file is an independently-built implementation, not a translation of the
+// JP sibling (39_coldchain_temperature_correlation_JP.html). The JP version composes three
+// named pressures (load/cooling/chain) with per-factor tau-shrink formulas and a hardcoded
+// correlation-pair list; this EN version instead uses generic per-factor "weight"/"group"/
+// "shrink"/"coupledBy"/"coupledGain" fields to drive a single weighted pressure model. Both
+// follow the same R_i = delta_i / tau_i(t) structure but are NOT numerically equivalent.
+// Per repository policy (see examples/35, 36) the two are documented separately rather than unified.
+// FACTORS: opt/tau/min/max are demo-tuned constants with no cited cold-chain sensor spec.
+// weight = this factor's share of the composite "main" pressure (see pressure()).
+// group = "thermal" or "supply", used to average into p.thermal / p.supply subtotals.
+// shrink = which pressure category dynamicTau() uses to shrink this factor's tau.
+// coupledBy/coupledGain = feedback: this factor's value is nudged each tick by that pressure.
 const FACTORS = [{"id":"ambient","name":"Ambient Temp","short":"AMB","unit":"℃","opt":18,"tau":18,"min":-10,"max":42,"dir":"hi","amp":1.5,"weight":0.22,"group":"thermal","shrink":"main","desc":"Outside heat load.","corr_base":[1,0.5,0.4,0.3,0.25,0.2,0.18]},{"id":"cargo","name":"Cargo Temp","short":"CARGO","unit":"℃","opt":4,"tau":4,"min":-5,"max":18,"dir":"both","amp":0.4,"weight":0.34,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.55,"desc":"Core monitored value; τ shrinks under cooling pressure.","corr_base":[0.5,1,0.55,0.42,0.3,0.25,0.2]},{"id":"door","name":"Door Opening","short":"DOOR","unit":"%","opt":8,"tau":18,"min":0,"max":100,"dir":"hi","amp":4,"weight":0.26,"group":"thermal","shrink":"main","desc":"Warm-air intrusion and humidity disturbance.","corr_base":[0.4,0.55,1,0.5,0.45,0.35,0.25]},{"id":"comp","name":"Compressor Load","short":"COMP","unit":"%","opt":52,"tau":30,"min":15,"max":100,"dir":"both","amp":4,"weight":0.22,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.0,"desc":"Cooling reaction and remaining reserve.","corr_base":[0.3,0.42,0.5,1,0.48,0.4,0.22]},{"id":"battery","name":"Battery Level","short":"BAT","unit":"%","opt":74,"tau":26,"min":0,"max":100,"dir":"lo","amp":0.6,"weight":0.22,"group":"supply","shrink":"supply","coupledBy":"main","coupledGain":-0.5,"desc":"Low-side power margin.","corr_base":[0.25,0.3,0.45,0.48,1,0.38,0.28]},{"id":"humidity","name":"Cargo Humidity","short":"HUM","unit":"%","opt":68,"tau":20,"min":20,"max":98,"dir":"both","amp":2,"weight":0.15,"group":"supply","shrink":"main","desc":"Condensation and quality support indicator.","corr_base":[0.2,0.25,0.35,0.4,0.38,1,0.24]},{"id":"delay","name":"Delivery Delay","short":"DLY","unit":"min","opt":10,"tau":40,"min":0,"max":300,"dir":"hi","amp":3,"weight":0.2,"group":"supply","shrink":"main","fmt":"int","desc":"More delay increases opening chances and thermal exposure.","corr_base":[0.18,0.2,0.25,0.22,0.28,0.24,1]}];
 const SCENARIOS = {"normal":{"label":"Normal","desc":"Normal synthetic transport."},"summer":{"label":"High ambient","desc":"Ambient heat raises cooling load.","drift":{"ambient":14,"cargo":2.4,"door":3,"comp":18,"battery":-6,"humidity":-5,"delay":8},"pressureBoost":0.15,"corrBoost":0.08},"doorfreq":{"label":"Frequent doors","desc":"Door openings drive warm intrusion.","drift":{"ambient":5,"cargo":3.6,"door":36,"comp":22,"battery":-4,"humidity":9,"delay":18},"pressureBoost":0.24,"corrBoost":0.12},"compdegrade":{"label":"Compressor degradation","desc":"Cooling reserve is reduced.","drift":{"ambient":4,"cargo":5.2,"door":6,"comp":-18,"battery":-5,"humidity":6,"delay":10},"pressureBoost":0.26,"corrBoost":0.14},"battery":{"label":"Low battery","desc":"Battery level shrinks compressor reserve.","drift":{"ambient":3,"cargo":4.4,"door":5,"comp":-10,"battery":-30,"humidity":4,"delay":12},"pressureBoost":0.25,"corrBoost":0.12},"delay":{"label":"Delivery delay","desc":"Delay increases thermal exposure.","drift":{"ambient":5,"cargo":3.8,"door":14,"comp":14,"battery":-10,"humidity":5,"delay":85},"pressureBoost":0.24,"corrBoost":0.13},"break":{"label":"Cold-chain break","desc":"Temperature excursion becomes a coupled chain.","drift":{"ambient":18,"cargo":8.5,"door":32,"comp":-22,"battery":-38,"humidity":12,"delay":120},"pressureBoost":0.45,"corrBoost":0.28}};
 const COLORS = ["#ff9f43","#67d8ff","#ff8ad3","#ffe066","#8bff7a","#5be0c4","#c89bff"];
 const HIST_LEN = 136;
+// tauC: fixed tau for correlation-drift R (R_corr), on a different scale from each
+// FACTORS[i].tau (4-40). Demo-tuned constant with no cited reference; coincidentally
+// the same numeric value as the JP sibling's tauC, but the two files' R_corr inputs differ.
 const tauC = 0.24;
 let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
 let vals = {};
@@ -194,6 +209,10 @@ function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
 function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
 function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
+// Note: this EN version has 4 zones (ok/watch/warn/fail, watch at R>=.4) while the JP
+// sibling has only 3 (ok/warn/fail, no watch tier) — a genuine behavioral difference,
+// not just a translation gap. RUPTURE_BOUNDARY(fail)/WARNING(warn) thresholds (1.0/.75)
+// match the shared NRA-IDE sample convention.
 function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
 function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
 function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
@@ -240,12 +259,19 @@ function buildDots(){
   });
 }
 
+// pressure(): composes one weighted "main" pressure from every factor's raw R
+// (weight field, default 0.18 if unset) plus a per-scenario flat pressureBoost,
+// then separately averages the "thermal" and "supply" group members. This is a
+// different composition strategy from the JP sibling's named load/cooling/chain chain.
 function pressure(){
   let p=0, thermal=0, supply=0;
   FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
   const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
   return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
 }
+// dynamicTau(): shrinks tau by category (f.shrink: "main"/"thermal"/"supply") rather
+// than per-factor formulas. Coefficients (.58/.18, .56/.20/.08, .50/.18/.08) and the
+// f.tau*.35 floor are demo-tuned; the floor prevents tau collapsing toward 0.
 function dynamicTau(f){
   const p=pressure(); let shrink=1;
   if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
@@ -263,11 +289,6 @@ function updateValues(){
     let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
     vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
   });
-  // Optional derived VPD for greenhouse sample.
-  if(FACTORS.some(f=>f.id==='vpd') && vals.temp!==undefined && vals.humidity!==undefined){
-    const es = 0.6108 * Math.exp((17.27*vals.temp)/(vals.temp+237.3));
-    vals.vpd = clamp(es*(1-vals.humidity/100), 0, 4);
-  }
   const p=pressure();
   FACTORS.forEach(f=>{
     if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
@@ -275,6 +296,9 @@ function updateValues(){
     if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
   });
 }
+// calcCorr(): correlation drift here is group-based (same-group pairs drift by the full
+// driftBase, cross-group pairs by driftBase*.55), unlike the JP sibling's hardcoded list
+// of specific factor-id pairs. driftBase mixes p.main*.14 with the scenario's corrBoost.
 function calcCorr(){
   const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
   for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
@@ -321,6 +345,10 @@ function drawChart(){
 function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span class="legend-fail">- - Fail</span>'; }
 function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
 function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
+// Note: tick is incremented twice per animation frame here — once inside updateValues()
+// (tick++ at its top) and again on the line below — unlike the JP sibling, which
+// increments tick only inside updateValues(). Reported as an observed fact per review;
+// logic left unchanged.
 function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
 function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
 function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Cold Chain Temperature Excursion Correlation Simulation initialized.','ok'); updateUI(); }

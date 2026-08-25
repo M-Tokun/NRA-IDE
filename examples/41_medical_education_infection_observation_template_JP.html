@@ -371,6 +371,9 @@ canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:
 </div>
 
 <script>
+// PEOPLE: 12名の合成プロファイル(age/frailty/chronic)。実患者データではなく、
+// 年齢帯・脆弱性・慢性疾患負荷の組み合わせパターンを提示するための教育用の作例。
+// frailty/chronicの数値自体に臨床的な出典はない。
 const PEOPLE = [
   {id:'P-01', name:'個体A', age:22, frailty:.08, chronic:.05, note:'若年。基礎余裕は比較的広い。'},
   {id:'P-02', name:'個体B', age:78, frailty:.66, chronic:.42, note:'高齢・慢性疾患あり。余裕が縮みやすい。'},
@@ -386,6 +389,9 @@ const PEOPLE = [
   {id:'P-12', name:'個体L', age:30, frailty:.10, chronic:.06, note:'若年成人。'}
 ];
 
+// FACTORS: opt(基準値)・tau(構造的許容時間)は一般的なバイタル正常範囲に近いが、
+// τの具体値そのもの（体温2.0、SpO2 5等）はこのsample用のデモ用チューニング値であり、
+// 臨床的な許容時間として引用できるものではない。
 const FACTORS = [
   {id:'temp', name:'体温', opt:36.8, tau:2.0, min:34.0, max:41.5, dir:'both', color:'var(--temp)'},
   {id:'rr', name:'呼吸数', opt:16, tau:11, min:8, max:38, dir:'both', color:'var(--rr)'},
@@ -416,6 +422,10 @@ function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 function rand(a){return (Math.random()-0.5)*2*a;}
 function delta(v,f){return f.dir==='lo'?Math.max(0,f.opt-v):f.dir==='hi'?Math.max(0,v-f.opt):Math.abs(v-f.opt);}
 
+// profilePressure(): 年齢区分の閾値(80/70/60/12歳)とそれぞれのageP値(.46/.32/.20/.12)、
+// およびfrailty重み.46・chronic重み.35は、いずれも根拠不明・デモ用チューニング値。
+// 実際の年齢層別リスク係数（臨床文献等）からの引用ではない。EN版(41_..._EN.html)の
+// profilePressure()と同一の閾値・重みを使用している。
 function profilePressure(p){
   let ageP = 0;
   if(p.age >= 80) ageP = .46;
@@ -436,6 +446,10 @@ function makeState(p, index){
     const base = BASE[f.id];
     const shift = sc.shift[f.id] || 0;
     const amp = sc.amp[f.id] || 0;
+    // pe: Profile圧(高齢・脆弱性・慢性疾患)が各バイタルへ及ぼす押し上げ/押し下げ量。
+    // 係数(.18/2.5/7.5/1.9/4.5/.18)はデモ用チューニング値だが、EN版のFACTORS内
+    // profileGainフィールド(temp:0.18, rr:2.5, hr:7.5, spo2:1.9, hyd:4.5, inf:0.18)と
+    // 数値そのものは一致している（実装方式はハードコードifとデータ駆動で異なる）。
     let pe = 0;
     if(f.id==='temp') pe = prof*.18;
     if(f.id==='rr') pe = prof*2.5;
@@ -447,9 +461,15 @@ function makeState(p, index){
   });
 
   const rs = {};
+  // tauScale: Profile圧全体でτを一律圧縮（上限36%減、下限は元τの45%）。
   const tauScale = clamp(1 - prof*.36, .45, 1);
   FACTORS.forEach(f=>{
     let tau = f.tau * tauScale;
+    // 追加のバイタル間カップリング：呼吸数が上がるとSpO2のτを追加で縮め(*.90)、
+    // 体温が38℃を超えると水分指標・心拍数のτも追加で縮める(*.92)。
+    // これらの相互作用条件と係数(23/38、.90/.92)はデモ用の根拠不明値。
+    // EN版(41_..._EN.html)のmakeState()にはこの追加カップリングが存在しない
+    // （EN版はtauScaleのみでτを決定しており、バイタル間の相互作用項がない）。
     if(f.id==='spo2' && vit.rr > 23) tau *= .90;
     if(f.id==='hyd' && vit.temp > 38) tau *= .92;
     if(f.id==='hr' && vit.temp > 38) tau *= .92;
@@ -458,6 +478,11 @@ function makeState(p, index){
     rs[f.id] = {delta:d, tau, R:d/tau};
   });
 
+  // infPressure: 感染症様マーカーの媒介圧。重み(.32/.26/.20/.30/.42/.18)はEN版FACTORSの
+  // medWeightフィールドと数値が一致する。
+  // corr: 3種の特定ペア合成(temp+hr, rr+spo2, temp+inf)とinfPressureの最大値を取る、
+  // このJP版固有の相関圧定義。EN版のcorr（vitalMax*.55+prof*.25とmedの最大値）とは
+  // 計算式が異なり、クランプ上限も1.65(JP)対1.75(EN)で異なる。
   const infPressure = clamp((rs.temp.R*.32 + rs.rr.R*.26 + rs.hr.R*.20 + rs.spo2.R*.30 + rs.inf.R*.42 + rs.hyd.R*.18), 0, 1.65);
   const corr = clamp(Math.max((rs.temp.R+rs.hr.R)*.32, (rs.rr.R+rs.spo2.R)*.36, (rs.temp.R+rs.inf.R)*.40, infPressure), 0, 1.65);
   const vitalMax = Math.max(...Object.values(rs).map(x=>x.R));
@@ -466,6 +491,9 @@ function makeState(p, index){
   return {person:p, vit, rs, profile:prof, infPressure, corr, vitalMax, personR};
 }
 
+// bucketOf(): 4段階の観察区分。R>=1.0(Human Review)はEDUCATIONAL NOTEに明記のとおり
+// 「自動決定ではなく人間確認へ戻すFail-Closed」。R>=.75/R>=.40の中間閾値はこのsample
+// 固有の教育用区分であり、臨床トリアージ基準からの引用ではない。
 function bucketOf(R){
   if(R>=1.0) return {key:'fail', label:'Human Review', badge:'HUMAN', color:'var(--fail)'};
   if(R>=.75) return {key:'warn', label:'Caution', badge:'CAUTION', color:'var(--warn)'};

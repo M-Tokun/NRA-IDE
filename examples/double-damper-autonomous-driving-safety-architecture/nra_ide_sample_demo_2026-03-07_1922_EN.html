@@ -320,6 +320,10 @@
     stateBadge: $('stateBadge'),
   };
 
+  // Double-damper core state:
+  // upperEMA/lowerEMA = deviation EMA for the upper / lower side (asymmetric damping)
+  // shortWindow       = recent R samples used for short-term log reconstruction
+  // longDamage        = long-term degradation index (clamped to 0-1.8)
   let running = true;
   let t = 0;
   let last = performance.now();
@@ -331,7 +335,7 @@
   let rawHistory = [];
   let shortHistory = [];
   let damageHistory = [];
-  const maxPoints = 220;
+  const maxPoints = 220; // History buffer length / number of points on the graph x-axis. Rationale unclear — demo tuning value.
 
   function syncLabels() {
     labels.tauBase.textContent = Number(sliders.tauBase.value).toFixed(1);
@@ -378,34 +382,50 @@
     const disturbance = Number(sliders.disturbance.value);
     const degradeRate = Number(sliders.degrade.value);
 
+    // raw is a synthesized waveform, not a real sensor reading (demo-only fluctuation).
+    // baseWave: low-frequency periodic sway, micro: high-frequency jitter, random: noise scaled by disturbance intensity, drift: very-low-frequency slow bias
     const baseWave = Math.sin(t * 1.5) * 4.5 + Math.sin(t * 0.37) * 2.4;
     const micro = Math.sin(t * 9.0) * 0.9;
     const random = (Math.random() - 0.5) * 2.8 * disturbance;
     const drift = Math.sin(t * 0.08) * 2.0;
 
-    spike *= 0.94;
+    spike *= 0.94; // Spike decay factor. A larger value makes the spike linger longer. Rationale unclear — demo tuning value.
     const raw = baseWave + micro + random + drift + spike;
 
+    // Double-damper branch point: split raw into an upper-side and lower-side deviation; each is handled with its own EMA and tau from here on
     const upperDev = Math.max(0, raw);
     const lowerDev = Math.max(0, -raw);
 
+    // Asymmetric damper: alphaUpper/alphaLower smooth the upper and lower sides at different rates by design (different response characteristics per side)
     upperEMA = upperEMA * (1 - alphaUpper) + upperDev * alphaUpper;
     lowerEMA = lowerEMA * (1 - alphaLower) + lowerDev * alphaLower;
 
+    // Dynamic boundary tau: expands/contracts the base thickness tauBase using the EMA. Coefficients 0.65 / 0.35 and the floor of 2.0 — rationale unclear, demo tuning values.
     const tauDynUpper = tauBase + upperEMA * 0.65;
     const tauDynLower = Math.max(2.0, tauBase - lowerEMA * 0.35);
 
+    // R = delta/tau (as defined in the header text), computed separately for the upper and lower side; the larger of the two becomes the instantaneous R
     const rUpper = upperDev / Math.max(tauDynUpper, 0.001);
     const rLower = lowerDev / Math.max(tauDynLower, 0.001);
     const rNow = Math.max(rUpper, rLower);
 
+    // Short-term log reconstruction: R_short is the moving average of the last 28 R samples. Window size 28 — rationale unclear, demo tuning value.
     shortWindow.push(rNow);
     if (shortWindow.length > 28) shortWindow.shift();
     const rShort = shortWindow.reduce((a, b) => a + b, 0) / shortWindow.length;
 
+    // Long-term degradation index update (degradation-formula coefficients):
+    // wearInput: the amount R_short exceeds 0.58, weighted by disturbance intensity (0.8 + disturbance*0.35)
+    // longDamage: decays the previous value by 0.995, accumulates wearInput*degradeRate*0.8,
+    //             and additionally adds 0.02x the amount instantaneous R exceeds 1.0 (capped at 1.8 via Math.min(1.8, ...)).
+    // Coefficients 0.58 / 0.995 / 0.8 / 0.35 / 0.02 and the 1.8 cap are all rationale unclear, demo tuning values.
     const wearInput = Math.max(0, rShort - 0.58) * (0.8 + disturbance * 0.35);
     longDamage = Math.min(1.8, longDamage * 0.995 + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
 
+    // State transition (decision ladder, matches the table above):
+    // SILENCE: rNow>=1.0 or longDamage>=1.0 (fail-safe, immediate stop)
+    // DAMP   : rNow>=0.72 or rShort>=0.60 or longDamage>=0.45 (damping region; the table only says "R_short is rising" / "cascading deterioration in D_long" without the numeric thresholds)
+    // PASS   : none of the above
     let state = 'PASS';
     if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE';
     else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP';
@@ -417,6 +437,7 @@
     metrics.tauLower.textContent = tauDynLower.toFixed(2);
     setBadge(state);
 
+    // Display-only normalization: rawHistory is scaled by /16 for visual fit, damageHistory is normalized to 0-1 by dividing by longDamage's cap of 1.8
     push(rawHistory, raw / 16);
     push(shortHistory, rShort);
     push(damageHistory, longDamage / 1.8);
@@ -452,6 +473,7 @@
       ctx.stroke();
     }
 
+    // Green band (visual "safe region"): purely decorative fill from 28% to 72% of canvas height; it is not tied to the actual R/tau boundary values
     const safeTop = h * 0.28;
     const safeBottom = h * 0.72;
     ctx.fillStyle = 'rgba(47,211,139,0.08)';

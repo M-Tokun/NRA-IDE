@@ -694,14 +694,14 @@
       let stopMargin = 4.4 + 0.5 * Math.cos(t * 0.6);
 
       switch (state.scene) {
-        case 'approach':
+        case 'approach': // Shrinks distance to ~14m, raises relative speed and yaw error, compresses stopping margin (dramatizes an approach hazard)
           distance = 14 + 3 * Math.sin(t * 0.8);
           relSpeed = 9.5 + 1.5 * Math.sin(t * 1.2);
           yawError = 2.5 + 0.8 * Math.sin(t * 1.0);
           laneConfidence = 0.84 + 0.04 * Math.sin(t * 0.8);
           stopMargin = 1.2 + 0.25 * Math.cos(t * 1.0);
           break;
-        case 'glare':
+        case 'glare': // Pushes cam up by ~0.42 to dramatize backlight-induced misperception; radar/imu rise only slightly
           cam += 0.42 + 0.12 * Math.sin(t * 1.9);
           distance = 30 + 3 * Math.sin(t * 0.6);
           relSpeed = 5.0 + 0.9 * Math.sin(t * 1.0);
@@ -711,7 +711,7 @@
           radar += 0.05;
           imu += 0.04;
           break;
-        case 'rain':
+        case 'rain': // Raises both cam and radar to dramatize sensor degradation from heavy rain
           cam += 0.22 + 0.04 * Math.sin(t * 2.1);
           radar += 0.24 + 0.05 * Math.cos(t * 1.4);
           imu += 0.03;
@@ -721,7 +721,7 @@
           laneConfidence = 0.61 + 0.06 * Math.sin(t * 1.1);
           stopMargin = 1.9 + 0.25 * Math.cos(t * 0.8);
           break;
-        case 'ghost':
+        case 'ghost': // Pushes radar up by ~0.48 to dramatize noise from ghost (multipath) reflections
           cam += 0.05;
           radar += 0.48 + 0.10 * Math.sin(t * 2.7);
           imu += 0.06;
@@ -731,7 +731,7 @@
           laneConfidence = 0.79 + 0.04 * Math.sin(t * 0.6);
           stopMargin = 1.8 + 0.2 * Math.cos(t * 0.7);
           break;
-        case 'drift':
+        case 'drift': // Pushes imu up by ~0.40 and widens yaw error to ~6.5 to dramatize ego-motion drift
           cam += 0.04;
           radar += 0.06;
           imu += 0.40 + 0.10 * Math.sin(t * 0.5);
@@ -741,7 +741,7 @@
           laneConfidence = 0.73 + 0.05 * Math.sin(t * 0.7);
           stopMargin = 2.0 + 0.25 * Math.cos(t * 0.8);
           break;
-        case 'mixed':
+        case 'mixed': // Raises cam/radar/imu simultaneously, and pushes distance/relSpeed/yawError/laneConfidence/stopMargin all toward worse values (compound anomaly)
           cam += 0.30 + 0.12 * Math.sin(t * 1.8);
           radar += 0.35 + 0.09 * Math.cos(t * 2.2);
           imu += 0.32 + 0.08 * Math.sin(t * 0.7);
@@ -785,6 +785,11 @@
       `).join('');
     }
 
+    // Computes an individual risk value (0-1.4) from each of the five physical monitoring quantities, then
+    // combines them by taking the maximum. The denominators (18, 12, 7.5, 0.75, 2.2) are the values treated as
+    // "risk = 1.0", corresponding to the lower-bound/upper-bound monitoring types described in the HTML
+    // metric-desc text, but no basis for the specific figures is given; basis unknown / demo tuning values.
+    // The composite weights (rRel*0.85, rStop*1.05) are likewise basis unknown / demo tuning values.
     function metricRisk(distance, relSpeed, yawError, laneConfidence, stopMargin) {
       const rDist = clamp((18 - distance) / 18, 0, 1.4);
       const rRel = clamp(relSpeed / 12, 0, 1.4);
@@ -797,6 +802,12 @@
       };
     }
 
+    // Computes the composite value that decides the final verdict (PASS/DAMP/FALLBACK).
+    // Takes the maximum of rNow (current boundary ratio), rShort*0.92 + dLong*0.45 (weighted short/long-term
+    // reconstruction value), and metricComposite (physical-quantity risk).
+    // The weights 0.92/0.45 and the thresholds 1.0 (FALLBACK) / 0.72 (DAMP) correspond to the operational split
+    // described in the HTML "Design policy" item 5 (separating outputs into PASS/DAMP/FALLBACK), but no basis
+    // for the specific figures is given; basis unknown / demo tuning values.
     function setDecision(rNow, rShort, dLong, metricComposite) {
       const composite = Math.max(rNow, rShort * 0.92 + dLong * 0.45, metricComposite);
       const prev = state.decision;
@@ -807,6 +818,9 @@
       } else {
         state.decision = 'PASS';
       }
+      // DANGER display fires when the composite value exceeds the slider-set dangerThreshold, OR when the
+      // example-only dangerInject slider (per the danger-card note, absent from any real implementation)
+      // is forced above the threshold.
       const dangerNow = composite >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
       if (dangerNow !== state.dangerActive) {
         state.dangerActive = dangerNow;
@@ -830,20 +844,36 @@
       state.laneConfidence = s.laneConfidence;
       state.stopMargin = s.stopMargin;
 
+      // Computes the disagreement among the three subsystems (cam/radar/imu): the average of the absolute
+      // difference across all 3 pairs. This implements the inline-note on the Mandatory sensor boundary card
+      // ("instead of forcing agreement, the degree of disagreement is treated as a danger boundary") and is
+      // the core algorithm of this demo.
       const pair1 = Math.abs(state.cam - state.radar);
       const pair2 = Math.abs(state.cam - state.imu);
       const pair3 = Math.abs(state.radar - state.imu);
       const disagreement = (pair1 + pair2 + pair3) / 3;
 
+      // Upper damper: relaxes by a factor of 0.35 for whatever amount rShort exceeds 0.4.
+      // Lower damper: tightens by a factor of 0.20 for whatever amount dLong exceeds 0.25 (floored at 0.25).
+      // This implements the asymmetric structure described in the parameter panel copy ("the lower side is
+      // sensitive, while the upper side is conservative"); the figures 0.4/0.35/0.25/0.20 are basis unknown /
+      // demo tuning values.
+      // Note: tauLower is used only for the UI display (ui.tauLower) — it is not used in rNow or any decision math.
       const tauUpper = state.upperDamper + Math.max(0, state.rShort - 0.4) * 0.35;
       const tauLower = Math.max(0.25, state.lowerDamper - Math.max(0, state.dLong - 0.25) * 0.20);
 
-      state.rNow = Math.max(disagreement / tauUpper, 0);
+      state.rNow = Math.max(disagreement / tauUpper, 0); // R_now = disagreement / upper damper
 
+      // Short-term memory: keeps the last 24 frames of rNow and averages them (window length 24 is basis
+      // unknown / demo tuning value).
       state.shortMemory.push(state.rNow);
       if (state.shortMemory.length > 24) state.shortMemory.shift();
       const recentAvg = state.shortMemory.reduce((a, b) => a + b, 0) / state.shortMemory.length;
+      // rShort lerps toward recentAvg at the rate of state.recon (reconstruction-sensitivity slider, 0.10-0.95).
       state.rShort = lerp(state.rShort, recentAvg, state.recon);
+      // dLong lerps toward rShort at the rate of state.deg*0.12. The 0.12 factor is a basis unknown fixed scale
+      // constant; combined with the deg slider (0.01-0.50) it makes long-term degradation update much more
+      // slowly than short-term reconstruction.
       state.dLong = lerp(state.dLong, state.rShort, state.deg * 0.12);
 
       const mr = metricRisk(state.distance, state.relSpeed, state.yawError, state.laneConfidence, state.stopMargin);
@@ -885,7 +915,7 @@
         ui.dangerDisplay.className = 'danger-display stop';
         ui.dangerMain.textContent = 'DANGER';
         ui.dangerSub.textContent = 'Danger-zone sample. Threshold exceeded or forced injection is active.';
-      } else if (Math.max(state.metricRisk, state.rNow, state.rShort) >= state.dangerThreshold * 0.8) {
+      } else if (Math.max(state.metricRisk, state.rNow, state.rShort) >= state.dangerThreshold * 0.8) { // WARNING: fires at 80% of dangerThreshold (the 0.8 factor is basis unknown / demo tuning value) to signal an approaching danger zone
         ui.dangerDisplay.className = 'danger-display warn';
         ui.dangerMain.textContent = 'WARNING';
         ui.dangerSub.textContent = 'Approaching the danger zone. Boundary margin is getting thin.';
@@ -951,7 +981,7 @@
         `State = ${state.cam.toFixed(2)}`
       ]);
       drawBox(30, 205, 220, 115, '#ffb14f', 'Radar', [
-        'DistanceとRelative speed',
+        'Distance and Relative speed',
         'Relatively strong in bad weather',
         `State = ${state.radar.toFixed(2)}`
       ]);

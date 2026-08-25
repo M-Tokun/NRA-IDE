@@ -320,6 +320,10 @@
     stateBadge: $('stateBadge'),
   };
 
+  // ダブルダンパー機構の状態変数：
+  // upperEMA/lowerEMA = 上限側／下限側の偏差EMA（非対称減衰）
+  // shortWindow       = 短期ログ再構成用のRの直近サンプル列
+  // longDamage        = 長期劣化指数（0〜1.8にクランプ）
   let running = true;
   let t = 0;
   let last = performance.now();
@@ -331,7 +335,7 @@
   let rawHistory = [];
   let shortHistory = [];
   let damageHistory = [];
-  const maxPoints = 220;
+  const maxPoints = 220; // 履歴バッファ長・グラフ横軸の点数。根拠不明・デモ用チューニング値
 
   function syncLabels() {
     labels.tauBase.textContent = Number(sliders.tauBase.value).toFixed(1);
@@ -378,34 +382,50 @@
     const disturbance = Number(sliders.disturbance.value);
     const degradeRate = Number(sliders.degrade.value);
 
+    // raw は実センサ値ではなく合成波形（デモ用の疑似変動）。
+    // baseWave: 低周波の周期揺れ、micro: 高周波の微振動、random: 外乱強度に比例するノイズ、drift: 超低周波の緩やかな偏り
     const baseWave = Math.sin(t * 1.5) * 4.5 + Math.sin(t * 0.37) * 2.4;
     const micro = Math.sin(t * 9.0) * 0.9;
     const random = (Math.random() - 0.5) * 2.8 * disturbance;
     const drift = Math.sin(t * 0.08) * 2.0;
 
-    spike *= 0.94;
+    spike *= 0.94; // スパイクの減衰係数。値が大きいほど余韻が長く残る。根拠不明・デモ用チューニング値
     const raw = baseWave + micro + random + drift + spike;
 
+    // ダブルダンパー機構の分岐点：raw を上限側偏差／下限側偏差に分離し、以降は別々のEMA・τで扱う
     const upperDev = Math.max(0, raw);
     const lowerDev = Math.max(0, -raw);
 
+    // 非対称ダンパー：alphaUpper/alphaLowerで上限・下限を別々の速度で平滑化（上限下限で応答特性を変える設計）
     upperEMA = upperEMA * (1 - alphaUpper) + upperDev * alphaUpper;
     lowerEMA = lowerEMA * (1 - alphaLower) + lowerDev * alphaLower;
 
+    // 動的境界τ：基準厚みtauBaseにEMAを加減して境界を伸縮させる。係数0.65/0.35と下限2.0は根拠不明・デモ用チューニング値
     const tauDynUpper = tauBase + upperEMA * 0.65;
     const tauDynLower = Math.max(2.0, tauBase - lowerEMA * 0.35);
 
+    // R = δ/τ（ヘッダー文言の定義どおり）を上限側・下限側それぞれで算出し、大きい方を瞬間Rとして採用
     const rUpper = upperDev / Math.max(tauDynUpper, 0.001);
     const rLower = lowerDev / Math.max(tauDynLower, 0.001);
     const rNow = Math.max(rUpper, rLower);
 
+    // 短期ログ再構成：直近28サンプルのRを移動平均してR_shortとする。窓幅28は根拠不明・デモ用チューニング値
     shortWindow.push(rNow);
     if (shortWindow.length > 28) shortWindow.shift();
     const rShort = shortWindow.reduce((a, b) => a + b, 0) / shortWindow.length;
 
+    // 長期劣化指数の更新式（劣化式係数）：
+    // wearInput: R_shortが0.58を超えた分に外乱強度で重み付け（0.8+disturbance*0.35）
+    // longDamage: 前値を0.995で減衰させつつwearInput*degradeRate*0.8を積算し、
+    //             さらに瞬間Rが1.0を超えた分を0.02倍で追加加算（1.8で頭打ち＝Math.min(1.8, ...)）。
+    // 係数0.58/0.995/0.8/0.35/0.02および上限1.8はいずれも根拠不明・デモ用チューニング値
     const wearInput = Math.max(0, rShort - 0.58) * (0.8 + disturbance * 0.35);
     longDamage = Math.min(1.8, longDamage * 0.995 + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
 
+    // 状態遷移（判定ラダー、画面上の表に対応）：
+    // SILENCE: rNow>=1.0 または longDamage>=1.0（フェイルセーフ、即停止）
+    // DAMP   : rNow>=0.72 または rShort>=0.60 または longDamage>=0.45（減衰域。表側は「R_short上昇」「D_long悪化」とのみ記載され数値は非表示）
+    // PASS   : 上記いずれも満たさない場合
     let state = 'PASS';
     if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE';
     else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP';
@@ -417,6 +437,7 @@
     metrics.tauLower.textContent = tauDynLower.toFixed(2);
     setBadge(state);
 
+    // 表示用の正規化：rawHistoryは目視スケール調整の/16、damageHistoryはlongDamageの上限1.8で割って0-1域に正規化
     push(rawHistory, raw / 16);
     push(shortHistory, rShort);
     push(damageHistory, longDamage / 1.8);
@@ -452,6 +473,7 @@
       ctx.stroke();
     }
 
+    // 緑帯（安全域の視覚表示）：canvas高さの28%-72%を固定的に塗るだけの装飾で、実際のR/τ境界値とは連動していない
     const safeTop = h * 0.28;
     const safeBottom = h * 0.72;
     ctx.fillStyle = 'rgba(47,211,139,0.08)';

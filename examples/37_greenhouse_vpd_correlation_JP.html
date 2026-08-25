@@ -493,6 +493,15 @@ function calcVPD(T, RH){
   return Math.max(0, es - ea);
 }
 
+// FACTORS: 各変数の構造パラメータ（opt=目標値、tau=基準τ、dir=δの向き、corr_base=
+// この変数と他変数の「基準相関」行。dynamicTau()・couplingPressures()・calcCorr()が
+// これらを使って動的τ・媒介圧・相関ドリフトを計算する。
+// 注：本JP版は37_greenhouse_vpd_correlation_EN.htmlの翻訳版ではなく別実装。
+// EN版はweight/group/shrink/coupledByベースの汎用結合モデル（pressure()）を使うのに対し、
+// JP版はここdynamicTau()内の個別ペア条件、couplingPressures()の"mediator"合成式、
+// calcCorr()内のペアID直接判定という、変数ごとに手書きされた結合則を使う。
+// どちらも内部的には一貫しているが、係数・重みに出典はなくデモ用チューニング値。
+// 今回の対応方針として、両実装の統一は行わず、各ファイルへ実装内容の説明コメントを付す。
 const FACTORS = [
   {
     id:'temp', name:'気温', short:'T', unit:'℃', color:'var(--temp)',
@@ -538,6 +547,9 @@ const FACTORS = [
   }
 ];
 
+// BASE: updateValues()内のdrift/noise/wave計算の起点値。FACTORS[].optと同じ数値を
+// 別オブジェクトとして重複保持している（例：temp 24, hum 68, co2 800…はFACTORS[].optと一致）。
+// 片方だけ変更すると値がずれるリスクがあるが、今回はロジック変更を行わないため統合はしない。
 const BASE = {
   temp:24, hum:68, co2:800, light:18000, water:62, ec:1.45
 };
@@ -554,9 +566,12 @@ let rHistory = FACTORS.map(()=>[]);
 let prevZones = FACTORS.map(()=>'ok');
 let logLines = [];
 const HIST_LEN = 132;
+// tauC: 相関ドリフトの基準τ。R_corr=|C(t)-C(t0)|/tauC（calcRCorr()参照）。出典なし、デモ用固定値。
 const tauC = 0.24;
 let corrBase = FACTORS.map(f => [...f.corr_base]);
 
+// SCENARIOS: drift=90tickでランプする各変数の目標オフセット（updateValues()参照）、
+// amp=そのシナリオでのノイズ振幅上書き。両方とも出典なし、デモ用チューニング値。
 const SCENARIOS = {
   normal: {
     desc:'通常範囲内で推移',
@@ -627,6 +642,9 @@ function dynamicTau(i){
   let shrink = 1.0;
 
   // VPD compresses water, CO2, and EC margins.
+  // 各行はfactor固有の手書きペア結合則（フラグ箇所）：しきい値（0.45/0.55/0.65/0.75）を
+  // 超えた分だけ他変数のRがτを圧縮する。しきい値・係数（0.18/0.10/0.08/0.15/0.08/0.06）・
+  // 上限（0.48/0.30/0.42/0.25/0.18）はいずれも出典なし、デモ用チューニング値。
   if(f.id === 'water') shrink -= Math.min(0.48, Math.max(0,vpdR-0.45) * 0.18);
   if(f.id === 'co2')   shrink -= Math.min(0.30, Math.max(0,lightR-0.55) * 0.10 + Math.max(0,vpdR-0.65)*0.08);
   if(f.id === 'ec')    shrink -= Math.min(0.42, Math.max(0,waterR-0.55) * 0.15);
@@ -659,6 +677,8 @@ function calcR(i){
   return {delta, tau, R: delta / tau};
 }
 
+// NRA-IDEのリポジトリ共通3段階しきい値：R>=1.0でRUPTURE_BOUNDARY(fail)、
+// R>=0.75でWARNING(warn)、それ未満はSAFE(ok)。
 function getColor(R){
   if(R >= 1.0) return 'var(--fail)';
   if(R >= 0.75) return 'var(--warn)';
@@ -736,6 +756,8 @@ function updateValues(){
     const amp = noiseAmp[id];
     const noise = (Math.random()-0.5)*2*amp;
     const wave = Math.sin(tick*0.045 + idx*0.85) * amp * 0.45;
+    // collapseシナリオ限定の追加オフセット（tick>38からランプ、collapseRamp参照）。
+    // 係数5/-8/-8/-120/0.25はいずれも出典なし、デモ演出用の固定値。
     let extra = 0;
     if(id === 'temp') extra += collapseRamp * 5;
     if(id === 'hum') extra -= collapseRamp * 8;
@@ -750,6 +772,10 @@ function updateValues(){
   vals.vpd = clamp(calcVPD(vals.temp, vals.hum), 0, 4.0);
 }
 
+// couplingPressures(): "mediator"圧はVPD/水分/光量/CO2それぞれのRが個別しきい値
+// （0.35/0.45/0.6/0.65）を超えた超過分の重み付き和（重み0.55/0.35/0.25/0.25）、1.8で頭打ち。
+// R_total = max(R_i, R_corr, R_loop相当)の第3項として使われる（updateUI()内 rTotal 参照）。
+// しきい値・重み・上限値はいずれも出典なし、デモ用チューニング値。
 function couplingPressures(){
   const vr = calcRById('vpd').R;
   const wr = calcRById('water').R;
@@ -770,6 +796,10 @@ function calcCorr(){
       let drift = 0;
 
       // VPD-mediated pairs become more tightly coupled under stress.
+      // ペアIDをハードコードした条件分岐（フラグ箇所）。VPD媒介ペアはmediator圧に比例して
+      // 相関がドリフトし（係数0.18）、co2drop/collapseシナリオ限定でCO2-光-温度ペアが
+      // 追加ドリフト（0.18 + tick比例、上限0.25）、collapseシナリオはtick>35から全体に
+      // 追加ドリフト（tick比例、上限0.38）が乗る。係数・しきい値はいずれも出典なし。
       if(['hum-temp','temp-vpd','hum-vpd','vpd-water','co2-vpd','light-vpd','ec-water'].includes(ids)){
         drift += cp.mediator * 0.18;
       }
@@ -901,6 +931,8 @@ function updateUI(){
     corrAlert.innerHTML = `<span class="corr-ok-txt">✓ 相関正常 R_corr=${rCorr.toFixed(3)}</span>`;
   }
 
+  // R_total = max(R_corr, R_i全体, R_mediator)：平均ではなくmaxで合成する（危険を薄めない）。
+  // これがこのsample全体の状態判定（フラグ）の核心。
   rTotal = Math.max(rTotal, cp.mediator);
   document.getElementById('overall-r').textContent = rTotal.toFixed(3);
   document.getElementById('overall-r').style.color = getColor(rTotal);

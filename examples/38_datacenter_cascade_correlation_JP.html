@@ -475,6 +475,16 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
 </div>
 
 <script>
+// FACTORS: 各変数の構造パラメータ（opt=目標値、tau=基準τ、dir=δの向き、corr_base=
+// この変数と他変数の「基準相関」行）。pressures()・dynamicTau()・calcCorr()がこれらを
+// 使って結合圧・動的τ・相関ドリフトを計算する。
+// 注：本JP版は38_datacenter_cascade_correlation_EN.htmlの翻訳版ではなく別実装。
+// EN版はweight/group/shrink/coupledByベースの汎用結合モデル（37_greenhouseと共通の
+// pressure()実装）を使うのに対し、JP版はpressures()内のfactor別重み付き圧力合成、
+// dynamicTau()の変数別個別条件、calcCorr()内のペアID直接判定という、変数ごとに
+// 手書きされた結合則を使う。どちらも内部的には一貫しているが、係数・重みに出典はなく
+// デモ用チューニング値。今回の対応方針として、両実装の統一は行わず、各ファイルへ
+// 実装内容の説明コメントを付す。
 const FACTORS = [
   {
     id:'cpu', name:'CPU負荷', short:'CPU', unit:'%', color:'var(--cpu)',
@@ -520,6 +530,9 @@ const FACTORS = [
   }
 ];
 
+// BASE: updateValues()内のdrift/noise/wave計算の起点値。FACTORS[].optと同じ数値を
+// 別オブジェクトとして重複保持している。片方だけ変更すると値がずれるリスクがあるが、
+// 今回はロジック変更を行わないため統合はしない。
 const BASE = {cpu:45, power:420, rack:34, inlet:22, fan:52, air:78, lat:8};
 let vals = {...BASE};
 let running = true;
@@ -531,9 +544,12 @@ let rHistory = FACTORS.map(()=>[]);
 let prevZones = FACTORS.map(()=>'ok');
 let logLines = [];
 const HIST_LEN = 136;
+// tauC: 相関ドリフトの基準τ。R_corr=|C(t)-C(t0)|/tauC（calcRCorr()参照）。出典なし、デモ用固定値。
 const tauC = 0.24;
 let corrBase = FACTORS.map(f => [...f.corr_base]);
 
+// SCENARIOS: drift=90tickでランプする各変数の目標オフセット（updateValues()参照）、
+// amp=そのシナリオでのノイズ振幅上書き。両方とも出典なし、デモ用チューニング値。
 const SCENARIOS = {
   normal: {
     desc:'通常範囲内で推移',
@@ -590,6 +606,8 @@ function calcDelta(val, f){
   return Math.abs(val - f.opt);
 }
 
+// 固定τでRを読む非再帰関数。pressures()内では必ずこちらを使い、dynamicTau()との
+// 循環参照（動的τがpressures()に依存し、pressures()が動的τに依存する）を防ぐ。
 function calcRawRById(id){
   const i = factorIndexById(id);
   const f = FACTORS[i];
@@ -597,6 +615,12 @@ function calcRawRById(id){
   return {delta, tau:f.tau, R:delta/f.tau};
 }
 
+// pressures(): cooling/thermal/loop/serviceの4つの合成圧力を、各変数の固定τベースR
+// （calcRawRById）の重み付き和として算出（重み合計は各式で1.0にはならず、そのまま
+// 2.0/2.2で頭打ち）。loopがpower→heat(rack)→fan→powerの正のフィードバックループ圧に
+// 相当し、UI上のFEEDBACK LOOP RおよびR_total = max(R_i, R_corr, R_loop)の第3項として
+// 使われる（updateUI()参照）。重み（0.45/0.35/0.30/0.40/0.45/0.25/0.33/0.25/0.24/0.18/
+// 0.45/0.28/0.20）と上限（2.0/2.2）はいずれも出典なし、デモ用チューニング値。
 function pressures(){
   const cpu = calcRawRById('cpu').R;
   const power = calcRawRById('power').R;
@@ -612,6 +636,11 @@ function pressures(){
   return {cpu,power,rack,inlet,fan,air,lat,cooling,thermal,loop,service};
 }
 
+// dynamicTau(i): 変数ごとに手書きされたペア圧縮則（フラグ箇所）。rack/inlet/power/fan/
+// air/latそれぞれが、関連する合成圧力（cooling/air/loop/thermal/fan・inlet/cpu・power）に
+// 応じてτを圧縮する。係数（0.18/0.08/0.16/0.08/0.12/0.10/0.08/0.10/0.06）と上限
+// （0.58/0.40/0.30/0.42/0.45/0.32）はいずれも出典なし、デモ用チューニング値。
+// τは基準値の35%未満には縮まない（floor）。
 function dynamicTau(i){
   const f = FACTORS[i];
   const p = pressures();
@@ -634,6 +663,8 @@ function calcR(i){
   return {delta, tau, R: delta / tau};
 }
 
+// NRA-IDEのリポジトリ共通3段階しきい値：R>=1.0でRUPTURE_BOUNDARY(fail)、
+// R>=0.75でWARNING(warn)、それ未満はSAFE(ok)。
 function getColor(R){
   if(R >= 1.0) return 'var(--fail)';
   if(R >= 0.75) return 'var(--warn)';
@@ -713,6 +744,8 @@ function updateValues(){
     const noise = (Math.random()-0.5)*2*amp;
     const wave = Math.sin(tick*0.045 + idx*0.85) * amp * 0.45;
 
+    // cascadeシナリオ限定の追加オフセット（tick>42からランプ、cascadeRamp参照）。
+    // 係数115/11/5/14/-12/20はいずれも出典なし、デモ演出用の固定値。
     let extra = 0;
     if(id === 'power') extra += cascadeRamp * 115;
     if(id === 'rack') extra += cascadeRamp * 11;
@@ -725,6 +758,9 @@ function updateValues(){
   });
 
   // Synthetic physical coupling after base update.
+  // power→heat(rack)→fan→powerの正のフィードバックループを模した直接加算（重要ポイント
+  // 箇所）。合成圧力pressures()の値に係数（18/12/0.9/1.4/0.8/3.2/1.6/0.8/1.5/0.7）を
+  // 掛けて各変数へ加算する。これらの係数はいずれも出典なし、デモ用チューニング値。
   const p = pressures();
   vals.power = clamp(vals.power + p.fan*18 + p.cpu*12, FACTORS[1].min, FACTORS[1].max);
   vals.rack  = clamp(vals.rack  + p.power*0.9 + p.air*1.4 + p.inlet*0.8, FACTORS[2].min, FACTORS[2].max);
@@ -742,6 +778,10 @@ function calcCorr(){
       const ids = [FACTORS[i].id, FACTORS[j].id].sort().join('-');
       let drift = 0;
 
+      // ペアIDをハードコードした条件分岐（フラグ箇所）。ループ関連ペアはloop/cooling圧に
+      // 比例してドリフト（係数0.15/0.08、0.16）、netqueueシナリオ限定でCPU-遅延関連ペアが
+      // 追加ドリフト（0.20 + tick比例、上限0.25）、cascadeシナリオはtick>36から全体に
+      // 追加ドリフト（tick比例、上限0.42）が乗る。係数・しきい値はいずれも出典なし。
       if(['power-rack','fan-rack','air-rack','inlet-rack','fan-power','cpu-power','cpu-lat'].includes(ids)){
         drift += p.loop * 0.15 + p.cooling * 0.08;
       }
@@ -789,6 +829,8 @@ function updateUI(){
   const {maxR:rCorr, alerts} = calcRCorr(C);
   const p = pressures();
 
+  // R_total = max(R_corr, R_loop, R_i全体)：平均ではなくmaxで合成する（危険を薄めない）。
+  // これがこのsample全体の状態判定（フラグ）の核心。
   let rTotal = Math.max(rCorr, p.loop);
   let failAny = false;
   let warnAny = false;

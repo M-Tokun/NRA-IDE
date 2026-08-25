@@ -179,10 +179,32 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 </div>
 
 <script>
+// FACTORS: per-variable structural parameters (opt=target value, tau=base structural
+// time-constant, dir=direction that counts as "delta" (both/hi/lo), amp=noise amplitude).
+// weight/group/shrink/coupledBy/coupledGain drive the coupling model in pressure()/
+// dynamicTau()/updateValues() below. corr_base is the reference correlation row used by
+// calcCorr()/corrR() as the "normal" correlation baseline. None of weight, group-average
+// blending, shrink magnitudes, coupledGain values, or corr_base numbers have a cited
+// engineering source — they are demo-tuning values chosen to make the sample react visibly.
+// NOTE: This EN file shares its script skeleton with 37_greenhouse_vpd_correlation_EN.html
+// (same pressure()/dynamicTau()/calcCorr() shapes) but is not a translation of the JP
+// sibling (38_datacenter_cascade_correlation_JP.html), which uses an entirely different,
+// per-factor hand-written coupling model (pressures()/dynamicTau()/calcCorr() with hardcoded
+// pair-id logic). Both are internally consistent; not unified per working policy for this pass.
 const FACTORS = [{"id":"cpu","name":"CPU Load","short":"CPU","unit":"%","opt":45,"tau":35,"min":5,"max":100,"dir":"hi","amp":5,"weight":0.22,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.4,"desc":"Compute load drives power and latency.","corr_base":[1,0.5,0.4,0.3,0.25,0.2,0.18]},{"id":"power","name":"Power","short":"PWR","unit":"kW","opt":420,"tau":220,"min":180,"max":980,"dir":"hi","amp":22,"weight":0.3,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":8,"fmt":"int","desc":"IT plus cooling power.","corr_base":[0.5,1,0.55,0.42,0.3,0.25,0.2]},{"id":"rack","name":"Rack Temp","short":"RACK","unit":"℃","opt":34,"tau":16,"min":18,"max":72,"dir":"hi","amp":1.1,"weight":0.3,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":1.0,"desc":"Thermal state near equipment.","corr_base":[0.4,0.55,1,0.5,0.45,0.35,0.25]},{"id":"inlet","name":"Inlet Temp","short":"IN","unit":"℃","opt":22,"tau":8,"min":12,"max":42,"dir":"hi","amp":0.6,"weight":0.2,"group":"supply","shrink":"supply","desc":"Cooling supply temperature.","corr_base":[0.3,0.42,0.5,1,0.48,0.4,0.22]},{"id":"fan","name":"Fan Rate","short":"FAN","unit":"%","opt":52,"tau":38,"min":20,"max":100,"dir":"both","amp":4,"weight":0.22,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":2,"desc":"Cooling reaction and power consumer.","corr_base":[0.25,0.3,0.45,0.48,1,0.38,0.28]},{"id":"air","name":"Airflow","short":"AIR","unit":"%","opt":78,"tau":28,"min":18,"max":100,"dir":"lo","amp":3,"weight":0.26,"group":"supply","shrink":"supply","coupledBy":"supply","coupledGain":-2,"desc":"Low-side cooling path risk.","corr_base":[0.2,0.25,0.35,0.4,0.38,1,0.24]},{"id":"lat","name":"Network Latency","short":"LAT","unit":"ms","opt":8,"tau":18,"min":1,"max":90,"dir":"hi","amp":2,"weight":0.2,"group":"supply","shrink":"main","coupledBy":"main","coupledGain":0.7,"desc":"Queueing and service degradation marker.","corr_base":[0.18,0.2,0.25,0.22,0.28,0.24,1]}];
+// SCENARIOS: drift = target offset per factor ramped in over ~90 ticks (see updateValues()),
+// pressureBoost/corrBoost = flat additions to pressure().main / calcCorr() drift respectively.
+// No cited basis for these magnitudes; demo tuning only.
+// NOTE (dead-ish branch): updateValues() reads `sc.amp && sc.amp[f.id]` as a per-scenario
+// noise-amplitude override, but no entry below defines an `amp` field, so that lookup is
+// always falsy and the code always falls back to the per-factor default `f.amp`. Scenario
+// selection therefore never changes noise amplitude in this file. Left as-is per
+// no-logic-change constraint; flagged here for future review.
 const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable operation."},"workload":{"label":"Workload burst","desc":"CPU load increases power, heat, and latency.","drift":{"cpu":36,"power":165,"rack":9,"inlet":2,"fan":18,"air":-4,"lat":16},"pressureBoost":0.14,"corrBoost":0.1},"coolingloss":{"label":"Cooling loss","desc":"Inlet and rack temperatures rise.","drift":{"cpu":8,"power":105,"rack":22,"inlet":12,"fan":30,"air":-12,"lat":7},"pressureBoost":0.24,"corrBoost":0.14},"airblock":{"label":"Airflow blockage","desc":"Airflow drops and compresses thermal margin.","drift":{"cpu":5,"power":95,"rack":18,"inlet":5,"fan":34,"air":-38,"lat":5},"pressureBoost":0.28,"corrBoost":0.16},"fandegrade":{"label":"Fan degradation","desc":"Fan capacity loss and heat rise together.","drift":{"cpu":9,"power":75,"rack":20,"inlet":5,"fan":-24,"air":-24,"lat":6},"pressureBoost":0.26,"corrBoost":0.15},"netqueue":{"label":"Network queueing","desc":"CPU wait and latency coupling changes.","drift":{"cpu":20,"power":70,"rack":5,"inlet":1,"fan":8,"air":-2,"lat":45},"pressureBoost":0.2,"corrBoost":0.2},"cascade":{"label":"Cascade","desc":"Power, heat, cooling, and latency close into a positive loop.","drift":{"cpu":42,"power":285,"rack":31,"inlet":15,"fan":42,"air":-42,"lat":55},"pressureBoost":0.45,"corrBoost":0.3}};
 const COLORS = ["#58d7ff","#ffd24a","#ff7a1a","#46c6ff","#b58cff","#39ff85","#ff4fb0"];
 const HIST_LEN = 136;
+// tauC: structural time-constant for correlation drift, R_corr = |C(t)-C(t0)| / tauC (see corrR()).
+// No cited basis — demo tuning value shared verbatim with the 37_greenhouse sibling file.
 const tauC = 0.24;
 let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
 let vals = {};
@@ -194,6 +216,8 @@ function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
 function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
 function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
+// Standard NRA-IDE 4-zone thresholds used throughout this repo's examples: R>=1.0
+// RUPTURE_BOUNDARY(fail), R>=.75 WARNING(warn), R>=.4 WATCH(watch), else SAFE(ok).
 function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
 function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
 function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
@@ -240,12 +264,26 @@ function buildDots(){
   });
 }
 
+// pressure(): core coupling metric. "main" = weight-weighted sum of every raw R_i (uses
+// f.weight, fixed tau — NOT the dynamic tau below, so this call is non-recursive with
+// dynamicTau()). "thermal"/"supply" = simple average of raw R_i within each FACTORS.group.
+// scenarioBoost adds SCENARIOS[scenario].pressureBoost as a flat offset. Output clamped to
+// [0,2.2] (2.2 ceiling is an arbitrary display/stability cap, no cited basis). In this file
+// "main" represents the closed power->heat->fan->power feedback loop referenced in the UI
+// (R_coupling / node-a/b/c), not a literal thermodynamic loop solution.
 function pressure(){
   let p=0, thermal=0, supply=0;
   FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
   const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
   return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
 }
+// dynamicTau(): shrinks a factor's tau (structural margin) according to which pressure
+// group it belongs to (f.shrink: 'main'/'thermal'/'supply'). This is the mechanism by which
+// system-wide (cascade) stress compresses an individual factor's tolerance band before its
+// own R_i crosses a threshold — the "margin compression under coupling" flag point. The
+// per-group multipliers (.18/.20/.08/.18/.08) and caps (.58/.56/.50) and the floor .35 are
+// demo tuning values with no cited basis. tau is never allowed to shrink below 35% of its
+// base value (floor), preventing runaway R_i growth from tau alone.
 function dynamicTau(f){
   const p=pressure(); let shrink=1;
   if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
@@ -263,11 +301,6 @@ function updateValues(){
     let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
     vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
   });
-  // Optional derived VPD for greenhouse sample.
-  if(FACTORS.some(f=>f.id==='vpd') && vals.temp!==undefined && vals.humidity!==undefined){
-    const es = 0.6108 * Math.exp((17.27*vals.temp)/(vals.temp+237.3));
-    vals.vpd = clamp(es*(1-vals.humidity/100), 0, 4);
-  }
   const p=pressure();
   FACTORS.forEach(f=>{
     if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
@@ -275,15 +308,29 @@ function updateValues(){
     if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
   });
 }
+// calcCorr(): synthesizes a live correlation matrix C(t) by nudging each pair's baseline
+// corr_base toward 1 as system pressure (p.main) rises, plus scenario corrBoost and small
+// random jitter (±.017). Pairs sharing the same FACTORS.group get the full driftBase; other
+// pairs get driftBase*.55. The .14 pressure-to-drift scale, the .55 cross-group discount,
+// and the .034 jitter width are demo tuning values with no cited basis.
 function calcCorr(){
   const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
   for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
   return C;
 }
+// corrR(): converts correlation drift into a structural ratio, R_corr = |C(t)-C(t0)|/tauC,
+// mirroring the R_i=delta/tau form used for individual factors. r>=1 is the same
+// RUPTURE_BOUNDARY threshold used everywhere else in this file (see zoneFor()/badgeFor()).
 function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
 
 function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
 function updateUI(){
+  // R_total = max(R_i, R_corr, R_coupling): the composition rule is a MAX across all
+  // structural ratios, never an average — a single factor, correlation pair, or the
+  // power->heat->fan->power feedback-loop pressure crossing 1.0 drives the whole-system
+  // status, so risk cannot be diluted by averaging with unrelated "safe" factors. This is
+  // the core flag/state-transition point for the whole simulation (see
+  // zoneFor()/badgeFor()/setStatusText() for the 3 zones).
   const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
   FACTORS.forEach((f,i)=>{
     const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();

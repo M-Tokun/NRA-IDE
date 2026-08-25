@@ -365,7 +365,10 @@
 <script>
 // FILE: NRA-IDE_AutoDrive_POC_02_EN.html  2026-02-24
 
-// ── μ テーブル ──
+// ── μ table ──
+// Friction coefficient μ per tire×road combination. No cited source or measurement conditions.
+// Illustrative demo values only; real-world μ varies considerably with vehicle, tire, and surface state
+// (basis unknown — flagged as a minor gap).
 const MU = {
     dry:  { summer: 0.80, studs: 0.70 },
     wet:  { summer: 0.55, studs: 0.50 },
@@ -378,8 +381,8 @@ const TIRE_LABEL = { summer: 'Summer', studs: 'Winter' };
 const ROAD_COLOR = { dry: '#888', wet: '#4488ff', snow: '#aaddff', ice: '#88eeff' };
 const TIRE_COLOR = { summer: '#ff8800', studs: '#00ccff' };
 
-const G    = 9.8;
-const REACT = 1.0;
+const G    = 9.8;      // standard gravitational acceleration [m/s²] (physical constant)
+const REACT = 1.0;     // assumed driver reaction time [s]. No cited source; demo representative value.
 
 // ── State ──
 let speed_kmh = 60;
@@ -416,12 +419,16 @@ function computeR(v_kmh, d_m, t_m) {
     return { delta, R, sd };
 }
 function zoneFromR(R) {
+    // Flag boundary: 4-tier judgment on R=δ/τ. R<0.40 -> A (PERMIT), R<0.70 -> B (PERMIT_WITH_CAVEAT),
+    // R<1.00 -> C (WARNING), R>=1.00 -> D (FAIL-CLOSED / emergency stop).
+    // The thresholds 0.40/0.70/1.00 themselves have no cited basis (accident statistics, engineering standard, etc.) in this file — demo tuning values.
     if (R < 0.40) return 'A';
     if (R < 0.70) return 'B';
     if (R < 1.00) return 'C';
     return 'D';
 }
 function getColor(R) {
+    // Reuses the same thresholds as zoneFromR() (0.40/0.70/1.00) for gauge/road-drawing colors (values duplicated, functions kept separate).
     if (R < 0.40) return '#00ff88';
     if (R < 0.70) return '#ffd600';
     if (R < 1.00) return '#ff8c00';
@@ -589,7 +596,7 @@ function drawRoad(delta, R, sd, dist) {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Danger zone
+    // Danger zone: the same thresholds as zoneFromR() (1.0/0.7/0.4) are hardcoded again here for the on-road danger fill color (value duplication).
     const pxPerM = w / 150;
     const actW   = dist * pxPerM;
     const ego_x  = 30;
@@ -643,7 +650,7 @@ function drawRoad(delta, R, sd, dist) {
     ctx.textAlign = 'left';
     ctx.fillText(TIRE_LABEL[tire] + ' Tire  μ=' + getMu().toFixed(2), 12, h - 10);
 
-    // FAIL overlay
+    // FAIL overlay: equivalent to zoneFromR()'s Zone D (R>=1.0), shows a full-screen warning overlay. The 1.0 threshold is duplicated here as well.
     if (R >= 1.0) {
         ctx.fillStyle = 'rgba(255,34,68,0.06)';
         ctx.fillRect(0, 0, w, h);

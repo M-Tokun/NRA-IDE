@@ -471,6 +471,8 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
 </div>
 
 <script>
+// FACTORS: opt(基準値)・tau(構造的許容時間)・corr_base(基準相関行列の1行)は、
+// このsample固有のデモ用チューニング値。実冷凍輸送のセンサー校正値や製品規格からの引用ではない。
 const FACTORS = [
   {
     id:'ambient', name:'外気温', short:'AMB', unit:'℃', color:'var(--ambient)',
@@ -527,6 +529,8 @@ let rHistory = FACTORS.map(()=>[]);
 let prevZones = FACTORS.map(()=>'ok');
 let logLines = [];
 const HIST_LEN = 136;
+// tauC: 相関崩れ(R_corr)専用のτ。FACTORS各要素のτ(4〜40)とは別スケールの
+// デモ用固定値で、根拠となる実測基準はない。
 const tauC = 0.24;
 const corrBase = FACTORS.map(f => [...f.corr_base]);
 
@@ -593,6 +597,11 @@ function calcRawRById(id){
   return {delta, tau:f.tau, R:delta / f.tau};
 }
 
+// chainPressures(): 個別R_iから3段階の合成圧を作る媒介レイヤー。
+// load(外気+扉+遅延) → cooling(load+電池+圧縮機) → chain(冷却連鎖全体) の順に
+// 前段の出力を次段の入力へ混ぜる構造。各係数(0.40/0.42/0.22等)は
+// 「どの要因がどれだけ次段に効くか」を表すデモ用の重みであり、実測校正値ではない。
+// 上限2.2はグラフ描画レンジに合わせたクランプで、物理的な意味は持たない。
 function chainPressures(){
   const amb = calcRawRById('ambient').R;
   const car = calcRawRById('cargo').R;
@@ -607,6 +616,10 @@ function chainPressures(){
   return {amb,car,dor,cmp,bat,hum,dly,load,cooling,chain};
 }
 
+// dynamicTau(): 要因ごとにτ(構造的許容時間)を動的圧縮するフラグ処理。
+// 各if行は「どの合成圧がどの要因のτをどれだけ縮めるか」を個別に定義しており、
+// 係数・上限値(0.60/0.36/0.24等)は要因ごとに異なるデモ用チューニング値。
+// 最終行 f.tau*0.35 はτが0近くまで潰れて0除算・過剰なR急騰を起こさないための下限フロア。
 function dynamicTau(i){
   const f = FACTORS[i];
   const p = chainPressures();
@@ -629,6 +642,8 @@ function calcR(i){
   return {delta, tau, R: delta / tau};
 }
 
+// R>=1.0(RUPTURE_BOUNDARY)・R>=0.75(WARNING)の2閾値は、このNRA-IDEサンプル群共通の
+// 構造境界表記（δ/τが構造許容を超えたか否か）であり、この2値自体はcoldchain固有の値ではない。
 function getColor(R){
   if(R >= 1.0) return 'var(--fail)';
   if(R >= 0.75) return 'var(--warn)';
@@ -719,6 +734,9 @@ function updateValues(){
     vals[id] = clamp(base + drift + noise + wave + extra, f.min, f.max);
   });
 
+  // 合成圧(p)を各実測値へ直接フィードバックする物理連鎖の演出。
+  // 例えばp.loadが上がると圧縮機負荷valsが押し上げられ、その結果comp由来のRも上がる、
+  // という循環構造を意図的に作っている。係数(4.6/2.8/0.55等)はいずれもデモ用固定値。
   const p = chainPressures();
   vals.comp = clamp(vals.comp + p.load*4.6 - p.bat*2.8, FACTORS[3].min, FACTORS[3].max);
   vals.cargo = clamp(vals.cargo + p.load*0.55 - p.cmp*0.28 + p.bat*0.20, FACTORS[1].min, FACTORS[1].max);
@@ -726,6 +744,11 @@ function updateValues(){
   vals.battery = clamp(vals.battery - (p.cmp*0.6 + p.dly*0.3), FACTORS[4].min, FACTORS[4].max);
 }
 
+// calcCorr(): 相関行列C(t)を毎tick再生成する。どのペアが崩れやすいかは
+// ハードコードされたid組み合わせのリストで指定しており、一般公式ではなく
+// このsample用に選んだ組。break(コールドチェーン破断)シナリオでは
+// tick>35から0.0055/tickで相関崩れを追加加算し、破断の進行を演出する
+// （0.0055・35・0.42はいずれも根拠不明・デモ用チューニング値）。
 function calcCorr(){
   const C = [];
   const p = chainPressures();
@@ -778,6 +801,8 @@ function updateUI(){
   const C = calcCorr();
   const {maxR:rCorr, alerts} = calcRCorr(C);
   const p = chainPressures();
+  // R_total = max(個別R_i, R_corr, chain圧) — footer記載どおり平均で危険を薄めない設計。
+  // ここでR_corrとchain圧を先にmax判定し、続くループで各要因のRとも比較する。
   let rTotal = Math.max(rCorr, p.chain);
 
   FACTORS.forEach((f,i) => {

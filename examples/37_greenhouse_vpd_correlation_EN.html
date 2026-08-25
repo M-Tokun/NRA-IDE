@@ -179,10 +179,31 @@ canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:
 </div>
 
 <script>
+// FACTORS: per-variable structural parameters (opt=target value, tau=base structural
+// time-constant, dir=direction that counts as "delta" (both/hi/lo), amp=noise amplitude).
+// weight/group/shrink/coupledBy/coupledGain drive the coupling model in pressure()/
+// dynamicTau()/updateValues() below. corr_base is the reference correlation row used by
+// calcCorr()/corrR() as the "normal" correlation baseline. None of weight, group-average
+// blending, shrink magnitudes, or corr_base numbers have a cited physical/statistical
+// source — they are demo-tuning values chosen to make the sample react visibly.
+// NOTE: This EN file is NOT a translation of the JP sibling (37_greenhouse_vpd_correlation_JP.html).
+// JP uses a different coupling mechanism (pairwise dynamicTau conditions + a separate
+// "mediator" pressure formula) and a different calcCorr() drift rule. Both are internally
+// consistent standalone implementations; they were not unified per working policy for this pass.
 const FACTORS = [{"id":"temp","name":"Air Temperature","short":"T","unit":"℃","opt":24,"tau":6,"min":8,"max":42,"dir":"both","amp":0.8,"weight":0.18,"group":"thermal","shrink":"main","desc":"Mapped into VPD rather than judged alone.","corr_base":[1,0.5,0.4,0.3,0.25,0.2,0.18]},{"id":"humidity","name":"Relative Humidity","short":"RH","unit":"%","opt":68,"tau":18,"min":20,"max":100,"dir":"both","amp":2.5,"weight":0.2,"group":"thermal","shrink":"main","desc":"Combines with temperature to form VPD.","corr_base":[0.5,1,0.55,0.42,0.3,0.25,0.2]},{"id":"vpd","name":"VPD","short":"VPD","unit":"kPa","opt":1.05,"tau":0.55,"min":0,"max":4,"dir":"both","amp":0.05,"weight":0.34,"group":"thermal","shrink":"main","fmt":"2","desc":"Mediator layer for plant stress.","corr_base":[0.4,0.55,1,0.5,0.45,0.35,0.25]},{"id":"co2","name":"CO₂","short":"CO2","unit":"ppm","opt":800,"tau":350,"min":250,"max":1500,"dir":"both","amp":45,"weight":0.15,"group":"supply","shrink":"main","fmt":"int","desc":"Ventilation and photosynthesis factor.","corr_base":[0.3,0.42,0.5,1,0.48,0.4,0.22]},{"id":"light","name":"Light","short":"LX","unit":"lx","opt":18000,"tau":9000,"min":1000,"max":42000,"dir":"both","amp":900,"weight":0.17,"group":"supply","shrink":"main","fmt":"int","desc":"Receiver-side illuminance.","corr_base":[0.25,0.3,0.45,0.48,1,0.38,0.28]},{"id":"water","name":"Soil Water","short":"W","unit":"%","opt":62,"tau":18,"min":15,"max":95,"dir":"both","amp":2,"weight":0.24,"group":"supply","shrink":"supply","coupledBy":"main","coupledGain":-1.2,"desc":"Root-zone water reserve.","corr_base":[0.2,0.25,0.35,0.4,0.38,1,0.24]},{"id":"ec","name":"EC","short":"EC","unit":"mS/cm","opt":1.45,"tau":0.55,"min":0.3,"max":3.2,"dir":"both","amp":0.05,"weight":0.14,"group":"supply","shrink":"supply","fmt":"2","desc":"Nutrient concentration; stress rises when water drops.","corr_base":[0.18,0.2,0.25,0.22,0.28,0.24,1]}];
+// SCENARIOS: drift = target offset per factor ramped in over ~90 ticks (see updateValues()),
+// pressureBoost/corrBoost = flat additions to pressure().main / calcCorr() drift respectively.
+// No cited basis for these magnitudes; demo tuning only.
+// NOTE (dead-ish branch): updateValues() reads `sc.amp && sc.amp[f.id]` as a per-scenario
+// noise-amplitude override, but no entry below defines an `amp` field, so that lookup is
+// always falsy and the code always falls back to the per-factor default `f.amp`. Scenario
+// selection therefore never changes noise amplitude in this file (only drift/pressureBoost/
+// corrBoost do). Left as-is per no-logic-change constraint; flagged here for future review.
 const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable greenhouse state."},"hotdry":{"label":"Hot dry","desc":"High temperature and low humidity lift VPD.","drift":{"temp":8,"humidity":-22,"co2":-60,"light":8000,"water":-14,"ec":0.28},"pressureBoost":0.18,"corrBoost":0.1},"humid":{"label":"High humidity","desc":"VPD drops and transpiration stagnates.","drift":{"temp":2,"humidity":23,"co2":-120,"light":-1000,"water":9,"ec":-0.1},"pressureBoost":0.12,"corrBoost":0.08},"shadeWet":{"label":"Cloudy and wet","desc":"Low light plus low VPD.","drift":{"temp":-3,"humidity":16,"co2":-90,"light":-12500,"water":6,"ec":-0.05},"pressureBoost":0.14,"corrBoost":0.08},"co2drop":{"label":"CO₂ drop","desc":"Ventilation-like CO₂ loss changes light/CO₂ relation.","drift":{"temp":-1,"humidity":-5,"co2":-430,"light":3000,"water":-3,"ec":0.02},"pressureBoost":0.18,"corrBoost":0.16},"irrigation":{"label":"Irrigation delay","desc":"Water drops and EC rises under VPD pressure.","drift":{"temp":3,"humidity":-10,"co2":-30,"light":4000,"water":-24,"ec":0.7},"pressureBoost":0.28,"corrBoost":0.18},"collapse":{"label":"Correlation collapse","desc":"VPD, water, CO₂, and light drift together.","drift":{"temp":9,"humidity":-26,"co2":-500,"light":-9500,"water":-25,"ec":0.85},"pressureBoost":0.38,"corrBoost":0.25}};
 const COLORS = ["#ff8c42","#46c6ff","#ff4fb0","#b7ff4a","#ffe066","#39ff85","#b58cff"];
 const HIST_LEN = 136;
+// tauC: structural time-constant for correlation drift, R_corr = |C(t)-C(t0)| / tauC (see corrR()).
+// No cited basis — demo tuning value shared verbatim with the 38_datacenter sibling file.
 const tauC = 0.24;
 let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
 let vals = {};
@@ -194,6 +215,8 @@ function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
 function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
 function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
+// Standard NRA-IDE 4-zone thresholds used throughout this repo's examples: R>=1.0
+// RUPTURE_BOUNDARY(fail), R>=.75 WARNING(warn), R>=.4 WATCH(watch), else SAFE(ok).
 function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
 function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
 function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
@@ -240,12 +263,24 @@ function buildDots(){
   });
 }
 
+// pressure(): core coupling metric. "main" = weight-weighted sum of every raw R_i (uses
+// f.weight, fixed tau — NOT the dynamic tau below, so this call is non-recursive with
+// dynamicTau()). "thermal"/"supply" = simple average of raw R_i within each FACTORS.group.
+// scenarioBoost adds SCENARIOS[scenario].pressureBoost as a flat offset. Output clamped to
+// [0,2.2] (2.2 ceiling is an arbitrary display/stability cap, no cited basis).
 function pressure(){
   let p=0, thermal=0, supply=0;
   FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
   const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
   return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
 }
+// dynamicTau(): shrinks a factor's tau (structural margin) according to which pressure
+// group it belongs to (f.shrink: 'main'/'thermal'/'supply'). This is the mechanism by which
+// system-wide stress compresses an individual factor's tolerance band before its own R_i
+// crosses a threshold — i.e. the "margin compression under coupling" flag point. The
+// per-group multipliers (.18/.20/.08/.18/.08) and caps (.58/.56/.50) and the floor .35 are
+// demo tuning values with no cited physical basis. tau is never allowed to shrink below 35%
+// of its base value (floor), preventing runaway R_i growth from tau alone.
 function dynamicTau(f){
   const p=pressure(); let shrink=1;
   if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
@@ -264,6 +299,15 @@ function updateValues(){
     vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
   });
   // Optional derived VPD for greenhouse sample.
+  // This block is LIVE in this file (FACTORS contains an id==='vpd' entry, and vals.temp /
+  // vals.humidity are populated above), so vpd is recomputed from temp+humidity every tick
+  // via the Tetens/FAO-56-style saturation-vapor-pressure approximation
+  // es(T)=0.6108*exp(17.27T/(T+237.3)) kPa, VPD=es*(1-RH/100). This overwrites whatever
+  // vpd value the generic drift/wave/noise loop above produced for the "vpd" factor entry,
+  // i.e. vpd's own opt/tau/amp settings only matter for its R_i display, not for its value.
+  // The identical `FACTORS.some(f=>f.id==='vpd')` guard also exists verbatim in the sibling
+  // 38_datacenter_cascade_correlation_EN.html, where FACTORS has no "vpd" id — there the
+  // guard is always false and this whole block is dead code (see note in that file).
   if(FACTORS.some(f=>f.id==='vpd') && vals.temp!==undefined && vals.humidity!==undefined){
     const es = 0.6108 * Math.exp((17.27*vals.temp)/(vals.temp+237.3));
     vals.vpd = clamp(es*(1-vals.humidity/100), 0, 4);
@@ -275,15 +319,28 @@ function updateValues(){
     if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
   });
 }
+// calcCorr(): synthesizes a live correlation matrix C(t) by nudging each pair's baseline
+// corr_base toward 1 as system pressure (p.main) rises, plus scenario corrBoost and small
+// random jitter (±.017). Pairs sharing the same FACTORS.group get the full driftBase; other
+// pairs get driftBase*.55. The .14 pressure-to-drift scale, the .55 cross-group discount,
+// and the .034 jitter width are demo tuning values with no cited basis.
 function calcCorr(){
   const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
   for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
   return C;
 }
+// corrR(): converts correlation drift into a structural ratio, R_corr = |C(t)-C(t0)|/tauC,
+// mirroring the R_i=delta/tau form used for individual factors. r>=1 is the same
+// RUPTURE_BOUNDARY threshold used everywhere else in this file (see zoneFor()/badgeFor()).
 function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
 
 function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
 function updateUI(){
+  // R_total = max(R_i, R_corr, R_coupling): the composition rule is a MAX across all
+  // structural ratios, never an average — a single factor, correlation pair, or coupling
+  // pressure crossing 1.0 drives the whole-system status, so risk cannot be diluted by
+  // averaging with unrelated "safe" factors. This is the core flag/state-transition point
+  // for the whole simulation (see zoneFor()/badgeFor()/setStatusText() for the 3 zones).
   const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
   FACTORS.forEach((f,i)=>{
     const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();

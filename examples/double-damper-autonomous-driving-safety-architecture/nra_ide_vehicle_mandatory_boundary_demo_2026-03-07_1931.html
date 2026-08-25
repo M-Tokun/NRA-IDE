@@ -694,14 +694,14 @@
       let stopMargin = 4.4 + 0.5 * Math.cos(t * 0.6);
 
       switch (state.scene) {
-        case 'approach':
+        case 'approach': // 距離を14m前後まで縮小、相対速度・ヨー誤差を増大、停止余裕を圧縮（接近危険を演出）
           distance = 14 + 3 * Math.sin(t * 0.8);
           relSpeed = 9.5 + 1.5 * Math.sin(t * 1.2);
           yawError = 2.5 + 0.8 * Math.sin(t * 1.0);
           laneConfidence = 0.84 + 0.04 * Math.sin(t * 0.8);
           stopMargin = 1.2 + 0.25 * Math.cos(t * 1.0);
           break;
-        case 'glare':
+        case 'glare': // カメラ値を+0.42前後押し上げて逆光による誤認識を演出。レーダー/IMUはわずかな上昇のみ
           cam += 0.42 + 0.12 * Math.sin(t * 1.9);
           distance = 30 + 3 * Math.sin(t * 0.6);
           relSpeed = 5.0 + 0.9 * Math.sin(t * 1.0);
@@ -711,7 +711,7 @@
           radar += 0.05;
           imu += 0.04;
           break;
-        case 'rain':
+        case 'rain': // カメラ・レーダー双方を底上げして豪雨によるセンサー劣化を演出
           cam += 0.22 + 0.04 * Math.sin(t * 2.1);
           radar += 0.24 + 0.05 * Math.cos(t * 1.4);
           imu += 0.03;
@@ -721,7 +721,7 @@
           laneConfidence = 0.61 + 0.06 * Math.sin(t * 1.1);
           stopMargin = 1.9 + 0.25 * Math.cos(t * 0.8);
           break;
-        case 'ghost':
+        case 'ghost': // レーダー値を+0.48前後押し上げてゴースト反射（多重経路）によるノイズを演出
           cam += 0.05;
           radar += 0.48 + 0.10 * Math.sin(t * 2.7);
           imu += 0.06;
@@ -731,7 +731,7 @@
           laneConfidence = 0.79 + 0.04 * Math.sin(t * 0.6);
           stopMargin = 1.8 + 0.2 * Math.cos(t * 0.7);
           break;
-        case 'drift':
+        case 'drift': // IMU値を+0.40前後押し上げ、ヨー誤差を6.5前後まで拡大して自己運動ドリフトを演出
           cam += 0.04;
           radar += 0.06;
           imu += 0.40 + 0.10 * Math.sin(t * 0.5);
@@ -741,7 +741,7 @@
           laneConfidence = 0.73 + 0.05 * Math.sin(t * 0.7);
           stopMargin = 2.0 + 0.25 * Math.cos(t * 0.8);
           break;
-        case 'mixed':
+        case 'mixed': // cam/radar/imuを同時に押し上げ、距離・相対速度・ヨー誤差・車線信頼・停止余裕も全て悪化方向に設定（複合異常）
           cam += 0.30 + 0.12 * Math.sin(t * 1.8);
           radar += 0.35 + 0.09 * Math.cos(t * 2.2);
           imu += 0.32 + 0.08 * Math.sin(t * 0.7);
@@ -785,6 +785,10 @@
       `).join('');
     }
 
+    // 5つの物理監視量から個別リスク値（0〜1.4）を算出し、最大値で合成する。
+    // 各正規化式の分母(18, 12, 7.5, 0.75, 2.2)は「リスク=1.0相当」とみなす基準値で、
+    // HTML本文のmetric-desc（下限監視型/上限監視型の説明）に対応する量だが、具体的な基準値の根拠は記載されておらず、根拠不明・デモ用チューニング値。
+    // compositeの重み(rRel*0.85, rStop*1.05)も同様に根拠不明・デモ用チューニング値。
     function metricRisk(distance, relSpeed, yawError, laneConfidence, stopMargin) {
       const rDist = clamp((18 - distance) / 18, 0, 1.4);
       const rRel = clamp(relSpeed / 12, 0, 1.4);
@@ -797,6 +801,10 @@
       };
     }
 
+    // 最終判定(PASS/DAMP/FALLBACK)を決めるcomposite値を算出する。
+    // rNow（現在の境界比）、rShort*0.92+dLong*0.45（短期・長期の重み付き再構成値）、metricComposite（物理量リスク）の最大値を採用する。
+    // 重み0.92/0.45、閾値1.0(FALLBACK)/0.72(DAMP)は、HTML本文「Design policy」5番（PASS/DAMP/FALLBACKへの分離）に対応する運用閾値だが、
+    // 具体的な数値の根拠は記載されておらず、根拠不明・デモ用チューニング値。
     function setDecision(rNow, rShort, dLong, metricComposite) {
       const composite = Math.max(rNow, rShort * 0.92 + dLong * 0.45, metricComposite);
       const prev = state.decision;
@@ -807,6 +815,8 @@
       } else {
         state.decision = 'PASS';
       }
+      // DANGER表示: composite合成値がスライダー設定のdangerThresholdを超える、
+      // または見本用のdangerInject（danger-cardの説明の通り実運用には存在しないスライダー）が閾値を超えると強制点灯する。
       const dangerNow = composite >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
       if (dangerNow !== state.dangerActive) {
         state.dangerActive = dangerNow;
@@ -830,20 +840,31 @@
       state.laneConfidence = s.laneConfidence;
       state.stopMargin = s.stopMargin;
 
+      // 3系統(cam/radar/imu)の不一致度を算出する。2系統間の絶対差3組の平均であり、
+      // 「一致させるのではなく不一致の度合いを危険境界として扱う」という inline-note（Mandatory sensor boundaryカード）の実装。本デモの中核アルゴリズム。
       const pair1 = Math.abs(state.cam - state.radar);
       const pair2 = Math.abs(state.cam - state.imu);
       const pair3 = Math.abs(state.radar - state.imu);
       const disagreement = (pair1 + pair2 + pair3) / 3;
 
+      // 上限ダンパー: 短期再構成値rShortが0.4を超えた分だけ0.35倍で緩める。
+      // 下限ダンパー: 長期劣化dLongが0.25を超えた分だけ0.20倍で締める（下限0.25でフロア）。
+      // 「下限側は敏感、上限側は慎重」という非対称構造（パラメータ操作パネルの説明文参照）に対応する演算で、
+      // 数値0.4/0.35/0.25/0.20は根拠不明・デモ用チューニング値。
+      // 注記: tauLowerはUI表示(ui.tauLower)にのみ使われ、rNow等の判定計算には使用されていない。
       const tauUpper = state.upperDamper + Math.max(0, state.rShort - 0.4) * 0.35;
       const tauLower = Math.max(0.25, state.lowerDamper - Math.max(0, state.dLong - 0.25) * 0.20);
 
-      state.rNow = Math.max(disagreement / tauUpper, 0);
+      state.rNow = Math.max(disagreement / tauUpper, 0); // R_now = 不一致度 / 上限ダンパー
 
+      // 短期記憶: 直近24フレーム分のrNowを保持し平均する（ウィンドウ長24は根拠不明・デモ用チューニング値）。
       state.shortMemory.push(state.rNow);
       if (state.shortMemory.length > 24) state.shortMemory.shift();
       const recentAvg = state.shortMemory.reduce((a, b) => a + b, 0) / state.shortMemory.length;
+      // rShortはrecentAvgへstate.recon（再構成感度スライダー、0.10〜0.95）の割合でlerp追従する。
       state.rShort = lerp(state.rShort, recentAvg, state.recon);
+      // dLongはrShortへstate.deg*0.12の割合でlerp追従する。0.12は根拠不明の固定スケール定数で、
+      // degスライダー(0.01〜0.50)と掛け合わさることで長期劣化が短期再構成より大幅に遅く更新されるよう作用する。
       state.dLong = lerp(state.dLong, state.rShort, state.deg * 0.12);
 
       const mr = metricRisk(state.distance, state.relSpeed, state.yawError, state.laneConfidence, state.stopMargin);
@@ -885,7 +906,7 @@
         ui.dangerDisplay.className = 'danger-display stop';
         ui.dangerMain.textContent = 'DANGER';
         ui.dangerSub.textContent = '危険域見本。しきい値超え、または強制注入です。';
-      } else if (Math.max(state.metricRisk, state.rNow, state.rShort) >= state.dangerThreshold * 0.8) {
+      } else if (Math.max(state.metricRisk, state.rNow, state.rShort) >= state.dangerThreshold * 0.8) { // WARNING: dangerThresholdの80%(倍率0.8は根拠不明・デモ用チューニング値)で危険接近を予告
         ui.dangerDisplay.className = 'danger-display warn';
         ui.dangerMain.textContent = 'WARNING';
         ui.dangerSub.textContent = '危険域に接近中です。境界余裕が薄くなっています。';

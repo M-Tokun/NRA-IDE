@@ -75,7 +75,8 @@ h1{margin:0;font-size:24px;}
 </div>
 
 <script>
-// Five factors
+// Five factors: base = reference value; range = assumed variation width used to normalize individual deviations (indDevs).
+// No source or calibration basis is documented for these values (demo assumed values).
 const vars = [
   {name:"Core Temp", unit:"°C", base:36.8, range:1.4},
   {name:"Skin Temp",   unit:"°C", base:33.5, range:2.8},
@@ -87,9 +88,15 @@ const vars = [
 let t = 0, running = true;
 
 function getValues(t) {
+  // p combines a short-period wobble (sin(t/8)) and a long-period wobble (sin(t/25)). Amplitudes 0.6/0.4 and periods
+  // 8/25 have no cited basis (demo tuning values).
   const p = Math.sin(t/8)*0.6 + Math.sin(t/25)*0.4; // physiological fluctuation
+  // A linear ramp starting at t=30, reaching 1.0 at t=110. Threshold 30 and slope 1/80 have no cited basis (demo tuning values).
   const stress = Math.max(0, (t-30)/80); // gradually increasing stress
 
+  // Each factor combines its base value with a stress contribution, a periodic wobble, and a share of p.
+  // All coefficients below (0.4, 0.25, 1.2, 0.45, 22, 4, 4.5, 1.2, 14, 2.5, etc.) are demo tuning values,
+  // not calibrated from measured data (basis unknown).
   return [
     36.8 + 0.4*stress + 0.25*Math.sin(t/5) + p*0.3,
     33.5 + 1.2*stress + 0.45*Math.sin(t/4.5) - p*0.4,
@@ -100,21 +107,25 @@ function getValues(t) {
 }
 
 function computeR(vals) {
-  // individual deviations
+  // individual deviations: |measured - base| normalized by vars[i].range (assumed variation width); only the maximum is kept.
   const indDevs = vals.map((v,i) => Math.abs(v - vars[i].base) / vars[i].range);
+  // Coefficient 0.78 has no cited basis (demo tuning value; possibly a scale adjustment for the later division by tau, unconfirmed).
   const rInd = Math.max(...indDevs) * 0.78;
 
-  // deviation from expected relationships (summary correlation)
+  // deviation from expected relationships (summary correlation): predicts skin/HR/water from core temperature via linear formulas.
+  // Coefficients 1.15, 20, -0.6, -1.3, -0.7 have no physiological source found; treated as a hypothetical demo correlation model (basis unknown).
   const [core, skin, hr, spo2, water] = vals;
   const expSkin = 33.5 + 1.15*(core-36.8);
   const expHR = 72 + 20*(core-36.8) - 0.6*(97-spo2);
   const expWater = 68 - 1.3*(core-36.8) - 0.7*(hr-72);
 
+  // Normalization constants 3.2, 26, 15 also have no cited basis (demo tuning values).
   const corrDevs = [
     Math.abs(skin - expSkin)/3.2,
     Math.abs(hr - expHR)/26,
     Math.abs(water - expWater)/15
   ];
+  // Coefficient 1.05 has no cited basis (demo tuning value).
   const rCorr = Math.max(...corrDevs) * 1.05;
 
   return {rInd, rCorr};
@@ -145,7 +156,11 @@ function update() {
   document.getElementById('fillInd').style.width = Math.min(100, rI*100) + '%';
   document.getElementById('fillCorr').style.width = Math.min(100, rC*100) + '%';
 
-  // status
+  // status (state-transition boundary): rC (correlation R) and rI (individual R) are both already normalized by tau.
+  // rC>=1.05 or rI>=1.1 -> Fail-Closed (bad); rC>=0.7 or rI>=0.8 -> caution (warn); below both -> normal (ok).
+  // The correlation-side threshold is lower than the individual-side threshold, matching the UI text's stated intent
+  // that correlation R is designed to rise ahead of the individual values. The specific threshold values
+  // (1.05/1.1/0.7/0.8) themselves have no cited basis (demo tuning values).
   let statusEl = document.getElementById('status');
   if (rC >= 1.05 || rI >= 1.1) {
     statusEl.className = 'status-box bad';
@@ -170,6 +185,7 @@ function update() {
 
 function tick(stamp) {
   if (running) {
+    // Speed scale 0.12 and cap 180 are demo timeline parameters with no cited basis. t is clamped at 180 and stops advancing.
     t += 0.12 * parseFloat(document.getElementById('speed').value);
     if (t > 180) t = 180;
     update();

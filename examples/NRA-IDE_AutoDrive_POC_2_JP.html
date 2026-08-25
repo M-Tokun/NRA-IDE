@@ -366,6 +366,8 @@
 // FILE: NRA-IDE_AutoDrive_POC_02_JP.html  2026-02-24
 
 // ── μ テーブル ──
+// タイヤ×路面ごとの摩擦係数μ。実測データの出典・測定条件の記載なし。デモ用の代表的な目安値であり、
+// 実際の車両・タイヤ・路面状態によって大きく変動しうる（根拠不明値・軽度不足として指摘済み）。
 const MU = {
     dry:  { summer: 0.80, studs: 0.70 },
     wet:  { summer: 0.55, studs: 0.50 },
@@ -378,8 +380,8 @@ const TIRE_LABEL = { summer: '夏タイヤ', studs: 'スタッドレス' };
 const ROAD_COLOR = { dry: '#888', wet: '#4488ff', snow: '#aaddff', ice: '#88eeff' };
 const TIRE_COLOR = { summer: '#ff8800', studs: '#00ccff' };
 
-const G    = 9.8;
-const REACT = 1.0;
+const G    = 9.8;      // 標準重力加速度 [m/s²]（物理定数）
+const REACT = 1.0;     // ドライバー反応時間の仮定値 [s]。出典なし・デモ用の代表値。
 
 // ── State ──
 let speed_kmh = 60;
@@ -416,12 +418,15 @@ function computeR(v_kmh, d_m, t_m) {
     return { delta, R, sd };
 }
 function zoneFromR(R) {
+    // フラグ境界：R=δ/τの4段階判定。R<0.40→A(許可)、R<0.70→B(注意付き許可)、R<1.00→C(警告)、R>=1.00→D(フェイルクローズド/緊急停止)。
+    // 閾値0.40/0.70/1.00自体の根拠（事故統計・工学基準等）は本ファイル内に記載なし・デモ用チューニング値。
     if (R < 0.40) return 'A';
     if (R < 0.70) return 'B';
     if (R < 1.00) return 'C';
     return 'D';
 }
 function getColor(R) {
+    // zoneFromR()と同一の閾値（0.40/0.70/1.00）をゲージ・道路描画の配色判定にも再利用（値は複製、関数は別）。
     if (R < 0.40) return '#00ff88';
     if (R < 0.70) return '#ffd600';
     if (R < 1.00) return '#ff8c00';
@@ -589,7 +594,7 @@ function drawRoad(delta, R, sd, dist) {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Danger zone
+    // Danger zone: zoneFromR()と同じ閾値（1.0/0.7/0.4）を道路上の危険域塗りつぶし色にも再度ハードコード（値の複製）。
     const pxPerM = w / 150;
     const actW   = dist * pxPerM;
     const ego_x  = 30;
@@ -643,7 +648,7 @@ function drawRoad(delta, R, sd, dist) {
     ctx.textAlign = 'left';
     ctx.fillText(TIRE_LABEL[tire] + '  μ=' + getMu().toFixed(2), 12, h - 10);
 
-    // FAIL overlay
+    // FAIL overlay: zoneFromR()のゾーンD相当（R>=1.0）で画面全体に警告オーバーレイを表示。閾値1.0はここでも複製されている。
     if (R >= 1.0) {
         ctx.fillStyle = 'rgba(255,34,68,0.06)';
         ctx.fillRect(0, 0, w, h);
