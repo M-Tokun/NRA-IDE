@@ -18,10 +18,24 @@ from .secret_file import load_secret_key_file
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--anchor-database", required=True)
-    parser.add_argument("--anchor-id", required=True)
-    parser.add_argument("--key-file", required=True)
+    parser = argparse.ArgumentParser(
+        description="Verify and anchor one audit bundle read from stdin."
+    )
+    parser.add_argument(
+        "--anchor-database",
+        required=True,
+        help="SQLite path for the append-only audit-anchor state",
+    )
+    parser.add_argument(
+        "--anchor-id",
+        required=True,
+        help="stable identity written into each anchor receipt",
+    )
+    parser.add_argument(
+        "--key-file",
+        required=True,
+        help="master secret-key file used to derive the anchor integrity key",
+    )
     args = parser.parse_args(argv)
     try:
         bundle_json = sys.stdin.read()

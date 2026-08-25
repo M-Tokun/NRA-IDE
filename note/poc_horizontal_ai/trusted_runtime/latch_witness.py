@@ -241,6 +241,14 @@ class LatchCheckpointWitnessStateStore:
         witnessed_at: datetime,
         admission_challenge: str | None = None,
     ) -> str:
+        """Verify a latch chain, advance witness state, and sign its checkpoint.
+
+        Checkpoints must form one fresh, monotonic chain for this store and
+        trust bundle. ``checkpoint_signature_max_age`` bounds signer evidence;
+        an optional ``admission_challenge`` is carried into the attestation.
+        Success commits the witness sequence and head. Replay is idempotent;
+        conflict, invalid input, or database failure rolls back and raises.
+        """
         signed_segment = tuple(signed_checkpoints)
         if not signed_segment or witnessed_at.tzinfo is None:
             raise ValueError("invalid latch witness request")
@@ -620,6 +628,14 @@ def assess_latch_witness_quorum(
     expected_admission_challenge: str | None = None,
     now: datetime | None = None,
 ) -> LatchWitnessQuorum:
+    """Assess distinct-principal agreement on one signed latch checkpoint.
+
+    Attestations must bind the exact checkpoint digest, latch store, trust
+    bundle, and optional admission challenge. ``minimum_principals`` counts
+    distinct witness principals and ``signature_max_age`` bounds freshness.
+    Invalid or mismatched evidence cannot satisfy quorum. This function does
+    not advance the latch or witness stores.
+    """
     verified_checkpoint, checkpoint_reasons = verify_signed_latch_checkpoint(
         signed_latch_checkpoint_json,
         trust_bundle=trust_bundle,

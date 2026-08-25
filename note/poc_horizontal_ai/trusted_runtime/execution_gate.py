@@ -39,6 +39,13 @@ class FileChangeContext:
     state_version: int
 
     def validate(self) -> None:
+        """Reject malformed or internally inconsistent file-change bindings.
+
+        Paths must remain relative and printable; modify operations require an
+        exact lowercase SHA-256 base while create operations forbid one. The
+        method raises ``ValueError`` on the first violation and has no side
+        effect.
+        """
         if (
             not isinstance(self.resource_path, str)
             or not self.resource_path
@@ -111,6 +118,13 @@ class BoundaryExecutionIntent:
     file_change: FileChangeContext | None = None
 
     def validate(self) -> None:
+        """Validate the exact effect identity without granting execution authority.
+
+        Identifiers and the action digest must use their bounded canonical
+        forms, the required postcondition must be non-empty, and an optional
+        file-change clause is validated independently. Failure raises
+        ``ValueError``; success does not execute, sign, or persist the intent.
+        """
         for field_name, value in (
             ("intent_id", self.intent_id),
             ("subject_id", self.subject_id),
@@ -348,6 +362,14 @@ def verify_signed_execution_authorization(
     signature_max_age: timedelta,
     now: datetime | None = None,
 ) -> tuple[VerifiedExecutionAuthorization | None, tuple[str, ...]]:
+    """Verify a fresh execution authorization from the active authority role.
+
+    The signed payload must bind the exact trust bundle and satisfy
+    ``signature_max_age`` at timezone-aware ``now``. Schema, identity,
+    authorization fields, trust state, signature, and time are validated.
+    Failure returns ``None`` with reason codes and does not consume or execute
+    the authorization.
+    """
     current = now or datetime.now(timezone.utc)
     verified = verify_role_signed_payload(
         signed_authorization_json,

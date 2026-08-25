@@ -487,7 +487,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true", help="emit ASCII-only JSON")
     parser.add_argument("--policy", type=pathlib.Path, help="policy JSON path")
     parser.add_argument("--baseline", type=pathlib.Path, help="exact reviewed baseline JSON")
-    parser.add_argument("--repo", type=pathlib.Path, default=pathlib.Path.cwd())
+    parser.add_argument(
+        "--repo",
+        type=pathlib.Path,
+        default=pathlib.Path.cwd(),
+        help="repository root used to resolve scope and baseline paths (default: cwd)",
+    )
     return parser
 
 

@@ -18,17 +18,22 @@ _MAX_REQUEST_BYTES = 1024 * 1024
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--witness-database", required=True)
-    parser.add_argument("--witness-principal-id", required=True)
-    parser.add_argument("--latch-store-id", required=True)
-    parser.add_argument("--witness-key-id", required=True)
-    parser.add_argument("--witness-private-key-file", required=True)
-    parser.add_argument("--pinned-root-key-id", required=True)
-    parser.add_argument("--pinned-root-public-key-file", required=True)
-    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300)
+    parser = argparse.ArgumentParser(
+        description="Witness one signed irreversible-latch checkpoint sequence."
+    )
+    parser.add_argument("--witness-database", required=True, help="SQLite path holding this witness's monotonic latch state")
+    parser.add_argument("--witness-principal-id", required=True, help="principal identity represented by this witness process")
+    parser.add_argument("--latch-store-id", required=True, help="latch-chain identity accepted by this witness")
+    parser.add_argument("--witness-key-id", required=True, help="trust-bundle key identifier used for the witness signature")
+    parser.add_argument("--witness-private-key-file", required=True, help="Ed25519 private-key file for the witness key identifier")
+    parser.add_argument("--pinned-root-key-id", required=True, help="identifier of the pinned primary trust root")
+    parser.add_argument("--pinned-root-public-key-file", required=True, help="Ed25519 public-key file for the pinned primary trust root")
+    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300, help="maximum accepted trust-bundle age in seconds (default: 300)")
     parser.add_argument(
-        "--checkpoint-signature-max-age-seconds", type=int, default=300
+        "--checkpoint-signature-max-age-seconds",
+        type=int,
+        default=300,
+        help="maximum accepted latch-checkpoint signature age in seconds (default: 300)",
     )
     args = parser.parse_args(argv)
     try:

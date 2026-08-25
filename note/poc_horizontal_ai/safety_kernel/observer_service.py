@@ -11,9 +11,19 @@ from .observer_protocol import serve_observation_request
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repository-root", required=True)
-    parser.add_argument("--observer-id", required=True)
+    parser = argparse.ArgumentParser(
+        description="Observe one repository path request from stdin."
+    )
+    parser.add_argument(
+        "--repository-root",
+        required=True,
+        help="repository root that bounds every observable path",
+    )
+    parser.add_argument(
+        "--observer-id",
+        required=True,
+        help="stable identifier recorded in the returned evidence",
+    )
     args = parser.parse_args(argv)
     request_json = sys.stdin.read()
     try:

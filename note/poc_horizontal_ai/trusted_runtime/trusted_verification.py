@@ -30,6 +30,13 @@ def verify_trusted_observation(
     observation_max_age: timedelta,
     now: datetime | None = None,
 ) -> SignedObservationResult:
+    """Verify an observer-role signature before validating observation content.
+
+    The signature must be fresh, active for the observer role, and bound to the
+    exact ``trust_bundle``. The decoded observation must then answer ``request``
+    within ``repository_root``, observer identity, and observation-age bounds.
+    Failure returns no evidence with reason codes; no trust state is changed.
+    """
     current = now or datetime.now(timezone.utc)
     role = verify_role_signed_payload(
         signed_json,
@@ -61,6 +68,13 @@ def verify_trusted_anchor_receipt(
     expected_bundle_json: str | None = None,
     now: datetime | None = None,
 ) -> SignedAnchorReceiptResult:
+    """Verify an anchor-role signature and the enclosed anchor receipt.
+
+    The signature must be fresh, active for the anchor role, and bound to the
+    exact trust bundle. ``expected_bundle_json`` optionally requires the receipt
+    to anchor that audit bundle. Failure returns no receipt with reason codes;
+    verification does not append an anchor or alter the ledger.
+    """
     current = now or datetime.now(timezone.utc)
     role = verify_role_signed_payload(
         signed_json,

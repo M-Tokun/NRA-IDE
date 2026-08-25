@@ -55,6 +55,13 @@ def assess_clarification(
     reconciliations: Iterable[ReconciliationState] = (),
     response_integrity: Iterable[ResponseIntegrityState] = (),
 ) -> ClarificationAssessment:
+    """Select the minimum clarification boundary implied by observed risks.
+
+    Consistency, environment, effect class, thickness, reconciliation, and
+    response-integrity states remain independent inputs. The function returns
+    the strongest required clarification level plus deduplicated reason codes;
+    it does not authorize execution or mutate any supplied record.
+    """
     facts: set[RiskFact] = set()
     if environment is ExecutionEnvironment.LIVE:
         facts.add(RiskFact.LIVE_ENVIRONMENT)

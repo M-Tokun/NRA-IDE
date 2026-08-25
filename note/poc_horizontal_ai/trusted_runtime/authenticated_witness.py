@@ -50,6 +50,13 @@ def create_signed_witness_attestation(
     admitted_signer: AdmittedSigner | None = None,
     witnessed_at: datetime,
 ) -> str:
+    """Sign one witness record with explicit principal and sequence binding.
+
+    ``admitted_signer`` may additionally prove that the supplied private key is
+    admitted for the witness role. Identifiers, sequence, key match, and the
+    timezone-aware ``witnessed_at`` value are validated before signing. The
+    function returns canonical signed JSON and performs no persistent write.
+    """
     if not attestation_id or len(attestation_id) > 128:
         raise ValueError("invalid attestation_id")
     if witness_principal_id != record.witness_id:
@@ -104,6 +111,13 @@ def verify_witness_attestation(
     signature_max_age: timedelta,
     now: datetime | None = None,
 ) -> tuple[VerifiedWitnessAttestation | None, tuple[str, ...]]:
+    """Verify a fresh witness attestation against the active witness role.
+
+    ``signature_max_age`` bounds the signed envelope and ``now`` supplies an
+    optional timezone-aware verification time. Trust binding, schema, identity,
+    sequence, and record fields must all validate. Failure returns ``None`` and
+    stable reason codes without changing witness state.
+    """
     verified = verify_role_signed_payload(
         signed_attestation_json,
         trust_bundle=trust_bundle,

@@ -56,6 +56,14 @@ def decode_action_proposal(
     max_input_bytes: int = 128 * 1024,
     max_patch_bytes: int = 64 * 1024,
 ) -> ProposalDecodeResult:
+    """Decode one bounded, strict UTF-8 JSON action proposal.
+
+    ``max_input_bytes`` limits the complete encoded request and
+    ``max_patch_bytes`` independently limits the patch field. Duplicate or
+    unknown fields, non-NFC text, invalid enum values, and size violations are
+    returned as reason codes with no proposal. ``raw_bytes`` preserves the
+    observable input for audit even when decoding fails.
+    """
     reasons: list[str] = []
     if isinstance(raw, str):
         try:
@@ -157,4 +165,3 @@ def decode_action_proposal(
         (),
         raw_bytes,
     )
-

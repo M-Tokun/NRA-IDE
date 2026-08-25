@@ -102,6 +102,14 @@ def assess_authority_manifest_quorum(
     signature_max_age: timedelta,
     now: datetime | None = None,
 ) -> AuthorityManifestQuorum:
+    """Verify fresh attestations agreeing on one exact runtime placement.
+
+    ``minimum_principals`` counts distinct trusted authority principals, not
+    signatures. Invalid attestations are ignored but reported; any placement
+    digest disagreement prevents quorum. ``now`` may provide a timezone-aware
+    verification time. The function returns evidence only and performs no
+    deployment or persistent-state update.
+    """
     current = now or datetime.now(timezone.utc)
     if (
         current.tzinfo is None

@@ -22,19 +22,22 @@ _MAX_REQUEST_BYTES = 512 * 1024
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--witness-database", required=True)
-    parser.add_argument("--policy-root-principal-id", required=True)
-    parser.add_argument("--policy-root-key-id", required=True)
-    parser.add_argument("--policy-root-private-key-file", required=True)
+    parser = argparse.ArgumentParser(
+        description="Witness and sign one root-policy endorsement request."
+    )
+    parser.add_argument("--witness-database", required=True, help="SQLite path holding this policy witness's monotonic state")
+    parser.add_argument("--policy-root-principal-id", required=True, help="distinct policy-root principal represented by this witness")
+    parser.add_argument("--policy-root-key-id", required=True, help="key identifier assigned to this pinned policy root")
+    parser.add_argument("--policy-root-private-key-file", required=True, help="Ed25519 private-key file for the policy-root key identifier")
     parser.add_argument(
         "--policy-root-public-key-fingerprint",
         required=True,
+        help="expected SHA-256 fingerprint of the policy-root public key",
     )
-    parser.add_argument("--pinned-root-key-id", required=True)
-    parser.add_argument("--pinned-root-public-key-file", required=True)
-    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300)
-    parser.add_argument("--endorsement-validity-seconds", type=int, default=300)
+    parser.add_argument("--pinned-root-key-id", required=True, help="identifier of the pinned primary trust root")
+    parser.add_argument("--pinned-root-public-key-file", required=True, help="Ed25519 public-key file for the pinned primary trust root")
+    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300, help="maximum accepted trust-bundle age in seconds (default: 300)")
+    parser.add_argument("--endorsement-validity-seconds", type=int, default=300, help="validity interval placed on a new endorsement in seconds (default: 300)")
     args = parser.parse_args(argv)
     try:
         if (

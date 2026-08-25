@@ -455,6 +455,15 @@ def verify_backup(directory: pathlib.Path, prepared: Sequence[PreparedChange]) -
 
 
 def restore_backup(repo: pathlib.Path, directory: pathlib.Path) -> list[str]:
+    """Restore files only when the prepared manifest and current hashes agree.
+
+    ``repo`` bounds every manifest path and ``directory`` must contain the
+    schema-versioned backup manifest and referenced blobs. A file is restored
+    only when its current SHA-256 equals the planned remediated hash; an already
+    original file is skipped. Any path escape, hash mismatch, or malformed
+    record raises ``ValueError`` before replacement of that invalid record.
+    Returns repository-relative paths restored during this call.
+    """
     manifest = json.loads((directory / "manifest.json").read_text(encoding="ascii"))
     if manifest.get("schema_version") != 1 or manifest.get("record_type") != "unicode_remediation_backup":
         raise ValueError("invalid remediation backup manifest")
@@ -497,6 +506,14 @@ def apply_approved(
     policy: unicode_gate.Policy,
     backup: pathlib.Path | None = None,
 ) -> list[str]:
+    """Apply only explicitly approved and fully revalidated Unicode changes.
+
+    ``records`` and ``policy`` are rechecked by ``prepare_approved`` against
+    current file hashes and exact findings. When ``backup`` is supplied its
+    manifest must match every planned change before replacement begins. Files
+    are atomically replaced with their original modes, and the returned paths
+    identify applied changes. Validation failures raise before any replacement.
+    """
     prepared = prepare_approved(repo, records, policy)
     if backup is not None:
         verify_backup(backup, prepared)
@@ -508,53 +525,117 @@ def apply_approved(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Deterministic Unicode review workflow")
-    parser.add_argument("--repo", type=pathlib.Path, default=pathlib.Path.cwd())
-    parser.add_argument("--policy", type=pathlib.Path)
+    parser.add_argument(
+        "--repo",
+        type=pathlib.Path,
+        default=pathlib.Path.cwd(),
+        help="repository root used for all reviewed paths (default: cwd)",
+    )
+    parser.add_argument(
+        "--policy",
+        type=pathlib.Path,
+        help="Unicode Gate policy JSON path (default: repository policy)",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     scan = subparsers.add_parser("scan", help="write an ASCII-only review report")
     scope = scan.add_mutually_exclusive_group(required=True)
     scope.add_argument("--all", action="store_true", help="scan tracked working-tree files")
     scope.add_argument("--paths", nargs="+", metavar="PATH", help="scan explicit repository files")
-    scan.add_argument("--output", type=pathlib.Path, default=DEFAULT_REPORT)
-    scan.add_argument("--replace-existing", action="store_true")
+    scan.add_argument(
+        "--output",
+        type=pathlib.Path,
+        default=DEFAULT_REPORT,
+        help=f"ASCII-only review report path (default: {DEFAULT_REPORT})",
+    )
+    scan.add_argument(
+        "--replace-existing",
+        action="store_true",
+        help="replace an existing report instead of refusing to overwrite it",
+    )
 
     apply_parser = subparsers.add_parser("apply", help="apply explicitly approved records")
-    apply_parser.add_argument("--report", type=pathlib.Path, default=DEFAULT_REPORT)
+    apply_parser.add_argument(
+        "--report",
+        type=pathlib.Path,
+        default=DEFAULT_REPORT,
+        help=f"review report containing explicit approvals (default: {DEFAULT_REPORT})",
+    )
     apply_parser.add_argument(
         "--backup",
         type=pathlib.Path,
         default=pathlib.Path("local_reports/unicode_gate/remediation_backup"),
+        help="prepared backup directory whose manifest must match the planned changes",
     )
 
     prepare_parser = subparsers.add_parser(
         "prepare", help="materialize verified originals and a planned-hash manifest"
     )
-    prepare_parser.add_argument("--report", type=pathlib.Path, default=DEFAULT_REPORT)
+    prepare_parser.add_argument(
+        "--report",
+        type=pathlib.Path,
+        default=DEFAULT_REPORT,
+        help=f"review report containing explicit approvals (default: {DEFAULT_REPORT})",
+    )
     prepare_parser.add_argument(
         "--output",
         type=pathlib.Path,
         default=pathlib.Path("local_reports/unicode_gate/remediation_backup"),
+        help="directory for verified originals and the planned-hash manifest",
     )
 
     baseline_parser = subparsers.add_parser(
         "baseline", help="write an exact U+FE0F baseline from a review report"
     )
-    baseline_parser.add_argument("--report", type=pathlib.Path, default=DEFAULT_REPORT)
     baseline_parser.add_argument(
-        "--output", type=pathlib.Path, default=pathlib.Path("unicode_gate_baseline.json")
+        "--report",
+        type=pathlib.Path,
+        default=DEFAULT_REPORT,
+        help=f"review report used to construct exact baseline entries (default: {DEFAULT_REPORT})",
     )
-    baseline_parser.add_argument("--replace-existing", action="store_true")
+    baseline_parser.add_argument(
+        "--output",
+        type=pathlib.Path,
+        default=pathlib.Path("unicode_gate_baseline.json"),
+        help="exact baseline JSON path (default: unicode_gate_baseline.json)",
+    )
+    baseline_parser.add_argument(
+        "--replace-existing",
+        action="store_true",
+        help="replace an existing baseline instead of refusing to overwrite it",
+    )
 
     decide_parser = subparsers.add_parser(
         "decide", help="set deterministic decisions for exact codepoints"
     )
-    decide_parser.add_argument("--report", type=pathlib.Path, default=DEFAULT_REPORT)
-    decide_parser.add_argument("--codepoint", nargs="+", required=True)
-    decide_parser.add_argument("--path", action="append")
-    decide_parser.add_argument("--decision", choices=["APPROVED", "REJECTED"], required=True)
     decide_parser.add_argument(
-        "--action", choices=["NONE", "REMOVE_CODEPOINT", "REPLACE_WITH_ESCAPE"], required=True
+        "--report",
+        type=pathlib.Path,
+        default=DEFAULT_REPORT,
+        help=f"review report to update (default: {DEFAULT_REPORT})",
+    )
+    decide_parser.add_argument(
+        "--codepoint",
+        nargs="+",
+        required=True,
+        help="one or more exact Unicode code points such as U+202E",
+    )
+    decide_parser.add_argument(
+        "--path",
+        action="append",
+        help="limit the decision to an exact repository path; repeat as needed",
+    )
+    decide_parser.add_argument(
+        "--decision",
+        choices=["APPROVED", "REJECTED"],
+        required=True,
+        help="human decision recorded for each matched finding",
+    )
+    decide_parser.add_argument(
+        "--action",
+        choices=["NONE", "REMOVE_CODEPOINT", "REPLACE_WITH_ESCAPE"],
+        required=True,
+        help="approved remediation action; NONE records review without changing text",
     )
 
     restore_parser = subparsers.add_parser(
@@ -564,6 +645,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--backup",
         type=pathlib.Path,
         default=pathlib.Path("local_reports/unicode_gate/remediation_backup"),
+        help="prepared backup directory containing the restore manifest and blobs",
     )
     return parser
 

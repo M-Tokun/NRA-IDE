@@ -16,34 +16,44 @@ from .trust_bundle import KeyRole
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repository-root", required=True)
-    parser.add_argument("--observer-id", required=True)
-    parser.add_argument("--nonce-database", required=True)
-    parser.add_argument("--ledger-key-file", required=True)
-    parser.add_argument("--signing-key-id", required=True)
-    parser.add_argument("--signing-key-file", required=True)
-    parser.add_argument("--trust-bundle-file", required=True)
-    parser.add_argument("--trust-checkpoint-database", required=True)
-    parser.add_argument("--pinned-root-key-id", required=True)
-    parser.add_argument("--pinned-root-public-key-file", required=True)
-    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300)
+    parser = argparse.ArgumentParser(
+        description="Observe one repository request and sign the response."
+    )
+    parser.add_argument("--repository-root", required=True, help="repository root that bounds every observable path")
+    parser.add_argument("--observer-id", required=True, help="stable observer identity recorded in signed evidence")
+    parser.add_argument("--nonce-database", required=True, help="SQLite replay-protection state path")
+    parser.add_argument("--ledger-key-file", required=True, help="secret-key file protecting the nonce ledger")
+    parser.add_argument("--signing-key-id", required=True, help="trusted OBSERVER_SIGNER key identifier")
+    parser.add_argument("--signing-key-file", required=True, help="Ed25519 private-key file for the signing key identifier")
+    parser.add_argument("--trust-bundle-file", required=True, help="signed trust-bundle JSON file used for signer admission")
+    parser.add_argument("--trust-checkpoint-database", required=True, help="SQLite path retaining the accepted trust-bundle chain")
+    parser.add_argument("--pinned-root-key-id", required=True, help="identifier of the pinned primary trust root")
+    parser.add_argument("--pinned-root-public-key-file", required=True, help="Ed25519 public-key file for the pinned primary trust root")
+    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300, help="maximum accepted trust-bundle age in seconds (default: 300)")
     parser.add_argument(
         "--trust-checkpoint-attestation-file",
         action="append",
         required=True,
+        help="signed checkpoint-attestation file; repeat for distinct witnesses",
     )
     parser.add_argument(
         "--minimum-checkpoint-witness-principals",
         type=int,
         default=2,
+        help="minimum number of distinct checkpoint witness principals (default: 2)",
     )
     parser.add_argument(
         "--checkpoint-attestation-max-age-seconds",
         type=int,
         default=300,
+        help="maximum checkpoint-attestation age in seconds (default: 300)",
     )
-    parser.add_argument("--request-max-age-seconds", type=int, default=30)
+    parser.add_argument(
+        "--request-max-age-seconds",
+        type=int,
+        default=30,
+        help="maximum accepted signed-request age in seconds (default: 30)",
+    )
     args = parser.parse_args(argv)
     try:
         ledger_key = load_secret_key_file(Path(args.ledger_key_file))

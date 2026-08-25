@@ -129,7 +129,14 @@ class TextExtractor:
         *,
         allow_markdown_structure: bool = True,
     ) -> Tuple[float, Tuple[str, ...]]:
-        """Return a bounded content score and its observable reasons."""
+        """Return a bounded content score and its observable reasons.
+
+        ``text`` is scored without changing its source representation.
+        ``context_strength`` applies the configured preceding-line bonus.
+        ``allow_markdown_structure`` controls only heading, list, and quotation
+        bonuses; callers set it false inside fenced or indented code so code
+        syntax is not mistaken for document structure.
+        """
         source = text.rstrip("\r\n")
         clean = source.strip()
         if not clean:

@@ -25,6 +25,15 @@ def verify_role_signed_payload(
     require_trust_binding: bool = False,
     now: datetime | None = None,
 ) -> RoleSignedPayloadResult:
+    """Verify a signed payload and bind its key to one active trust role.
+
+    ``trust_bundle`` supplies active keys for ``required_role`` and
+    ``signature_max_age`` bounds freshness. When ``require_trust_binding`` is
+    true, the signed envelope must also name the bundle generation and exact
+    signed-bundle SHA-256; false skips only that additional binding check.
+    ``now`` must be timezone-aware when supplied. Failures return no payload or
+    key record with reason codes and do not mutate trust state.
+    """
     current = now or datetime.now(timezone.utc)
     if current.tzinfo is None:
         return RoleSignedPayloadResult(

@@ -15,14 +15,45 @@ from .trust_bundle import verify_signed_trust_bundle
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--witness-database", required=True)
-    parser.add_argument("--witness-principal-id", required=True)
-    parser.add_argument("--witness-key-id", required=True)
-    parser.add_argument("--witness-private-key-file", required=True)
-    parser.add_argument("--pinned-root-key-id", required=True)
-    parser.add_argument("--pinned-root-public-key-file", required=True)
-    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300)
+    parser = argparse.ArgumentParser(
+        description="Witness one monotonic trust checkpoint read from stdin."
+    )
+    parser.add_argument(
+        "--witness-database",
+        required=True,
+        help="SQLite path holding this witness's monotonic checkpoint state",
+    )
+    parser.add_argument(
+        "--witness-principal-id",
+        required=True,
+        help="principal identity represented by this witness process",
+    )
+    parser.add_argument(
+        "--witness-key-id",
+        required=True,
+        help="trust-bundle key identifier used to sign the attestation",
+    )
+    parser.add_argument(
+        "--witness-private-key-file",
+        required=True,
+        help="Ed25519 private-key file for the witness key identifier",
+    )
+    parser.add_argument(
+        "--pinned-root-key-id",
+        required=True,
+        help="identifier of the pinned primary trust root",
+    )
+    parser.add_argument(
+        "--pinned-root-public-key-file",
+        required=True,
+        help="Ed25519 public-key file for the pinned primary trust root",
+    )
+    parser.add_argument(
+        "--trust-bundle-max-age-seconds",
+        type=int,
+        default=300,
+        help="maximum accepted trust-bundle signature age in seconds (default: 300)",
+    )
     args = parser.parse_args(argv)
     try:
         current = datetime.now(timezone.utc)

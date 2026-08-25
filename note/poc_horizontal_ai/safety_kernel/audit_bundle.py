@@ -57,6 +57,13 @@ def verify_audit_bundle(
     *,
     expected_head_digest: str | None = None,
 ) -> AuditBundleVerification:
+    """Verify an exported audit bundle and its append-only digest chain.
+
+    ``bundle_json`` must use the exact bundle schema and bounded record format.
+    ``expected_head_digest`` optionally binds the verified chain to an external
+    anchor. Structural, count, chain, head, or anchor mismatches return no
+    events with stable reason codes; the function performs no writes.
+    """
     try:
         bundle = _strict_object(bundle_json, _MAX_BUNDLE_BYTES)
         if set(bundle) != {

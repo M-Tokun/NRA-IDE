@@ -67,6 +67,14 @@ class CheckpointWitnessStateStore:
         witness_private_key: Ed25519PrivateKey,
         witnessed_at: datetime,
     ) -> str:
+        """Advance this witness monotonically and sign the resulting checkpoint.
+
+        The bundle must continue the locally retained generation and digest.
+        ``witnessed_at`` must be timezone-aware, and the private key must match
+        ``witness_key_id`` in the bundle. Success commits the new witness state;
+        replay returns the identical stored attestation, while conflicts or
+        database failures roll back and raise.
+        """
         if witnessed_at.tzinfo is None:
             raise ValueError("witnessed_at must be timezone-aware")
         current = witnessed_at.astimezone(timezone.utc)
@@ -193,6 +201,13 @@ def create_checkpoint_attestation(
     witness_private_key: Ed25519PrivateKey,
     witnessed_at: datetime,
 ) -> str:
+    """Create a signed statement binding one witness to a trust checkpoint.
+
+    The attestation includes the exact bundle generation and signed-bundle
+    digest plus the caller-supplied principal, key, sequence, identifier, and
+    timezone-aware witness time. Validation failure raises ``ValueError``. This
+    constructor signs data but does not persist witness state.
+    """
     if not attestation_id or len(attestation_id) > 128:
         raise ValueError("invalid attestation_id")
     if (
@@ -246,6 +261,13 @@ def verify_checkpoint_attestation(
     signature_max_age: timedelta,
     now: datetime | None = None,
 ) -> tuple[VerifiedCheckpointAttestation | None, tuple[str, ...]]:
+    """Verify one fresh checkpoint attestation against its trust bundle.
+
+    The signing key must be active for the witness role and the payload must
+    bind the exact bundle generation and digest. ``signature_max_age`` limits
+    freshness. Invalid signatures, schema, identity, sequence, or bundle
+    binding return ``None`` and reason codes without persistent mutation.
+    """
     verified = verify_role_signed_payload(
         signed_attestation_json,
         trust_bundle=trust_bundle,
@@ -306,6 +328,13 @@ def assess_checkpoint_witness_quorum(
     signature_max_age: timedelta,
     now: datetime | None = None,
 ) -> CheckpointWitnessQuorum:
+    """Assess distinct-principal agreement on one trust-bundle checkpoint.
+
+    Every accepted attestation must bind ``trust_bundle`` and pass the supplied
+    signature-age boundary. ``minimum_principals`` counts distinct principals,
+    not files or signatures. Invalid or conflicting evidence cannot satisfy
+    quorum and is reflected in reason codes. No checkpoint is accepted here.
+    """
     if minimum_principals < 2:
         return CheckpointWitnessQuorum(
             False,

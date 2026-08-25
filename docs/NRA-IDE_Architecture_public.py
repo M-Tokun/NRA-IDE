@@ -354,11 +354,38 @@ def nra_ide_core_evaluation(
     input_exception_log: Optional[List[str]] = None,
     audit_log: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
-    """Evaluate one canonical state without inferring missing domain rules.
+    """Evaluate one canonical boundary state from Cause-Side inputs.
 
-    ``r_handoff`` is canonical. ``r_op`` and positional ``rop`` are retained
-    only as compatibility aliases. Legacy calls lacking ``r_warn`` or
-    ``r_irrev`` return CONFESSION instead of guessing.
+    Args:
+        delta: Domain-defined deviation supplied by the Cause-Side model.
+        tau: Domain-defined absorption thickness in units compatible with delta.
+        rop: Positional compatibility alias for ``r_handoff``.
+        r_warn: Domain threshold for ``BOUNDARY_WARNING``.
+        r_handoff: Canonical handoff threshold.
+        r_op: Keyword compatibility alias for ``r_handoff``.
+        r_irrev: Domain threshold for ``IRREVERSIBLE_TRANSITION``.
+        irreversible_latched: Retained latch state; true cannot be cleared here.
+        d_delta_dt: Optional observed delta derivative for double-fluctuation data.
+        d_tau_dt: Optional observed tau derivative for double-fluctuation data.
+        trend: Optional domain-provided trend label retained in the result.
+        input_side: Must be ``CAUSE_SIDE``; Effect-Side input is rejected.
+        declared_target: Non-empty target fixed before boundary evaluation.
+        observation_channels: Domain-defined observation-channel records.
+        logging_state: Independent canonical logging-channel state.
+        communication_state: Independent canonical communication-channel state.
+        structural_disclosure_log: Cause-Side structural disclosure records.
+        input_exception_log: Records supporting an input exception.
+        audit_log: Compatibility source for an input-exception log.
+
+    Returns:
+        A canonical result dictionary. Invalid, unknown, non-finite, or
+        underspecified inputs return ``CONFESSION``; zero tau returns
+        ``OUT_OF_DESCRIPTION_DOMAIN``.
+
+    ``r_handoff`` is canonical. ``r_op`` and ``rop`` are compatibility aliases.
+    Thresholds must satisfy ``0 <= r_warn < r_handoff < r_irrev < 1``. Reaching
+    ``RUPTURE_BOUNDARY`` concerns the declared target and does not itself imply
+    loss of observation, records, or communications.
     """
     double = _double_fluctuation(d_delta_dt, d_tau_dt)
     if not isinstance(declared_target, str) or not declared_target:
@@ -677,6 +704,13 @@ class DynamicTauEngine:
 
 
 def pre_nra_input_gate(raw_input: Any) -> Dict[str, Any]:
+    """Admit only dictionary input carrying delta, tau, and Cause-Side authority.
+
+    The returned dictionary is a shallow copy marked ``SANITIZED_INPUT``.
+    Missing variables, a non-dictionary value, or Effect-Side authority returns
+    ``CONFESSION``. This structural check neither infers domain rules nor
+    calculates a boundary ratio.
+    """
     if not isinstance(raw_input, dict):
         return _confession("Pre-NRA input must be a dictionary.")
     missing = [name for name in ("delta", "tau") if name not in raw_input]
@@ -699,6 +733,15 @@ def post_nra_output_gate(
     current_rop: Any = None,
     dynamic_engine: Optional[DynamicTauEngine] = None,
 ) -> Dict[str, Any]:
+    """Gate unvalidated LLM output with independently supplied structural data.
+
+    ``current_delta`` and ``current_tau`` remain Cause-Side quantities;
+    ``current_rop`` is the positional compatibility alias for the handoff
+    threshold. ``dynamic_engine`` may add a domain-specific directional
+    auxiliary but cannot change the canonical ratio or state. ``llm_output`` is
+    returned only for ``PERMIT`` or ``BOUNDARY_WARNING`` and never updates
+    delta, tau, thresholds, latch state, or authority.
+    """
     result = nra_ide_core_evaluation(
         current_delta,
         current_tau,

@@ -34,6 +34,14 @@ class DeploymentBoundaryAssessment:
 def assess_runtime_placement(
     placement: RuntimePlacement,
 ) -> DeploymentBoundaryAssessment:
+    """Assess path and declared authority separation for a runtime placement.
+
+    ``placement`` supplies repository, key, database, witness-root, and
+    authority-domain locations. The result distinguishes structural path checks
+    from facts portable Python cannot attest, including distinct OS identities
+    and authority ownership. It reports those unverified boundaries explicitly
+    and does not create, move, or open any runtime state.
+    """
     reasons: list[str] = []
     repository = placement.repository_root.resolve()
     if not repository.is_dir():

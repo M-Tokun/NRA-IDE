@@ -103,6 +103,14 @@ def verify_observation_envelope(
     max_age: timedelta,
     now: datetime | None = None,
 ) -> ObservationEnvelopeResult:
+    """Verify that an observation envelope answers the exact fresh request.
+
+    The envelope is bound to ``request``, ``expected_observer_id``, and the
+    resolved path below ``repository_root``. ``max_age`` limits evidence age;
+    ``now`` may supply a timezone-aware verification time for deterministic
+    tests. Any schema, digest, identity, path, hash, or time mismatch returns no
+    evidence and one or more reason codes. No persistent state is changed.
+    """
     current_time = now or datetime.now(timezone.utc)
     if (
         max_age <= timedelta(0)

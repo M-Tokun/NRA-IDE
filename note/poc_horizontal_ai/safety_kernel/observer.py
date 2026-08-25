@@ -32,6 +32,14 @@ class TrustedFileObserver:
         self.observer_id = observer_id
 
     def observe(self, resource_path: str, state_version: int) -> FileObservationResult:
+        """Hash one repository-bounded file without following a scope escape.
+
+        ``resource_path`` must be a relative POSIX path and ``state_version`` a
+        non-negative integer. Missing files are valid observations with no
+        hash; directories, malformed paths, and resolved paths outside the
+        configured repository return reason codes. The method reads file bytes
+        but does not modify repository or observer state.
+        """
         path = PurePosixPath(resource_path)
         if (
             not resource_path

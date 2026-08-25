@@ -70,6 +70,14 @@ def _confession(axis: AxisEvidence, reason: str) -> AxisAssessment:
 
 
 def evaluate_axis(axis: AxisEvidence) -> AxisAssessment:
+    """Evaluate one verified Cause-Side axis against canonical boundaries.
+
+    ``axis`` supplies the domain-defined delta, tau, ordered thresholds, and
+    retained irreversible-latch state. Invalid or unverified evidence returns
+    ``CONFESSION``; zero tau returns ``OUT_OF_DESCRIPTION_DOMAIN``. The result
+    never clears an existing irreversible latch and has no persistence side
+    effect.
+    """
     if (
         not isinstance(axis.name, str)
         or not axis.name

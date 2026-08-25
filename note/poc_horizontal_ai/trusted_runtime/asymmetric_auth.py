@@ -88,6 +88,14 @@ def verify_signed_payload_ed25519(
     max_age: timedelta | None,
     now: datetime | None = None,
 ) -> SignedPayloadResult:
+    """Verify one strict Ed25519 envelope against the supplied trusted keys.
+
+    ``trusted_public_keys`` maps accepted key identifiers to public keys.
+    ``max_age`` limits signature age when non-None, and ``now`` must be
+    timezone-aware when supplied. Schema, digest, fingerprint, signature, key,
+    or time failures return no payload with reason codes. Version 1.1 trust
+    binding fields are verified as signed data but interpreted by the caller.
+    """
     current_time = now or datetime.now(timezone.utc)
     if (
         (max_age is not None and max_age <= timedelta(0))

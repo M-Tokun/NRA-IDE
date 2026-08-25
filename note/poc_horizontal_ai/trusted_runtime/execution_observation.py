@@ -112,6 +112,14 @@ def verify_signed_execution_reality_observation(
     observation_max_age: timedelta,
     now: datetime | None = None,
 ) -> tuple[VerifiedExecutionRealityObservation | None, tuple[str, ...]]:
+    """Verify a signed execution-reality observation and both age bounds.
+
+    ``signature_max_age`` limits the signed envelope while
+    ``observation_max_age`` independently limits the observed event. The signer
+    must have the active observer role and bind the exact trust bundle. Invalid
+    identity, schema, digest, sequence, or time data returns ``None`` with
+    reason codes and does not update the execution journal.
+    """
     current = now or datetime.now(timezone.utc)
     if (
         current.tzinfo is None
@@ -304,6 +312,14 @@ class ExecutionFileObservationRequest:
 def encode_execution_file_observation_request(
     request: ExecutionFileObservationRequest,
 ) -> str:
+    """Validate, observe, journal, and sign one execution-file request.
+
+    ``repository_root`` bounds the observed path, ``nonce_store`` enforces
+    replay resistance, and ``admitted_signer`` supplies the trusted observer
+    key. ``request_max_age`` and timezone-aware ``now`` bound request freshness.
+    Success records the nonce/observation before returning signed JSON; invalid
+    input raises ``ValueError`` and must not be represented as an observation.
+    """
     _validate_file_request(request)
     return _canonical_json(
         {
@@ -425,6 +441,13 @@ def verify_signed_execution_file_observation(
     observation_max_age: timedelta,
     now: datetime | None = None,
 ) -> tuple[VerifiedExecutionRealityObservation | None, tuple[str, ...]]:
+    """Verify that signed file evidence answers the exact observation request.
+
+    Signature and observation ages are checked independently, then request id,
+    challenge, attempt, path, expected hash, and trust binding are compared.
+    Any mismatch returns ``None`` with reason codes. The verifier is read-only
+    and does not reconcile or update the execution journal.
+    """
     _validate_file_request(request)
     observation, reasons = verify_signed_execution_reality_observation(
         signed_observation_json,

@@ -211,7 +211,7 @@
 <header>
     <div class="logo">NRA‑IDE</div>
     <div class="sub">// Autonomous Drive Safety Gate v0.2 — Tire × Road Surface μ</div>
-    <div class="ver">R = δ / τ &nbsp;|&nbsp; FAIL‑CLOSED</div>
+    <div class="ver">R = δ / τ &nbsp;|&nbsp; RUPTURE_BOUNDARY</div>
 </header>
 
 <div id="main">
@@ -420,7 +420,7 @@ function computeR(v_kmh, d_m, t_m) {
 }
 function zoneFromR(R) {
     // Flag boundary: 4-tier judgment on R=δ/τ. R<0.40 -> A (PERMIT), R<0.70 -> B (PERMIT_WITH_CAVEAT),
-    // R<1.00 -> C (WARNING), R>=1.00 -> D (FAIL-CLOSED / emergency stop).
+    // R<1.00 -> C (WARNING), R>=1.00 -> D (RUPTURE_BOUNDARY; operational response: emergency stop).
     // The thresholds 0.40/0.70/1.00 themselves have no cited basis (accident statistics, engineering standard, etc.) in this file — demo tuning values.
     if (R < 0.40) return 'A';
     if (R < 0.70) return 'B';
@@ -650,7 +650,7 @@ function drawRoad(delta, R, sd, dist) {
     ctx.textAlign = 'left';
     ctx.fillText(TIRE_LABEL[tire] + ' Tire  μ=' + getMu().toFixed(2), 12, h - 10);
 
-    // FAIL overlay: equivalent to zoneFromR()'s Zone D (R>=1.0), shows a full-screen warning overlay. The 1.0 threshold is duplicated here as well.
+    // RUPTURE_BOUNDARY overlay: Zone D (R>=1.0) shows a full-screen emergency-stop warning. The 1.0 threshold is duplicated here as well.
     if (R >= 1.0) {
         ctx.fillStyle = 'rgba(255,34,68,0.06)';
         ctx.fillRect(0, 0, w, h);
@@ -659,7 +659,7 @@ function drawRoad(delta, R, sd, dist) {
         ctx.textAlign = 'center';
         ctx.shadowColor = '#ff2244';
         ctx.shadowBlur = 10;
-        ctx.fillText('⚠ FAIL‑CLOSED — EMERGENCY STOP', w / 2, 22);
+        ctx.fillText('⚠ RUPTURE_BOUNDARY — EMERGENCY STOP', w / 2, 22);
         ctx.shadowBlur = 0;
     }
 }
@@ -717,7 +717,7 @@ function updateZoneUI(zone, R) {
         case 'A': color='#00ff88'; zName='ZONE A — PERMIT';       gateText='PERMIT'; break;
         case 'B': color='#ffd600'; zName='ZONE B — CAVEAT';       gateText='PERMIT_WITH_CAVEAT'; break;
         case 'C': color='#ff8c00'; zName='ZONE C — WARNING';      gateText='WARNING'; break;
-        case 'D': color='#ff2244'; zName='ZONE D — FAIL‑CLOSED';  gateText='FAIL‑CLOSED 🚨'; break;
+        case 'D': color='#ff2244'; zName='ZONE D — RUPTURE_BOUNDARY'; gateText='RUPTURE_BOUNDARY 🚨'; break;
     }
     rEl.style.color = color;
     rEl.textContent = Math.min(R, 9.99).toFixed(2);

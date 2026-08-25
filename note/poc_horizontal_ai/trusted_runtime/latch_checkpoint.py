@@ -140,6 +140,14 @@ def synchronize_latch_checkpoints(
     checkpointed_at: datetime,
     minimum_witnesses: int = 2,
 ) -> None:
+    """Copy a verified latch head to multiple create-only checkpoint stores.
+
+    ``minimum_witnesses`` requires distinct configured stores and defaults to
+    two. ``checkpointed_at`` must be timezone-aware. All existing checkpoints
+    are verified against the latch head before any missing checkpoint is
+    created; conflicts or insufficient witnesses raise ``ValueError``. The
+    latch store itself is read-only during synchronization.
+    """
     if minimum_witnesses < 2 or len(checkpoint_stores) < minimum_witnesses:
         raise ValueError("LATCH_CHECKPOINT_QUORUM_CONFIG_INVALID")
     local_head = latch_store.head()

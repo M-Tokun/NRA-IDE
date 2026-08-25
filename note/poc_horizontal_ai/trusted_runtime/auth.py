@@ -66,6 +66,14 @@ def verify_authenticated_payload(
     max_age: timedelta,
     now: datetime | None = None,
 ) -> AuthenticatedPayloadResult:
+    """Verify one strict HMAC-SHA256 envelope and its freshness boundary.
+
+    ``trusted_keys`` maps accepted key identifiers to secret keys,
+    ``max_age`` must be positive, and ``now`` must be timezone-aware when
+    supplied. Unknown keys, malformed envelopes, digest or MAC mismatches, and
+    stale or future timestamps return no payload with reason codes. The input
+    mapping and persistent state are not modified.
+    """
     current_time = now or datetime.now(timezone.utc)
     if max_age <= timedelta(0) or current_time.tzinfo is None:
         return AuthenticatedPayloadResult(

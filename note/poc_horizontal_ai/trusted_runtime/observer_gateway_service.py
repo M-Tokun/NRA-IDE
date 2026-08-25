@@ -15,13 +15,15 @@ from .secret_file import load_secret_key_file
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repository-root", required=True)
-    parser.add_argument("--observer-id", required=True)
-    parser.add_argument("--nonce-database", required=True)
-    parser.add_argument("--key-id", required=True)
-    parser.add_argument("--key-file", required=True)
-    parser.add_argument("--request-max-age-seconds", type=int, default=30)
+    parser = argparse.ArgumentParser(
+        description="Authenticate one replay-resistant observation request."
+    )
+    parser.add_argument("--repository-root", required=True, help="repository root that bounds every observable path")
+    parser.add_argument("--observer-id", required=True, help="stable observer identity recorded in returned evidence")
+    parser.add_argument("--nonce-database", required=True, help="SQLite replay-protection state path")
+    parser.add_argument("--key-id", required=True, help="identifier of the configured request-authentication key")
+    parser.add_argument("--key-file", required=True, help="master secret-key file used to derive authentication and nonce keys")
+    parser.add_argument("--request-max-age-seconds", type=int, default=30, help="maximum accepted authenticated-request age in seconds (default: 30)")
     args = parser.parse_args(argv)
     try:
         master_key = load_secret_key_file(Path(args.key_file))

@@ -27,7 +27,13 @@ _telemetry: Dict[str, Any] = {
 
 
 def track_metrics(status_code: int, is_timeout: bool = False):
-    """Track metrics for HAN decision"""
+    """Update process-local counters consumed by the next HAN decision.
+
+    ``status_code`` values of 500 or greater increment the retry/error counter.
+    ``is_timeout=True`` or status 408/504 increments the timeout counter; a 504
+    therefore contributes to both counters. The function mutates the module's
+    in-memory telemetry and does not emit or persist a decision itself.
+    """
     global _telemetry
     
     # Increment retry/error counters

@@ -199,6 +199,15 @@ def assess_root_policy_rotation_quorum(
     signature_max_age: timedelta,
     now: datetime | None = None,
 ) -> RootPolicyRotationQuorum:
+    """Verify that both root sets authorize one exact policy-root rotation.
+
+    The previous and next configurations, target trust bundle, admission
+    challenge, and rotation identifiers are digest-bound into the approvals.
+    ``previous_minimum_principals`` and ``next_minimum_principals`` count
+    distinct principals in their respective root sets. Invalid, stale, or
+    disagreeing approvals cannot satisfy quorum. This evidence-only function
+    does not update checkpoints or activate the next root set.
+    """
     empty = (False, None, None, None, None, None, None, (), ())
     current = now or datetime.now(timezone.utc)
     try:
@@ -337,6 +346,14 @@ def assess_root_policy_rotation_quorum(
 
 
 def assess_root_policy_quorum(signed_endorsements: tuple[str, ...], *, pinned_policy_roots: Mapping[str, PinnedPolicyRoot], primary_root_keys: Mapping[str, Ed25519PublicKey], trust_bundle: VerifiedTrustBundle, admission_challenge: str, minimum_principals: int, signature_max_age: timedelta, now: datetime | None = None) -> RootPolicyQuorum:
+    """Verify distinct pinned-root endorsements of one admission state.
+
+    Endorsements must agree on the policy configuration, trust-bundle
+    generation and digest, and exact ``admission_challenge``.
+    ``minimum_principals`` counts distinct policy-root principals and
+    ``signature_max_age`` bounds freshness. Invalid or mismatched evidence is
+    reported through reason codes; no checkpoint is changed.
+    """
     current = now or datetime.now(timezone.utc)
     try:
         roots = _validate_root_set(pinned_policy_roots, primary_root_keys)
@@ -447,6 +464,16 @@ class RootPolicyCheckpointStore:
         rotation_evidence: RootPolicyRotationEvidence | None = None,
         now: datetime | None = None,
     ) -> RootPolicyCheckpointResult:
+        """Monotonically retain a quorum-approved root-policy checkpoint.
+
+        ``signed_endorsements`` must satisfy the currently supplied pinned-root
+        policy for ``trust_bundle`` and the exact admission challenge. Genesis,
+        replay, generation continuity, and previous-digest constraints are
+        checked transactionally. A policy-configuration change additionally
+        requires verified ``rotation_evidence`` authorized by both root sets.
+        Success commits one checkpoint; every failure path rolls back or leaves
+        an identical existing checkpoint unchanged.
+        """
         if not isinstance(trust_bundle, VerifiedTrustBundle):
             return RootPolicyCheckpointResult(False, ("ROOT_POLICY_CHECKPOINT_INPUT_INVALID",))
         quorum = assess_root_policy_quorum(
@@ -619,6 +646,15 @@ class RootPolicyWitnessStateStore:
         self._connection.close()
 
     def endorse(self, *, policy_id: str, policy_configuration_sha256: str, endorsement_id: str, private_key: Ed25519PrivateKey, trust_bundle: VerifiedTrustBundle, admission_challenge: str, endorsed_at: datetime, valid_until: datetime) -> str:
+        """Persist witness state and return one signed policy endorsement.
+
+        The requested policy configuration must continue the locally witnessed
+        trust-bundle chain. Configuration changes are rejected in this method;
+        they require the separate rotation-evidence stage. ``endorsement_id``
+        is idempotent only when the existing signed value is identical.
+        Database or validation failure rolls back and raises the original
+        exception; successful insertion commits the witness record.
+        """
         _digest(policy_configuration_sha256)
         try:
             self._connection.execute("BEGIN IMMEDIATE")

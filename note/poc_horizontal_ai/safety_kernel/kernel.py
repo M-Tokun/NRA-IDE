@@ -89,6 +89,15 @@ class ShadowSafetyKernel:
         reconciliations: Iterable[ReconciliationResult] = (),
         response_integrity: Iterable[ResponseIntegrityState] = (),
     ) -> SafetyDecision:
+        """Combine independent evidence into a non-executing safety decision.
+
+        ``proposal`` is checked against authoritative evidence and the exact
+        instruction contract. ``solution_stage`` and ``thickness`` are required
+        gates; optional axes, reconciliations, and response-integrity states add
+        independent denial reasons. The result contains directives and
+        testimony state only: a passing result grants shadow-policy status and
+        does not itself execute, persist, or elevate Effect-Side output.
+        """
         reasons = list(self.policy.violations(proposal, evidence))
         consistency = assess_instruction_consistency(proposal, instruction_contract)
         reasons.extend(consistency.reason_codes)

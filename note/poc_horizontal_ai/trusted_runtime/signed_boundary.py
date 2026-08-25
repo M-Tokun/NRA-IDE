@@ -111,6 +111,14 @@ def verify_signed_observation(
     observation_max_age: timedelta,
     now: datetime | None = None,
 ) -> SignedObservationResult:
+    """Verify a signed observation and its exact request/path binding.
+
+    ``trusted_public_keys`` defines accepted signers. Signature age and
+    observation age are independent bounds; repository root, observer identity,
+    request digest, resolved path, snapshot digest, and file hash are all
+    checked. Any mismatch returns no observation with reason codes. The
+    verifier is read-only and does not confer Cause-Side authority on output.
+    """
     signed = verify_signed_payload_ed25519(
         signed_json,
         trusted_public_keys=trusted_public_keys,

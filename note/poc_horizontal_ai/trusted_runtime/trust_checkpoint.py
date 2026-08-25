@@ -47,6 +47,14 @@ class TrustBundleCheckpointStore:
         signature_max_age: timedelta,
         now: datetime | None = None,
     ) -> TrustCheckpointResult:
+        """Verify and monotonically accept one signed trust-bundle generation.
+
+        ``pinned_root_keys`` defines the accepted signing roots and
+        ``signature_max_age`` bounds freshness. Genesis, replay, generation
+        continuity, and previous-digest linkage are checked transactionally.
+        Identical replay succeeds without insertion; rollback, gaps, conflicts,
+        and database errors leave retained state unchanged and return reasons.
+        """
         if signature_max_age is None or signature_max_age <= timedelta(0):
             return TrustCheckpointResult(
                 False,

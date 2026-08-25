@@ -177,6 +177,14 @@ class FileChangeThicknessModel:
         return evaluate_thickness_estimate(estimate, self.contract.thresholds)
 
     def estimate(self, history: Sequence[HistoryEvent]) -> ThicknessEstimate:
+        """Derive conservative file-change delta and tau from verified history.
+
+        ``history`` must be a valid append-only chain with exactly one capacity
+        baseline and consistent proposal, resolution, loss, and recovery facts.
+        Invalid ordering or impossible recovery raises ``ValueError``. The
+        returned estimate records source event identifiers and does not modify
+        the ledger or the estimator contract.
+        """
         events = tuple(history)
         if not AppendOnlyHistoryLedger.verify(events):
             raise ValueError("history chain is invalid")

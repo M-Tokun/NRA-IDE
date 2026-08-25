@@ -57,6 +57,15 @@ def admit_file_signer(
     checkpoint_attestation_max_age: timedelta,
     now: datetime | None = None,
 ) -> AdmittedSigner:
+    """Admit a file-backed signer only after trust and witness verification.
+
+    The signed bundle and pinned root establish the candidate trust state;
+    ``signing_key_id`` must have ``required_role`` and match the private-key
+    file. Distinct checkpoint attestations must meet
+    ``minimum_checkpoint_witness_principals`` within their age boundary. The
+    checkpoint store is advanced monotonically when needed. Invalid files,
+    trust state, roles, keys, quorum, or chain continuity raise ``ValueError``.
+    """
     current = now or datetime.now(timezone.utc)
     if current.tzinfo is None or bundle_max_age <= timedelta(0):
         raise ValueError("invalid signer admission time policy")

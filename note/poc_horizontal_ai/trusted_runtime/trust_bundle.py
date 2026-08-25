@@ -147,6 +147,15 @@ def verify_signed_trust_bundle(
     signature_max_age: timedelta | None,
     now: datetime | None = None,
 ) -> TrustBundleVerification:
+    """Verify and decode one root-signed trust bundle candidate.
+
+    ``pinned_root_keys`` defines the only accepted signing roots.
+    ``signature_max_age`` optionally limits signature age, with timezone-aware
+    ``now`` used for deterministic verification. The bundle must have a strict
+    schema, monotonic-generation link field, unique key identifiers, and unique
+    public keys. Failure returns no bundle and stable reason codes; chain-state
+    acceptance is deliberately left to the checkpoint store.
+    """
     signed = verify_signed_payload_ed25519(
         signed_bundle_json,
         trusted_public_keys=pinned_root_keys,

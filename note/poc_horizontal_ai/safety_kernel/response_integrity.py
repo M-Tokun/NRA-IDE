@@ -49,6 +49,14 @@ def assess_response_integrity(
     *,
     now: datetime | None = None,
 ) -> ResponseIntegrityState:
+    """Classify an immutable response-event history and reconciliation state.
+
+    ``events`` must describe one target/warning pair with unique identifiers
+    and ordering keys. ``now`` is required and must be timezone-aware whenever
+    an expiry is present. Invalid input maps to ``INPUT_EXCEPTION``; completion
+    is ``VERIFIED_RESOLVED`` only when reconciliation is ``MATCHED``. The
+    function sorts a local copy and does not mutate the event history.
+    """
     recorded = tuple(events)
     if not recorded:
         return ResponseIntegrityState.NO_RESPONSE_HISTORY

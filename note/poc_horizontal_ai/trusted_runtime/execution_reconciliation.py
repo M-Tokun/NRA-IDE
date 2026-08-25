@@ -18,6 +18,14 @@ def reconcile_execution_file_observations(
     signature_max_age: timedelta, observation_max_age: timedelta,
     now: datetime | None = None,
 ) -> ExecutionReconciliationResult:
+    """Reconcile requested file observations with one retained execution attempt.
+
+    ``requested_observations`` pairs exact requests with signed responses.
+    ``minimum_principals`` counts distinct trusted observer principals, while
+    signature and observation ages remain separate bounds. The function asks
+    ``journal`` to record the resulting reconciliation; missing quorum,
+    conflicts, invalid evidence, or journal mismatch are returned explicitly.
+    """
     current = now or datetime.now(timezone.utc)
     if (
         current.tzinfo is None

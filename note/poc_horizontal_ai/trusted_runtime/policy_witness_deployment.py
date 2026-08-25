@@ -121,6 +121,14 @@ def assess_policy_witness_deployment_quorum(
     signature_max_age: timedelta,
     now: datetime | None = None,
 ) -> PolicyWitnessDeploymentQuorum:
+    """Assess distinct-principal agreement on one witness deployment digest.
+
+    ``processes`` defines the expected deployment and ``signed_attestations``
+    supplies authority statements bound to the verified trust bundle.
+    ``minimum_principals`` counts distinct principals; ``signature_max_age``
+    and timezone-aware ``now`` bound freshness. Invalid or disagreeing evidence
+    is reported and cannot satisfy quorum. No process is launched or changed.
+    """
     current = now or datetime.now(timezone.utc)
     if (
         current.tzinfo is None

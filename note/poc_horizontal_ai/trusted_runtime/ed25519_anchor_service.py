@@ -16,31 +16,36 @@ from .trust_bundle import KeyRole
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--anchor-database", required=True)
-    parser.add_argument("--anchor-id", required=True)
-    parser.add_argument("--ledger-key-file", required=True)
-    parser.add_argument("--signing-key-id", required=True)
-    parser.add_argument("--signing-key-file", required=True)
-    parser.add_argument("--trust-bundle-file", required=True)
-    parser.add_argument("--trust-checkpoint-database", required=True)
-    parser.add_argument("--pinned-root-key-id", required=True)
-    parser.add_argument("--pinned-root-public-key-file", required=True)
-    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300)
+    parser = argparse.ArgumentParser(
+        description="Anchor one audit bundle and return an Ed25519 receipt."
+    )
+    parser.add_argument("--anchor-database", required=True, help="SQLite audit-anchor state path")
+    parser.add_argument("--anchor-id", required=True, help="identity recorded in the anchor receipt")
+    parser.add_argument("--ledger-key-file", required=True, help="secret-key file protecting the local anchor ledger")
+    parser.add_argument("--signing-key-id", required=True, help="trusted ANCHOR_SIGNER key identifier")
+    parser.add_argument("--signing-key-file", required=True, help="Ed25519 private-key file for the signing key identifier")
+    parser.add_argument("--trust-bundle-file", required=True, help="signed trust-bundle JSON file used for signer admission")
+    parser.add_argument("--trust-checkpoint-database", required=True, help="SQLite path retaining the accepted trust-bundle chain")
+    parser.add_argument("--pinned-root-key-id", required=True, help="identifier of the pinned primary trust root")
+    parser.add_argument("--pinned-root-public-key-file", required=True, help="Ed25519 public-key file for the pinned primary trust root")
+    parser.add_argument("--trust-bundle-max-age-seconds", type=int, default=300, help="maximum accepted trust-bundle age in seconds (default: 300)")
     parser.add_argument(
         "--trust-checkpoint-attestation-file",
         action="append",
         required=True,
+        help="signed checkpoint-attestation file; repeat for distinct witnesses",
     )
     parser.add_argument(
         "--minimum-checkpoint-witness-principals",
         type=int,
         default=2,
+        help="minimum number of distinct checkpoint witness principals (default: 2)",
     )
     parser.add_argument(
         "--checkpoint-attestation-max-age-seconds",
         type=int,
         default=300,
+        help="maximum checkpoint-attestation age in seconds (default: 300)",
     )
     args = parser.parse_args(argv)
     try:
