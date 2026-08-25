@@ -447,6 +447,7 @@ function updateUI(R, delta) {
 
   if (deltaAccum > 0.001) {
     const ratePerFrame = deltaAccum / frameCount;
+    // 残り寿命の単純推定（現在の劣化速度が今後も一定と仮定）。単位は"units"で年数ではない。
     const framesLeft = (tauCurrent - 0.1) / (ratePerFrame * degSensitivity * 0.0001);
     const yearsLeft = (framesLeft / 3600).toFixed(1);
     document.getElementById('remaining-life').textContent = `~ ${yearsLeft} units`;
@@ -483,6 +484,7 @@ function loop() {
   const delta = Math.abs(rawFluc) * 0.03;
 
   deltaAccum += delta * 0.001 * degSensitivity;
+  // 劣化速度定数(0.0001, 10)はデモ用チューニング値であり、実測データに基づく物理モデルではない。
   tauCurrent = Math.max(0.1, TAU_INIT - deltaAccum * 0.0001 * degSensitivity * 10);
 
   const tau = tauCurrent * 0.25 + 0.02;

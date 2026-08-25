@@ -183,6 +183,7 @@ function param(id) { return Number($(id).value); }
 function colorForR(r) { if (r >= 1) return 'var(--red)'; if (r >= 0.85) return 'var(--yellow)'; return 'var(--green)'; }
 function statusFor(maxR) { if (maxR >= 1) return ['fail','FAIL-CLOSED','遊び幅を超えたため、次の計算へ渡さず停止しました。']; if (maxR >= 0.85) return ['watch','限界接近','遊び幅を使い切りつつあります。ここから補正や停止判定が現実的になります。']; return ['safe','遊び幅の内側','微小な揺らぎは追いかけず、誤差を広げないために許容範囲内へ留めています。']; }
 
+// 位相・振幅係数（0.020, 0.86等）はデモ用の模擬値。実測の量子相関データではない。
 function rawValues(t) {
   const decay = param('decay');
   const noise = param('noise');
@@ -269,7 +270,7 @@ function render() {
   $('statusCaption').textContent = state.fail ? '遊び幅を超過しました。残渣を次の推定へ広げず、ここで停止しています。' : st[2];
   $('failCurtain').classList.toggle('show', state.fail);
 
-  const bucket = Math.floor(state.t / 4);
+  const bucket = Math.floor(state.t / 4);  // ログ記録の間引き間隔（4単位ごと）
   if (bucket !== state.lastLogBucket) {
     state.lastLogBucket = bucket;
     const cls = state.fail ? 'fail' : (maxR >= 0.85 ? 'watch' : 'ok');

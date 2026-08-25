@@ -515,6 +515,7 @@
 </div>
 <script>
         const TAU = 100.0;
+        // これらは例示用の固定閾値であり、実運用値ではない（画面上のscope-noticeにも記載）。
         const R_WARN = 0.40;
         const R_HANDOFF = 0.80;
         const R_IRREV = 0.90;
@@ -592,6 +593,7 @@
                 return;
             }
 
+            // 一度ラッチすると、後でRが下がっても解除されない（不可逆性の実装）。
             if (r >= R_IRREV && !irreversibleLatched) {
                 irreversibleLatched = true;
                 addLog(texts[currentLang].logLatched, true);

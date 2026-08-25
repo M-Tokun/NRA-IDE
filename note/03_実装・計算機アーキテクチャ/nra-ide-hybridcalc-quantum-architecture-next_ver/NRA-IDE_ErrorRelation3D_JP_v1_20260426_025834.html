@@ -87,8 +87,9 @@ input[type=range]{width:100%;accent-color:#66d9ff}
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 let mode='cancel',surface='hidden',playing=true,t=0;let drag=false,dx0=0,rot0=38;
 const el=id=>document.getElementById(id);const inp=id=>parseFloat(el(id).value);
-function cls(v){return v>=1?'bad':v>=0.7?'warn':'ok'}
+function cls(v){return v>=1?'bad':v>=0.7?'warn':'ok'}  // R相当値：1.0でFail-Closed、0.7で注意
 function setFill(id,v){const f=el(id);f.className='fill '+cls(v);f.style.width=Math.max(0,Math.min(100,v*100))+'%'}
+// H = δ_gross/(δ_net+ε)（隠れ危険比）、R = δ_net/τ。詳細はformulaBox表示を参照。
 function calc(a,b){const rho=inp('rho'),eps=inp('eps'),tau=inp('tau');let net,gross,effective,interaction=0;
  if(mode==='cancel'){net=Math.abs(a-b);gross=Math.abs(a)+Math.abs(b);effective=net;}
  else{interaction=rho*a*b;net=Math.abs(a+b+interaction);gross=Math.abs(a)+Math.abs(b)+Math.abs(interaction);effective=net;}

@@ -217,14 +217,14 @@ Date: 26-0223-0115 JST
         f2_amp: 3.0,
         f2_freq: 0.7,         // 熱的（散逸）
 
-        // 動力学パラメータ
+        // 動力学パラメータ（状態文言分岐用の閾値、デモ用のチューニング値）
         threshold: 0.8,
         margin: 0.16,
         inputRate: 0.026,     // Rodの過剰点滅を避けるため、構造蓄積を低速化
         baseEntropy: 0.5,
         entropyVariation: 0.15,
         entropyTimeScale: 0.05,
-        criticalThreshold: 0.7,
+        criticalThreshold: 0.7,   // 臨界接近表示（updateUI）の分岐閾値
         criticalEventProb: 0.002,
         criticalDuration: 240
     };
@@ -539,6 +539,8 @@ Date: 26-0223-0115 JST
         // Rod & Structural
         UI.rodRad.textContent = rodRadius.toFixed(1);
         UI.deltaVal.textContent = state.value.toFixed(3);
+        // 注意：これは表示演出用の疑似変動値であり、実際のτ計算（CONFIG.tauBase等）とは無関係。
+        // R=δ/τ表示に使われるが、実体のτとは接続していない見せかけの値。
         const tau = 0.1 + Math.abs(Math.sin(time)) * 0.05;
         UI.tauVal.textContent = tau.toFixed(3);
         UI.rVal.textContent = (state.value / tau).toFixed(3);

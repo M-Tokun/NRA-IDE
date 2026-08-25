@@ -552,6 +552,7 @@ function getTelemetry(t) {
 }
 
 function computeR(tel, tau_base, ema_prev, params) {
+  // 除数1.5/1.0/0.9は各テレメトリ値の平常時基準値（正規化の分母）。
   const r_raw = (tel.retry / 1.5) * (tel.queue / 1.0) * (tel.dep_to / 0.9);
   const ema   = params.alpha * r_raw + (1 - params.alpha) * ema_prev;
   const mult  = Math.min(1 + ema, params.amp);
@@ -699,7 +700,7 @@ function updateUI(r_dyn, tau_d, isSilence, params) {
   const rop = params.rop;
   const ratio = Math.min(r_dyn / (rop * 1.5), 1);
   const col   = isSilence ? 'var(--danger)' :
-                r_dyn >= rop * 0.7 ? 'var(--warn)' : 'var(--safe)';
+                r_dyn >= rop * 0.7 ? 'var(--warn)' : 'var(--safe)';  // WARN境界=ropの70%
 
   document.getElementById('m-r').textContent = r_dyn.toFixed(4);
   document.getElementById('m-r').style.color = col;
@@ -756,7 +757,7 @@ function checkLog(isSilence, r_dyn, tau_d, params) {
     holdLogged = false;
   } else if (!isSilence && lastDecision === 'SILENCE' && !holdLogged) {
     addLog(`HOLD END → PASS  R=${r_dyn.toFixed(4)}`, 'pass');
-  } else if (r_dyn >= params.rop * 0.7 && r_dyn < params.rop && lastDecision !== 'warn') {
+  } else if (r_dyn >= params.rop * 0.7 && r_dyn < params.rop && lastDecision !== 'warn') {  // WARN境界=ropの70%
     addLog(`WARN  R=${r_dyn.toFixed(4)}  接近中 (R_OP×70%)`, 'warn');
   }
   lastDecision = isSilence ? 'SILENCE' : 'PASS';
@@ -774,6 +775,7 @@ function getParams() {
   };
 }
 
+// SILENCE確定後の最小保持時間。短すぎると判定がちらつくため2秒に設定。
 const HOLD_MS = 2000;
 
 function tick() {
@@ -895,6 +897,7 @@ const PRESETS = {
     note:'厳しめ設定。早めに SILENCE になります。重要サービスや障害対応向け。' },
   loose:   { rop:2.0, tau:1.0, alpha:0.10, amp:1.5,
     note:'緩め設定。SILENCE になりにくくなります。連鎖崩壊の検知が遅れるリスクがあります。' },
+  // 悪い例：rop高・tau低・alpha極小の組み合わせが感度を鈍らせる。誤ってコピペ流用しないこと。
   risky:   { rop:3.0, tau:0.5, alpha:0.01, amp:1.1,
     note:'⚠ 危険な例。閾値が高すぎ・感度が低すぎます。波は穏やかに見えますが、本物の連鎖崩壊でも SILENCE にならない場合があります。絶対に使用しないでください。' },
 };

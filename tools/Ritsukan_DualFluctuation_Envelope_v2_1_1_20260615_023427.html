@@ -172,6 +172,7 @@ const C = {
     entropyScale: 0.035,
     congestionScale: 28.0,
 
+    // R=δ_total/τ合成時の重み。各成分（内側/外側/輻輳）の寄与度を決める最重要パラメータ。
     wInner: 0.55,
     wOuter: 0.92,
     wCong: 0.85,
@@ -318,6 +319,8 @@ function updateGate(spiral) {
     st.deltaOuter = computeMeanAbs(spiral, 'fo');
     st.deltaTotal = C.wInner * st.deltaInner + C.wOuter * st.deltaOuter + C.wCong * st.deltaCong;
     st.R = st.deltaTotal / Math.max(st.tau, 0.001);
+    // FAIL-CLOSEDラッチ：R>=1.0到達で1.0に固定し、以後Rが下がっても即座には解除しない。
+    // 0.012は表示のちらつき防止のための減衰速度（1フレームあたりの解除量）。
     if (st.R >= 1.0) st.failLatch = Math.max(st.failLatch, 1.0);
     else st.failLatch = Math.max(0, st.failLatch - 0.012);
 }

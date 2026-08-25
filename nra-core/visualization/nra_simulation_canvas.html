@@ -485,12 +485,16 @@
         // Logic: Safety Node (BoundLaw)
         function safetyCheck() {
             if (state.value > THRESHOLD) {
+                // 1. Calculate Tension (Distance from constraint)
                 let excess = state.value - THRESHOLD;
                 state.tension = excess;
 
+                // 2. Correction Phase
                 let target = THRESHOLD - MARGIN;
+                // 3. Move excess energy to buffer (Do not erase)
                 let dissipated = state.value - target;
                 state.buffer += dissipated;
+                // 4. Apply State Correction
                 state.value = target;
             } else {
                 state.tension = 0;

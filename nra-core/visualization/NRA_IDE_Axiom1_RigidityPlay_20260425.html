@@ -181,6 +181,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
 </footer>
 
 <script>
+// 各フィールド: tauLeft/tauRightInit=初期吸収厚み, driftSat=ドリフト飽和値, driftT=到達フレーム数, oscA/oscW=振動振幅・角速度, noiseA=ノイズ振幅
 const SCENARIOS = [
   {tauLeft:0.020, tauRightInit:0.400, driftSat:0.022, driftT:150, oscA:0.006, oscW:0.040, noiseA:0.005},
   {tauLeft:0.018, tauRightInit:0.350, driftSat:0.020, driftT:130, oscA:0.007, oscW:0.050, noiseA:0.006},
@@ -237,7 +238,7 @@ function computeDelta() {
   const osc   = sc.oscA * Math.sin(t * sc.oscW);
   const n     = (Math.random() - 0.5) * 2 * sc.noiseA * stressMult;
   const imp   = pendingImpulse;
-  pendingImpulse *= 0.65;
+  pendingImpulse *= 0.65;  // 衝撃の減衰係数（デモ用）
   return Math.abs(drift + osc + n + imp);
 }
 

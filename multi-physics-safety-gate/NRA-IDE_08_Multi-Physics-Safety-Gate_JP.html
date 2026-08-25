@@ -327,7 +327,7 @@
         valSys.textContent = Rsys.toFixed(3);
 
         // Color coding for R_sys
-        if (Rsys < 0.6) valSys.style.color = 'var(--green)';
+        if (Rsys < 0.6) valSys.style.color = 'var(--green)';       // 表示用の色分け閾値（安全側の目安）
         else if (Rsys < 0.95) valSys.style.color = '#ffaa00';
         else valSys.style.color = 'var(--red)';
 

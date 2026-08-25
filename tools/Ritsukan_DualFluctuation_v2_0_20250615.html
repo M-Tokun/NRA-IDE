@@ -175,6 +175,7 @@ const C = {
     outerTimeScale: 0.06,
 
     thickness: 22,       // 許容域厚み
+    // 状態文言分岐（L488-490）に使う閾値。デモ用のチューニング値。
     critThreshold: 0.7,
     critProb: 0.0015,
     critDuration: 280,
@@ -270,8 +271,8 @@ function updateDynamics() {
     st.cong = st.sigma - st.J;
     st.phase = (t * C.rotSpeed * 10) % (2 * Math.PI);
 
-    st.innerRatio = st.innerAmp / (C.thickness * 0.4);
-    st.outerRatio = st.outerAmp / (C.thickness * 1.2);
+    st.innerRatio = st.innerAmp / (C.thickness * 0.4);  // 内側は薄い変位でも反応させるため係数を小さく
+    st.outerRatio = st.outerAmp / (C.thickness * 1.2);  // 外側は許容幅を広く取るため係数を大きく
     st.totalRatio = Math.max(st.innerRatio, st.outerRatio);
 
     if (st.contactFlash > 0) st.contactFlash -= 0.05;

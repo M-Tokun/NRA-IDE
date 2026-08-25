@@ -162,6 +162,7 @@ const scenarios = {
       ['水分','余裕・遊びに近い量。暑さが続くと減りやすいです。']
     ],
     step(t){
+      // 以下の係数はデモ用の模擬パラメータ（生理学的な実測値ではない）。
       const phase = Math.min(1, t/50);
       const temp = 24 + 10*phase + 0.6*Math.sin(t/5);
       const hydration = 62 - 10*phase + 0.9*Math.sin(t/6+0.6);
@@ -196,6 +197,7 @@ const scenarios = {
       ['土壌水分','水の供給です。足りないと全体の関係が崩れます。']
     ],
     step(t){
+      // 以下の係数はデモ用の模擬パラメータ（生物学的な実測値ではない）。
       const phase = Math.min(1, t/50);
       const light = 18 + 14*phase + 0.7*Math.sin(t/5.5);
       const soil = 58 - 14*phase + 0.8*Math.sin(t/6.5+0.3);
@@ -249,7 +251,7 @@ const ids = {
   node1: document.getElementById('node1'), node2: document.getElementById('node2'), node3: document.getElementById('node3')
 };
 
-function levelClass(v){ if(v >= 1.0) return 'bad'; if(v >= 0.7) return 'warn'; return 'ok'; }
+function levelClass(v){ if(v >= 1.0) return 'bad'; if(v >= 0.7) return 'warn'; return 'ok'; }  // R相当値：1.0でFail-Closed、0.7で注意
 function pct(v){ return Math.max(0, Math.min(100, v*100)); }
 
 function setScenario(key){
@@ -314,6 +316,7 @@ function updateFrame(){
   updateMeter(ids.rIndFill, ids.rIndText, rInd);
   updateMeter(ids.rCorrFill, ids.rCorrText, rCorr);
 
+  // rInd/rCorrはR=δ/τ相当。1.0でFail-Closed、0.7で注意域。
   let statusCls='ok', text='正常域です。小さな揺らぎは遊びの中にあり、すぐ補正せず広げません。';
   if (rCorr >= 1.0 || rInd >= 1.0) {
     statusCls='bad';

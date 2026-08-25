@@ -185,6 +185,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
 // ── Parameters ────────────────────────────────────────────────────
 let k0   = 1.0;
 let beta = 0.15;
+// P/D/gamma/alpha/DT/HISTはデモ用初期値。理論的必然性はなく、UI上で調整可能。
 const alpha = 0.5;
 const P = 2.0, D = 0.4, gamma = 0.5;
 const DT = 0.05;
@@ -446,9 +447,9 @@ function updateUI(mF, mA) {
   }
 
   const jR = document.getElementById('jRight');
-  if (mA.k > k0 * 1.3) {
+  if (mA.k > k0 * 1.3) {  // |ṙ|(変化速度)が大きいときk_effが上昇し、ゲートを弱めIDE慣性を優先する表示モードへの切替閾値
     jR.className = 'judgment j-track';
-    jR.textContent = 'k_eff=' + mA.k.toFixed(3) + ' ↑ 高速遷移 — IDE慣性優先 / high-speed: IDE inertia prioritized';
+    jR.textContent = 'k_eff=' + mA.k.toFixed(3) + ' ↑ 高速モード — IDE慣性優先 / high-speed: IDE inertia prioritized';
   } else if (mA.r > 0.10) {
     jR.className = 'judgment j-warn';
     jR.textContent = '|r|=' + mA.r.toFixed(3) + ' — 追従中 / tracking target';
