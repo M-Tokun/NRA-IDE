@@ -471,6 +471,9 @@ function physicsStep() {
   state.R = Math.abs(state.delta) / tau;
 
   // 残留負債
+  // k_recovery=0.12、および蓄積/減衰レート0.08/0.03は、根拠となる工学的仕様のないデモ用
+  // チューニング値。R>0.4が持続するとresidualDebtが目に見えて蓄積し、R低下後は緩やかに
+  // 減衰する挙動を作るためだけに選ばれている。
   const k_recovery = 0.12;
   if (state.R > 0.4) {
     state.residualDebt += (state.R - state.R * k_recovery) * dt * 0.08;
@@ -480,6 +483,8 @@ function physicsStep() {
   state.residualDebt = Math.min(state.residualDebt, 2.0);
 
   // FSM遷移
+  // ゾーン閾値（R>=0.4→CAVEAT/ZONE-B、R>=1.0またはresidualDebt>0.8→RUPTURE_BOUNDARY）は
+  // 例示的なデモ値であり、実際の電力系統運用基準に由来するものではない。
   const prevFsm = state.fsm;
   if (prevFsm === 'RUPTURE_BOUNDARY') {
     state.fsm = 'RUPTURE_BOUNDARY';

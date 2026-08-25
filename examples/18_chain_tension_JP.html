@@ -247,9 +247,13 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 
 <script>
 // ── パラメータ ──
+// T_OPT/T_MIN/T_MAX（チェーン張力、N）とPOLY_AMP/POLY_FREQ（プーリー振動波形）は
+// デモ表示用の値であり、実チェーン・スプロケット仕様の出典はない。
 const T_OPT=800,T_MIN=620,T_MAX=1000;
 const R_WARN=0.75,R_RUPTURE=1.0;
 const POLY_AMP=35,POLY_FREQ=5;
+// ADJ_GAIN_FINE/ADJ_GAIN_AHEAD（自動調整の比例ゲイン）とADJ_MAX（調整量クランプ、N）も
+// デモ用チューニング値であり、アクチュエータ・制御系仕様から導出したものではない。
 const ADJ_GAIN_FINE=0.12,ADJ_GAIN_AHEAD=0.32,ADJ_MAX=22;
 
 // ── 状態 ──
@@ -295,6 +299,8 @@ function onBias(v){
 }
 
 // ── NRA-IDE計算 ──
+// 非対称τ：T_OPTより張力が高い側ではMAX側のスパン、低い側ではMIN側のスパンをtauに
+// 使うため、|delta|が同じでもRはT_OPTを中心に対称にはならない。
 function calcIDE(t){
   const delta=Math.abs(t-T_OPT);
   const tau=t>=T_OPT?(T_MAX-T_OPT):(T_OPT-T_MIN);
@@ -304,16 +310,24 @@ function calcIDE(t){
 
 function calcAdj(R,drdt,amp,tSmooth){
   if(R>=R_RUPTURE) return {adj:0,reason:'RUPTURE_BOUNDARY：調整権限返却'};
+  // ampRatio/ampWarn：振動振幅がPOLY_AMP基準の150%を超えたら異常とみなす。張力ベースの
+  // Rとは独立したフラグ。閾値1.5は根拠不明のデモ値。
   const ampRatio=amp/(POLY_AMP||1);
   const ampWarn=ampRatio>1.5;
   const dir=tSmooth<T_OPT?1:-1;
   const dev=Math.abs(tSmooth-T_OPT);
+  // R<0.5の不感帯：振幅異常フラグが立っていてもこの範囲では調整を発火しない。
   if(R<0.5&&!ampWarn) return {adj:0,reason:'正常：調整不要'};
   if(R<R_WARN){
+    // 微調整分岐：ampWarn中はゲインを1.5倍。出力はADJ_MAXの半分でクランプ
+    // （0.5倍という係数も、実アクチュエータ限界から導出したものではない）。
     const g=ADJ_GAIN_FINE*(ampWarn?1.5:1);
     return {adj:dir*Math.min(dev*g,ADJ_MAX*0.5),
       reason:`微調整（R=${R.toFixed(3)}${ampWarn?' 振幅異常':''}）`};
   }
+  // 先行調整分岐（R>=R_WARN）：urgencyは現在のdR/dtでRがR_RUPTUREへ到達するまでの
+  // 残り時間を、根拠不明の係数0.5でスケールした推定値。drdt<=0.001（横ばいまたは
+  // 低下中）はurgency=0として、暴走・負値になるのを避けている。
   const urgency=drdt>0.001?Math.max(0,1-(R_RUPTURE-R)/drdt*0.5):0;
   const g=ADJ_GAIN_AHEAD*(1+urgency*0.5);
   return {adj:dir*Math.min(dev*g,ADJ_MAX),reason:`先行調整（dR/dt=${drdt>=0?'+':''}${drdt.toFixed(4)}）`};

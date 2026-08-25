@@ -247,9 +247,13 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 
 <script>
 // ── Parameters ──
+// T_OPT/T_MIN/T_MAX (chain tension, N) and POLY_AMP/POLY_FREQ (pulley-vibration wave)
+// are demo-tuned display values, no cited chain/sprocket spec.
 const T_OPT=800,T_MIN=620,T_MAX=1000;
 const R_WARN=0.75,R_RUPTURE=1.0;
 const POLY_AMP=35,POLY_FREQ=5;
+// ADJ_GAIN_FINE/ADJ_GAIN_AHEAD (auto-adjust proportional gains) and ADJ_MAX (adjustment
+// clamp, N) are demo tuning values only — not derived from an actuator/controller spec.
 const ADJ_GAIN_FINE=0.12,ADJ_GAIN_AHEAD=0.32,ADJ_MAX=22;
 
 // ── State ──
@@ -295,6 +299,8 @@ function onBias(v){
 }
 
 // ── NRA-IDE calculation ──
+// Asymmetric τ: tau uses the MAX-side span when tension is above T_OPT, the MIN-side
+// span when below — R is therefore not symmetric around T_OPT even for equal |delta|.
 function calcIDE(t){
   const delta=Math.abs(t-T_OPT);
   const tau=t>=T_OPT?(T_MAX-T_OPT):(T_OPT-T_MIN);
@@ -304,16 +310,24 @@ function calcIDE(t){
 
 function calcAdj(R,drdt,amp,tSmooth){
   if(R>=R_RUPTURE) return {adj:0,reason:'RUPTURE_BOUNDARY: adjustment authority returned'};
+  // ampRatio/ampWarn: flags vibration amplitude >150% of POLY_AMP baseline as anomalous,
+  // independent of the tension-based R value — threshold 1.5 is a demo value, uncited.
   const ampRatio=amp/(POLY_AMP||1);
   const ampWarn=ampRatio>1.5;
   const dir=tSmooth<T_OPT?1:-1;
   const dev=Math.abs(tSmooth-T_OPT);
+  // R<0.5 dead-band: below this, no adjustment fires even with an amplitude warning present.
   if(R<0.5&&!ampWarn) return {adj:0,reason:'NORMAL: no adjustment needed'};
   if(R<R_WARN){
+    // Fine-adjustment branch: gain boosted 1.5x while ampWarn is active; output capped at
+    // half of ADJ_MAX (0.5 factor is a demo value, not a derived actuator limit).
     const g=ADJ_GAIN_FINE*(ampWarn?1.5:1);
     return {adj:dir*Math.min(dev*g,ADJ_MAX*0.5),
       reason:`Fine adjustment (R=${R.toFixed(3)}${ampWarn?' amplitude anomaly':''})`};
   }
+  // Predictive branch (R>=R_WARN): urgency estimates how many time-units remain before
+  // R reaches R_RUPTURE at the current dR/dt, scaled by an uncited 0.5 factor; drdt<=0.001
+  // (not rising, or falling) is treated as zero urgency to avoid a runaway/negative term.
   const urgency=drdt>0.001?Math.max(0,1-(R_RUPTURE-R)/drdt*0.5):0;
   const g=ADJ_GAIN_AHEAD*(1+urgency*0.5);
   return {adj:dir*Math.min(dev*g,ADJ_MAX),reason:`Predictive adjustment (dR/dt=${drdt>=0?'+':''}${drdt.toFixed(4)})`};

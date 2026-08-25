@@ -374,9 +374,12 @@
             step++;
             
             // Conventional: Triple Error accumulation logic
+            // Magnitudes (0.002 / 0.001 / 0.01) are illustrative demo tuning values, not
+            // derived from a measured sensor/model spec — chosen only to make the divergence
+            // from trueValue visible within MAX_STEPS.
             const linearError = (Math.random() - 0.5) * 0.002;
             const averagingError = (Math.random() - 0.5) * 0.001;
-            
+
             let temp = 0;
             for (let i = 0; i < 10; i++) { temp += 0.1; }
             const floatingError = (temp - 1.0) * 0.01;
@@ -415,6 +418,9 @@
             const convElem = document.getElementById('conventional-value');
             convElem.className = error < 1 ? 'metric-value safe' : error < 10 ? 'metric-value warning' : 'metric-value danger';
             
+            // Domain collapse thresholds (1/5/10/30%): illustrative tiers for the demo
+            // narrative (medical stricter than finance stricter than general), not sourced
+            // from an actual regulatory or engineering tolerance spec.
             const thresholds = [
                 { limit: 1, elem: 'medical-status' },
                 { limit: 5, elem: 'auto-status' },

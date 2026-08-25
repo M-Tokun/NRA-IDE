@@ -471,6 +471,9 @@ function physicsStep() {
   state.R = Math.abs(state.delta) / tau;
 
   // Residual debt
+  // k_recovery=0.12 and the 0.08/0.03 accrual/decay rates are demo-tuned constants with
+  // no cited engineering basis — chosen only so residualDebt visibly builds up under
+  // sustained R>0.4 and drains gradually once R drops back down.
   const k_recovery = 0.12;
   if (state.R > 0.4) {
     state.residualDebt += (state.R - state.R * k_recovery) * dt * 0.08;
@@ -480,6 +483,8 @@ function physicsStep() {
   state.residualDebt = Math.min(state.residualDebt, 2.0);
 
   // FSM transition
+  // Zone thresholds (R>=0.4 → CAVEAT/ZONE-B, R>=1.0 or residualDebt>0.8 → RUPTURE_BOUNDARY)
+  // are illustrative demo values, not sourced from an actual grid-operation standard.
   const prevFsm = state.fsm;
   if (prevFsm === 'RUPTURE_BOUNDARY') {
     state.fsm = 'RUPTURE_BOUNDARY';
