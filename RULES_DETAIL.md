@@ -133,6 +133,5 @@ npm公式はnpm系packageにだけ用いる。Python、Rust、Java等には各�
 
 ## 8. ファイル記述方法
 
-Markdownの数式latexは、$$形式（git,vscode準拠）とすること。
-
-ProgramCode　Python,ts,htmlなどではフラグ・境界線・ポイントの場所には次回参照時にも理解できるコメントを書くこと。
+- **Markdown**: Git/GitHub準拠形式（改行コードLF、$$形式の数式LaTeXなど）とし、commit前の検証ステップで形式チェックを行うこと。
+- **ProgramCode**: Python, ts, html などではフラグ・境界線・ポイントの場所には次回参照時にも理解できるコメントを書くこと。
