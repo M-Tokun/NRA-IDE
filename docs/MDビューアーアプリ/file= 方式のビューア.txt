@@ -1,0 +1,21 @@
+?file= 方式のビューア リポジトリの実際の構成（master ブランチ、theory/・ground/・docs/ などに .md が分散している状態）に合わせて設定済み
+
+配置と設定
+
+docs/index.html として置き、Pages の公開元を「master ブランチ / (root)」にしてください。冒頭の CFG だけが可変部分で、localBase: "../" は docs/ からリポジトリ直下を指す位置関係を表しています。別の場所に置く場合はここを直してください。
+
+https://m-tokun.github.io/NRA-IDE/docs/?file=theory/THEORY.md
+https://m-tokun.github.io/NRA-IDE/docs/?file=FORMULA.md#definition-2
+
+動作
+
+左のサイドバーは GitHub API（git/trees?recursive=1）でリポジトリ内の .md を自動収集し、ディレクトリ単位で並べます。ファイルが増えても手作業は不要です。絞り込み欄も付けています。
+本文取得は同一オリジンの相対パスを先に試し、失敗した場合のみ raw.githubusercontent.com へ切り替えます。ローカルの file:// から開いても raw 経由で表示できます。
+README.md 内の GitHub blob リンク（https://github.com/.../blob/master/theory/THEORY.md 形式）も、同一リポジトリかつ .md であればビューア内遷移に自動変換します。相対リンクも同様です。.md 以外の相対リンクは GitHub 側へ飛ばします。
+画像は docs/NRA-IDE_git.jpg のような相対指定を raw URL に解決します。
+$$ R = \frac{\delta}{\tau} $$ のような数式は KaTeX で描画します。\mathrm{EMA}_{\text{upper}} の下付き記号が Markdown の強調と衝突しないよう、パーサ前に数式を退避しています。README の該当箇所が GitHub 上で崩れて見える件も、このビューアでは正しく出るはずです。
+取得結果は sessionStorage にキャッシュします。API の未認証上限は 1 時間 60 回ですので、一覧は初回のみ取得します。
+
+留意点
+
+CDN 依存のため閲覧にはネット接続が必要です。また examples/ 配下は HTML デモですので一覧には出ません。デモへの導線が要る場合は、CFG の対象拡張子を広げるより、docs/DEMOS.md に一覧を書いてビューアで開く形が扱いやすい。

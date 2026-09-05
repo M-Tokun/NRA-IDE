@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<!--
+  FILE : nra-docs-viewer-20260904-2049.html  (推奨配置名: docs/index.html)
+  TITLE: NRA-IDE Docs Viewer — ?file=theory/THEORY.md 方式の Markdown ビューア
+  TIME : 2026-09-04 20:49:30 (JST)
+  (C) M-Tokuni 2026 / Author: M-Tokuni
+  依存: CDN (marked / DOMPurify / highlight.js / KaTeX / Mermaid)
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NRA-IDE Docs</title>
+<meta name="description" content="NRA-IDE リポジトリの Markdown ドキュメントビューア">
+
+<link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<link id="hljs-dark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" disabled>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+
+<style>
+:root{
+  --bg:#ffffff; --bg-soft:#f6f8fa; --fg:#1f2328; --fg-muted:#59636e;
+  --line:#d1d9e0; --link:#0969da; --code-bg:#f6f8fa; --quote:#59636e;
+  --mark:#fff8c5; --sidebar-w:288px; --header-h:48px;
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117; --bg-soft:#161b22; --fg:#e6edf3; --fg-muted:#9198a1;
+  --line:#30363d; --link:#4493f8; --code-bg:#161b22; --quote:#9198a1; --mark:#3b2e00;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-size:16px;line-height:1.7;
+  font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP","Segoe UI",Meiryo,sans-serif}
+button,input,select{font:inherit;color:inherit}
+header{position:fixed;inset:0 0 auto 0;height:var(--header-h);z-index:20;display:flex;align-items:center;
+  gap:8px;padding:0 12px;background:var(--bg-soft);border-bottom:1px solid var(--line)}
+header .brand{font-weight:600;font-size:14px;white-space:nowrap}
+header .path{font-size:12.5px;color:var(--fg-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header .spacer{flex:1}
+.btn{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-size:13px;
+  cursor:pointer;white-space:nowrap;text-decoration:none;color:inherit;display:inline-block}
+.btn:hover{background:var(--line)}
+.btn:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.btn[aria-pressed="true"]{background:var(--link);border-color:var(--link);color:#fff}
+main{display:flex;padding-top:var(--header-h);height:100%}
+aside{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);border-right:1px solid var(--line);background:var(--bg-soft);
+  overflow-y:auto;height:calc(100vh - var(--header-h));position:sticky;top:var(--header-h)}
+aside.hidden{display:none}
+.side-sec{padding:10px 12px;border-bottom:1px solid var(--line)}
+.side-sec h2{font-size:11px;letter-spacing:.04em;color:var(--fg-muted);margin:0 0 6px;font-weight:600}
+#filter{width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-size:13px}
+.side-sec ul{list-style:none;margin:0;padding:0}
+.side-sec li a{display:block;padding:3px 6px;border-radius:5px;font-size:13px;color:var(--fg);text-decoration:none;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-sec li a:hover{background:var(--line)}
+.side-sec li a.current{background:var(--line);font-weight:600}
+.dir{font-size:11px;color:var(--fg-muted);margin:10px 0 2px;padding:0 6px;font-weight:600}
+.dir:first-child{margin-top:0}
+.toc .lv3{padding-left:14px}.toc .lv4{padding-left:28px}.toc .lv5,.toc .lv6{padding-left:40px}
+#viewport{flex:1;min-width:0;overflow-y:auto;height:calc(100vh - var(--header-h));padding:28px 32px 120px}
+#doc{max-width:76ch;margin:0 auto}
+.notice{color:var(--fg-muted);font-size:14px;padding:24px 0}
+.err{border:1px solid #cf222e;border-radius:8px;padding:12px 16px;color:#cf222e;font-size:14px}
+#doc h1,#doc h2,#doc h3,#doc h4,#doc h5,#doc h6{line-height:1.35;margin:1.6em 0 .6em;font-weight:600;
+  scroll-margin-top:calc(var(--header-h) + 12px)}
+#doc h1{font-size:1.9em;padding-bottom:.3em;border-bottom:1px solid var(--line);margin-top:0}
+#doc h2{font-size:1.45em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+#doc h3{font-size:1.2em}#doc h4{font-size:1em}#doc h5{font-size:.9em}#doc h6{font-size:.85em;color:var(--fg-muted)}
+#doc p,#doc ul,#doc ol,#doc dl{margin:0 0 1em}
+#doc li{margin:.25em 0}#doc li>ul,#doc li>ol{margin:.25em 0}
+#doc a{color:var(--link);text-decoration:none}#doc a:hover{text-decoration:underline}
+#doc .anchor{opacity:0;margin-left:.3em;font-size:.8em}
+#doc h1:hover .anchor,#doc h2:hover .anchor,#doc h3:hover .anchor,
+#doc h4:hover .anchor,#doc h5:hover .anchor,#doc h6:hover .anchor{opacity:.6}
+#doc blockquote{margin:0 0 1em;padding:.1em 1em;color:var(--quote);border-left:.25em solid var(--line)}
+#doc code{font-family:ui-monospace,SFMono-Regular,Consolas,"Noto Sans Mono",monospace;font-size:.88em}
+#doc :not(pre)>code{background:var(--code-bg);padding:.2em .4em;border-radius:6px}
+#doc pre{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;overflow:auto;margin:0 0 1em}
+#doc pre code{background:none;padding:0;font-size:.86em;line-height:1.55}
+#doc pre .copy{position:absolute;top:6px;right:6px;opacity:0;transition:opacity .12s}
+#doc pre:hover .copy,#doc pre .copy:focus-visible{opacity:1}
+#doc table{border-collapse:collapse;display:block;overflow:auto;margin:0 0 1em;max-width:100%}
+#doc th,#doc td{border:1px solid var(--line);padding:6px 13px}
+#doc thead th{background:var(--bg-soft)}
+#doc tbody tr:nth-child(2n){background:var(--bg-soft)}
+#doc img{max-width:100%}
+#doc hr{height:1px;border:0;background:var(--line);margin:1.8em 0}
+#doc ul.contains-task-list{padding-left:1.6em}
+#doc .task-list-item{list-style:none}
+#doc .task-list-item input{margin:0 .4em 0 -1.4em;vertical-align:middle}
+#doc mark{background:var(--mark);color:inherit}
+#doc .frontmatter{background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;padding:10px 14px;
+  margin:0 0 1.4em;font-size:.85em;color:var(--fg-muted);white-space:pre-wrap;font-family:ui-monospace,monospace}
+#doc .mermaid{margin:0 0 1em;text-align:center}
+#doc .katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+footer.docfoot{max-width:76ch;margin:32px auto 0;padding-top:14px;border-top:1px solid var(--line);
+  font-size:12.5px;color:var(--fg-muted);display:flex;gap:12px;flex-wrap:wrap}
+@media (max-width:820px){
+  :root{--sidebar-w:230px}
+  aside{position:fixed;left:0;top:var(--header-h);z-index:15}
+  #viewport{padding:20px 16px 100px}
+  header .path{display:none}
+}
+@media print{header,aside{display:none!important}main{display:block;padding:0}
+  #viewport{overflow:visible;height:auto;padding:0}#doc{max-width:none}.copy,.anchor{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">NRA-IDE Docs</span>
+  <span class="path" id="path">—</span>
+  <span class="spacer"></span>
+  <button class="btn" id="btn-side" aria-pressed="true">目次</button>
+  <button class="btn" id="btn-theme">ダーク</button>
+  <a class="btn" id="btn-gh" href="#" target="_blank" rel="noopener noreferrer">GitHub</a>
+  <button class="btn" id="btn-print">印刷</button>
+</header>
+
+<main>
+  <aside id="sidebar">
+    <div class="side-sec">
+      <h2>ドキュメント</h2>
+      <input id="filter" type="search" placeholder="ファイル名で絞り込み" autocomplete="off">
+      <div id="filelist" style="margin-top:8px"></div>
+    </div>
+    <div class="side-sec">
+      <h2>このページの目次</h2>
+      <ul id="toc" class="toc"></ul>
+    </div>
+  </aside>
+
+  <div id="viewport">
+    <div id="doc"></div>
+    <footer class="docfoot" id="docfoot" hidden></footer>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+
+<script>
+"use strict";
+/* ============================================================
+   設定：この 1 か所だけ書き換えれば他のリポジトリでも使えます。
+   ============================================================ */
+const CFG = {
+  owner: "M-Tokun",
+  repo: "NRA-IDE",
+  branch: "master",
+  home: "README_JP.md",              // ?file= 未指定のときに開くファイル
+  localBase: "../",                  // docs/index.html から見たリポジトリ直下の位置
+  exclude: /^(node_modules|\.github|\.devcontainer)\//,  // 一覧から除外するパス
+  useApiIndex: true                  // GitHub API でファイル一覧を自動取得します
+};
+
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const doc = $("doc"), viewport = $("viewport"), tocEl = $("toc");
+  const fileListEl = $("filelist"), pathEl = $("path"), footEl = $("docfoot");
+
+  const RAW = "https://raw.githubusercontent.com/" + CFG.owner + "/" + CFG.repo + "/" + CFG.branch + "/";
+  const BLOB = "https://github.com/" + CFG.owner + "/" + CFG.repo + "/blob/" + CFG.branch + "/";
+  const API_TREE = "https://api.github.com/repos/" + CFG.owner + "/" + CFG.repo + "/git/trees/" + CFG.branch + "?recursive=1";
+
+  const hasMarked = typeof marked !== "undefined";
+  const hasPurify = typeof DOMPurify !== "undefined";
+  const hasHljs = typeof hljs !== "undefined";
+  const hasKatex = typeof katex !== "undefined";
+  const hasMermaid = typeof mermaid !== "undefined";
+  if (hasMarked) marked.setOptions({ gfm: true, breaks: false });
+  if (hasMermaid) { try { mermaid.initialize({ startOnLoad: false, securityLevel: "strict" }); } catch (e) {} }
+
+  let currentPath = "";
+  let allFiles = [];
+
+  /* ---------- 数式の保護 ---------- */
+  function protect(src) {
+    const code = [], math = [];
+    let s = src;
+    s = s.replace(/^([ \t]*)(`{3,}|~{3,})([^\n]*)\n[\s\S]*?^[ \t]*\2[ \t]*$/gm, (m) => {
+      code.push(m); return "%%%CODE" + (code.length - 1) + "%%%";
+    });
+    s = s.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, (m) => {
+      code.push(m); return "%%%CODE" + (code.length - 1) + "%%%";
+    });
+    s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m, x) => { math.push({ tex: x, display: true }); return "%%%MATH" + (math.length - 1) + "%%%"; });
+    s = s.replace(/\\\[([\s\S]+?)\\\]/g, (m, x) => { math.push({ tex: x, display: true }); return "%%%MATH" + (math.length - 1) + "%%%"; });
+    s = s.replace(/(^|[^\\$])\$(?!\s)((?:[^$\n\\]|\\.)+?)(?<!\s)\$(?!\$)/g, (m, pre, x) => {
+      math.push({ tex: x, display: false }); return pre + "%%%MATH" + (math.length - 1) + "%%%";
+    });
+    s = s.replace(/\\\(([\s\S]+?)\\\)/g, (m, x) => { math.push({ tex: x, display: false }); return "%%%MATH" + (math.length - 1) + "%%%"; });
+    s = s.replace(/%%%CODE(\d+)%%%/g, (m, i) => code[Number(i)] ?? m);
+    return { text: s, math };
+  }
+
+  function renderMath(root, math) {
+    if (!math.length) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const targets = [];
+    while (walker.nextNode()) {
+      const n = walker.currentNode;
+      if (n.nodeValue.indexOf("%%%MATH") >= 0 && !n.parentElement.closest("pre,code")) targets.push(n);
+    }
+    targets.forEach((node) => {
+      const frag = document.createDocumentFragment();
+      let last = 0, m; const re = /%%%MATH(\d+)%%%/g;
+      while ((m = re.exec(node.nodeValue))) {
+        if (m.index > last) frag.appendChild(document.createTextNode(node.nodeValue.slice(last, m.index)));
+        const item = math[Number(m[1])];
+        const span = document.createElement("span");
+        if (item && hasKatex) {
+          try { katex.render(item.tex, span, { displayMode: item.display, throwOnError: false, output: "html" }); }
+          catch (e) { span.className = "err"; span.textContent = "数式エラー: " + item.tex; }
+        } else if (item) {
+          span.textContent = (item.display ? "$$" : "$") + item.tex + (item.display ? "$$" : "$");
+        }
+        frag.appendChild(span);
+        last = m.index + m[0].length;
+      }
+      if (last < node.nodeValue.length) frag.appendChild(document.createTextNode(node.nodeValue.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    });
+  }
+
+  /* ---------- slug / パス解決 ---------- */
+  const slugCount = new Map();
+  function slugify(t) {
+    let s = t.trim().toLowerCase().replace(/[\s\u3000]+/g, "-").replace(/[!-\/:-@\[-`{-~。、「」『』（）]/g, "");
+    if (!s) s = "section";
+    const n = slugCount.get(s) || 0; slugCount.set(s, n + 1);
+    return n ? s + "-" + n : s;
+  }
+  function resolvePath(base, rel) {
+    if (/^([a-z]+:)?\/\//i.test(rel) || rel.startsWith("data:") || rel.startsWith("#")) return null;
+    const dir = base.includes("/") ? base.slice(0, base.lastIndexOf("/")) : "";
+    const parts = dir ? dir.split("/") : [];
+    rel.split("/").forEach((p) => { if (p === "." || p === "") return; if (p === "..") parts.pop(); else parts.push(p); });
+    return parts.join("/");
+  }
+  const viewUrl = (p) => location.pathname + "?file=" + encodeURIComponent(p);
+
+  /* ---------- 取得（同一オリジン優先、失敗したら raw） ---------- */
+  async function fetchText(path) {
+    const key = "md:" + CFG.branch + ":" + path;
+    try { const c = sessionStorage.getItem(key); if (c) return c; } catch (e) {}
+    const candidates = [CFG.localBase + path, RAW + path];
+    let lastErr = null;
+    for (const url of candidates) {
+      try {
+        const r = await fetch(url, { cache: "no-cache" });
+        if (!r.ok) { lastErr = new Error(r.status + " " + r.statusText); continue; }
+        const t = await r.text();
+        if (/^\s*<(!doctype|html)/i.test(t)) { lastErr = new Error("HTML が返りました"); continue; }
+        try { sessionStorage.setItem(key, t); } catch (e) {}
+        return t;
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error("取得に失敗しました");
+  }
+
+  /* ---------- 描画 ---------- */
+  function renderMarkdown(src, path) {
+    slugCount.clear();
+    currentPath = path;
+    let fm = "", body = src.replace(/^\uFEFF/, "");
+    const fmM = body.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+    if (fmM) { fm = fmM[1]; body = body.slice(fmM[0].length); }
+
+    if (!hasMarked) { doc.innerHTML = '<p class="err">marked を読み込めませんでした。ネットワークを確認してください。</p>'; return; }
+
+    const { text, math } = protect(body);
+    let html = "";
+    try { html = marked.parse(text); }
+    catch (e) { doc.innerHTML = '<p class="err">解析エラー: ' + String(e.message || e) + "</p>"; return; }
+    if (hasPurify) html = DOMPurify.sanitize(html, { USE_PROFILES: { html: true, svg: true, mathMl: true } });
+
+    doc.innerHTML = (fm ? '<div class="frontmatter"></div>' : "") + html;
+    if (fm) doc.querySelector(".frontmatter").textContent = fm;
+
+    renderMath(doc, math);
+    decorate();
+    buildToc();
+    setChrome(path);
+    const hash = location.hash.slice(1);
+    const target = hash ? document.getElementById(decodeURIComponent(hash)) : null;
+    viewport.scrollTop = target ? target.offsetTop - 12 : 0;
+  }
+
+  function decorate() {
+    doc.querySelectorAll("h1,h2,h3,h4,h5,h6").forEach((h) => {
+      if (!h.id) h.id = slugify(h.textContent);
+      const a = document.createElement("a");
+      a.className = "anchor"; a.href = "#" + h.id; a.textContent = "#";
+      a.setAttribute("aria-label", "この見出しへのリンク");
+      h.appendChild(a);
+    });
+
+    doc.querySelectorAll("pre > code.language-mermaid, pre > code.lang-mermaid").forEach((code, i) => {
+      const pre = code.parentElement, div = document.createElement("div"), srcText = code.textContent;
+      div.className = "mermaid"; pre.replaceWith(div);
+      if (!hasMermaid) { div.textContent = srcText; return; }
+      try {
+        mermaid.render("mmd-" + Date.now() + "-" + i, srcText).then(({ svg }) => {
+          div.innerHTML = hasPurify ? DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, html: true } }) : svg;
+        }).catch(() => { div.className = "err"; div.textContent = "Mermaid の描画に失敗しました。"; });
+      } catch (e) { div.className = "err"; div.textContent = "Mermaid の描画に失敗しました。"; }
+    });
+
+    doc.querySelectorAll("pre > code").forEach((code) => {
+      if (hasHljs) { try { hljs.highlightElement(code); } catch (e) {} }
+      const btn = document.createElement("button");
+      btn.className = "btn copy"; btn.type = "button"; btn.textContent = "コピー";
+      btn.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(code.textContent); btn.textContent = "コピーしました"; }
+        catch (e) { btn.textContent = "コピーできません"; }
+        setTimeout(() => (btn.textContent = "コピー"), 1400);
+      });
+      code.parentElement.appendChild(btn);
+    });
+
+    // 画像：相対パスは raw に解決します。
+    doc.querySelectorAll("img[src]").forEach((img) => {
+      const key = resolvePath(currentPath, img.getAttribute("src"));
+      if (key) img.src = RAW + key;
+      img.loading = "lazy";
+    });
+
+    // リンク：.md はビューア内遷移、それ以外の相対リンクは GitHub へ、外部は新規タブ。
+    doc.querySelectorAll("a[href]").forEach((a) => {
+      const href = a.getAttribute("href");
+      if (!href || href.startsWith("#")) return;
+      if (/^([a-z]+:)?\/\//i.test(href)) {
+        // 同一リポジトリの blob リンクはビューア内で開きます。
+        const m = href.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/[^/]+\/(.+)$/i);
+        if (m && m[1] === CFG.owner && m[2] === CFG.repo && /\.md$/i.test(m[3])) {
+          const p = decodeURIComponent(m[3].split("#")[0]);
+          a.href = viewUrl(p);
+          a.addEventListener("click", (ev) => { ev.preventDefault(); navigate(p, true); });
+          return;
+        }
+        a.target = "_blank"; a.rel = "noopener noreferrer"; return;
+      }
+      const [rel, frag] = href.split("#");
+      const key = resolvePath(currentPath, rel);
+      if (!key) return;
+      if (/\.md$/i.test(key)) {
+        a.href = viewUrl(key) + (frag ? "#" + frag : "");
+        a.addEventListener("click", (ev) => { ev.preventDefault(); navigate(key, true, frag); });
+      } else {
+        a.href = BLOB + key; a.target = "_blank"; a.rel = "noopener noreferrer";
+      }
+    });
+  }
+
+  function buildToc() {
+    tocEl.innerHTML = "";
+    const hs = doc.querySelectorAll("h1,h2,h3,h4,h5,h6");
+    if (!hs.length) { tocEl.innerHTML = '<li style="color:var(--fg-muted);font-size:13px;padding:3px 6px">見出しがありません</li>'; return; }
+    hs.forEach((h) => {
+      const li = document.createElement("li"), a = document.createElement("a");
+      a.href = "#" + h.id; a.className = "lv" + h.tagName[1];
+      a.textContent = h.textContent.replace(/#$/, "").trim();
+      a.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        const t = document.getElementById(h.id);
+        if (t) { viewport.scrollTo({ top: t.offsetTop - 12, behavior: "smooth" }); history.replaceState(null, "", "#" + h.id); }
+      });
+      li.appendChild(a); tocEl.appendChild(li);
+    });
+  }
+
+  function setChrome(path) {
+    pathEl.textContent = path;
+    document.title = (path.split("/").pop() || "Docs") + " — NRA-IDE Docs";
+    $("btn-gh").href = BLOB + path;
+    footEl.hidden = false;
+    footEl.innerHTML = "";
+    const src = document.createElement("a");
+    src.className = "btn"; src.href = RAW + path; src.target = "_blank"; src.rel = "noopener noreferrer";
+    src.textContent = "Markdown 原文";
+    const edit = document.createElement("a");
+    edit.className = "btn"; edit.target = "_blank"; edit.rel = "noopener noreferrer";
+    edit.href = "https://github.com/" + CFG.owner + "/" + CFG.repo + "/edit/" + CFG.branch + "/" + path;
+    edit.textContent = "GitHub で編集";
+    const c = document.createElement("span");
+    c.textContent = "© M-Tokuni 2026 / " + CFG.owner + "/" + CFG.repo + "@" + CFG.branch;
+    c.style.marginLeft = "auto";
+    footEl.append(src, edit, c);
+    highlightCurrentFile();
+  }
+
+  /* ---------- 一覧（GitHub API） ---------- */
+  async function loadIndex() {
+    if (!CFG.useApiIndex) { fileListEl.innerHTML = '<p class="notice">一覧は無効です。</p>'; return; }
+    const cacheKey = "tree:" + CFG.repo + ":" + CFG.branch;
+    let paths = null;
+    try { const c = sessionStorage.getItem(cacheKey); if (c) paths = JSON.parse(c); } catch (e) {}
+    if (!paths) {
+      try {
+        const r = await fetch(API_TREE, { headers: { Accept: "application/vnd.github+json" } });
+        if (!r.ok) throw new Error(r.status === 403 ? "GitHub API の回数制限に達しました（1 時間あたり 60 回）" : r.status + " " + r.statusText);
+        const j = await r.json();
+        paths = (j.tree || []).filter((n) => n.type === "blob" && /\.md$/i.test(n.path) && !CFG.exclude.test(n.path)).map((n) => n.path);
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(paths)); } catch (e) {}
+      } catch (e) {
+        fileListEl.innerHTML = '<p class="notice">一覧を取得できませんでした。' + String(e.message || e) + "</p>";
+        return;
+      }
+    }
+    allFiles = paths.sort((a, b) => {
+      const da = a.includes("/") ? a.slice(0, a.lastIndexOf("/")) : "";
+      const db = b.includes("/") ? b.slice(0, b.lastIndexOf("/")) : "";
+      return da === db ? a.localeCompare(b) : (da === "" ? -1 : db === "" ? 1 : da.localeCompare(db));
+    });
+    drawIndex("");
+  }
+
+  function drawIndex(q) {
+    const kw = q.trim().toLowerCase();
+    const list = kw ? allFiles.filter((p) => p.toLowerCase().includes(kw)) : allFiles;
+    fileListEl.innerHTML = "";
+    if (!list.length) { fileListEl.innerHTML = '<p class="notice">該当なし</p>'; return; }
+    let lastDir = null, ul = null;
+    list.forEach((p) => {
+      const dir = p.includes("/") ? p.slice(0, p.lastIndexOf("/")) : "(root)";
+      if (dir !== lastDir) {
+        const h = document.createElement("div"); h.className = "dir"; h.textContent = dir;
+        fileListEl.appendChild(h);
+        ul = document.createElement("ul"); fileListEl.appendChild(ul);
+        lastDir = dir;
+      }
+      const li = document.createElement("li"), a = document.createElement("a");
+      a.href = viewUrl(p); a.textContent = p.split("/").pop(); a.title = p; a.dataset.path = p;
+      a.addEventListener("click", (ev) => { ev.preventDefault(); navigate(p, true); });
+      li.appendChild(a); ul.appendChild(li);
+    });
+    highlightCurrentFile();
+  }
+
+  function highlightCurrentFile() {
+    fileListEl.querySelectorAll("a").forEach((a) => a.classList.toggle("current", a.dataset.path === currentPath));
+  }
+
+  $("filter").addEventListener("input", (e) => drawIndex(e.target.value));
+
+  /* ---------- 遷移 ---------- */
+  async function navigate(path, push, frag) {
+    doc.innerHTML = '<p class="notice">読み込み中: ' + path + "</p>";
+    footEl.hidden = true;
+    if (push) history.pushState({ path }, "", viewUrl(path) + (frag ? "#" + frag : ""));
+    try {
+      const text = await fetchText(path);
+      renderMarkdown(text, path);
+      if (frag) {
+        const t = document.getElementById(decodeURIComponent(frag));
+        if (t) viewport.scrollTop = t.offsetTop - 12;
+      }
+    } catch (e) {
+      currentPath = path;
+      doc.innerHTML = '<div class="err">「' + path + "」を取得できませんでした（" + String(e.message || e)
+        + "）。パスとブランチ名をご確認ください。</div>";
+      setChrome(path);
+    }
+  }
+
+  window.addEventListener("popstate", () => {
+    const p = new URLSearchParams(location.search).get("file") || CFG.home;
+    navigate(p, false, location.hash.slice(1));
+  });
+
+  /* ---------- ヘッダー操作 ---------- */
+  $("btn-side").addEventListener("click", (ev) => {
+    const hidden = $("sidebar").classList.toggle("hidden");
+    ev.currentTarget.setAttribute("aria-pressed", String(!hidden));
+  });
+  $("btn-print").addEventListener("click", () => window.print());
+  function setTheme(mode) {
+    document.documentElement.dataset.theme = mode;
+    $("hljs-light").disabled = mode === "dark";
+    $("hljs-dark").disabled = mode !== "dark";
+    $("btn-theme").textContent = mode === "dark" ? "ライト" : "ダーク";
+    if (hasMermaid) { try { mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: mode === "dark" ? "dark" : "default" }); } catch (e) {} }
+    try { localStorage.setItem("nra-docs-theme", mode); } catch (e) {}
+  }
+  $("btn-theme").addEventListener("click", () => {
+    setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+    if (currentPath) navigate(currentPath, false, location.hash.slice(1));
+  });
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem("nra-docs-theme"); } catch (e) {}
+  setTheme(savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+  /* ---------- 起動 ---------- */
+  loadIndex();
+  const initial = new URLSearchParams(location.search).get("file") || CFG.home;
+  navigate(initial, false, location.hash.slice(1));
+})();
+</script>
+</body>
+</html>
