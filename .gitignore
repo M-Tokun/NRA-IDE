@@ -15,7 +15,8 @@ Thumbs.db
 desktop.ini
 
 # Claude Code local settings
-.claude/
+.claude/*
+!.claude/settings.json
 
 # AGENTS.md読了マーカー（Claude/Codex/Gemini共通、セッションごとの実行時状態）
 .agent_state/
@@ -40,6 +41,13 @@ local_reportsDirectory/
 # Gemini CLI
 .gemini/*
 !.gemini/settings.json
+
+# Codex CLI
+.codex/*
+!.codex/hooks.json
+
+# Stray Claude Code local settings created under a non-root working dir
+nra-core/.claude/
 
 # Node.js（Gemini CLI・各種ツール）
 node_modules/

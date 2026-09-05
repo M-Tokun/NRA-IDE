@@ -1,0 +1,55 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(git -c commit.gpgsign=false commit -m ' *)",
+      "Bash(git mv *)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('gate/han_gate_service.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('nra_document_structure_2026-02-13_0135.py', encoding='utf-8'\\).read\\(\\)\\); ast.parse\\(open\\('nra_document_structure_EN_2026-02-13_0135.py', encoding='utf-8'\\).read\\(\\)\\)\")",
+      "Bash(grep -c '^```' NRA-IDE_Automotive_Scope_2026-02-24_v2.md)",
+      "Bash(awk '{print $1}')",
+      "Bash(xargs -0 du -b)",
+      "Bash(xargs -0 -I{} sh -c 'wc -c < \"{}\" 2>/dev/null | tr -d \"\\\\n\"; echo \" {}\"')",
+      "Bash(git fetch *)",
+      "Bash(git fsck *)",
+      "Bash(python scripts/check_links.py)",
+      "Bash(python -m unittest tests.test_nra_ide_reference -v)",
+      "Bash(python nra-core/implementation/nra_ide_foundation_fixed_JP.py)",
+      "Bash(git commit -m ' *)",
+      "WebFetch(domain:zenodo.org)",
+      "Bash(python -m unittest discover -v)",
+      "Bash(python -c \"import json; json.load\\(open\\('g:/git-M-Tokun/AI-IDE-NRA/NRA-IDE/nra-core/foundations/NRA-IDE_律環公理とIDEのPython解説_conformance_vectors.json', encoding='utf-8'\\)\\); print\\('OK: valid JSON'\\)\")",
+      "Bash(python \"E:/temp/claude/g--git-M-Tokun-AI-IDE-NRA-NRA-IDE/a7222b55-c142-4490-85be-3cb3ce3d25db/scratchpad/verify_section15.py\")",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(PYTHONIOENCODING=utf-8 python test_pasted_script.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python test_pasted_script_fixed.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python NRA-IDE_conformance_checks.py)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python skills/agents-md-guard/claude_mark.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Bash|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python skills/agents-md-guard/claude_guard.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
