@@ -6,5 +6,6 @@
   "editor.unicodeHighlight.includeStrings": true,
   "editor.unicodeHighlight.allowedLocales": {
     "ja": true
-  }
+  },
+  "git.path": "C:\\git\\cmd\\git.exe"
 }

@@ -22,8 +22,7 @@ desktop.ini
 .agent_state/
 
 # Editors
-.vscode/*
-!.vscode/settings.json
+.vscode/
 .idea/
 .kilo/
 
