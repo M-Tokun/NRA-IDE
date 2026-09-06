@@ -23,6 +23,7 @@ desktop.ini
 
 # Editors
 .vscode/
+.obsidian/
 .idea/
 .kilo/
 
