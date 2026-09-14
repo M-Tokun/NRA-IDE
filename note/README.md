@@ -18,8 +18,8 @@
 
 ## ディレクトリ構成 / Directory Structure
 
-`note/`配下は以下のカテゴリで整理されている。これらはすべて「非正規の検討覚書・草稿」である。
-The `note/` directory is organized into the following categories. All of these are "noncanonical memoranda and drafts."
+`note/`配下は以下のカテゴリで整理されている。これらはすべて非正規の研究資料（検討覚書・草稿・記事・実験実装・履歴）である。
+The `note/` directory is organized into the following categories. All of these are noncanonical research materials, including memoranda, drafts, articles, experimental implementations, and historical records.
 
 - **`01_理論・公理_検討覚書`**: 理論の着想、旧公理、数理定義の検討プロセス。
 - **`02_AI・ガバナンス検討`**: AIの非線形表現、ガバナンス、誤解防止策の検討。
@@ -27,6 +27,8 @@ The `note/` directory is organized into the following categories. All of these a
 - **`04_思想・線形批判_草稿`**: 線形誤謬批判、人間とAIの進化に関する哲学的考察の草稿。
 - **`05_応用ドメイン・デモ補助`**: 医療、物理、社会システムへの適用案とデモ用補助メモ。
 - **`06_対話セッション記録`**: AIとの詳細な対話ログ、歴史的な執筆・推敲プロセス。
+- **`AIリテラシー`**: AI出力の検証、安全境界、マルチエージェント、Unicode偽装等に関する記事・図版。
+- **`poc_horizontal_ai`**: 水平軸AIのSafety Kernel、Trusted Runtime、実験実装の候補、検証記録、履歴。
 
 ## 権威順位 / Authority
 
@@ -34,14 +36,14 @@ The `note/` directory is organized into the following categories. All of these a
 - 機械可読な正典同期表現: `../theory/axioms.json`
 - 正規参照実装ソース: `../nra-core/foundations/NRA-IDE_Architecture_public.py`
 - docs同期ミラー: `../docs/NRA-IDE_Architecture_public.py`（正規ソースとSHA-256一致が必要）
-- 正典適合試験: `../tests/test_nra_ide_reference.py`（現行17試験）
+- 正典適合試験: `../tests/test_nra_ide_reference.py`（現行38試験）
 - `note/`内の資産: 個別に正典へ昇格した記録がない限り、すべて非正規の研究・草稿・履歴資料
 
 - Canonical order: `../theory/AXIOMS.md` > `../theory/axioms.json` > `../theory/NRA-IDE_Foundational_Thesis_Bilingual.md` > `../theory/SANDWICH_ARCH.md` > `../theory/THEORY.md` > `../FORMULA.md` > `../llms.md` > domain-specific rules > normative reference implementation passing canonical conformance tests > other implementation > comments, examples, and AI-generated explanations
 - Machine-readable synchronized canonical representation: `../theory/axioms.json`
 - Normative reference implementation source: `../nra-core/foundations/NRA-IDE_Architecture_public.py`
 - Synchronized docs mirror: `../docs/NRA-IDE_Architecture_public.py` (its SHA-256 must match the normative source)
-- Canonical conformance suite: `../tests/test_nra_ide_reference.py` (currently 17 tests)
+- Canonical conformance suite: `../tests/test_nra_ide_reference.py` (currently 38 tests)
 - Artifacts under `note/`: noncanonical research, draft, or historical material unless a canonical record explicitly promotes one
 
 ## 取扱い / Handling
