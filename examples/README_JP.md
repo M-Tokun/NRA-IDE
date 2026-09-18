@@ -170,12 +170,12 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 
 | # | ファイル | 内容 |
 |---|---------|------|
-| 11 | [11_Motor3Phase_BandGate_live_JP.html](./11_Motor3Phase_BandGate_live_JP.html) | **三相モーター Band Gate ライブ監視。** 三相モーターの負荷バランスと過負荷検知に R = δ/τ をリアルタイム適用。 |
-| 12 | [12_agri_mol_antagonism_JP.html](./12_agri_mol_antagonism_JP.html) | **農業イオン監視 + Mg²⁺/K⁺ 拮抗連鎖 Band Gate。** 黒ぼく土（Andosol）/一般農耕地プロファイル切替対応。動的τ＋非対称EMA。Mg障害時にK⁺τ連結ゲートが発動。 |
-| 13 | [13_photosynthesis_layer5_JP.html](./13_photosynthesis_layer5_JP.html) | **光合成監視 Layer 5。** Farquhar-von Caemmerer-Berry（FvCB）モデルを外部δ生成装置として使用 → R = δ/τ。非線形プリプロセッサとしての Layer 5 実装。 |
-| 14 | [14_powergrid_transition_JP.html](./14_powergrid_transition_JP.html) | **電力系統・遷移点監視。** 電力系統における構造的遷移点を検知。固定閾値では見逃す早期乖離をNRA-IDEが捕捉する。 |
-| 15 | [15_or_icu_continuum_JP.html](./15_or_icu_continuum_JP.html) | **OR/ICU 経過蓄積型モニタリング。** 手術〜ICU フェーズを通じた累積ズレを追跡。R は瞬間値ではなく継続的な構造的負荷を反映。 |
-| 16 | [16_passive_safety_JP.html](./16_passive_safety_JP.html) | **受動型・重力駆動安全システム。** 能動制御なしで物理的制約（重力・張力）だけで安全状態に遷移するアーキテクチャ。 |
+| 11 | [JP](./11_Motor3Phase_BandGate_live_JP.html) / [EN](./11_Motor3Phase_BandGate_live_EN.html) | **三相モーター Band Gate ライブ監視。** 三相モーターの負荷バランスと過負荷検知に R = δ/τ をリアルタイム適用。 |
+| 12 | [JP](./12_agri_mol_antagonism_JP.html) / [EN](./12_agri_mol_antagonism_EN.html) | **農業イオン監視 + Mg²⁺/K⁺ 拮抗連鎖 Band Gate。** 黒ぼく土（Andosol）/一般農耕地プロファイル切替対応。動的τ＋非対称EMA。Mg障害時にK⁺τ連結ゲートが発動。 |
+| 13 | [JP](./13_photosynthesis_layer5_JP.html) / [EN](./13_photosynthesis_layer5_EN.html) | **光合成監視 Layer 5。** Farquhar-von Caemmerer-Berry（FvCB）モデルを外部δ生成装置として使用 → R = δ/τ。非線形プリプロセッサとしての Layer 5 実装。 |
+| 14 | [JP](./14_powergrid_transition_JP.html) / [EN](./14_powergrid_transition_EN.html) | **電力系統・遷移点監視。** 電力系統における構造的遷移点を検知。固定閾値では見逃す早期乖離をNRA-IDEが捕捉する。 |
+| 15 | [JP](./15_or_icu_continuum_JP.html) / [EN](./15_or_icu_continuum_EN.html) | **OR/ICU 経過蓄積型モニタリング。** 手術〜ICU フェーズを通じた累積ズレを追跡。R は瞬間値ではなく継続的な構造的負荷を反映。 |
+| 16 | [JP](./16_passive_safety_JP.html) / [EN](./16_passive_safety_EN.html) | **受動型・重力駆動安全システム。** 能動制御なしで物理的制約（重力・張力）だけで安全状態に遷移するアーキテクチャ。 |
 
 ---
 
@@ -183,12 +183,12 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 
 | # | ファイル | 内容 |
 |---|---------|------|
-| 17 | [17_water_ice_phase_transition_JP.html](./17_water_ice_phase_transition_JP.html) | **水→氷 相転移。** 相変化境界（0°C）への接近を R で追跡。潜熱と温度が構造閾値を越える過程を可視化。 |
-| 18 | [18_chain_tension_JP.html](./18_chain_tension_JP.html) | **チェーン張力 ポリゴン効果＋自動調整。** スプロケット歯数同期の三層合成波でポリゴン効果を再現。dR/dt 予測制御で限界到達前に先行介入。 |
-| 19 | [19_air_pressure_JP.html](./19_air_pressure_JP.html) | **空気圧管理（圧縮性流体・動的τ・二重ゆらぎ）。** ボイル・シャルル則でτ_hiが温度依存で縮小。δとτが独立にゆらぐシリーズ最深構造。 |
-| 20 | [20_water_pressure_JP.html](./20_water_pressure_JP.html) | **水圧管理（非圧縮性流体・固定τ・ウォーターハンマー）。** ポンプ脈動を三層高調波で再現。弁急閉によるウォーターハンマー（指数減衰×正弦波）を実装。 |
-| 21 | [21_cabg_monitor_JP.html](./21_cabg_monitor_JP.html) | **CABG（冠動脈バイパス）モニター。** バイパス手術中の血流・圧力・温度を監視。Fail-Closed 時は手術中断を推奨。 |
-| 22 | [22_vascular_monitor_JP.html](./22_vascular_monitor_JP.html) | **NRA-IDE 血管インターベンションモニター。** 6物理量（圧力・せん断・壁張力・血流・温度・接着性）を二重ゆらぎ＋動的τで統合監視。PTA・ステント・吻合・クライオに特化。 |
+| 17 | [JP](./17_water_ice_phase_transition_JP.html) / [EN](./17_water_ice_phase_transition_EN.html) | **水→氷 相転移。** 相変化境界（0°C）への接近を R で追跡。潜熱と温度が構造閾値を越える過程を可視化。 |
+| 18 | [JP](./18_chain_tension_JP.html) / [EN](./18_chain_tension_EN.html) | **チェーン張力 ポリゴン効果＋自動調整。** スプロケット歯数同期の三層合成波でポリゴン効果を再現。dR/dt 予測制御で限界到達前に先行介入。 |
+| 19 | [JP](./19_air_pressure_JP.html) / [EN](./19_air_pressure_EN.html) | **空気圧管理（圧縮性流体・動的τ・二重ゆらぎ）。** ボイル・シャルル則でτ_hiが温度依存で縮小。δとτが独立にゆらぐシリーズ最深構造。 |
+| 20 | [JP](./20_water_pressure_JP.html) / [EN](./20_water_pressure_EN.html) | **水圧管理（非圧縮性流体・固定τ・ウォーターハンマー）。** ポンプ脈動を三層高調波で再現。弁急閉によるウォーターハンマー（指数減衰×正弦波）を実装。 |
+| 21 | [JP](./21_cabg_monitor_JP.html) / [EN](./21_cabg_monitor_EN.html) | **CABG（冠動脈バイパス）モニター。** バイパス手術中の血流・圧力・温度を監視。Fail-Closed 時は手術中断を推奨。 |
+| 22 | [JP](./22_vascular_monitor_JP.html) / [EN](./22_vascular_monitor_EN.html) | **NRA-IDE 血管インターベンションモニター。** 6物理量（圧力・せん断・壁張力・血流・温度・接着性）を二重ゆらぎ＋動的τで統合監視。PTA・ステント・吻合・クライオに特化。 |
 
 ---
 
@@ -211,12 +211,12 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 | # | ファイル | ドメイン | ポイント |
 |---|---------|---------|---------|
-| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN_20260425_011850_JST.html) | ベルトコンベアー・Vベルト張力 | τを「最適値から限界までの全余裕」と定義 → Rが自然に [0,1] に正規化。Fail-Closed でベルト停止。 |
-| 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN_20260425_012100_JST.html) | 水温 上下限管理 | R_hi と R_lo を独立評価。熱対流ゆらぎ（3周波数合成）。Fail-Closed で逆方向動作を自動停止。 |
-| 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN_20260425_012747_JST.html) | 光量（照度）管理 | 受光側（ルクス）で計測。R_hi > 0.75 から比例的に遮光率増加 — 予兆段階からの段階的介入。 |
-| 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN_20260425_012956_JST.html) | 電力管理（V×I 統合） | 電流・電圧を P = V×I として一本化。熱蓄積：過電力継続時間が R を時間的に押し上げる。 |
-| 31 | [JP](./31_move_water_or_ice_JP.html) / [EN](./31_move_water_or_ice_EN_20260425_013623_JST.html) | 水・氷 状態ナビゲーション | インタラクティブな相転移制御。液体と固体の間をスライドしながら相境界での R を追跡。 |
-| 32 | [JP](./32_nra_ide_water_ice_20260324_2216_JP.html) / [EN](./32_nra_ide_ice_water_EN_20260425_013818_JST.html) | 氷→水 相転移 | Demo 17 の逆方向：氷が 0°C を超えて潜熱を吸収しながら相変化する構造 R を追跡。 |
+| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN.html) | ベルトコンベアー・Vベルト張力 | τを「最適値から限界までの全余裕」と定義 → Rが自然に [0,1] に正規化。Fail-Closed でベルト停止。 |
+| 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN.html) | 水温 上下限管理 | R_hi と R_lo を独立評価。熱対流ゆらぎ（3周波数合成）。Fail-Closed で逆方向動作を自動停止。 |
+| 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN.html) | 光量（照度）管理 | 受光側（ルクス）で計測。R_hi > 0.75 から比例的に遮光率増加 — 予兆段階からの段階的介入。 |
+| 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN.html) | 電力管理（V×I 統合） | 電流・電圧を P = V×I として一本化。熱蓄積：過電力継続時間が R を時間的に押し上げる。 |
+| 31 | [JP](./31_move_water_or_ice_JP.html) / [EN](./31_move_water_or_ice_EN.html) | 水・氷 状態ナビゲーション | インタラクティブな相転移制御。液体と固体の間をスライドしながら相境界での R を追跡。 |
+| 32 | [JP](./32_nra_ide_water_ice_JP.html) / [EN](./32_nra_ide_ice_water_EN.html) | 氷→水 相転移 | Demo 17 の逆方向：氷が 0°C を超えて潜熱を吸収しながら相変化する構造 R を追跡。 |
 
 ---
 
@@ -224,7 +224,7 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 | ファイル | 内容 |
 |---------|------|
-| [JP](./33_nra_ide_6d_layer_viz_JP_2026-03-21_1237.html) / [EN](./33_nra_ide_6d_layer_viz_EN_20260425_013923_JST.html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
+| [JP](./33_nra_ide_6d_layer_viz_JP.html) / [EN](./33_nra_ide_6d_layer_viz_EN.html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
 | [JP](../docs/ja-JP/figures/causal_diode_fail_closed_JP.html) / [EN](../docs/en-US/figures/causal_diode_fail_closed_EN.html) | **因果ダイオード & Fail-Closed 可視化。** AIが結果から原因側（閾値）を操作しようとする「逆流（Π⁻¹）」を構造的にブロックするアニメーションと、限界到達時の自律的遮断を体感できる直感的なデモ。 |
 
 ---
@@ -237,18 +237,18 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 | # | ファイル | ドメイン | ポイント |
 |---|---------|---------|---------|
-| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_JP.html) / [EN](./34_NRA-IDE_AgroDrone_4Factor_Simulation_2026-04-20_2041_EN.html) | 育苗ハウス・農業ドローン 4要素相関 | 温度・湿度・光量・水分を R = δ/τ で追跡し、相関行列 C[i][j](t)、残渣ゲート G(r)、τステップ前の実測記録 x_{t-τ} を組み合わせる相関sampleの入口。 |
-| 35 | [JP](./35_rotor_bearing_correlation_JP_20260425_024602_JST.html) / [EN](./35_rotor_bearing_correlation_EN_20260425_160443_JST.html) | 回転機械・軸受相関 | 振動、軸受温度、電流、潤滑圧、音響、回転数偏差を監視。振動が先行し、温度・電流・音響へ遅延波及する構造を可視化。 |
-| 36 | [JP](./36_battery_thermal_runaway_correlation_JP_20260425_025803_JST.html) / [EN](./36_battery_thermal_runaway_correlation_EN_20260425_160443_JST.html) | バッテリー熱暴走相関 | 内部抵抗と温度上昇率 dT/dt を先行指標として扱い、温度、膨張圧、電圧偏差へ波及する構造を表示。実機制御ではなく教育・構造可視化用。 |
-| 37 | [JP](./37_greenhouse_vpd_correlation_JP_20260425_032257_JST.html) / [EN](./37_greenhouse_vpd_correlation_EN_20260425_160443_JST.html) | 温室VPD媒介相関 | 温度と湿度を単純加算せず、VPD（飽差）を媒介レイヤーとして、土壌水分、CO₂、光量、ECへ相関圧が伝わる構造を可視化。 |
-| 38 | [JP](./38_datacenter_cascade_correlation_JP_20260425_032611_JST.html) / [EN](./38_datacenter_cascade_correlation_EN_20260425_160443_JST.html) | データセンター・カスケード相関 | CPU負荷、電力、ラック温度、吸気温度、ファン回転率、空気流量、ネットワーク遅延をつなぎ、power → heat → fan → power の正のフィードバック環を表示。 |
-| 39 | [JP](./39_coldchain_temperature_correlation_JP_20260425_033809_JST.html) / [EN](./39_coldchain_temperature_correlation_EN_20260425_160443_JST.html) | コールドチェーン温度逸脱相関 | 外気温、荷室温度、扉開閉率、圧縮機負荷、バッテリー残量、湿度、輸送遅延をつなぎ、外気＋扉 → 圧縮機余裕 → 荷室温度の媒介連鎖を可視化。 |
-| 40 | [JP](./40_medical_education_individual_stratification_template_JP_20260425_040110_JST.html) / [EN](./40_medical_education_individual_stratification_template_EN_20260425_160443_JST.html) | 医療教育用・個体別振り分け | SpO₂、呼吸数、心拍数、収縮期血圧、体温を合成データとして扱い、年齢・脆弱性・既往による profile 圧で個体ごとの余裕差を可視化。診断・治療判断ではなく Human Review へ戻す教育テンプレート。 |
-| 41 | [JP](./41_medical_education_infection_observation_template_JP_20260425_040544_JST.html) / [EN](./41_medical_education_infection_observation_template_EN_20260425_160443_JST.html) | 医療教育用・感染症観察群 | 発熱、呼吸、循環、水分、炎症様マーカーを合成データとして扱い、個体差つきで Observe / Watch / Caution / Human Review に振り分ける。診断名や治療推奨には寄せない教育用sample。 |
+| 34 | [JP](./34_NRA-IDE_AgroDrone_4Factor_Simulation_JP.html) / [EN](./34_NRA-IDE_AgroDrone_4Factor_Simulation_EN.html) | 育苗ハウス・農業ドローン 4要素相関 | 温度・湿度・光量・水分を R = δ/τ で追跡し、相関行列 C[i][j](t)、残渣ゲート G(r)、τステップ前の実測記録 x_{t-τ} を組み合わせる相関sampleの入口。 |
+| 35 | [JP](./35_rotor_bearing_correlation_JP.html) / [EN](./35_rotor_bearing_correlation_EN.html) | 回転機械・軸受相関 | 振動、軸受温度、電流、潤滑圧、音響、回転数偏差を監視。振動が先行し、温度・電流・音響へ遅延波及する構造を可視化。 |
+| 36 | [JP](./36_battery_thermal_runaway_correlation_JP.html) / [EN](./36_battery_thermal_runaway_correlation_EN.html) | バッテリー熱暴走相関 | 内部抵抗と温度上昇率 dT/dt を先行指標として扱い、温度、膨張圧、電圧偏差へ波及する構造を表示。実機制御ではなく教育・構造可視化用。 |
+| 37 | [JP](./37_greenhouse_vpd_correlation_JP.html) / [EN](./37_greenhouse_vpd_correlation_EN.html) | 温室VPD媒介相関 | 温度と湿度を単純加算せず、VPD（飽差）を媒介レイヤーとして、土壌水分、CO₂、光量、ECへ相関圧が伝わる構造を可視化。 |
+| 38 | [JP](./38_datacenter_cascade_correlation_JP.html) / [EN](./38_datacenter_cascade_correlation_EN.html) | データセンター・カスケード相関 | CPU負荷、電力、ラック温度、吸気温度、ファン回転率、空気流量、ネットワーク遅延をつなぎ、power → heat → fan → power の正のフィードバック環を表示。 |
+| 39 | [JP](./39_coldchain_temperature_correlation_JP.html) / [EN](./39_coldchain_temperature_correlation_EN.html) | コールドチェーン温度逸脱相関 | 外気温、荷室温度、扉開閉率、圧縮機負荷、バッテリー残量、湿度、輸送遅延をつなぎ、外気＋扉 → 圧縮機余裕 → 荷室温度の媒介連鎖を可視化。 |
+| 40 | [JP](./40_medical_education_individual_stratification_template_JP.html) / [EN](./40_medical_education_individual_stratification_template_EN.html) | 医療教育用・個体別振り分け | SpO₂、呼吸数、心拍数、収縮期血圧、体温を合成データとして扱い、年齢・脆弱性・既往による profile 圧で個体ごとの余裕差を可視化。診断・治療判断ではなく Human Review へ戻す教育テンプレート。 |
+| 41 | [JP](./41_medical_education_infection_observation_template_JP.html) / [EN](./41_medical_education_infection_observation_template_EN.html) | 医療教育用・感染症観察群 | 発熱、呼吸、循環、水分、炎症様マーカーを合成データとして扱い、個体差つきで Observe / Watch / Caution / Human Review に振り分ける。診断名や治療推奨には寄せない教育用sample。 |
 
 ---
 
-### 🚀 STEP 12 — 拡張POC・追加コンセプト（42〜52）
+### 🚀 STEP 12 — 拡張POC・追加コンセプト（42〜53）
 
 42番以降は、自動運転やロボット制御、FPGA実装のPOC、および基盤哲学のデモ群です。
 
@@ -259,12 +259,12 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 | 44 | [JP](./44_RobotArm_POC_1_JP.html) / [EN](./44_RobotArm_POC_1_EN.html) | 産業用ロボットアーム制御 POC 1 |
 | 45 | [JP](./45_HybridCalc_vs_Traditional_JP.html) / [EN](./45_HybridCalc_vs_Traditional_EN.html) | ハイブリッド計算 vs 従来手法の比較 |
 | 46 | [JP](./46_Connection_vs_Mixing_JP.html) / [EN](./46_Connection_vs_Mixing_EN.html) | Connection vs Mixing（接続と混合のリスク評価） |
-| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) | FPGA ハードウェア実装スピードデモ |
-| 48 | [JP](./48_Human_5Factors_Correlation_JP.html) | 人体5要素相関 実数値推移デモ（医療系テンプレートの初期軽量版） |
+| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) / [EN](./47_FPGA_Demo_SPEED_EN.html) | FPGA ハードウェア実装スピードデモ |
+| 48 | [JP](./48_Human_5Factors_Correlation_JP.html) / [EN](./48_Human_5Factors_Correlation_EN.html) | 人体5要素相関 実数値推移デモ（医療系テンプレートの初期軽量版） |
 | 49 | [JP](./49_Architecture_Infographic_JP.html) / [EN](./49_Architecture_Infographic_EN.html) | NRA-IDE アーキテクチャ・インフォグラフィック |
-| 50 | [JP](./50_Constraint_Philosophy_JP.html) | 哲学コンセプト「制約は制限ではない。制約こそが知性を駆動する力である。」 |
-| 51 | [JP](./51_ritsukan_spiral_fixed_rod_JP.html) | 律環スパイラル・散逸構造ベース可視化 |
+| 50 | [JP](./50_Constraint_Philosophy_JP.html) / [EN](./50_Constraint_Philosophy_EN.html) | 哲学コンセプト「制約は制限ではない。制約こそが知性を駆動する力である。」 |
 | 52 | [JP](./52_Hybrid_DoubleFluctuation_EntropyTracking_JP.html) | ハイブリッド二重ゆらぎ エントロピー追跡 |
+| 53 | [JP](./53_Formula_Lab_JP.html) | Formula Lab — 基礎式（R = δ/τ）と二次式（二重ゆらぎ、R_upper / R_lower）を境界の動きとして可視化するインタラクティブなプロトタイプ。説明文と連動。（日本語のみ） |
 
 ---
 
