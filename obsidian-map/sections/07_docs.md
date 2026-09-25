@@ -2,8 +2,9 @@
 
 [← NRA-IDE Markdown 接続図](../00_NRA-IDE%E6%8E%A5%E7%B6%9A%E5%9B%B3.md)
 
-対象 Markdown: 29 ファイル
+対象 Markdown: 30 ファイル
 
+- [docs/CONCEPT_DEPENDENCY_MAP.md](../../docs/CONCEPT_DEPENDENCY_MAP.md)
 - [docs/en-US/ai/00_overview_EN.md](../../docs/en-US/ai/00_overview_EN.md)
 - [docs/en-US/ai/01_paradigm_shift_EN.md](../../docs/en-US/ai/01_paradigm_shift_EN.md)
 - [docs/en-US/ai/02_limits_of_ai_optimization_EN.md](../../docs/en-US/ai/02_limits_of_ai_optimization_EN.md)
