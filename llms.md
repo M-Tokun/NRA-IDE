@@ -1,13 +1,18 @@
 <!-- FILE: llms.md -->
 <!-- Role: Mandatory AI identification, interpretation, and operational gate for NRA-IDE -->
 <!-- Author: M-Tokuni -->
-<!-- Updated: 2026-07-15 JST -->
+<!-- Updated: 2026-09-27 JST -->
 
-# llms.md — Instructions for AI Agents Handling NRA-IDE
+# llms.md — NRA-IDE Operational Gate
 
 This document is the mandatory identification, interpretation, and operational gate for any AI that reads, summarizes, generates, evaluates, or implements NRA-IDE content.
 
 This document does not override the sole canonical axiom or higher-precedence canonical definitions.
+
+This document is a working contract for AI agents and the reference for human reviewers.
+
+- **AI agents:** read this document in full before acting on NRA-IDE content. llms.txt points here; on any conflict, follow the canonical order in §0.
+- **Humans:** project overview: `README.md` / `README_JP.md`. Repository navigation and authority classes: `REPOSITORY_OVERVIEW.md`. The AI/human responsibility boundary is defined in §§13–16.
 
 ---
 
@@ -713,11 +718,16 @@ Do not allow Effect-Side output to rewrite Cause-Side structure.
 ---
 ---
 
-# llms.md — NRA-IDEを扱うAIへの指示書
+# llms.md — NRA-IDE運用ゲート
 
 この文書は、AIがNRA-IDEに関する文書を読み、要約し、生成し、評価し、実装する際に必ず通過する識別・解釈・運用ゲートです。
 
 この文書は唯一の正規公理または上位の正規定義を上書きしません。
+
+この文書は、AIエージェントの行動契約であると同時に、人間のレビュアーがそれを確認するための参照文書です。
+
+- **AIへ：** NRA-IDEを扱う前にこの文書を最後まで読むこと。llms.txt がここを指す。競合時は §0 の正規参照順に従う。
+- **人間へ：** プロジェクト概要は `README.md` / `README_JP.md`。リポジトリの案内と権威区分は `REPOSITORY_OVERVIEW.md`。AIと人間の責任境界は §13–16 に定義される。
 
 ---
 
