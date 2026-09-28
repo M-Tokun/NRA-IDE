@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
-  FILE: md-viewer-20260904-2036.html
+  FILE: md-viewer-splitter-20260928-2301.html
   TITLE: GFM Markdown Viewer (single file)
-  TIME : 2026-09-04 20:36:42 (JST)
+  TIME : 2026-09-28 23:01:25 (JST)
   (C) M-Tokuni 2026 / Author: M-Tokuni
   依存: CDN (marked / DOMPurify / highlight.js / KaTeX / Mermaid) → 初回表示時はネット接続が必要です。
 -->
@@ -21,7 +21,7 @@
   --bg:#ffffff; --bg-soft:#f6f8fa; --fg:#1f2328; --fg-muted:#59636e;
   --line:#d1d9e0; --link:#0969da; --accent:#1a7f37; --code-bg:#f6f8fa;
   --quote:#59636e; --quote-line:#d1d9e0; --mark:#fff8c5;
-  --sidebar-w:264px; --header-h:46px;
+  --sidebar-w:264px; --header-h:46px; --editor-w:44%; --splitter-w:8px;
 }
 :root[data-theme="dark"]{
   --bg:#0d1117; --bg-soft:#161b22; --fg:#e6edf3; --fg-muted:#9198a1;
@@ -72,11 +72,24 @@ aside.hidden{display:none}
 .toc .lv5,.toc .lv6{padding-left:40px}
 #pane{flex:1;min-width:0;display:flex;height:calc(100vh - var(--header-h))}
 #editor{
-  display:none; width:44%; border-right:1px solid var(--line); resize:none; padding:14px;
+  display:none; width:var(--editor-w); flex:0 0 var(--editor-w); border-right:0; resize:none; padding:14px;
   font-family:ui-monospace,SFMono-Regular,Consolas,"Noto Sans Mono",monospace;
   font-size:13.5px; line-height:1.6; background:var(--bg); border-top:0;border-left:0;border-bottom:0;
 }
 #editor.on{display:block}
+#splitter{
+  display:none; position:relative; width:var(--splitter-w); flex:0 0 var(--splitter-w);
+  cursor:col-resize; touch-action:none; user-select:none; background:transparent; outline:none;
+}
+#splitter::before{
+  content:""; position:absolute; top:0; bottom:0; left:50%; width:1px; transform:translateX(-50%);
+  background:var(--line); transition:width .12s,background .12s;
+}
+#splitter:hover::before,#splitter:focus-visible::before,body.resizing #splitter::before{
+  width:3px; background:var(--link);
+}
+#pane.editing #splitter{display:block}
+body.resizing,body.resizing *{cursor:col-resize!important;user-select:none!important}
 #viewport{flex:1;min-width:0;overflow-y:auto;padding:28px 32px 120px}
 #doc{max-width:76ch;margin:0 auto}
 .drop{
@@ -124,6 +137,7 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
   aside{position:fixed;left:0;top:var(--header-h);z-index:15}
   #viewport{padding:20px 16px 100px}
   #editor.on{width:100%;display:none}
+  #splitter{display:none!important}
 }
 @media print{
   header,aside,#editor{display:none!important}
@@ -162,6 +176,7 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
 
   <div id="pane">
     <textarea id="editor" spellcheck="false" placeholder="ここに Markdown を書くと右側に反映されます。"></textarea>
+    <div id="splitter" role="separator" aria-orientation="vertical" aria-label="編集領域とプレビュー領域の幅を変更" tabindex="0" title="ドラッグで幅変更 / ダブルクリックで44%に戻す"></div>
     <div id="viewport"><div id="doc"></div></div>
   </div>
 </main>
@@ -181,6 +196,7 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
   /* ============ 要素 ============ */
   const $ = (id) => document.getElementById(id);
   const doc = $("doc"), viewport = $("viewport"), editor = $("editor");
+  const pane = $("pane"), splitter = $("splitter");
   const tocEl = $("toc"), fileListEl = $("filelist"), fileSec = $("filesec");
   const fnameEl = $("fname");
 
@@ -469,6 +485,77 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
     });
   }
 
+  /* ============ 編集 / プレビュー分割幅 ============ */
+  const SPLIT_DEFAULT = 0.44;
+  const SPLIT_MIN = 0.20;
+  const SPLIT_MAX = 0.80;
+  let splitRatio = SPLIT_DEFAULT;
+  let splitDragging = false;
+
+  function clampSplit(v) { return Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, v)); }
+
+  function applySplit(ratio, save) {
+    splitRatio = clampSplit(Number(ratio) || SPLIT_DEFAULT);
+    const pct = (splitRatio * 100).toFixed(3) + "%";
+    document.documentElement.style.setProperty("--editor-w", pct);
+    splitter.setAttribute("aria-valuemin", String(Math.round(SPLIT_MIN * 100)));
+    splitter.setAttribute("aria-valuemax", String(Math.round(SPLIT_MAX * 100)));
+    splitter.setAttribute("aria-valuenow", String(Math.round(splitRatio * 100)));
+    splitter.setAttribute("aria-valuetext", "編集領域 " + Math.round(splitRatio * 100) + "%");
+    if (save) {
+      try { localStorage.setItem("mdviewer-split-ratio", String(splitRatio)); } catch (e) {}
+    }
+  }
+
+  function splitFromClientX(clientX) {
+    const rect = pane.getBoundingClientRect();
+    const sw = splitter.getBoundingClientRect().width || 0;
+    const usable = Math.max(1, rect.width - sw);
+    applySplit((clientX - rect.left) / usable, false);
+  }
+
+  try {
+    const savedSplit = Number(localStorage.getItem("mdviewer-split-ratio"));
+    if (Number.isFinite(savedSplit) && savedSplit >= SPLIT_MIN && savedSplit <= SPLIT_MAX) splitRatio = savedSplit;
+  } catch (e) {}
+  applySplit(splitRatio, false);
+
+  splitter.addEventListener("pointerdown", (e) => {
+    if (!editor.classList.contains("on") || matchMedia("(max-width:820px)").matches) return;
+    splitDragging = true;
+    document.body.classList.add("resizing");
+    try { splitter.setPointerCapture(e.pointerId); } catch (err) {}
+    splitFromClientX(e.clientX);
+    e.preventDefault();
+  });
+
+  splitter.addEventListener("pointermove", (e) => {
+    if (!splitDragging) return;
+    splitFromClientX(e.clientX);
+  });
+
+  function endSplitDrag(e) {
+    if (!splitDragging) return;
+    splitDragging = false;
+    document.body.classList.remove("resizing");
+    try { splitter.releasePointerCapture(e.pointerId); } catch (err) {}
+    applySplit(splitRatio, true);
+  }
+  splitter.addEventListener("pointerup", endSplitDrag);
+  splitter.addEventListener("pointercancel", endSplitDrag);
+
+  splitter.addEventListener("dblclick", () => applySplit(SPLIT_DEFAULT, true));
+  splitter.addEventListener("keydown", (e) => {
+    let next = splitRatio;
+    if (e.key === "ArrowLeft") next -= e.shiftKey ? 0.05 : 0.02;
+    else if (e.key === "ArrowRight") next += e.shiftKey ? 0.05 : 0.02;
+    else if (e.key === "Home") next = SPLIT_MIN;
+    else if (e.key === "End") next = SPLIT_MAX;
+    else return;
+    e.preventDefault();
+    applySplit(next, true);
+  });
+
   /* ============ 操作 ============ */
   $("btn-file").addEventListener("click", () => $("in-file").click());
   $("in-file").addEventListener("change", (e) => {
@@ -499,8 +586,10 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
   // 編集モード
   $("btn-edit").addEventListener("click", (ev) => {
     const on = editor.classList.toggle("on");
+    pane.classList.toggle("editing", on);
     ev.currentTarget.setAttribute("aria-pressed", String(on));
-    if (on) editor.focus();
+    if (on) { applySplit(splitRatio, false); editor.focus(); }
+    else { splitDragging = false; document.body.classList.remove("resizing"); }
   });
   let timer = null;
   editor.addEventListener("input", () => {
