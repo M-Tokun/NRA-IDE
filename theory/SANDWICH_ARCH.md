@@ -393,6 +393,27 @@ $$
 
 When detected, the reverse update is rejected and recorded.
 
+### 8.4 Symbol and Scope of Inverse Projection $\Pi^{-1}$
+
+$\Pi^{-1}$ is not the mathematical inverse of the projection $\Pi$ in 8.2. $\Pi$ selects permitted Effect-Side content and has no inverse map. $\Pi^{-1}$ is the name of a prohibited reverse path.
+
+The definition of reverse derivation follows `theory/AXIOMS.md` §14. This section classifies, according to that definition, what is called "reverse derivation," "reverse calculation," or "backflow" in this repository.
+
+| Category | Content | Treatment |
+|---|---|---|
+| Reverse derivation A: authority backflow | A path from Effect-Side to a Cause-Side value, threshold, state, irreversible latch, rule, transformation input, update ground, or provenance | Prohibited |
+| Reverse derivation B: self-adjustment of the gauge | A path from an evaluation output ($R$, its moving averages and aggregates, canonical state, or irreversible latch) to the reference, transformation rule, thresholds, or effective gate width of the same evaluation target, including paths across steps and paths returning through another evaluation target, in either direction | Prohibited |
+| Adjustment by another target's evaluation output | A path feeding an evaluation output of another evaluation target into the thresholds or effective gate width of one's own evaluation target | Permitted only in the safe-side direction (lowering thresholds, narrowing gate widths) and only when no path returns one's own evaluation outputs to that target; fixed before evaluation begins |
+| Unique reconstruction | Determining $\delta$ or $\tau$ from $R$ alone | Prohibited |
+| Chained re-estimation | Treating an estimate as an observation and estimating further from it | Prohibited. When estimates must be chained, the whole chain is declared as one pre-fixed transformation rule, and intermediate estimates are not treated as observations |
+| Identity transformation | Algebraic rearrangement within one evaluation snapshot using independently obtained $\delta$ and $\tau$ (such as $\delta=R\tau$ or $M_\tau=\tau(1-R)$) | Permitted; not reverse derivation |
+| Inverse computation / inverse problem | Numerical estimation of a cause state from observations within Cause-Side under pre-fixed rules | Permitted; approximation and uncertainty are disclosed, and use for $\delta$ or $\tau$ is declared as a pre-fixed transformation rule |
+| Physical control loop | An actuator operation according to the boundary state that appears in the next Cause-Side observation through the physics of the target | Permitted; thresholds, transformation rules, and effective gate widths are not rewritten |
+| Post-hoc reconstruction | Explaining the course of events from records | Permitted only outside the terminated path; returning the result to Cause-Side is reverse derivation A |
+| Mutual inversion of transition formulas | Deriving a reverse transition formula by substitution or inversion of a one-way transition formula | Prohibited; the reverse direction is declared independently |
+
+Reverse inference (estimating causes by similarity or association) is not a separate category. Used as an input to structural judgment, it is reverse derivation A; uses outside structural judgment (such as creative work) are outside the scope of this table.
+
 ---
 
 ## 9. Output Composer
@@ -590,7 +611,7 @@ At $R_{\mathrm{target}}\ge1.0$, it switches to predefined `POST_RUPTURE_FIXED` t
 | Concept | Canonical role in the architecture |
 |---|---|
 | $\delta$ | Obtained only from Cause-Side observation or predefined Cause-Side transformation |
-| $\tau$ | Obtained only from Cause-Side observation, design definition, or authorized exogenous replenishment |
+| $\tau$ | Obtained only from Cause-Side observation, design definition, or an authorized addition of a structural element (the added element's thickness determined by Cause-Side measurement) |
 | $R=\delta/\tau$ | Calculated by the NRA-IDE boundary evaluator outside the LLM |
 | Boundary state | Classified by the NRA-IDE boundary evaluator |
 | `irreversible_latched` | Managed outside the LLM and not released by Effect-Side output |
@@ -1073,6 +1094,27 @@ $$
 
 検出した逆更新は棄却し、監査ログへ記録する。
 
+### 8.4 逆射影 $\Pi^{-1}$ の記号と語義の範囲
+
+$\Pi^{-1}$ は、8.2 の $\Pi$ の数学的な逆写像ではない。$\Pi$ は許可された Effect-Side 内容を選ぶ操作であり、逆写像を持たない。$\Pi^{-1}$ は、禁止された逆向き経路の名前である。
+
+逆導出の定義は `theory/AXIOMS.md` §14 による。本節は、リポジトリ内で「逆導出」「逆算」「逆流」と呼ばれるものを、その定義に従って分類する。
+
+| 区分 | 内容 | 扱い |
+|---|---|---|
+| 逆導出A：権威の逆流 | Effect-Side から Cause-Side の値・閾値・状態・不可逆ラッチ・規則・変換入力・更新根拠・出所への経路 | 禁止 |
+| 逆導出B：計器の自己調整 | 評価出力（$R$、その移動平均・集約、正規状態、不可逆ラッチ）から、同じ評価対象の基準・変換規則・閾値・有効ゲート幅への経路。段をまたぐ経路、他の評価対象を経由して戻る経路を含み、向きを問わない | 禁止 |
+| 他の評価対象の評価出力による調整 | 他の評価対象の評価出力を、自らの評価対象の閾値・有効ゲート幅へ入れる経路 | 安全側の向き（閾値を下げる、ゲート幅を狭める）で、自らの評価出力がその評価対象へ戻る経路がない場合に限り許可。評価開始前に固定する |
+| 一意復元 | $R$ だけから $\delta$ または $\tau$ を決めること | 禁止 |
+| 再推定連鎖 | 推定値を観測値として扱い、そこからさらに推定を重ねること | 禁止。推定を重ねる必要がある場合は、全体を一つの事前固定変換規則として宣言し、途中の推定値を観測値として扱わない |
+| 恒等変形 | 同一評価スナップショット内で、独立に得た $\delta,\tau$ を使う代数的変形（$\delta=R\tau$、$M_\tau=\tau(1-R)$ など） | 許可。逆導出ではない |
+| 逆演算・逆問題 | Cause-Side 内で、事前固定規則に従い観測から原因状態を推定する数値計算 | 許可。近似と不確かさを開示し、$\delta,\tau$ に使う場合は事前固定変換規則として宣言する |
+| 物理制御ループ | 境界状態に応じたアクチュエータ操作が、対象の物理を経て次の Cause-Side 観測に現れる経路 | 許可。閾値・変換規則・有効ゲート幅を書き換えない |
+| 事後再構成 | 記録から経緯を説明すること | 終端済み経路の外でのみ許可。結果を Cause-Side へ戻せば逆導出A |
+| 遷移式の相互逆算 | 一方向の遷移式から逆方向の遷移式を代入・逆算で作ること | 禁止。逆方向は独立に宣言する |
+
+逆推論（類似・連想による原因の推定）は、独立の区分としない。構造判定の入力に使えば逆導出Aに当たり、構造判定の外での用法（創作など）はこの表の対象外である。
+
 ---
 
 ## 9. OUTPUT COMPOSER
@@ -1268,7 +1310,7 @@ $R_{\mathrm{target}}\ge1.0$ では、事前定義された`POST_RUPTURE_FIXED`�
 | 概念 | 正規上の役割 |
 |---|---|
 | $\delta$ | Cause-Side観測または事前固定されたCause-Side変換からのみ取得 |
-| $\tau$ | Cause-Side観測、設計定義、権限ある外生補充からのみ取得 |
+| $\tau$ | Cause-Side観測、設計定義、権限ある構造要素の付加（加えた要素の厚みはCause-Side測定で定める）からのみ取得 |
 | $R=\delta/\tau$ | LLM外部のNRA-IDE境界評価器が計算 |
 | 境界状態 | NRA-IDE境界評価器が分類 |
 | `irreversible_latched` | LLM外部で管理し、Effect-Sideから解除しない |

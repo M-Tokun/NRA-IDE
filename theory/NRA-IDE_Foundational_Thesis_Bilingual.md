@@ -191,7 +191,7 @@ The Primary Formula centers on three quantities. The complete IDE additionally r
 
 **δ (delta): Accumulated Deviation**
 
-The amount of deviation accumulated within a structure as history. For materials this corresponds to fatigue; for biological systems, stress; for engineered systems, load accumulation. δ tends to increase over time.
+The amount of deviation accumulated within a structure as history. For materials this corresponds to fatigue; for biological systems, stress; for engineered systems, load accumulation. δ tends to increase over time. It consists of a reversible component and an irreversible component (residual deviation), both measured from a reference fixed before evaluation (theory/AXIOMS.md §4).
 
 **τ (tau): Absorption Thickness**
 
@@ -402,7 +402,7 @@ The formal role of this formula is dynamic structural tracking. Its memorable na
 
 $R_{\mathrm{dir}}$ is an auxiliary directional aggregate, not the canonical $R=\delta/\tau$. To connect it to canonical state classification, a Cause-Side domain transformation rule fixed before evaluation must determine the canonical $\delta$ and $\tau$.
 
-This formula does not redefine $R$, and it does not permit spontaneous restoration of $\tau$. Any increase in true absorption thickness requires exogenous replenishment or a Cause-Side update rule fixed before evaluation.
+This formula does not redefine $R$, and it does not permit spontaneous restoration of $\tau$. Any increase in true absorption thickness requires the addition of a structural element. A change of the declared thickness by a new Cause-Side observation is handled as the next evaluation snapshot.
 
 ### 7.3 Complementary Computation Formula
 
@@ -511,6 +511,8 @@ LLM text, self-evaluation, semantic scoring, output ranking, discarded generatio
 
 Cause-Side is not frozen across time. Authorized new Cause-Side observations may form the next evaluation snapshot. For each evaluation, the update authority, route, provenance, target, unit, observation time, transformation rule, threshold rule, and evaluated snapshot are fixed. Effect-Side output cannot rewrite any of them or release the irreversible latch.
 
+$R$, the canonical state, and the irreversible latch are evaluation outputs, neither Cause-Side observations nor Effect-Side artifacts. They must not be returned to the reference, transformation rule, thresholds, or effective gate width of the same evaluation target (reverse derivation B). The definitions follow theory/AXIOMS.md §14.
+
 ---
 
 ## 8. Mathematical Treatment of the Structural-Persistence Principle
@@ -524,7 +526,7 @@ $$
 
 This is an outside-domain state, not a Fail-Closed state. Because evaluation cannot proceed, the fail-closed operational principle suppresses autonomous processing.
 
-Within a closed operational interval without exogenous replenishment, $\tau$ is non-increasing rather than spontaneously restored.
+Within a closed operational interval without the addition of a structural element, $\tau$ is non-increasing rather than spontaneously restored.
 
 $$
 \tau(t) = \tau_0-\int_0^t f(\delta(s))\,ds
@@ -538,9 +540,9 @@ $$
 
 $$
 
-Any increase in $\tau$ must be attributable to external replenishment or a predefined Cause-Side update rule.
+Any increase in $\tau$ must be attributable to the addition of a structural element. A change of the declared thickness by a new Cause-Side observation is not an increase during the evaluation; it is redeclared as the next evaluation snapshot.
 
-If restoration after rupture or phase transition is claimed, $\tau_0$ must be a pre-fixed baseline and $\tau_{\mathrm{restored}}$ must be measured for the successor structure using the same subject, unit, and Cause-Side rule. Both comparability and $\tau_{\mathrm{restored}}<\tau_0$ require evidence; otherwise restoration to the initial structure must not be inferred. This inequality is a structural constraint, not an axiom or a third canonical IDE formula system.
+If restoration after rupture or phase transition is claimed, $\tau_0$ must be a pre-fixed baseline and $\tau_{\mathrm{restored}}$ must be measured for the existing elements of the successor structure, excluding added elements, using the same subject, unit, and Cause-Side rule. Both comparability and $\tau_{\mathrm{restored}}<\tau_0$ require evidence; otherwise restoration to the initial structure must not be inferred. This inequality is a structural constraint, not an axiom or a third canonical IDE formula system.
 
 The boundary-approach ratio $R$ may be read approximately as a play utilization rate for intuitive explanation, but its formal name and meaning remain **boundary-approach ratio**.
 
@@ -862,7 +864,7 @@ IDEはこの比喩を、明示的な遷移規則と残差取扱い規則の説�
 
 **δ（デルタ）：蓄積ズレ**
 
-構造の内部に蓄積されたズレの量である。材料であれば疲労、生体であればストレス、システムであれば負荷の蓄積がこれに当たる。δは時間とともに増加する傾向を持つ。
+構造の内部に蓄積されたズレの量である。材料であれば疲労、生体であればストレス、システムであれば負荷の蓄積がこれに当たる。δは時間とともに増加する傾向を持つ。δは、評価前に固定した基準から測り、作用を除けば戻る可逆成分と、作用を除いても残る不可逆成分（残留ズレ）とから成る（theory/AXIOMS.md §4）。
 
 **τ（タウ）：吸収厚み**
 
@@ -1079,7 +1081,7 @@ $$
 
 $R_{\mathrm{dir}}$ は側別評価の補助集約量であり、正規の $R=\delta/\tau$ ではない。正規状態分類へ接続する場合、評価前に固定されたCause-Sideのドメイン変換規則によって、正規の $\delta$ と $\tau$ を定めなければならない。
 
-二次式はRを再定義しない。また、 $\tau$ の自然回復を認めるものではない。真の吸収厚みの増加には、外生補充または評価前に固定されたCause-Side更新規則が必要である。
+二次式はRを再定義しない。また、 $\tau$ の自然回復を認めるものではない。真の吸収厚みの増加には、構造要素の付加が必要である。新しいCause-Side観測で宣言厚みが変わる場合は、次の評価スナップショットとして扱う。
 
 ### 7.3 補完計算式
 
@@ -1188,6 +1190,8 @@ LLMの文章、自己評価、意味スコア、出力順位、廃棄生成、�
 
 Cause-Side全体は時間的に凍結されない。権限ある新しいCause-Side観測は次の評価スナップショットを形成できる。各評価では、更新権限、更新経路、出所、対象、単位、観測時刻、変換規則、閾値規則、評価スナップショットを固定する。Effect-Sideはこれらを書き換えず、不可逆ラッチも解除できない。
 
+R、正規状態、不可逆ラッチは、Cause-Side観測でもEffect-Side生成物でもない評価出力である。同じ評価対象の基準、変換規則、閾値、有効ゲート幅へ戻してはならない（逆導出B）。定義は theory/AXIOMS.md §14 による。
+
 ---
 
 ## 8. 構造持続原則のIDE数学的取扱い
@@ -1201,7 +1205,7 @@ $$
 
 これは定義域外状態であり、Fail-Closed状態ではない。ただし評価を継続できないため、Fail-Closed運用原則によって自律処理を抑止する。
 
-外生補充のない閉じた運用区間では、 $\tau$ は自然回復せず非増加である。
+構造要素の付加のない閉じた運用区間では、 $\tau$ は自然回復せず非増加である。
 
 $$
 \tau(t) = \tau_0-\int_0^t f(\delta(s))\,ds
@@ -1215,9 +1219,9 @@ $$
 
 $$
 
-$\tau$ の増加は、外生補充または事前定義されたCause-Side更新規則によってのみ生じる。
+$\tau$ の増加は、構造要素の付加によってのみ生じる。新しいCause-Side観測で宣言厚みが変わる場合は、評価中の増加ではなく、次の評価スナップショットとして宣言し直す。
 
-破断または相転移後の復元を主張する場合、 $\tau_0$ は事前固定された基準値、 $\tau_{\mathrm{restored}}$ は同一対象・同一単位・同一Cause-Side規則で評価した後継構造の値でなければならない。比較可能性と $\tau_{\mathrm{restored}}<\tau_0$ の双方に証拠がない場合、初期構造への復元を推定しない。この不等式は構造制約であり、公理または第三の正規IDE計算式ではない。
+破断または相転移後の復元を主張する場合、 $\tau_0$ は事前固定された基準値、 $\tau_{\mathrm{restored}}$ は同一対象・同一単位・同一Cause-Side規則で評価した、後継構造のうち付加した要素を除く既存の要素の値でなければならない。比較可能性と $\tau_{\mathrm{restored}}<\tau_0$ の双方に証拠がない場合、初期構造への復元を推定しない。この不等式は構造制約であり、公理または第三の正規IDE計算式ではない。
 
 Rは直感的な説明として「遊びの使用率」と近似的に読むこともできる。ただし、正式名称と正式な意味は常に**境界接近比**である。
 

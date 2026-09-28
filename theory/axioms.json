@@ -2,10 +2,10 @@
   "file_metadata": {
     "file": "theory/axioms.json",
     "document_role": "canonical_sole_axiom_nra_principles_ide_calculation_and_boundary_definition",
-    "version": "2.1",
+    "version": "2.3",
     "status": "canonical",
-    "base": "AXIOMS_v1.2_20260424.md",
-    "updated": "2026-07-14 JST",
+    "base": "AXIOMS v2.2",
+    "updated": "2026-09-29 JST",
     "author": "M-Tokuni",
     "precedence_note": "This file defines the sole Nomological Ring Axiom, NRA structural principles, IDE calculation definitions, variable meanings, description domain, boundary-state invariants, irreversible-transition principles, and structural-testimony rules. Implementation code, comments, examples, and AI-generated explanations must not override it."
   },
@@ -16,7 +16,7 @@
       "name": "Intensional Dynamics Engine",
       "abbreviation": "IDE"
     },
-    "version": "2.1",
+    "version": "2.3",
     "description": "A structural framework describing existence as continuous generation and state transition, with structural play as the persistence condition and boundary approach as a historical process."
   },
   "precedence_order": [
@@ -66,8 +66,11 @@
     "tau_non_spontaneous_recovery": {
       "id": "NRA-IDE-PRINCIPLE-TAU",
       "type": "structural_principle_not_axiom",
-      "closed_interval_rule": "Within a closed operational interval without external replenishment, tau is non-increasing.",
-      "replenishment_rule": "Increase of tau arises only through exogenous replenishment, not spontaneous reversal."
+      "closed_interval_rule": "Within a closed operational interval without the addition of a structural element, tau is non-increasing.",
+      "replenishment_rule": "Increase of tau arises only through the addition of a structural element, not spontaneous reversal. Addition does not restore the absorption thickness of existing structural elements. The absorption thickness of an added element is determined by Cause-Side measurement at the time of addition. Thickness loss and residual deviation of existing structural elements do not decrease through addition. The rule combining the thicknesses of existing and added elements is fixed before evaluation begins.",
+      "removal_rule": "Planned removal of an undamaged structural element (removal of a structural element) is not degradation. Removal decreases absorption thickness but is not counted as degradation. Returning a removed element is treated anew as the addition of a structural element.",
+      "residual_deviation_rule": "The irreversible component of accumulated deviation (residual deviation) does not decrease during an evaluation. Only the reversible component of accumulated deviation may decrease with the passage of time alone. If a straightening operation forces a deformation back, that evaluation ends and the evaluation is redeclared.",
+      "dynamic_tau_rule": "When dynamic tau is used, each increase or decrease must be identified as a decrease of effective thickness, an operational effective gate width, or the addition or removal of a structural element. A temporary thickness reduction caused by an action or condition is not subtracted from effective thickness; it is counted as the reversible component of accumulated deviation. A change of the declared thickness by a new observation is not an increase during the evaluation; it is redeclared as the next evaluation snapshot."
     },
     "restoration_degradation": {
       "id": "NRA-IDE-PRINCIPLE-RESTORATION",
@@ -75,8 +78,9 @@
       "constraint": "tau_restored < tau_0",
       "constraint_role": "canonical constraint, not an axiom and not a third canonical IDE formula system",
       "baseline_definition": "tau_0 is the pre-transition baseline fixed in advance.",
-      "restored_definition": "tau_restored is the successor structure's absorption thickness evaluated after an exogenous restoration operation using the same subject, unit, and Cause-Side measurement rule.",
-      "evidence_rule": "A restoration claim requires evidence of both comparability and tau_restored < tau_0. Without that evidence, restoration to the initial structure must not be inferred."
+      "restored_definition": "tau_restored is the absorption thickness of the existing elements of the successor structure, excluding elements added by the addition of structural elements, evaluated after an operation intended for restoration using the same subject, unit, and Cause-Side measurement rule.",
+      "evidence_rule": "A restoration claim requires evidence of both comparability and tau_restored < tau_0. Without that evidence, restoration to the initial structure must not be inferred.",
+      "addition_note": "Even if the addition of structural elements makes the absorption thickness of the whole configuration exceed tau_0, this is not restoration to the initial structure."
     }
   },
   "ide_structural_definitions": {
@@ -84,7 +88,9 @@
       "id": "IDE-DEF-DELTA-TAU",
       "type": "ide_structural_definition_not_axiom",
       "note": "As long as generation continues, history accumulates within the structure. That accumulation is delta, and the structural margin that receives it is tau.",
-      "_boundary_note": "Delta is not a mere instantaneous value. Tau is not a time constant, semantic tolerance, quality score, or similarity width."
+      "_boundary_note": "Delta is not a mere instantaneous value. Tau is not a time constant, semantic tolerance, quality score, or similarity width.",
+      "delta_composition": "Accumulated deviation is the deviation measured from a reference state fixed before evaluation begins, in the direction of the declared rupture. It consists of a reversible component, which returns toward the reference when the action is removed, and an irreversible component (residual deviation), which remains after the action is removed.",
+      "reference_rule": "The reference state is not reset during an evaluation, so residual deviation left by past events remains contained in the present accumulated deviation. The reference may be redeclared only between evaluations."
     }
   },
   "ide_canonical_formula_systems": {
@@ -165,7 +171,8 @@
         "discarded output",
         "Effect-Side reverse estimation",
         "analogy-based substitution"
-      ]
+      ],
+      "composition": "reversible component + irreversible component (residual deviation); see ide_structural_definitions.historical_accumulation_and_absorption_thickness"
     },
     "tau": {
       "symbol": "τ",
@@ -501,6 +508,15 @@
   "cause_effect_separation": {
     "rule": "Cause-Side observations and design-fixed transformations may determine delta, tau, and R. Effect-Side semantic evaluation, output ranking, generated text, and prior discarded output must not update them.",
     "reverse_flow": "forbidden",
+    "evaluation_output_position": "R, the canonical state, and the irreversible latch are neither Cause-Side observations nor Effect-Side artifacts. They are evaluation outputs computed from Cause-Side inputs by pre-fixed rules, usable for audit, structural testimony, state classification, and pre-fixed physical-control commands.",
+    "reverse_derivation": {
+      "prohibited_means": ["automatic", "manual", "human review", "authorization", "version update"],
+      "A_authority_backflow": "A path from Effect-Side to a Cause-Side value, threshold, state, irreversible latch, rule, transformation input, update ground, or provenance. Prohibited.",
+      "B_gauge_self_adjustment": "A path from an evaluation output (including its moving averages and aggregates) to the reference, transformation rule, thresholds, or effective gate width of the same evaluation target, including paths across steps and paths returning through another evaluation target, whether widening or narrowing. Prohibited.",
+      "other_target_output_rule": "An evaluation output of another evaluation target may enter the thresholds or effective gate width of one's own evaluation target only in the safe-side direction (lowering thresholds, narrowing gate widths) and only when no path returns one's own evaluation outputs to that other target. The existence of the path and its rule are fixed before evaluation begins.",
+      "judgment_basis": "Judged by the origin and rewrite target of the path, not by the name of the symbol used. An update of state by the physical law of the target structure itself is not reverse derivation.",
+      "classification_table_ref": "theory/SANDWICH_ARCH.md#8.4"
+    },
     "cause_side_update_rule": "New authorized Cause-Side observations may create the next evaluation snapshot.",
     "immutable_per_evaluation": [
       "update authority",
@@ -580,6 +596,27 @@
     "conformance_gate": "Location alone does not confer normative status. The implementation must pass conformance tests against theory/AXIOMS.md and theory/axioms.json before it is treated as normative."
   },
   "revision_history": {
+    "v2.3": {
+      "date": "2026-09-29 JST",
+      "base": "AXIOMS v2.2",
+      "changes": [
+        "Defined the addition of a structural element as the only route by which tau increases, and the removal of a structural element as not degradation",
+        "Limited residual deviation to non-decrease during an evaluation; straightening requires redeclaration",
+        "Extended the dynamic-tau classification: temporary thickness reduction is counted as the reversible component; a change of declared thickness is the next evaluation snapshot",
+        "Defined tau_restored as the thickness of existing elements excluding added elements"
+      ]
+    },
+    "v2.2": {
+      "date": "2026-09-28 JST",
+      "base": "AXIOMS v2.1",
+      "changes": [
+        "Defined accumulated deviation as a reversible component plus an irreversible component (residual deviation), measured from a reference state fixed before evaluation (definition content changed)",
+        "Prohibited resetting the reference state during an evaluation; redeclaration only between evaluations",
+        "Extended non-spontaneous recovery to residual deviation",
+        "Defined R, canonical state, and irreversible latch as evaluation outputs",
+        "Added reverse derivation B (self-adjustment of the gauge) and the safe-side rule for another target's evaluation outputs"
+      ]
+    },
     "v2.1": {
       "date": "2026-07-10 JST",
       "base": "AXIOMS_v1.2_20260424.md",

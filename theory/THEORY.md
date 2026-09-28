@@ -82,6 +82,8 @@ $$
 
 $\delta$ と $\tau$ は有限値でなければならない。
 
+$\delta$ は、評価前に固定した基準から測った可逆成分と不可逆成分（残留ズレ）とから成る（theory/AXIOMS.md §4）。
+
 ---
 
 ### English
@@ -107,6 +109,8 @@ $$
 $$
 
 Both $\delta$ and $\tau$ must be finite.
+
+$\delta$ consists of a reversible component and an irreversible component (residual deviation), both measured from a reference fixed before evaluation (theory/AXIOMS.md §4).
 
 The Primary Formula is a canonical calculation system of IDE, not an additional axiom. The IDE Secondary Formula is the Dual-Fluctuation Formula defined below. Every other equation is an IDE-derived, auxiliary, or complementary formula and must not become a third canonical IDE formula system.
 
@@ -378,6 +382,8 @@ $$
 
 Cause-Side全体は時間的に更新不能ではない。権限ある新規Cause-Side観測は次の評価スナップショットを形成できる。各評価中は更新権限、更新経路、出所、対象、単位、観測時刻、変換規則、閾値規則、評価スナップショットを固定し、Effect-Sideからの書換えを禁止する。
 
+R、正規状態、不可逆ラッチは、Cause-Side観測でもEffect-Side生成物でもない評価出力である。同じ評価対象の基準、変換規則、閾値、有効ゲート幅へ戻してはならない（逆導出B）。定義は theory/AXIOMS.md §14 による。
+
 ---
 
 ### English
@@ -400,6 +406,8 @@ $$
 Even an LLM output that has been validated, selected, or permitted by Layer 03 remains Effect-Side.
 
 Cause-Side as a whole is not temporally immutable. Authorized new Cause-Side observations may form the next evaluation snapshot. During each evaluation, update authority, update route, provenance, target, unit, observation time, transformation rule, threshold rule, and snapshot remain fixed and cannot be rewritten from Effect-Side.
+
+$R$, the canonical state, and the irreversible latch are evaluation outputs, neither Cause-Side observations nor Effect-Side artifacts. They must not be returned to the reference, transformation rule, thresholds, or effective gate width of the same evaluation target (reverse derivation B). The definitions follow theory/AXIOMS.md §14.
 
 ---
 
@@ -451,7 +459,7 @@ $\tau_{\mathrm{upper}}$ と $\tau_{\mathrm{lower}}$ は、動的評価に使用�
 
 これらの変化は、基礎となる真の吸収厚み $\tau$ が自然回復または自然増加したことを意味しない。
 
-閉じた運用区間における真の $\tau$ は、外生補充なしに自発的増加しない。
+閉じた運用区間における真の $\tau$ は、構造要素の付加なしに増加しない。
 
 この再帰計算は、 $\alpha_u$ 、 $\alpha_l$ 、 $h_{\mathrm{upper}}$ 、 $h_{\mathrm{lower}}$ 、初期EMA、領域規則を事前固定した後、評価区間内で閉じる。
 
@@ -503,7 +511,7 @@ $\tau_{\mathrm{upper}}$ and $\tau_{\mathrm{lower}}$ are side-specific effective 
 
 Their change does not mean that the underlying true absorption thickness $\tau$ has naturally recovered or increased.
 
-Within a closed operational interval, true $\tau$ does not spontaneously increase without exogenous replenishment.
+Within a closed operational interval, true $\tau$ does not increase without the addition of a structural element.
 
 The recurrence is computationally closed within an evaluation interval only after $\alpha_u$, $\alpha_l$, $h_{\mathrm{upper}}$, $h_{\mathrm{lower}}$, initial EMA values, and domain rules have been fixed in advance.
 
@@ -701,7 +709,7 @@ $\tau$ は時間定数ではない。
 
 $\tau$ は、蓄積ズレを受け止める構造的な遊びの厚みである。
 
-閉じた運用区間では、外生補充なしに自然回復せず、 $\tau$ は非増加である。
+閉じた運用区間では、 $\tau$ は自然回復せず非増加である。 $\tau$ が増えるのは、構造要素の付加による場合だけである。
 
 次の積分式は、この原則を表すドメイン固有のIDE補助モデルであり、公理または正規IDE計算式ではない。
 
@@ -721,7 +729,7 @@ $$
 
 の場合に限り、 $\tau(t_2)<\tau(t_1)$ となる。
 
-一度破断または不可逆遷移へ達した構造は、外部補充があっても初期構造へ戻ったと推定しない。
+一度破断または不可逆遷移へ達した構造は、構造要素の付加があっても初期構造へ戻ったと推定しない。
 
 $$
 \tau_{\mathrm{restored}} < \tau_0
@@ -737,7 +745,7 @@ $\tau$ is not a time constant.
 
 It is the structural thickness of play that absorbs accumulated deviation.
 
-Within a closed operational interval, it does not naturally recover without exogenous replenishment, and $\tau$ is non-increasing.
+Within a closed operational interval, it does not naturally recover, and $\tau$ is non-increasing. $\tau$ increases only through the addition of a structural element.
 
 The following integral equation is a domain-specific IDE auxiliary model of this principle, not an axiom or canonical IDE formula system.
 
@@ -757,7 +765,7 @@ $$
 
 does $\tau(t_2)<\tau(t_1)$ hold over $[t_1,t_2]$.
 
-A structure that has reached rupture or irreversible transition must not be inferred to have returned to its initial structure after external replenishment.
+A structure that has reached rupture or irreversible transition must not be inferred to have returned to its initial structure after the addition of structural elements.
 
 $$
 \tau_{\mathrm{restored}} < \tau_0

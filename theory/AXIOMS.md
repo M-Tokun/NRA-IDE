@@ -1,17 +1,17 @@
-# AXIOMS_v2.1.md
+# AXIOMS_v2.3.md
 ## NRA-IDE 律環公理・解釈境界レジストリ
 ### Nomological Ring Axioms / Intensional Dynamics Engine
 
 **著者 / Author:** M-Tokuni  
 **プロジェクト / Project:** NRA-IDE  
-**版 / Version:** 2.1  
-**基準旧版 / Base:** AXIOMS_v1.2_20260424.md  
+**版 / Version:** 2.3  
+**基準旧版 / Base:** AXIOMS v2.2（v2.2の基準旧版：AXIOMS v2.1）  
 **状態 / Status:** 正規版 / Canonical  
 **位置付け / Role:** 唯一公理・NRA構造原則・IDE計算定義・境界状態・不可逆遷移・構造証言の正規文書
 
 ---
 
-# 上段：AXIOMS v2.1 正規本文
+# 上段：AXIOMS v2.3 正規本文
 
 ---
 
@@ -140,6 +140,14 @@ That accumulation is \(\delta\), and the structural margin that receives it is \
 Any generative structure possesses deviation accumulated through history.
 
 Structural state is described by the relation between accumulated deviation and absorption thickness.
+
+蓄積ズレは、評価開始前に固定した基準状態から、宣言した破断方向へ測ったズレである。作用を除けば基準側へ戻る可逆成分と、作用を除いても残る不可逆成分（残留ズレ）とから成る。
+
+基準状態は評価中に付け直さない。基準を動かさずに測ることで、過去の事象が残した残留ズレは現在の蓄積ズレに含まれ続ける。蓄積ズレが履歴を伴うとは、この意味である。基準の再宣言は、評価と評価の間でのみ許す。
+
+Accumulated deviation is the deviation measured from a reference state fixed before evaluation begins, in the direction of the declared rupture. It consists of a reversible component, which returns toward the reference when the action is removed, and an irreversible component (residual deviation), which remains after the action is removed.
+
+The reference state is not reset during an evaluation. Because the reference is not moved, residual deviation left by past events remains contained in the present accumulated deviation. This is what it means for accumulated deviation to carry history. The reference may be redeclared only between evaluations.
 
 ### 解釈境界コメント
 
@@ -366,9 +374,9 @@ Fail-Closed is not a canonical state name but an operational principle that supp
 
 ## 7. NRA-IDE構造原則：τ非自然回復 / NRA-IDE Structural Principle: Non-Spontaneous Tau Recovery
 
-外部補充のない閉じた運用区間において、\(\tau\) は時間とともに増加しない。
+構造要素の付加のない閉じた運用区間において、\(\tau\) は時間とともに増加しない。
 
-Within a closed operational interval without external replenishment, \(\tau\) does not increase with time.
+Within a closed operational interval without the addition of a structural element, \(\tau\) does not increase with time.
 
 この原則を計算上表現するIDE補助モデルとして、次の $\tau$ 状態遷移式を使用できる。
 
@@ -399,19 +407,27 @@ Therefore \(\tau\) is non-increasing in the closed interval. It strictly decreas
 
 This integral equation and the choice of $f$ are neither the Nomological Ring Axiom nor a canonical IDE formula system; they are domain-specific auxiliary models. They must remain consistent with the principle that tau does not increase spontaneously within the closed interval.
 
-\(\tau\) の増加は、自然回復ではなく外生的な補充操作によってのみ生じる。
+\(\tau\) の増加は、自然回復ではなく、構造要素の付加によってのみ生じる。構造要素の付加とは、評価対象へ新しい構造要素を加えることをいう。付加は既存の構造要素の吸収厚みを回復させるものではない。加えた要素の吸収厚みは、加えた時点のCause-Side測定で定める。既存の構造要素の厚み損失と残留ズレは、付加によって減少しない。既存の要素と加えた要素の厚みを合わせる規則は、評価開始前に固定する。
 
-したがって、減少と補充は同一過程として扱わない。
+壊れていない構造要素を計画的に外すこと（構造要素の除去）は劣化ではない。除去は吸収厚みを減らすが、劣化として計上しない。除去した要素を戻す場合は、改めて構造要素の付加として扱う。
 
-Increase of \(\tau\) arises only through exogenous replenishment, not spontaneous reversal.
+したがって、減少と付加は同一過程として扱わない。
 
-Therefore depletion and replenishment are not treated as the same process.
+Increase of \(\tau\) arises only through the addition of a structural element, not spontaneous reversal. Addition of a structural element means adding a new structural element to the evaluation target. Addition does not restore the absorption thickness of existing structural elements. The absorption thickness of an added element is determined by Cause-Side measurement at the time of addition. Thickness loss and residual deviation of existing structural elements do not decrease through addition. The rule combining the thicknesses of existing and added elements is fixed before evaluation begins.
+
+Planned removal of an undamaged structural element (removal of a structural element) is not degradation. Removal decreases absorption thickness but is not counted as degradation. Returning a removed element is treated anew as the addition of a structural element.
+
+Therefore depletion and addition are not treated as the same process.
+
+蓄積ズレの不可逆成分（残留ズレ）も、評価中に減少しない。時間経過だけで減少してよいのは、蓄積ズレの可逆成分だけである。伸び・曲がりを力で戻す矯正を行った場合は、その評価を終え、評価を宣言し直す。
+
+The irreversible component of accumulated deviation (residual deviation) likewise does not decrease during an evaluation. Only the reversible component of accumulated deviation may decrease with the passage of time alone. If a straightening operation forces a deformation back, that evaluation ends and the evaluation is redeclared.
 
 ### 解釈境界コメント
 
 閉じた運用区間で、\(\tau\) が自然に回復すると解釈してはならない。
 
-動的\(\tau\)を用いる場合も、その増加が真の吸収厚みの増加なのか、運用上の有効ゲート幅なのか、外生補充なのかを明示しなければならない。
+動的\(\tau\)を用いる場合も、その増減が実効厚みの減少なのか、運用上の有効ゲート幅なのか、構造要素の付加または除去なのかを明示しなければならない。作用や条件による一時的な厚みの減少は、実効厚みから差し引かず、蓄積ズレの可逆成分として数える。新しい観測で宣言厚みが変わる場合は、評価中の増加として扱わず、次の評価スナップショットとして宣言し直す。
 
 ---
 
@@ -425,11 +441,15 @@ $$
 
 This inequality is a canonical constraint of the restoration-degradation principle. It is neither the Nomological Ring Axiom nor a third canonical IDE formula system alongside the Primary and Secondary Formulas.
 
-一度、破断または相転移に至った構造は、外部補充を受けても初期値 \(\tau_0\) を回復しない。
+一度、破断または相転移に至った構造は、構造要素の付加を受けても初期値 \(\tau_0\) を回復しない。
 
-ここで、 $\tau_0$ は遷移前に固定された基準吸収厚み、 $\tau_{\mathrm{restored}}$ は外生的な復元操作後に、同一対象・同一単位・同一Cause-Side測定規則で評価した後継構造の吸収厚みである。復元を主張するには、この比較可能性と $\tau_{\mathrm{restored}}<\tau_0$ の双方を立証しなければならない。立証できない場合、初期構造への復元を推定してはならない。
+ここで、 $\tau_0$ は遷移前に固定された基準吸収厚み、 $\tau_{\mathrm{restored}}$ は復元を目的とする操作の後に、同一対象・同一単位・同一Cause-Side測定規則で評価した後継構造のうち、構造要素の付加で加えた要素を除く既存の要素の吸収厚みである。復元を主張するには、この比較可能性と $\tau_{\mathrm{restored}}<\tau_0$ の双方を立証しなければならない。立証できない場合、初期構造への復元を推定してはならない。
 
-A structure that has once reached rupture or phase transition does not recover its initial $\tau_0$ through external replenishment. Here, $\tau_0$ is the pre-transition baseline fixed in advance, and $\tau_{\mathrm{restored}}$ is the successor structure's absorption thickness evaluated after an exogenous restoration operation using the same subject, unit, and Cause-Side measurement rule. A restoration claim requires evidence of both comparability and $\tau_{\mathrm{restored}}<\tau_0$; without that evidence, restoration to the initial structure must not be inferred.
+構造要素の付加によって構成全体の吸収厚みが \(\tau_0\) を上回ることがあっても、それは初期構造への復元ではない。
+
+A structure that has once reached rupture or phase transition does not recover its initial $\tau_0$ through the addition of structural elements. Here, $\tau_0$ is the pre-transition baseline fixed in advance, and $\tau_{\mathrm{restored}}$ is the absorption thickness of the existing elements of the successor structure, excluding elements added by the addition of structural elements, evaluated after an operation intended for restoration using the same subject, unit, and Cause-Side measurement rule. A restoration claim requires evidence of both comparability and $\tau_{\mathrm{restored}}<\tau_0$; without that evidence, restoration to the initial structure must not be inferred.
+
+Even if the addition of structural elements makes the absorption thickness of the whole configuration exceed $\tau_0$, this is not restoration to the initial structure.
 
 ### 解釈境界コメント
 
@@ -881,6 +901,36 @@ Effect-Sideの出力評価を、Cause-Sideの構造変数へ逆流させては�
 
 これは、NRA-IDEの因果方向を保つための必須境界である。
 
+### 評価出力の位置
+
+R、正規状態、不可逆ラッチは、Cause-Side観測そのものでもEffect-Side生成物でもない。Cause-Side入力から事前固定規則で計算した評価出力である。評価出力は、監査、構造証言、状態分類、および事前固定された物理制御の指令に使える。
+
+R, the canonical state, and the irreversible latch are neither Cause-Side observations nor Effect-Side artifacts. They are evaluation outputs computed from Cause-Side inputs by pre-fixed rules. Evaluation outputs may be used for audit, structural testimony, state classification, and pre-fixed physical-control commands.
+
+### 逆導出の定義
+
+次の経路を逆導出とし、自動、手動、人間レビュー、承認、版更新のいずれを介しても禁止する。
+
+- 逆導出A（権威の逆流）：Effect-Sideから、Cause-Sideの値、閾値、状態、不可逆ラッチ、規則、変換入力、更新根拠、出所への経路。
+- 逆導出B（計器の自己調整）：評価出力（その移動平均・集約を含む）から、同じ評価対象の基準、変換規則、閾値、有効ゲート幅への経路。段をまたぐ経路と、他の評価対象を経由して戻る経路を含み、広げる向きか狭める向きかを問わない。
+
+他の評価対象の評価出力を、自らの評価対象の閾値または有効ゲート幅へ入れる経路は、安全側の向き（閾値を下げる、ゲート幅を狭める）に限り、かつ自らの評価出力がその評価対象へ戻る経路がない場合に限り許す。この経路の有無と規則は、評価開始前に固定する。
+
+逆導出かどうかは、使った記号の名前ではなく、経路の出所と書き換え先で判定する。対象構造そのものの物理法則による状態の更新（例：§7のτ状態遷移式）は、書き換え先が対象構造であり、逆導出ではない。
+
+語義の分類表は`theory/SANDWICH_ARCH.md`§8.4に置く。定義は本節による。
+
+The following paths are reverse derivation and are prohibited, whether through automatic, manual, human-reviewed, authorized, or versioned means.
+
+- Reverse derivation A (authority backflow): a path from Effect-Side to a Cause-Side value, threshold, state, irreversible latch, rule, transformation input, update ground, or provenance.
+- Reverse derivation B (self-adjustment of the gauge): a path from an evaluation output (including its moving averages and aggregates) to the reference, transformation rule, thresholds, or effective gate width of the same evaluation target. It includes paths across steps and paths returning through another evaluation target, whether widening or narrowing.
+
+A path that feeds an evaluation output of another evaluation target into the thresholds or effective gate width of one's own evaluation target is permitted only in the safe-side direction (lowering thresholds, narrowing gate widths), and only when no path returns one's own evaluation outputs to that other target. The existence of such a path and its rule are fixed before evaluation begins.
+
+Whether a path is reverse derivation is judged by its origin and rewrite target, not by the name of the symbol used. An update of state by the physical law of the target structure itself (for example, the tau state-transition equation in §7) rewrites the target structure and is not reverse derivation.
+
+The classification table of meanings is placed in `theory/SANDWICH_ARCH.md` §8.4. The definitions follow this section.
+
 ---
 
 ## 15. 現場固有物理モデル・現場固有値と不変原則の分離
@@ -903,7 +953,7 @@ NRA-IDEは、あらゆる対象の物理現象を単一の方程式によって�
 - 対象領域の支配方程式または実証された変換規則
 - 蓄積ズレ \(\delta\) の算定規則
 - 吸収厚み \(\tau\) の算定規則
-- 蓄積、消耗、補充および復元を区別する規則
+- 蓄積、消耗、構造要素の付加および復元を区別する規則
 - 適用可能な定義域
 - 境界閾値の具体値と、その値を支える根拠
 - 観測不能、欠測および計算不能時の処理
@@ -1003,7 +1053,7 @@ The role of IDE is to connect Cause-Side structural quantities obtained from tho
 文書、コード、コメント、例示、AI説明が競合した場合、次の順で解決する。
 
 ```text
-theory/AXIOMS.md (AXIOMS_v2.1)
+theory/AXIOMS.md (AXIOMS_v2.3)
   > theory/axioms.json
   > theory/NRA-IDE_Foundational_Thesis_Bilingual.md
   > theory/SANDWICH_ARCH.md
@@ -1033,6 +1083,89 @@ theory/AXIOMS.md (AXIOMS_v2.1)
 配置名だけでは正規性を取得しない。正規参照実装として扱うには、本書および`theory/axioms.json`との適合試験に合格しなければならない。適合前の既存実装を、配置だけを理由に正規実装とみなしてはならない。
 
 The normative reference implementation source is located at `nra-core/foundations/NRA-IDE_Architecture_public.py`. The file at `docs/NRA-IDE_Architecture_public.py` is a generated public mirror, not an independent normative source. Generation and SHA-256 equality checks must keep the two synchronized. Normative status additionally requires passing conformance tests against this document and `theory/axioms.json`; location alone does not confer conformance.
+
+---
+
+# 下段：AXIOMS v2.2 からの変更点
+
+---
+
+## 1. 変更の性質
+
+v2.3は、唯一の律環公理、NRA構造原則、一次式 \(R=\delta/\tau\)、定義域、閾値の順序、正規境界状態を変更しない。
+
+v2.3は、吸収厚みが増える経路を「構造要素の付加」の一つに定め、その対として「構造要素の除去」を定める。v2.2までの「外部補充」「外生的な補充操作」「外生補充」「外生的な補修事象」「外生的な復元操作」は、既存の厚みや残留ズレが元に戻るとも読めたため、語を改めた。
+
+---
+
+## 2. 主な追加点
+
+### 2.1 構造要素の付加と除去を定義（§7）
+
+付加は、既存の構造要素の吸収厚みを回復させない。加えた要素の吸収厚みは加えた時点のCause-Side測定で定め、既存の要素と加えた要素の厚みを合わせる規則は評価開始前に固定する。壊れていない要素を計画的に外す除去は、劣化として計上しない。
+
+### 2.2 残留ズレの扱いを限定（§7）
+
+v2.2は残留ズレを「外生的な補修事象がない限り減少しない」としていた。v2.3は「評価中に減少しない」とし、伸び・曲がりを力で戻す矯正を行った場合は、評価を宣言し直すと定める。
+
+### 2.3 動的τの区分を拡張（§7 解釈境界コメント）
+
+作用や条件による一時的な厚みの減少は、実効厚みから差し引かず、蓄積ズレの可逆成分として数える。新しい観測で宣言厚みが変わる場合は、評価中の増加として扱わず、次の評価スナップショットとして宣言し直す。
+
+### 2.4 \(\tau_{\mathrm{restored}}\) の範囲を明確化（§8）
+
+\(\tau_{\mathrm{restored}}\) を、構造要素の付加で加えた要素を除く、既存の要素の吸収厚みとした。付加によって構成全体の吸収厚みが \(\tau_0\) を上回っても、初期構造への復元ではない。
+
+---
+
+## 3. 変更していないもの
+
+- 唯一の律環公理「存在は生成である。」
+- \(R=\delta/\tau\)、\(\tau>0\)、\(\tau=0\)は定義域外
+- 閾値の順序 \(R_{\mathrm{warn}}<R_{\mathrm{handoff}}<R_{\mathrm{irrev}}<1.0\) と正規境界状態
+- 蓄積ズレの構成と基準不動（§4）
+- 逆導出A・Bの定義と、他の評価対象の評価出力の扱い（§14）
+- 復元劣化の制約 \(\tau_{\mathrm{restored}}<\tau_0\) と、比較可能性の立証要件（§8）
+
+---
+
+# 下段：AXIOMS v2.1 からの変更点
+
+---
+
+## 1. 変更の性質
+
+v2.2は、唯一の律環公理、NRA構造原則、一次式 \(R=\delta/\tau\)、定義域、閾値の順序、正規境界状態を変更しない。
+
+v2.2は、蓄積ズレの定義内容を変更する。v2.1は蓄積ズレを「履歴を伴う蓄積ズレ」とだけ定め、減少し得るかどうかを定めていなかった。v2.2は、蓄積ズレが可逆成分と残留ズレから成ることを定める。これにより、蓄積ズレは作用を除けば減少する成分を含むことになる。
+
+v2.2は、評価出力の位置と逆導出Bの禁止を追加する。
+
+---
+
+## 2. 主な追加点
+
+### 2.1 蓄積ズレの構成と基準不動を定義（§4）
+
+FORMULA.md §4.7は蓄積ズレの差分の符号を判定条件にしており、蓄積ズレの減少を排除していない。v2.1の定義はこれと両立するかどうかを示していなかった。v2.2は、基準状態を評価中に付け直さないことで、残留ズレとして履歴が蓄積ズレに保持されると定める。
+
+### 2.2 残留ズレの非自然回復を追加（§7）
+
+v2.1のτ非自然回復を、蓄積ズレの不可逆成分へ及ぼす。時間経過だけで減少してよいのは、蓄積ズレの可逆成分だけである。
+
+### 2.3 評価出力の位置と逆導出Bを追加（§14）
+
+v2.1は逆導出を、Effect-SideからCause-Sideへの経路だけで定めていた。そのため、評価出力が同じ評価対象の計器を動かす経路を、禁止とも許可とも判定できなかった。v2.2は、評価出力をCause-Side観測ともEffect-Side生成物とも異なる区分として定め、評価出力から同じ評価対象の計器への経路を逆導出Bとして禁止する。他の評価対象の評価出力は、安全側の向きで、閉路がない場合に限り使える。
+
+---
+
+## 3. 変更していないもの
+
+- 唯一の律環公理「存在は生成である。」
+- \(R=\delta/\tau\)、\(\tau>0\)、\(\tau=0\)は定義域外
+- 閾値の順序 \(R_{\mathrm{warn}}<R_{\mathrm{handoff}}<R_{\mathrm{irrev}}<1.0\) と正規境界状態
+- 逆導出A（Effect-SideからCause-Sideへの逆流）の禁止
+- τ非自然回復と外生補充の区別
 
 ---
 
