@@ -81,7 +81,7 @@
 - 英語版：[Temporary Reversible Deviation](./NRA-IDE_Dictionary_EN.md#temporary-reversible-deviation)
 - 記号・固定名： $q^{\mathrm{temp}}_n$ ／ `temporary_reversible_deviation`
 - 型：対象状態（可逆成分 $q_n$ の一部）
-- 意味：作用や条件で一時的に狭まった受け止め幅を、ズレの側に数えた量。条件が去れば0に戻る。定義元：AXIOMS §7 解釈境界コメント（一時的な厚みの減少は可逆成分として数える）
+- 意味：作用や条件で一時的に狭まった受け止め幅を、ズレの側に数えた量。条件が去れば0に戻る。定義元：AXIOMS §7 解釈境界コメント（一時的な厚みの減少は可逆成分として数える）、FORMULA §0.5.3
 - 書き方：実効厚みから差し引かない。 $\mathsf{Alloc}$ で作用に計上し、 $q_n$ に含める
 - 混同注意：「一時的な厚みの減少」と呼んでいた（記号 $\mu_n$ ）。名前は厚みなのに、実際はズレの側に数える量だったため、改名した（2026-09-29）
 - 受け取り方の違い【未確認】：英語の reversible は、熱力学の可逆過程と読まれやすい。ここでは「条件が去れば戻る」の意味
@@ -104,8 +104,8 @@
 - 英語版：[Reversible Deviation](./NRA-IDE_Dictionary_EN.md#reversible-deviation)
 - 記号・固定名： $q_n$ ／ `reversible_deviation`
 - 型：対象状態
-- 意味：蓄積ズレのうち、作用を除けば基準側へ戻る部分。定義元：AXIOMS §4
-- 書き方： $q_n=\sigma(o_n)-p_n$ として定まる（導出文書P5）
+- 意味：蓄積ズレのうち、作用を除けば基準側へ戻る部分。定義元：AXIOMS §4、FORMULA §0.5.3
+- 書き方： $q_n=\sigma(o_n)-p_n$ として定まる（FORMULA §0.5.3、導出文書P5）
 - 混同注意：以前の案では「可逆進入」と呼んでいた。正典の語は「可逆成分」（2026-09-28）
 - 受け取り方の違い【未確認】：「可逆」を「値が戻れば構造も戻る」と読まない。値が戻っても経路履歴は戻らない（導出文書 命題2b）
 - 関連：[残留ズレ](#residual-deviation)、[蓄積ズレ](#accumulated-deviation)
@@ -123,7 +123,7 @@
 - 英語版：[Observation Event](./NRA-IDE_Dictionary_EN.md#observation-event)
 - 記号・固定名： $\mathrm{Ev}_n$ ／ `observation_event`
 - 型：事象の記録（対象・値・単位・出所・時点・不確かさ・順序・観測経路）
-- 意味：更新番号 $n$ の事象。状態を $n-1$ から $n$ へ進める
+- 意味：更新番号 $n$ の事象。状態を $n-1$ から $n$ へ進める。定義元：FORMULA §0.5.2
 - 書き方： $\mathrm{Ev}$ と書く。構造要素の $e$ と大小だけで区別しないため、 $E$ は使わない
 - 混同注意： $E_n$ と要素番号 $e$ が大小だけの区別になっていた（2026-09-29）
 - 関連：[経路履歴](#event-history)、[分解規則](#event-allocation-rule)
@@ -133,7 +133,7 @@
 - 英語版：[Observation Value](./NRA-IDE_Dictionary_EN.md#observation-value)
 - 記号・固定名： $o_n$ ／ `observation_value`
 - 型：Cause-Side入力
-- 意味：Cause-Sideの観測（多変数でよい）。射影規則で蓄積ズレへ移す
+- 意味：Cause-Sideの観測（多変数でよい）。射影規則で蓄積ズレへ移す。定義元：FORMULA §0.5.2
 - 混同注意：以前は $x_n$ と書いていた。FORMULA §5の計算状態 $x$ と字形が同じなので改めた（2026-09-29）
 - 関連：[射影規則](#observation-projection-rule)
 
@@ -268,7 +268,7 @@
 - 英語版：[Active Elements](./NRA-IDE_Dictionary_EN.md#active-elements)
 - 記号・固定名： $\mathsf{Active}_n$ ／ `active_elements`
 - 型：集合
-- 意味：時点 $n$ に評価対象に含まれている構造要素の集合（付加され、まだ除去されていない要素）
+- 意味：時点 $n$ に評価対象に含まれている構造要素の集合（付加され、まだ除去されていない要素）。定義元：FORMULA §0.5.4
 - 混同注意：
   - 瞬間分類 $C_0$ ・連結条件C1〜C4と字体・大小だけの区別になっていたので、分類と条件の側を改名した（2026-09-29）
   - 以前は $\mathcal{C}_n$ と書いていた。AXIOMS v2.4で制約 $C$ が正典の記号になり、装飾だけの区別になったため、構成の側を改名した（2026-09-29）
@@ -279,7 +279,7 @@
 - 英語版：[Thickness Composition Rule](./NRA-IDE_Dictionary_EN.md#thickness-composition-rule)
 - 記号・固定名： $\mathrm{Comp}_\tau$ ／ `thickness_composition_rule`
 - 型：写像（評価前に固定）
-- 意味：要素の厚みから全体の実効厚みを定める規則。 $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)$ 。条件：各引数について非減少、有限・非負・単位を保つ、要素一つならその厚み、全要素0なら0、評価の中で除去を認める場合は要素を外しても値が増えない
+- 意味：要素の厚みから全体の実効厚みを定める規則。 $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)$ 。条件：各引数について非減少、有限・非負・単位を保つ、要素一つならその厚み、全要素0なら0、評価の中で除去を認める場合は要素を外しても値が増えない。定義元：FORMULA §0.5.4
 - 書き方：並列なら和。直列（ $\min$ ）は要素を外すと全体が強くなるので、評価の中で除去を扱わず宣言の変更とする
 - 混同注意：以前は $\Gamma$ と書いていた。FORMULA §5の減衰係数 $\gamma$ と大小だけの区別だったため改めた（2026-09-29）。「要素を外しても値は増えない」を全ての形に課すと直列の構造が表せないことを、条件を足す途中で見つけた（2026-09-29）
 - 関連：[構成](#active-elements)、[構造要素の付加](#structural-element-addition)
@@ -305,7 +305,7 @@
 - 英語版：[Structural Element](./NRA-IDE_Dictionary_EN.md#structural-element)
 - 記号・固定名： $e$ ／ `element_id`
 - 型：添字
-- 意味：評価対象を構成する要素。 $e=0$ は宣言時の構造、 $e\ge1$ は付加した要素。要素ごとに宣言厚み $\tau^{[e]}_0$ と劣化度 $\lambda^{[e]}_n$ を持つ
+- 意味：評価対象を構成する要素。 $e=0$ は宣言時の構造、 $e\ge1$ は付加した要素。要素ごとに宣言厚み $\tau^{[e]}_0$ と劣化度 $\lambda^{[e]}_n$ を持つ。定義元：FORMULA §0.5.4
 - 関連：[構成](#active-elements)、[構造要素の付加](#structural-element-addition)
 
 <a id="structural-element-removal"></a>
@@ -354,7 +354,7 @@
 - 英語版：[Applied Action](./NRA-IDE_Dictionary_EN.md#applied-action)
 - 記号・固定名： $a_n$ ／ `applied_action`
 - 型：対象への入力（観測された物理的事象）
-- 意味：その時点で構造に加わっている作用。受け止め幅を一時的に狭める条件の効果（一時的な可逆成分）もここに計上する
+- 意味：その時点で構造に加わっている作用。受け止め幅を一時的に狭める条件の効果（一時的な可逆成分）もここに計上する。定義元：FORMULA §0.5.3
 - 混同注意：
   - 命題2の事象の前後を $a$ 、 $b$ 、命題4の二つの構造を $\lambda_a$ 、 $\lambda_b$ と書いて、作用と同じ文字を使っていた（2026-09-29）
   - [制約](#external-constraint) $C$ （外部条件）と混同しない。 $C$ は計上先ではなく、その効果が $\Delta\lambda_n$ や計器にだけ現れる場合は $a_n$ に現れない（2026-09-30）
@@ -386,7 +386,7 @@
 - 英語版：[Residual Deviation](./NRA-IDE_Dictionary_EN.md#residual-deviation)
 - 記号・固定名： $p_n$ ／ `residual_deviation`
 - 型：対象状態
-- 意味：蓄積ズレのうち、作用を除いても残る部分（不可逆成分）。評価中に減少しない。定義元：AXIOMS §4・§7
+- 意味：蓄積ズレのうち、作用を除いても残る部分（不可逆成分）。評価中に減少しない。定義元：AXIOMS §4・§7、FORMULA §0.5.3
 - 書き方：後退差分で $p_n=p_{n-1}+\Delta p_n$ 、 $p_n=p_0+\sum_{m=1}^{n}\Delta p_m$
 - 混同注意：デモの residualDebt・ $D_{\mathrm{long}}$ は $R$ から作った量で、残留ズレではない（2026-09-29）
 - 関連：[可逆成分](#reversible-deviation)、[矯正](#straightening)
@@ -415,7 +415,7 @@
 ### 実効厚み（じっこうあつみ）
 - 英語版：[Effective Thickness](./NRA-IDE_Dictionary_EN.md#effective-thickness)
 - 記号： $\tau_n$
-- 意味：一次式で使う、時点 $n$ の構造全体の厚み。構造要素の付加がない限り増えない
+- 意味：一次式で使う、時点 $n$ の構造全体の厚み。構造要素の付加がない限り増えない。定義元：FORMULA §0.5.4
 - 関連：[吸収厚み](#absorption-thickness)、[側別有効ゲート幅](#side-specific-gate-width)
 
 <a id="dominant-side"></a>
@@ -438,7 +438,7 @@
 - 英語版：[Observation Projection Rule](./NRA-IDE_Dictionary_EN.md#observation-projection-rule)
 - 記号・固定名： $\sigma$ ／ `observation_projection_rule`
 - 型：写像（評価前に固定）
-- 意味：観測値を、基準状態から宣言した破断方向へ測ったズレへ移す規則。 $\delta_n=\sigma(o_n)$
+- 意味：観測値を、基準状態から宣言した破断方向へ測ったズレへ移す規則。 $\delta_n=\sigma(o_n)$ 。定義元：FORMULA §0.5.2
 - 混同注意：SANDWICHの射影 $\Pi$ とは別物（2026-09-29）
 - 関連：[射影](#projection)
 
@@ -492,7 +492,7 @@
 - 英語版：[Declared Thickness](./NRA-IDE_Dictionary_EN.md#declared-thickness)
 - 記号・固定名： $\tau_0$ ／ `initial_tau`（参照実装 `DynamicTauEngine` の引数）
 - 型・単位：構造量（Cause-Side）、 $u$
-- 意味：評価開始時（遷移前）の構造全体の吸収厚み。要素が複数なら $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ 。定義元：AXIOMS §7（初期吸収厚み）・§8（基準吸収厚み）
+- 意味：評価開始時（遷移前）の構造全体の吸収厚み。要素が複数なら $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ 。定義元：AXIOMS §7（初期吸収厚み）・§8（基準吸収厚み）、FORMULA §0.5.1・§0.5.4
 - 混同注意：「要素が一つの場合だけの特殊形」と書いたのは正典と食い違っていた（2026-09-29）
 - 関連：[吸収厚み](#absorption-thickness)、[復元後の吸収厚み](#restored-thickness)
 
@@ -586,7 +586,7 @@
 - 英語版：[Evaluation Declaration](./NRA-IDE_Dictionary_EN.md#evaluation-declaration)
 - 記号・固定名： $\mathsf{Decl}$ ／ `evaluation_declaration`
 - 型：宣言（評価前に固定）
-- 意味：計算開始前に固定する約束の組。必須要素は、評価対象と破断様式、単位、観測の種類と出所、閾値、欠測・観測不能の処理、基準状態、射影規則、分解規則、宣言厚み、合成規則。現時点では導出文書が置く前提で、FORMULA §0.5への反映を予定している
+- 意味：計算開始前に固定する約束の組。必須要素は、評価対象と破断様式、単位、観測の種類と出所、閾値、欠測・観測不能の処理、基準状態、射影規則、分解規則、宣言厚み、合成規則。任意要素は、評価の系列と構造連続性 $\omega$ との対応づけ、外部条件（制約 $C$ ）の同定。定義元：FORMULA §0.5.1
 - 混同注意：以前は $\mathcal{D}$ と書いていた（支配側 $D$ と字体だけの区別）（2026-09-29）
 - 関連：[評価スナップショット](#evaluation-snapshot)
 
@@ -627,7 +627,7 @@
 - 英語版：[Event Allocation Rule](./NRA-IDE_Dictionary_EN.md#event-allocation-rule)
 - 記号・固定名： $\mathsf{Alloc}$ ／ `event_allocation_rule`
 - 型：写像（評価前に固定）
-- 意味：観測された一つの変化を、作用・残留ズレの増分・劣化度の増分の**ちょうど一つ**に計上する規則（一変化一計上）。文脈・権限・出所 $\mathrm{ctx}_n$ は計上先ではない
+- 意味：観測された一つの変化を、作用・残留ズレの増分・劣化度の増分の**ちょうど一つ**に計上する規則（一変化一計上）。文脈・権限・出所 $\mathrm{ctx}_n$ は計上先ではない。定義元：FORMULA §0.5.3
 - 混同注意：以前は $\Lambda$ と書いていた（劣化度 $\lambda$ と大小だけの区別）（2026-09-29）
 - 関連：[観測事象](#observation-event)
 
@@ -655,7 +655,7 @@
 - 英語版：[Degradation Fraction](./NRA-IDE_Dictionary_EN.md#degradation-fraction)
 - 記号・固定名： $\lambda^{[e]}_n$ ／ `element_degradation_fraction`（要素が一つの場合は $\lambda_n$ ）
 - 型：対象状態（無次元、 $0\le\lambda\le1$ ）
-- 意味：要素の厚みが失われた割合。 $\tau^{[e]}_n=(1-\lambda^{[e]}_n)\tau^{[e]}_0$ 。評価中に減らない
+- 意味：要素の厚みが失われた割合。 $\tau^{[e]}_n=(1-\lambda^{[e]}_n)\tau^{[e]}_0$ 。評価中に減らない。定義元：FORMULA §0.5.4
 - 書き方：一般の式では要素ごとの $\lambda^{[e]}_n$ を使い、 $\lambda_n$ は要素が一つの式だけで使う
 - 混同注意：要素を複数にした後も、単一要素の $\lambda_n$ ・ $\tau_0$ を全体の状態として使い続け、一次式・補題・命題5へ波及した（2026-09-29）
 - 関連：[構造要素](#structural-element)

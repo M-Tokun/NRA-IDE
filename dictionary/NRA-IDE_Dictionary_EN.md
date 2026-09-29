@@ -109,7 +109,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [構成](./NRA-IDE_Dictionary_JP.md#active-elements)
 - Symbol / fixed name: $\mathsf{Active}_n$ / `active_elements`
 - Type: set
-- Meaning: the set of structural elements included in the evaluation target at step $n$ (added and not yet removed)
+- Meaning: the set of structural elements included in the evaluation target at step $n$ (added and not yet removed). Source: FORMULA §0.5.4
 - Confusion notes:
   - it differed from the instantaneous classification $C_0$ and link conditions C1–C4 only by typeface and case; the classification and the conditions were renamed (2026-09-29)
   - it was formerly written $\mathcal{C}_n$; after AXIOMS v2.4 made constraint $C$ a canonical symbol, the two differed only by decoration, so this side was renamed (2026-09-29)
@@ -132,7 +132,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [作用](./NRA-IDE_Dictionary_JP.md#applied-action)
 - Symbol / fixed name: $a_n$ / `applied_action`
 - Type: input to the target (an observed physical event)
-- Meaning: the action applied to the structure at that step. The effect of conditions that temporarily narrow the receiving width (the temporary reversible deviation) is also allocated here
+- Meaning: the action applied to the structure at that step. The effect of conditions that temporarily narrow the receiving width (the temporary reversible deviation) is also allocated here. Source: FORMULA §0.5.3
 - Confusion notes:
   - before/after in Proposition 2 were written $a$ , $b$ , and the two structures in Proposition 4 $\lambda_a$ , $\lambda_b$ , reusing the letter of the action (2026-09-29)
   - do not confuse with the [Constraint](#external-constraint) $C$ (an external condition). $C$ is not an allocation target; when its effect appears only in $\Delta\lambda_n$ or in the gauge, it does not appear in $a_n$ (2026-09-30)
@@ -211,7 +211,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [宣言厚み](./NRA-IDE_Dictionary_JP.md#declared-thickness)
 - Symbol / fixed name: $\tau_0$ / `initial_tau` (argument of `DynamicTauEngine` in the reference implementation)
 - Type / unit: structural quantity (Cause-Side); $u$
-- Meaning: the absorption thickness of the whole structure at the start of evaluation (before transition). With several elements, $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ . Source: AXIOMS §7 (initial absorption thickness), §8 (baseline absorption thickness)
+- Meaning: the absorption thickness of the whole structure at the start of evaluation (before transition). With several elements, $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ . Source: AXIOMS §7 (initial absorption thickness), §8 (baseline absorption thickness); FORMULA §0.5.1, §0.5.4
 - Confusion notes: writing it as "a special form for a single element only" diverged from the canon (2026-09-29)
 - Related: [Absorption Thickness](#absorption-thickness), [Restored Absorption Thickness](#restored-thickness)
 
@@ -220,7 +220,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [劣化度](./NRA-IDE_Dictionary_JP.md#degradation-fraction)
 - Symbol / fixed name: $\lambda^{[e]}_n$ / `element_degradation_fraction` ( $\lambda_n$ for a single element)
 - Type: target state (dimensionless, $0\le\lambda\le1$ )
-- Meaning: the fraction of an element's thickness that has been lost; $\tau^{[e]}_n=(1-\lambda^{[e]}_n)\tau^{[e]}_0$ . It does not decrease during an evaluation
+- Meaning: the fraction of an element's thickness that has been lost; $\tau^{[e]}_n=(1-\lambda^{[e]}_n)\tau^{[e]}_0$ . It does not decrease during an evaluation. Source: FORMULA §0.5.4
 - Notation: general formulas use per-element $\lambda^{[e]}_n$ ; $\lambda_n$ is used only in single-element formulas
 - Confusion notes: after elements became plural, the single-element $\lambda_n$ and $\tau_0$ continued to be used as the whole state, which spread to the primary formula, the lemmas, and Proposition 5 (2026-09-29)
 - Related: [Structural Element](#structural-element)
@@ -237,7 +237,7 @@ Temporary variables used only inside an implementation (for example, the interna
 ### Effective Thickness
 - Japanese: [実効厚み](./NRA-IDE_Dictionary_JP.md#effective-thickness)
 - Symbol: $\tau_n$
-- Meaning: the thickness of the whole structure at step $n$ used in the primary formula. It does not increase without the addition of a structural element
+- Meaning: the thickness of the whole structure at step $n$ used in the primary formula. It does not increase without the addition of a structural element. Source: FORMULA §0.5.4
 - Related: [Absorption Thickness](#absorption-thickness), [Side-Specific Effective Gate Width](#side-specific-gate-width)
 
 <a id="entropy-quantity"></a>
@@ -264,7 +264,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [評価宣言](./NRA-IDE_Dictionary_JP.md#evaluation-declaration)
 - Symbol / fixed name: $\mathsf{Decl}$ / `evaluation_declaration`
 - Type: declaration (fixed before evaluation)
-- Meaning: the set of commitments fixed before computation begins. Required elements: target and rupture mode, unit, observations and provenance, thresholds, handling of missing or unobservable data, reference state, projection rule, allocation rule, declared thickness, composition rule. At present these are premises of the derivation document, to be reflected in FORMULA §0.5
+- Meaning: the set of commitments fixed before computation begins. Required elements: target and rupture mode, unit, observations and provenance, thresholds, handling of missing or unobservable data, reference state, projection rule, allocation rule, declared thickness, composition rule. Optional elements: the mapping of the sequence of evaluations to structural continuity $\omega$ , and the identification of external conditions (constraint $C$ ). Source: FORMULA §0.5.1
 - Confusion notes: formerly written $\mathcal{D}$ , differing only by typeface from the dominant side $D$ (2026-09-29)
 - Related: [Evaluation Snapshot](#evaluation-snapshot)
 
@@ -308,7 +308,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [分解規則](./NRA-IDE_Dictionary_JP.md#event-allocation-rule)
 - Symbol / fixed name: $\mathsf{Alloc}$ / `event_allocation_rule`
 - Type: map (fixed before evaluation)
-- Meaning: the rule that counts each observed change in **exactly one** of: the action, the increment of residual deviation, or the increment of degradation (one change, one count). The context, authority, and provenance $\mathrm{ctx}_n$ are not a destination
+- Meaning: the rule that counts each observed change in **exactly one** of: the action, the increment of residual deviation, or the increment of degradation (one change, one count). The context, authority, and provenance $\mathrm{ctx}_n$ are not a destination. Source: FORMULA §0.5.3
 - Confusion notes: formerly written $\Lambda$ , differing only by case from the degradation fraction $\lambda$ (2026-09-29)
 - Related: [Observation Event](#observation-event)
 
@@ -374,7 +374,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [観測事象](./NRA-IDE_Dictionary_JP.md#observation-event)
 - Symbol / fixed name: $\mathrm{Ev}_n$ / `observation_event`
 - Type: event record (target, value, unit, provenance, time, uncertainty, order, observation path)
-- Meaning: the event at update step $n$ . It advances the state from $n-1$ to $n$
+- Meaning: the event at update step $n$ . It advances the state from $n-1$ to $n$ . Source: FORMULA §0.5.2
 - Notation: write $\mathrm{Ev}$ . $E$ is not used, so that it is not distinguished from the structural element $e$ only by case
 - Confusion notes: $E_n$ and the element index $e$ differed only by case (2026-09-29)
 - Related: [Event History](#event-history), [Event Allocation Rule](#event-allocation-rule)
@@ -384,7 +384,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [射影規則](./NRA-IDE_Dictionary_JP.md#observation-projection-rule)
 - Symbol / fixed name: $\sigma$ / `observation_projection_rule`
 - Type: map (fixed before evaluation)
-- Meaning: the rule that maps an observation to the deviation measured from the reference state in the declared rupture direction; $\delta_n=\sigma(o_n)$
+- Meaning: the rule that maps an observation to the deviation measured from the reference state in the declared rupture direction; $\delta_n=\sigma(o_n)$ . Source: FORMULA §0.5.2
 - Confusion notes: distinct from the projection $\Pi$ of SANDWICH_ARCH (2026-09-29)
 - Related: [Projection](#projection)
 
@@ -393,7 +393,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [観測値](./NRA-IDE_Dictionary_JP.md#observation-value)
 - Symbol / fixed name: $o_n$ / `observation_value`
 - Type: Cause-Side input
-- Meaning: a Cause-Side observation (may be multivariate), mapped to accumulated deviation by the projection rule
+- Meaning: a Cause-Side observation (may be multivariate), mapped to accumulated deviation by the projection rule. Source: FORMULA §0.5.2
 - Confusion notes: formerly written $x_n$ , the same glyph as the computational state $x$ in FORMULA §5 (2026-09-29)
 - Related: [Observation Projection Rule](#observation-projection-rule)
 
@@ -484,7 +484,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [残留ズレ](./NRA-IDE_Dictionary_JP.md#residual-deviation)
 - Symbol / fixed name: $p_n$ / `residual_deviation`
 - Type: target state
-- Meaning: the part of accumulated deviation that remains after the action is removed (the irreversible component). It does not decrease during an evaluation. Source: AXIOMS §4, §7
+- Meaning: the part of accumulated deviation that remains after the action is removed (the irreversible component). It does not decrease during an evaluation. Source: AXIOMS §4, §7; FORMULA §0.5.3
 - Notation: with backward differences, $p_n=p_{n-1}+\Delta p_n$ and $p_n=p_0+\sum_{m=1}^{n}\Delta p_m$
 - Confusion notes: residualDebt and $D_{\mathrm{long}}$ in the demos are quantities built from $R$ , not residual deviation (2026-09-29)
 - Related: [Reversible Deviation](#reversible-deviation), [Straightening](#straightening)
@@ -526,8 +526,8 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [可逆成分](./NRA-IDE_Dictionary_JP.md#reversible-deviation)
 - Symbol / fixed name: $q_n$ / `reversible_deviation`
 - Type: target state
-- Meaning: the part of accumulated deviation that returns toward the reference when the action is removed. Source: AXIOMS §4
-- Notation: determined as $q_n=\sigma(o_n)-p_n$ (derivation document, P5)
+- Meaning: the part of accumulated deviation that returns toward the reference when the action is removed. Source: AXIOMS §4; FORMULA §0.5.3
+- Notation: determined as $q_n=\sigma(o_n)-p_n$ (FORMULA §0.5.3; derivation document, P5)
 - Confusion notes: an earlier draft called it "reversible penetration"; the canonical term is "reversible component" (2026-09-28)
 - Reading risk [Unconfirmed]: do not read "reversible" as the thermodynamic reversible (quasi-static) process, nor as "if the value returns, the structure returns". The event history does not return (derivation document, Proposition 2b)
 - Related: [Residual Deviation](#residual-deviation), [Accumulated Deviation](#accumulated-deviation)
@@ -565,7 +565,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [構造要素](./NRA-IDE_Dictionary_JP.md#structural-element)
 - Symbol / fixed name: $e$ / `element_id`
 - Type: index
-- Meaning: an element constituting the evaluation target. $e=0$ is the structure at declaration; $e\ge1$ are added elements. Each has a declared thickness $\tau^{[e]}_0$ and a degradation fraction $\lambda^{[e]}_n$
+- Meaning: an element constituting the evaluation target. $e=0$ is the structure at declaration; $e\ge1$ are added elements. Each has a declared thickness $\tau^{[e]}_0$ and a degradation fraction $\lambda^{[e]}_n$ . Source: FORMULA §0.5.4
 - Related: [Active Elements](#active-elements), [Addition of a Structural Element](#structural-element-addition)
 
 <a id="structural-sensitivity"></a>
@@ -619,7 +619,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [一時的な可逆成分](./NRA-IDE_Dictionary_JP.md#temporary-reversible-deviation)
 - Symbol / fixed name: $q^{\mathrm{temp}}_n$ / `temporary_reversible_deviation`
 - Type: target state (part of the reversible component $q_n$ )
-- Meaning: a receiving width temporarily narrowed by an action or condition, counted on the deviation side. It returns to 0 when the condition is removed. Source: AXIOMS §7 interpretive-boundary comment (a temporary thickness reduction is counted as the reversible component)
+- Meaning: a receiving width temporarily narrowed by an action or condition, counted on the deviation side. It returns to 0 when the condition is removed. Source: AXIOMS §7 interpretive-boundary comment (a temporary thickness reduction is counted as the reversible component); FORMULA §0.5.3
 - Notation: not subtracted from the effective thickness; counted by $\mathsf{Alloc}$ as action and included in $q_n$
 - Confusion notes: it had been called "temporary thickness reduction" (symbol $\mu_n$ ). Although named as a thickness, it is counted on the deviation side, so it was renamed (2026-09-29)
 - Reading risk [Unconfirmed]: do not read "reversible" as the thermodynamic reversible process. Here it means "returns when the condition is removed"
@@ -630,7 +630,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [合成規則](./NRA-IDE_Dictionary_JP.md#thickness-composition-rule)
 - Symbol / fixed name: $\mathrm{Comp}_\tau$ / `thickness_composition_rule`
 - Type: map (fixed before evaluation)
-- Meaning: the rule that determines the effective thickness of the whole from element thicknesses; $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)$ . Conditions: non-decreasing in each argument; finite, non-negative, and keeping the unit; equal to the element's thickness for a single element; zero when all elements are zero; and, where removal is allowed within an evaluation, not increasing when an element is removed
+- Meaning: the rule that determines the effective thickness of the whole from element thicknesses; $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)$ . Conditions: non-decreasing in each argument; finite, non-negative, and keeping the unit; equal to the element's thickness for a single element; zero when all elements are zero; and, where removal is allowed within an evaluation, not increasing when an element is removed. Source: FORMULA §0.5.4
 - Notation: a sum for parallel elements. For series ( $\min$ ), removing an element can make the whole stronger, so removal is not handled within the evaluation and is treated as a declaration change
 - Confusion notes: formerly written $\Gamma$ , differing only by case from the damping coefficient $\gamma$ of FORMULA §5 (2026-09-29). While adding conditions, it was found that imposing "removal does not increase the value" on every form makes series structures unrepresentable (2026-09-29)
 - Related: [Active Elements](#active-elements), [Addition of a Structural Element](#structural-element-addition)
