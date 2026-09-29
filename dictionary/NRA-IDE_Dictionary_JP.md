@@ -231,10 +231,11 @@
 <a id="evaluation-gauge"></a>
 ### 計器（けいき）
 - 英語版：[Evaluation Gauge](./NRA-IDE_Dictionary_EN.md#evaluation-gauge)
-- 記号・固定名： $\mathcal{K}^{(\mathrm{self})}$ ／ `evaluation_gauge`
+- 記号・固定名： $\mathsf{Gauge}^{(\mathrm{self})}$ ／ `evaluation_gauge`
 - 型：計器の記録
 - 意味：対象を測る基準状態・射影規則・閾値・形状変換関数・平滑係数・有効ゲート幅
 - 使ってはならない先：同じ評価対象の評価出力による変更（逆導出B）
+- 混同注意：以前は $\mathcal{K}^{(\mathrm{self})}$ と書いていた。FORMULA §5.5のknee値 $k$ と大小・装飾だけの区別だったため改めた（2026-09-29）
 - 関連：[逆導出](#reverse-derivation)
 
 <a id="event-history"></a>
@@ -253,10 +254,12 @@
 <a id="active-elements"></a>
 ### 構成（こうせい）
 - 英語版：[Active Elements](./NRA-IDE_Dictionary_EN.md#active-elements)
-- 記号・固定名： $\mathcal{C}_n$ ／ `active_elements`
+- 記号・固定名： $\mathsf{Active}_n$ ／ `active_elements`
 - 型：集合
 - 意味：時点 $n$ に評価対象に含まれている構造要素の集合（付加され、まだ除去されていない要素）
-- 混同注意：瞬間分類 $C_0$ ・連結条件C1〜C4と字体・大小だけの区別になっていたので、分類と条件の側を改名した（2026-09-29）
+- 混同注意：
+  - 瞬間分類 $C_0$ ・連結条件C1〜C4と字体・大小だけの区別になっていたので、分類と条件の側を改名した（2026-09-29）
+  - 以前は $\mathcal{C}_n$ と書いていた。AXIOMS v2.4で制約 $C$ が正典の記号になり、装飾だけの区別になったため、構成の側を改名した（2026-09-29）
 - 関連：[合成規則](#thickness-composition-rule)、[構造要素](#structural-element)
 
 <a id="thickness-composition-rule"></a>
@@ -264,7 +267,7 @@
 - 英語版：[Thickness Composition Rule](./NRA-IDE_Dictionary_EN.md#thickness-composition-rule)
 - 記号・固定名： $\mathrm{Comp}_\tau$ ／ `thickness_composition_rule`
 - 型：写像（評価前に固定）
-- 意味：要素の厚みから全体の実効厚みを定める規則。 $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathcal{C}_n}\bigr)$ 。条件：各引数について非減少、有限・非負・単位を保つ、要素一つならその厚み、全要素0なら0、評価の中で除去を認める場合は要素を外しても値が増えない
+- 意味：要素の厚みから全体の実効厚みを定める規則。 $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)$ 。条件：各引数について非減少、有限・非負・単位を保つ、要素一つならその厚み、全要素0なら0、評価の中で除去を認める場合は要素を外しても値が増えない
 - 書き方：並列なら和。直列（ $\min$ ）は要素を外すと全体が強くなるので、評価の中で除去を扱わず宣言の変更とする
 - 混同注意：以前は $\Gamma$ と書いていた。FORMULA §5の減衰係数 $\gamma$ と大小だけの区別だったため改めた（2026-09-29）。「要素を外しても値は増えない」を全ての形に課すと直列の構造が表せないことを、条件を足す途中で見つけた（2026-09-29）
 - 関連：[構成](#active-elements)、[構造要素の付加](#structural-element-addition)
@@ -424,7 +427,7 @@
 - 英語版：[Declared Thickness](./NRA-IDE_Dictionary_EN.md#declared-thickness)
 - 記号・固定名： $\tau_0$ ／ `initial_tau`（参照実装 `DynamicTauEngine` の引数）
 - 型・単位：構造量（Cause-Side）、 $u$
-- 意味：評価開始時（遷移前）の構造全体の吸収厚み。要素が複数なら $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathcal{C}_0}\bigr)$ 。定義元：AXIOMS §7（初期吸収厚み）・§8（基準吸収厚み）
+- 意味：評価開始時（遷移前）の構造全体の吸収厚み。要素が複数なら $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ 。定義元：AXIOMS §7（初期吸収厚み）・§8（基準吸収厚み）
 - 混同注意：「要素が一つの場合だけの特殊形」と書いたのは正典と食い違っていた（2026-09-29）
 - 関連：[吸収厚み](#absorption-thickness)、[復元後の吸収厚み](#restored-thickness)
 
@@ -440,12 +443,14 @@
 <a id="target-physical-state"></a>
 ### 対象状態（たいしょうじょうたい）
 - 英語版：[Target Physical State](./NRA-IDE_Dictionary_EN.md#target-physical-state)
-- 記号・固定名： $\mathcal{W}^{(\mathrm{self})}_n$ ／ `target_physical_state`
+- 記号・固定名： $\mathsf{Phys}^{(\mathrm{self})}_n$ ／ `target_physical_state`
 - 型：状態の記録
-- 意味：対象の物理状態 $(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathcal{C}_n})$ 。評価状態（ラッチ）と経路履歴は含まない
+- 意味：対象の物理状態 $(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathsf{Active}_n})$ 。評価状態（ラッチ）と経路履歴は含まない
 - 出所：観測された物理的事象、対象の物理法則
 - 使ってはならない先：評価出力の読み戻し（自構造・他構造とも）
-- 混同注意：対象状態へ入るのは観測された物理的事象だけ。物理状態・評価状態・経路履歴を混ぜない（2026-09-29）
+- 混同注意：
+  - 対象状態へ入るのは観測された物理的事象だけ。物理状態・評価状態・経路履歴を混ぜない（2026-09-29）
+  - 以前は $\mathcal{W}^{(\mathrm{self})}_n$ と書いていた。AXIOMS v2.4の仕事量 $W$ と装飾だけの区別になったため改めた（2026-09-29）
 - 関連：[評価状態](#evaluation-state)、[経路履歴](#event-history)
 
 <a id="other-target"></a>
@@ -489,10 +494,11 @@
 <a id="evaluation-output"></a>
 ### 評価出力（ひょうかしゅつりょく）
 - 英語版：[Evaluation Output](./NRA-IDE_Dictionary_EN.md#evaluation-output)
-- 記号・固定名： $\mathcal{Y}^{(\mathrm{self})}_n$ ／ `evaluation_output`
+- 記号・固定名： $\mathsf{Out}^{(\mathrm{self})}_n$ ／ `evaluation_output`
 - 意味： $R$ 、正規状態、不可逆ラッチ。Cause-Side観測でもEffect-Side生成物でもない。Cause-Side入力から事前固定規則で計算した出力。定義元：AXIOMS §14（側別比を含めるのは導出文書の読み）
 - 使ってよい先：監査、構造証言、状態分類、事前固定された物理制御の指令。他の評価対象の閾値・有効ゲート幅へは安全側で閉路がない場合に限る
 - 使ってはならない先：同じ評価対象の計器（逆導出B）、対象状態
+- 書き方：以前は $\mathcal{Y}^{(\mathrm{self})}_n$ と書いていた。衝突はないが、P9の三区分（対象状態・計器・評価出力）の書き方を揃えるため改めた（2026-09-29）
 - 混同注意：使ってよい先を「閾値・ゲートと物理制御にだけ」と狭く書いた（2026-09-29）
 - 関連：[境界接近比](#boundary-approach-ratio)、[逆導出](#reverse-derivation)
 
@@ -598,6 +604,7 @@
 | 記号 | 見出し |
 |---|---|
 | $a_n$ | [作用](#applied-action) |
+| $\mathsf{Active}_n$ | [構成](#active-elements) |
 | $\mathrm{Class}(R)$ | [瞬間分類](#instantaneous-classification) |
 | $\mathrm{Comp}_\tau$ | [合成規則](#thickness-composition-rule) |
 | $\mathrm{ctx}_n$ | 文脈・権限・出所（[分解規則](#event-allocation-rule)） |
@@ -607,10 +614,13 @@
 | $\mathrm{Ev}_n$ | [観測事象](#observation-event) |
 | $\mathrm{EvalGraph}^{(j)}$ | 展開評価グラフ（導出文書 第3部） |
 | $g_p$ 、 $g^{[e]}_\lambda$ | 残留ズレ・要素の劣化の増分則（物理法則。評価出力を入力にしない） |
+| $\mathsf{Gauge}^{(\mathrm{self})}$ | [計器](#evaluation-gauge) |
 | $\mathsf{History}_n$ | [経路履歴](#event-history) |
 | $M_R$ 、 $M_\tau$ | [残存比率余白](#remaining-ratio-margin)、[残存吸収余白](#remaining-absorption-margin) |
 | $o_n$ | [観測値](#observation-value) |
+| $\mathsf{Out}^{(\mathrm{self})}_n$ | [評価出力](#evaluation-output) |
 | $p_n$ | [残留ズレ](#residual-deviation) |
+| $\mathsf{Phys}^{(\mathrm{self})}_n$ | [対象状態](#target-physical-state) |
 | $q_n$ 、 $q^{\mathrm{temp}}_n$ | [可逆成分](#reversible-deviation)、[一時的な可逆成分](#temporary-reversible-deviation) |
 | $R$ 、 $R_{\mathrm{target}}$ | [境界接近比](#boundary-approach-ratio) |
 | $R_{\mathrm{warn}}$ 、 $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ | [警告点](#warning-threshold)、[委譲点](#handoff-threshold)、[不可逆遷移開始点](#irreversible-threshold) |
@@ -640,12 +650,7 @@
 
 ### 2.3 装飾文字
 
-| 記号 | 見出し |
-|---|---|
-| $\mathcal{C}_n$ | [構成](#active-elements) |
-| $\mathcal{K}^{(\mathrm{self})}$ | [計器](#evaluation-gauge) |
-| $\mathcal{W}^{(\mathrm{self})}_n$ | [対象状態](#target-physical-state) |
-| $\mathcal{Y}^{(\mathrm{self})}_n$ | [評価出力](#evaluation-output) |
+現在、装飾文字の記号はない。 $\mathcal{C}_n$ ・ $\mathcal{W}^{(\mathrm{self})}_n$ ・ $\mathcal{K}^{(\mathrm{self})}$ ・ $\mathcal{Y}^{(\mathrm{self})}_n$ は、2026-09-29に $\mathsf{Active}_n$ ・ $\mathsf{Phys}^{(\mathrm{self})}_n$ ・ $\mathsf{Gauge}^{(\mathrm{self})}$ ・ $\mathsf{Out}^{(\mathrm{self})}_n$ へ改め、2.1へ移した。
 
 ### 2.4 演算子・関係（規則の対象外）
 
@@ -792,6 +797,7 @@
 | 2026-09-29 | 物理状態・評価状態・経路履歴 | [対象状態](#target-physical-state)、[経路履歴](#event-history) |
 | 2026-09-29 | 単一要素の $\tau_0$ ・ $\lambda_n$ と、要素を複数にした一般形 | [劣化度](#degradation-fraction)、[宣言厚み](#declared-thickness) |
 | 2026-09-29 | 字体・大小だけの区別（ $\mathcal{D}$ と $D$ 、 $\Gamma$ と $\gamma$ 、 $\Lambda$ と $\lambda$ 、 $Q$ と $q$ 、 $E$ と $e$ など） | 各見出し、0.5 |
+| 2026-09-29 | 正典に加えた記号（制約 $C$ ・仕事量 $W$ ）と、導出文書の $\mathcal{C}_n$ ・ $\mathcal{W}_n$ （装飾だけの区別）。 $\mathcal{K}$ とknee値 $k$ | [構成](#active-elements)、[対象状態](#target-physical-state)、[計器](#evaluation-gauge) |
 | 2026-09-29 | 評価出力の使い道を狭く書いた | [評価出力](#evaluation-output) |
 | 2026-09-29 | 差分 $\Delta$ の向き（前進と後退） | 2.4 |
 | 2026-09-29 | 記録の個数と絶対値（ $\lvert\cdot\rvert$ ） | [経路履歴](#event-history) |

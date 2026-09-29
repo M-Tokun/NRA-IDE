@@ -207,10 +207,10 @@ NRA-IDEの「二重ゆらぎ」は、まさにこの「ズレが増えて、同�
 | $q_n$ | 可逆成分 | 作用を除けば0へ戻るズレ | AXIOMS.md §4（語）、FORMULA.md §0.5（記号、反映予定） | 【3】 |
 | $p_n$ | 不可逆成分（残留ズレ） | 作用を除いても残るズレ | AXIOMS.md §4（語）、FORMULA.md §0.5（記号、反映予定） | 【4】1 |
 | $\lambda_n$ | 劣化度（要素が一つの場合） | 厚みが失われた割合、 $0\le\lambda_n\le1$ 。要素が複数のときは要素ごとの $\lambda^{[e]}_n$ を使う | FORMULA.md §0.5（反映予定） | 【4】2 |
-| $\tau_0$ | 宣言厚み | 評価開始時の構造全体の吸収厚み。要素が複数なら $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathcal{C}_0}\bigr)$ | FORMULA.md §0.5（反映予定）。AXIOMS.md §7・§8の $\tau_0$ と整合 | 30 mm |
+| $\tau_0$ | 宣言厚み | 評価開始時の構造全体の吸収厚み。要素が複数なら $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ | FORMULA.md §0.5（反映予定）。AXIOMS.md §7・§8の $\tau_0$ と整合 | 30 mm |
 | $e$ | 要素番号 | 構造要素の番号。 $e=0$ は宣言時の構造、 $e\ge1$ は付加した要素 | 本書 | 【10】 |
 | $n_e$ | 付加時点 | 要素 $e$ が加わった更新番号（ $n_0=0$ ） | 本書 | 【10】 |
-| $\mathcal{C}_n$ | 構成 | 時点 $n$ に評価対象に含まれている要素の集合（付加され、まだ除去されていない要素） | 本書 | 【10】 |
+| $\mathsf{Active}_n$ | 構成 | 時点 $n$ に評価対象に含まれている要素の集合（付加され、まだ除去されていない要素） | 本書 | 【10】 |
 | $q^{\mathrm{temp}}_n$ | 一時的な可逆成分 | 作用や条件で一時的に狭まる受け止め幅を、ズレの側に数えた量。可逆成分 $q_n$ の一部 | 本書 | — |
 | $\tau^{[e]}_0$、 $\lambda^{[e]}_n$ | 要素の宣言厚み・劣化度 | 要素 $e$ 自身の宣言厚みと劣化度（要素が一つなら $\tau^{[0]}_0=\tau_0$ 、 $\lambda^{[0]}_n=\lambda_n$ ） | 本書 | 【10】 |
 | $\mathrm{Comp}_\tau$ | 合成規則 | 要素の厚みから全体の実効厚みを定める規則 | 本書（AXIOMS.md §7「構造要素の付加」を記号化） | 【10】 |
@@ -221,9 +221,9 @@ NRA-IDEの「二重ゆらぎ」は、まさにこの「ズレが増えて、同�
 | $M_{\tau,n}$ | 残存吸収余白 | $\tau_n-\delta_n$ | FORMULA.md §2 | 【2】 |
 | $\ell_n$ | 不可逆ラッチ | 0 または 1 | AXIOMS.md §10.4（`irreversible_latched`） | 【7】 |
 | $\mathsf{History}_n$ | 経路履歴 | $\mathrm{Ev}_1,\dots,\mathrm{Ev}_n$ の記録列（評価開始時は空） | 本書 | 【6】【11】 |
-| $\mathcal{W}^{(\mathrm{self})}_n$ | 対象状態 | 自構造の物理状態 $(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathcal{C}_n})$ 。評価状態（ $\ell_n$ ）と経路履歴（ $\mathsf{History}_n$ ）は含まない（命題2）。他構造 $i$ の物理状態は $\mathcal{W}^{(i)}_n$ | 本書（AXIOMS.md §14の区分を記号化） | 【9】 |
-| $\mathcal{K}^{(\mathrm{self})}$ | 計器 | 自構造を測る基準・変換規則・閾値・有効ゲート幅 | 本書（同上） | 【9】 |
-| $\mathcal{Y}^{(\mathrm{self})}_n$ | 評価出力 | $R_n$、側別比、 $\ell_n$、正規状態と、その集約 | AXIOMS.md §14（同節は $R$・正規状態・不可逆ラッチを挙げる。側別比を含めるのは本書の読み） | 【9】 |
+| $\mathsf{Phys}^{(\mathrm{self})}_n$ | 対象状態 | 自構造の物理状態 $(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathsf{Active}_n})$ 。評価状態（ $\ell_n$ ）と経路履歴（ $\mathsf{History}_n$ ）は含まない（命題2）。他構造 $i$ の物理状態は $\mathsf{Phys}^{(i)}_n$ | 本書（AXIOMS.md §14の区分を記号化） | 【9】 |
+| $\mathsf{Gauge}^{(\mathrm{self})}$ | 計器 | 自構造を測る基準・変換規則・閾値・有効ゲート幅 | 本書（同上） | 【9】 |
+| $\mathsf{Out}^{(\mathrm{self})}_n$ | 評価出力 | $R_n$、側別比、 $\ell_n$、正規状態と、その集約 | AXIOMS.md §14（同節は $R$・正規状態・不可逆ラッチを挙げる。側別比を含めるのは本書の読み） | 【9】 |
 
 第3部だけで使う記号（ $j$ 、 $\mathsf{Archive}$ 、 $Z_n$ 、 $\mathsf{State}_n$ 、 $\mathsf{Update}$ 、 $\rho$ 、 $g_p$ 、 $g^{[e]}_\lambda$ 、 $\mathrm{EvalGraph}^{(j)}$ ）は第3部に示す。
 
@@ -385,9 +385,9 @@ P8は**入力元の種類**についての前提である。次のP9は、入力
 
 | 区分 | 記号 | 含まれるもの | 性質 |
 |---|---|---|---|
-| 対象状態 | $\mathcal{W}^{(\mathrm{self})}_n$ | $q_n,p_n,\lambda_n$（と、そこから決まる $\delta_n,\tau_n$ ） | 対象そのものの物理状態。対象の物理法則で動く |
-| 計器 | $\mathcal{K}^{(\mathrm{self})}$ | 基準状態、 $\sigma$、閾値、形状変換関数 $h_{\mathrm{upper}},h_{\mathrm{lower}}$、EMA係数、 $\tau_{\mathrm{upper}},\tau_{\mathrm{lower}}$ | 対象を測る物差しと、危険とみなす線 |
-| 評価出力 | $\mathcal{Y}^{(\mathrm{self})}_n$ | $R_n,R_{\mathrm{upper}},R_{\mathrm{lower}},R_{\mathrm{dir}},\ell_n$、正規状態と、それらの移動平均・集約 | 計器で対象を読んだ結果 |
+| 対象状態 | $\mathsf{Phys}^{(\mathrm{self})}_n$ | $q_n,p_n,\lambda_n$（と、そこから決まる $\delta_n,\tau_n$ ） | 対象そのものの物理状態。対象の物理法則で動く |
+| 計器 | $\mathsf{Gauge}^{(\mathrm{self})}$ | 基準状態、 $\sigma$、閾値、形状変換関数 $h_{\mathrm{upper}},h_{\mathrm{lower}}$、EMA係数、 $\tau_{\mathrm{upper}},\tau_{\mathrm{lower}}$ | 対象を測る物差しと、危険とみなす線 |
+| 評価出力 | $\mathsf{Out}^{(\mathrm{self})}_n$ | $R_n,R_{\mathrm{upper}},R_{\mathrm{lower}},R_{\mathrm{dir}},\ell_n$、正規状態と、それらの移動平均・集約 | 計器で対象を読んだ結果 |
 
 評価出力の位置はAXIOMS.md §14「評価出力の位置」による。
 
@@ -395,17 +395,17 @@ P8は**入力元の種類**についての前提である。次のP9は、入力
 
 $$
 \text{逆導出}\iff
-\underbrace{\exists\ \text{経路}\ (\text{Effect-Side出力})\leadsto\mathcal{W}^{(\mathrm{self})}\cup\mathcal{K}^{(\mathrm{self})}\cup\mathcal{Y}^{(\mathrm{self})}}_{\text{(i) 逆導出A：権威の逆流}}
+\underbrace{\exists\ \text{経路}\ (\text{Effect-Side出力})\leadsto\mathsf{Phys}^{(\mathrm{self})}\cup\mathsf{Gauge}^{(\mathrm{self})}\cup\mathsf{Out}^{(\mathrm{self})}}_{\text{(i) 逆導出A：権威の逆流}}
 \ \lor\
-\underbrace{\exists\ \text{経路}\ \mathcal{Y}^{(\mathrm{self})}_m\leadsto\mathcal{K}^{(\mathrm{self})}\quad(\text{任意の段、他構造経由を含む})}_{\text{(ii) 逆導出B：計器の自己調整}}
+\underbrace{\exists\ \text{経路}\ \mathsf{Out}^{(\mathrm{self})}_m\leadsto\mathsf{Gauge}^{(\mathrm{self})}\quad(\text{任意の段、他構造経由を含む})}_{\text{(ii) 逆導出B：計器の自己調整}}
 $$
 
-(ii)の理由：入力がすべてCause-Sideでも、評価の出力が自分の物差しや危険線を動かせば、計器が「自分の読みに合わせて自分を調整する」ことになる。 $R$ が上がるほど幅を広げれば接近は隠れ、 $R$ が上がるほど幅を狭めれば接近は誇張される。どちらの向きでも、 $R$ は対象の状態ではなく計器自身の履歴を映すようになる。したがって向きを問わず禁止する。前段の $R$ や $R$ の移動平均を使っても、他構造を経由して戻っても（ $R^{(\mathrm{self})}\to\mathcal{K}^{(i)}\to R^{(i)}\to\mathcal{K}^{(\mathrm{self})}$ ）同じである。
+(ii)の理由：入力がすべてCause-Sideでも、評価の出力が自分の物差しや危険線を動かせば、計器が「自分の読みに合わせて自分を調整する」ことになる。 $R$ が上がるほど幅を広げれば接近は隠れ、 $R$ が上がるほど幅を狭めれば接近は誇張される。どちらの向きでも、 $R$ は対象の状態ではなく計器自身の履歴を映すようになる。したがって向きを問わず禁止する。前段の $R$ や $R$ の移動平均を使っても、他構造を経由して戻っても（ $R^{(\mathrm{self})}\to\mathsf{Gauge}^{(i)}\to R^{(i)}\to\mathsf{Gauge}^{(\mathrm{self})}$ ）同じである。
 
 **他の評価対象の評価出力**（AXIOMS.md §14）：
 
 $$
-\text{(iv)}\quad \mathcal{Y}^{(i)}\to(\text{閾値}^{(\mathrm{self})},\ \tau^{(\mathrm{self})}_{\mathrm{upper}},\ \tau^{(\mathrm{self})}_{\mathrm{lower}})\ \text{の辺は、安全側（ゲート幅を狭める・閾値を下げる）に限り、}\mathcal{Y}^{(\mathrm{self})}\text{から構造}i\text{への経路がない場合に限る}
+\text{(iv)}\quad \mathsf{Out}^{(i)}\to(\text{閾値}^{(\mathrm{self})},\ \tau^{(\mathrm{self})}_{\mathrm{upper}},\ \tau^{(\mathrm{self})}_{\mathrm{lower}})\ \text{の辺は、安全側（ゲート幅を狭める・閾値を下げる）に限り、}\mathsf{Out}^{(\mathrm{self})}\text{から構造}i\text{への経路がない場合に限る}
 $$
 
 (iv)が許すのは、計器のうち閾値と有効ゲート幅への辺だけである。基準状態や射影規則 $\sigma$ へ他構造の評価出力を入れる辺は、(iv)の対象ではない。この辺の有無と規則は、評価開始前に固定する（AXIOMS.md §14）。
@@ -415,8 +415,8 @@ $$
 **判定の基準は記号の名前ではなく、経路の出所と書き換え先である**（AXIOMS.md §14）。そのために、出所の違うものには違う名前を使う。
 
 - **物理法則の中の比**：対象状態の法則が、物理的な負荷の比に依存すること（例えば、疲労劣化が応力比で進むこと）は、対象の物理として正当である。この比は、物理法則の中で、Cause-Sideの $\delta$ と $\tau$ から直接計算する。書き方は $\Delta\lambda^{[e]}_n=g^{[e]}_\lambda(\delta_n,\tau_n,\dots)$ のように、Cause-Side由来の引数を直接示す。この比に $R$ という名前を付けない。
-- **評価出力 $R$ **：保存された評価出力 $R$ （その移動平均・集約・状態区分を含む）を読み戻して、対象状態 $\mathcal{W}$ を更新してはならない。自構造の評価出力でも、他構造の評価出力でも同じである。対象状態はCause-Side観測または事前固定の変換規則からのみ得る（P8、AXIOMS.md §14）。
-- **計器を書き換える規則**：計器 $\mathcal{K}$ を書き換える規則は、 $R$ という名前を使わずに $\delta/\tau$ で書き直しても、評価と同じ比で計器を動かす経路であり、(ii)に当たる。
+- **評価出力 $R$ **：保存された評価出力 $R$ （その移動平均・集約・状態区分を含む）を読み戻して、対象状態 $\mathsf{Phys}$ を更新してはならない。自構造の評価出力でも、他構造の評価出力でも同じである。対象状態はCause-Side観測または事前固定の変換規則からのみ得る（P8、AXIOMS.md §14）。
+- **計器を書き換える規則**：計器 $\mathsf{Gauge}$ を書き換える規則は、 $R$ という名前を使わずに $\delta/\tau$ で書き直しても、評価と同じ比で計器を動かす経路であり、(ii)に当たる。
 
 **許される辺と許されない辺の例**：
 
@@ -429,7 +429,7 @@ $$
 | $R^{(i)}_n\to\Delta\lambda^{(\mathrm{self})}$ など自構造の対象状態 | 許されない | $R^{(i)}$ は評価出力であり、Cause-Side観測ではない。 $\delta$ ・ $\tau$ と対象状態はCause-Side観測または事前固定の変換規則からのみ得る（AXIOMS.md §14） |
 | $R^{(i)}_n\to\tau^{(\mathrm{self})}_{\mathrm{upper}}$（狭める向き） | 許される | (iv) 安全側で、閉路がない場合 |
 | $R^{(\mathrm{self})}$ またはその平均 $\to\tau^{(\mathrm{self})}_{\mathrm{upper}},\ $ 閾値 | 許されない | (ii) 計器の自己調整。向きを問わない |
-| $R^{(\mathrm{self})}\to\mathcal{K}^{(i)}\to R^{(i)}\to\mathcal{K}^{(\mathrm{self})}$ | 許されない | (ii) 他構造を経由した自己調整 |
+| $R^{(\mathrm{self})}\to\mathsf{Gauge}^{(i)}\to R^{(i)}\to\mathsf{Gauge}^{(\mathrm{self})}$ | 許されない | (ii) 他構造を経由した自己調整 |
 | LLM自己評価 $\to\delta$ | 許されない | (i) 入力元の逆流 |
 | $R\to\ell\to$ 正規状態 | 許される | 評価出力の中での計算。計器にも対象にも戻らない |
 
@@ -486,7 +486,7 @@ $$
 \boxed{\ \tau_n=(1-\lambda_n)\,\tau_0\ }
 $$
 
-これは要素が一つ（宣言時の構造だけ）の場合の形である。構造要素を付加・除去する一般の形は、下の「構造要素の付加と除去」で示す。宣言厚み $\tau_0$ は、正典（AXIOMS.md §7・§8）と同じく、評価開始時の構造全体の吸収厚みを表す。要素が複数あるときは、評価開始時の構成 $\mathcal{C}_0$ について $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathcal{C}_0}\bigr)$ であり、要素が一つなら $\tau_0=\tau^{[0]}_0$ である。
+これは要素が一つ（宣言時の構造だけ）の場合の形である。構造要素を付加・除去する一般の形は、下の「構造要素の付加と除去」で示す。宣言厚み $\tau_0$ は、正典（AXIOMS.md §7・§8）と同じく、評価開始時の構造全体の吸収厚みを表す。要素が複数あるときは、評価開始時の構成 $\mathsf{Active}_0$ について $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ であり、要素が一つなら $\tau_0=\tau^{[0]}_0$ である。
 
 | 層 | 記号 | 性質 | 使う場所 |
 |---|---|---|---|
@@ -500,14 +500,14 @@ $$
 
 吸収厚みが増える経路は、評価対象へ新しい構造要素を加えること（**構造要素の付加**、略して付加）だけである。既存の要素の厚みが戻るのではない。逆に、壊れていない構造要素を計画的に外すことを**構造要素の除去**（略して除去）という。除去は劣化ではないので、劣化度 $\lambda$ には計上しない。
 
-宣言時の構造を要素 $e=0$ とし、更新番号 $n_e$ に加わった要素を $e=1,2,\dots$ とする。各要素は自身の宣言厚みと劣化度を持つ。時点 $n$ に評価対象に含まれている要素（付加され、まだ除去されていない要素）の集合を**構成** $\mathcal{C}_n$ とする。
+宣言時の構造を要素 $e=0$ とし、更新番号 $n_e$ に加わった要素を $e=1,2,\dots$ とする。各要素は自身の宣言厚みと劣化度を持つ。時点 $n$ に評価対象に含まれている要素（付加され、まだ除去されていない要素）の集合を**構成** $\mathsf{Active}_n$ とする。
 
 $$
-\tau^{[e]}_n=(1-\lambda^{[e]}_n)\,\tau^{[e]}_0\qquad(e\in\mathcal{C}_n)
+\tau^{[e]}_n=(1-\lambda^{[e]}_n)\,\tau^{[e]}_0\qquad(e\in\mathsf{Active}_n)
 $$
 
 $$
-\boxed{\ \tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathcal{C}_n}\bigr)\ }
+\boxed{\ \tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)\ }
 $$
 
 合成規則 $\mathrm{Comp}_\tau$ には次を課す。
@@ -522,7 +522,7 @@ $$
 
 外した要素を後で戻す場合は、改めて付加として扱い、戻した時点のCause-Side測定で厚みを定める。外していた間に進んだ劣化も、その測定に含まれる。
 
-**系（付加のない区間での非増加）**：付加がない区間（ $\mathcal{C}_{n+1}\subseteq\mathcal{C}_n$ ）では $\tau_{n+1}\le\tau_n$ 。
+**系（付加のない区間での非増加）**：付加がない区間（ $\mathsf{Active}_{n+1}\subseteq\mathsf{Active}_n$ ）では $\tau_{n+1}\le\tau_n$ 。
 
 **証明**：P6より各要素の $\lambda^{[e]}$ は減らないので、各 $\tau^{[e]}$ は増えない。条件1より、残る要素について $\mathrm{Comp}_\tau$ の値は増えない。評価の中で除去が起きるのは条件2を満たす場合だけなので、除去した要素を外しても値は増えない。∎
 
@@ -606,12 +606,12 @@ $$
 
 $$
 \boxed{\
-R_n=\frac{\delta_n}{\tau_n}=\frac{q_n+p_n}{\mathrm{Comp}_\tau\bigl(((1-\lambda^{[e]}_n)\,\tau^{[e]}_0)_{e\in\mathcal{C}_n}\bigr)}
+R_n=\frac{\delta_n}{\tau_n}=\frac{q_n+p_n}{\mathrm{Comp}_\tau\bigl(((1-\lambda^{[e]}_n)\,\tau^{[e]}_0)_{e\in\mathsf{Active}_n}\bigr)}
 \ }
 $$
 
 $$
-M_{\tau,n}=\tau_n-\delta_n=\mathrm{Comp}_\tau\bigl(((1-\lambda^{[e]}_n)\,\tau^{[e]}_0)_{e\in\mathcal{C}_n}\bigr)-q_n-p_n
+M_{\tau,n}=\tau_n-\delta_n=\mathrm{Comp}_\tau\bigl(((1-\lambda^{[e]}_n)\,\tau^{[e]}_0)_{e\in\mathsf{Active}_n}\bigr)-q_n-p_n
 $$
 
 要素が一つ（宣言時の構造だけ）の場合は、次のとおりである。
@@ -709,13 +709,13 @@ $$
 
 観測できる値を $o$ とする。次の三つを区別する。
 
-- **対象の物理状態** $\mathcal{W}_n=(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathcal{C}_n})$ （P9の対象状態）
+- **対象の物理状態** $\mathsf{Phys}_n=(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathsf{Active}_n})$ （P9の対象状態）
 - **評価状態**：不可逆ラッチ $\ell_n$ など、評価出力として保持するもの
 - **経路履歴** $\mathsf{History}_n$ ：事象の記録（監査・構造証言のため）
 
 一つの観測事象 $\mathrm{Ev}$ を挟んだ前を $(-)$ 、後を $(+)$ で表す。
 
-**命題2a（物理状態）**：その事象で $\Delta p>0$ 、またはある要素で $\Delta\lambda^{[e]}>0$ ならば、 $o^{(+)}=o^{(-)}$ であっても $\mathcal{W}^{(+)}\ne\mathcal{W}^{(-)}$ 。
+**命題2a（物理状態）**：その事象で $\Delta p>0$ 、またはある要素で $\Delta\lambda^{[e]}>0$ ならば、 $o^{(+)}=o^{(-)}$ であっても $\mathsf{Phys}^{(+)}\ne\mathsf{Phys}^{(-)}$ 。
 
 **証明**：P5の増分の定義より $p^{(+)}=p^{(-)}+\Delta p$ 、 $\lambda^{[e](+)}=\lambda^{[e](-)}+\Delta\lambda^{[e]}$ 。いずれかの増分が正なら、その成分が異なる。 $o$ の一致は、この成分の一致を含まない。∎
 
@@ -725,7 +725,7 @@ $$
 
 **証明**：P6より $\#\mathsf{History}^{(+)}=\#\mathsf{History}^{(-)}+1$ 。∎
 
-**二つの命題の関係**：完全に弾性範囲の事象（ $\Delta p=0$ 、すべての $\Delta\lambda^{[e]}=0$ 、除荷後 $q=0$ ）では、物理状態は元に戻る（ $\mathcal{W}^{(+)}=\mathcal{W}^{(-)}$ ）。命題2aは、この場合について何も主張しない。それでも、事象が起きたという記録は経路履歴に残る（命題2b）。これは唯一の律環公理の帰結「同一履歴の完全再現は不可能である」（AXIOMS.md §2）に対応する。値の復帰（ $o$ ）、物理状態の復帰（ $\mathcal{W}$ ）、履歴の同一（ $\mathsf{History}$ ）は別々の問いであり、「値は戻っても、経路履歴は戻らない」は命題2bの主張、「値は戻っても、構造は戻っていない」は、不可逆な変化があった場合の命題2aの主張である。
+**二つの命題の関係**：完全に弾性範囲の事象（ $\Delta p=0$ 、すべての $\Delta\lambda^{[e]}=0$ 、除荷後 $q=0$ ）では、物理状態は元に戻る（ $\mathsf{Phys}^{(+)}=\mathsf{Phys}^{(-)}$ ）。命題2aは、この場合について何も主張しない。それでも、事象が起きたという記録は経路履歴に残る（命題2b）。これは唯一の律環公理の帰結「同一履歴の完全再現は不可能である」（AXIOMS.md §2）に対応する。値の復帰（ $o$ ）、物理状態の復帰（ $\mathsf{Phys}$ ）、履歴の同一（ $\mathsf{History}$ ）は別々の問いであり、「値は戻っても、経路履歴は戻らない」は命題2bの主張、「値は戻っても、構造は戻っていない」は、不可逆な変化があった場合の命題2aの主張である。
 
 **閾値と遷移の履歴**：安全域（どの閾値も越えていない範囲）で劣化が進まない間は、 $R$ は $\delta$ に比例する線形の計算で足りる。IDEの価値が現れるのは、閾値という境界が現れたときである。閾値を越えることは、それまで見えていなかった、または見過ごしていたリスク・変動・変化が、分かりやすい事象として見え始めることを意味する。だから、いつ・どの閾値を越えたかという遷移を、経路履歴に残す。不可逆ラッチ（第3部段5）は、その遷移を評価状態に反映したものである。
 
@@ -929,7 +929,7 @@ $$
 | $\mathsf{State}_n$ | 状態区分 | PERMIT 〜 RUPTURE_BOUNDARY（ラッチを反映） | 【7】 |
 | $j$ | 評価番号 | 何番目の評価宣言か | 【10】 |
 | $\mathsf{Archive}$ | 保管記録 | 終了した評価の記録の列 | 【10】 |
-| $Z_n$ | 判定用十分状態 | 名前付きの欄を持つ記録：残留ズレ $p_n$ 、構成 $\mathcal{C}_n$ と各要素の宣言厚み・劣化度、不可逆ラッチ $\ell_n$ （必要なら追加状態）。物理状態と評価状態の組（辞書「判定用十分状態」） | 【11】 |
+| $Z_n$ | 判定用十分状態 | 名前付きの欄を持つ記録：残留ズレ $p_n$ 、構成 $\mathsf{Active}_n$ と各要素の宣言厚み・劣化度、不可逆ラッチ $\ell_n$ （必要なら追加状態）。物理状態と評価状態の組（辞書「判定用十分状態」） | 【11】 |
 | $\mathrm{EvalGraph}^{(j)}$ | 展開評価グラフ | 評価 $j$ の全段で、どの量からどの量を計算したかを表す有向グラフ | 【9】 |
 
 ## 2. P9の残りの条件
@@ -962,7 +962,7 @@ $$
 p_n=p_{n-1}+\Delta p_n,\qquad \lambda^{[e]}_n=\lambda^{[e]}_{n-1}+\Delta\lambda^{[e]}_n,\qquad 0\le\lambda^{[e]}_n\le1
 $$
 
-更新番号 $n$ で構造要素を付加した場合は、新しい要素を構成 $\mathcal{C}_n$ に加え、その $\lambda$ を0、宣言厚みを付加時点のCause-Side測定値として始める（第2部3.3）。構造要素を除去した場合は、その要素を構成から外す。 $\lambda$ を減らす項は置かない（P6）。
+更新番号 $n$ で構造要素を付加した場合は、新しい要素を構成 $\mathsf{Active}_n$ に加え、その $\lambda$ を0、宣言厚みを付加時点のCause-Side測定値として始める（第2部3.3）。構造要素を除去した場合は、その要素を構成から外す。 $\lambda$ を減らす項は置かない（P6）。
 
 冷却のように戻るまでに時間がかかる領域では、 $q_n=\rho(q_{n-1},a_n)$ とし、「 $a=0$ が続けば $q\to0$ 」を満たすことを条件とする。自然減衰が許されるのは $q$ だけである（P6）。
 
@@ -1066,15 +1066,15 @@ $$
 **判定用十分状態** $Z_n$ を、位置で並べる組ではなく、次の名前付きの欄を持つ記録とする（辞書「判定用十分状態」）。
 
 - 残留ズレ $p_n$
-- 構成 $\mathcal{C}_n$ と、各要素 $e\in\mathcal{C}_n$ の宣言厚み $\tau^{[e]}_0$ と劣化度 $\lambda^{[e]}_n$
+- 構成 $\mathsf{Active}_n$ と、各要素 $e\in\mathsf{Active}_n$ の宣言厚み $\tau^{[e]}_0$ と劣化度 $\lambda^{[e]}_n$
 - 不可逆ラッチ $\ell_n$
 
-$Z_n$ のうち、ラッチを除く欄（ $p_n$ 、構成、各要素の宣言厚みと劣化度）は物理状態であり、これを $\mathcal{W}_n$ と書く。更新規則が次の形をしているとする（後退差分。更新番号 $n$ の事象が状態を $n-1$ から $n$ へ進める。 $e\in\mathcal{C}_{n-1}$ ）。
+$Z_n$ のうち、ラッチを除く欄（ $p_n$ 、構成、各要素の宣言厚みと劣化度）は物理状態であり、これを $\mathsf{Phys}_n$ と書く。更新規則が次の形をしているとする（後退差分。更新番号 $n$ の事象が状態を $n-1$ から $n$ へ進める。 $e\in\mathsf{Active}_{n-1}$ ）。
 
 $$
 q_n=\rho(a_n),\quad
-\Delta p_n=g_p(\mathcal{W}_{n-1},a_n),\quad
-\Delta\lambda^{[e]}_n=g^{[e]}_\lambda(\mathcal{W}_{n-1},a_n)
+\Delta p_n=g_p(\mathsf{Phys}_{n-1},a_n),\quad
+\Delta\lambda^{[e]}_n=g^{[e]}_\lambda(\mathsf{Phys}_{n-1},a_n)
 $$
 
 更新規則は物理法則なので、評価状態であるラッチ $\ell$ や、評価出力 $R$ ・ $\mathsf{State}$ を入力にしない（第2部P9）。 $\ell_n$ が $Z_n$ に含まれるのは、次の状態区分を決めるためである。
@@ -1083,7 +1083,7 @@ $$
 
 **命題5**：同じ評価宣言 $\mathsf{Decl}$ （同じ閾値・同じ合成規則・同じ規則）の下で、時点 $n$ の $Z_n$ が同じ二つの履歴は、その後の事象の列 $\mathrm{Ev}_{n+1},\mathrm{Ev}_{n+2},\dots$ が同じなら、 $n+1$ 以後、同じ分類（CONFESSION、OUT_OF_DESCRIPTION_DOMAIN、または同じ $R$ ）と同じ $\mathsf{State}$ をたどる。時点 $n$ の $R_n$ そのものは $q_n$ に依存するので、 $Z_n$ だけでは決まらない（主張は $n+1$ 以後についてである）。
 
-**証明**： $n$ についての帰納法。 $Z_n$ と事象 $\mathrm{Ev}_{n+1}$ が等しければ、上の規則から $q_{n+1}=\rho(a_{n+1})$ 、 $p_{n+1}=p_n+g_p(\mathcal{W}_n,a_{n+1})$ 、各要素の $\lambda^{[e]}_{n+1}$ が等しい。付加・除去が等しいので $\mathcal{C}_{n+1}$ が等しく、付加した要素の宣言厚みも（同じ測定値として）等しい。同じ合成規則により $\tau_{n+1}$ が等しく、 $\delta_{n+1}=q_{n+1}+p_{n+1}$ も等しい。第3部段5の分類の順序は同じ入力に同じ結果を与えるので、分類が等しい。 $R_{n+1}$ が定まる場合はそれが等しく、 $\ell_{n+1}$ と $\mathsf{State}_{n+1}$ も等しい。よって $Z_{n+1}$ も等しい。∎
+**証明**： $n$ についての帰納法。 $Z_n$ と事象 $\mathrm{Ev}_{n+1}$ が等しければ、上の規則から $q_{n+1}=\rho(a_{n+1})$ 、 $p_{n+1}=p_n+g_p(\mathsf{Phys}_n,a_{n+1})$ 、各要素の $\lambda^{[e]}_{n+1}$ が等しい。付加・除去が等しいので $\mathsf{Active}_{n+1}$ が等しく、付加した要素の宣言厚みも（同じ測定値として）等しい。同じ合成規則により $\tau_{n+1}$ が等しく、 $\delta_{n+1}=q_{n+1}+p_{n+1}$ も等しい。第3部段5の分類の順序は同じ入力に同じ結果を与えるので、分類が等しい。 $R_{n+1}$ が定まる場合はそれが等しく、 $\ell_{n+1}$ と $\mathsf{State}_{n+1}$ も等しい。よって $Z_{n+1}$ も等しい。∎
 
 要素が一つの場合は、構成が $\{0\}$ で、宣言厚み $\tau_0$ は評価宣言で決まっているので、 $Z_n$ は $(p_n,\lambda_n,\ell_n)$ に戻る。
 

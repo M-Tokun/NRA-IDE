@@ -107,10 +107,12 @@ Temporary variables used only inside an implementation (for example, the interna
 <a id="active-elements"></a>
 ### Active Elements
 - Japanese: [構成](./NRA-IDE_Dictionary_JP.md#active-elements)
-- Symbol / fixed name: $\mathcal{C}_n$ / `active_elements`
+- Symbol / fixed name: $\mathsf{Active}_n$ / `active_elements`
 - Type: set
 - Meaning: the set of structural elements included in the evaluation target at step $n$ (added and not yet removed)
-- Confusion notes: it differed from the instantaneous classification $C_0$ and link conditions C1–C4 only by typeface and case; the classification and the conditions were renamed (2026-09-29)
+- Confusion notes:
+  - it differed from the instantaneous classification $C_0$ and link conditions C1–C4 only by typeface and case; the classification and the conditions were renamed (2026-09-29)
+  - it was formerly written $\mathcal{C}_n$; after AXIOMS v2.4 made constraint $C$ a canonical symbol, the two differed only by decoration, so this side was renamed (2026-09-29)
 - Related: [Thickness Composition Rule](#thickness-composition-rule), [Structural Element](#structural-element)
 
 <a id="structural-element-addition"></a>
@@ -192,7 +194,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [宣言厚み](./NRA-IDE_Dictionary_JP.md#declared-thickness)
 - Symbol / fixed name: $\tau_0$ / `initial_tau` (argument of `DynamicTauEngine` in the reference implementation)
 - Type / unit: structural quantity (Cause-Side); $u$
-- Meaning: the absorption thickness of the whole structure at the start of evaluation (before transition). With several elements, $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathcal{C}_0}\bigr)$ . Source: AXIOMS §7 (initial absorption thickness), §8 (baseline absorption thickness)
+- Meaning: the absorption thickness of the whole structure at the start of evaluation (before transition). With several elements, $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ . Source: AXIOMS §7 (initial absorption thickness), §8 (baseline absorption thickness)
 - Confusion notes: writing it as "a special form for a single element only" diverged from the canon (2026-09-29)
 - Related: [Absorption Thickness](#absorption-thickness), [Restored Absorption Thickness](#restored-thickness)
 
@@ -240,19 +242,21 @@ Temporary variables used only inside an implementation (for example, the interna
 <a id="evaluation-gauge"></a>
 ### Evaluation Gauge
 - Japanese: [計器](./NRA-IDE_Dictionary_JP.md#evaluation-gauge)
-- Symbol / fixed name: $\mathcal{K}^{(\mathrm{self})}$ / `evaluation_gauge`
+- Symbol / fixed name: $\mathsf{Gauge}^{(\mathrm{self})}$ / `evaluation_gauge`
 - Type: gauge record
 - Meaning: the reference state, projection rule, thresholds, shape-transformation functions, smoothing coefficients, and effective gate widths that measure the target
 - Prohibited uses: change by the evaluation outputs of the same target (reverse derivation B)
+- Confusion notes: it was formerly written $\mathcal{K}^{(\mathrm{self})}$; it differed from the knee value $k$ of FORMULA §5.5 only by case and decoration, so it was renamed (2026-09-29)
 - Related: [Reverse Derivation](#reverse-derivation)
 
 <a id="evaluation-output"></a>
 ### Evaluation Output
 - Japanese: [評価出力](./NRA-IDE_Dictionary_JP.md#evaluation-output)
-- Symbol / fixed name: $\mathcal{Y}^{(\mathrm{self})}_n$ / `evaluation_output`
+- Symbol / fixed name: $\mathsf{Out}^{(\mathrm{self})}_n$ / `evaluation_output`
 - Meaning: $R$ , the canonical state, and the irreversible latch. Neither Cause-Side observations nor Effect-Side artifacts; outputs computed from Cause-Side inputs by pre-fixed rules. Source: AXIOMS §14 (including side-specific ratios is the derivation document's reading)
 - Permitted uses: audit, structural testimony, state classification, pre-fixed physical-control commands. Into another target's thresholds or effective gate widths only in the safe-side direction and without a return path
 - Prohibited uses: the gauge of the same target (reverse derivation B); target states
+- Notation: formerly written $\mathcal{Y}^{(\mathrm{self})}_n$. There was no collision, but it was renamed to align the notation of the three P9 categories (target state, gauge, evaluation output) (2026-09-29)
 - Confusion notes: the permitted uses were once written too narrowly as "only thresholds, gates, and physical control" (2026-09-29)
 - Related: [Boundary Approach Ratio](#boundary-approach-ratio), [Reverse Derivation](#reverse-derivation)
 
@@ -560,12 +564,14 @@ Temporary variables used only inside an implementation (for example, the interna
 <a id="target-physical-state"></a>
 ### Target Physical State
 - Japanese: [対象状態](./NRA-IDE_Dictionary_JP.md#target-physical-state)
-- Symbol / fixed name: $\mathcal{W}^{(\mathrm{self})}_n$ / `target_physical_state`
+- Symbol / fixed name: $\mathsf{Phys}^{(\mathrm{self})}_n$ / `target_physical_state`
 - Type: state record
-- Meaning: the target's physical state $(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathcal{C}_n})$ . It excludes the evaluation state (latch) and the event history
+- Meaning: the target's physical state $(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathsf{Active}_n})$ . It excludes the evaluation state (latch) and the event history
 - Origin: observed physical events; the target's physical laws
 - Prohibited uses: reading back evaluation outputs (of this or another structure)
-- Confusion notes: only observed physical events enter the target state. Do not mix the physical state, the evaluation state, and the event history (2026-09-29)
+- Confusion notes:
+  - only observed physical events enter the target state. Do not mix the physical state, the evaluation state, and the event history (2026-09-29)
+  - it was formerly written $\mathcal{W}^{(\mathrm{self})}_n$; it differed from work $W$ of AXIOMS v2.4 only by decoration, so it was renamed (2026-09-29)
 - Related: [Evaluation State](#evaluation-state), [Event History](#event-history)
 
 <a id="temporary-reversible-deviation"></a>
@@ -584,7 +590,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [合成規則](./NRA-IDE_Dictionary_JP.md#thickness-composition-rule)
 - Symbol / fixed name: $\mathrm{Comp}_\tau$ / `thickness_composition_rule`
 - Type: map (fixed before evaluation)
-- Meaning: the rule that determines the effective thickness of the whole from element thicknesses; $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathcal{C}_n}\bigr)$ . Conditions: non-decreasing in each argument; finite, non-negative, and keeping the unit; equal to the element's thickness for a single element; zero when all elements are zero; and, where removal is allowed within an evaluation, not increasing when an element is removed
+- Meaning: the rule that determines the effective thickness of the whole from element thicknesses; $\tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)$ . Conditions: non-decreasing in each argument; finite, non-negative, and keeping the unit; equal to the element's thickness for a single element; zero when all elements are zero; and, where removal is allowed within an evaluation, not increasing when an element is removed
 - Notation: a sum for parallel elements. For series ( $\min$ ), removing an element can make the whole stronger, so removal is not handled within the evaluation and is treated as a declaration change
 - Confusion notes: formerly written $\Gamma$ , differing only by case from the damping coefficient $\gamma$ of FORMULA §5 (2026-09-29). While adding conditions, it was found that imposing "removal does not increase the value" on every form makes series structures unrepresentable (2026-09-29)
 - Related: [Active Elements](#active-elements), [Addition of a Structural Element](#structural-element-addition)
@@ -598,6 +604,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | Symbol | Entry |
 |---|---|
 | $a_n$ | [Applied Action](#applied-action) |
+| $\mathsf{Active}_n$ | [Active Elements](#active-elements) |
 | $\mathrm{Class}(R)$ | [Instantaneous Classification](#instantaneous-classification) |
 | $\mathrm{Comp}_\tau$ | [Thickness Composition Rule](#thickness-composition-rule) |
 | $\mathrm{ctx}_n$ | context, authority, and provenance ([Event Allocation Rule](#event-allocation-rule)) |
@@ -607,10 +614,13 @@ Temporary variables used only inside an implementation (for example, the interna
 | $\mathrm{Ev}_n$ | [Observation Event](#observation-event) |
 | $\mathrm{EvalGraph}^{(j)}$ | expanded evaluation graph (derivation document, Part 3) |
 | $g_p$ , $g^{[e]}_\lambda$ | increment laws of residual deviation and element degradation (physical laws; they do not take evaluation outputs as input) |
+| $\mathsf{Gauge}^{(\mathrm{self})}$ | [Evaluation Gauge](#evaluation-gauge) |
 | $\mathsf{History}_n$ | [Event History](#event-history) |
 | $M_R$ , $M_\tau$ | [Remaining Ratio Margin](#remaining-ratio-margin), [Remaining Absorption Margin](#remaining-absorption-margin) |
 | $o_n$ | [Observation Value](#observation-value) |
+| $\mathsf{Out}^{(\mathrm{self})}_n$ | [Evaluation Output](#evaluation-output) |
 | $p_n$ | [Residual Deviation](#residual-deviation) |
+| $\mathsf{Phys}^{(\mathrm{self})}_n$ | [Target Physical State](#target-physical-state) |
 | $q_n$ , $q^{\mathrm{temp}}_n$ | [Reversible Deviation](#reversible-deviation), [Temporary Reversible Deviation](#temporary-reversible-deviation) |
 | $R$ , $R_{\mathrm{target}}$ | [Boundary Approach Ratio](#boundary-approach-ratio) |
 | $R_{\mathrm{warn}}$ , $R_{\mathrm{handoff}}$ , $R_{\mathrm{irrev}}$ | [Warning Point](#warning-threshold), [Handoff Point](#handoff-threshold), [Irreversible Transition Onset](#irreversible-threshold) |
@@ -640,12 +650,7 @@ Temporary variables used only inside an implementation (for example, the interna
 
 ### 2.3 Decorated letters
 
-| Symbol | Entry |
-|---|---|
-| $\mathcal{C}_n$ | [Active Elements](#active-elements) |
-| $\mathcal{K}^{(\mathrm{self})}$ | [Evaluation Gauge](#evaluation-gauge) |
-| $\mathcal{W}^{(\mathrm{self})}_n$ | [Target Physical State](#target-physical-state) |
-| $\mathcal{Y}^{(\mathrm{self})}_n$ | [Evaluation Output](#evaluation-output) |
+There are currently no decorated-letter symbols. $\mathcal{C}_n$ , $\mathcal{W}^{(\mathrm{self})}_n$ , $\mathcal{K}^{(\mathrm{self})}$ , and $\mathcal{Y}^{(\mathrm{self})}_n$ were renamed on 2026-09-29 to $\mathsf{Active}_n$ , $\mathsf{Phys}^{(\mathrm{self})}_n$ , $\mathsf{Gauge}^{(\mathrm{self})}$ , and $\mathsf{Out}^{(\mathrm{self})}_n$ , and moved to 2.1.
 
 ### 2.4 Operators and relations (outside the rule)
 
@@ -792,6 +797,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-09-29 | physical state, evaluation state, and event history | [Target Physical State](#target-physical-state), [Event History](#event-history) |
 | 2026-09-29 | single-element $\tau_0$ , $\lambda_n$ and the general multi-element form | [Degradation Fraction](#degradation-fraction), [Declared Thickness](#declared-thickness) |
 | 2026-09-29 | distinctions only by typeface or case ( $\mathcal{D}$ and $D$ , $\Gamma$ and $\gamma$ , $\Lambda$ and $\lambda$ , $Q$ and $q$ , $E$ and $e$ , etc.) | each entry; 0.5 |
+| 2026-09-29 | symbols added to the canon (constraint $C$ , work $W$ ) and the derivation document's $\mathcal{C}_n$ , $\mathcal{W}_n$ (distinguished only by decoration); $\mathcal{K}$ and the knee value $k$ | [Active Elements](#active-elements), [Target Physical State](#target-physical-state), [Evaluation Gauge](#evaluation-gauge) |
 | 2026-09-29 | the permitted uses of evaluation outputs written too narrowly | [Evaluation Output](#evaluation-output) |
 | 2026-09-29 | the direction of the difference $\Delta$ (forward and backward) | 2.4 |
 | 2026-09-29 | the number of records and the absolute value ( $\lvert\cdot\rvert$ ) | [Event History](#event-history) |
