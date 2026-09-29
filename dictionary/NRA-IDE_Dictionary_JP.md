@@ -354,9 +354,11 @@
 - 英語版：[Applied Action](./NRA-IDE_Dictionary_EN.md#applied-action)
 - 記号・固定名： $a_n$ ／ `applied_action`
 - 型：対象への入力（観測された物理的事象）
-- 意味：その時点で構造に加わっている作用。受け止め幅を一時的に狭める条件も含む
-- 混同注意：命題2の事象の前後を $a$ 、 $b$ 、命題4の二つの構造を $\lambda_a$ 、 $\lambda_b$ と書いて、作用と同じ文字を使っていた（2026-09-29）
-- 関連：[可逆成分](#reversible-deviation)
+- 意味：その時点で構造に加わっている作用。受け止め幅を一時的に狭める条件の効果（一時的な可逆成分）もここに計上する
+- 混同注意：
+  - 命題2の事象の前後を $a$ 、 $b$ 、命題4の二つの構造を $\lambda_a$ 、 $\lambda_b$ と書いて、作用と同じ文字を使っていた（2026-09-29）
+  - [制約](#external-constraint) $C$ （外部条件）と混同しない。 $C$ は計上先ではなく、その効果が $\Delta\lambda_n$ や計器にだけ現れる場合は $a_n$ に現れない（2026-09-30）
+- 関連：[可逆成分](#reversible-deviation)、[制約](#external-constraint)
 
 <a id="remaining-absorption-margin"></a>
 ### 残存吸収余白（ざんぞんきゅうしゅうよはく）
@@ -462,15 +464,15 @@
 - 英語版：[Constraint](./NRA-IDE_Dictionary_EN.md#external-constraint)
 - 記号・固定名： $C$ ／ `external_constraint`
 - 型：補助構造量（Cause-Side）
-- 意味：対象構造へ外部から加わる負荷・制約。定義元：AXIOMS §4.5、FORMULA §7
+- 意味：対象構造へ外部から加わる負荷・拘束・環境条件。時点の値 $C_n$ を持つ量で、観測 $o_n$ の成分。何を $C$ とするか（種類・出所・単位・換算規則）は評価宣言に語で書く。定義元：AXIOMS §4.5、FORMULA §7
 - 出所：Cause-Side観測、評価前に固定した変換規則
-- 使ってはならない先：評価出力（ $R$ 、正規状態、不可逆ラッチ、その集約）から得ること
+- 使ってはならない先：評価出力（ $R$ 、正規状態、不可逆ラッチ、その集約）から得ること。蓄積ズレ・吸収厚みへの直接の計上（計上は $a_n$ ・ $\Delta p_n$ ・ $\Delta\lambda_n$ のいずれか一つ）
 - 混同注意：
   - 構成の旧記号 $\mathcal{C}_n$ と装飾だけの区別になっていた。構成の側を $\mathsf{Active}_n$ に改めた（2026-09-29）
   - 一般語の「制約（条件）」と区別する。例えば「 $\tau_{\mathrm{restored}}<\tau_0$ という制約」は条件の意味（2026-09-29）
-  - [作用](#applied-action) $a_n$ との関係は未整理（2026-09-29）
+  - $C$ は条件、[作用](#applied-action) $a_n$ は計上された作用。 $\delta$ ・ $\tau$ へ計上されるのは $a_n$ ・ $\Delta p_n$ ・ $\Delta\lambda_n$ のどれか一つで、 $C$ は計上先にならない。同じ因子（温度など）が $C$ と $a_n$ の両方に現れても二重計上ではない（2026-09-30）
 - 受け取り方の違い【未確認】：英語の constraint は最適化の制約条件と読まれやすい。ここでは外部から加わる負荷
-- 関連：[作用](#applied-action)、[構成](#active-elements)
+- 関連：[作用](#applied-action)、[構成](#active-elements)、[評価宣言](#evaluation-declaration)
 
 <a id="transition-phase"></a>
 ### 遷移位相（せんいいそう）
@@ -668,7 +670,7 @@
 |---|---|
 | $a_n$ | [作用](#applied-action) |
 | $\mathsf{Active}_n$ | [構成](#active-elements) |
-| $C$ | [制約](#external-constraint) |
+| $C$ 、 $C_n$ | [制約](#external-constraint) |
 | $\mathrm{Class}(R)$ | [瞬間分類](#instantaneous-classification) |
 | $\mathrm{Comp}_\tau$ | [合成規則](#thickness-composition-rule) |
 | $\mathrm{ctx}_n$ | 文脈・権限・出所（[分解規則](#event-allocation-rule)） |
@@ -877,6 +879,7 @@
 | 2026-09-29 | 記録の個数と絶対値（ $\lvert\cdot\rvert$ ） | [経路履歴](#event-history) |
 | 2026-09-29 | 正典v2.4の補助構造量（ $\omega$ ・ $\mathrm{Phase}$ ・ $C$ ・ $W$ ・ $\mathrm{entropy}$ ）が辞書になかった。 $\omega$ を「遷移継続量」とも呼んでいた（docs 12章） | [構造連続性](#structural-continuity)、[遷移位相](#transition-phase)、[制約](#external-constraint)、[仕事量](#work-quantity)、[エントロピー相当量](#entropy-quantity) |
 | 2026-09-30 | 余裕と余白（総幅 $\tau$ と残り $M_\tau$ が同じ「余裕」になっていた） | [残存吸収余白](#remaining-absorption-margin)、[残存比率余白](#remaining-ratio-margin) |
+| 2026-09-30 | 制約 $C$ （条件）と作用 $a_n$ （計上された入力） | [制約](#external-constraint)、[作用](#applied-action) |
 
 ---
 

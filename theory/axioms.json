@@ -222,7 +222,7 @@
       "name": "Constraint",
       "jp": "制約",
       "classification": "auxiliary_structural_quantity",
-      "meaning": "An external load or constraint acting on the target structure.",
+      "meaning": "An external load, restraint, or environmental condition acting on the target structure. What counts as C (kind, source, unit, conversion rule) is fixed in the evaluation declaration. C is not an allocation target of accumulated deviation or absorption thickness; it acts only as an argument of rules fixed before evaluation. Each change it causes is allocated exactly once, as a reversible component, residual deviation, or a decrease of absorption thickness.",
       "source": "Cause-Side observation or a transformation rule fixed before evaluation; must not be obtained from evaluation outputs"
     },
     "work_quantity": {
@@ -649,7 +649,9 @@
       "changes": [
         "Canonized auxiliary structural quantities (omega, Phase, C, W, entropy) that docs had used without a canonical definition",
         "Named the phase quantity 'Phase' (spelled, upright) rather than lowercase phi, to avoid a case-only collision with FORMULA.md section 5.1's Phi(x)",
-        "Stated explicitly that entropy is distinct from structural sensitivity S"
+        "Stated explicitly that entropy is distinct from structural sensitivity S",
+        "Stated that C is not an allocation target and acts only as an argument of pre-fixed rules",
+        "Unified the names of M_R and M_tau (Japanese 余白; English remaining ratio margin)"
       ]
     },
     "v2.3": {

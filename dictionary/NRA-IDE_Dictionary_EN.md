@@ -132,9 +132,11 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [作用](./NRA-IDE_Dictionary_JP.md#applied-action)
 - Symbol / fixed name: $a_n$ / `applied_action`
 - Type: input to the target (an observed physical event)
-- Meaning: the action applied to the structure at that step, including conditions that temporarily narrow the receiving width
-- Confusion notes: before/after in Proposition 2 were written $a$ , $b$ , and the two structures in Proposition 4 $\lambda_a$ , $\lambda_b$ , reusing the letter of the action (2026-09-29)
-- Related: [Reversible Deviation](#reversible-deviation)
+- Meaning: the action applied to the structure at that step. The effect of conditions that temporarily narrow the receiving width (the temporary reversible deviation) is also allocated here
+- Confusion notes:
+  - before/after in Proposition 2 were written $a$ , $b$ , and the two structures in Proposition 4 $\lambda_a$ , $\lambda_b$ , reusing the letter of the action (2026-09-29)
+  - do not confuse with the [Constraint](#external-constraint) $C$ (an external condition). $C$ is not an allocation target; when its effect appears only in $\Delta\lambda_n$ or in the gauge, it does not appear in $a_n$ (2026-09-30)
+- Related: [Reversible Deviation](#reversible-deviation), [Constraint](#external-constraint)
 
 <a id="boundary-approach-ratio"></a>
 ### Boundary Approach Ratio
@@ -184,15 +186,15 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [制約](./NRA-IDE_Dictionary_JP.md#external-constraint)
 - Symbol / fixed name: $C$ / `external_constraint`
 - Type: auxiliary structural quantity (Cause-Side)
-- Meaning: an external load or constraint acting on the target structure. Source: AXIOMS §4.5, FORMULA §7
+- Meaning: an external load, restraint, or environmental condition acting on the target structure. A quantity with a value $C_n$ at each step, as a component of the observation $o_n$ . What counts as $C$ (kind, source, unit, conversion rule) is written in words in the evaluation declaration. Source: AXIOMS §4.5, FORMULA §7
 - Origin: Cause-Side observation; transformation rules fixed before evaluation
-- Prohibited uses: obtaining it from evaluation outputs ( $R$ , the canonical state, the irreversible latch, or their aggregates)
+- Prohibited uses: obtaining it from evaluation outputs ( $R$ , the canonical state, the irreversible latch, or their aggregates); direct allocation into accumulated deviation or absorption thickness (allocation is to exactly one of $a_n$ , $\Delta p_n$ , $\Delta\lambda_n$ )
 - Confusion notes:
   - it differed from the former symbol $\mathcal{C}_n$ of active elements only by decoration; the active-elements side was renamed to $\mathsf{Active}_n$ (2026-09-29)
   - distinguish it from "constraint" as a general word meaning a condition; for example, "the constraint $\tau_{\mathrm{restored}}<\tau_0$ " means a condition (2026-09-29)
-  - its relation to the [Applied Action](#applied-action) $a_n$ is not yet settled (2026-09-29)
+  - $C$ is a condition; the [Applied Action](#applied-action) $a_n$ is an allocated action. What is allocated into $\delta$ or $\tau$ is exactly one of $a_n$ , $\Delta p_n$ , $\Delta\lambda_n$ ; $C$ is never an allocation target. The same factor (such as temperature) may appear in both $C$ and $a_n$ without double counting (2026-09-30)
 - Reading risk [Unconfirmed]: English constraint is easily read as a constraint in optimization. Here it is a load acting from outside
-- Related: [Applied Action](#applied-action), [Active Elements](#active-elements)
+- Related: [Applied Action](#applied-action), [Active Elements](#active-elements), [Evaluation Declaration](#evaluation-declaration)
 
 <a id="decision-sufficient-state"></a>
 ### Decision-Sufficient State
@@ -668,7 +670,7 @@ Temporary variables used only inside an implementation (for example, the interna
 |---|---|
 | $a_n$ | [Applied Action](#applied-action) |
 | $\mathsf{Active}_n$ | [Active Elements](#active-elements) |
-| $C$ | [Constraint](#external-constraint) |
+| $C$ , $C_n$ | [Constraint](#external-constraint) |
 | $\mathrm{Class}(R)$ | [Instantaneous Classification](#instantaneous-classification) |
 | $\mathrm{Comp}_\tau$ | [Thickness Composition Rule](#thickness-composition-rule) |
 | $\mathrm{ctx}_n$ | context, authority, and provenance ([Event Allocation Rule](#event-allocation-rule)) |
@@ -877,6 +879,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-09-29 | the number of records and the absolute value ( $\lvert\cdot\rvert$ ) | [Event History](#event-history) |
 | 2026-09-29 | the auxiliary structural quantities of canon v2.4 ( $\omega$ , $\mathrm{Phase}$ , $C$ , $W$ , $\mathrm{entropy}$ ) were missing from the dictionary; $\omega$ was also called "transition-continuation quantity" (docs Chapter 12) | [Structural Continuity](#structural-continuity), [Transition Phase](#transition-phase), [Constraint](#external-constraint), [Work](#work-quantity), [Entropy Quantity](#entropy-quantity) |
 | 2026-09-30 | 余裕 and 余白 (the total width $\tau$ and the remainder $M_\tau$ were both called 余裕 in Japanese) | [Remaining Absorption Margin](#remaining-absorption-margin), [Remaining Ratio Margin](#remaining-ratio-margin) |
+| 2026-09-30 | the constraint $C$ (a condition) and the applied action $a_n$ (an allocated input) | [Constraint](#external-constraint), [Applied Action](#applied-action) |
 
 ---
 

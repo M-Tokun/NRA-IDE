@@ -791,7 +791,7 @@ The following must not be used as computational inputs:
 - $\delta$ ：蓄積ズレのみ  
 - $\tau$ ：吸収厚みのみ  
 - $\omega$ ：構造連続性のみ（theory/AXIOMS.md §4.5）
-- $C$ ：制約のみ（使う場合、theory/AXIOMS.md §4.5）
+- $C$ ：制約（外部から加わる負荷・拘束・環境条件）のみ。蓄積ズレ・吸収厚みの計上先にしない（使う場合、theory/AXIOMS.md §4.5）
 - $\mathrm{entropy}$ ：ドメイン固有のエントロピー相当量のみ（使う場合、theory/AXIOMS.md §4.5）。$S$ と混同しない
 
 - $R$: boundary-approach ratio only  
@@ -801,7 +801,7 @@ The following must not be used as computational inputs:
 - $\delta$: accumulated deviation only  
 - $\tau$: absorption thickness only  
 - $\omega$: structural continuity only (theory/AXIOMS.md §4.5)
-- $C$: constraint only, when used (theory/AXIOMS.md §4.5)
+- $C$: constraint (external load, restraint, or environmental condition) only; never an allocation target of accumulated deviation or absorption thickness (when used, theory/AXIOMS.md §4.5)
 - $\mathrm{entropy}$: domain-specific entropy-like quantity only, when used (theory/AXIOMS.md §4.5); not to be confused with $S$
 
 同一文書または同一実装内で、これらの記号を別の意味に再利用してはならない。$W$（仕事量）は、使う場合だけドメインが定義・単位・観測方法を明記する任意量であり（theory/AXIOMS.md §4.5）、この予約表には含めない。位相は $\mathrm{Phase}$ と綴りで表し、FORMULA.md §5.1の $\Phi(x)$ と大小文字だけで区別しない。

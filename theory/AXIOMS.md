@@ -169,7 +169,7 @@ These auxiliary structural quantities may be used to support the Primary and Sec
 
 - \(\omega\)：構造連続性。構造が遷移を継続しているかを示す。ドメインが定めた連続観測または位相更新規則の下で継続が確認できるときに限り \(\omega>0\) とする。観測が欠けていることと \(\omega=0\) は同じではない。
 - \(\mathrm{Phase}\)：遷移位相。対象構造が遷移のどの段階にあるかを示す内部状態。Cause-Sideに由来する遷移規則で更新する。空間座標でも、モデルが生成した埋め込みでもない。
-- \(C\)：制約。対象構造へ外部から加わる負荷・制約。
+- \(C\)：制約。対象構造へ外部から加わる負荷・拘束・環境条件。何を \(C\) とするか（種類・出所・単位・換算規則）は評価宣言で固定する。\(C\) は蓄積ズレ・吸収厚みの計上先ではなく、評価前に固定した規則の引数としてだけ効く。その効果は、一つの変化につき一つだけ、可逆成分・残留ズレ・吸収厚みの減少のいずれかとして計上する。
 - \(W\)：仕事量。ドメインが定義・単位・観測方法を明記した場合だけ使う任意量。
 - \(\mathrm{entropy}\)：ドメイン固有のエントロピー相当量。ドメインが定義・算出規則を明記した場合だけ使う任意量。構造感度 \(S\)（FORMULA §3）とは別の記号であり、\(S\) をエントロピーの意味で使わない。
 
@@ -177,7 +177,7 @@ These auxiliary structural quantities may be used to support the Primary and Sec
 
 \(\mathrm{Phase}\) is an internal state showing which stage of transition the target structure occupies, updated under a Cause-Side-derived rule. It is neither a spatial coordinate nor a model-generated embedding.
 
-\(C\) is Constraint, an external load or constraint acting on the target structure.
+\(C\) is Constraint: an external load, restraint, or environmental condition acting on the target structure. What counts as \(C\) (kind, source, unit, conversion rule) is fixed in the evaluation declaration. \(C\) is not an allocation target of accumulated deviation or absorption thickness; it acts only as an argument of rules fixed before evaluation. Each change it causes is allocated exactly once, as a reversible component, residual deviation, or a decrease of absorption thickness.
 
 \(W\) is Work, an optional domain-specific quantity used only when a domain fixes its definition, unit, and observation method.
 
@@ -1140,7 +1140,7 @@ v2.4は、既存のdocs説明文書群が正典に定義のないまま使って
 
 ### 2.1 補助構造量を定義（§4.5）
 
-ω（構造連続性）、位相、制約、仕事量、エントロピーを、一次式・二次式を補う補助構造量として定義した。出所はCause-Sideに限る（§14と同じ権威原則）。いずれも評価出力から得てはならない。
+ω（構造連続性）、位相、制約、仕事量、エントロピーを、一次式・二次式を補う補助構造量として定義した。出所はCause-Sideに限る（§14と同じ権威原則）。いずれも評価出力から得てはならない。制約 \(C\) は計上先ではなく、規則の引数としてだけ効くことを明記した。
 
 ### 2.2 位相の記号を確定
 
