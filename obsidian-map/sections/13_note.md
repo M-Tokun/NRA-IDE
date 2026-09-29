@@ -2,7 +2,7 @@
 
 [← NRA-IDE Markdown 接続図](../00_NRA-IDE%E6%8E%A5%E7%B6%9A%E5%9B%B3.md)
 
-対象 Markdown: 85 ファイル
+対象 Markdown: 99 ファイル
 
 - [note/01_理論・公理_検討覚書/NRA-IDE_Official_Definition.md](../../note/01_%E7%90%86%E8%AB%96%E3%83%BB%E5%85%AC%E7%90%86_%E6%A4%9C%E8%A8%8E%E8%A6%9A%E6%9B%B8/NRA-IDE_Official_Definition.md)
 - [note/01_理論・公理_検討覚書/NRA-IDE_Principle_Anchor_and_Formula_Dictionary_2026-05-13.md](../../note/01_%E7%90%86%E8%AB%96%E3%83%BB%E5%85%AC%E7%90%86_%E6%A4%9C%E8%A8%8E%E8%A6%9A%E6%9B%B8/NRA-IDE_Principle_Anchor_and_Formula_Dictionary_2026-05-13.md)
@@ -62,6 +62,7 @@
 - [note/06_対話セッション記録/NRA_IDE_Quantum_Session_Records_EN.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/NRA_IDE_Quantum_Session_Records_EN.md)
 - [note/06_対話セッション記録/NRA_IDE_Quantum_Session_Records_JP.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/NRA_IDE_Quantum_Session_Records_JP.md)
 - [note/06_対話セッション記録/NRA-IDE_Paper_With_Figures_2026-04-15_JP.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/NRA-IDE_Paper_With_Figures_2026-04-15_JP.md)
+- [note/06_対話セッション記録/経路ライブラリ型AI安全アーキテクチャ.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/%E7%B5%8C%E8%B7%AF%E3%83%A9%E3%82%A4%E3%83%96%E3%83%A9%E3%83%AA%E5%9E%8BAI%E5%AE%89%E5%85%A8%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3.md)
 - [note/AIリテラシー/#_AIを「疑う」だけでは足りない.md](../../note/AI%E3%83%AA%E3%83%86%E3%83%A9%E3%82%B7%E3%83%BC/%23_AI%E3%82%92%E3%80%8C%E7%96%91%E3%81%86%E3%80%8D%E3%81%A0%E3%81%91%E3%81%A7%E3%81%AF%E8%B6%B3%E3%82%8A%E3%81%AA%E3%81%84.md)
 - [note/AIリテラシー/AIリテラシー_プロンプトは目的関数で書く_26-0905-1334.md](../../note/AI%E3%83%AA%E3%83%86%E3%83%A9%E3%82%B7%E3%83%BC/AI%E3%83%AA%E3%83%86%E3%83%A9%E3%82%B7%E3%83%BC_%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88%E3%81%AF%E7%9B%AE%E7%9A%84%E9%96%A2%E6%95%B0%E3%81%A7%E6%9B%B8%E3%81%8F_26-0905-1334.md)
 - [note/AIリテラシー/AIリテラシー_疑うから境界線へ_26-0825-1923.md](../../note/AI%E3%83%AA%E3%83%86%E3%83%A9%E3%82%B7%E3%83%BC/AI%E3%83%AA%E3%83%86%E3%83%A9%E3%82%B7%E3%83%BC_%E7%96%91%E3%81%86%E3%81%8B%E3%82%89%E5%A2%83%E7%95%8C%E7%B7%9A%E3%81%B8_26-0825-1923.md)
@@ -89,3 +90,16 @@
 - [note/poc_horizontal_ai/trusted_runtime/README.md](../../note/poc_horizontal_ai/trusted_runtime/README.md)
 - [note/README.md](../../note/README.md)
 - [note/Untitled-1.md](../../note/Untitled-1.md)
+- [note/正典考慮課題/一次式成立前提_経過記録.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E4%B8%80%E6%AC%A1%E5%BC%8F%E6%88%90%E7%AB%8B%E5%89%8D%E6%8F%90_%E7%B5%8C%E9%81%8E%E8%A8%98%E9%8C%B2.md)
+- [note/正典考慮課題/一次式成立前提_状態と未決事項.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E4%B8%80%E6%AC%A1%E5%BC%8F%E6%88%90%E7%AB%8B%E5%89%8D%E6%8F%90_%E7%8A%B6%E6%85%8B%E3%81%A8%E6%9C%AA%E6%B1%BA%E4%BA%8B%E9%A0%85.md)
+- [note/正典考慮課題/元ファイル/2026-09-26_0033_継続セッション_NRA-IDE非線形離散の実体化_承認待ち.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/2026-09-26_0033_%E7%B6%99%E7%B6%9A%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3_NRA-IDE%E9%9D%9E%E7%B7%9A%E5%BD%A2%E9%9B%A2%E6%95%A3%E3%81%AE%E5%AE%9F%E4%BD%93%E5%8C%96_%E6%89%BF%E8%AA%8D%E5%BE%85%E3%81%A1.md)
+- [note/正典考慮課題/元ファイル/2026-09-26_一次式成立前提_対話全文.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/2026-09-26_%E4%B8%80%E6%AC%A1%E5%BC%8F%E6%88%90%E7%AB%8B%E5%89%8D%E6%8F%90_%E5%AF%BE%E8%A9%B1%E5%85%A8%E6%96%87.md)
+- [note/正典考慮課題/元ファイル/2026-09-27_一次式成立前提_Claude案.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/2026-09-27_%E4%B8%80%E6%AC%A1%E5%BC%8F%E6%88%90%E7%AB%8B%E5%89%8D%E6%8F%90_Claude%E6%A1%88.md)
+- [note/正典考慮課題/元ファイル/2026-09-27_一次式成立前提_総合案.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/2026-09-27_%E4%B8%80%E6%AC%A1%E5%BC%8F%E6%88%90%E7%AB%8B%E5%89%8D%E6%8F%90_%E7%B7%8F%E5%90%88%E6%A1%88.md)
+- [note/正典考慮課題/元ファイル/2026-09-27_逆導出_語義と但し書き_棚卸し.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/2026-09-27_%E9%80%86%E5%B0%8E%E5%87%BA_%E8%AA%9E%E7%BE%A9%E3%81%A8%E4%BD%86%E3%81%97%E6%9B%B8%E3%81%8D_%E6%A3%9A%E5%8D%B8%E3%81%97.md)
+- [note/正典考慮課題/元ファイル/2026-09-27_逆導出_但し書き文案.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/2026-09-27_%E9%80%86%E5%B0%8E%E5%87%BA_%E4%BD%86%E3%81%97%E6%9B%B8%E3%81%8D%E6%96%87%E6%A1%88.md)
+- [note/正典考慮課題/元ファイル/2026-09-28_作業予定.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/2026-09-28_%E4%BD%9C%E6%A5%AD%E4%BA%88%E5%AE%9A.md)
+- [note/正典考慮課題/元ファイル/Claude提起文2026-09-27.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/Claude%E6%8F%90%E8%B5%B7%E6%96%872026-09-27.md)
+- [note/正典考慮課題/元ファイル/Claude提起文2026-09-28.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/Claude%E6%8F%90%E8%B5%B7%E6%96%872026-09-28.md)
+- [note/正典考慮課題/元ファイル/Claude提起文2026-09-29.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/Claude%E6%8F%90%E8%B5%B7%E6%96%872026-09-29.md)
+- [note/正典考慮課題/元ファイル/検討中.md](../../note/%E6%AD%A3%E5%85%B8%E8%80%83%E6%85%AE%E8%AA%B2%E9%A1%8C/%E5%85%83%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB/%E6%A4%9C%E8%A8%8E%E4%B8%AD.md)
