@@ -64,7 +64,7 @@ In implementations that use discrete phase transitions, residuals not adopted as
 
 This is an explicit implementation choice that blocks the path by which residuals re-enter as hidden state.
 
-However, this does not guarantee that every error associated with floating-point computation disappears. Nor is `entropy_export` a measurement of thermodynamic entropy or the $S$ that represents the reciprocal of remaining structural margin.
+However, this does not guarantee that every error associated with floating-point computation disappears. Nor is `entropy_export` a measurement of thermodynamic entropy or the $S$ that represents the reciprocal of remaining absorption margin.
 
 ### Separating the Role of the LLM from Structural Authority in Systems That Include an LLM
 

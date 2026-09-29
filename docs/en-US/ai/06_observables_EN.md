@@ -119,7 +119,7 @@ $W$ and entropy are not common inputs required in every implementation. Only whe
 
 $\omega$, $\mathrm{Phase}$, $C$, $W$, and entropy are auxiliary structural quantities defined in `theory/AXIOMS.md` §4.5.
 
-In this document set, $S = 1 / (\tau \cdot (1 - R))$ is used as the reciprocal of remaining structural margin. Therefore, representing entropy with the same symbol $S$ would create a notation conflict. This chapter denotes entropy as `entropy`. This distinction is also stated in `theory/AXIOMS.md` §4.5.
+In this document set, $S = 1 / (\tau \cdot (1 - R))$ is used as the reciprocal of remaining absorption margin. Therefore, representing entropy with the same symbol $S$ would create a notation conflict. This chapter denotes entropy as `entropy`. This distinction is also stated in `theory/AXIOMS.md` §4.5.
 
 ### $R$ and the Canonical Thresholds Are Not Cause-Side Inputs
 

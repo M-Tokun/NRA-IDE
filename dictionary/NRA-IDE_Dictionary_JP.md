@@ -114,7 +114,7 @@
 ### 完全破断境界（かんぜんはだんきょうかい）
 - 英語版：[Complete Rupture Boundary](./NRA-IDE_Dictionary_EN.md#complete-rupture-boundary)
 - 記号・固定名： $R=1.0$ ／ `RUPTURE_BOUNDARY`（状態名）
-- 意味：評価前に宣言した対象構造の残存構造余裕が尽きた境界。定義元：AXIOMS §9・§10.5
+- 意味：評価前に宣言した対象構造の残存吸収余白が尽きた境界。定義元：AXIOMS §9・§10.5
 - 混同注意：部分の破断を全体の破断と同じにしない（部分の破断は全体への事象）。 $\tau=0$ を完全破断へ読み替えない（→[定義域外](#out-of-domain)）
 - 関連：[境界接近比](#boundary-approach-ratio)
 
@@ -364,7 +364,9 @@
 - 記号・固定名： $M_\tau=\tau-\delta$ ／ `remaining_absorption_margin`（旧名 `remaining_slack` は非推奨）
 - 型・単位：派生出力、 $u$
 - 意味：厚みのうち、まだズレが入っていない残り。定義元：AXIOMS §5、FORMULA §2
-- 混同注意：吸収厚み（総幅）と混同しない（2026-09-26）
+- 混同注意：
+  - 吸収厚み（総幅）と混同しない（2026-09-26）
+  - 「残存吸収余裕」（AXIOMS §5）、「残存構造余裕」（AXIOMS §10.5、Thesis、docs）とも呼んでいた。余白に揃えた（2026-09-30）
 - 受け取り方の違い【未確認】：英語の margin は利益率や安全率と読まれやすい
 - 関連：[残存比率余白](#remaining-ratio-margin)
 
@@ -374,6 +376,8 @@
 - 記号・固定名： $M_R=1-R$ ／ `remaining_ratio_margin`
 - 型・単位：派生出力、無次元
 - 意味：定義元：AXIOMS §5、FORMULA §2。`remaining margin` という曖昧な単独名を使わない
+- 書き方：「比率」は、境界接近比 $R$ の尺度で測った余白という意味である。値は $M_\tau/\tau$ に等しい（ $M_R=1-R=(\tau-\delta)/\tau$ ）
+- 混同注意：AXIOMS §5では「無次元の境界余裕」と呼んでいた。「余裕」は総幅 $\tau$ の説明（AXIOMS §3・§4）にも使われるため、量の名前は「余白」に揃えた（2026-09-30）
 
 <a id="residual-deviation"></a>
 ### 残留ズレ（ざんりゅうずれ）
@@ -872,6 +876,7 @@
 | 2026-09-29 | 差分 $\Delta$ の向き（前進と後退） | 2.4 |
 | 2026-09-29 | 記録の個数と絶対値（ $\lvert\cdot\rvert$ ） | [経路履歴](#event-history) |
 | 2026-09-29 | 正典v2.4の補助構造量（ $\omega$ ・ $\mathrm{Phase}$ ・ $C$ ・ $W$ ・ $\mathrm{entropy}$ ）が辞書になかった。 $\omega$ を「遷移継続量」とも呼んでいた（docs 12章） | [構造連続性](#structural-continuity)、[遷移位相](#transition-phase)、[制約](#external-constraint)、[仕事量](#work-quantity)、[エントロピー相当量](#entropy-quantity) |
+| 2026-09-30 | 余裕と余白（総幅 $\tau$ と残り $M_\tau$ が同じ「余裕」になっていた） | [残存吸収余白](#remaining-absorption-margin)、[残存比率余白](#remaining-ratio-margin) |
 
 ---
 

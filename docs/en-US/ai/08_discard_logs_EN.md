@@ -60,13 +60,13 @@ This process blocks the path by which residuals not adopted into the next transi
 
 `entropy_export` is an **implementation-level record field** indicating residual that was not adopted into the next transition during discretization.
 
-It does not mean a directly measured value of thermodynamic entropy or physical heat itself. Therefore, when this document set uses $S$ as the reciprocal of remaining structural margin, `entropy_export` must not be represented by the same symbol.
+It does not mean a directly measured value of thermodynamic entropy or physical heat itself. Therefore, when this document set uses $S$ as the reciprocal of remaining absorption margin, `entropy_export` must not be represented by the same symbol.
 
 ```text
 S = 1 / (τ · (1 − R)) = 1 / (τ − δ)
 ```
 
-* **$S$:** Structural sensitivity as the reciprocal of remaining structural margin
+* **$S$:** Structural sensitivity as the reciprocal of remaining absorption margin
 * **`entropy_export`:** A record field for residual not adopted in a discrete transition
 
 Their roles and generation paths are different.

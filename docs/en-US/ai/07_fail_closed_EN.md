@@ -39,7 +39,7 @@ The sole axiom is “Existence is generation.” No second or subsequent axiom e
 
 `R_handoff` is a canonical Handoff threshold fixed before evaluation by Cause-Side domain authority in accordance with the domain-specific condition of approach to an irreversible regime. It cannot be established or rewritten after evaluation by an Effect-Side result or external audit. In principle, ordinary responses must be stopped at this point.
 
-$R = 1.0$ is not the canonical Handoff threshold. It is the `RUPTURE_BOUNDARY` of the declared NRA-IDE evaluation, at which that evaluation has no remaining structural margin, $\tau - \delta$. This classification does not declare every natural phase transition to be an NRA-IDE rupture. After this boundary has been reached, the LLM must not be asked to generate new free-form text in order to explain the reason for stopping.
+$R = 1.0$ is not the canonical Handoff threshold. It is the `RUPTURE_BOUNDARY` of the declared NRA-IDE evaluation, at which that evaluation has no remaining absorption margin, $\tau - \delta$. This classification does not declare every natural phase transition to be an NRA-IDE rupture. After this boundary has been reached, the LLM must not be asked to generate new free-form text in order to explain the reason for stopping.
 
 ---
 
@@ -66,7 +66,7 @@ Therefore, even when the LLM self-evaluates that “it is acceptable to continue
 
 ## After $R = 1.0$, Do Not Continue Ordinary Explanations
 
-`R ≥ 1.0` is the terminal boundary of the declared evaluation, at which that evaluation's structural margin has been lost.
+`R ≥ 1.0` is the terminal boundary of the declared evaluation, at which that evaluation's remaining absorption margin has been lost.
 
 For example, when `δ = 0.15` and `τ = 0.14`,
 
@@ -74,7 +74,7 @@ For example, when `δ = 0.15` and `τ = 0.14`,
 R = 0.15 / 0.14 ≒ 1.071
 ```
 
-At this point, regenerating an ordinary response or rephrasing it into a more cautious explanation does not restore structural margin itself.
+At this point, regenerating an ordinary response or rephrasing it into a more cautious explanation does not restore the remaining absorption margin itself.
 
 Post-NRA returns the predefined post-rupture fixed testimony or a reference to a protected Discard Log.
 

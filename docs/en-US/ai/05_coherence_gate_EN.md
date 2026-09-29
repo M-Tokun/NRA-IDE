@@ -45,7 +45,7 @@ When $\tau = 0$, canonical $R$ is undefined and the state is `OUT_OF_DESCRIPTION
 
 ---
 
-## Remaining Structural Margin
+## Remaining Absorption Margin
 
 Since $R = \delta / \tau$, when $\tau > 0$, the following relation holds.
 
@@ -53,7 +53,7 @@ Since $R = \delta / \tau$, when $\tau > 0$, the following relation holds.
 τ · (1 − R) = τ − δ
 ```
 
-$\tau - \delta$ is the remaining structural margin after deviation is subtracted from the current thickness.
+$\tau - \delta$ is the remaining absorption margin after deviation is subtracted from the current thickness.
 
 The following expression, discussed in Chapter 02,
 
@@ -61,7 +61,7 @@ The following expression, discussed in Chapter 02,
 S = 1 / (τ · (1 − R)) = 1 / (τ − δ)
 ```
 
-can be read as the reciprocal of this remaining structural margin. As $\delta$ approaches $\tau$, the remaining structural margin approaches zero, and $S$ diverges hyperbolically.
+can be read as the reciprocal of this remaining absorption margin. As $\delta$ approaches $\tau$, the remaining absorption margin approaches zero, and $S$ diverges hyperbolically.
 
 For the declared NRA-IDE evaluation, this shows why $R = 1.0$ is not an ordinary handoff threshold but `RUPTURE_BOUNDARY`. This classification does not declare every phase transition in nature to be an NRA-IDE rupture. After the declared evaluation reaches $R = 1.0$, it must not be assumed that there remains margin for “continuing ordinary output while making a judgment.”
 

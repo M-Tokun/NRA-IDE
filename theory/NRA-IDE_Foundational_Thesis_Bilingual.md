@@ -41,7 +41,7 @@ Updated: 2026-07-10 JST
 
 ## Abstract
 
-We intuitively feel that change happens gradually. Some bridges, biological systems, and power grids nevertheless undergo abrupt transitions after progressive degradation. Available measurements do not always expose the relevant remaining structural margin in time.
+We intuitively feel that change happens gradually. Some bridges, biological systems, and power grids nevertheless undergo abrupt transitions after progressive degradation. Available measurements do not always expose the relevant remaining absorption margin in time.
 
 Part I presents a framework for understanding this "suddenness" in structural terms rather than mathematical equations. No specialist knowledge is required. Only three concepts are needed: **accumulation**, **margin**, and **limit**.
 
@@ -69,7 +69,7 @@ That is the starting point of this framework.
 
 ### 1.2 Why Could It Not Be Predicted?
 
-One possible reason for prediction failure is that the available measurements and model did not adequately represent the **remaining structural margin**. This is a hypothesis to test for each domain, not a universal explanation of every failure.
+One possible reason for prediction failure is that the available measurements and model did not adequately represent the **remaining absorption margin**. This is a hypothesis to test for each domain, not a universal explanation of every failure.
 
 Measuring "velocity" requires time. Measuring "distance" requires a reference point. Both are quantities for describing *how change progresses*.
 
@@ -706,7 +706,7 @@ Updated: 2026-07-10 JST
 
 ## 要旨
 
-私たちは日常的に「変化は徐々に起こる」と感じている。しかし、橋梁、生体系、電力網の一部では、進行する劣化の後に急激な状態転換が生じる。利用可能な測定値が、関連する残存構造余裕を十分早く示すとは限らない。
+私たちは日常的に「変化は徐々に起こる」と感じている。しかし、橋梁、生体系、電力網の一部では、進行する劣化の後に急激な状態転換が生じる。利用可能な測定値が、関連する残存吸収余白を十分早く示すとは限らない。
 
 本稿の第一部では、この「突然性」を数式ではなく構造の言葉で理解するための枠組みを示す。専門的な数学の知識は必要としない。
 
@@ -736,7 +736,7 @@ Updated: 2026-07-10 JST
 
 ### 1.2 なぜ予測できなかったのか
 
-予測失敗の一因として、利用可能な測定とモデルが**残存構造余裕**を十分に表現していなかった可能性がある。これは各領域で検証すべき仮説であり、あらゆる失敗の普遍的説明ではない。
+予測失敗の一因として、利用可能な測定とモデルが**残存吸収余白**を十分に表現していなかった可能性がある。これは各領域で検証すべき仮説であり、あらゆる失敗の普遍的説明ではない。
 
 「速度」を測るためには時間が必要である。「距離」を測るためには基準点が必要である。どちらも「変化がどのように進むか」を記述するための量である。
 
@@ -836,7 +836,7 @@ NRAでは、この一文を唯一の基礎公理として採用する。あら�
 
 境界接近比 R = δ / τ は、蓄積ズレ δ が吸収厚み τ に対してどこまで進んでいるかを示す。R の正式な意味は構造境界への接近度である。直感的な説明では、**遊びの使用率として近似的に読むこともできる。**
 
-R が 0 に近ければ遊びはほとんど使われていない。R が 1.0 に近づくにつれて、残存する吸収余裕は尽きつつある。R = 1.0 で不変完全破断境界に達する。
+R が 0 に近ければ遊びはほとんど使われていない。R が 1.0 に近づくにつれて、残存吸収余白は尽きつつある。R = 1.0 で不変完全破断境界に達する。
 
 唯一公理が基礎前提を示し、構造持続原則が持続条件を記述する。第4章で導入するIDE基本式 $R=\delta/\tau$ は、この区分の下で使用する計算方法であり、追加公理ではない。
 
@@ -891,7 +891,7 @@ R が 0 に近いとき、蓄積されたズレは構造の余裕に対して小
 
 R が 1.0 に近づくにつれて、蓄積されたズレが構造の余裕を使い果たしつつある。境界への接近が進んでいる。
 
-**R が 1.0 に到達する前でも、不可逆遷移開始閾値 R_irrev を越えれば不可逆遷移は始まっている。R = 1.0 は、残存する吸収余裕を使い切った不変完全破断境界である。**
+**R が 1.0 に到達する前でも、不可逆遷移開始閾値 R_irrev を越えれば不可逆遷移は始まっている。R = 1.0 は、残存吸収余白を使い切った不変完全破断境界である。**
 
 この状態転換を、材料工学では「破断」と呼ぶ。
 
@@ -1045,13 +1045,13 @@ $\tau=0 \neq$ `FAIL_CLOSED`
 
 不明値を、平均、類似性、過去出力、または未観測部分への推論によって補完してはならない。既知の数学的恒等式、単位変換、事前に定義された確定規則の適用は、補完推論に含めない。
 
-残存余裕はIDE補助式であり、正規IDE計算式ではない。
+残存余白はIDE補助式であり、正規IDE計算式ではない。
 
 $$
 M_R=1-R,\qquad M_{\tau}=\tau-\delta
 $$
 
-`remaining_ratio_margin`は無次元であり、`remaining_absorption_margin`は $\delta$ 、 $\tau$ と同じ単位を持つ。両者は有限な $\delta\ge0$ かつ有限な $\tau>0$ でのみ定義し、曖昧な単一の残存余裕欄へ畳み込まない。
+`remaining_ratio_margin`は無次元であり、`remaining_absorption_margin`は $\delta$ 、 $\tau$ と同じ単位を持つ。両者は有限な $\delta\ge0$ かつ有限な $\tau>0$ でのみ定義し、曖昧な単一の残存余白欄へ畳み込まない。
 
 ### 7.2 二次式（二重ゆらぎ式）
 

@@ -66,9 +66,9 @@ $R$ が $R_{\mathrm{handoff}}$ に到達した場合、通常の生成回答は�
 **$R_{irrev}$ （不可逆遷移開始閾値）**
 `IRREVERSIBLE_TRANSITION`を開始してラッチする正規閾値です。具体値はドメイン固有ですが、 $R_{\mathrm{handoff}} < R_{irrev} < 1$ を満たします。 $R_{\mathrm{handoff}}$ を置き換えず、 $R=1$ も動かしません。
 
-**$S$ （構造感度／残存構造余裕の逆数）**
+**$S$ （構造感度／残存吸収余白の逆数）**
 $$S = \frac{1}{\tau \cdot (1-R)} = \frac{1}{\tau-\delta}$$
-残存構造余裕の逆数です。 $\tau > 0$ かつ $R < 1.0$ のときだけ定義します。 $R$ が1.0へ近づくと $S$ は発散します。 $S$ はエントロピーではありません。 $R \ge 1.0$ では、 $S$ を用いて追加評価や通常生成の継続を正当化しません。
+残存吸収余白の逆数です。 $\tau > 0$ かつ $R < 1.0$ のときだけ定義します。 $R$ が1.0へ近づくと $S$ は発散します。 $S$ はエントロピーではありません。 $R \ge 1.0$ では、 $S$ を用いて追加評価や通常生成の継続を正当化しません。
 
 **補助構造量について**
 $\omega$ 、 $\mathrm{Phase}$ 、 $C$ 、 $W$ 、entropyは、`theory/AXIOMS.md` §4.5が定める補助構造量です。出所はCause-Sideの観測または事前固定の変換規則に限られ、評価出力から得てはなりません。
@@ -96,7 +96,7 @@ $\omega$ 、 $\mathrm{Phase}$ 、 $C$ 、 $W$ 、entropyは、`theory/AXIOMS.md`
 
 **`PERMIT`** — $0 \le R < R_{warn}$ 。構造監査を継続しながら通常運用します。
 
-**`BOUNDARY_WARNING`** — $R_{warn} \le R < R_{\mathrm{handoff}}$ 。境界接近、残存余裕、傾向、常時存在する二重ゆらぎ欄、支配側、欠損情報、警告、監査記録を開示します。
+**`BOUNDARY_WARNING`** — $R_{warn} \le R < R_{\mathrm{handoff}}$ 。境界接近、残存余白、傾向、常時存在する二重ゆらぎ欄、支配側、欠損情報、警告、監査記録を開示します。
 
 **`HANDOFF_REQUIRED`** — $R_{\mathrm{handoff}} \le R < R_{irrev}$ 。新規自律判断・通常操作を停止し、固定Handoff証言を外部人間監査へ提示し、構造証言を継続します。
 

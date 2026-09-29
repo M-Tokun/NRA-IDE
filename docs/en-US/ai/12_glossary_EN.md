@@ -77,13 +77,13 @@ When $R$ reaches $R_{\mathrm{handoff}}$, ordinary generated responses do not pas
 **$R_{irrev}$ (irreversible-transition onset threshold)**
 The canonical threshold at which `IRREVERSIBLE_TRANSITION` begins and is latched. Its concrete value is domain-specific, but it must satisfy $R_{\mathrm{handoff}} < R_{irrev} < 1$. It does not replace $R_{\mathrm{handoff}}$ and does not move $R=1$.
 
-**$S$ (structural sensitivity / reciprocal of remaining structural margin)**
+**$S$ (structural sensitivity / reciprocal of remaining absorption margin)**
 
 $$
 S = \frac{1}{\tau \cdot (1-R)} = \frac{1}{\tau-\delta}
 $$
 
-The reciprocal of remaining structural margin. It is defined only when $\tau > 0$ and $R < 1.0$. As $R$ approaches 1.0, $S$ diverges. $S$ is not entropy. When $R \geq 1.0$, $S$ must not be used to justify further evaluation or the continuation of ordinary generation.
+The reciprocal of remaining absorption margin. It is defined only when $\tau > 0$ and $R < 1.0$. As $R$ approaches 1.0, $S$ diverges. $S$ is not entropy. When $R \geq 1.0$, $S$ must not be used to justify further evaluation or the continuation of ordinary generation.
 
 **On auxiliary structural quantities**
 $\omega$, $\mathrm{Phase}$, $C$, $W$, and entropy are auxiliary structural quantities defined in `theory/AXIOMS.md` §4.5. Their origin is limited to Cause-Side observation or a transformation rule fixed before evaluation; they must not be obtained from evaluation outputs.

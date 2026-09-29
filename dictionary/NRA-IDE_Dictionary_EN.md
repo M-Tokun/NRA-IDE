@@ -165,7 +165,7 @@ Temporary variables used only inside an implementation (for example, the interna
 ### Complete Rupture Boundary
 - Japanese: [完全破断境界](./NRA-IDE_Dictionary_JP.md#complete-rupture-boundary)
 - Symbol / fixed name: $R=1.0$ / `RUPTURE_BOUNDARY` (state name)
-- Meaning: the boundary at which the remaining structural margin of the target declared before evaluation is exhausted. Source: AXIOMS §9, §10.5
+- Meaning: the boundary at which the remaining absorption margin of the target declared before evaluation is exhausted. Source: AXIOMS §9, §10.5
 - Confusion notes: do not equate the rupture of a part with the rupture of the whole (a part's rupture is an event for the whole). Do not reinterpret $\tau=0$ as complete rupture (→ [Out of Domain](#out-of-domain))
 - Related: [Boundary Approach Ratio](#boundary-approach-ratio)
 
@@ -443,7 +443,9 @@ Temporary variables used only inside an implementation (for example, the interna
 - Symbol / fixed name: $M_\tau=\tau-\delta$ / `remaining_absorption_margin` (old name `remaining_slack` is deprecated)
 - Type / unit: derived output; $u$
 - Meaning: the part of the thickness not yet entered by deviation. Source: AXIOMS §5; FORMULA §2
-- Confusion notes: do not confuse with the absorption thickness (total width) (2026-09-26)
+- Confusion notes:
+  - do not confuse with the absorption thickness (total width) (2026-09-26)
+  - it was also called 残存吸収余裕 (AXIOMS §5) and 残存構造余裕 / "remaining structural margin" (AXIOMS §10.5, Thesis, docs); the Japanese name was unified to 余白 (2026-09-30)
 - Reading risk [Unconfirmed]: do not read "margin" as a profit margin or a safety factor
 - Related: [Remaining Ratio Margin](#remaining-ratio-margin)
 
@@ -453,6 +455,8 @@ Temporary variables used only inside an implementation (for example, the interna
 - Symbol / fixed name: $M_R=1-R$ / `remaining_ratio_margin`
 - Type / unit: derived output; dimensionless
 - Meaning: Source: AXIOMS §5; FORMULA §2. Do not use the ambiguous single name `remaining margin`
+- Notation: "ratio" means a margin measured on the scale of the boundary approach ratio $R$ . Its value equals $M_\tau/\tau$ ( $M_R=1-R=(\tau-\delta)/\tau$ )
+- Confusion notes: AXIOMS §5 called it "dimensionless boundary margin" (境界余裕). Because the Japanese 余裕 is also used to describe the total width $\tau$ (AXIOMS §3, §4), the quantity names were unified to 余白 (2026-09-30)
 
 <a id="structural-element-removal"></a>
 ### Removal of a Structural Element
@@ -872,6 +876,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-09-29 | the direction of the difference $\Delta$ (forward and backward) | 2.4 |
 | 2026-09-29 | the number of records and the absolute value ( $\lvert\cdot\rvert$ ) | [Event History](#event-history) |
 | 2026-09-29 | the auxiliary structural quantities of canon v2.4 ( $\omega$ , $\mathrm{Phase}$ , $C$ , $W$ , $\mathrm{entropy}$ ) were missing from the dictionary; $\omega$ was also called "transition-continuation quantity" (docs Chapter 12) | [Structural Continuity](#structural-continuity), [Transition Phase](#transition-phase), [Constraint](#external-constraint), [Work](#work-quantity), [Entropy Quantity](#entropy-quantity) |
+| 2026-09-30 | 余裕 and 余白 (the total width $\tau$ and the remainder $M_\tau$ were both called 余裕 in Japanese) | [Remaining Absorption Margin](#remaining-absorption-margin), [Remaining Ratio Margin](#remaining-ratio-margin) |
 
 ---
 

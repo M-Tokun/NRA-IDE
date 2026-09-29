@@ -116,7 +116,7 @@ The Primary Formula is a canonical calculation system of IDE, not an additional 
 
 基本式はIDEの正規計算式であり、追加公理ではない。IDE二次式は後述する二重ゆらぎ式である。その他の数式はIDEの派生式、補助式、または補完式であり、第三の正規IDE計算式にはならない。
 
-残存余裕はIDE補助式として次の2種を区別する。
+残存余白はIDE補助式として次の2種を区別する。
 
 $$
 M_R=1-R,qquad M_{\tau}=\tau-\delta

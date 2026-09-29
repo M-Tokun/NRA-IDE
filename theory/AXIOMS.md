@@ -228,7 +228,7 @@ R \uparrow \Rightarrow \text{危険境界への接近}
 $$
 
 Rが高いほど安全なのではない。  
-Rが高いほど、構造余裕は消費され、破断境界へ近づく。
+Rが高いほど、残存吸収余白は減り、破断境界へ近づく。
 
 ### 解釈境界コメント
 
@@ -282,13 +282,13 @@ Rを、安全スコア、構造保持率、信頼度、品質指標、意味保�
 
 The Nomological Ring Axiom is not itself an equation. The Primary Formula and the Secondary Formula (Dual-Fluctuation Formula) are canonical calculation systems of IDE, the computational method and engine; neither is an additional axiom. “Primary” and “Secondary” indicate definitional order and role, not mathematical degree. Directional outputs and $R_{\mathrm{dir}}$ neither redefine canonical $R$ nor directly classify canonical state.
 
-上記2系統以外の数式は、用途に応じてIDEの**派生式、補助式、または補完式**として扱う。残存余裕、構造感度、 $\tau$ 遷移積分、数値安定化、EMA実装詳細、残差応答、ハイブリッド力学などがこれに含まれる。これらは基本式または二重ゆらぎ式を説明・計算・実装上補うことはできるが、新たな公理または第三の正規IDE計算式にならず、唯一公理、2つの正規IDE計算式、Cause-Side権威、正規状態、不可逆ラッチを上書きしてはならない。
+上記2系統以外の数式は、用途に応じてIDEの**派生式、補助式、または補完式**として扱う。残存余白、構造感度、 $\tau$ 遷移積分、数値安定化、EMA実装詳細、残差応答、ハイブリッド力学などがこれに含まれる。これらは基本式または二重ゆらぎ式を説明・計算・実装上補うことはできるが、新たな公理または第三の正規IDE計算式にならず、唯一公理、2つの正規IDE計算式、Cause-Side権威、正規状態、不可逆ラッチを上書きしてはならない。
 
 Every other equation is classified, according to purpose, as an IDE-derived, auxiliary, or complementary formula. Such equations may support explanation, computation, or implementation, but they do not become another axiom or a third canonical IDE formula system and must not override the sole axiom, either canonical IDE formula system, Cause-Side authority, canonical states, or the irreversible latch.
 
-### IDE補助式：残存余裕 / IDE Auxiliary Formula: Remaining Margins
+### IDE補助式：残存余白 / IDE Auxiliary Formula: Remaining Margins
 
-「残存余裕」を出力する場合、無次元の境界余裕と、δ・τと同じ単位を持つ吸収余裕を区別する。
+「残存余白」を出力する場合、無次元の残存比率余白と、δ・τと同じ単位を持つ残存吸収余白を区別する。
 
 $$
 M_R=1-R
@@ -298,8 +298,8 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-- $M_R$ ：無次元の境界余裕 / dimensionless boundary margin
-- $M_{\tau}$ ：残存吸収余裕 / remaining absorption margin in the same unit as $\delta$ and $\tau$
+- $M_R$ ：残存比率余白（無次元） / remaining ratio margin (dimensionless)
+- $M_{\tau}$ ：残存吸収余白 / remaining absorption margin in the same unit as $\delta$ and $\tau$
 
 両者は、有限な $\delta\ge0$ かつ有限な $\tau>0$ のときだけ定義する。`remaining margin`という単独の曖昧なフィールド名を使用してはならない。構造証言では、`remaining_ratio_margin`と`remaining_absorption_margin`を区別して出力する。
 
@@ -648,7 +648,7 @@ $$
 R_{\mathrm{target}}\ge1.0
 $$
 
-評価前に宣言された対象構造の残存構造余裕が尽きた完全破断境界である。添字を省略した正規Rを用いる場合も、評価対象は事前に一意に宣言されていなければならない。
+評価前に宣言された対象構造の残存吸収余白が尽きた完全破断境界である。添字を省略した正規Rを用いる場合も、評価対象は事前に一意に宣言されていなければならない。
 
 この状態では、通常生成、回復提案、最適化、自律判断を禁止する。
 
@@ -726,7 +726,7 @@ $$
 - 境界警告
 - 人間委譲通知
 - 不可逆遷移通知
-- 残存余裕
+- 残存余白
 - 支配側
 - 欠損情報
 - 監査ログ
@@ -1132,7 +1132,7 @@ The normative reference implementation source is located at `nra-core/foundation
 
 v2.4は、唯一の律環公理、NRA構造原則、一次式 \(R=\delta/\tau\)、定義域、閾値の順序、正規境界状態、構造要素の付加・除去を変更しない。
 
-v2.4は、既存のdocs説明文書群が正典に定義のないまま使っていた補助構造量（ω・位相・制約・仕事量・エントロピー）を、新設§4.5として正式に正典化する。これにより、docs文書群がこれらの量を参照する際、正典の定義を引用できるようになる。
+v2.4は、既存のdocs説明文書群が正典に定義のないまま使っていた補助構造量（ω・位相・制約・仕事量・エントロピー）を、新設§4.5として正式に正典化する。これにより、docs文書群がこれらの量を参照する際、正典の定義を引用できるようになる。あわせて、残存余白の表記を揃えた（定義は変えない）。
 
 ---
 
@@ -1149,6 +1149,10 @@ docsで使われていた小文字 \(\varphi\) は、FORMULA.md §5.1の補助�
 ### 2.3 エントロピーとSの区別を明記
 
 エントロピー相当量を使う場合、構造感度 \(S\)（FORMULA §3）と混同しないことを正典で明記した。
+
+### 2.4 残存余白の表記を統一（§5・§10.5・§11）
+
+\(M_R\)・\(M_\tau\) の名前を、FORMULA.md §2・§7と同じ「残存比率余白」「残存吸収余白」に揃えた（英語では \(M_R\) を remaining ratio margin とした）。「余裕」は総幅 \(\tau\) の説明（§3・§4）にも使われるため、量の名前には「余白」を使う。定義は変えていない。
 
 ---
 
