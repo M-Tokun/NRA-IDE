@@ -66,7 +66,7 @@ NRA-IDEを実装へ配置するとき、Cause-Sideの構造権威、決定論的
 - **Structural Input Gate:** Cause-Side観測と更新規則を検証する境界。
 - **Normative IDE evaluator:** [`nra-core/foundations/NRA-IDE_Architecture_public.py`](../nra-core/foundations/NRA-IDE_Architecture_public.py)。配置だけで適合性は決まらない。
 - **Generated docs mirror:** [`docs/NRA-IDE_Architecture_public.py`](./NRA-IDE_Architecture_public.py)。正規ソースとSHA-256が一致しなければならない。
-- **Conformance suite:** [`tests/test_nra_ide_reference.py`](../tests/test_nra_ide_reference.py)。現行17試験への合格が必要であり、特定ドメインの安全性までは立証しない。
+- **Conformance suite:** [`tests/test_nra_ide_reference.py`](../tests/test_nra_ide_reference.py)。現行38試験への合格が必要であり、特定ドメインの安全性までは立証しない。
 - **LLM / presentation layer:** 構造証言を説明へ反映するEffect-Side。
 - **Effect-Side discard record:** 採用しなかった生成値をEffect-Side監査用に保持し、自動的な構造入力へ戻さない。正規の二つの構造ログと混同しない。
 - **Canonical structural logs:** 既知の数値進行用`STRUCTURAL_DISCLOSURE_LOG`と入力例外用`INPUT_EXCEPTION_LOG`を分離する。
