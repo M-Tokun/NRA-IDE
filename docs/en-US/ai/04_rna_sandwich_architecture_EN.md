@@ -74,7 +74,7 @@ It handles observations from the same Cause-Side history, update rules fixed bef
 
 * Verifies the observation procedure and provenance of $\delta$.
 * Determines the current value of $\tau$ from fixed rules and Cause-Side load history.
-* Verifies the provenance of quantities needed for structural state, such as $\omega$, $C$, and accumulated deviation.
+* Verifies the provenance of auxiliary structural quantities defined in `theory/AXIOMS.md` §4.5, such as $\omega$, $\mathrm{Phase}$, $C$, and accumulated deviation.
 * Verifies `R_warn`, `R_handoff`, and `R_irrev` and their canonical ordering before evaluation.
 * Separates `OUT_OF_DESCRIPTION_DOMAIN` for $\tau=0$ from `CONFESSION` for invalid values, provenance, rules, or threshold declarations.
 * Excludes Effect-Side scores, evaluations, previous outputs, and logs from Cause-Side values, canonical thresholds, states, the irreversible latch, rules, transformation inputs, update grounds, and provenance.

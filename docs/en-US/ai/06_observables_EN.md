@@ -16,7 +16,7 @@ The sole axiom is “Existence is generation.” The Primary Formula is neither 
 
 The important point here is that values usable for structural evaluation must not be divided simply into “directly measured values” and “calculated values.”
 
-Raw sensor values are not the only values that may be used. Structural variables obtained by transforming or accumulating Cause-Side observations according to rules defined in advance also exist. $\tau$, $\omega$, $\varphi$, and $R$ are representative examples.
+Raw sensor values are not the only values that may be used. Structural variables obtained by transforming or accumulating Cause-Side observations according to rules defined in advance also exist. $\tau$, $\omega$, $\mathrm{Phase}$, and $R$ are representative examples.
 
 Conversely, not every calculated value may be used. When LLM output, evaluation scores, old Effect-Side logs, or estimates made after examining results become Cause-Side values, thresholds, states, rules, transformation inputs, update grounds, or provenance, the $\Pi^{-1}$ path discussed in Chapter 03 arises.
 
@@ -57,7 +57,7 @@ The following quantities do not have the same role. Raw observations, structural
 | **$\delta$ (fluctuation / deviation)** | Structural input representing deviation occurring in the target system | Determined from direct observations or observation procedures defined in advance for the target domain        | Prohibited                                          |
 | **$\tau$ (thickness)**                 | Currently absorbable structural margin                                 | Determined from rules fixed at design time and Cause-Side load history                                        | Prohibited                                          |
 | **$\omega$ (angular velocity)**        | Quantity indicating whether the structure continues transitioning      | Determined from time-series Cause-Side observations or state-transition rules fixed in advance                | Prohibited                                          |
-| **$\varphi$ (phase)**                  | Internal state indicating the position of structural state transition  | Updated according to transition rules originating from the Cause-Side                                         | Prohibited                                          |
+| **$\mathrm{Phase}$**                   | Internal state indicating the position of structural state transition  | Updated according to transition rules originating from the Cause-Side                                         | Prohibited                                          |
 | **$C$ (constraint)**                   | Load or constraint applied externally to the target system             | Determined from sensor values, verified load records, or fixed physical conversions                           | Prohibited                                          |
 | **$W$ (work)**                         | Auxiliary quantity used only when required by the domain               | Used only when its definition, unit, and observation procedure are specified in the domain specification      | Prohibited                                          |
 | **entropy**                            | Auxiliary quantity used only when required by the domain               | Used only when its definition, calculation rule, and purpose of use are specified in the domain specification | Prohibited                                          |
@@ -78,6 +78,8 @@ $\delta$ is not necessarily a single raw sensor value. Even when it is determine
 
 Conversely, a “value that appears dangerous” estimated by an LLM from the impression of text, or a value inferred backward from an evaluation score, cannot be treated as $\delta$.
 
+$\delta$ consists of a reversible component, which returns toward the reference when the action is removed, and an irreversible component (residual deviation), which remains after the action is removed. The reference state is not reset during an evaluation. Because the reference is not moved, residual deviation left by past events remains contained in the present $\delta$. The definition follows `theory/AXIOMS.md` §4.
+
 ### $\tau$ Is Not a Direct Observation but the Current Thickness Determined by Rules
 
 $\tau$ is the current thickness through which the structure can absorb fluctuation. It is not a value returned directly by a raw sensor.
@@ -91,6 +93,8 @@ Through this distinction, $\tau$ may change dynamically, but LLMs and evaluation
 
 This dynamic update is legitimate only within the same Cause-Side history under a rule fixed before the relevant evaluation. It does not authorize transfer from an old Effect-Side to a later Cause-Side across Causal Diodes.
 
+The only route by which $\tau$ increases is the addition of a new structural element to the evaluation target (addition of a structural element). It does not restore the thickness of existing elements. Planned removal of an undamaged structural element (removal of a structural element) is not degradation, but it is also not a route by which $\tau$ increases. The definition follows `theory/AXIOMS.md` §7 and §8.
+
 ### $\omega$ Indicates Whether Transition Continues
 
 $\omega$ is a quantity that indicates whether the structure continues its state transition. It is not determined from the impression of a single point in time.
@@ -101,11 +105,11 @@ Inability to quantify precisely is not the same as inability to observe. In a no
 
 Linear computation is human survival wisdom where constants can be approximated in a local, static region; it is not nature as a whole. In large coupled recursive systems, errors multiply. If the observation axis or model itself changes, the change is not treated as an ordinary error correction but as generation of new structure and history under a newly declared observation context.
 
-### $\varphi$ Is Not a Spatial Coordinate
+### $\mathrm{Phase}$ Is Not a Spatial Coordinate
 
-$\varphi$ is a **phase** that indicates which stage of structural transition the target system occupies. It does not mean a position on a map or an embedding coordinate generated by a model.
+$\mathrm{Phase}$ indicates which stage of structural transition the target system occupies. It does not mean a position on a map or an embedding coordinate generated by a model. It is written $\mathrm{Phase}$ (spelled), not lowercase $\varphi$, so as not to be distinguished from the auxiliary computation term $\Phi(x)$ in FORMULA.md §5.1 by case alone.
 
-$\varphi$ is an internal state that records Cause-Side state transitions according to rules defined in advance. It is not the same as a “coordinate” or “center” generated by the Effect-Side.
+$\mathrm{Phase}$ is an internal state that records Cause-Side state transitions according to rules defined in advance. It is not the same as a “coordinate” or “center” generated by the Effect-Side. The definition follows `theory/AXIOMS.md` §4.5.
 
 ### $C$, $W$, and entropy Are Used Only After Their Necessity Is Defined
 
@@ -113,7 +117,9 @@ $C$ represents external constraints or loads applied to the target system. The o
 
 $W$ and entropy are not common inputs required in every implementation. Only when they are used must the domain specification record what they represent, which units they use, and from which Cause-Side observations they are determined.
 
-In this document set, $S = 1 / (\tau \cdot (1 - R))$ is used as the reciprocal of remaining structural margin. Therefore, representing entropy with the same symbol $S$ would create a notation conflict. This chapter denotes entropy as `entropy`. The glossary in Chapter 12 must maintain this notation consistently.
+$\omega$, $\mathrm{Phase}$, $C$, $W$, and entropy are auxiliary structural quantities defined in `theory/AXIOMS.md` §4.5.
+
+In this document set, $S = 1 / (\tau \cdot (1 - R))$ is used as the reciprocal of remaining structural margin. Therefore, representing entropy with the same symbol $S$ would create a notation conflict. This chapter denotes entropy as `entropy`. This distinction is also stated in `theory/AXIOMS.md` §4.5.
 
 ### $R$ and the Canonical Thresholds Are Not Cause-Side Inputs
 
@@ -174,7 +180,7 @@ The duty of testimony in NRA-IDE is to retain not only the values used, but also
 At minimum, the following must be recorded.
 
 * Provenance, acquisition time, and units of observations
-* Identifiers of the rules used to determine $\delta$, $\tau$, $\omega$, $\varphi$, and related quantities
+* Identifiers of the rules used to determine $\delta$, $\tau$, $\omega$, $\mathrm{Phase}$, and related quantities
 * Cause-Side load history used to update $\tau$
 * Grounds and rule version fixed in advance for `R_warn`, `R_handoff`, and `R_irrev`
 * Conditions under which ordinary output was suppressed
@@ -187,7 +193,7 @@ This record is terminal testimony that enables external human audit of the groun
 
 ## What Becomes Visible When the Observation Path Is Established
 
-When the provenance and update rules for $\delta$, $\tau$, $\omega$, and $\varphi$ are established, structural state can be traced.
+When the provenance and update rules for $\delta$, $\tau$, $\omega$, and $\mathrm{Phase}$ are established, structural state can be traced.
 
 * Which deviations are being observed.
 * From which Cause-Side load history the current thickness was determined.

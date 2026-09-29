@@ -127,6 +127,31 @@ Cause-Side observation and pre-fixed rule
 
 ---
 
+## The Moment an Evaluation Output Moves Its Own Gauge (Reverse Derivation B)
+
+Even when only Cause-Side-derived values are used, a different reverse connection arises if an evaluation output moves its own gauge.
+
+$R$, the canonical state, and the irreversible latch are neither Cause-Side observations nor Effect-Side artifacts. They are **evaluation outputs** computed from Cause-Side inputs by pre-fixed rules.
+
+```text
+Evaluation output (R or its moving average/aggregate)
+→ the reference, transformation rule, thresholds, or effective gate width of the same evaluation target
+→ an apparent change in R
+→ the target's actual state is unchanged
+```
+
+For example, widening the same target's effective gate width for tau because R has risen makes R appear to fall, without changing the target's actual absorption thickness. The same holds in the narrowing direction. The gauge would be adjusting itself to match its own reading, so R would come to reflect the gauge's own history rather than the target's state.
+
+This chapter calls this path **Reverse Derivation B (self-adjustment of the gauge)**. It includes paths across steps and paths returning through another evaluation target, and applies regardless of whether the direction widens or narrows.
+
+A path that feeds an evaluation output of another evaluation target into the thresholds or effective gate width of one's own evaluation target is permitted only in the safe-side direction (lowering thresholds, narrowing gate widths), and only when no path returns one's own evaluation outputs to that other target. The existence of such a path and its rule are fixed before evaluation begins.
+
+Whether a path is reverse derivation is judged by its origin and rewrite target, not by the name of the symbol used. An update of state by the physical law of the target structure itself rewrites the target structure and is not reverse derivation.
+
+The definition follows `theory/AXIOMS.md` §14. The classification table of meanings is placed in `theory/SANDWICH_ARCH.md` §8.4.
+
+---
+
 ## Human Investigation and Future Rule Revision Are Outside the Old Diode
 
 The old causal path ends at its Effect-Side:
