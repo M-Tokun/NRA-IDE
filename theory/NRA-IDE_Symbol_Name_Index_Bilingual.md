@@ -100,9 +100,9 @@ FORMULA §5の記号（ $x$ 、 $x_{\mathrm{exact}}$ 、 $r$ 、 $\gamma$ 、 $k
 
 ## 2. 導出文書の記号 / Symbols of the derivation document
 
-`theory/NRA-IDE_Primary_Formula_Derivation_Bilingual.md` で使う記号。評価宣言・射影・分解・合成などは、現時点では導出文書が置く前提であり、FORMULA.md §0.5への反映を予定している。「改訂後の表示」は、5章の規則による名前であり、2026-09-29に確定した（6章）。導出文書への反映は別に行う。
+`theory/NRA-IDE_Primary_Formula_Derivation_Bilingual.md` で使う記号。評価宣言・射影・分解・合成などは、現時点では導出文書が置く前提であり、FORMULA.md §0.5への反映を予定している。「表示」は、5章の規則による名前であり、2026-09-29に確定し（6章）、同日に導出文書へ反映した。「旧表示」は反映前の表示である。
 
-| 日本語名 | English | 現在の表示 | 改訂後の表示 | 固定名 | 型 | 出所 | 使ってよい先 | 状態 |
+| 日本語名 | English | 旧表示 | 表示 | 固定名 | 型 | 出所 | 使ってよい先 | 状態 |
 |---|---|---|---|---|---|---|---|---|
 | 評価宣言 | Evaluation Declaration | $\mathcal{D}$ | $\mathsf{Decl}$ | `evaluation_declaration` | 宣言 | 評価前の固定 | 当該評価の全体 | 改名（ $D$ との字体だけの区別をやめる） |
 | 構造更新番号 | Update Index | $n$ | $n$ | `update_index` | 添字 | 更新の順序 | 各状態量 | 維持 |
@@ -204,6 +204,7 @@ decision_sufficient_state:
 | 段7の $i=1,\dots,m$ の $m$ と和の添字 $m$ | 部分構造の個数と和の添字 | 語で書く（「有限個」） |
 | 引用中の先行草案の記号（ $D_T$ 、 $\Phi$ 、 $T$ 、 $J_t$ 、 $G_{\max}$ 、 $h_t$ 、 $U$ ） | それぞれ $D$ 、FORMULA §5の $\Phi$ 、 $G(r)$ 、 $h_{\mathrm{upper}}$ 、単位 $u$ などと衝突する | 引用は語で言い換え、式は元の文書（先行草案）を参照する |
 | 命題2の $a$ 、 $b$ と作用 $a_n$ | 事象の前後と作用 | $(-)$ 、 $(+)$ |
+| 命題4の $\lambda_a$ 、 $\lambda_b$ と作用 $a_n$ | 二つの構造のラベルと作用 | $\lambda_{\mathrm{low}}$ 、 $\lambda_{\mathrm{high}}$ （導出文書の反映時に追加） |
 | 自構造の添字 $k$ （案）と knee値 $k$ | 添字とFORMULA §5の係数、導出文書6.2の係数 | $(\mathrm{self})$ |
 | $\lambda_n$ と $\lambda^{[e]}_n$ | 単一要素の特殊形と要素ごとの一般形 | $\lambda_n$ は要素が一つの式だけで使う |
 | 名前「一時的な厚みの減少」 $\mu_n$ | 厚みの名前なのにズレの側に数える | $q^{\mathrm{temp}}_n$ |
