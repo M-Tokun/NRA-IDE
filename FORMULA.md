@@ -1,6 +1,6 @@
 # NRA-IDE 定義式 / NRA-IDE Formal Equations
 
-**Version:** 2.1  
+**Version:** 2.2  
 **Author:** M-Tokuni  
 **Document role:** Mathematical and computational definitions subordinate to `theory/AXIOMS.md` and `theory/axioms.json`
 
@@ -616,21 +616,21 @@ $$
 \gamma\frac{dx}{dt} =
 F_{\mathrm{IDE}}(x)
 +
-G(r)\Phi(x)
+G(\xi)\Phi(x)
 $$
 
 残差：
 
 $$
-r =
+\xi =
 x_{\mathrm{exact}}-x
 $$
 
 二次残差ゲート：
 
 $$
-G(r) =
-r\frac{|r|}{k+|r|}
+G(\xi) =
+\xi\frac{|\xi|}{k+|\xi|}
 $$
 
 ---
@@ -640,21 +640,21 @@ $$
 
 - $x$ ：現在の計算状態  
 - $x_{\mathrm{exact}}$ ：由来と不確かさを記録した事前定義の高精度参照状態（絶対的真値を意味しない）
-- $r$ ：参照状態との差  
+- $\xi$ ：参照状態との差  
 - $\gamma$ ：減衰係数  
 - $k$ ：knee値  
 - $F_{\mathrm{IDE}}(x)$ ：領域固有の基礎動力学項（IDE一次式ではない）
 - $\Phi(x)$ ：補助計算項  
-- $G(r)$ ：二次残差ゲート  
+- $G(\xi)$ ：二次残差ゲート  
 
 - $x$: current computational state  
 - $x_{\mathrm{exact}}$: predefined high-precision reference state with recorded provenance and uncertainty (not guaranteed absolute ground truth)
-- $r$: residual relative to the reference state  
+- $\xi$: residual relative to the reference state  
 - $\gamma$: damping coefficient  
 - $k$: knee value  
 - $F_{\mathrm{IDE}}(x)$: domain-specific base-dynamics term (not the IDE Primary Formula)
 - $\Phi(x)$: auxiliary computation term  
-- $G(r)$: second-order residual gate  
+- $G(\xi)$: second-order residual gate  
 
 ---
 
@@ -673,9 +673,9 @@ $$
 \gamma,k\in\mathbb{R}_{\mathrm{finite}}
 $$
 
-$x$ 、 $x_{\mathrm{exact}}$ 、 $r$ 、 $F_{\mathrm{IDE}}(x)$ 、 $\Phi(x)$ は有限値でなければならない。
+$x$ 、 $x_{\mathrm{exact}}$ 、 $\xi$ 、 $F_{\mathrm{IDE}}(x)$ 、 $\Phi(x)$ は有限値でなければならない。
 
-$x$, $x_{\mathrm{exact}}$, $r$, $F_{\mathrm{IDE}}(x)$, and $\Phi(x)$ must be finite.
+$x$, $x_{\mathrm{exact}}$, $\xi$, $F_{\mathrm{IDE}}(x)$, and $\Phi(x)$ must be finite.
 
 $x_{\mathrm{exact}}$ 、 $F_{\mathrm{IDE}}(x)$ 、 $\Phi(x)$ および各パラメータは、領域固有の根拠、適用範囲、不確かさ、検証方法を計算開始前に固定し、追跡可能にしなければならない。
 
@@ -683,16 +683,16 @@ For $x_{\mathrm{exact}}$, $F_{\mathrm{IDE}}(x)$, $\Phi(x)$, and each parameter, 
 
 ### 次元整合条件 / Dimensional Consistency
 
-\([x]=X\)、\([t]=T\)とする。残差 \(r=x_{\mathrm{exact}}-x\) と残差ゲートの加算 \(k+|r|\) を成立させるため、次を満たさなければならない。
+\([x]=X\)、\([t]=T\)とする。残差 \(\xi=x_{\mathrm{exact}}-x\) と残差ゲートの加算 \(k+|\xi|\) を成立させるため、次を満たさなければならない。
 
 $$
-[x_{\mathrm{exact}}]=[r]=[k]=X
+[x_{\mathrm{exact}}]=[\xi]=[k]=X
 $$
 
 このとき、
 
 $$
-[G(r)]=X
+[G(\xi)]=X
 $$
 
 である。補完式の各項を同次元にするため、次を満たさなければならない。
@@ -718,12 +718,12 @@ $$
 =
 [F_{\mathrm{IDE}}(x)]
 =
-[G(r)\Phi(x)]
+[G(\xi)\Phi(x)]
 =
 XT^{-2}
 $$
 
-Let \([x]=X\) and \([t]=T\). Dimensional validity of \(r=x_{\mathrm{exact}}-x\) and \(k+|r|\) requires \([x_{\mathrm{exact}}]=[r]=[k]=X\), which gives \([G(r)]=X\). The complementary equation is dimensionally homogeneous only when \([\gamma]=T^{-1}\), \([F_{\mathrm{IDE}}(x)]=XT^{-2}\), and \([\Phi(x)]=T^{-2}\). A domain may choose its own units, but it must establish these dimensional relations before computation.
+Let \([x]=X\) and \([t]=T\). Dimensional validity of \(\xi=x_{\mathrm{exact}}-x\) and \(k+|\xi|\) requires \([x_{\mathrm{exact}}]=[\xi]=[k]=X\), which gives \([G(\xi)]=X\). The complementary equation is dimensionally homogeneous only when \([\gamma]=T^{-1}\), \([F_{\mathrm{IDE}}(x)]=XT^{-2}\), and \([\Phi(x)]=T^{-2}\). A domain may choose its own units, but it must establish these dimensional relations before computation.
 
 ---
 
@@ -731,20 +731,20 @@ Let \([x]=X\) and \([t]=T\). Dimensional validity of \(r=x_{\mathrm{exact}}-x\) 
 ## 5.3 Small-Residual Region
 
 $$
-|r| \ll k
+|\xi| \ll k
 $$
 
 このとき、
 
 $$
-G(r)
+G(\xi)
 \approx
-\frac{r|r|}{k}
+\frac{\xi|\xi|}{k}
 $$
 
-したがって、 $G(r)$ は $r$ に対して二次的に小さくなる。
+したがって、 $G(\xi)$ は $\xi$ に対して二次的に小さくなる。
 
-Therefore, $G(r)$ becomes second-order small with respect to $r$.
+Therefore, $G(\xi)$ becomes second-order small with respect to $\xi$.
 
 ---
 
@@ -752,31 +752,31 @@ Therefore, $G(r)$ becomes second-order small with respect to $r$.
 ## 5.4 Large-Residual Region
 
 $$
-|r| \gg k
+|\xi| \gg k
 $$
 
 このとき、
 
 $$
-G(r) =
-\frac{r}{1+k/|r|}
+G(\xi) =
+\frac{\xi}{1+k/|\xi|}
 $$
 
 したがって、
 
 $$
-\lim_{|r|/k\to\infty}\frac{G(r)}{r}=1
+\lim_{|\xi|/k\to\infty}\frac{G(\xi)}{\xi}=1
 $$
 
 すなわち、
 
 $$
-G(r)\sim r
+G(\xi)\sim \xi
 $$
 
-$G(r)$ は奇関数であり、 $r$ の符号を保持する。大残差で有界値へ飽和せず、漸近的に線形かつ非有界である。
+$G(\xi)$ は奇関数であり、 $\xi$ の符号を保持する。大残差で有界値へ飽和せず、漸近的に線形かつ非有界である。
 
-$G(r)$ is odd and preserves the sign of $r$. For large residuals it is asymptotically linear and unbounded; it does not saturate to a bounded value.
+$G(\xi)$ is odd and preserves the sign of $\xi$. For large residuals it is asymptotically linear and unbounded; it does not saturate to a bounded value.
 
 ---
 
@@ -784,12 +784,12 @@ $G(r)$ is odd and preserves the sign of $r$. For large residuals it is asymptoti
 ## 5.5 Knee Value
 
 $$
-|r| = k
+|\xi| = k
 $$
 
 の近傍は、小残差の二次応答と大残差の漸近線形応答の遷移領域である。
 
-The neighborhood of $|r|=k$ is the transition region between the quadratic small-residual response and the asymptotically linear large-residual response.
+The neighborhood of $|\xi|=k$ is the transition region between the quadratic small-residual response and the asymptotically linear large-residual response.
 
 ---
 
@@ -853,11 +853,11 @@ $$
 $$
 
 $$
-r_n \in \mathbb{R}
+\xi_n \in \mathbb{R}
 $$
 
 $$
-G(r_n) \in \mathbb{R}
+G(\xi_n) \in \mathbb{R}
 $$
 
 すべて有限値でなければならない。
@@ -946,7 +946,11 @@ The prohibition of "values reverse-estimated from Effect-Side artifacts" does no
 
 同一文書または同一実装内で、これらの記号を別の意味に再利用してはならない。$W$（仕事量）は、使う場合だけドメインが定義・単位・観測方法を明記する任意量であり（theory/AXIOMS.md §4.5）、この予約表には含めない。位相は $\mathrm{Phase}$ と綴りで表し、FORMULA.md §5.1の $\Phi(x)$ と大小文字だけで区別しない。
 
+同一文書または同一実装内では、字体・大小文字・書体・装飾の違いだけで、別の意味の記号を区別してはならない。別の意味には別の基底名を使う。標準の数学演算子、名前・説明を表す添字（ラベル）、次元の記号は、この規則の対象外とする。
+
 These symbols must not be reused with different meanings within the same document or implementation. $W$ (Work) is an optional quantity used only when a domain fixes its definition, unit, and observation method (theory/AXIOMS.md §4.5), and is not included in this reserved list. The transition phase is written $\mathrm{Phase}$ (spelled), not distinguished from $\Phi(x)$ in §5.1 by case alone.
+
+Within the same document or implementation, symbols with different meanings must not be distinguished only by font, letter case, typeface, or decoration. Distinct meanings use distinct base names. Standard mathematical operators, subscripts that are names or descriptions (labels), and dimension symbols are outside this rule.
 
 ---
 

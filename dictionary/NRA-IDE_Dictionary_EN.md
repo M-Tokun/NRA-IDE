@@ -52,7 +52,7 @@ Temporary variables used only inside an implementation (for example, the interna
 
 ### 0.5 General notation rules
 
-**Typeface** (following ISO 80000-2)
+**Typeface** (ISO 80000-2; recommended for new writing)
 
 | Kind | Typeface | Examples |
 |---|---|---|
@@ -63,9 +63,9 @@ Temporary variables used only inside an implementation (for example, the interna
 | Dimensions | Upright sans-serif capitals | length $\mathsf{L}$ , mass $\mathsf{M}$ , time $\mathsf{T}$ , electric current $\mathsf{I}$ , thermodynamic temperature $\mathsf{\Theta}$ , amount of substance $\mathsf{N}$ , luminous intensity $\mathsf{J}$ |
 | Writing a dimension | Square brackets | $[F]=\mathsf{L}\,\mathsf{M}\,\mathsf{T}^{-2}$ ; a dimensionless quantity has $[Z]=1$ |
 
-**Repository rule**: within the same document or implementation, distinct meanings must not be distinguished solely by font, letter case, typeface, or decoration. Distinct meanings use distinct base names. Standard mathematical operators, labels, and dimension symbols are outside this rule. The rule is to be proposed for `FORMULA.md` §7 and is not yet normative. However, FORMULA §7 already contains one sentence on distinguishing the transition phase $\mathrm{Phase}$ from $\Phi(x)$ (v2.4).
+**Repository rule**: within the same document or implementation, distinct meanings must not be distinguished solely by font, letter case, typeface, or decoration. Distinct meanings use distinct base names. Standard mathematical operators, labels, and dimension symbols are outside this rule. The rule is normative in `FORMULA.md` §7 (FORMULA v2.2, 2026-09-30).
 
-**Differences from current canonical notation (not yet reflected)**: in FORMULA.md, the differential in §4.7 is an italic $d$ , and the dimension symbols in §5.2 are italic $X$ and $T$ . These differ from the typeface rules above. Any change to the canon will be presented individually in diff ④. The residual $r$ and the boundary approach ratio $R$ in FORMULA.md §5 differ only by case; whether to rename or to exempt it will be decided in diff ④.
+**Notation of this repository**: the current practice of writing the differential $d$ and the dimension symbols $X$ and $T$ in italic (FORMULA §4.7, §5.2; AXIOMS §5) is accepted. Not letting typeface carry meaning (FORMULA §7) takes priority, and the typeface table above (ISO 80000-2) is a recommendation for new writing. The residual in FORMULA §5, formerly $r$ (distinguished from the boundary approach ratio $R$ only by case), was renamed to $\xi$ (2026-09-30).
 
 ### 0.6 Marks for "Reading risk"
 
@@ -710,6 +710,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | $\epsilon$ | minimum threshold / near-zero (AXIOMS §1) |
 | $\ell_n$ | [Irreversible Latch](#irreversible-latch) |
 | $\lambda^{[e]}_n$ , $\lambda_n$ | [Degradation Fraction](#degradation-fraction) |
+| $\xi$ | residual (FORMULA §5; formerly $r$ ) |
 | $\Pi$ , $\Pi^{-1}$ | [Projection](#projection), [Inverse Projection](#inverse-projection) |
 | $\rho$ | reversible response (derivation document, Part 3) |
 | $\sigma$ | [Observation Projection Rule](#observation-projection-rule) |
@@ -728,7 +729,7 @@ There are currently no decorated-letter symbols. $\mathcal{C}_n$ , $\mathcal{W}^
 |---|---|---|
 | $\sum$ | sum | state the index range |
 | $\Delta$ | difference / increment | write **backward differences**: $\Delta x_n=x_n-x_{n-1}$ (FORMULA §4.7). The derivation document was aligned to backward differences on 2026-09-29 |
-| $\mathrm{d}/\mathrm{d}t$ , $\partial$ | derivative, partial derivative | the differential d is upright (0.5); FORMULA §4.7 uses italic (not yet reflected) |
+| $\mathrm{d}/\mathrm{d}t$ , $\partial$ | derivative, partial derivative | upright is recommended for new writing (0.5); the italic in FORMULA §4.7 and AXIOMS §5 is also accepted |
 | $\int$ , $\lim$ | integral, limit | — |
 | $\to$ | depends on context: limit, direction of a map, an edge of a computation path | as a path edge: "which quantity is computed from which" |
 | $\leadsto$ | a path exists (reaches after some steps) | — |
@@ -752,7 +753,7 @@ There are currently no decorated-letter symbols. $\mathcal{C}_n$ , $\mathcal{W}^
 |---|---|---|
 | $[x]$ | the dimension of quantity $x$ | — |
 | $\mathsf{L}$ , $\mathsf{M}$ , $\mathsf{T}$ , $\mathsf{I}$ , $\mathsf{\Theta}$ , $\mathsf{N}$ , $\mathsf{J}$ | ISQ base dimensions | upright sans-serif capitals (0.5) |
-| $X$ , $T$ (FORMULA §5.2) | dimension of state, dimension of time | current canon uses italic (not yet reflected) |
+| $X$ , $T$ (FORMULA §5.2) | dimension of state, dimension of time | italic is accepted as the notation of this repository (0.5) |
 | $[R]=1$ | dimensionless | — |
 
 ---
@@ -880,6 +881,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-09-29 | the auxiliary structural quantities of canon v2.4 ( $\omega$ , $\mathrm{Phase}$ , $C$ , $W$ , $\mathrm{entropy}$ ) were missing from the dictionary; $\omega$ was also called "transition-continuation quantity" (docs Chapter 12) | [Structural Continuity](#structural-continuity), [Transition Phase](#transition-phase), [Constraint](#external-constraint), [Work](#work-quantity), [Entropy Quantity](#entropy-quantity) |
 | 2026-09-30 | 余裕 and 余白 (the total width $\tau$ and the remainder $M_\tau$ were both called 余裕 in Japanese) | [Remaining Absorption Margin](#remaining-absorption-margin), [Remaining Ratio Margin](#remaining-ratio-margin) |
 | 2026-09-30 | the constraint $C$ (a condition) and the applied action $a_n$ (an allocated input) | [Constraint](#external-constraint), [Applied Action](#applied-action) |
+| 2026-09-30 | the residual $r$ and the boundary approach ratio $R$ (distinguished only by case); the rule against distinguishing by typeface or case alone was made normative in FORMULA §7 | 0.5, 2.2 |
 
 ---
 

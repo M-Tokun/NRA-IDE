@@ -529,21 +529,21 @@ $$
 \gamma\dot{x} =
 \underbrace{F_{\mathrm{IDE}}(x)}_{\text{基礎・全域}}
 +
-\underbrace{G(r)\Phi(x)}_{\text{補助計算}}
+\underbrace{G(\xi)\Phi(x)}_{\text{補助計算}}
 $$
 
 $$
-G(r) =
-r\frac{|r|}{k+|r|}
+G(\xi) =
+\xi\frac{|\xi|}{k+|\xi|}
 ,\qquad
-r=x_{\mathrm{exact}}-x
+\xi=x_{\mathrm{exact}}-x
 $$
 
-$G(r)$ は二次残差ゲートである。
+$G(\xi)$ は二次残差ゲートである。
 
-$r$ が小さい場合、 $G(r)\approx r|r|/k$ となり、 $r$ に対して二次的に小さい。
+$\xi$ が小さい場合、 $G(\xi)\approx \xi|\xi|/k$ となり、 $\xi$ に対して二次的に小さい。
 
-$r$ が大きい場合、 $G(r)\sim r$ となる。応答は $r$ の符号を保持し、漸近的に線形かつ非有界であり、有界値へ飽和しない。
+$\xi$ が大きい場合、 $G(\xi)\sim \xi$ となる。応答は $\xi$ の符号を保持し、漸近的に線形かつ非有界であり、有界値へ飽和しない。
 
 IDE項 $F_{\mathrm{IDE}}$ は全域で動作し、補助計算層は追従精度を補う。
 
@@ -567,21 +567,21 @@ $$
 \gamma\dot{x} =
 \underbrace{F_{\mathrm{IDE}}(x)}_{\text{base / full domain}}
 +
-\underbrace{G(r)\Phi(x)}_{\text{auxiliary computation}}
+\underbrace{G(\xi)\Phi(x)}_{\text{auxiliary computation}}
 $$
 
 $$
-G(r) =
-r\frac{|r|}{k+|r|}
+G(\xi) =
+\xi\frac{|\xi|}{k+|\xi|}
 ,\qquad
-r=x_{\mathrm{exact}}-x
+\xi=x_{\mathrm{exact}}-x
 $$
 
-$G(r)$ is a second-order residual gate.
+$G(\xi)$ is a second-order residual gate.
 
-When $r$ is small, $G(r)\approx r|r|/k$ and is second-order small with respect to $r$.
+When $\xi$ is small, $G(\xi)\approx \xi|\xi|/k$ and is second-order small with respect to $\xi$.
 
-When $r$ is large, $G(r)\sim r$. The response preserves the sign of $r$, is asymptotically linear and unbounded, and does not saturate to a bounded value.
+When $\xi$ is large, $G(\xi)\sim \xi$. The response preserves the sign of $\xi$, is asymptotically linear and unbounded, and does not saturate to a bounded value.
 
 The IDE term $F_{\mathrm{IDE}}$ operates across the full domain, while the auxiliary computation layer improves tracking precision.
 
