@@ -1,8 +1,6 @@
 ?file= 方式のビューア リポジトリの実際の構成（master ブランチ、theory/・ground/・docs/ などに .md が分散している状態）に合わせて設定済み
 
-配置と設定
-
-docs/index.html として置き、Pages の公開元を「master ブランチ / (root)」にしてください。冒頭の CFG だけが可変部分で、localBase: "../" は docs/ からリポジトリ直下を指す位置関係を表しています。別の場所に置く場合はここを直してください。
+配置と設定 md-app
 
 https://m-tokun.github.io/NRA-IDE/docs/?file=theory/THEORY.md
 https://m-tokun.github.io/NRA-IDE/docs/?file=FORMULA.md#definition-2

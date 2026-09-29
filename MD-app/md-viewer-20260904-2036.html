@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  FILE: md-viewer-splitter-20260928-2301.html
+  FILE: md-viewer-dual-resizable-20260929-1651.html
   TITLE: GFM Markdown Viewer (single file)
   TIME : 2026-09-28 23:01:25 (JST)
   (C) M-Tokuni 2026 / Author: M-Tokuni
@@ -21,7 +21,7 @@
   --bg:#ffffff; --bg-soft:#f6f8fa; --fg:#1f2328; --fg-muted:#59636e;
   --line:#d1d9e0; --link:#0969da; --accent:#1a7f37; --code-bg:#f6f8fa;
   --quote:#59636e; --quote-line:#d1d9e0; --mark:#fff8c5;
-  --sidebar-w:264px; --header-h:46px; --editor-w:44%; --splitter-w:8px;
+  --sidebar-w:360px; --header-h:46px; --editor-w:44%; --splitter-w:8px; --side-splitter-w:8px;
 }
 :root[data-theme="dark"]{
   --bg:#0d1117; --bg-soft:#161b22; --fg:#e6edf3; --fg-muted:#9198a1;
@@ -59,12 +59,20 @@ aside{
   position:sticky; top:var(--header-h);
 }
 aside.hidden{display:none}
+#side-splitter{
+  position:relative;width:var(--side-splitter-w);flex:0 0 var(--side-splitter-w);
+  cursor:col-resize;touch-action:none;user-select:none;background:transparent;outline:none;
+}
+#side-splitter::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;transform:translateX(-50%);background:var(--line);transition:width .12s,background .12s}
+#side-splitter:hover::before,#side-splitter:focus-visible::before,body.side-resizing #side-splitter::before{width:4px;background:var(--link)}
+#sidebar.hidden + #side-splitter{display:none}
+body.side-resizing,body.side-resizing *{cursor:col-resize!important;user-select:none!important}
 .side-sec{padding:10px 12px;border-bottom:1px solid var(--line)}
 .side-sec h2{font-size:11px;letter-spacing:.04em;color:var(--fg-muted);margin:0 0 6px;font-weight:600}
 .side-sec ul{list-style:none;margin:0;padding:0}
 .side-sec li a{
   display:block;padding:3px 6px;border-radius:5px;font-size:13px;color:var(--fg);
-  text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-decoration:none;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.45;
 }
 .side-sec li a:hover{background:var(--line)}
 .side-sec li a.current{background:var(--line);font-weight:600}
@@ -137,10 +145,10 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
   aside{position:fixed;left:0;top:var(--header-h);z-index:15}
   #viewport{padding:20px 16px 100px}
   #editor.on{width:100%;display:none}
-  #splitter{display:none!important}
+  #splitter,#side-splitter{display:none!important}
 }
 @media print{
-  header,aside,#editor{display:none!important}
+  header,aside,#side-splitter,#editor{display:none!important}
   #viewport{overflow:visible;padding:0;height:auto}
   main{padding:0;display:block}
   #doc{max-width:none}
@@ -173,6 +181,7 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
       <ul id="toc" class="toc"></ul>
     </div>
   </aside>
+  <div id="side-splitter" role="separator" aria-orientation="vertical" aria-label="目次サイドバーの幅を変更" tabindex="0" title="ドラッグで目次幅変更 / ダブルクリックで360pxに戻す"></div>
 
   <div id="pane">
     <textarea id="editor" spellcheck="false" placeholder="ここに Markdown を書くと右側に反映されます。"></textarea>
@@ -197,6 +206,7 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
   const $ = (id) => document.getElementById(id);
   const doc = $("doc"), viewport = $("viewport"), editor = $("editor");
   const pane = $("pane"), splitter = $("splitter");
+  const sidebar = $("sidebar"), sideSplitter = $("side-splitter");
   const tocEl = $("toc"), fileListEl = $("filelist"), fileSec = $("filesec");
   const fnameEl = $("fname");
 
@@ -223,7 +233,62 @@ body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
 
   /* ============ 数式・コードの保護 ============ */
   // marked が数式内の _ や * を解釈しないよう、先に退避します。
-  function protect(src) {
+    /* ---------- 目次サイドバー可変幅 ---------- */
+  const SIDEBAR_DEFAULT = 360;
+  const SIDEBAR_MIN = 220;
+  const SIDEBAR_MAX = 760;
+  const SIDEBAR_STORAGE_KEY = "md-viewer-sidebar-width-v2";
+
+  function sidebarBounds(){
+    const total = document.querySelector("main")?.clientWidth || window.innerWidth;
+    return {min:SIDEBAR_MIN, max:Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, total - 420))};
+  }
+  function setSidebarWidth(px, persist=true){
+    const b=sidebarBounds();
+    const w=Math.max(b.min, Math.min(b.max, Math.round(px)));
+    document.documentElement.style.setProperty("--sidebar-w", w+"px");
+    sideSplitter.setAttribute("aria-valuemin", String(b.min));
+    sideSplitter.setAttribute("aria-valuemax", String(b.max));
+    sideSplitter.setAttribute("aria-valuenow", String(w));
+    sideSplitter.setAttribute("aria-valuetext", "目次 " + w + "px");
+    if(persist){try{localStorage.setItem(SIDEBAR_STORAGE_KEY,String(w))}catch(e){}}
+    return w;
+  }
+  let savedSide=null;
+  try{savedSide=Number(localStorage.getItem(SIDEBAR_STORAGE_KEY))}catch(e){}
+  setSidebarWidth(Number.isFinite(savedSide)&&savedSide>0?savedSide:SIDEBAR_DEFAULT,false);
+
+  let sideDrag=null;
+  sideSplitter.addEventListener("pointerdown",e=>{
+    if(matchMedia("(max-width:820px)").matches || sidebar.classList.contains("hidden")) return;
+    e.preventDefault();
+    sideDrag={x:e.clientX,width:sidebar.getBoundingClientRect().width,id:e.pointerId};
+    try{sideSplitter.setPointerCapture(e.pointerId)}catch(err){}
+    document.body.classList.add("side-resizing");
+  });
+  sideSplitter.addEventListener("pointermove",e=>{
+    if(!sideDrag || e.pointerId!==sideDrag.id) return;
+    setSidebarWidth(sideDrag.width+(e.clientX-sideDrag.x));
+  });
+  function endSideDrag(e){
+    if(!sideDrag || (e && e.pointerId!==sideDrag.id)) return;
+    try{sideSplitter.releasePointerCapture(sideDrag.id)}catch(err){}
+    sideDrag=null; document.body.classList.remove("side-resizing");
+  }
+  sideSplitter.addEventListener("pointerup",endSideDrag);
+  sideSplitter.addEventListener("pointercancel",endSideDrag);
+  sideSplitter.addEventListener("dblclick",()=>setSidebarWidth(SIDEBAR_DEFAULT));
+  sideSplitter.addEventListener("keydown",e=>{
+    const w=sidebar.getBoundingClientRect().width;
+    if(e.key==="ArrowLeft"){e.preventDefault();setSidebarWidth(w-16)}
+    else if(e.key==="ArrowRight"){e.preventDefault();setSidebarWidth(w+16)}
+    else if(e.key==="Home"){e.preventDefault();setSidebarWidth(SIDEBAR_DEFAULT)}
+  });
+  window.addEventListener("resize",()=>{
+    if(!matchMedia("(max-width:820px)").matches) setSidebarWidth(sidebar.getBoundingClientRect().width,false);
+  });
+
+function protect(src) {
     const code = [], math = [];
     let s = src;
 
