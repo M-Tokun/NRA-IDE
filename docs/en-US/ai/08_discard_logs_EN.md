@@ -41,7 +41,7 @@ next_phase_int = math.floor(raw_next_phase)
 entropy_export = raw_next_phase - next_phase_int
 ```
 
-`raw_next_phase` contains an integer part adopted as the next phase and a fractional part that is not adopted. Only `next_phase_int` is passed to the next discrete transition, while the fractional part is recorded as `entropy_export`.
+`raw_next_phase` contains an integer part adopted as the next phase and a fractional part that is not adopted. Only `next_phase_int` is passed to the next discrete transition, while the fractional part is recorded as `entropy_export`. In this example, $\omega$ is implemented as the phase increment per transition (such as angular velocity in a rotating system). This is consistent with the definition in `theory/AXIOMS.md` §4.5 that $\omega > 0$ indicates a continuing transition.
 
 The important point is that this does **not** discard all information or all error.
 

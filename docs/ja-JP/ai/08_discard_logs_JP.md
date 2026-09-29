@@ -41,7 +41,7 @@ next_phase_int = math.floor(raw_next_phase)
 entropy_export = raw_next_phase - next_phase_int
 ```
 
-`raw_next_phase`には、次の位相として採用する整数部分と、採用しない小数部分が含まれます。`next_phase_int`だけを次の離散遷移へ渡し、小数部分は`entropy_export`として記録します。
+`raw_next_phase`には、次の位相として採用する整数部分と、採用しない小数部分が含まれます。`next_phase_int`だけを次の離散遷移へ渡し、小数部分は`entropy_export`として記録します。この例では、ωを一回の遷移で進む位相の増分（回転系の角速度など）として実装しています。これは、ω > 0 が遷移の継続を示すという`theory/AXIOMS.md` §4.5の定義と矛盾しません。
 
 重要なのは、**すべての情報やすべての誤差を捨てるのではない**ことです。ここで扱うのは、事前に定めた離散化規則において、次の状態遷移へ持ち越さない残差だけです。
 
