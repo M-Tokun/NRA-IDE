@@ -193,7 +193,7 @@ NRA-IDEの「二重ゆらぎ」は、まさにこの「ズレが増えて、同�
 
 ## 1. 記号表
 
-記号の名前・固定名・型・出所・使ってよい先・混同しやすい点は、辞書 `theory/NRA-IDE_Dictionary_JP.md` （英語版 `theory/NRA-IDE_Dictionary_EN.md`。非規範）で引ける。本書は、字体・大小・書体の違いだけで別の意味の記号を区別しない（辞書0.5）。正典の予約記号（FORMULA.md §7： $R,S,M_R,M_\tau,\delta,\tau$ ）とAXIOMS.md §1の記号（ $\omega$ 、 $\epsilon$ 、 $\emptyset$ ほか）は、正典の意味でだけ使う。
+記号の名前・固定名・型・出所・使ってよい先・混同しやすい点は、辞書 `dictionary/NRA-IDE_Dictionary_JP.md` （英語版 `dictionary/NRA-IDE_Dictionary_EN.md`。非規範）で引ける。本書は、字体・大小・書体の違いだけで別の意味の記号を区別しない（辞書0.5）。正典の予約記号（FORMULA.md §7： $R,S,M_R,M_\tau,\delta,\tau$ ）とAXIOMS.md §1の記号（ $\omega$ 、 $\epsilon$ 、 $\emptyset$ ほか）は、正典の意味でだけ使う。
 
 | 記号 | 名称 | 意味 | 定義箇所 | 第1部 |
 |---|---|---|---|---|
