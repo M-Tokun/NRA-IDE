@@ -63,7 +63,7 @@
 | 次元 | サンセリフの立体大文字 | 長さ $\mathsf{L}$ 、質量 $\mathsf{M}$ 、時間 $\mathsf{T}$ 、電流 $\mathsf{I}$ 、熱力学温度 $\mathsf{\Theta}$ 、物質量 $\mathsf{N}$ 、光度 $\mathsf{J}$ |
 | 次元の書き方 | 大括弧 | $[F]=\mathsf{L}\,\mathsf{M}\,\mathsf{T}^{-2}$ 、無次元量は $[Z]=1$ |
 
-**本リポジトリの規則**：同一文書または同一実装の中では、字体・大小文字・書体・装飾の違いだけで、別の意味の記号を区別しない。別の意味には別の基底名を使う。規則の対象外は、標準の数学演算子、ラベル、次元の記号である。この規則は `FORMULA.md` §7へ提示する予定であり、現時点では規範ではない。
+**本リポジトリの規則**：同一文書または同一実装の中では、字体・大小文字・書体・装飾の違いだけで、別の意味の記号を区別しない。別の意味には別の基底名を使う。規則の対象外は、標準の数学演算子、ラベル、次元の記号である。この規則は `FORMULA.md` §7へ提示する予定であり、現時点では規範ではない。ただし、遷移位相 $\mathrm{Phase}$ と $\Phi(x)$ の区別については、FORMULA §7に一文がある（v2.4）。
 
 **正典の現在の書き方との違い（未反映）**：FORMULA.md §4.7の微分は斜体の $d$ 、§5.2の次元の記号は斜体の $X$ 、 $T$ である。上の書体の規則とは違う。正典を改める場合は、差分④で個別に提示する。FORMULA.md §5の残差 $r$ と境界接近比 $R$ は大小だけの区別であり、扱い（改名するか、規則の対象外にするか）は差分④で判断する。
 
@@ -86,6 +86,18 @@
 - 混同注意：「一時的な厚みの減少」と呼んでいた（記号 $\mu_n$ ）。名前は厚みなのに、実際はズレの側に数える量だったため、改名した（2026-09-29）
 - 受け取り方の違い【未確認】：英語の reversible は、熱力学の可逆過程と読まれやすい。ここでは「条件が去れば戻る」の意味
 - 関連：[可逆成分](#reversible-deviation)、[実効厚み](#effective-thickness)
+
+<a id="entropy-quantity"></a>
+### エントロピー相当量（えんとろぴーそうとうりょう）
+- 英語版：[Entropy Quantity](./NRA-IDE_Dictionary_EN.md#entropy-quantity)
+- 記号・固定名： $\mathrm{entropy}$ ／ `entropy_quantity`
+- 型：補助構造量（任意、Cause-Side）
+- 意味：ドメイン固有のエントロピー相当量。ドメインが定義・算出規則を明記した場合だけ使う。定義元：AXIOMS §4.5、FORMULA §7
+- 出所：Cause-Side観測、評価前に固定した変換規則
+- 使ってはならない先：評価出力（ $R$ 、正規状態、不可逆ラッチ、その集約）から得ること
+- 書き方： $S$ で書かない（ $S$ は[構造感度](#structural-sensitivity)）。離散的な遷移で次の段階へ持ち越さない残差は別の概念で、 `entropy_export` と呼ぶ（熱力学的エントロピーの測定値ではない。AXIOMS §4.5、docs 08章）
+- 受け取り方の違い【未確認】：熱力学のエントロピーの測定値と読まれやすい
+- 関連：[構造感度](#structural-sensitivity)
 
 <a id="reversible-deviation"></a>
 ### 可逆成分（かぎゃくせいぶん）
@@ -278,7 +290,8 @@
 - 記号： $S=1/M_\tau$
 - 型・単位：派生出力、 $u^{-1}$
 - 意味：残存吸収余白の逆数。定義元：FORMULA §3
-- 関連：[残存吸収余白](#remaining-absorption-margin)
+- 混同注意：エントロピー相当量 $\mathrm{entropy}$ と `entropy_export` を $S$ で書かない（AXIOMS §4.5、FORMULA §7）（2026-09-29）
+- 関連：[残存吸収余白](#remaining-absorption-margin)、[エントロピー相当量](#entropy-quantity)
 
 <a id="structural-testimony"></a>
 ### 構造証言（こうぞうしょうげん）
@@ -317,8 +330,14 @@
 <a id="structural-continuity"></a>
 ### 構造連続性（こうぞうれんぞくせい）
 - 英語版：[Structural Continuity](./NRA-IDE_Dictionary_EN.md#structural-continuity)
-- 記号： $\omega$
-- 意味：正典の記号表の概念。評価の系列との対応づけは、評価宣言の任意要素として評価ごとに宣言する（一般規則は定めない）。定義元：AXIOMS §1
+- 記号・固定名： $\omega$ ／ `omega`
+- 型：補助構造量（Cause-Side）
+- 意味：構造が遷移を継続しているかを示す。ドメインが評価前に定めた連続観測または位相更新規則の下で継続が確認できるときに限り $\omega>0$ 。定義元：AXIOMS §1（凡例）・§4.5
+- 出所：Cause-Side観測、評価前に固定した変換規則
+- 使ってはならない先：評価出力（ $R$ 、正規状態、不可逆ラッチ、その集約）から得ること
+- 書き方：評価の系列との対応づけは、評価宣言の任意要素として評価ごとに宣言する（一般規則は定めない。導出文書P0）
+- 混同注意：観測が欠けていることを $\omega=0$ と書かない（AXIOMS §4.5）。docs 12章の用語集が「遷移継続量」と呼んでいた（2026-09-29）
+- 関連：[遷移位相](#transition-phase)
 
 <a id="confession"></a>
 ### 告白（こくはく）
@@ -365,6 +384,18 @@
 - 書き方：後退差分で $p_n=p_{n-1}+\Delta p_n$ 、 $p_n=p_0+\sum_{m=1}^{n}\Delta p_m$
 - 混同注意：デモの residualDebt・ $D_{\mathrm{long}}$ は $R$ から作った量で、残留ズレではない（2026-09-29）
 - 関連：[可逆成分](#reversible-deviation)、[矯正](#straightening)
+
+<a id="work-quantity"></a>
+### 仕事量（しごとりょう）
+- 英語版：[Work](./NRA-IDE_Dictionary_EN.md#work-quantity)
+- 記号・固定名： $W$ ／ `work_quantity`
+- 型：補助構造量（任意、Cause-Side）
+- 意味：ドメインが定義・単位・観測方法を明記した場合だけ使う任意量。定義元：AXIOMS §4.5。FORMULA §7の予約表には含めない
+- 出所：Cause-Side観測、評価前に固定した変換規則
+- 使ってはならない先：評価出力（ $R$ 、正規状態、不可逆ラッチ、その集約）から得ること
+- 混同注意：対象状態の旧記号 $\mathcal{W}$ と装飾だけの区別になっていた。対象状態の側を $\mathsf{Phys}$ に改めた（2026-09-29）
+- 受け取り方の違い【未確認】：物理の仕事（力×変位）とそのまま読まれやすい。定義はドメインが与える
+- 関連：[対象状態](#target-physical-state)
 
 <a id="subject-target"></a>
 ### 自構造（じこうぞう）
@@ -421,6 +452,34 @@
 - 意味：有効な $R$ とラッチから決まる状態。定義元：AXIOMS §9〜§11.1
 - 混同注意：以前は $Q_n$ と書いていた（可逆成分 $q_n$ と大小だけの区別）（2026-09-29）
 - 関連：[瞬間分類](#instantaneous-classification)、[不可逆ラッチ](#irreversible-latch)
+
+<a id="external-constraint"></a>
+### 制約（せいやく）
+- 英語版：[Constraint](./NRA-IDE_Dictionary_EN.md#external-constraint)
+- 記号・固定名： $C$ ／ `external_constraint`
+- 型：補助構造量（Cause-Side）
+- 意味：対象構造へ外部から加わる負荷・制約。定義元：AXIOMS §4.5、FORMULA §7
+- 出所：Cause-Side観測、評価前に固定した変換規則
+- 使ってはならない先：評価出力（ $R$ 、正規状態、不可逆ラッチ、その集約）から得ること
+- 混同注意：
+  - 構成の旧記号 $\mathcal{C}_n$ と装飾だけの区別になっていた。構成の側を $\mathsf{Active}_n$ に改めた（2026-09-29）
+  - 一般語の「制約（条件）」と区別する。例えば「 $\tau_{\mathrm{restored}}<\tau_0$ という制約」は条件の意味（2026-09-29）
+  - [作用](#applied-action) $a_n$ との関係は未整理（2026-09-29）
+- 受け取り方の違い【未確認】：英語の constraint は最適化の制約条件と読まれやすい。ここでは外部から加わる負荷
+- 関連：[作用](#applied-action)、[構成](#active-elements)
+
+<a id="transition-phase"></a>
+### 遷移位相（せんいいそう）
+- 英語版：[Transition Phase](./NRA-IDE_Dictionary_EN.md#transition-phase)
+- 記号・固定名： $\mathrm{Phase}$ ／ `transition_phase`
+- 型：補助構造量（Cause-Side、内部状態）
+- 意味：対象構造が遷移のどの段階にあるかを示す内部状態。Cause-Sideに由来する遷移規則で更新する。定義元：AXIOMS §4.5
+- 出所：Cause-Side観測、評価前に固定した変換規則
+- 使ってはならない先：空間座標・モデルが生成した埋め込みとして読むこと。評価出力から得ること
+- 書き方：綴りで $\mathrm{Phase}$ と書く。 $\varphi$ ・ $\phi$ は使わない
+- 混同注意：案では $\varphi$ と書いていたが、FORMULA §5.1の補助計算項 $\Phi(x)$ と大小だけの区別になるため改めた（2026-09-29）
+- 受け取り方の違い【未確認】：英語の phase は物質の相や波の位相と読まれやすい。ここでは遷移の段階
+- 関連：[構造連続性](#structural-continuity)
 
 <a id="declared-thickness"></a>
 ### 宣言厚み（せんげんあつみ）
@@ -605,12 +664,14 @@
 |---|---|
 | $a_n$ | [作用](#applied-action) |
 | $\mathsf{Active}_n$ | [構成](#active-elements) |
+| $C$ | [制約](#external-constraint) |
 | $\mathrm{Class}(R)$ | [瞬間分類](#instantaneous-classification) |
 | $\mathrm{Comp}_\tau$ | [合成規則](#thickness-composition-rule) |
 | $\mathrm{ctx}_n$ | 文脈・権限・出所（[分解規則](#event-allocation-rule)） |
 | $D$ | [支配側](#dominant-side) |
 | $\mathsf{Decl}$ | [評価宣言](#evaluation-declaration) |
 | $e$ | [構造要素](#structural-element) |
+| $\mathrm{entropy}$ | [エントロピー相当量](#entropy-quantity) |
 | $\mathrm{Ev}_n$ | [観測事象](#observation-event) |
 | $\mathrm{EvalGraph}^{(j)}$ | 展開評価グラフ（導出文書 第3部） |
 | $g_p$ 、 $g^{[e]}_\lambda$ | 残留ズレ・要素の劣化の増分則（物理法則。評価出力を入力にしない） |
@@ -620,6 +681,7 @@
 | $o_n$ | [観測値](#observation-value) |
 | $\mathsf{Out}^{(\mathrm{self})}_n$ | [評価出力](#evaluation-output) |
 | $p_n$ | [残留ズレ](#residual-deviation) |
+| $\mathrm{Phase}$ | [遷移位相](#transition-phase) |
 | $\mathsf{Phys}^{(\mathrm{self})}_n$ | [対象状態](#target-physical-state) |
 | $q_n$ 、 $q^{\mathrm{temp}}_n$ | [可逆成分](#reversible-deviation)、[一時的な可逆成分](#temporary-reversible-deviation) |
 | $R$ 、 $R_{\mathrm{target}}$ | [境界接近比](#boundary-approach-ratio) |
@@ -629,6 +691,7 @@
 | $\mathsf{State}_n$ | [状態区分](#target-state) |
 | $u$ | $\delta$ と $\tau$ に共通の単位 |
 | $\mathsf{Update}$ | 更新規則（導出文書 第3部） |
+| $W$ | [仕事量](#work-quantity) |
 | $Z_n$ | [判定用十分状態](#decision-sufficient-state) |
 
 ### 2.2 ギリシャ文字
@@ -646,6 +709,7 @@
 | $\sigma$ | [射影規則](#observation-projection-rule) |
 | $\tau$ 、 $\tau_n$ 、 $\tau_0$ 、 $\tau^{[e]}_0$ 、 $\tau_{\mathrm{restored}}$ | [吸収厚み](#absorption-thickness)、[実効厚み](#effective-thickness)、[宣言厚み](#declared-thickness)、[復元後の吸収厚み](#restored-thickness) |
 | $\tau_{\mathrm{upper}}$ 、 $\tau_{\mathrm{lower}}$ | [側別有効ゲート幅](#side-specific-gate-width) |
+| $\Phi(x)$ | 補助計算項（FORMULA §5.1）。遷移位相 $\mathrm{Phase}$ とは別 |
 | $\omega$ | [構造連続性](#structural-continuity) |
 
 ### 2.3 装飾文字
@@ -705,12 +769,15 @@
 | `element_declared_tau` | 要素の宣言厚み（[構造要素](#structural-element)） |
 | `element_degradation_fraction` | [劣化度](#degradation-fraction) |
 | `element_id` | [構造要素](#structural-element) |
+| `entropy_export` | 離散遷移で持ち越さない残差（[エントロピー相当量](#entropy-quantity)の書き方） |
+| `entropy_quantity` | [エントロピー相当量](#entropy-quantity) |
 | `evaluation_archive` | [保管記録](#evaluation-archive) |
 | `evaluation_declaration` | [評価宣言](#evaluation-declaration) |
 | `evaluation_gauge` | [計器](#evaluation-gauge) |
 | `evaluation_output` | [評価出力](#evaluation-output) |
 | `event_allocation_rule` | [分解規則](#event-allocation-rule) |
 | `event_history` | [経路履歴](#event-history) |
+| `external_constraint` | [制約](#external-constraint) |
 | `initial_tau` | [宣言厚み](#declared-thickness) |
 | `instantaneous_classification` | [瞬間分類](#instantaneous-classification) |
 | `irreversible_latched` | [不可逆ラッチ](#irreversible-latch) |
@@ -718,6 +785,7 @@
 | `observation_event` | [観測事象](#observation-event) |
 | `observation_projection_rule` | [射影規則](#observation-projection-rule) |
 | `observation_value` | [観測値](#observation-value) |
+| `omega` | [構造連続性](#structural-continuity) |
 | `other_target_index` | [他構造](#other-target) |
 | `OUT_OF_DESCRIPTION_DOMAIN` | [定義域外](#out-of-domain) |
 | `R`・`R_upper`・`R_lower`・`R_dir` | [境界接近比](#boundary-approach-ratio)、側別比 |
@@ -734,6 +802,8 @@
 | `tau_upper`・`tau_lower` | [側別有効ゲート幅](#side-specific-gate-width) |
 | `temporary_reversible_deviation` | [一時的な可逆成分](#temporary-reversible-deviation) |
 | `thickness_composition_rule` | [合成規則](#thickness-composition-rule) |
+| `transition_phase` | [遷移位相](#transition-phase) |
+| `work_quantity` | [仕事量](#work-quantity) |
 
 ---
 
@@ -801,6 +871,7 @@
 | 2026-09-29 | 評価出力の使い道を狭く書いた | [評価出力](#evaluation-output) |
 | 2026-09-29 | 差分 $\Delta$ の向き（前進と後退） | 2.4 |
 | 2026-09-29 | 記録の個数と絶対値（ $\lvert\cdot\rvert$ ） | [経路履歴](#event-history) |
+| 2026-09-29 | 正典v2.4の補助構造量（ $\omega$ ・ $\mathrm{Phase}$ ・ $C$ ・ $W$ ・ $\mathrm{entropy}$ ）が辞書になかった。 $\omega$ を「遷移継続量」とも呼んでいた（docs 12章） | [構造連続性](#structural-continuity)、[遷移位相](#transition-phase)、[制約](#external-constraint)、[仕事量](#work-quantity)、[エントロピー相当量](#entropy-quantity) |
 
 ---
 

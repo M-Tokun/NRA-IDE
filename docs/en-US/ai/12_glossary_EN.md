@@ -88,7 +88,7 @@ The reciprocal of remaining structural margin. It is defined only when $\tau > 0
 **On auxiliary structural quantities**
 $\omega$, $\mathrm{Phase}$, $C$, $W$, and entropy are auxiliary structural quantities defined in `theory/AXIOMS.md` §4.5. Their origin is limited to Cause-Side observation or a transformation rule fixed before evaluation; they must not be obtained from evaluation outputs.
 
-**$\omega$ (omega / transition-continuation quantity)**
+**$\omega$ (omega / structural continuity)**
 A quantity indicating whether the structure continues its state transition. In domains involving rotational systems, it may be implemented as angular velocity, but it does not necessarily mean physical angular velocity in every domain. $\omega > 0$ indicates that transition is confirmed as continuing through observation or state-transition rules defined for the target domain. $\omega = 0$ indicates that transition cannot be confirmed under the same rules. Missing observations are not equivalent to $\omega = 0$.
 
 **$\mathrm{Phase}$**

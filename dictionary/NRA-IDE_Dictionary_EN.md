@@ -63,7 +63,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | Dimensions | Upright sans-serif capitals | length $\mathsf{L}$ , mass $\mathsf{M}$ , time $\mathsf{T}$ , electric current $\mathsf{I}$ , thermodynamic temperature $\mathsf{\Theta}$ , amount of substance $\mathsf{N}$ , luminous intensity $\mathsf{J}$ |
 | Writing a dimension | Square brackets | $[F]=\mathsf{L}\,\mathsf{M}\,\mathsf{T}^{-2}$ ; a dimensionless quantity has $[Z]=1$ |
 
-**Repository rule**: within the same document or implementation, distinct meanings must not be distinguished solely by font, letter case, typeface, or decoration. Distinct meanings use distinct base names. Standard mathematical operators, labels, and dimension symbols are outside this rule. The rule is to be proposed for `FORMULA.md` §7 and is not yet normative.
+**Repository rule**: within the same document or implementation, distinct meanings must not be distinguished solely by font, letter case, typeface, or decoration. Distinct meanings use distinct base names. Standard mathematical operators, labels, and dimension symbols are outside this rule. The rule is to be proposed for `FORMULA.md` §7 and is not yet normative. However, FORMULA §7 already contains one sentence on distinguishing the transition phase $\mathrm{Phase}$ from $\Phi(x)$ (v2.4).
 
 **Differences from current canonical notation (not yet reflected)**: in FORMULA.md, the differential in §4.7 is an italic $d$ , and the dimension symbols in §5.2 are italic $X$ and $T$ . These differ from the typeface rules above. Any change to the canon will be presented individually in diff ④. The residual $r$ and the boundary approach ratio $R$ in FORMULA.md §5 differ only by case; whether to rename or to exempt it will be decided in diff ④.
 
@@ -179,6 +179,21 @@ Temporary variables used only inside an implementation (for example, the interna
 - Reading risk [Unconfirmed]: do not read "confession" in its religious or legal sense. It is a stop signal that structures the unknown
 - Related: [Not Observable](#not-observable)
 
+<a id="external-constraint"></a>
+### Constraint
+- Japanese: [制約](./NRA-IDE_Dictionary_JP.md#external-constraint)
+- Symbol / fixed name: $C$ / `external_constraint`
+- Type: auxiliary structural quantity (Cause-Side)
+- Meaning: an external load or constraint acting on the target structure. Source: AXIOMS §4.5, FORMULA §7
+- Origin: Cause-Side observation; transformation rules fixed before evaluation
+- Prohibited uses: obtaining it from evaluation outputs ( $R$ , the canonical state, the irreversible latch, or their aggregates)
+- Confusion notes:
+  - it differed from the former symbol $\mathcal{C}_n$ of active elements only by decoration; the active-elements side was renamed to $\mathsf{Active}_n$ (2026-09-29)
+  - distinguish it from "constraint" as a general word meaning a condition; for example, "the constraint $\tau_{\mathrm{restored}}<\tau_0$ " means a condition (2026-09-29)
+  - its relation to the [Applied Action](#applied-action) $a_n$ is not yet settled (2026-09-29)
+- Reading risk [Unconfirmed]: English constraint is easily read as a constraint in optimization. Here it is a load acting from outside
+- Related: [Applied Action](#applied-action), [Active Elements](#active-elements)
+
 <a id="decision-sufficient-state"></a>
 ### Decision-Sufficient State
 - Japanese: [判定用十分状態](./NRA-IDE_Dictionary_JP.md#decision-sufficient-state)
@@ -222,6 +237,18 @@ Temporary variables used only inside an implementation (for example, the interna
 - Symbol: $\tau_n$
 - Meaning: the thickness of the whole structure at step $n$ used in the primary formula. It does not increase without the addition of a structural element
 - Related: [Absorption Thickness](#absorption-thickness), [Side-Specific Effective Gate Width](#side-specific-gate-width)
+
+<a id="entropy-quantity"></a>
+### Entropy Quantity
+- Japanese: [エントロピー相当量](./NRA-IDE_Dictionary_JP.md#entropy-quantity)
+- Symbol / fixed name: $\mathrm{entropy}$ / `entropy_quantity`
+- Type: auxiliary structural quantity (optional; Cause-Side)
+- Meaning: a domain-specific entropy-like quantity, used only when a domain fixes its definition and calculation rule. Source: AXIOMS §4.5, FORMULA §7
+- Origin: Cause-Side observation; transformation rules fixed before evaluation
+- Prohibited uses: obtaining it from evaluation outputs ( $R$ , the canonical state, the irreversible latch, or their aggregates)
+- Notation: do not write it as $S$ ( $S$ is [Structural Sensitivity](#structural-sensitivity)). A remainder not carried to the next stage in a discrete transition is a separate concept called `entropy_export` (not a measurement of thermodynamic entropy; AXIOMS §4.5, docs Chapter 08)
+- Reading risk [Unconfirmed]: easily read as a measured value of thermodynamic entropy
+- Related: [Structural Sensitivity](#structural-sensitivity)
 
 <a id="evaluation-archive"></a>
 ### Evaluation Archive
@@ -518,8 +545,14 @@ Temporary variables used only inside an implementation (for example, the interna
 <a id="structural-continuity"></a>
 ### Structural Continuity
 - Japanese: [構造連続性](./NRA-IDE_Dictionary_JP.md#structural-continuity)
-- Symbol: $\omega$
-- Meaning: a concept in the canonical notation table. Its mapping to the sequence of evaluations is declared per evaluation as an optional element of the declaration (no general rule). Source: AXIOMS §1
+- Symbol / fixed name: $\omega$ / `omega`
+- Type: auxiliary structural quantity (Cause-Side)
+- Meaning: indicates whether the structure continues its transition. $\omega>0$ only when continuity is confirmed under a continuous observation or phase-update rule that the domain fixed before evaluation. Source: AXIOMS §1 (notation), §4.5
+- Origin: Cause-Side observation; transformation rules fixed before evaluation
+- Prohibited uses: obtaining it from evaluation outputs ( $R$ , the canonical state, the irreversible latch, or their aggregates)
+- Notation: its mapping to the sequence of evaluations is declared per evaluation as an optional element of the declaration (no general rule; derivation document P0)
+- Confusion notes: do not write a missing observation as $\omega=0$ (AXIOMS §4.5). The docs Chapter 12 glossary called it "transition-continuation quantity" (2026-09-29)
+- Related: [Transition Phase](#transition-phase)
 
 <a id="structural-element"></a>
 ### Structural Element
@@ -535,7 +568,8 @@ Temporary variables used only inside an implementation (for example, the interna
 - Symbol: $S=1/M_\tau$
 - Type / unit: derived output; $u^{-1}$
 - Meaning: the inverse of the remaining absorption margin. Source: FORMULA §3
-- Related: [Remaining Absorption Margin](#remaining-absorption-margin)
+- Confusion notes: do not write the entropy quantity $\mathrm{entropy}$ or `entropy_export` as $S$ (AXIOMS §4.5, FORMULA §7) (2026-09-29)
+- Related: [Remaining Absorption Margin](#remaining-absorption-margin), [Entropy Quantity](#entropy-quantity)
 
 <a id="structural-testimony"></a>
 ### Structural Testimony
@@ -595,6 +629,31 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes: formerly written $\Gamma$ , differing only by case from the damping coefficient $\gamma$ of FORMULA §5 (2026-09-29). While adding conditions, it was found that imposing "removal does not increase the value" on every form makes series structures unrepresentable (2026-09-29)
 - Related: [Active Elements](#active-elements), [Addition of a Structural Element](#structural-element-addition)
 
+<a id="transition-phase"></a>
+### Transition Phase
+- Japanese: [遷移位相](./NRA-IDE_Dictionary_JP.md#transition-phase)
+- Symbol / fixed name: $\mathrm{Phase}$ / `transition_phase`
+- Type: auxiliary structural quantity (Cause-Side; internal state)
+- Meaning: an internal state showing which stage of transition the target structure occupies, updated under a Cause-Side-derived transition rule. Source: AXIOMS §4.5
+- Origin: Cause-Side observation; transformation rules fixed before evaluation
+- Prohibited uses: reading it as a spatial coordinate or a model-generated embedding; obtaining it from evaluation outputs
+- Notation: spelled $\mathrm{Phase}$ ; $\varphi$ and $\phi$ are not used
+- Confusion notes: the draft wrote $\varphi$ , which would differ from the auxiliary computation term $\Phi(x)$ of FORMULA §5.1 only by case, so it was renamed (2026-09-29)
+- Reading risk [Unconfirmed]: English phase is easily read as a phase of matter or the phase of a wave. Here it is a stage of transition
+- Related: [Structural Continuity](#structural-continuity)
+
+<a id="work-quantity"></a>
+### Work
+- Japanese: [仕事量](./NRA-IDE_Dictionary_JP.md#work-quantity)
+- Symbol / fixed name: $W$ / `work_quantity`
+- Type: auxiliary structural quantity (optional; Cause-Side)
+- Meaning: an optional quantity used only when a domain fixes its definition, unit, and observation method. Source: AXIOMS §4.5. Not included in the reserved list of FORMULA §7
+- Origin: Cause-Side observation; transformation rules fixed before evaluation
+- Prohibited uses: obtaining it from evaluation outputs ( $R$ , the canonical state, the irreversible latch, or their aggregates)
+- Confusion notes: it differed from the former symbol $\mathcal{W}$ of the target physical state only by decoration; the target-state side was renamed to $\mathsf{Phys}$ (2026-09-29)
+- Reading risk [Unconfirmed]: easily read directly as mechanical work (force × displacement). The definition is given by the domain
+- Related: [Target Physical State](#target-physical-state)
+
 ---
 
 ## 2. Symbols
@@ -605,12 +664,14 @@ Temporary variables used only inside an implementation (for example, the interna
 |---|---|
 | $a_n$ | [Applied Action](#applied-action) |
 | $\mathsf{Active}_n$ | [Active Elements](#active-elements) |
+| $C$ | [Constraint](#external-constraint) |
 | $\mathrm{Class}(R)$ | [Instantaneous Classification](#instantaneous-classification) |
 | $\mathrm{Comp}_\tau$ | [Thickness Composition Rule](#thickness-composition-rule) |
 | $\mathrm{ctx}_n$ | context, authority, and provenance ([Event Allocation Rule](#event-allocation-rule)) |
 | $D$ | [Dominant Side](#dominant-side) |
 | $\mathsf{Decl}$ | [Evaluation Declaration](#evaluation-declaration) |
 | $e$ | [Structural Element](#structural-element) |
+| $\mathrm{entropy}$ | [Entropy Quantity](#entropy-quantity) |
 | $\mathrm{Ev}_n$ | [Observation Event](#observation-event) |
 | $\mathrm{EvalGraph}^{(j)}$ | expanded evaluation graph (derivation document, Part 3) |
 | $g_p$ , $g^{[e]}_\lambda$ | increment laws of residual deviation and element degradation (physical laws; they do not take evaluation outputs as input) |
@@ -620,6 +681,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | $o_n$ | [Observation Value](#observation-value) |
 | $\mathsf{Out}^{(\mathrm{self})}_n$ | [Evaluation Output](#evaluation-output) |
 | $p_n$ | [Residual Deviation](#residual-deviation) |
+| $\mathrm{Phase}$ | [Transition Phase](#transition-phase) |
 | $\mathsf{Phys}^{(\mathrm{self})}_n$ | [Target Physical State](#target-physical-state) |
 | $q_n$ , $q^{\mathrm{temp}}_n$ | [Reversible Deviation](#reversible-deviation), [Temporary Reversible Deviation](#temporary-reversible-deviation) |
 | $R$ , $R_{\mathrm{target}}$ | [Boundary Approach Ratio](#boundary-approach-ratio) |
@@ -629,6 +691,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | $\mathsf{State}_n$ | [Target Boundary State](#target-state) |
 | $u$ | the unit shared by $\delta$ and $\tau$ |
 | $\mathsf{Update}$ | update rule (derivation document, Part 3) |
+| $W$ | [Work](#work-quantity) |
 | $Z_n$ | [Decision-Sufficient State](#decision-sufficient-state) |
 
 ### 2.2 Greek letters
@@ -646,6 +709,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | $\sigma$ | [Observation Projection Rule](#observation-projection-rule) |
 | $\tau$ , $\tau_n$ , $\tau_0$ , $\tau^{[e]}_0$ , $\tau_{\mathrm{restored}}$ | [Absorption Thickness](#absorption-thickness), [Effective Thickness](#effective-thickness), [Declared Thickness](#declared-thickness), [Restored Absorption Thickness](#restored-thickness) |
 | $\tau_{\mathrm{upper}}$ , $\tau_{\mathrm{lower}}$ | [Side-Specific Effective Gate Width](#side-specific-gate-width) |
+| $\Phi(x)$ | auxiliary computation term (FORMULA §5.1); distinct from the transition phase $\mathrm{Phase}$ |
 | $\omega$ | [Structural Continuity](#structural-continuity) |
 
 ### 2.3 Decorated letters
@@ -705,12 +769,15 @@ There are currently no decorated-letter symbols. $\mathcal{C}_n$ , $\mathcal{W}^
 | `element_declared_tau` | element declared thickness ([Structural Element](#structural-element)) |
 | `element_degradation_fraction` | [Degradation Fraction](#degradation-fraction) |
 | `element_id` | [Structural Element](#structural-element) |
+| `entropy_export` | remainder not carried forward in a discrete transition (see the notation of [Entropy Quantity](#entropy-quantity)) |
+| `entropy_quantity` | [Entropy Quantity](#entropy-quantity) |
 | `evaluation_archive` | [Evaluation Archive](#evaluation-archive) |
 | `evaluation_declaration` | [Evaluation Declaration](#evaluation-declaration) |
 | `evaluation_gauge` | [Evaluation Gauge](#evaluation-gauge) |
 | `evaluation_output` | [Evaluation Output](#evaluation-output) |
 | `event_allocation_rule` | [Event Allocation Rule](#event-allocation-rule) |
 | `event_history` | [Event History](#event-history) |
+| `external_constraint` | [Constraint](#external-constraint) |
 | `initial_tau` | [Declared Thickness](#declared-thickness) |
 | `instantaneous_classification` | [Instantaneous Classification](#instantaneous-classification) |
 | `irreversible_latched` | [Irreversible Latch](#irreversible-latch) |
@@ -718,6 +785,7 @@ There are currently no decorated-letter symbols. $\mathcal{C}_n$ , $\mathcal{W}^
 | `observation_event` | [Observation Event](#observation-event) |
 | `observation_projection_rule` | [Observation Projection Rule](#observation-projection-rule) |
 | `observation_value` | [Observation Value](#observation-value) |
+| `omega` | [Structural Continuity](#structural-continuity) |
 | `other_target_index` | [Other Target](#other-target) |
 | `OUT_OF_DESCRIPTION_DOMAIN` | [Out of Domain](#out-of-domain) |
 | `R`, `R_upper`, `R_lower`, `R_dir` | [Boundary Approach Ratio](#boundary-approach-ratio); side-specific ratios |
@@ -734,6 +802,8 @@ There are currently no decorated-letter symbols. $\mathcal{C}_n$ , $\mathcal{W}^
 | `tau_upper`, `tau_lower` | [Side-Specific Effective Gate Width](#side-specific-gate-width) |
 | `temporary_reversible_deviation` | [Temporary Reversible Deviation](#temporary-reversible-deviation) |
 | `thickness_composition_rule` | [Thickness Composition Rule](#thickness-composition-rule) |
+| `transition_phase` | [Transition Phase](#transition-phase) |
+| `work_quantity` | [Work](#work-quantity) |
 
 ---
 
@@ -801,6 +871,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-09-29 | the permitted uses of evaluation outputs written too narrowly | [Evaluation Output](#evaluation-output) |
 | 2026-09-29 | the direction of the difference $\Delta$ (forward and backward) | 2.4 |
 | 2026-09-29 | the number of records and the absolute value ( $\lvert\cdot\rvert$ ) | [Event History](#event-history) |
+| 2026-09-29 | the auxiliary structural quantities of canon v2.4 ( $\omega$ , $\mathrm{Phase}$ , $C$ , $W$ , $\mathrm{entropy}$ ) were missing from the dictionary; $\omega$ was also called "transition-continuation quantity" (docs Chapter 12) | [Structural Continuity](#structural-continuity), [Transition Phase](#transition-phase), [Constraint](#external-constraint), [Work](#work-quantity), [Entropy Quantity](#entropy-quantity) |
 
 ---
 
