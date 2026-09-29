@@ -1,7 +1,7 @@
 <!-- FILE: llms.md -->
 <!-- Role: Mandatory AI identification, interpretation, and operational gate for NRA-IDE -->
 <!-- Author: M-Tokuni -->
-<!-- Updated: 2026-09-27 JST -->
+<!-- Updated: 2026-09-30 JST -->
 
 # llms.md — NRA-IDE Operational Gate
 
@@ -127,6 +127,10 @@ $$
 
 Both values must be finite.
 
+Accumulated deviation $\delta$ is measured from a reference state fixed before evaluation, in the declared rupture direction, and consists of a reversible component and an irreversible component (residual deviation). The reference state is not reset during an evaluation (`theory/AXIOMS.md` §4). Absorption thickness $\tau$ does not recover naturally; it increases only through the addition of a structural element, measured by Cause-Side observation at the time of addition. Planned removal of an undamaged element is not degradation (`theory/AXIOMS.md` §7, §8). How $\delta$ and $\tau$ are constructed from Cause-Side observations is defined in `FORMULA.md` §0.5.
+
+The auxiliary structural quantities $\omega$, $\mathrm{Phase}$, $C$, $W$, and $\mathrm{entropy}$ are defined in `theory/AXIOMS.md` §4.5. They are obtained only from Cause-Side observation or pre-fixed transformation rules, never from evaluation outputs. $C$ is not an allocation target of $\delta$ or $\tau$. $S$ must not be used for entropy.
+
 The Primary Formula $R=\delta/\tau$ and the Secondary / Dual-Fluctuation Formula are IDE calculation systems, not axioms. The two remaining margins are:
 
 $$
@@ -137,7 +141,7 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-$M_R$ is dimensionless. $M_{\tau}$ has the same unit as $\delta$ and $\tau$.
+$M_R$ is the dimensionless remaining ratio margin. $M_{\tau}$ is the remaining absorption margin and has the same unit as $\delta$ and $\tau$.
 
 ---
 
@@ -172,6 +176,17 @@ Passing an output through Layer 03 does not convert it into Cause-Side evidence.
 Cause-Side as a whole is not temporally immutable. Authorized new Cause-Side observations may form the next evaluation snapshot. For each evaluation, update authority, update route, provenance, declared target, unit, observation time, transformation rule, threshold rule, and evaluated snapshot remain fixed.
 
 Effect-Side output must not rewrite an observation value, threshold, canonical state, irreversible latch, or source meaning.
+
+R, the canonical state, and the irreversible latch are neither Cause-Side observations nor Effect-Side artifacts. They are evaluation outputs computed from Cause-Side inputs by pre-fixed rules. Evaluation outputs may be used for audit, structural testimony, state classification, and pre-fixed physical-control commands (`theory/AXIOMS.md` §14).
+
+The following paths are reverse derivation and are prohibited, whether through automatic, manual, human-reviewed, authorized, or versioned means (`theory/AXIOMS.md` §14).
+
+- Reverse derivation A (authority backflow): a path from Effect-Side to a Cause-Side value, threshold, state, irreversible latch, rule, transformation input, update ground, or provenance.
+- Reverse derivation B (self-adjustment of the gauge): a path from an evaluation output (including its moving averages and aggregates) to the reference, transformation rule, thresholds, or effective gate width of the same evaluation target. It includes paths across steps and paths returning through another evaluation target, whether widening or narrowing.
+
+A path that feeds an evaluation output of another evaluation target into the thresholds or effective gate width of one's own evaluation target is permitted only in the safe-side direction (lowering thresholds, narrowing gate widths), and only when no path returns one's own evaluation outputs to that other target. The existence of such a path and its rule are fixed before evaluation begins.
+
+Whether a path is reverse derivation is judged by its origin and rewrite target, not by the name of the symbol used. An update of state by the physical law of the target structure itself rewrites the target structure and is not reverse derivation.
 
 ---
 
@@ -842,7 +857,11 @@ $$
 
 両方とも有限値でなければなりません。
 
-一次式 $R=\delta/\tau$ と二次式（二重ゆらぎ式）は、公理ではなくIDEの計算系です。二つの残余余白は次です。
+蓄積ズレ $\delta$ は、評価開始前に固定した基準状態から宣言した破断方向へ測ったズレであり、可逆成分と不可逆成分（残留ズレ）から成ります。基準状態は評価中に付け直しません（`theory/AXIOMS.md` §4）。吸収厚み $\tau$ は自然に回復せず、増えるのは構造要素の付加（加えた時点のCause-Side測定）だけです。壊れていない要素の計画的な除去は劣化ではありません（`theory/AXIOMS.md` §7・§8）。Cause-Side観測から $\delta$ と $\tau$ を構成する方法は `FORMULA.md` §0.5 が定めます。
+
+補助構造量 $\omega$ ・ $\mathrm{Phase}$ ・ $C$ ・ $W$ ・ $\mathrm{entropy}$ は `theory/AXIOMS.md` §4.5 が定めます。Cause-Side観測または事前固定の変換規則からだけ得て、評価出力から得てはなりません。 $C$ は $\delta$ ・ $\tau$ の計上先ではありません。 $S$ をエントロピーの意味で使ってはなりません。
+
+一次式 $R=\delta/\tau$ と二次式（二重ゆらぎ式）は、公理ではなくIDEの計算系です。二つの残存余白は次です。
 
 $$
 M_R=1-R
@@ -852,7 +871,7 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-$M_R$ は無次元です。 $M_{\tau}$ は $\delta$ および $\tau$ と同じ単位を持ちます。
+$M_R$ は無次元の残存比率余白です。 $M_{\tau}$ は残存吸収余白であり、 $\delta$ および $\tau$ と同じ単位を持ちます。
 
 ---
 
@@ -887,6 +906,17 @@ Layer 03を通過しても、Cause-Side証拠には変わりません。
 Cause-Side全体は時間的に更新不能ではありません。権限ある新しいCause-Side観測は次の評価スナップショットを形成できます。各評価では、更新権限、更新経路、出所、宣言対象、単位、観測時刻、変換規則、閾値規則、評価スナップショットを固定します。
 
 Effect-Side出力は、観測値、閾値、正規状態、不可逆ラッチ、出所の意味を書き換えてはなりません。
+
+R、正規状態、不可逆ラッチは、Cause-Side観測そのものでもEffect-Side生成物でもありません。Cause-Side入力から事前固定規則で計算した評価出力です。評価出力は、監査、構造証言、状態分類、および事前固定された物理制御の指令に使えます（`theory/AXIOMS.md` §14）。
+
+次の経路を逆導出とし、自動、手動、人間レビュー、承認、版更新のいずれを介しても禁止します（`theory/AXIOMS.md` §14）。
+
+- 逆導出A（権威の逆流）：Effect-Sideから、Cause-Sideの値、閾値、状態、不可逆ラッチ、規則、変換入力、更新根拠、出所への経路。
+- 逆導出B（計器の自己調整）：評価出力（その移動平均・集約を含む）から、同じ評価対象の基準、変換規則、閾値、有効ゲート幅への経路。段をまたぐ経路と、他の評価対象を経由して戻る経路を含み、広げる向きか狭める向きかを問いません。
+
+他の評価対象の評価出力を、自らの評価対象の閾値または有効ゲート幅へ入れる経路は、安全側の向き（閾値を下げる、ゲート幅を狭める）に限り、かつ自らの評価出力がその評価対象へ戻る経路がない場合に限り許します。この経路の有無と規則は、評価開始前に固定します。
+
+逆導出かどうかは、使った記号の名前ではなく、経路の出所と書き換え先で判定します。対象構造そのものの物理法則による状態の更新は、書き換え先が対象構造であり、逆導出ではありません。
 
 ---
 
