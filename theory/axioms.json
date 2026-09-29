@@ -2,9 +2,9 @@
   "file_metadata": {
     "file": "theory/axioms.json",
     "document_role": "canonical_sole_axiom_nra_principles_ide_calculation_and_boundary_definition",
-    "version": "2.3",
+    "version": "2.4",
     "status": "canonical",
-    "base": "AXIOMS v2.2",
+    "base": "AXIOMS v2.3",
     "updated": "2026-09-29 JST",
     "author": "M-Tokuni",
     "precedence_note": "This file defines the sole Nomological Ring Axiom, NRA structural principles, IDE calculation definitions, variable meanings, description domain, boundary-state invariants, irreversible-transition principles, and structural-testimony rules. Implementation code, comments, examples, and AI-generated explanations must not override it."
@@ -16,7 +16,7 @@
       "name": "Intensional Dynamics Engine",
       "abbreviation": "IDE"
     },
-    "version": "2.3",
+    "version": "2.4",
     "description": "A structural framework describing existence as continuous generation and state transition, with structural play as the persistence condition and boundary approach as a historical process."
   },
   "precedence_order": [
@@ -197,6 +197,53 @@
       "reserved_meaning": "R is reserved exclusively for the NRA-IDE boundary approach ratio. It must not be reused for safety scores, preservation scores, confidence scores, or quality metrics.",
       "directional_auxiliary_aggregate": "R_dir = max(R_upper, R_lower); R_dir is not canonical R.",
       "_boundary_note": "R = delta / tau only. Higher R means closer to danger. Directional ratios require distinct subscripted symbols and their aggregate is R_dir."
+    },
+    "omega": {
+      "symbol": "omega",
+      "name": "Structural Continuity",
+      "jp": "構造連続性",
+      "classification": "auxiliary_structural_quantity",
+      "meaning": "Indicates whether the structure continues its transition. omega > 0 only when continuity is confirmed under a domain-declared continuous observation or phase-update rule fixed before evaluation.",
+      "source": "Cause-Side observation or a transformation rule fixed before evaluation; must not be obtained from evaluation outputs",
+      "missing_observation_rule": "A missing observation is not the same as omega = 0.",
+      "_boundary_note": "omega does not rewrite the Primary Formula, replace canonical states, lower R, or release the irreversible latch."
+    },
+    "transition_phase": {
+      "symbol": "Phase",
+      "name": "Transition Phase",
+      "jp": "遷移位相",
+      "classification": "auxiliary_structural_quantity",
+      "meaning": "An internal state showing which stage of transition the target structure occupies, updated under a Cause-Side-derived rule. Neither a spatial coordinate nor a model-generated embedding.",
+      "source": "Cause-Side observation or a transformation rule fixed before evaluation; must not be obtained from evaluation outputs",
+      "symbol_note": "Named 'Phase' (upright, spelled) rather than lowercase phi, to avoid a case-only collision with FORMULA.md section 5.1's auxiliary computation term Phi(x)."
+    },
+    "external_constraint": {
+      "symbol": "C",
+      "name": "Constraint",
+      "jp": "制約",
+      "classification": "auxiliary_structural_quantity",
+      "meaning": "An external load or constraint acting on the target structure.",
+      "source": "Cause-Side observation or a transformation rule fixed before evaluation; must not be obtained from evaluation outputs"
+    },
+    "work_quantity": {
+      "symbol": "W",
+      "name": "Work",
+      "jp": "仕事量",
+      "classification": "auxiliary_structural_quantity",
+      "optional": true,
+      "meaning": "An optional domain-specific quantity used only when a domain fixes its definition, unit, and observation method.",
+      "source": "Cause-Side observation or a transformation rule fixed before evaluation; must not be obtained from evaluation outputs"
+    },
+    "entropy_quantity": {
+      "symbol": "entropy",
+      "name": "Entropy (domain-specific)",
+      "jp": "エントロピー（ドメイン固有）",
+      "classification": "auxiliary_structural_quantity",
+      "optional": true,
+      "meaning": "An optional domain-specific quantity used only when a domain fixes its definition and derivation rule.",
+      "source": "Cause-Side observation or a transformation rule fixed before evaluation; must not be obtained from evaluation outputs",
+      "distinct_from_S": "entropy is a symbol distinct from structural sensitivity S (FORMULA.md section 3); S must not be reused for entropy.",
+      "entropy_export": "When a discrete transition records a remainder not carried to the next stage, that remainder may be called entropy_export. It is not a measurement of thermodynamic entropy and is distinct from S."
     }
   },
   "domain_constraints": {
@@ -596,6 +643,15 @@
     "conformance_gate": "Location alone does not confer normative status. The implementation must pass conformance tests against theory/AXIOMS.md and theory/axioms.json before it is treated as normative."
   },
   "revision_history": {
+    "v2.4": {
+      "date": "2026-09-29 JST",
+      "base": "AXIOMS v2.3",
+      "changes": [
+        "Canonized auxiliary structural quantities (omega, Phase, C, W, entropy) that docs had used without a canonical definition",
+        "Named the phase quantity 'Phase' (spelled, upright) rather than lowercase phi, to avoid a case-only collision with FORMULA.md section 5.1's Phi(x)",
+        "Stated explicitly that entropy is distinct from structural sensitivity S"
+      ]
+    },
     "v2.3": {
       "date": "2026-09-29 JST",
       "base": "AXIOMS v2.2",

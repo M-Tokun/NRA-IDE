@@ -1,17 +1,17 @@
-# AXIOMS_v2.3.md
+# AXIOMS_v2.4.md
 ## NRA-IDE 律環公理・解釈境界レジストリ
 ### Nomological Ring Axioms / Intensional Dynamics Engine
 
 **著者 / Author:** M-Tokuni  
 **プロジェクト / Project:** NRA-IDE  
-**版 / Version:** 2.3  
-**基準旧版 / Base:** AXIOMS v2.2（v2.2の基準旧版：AXIOMS v2.1）  
+**版 / Version:** 2.4  
+**基準旧版 / Base:** AXIOMS v2.3（v2.3の基準旧版：AXIOMS v2.2）  
 **状態 / Status:** 正規版 / Canonical  
 **位置付け / Role:** 唯一公理・NRA構造原則・IDE計算定義・境界状態・不可逆遷移・構造証言の正規文書
 
 ---
 
-# 上段：AXIOMS v2.3 正規本文
+# 上段：AXIOMS v2.4 正規本文
 
 ---
 
@@ -158,6 +158,44 @@ The reference state is not reset during an evaluation. Because the reference is 
 \(\tau\) は、意味的な許容幅、時間定数、品質スコア、類似度幅ではない。
 
 \(\tau\) は、構造が蓄積ズレを吸収できる厚みである。
+
+---
+
+## 4.5 補助構造量：ω・位相・制約・仕事量・エントロピー / Auxiliary Structural Quantities
+
+一次式・二次式を補うために、次の補助構造量を使うことができる。これらは唯一の律環公理、一次式、二次式、Cause-Side権威、正規状態、不可逆ラッチを上書きしない（§5の派生式・補助式・補完式の分類による）。
+
+These auxiliary structural quantities may be used to support the Primary and Secondary Formulas. They do not override the sole axiom, either canonical formula, Cause-Side authority, canonical states, or the irreversible latch (classified as derived, auxiliary, or complementary under §5).
+
+- \(\omega\)：構造連続性。構造が遷移を継続しているかを示す。ドメインが定めた連続観測または位相更新規則の下で継続が確認できるときに限り \(\omega>0\) とする。観測が欠けていることと \(\omega=0\) は同じではない。
+- \(\mathrm{Phase}\)：遷移位相。対象構造が遷移のどの段階にあるかを示す内部状態。Cause-Sideに由来する遷移規則で更新する。空間座標でも、モデルが生成した埋め込みでもない。
+- \(C\)：制約。対象構造へ外部から加わる負荷・制約。
+- \(W\)：仕事量。ドメインが定義・単位・観測方法を明記した場合だけ使う任意量。
+- \(\mathrm{entropy}\)：ドメイン固有のエントロピー相当量。ドメインが定義・算出規則を明記した場合だけ使う任意量。構造感度 \(S\)（FORMULA §3）とは別の記号であり、\(S\) をエントロピーの意味で使わない。
+
+\(\omega\) is Structural Continuity, indicating whether the structure continues its transition. \(\omega>0\) holds only when continuity is confirmed under a domain-declared continuous observation or phase-update rule fixed before evaluation. A missing observation is not the same as \(\omega=0\).
+
+\(\mathrm{Phase}\) is an internal state showing which stage of transition the target structure occupies, updated under a Cause-Side-derived rule. It is neither a spatial coordinate nor a model-generated embedding.
+
+\(C\) is Constraint, an external load or constraint acting on the target structure.
+
+\(W\) is Work, an optional domain-specific quantity used only when a domain fixes its definition, unit, and observation method.
+
+\(\mathrm{entropy}\) is an optional domain-specific quantity. It is a symbol distinct from structural sensitivity \(S\) (FORMULA §3); \(S\) must not be reused for entropy.
+
+\(\omega\) 、 \(\mathrm{Phase}\) 、 \(C\) 、 \(W\) 、 \(\mathrm{entropy}\) は、Cause-Side観測または評価前に固定した変換規則からのみ得る（§14）。評価出力（\(R\)、正規状態、不可逆ラッチ、その集約）から得てはならない。
+
+\(\omega\), \(\mathrm{Phase}\), \(C\), \(W\), and \(\mathrm{entropy}\) are obtained only from Cause-Side observation or a transformation rule fixed before evaluation (§14). They must not be obtained from evaluation outputs (\(R\), canonical state, the irreversible latch, or their aggregates).
+
+離散的な遷移で、次の段階へ持ち越さない残差を記録する場合、その残差を \(\mathrm{entropy\_export}\) と呼ぶことができる。これは熱力学的エントロピーの測定値ではなく、構造感度 \(S\) とも別の概念である。
+
+When a discrete transition records a remainder not carried to the next stage, that remainder may be called \(\mathrm{entropy\_export}\). It is not a measurement of thermodynamic entropy and is a concept distinct from structural sensitivity \(S\).
+
+### 解釈境界コメント
+
+これらの補助構造量は、一次式 \(R=\delta/\tau\) を書き換えない。構造証言の補助欄として使う場合も、正規状態を置き換えず、\(R\) を下げず、不可逆ラッチを解除しない。
+
+These auxiliary structural quantities do not rewrite the Primary Formula \(R=\delta/\tau\). When used as auxiliary testimony fields, they do not replace canonical states, lower \(R\), or release the irreversible latch.
 
 ---
 
@@ -1053,7 +1091,7 @@ The role of IDE is to connect Cause-Side structural quantities obtained from tho
 文書、コード、コメント、例示、AI説明が競合した場合、次の順で解決する。
 
 ```text
-theory/AXIOMS.md (AXIOMS_v2.3)
+theory/AXIOMS.md (AXIOMS_v2.4)
   > theory/axioms.json
   > theory/NRA-IDE_Foundational_Thesis_Bilingual.md
   > theory/SANDWICH_ARCH.md
@@ -1083,6 +1121,45 @@ theory/AXIOMS.md (AXIOMS_v2.3)
 配置名だけでは正規性を取得しない。正規参照実装として扱うには、本書および`theory/axioms.json`との適合試験に合格しなければならない。適合前の既存実装を、配置だけを理由に正規実装とみなしてはならない。
 
 The normative reference implementation source is located at `nra-core/foundations/NRA-IDE_Architecture_public.py`. The file at `docs/NRA-IDE_Architecture_public.py` is a generated public mirror, not an independent normative source. Generation and SHA-256 equality checks must keep the two synchronized. Normative status additionally requires passing conformance tests against this document and `theory/axioms.json`; location alone does not confer conformance.
+
+---
+
+# 下段：AXIOMS v2.3 からの変更点
+
+---
+
+## 1. 変更の性質
+
+v2.4は、唯一の律環公理、NRA構造原則、一次式 \(R=\delta/\tau\)、定義域、閾値の順序、正規境界状態、構造要素の付加・除去を変更しない。
+
+v2.4は、既存のdocs説明文書群が正典に定義のないまま使っていた補助構造量（ω・位相・制約・仕事量・エントロピー）を、新設§4.5として正式に正典化する。これにより、docs文書群がこれらの量を参照する際、正典の定義を引用できるようになる。
+
+---
+
+## 2. 主な追加点
+
+### 2.1 補助構造量を定義（§4.5）
+
+ω（構造連続性）、位相、制約、仕事量、エントロピーを、一次式・二次式を補う補助構造量として定義した。出所はCause-Sideに限る（§14と同じ権威原則）。いずれも評価出力から得てはならない。
+
+### 2.2 位相の記号を確定
+
+docsで使われていた小文字 \(\varphi\) は、FORMULA.md §5.1の補助計算項 \(\Phi(x)\) と大小文字だけの区別になるため採らず、\(\mathrm{Phase}\) と綴りで表す。
+
+### 2.3 エントロピーとSの区別を明記
+
+エントロピー相当量を使う場合、構造感度 \(S\)（FORMULA §3）と混同しないことを正典で明記した。
+
+---
+
+## 3. 変更していないもの
+
+- 唯一の律環公理「存在は生成である。」
+- \(R=\delta/\tau\)、\(\tau>0\)、\(\tau=0\)は定義域外
+- 閾値の順序 \(R_{\mathrm{warn}}<R_{\mathrm{handoff}}<R_{\mathrm{irrev}}<1.0\) と正規境界状態
+- 蓄積ズレの構成と基準不動（§4）
+- 構造要素の付加・除去（§7・§8）
+- 逆導出A・Bの定義（§14）
 
 ---
 
