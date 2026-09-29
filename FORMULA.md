@@ -108,7 +108,7 @@ $$
 
 ### 0.5.4 厚み / Thickness
 
-宣言時の構造を要素 $e=0$ 、後に付加した要素を $e=1,2,\dots$ とする。時点 $n$ に評価対象に含まれている要素（付加され、まだ除去されていない要素）の集合を構成 $\mathsf{Active}_n$ とする。 / The structure at declaration is element $e=0$; elements added later are $e=1,2,\dots$. The set of elements included in the evaluation target at step $n$ (added and not yet removed) is the active set $\mathsf{Active}_n$.
+宣言時の構造を要素 $e=0$ 、後に付加した要素を $e=1,2,\dots$ とする。時点 $n$ に評価対象に含まれている要素（付加され、まだ除去されていない要素）の集合を構成 $\mathsf{Active}_n$ とする。 / The structure at declaration is element $e=0$; elements added later are $e=1,2,\dots$. The set of elements included in the evaluation target at step $n$ (added and not yet removed) is the active elements $\mathsf{Active}_n$.
 
 $$
 \tau^{[e]}_n=(1-\lambda^{[e]}_n)\,\tau^{[e]}_0,\qquad 0\le\lambda^{[e]}_n\le1\quad(e\in\mathsf{Active}_n)
@@ -120,7 +120,7 @@ $$
 
 要素が一つの場合は $\tau_n=(1-\lambda_n)\,\tau_0$ である。 / For a single element, $\tau_n=(1-\lambda_n)\,\tau_0$.
 
-$\lambda^{[e]}_n$ は要素の劣化度であり、評価中に減らない。 $\mathrm{Comp}_\tau$ は、各引数について非減少、値は有限・非負で単位 $u$ を保ち、要素一つならその厚みに等しく、全要素が0または構成が空なら0とする。評価の中で除去を扱う場合は、要素を外しても値が増えない形でなければならない（直列の連結 $\min_e$ のように、外すと全体が強くなる形では、除去を評価宣言の変更とする）。 / $\lambda^{[e]}_n$ is the degradation fraction of the element and does not decrease during evaluation. $\mathrm{Comp}_\tau$ is non-decreasing in each argument, finite and non-negative in the unit $u$, equal to the element's thickness for a single element, and zero when all elements are zero or the set is empty. If removal is handled within an evaluation, removing an element must not increase the value (for forms such as a series link $\min_e$, where removal strengthens the whole, removal is treated as a change of the declaration).
+$\lambda^{[e]}_n$ は要素の劣化度であり、評価中に減らない。 $\mathrm{Comp}_\tau$ は、各引数について非減少、値は有限・非負で単位 $u$ を保ち、要素一つならその厚みに等しく、全要素が0または構成が空なら0とする。評価の中で除去を扱う場合は、要素を外しても値が増えない形でなければならない（直列の連結 $\min_e$ のように、外すと全体が強くなる形では、除去を評価宣言の変更とする）。 / $\lambda^{[e]}_n$ is the degradation fraction of the element and does not decrease during evaluation. $\mathrm{Comp}_\tau$ is non-decreasing in each argument, finite and non-negative in the unit $u$, equal to the element's thickness for a single element, and zero when all elements are zero or there are no active elements. If removal is handled within an evaluation, removing an element must not increase the value (for forms such as a series link $\min_e$, where removal strengthens the whole, removal is treated as a change of the declaration).
 
 吸収厚みが増えるのは構造要素の付加だけである（AXIOMS §7）。付加した要素の宣言厚み $\tau^{[e]}_0$ は、加えた時点のCause-Side測定で定め、評価出力から定めない。壊れていない要素の計画的な除去は劣化ではないので $\lambda$ に計上しない。付加と除去は事象として記録する。 / Absorption thickness increases only through the addition of a structural element (AXIOMS §7). The declared thickness $\tau^{[e]}_0$ of an added element is determined by Cause-Side measurement at the time of addition, not from evaluation outputs. Planned removal of an undamaged element is not degradation and is not counted in $\lambda$. Additions and removals are recorded as events.
 

@@ -1,10 +1,1112 @@
 # NRA-IDE 一次式の導出 / Derivation of the Primary Formula
 
-**Version:** 1.0（日本語版。英語版は内容の確定後に対で作成する）  
-**Author:** M-Tokuni  
-**Document role:** 正典が定める一次式 $R=\delta/\tau$ について、その前段（Cause-Side観測から $\delta$ と $\tau$ を構成するまで）の導出・証明・例示を示す
+**Version:** 1.1（日英対訳版 / Bilingual Edition — English / Japanese）
+**Author:** M-Tokuni
+**Document role:** 正典が定める一次式 $R=\delta/\tau$ について、その前段（Cause-Side観測から $\delta$ と $\tau$ を構成するまで）の導出・証明・例示を示す / Derivation, proof, and illustration of the pre-stage of the canonical Primary Formula $R=\delta/\tau$ (from Cause-Side observations to $\delta$ and $\tau$ )
+
+> **Note:** This document presents the English version (Section I) followed by the Japanese original (Section II). The Japanese version is the primary source text; the English version is a faithful translation.
+>
+> 本書は、前半に英語版（Section I）、後半に日本語原文（Section II）を収めた対訳版です。日本語版が一次原文であり、英語版はその忠実な翻訳です。
 
 ---
+
+# SECTION I — ENGLISH
+
+## 0. Role of This Document and How to Read It
+
+This document neither creates nor changes canonical definitions. Definitions, classifications, and precedence follow `theory/AXIOMS.md` (§16). If this document conflicts with the canon (`theory/AXIOMS.md`, `theory/axioms.json`, `FORMULA.md`, and others), the canon prevails and this document is corrected.
+
+Among the symbols used in this document, those defined in the canon follow the canonical definitions. Symbols for which the "Defined in" column of the symbol table (Part 2, 1) names a canonical section follow the definition in that section.
+
+All numerical values in the examples are illustrative and are not values of real members or equipment. References to external theories point to similar observations and are not grounds for the derivation. Each proof is closed within the premises of this document. The record of the deliberations is kept in `note/正典考慮課題/`.
+
+This document consists of three parts.
+
+- **Part 1 (for a high-school senior):** explains the whole picture with a spring, using almost no symbols. It is enough to grasp "what this is about," even without following every detail.
+- **Part 2 (establishing the Primary Formula):** writes the path up to the Primary Formula (Stages 1–4) with variables, formulas, and proofs, and shows which symbol each phrase of Part 1 corresponds to.
+- **Part 3 (after the Primary Formula):** writes the transitions after the Primary Formula (Stages 5–7). Part 3 precedes any decision on canonization and is not a canonical definition.
+
+The sections of Part 1 are numbered [1]–[11], and Parts 2 and 3 show the correspondence as "→[3]". [1]–[6] and [8] correspond to Part 2; [11] to Part 3; [7] to both Part 2 (the latch in P6) and Part 3 (Stage 5); [10] to both Part 2 (P6 and the addition of a structural element in 3.3) and Part 3 (Stage 6); and [9] to both Part 2 (P9) and Part 3 (Stage 7).
+
+---
+
+# Part 1　Explanation for a High-School Senior
+
+## [1] First, agree on "what to look at"
+
+Consider an experiment of pulling a spring.
+
+Before starting any calculation, decide the following in advance.
+
+- Which spring to look at (the target)
+- What counts as "broken" (rupture)
+- How to measure the extension (the unit is mm)
+- Where "zero extension" is (the reference = the natural length when the spring was bought; **this mark is never moved later**)
+
+If you calculate without deciding these, the same number can mean different things to different people.
+The NRA-IDE Primary Formula is not "a formula that divides any two numbers you like." It is **a formula that can be used only after this agreement has been made**.
+
+## [2] Look at "how far it has come" as a ratio
+
+Suppose this spring breaks when stretched **30 mm** beyond its natural length.
+This width that can be received before breaking, 30 mm, is called the **thickness (τ)**.
+
+If it is now stretched 12 mm, then of the way to breaking,
+
+$$
+\frac{12}{30}=0.4
+$$
+
+that is, it has come **40%** of the way.
+This "extension from the reference to the present position" is called the **deviation (δ)**, and the ratio 0.4 is called **R**. When R reaches 1, the spring ruptures.
+
+- R = 0.4 → 40% of the way
+- The remaining width 30 − 12 = 18 mm → this is the "margin"
+
+The thickness is not "what remains" but "the whole width from the reference to rupture." What remains is called the "margin" separately.
+
+## [3] Deviation that returns and deviation that does not
+
+As learned in physics, a spring has an **elastic limit**. Let the elastic limit of this spring be 12 mm.
+
+- **Pull 8 mm and let go** → it returns to its original length. This is **reversible** (deviation that returns).
+- **Pull 15 mm and let go** → since it went 3 mm beyond the elastic limit, it **stays 3 mm stretched** after release. This is **irreversible** (deviation that does not return). Gaps appear between the coils.
+
+While the spring is being pulled to 15 mm, the extension can be divided into "12 mm that returns on release" and "3 mm that no longer returns." A single event contains a returning part and a non-returning part **at the same time**.
+
+## [4] There are two kinds of things that do not return
+
+A spring that has gone beyond its elastic limit undergoes two kinds of changes that do not return.
+
+1. **Stays stretched:** the natural length has become 3 mm longer (the position remains shifted).
+2. **Has become weaker:** invisible damage has formed inside the metal, and the width before breaking has decreased from 30 mm to **27 mm**.
+
+1 is "deviation remained," and 2 is "the vessel itself became smaller." **They are different phenomena, so they are counted separately.**
+Counting the same change in both would make it look worse than it is (double counting). Which observation is counted where is decided within the agreement of [1].
+
+## [5] The scale contains the past just by measuring. That is why it must not be reset
+
+If the spring that was pulled to 15 mm and released is measured **with the scale of the original natural length unchanged**, the extension reads 3 mm.
+Without any calculation, **the present reading of the scale itself contains the 3 mm that stayed stretched in the past**.
+"Deviation is not an instantaneous value; it carries history" does not mean some special accumulation. It means that **if you measure without moving the scale, the past remains visible in the present value**.
+
+If, however, the present length is reset as the new "zero extension,"
+
+- extension 0, R = 0 → **it looks "completely restored"**
+
+but in reality,
+
+- residual extension 3 mm, thickness 27 mm → R = 3 ÷ 27 ≈ 0.11.
+
+Resetting the scale makes past events invisible.
+That is why **the reference (the zero-extension position) stays where it was first decided**. Part 2 shows that not moving it is always on the safe side (R comes out larger).
+
+## [6] The same appearance does not mean the same spring
+
+Pull a new spring and a spring that was once pulled to 15 mm, both to the same position, 15 mm.
+
+| | Extension | Thickness | R |
+|---|---|---|---|
+| New | 15 mm | 30 mm | 0.50 |
+| Once-pulled spring | 15 mm | 27 mm | about 0.56 |
+
+The visible extension is the same 15 mm, yet R differs. What makes the difference is **what happened in the past (the history)**.
+
+From here comes the most important sentence of this theory.
+
+> **Even if the value returns, the structure has not returned.**
+
+On release, part of the extension returns (the value returns). But the 3 mm that stayed stretched, the reduced thickness, and the record of the event "pulled to 15 mm" do not disappear (the structure has not been restored).
+
+## [7] There is a line that, once crossed, does not return automatically (→Part 2 P6, Part 3 Stage 5)
+
+Once R crosses a set value (the irreversible transition onset) even once, the record "entered irreversibility" is not erased even if R later falls.
+This is called a **latch**. Once it catches, it does not release automatically.
+
+## [8] Being "pushed in" and "the vessel being shaved" at the same time is the most dangerous
+
+Suppose a spring pulled to 8 mm is stretched further to 15 mm. Two things happen at the same time.
+
+- The extension increased from 8 mm to 15 mm (pushed in)
+- Having gone beyond the elastic limit, the thickness decreased from 30 mm to 27 mm (the vessel shaved)
+
+R rises from 8/30 ≈ 0.27 to 15/27 ≈ 0.56. Of the rise of 0.29,
+
+- about 0.26 is due to "the extension increased"
+- about 0.03 is due to "the vessel became smaller"
+
+R rises both when the numerator increases and when the denominator decreases, so **an event in which both occur at once pushes R up from two directions**.
+The NRA-IDE "dual fluctuation" is a formula that watches for exactly this moment, when "deviation increases and thickness decreases at the same time."
+
+## [9] A broken part does not mean the whole is broken (→Part 2 P9, Part 3 Stage 7)
+
+Consider a platform supported by ten springs. One of them breaks.
+
+- For that one spring, it is rupture (R = 1)
+- For the whole platform, it is not yet rupture
+
+But the load on the remaining nine increases, and the thickness of the whole platform decreases.
+That is, **the rupture of a lower level enters the upper level as "one event."** The rupture of a part must neither be equated with the rupture of the whole nor ignored.
+
+The same holds when the state of a neighboring spring affects this spring. The neighbor's state arrives here as an "event."
+
+One distinction must be made here. **The spring itself** and the **ruler** that measures it (where zero extension is, from where it is considered dangerous) are different things.
+
+- It is natural, as the physics of the spring, that the spring itself is damaged faster the harder it is pulled.
+- But **you must not rewrite the ruler that measures you by looking at your own R**. Moving the danger line away when R is high hides the approach; moving it closer exaggerates the approach. In either case, R comes to reflect the convenience of the ruler rather than the state of the spring.
+
+This is what "no reverse derivation" means. In the canon, this prohibition is called reverse derivation B (self-adjustment of the gauge).
+
+## [10] A stretched spring does not return. To strengthen it, add. When it breaks, count anew (→Part 2 3.3, Part 3 Stage 6)
+
+A spring that stayed stretched does not return to its original state. To make it stronger, do not "restore" the damaged spring; **add something new**.
+
+- Example: place another spring beside it, or attach a thicker spring.
+- An added spring has its own thickness. That thickness is determined by measuring at the time of addition.
+- The old spring's 3 mm of permanent stretch and its weakening from 30 mm to 27 mm remain after the addition; they do not disappear.
+- The whole thickness is the width that combines the old spring and the added spring. How they are combined (adding them if placed side by side, and so on) is decided in advance within the agreement of [1].
+- The calculation continues after the addition, and the addition stays in the record. It may happen at any time (even right after the calculation starts).
+- Conversely, an undamaged spring may be taken out. This is recorded as "removed," not "broken." When a removed spring is put back, it is treated again as "added" and measured anew at that time.
+
+Instead of continuing the same calculation, count anew in the following cases.
+
+- When the spring breaks (R = 1).
+- When the agreement itself is changed. For example, when the stretched spring is forcibly pulled back to its original length (straightened), or when a new measurement shows that the thickness differs from the agreed value.
+
+When counting anew,
+
+- keep all records of the old spring in storage (do not discard them, do not rewrite them). The record "crossed the no-return line once" ([7]) is also written into the new agreement.
+- Make a **new agreement** ([1]) and start counting. The R of the previous calculation and the R of the new calculation are not compared.
+
+The "escapement" wheel in a clock is a mechanism that repeats this regularly. When one tooth's worth accumulates, it advances one step; the overshoot is not carried to the next tooth, and counting starts anew with the next tooth (in a mechanical escapement, the overshooting energy dissipates as heat). The wheel only advances and never returns to the same state at the same position.
+
+## [11] Keep all records; a summary is enough for judgment (→Part 3)
+
+Recording everything, "when and how many mm it was pulled," becomes very long.
+But to judge what happens next, it is enough to know three things:
+
+- the amount of permanent stretch (3 mm)
+- how much weaker it has become (30 → 27 mm)
+- whether the latch has caught
+
+(for a single element; the general case is proved, with conditions, in Proposition 5 of Part 3).
+
+However, **all records are kept for explanation and audit**. "The summary needed for judgment" and "the record needed for testimony" have different roles. The formula is shortened not by cancellation but **by summary**. Only what does not change the next judgment when erased may be erased.
+
+---
+
+# Part 2　Establishing the Primary Formula
+
+## 1. Symbol Table
+
+The names, fixed names, types, provenance, permitted uses, and points of confusion of the symbols can be looked up in the dictionary `dictionary/NRA-IDE_Dictionary_EN.md` (Japanese edition `dictionary/NRA-IDE_Dictionary_JP.md`; non-normative). This document does not distinguish symbols with different meanings only by font, case, or typeface (dictionary 0.5, FORMULA.md §7). The reserved symbols of the canon (FORMULA.md §7: $R,S,M_R,M_\tau,\delta,\tau,\omega,C,\mathrm{entropy}$ ), the symbols of AXIOMS.md §1 ( $\epsilon$ , $\emptyset$ , and others), and the auxiliary structural quantities of AXIOMS.md §4.5 ( $\omega$ , $\mathrm{Phase}$ , $C$ , $W$ , $\mathrm{entropy}$ ) are used only in their canonical meanings.
+
+| Symbol | Name | Meaning | Defined in | Part 1 |
+|---|---|---|---|---|
+| $\mathsf{Decl}$ | evaluation declaration | the set of commitments fixed before computation begins | FORMULA.md §0.5.1 | [1] |
+| $n$ | structural update number | the order of events (not time) | FORMULA.md §0.5.2 | — |
+| $o_n$ | observation value | a Cause-Side observation (may be multivariate); a symbol distinct from the computational state $x$ of FORMULA.md §5 | FORMULA.md §0.5.2 | — |
+| $\mathrm{Ev}_n$ | observation event | the event recorded $n$th | FORMULA.md §0.5.2 | — |
+| $\sigma$ | projection rule | conversion from observation to accumulated deviation | FORMULA.md §0.5.2 | [5] |
+| $\mathsf{Alloc}$ | allocation rule | the rule that decides where an observed change is allocated | FORMULA.md §0.5.3 | [4] |
+| $a_n$ | applied action | the action applied to the structure at that step | FORMULA.md §0.5.3 | pulling force |
+| $C_n$ | constraint | the value at that step of an external load, restraint, or environmental condition (a component of the observation $o_n$ ); not an allocation target | AXIOMS.md §4.5, FORMULA.md §0.5.3 | — |
+| $q_n$ | reversible component | deviation that returns to 0 when the action is removed | AXIOMS.md §4 (term), FORMULA.md §0.5.3 (symbol) | [3] |
+| $p_n$ | irreversible component (residual deviation) | deviation that remains after the action is removed | AXIOMS.md §4 (term), FORMULA.md §0.5.3 (symbol) | [4] 1 |
+| $\lambda_n$ | degradation fraction (single element) | the fraction of thickness lost, $0\le\lambda_n\le1$ ; with several elements, the per-element $\lambda^{[e]}_n$ is used | FORMULA.md §0.5.4 | [4] 2 |
+| $\tau_0$ | declared thickness | the absorption thickness of the whole structure at the start of evaluation; with several elements, $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ | FORMULA.md §0.5.1, §0.5.4; consistent with $\tau_0$ in AXIOMS.md §7, §8 | 30 mm |
+| $e$ | element number | the number of a structural element; $e=0$ is the structure at declaration and $e\ge1$ are added elements | FORMULA.md §0.5.4 | [10] |
+| $n_e$ | time of addition | the update number at which element $e$ was added ( $n_0=0$ ) | this document | [10] |
+| $\mathsf{Active}_n$ | active elements | the set of elements included in the evaluation target at step $n$ (added and not yet removed) | FORMULA.md §0.5.4 | [10] |
+| $q^{\mathrm{temp}}_n$ | temporary reversible deviation | a receiving width temporarily narrowed by an action or condition, counted on the deviation side; part of the reversible component $q_n$ | FORMULA.md §0.5.3 | — |
+| $\tau^{[e]}_0$ , $\lambda^{[e]}_n$ | declared thickness and degradation fraction of an element | the declared thickness and degradation fraction of element $e$ itself (for a single element, $\tau^{[0]}_0=\tau_0$ and $\lambda^{[0]}_n=\lambda_n$ ) | FORMULA.md §0.5.4 | [10] |
+| $\mathrm{Comp}_\tau$ | composition rule | the rule that determines the effective thickness of the whole from element thicknesses | FORMULA.md §0.5.4 (symbolizes "addition of a structural element" in AXIOMS.md §7) | [10] |
+| $\delta_n$ | accumulated deviation | $q_n+p_n$ | AXIOMS.md §4, FORMULA.md §1, §0.5.3 | [2] [5] |
+| $\tau_n$ | effective thickness | $(1-\lambda_n)\tau_0$ for a single element; in general, given by $\mathrm{Comp}_\tau$ of Stage 3 | FORMULA.md §1 ( $\tau$ ), §0.5.4 (distinction of layers) | [2] [4] |
+| $\tau_{\mathrm{upper}}(n)$ , $\tau_{\mathrm{lower}}(n)$ | side-specific effective gate widths | widths used only for side-specific evaluation in the Secondary Formula | FORMULA.md §4.4 | — |
+| $R_n$ | boundary approach ratio | $\delta_n/\tau_n$ | FORMULA.md §1 | [2] |
+| $M_{\tau,n}$ | remaining absorption margin | $\tau_n-\delta_n$ | FORMULA.md §2 | [2] |
+| $\ell_n$ | irreversible latch | 0 or 1 | AXIOMS.md §10.4 (`irreversible_latched`) | [7] |
+| $\mathsf{History}_n$ | event history | the record sequence $\mathrm{Ev}_1,\dots,\mathrm{Ev}_n$ (empty at the start of evaluation) | this document | [6] [11] |
+| $\mathsf{Phys}^{(\mathrm{self})}_n$ | target state | the physical state of this structure $(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathsf{Active}_n})$ ; it does not include the evaluation state ( $\ell_n$ ) or the event history ( $\mathsf{History}_n$ ) (Proposition 2). The physical state of another structure $i$ is $\mathsf{Phys}^{(i)}_n$ | this document (symbolizes the categories of AXIOMS.md §14) | [9] |
+| $\mathsf{Gauge}^{(\mathrm{self})}$ | gauge | the reference, transformation rules, thresholds, and effective gate widths that measure this structure | this document (same as above) | [9] |
+| $\mathsf{Out}^{(\mathrm{self})}_n$ | evaluation output | $R_n$ , side-specific ratios, $\ell_n$ , the canonical state, and their aggregates | AXIOMS.md §14 (that section lists $R$ , the canonical state, and the irreversible latch; including side-specific ratios is this document's reading) | [9] |
+
+Symbols used only in Part 3 ( $j$ , $\mathsf{Archive}$ , $Z_n$ , $\mathsf{State}_n$ , $\mathsf{Update}$ , $\rho$ , $g_p$ , $g^{[e]}_\lambda$ , $\mathrm{EvalGraph}^{(j)}$ ) are given in Part 3.
+
+---
+
+## 2. Premises P0–P9
+
+For each premise, the correspondence with the canon is shown.
+
+### P0　Evaluation declaration (→[1])
+
+Before computation begins ( $n=0$ ), the evaluation declaration $\mathsf{Decl}$ is fixed. $\mathsf{Decl}$ is not rewritten by the results of the evaluation.
+
+| Required element | Content | Correspondence with the canon |
+|---|---|---|
+| Target and rupture mode | the structure evaluated and the mode and path regarded as complete rupture | FORMULA.md §0 |
+| Unit | the unit $u$ shared by $\delta$ and $\tau$ | FORMULA.md §1 |
+| Observations and provenance | the Cause-Side observations used, with their provenance, time, unit, and uncertainty | FORMULA.md §6, AXIOMS.md §14, §15.1 |
+| Thresholds | $R_{\mathrm{warn}}$ , $R_{\mathrm{handoff}}$ , $R_{\mathrm{irrev}}$ | AXIOMS.md §9 |
+| Handling of missing or unobservable data | the treatment when data are unobservable, missing, or not computable. An unobservable channel is reported as `NOT_OBSERVABLE` with the reason and is not filled in as zero, stable, safe, or recovered | AXIOMS.md §10.2, §11.2, §15.1 |
+| Reference state | the origin from which accumulated deviation is measured | AXIOMS.md §4 |
+| Projection rule $\sigma$ | Stage 1 | this document |
+| Allocation rule $\mathsf{Alloc}$ | P5 | this document |
+| Declared thickness $\tau_0$ | Stage 3 | this document |
+| Composition rule $\mathrm{Comp}_\tau$ | the rule that determines the effective thickness of the whole from element thicknesses when structural elements are added or removed (Stage 3) | AXIOMS.md §7 (addition of a structural element) |
+
+The composition rule is declared even in an evaluation where no addition has yet occurred. Because an addition may occur at any time (even right after $n=0$ ), deciding the rule only after an addition occurs would leave room to fit the rule to the result.
+
+As an optional element, whether and how the sequence of evaluations is mapped to structural continuity $\omega$ may be declared. If it is not declared, there is no mapping. No general rule for the mapping is defined. The $\omega$ used for the mapping is obtained from Cause-Side observation or a pre-fixed transformation rule, as stated in AXIOMS.md §4.5 (P8).
+
+As an optional element, the identification of external conditions (what counts as constraint $C$ : kind, source, unit, and conversion rule) may be declared. If $C$ enters the gauge, it is declared as a function fixed before evaluation.
+
+Elements are not omitted. In a domain where a component does not exist, that component is declared to be zero (for example, $p\equiv0$ ).
+
+**The Primary Formula is always bound to a declaration.**
+
+$$
+R_{\mathsf{Decl}}=\frac{\delta_{\mathsf{Decl}}}{\tau_{\mathsf{Decl}}}
+$$
+
+$R$ values from different declarations are not compared or transferred unless comparability is established.
+
+$$
+\mathsf{Decl}_A\neq\mathsf{Decl}_B
+\;\Rightarrow\;
+R_{\mathsf{Decl}_A}\text{ and }R_{\mathsf{Decl}_B}\text{ are not compared without establishing comparability}
+$$
+
+A **necessary condition** for comparability is that $\delta$ and $\tau$ are obtained for the same target, in the same unit, under the same Cause-Side measurement rules (the same condition that AXIOMS.md §8 requires for comparing $\tau_{\mathrm{restored}}$ with $\tau_0$ ). "The same measurement rules" here include that all elements of the declaration that change the meaning of $R$ are the same: the reference state, the rupture mode and rupture path, the projection rule $\sigma$ , the allocation rule $\mathsf{Alloc}$ , the composition rule $\mathrm{Comp}_\tau$ , and the meaning of the evaluation snapshot. These conditions are not sufficient conditions that guarantee a comparison is permissible. When comparing, show that the conditions are met; if any element does not meet them, do not compare. This reads FORMULA.md §0 ("the evaluation target is declared unambiguously before computation begins") and AXIOMS.md §15.1 ("do not transfer $\delta$ and $\tau$ to another domain on the basis of similarity alone") at the level of a declaration, and is not a new rule.
+
+### P1　Deviation and the rupture boundary (→[2])
+
+Along the declared rupture mode, the deviation measured from the reference state in the rupture direction is $\delta\ge0$ . $\delta=0$ is the reference state, and $\delta=\tau_n$ is the rupture position at the present step.
+
+$\tau$ is not "what remains" but **the whole width from the reference to rupture**. What remains is defined separately as $M_\tau=\tau-\delta$ (FORMULA.md §2).
+
+### P2　Observation events (→[1])
+
+An observation event is not a single number but a unit of record.
+
+$$
+\mathrm{Ev}_n=
+(\text{target},\ \text{value},\ \text{unit},\ \text{provenance},\ \text{time},\ \text{uncertainty},\ \text{order}\ n,\ \text{observation path})
+$$
+
+The time is the acquisition time or version and is kept separately from the order $n$ (FORMULA.md §6).
+
+The following two are distinguished.
+
+- **Unknown or invalid input:** an event whose target, unit, time, or provenance is unknown, or whose value is invalid or non-finite, is not input to the Primary Formula and results in CONFESSION (AXIOMS.md §6, §10.6). It is not filled in by analogy.
+- **Merely unobservable:** when it is known that no value can be obtained from an observation channel, `NOT_OBSERVABLE` and the reason are output, and the declared handling of missing data applies (AXIOMS.md §10.2, §11.1, §11.2). Unobservability alone does not cause a transition to CONFESSION.
+
+### P3　Commensurability
+
+$$
+[\delta]=[\tau]=u
+$$
+
+and $\delta_n$ and $\tau_n$ belong to the same $\mathsf{Decl}$ and the same $n$ .
+
+### P4　Domain
+
+$$
+\delta_n\ge0,\qquad \tau_n>0,\qquad \delta_n,\tau_n\ \text{finite}
+$$
+
+This is exactly the domain of FORMULA.md §1. Lemma 1 shows that it is satisfied within the range $\lambda_n<1$ for a single element and, in general, within the range where the value of the composition rule is positive.
+
+### P5　Reversible/irreversible decomposition (→[3] [4])
+
+The allocation rule $\mathsf{Alloc}$ divides each event into the following four.
+
+$$
+\mathsf{Alloc}(\mathrm{Ev}_n)=\bigl(a_n,\ \Delta p_n,\ \Delta\lambda_n,\ \mathrm{ctx}_n\bigr)
+$$
+
+- $a_n$ : applied action (produces the reversible component). The effect of conditions that temporarily narrow the width the structure can receive ( $q^{\mathrm{temp}}_n$ , Stage 3) is also allocated here. The condition itself (constraint $C_n$ , AXIOMS.md §4.5) is not an allocation target
+- $\Delta p_n\ge0$ : increment of residual deviation
+- $\Delta\lambda_n\ge0$ : increment of the degradation fraction (with several structural elements, the per-element $\Delta\lambda^{[e]}_n\ge0$ )
+- $\mathrm{ctx}_n$ : context, authority, and provenance
+
+**Definition of increments:** the event $\mathrm{Ev}_n$ at update number $n$ advances the state from $n-1$ to $n$ ( $n=1,2,\dots$ ; $n=0$ is the start of evaluation). Increments are written with the same backward difference as FORMULA.md §4.7.
+
+$$
+p_n=p_{n-1}+\Delta p_n,\qquad \lambda^{[e]}_n=\lambda^{[e]}_{n-1}+\Delta\lambda^{[e]}_n
+$$
+
+Hence $p_n=p_0+\sum_{m=1}^{n}\Delta p_m$ ( $p_0$ is the residual deviation at the start of evaluation). The rule for the time evolution of the reversible component $q$ (the update rule $\mathsf{Update}$ of Stage 5 in Part 3) precedes any decision on canonization and is therefore not included in the premises of this part.
+
+**Consistency with the projection:** the decomposition divides the value of the projection and satisfies
+
+$$
+q_n+p_n=\sigma(o_n)=\delta_n
+$$
+
+The reversible component is determined as $q_n=\sigma(o_n)-p_n$ , and $q_n\ge0$ gives $0\le p_n\le\delta_n$ . When $q_n$ is given by a model, this consistency must also hold. A violation is evidence that the declared $\sigma$ or $\mathsf{Alloc}$ does not fit the target. The temporary reversible deviation $q^{\mathrm{temp}}_n$ (a temporarily narrowed receiving width; Stage 3) is converted by $\sigma$ from the observation of the condition (temperature and so on) and included in $\delta_n$ , and $\mathsf{Alloc}$ allocates it to $q_n$ .
+
+**One change, one allocation:** each observed physical change is allocated to **exactly one** of $a_n$ , $\Delta p_n$ , $\Delta\lambda_n$ . $\mathrm{ctx}_n$ is not an allocation target but information attached to the allocation. Which observation is allocated where is fixed in advance within $\mathsf{Alloc}$ (→ the prevention of double counting in [4]). A single event may contain several changes (the 15 mm example of [3]); even then, each change has exactly one allocation target. The constraint $C_n$ is not an allocation target. $C_n$ is a component of the observation $o_n$ and acts only as an argument of rules fixed before evaluation, such as $\sigma$ , $\mathsf{Alloc}$ , physical laws, and gauge functions. Its effect is allocated, change by change, to exactly one of $a_n$ , $\Delta p_n$ , $\Delta\lambda_n$ . The same factor (temperature and so on) may appear in both $C_n$ and $a_n$ ; since $C_n$ is not an allocation target, this is not double counting.
+
+### P6　Monotonicity of the irreversible components (→[4] [7] [10])
+
+Within an evaluation, without exception,
+
+$$
+p_n\ge p_{n-1},\qquad \lambda^{[e]}_n\ge\lambda^{[e]}_{n-1}\quad(\text{each element}\ e)
+$$
+
+No operation decreases the degradation or residual deviation of existing elements. Absorption thickness increases only through the addition of a structural element (Stage 3). Removal of a structural element (Stage 3), the planned taking-out of an undamaged element, decreases the thickness but is not degradation and is not counted in $\lambda$ . Straightening, which forcibly returns an extension or bend, decreases $\delta$ measured from the fixed reference and is therefore not handled within an evaluation. When straightening is performed, that evaluation ends and a new evaluation is declared (Part 3, Stage 6).
+
+The irreversible latch is not released automatically during an evaluation (AXIOMS.md §10.4).
+
+$$
+\ell_n\ge\ell_{n-1}
+$$
+
+The event history always grows.
+
+$$
+\mathsf{History}_n=\mathsf{History}_{n-1}\oplus \mathrm{Ev}_n,\qquad \#\mathsf{History}_n=\#\mathsf{History}_{n-1}+1
+$$
+
+$\oplus$ is not addition but "appending to the end of the record sequence," and $\#$ is the number of records.
+
+Only the reversible component $q$ may decrease through the passage of time alone. This writes AXIOMS.md §7 (non-spontaneous recovery of $\tau$ and of residual deviation) for each decomposed component. AXIOMS.md §7 states that residual deviation does not decrease during an evaluation and that, when straightening is performed, the evaluation is declared anew.
+
+### P7　Fixed reference (→[5])
+
+The reference state is fixed by $\mathsf{Decl}$ and is not reset during an evaluation. Residual deviation $p_n$ is kept as part of $\delta$ , not as a shift of the reference. Redeclaring the reference is permitted only between evaluations (Part 3, Stage 6).
+
+Correspondence with the canon: AXIOMS.md §4.
+
+### P8　Authority
+
+$q,p,\lambda,\tau_0$ and their increments are obtained only from Cause-Side observation or pre-fixed transformation rules. They are not back-calculated from Effect-Side outputs or visualization results (AXIOMS.md §14, reverse derivation A). The same applies when the evaluation uses auxiliary structural quantities ( $\omega$ , $\mathrm{Phase}$ , $C$ , $W$ , $\mathrm{entropy}$ of AXIOMS.md §4.5); they must not be obtained from evaluation outputs ( $R$ , the canonical state, the irreversible latch, or their aggregates) (AXIOMS.md §4.5).
+
+P8 is a premise about **the kind of input source**. The next premise, P9, is a premise about **the shape of the computation path**, which must hold even when all input sources are Cause-Side.
+
+### P9　Categories of target state, gauge, and evaluation output (→[9])
+
+**Three categories:** the quantities appearing in an evaluation are divided into the following three.
+
+| Category | Symbol | Contents | Character |
+|---|---|---|---|
+| Target state | $\mathsf{Phys}^{(\mathrm{self})}_n$ | $q_n,p_n,\lambda_n$ (and $\delta_n,\tau_n$ determined from them) | the physical state of the target itself; moves under the physical laws of the target |
+| Gauge | $\mathsf{Gauge}^{(\mathrm{self})}$ | the reference state, $\sigma$ , thresholds, shape-transformation functions $h_{\mathrm{upper}},h_{\mathrm{lower}}$ , EMA coefficients, $\tau_{\mathrm{upper}},\tau_{\mathrm{lower}}$ | the ruler that measures the target and the lines regarded as dangerous |
+| Evaluation output | $\mathsf{Out}^{(\mathrm{self})}_n$ | $R_n,R_{\mathrm{upper}},R_{\mathrm{lower}},R_{\mathrm{dir}},\ell_n$ , the canonical state, and their moving averages and aggregates | the result of reading the target with the gauge |
+
+The position of evaluation outputs follows "Position of evaluation outputs" in AXIOMS.md §14.
+
+**Reverse derivation** ("Definition of reverse derivation" in AXIOMS.md §14):
+
+$$
+\text{reverse derivation}\iff
+\underbrace{\exists\ \text{path}\ (\text{Effect-Side output})\leadsto\mathsf{Phys}^{(\mathrm{self})}\cup\mathsf{Gauge}^{(\mathrm{self})}\cup\mathsf{Out}^{(\mathrm{self})}}_{\text{(i) reverse derivation A: authority backflow}}
+\ \lor\
+\underbrace{\exists\ \text{path}\ \mathsf{Out}^{(\mathrm{self})}_m\leadsto\mathsf{Gauge}^{(\mathrm{self})}\quad(\text{any step, including via other structures})}_{\text{(ii) reverse derivation B: self-adjustment of the gauge}}
+$$
+
+Reason for (ii): even if all inputs are Cause-Side, if the output of the evaluation moves its own ruler or danger lines, the gauge "adjusts itself to its own reading." Widening the width as $R$ rises hides the approach; narrowing it as $R$ rises exaggerates the approach. In either direction, $R$ comes to reflect the history of the gauge itself rather than the state of the target. It is therefore prohibited regardless of direction. The same holds when an earlier-step $R$ or a moving average of $R$ is used, or when the path returns via another structure ( $R^{(\mathrm{self})}\to\mathsf{Gauge}^{(i)}\to R^{(i)}\to\mathsf{Gauge}^{(\mathrm{self})}$ ).
+
+**Evaluation outputs of other evaluation targets** (AXIOMS.md §14):
+
+$$
+\text{(iv)}\quad \text{an edge }\mathsf{Out}^{(i)}\to(\text{thresholds}^{(\mathrm{self})},\ \tau^{(\mathrm{self})}_{\mathrm{upper}},\ \tau^{(\mathrm{self})}_{\mathrm{lower}})\ \text{is allowed only in the safe-side direction (narrowing gate widths, lowering thresholds), and only when there is no path from }\mathsf{Out}^{(\mathrm{self})}\text{ to structure }i
+$$
+
+(iv) allows only edges to the thresholds and effective gate widths among the gauge elements. Edges that feed another structure's evaluation outputs into the reference state or the projection rule $\sigma$ are not covered by (iv). The existence and rule of such an edge are fixed before evaluation begins (AXIOMS.md §14).
+
+Difference between (ii) and (iv): (ii) moves one's own ruler by one's own reading and is therefore prohibited regardless of direction. (iv) is an edge that receives another structure's reading; without a cycle, it is not self-adjustment. However, the widening direction would hide the approach of this structure on account of another structure's state, so it is limited to the safe side.
+
+**The criterion is not the name of the symbol but the origin and rewrite target of the path** (AXIOMS.md §14). For that purpose, things with different origins are given different names.
+
+- **A ratio inside a physical law:** that the law of the target state depends on the ratio of a physical load (for example, fatigue degradation progressing with the stress ratio) is legitimate as the physics of the target. This ratio is computed inside the physical law directly from Cause-Side $\delta$ and $\tau$ . It is written with the Cause-Side arguments shown directly, as in $\Delta\lambda^{[e]}_n=g^{[e]}_\lambda(\delta_n,\tau_n,\dots)$ . This ratio is not named $R$ .
+- **The evaluation output $R$ :** the stored evaluation output $R$ (including its moving averages, aggregates, and state categories) must not be read back to update the target state $\mathsf{Phys}$ . This applies to the evaluation outputs of this structure and of other structures alike. The target state is obtained only from Cause-Side observation or pre-fixed transformation rules (P8, AXIOMS.md §14).
+- **A rule that rewrites the gauge:** a rule that rewrites the gauge $\mathsf{Gauge}$ is a path that moves the gauge by the same ratio as the evaluation even if it is rewritten as $\delta/\tau$ without the name $R$ , and falls under (ii).
+
+**Examples of permitted and prohibited edges:**
+
+| Edge | Judgment | Reason |
+|---|---|---|
+| $\mathrm{EMA}(\delta_{\le n})\to\tau_{\mathrm{upper}},\tau_{\mathrm{lower}}$ | permitted | the input to the gauge is the history $\delta$ of the target, not an evaluation output (FORMULA.md §4.4) |
+| $f(\delta)\to\Delta\lambda_n\to\tau_n$ | permitted | a physical law of the target; only in the direction of decreasing thickness (the $\tau$ state-transition equation of AXIOMS.md §7) |
+| $g^{[e]}_\lambda(\delta_{n-1},\tau_{n-1},\dots)\to\lambda^{[e]}_n$ | permitted | the rewrite target is the target state; the load ratio is computed inside the physical law directly from Cause-Side $\delta$ and $\tau$ (the stored $R$ is not read back) |
+| a physical event observed in structure $i$ (rupture, load transfer, and so on) $\to\mathsf{Alloc}^{(\mathrm{self})}\to a^{(\mathrm{self})},\Delta p^{(\mathrm{self})},\Delta\lambda^{(\mathrm{self})}$ | permitted | the physical state of another structure is received as a Cause-Side observation event (Part 3, Stage 7) |
+| $R^{(i)}_n\to\Delta\lambda^{(\mathrm{self})}$ or any other target state of this structure | prohibited | $R^{(i)}$ is an evaluation output, not a Cause-Side observation; $\delta$ , $\tau$ , and the target state are obtained only from Cause-Side observation or pre-fixed transformation rules (AXIOMS.md §14) |
+| $R^{(i)}_n\to\tau^{(\mathrm{self})}_{\mathrm{upper}}$ (narrowing) | permitted | (iv), on the safe side and without a cycle |
+| $R^{(\mathrm{self})}$ or its average $\to\tau^{(\mathrm{self})}_{\mathrm{upper}},\ $ thresholds | prohibited | (ii) self-adjustment of the gauge, regardless of direction |
+| $R^{(\mathrm{self})}\to\mathsf{Gauge}^{(i)}\to R^{(i)}\to\mathsf{Gauge}^{(\mathrm{self})}$ | prohibited | (ii) self-adjustment via another structure |
+| LLM self-evaluation $\to\delta$ | prohibited | (i) backflow of the input source |
+| $R\to\ell\to$ canonical state | permitted | computation within evaluation outputs; returns neither to the gauge nor to the target |
+
+Two structures that influence each other can be represented without falling under (ii) by linking them through each other's target states (concentration, displacement, degradation fraction, and so on) rather than through each other's gauges.
+
+The classification of the meanings of reverse derivation follows `theory/SANDWICH_ARCH.md` §8.4. The remaining conditions of P9 ((iii), (v), (vi)) are placed in Part 3.
+
+---
+
+## 3. The Derivation Chain (observation → $\delta$ , $\tau$ → $R$ )
+
+Stages 1–3 are the pre-stage before the Primary Formula, and Stage 4 is the Primary Formula. The transitions after the Primary Formula (Stages 5–7) are placed in Part 3.
+
+### 3.1 Stage 1　Projection: from observation to accumulated deviation
+
+$$
+\delta_n=\sigma(o_n)\ \ge0
+$$
+
+$\sigma$ is the rule that maps an observation value to "the distance measured from the reference state in the declared rupture direction." A multivariate observation is combined into one quantity here. The concrete form of $\sigma$ is a governing equation of the domain or a validated transformation rule; the "domain-specific physical equations" mentioned in FORMULA.md §0 enter here.
+
+Example (`examples/13_photosynthesis_layer5_JP.html`): the photosynthesis rate is computed with the FvCB model, and $\delta=\max(0,\ \text{maximum photosynthesis rate}-\text{photosynthesis rate})$ . The demo itself states that "Layer 5 only generates $\delta$ ; $R=\delta/\tau$ does not change," which is an existing example of separating the projection from the judgment formula.
+
+### 3.2 Stage 2　Decomposition: the two components of accumulated deviation
+
+$$
+\boxed{\ \delta_n=q_n+p_n\ }
+$$
+
+- $q_n$ : the part that returns to 0 when the action is removed (reversible component)
+- $p_n$ : the part that remains after the action is removed (irreversible component, residual deviation)
+
+**Proposition 0 (an observation with a fixed reference contains history):** under P5 and P7, an observation in the unloaded state with neither action nor temporary condition ( $a=0$ , $q=0$ ) gives $\delta=\sigma(o)=p_n$ . Hence the instantaneously measured $\delta_n$ contains $p_n=p_0+\sum_{m=1}^{n}\Delta p_m$ , the sum of the residual $p_0$ at the start of evaluation and the residuals of all subsequent events.
+
+**Proof:** substituting $q_n=0$ into the consistency with the projection of P5, $q_n+p_n=\sigma(o_n)$ , gives $\sigma(o_n)=p_n$ . The form of $p_n$ follows from the definition of increments in P5. Since the reference does not move by P7, $\sigma$ measures from the same origin throughout the evaluation. ∎
+
+$p_0$ is the deviation that already remains from the reference state at the start of evaluation. If the reference is placed at the unloaded state at the start of evaluation, $p_0=0$ (for the spring of Part 1, the natural length when it was bought).
+
+In this way, "$\delta$ is not merely an instantaneous value; it is accumulated deviation that carries history" (AXIOMS.md §4) and implementations based on instantaneous observation are **compatible under two conditions: the fixed reference (P7) and the retention of $p$**. $q$ and $p$ are separated by observation in the unloaded state or by a model fixed in $\mathsf{Alloc}$ .
+
+The ways of constructing $\delta$ found in existing materials are positioned as follows.
+
+| $\delta$ in existing materials | Examples | Position in this document |
+|---|---|---|
+| present deviation from an optimum | examples 18, 20, 27–30 | $\delta_n$ itself; compatible with the canon if the reference is fixed and $p$ is not discarded |
+| a quantity that accumulates and only increases | paper v3, Axiom2 series | the special case $q\equiv0$ |
+| the amount exceeding a threshold | examples 08–11 | a different evaluation declaration with the reference state placed at the threshold |
+| the degree of disagreement among several channels | examples 24 | a declaration that chooses the disagreement as $\sigma$ |
+| a quantity that accumulates and returns to 0 at each jump | examples 06, 26 (escapement) | a periodic example of transitions between evaluations (Part 3, Stage 6) |
+
+### 3.3 Stage 3　Thickness: three layers
+
+$$
+\boxed{\ \tau_n=(1-\lambda_n)\,\tau_0\ }
+$$
+
+This is the form for a single element (only the structure at declaration). The general form with addition and removal of structural elements is given below in "Addition and removal of structural elements." The declared thickness $\tau_0$ represents, as in the canon (AXIOMS.md §7, §8), the absorption thickness of the whole structure at the start of evaluation. With several elements, $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ for the active elements $\mathsf{Active}_0$ at the start of evaluation, and $\tau_0=\tau^{[0]}_0$ for a single element.
+
+| Layer | Symbol | Character | Used in |
+|---|---|---|---|
+| Declared thickness | $\tau_0$ | fixed by the evaluation declaration | the starting point of each evaluation |
+| Effective thickness | $\tau_n$ | non-increasing unless a structural element is added | the Primary Formula |
+| Side-specific effective gate widths | $\tau_{\mathrm{upper}}(n)$ , $\tau_{\mathrm{lower}}(n)$ | may increase or decrease | only the Secondary Formula (FORMULA.md §4.4) |
+
+As FORMULA.md §4.4 states, the side-specific effective gate widths "do not mean that the underlying absorption thickness $\tau$ has naturally recovered."
+
+#### Addition and removal of structural elements (→[10])
+
+The only path by which absorption thickness increases is adding a new structural element to the evaluation target (**addition of a structural element**, or simply addition). The thickness of existing elements does not return. Conversely, the planned taking-out of an undamaged structural element is called **removal of a structural element** (or simply removal). Removal is not degradation and is not counted in the degradation fraction $\lambda$ .
+
+The structure at declaration is element $e=0$ , and elements added at update number $n_e$ are $e=1,2,\dots$ . Each element has its own declared thickness and degradation fraction. The set of elements included in the evaluation target at step $n$ (added and not yet removed) is called the **active elements** $\mathsf{Active}_n$ .
+
+$$
+\tau^{[e]}_n=(1-\lambda^{[e]}_n)\,\tau^{[e]}_0\qquad(e\in\mathsf{Active}_n)
+$$
+
+$$
+\boxed{\ \tau_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_n}\bigr)\ }
+$$
+
+The composition rule $\mathrm{Comp}_\tau$ is subject to the following.
+
+1. It is non-decreasing in each argument.
+2. If removal is allowed within an evaluation, removing one argument (element) does not increase the value. For forms that do not satisfy this condition (forms such as the series link $\mathrm{Comp}_\tau=\min_e\tau^{[e]}_n$ , in which removing and reconnecting a weak element makes the whole stronger), removal is not handled within the evaluation and is treated as a change of the evaluation declaration (Part 3, Stage 6).
+3. The value is finite and non-negative, and its unit is $u$ , the same as the element thicknesses.
+4. When the active elements consist of a single element $e$ only, $\mathrm{Comp}_\tau(\tau^{[e]}_n)=\tau^{[e]}_n$ for any $e$ . With only the element at declaration, $e=0$ , the boxed formula above is recovered.
+5. When the thicknesses of all elements are 0, and when the active elements are empty, the value is 0.
+6. The declared thickness $\tau^{[e]}_0$ of an added element is determined by Cause-Side measurement at the time of addition, not from evaluation outputs such as $R$ (P8, P9).
+7. Additions and removals are recorded as events in the event history $\mathsf{History}$ .
+
+When a removed element is later put back, it is treated again as an addition, and its thickness is determined by Cause-Side measurement at the time it is put back. Degradation that progressed while it was removed is included in that measurement.
+
+**Corollary (non-increase in intervals without addition):** in an interval without addition ( $\mathsf{Active}_{n+1}\subseteq\mathsf{Active}_n$ ), $\tau_{n+1}\le\tau_n$ .
+
+**Proof:** by P6, $\lambda^{[e]}$ of each element does not decrease, so each $\tau^{[e]}$ does not increase. By condition 1, the value of $\mathrm{Comp}_\tau$ for the remaining elements does not increase. Since removal within an evaluation occurs only when condition 2 holds, taking out a removed element does not increase the value. ∎
+
+Hence $\tau_n$ increases only at the time of an addition, which agrees with AXIOMS.md §7: "in a closed operating interval without addition of a structural element, $\tau$ does not increase with time." An addition may occur at any time (even right after the start of evaluation). The concrete form of $\mathrm{Comp}_\tau$ differs by domain (for example, the sum $\mathrm{Comp}_\tau=\sum_e\tau^{[e]}_n$ for elements placed in parallel) and is fixed in advance in the evaluation declaration (P0).
+
+The agent performing an addition does not matter. Reinforcement by a person and repair by a living body forming new tissue are both treated as additions. Three cases of the relation between evaluation outputs and additions are distinguished.
+
+- Using $R$ as the trigger for a pre-fixed reinforcement operation (such as adding capacity with an autoscaler): permitted. Evaluation outputs may be used for pre-fixed physical-control commands (AXIOMS.md §14).
+- Accepting, on the basis of $R$ alone, that "an addition has physically been made" or that "the thickness has increased": prohibited. Evaluation outputs are not grounds for the target state.
+- Measuring anew on the Cause-Side that the addition has been made and how much thickness was added: required.
+
+When an AI execution system claims that it has added a boundary to itself through its own output, this is not accepted as an addition unless it can be shown by Cause-Side measurement.
+
+If element $e$ breaks ( $\lambda^{[e]}=1$ ), its thickness becomes 0. As long as the value of $\mathrm{Comp}_\tau$ is positive, the evaluation of the whole continues. "Small rupture points" within an evaluation can be represented in this form. An evaluation ends when, for example, the evaluation target as a whole reaches $R\ge1$ (Part 3, Stage 6).
+
+**Corollary (loss of all elements):** when all active elements have broken, or all have been removed, $\tau_n=0$ by condition 5, and the result is OUT_OF_DESCRIPTION_DOMAIN (Lemma 1). Depending on the form of $\mathrm{Comp}_\tau$ , $\tau_n=0$ may result when only some elements break (for example, with the series link $\mathrm{Comp}_\tau=\min_e\tau^{[e]}_n$ , the thickness of the whole becomes 0 when one element breaks. This form satisfies conditions 1, 3, 4, and 5 but not condition 2, so removal is not handled within the evaluation).
+
+#### Why repair is not treated as recovery
+
+One might read a repair such as build-up welding as "the degradation fraction returned" (repair recovery). The thickness of the whole at the time of welding can be the same under either reading. The difference appears in the subsequent treatment and in the record.
+
+Example: a member with declared thickness 30 and degradation fraction 0.2 (effective thickness 24) is strengthened by welding to the equivalent of 27. The heat of welding adds a degradation fraction of 0.02 to the base metal, and the declared thickness of the weld is 3.6 (values are illustrative).
+
+| | Read as "the degradation fraction returned" | Read as "addition of a structural element" |
+|---|---|---|
+| Thickness of the whole at the time of welding | $\lambda$ is returned from 0.2 to 0.1; $30\times0.9=27$ | base metal $30\times(1-0.22)=23.4$ combined with weld 3.6 gives $27.0$ ( $\mathrm{Comp}_\tau$ is the sum) |
+| Record of base-metal degradation | rewritten to 0.1; the fact that it was damaged disappears from the value | stays at 0.22 (including the part due to welding heat) |
+| Degradation of the weld | assumed to progress with the same degradation fraction as the base metal | progresses under the weld's own laws (weld defects, residual stress, and other failure modes different from the base metal) |
+| When the weld breaks | what broke cannot be distinguished in the formula | represented as the rupture of one element (thickness 0) |
+
+Reading it as "the degradation fraction returned" identifies the recovery of a value, the thickness of the whole, with the restoration of the physical state of the base metal, which contradicts P6 and Proposition 2a. The practice of attaching a separate inspection record to a repaired member and reassessing its capacity also agrees with the reading as an addition.
+
+#### Classifying cases where the thickness appears to change
+
+| Apparent phenomenon | Classification | Effective thickness $\tau_n$ |
+|---|---|---|
+| returns with time | natural recovery | not increased (AXIOMS.md §7) |
+| a receiving width temporarily narrowed by an action or condition returns (for example, strength reduction at high temperature, a new server warming up) | reversible change | not subtracted from $\tau_n$ (AXIOMS.md §7). In the Primary Formula it is counted as the temporary reversible deviation $q^{\mathrm{temp}}$ (see "When the receiving width narrows temporarily" below). In the Secondary Formula it is handled with the side-specific effective gate widths |
+| the side-specific effective gate widths widen | change of the gauge of the Secondary Formula | not increased (FORMULA.md §4.4) |
+| thresholds, filters, or gate widths are adjusted by evaluation outputs | self-adjustment of the gauge | not increased (reverse derivation B, AXIOMS.md §14) |
+| the declared thickness changes with a new observation | update of the evaluation snapshot | not increased within the evaluation; redeclared as the next evaluation snapshot (FORMULA.md §6, AXIOMS.md §14) |
+| reinforcement, expansion, or a new boundary | addition of a structural element | **increases** (the path of this section) |
+| an element is replaced | removal of the old element (rupture, if it was broken) and addition of a new element | decreases by the old element and increases by the new element |
+| an undamaged element is taken out as planned (for example, server downscaling) | removal of a structural element | decreases; not counted in $\lambda$ |
+| damage is repaired (welding, filling, and so on) | addition of an element, the repair material; the degradation fraction of existing elements does not decrease | increases by the repair material |
+| an extension or bend is forcibly returned | straightening | not handled within the evaluation; the evaluation ends and is redeclared (P6) |
+
+In an AI execution system, adjusting filters or thresholds is a change of the gauge, not an increase of thickness. The thickness can be said to have increased only when another structure or boundary whose grounds can be shown on the Cause-Side has newly been established. An implementation using a dynamic $\tau$ states which row of this table each increase or decrease belongs to (AXIOMS.md §7, interpretive-boundary comment).
+
+#### When the receiving width narrows temporarily (temporary reversible deviation)
+
+The width that a structure can receive may narrow temporarily due to an action or condition and return when the condition ends (strength reduction at high temperature, a server warming up, and so on). Subtracting the narrowed width from the effective thickness would mean the thickness increases when it returns, which contradicts AXIOMS.md §7. The narrowed width is therefore counted on the deviation side. This quantity is the **temporary reversible deviation** $q^{\mathrm{temp}}_n\ge0$ ; the allocation rule $\mathsf{Alloc}$ allocates it to the action $a_n$ and makes it part of the reversible component $q_n$ . Permanent damage left by the condition is allocated not to $q^{\mathrm{temp}}_n$ but to $\Delta\lambda_n$ (one change, one allocation, P5).
+
+**Corollary (safe-side character of counting on the deviation side):** let the deviation other than $q^{\mathrm{temp}}$ be $\delta\ge0$ , with $0\le q^{\mathrm{temp}}<\tau$ and $\delta+q^{\mathrm{temp}}\le\tau$ . For the ratio counted on the deviation side, $(\delta+q^{\mathrm{temp}})/\tau$ , and the ratio with the narrowed width subtracted on the thickness side, $\delta/(\tau-q^{\mathrm{temp}})$ ,
+
+$$
+\frac{\delta+q^{\mathrm{temp}}}{\tau}-\frac{\delta}{\tau-q^{\mathrm{temp}}}=\frac{q^{\mathrm{temp}}\,(\tau-\delta-q^{\mathrm{temp}})}{\tau\,(\tau-q^{\mathrm{temp}})}\ \ge0
+$$
+
+and both reach 1 simultaneously at $\delta+q^{\mathrm{temp}}=\tau$ .
+
+**Proof:** bringing to a common denominator, the numerator is
+
+$$
+(\delta+q^{\mathrm{temp}})(\tau-q^{\mathrm{temp}})-\delta\,\tau
+=q^{\mathrm{temp}}\,\tau-\delta\,q^{\mathrm{temp}}-\bigl(q^{\mathrm{temp}}\bigr)^2
+=q^{\mathrm{temp}}\,(\tau-\delta-q^{\mathrm{temp}})
+$$
+
+The denominator is positive, and $q^{\mathrm{temp}}\ge0$ and $\tau-\delta-q^{\mathrm{temp}}\ge0$ , so it is non-negative. ∎
+
+This is the form of Proposition 1 with $p$ replaced by $q^{\mathrm{temp}}$ . The rupture point does not change, and before rupture, counting on the deviation side gives an $R$ that is equal or larger (safe side). Numerical check: with $\tau=30$ , $\delta=12$ , $q^{\mathrm{temp}}=6$ , $18/30=0.60$ , $12/24=0.50$ , and the difference is $0.10=6\times12/(30\times24)$ .
+
+Whether temporarily taking out an element for maintenance is treated as removal and re-addition or as $q^{\mathrm{temp}}$ is decided in advance in the evaluation declaration.
+
+**Restoration degradation:** in a structure that has reached rupture or phase transition (AXIOMS.md §8), the degradation of existing elements remains as it is. This document reads $\tau_{\mathrm{restored}}$ of §8 as "the absorption thickness of existing elements, excluding added elements." Under this reading, the constraint $\tau_{\mathrm{restored}}<\tau_0$ of §8 is a constraint on existing elements and does not contradict addition. The effective thickness of the whole may exceed $\tau_0$ through addition, but that is not restoration to the initial structure. This reading and sentence are in AXIOMS.md §8.
+
+### 3.4 Stage 4　The Primary Formula
+
+From the above, the Primary Formula is reached in the following form.
+
+$$
+\boxed{\
+R_n=\frac{\delta_n}{\tau_n}=\frac{q_n+p_n}{\mathrm{Comp}_\tau\bigl(((1-\lambda^{[e]}_n)\,\tau^{[e]}_0)_{e\in\mathsf{Active}_n}\bigr)}
+\ }
+$$
+
+$$
+M_{\tau,n}=\tau_n-\delta_n=\mathrm{Comp}_\tau\bigl(((1-\lambda^{[e]}_n)\,\tau^{[e]}_0)_{e\in\mathsf{Active}_n}\bigr)-q_n-p_n
+$$
+
+For a single element (only the structure at declaration), this is as follows.
+
+$$
+R_n=\frac{q_n+p_n}{(1-\lambda_n)\,\tau_0},\qquad
+M_{\tau,n}=(1-\lambda_n)\tau_0-q_n-p_n
+$$
+
+In the lemmas and propositions below, statements marked "for a single element" use this form.
+
+The numerator represents "how far it has penetrated," and the denominator "how much of the vessel remains now." The Primary Formula itself has not been changed. The only change is that the contents of $\delta$ and $\tau$ are written out in decomposed form.
+
+---
+
+## 4. Lemmas and Propositions
+
+### Lemma 1　Satisfaction of the domain and its boundary
+
+(a) General case: if $q_n,p_n\ge0$ are finite and the value of the composition rule $\tau_n=\mathrm{Comp}_\tau(\cdot)$ is positive, then $\tau_n$ is finite (condition 3 of $\mathrm{Comp}_\tau$ ) and positive, and $\delta_n=q_n+p_n\ge0$ is finite. Hence P4 is satisfied. When $\tau_n=0$ (loss of all elements and so on; the corollary in Part 2, 3.3), P4 is not satisfied.
+
+(b) Single element: if $\tau_0>0$ , $0\le\lambda_n<1$ , and $q_n,p_n\ge0$ , all finite, then
+
+$$
+\tau_n=(1-\lambda_n)\tau_0>0,\qquad \delta_n=q_n+p_n\ge0
+$$
+
+**Proof:** (a) follows from the assumptions, condition 3 of $\mathrm{Comp}_\tau$ , and the fact that a sum of non-negative numbers is non-negative. (b) follows from the product of $1-\lambda_n>0$ and $\tau_0>0$ being positive. ∎
+
+When $\tau_n=0$ , the result is **OUT_OF_DESCRIPTION_DOMAIN**, as in the canon ( $\tau=0$ is not replaced by an infinite $R$ ; FORMULA.md §1, AXIOMS.md §6). For a single element, $\tau_n=0$ when $\lambda_n=1$ . The order of the boundaries is described below for a single element. If $\lambda$ approaches 1 while $\delta>0$ , $R\ge1$ is reached when $\tau_n\le\delta_n$ , that is, when $\lambda_n\ge1-\delta_n/\tau_0$ . If $1-\delta_n/\tau_0\le\lambda_n<1$ at some update number, RUPTURE_BOUNDARY is recorded before OUT_OF_DESCRIPTION_DOMAIN. With discrete updates, however, $\lambda$ may reach 1 in a single step without passing through this interval. In that case, and when the thickness is exhausted while $\delta=0$ , the classification at that step is OUT_OF_DESCRIPTION_DOMAIN even if the preceding $R$ was below 1. $\tau=0$ is not reinterpreted as RUPTURE_BOUNDARY.
+
+### Lemma 2　Dimensionlessness
+
+If $[\delta]=[\tau]=u$ , then $[R]=1$ . $\lambda$ is a fraction and therefore dimensionless, and the unit of each element's thickness remains the unit $u$ of the declared thickness. The value of the composition rule also keeps the unit $u$ (condition 3 of $\mathrm{Comp}_\tau$ ). ∎
+
+### Lemma 3　Monotonicity
+
+(a) General case: in the range $\tau_n>0$ , $R_n$ is increasing in $q_n$ and $p_n$ and non-decreasing in the degradation fraction $\lambda^{[e]}_n$ of each element.
+
+**Proof:** the denominator of $R=(q+p)/\tau$ is positive regardless of $q$ and $p$ , so $R$ is increasing in $q$ and $p$ . $\tau^{[e]}=(1-\lambda^{[e]})\tau^{[e]}_0$ is decreasing in $\lambda^{[e]}$ , and $\mathrm{Comp}_\tau$ is non-decreasing in each argument (condition 1), so $\tau$ is non-increasing in $\lambda^{[e]}$ . Since $q+p\ge0$ , $R$ is non-decreasing in $\lambda^{[e]}$ . ∎
+
+(b) Single element:
+
+$$
+\frac{\partial R}{\partial q}=\frac{\partial R}{\partial p}=\frac{1}{(1-\lambda)\tau_0}>0,
+\qquad
+\frac{\partial R}{\partial \lambda}=\frac{q+p}{(1-\lambda)^2\tau_0}\ge0
+$$
+
+$R$ rises whether the deviation increases or the vessel shrinks. There are two reasons for approaching the boundary, and both are distinguished in the formula (→[4] [8]). ∎
+
+### Proposition 1　Safe-side character of the fixed reference (→[5])
+
+Consider the representation in which the reference is reset to the position of the residual deviation.
+
+$$
+\delta'=q,\qquad \tau'=\tau-p,\qquad R'=\frac{q}{\tau-p}\quad(\tau>p)
+$$
+
+Then the following hold.
+
+(a) The remaining margin is the same: $M'_\tau=\tau'-\delta'=\tau-p-q=M_\tau$
+
+(b) The rupture point is the same: $R=1\iff q+p=\tau\iff R'=1$
+
+(c) Before rupture ( $M_\tau\ge0$ ), always
+
+$$
+R-R'=\frac{p\,M_\tau}{\tau(\tau-p)}\ge0
+$$
+
+**Proof of (c):**
+
+$$
+R-R'=\frac{(q+p)(\tau-p)-q\tau}{\tau(\tau-p)}
+=\frac{p\tau-qp-p^2}{\tau(\tau-p)}
+=\frac{p(\tau-q-p)}{\tau(\tau-p)}
+=\frac{p\,M_\tau}{\tau(\tau-p)}
+$$
+
+The denominator is positive, and $p\ge0$ and $M_\tau\ge0$ , so it is non-negative. ∎
+
+**Meaning:** the rupture point ( $R=1$ ) agrees in both representations. On the other hand, reaching the intermediate thresholds $R_{\mathrm{warn}}$ , $R_{\mathrm{handoff}}$ , $R_{\mathrm{irrev}}$ is **delayed** in the representation with the reset scale. Moreover, after unloading ( $q=0$ ), $R'=0$ and it is displayed as "completely returned." The fixed reference (P7) is not a matter of preference; it is **the premise for not delaying warnings and not hiding history**. When the reference is redeclared between evaluations (Part 3, Stage 6), $\tau'=\tau-p$ is enforced in order to keep the agreement of the rupture point in (b).
+
+**Numerical check** (the spring of Part 1, $\tau=27$ , $p=3$ , $q=12$ ):
+
+$$
+R=\frac{15}{27}\approx0.556,\qquad R'=\frac{12}{24}=0.5,\qquad
+\frac{p\,M_\tau}{\tau(\tau-p)}=\frac{3\times12}{27\times24}=\frac{36}{648}\approx0.056
+$$
+
+The difference $0.556-0.5=0.056$ agrees.
+
+### Proposition 2　The return of a value does not mean the restoration of the structure (→[6])
+
+Let $o$ be the observable value. The following three are distinguished.
+
+- **The physical state of the target** $\mathsf{Phys}_n=(q_n,p_n,(\lambda^{[e]}_n)_{e\in\mathsf{Active}_n})$ (the target state of P9)
+- **The evaluation state:** what is kept as an evaluation output, such as the irreversible latch $\ell_n$
+- **The event history** $\mathsf{History}_n$ : the record of events (for audit and structural testimony)
+
+The state before and after one observation event $\mathrm{Ev}$ is written $(-)$ and $(+)$ .
+
+**Proposition 2a (physical state):** if $\Delta p>0$ in that event, or $\Delta\lambda^{[e]}>0$ for some element, then $\mathsf{Phys}^{(+)}\ne\mathsf{Phys}^{(-)}$ even if $o^{(+)}=o^{(-)}$ .
+
+**Proof:** by the definition of increments in P5, $p^{(+)}=p^{(-)}+\Delta p$ and $\lambda^{[e](+)}=\lambda^{[e](-)}+\Delta\lambda^{[e]}$ . If either increment is positive, that component differs. Agreement of $o$ does not include agreement of this component. ∎
+
+Example: the new spring and the once-pulled spring of [6] in Part 1 are at the same 15 mm position (the same $o$ ), but $p$ (0 and 3) and $\lambda$ (0 and 0.1) differ.
+
+**Proposition 2b (event history):** for any event, $\mathsf{History}^{(+)}\ne\mathsf{History}^{(-)}$ .
+
+**Proof:** by P6, $\#\mathsf{History}^{(+)}=\#\mathsf{History}^{(-)}+1$ . ∎
+
+**Relation between the two propositions:** for an event entirely within the elastic range ( $\Delta p=0$ , all $\Delta\lambda^{[e]}=0$ , and $q=0$ after unloading), the physical state returns ( $\mathsf{Phys}^{(+)}=\mathsf{Phys}^{(-)}$ ). Proposition 2a asserts nothing about this case. Even so, the record that the event occurred remains in the event history (Proposition 2b). This corresponds to the corollary of the sole Nomological Ring Axiom, "exact reproduction of identical history is impossible" (AXIOMS.md §2). The return of the value ( $o$ ), the return of the physical state ( $\mathsf{Phys}$ ), and the identity of the history ( $\mathsf{History}$ ) are separate questions. "Even if the value returns, the event history does not return" is the claim of Proposition 2b, and "even if the value returns, the structure has not returned" is the claim of Proposition 2a when an irreversible change has occurred.
+
+**Thresholds and the history of transitions:** while degradation does not progress within the safe region (the range where no threshold has been crossed), a linear computation in which $R$ is proportional to $\delta$ suffices. The value of IDE appears when a boundary called a threshold appears. Crossing a threshold means that risks, fluctuations, or changes that had been invisible or overlooked begin to appear as recognizable events. That is why the transition — when and which threshold was crossed — is kept in the event history. The irreversible latch (Part 3, Stage 5) reflects that transition in the evaluation state.
+
+Furthermore, if $\Delta p>0$ or $\Delta\lambda>0$ , $R$ for the same action also differs (Proposition 4).
+
+### Proposition 3　R does not exhaust the state (non-sufficiency of R)
+
+For a single element with $\tau_0=30$ , consider the following two structures (since this is a counterexample, one suffices).
+
+| | $q$ | $p$ | $\lambda$ | $\delta$ | $\tau$ | $R$ |
+|---|---|---|---|---|---|---|
+| A | 12 | 0 | 0 | 12 | 30 | 0.40 |
+| B | 3 | 6 | 0.25 | 9 | 22.5 | 0.40 |
+
+$R$ is the same, 0.40. Now apply the same action, which produces a reversible component of 15.
+
+| | $\delta$ | $\tau$ | $R$ |
+|---|---|---|---|
+| A | 15 | 30 | 0.50 |
+| B | 21 | 22.5 | about 0.93 |
+
+For the same action, A is halfway and B is on the verge of rupture. Wherever the thresholds are placed, A and B do not necessarily fall into the same category.
+
+**Conclusion:** $R$ is an **evaluation output** that indicates the approach to the boundary (AXIOMS.md §14), not the structural state itself. What should be kept is not $R$ but the physical state of the target $(p,\lambda)$ and the irreversible latch $\ell$ as the evaluation state (the distinction of Proposition 2). ∎
+
+**Relation to existing demos:** several demos in the repository share the concern of not determining the state from the instantaneous value of $R$ alone. However, none of them implements the conclusion of Proposition 3 as it is.
+
+| Demo | Additional variable | Use in determining the state | Position from this document |
+|---|---|---|---|
+| examples 14 | residualDebt | RUPTURE_BOUNDARY when $R\ge1$ or debt $>0.8$ | debt is a quantity accumulated from $R$ . Determining RUPTURE_BOUNDARY by debt does not agree with AXIOMS.md §10.5 ( $R_{\mathrm{target}}\ge1.0$ ) |
+| examples 15 | residualDebt | classification by $R_{\mathrm{eff}}=R_{\mathrm{total}}+0.4\,\mathrm{debt}$ | debt is a quantity accumulated from $R$ . Classifying by a value added to $R$ requires clarifying its relation to AXIOMS.md §5 ( $R$ means only $\delta/\tau$ ) |
+| examples 21 | individual thresholds for PI and MGF | boundary determined by OR with conditions other than $R$ | combined use of judgments by other observed quantities |
+| examples 23, 24 | $D_{\mathrm{long}}$ | toward the stopping side when $D_{\mathrm{long}}\ge1$ | $D_{\mathrm{long}}$ is a quantity made from the moving average $R_{\mathrm{short}}$ of $R$ |
+
+residualDebt and $D_{\mathrm{long}}$ are both aggregates made from the history of $R$ (an evaluation output) and do not correspond to $(p,\lambda)$ (the target state) of this document. Both are also implemented to decrease with the passage of time. Reading them as quantities of residual deviation or degradation would contradict the non-spontaneous recovery of AXIOMS.md §7 (P6). Since the demos are subordinate to the canon (AXIOMS.md §16), this is addressed by clarifying the position of the demos.
+
+### Proposition 4　Thickness reduction and history sensitivity (→[6])
+
+For a single element, let the degradation fractions of two structures be $\lambda_{\mathrm{low}}$ and $\lambda_{\mathrm{high}}$ . If $\delta>0$ and $0\le\lambda_{\mathrm{low}}<\lambda_{\mathrm{high}}<1$ , then
+
+$$
+\frac{\delta}{(1-\lambda_{\mathrm{high}})\tau_0}>\frac{\delta}{(1-\lambda_{\mathrm{low}})\tau_0}
+$$
+
+Even with the same deviation, a structure whose vessel has become smaller through its history is closer to the boundary. In the general case, by Lemma 3(a), the $R$ of a structure with a larger degradation fraction of some element is not smaller (it is larger if $\mathrm{Comp}_\tau$ is strictly increasing in that element).
+
+**The dam counterexample** ( $\tau_0=100$ , in units of deviation):
+
+| | Present water level | $q$ | $p$ | $\lambda$ | $\delta$ | $\tau$ | $R$ |
+|---|---|---|---|---|---|---|---|
+| Dam A | low | 20 | 10 | 0.4 | 30 | 60 | 0.50 |
+| Dam B | high | 40 | 0 | 0 | 40 | 100 | 0.40 |
+
+**Dam A, with the lower water level, is closer to the boundary.** Present-value monitoring (judging by water level alone) shows this order reversed.
+
+### Proposition 6　Consistency between the increment of the Primary Formula and the dual-fluctuation detection condition (→[8])
+
+Indices follow the backward differences of FORMULA.md §4.7 ( $\Delta\delta_n=\delta_n-\delta_{n-1}$ , $\Delta\tau_n=\tau_n-\tau_{n-1}$ ).
+
+$$
+R_n-R_{n-1}=
+\underbrace{\frac{\Delta\delta_n}{\tau_n}}_{\text{penetration term}}
++
+\underbrace{\delta_{n-1}\Bigl(\frac{1}{\tau_n}-\frac{1}{\tau_{n-1}}\Bigr)}_{\text{contraction term}}
+$$
+
+**Proof:**
+
+$$
+R_n-R_{n-1}=\frac{\delta_{n-1}+\Delta\delta_n}{\tau_n}-\frac{\delta_{n-1}}{\tau_{n-1}}
+=\frac{\Delta\delta_n}{\tau_n}+\delta_{n-1}\Bigl(\frac{1}{\tau_n}-\frac{1}{\tau_{n-1}}\Bigr)\qquad∎
+$$
+
+For a single element, using $\tau_n=(1-\lambda_n)\tau_0$ of Stage 3, the contraction term becomes
+
+$$
+\delta_{n-1}\Bigl(\frac{1}{\tau_n}-\frac{1}{\tau_{n-1}}\Bigr)=\frac{\delta_{n-1}\,\tau_0\,(\lambda_n-\lambda_{n-1})}{\tau_n\,\tau_{n-1}}
+$$
+
+which is non-negative by P6. In the general case with several elements, it is also non-negative in intervals without addition, and it can be negative at the time of an addition.
+
+**Corollary:** when $\tau_n,\tau_{n-1}>0$ and $\delta_{n-1}>0$ ,
+
+$$
+\bigl(\Delta\delta_n>0\ \land\ \Delta\tau_n<0\bigr)
+\iff
+\bigl(\text{penetration term}>0\ \land\ \text{contraction term}>0\bigr)
+$$
+
+**Proof:** the sign of the penetration term equals the sign of $\Delta\delta_n$ ( $\tau_n>0$ ). The contraction term is $\delta_{n-1}(\tau_{n-1}-\tau_n)/(\tau_n\tau_{n-1})$ , and when $\delta_{n-1}>0$ its sign equals the sign of $-\Delta\tau_n$ . ∎
+
+**Position:** the left-hand side is the dual-fluctuation detection condition of FORMULA.md §4.7. The corollary shows that the detection condition of the Secondary Formula is **consistent** with the change of the Primary Formula (a transition in which penetration and shaving of the vessel occur at the same time and $R$ is pushed up from two directions). It does not position the Secondary Formula as a consequence of the Primary Formula. The Secondary Formula is the second canonical IDE calculation system (FORMULA.md §4).
+
+When $\delta_{n-1}=0$ , the contraction term is 0 even if $\Delta\tau_n<0$ . In a structure into which nothing has yet penetrated, the shaving of the vessel does not appear in the increment of $R$ and remains only in $\lambda$ . This is also a form of Proposition 3.
+
+**Numerical check** (the spring of [8] in Part 1, $\tau_0=30$ ): before, $q=8,p=0,\lambda=0$ and $R=8/30\approx0.267$ . After pulling to 15 mm, $q=12,p=3,\lambda=0.1$ , $\tau=27$ , and $R=15/27\approx0.556$ .
+
+$$
+\text{penetration term}=\frac{7}{27}\approx0.259,\qquad
+\text{contraction term}=8\Bigl(\frac{1}{27}-\frac{1}{30}\Bigr)\approx0.030
+$$
+
+The sum is $0.289$ , which agrees with $0.556-0.267=0.289$ .
+
+(Proposition 5 presupposes the update rule and is therefore placed in Part 3.)
+
+---
+
+## 5. Application to Three Domains
+
+| | $q$ (reversible component) | $p$ (residual deviation) | $\lambda$ (degradation fraction) | Examples of observations |
+|---|---|---|---|---|
+| Spring | elastic extension | permanent extension (gaps between coils) | reduction of breaking extension due to fatigue and microcracks | displacement, natural length, spring constant |
+| Dam | elastic deformation due to water pressure | residual displacement and settlement | cracks, leakage paths, loss of stiffness | water level, displacement gauges, leakage volume, turbidity, crack length |
+| Motor | temperature rise due to load (returns when cooled) | 0 depending on the declaration | insulation degradation, winding damage | current, temperature, insulation resistance, smoke |
+
+- In a domain where $p$ does not exist, such as a motor, $\mathsf{Decl}$ declares $p\equiv0$ . **The element is not deleted; it is declared to be 0.**
+- "Smoke came out" or "water leaked" is not itself a value of $\Delta\lambda$ . A rule that converts the observation into $\Delta\lambda$ ( $\mathsf{Alloc}$ ) is needed for each domain.
+- A motor's "the breaker tripped" is $a_n=0$ (removal of the action), not the addition of a structural element. Therefore $q$ returns to 0, but $\lambda$ does not decrease. Stopping is not recovery.
+- The thermal-damage integral of the earlier draft (damage accumulated over time by the amount exceeding the limit temperature; the thickness does not recover even when the temperature falls below the limit; earlier draft §14.1) can be read as a concrete example of $\mathsf{Alloc}$ that gives $\Delta\lambda$ in the motor row.
+
+---
+
+## 6. Correspondence with the Canon and Existing Materials
+
+### 6.1 Correspondence with the canonical $\tau$ state-transition equation
+
+The auxiliary model of AXIOMS.md §7
+
+$$
+\tau(t)=\tau_0-\int_0^t f(\delta(s))\,ds
+$$
+
+corresponds, for a single element, to the special case in which this document sets $\tau_0-\tau_n=\tau_0\lambda_n$ , associates the update number $n$ with the time $t_n$ , and gives the increment of degradation as
+
+$$
+\Delta\lambda_n=\frac{1}{\tau_0}\int_{t_{n-1}}^{t_n} f(\delta(s))\,ds
+$$
+
+If $\delta$ within the interval is represented by $\delta_{n-1}$ at the start of the interval, this becomes approximately $\Delta\lambda_n\approx f(\delta_{n-1})\,\Delta t_n/\tau_0$ ( $\Delta t_n=t_n-t_{n-1}$ ). The canonical statement "within a closed interval, $\tau$ is non-increasing" has the same content as $\lambda_n\ge\lambda_{n-1}$ (P6) in this document.
+
+In the canonical equation, $\delta$ enters the numerator of $R$ and at the same time shaves $\tau$ . This is not double counting. $\delta$ enters $R$ as "the amount of penetration," and $f(\delta)$ enters $\lambda$ as "the action by which penetration wears the vessel," because they are different physical actions. This update is due to the physical law of the target structure and is not reverse derivation (AXIOMS.md §14).
+
+### 6.2 Correspondence with the demos
+
+| Demo | Reading in this document | Note |
+|---|---|---|
+| 25 dam degradation | $\delta$ = instantaneous fluctuation ( $q$ ), $\tau=\tau_0-k\int\delta$ ( $\lambda$ ); the special case $p\equiv0$ | a straightforward implementation of AXIOMS.md §7 |
+| 13 photosynthesis | an example of the projection of Stage 1 | states explicitly that it "only generates δ" |
+| 06, 26 escapement | periodic transitions between evaluations in Stage 6 of Part 3 | number of jumps = evaluation number |
+| 14, 15 power grid, OR/ICU | Stage 6 of Part 3 (new evaluation and archive of the old history), Proposition 3 (debt) | debt is a quantity accumulated from $R$ and decreases with time. 14 determines RUPTURE_BOUNDARY by debt (the table of Proposition 3) |
+| 23, 24 sample, vehicle | Proposition 3 ( $D_{\mathrm{long}}$ ) | $D_{\mathrm{long}}$ is a quantity made from the moving average of $R$ and decreases with time. 24 widens $\tau_{\mathrm{upper}}$ by the moving average of its own evaluation output, which is reverse derivation B (P9(ii)) |
+| 07–12 band gates | dynamic change of the side-specific effective gate widths | it is not stated whether this is the effective thickness or the side-specific effective gate widths. 07 builds $\tau$ from the EMA of Cause-Side deviation and is not reverse derivation B |
+| 18, 20, 27–30 tension, pressure, and others | the instantaneous-observation type of Stage 2 | compatible with the canon under the fixed reference and retention of $p$ |
+
+### 6.3 Correspondence with the earlier draft
+
+`nra-core/foundations/NRA-IDE_動的厚みと不可逆境界_会話統合_26-0802-1830.md` gave the following before this document. Some symbols of the earlier draft collide with those of this document (dictionary 0.5), so they are shown here in words, and the formulas are referred to in the corresponding sections of the earlier draft.
+
+| Earlier draft (section) | This document |
+|---|---|
+| update of deviation and thickness per transition (§4.1) | the update rule of Stage 5 in Part 3. This document splits the increment of deviation into $\Delta q+\Delta p$ and the decrease of thickness into the increments of the per-element degradation fractions |
+| "if the numerator increases and the denominator decreases at the same time, it is not linear" (§4.1) | written as a formula in Proposition 6 (penetration term and contraction term) |
+| residual thickness and the one-transition collapse ratio (§5) | the residual thickness is $M_{\tau,n}$ . The one-transition collapse ratio can be used together as a one-step look-ahead of Stage 5 in Part 3 |
+| boundary specification (declaration of eight items; §3) | the evaluation declaration $\mathsf{Decl}$ of P0 |
+| irreversible thickness loss (§9.1) | $\Delta\lambda_n$ ( $\Delta\lambda^{[e]}_n$ with several elements) |
+| finite-observation proximity that deducts unobserved parts from the thickness (§11.3) | a concrete example of the declared handling of missing data (a rule that does not increase the thickness for lack of observation) |
+
+### 6.4 Classification of the meanings of reverse derivation
+
+The classification of the meanings of "reverse derivation," "back-calculation," "backflow," and " $\Pi^{-1}$ " in the repository follows `theory/SANDWICH_ARCH.md` §8.4. P8 and P9 of this document are the premises from which reverse derivation A, reverse derivation B, and the treatment of the evaluation outputs of other evaluation targets in that classification are derived.
+
+---
+
+## 7. What Is Proved, What Is Declared, and What Is Verified
+
+| Category | Content | Treatment |
+|---|---|---|
+| Can be proved | Lemmas 1–3, Propositions 0–4 and 6 (Part 2), Proposition 5 (Part 3) | closed as mathematics, as in this document |
+| Declared | the elements of $\mathsf{Decl}$ (including the composition rule $\mathrm{Comp}_\tau$ ), declarations of zero such as $p\equiv0$ , the reference state, and which of target state, gauge, or evaluation output each quantity belongs to | not proved; commitments fixed before computation begins |
+| Requires verification | the concrete form of $\sigma$ , how degradation progresses, $\tau_0$ and the $\tau^{[e]}_0$ of added elements, the concrete form of $\mathrm{Comp}_\tau$ , the values of the thresholds, and the conversion from observation to $\Delta\lambda$ | supported by measurement and experiment in the domain; the canon defines only the form and conditions |
+
+The premise formulas need not "all be proved." What this document undertakes is up to the **proofs** and the **framework of declaration** in the table above. Concrete functional forms are left to each domain.
+
+The elements of the evaluation declaration (including $\sigma$ , $\mathsf{Alloc}$ , and $\mathrm{Comp}_\tau$ ), one change one allocation, and consistency with the projection are defined in form and conditions by FORMULA.md §0.5 (v2.1). The fixed reference, the composition of accumulated deviation, and the addition and removal of structural elements are defined by AXIOMS.md §4 and §7. This document gives their derivation, proofs, and examples.
+
+---
+
+# Part 3　After the Primary Formula (before a decision on canonization)
+
+This part deals with the transitions after the Primary Formula (transitions within an evaluation, transitions between evaluations, and links with hierarchies and other structures). The content of this part precedes any decision on canonization and is not a canonical definition. If it is canonized, it will be reflected in FORMULA.md and elsewhere after that decision.
+
+## 1. Symbols of This Part
+
+| Symbol | Name | Meaning | Part 1 |
+|---|---|---|---|
+| $\mathsf{Update}$ | update rule | the rule that advances the state within an evaluation (Stage 5) | — |
+| $\rho$ | reversible response | the function that gives the reversible component from the action | — |
+| $g_p$ , $g^{[e]}_\lambda$ | laws of irreversible increments | the functions that give the increments of residual deviation and degradation fraction | — |
+| $\mathrm{Class}(R)$ | instantaneous classification | the canonical classification by intervals of valid $R$ (before reflecting the latch) | [7] |
+| $\mathsf{State}_n$ | target boundary state | PERMIT to RUPTURE_BOUNDARY (reflecting the latch) | [7] |
+| $j$ | evaluation number | which evaluation declaration it is | [10] |
+| $\mathsf{Archive}$ | evaluation archive | the sequence of records of finished evaluations | [10] |
+| $Z_n$ | decision-sufficient state | a record with named fields: residual deviation $p_n$ , active elements $\mathsf{Active}_n$ with each element's declared thickness and degradation fraction, and the irreversible latch $\ell_n$ (additional state if needed); a combination of the physical state and the evaluation state (dictionary "Decision-Sufficient State") | [11] |
+| $\mathrm{EvalGraph}^{(j)}$ | expanded evaluation graph | a directed graph showing, over all steps of evaluation $j$ , from which quantities each quantity was computed | [9] |
+
+## 2. The Remaining Conditions of P9
+
+The directed graph that takes quantities as vertices and "a quantity was used to compute another quantity" as directed edges, connecting all steps of evaluation $j$ , is called the **expanded evaluation graph** $\mathrm{EvalGraph}^{(j)}$ . Its vertices include the quantities of other structures $i$ and Effect-Side outputs. $\mathrm{EvalGraph}^{(j)}$ contains no reverse derivation ((i) and (ii) of P9 in Part 2) and, in addition to (iv), satisfies the following.
+
+$$
+\text{(iii)}\quad \text{edges into the target state are limited to updates by the physical laws of the target, events through }\mathsf{Alloc}\text{ (}\Delta p\ge0,\ \Delta\lambda\ge0\text{), or the addition of a structural element}
+$$
+
+$$
+\text{(v)}\quad \text{the computation at each step has no cycle, and the order of computation within the same step is declared in}\ \mathsf{Decl}
+$$
+
+$$
+\text{(vi)}\quad \text{the existence of edges and the computation rule of each edge are fixed before evaluation as elements of}\ \mathsf{Decl}
+$$
+
+## 3. Stage 5　Transitions within an evaluation (→[7])
+
+**Update rule $\mathsf{Update}$ :**
+
+Increments are written with the same backward differences as P5 of Part 2 (the event at update number $n$ advances the state from $n-1$ to $n$ ).
+
+$$
+q_n=\rho(a_n),\qquad \rho(0)=0,\qquad \rho\ge0
+$$
+
+$$
+p_n=p_{n-1}+\Delta p_n,\qquad \lambda^{[e]}_n=\lambda^{[e]}_{n-1}+\Delta\lambda^{[e]}_n,\qquad 0\le\lambda^{[e]}_n\le1
+$$
+
+When a structural element is added at update number $n$ , the new element is added to the active elements $\mathsf{Active}_n$ , starting with its $\lambda$ at 0 and its declared thickness at the value measured on the Cause-Side at the time of addition (Part 2, 3.3). When a structural element is removed, that element is taken out of the active elements. No term that decreases $\lambda$ is placed (P6).
+
+In domains that take time to return, such as cooling, $q_n=\rho(q_{n-1},a_n)$ , with the condition that " $q\to0$ if $a=0$ continues." Only $q$ is allowed to decay spontaneously (P6).
+
+The increment of $R$ , $R_n-R_{n-1}$ , splits into the penetration term and the contraction term as in Proposition 6 of Part 2.
+
+**Order of classification:** at each update number, before computing $R$ , judge in the following order.
+
+1. If the input is unknown, invalid, or non-finite (including unknown target, unit, time, or provenance), the result is **CONFESSION** (AXIOMS.md §6, §10.6). $R$ is not computed.
+2. If $\tau_n=0$ , the result is **OUT_OF_DESCRIPTION_DOMAIN** (AXIOMS.md §6, §10.7). $R$ is not computed.
+3. Only otherwise ( $\tau_n>0$ , $\delta_n\ge0$ , finite), compute $R_n$ and update the latch and the target boundary state below.
+
+In cases 1 and 2, the latch $\ell$ keeps its value and is not updated by $R$ (the latch is not released automatically). When the data are merely unobservable, `NOT_OBSERVABLE` and the reason are output, and there is no transition to CONFESSION (P2 of Part 2).
+
+**Latch and target boundary state** (→[7]):
+
+$$
+\ell_n=\ell_{n-1}\ \lor\ \mathbf{1}\{R_n\ge R_{\mathrm{irrev}}\}
+$$
+
+The instantaneous classification $\mathrm{Class}(R)$ is the canonical interval classification (PERMIT / BOUNDARY_WARNING / HANDOFF_REQUIRED / IRREVERSIBLE_TRANSITION / RUPTURE_BOUNDARY). Place the order
+
+$$
+\text{PERMIT}<\text{BOUNDARY\_WARNING}<\text{HANDOFF\_REQUIRED}<\text{IRREVERSIBLE\_TRANSITION}<\text{RUPTURE\_BOUNDARY}
+$$
+
+on the target boundary states, and set
+
+$$
+\mathsf{State}_n=
+\begin{cases}
+\mathrm{Class}(R_n) & \ell_n=0\\[2pt]
+\max\bigl(\mathrm{Class}(R_n),\ \text{IRREVERSIBLE\_TRANSITION}\bigr) & \ell_n=1
+\end{cases}
+$$
+
+Even if $R$ falls after the latch, the state does not automatically return below IRREVERSIBLE_TRANSITION (AXIOMS.md §10.4).
+
+## 4. Stage 6　Transitions between evaluations (end of the old path and a new evaluation) (→[10])
+
+Evaluation $j$ ends at any of the following events.
+
+- $\mathsf{State}_n=\text{RUPTURE\_BOUNDARY}$ (rupture or transition of the evaluation target as a whole; the rupture of a part does not end it)
+- OUT_OF_DESCRIPTION_DOMAIN ( $\tau=0$ ; loss of all elements and so on). Since it is outside the description domain, $R$ cannot continue to be computed within that evaluation. Structural testimony through the surviving observation and recording paths continues (AXIOMS.md §11)
+- A change of the evaluation declaration, including:
+  - a change of the target, rupture mode, reference, or rules (including replacement of the evaluation target itself)
+  - a case where the declared thickness changes with a new observation (redeclared as the next evaluation snapshot; FORMULA.md §6, AXIOMS.md §14)
+  - straightening (P6)
+  - an addition that cannot be represented by the declared composition rule $\mathrm{Comp}_\tau$
+  - a removal when the composition rule does not satisfy condition 2 (Part 2, 3.3)
+
+The addition of a structural element does not end the evaluation as long as it can be represented by the composition rule (Part 2, 3.3). CONFESSION is a stop signal for the unknown and does not end the evaluation. Until the unknown is resolved, $R$ is not computed and the target boundary state is not advanced.
+
+Operations at the end:
+
+$$
+\mathsf{Archive}\leftarrow\mathsf{Archive}\oplus\bigl(\mathsf{Decl}_j,\ \mathsf{History}^{(j)},\ Z^{(j)}_{\mathrm{final}}\bigr)
+$$
+
+$$
+\mathsf{Decl}_j\ \longrightarrow\ \mathsf{Decl}_{j+1},\qquad j\leftarrow j+1
+$$
+
+- The records of the old evaluation are archived and not rewritten. What is carried into the new evaluation is not the summary but **$\tau_0^{(j+1)}$ determined by a new Cause-Side measurement**.
+- If the latch caught in evaluation $j$ , that record is kept in $\mathsf{Archive}$ , and $\mathsf{Decl}_{j+1}$ also states that "the latch caught in the previous evaluation." No claim is made that the $R$ of evaluation $j$ and the $R$ of evaluation $j+1$ can be compared (comparability in P0 of Part 2).
+- When restoration to the initial structure is claimed after reaching rupture or phase transition, both comparability (same target, same unit, same measurement rules) and $\tau_{\mathrm{restored}}<\tau_0^{(j)}$ are established, as in AXIOMS.md §8. $\tau_{\mathrm{restored}}$ here is the absorption thickness of existing elements, excluding added elements. Even if the declared thickness of the whole, including added elements, exceeds $\tau_0^{(j)}$ , that is not restoration (Part 2, 3.3).
+- Redeclaring the reference state is permitted only here (P7, AXIOMS.md §4). When the reference is reset to the position of the residual deviation, $\tau_0^{(j+1)}\le\tau_n^{(j)}-p_n^{(j)}$ , unless a structural element has been added or the thickness has been measured anew by a new Cause-Side measurement. This is this document's safe-side condition for resetting the reference, derived from Proposition 1(b) (agreement of the rupture point), and not a general rule of the canon. If the reference is not reset, $p_n^{(j)}$ appears as $p_0$ in the observations of the new evaluation even without carrying over a summary (Proposition 0). The declared thickness of the new evaluation is determined by a new Cause-Side measurement (the next evaluation snapshot; FORMULA.md §6, AXIOMS.md §14). Even if its value comes out larger than $\tau_n^{(j)}$ of the old evaluation, it is not an increase within an evaluation, and no claim is made that the $R$ of the old and new evaluations can be compared.
+- The evaluation number $j$ and the evaluation archive $\mathsf{Archive}$ do not decrease. The structure does not return to the same state and keeps advancing. Whether and how the sequence of evaluations is mapped to structural continuity $\omega$ is declared per evaluation as an optional element of the evaluation declaration (P0 of Part 2). No general rule for the mapping is defined.
+
+**Correspondence with the escapement** (`examples/06_Escapement_Principle_JP.html`, `examples/26_escapement_contactpoint_JP.html`): in the evaluation for each tooth, when $\delta$ reaches $\tau$ the escapement jumps, the overshoot $\delta-\tau$ is not carried to the next tooth, and the next tooth is counted from $\delta=0$ (in a mechanical escapement, the overshooting energy dissipates as heat). This document reads each tooth as one evaluation, the jump as the transition between evaluations of Stage 6, and the overshoot as "a quantity not carried into the new evaluation" (though kept in the archive). The number of jumps corresponds to $j$ .
+
+**Relation to existing demos:** `examples/14_powergrid_transition_JP.html` and `examples/15_or_icu_continuum_JP.html` fix RUPTURE_BOUNDARY, then start an "independent new Cause-Side evaluation" and archive the old history. They are existing implementations of Stage 6.
+
+## 5. Stage 7　Links with hierarchies and other structures (→[9])
+
+When this structure has substructures $i$ (finitely many), or is influenced by another structure $i$ , the **observed physical state** of the other enters this structure as an observation event.
+
+$$
+\mathrm{Ev}^{(\mathrm{self})}_{n}=\bigl(\text{physical state observed in structure }i,\dots\bigr),\qquad
+\mathsf{Alloc}^{(\mathrm{self})}\bigl(\mathrm{Ev}^{(\mathrm{self})}_n\bigr)=\bigl(a^{(\mathrm{self})}_n,\ \Delta p^{(\mathrm{self})}_n,\ \Delta\lambda^{(\mathrm{self})}_n,\ \mathrm{ctx}^{(\mathrm{self})}_n\bigr)
+$$
+
+The rupture of a part (an observed rupture event: one spring broke) is a special case of this event. The part's evaluation output $R^{(i)}_n\ge1$ itself is not put into the target state of this structure. $R^{(i)}$ (the evaluation output of another structure) can be used in this structure for the following: records in audit and structural testimony, safe-side gauge inputs under P9(iv) (lowering thresholds, narrowing gate widths), and pre-fixed physical-control commands (AXIOMS.md §14). It is not put into the target state of this structure. Part and whole, and this structure and another structure, are **separate evaluations with separate declarations**, linked in the formulas by observed physical events.
+
+The conditions under which a link does not constitute reverse derivation are derived from P9 as follows. They are not independent rules but consequences of P9.
+
+| Condition | Content | Grounds |
+|---|---|---|
+| LC-1 No self-adjustment | the evaluation outputs of this structure ( $R$ , its averages and aggregates, $\mathsf{State}$ ) are not returned to the gauge of this structure (side-specific effective gate widths, thresholds, reference, projection); the same applies when returning via another structure | P9(ii) (AXIOMS.md §14) |
+| LC-2 Direction | the observed physical state of the other enters this structure only as an event through $\mathsf{Alloc}^{(\mathrm{self})}$ : as an action $a$ (for example, the load increases because a neighboring spring broke), or as $\Delta p\ge0$ , $\Delta\lambda\ge0$ . It does not enter in the direction of decreasing $p$ or $\lambda$ . The evaluation outputs of the other do not enter the target state of this structure. They enter the gauge of this structure only at thresholds and effective gate widths, and only in the safe-side direction of narrowing gate widths or lowering thresholds | P9(iii)(iv), P6 |
+| LC-3 No cycles | when quantities of the other are used in the same step, an order of computation that forms no cycle is declared; mutual links are represented between target states, not between gauges | P9(iv)(v) |
+| LC-4 Fixed in advance | the existence of links, conversion rules, and thresholds are fixed before evaluation as elements of $\mathsf{Decl}^{(\mathrm{self})}$ , and link events are recorded in $\mathsf{History}$ | P9(vi) |
+
+Relation to existing demos:
+
+- `examples/12_agri_mol_antagonism_JP.html` (shrinks $\tau_K$ when $R_{\mathrm{Mg}}\ge0.7$ ) is an edge from another structure's evaluation output into this structure's gauge in the narrowing direction and satisfies LC-1 and LC-2. Computing Mg first within the same frame forms no cycle, so declaring that order also satisfies LC-3. However, since $\tau_K$ returns when $R_{\mathrm{Mg}}$ falls, it should be declared as a link of side-specific effective gate widths rather than of the effective thickness $\tau_n$ .
+- `examples/24_vehicle_mandatory_boundary_JP.html` (widens $\tau_{\mathrm{upper}}$ by its own $R_{\mathrm{short}}$ ) falls under LC-1 (self-adjustment of the gauge) even though it uses the value of the previous frame, and since it widens, it also does not meet LC-2.
+- `examples/07_HAN_gate_live_JP.html` builds the dynamic change of $\tau$ from the EMA of Cause-Side deviation rather than from $R$ , and does not fall under LC-1. The comment in that demo, "changing $\tau$ from the result value disables the causal diode," is an earlier example of the same idea as P9(ii) (though the multiplication $R=r_{\mathrm{raw}}\times\tau$ in that demo remains a separate issue).
+
+## 6. Proposition 5　Sufficiency of the decision summary (→[11])
+
+The **decision-sufficient state** $Z_n$ is taken to be not a positional tuple but a record with the following named fields (dictionary "Decision-Sufficient State").
+
+- residual deviation $p_n$
+- active elements $\mathsf{Active}_n$ , and for each element $e\in\mathsf{Active}_n$ , its declared thickness $\tau^{[e]}_0$ and degradation fraction $\lambda^{[e]}_n$
+- irreversible latch $\ell_n$
+
+The fields of $Z_n$ other than the latch ( $p_n$ , the active elements, and each element's declared thickness and degradation fraction) are the physical state, written $\mathsf{Phys}_n$ . Suppose the update rule has the following form (backward differences; the event at update number $n$ advances the state from $n-1$ to $n$ ; $e\in\mathsf{Active}_{n-1}$ ).
+
+$$
+q_n=\rho(a_n),\quad
+\Delta p_n=g_p(\mathsf{Phys}_{n-1},a_n),\quad
+\Delta\lambda^{[e]}_n=g^{[e]}_\lambda(\mathsf{Phys}_{n-1},a_n)
+$$
+
+Since the update rule is a physical law, it does not take the latch $\ell$ (an evaluation state) or the evaluation outputs $R$ and $\mathsf{State}$ as inputs (P9 of Part 2). $\ell_n$ is included in $Z_n$ in order to determine the next target boundary state.
+
+The event $\mathrm{Ev}_n$ consists of the action $a_n$ and additions (including the declared thickness measured at the time of addition) and removals of structural elements.
+
+**Proposition 5:** under the same evaluation declaration $\mathsf{Decl}$ (the same thresholds, the same composition rule, the same rules), two histories whose $Z_n$ at step $n$ are the same follow the same classification (CONFESSION, OUT_OF_DESCRIPTION_DOMAIN, or the same $R$ ) and the same $\mathsf{State}$ from $n+1$ onward, provided that the subsequent sequences of events $\mathrm{Ev}_{n+1},\mathrm{Ev}_{n+2},\dots$ are the same. $R_n$ at step $n$ itself depends on $q_n$ and is therefore not determined by $Z_n$ alone (the claim concerns $n+1$ onward).
+
+**Proof:** by induction on $n$ . If $Z_n$ and the event $\mathrm{Ev}_{n+1}$ are equal, the rules above give equal $q_{n+1}=\rho(a_{n+1})$ , $p_{n+1}=p_n+g_p(\mathsf{Phys}_n,a_{n+1})$ , and equal $\lambda^{[e]}_{n+1}$ for each element. Since the additions and removals are equal, $\mathsf{Active}_{n+1}$ is equal, and the declared thicknesses of added elements are also equal (as the same measured values). By the same composition rule, $\tau_{n+1}$ is equal, and $\delta_{n+1}=q_{n+1}+p_{n+1}$ is also equal. The order of classification in Stage 5 of Part 3 gives the same result for the same input, so the classifications are equal. If $R_{n+1}$ is determined, it is equal, and $\ell_{n+1}$ and $\mathsf{State}_{n+1}$ are also equal. Hence $Z_{n+1}$ is also equal. ∎
+
+For a single element, the active elements are $\{0\}$ and the declared thickness $\tau_0$ is fixed by the evaluation declaration, so $Z_n$ reduces to $(p_n,\lambda_n,\ell_n)$ .
+
+**Meaning:**
+
+- For judgment, the long history $\mathsf{History}$ may be summarized into $Z_n$ .
+- **Whether a summary is sufficient is determined by the form of the update rule.** For example, in a domain such as metal fatigue, where the progress of degradation changes with the number of cycles so far, the number of cycles must be added to $Z_n$ as a field (additional domain state). In a domain such as cooling, where $q_n=\rho(q_{n-1},a_n)$ (Stage 5), $q_n$ is added as a field. Which fields may be dropped is determined by the declared rules. With named fields, omissions in updating the summary when state is added can be checked by the presence or absence of fields.
+- For structural testimony and audit, $\mathsf{History}$ itself is kept. **The decision summary $Z$ and the testimony record $\mathsf{History}$ have different roles.**
+
+Reference: the idea of "identifying histories whose subsequent behavior is the same" has a structure similar to the Myhill–Nerode equivalence of automata theory. However, the proof above does not depend on that theory and is closed within the premises of this document.
+
+---
+
+# SECTION II — 日本語（原文）
 
 ## 0. 本書の位置付けと読み方
 
@@ -193,7 +1295,7 @@ NRA-IDEの「二重ゆらぎ」は、まさにこの「ズレが増えて、同�
 
 ## 1. 記号表
 
-記号の名前・固定名・型・出所・使ってよい先・混同しやすい点は、辞書 `dictionary/NRA-IDE_Dictionary_JP.md` （英語版 `dictionary/NRA-IDE_Dictionary_EN.md`。非規範）で引ける。本書は、字体・大小・書体の違いだけで別の意味の記号を区別しない（辞書0.5）。正典の予約記号（FORMULA.md §7： $R,S,M_R,M_\tau,\delta,\tau,\omega,C,\mathrm{entropy}$ ）、AXIOMS.md §1の記号（ $\epsilon$ 、 $\emptyset$ ほか）、AXIOMS.md §4.5の補助構造量（ $\omega$ 、 $\mathrm{Phase}$ 、 $C$ 、 $W$ 、 $\mathrm{entropy}$ ）は、正典の意味でだけ使う。
+記号の名前・固定名・型・出所・使ってよい先・混同しやすい点は、辞書 `dictionary/NRA-IDE_Dictionary_JP.md` （英語版 `dictionary/NRA-IDE_Dictionary_EN.md`。非規範）で引ける。本書は、字体・大小・書体の違いだけで別の意味の記号を区別しない（辞書0.5、FORMULA.md §7）。正典の予約記号（FORMULA.md §7： $R,S,M_R,M_\tau,\delta,\tau,\omega,C,\mathrm{entropy}$ ）、AXIOMS.md §1の記号（ $\epsilon$ 、 $\emptyset$ ほか）、AXIOMS.md §4.5の補助構造量（ $\omega$ 、 $\mathrm{Phase}$ 、 $C$ 、 $W$ 、 $\mathrm{entropy}$ ）は、正典の意味でだけ使う。
 
 | 記号 | 名称 | 意味 | 定義箇所 | 第1部 |
 |---|---|---|---|---|
