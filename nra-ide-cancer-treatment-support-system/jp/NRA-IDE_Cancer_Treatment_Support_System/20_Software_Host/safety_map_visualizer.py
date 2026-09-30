@@ -17,7 +17,7 @@ from nra_core_model import (
     check_inputs as _check_inputs,
     required_boost as _required_boost,
     DEFAULT_DEFORM_VELOCITY,
-    ERR_VISC0, ERR_GEOM, ERR_RANGE, ERR_NAME,
+    ERR_NONE, ERR_NAME, normalize_type,
 )
 
 
@@ -33,7 +33,8 @@ class SafetyMapVisualizer:
         sigma_v  = 12 * eta * v * D / (1000 * d^2)
         sigma_el + sigma_v > ΔP  =>  BLOCKED
 
-    独自の近似式を持ってはならない。本図の境界線は FPGA の判定境界と一致する。
+    独自の近似式を持ってはならない。本図は参照モデルの判定境界である。
+    FPGA は v=200 um/s 固定のため、実機結果の有効性確認後にのみ併記する。
     """
 
     def required_boost(self, patient_data: dict):
@@ -44,6 +45,8 @@ class SafetyMapVisualizer:
         return _required_boost(patient_data)
 
     def generate_map(self, patient_data: dict, output_path: str) -> None:
+        if normalize_type(patient_data.get('cancer_type', 'Type A')) != 'typea':
+            raise ValueError('INVALID: Type A 以外の判定図は生成しない')
         q = {k: _to_q88(patient_data.get(k, 0.0)) for k in
              ('cell_stiffness', 'cell_viscosity', 'cell_diameter',
               'pore_size', 'flow_dp', 'drug_boost')}
@@ -60,20 +63,15 @@ class SafetyMapVisualizer:
         B_q = (boost_axis * 256).astype(np.int64)
         F_q = (flow_axis * 256).astype(np.int64)
 
-        # 妥当性判定も参照実装に委譲する（Boost は軸なので 0 で評価）
+        # 妥当性判定も参照実装に委譲する。現在地の Boost も検証する。
         # エラー名は nra_core_model.ERR_NAME を参照する（本ファイルに複製しない）
-        err_code = _check_inputs(dict(q, drug_boost=0))
-        err = (f'0x{err_code:02X} {ERR_NAME[err_code]}'
-               if err_code in (ERR_VISC0, ERR_RANGE, ERR_GEOM) else None)
-
-        if err:
-            # 異常時は転移リスク側（全面 PASSABLE）へ倒す＝Fail-Closed
-            is_blocked = np.zeros((len(F_q), len(B_q)), dtype=float)
-        else:
-            strain, sigma_v = _fixed_terms(eta_q, D_q, d_q, v_q)
-            sigma_el = ((E_q + B_q) * strain) >> 8          # (1, nB)
-            sigma_tot = sigma_el + sigma_v
-            is_blocked = (sigma_tot[None, :] > F_q[:, None]).astype(float)
+        err_code = _check_inputs(q)
+        if err_code != ERR_NONE:
+            raise ValueError(f'INVALID: 0x{err_code:02X} {ERR_NAME[err_code]}')
+        strain, sigma_v = _fixed_terms(eta_q, D_q, d_q, v_q)
+        sigma_el = ((E_q + B_q) * strain) >> 8          # (1, nB)
+        sigma_tot = sigma_el + sigma_v
+        is_blocked = (sigma_tot[None, :] > F_q[:, None]).astype(float)
 
         Bg, Fg = np.meshgrid(boost_axis, flow_axis)
 
@@ -97,8 +95,7 @@ class SafetyMapVisualizer:
         ax.set_xlabel('Drug Boost B [kPa]', fontsize=12)
         ax.set_ylabel('Flow Pressure ΔP [kPa]', fontsize=12)
 
-        subtitle = f'ERROR {err} — judgement invalid' if err else \
-                   'Boundary identical to FPGA decision (Q8.8)'
+        subtitle = 'Reference-model decision boundary (Q8.8)'
         ax.set_title(
             f'NRA-IDE Jamming Map\nPatient: {p_id}  ({cancer})\n{subtitle}',
             fontsize=12, fontweight='bold'
@@ -106,8 +103,8 @@ class SafetyMapVisualizer:
         ax.grid(True, alpha=0.3)
 
         legend_handles = [
-            mpatches.Patch(color='#ccffcc', label='BLOCKED (cell cannot pass)'),
-            mpatches.Patch(color='#ffcccc', label='PASSABLE (escape route open)'),
+            mpatches.Patch(color='#ccffcc', label='BLOCKED (model only)'),
+            mpatches.Patch(color='#ffcccc', label='PASSABLE (model only)'),
             mlines.Line2D([], [], marker='o', color='black',
                           markersize=10, linestyle='None', label='Current State'),
         ]
@@ -115,8 +112,7 @@ class SafetyMapVisualizer:
 
         # BLOCKED は臨床的な「投与可」を意味しない（Gate Axiom）
         fig.text(0.5, 0.005,
-                 'BLOCKED indicates physical containment only. '
-                 'Treatment decision rests with the physician.',
+                 'Unvalidated model output, not observed passage or treatment guidance.',
                  ha='center', fontsize=8, color='#555555')
 
         dirpart = os.path.dirname(output_path)

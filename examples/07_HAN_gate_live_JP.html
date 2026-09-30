@@ -5,7 +5,7 @@
   NRA-IDE 実証デモ #07 — HAN Gate ライブデモ（FIX版）
   (c) 2026 M-Tokuni
 
-  【_FIX 修正内容】2026-03-10
+  【_FIX 修正内容】2026-03-10（旧修正記録・現行正典の説明ではない）
   旧版の computeR() では EMA の入力に r_raw（R計算結果 = Effect-Side）を使用していた。
   これは結果値からτを逆算することになり、Π⁻¹（逆導出）に相当する構造違反。
   因果ダイオードが無効化されるため修正対象となった。
@@ -16,10 +16,15 @@
     - τを決定する関数は設計時に固定（Immutable）
     - AI や Effect-Side 値はτを変更できない
 
-  NRA-IDE 構造原則:
+  NRA-IDE 構造原則（当時の説明）:
     τの値は Effect-Side（AI・計算結果）から変更不可。
     Cause-Side（δ偏差 = 直接観測された計測値）の積算によってのみ動的に変化する。
     このルール自体は設計時に固定される。
+
+  【現行の位置付け】
+  本デモの乗算値は正規Rではなく、非正典の連鎖予兆スコアである。
+  EMA入力はテレメトリから作る負荷偏差、動的倍率は吸収厚みτではない。
+  PASS/SILENCEはデモ固有の運用判定で、正規状態分類ではない。
 -->
 <html lang="ja">
 <head>
@@ -393,7 +398,7 @@ footer a { color: var(--accent); text-decoration: none; }
   <div class="header-left">
     <div class="header-label">NRA-IDE / HAN Gate — Live Simulation</div>
     <h1>連鎖崩壊はこうして始まる<br>— そして HAN Gate が止める</h1>
-    <p>リアルタイムで R が上昇し、閾値を超えた瞬間に SILENCE が発動します。<br>
+    <p>非正典の連鎖予兆スコアが閾値を超えると SILENCE が発動します。正規R=δ/τのデモではありません。<br>
        パラメータを変えて「安全な波形」と「見逃す波形」の違いを体験してください。</p>
   </div>
   <div class="header-right">
@@ -417,10 +422,10 @@ footer a { color: var(--accent); text-decoration: none; }
 
 <!-- 凡例 -->
 <div class="legend">
-  <div class="legend-item"><div class="legend-line bg-accent"></div>R（動的τ）</div>
-  <div class="legend-item"><div class="legend-line bg-dashed"></div>R（静的τ・参考）</div>
-  <div class="legend-item"><div class="legend-line bg-danger"></div>R_OP 閾値</div>
-  <div class="legend-item"><div class="legend-line bg-warn"></div>動的τ</div>
+  <div class="legend-item"><div class="legend-line bg-accent"></div>連鎖予兆スコア（動的倍率）</div>
+  <div class="legend-item"><div class="legend-line bg-dashed"></div>連鎖予兆スコア（固定倍率・参考）</div>
+  <div class="legend-item"><div class="legend-line bg-danger"></div>スコア閾値</div>
+  <div class="legend-item"><div class="legend-line bg-warn"></div>動的倍率</div>
 </div>
 
 <!-- 下段 -->
@@ -432,38 +437,38 @@ footer a { color: var(--accent); text-decoration: none; }
 
     <div class="param-group">
       <div class="param-row">
-        <span class="param-name">R_OP（閾値）</span>
-        <span class="param-val" id="v-rop">1.0</span>
+        <span class="param-name">CHAIN_SCORE_LIMIT（閾値）</span>
+        <span class="param-val" id="v-limit">1.0</span>
       </div>
       <div class="param-desc">低いほど早く SILENCE になります</div>
-      <input type="range" id="rop" min="0.3" max="3.0" step="0.05" value="1.0" title="R_OP（閾値）">
+      <input type="range" id="limit" min="0.3" max="3.0" step="0.05" value="1.0" title="連鎖予兆スコア閾値">
     </div>
 
     <div class="param-group">
       <div class="param-row">
-        <span class="param-name">TAU_DEFAULT</span>
-        <span class="param-val" id="v-tau">1.5</span>
+        <span class="param-name">GAIN_BASE</span>
+        <span class="param-val" id="v-gain">1.5</span>
       </div>
-      <div class="param-desc">吸収厚みの基底値</div>
-      <input type="range" id="tau" min="0.5" max="4.0" step="0.1" value="1.5" title="TAU_DEFAULT">
+      <div class="param-desc">非正典スコアの基底倍率</div>
+      <input type="range" id="gain" min="0.5" max="4.0" step="0.1" value="1.5" title="GAIN_BASE">
     </div>
 
     <div class="param-group">
       <div class="param-row">
-        <span class="param-name">TAU_EMA_ALPHA</span>
+        <span class="param-name">GAIN_EMA_ALPHA</span>
         <span class="param-val" id="v-alpha">0.30</span>
       </div>
-      <div class="param-desc">二重ゆらぎ感度（大きいほど敏感）</div>
-      <input type="range" id="alpha" min="0.01" max="0.99" step="0.01" value="0.30" title="TAU_EMA_ALPHA">
+      <div class="param-desc">倍率EMAの平滑係数</div>
+      <input type="range" id="alpha" min="0.01" max="0.99" step="0.01" value="0.30" title="GAIN_EMA_ALPHA">
     </div>
 
     <div class="param-group">
       <div class="param-row">
-        <span class="param-name">TAU_AMPLIFY</span>
+        <span class="param-name">GAIN_AMPLIFY_LIMIT</span>
         <span class="param-val" id="v-amp">2.0</span>
       </div>
-      <div class="param-desc">τの最大増幅倍率</div>
-      <input type="range" id="amp" min="1.0" max="5.0" step="0.1" value="2.0" title="TAU_AMPLIFY">
+      <div class="param-desc">倍率の最大増幅率</div>
+      <input type="range" id="amp" min="1.0" max="5.0" step="0.1" value="2.0" title="GAIN_AMPLIFY_LIMIT">
     </div>
 
     <div class="param-group">
@@ -497,9 +502,9 @@ footer a { color: var(--accent); text-decoration: none; }
   <div>
     <div class="meters">
       <div class="meter">
-        <div class="meter-label">CURRENT R</div>
-        <div class="meter-val text-safe" id="m-r">0.0000</div>
-        <div class="meter-bar"><div class="meter-bar-fill bg-safe w-0" id="bar-r"></div></div>
+        <div class="meter-label">CHAIN SCORE (NON-CANONICAL)</div>
+        <div class="meter-val text-safe" id="m-score">0.0000</div>
+        <div class="meter-bar"><div class="meter-bar-fill bg-safe w-0" id="bar-score"></div></div>
       </div>
       <div class="meter">
         <div class="meter-label">DECISION</div>
@@ -507,9 +512,9 @@ footer a { color: var(--accent); text-decoration: none; }
         <div class="meter-bar"><div class="meter-bar-fill bg-danger w-0" id="bar-silence"></div></div>
       </div>
       <div class="meter">
-        <div class="meter-label">DYNAMIC τ</div>
-        <div class="meter-val text-warn" id="m-tau">1.50</div>
-        <div class="meter-bar"><div class="meter-bar-fill bg-warn w-30" id="bar-tau"></div></div>
+        <div class="meter-label">DYNAMIC GAIN</div>
+        <div class="meter-val text-warn" id="m-gain">1.50</div>
+        <div class="meter-bar"><div class="meter-bar-fill bg-warn w-30" id="bar-gain"></div></div>
       </div>
       <div class="meter">
         <div class="meter-label">SILENCE COUNT</div>
@@ -545,9 +550,9 @@ let state = {
   t: 0,
   ema: 0,
   holdUntil: 0,
-  rHistory:      [],
-  rStaticHistory:[],
-  tauHistory:    [],
+  scoreHistory:      [],
+  staticScoreHistory:[],
+  gainHistory:    [],
   silenceHistory:[],
   silenceCount: 0,
   playing: true,
@@ -587,35 +592,21 @@ function getTelemetry(t) {
   };
 }
 
-function computeR(tel, tau_base, ema_prev, params) {
-  // ─── R計算（Effect-Side） ───────────────────────────────────────────
-  // r_raw は各テレメトリの積として求めたR値。
-  // これは「出力の結果」であり Effect-Side に属する。
-  // 【禁止】r_raw を直接 EMA に渡すことは Π⁻¹（逆導出）に相当する。
-  //         結果値からτを変化させると因果ダイオードが無効化される。
-  const r_raw = (tel.retry / 1.5) * (tel.queue / 1.0) * (tel.dep_to / 0.9);
+function computeChainScore(tel, base_gain, ema_prev, params) {
+  // テレメトリから求める共起値。正規RでもEffect-Sideの生成出力でもない。
+  const cooccurrence = (tel.retry / 1.5) * (tel.queue / 1.0) * (tel.dep_to / 0.9);
 
-  // ─── Cause-Side δ偏差（EMAへの入力） ──────────────────────────────
-  // 各テレメトリ値が「基準値を超えた量」＝δ偏差（Cause-Side）を計算する。
-  // 基準値: retry=1.5, queue=1.0, dep_to=0.9（設計時に固定）
-  // δ偏差は直接観測された計測値から導出されるため Cause-Side に属する。
-  // τの動的変化は必ずこの Cause-Side 値を根拠とする（NRA-IDE 構造原則）。
-  const d_retry  = Math.max(0, tel.retry  - 1.5) / 1.5;  // 正規化δ偏差
+  // EMA入力は計測値の基準超過分。正規の蓄積ズレδではない。
+  const d_retry  = Math.max(0, tel.retry  - 1.5) / 1.5;
   const d_queue  = Math.max(0, tel.queue  - 1.0) / 1.0;
   const d_dep_to = Math.max(0, tel.dep_to - 0.9) / 0.9;
-  // 最大δ偏差を Cause-Side の代表値として使用
-  const delta_cause = Math.max(d_retry, d_queue, d_dep_to);
+  const load_deviation = Math.max(d_retry, d_queue, d_dep_to);
 
-  // ─── EMA（τ動的変化の根拠） ────────────────────────────────────────
-  // EMA入力 = delta_cause（Cause-Side δ偏差）
-  // 【正しい理由】物理的な負荷履歴の蓄積によってのみτが変化する。
-  //               これは「τを決定する因果的ルール（関数）は不変だが、
-  //               Cause-Side の入力によってτ値が動的に変化する」という
-  //               NRA-IDE のτ定義と完全に整合する。
-  const ema  = params.alpha * delta_cause + (1 - params.alpha) * ema_prev;
+  // 固定した関数で補助倍率を計算する。吸収厚みτの更新ではない。
+  const ema  = params.alpha * load_deviation + (1 - params.alpha) * ema_prev;
   const mult = Math.min(1 + ema, params.amp);
-  const tau_d = tau_base * mult;
-  return { r_raw, r_dyn: r_raw * tau_d, r_static: r_raw * tau_base, tau_d, ema };
+  const dynamic_gain = base_gain * mult;
+  return { cooccurrence, chain_score: cooccurrence * dynamic_gain, static_score: cooccurrence * base_gain, dynamic_gain, ema };
 }
 
 // ─────────────────────────────────────────────────
@@ -639,19 +630,19 @@ function drawChart(params) {
 
   ctx.clearRect(0, 0, W, H);
 
-  const rArr    = state.rHistory;
-  const rsArr   = state.rStaticHistory;
-  const tauArr  = state.tauHistory;
+  const scoreArr    = state.scoreHistory;
+  const staticScoreArr   = state.staticScoreHistory;
+  const gainArr  = state.gainHistory;
   const silArr  = state.silenceHistory;
-  const len     = rArr.length;
-  const rop     = params.rop;
+  const len     = scoreArr.length;
+  const limit     = params.limit;
 
-  const maxR   = Math.max(...rArr, rop * 1.3, 0.01);
-  const maxTau = Math.max(...tauArr, params.tau * params.amp, 0.01);
+  const maxScore   = Math.max(...scoreArr, limit * 1.3, 0.01);
+  const maxGain = Math.max(...gainArr, params.gain * params.amp, 0.01);
 
   function xp(i) { return pad.left + (i / (HISTORY - 1)) * pW; }
   function yp(v, mx) { return pad.top + pH - (Math.min(v, mx * 1.05) / mx) * pH; }
-  function yt(v)     { return pad.top + pH - (v / maxTau) * pH; }
+  function yt(v)     { return pad.top + pH - (v / maxGain) * pH; }
 
   // グリッド
   ctx.strokeStyle = 'rgba(24,32,48,0.9)';
@@ -659,24 +650,24 @@ function drawChart(params) {
   for (let i = 0; i <= 4; i++) {
     const y = pad.top + (pH / 4) * i;
     ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pW, y); ctx.stroke();
-    const v = (maxR * (4 - i) / 4).toFixed(2);
+    const v = (maxScore * (4 - i) / 4).toFixed(2);
     ctx.fillStyle = 'rgba(58,80,112,0.8)';
     ctx.font = '9px Share Tech Mono';
     ctx.textAlign = 'right';
     ctx.fillText(v, pad.left - 5, y + 3);
   }
 
-  // R_OP線
-  const ropY = yp(rop, maxR);
+  // 連鎖予兆スコア閾値
+  const limitY = yp(limit, maxScore);
   ctx.strokeStyle = 'rgba(255,61,90,0.6)';
   ctx.lineWidth = 1.2;
   ctx.setLineDash([5, 4]);
-  ctx.beginPath(); ctx.moveTo(pad.left, ropY); ctx.lineTo(pad.left + pW, ropY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.left, limitY); ctx.lineTo(pad.left + pW, limitY); ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle = 'rgba(255,61,90,0.7)';
   ctx.font = '9px Share Tech Mono';
   ctx.textAlign = 'left';
-  ctx.fillText(`R_OP ${rop.toFixed(2)}`, pad.left + pW + 4, ropY + 3);
+  ctx.fillText(`CHAIN_SCORE_LIMIT ${limit.toFixed(2)}`, pad.left + pW + 4, limitY + 3);
 
   if (len < 2) return;
 
@@ -688,34 +679,34 @@ function drawChart(params) {
     }
   }
 
-  // 動的τ（オレンジ）
+  // 動的倍率（オレンジ）
   ctx.strokeStyle = 'rgba(240,165,0,0.45)';
   ctx.lineWidth = 1.2;
   ctx.beginPath();
   for (let i = 0; i < len; i++) {
-    const x = xp(i), y = yt(tauArr[i]);
+    const x = xp(i), y = yt(gainArr[i]);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  // 静的τ版R（破線・薄グレー）
+  // 固定倍率の補助スコア（破線・薄グレー）
   ctx.strokeStyle = 'rgba(48,72,100,0.65)';
   ctx.lineWidth = 1;
   ctx.setLineDash([3, 4]);
   ctx.beginPath();
   for (let i = 0; i < len; i++) {
-    const x = xp(i), y = yp(rsArr[i], maxR);
+    const x = xp(i), y = yp(staticScoreArr[i], maxScore);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // 動的τ版R グロー（青）
+  // 動的倍率の連鎖予兆スコア（青）
   ctx.strokeStyle = 'rgba(56,182,255,0.18)';
   ctx.lineWidth = 6;
   ctx.beginPath();
   for (let i = 0; i < len; i++) {
-    const x = xp(i), y = yp(rArr[i], maxR);
+    const x = xp(i), y = yp(scoreArr[i], maxScore);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.stroke();
@@ -724,16 +715,16 @@ function drawChart(params) {
   ctx.lineWidth = 2;
   ctx.beginPath();
   for (let i = 0; i < len; i++) {
-    const x = xp(i), y = yp(rArr[i], maxR);
+    const x = xp(i), y = yp(scoreArr[i], maxScore);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.stroke();
 
   // 最新点ドット
   if (len > 0) {
-    const last = rArr[len - 1];
+    const last = scoreArr[len - 1];
     const lx   = xp(len - 1);
-    const ly   = yp(last, maxR);
+    const ly   = yp(last, maxScore);
     const isSil = silArr[len - 1];
     ctx.fillStyle = isSil ? '#ff3d5a' : '#38b6ff';
     ctx.shadowColor = isSil ? 'rgba(255,61,90,0.8)' : 'rgba(56,182,255,0.8)';
@@ -754,20 +745,20 @@ function drawChart(params) {
 // ─────────────────────────────────────────────────
 let flashTimer = null;
 
-function updateUI(r_dyn, tau_d, isSilence, params) {
-  const rop = params.rop;
-  const ratio = Math.min(r_dyn / (rop * 1.5), 1);
+function updateUI(chain_score, dynamic_gain, isSilence, params) {
+  const limit = params.limit;
+  const ratio = Math.min(chain_score / (limit * 1.5), 1);
   const col   = isSilence ? 'var(--danger)' :
-                r_dyn >= rop * 0.7 ? 'var(--warn)' : 'var(--safe)';
+                chain_score >= limit * 0.7 ? 'var(--warn)' : 'var(--safe)';
 
-  document.getElementById('m-r').textContent = r_dyn.toFixed(4);
-  document.getElementById('m-r').style.color = col;
-  document.getElementById('bar-r').style.width = (ratio * 100) + '%';
-  document.getElementById('bar-r').style.background = col;
+  document.getElementById('m-score').textContent = chain_score.toFixed(4);
+  document.getElementById('m-score').style.color = col;
+  document.getElementById('bar-score').style.width = (ratio * 100) + '%';
+  document.getElementById('bar-score').style.background = col;
 
-  document.getElementById('m-tau').textContent = tau_d.toFixed(3);
-  const tauRatio = Math.min((tau_d - params.tau) / (params.tau * (params.amp - 1) + 0.001), 1);
-  document.getElementById('bar-tau').style.width = (tauRatio * 100) + '%';
+  document.getElementById('m-gain').textContent = dynamic_gain.toFixed(3);
+  const gainRatio = Math.min((dynamic_gain - params.gain) / (params.gain * (params.amp - 1) + 0.001), 1);
+  document.getElementById('bar-gain').style.width = (gainRatio * 100) + '%';
 
   document.getElementById('m-decision').textContent = isSilence ? 'SILENCE' : 'PASS';
   document.getElementById('m-decision').style.color = isSilence ? 'var(--danger)' : 'var(--safe)';
@@ -809,14 +800,14 @@ function addLog(msg, cls) {
   while (area.children.length > 80) area.removeChild(area.firstChild);
 }
 
-function checkLog(isSilence, r_dyn, tau_d, params) {
+function checkLog(isSilence, chain_score, dynamic_gain, params) {
   if (isSilence && lastDecision === 'PASS') {
-    addLog(`SILENCE  R=${r_dyn.toFixed(4)} > R_OP=${params.rop.toFixed(2)}  τ=${tau_d.toFixed(3)}`, 'silence');
+    addLog(`SILENCE  score=${chain_score.toFixed(4)} > CHAIN_SCORE_LIMIT=${params.limit.toFixed(2)}  gain=${dynamic_gain.toFixed(3)}`, 'silence');
     holdLogged = false;
   } else if (!isSilence && lastDecision === 'SILENCE' && !holdLogged) {
-    addLog(`HOLD END → PASS  R=${r_dyn.toFixed(4)}`, 'pass');
-  } else if (r_dyn >= params.rop * 0.7 && r_dyn < params.rop && lastDecision !== 'warn') {
-    addLog(`WARN  R=${r_dyn.toFixed(4)}  接近中 (R_OP×70%)`, 'warn');
+    addLog(`HOLD END → PASS  score=${chain_score.toFixed(4)}`, 'pass');
+  } else if (chain_score >= params.limit * 0.7 && chain_score < params.limit && lastDecision !== 'warn') {
+    addLog(`WARN  score=${chain_score.toFixed(4)}  接近中 (CHAIN_SCORE_LIMIT×70%)`, 'warn');
   }
   lastDecision = isSilence ? 'SILENCE' : 'PASS';
 }
@@ -826,8 +817,8 @@ function checkLog(isSilence, r_dyn, tau_d, params) {
 // ─────────────────────────────────────────────────
 function getParams() {
   return {
-    rop:   parseFloat(document.getElementById('rop').value),
-    tau:   parseFloat(document.getElementById('tau').value),
+    limit:   parseFloat(document.getElementById('limit').value),
+    gain:   parseFloat(document.getElementById('gain').value),
     alpha: parseFloat(document.getElementById('alpha').value),
     amp:   parseFloat(document.getElementById('amp').value),
   };
@@ -851,34 +842,34 @@ function tick() {
   for (let s = 0; s < speed; s++) {
     state.t++;
     const tel    = getTelemetry(state.t);
-    const result = computeR(tel, params.tau, state.ema, params);
+    const result = computeChainScore(tel, params.gain, state.ema, params);
     state.ema    = result.ema;
 
     const nowMs   = state.t * 40;
     const silence = nowMs < state.holdUntil;
     let isSilence = silence;
 
-    if (result.r_dyn >= params.rop && !silence) {
+    if (result.chain_score >= params.limit && !silence) {
       state.holdUntil = nowMs + HOLD_MS;
       isSilence = true;
       state.silenceCount++;
     }
 
     // 履歴に積む（先頭を捨てて末尾に追加）
-    if (state.rHistory.length >= HISTORY)      state.rHistory.shift();
-    if (state.rStaticHistory.length >= HISTORY) state.rStaticHistory.shift();
-    if (state.tauHistory.length >= HISTORY)    state.tauHistory.shift();
+    if (state.scoreHistory.length >= HISTORY)      state.scoreHistory.shift();
+    if (state.staticScoreHistory.length >= HISTORY) state.staticScoreHistory.shift();
+    if (state.gainHistory.length >= HISTORY)    state.gainHistory.shift();
     if (state.silenceHistory.length >= HISTORY) state.silenceHistory.shift();
 
-    state.rHistory.push(result.r_dyn);
-    state.rStaticHistory.push(result.r_static);
-    state.tauHistory.push(result.tau_d);
+    state.scoreHistory.push(result.chain_score);
+    state.staticScoreHistory.push(result.static_score);
+    state.gainHistory.push(result.dynamic_gain);
     state.silenceHistory.push(isSilence);
 
     // ログはlastステップのみ
     if (s === speed - 1) {
-      checkLog(isSilence, result.r_dyn, result.tau_d, params);
-      updateUI(result.r_dyn, result.tau_d, isSilence, params);
+      checkLog(isSilence, result.chain_score, result.dynamic_gain, params);
+      updateUI(result.chain_score, result.dynamic_gain, isSilence, params);
     }
   }
 
@@ -912,9 +903,9 @@ function resetSim() {
   state.t            = 0;
   state.ema          = 0;
   state.holdUntil    = 0;
-  state.rHistory     = [];
-  state.rStaticHistory = [];
-  state.tauHistory   = [];
+  state.scoreHistory     = [];
+  state.staticScoreHistory = [];
+  state.gainHistory   = [];
   state.silenceHistory = [];
   state.silenceCount = 0;
   lastDecision       = 'PASS';
@@ -926,7 +917,7 @@ function resetSim() {
 }
 
 // スライダー
-['rop','tau','alpha','amp','speed'].forEach(id => {
+['limit','gain','alpha','amp','speed'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     updateSliderLabels();
     ['default','tight','loose','risky'].forEach(n =>
@@ -936,8 +927,8 @@ function resetSim() {
 });
 
 function updateSliderLabels() {
-  document.getElementById('v-rop').textContent   = parseFloat(document.getElementById('rop').value).toFixed(2);
-  document.getElementById('v-tau').textContent   = parseFloat(document.getElementById('tau').value).toFixed(1);
+  document.getElementById('v-limit').textContent   = parseFloat(document.getElementById('limit').value).toFixed(2);
+  document.getElementById('v-gain').textContent   = parseFloat(document.getElementById('gain').value).toFixed(1);
   document.getElementById('v-alpha').textContent = parseFloat(document.getElementById('alpha').value).toFixed(2);
   document.getElementById('v-amp').textContent   = parseFloat(document.getElementById('amp').value).toFixed(1);
   const s = document.getElementById('speed').value;
@@ -948,20 +939,20 @@ function updateSliderLabels() {
 // プリセット
 // ─────────────────────────────────────────────────
 const PRESETS = {
-  default: { rop:1.0, tau:1.5, alpha:0.30, amp:2.0,
+  default: { limit:1.0, gain:1.5, alpha:0.30, amp:2.0,
     note:'推奨設定。ほとんどの環境に適しています。' },
-  tight:   { rop:0.6, tau:2.5, alpha:0.50, amp:3.0,
+  tight:   { limit:0.6, gain:2.5, alpha:0.50, amp:3.0,
     note:'厳しめ設定。早めに SILENCE になります。重要サービスや障害対応向け。' },
-  loose:   { rop:2.0, tau:1.0, alpha:0.10, amp:1.5,
+  loose:   { limit:2.0, gain:1.0, alpha:0.10, amp:1.5,
     note:'緩め設定。SILENCE になりにくくなります。連鎖崩壊の検知が遅れるリスクがあります。' },
-  risky:   { rop:3.0, tau:0.5, alpha:0.01, amp:1.1,
+  risky:   { limit:3.0, gain:0.5, alpha:0.01, amp:1.1,
     note:'⚠ 危険な例。閾値が高すぎ・感度が低すぎます。波は穏やかに見えますが、本物の連鎖崩壊でも SILENCE にならない場合があります。絶対に使用しないでください。' },
 };
 
 function applyPreset(name) {
   const p = PRESETS[name];
-  document.getElementById('rop').value   = p.rop;
-  document.getElementById('tau').value   = p.tau;
+  document.getElementById('limit').value   = p.limit;
+  document.getElementById('gain').value   = p.gain;
   document.getElementById('alpha').value = p.alpha;
   document.getElementById('amp').value   = p.amp;
   updateSliderLabels();

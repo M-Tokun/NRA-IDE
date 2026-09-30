@@ -23,6 +23,8 @@ _ERR_MEANING = {
     core.ERR_OVF:         "演算がオーバーフローした。システム点検を要する",
     core.ERR_COMM:        "FPGA と通信できなかった。結線・電源を点検する",
     core.ERR_UNSUPPORTED: "未実装の癌腫タイプが指定された",
+    core.ERR_UNSUPPORTED_INPUT: "指定された変形速度を現行FPGA通信では搬送できない。判定未実施",
+    core.ERR_DISCREPANCY: "FPGA と参照実装の結果が一致しない。判定を無効化した",
 }
 
 SEP = "═" * 58
@@ -47,6 +49,12 @@ class ClinicalReportGenerator:
         # 参照実装による独立計算。[Reference] 節と突き合わせに用いる
         ref = core.evaluate(patient_data,
                             patient_data.get('cancer_type', 'Type A'))
+        fpga_result = result.get('fpga_result')
+        if (source == "FPGA" and err != core.ERR_COMM and
+                (jammed, err) != (ref['is_jammed'], ref['error_code'])):
+            fpga_result = {'is_jammed': jammed, 'error_code': err}
+            err = core.ERR_DISCREPANCY
+            jammed = False
 
         # ── 入力（Q8.8 量子化後の値を表示する。判定はこの値で行われる） ──
         q = {k: core.to_q88(patient_data.get(k, 0.0)) for k in core.RANGES_Q88}
@@ -92,16 +100,18 @@ class ClinicalReportGenerator:
         else:
             lines += [
                 "[Computation]",
-                "  判定は実行されていない（入力または通信の異常）",
+                ("  FPGA と参照実装の不一致により判定を無効化した"
+                 if err == core.ERR_DISCREPANCY else
+                 "  判定は実行されていない（入力または通信の異常）"),
                 "",
             ]
 
         # ── 判定結果 ──
         if err == core.ERR_NONE:
             judgement = "BLOCKED" if jammed else "PASSABLE"
-            meaning = ("細胞は隙間を通過できない"
+            meaning = ("モデル上、抵抗応力が駆動圧を上回る（現実の通過不能は未確認）"
                        if jammed else
-                       "細胞は変形して通過しうる（転移経路が開いている）")
+                       "モデル上、抵抗応力が駆動圧以下（現実の通過は未確認）")
         else:
             judgement = "INVALID"
             meaning = _ERR_MEANING.get(err, "未定義のエラー")
@@ -131,16 +141,16 @@ class ClinicalReportGenerator:
             ]
 
         # ── 検証層: FPGA と参照実装の突き合わせ ──
-        if err in (core.ERR_NONE, core.ERR_GEOM, core.ERR_RANGE, core.ERR_VISC0):
-            if (ref['is_jammed'], ref['error_code']) != (jammed, err):
-                lines += [
-                    "[!] DISCREPANCY: FPGA と参照実装の判定が一致しない",
-                    f"    FPGA      : jammed={jammed}, err=0x{err:02X}",
-                    f"    Reference : jammed={ref['is_jammed']}, "
-                    f"err=0x{ref['error_code']:02X}",
-                    "    本レポートを臨床判断に用いてはならない。",
-                    "",
-                ]
+        if err == core.ERR_DISCREPANCY and fpga_result is not None:
+            lines += [
+                "[!] DISCREPANCY: FPGA と参照実装の判定が一致しない",
+                f"    FPGA      : jammed={fpga_result['is_jammed']}, "
+                f"err=0x{fpga_result['error_code']:02X}",
+                f"    Reference : jammed={ref['is_jammed']}, "
+                f"err=0x{ref['error_code']:02X}",
+                "    判定は INVALID。研究上の結論にも使用しないこと。",
+                "",
+            ]
 
         # ── 来歴 ──
         # 本レポートはリポジトリから切り離されて単独で流通しうる。
@@ -154,13 +164,15 @@ class ClinicalReportGenerator:
             f"               {core.TEMPLATE_URL}",
             "",
             "[Physician's Gate]",
-            "  本判定は物理的封鎖の可否のみを示す。投薬の可否を意味しない。",
+            "  本判定は未検証モデル内の応力比較のみを示す。現実の封鎖・投薬の可否を意味しない。",
             "  最終的な治療方針は、倫理的責任を負う医師が決定する。",
             "",
             "  表示された数値は物理モデルの計算結果であり、実測値ではない。",
             "  本モデルは実験による検証を経ていない。",
             "",
-            "  本テンプレートは薬機法上の医療機器ではなく、研究・教育目的に限る。",
+            "  本テンプレートは医療機器としての承認等を取得していない。",
+            "  研究・教育目的に限り、臨床使用しない。医療機器該当性は",
+            "  実際の使用目的・標榜等に基づく個別判断を要する。",
             "  IEC 62304 の文脈では SOUP（由来不明ソフトウェア）に分類される。",
             "  医療機器開発に用いる場合、V&V・リスク管理・規制申請は",
             "  利用者の責任に属する。",

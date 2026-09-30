@@ -38,13 +38,13 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 
-**NRA-IDE**（Nomological Ring Axioms - Intensional Dynamics Engine）は、癌細胞の物理的特性を解析し、転移リスクを決定論的に判定する研究用の計算エンジンです。
+**NRA-IDE**（Nomological Ring Axioms - Intensional Dynamics Engine）は、指定条件下の単一細胞の狭窄通過について、未検証モデル内の決定論的な計算結果を返す研究用エンジンです。患者の転移リスクは判定しません。
 
 
 
 従来の医療AIが数百万人の「統計（平均）」に依存するのに対し、本システムは目の前の患者一人の「物理（実測値）」に依拠します。
 
-物理法則（構造力学）によって計算される「転移が不可能な条件」を特定し、治療計画の検討を支援します。
+モデルで仮定した抵抗応力と駆動圧の関係を示します。現実の通過可否や治療計画の妥当性は、この計算だけでは確定できません。
 
 
 
@@ -78,13 +78,15 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 
-> **癌細胞が血管内皮の隙間（Pore）を通り抜けられるか。**
+> **指定入力が、単一細胞の狭窄通過モデルの判定境界のどちら側にあるか。**
+
+これは未実験検証モデル内の計算であり、現実の通過事象や患者の転移を予測・確認したものではありません。
 
 
 
 | 問い | 本システム |
 |:---|:---|
-| 癌細胞が血管の隙間を脱出できるか | **判定する** |
+| 指定条件がモデルの通過境界のどちら側か | **モデル内で計算する** |
 | 薬剤が腫瘍間質へ浸透できるか | **判定しない**（§5 の背景で述べる動機であり、判定対象ではない） |
 
 
@@ -99,12 +101,12 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 | 出力 | 物理的意味 |
 |:---|:---|
-| `BLOCKED` | 抵抗応力が駆動圧を上回り、細胞は隙間を通過できない |
-| `PASSABLE` | 細胞は変形して通過しうる（転移経路が開いている） |
+| `BLOCKED` | モデル上、抵抗応力が駆動圧を上回る。現実の通過不能は未確認 |
+| `PASSABLE` | モデル上、抵抗応力が駆動圧以下。現実の通過は未確認 |
 
 
 
-**`SAFE` / `DANGER` の語は使用しません。** 「細胞が物理的に封鎖されている」ことと「投薬してよい」ことは別の命題です。一語に畳むと、計算結果が治療の許可として読まれ、Gate Axiom（決定権は医師にある）に反します。
+**`SAFE` / `DANGER` の語は使用しません。** 「モデル上で抵抗応力が優位」と「投薬してよい」は別の命題です。一語に畳むと、計算結果が治療の許可として読まれ、Gate Axiom（決定権は医師にある）に反します。
 
 
 
@@ -128,7 +130,7 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 ### 2. **Fail-Closed (ギアメカニズム)**
 
-通信、計算、入力のいずれかに **1ビットでも不確実性があれば**、システムは安全側に倒れ、警告（Error）を発する。ここでいう安全側とは、**転移リスクが有るとみなす側（`PASSABLE`）** である。
+通信、計算、入力に異常があれば、エラーを出して判定を `INVALID` とし、通過可否を分類しません。リスクを否定できないまま処置判断へ進めないことが安全側の扱いです。エラーを伴う `o_is_jammed = 0` は有効な `PASSABLE` ではありません。
 
 
 
@@ -194,7 +196,7 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 
-判定式は `20_Software_Host/nra_core_model.py`（参照実装）と `10_Hardware_Design/src/10_BioCalibrator_TypeA.v`（FPGA）が**ビット単位で同一**です。可視化もこの参照実装だけを判定根拠とし、独自の近似式を持ちません。
+参照実装はRTLのType A Q8.8演算を再現する構成です。可視化は参照実装を使います。実機FPGAは変形速度200 μm/sを固定使用し、それ以外の指定値は送信前に却下します。テストケースの一致は実験的妥当性を証明しません。
 
 
 
@@ -224,7 +226,7 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 
-「届いていない領域」を数値で評価する術が乏しい——この問題意識から出発し、まず**物理的に扱いが確定している「細胞の脱出可否」**を定式化したのが本システムです。薬剤到達側のモデル化は今後の課題です。
+「届いていない領域」を数値で評価する術が乏しい——この問題意識から出発し、まず単一細胞の狭窄通過について**検証前の応力比較モデル**を構成しました。現実の脱出可否は未確認であり、薬剤到達側のモデル化も今後の課題です。
 
 
 
@@ -236,7 +238,7 @@ Please see **[README.md](./README.md)** for an overview, then translate detailed
 
 
 
-細胞が隙間を通過できるか否かは、**抵抗応力** $\sigma_{resist}$ と**駆動圧** $\Delta P$ の闘争で決まります。
+本モデルでは、**抵抗応力** $\sigma_{resist}$ と**駆動圧** $\Delta P$ の比較で判定語を定めます。現実の通過可否は実験で未確認です。
 
 
 
@@ -283,18 +285,18 @@ $$\sigma_{resist} = (E + B)\cdot\frac{D-d}{D} \;+\; \frac{12\,\eta\,v\,D}{1000\,
 
 
 
-NRA-IDEは、入力パラメータ（細胞硬度・粘性・血流圧・細胞径・隙間径）をFPGAでリアルタイム処理し、薬剤量 $B$ と血流圧 $\Delta P$ の平面上に判定境界を描きます。
+NRA-IDEは、指定入力を参照モデルで計算し、硬化分 $B$（投与量ではない）と駆動圧 $\Delta P$ の平面上にモデル内の判定境界を描きます。
 
 
 
 | 領域 | 条件 | 意味 |
 |:---|:---|:---|
-| 🟩 BLOCKED | $\sigma_{resist} > \Delta P$ | 細胞は隙間を通過できない |
-| 🟥 PASSABLE | $\sigma_{resist} \le \Delta P$ | 細胞は変形通過しうる |
+| 🟩 BLOCKED | $\sigma_{resist} > \Delta P$ | モデル上の抵抗優位。現実の通過不能は未確認 |
+| 🟥 PASSABLE | $\sigma_{resist} \le \Delta P$ | モデル上の駆動圧優位。現実の通過は未確認 |
 
 
 
-描画される境界線は近似ではなく、**FPGA の判定境界そのもの**（同一の Q8.8 演算）です。
+描画されるのは参照モデルの判定境界であり、現実の生物学的境界ではありません。
 
 
 
@@ -319,6 +321,7 @@ NRA-IDEは、入力パラメータ（細胞硬度・粘性・血流圧・細胞�
 cd jp/NRA-IDE_Cancer_Treatment_Support_System/20_Software_Host
 
 pip install -r requirements.txt
+# 実機FPGA / UART を使う場合のみ: pip install -r requirements-hardware.txt
 
 
 
@@ -334,7 +337,7 @@ cd ../30_Test_Data && python run_validation.py
 
 
 
-# 臨床セッション（レポートとジャミングマップを出力）
+# 研究用シミュレーション（レポートとジャミングマップを出力。臨床使用不可）
 
 cd ../20_Software_Host
 
@@ -452,7 +455,7 @@ NRA-IDE_CancerTreatmentSupport_System/
 
 - **研究用であり、臨床用ではありません**
 
-- **医療機器ではありません**（薬機法上の医療機器・プログラム医療機器に該当しません）
+- **医療機器としての承認・認証・届出は取得していません**。薬機法上の該当性は実際の使用目的・標榜等に基づく個別判断を要します
 
 - **最終的な治療判断は資格のある医師が行う必要があります**
 

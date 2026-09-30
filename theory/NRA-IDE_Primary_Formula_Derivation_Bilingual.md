@@ -350,6 +350,8 @@ The reversible component is determined as $q_n=\sigma(o_n)-p_n$ , and $q_n\ge0$ 
 
 **One change, one allocation:** each observed physical change is allocated to **exactly one** of $a_n$ , $\Delta p_n$ , $\Delta\lambda_n$ . $\mathrm{ctx}_n$ is not an allocation target but information attached to the allocation. Which observation is allocated where is fixed in advance within $\mathsf{Alloc}$ (→ the prevention of double counting in [4]). A single event may contain several changes (the 15 mm example of [3]); even then, each change has exactly one allocation target. The constraint $C_n$ is not an allocation target. $C_n$ is a component of the observation $o_n$ and acts only as an argument of rules fixed before evaluation, such as $\sigma$ , $\mathsf{Alloc}$ , physical laws, and gauge functions. Its effect is allocated, change by change, to exactly one of $a_n$ , $\Delta p_n$ , $\Delta\lambda_n$ . The same factor (temperature and so on) may appear in both $C_n$ and $a_n$ ; since $C_n$ is not an allocation target, this is not double counting.
 
+Addition or removal of a structural element itself is not allocated to these three destinations. It updates the composition $\mathsf{Active}_n$ and is recorded as an event (Stage 3). If separate action, residual deviation, or degradation accompanies an addition or removal, each such change follows the one-change-one-allocation rule.
+
 ### P6　Monotonicity of the irreversible components (→[4] [7] [10])
 
 Within an evaluation, without exception,
@@ -1445,6 +1447,8 @@ $$
 を満たす。可逆成分は $q_n=\sigma(o_n)-p_n$ として定まり、 $q_n\ge0$ より $0\le p_n\le\delta_n$ である。モデルで $q_n$ を与える場合も、この整合を満たさなければならない。満たさないことは、 $\sigma$ か $\mathsf{Alloc}$ の宣言が対象に合っていないことの証拠である。一時的な可逆成分 $q^{\mathrm{temp}}_n$ （一時的に狭まった受け止め幅。段3）は、 $\sigma$ が条件の観測（温度など）から換算して $\delta_n$ に含め、 $\mathsf{Alloc}$ が $q_n$ に計上する。
 
 **一変化一計上**：観測された一つの物理的変化は、 $a_n$・$\Delta p_n$・$\Delta\lambda_n$ のうち**ちょうど一つ**に計上する。 $\mathrm{ctx}_n$ は計上先ではなく、計上に付随する情報である。どの観測をどれに計上するかは $\mathsf{Alloc}$ の中で事前に固定する（→【4】の二重計上防止）。一つの事象が複数の変化を含むことはある（【3】の15 mmの例）。その場合も、変化ごとに計上先は一つである。制約 $C_n$ は計上先にしない。 $C_n$ は観測 $o_n$ の成分であり、 $\sigma$ ・ $\mathsf{Alloc}$ ・物理法則・計器の関数など、評価前に固定した規則の引数としてだけ効く。その効果は、変化ごとに $a_n$ ・ $\Delta p_n$ ・ $\Delta\lambda_n$ のちょうど一つに計上する。同じ因子（温度など）が $C_n$ と $a_n$ の両方に現れることはあるが、 $C_n$ は計上先ではないので二重計上ではない。
+
+構造要素の付加・除去そのものは、この三つの計上先に含めない。構成 $\mathsf{Active}_n$ の更新として扱い、事象として記録する（段3）。付加・除去に伴う別個の作用・残留ズレ・劣化には、各変化に一変化一計上を適用する。
 
 ### P6　不可逆成分の単調性（→【4】【7】【10】）
 

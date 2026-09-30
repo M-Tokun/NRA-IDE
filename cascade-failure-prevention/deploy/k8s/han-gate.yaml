@@ -25,7 +25,7 @@
 #   小さな修正を素早く反映できる、運用上の工夫です。
 #
 # ★ 大切なお願い ★
-#   ④のコードは gate/han_gate_service.py と「まったく同じもの」です。
+#   ④の実行コードは gate/han_gate_service.py と同期します。
 #   どちらか一方を変えたら、必ずもう一方も更新してください。
 #   2か所あるのは「K8sの仕組み上の都合」であり、
 #   設計上は gate/han_gate_service.py が「唯一の正式版」です。
@@ -41,24 +41,23 @@ metadata:
 #
 # 【各パラメータの意味と調整の考え方】
 #
-# R_OP（判定の厳しさ）
-#   連鎖反応スコア R がこの値に達したら SILENCE になります。
+# CHAIN_SCORE_LIMIT（判定の厳しさ）
+#   非正典の連鎖予兆スコアがこの値に達したら SILENCE になります。
 #   低くすると「早めに止まる」= より安全。
 #   高くすると「少しくらいなら様子を見る」= 通信量重視。
 #   迷ったら 1.0 のままにしておきましょう。
 #
-# TAU_DEFAULT（吸収の厚さ・基底値）
-#   システムがどれくらいの圧力を吸収できるかの基準値です。
-#   高くすると「より重い症状が出るまで反応しない」= 安全方向。
-#   低くすると「ちょっとした変化でも SILENCE しやすい」= 敏感。
+# GAIN_BASE（スコア補助倍率の基底値）
+#   大きくするとスコアも大きくなり、より早く SILENCE します。
+#   リクエストからは変更できません。正典の吸収厚みτではありません。
 #
-# TAU_EMA_ALPHA（二重ゆらぎの感度）
+# GAIN_EMA_ALPHA（スコア補助倍率EMAの感度）
 #   0〜1 の間の数値。大きいほど「最近の変化を重視」します。
 #   0.3（デフォルト）= 適度にゆっくり反応する、安定重視の設定です。
 #   詳しくは docs/SPEC.md をご覧ください。
 #
-# TAU_AMPLIFY（τの最大増幅倍率）
-#   動的τがどこまで大きくなれるかの上限です。
+# GAIN_AMPLIFY_LIMIT（スコア補助倍率の最大増幅率）
+#   補助倍率がどこまで大きくなれるかの上限です。
 #   2.0 = 最大で基底値の 2 倍まで広がる、という意味です。
 #
 # HOLD_MS（SILENCE を維持する最短時間）
@@ -77,10 +76,10 @@ metadata:
   name: han-gate-config
   namespace: han
 data:
-  R_OP:           "1.0"
-  TAU_DEFAULT:    "1.5"
-  TAU_EMA_ALPHA:  "0.3"
-  TAU_AMPLIFY:    "2.0"
+  CHAIN_SCORE_LIMIT: "1.0"
+  GAIN_BASE: "1.5"
+  GAIN_EMA_ALPHA: "0.3"
+  GAIN_AMPLIFY_LIMIT: "2.0"
   HOLD_MS:        "2000"
   MAX_CACHE_SIZE: "5000"
 ---
@@ -173,52 +172,79 @@ data:
     #   リトライが少し増えただけ、キューが少し増えただけでは
     #   まだ連鎖崩壊の兆候とは言えません。
     #   「3つが同時に上昇している」ことが、連鎖崩壊特有のパターンです。
-    #   だから R の計算は「掛け算（乗算共起）」を使っています。
-    #   1つでも小さければ R は小さいまま、3つ揃って大きくなります。
+    #   だから非正典の連鎖予兆スコアは「掛け算（乗算共起）」を使っています。
+    #   1つでも小さければスコアは小さいまま、3つ揃って大きくなります。
     #
-    # 【二重ゆらぎ（動的τ）について】
+    # 【EMAによるスコア補助倍率について】
     #
-    #   従来の設計では τ（吸収の厚さ）は固定値でした。
-    #   固定値だと「急に山が尖る（R が急激に上がる）」問題がありました。
-    #   改良版では τ を「最近の状況の記憶（EMA）」に基づいて動かします。
-    #   圧力が上がり始めると τ も連動して膨らむので、
-    #   R が閾値に緩やかに近づき始めます（尖りが丸まります）。
+    #   テレメトリの共起値のEMAから補助倍率を計算します。
+    #   正典の R=δ/τ、吸収厚みτ、状態分類とは別の例示的な運用スコアです。
+    #   倍率と閾値の設定はサーバー側だけが保持します。
     # ─────────────────────────────────────────────────
 
     from __future__ import annotations
     from typing import Dict, Any
     from collections import OrderedDict
+    import math
     import os
     import time
     from flask import Flask, request, jsonify, make_response
 
     app = Flask(__name__)
 
-    # 設定値（すべて環境変数で上書きできます）
-    R_OP           = float(os.getenv("R_OP",           "1.0"))
-    TAU_DEFAULT    = float(os.getenv("TAU_DEFAULT",    "1.5"))
-    HOLD_MS        = int(os.getenv("HOLD_MS",          "2000"))
-    MAX_CACHE_SIZE = int(os.getenv("MAX_CACHE_SIZE",   "5000"))
-    TAU_EMA_ALPHA  = float(os.getenv("TAU_EMA_ALPHA",  "0.3"))
-    TAU_AMPLIFY    = float(os.getenv("TAU_AMPLIFY",    "2.0"))
+    # ============================================================
+    # Config (Fail-Closed) — 環境変数で上書き可能
+    # ============================================================
+    CHAIN_SCORE_LIMIT = float(os.getenv("CHAIN_SCORE_LIMIT", "1.0"))
+    GAIN_BASE         = float(os.getenv("GAIN_BASE", "1.5"))
+    HOLD_MS      = int(os.getenv("HOLD_MS",         "2000"))  # SILENCE保持時間(ms)
+    MAX_CACHE_SIZE = int(os.getenv("MAX_CACHE_SIZE", "5000")) # メモリリーク防止
 
-    # 内部状態
-    _ema_r:         Dict[str, float]        = {}
-    _silence_until: OrderedDict[str, float] = OrderedDict()
-    _metrics = {"PASS": 0, "SILENCE": 0, "FAIL_CLOSED": 0}
+    # 非正典スコアのEMA補助倍率
+    GAIN_EMA_ALPHA    = float(os.getenv("GAIN_EMA_ALPHA", "0.3"))
+    GAIN_AMPLIFY_LIMIT = float(os.getenv("GAIN_AMPLIFY_LIMIT", "2.0"))
 
-    def _update_ema(scope_key: str, r_raw: float) -> float:
-        alpha = TAU_EMA_ALPHA
-        prev  = _ema_r.get(scope_key, r_raw)
-        ema   = alpha * r_raw + (1.0 - alpha) * prev
-        _ema_r[scope_key] = ema
+    # ============================================================
+    # 状態: 共起値のEMA
+    # ============================================================
+    # スコープ別にEMAを保持する（スコープ間で影響しない）
+    _ema_cooccurrence: Dict[str, float] = {}
+
+    def _update_ema(scope_key: str, cooccurrence: float) -> float:
+        """
+        共起値のEMAを更新して返す。初回は現在値を使う。
+        """
+        alpha = GAIN_EMA_ALPHA
+        prev = _ema_cooccurrence.get(scope_key, cooccurrence)
+        ema = alpha * cooccurrence + (1.0 - alpha) * prev
+        _ema_cooccurrence[scope_key] = ema
         return ema
 
-    def _dynamic_tau(scope_key: str, r_raw: float, tau_base: float) -> float:
-        ema        = _update_ema(scope_key, r_raw)
-        multiplier = min(1.0 + ema, TAU_AMPLIFY)
-        return tau_base * multiplier
+    def _dynamic_gain(scope_key: str, cooccurrence: float, base_gain: float) -> float:
+        """
+        共起値のEMAで非正典スコアの補助倍率を調整する。
+        """
+        if not math.isfinite(GAIN_EMA_ALPHA) or not 0 < GAIN_EMA_ALPHA <= 1:
+            raise ValueError("invalid EMA coefficient")
+        if not math.isfinite(GAIN_AMPLIFY_LIMIT) or GAIN_AMPLIFY_LIMIT < 1:
+            raise ValueError("invalid gain amplification limit")
+        ema = _update_ema(scope_key, cooccurrence)
+        multiplier = min(1.0 + ema, GAIN_AMPLIFY_LIMIT)
+        return base_gain * multiplier
 
+    # ============================================================
+    # 状態: SILENCE Hold (LRU-like via OrderedDict)
+    # ============================================================
+    _silence_until: OrderedDict[str, float] = OrderedDict()
+
+    # ============================================================
+    # 状態: メトリクスカウンタ
+    # ============================================================
+    _metrics = {"PASS": 0, "SILENCE": 0, "FAIL_CLOSED": 0}
+
+    # ============================================================
+    # ヘルパー関数
+    # ============================================================
     def _scope_key(scope: Dict[str, Any]) -> str:
         return (
             f"svc={scope.get('service', '')}"
@@ -229,35 +255,82 @@ data:
     def _now() -> float:
         return time.time()
 
-    def compute_R(telemetry: Dict[str, float], tau: float, scope_key: str = "") -> float:
-        retry  = max(0.0, float(telemetry.get("retry_rate",       0.0)))
-        queue  = max(0.0, float(telemetry.get("queue_depth",      0.0)))
-        dep_to = max(0.0, float(telemetry.get("dep_timeout_rate", 0.0)))
-        r_raw  = (retry / 10.0) * (queue / 500.0) * (dep_to / 5.0)
-        tau_d  = _dynamic_tau(scope_key, r_raw, tau)
-        return r_raw * tau_d
+    # ============================================================
+    # 非正典の連鎖予兆スコア
+    # ============================================================
+    def _nonnegative_measurement(telemetry: Dict[str, float], name: str) -> float:
+        value = float(telemetry[name])
+        if not math.isfinite(value) or value < 0:
+            raise ValueError(f"invalid telemetry: {name}")
+        return value
 
-    def should_silence(scope_key: str, R: float) -> bool:
+
+    def compute_chain_score(
+        telemetry: Dict[str, float], base_gain: float, scope_key: str = ""
+    ) -> float:
+        """
+        テレメトリの共起値とEMA補助倍率から、非正典スコアを計算する。
+        正規化定数と閾値はこのゲートの例示設定で、領域根拠のある正規Rではない。
+        """
+        if not math.isfinite(base_gain) or base_gain <= 0:
+            raise ValueError("invalid base gain")
+        retry = _nonnegative_measurement(telemetry, "retry_rate")
+        queue = _nonnegative_measurement(telemetry, "queue_depth")
+        dep_to = _nonnegative_measurement(telemetry, "dep_timeout_rate")
+
+        cooccurrence = (retry / 10.0) * (queue / 500.0) * (dep_to / 5.0)
+        if not math.isfinite(cooccurrence):
+            raise ValueError("non-finite cooccurrence")
+
+        gain = _dynamic_gain(scope_key, cooccurrence, base_gain)
+        chain_score = cooccurrence * gain
+        if not math.isfinite(chain_score):
+            raise ValueError("non-finite chain score")
+        return chain_score
+
+    # ============================================================
+    # should_silence: SILENCE判定 + HOLDロジック
+    # ============================================================
+    def should_silence(scope_key: str, chain_score: float) -> bool:
         global _silence_until
+        if not math.isfinite(CHAIN_SCORE_LIMIT) or CHAIN_SCORE_LIMIT <= 0:
+            raise ValueError("invalid chain score limit")
+        if not math.isfinite(chain_score) or chain_score < 0:
+            raise ValueError("invalid chain score")
         now = _now()
+
+        # LRU: 最近参照されたキーを末尾へ
         if scope_key in _silence_until:
             _silence_until.move_to_end(scope_key)
+
+        # キャッシュ上限を超えたら古いエントリを削除
         while len(_silence_until) > MAX_CACHE_SIZE:
             _silence_until.popitem(last=False)
+
+        # HOLD中か確認
         until = _silence_until.get(scope_key, 0.0)
         if now < until:
             return True
-        if R >= R_OP:
+
+        # 閾値判定
+        if chain_score >= CHAIN_SCORE_LIMIT:
             _silence_until[scope_key] = now + (HOLD_MS / 1000.0)
             return True
+
         return False
 
+
+    # ============================================================
+    # エンドポイント
+    # ============================================================
     @app.get("/healthz")
     def healthz():
         return "OK", 200
 
+
     @app.get("/metrics")
     def metrics():
+        """Prometheus形式のシンプルメトリクス"""
         return (
             f"# HELP han_gate_decisions_total Total decisions made\n"
             f"# TYPE han_gate_decisions_total counter\n"
@@ -266,56 +339,70 @@ data:
             f'han_gate_decisions_total{{decision="FAIL_CLOSED"}} {_metrics["FAIL_CLOSED"]}\n'
         ), 200, {"Content-Type": "text/plain"}
 
+
     @app.post("/v1/decision")
     def decision():
         try:
-            data      = request.get_json(force=True, silent=True) or {}
-            scope     = data.get("scope")     or {}
+            data     = request.get_json(force=True, silent=True) or {}
+            scope    = data.get("scope")    or {}
             telemetry = data.get("telemetry") or {}
-            tau       = float(data.get("tau") or TAU_DEFAULT)
-            required  = ["retry_rate", "queue_depth", "dep_timeout_rate"]
-            if any(k not in telemetry for k in required):
-                _metrics["FAIL_CLOSED"] += 1
-                _metrics["SILENCE"]     += 1
-                return jsonify({"decision": "SILENCE", "R": 999.0,
-                                "reason": "missing telemetry (fail-closed)"}), 200
+            if "tau" in data or "base_gain" in data:
+                raise ValueError("request-controlled score gain is forbidden")
+
             scope_key = _scope_key(scope)
-            R = compute_R(telemetry, tau, scope_key)
-            if should_silence(scope_key, R):
+            chain_score = compute_chain_score(telemetry, GAIN_BASE, scope_key)
+
+            if should_silence(scope_key, chain_score):
                 _metrics["SILENCE"] += 1
-                return jsonify({"decision": "SILENCE", "R": R,
-                                "reason": "chain reaction detected or hold active"}), 200
+                return jsonify({
+                    "decision": "SILENCE",
+                    "chain_score": chain_score,
+                    "reason": "chain reaction detected or hold active"
+                }), 200
+
             _metrics["PASS"] += 1
-            return jsonify({"decision": "PASS", "R": R,
-                            "reason": "within safe envelope"}), 200
+            return jsonify({
+                "decision": "PASS",
+                "chain_score": chain_score,
+                "reason": "below local chain-score limit"
+            }), 200
+
         except Exception:
             _metrics["FAIL_CLOSED"] += 1
             _metrics["SILENCE"]     += 1
-            return jsonify({"decision": "SILENCE", "R": 999.9,
-                            "reason": "internal error (fail-closed)"}), 200
+            return jsonify({
+                "decision": "SILENCE",
+                "chain_score": None,
+                "reason": "invalid or missing input, or internal error (fail-closed)"
+            }), 200
+
 
     @app.post("/v1/nginx_auth")
     def nginx_auth():
         try:
-            retry  = float(request.headers.get("X-HAN-Retry-Rate",       "nan"))
-            queue  = float(request.headers.get("X-HAN-Queue-Depth",      "nan"))
-            dep_to = float(request.headers.get("X-HAN-Dep-Timeout-Rate", "nan"))
-            if any(x != x for x in [retry, queue, dep_to]):
-                raise ValueError("missing headers")
+            retry  = float(request.headers.get("X-HAN-Retry-Rate",        "nan"))
+            queue  = float(request.headers.get("X-HAN-Queue-Depth",       "nan"))
+            dep_to = float(request.headers.get("X-HAN-Dep-Timeout-Rate",  "nan"))
+
             scope_key = "nginx|default"
-            R = compute_R(
+            chain_score = compute_chain_score(
                 {"retry_rate": retry, "queue_depth": queue, "dep_timeout_rate": dep_to},
-                TAU_DEFAULT, scope_key,
+                GAIN_BASE,
+                scope_key,
             )
-            if should_silence(scope_key, R):
+
+            if should_silence(scope_key, chain_score):
                 _metrics["SILENCE"] += 1
                 return make_response("SILENCE", 403)
+
             _metrics["PASS"] += 1
             return make_response("PASS", 200)
+
         except Exception:
             _metrics["FAIL_CLOSED"] += 1
             _metrics["SILENCE"]     += 1
             return make_response("SILENCE", 403)
+
 
     if __name__ == "__main__":
         app.run(host="0.0.0.0", port=8080)

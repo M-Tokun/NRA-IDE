@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: HAN Gate Decision API
-  version: "1.1.0"
+  version: "2.0.0"
   description: |
     HAN Gate（NRA/IDE）の判定 API です。
     リクエストごとに PASS / SILENCE を返します。
@@ -10,6 +10,8 @@ info:
       1.0.0  2026-02-05: 初版
       1.1.0  2026-03-06: /metrics エンドポイント追加
                          DecisionRequest に tau パラメータを追加（二重ゆらぎ対応）
+      2.0.0  2026-09-30: 非正典の連鎖予兆スコアへ改名。リクエストの tau を廃止。
+                         応答の R を chain_score に変更。URL は据え置き。
 
 servers:
   - url: http://han-gate:8080
@@ -65,10 +67,10 @@ paths:
           1つだけ高くても反応しにくい設計です。
           これが「連鎖崩壊特有のパターン」だからです。
 
-        【tau パラメータについて】
-          省略すると環境変数 TAU_DEFAULT（初期値 1.5）が使われます。
-          大きくすると「より重症になるまで反応しない」= 安全方向。
-          小さくすると「軽い症状でも早めに反応する」= 敏感。
+        【判定値について】
+          乗算値は非正典の連鎖予兆スコアであり、正典の R=δ/τ ではありません。
+          補助倍率はサーバーの GAIN_BASE でのみ設定します。
+          リクエストに tau または base_gain がある場合は Fail-Closed で SILENCE します。
       requestBody:
         required: true
         content:
@@ -83,7 +85,6 @@ paths:
                 retry_rate: 15.0
                 queue_depth: 600
                 dep_timeout_rate: 8.0
-              tau: 1.5
       responses:
         "200":
           description: 判定結果（PASS または SILENCE）
@@ -96,14 +97,20 @@ paths:
                   summary: 正常通過の例
                   value:
                     decision: PASS
-                    R: 0.0036
-                    reason: within safe envelope
+                    chain_score: 0.000003000006
+                    reason: below local chain-score limit
                 silence_example:
                   summary: 遮断の例
                   value:
                     decision: SILENCE
-                    R: 8.64
+                    chain_score: 8.64
                     reason: chain reaction detected or hold active
+                fail_closed_example:
+                  summary: 入力不備時の例
+                  value:
+                    decision: SILENCE
+                    chain_score: null
+                    reason: invalid or missing input, or internal error (fail-closed)
 
   /v1/nginx_auth:
     post:
@@ -176,13 +183,6 @@ components:
           $ref: "#/components/schemas/Scope"
         telemetry:
           $ref: "#/components/schemas/Telemetry"
-        tau:
-          type: number
-          description: |
-            吸収厚みの上書き値（省略可能）。
-            省略時は環境変数 TAU_DEFAULT（初期値 1.5）が使われます。
-            二重ゆらぎ（動的τ）の基底値として使用されます。
-          default: 1.5
       required: [scope, telemetry]
 
     DecisionResponse:
@@ -193,12 +193,13 @@ components:
           type: string
           enum: [PASS, SILENCE]
           description: PASS = 通過を許可、SILENCE = 遮断
-        R:
+        chain_score:
           type: number
+          nullable: true
           description: |
-            連鎖反応スコア。R >= R_OP で SILENCE になります。
-            999.0 / 999.9 はテレメトリ欠損・内部エラー時の特殊値です。
+            非正典の連鎖予兆スコア。chain_score >= CHAIN_SCORE_LIMIT で SILENCE になります。
+            入力不備や内部エラーでは null を返し、SILENCE します。
         reason:
           type: string
           description: 判定理由の説明文
-      required: [decision, R]
+      required: [decision, chain_score]

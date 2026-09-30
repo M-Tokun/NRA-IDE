@@ -47,7 +47,9 @@ ERR_RANGE = 0x02        # 範囲外入力
 ERR_VISC0 = 0x03        # eta = 0         律環公理違反
 ERR_OVF = 0x04          # 演算オーバーフロー
 ERR_COMM = 0x05         # 通信異常（ホストのみ）
-ERR_UNSUPPORTED = 0x06  # 未実装の癌腫タイプ（ホストのみ）
+ERR_UNSUPPORTED = 0x06  # 未実装の癌腫タイプ（FPGA / ホスト）
+ERR_UNSUPPORTED_INPUT = 0x07  # 実機プロトコルで搬送できない入力（ホストのみ）
+ERR_DISCREPANCY = 0x08  # FPGA と参照実装の不一致（ホストのみ）
 
 # エラーコード名。レポート・可視化とも本辞書のみを参照し、独自に持たない。
 ERR_NAME = {
@@ -58,6 +60,8 @@ ERR_NAME = {
     ERR_OVF:         "ERR_OVERFLOW",
     ERR_COMM:        "ERR_COMM",
     ERR_UNSUPPORTED: "ERR_UNSUPPORTED",
+    ERR_UNSUPPORTED_INPUT: "ERR_UNSUPPORTED_INPUT",
+    ERR_DISCREPANCY: "ERR_DISCREPANCY",
 }
 
 # ── Phase 4 §1 入力範囲 (Q8.8) ─────────────────────────────────────────
@@ -129,7 +133,7 @@ def evaluate(params: Dict[str, float], cancer_type: str = "Type A") -> Dict:
 
     err = check_inputs(q)
     if err != ERR_NONE:
-        # Fail-Closed: 異常時は転移リスク側（PASSABLE）へ倒す
+        # エラー時の jammed=0 は有効な PASSABLE 判定ではない。
         return {'is_jammed': False, 'error_code': err}
 
     strain, sigma_v = fixed_terms(

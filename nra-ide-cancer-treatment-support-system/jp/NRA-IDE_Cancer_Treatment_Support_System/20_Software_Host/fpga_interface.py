@@ -4,7 +4,6 @@
 # Rev:  2.0 (2026-07-29) シミュレーション判定を参照実装へ接続
 # ═══════════════════════════════════════════════════════════════════════
 
-import serial
 import struct
 import time
 from typing import Dict, Optional
@@ -13,7 +12,9 @@ import nra_core_model as core
 
 class FPGAInterface:
     def __init__(self, port: str = "/dev/ttyUSB0", baudrate: int = 115200):
+        self.serial = None
         try:
+            import serial  # 実機通信時のみ必要。参照モデルには不要。
             self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=1.0)
             time.sleep(2.0) # FPGA Reset Grace Period
             print(f"[OK] FPGA Infrastructure Online: {port}")
@@ -33,6 +34,12 @@ class FPGAInterface:
             # シミュレーションモード: 参照実装（RTL のビット単位再現）で判定する。
             # 旧版は 0xFF を返していたため、FPGA 非接続では自己診断が必ず失敗した。
             return core.evaluate(p, c_type)
+
+        # 現行14バイトプロトコルは v を搬送せず、FPGA は常に 200 um/s を使う。
+        # 別の v を受け取ったまま送信すると、レポート・図と装置の条件が食い違う。
+        if core.to_q88(p.get('deform_velocity', core.DEFAULT_DEFORM_VELOCITY)) != \
+                core.to_q88(core.DEFAULT_DEFORM_VELOCITY):
+            return {'is_jammed': False, 'error_code': core.ERR_UNSUPPORTED_INPUT}
 
         # 1. Header selection based on Cancer Type
         header = b'\xA5' if is_type_a else b'\xA6'

@@ -178,7 +178,7 @@ module BioCalibrator_TypeA_Jamming (
         end else begin
             o_out_valid <= v4;
             if (err4 != ERR_NONE) begin
-                // Fail-Closed: 異常時は転移リスク側（PASSABLE）へ倒す
+                // エラー時の jammed=0 は有効な PASSABLE 判定ではない。
                 o_error_code <= err4;
                 o_is_jammed  <= 1'b0;
             end else if (overflow) begin

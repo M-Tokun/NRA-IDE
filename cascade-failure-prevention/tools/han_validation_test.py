@@ -28,18 +28,14 @@
 #   ⚠️  WARNING が出たら、期待した動作になっていないサインです。
 #   ❌  Error が出たら、ゲートに接続できていません。
 #
-# 【R の値について（動的τ版）】
+# 【現行の非正典スコアについて】
 #
-#   R = r_raw × τ_dynamic
-#     r_raw = (retry/10) × (queue/500) × (dep_to/5)
-#     τ_dynamic = τ_base × (1 + EMA(r_raw))  ← EMAは状態によって変わります
+#   chain_score = cooccurrence × dynamic_gain
+#     cooccurrence = (retry/10) × (queue/500) × (dep_to/5)
+#     dynamic_gain = GAIN_BASE × min(1 + EMA(cooccurrence), GAIN_AMPLIFY_LIMIT)
 #
-#   「なぜ静的計算式と値が違うの？」と思ったら、
-#   それは EMA（過去の状態の記憶）が影響しているためです。
-#   初回呼び出しでは EMA ≒ r_raw なので、
-#   τ_dynamic ≒ τ_base × (1 + r_raw) となります。
-#   2回目以降は EMA が蓄積されるため、同じテレメトリでも R が変わることがあります。
-#   これが「二重ゆらぎ」の意図した挙動です。
+#   EMAはスコアの補助倍率を変えるだけです。正典の R=δ/τ、τ、状態分類ではありません。
+#   同じテレメトリでも、スコープ別EMAの履歴によってスコアが変わります。
 
 import requests
 import time
@@ -48,19 +44,18 @@ GATE_URL = "http://localhost:8080/v1/decision"  # 実際の環境に合わせて
 
 
 def test_decision(label: str, telemetry: dict, expected: str | None = None,
-                  tau: float = 1.5) -> dict | None:
+                  scope_name: str = "validation-test") -> dict | None:
     """
     1件の判定リクエストを送って結果を表示する共通関数。
 
     label    : テストの説明文
     telemetry: 送るテレメトリデータ
     expected : 期待する判定（"PASS" または "SILENCE"）
-    tau      : 吸収厚み（省略時 1.5）
+    scope_name: EMAとHOLDを区別するサービス名
     """
     payload = {
-        "scope":     {"service": "validation-test", "route": "/test"},
+        "scope":     {"service": scope_name, "route": "/test"},
         "telemetry": telemetry,
-        "tau":       tau,
     }
 
     print(f"\n--- {label} ---")
@@ -71,8 +66,9 @@ def test_decision(label: str, telemetry: dict, expected: str | None = None,
         result   = resp.json()
 
         decision = result.get("decision")
-        R        = result.get("R", 0)
-        print(f"  判定: {decision}  (R={R:.6f})  応答時間: {duration:.1f}ms")
+        chain_score = result.get("chain_score")
+        score_text = "null" if chain_score is None else f"{chain_score:.6f}"
+        print(f"  判定: {decision}  (chain_score={score_text})  応答時間: {duration:.1f}ms")
         print(f"  理由: {result.get('reason', '')}")
 
         if expected and decision != expected:
@@ -93,10 +89,10 @@ def test_decision(label: str, telemetry: dict, expected: str | None = None,
 #   リトライも、キューも、タイムアウトも小さい。
 #   3指標が全て小さいので乗算結果は非常に小さく、PASS になるはずです。
 #
-# 【計算の目安（初回呼び出し時）】
-#   r_raw = (0.1/10) × (5/500) × (0.1/5) = 0.000002
-#   τ_dynamic ≈ 1.5 × (1 + 0.000002) ≈ 1.500003
-#   R ≈ 0.000003  → R_OP(1.0) より遥かに小さい → PASS
+# 【計算の目安（このスコープで初回呼び出し時）】
+#   cooccurrence = (0.1/10) × (5/500) × (0.1/5) = 0.000002
+#   dynamic_gain ≈ 1.5 × (1 + 0.000002) ≈ 1.500003
+#   chain_score ≈ 0.000003  → CHAIN_SCORE_LIMIT(1.0) 未満 → PASS
 print("\n" + "="*50)
 print("【テスト 1】正常系 — 低負荷時は PASS になるか")
 print("="*50)
@@ -127,18 +123,17 @@ test_decision(
 #
 # 【狙い】
 #   リトライ・キュー・タイムアウトが同時に高い値になると
-#   R が R_OP(1.0) を超えて SILENCE になるはずです。
+#   chain_score が CHAIN_SCORE_LIMIT(1.0) 以上で SILENCE になるはずです。
 #
-# 【計算の目安（初回呼び出し時）】
-#   r_raw = (15/10) × (600/500) × (8/5)
+# 【計算の目安（このスコープで初回呼び出し時）】
+#   cooccurrence = (15/10) × (600/500) × (8/5)
 #         = 1.5 × 1.2 × 1.6 = 2.88
-#   EMA(初回) ≈ r_raw = 2.88
-#   τ_dynamic = 1.5 × min(1 + 2.88, 2.0) = 1.5 × 2.0 = 3.0  ← TAU_AMPLIFY で上限
-#   R = 2.88 × 3.0 = 8.64  → R_OP(1.0) を大きく超える → SILENCE
+#   既存EMAがあるため、このスクリプトの実測スコアは 8.64 とは限りません。
+#   EMAは前回の低負荷 0.000002 から更新され、約 0.8640014。
+#   dynamic_gain ≈ 1.5 × (1 + 0.8640014) ≈ 2.7960021
+#   chain_score ≈ 2.88 × 2.7960021 ≈ 8.052486  → SILENCE
 #
-#   ※ TAU_AMPLIFY=2.0 が上限として機能しているのがわかります。
-#   ※ 静的τ版の R=4.32 より大きくなっています。
-#      これは動的τが「危険な状況をより早く捉える」ように機能しているためです。
+#   ※ 独立した新規スコープで高負荷を初回入力すると 8.64 となります。
 print("\n" + "="*50)
 print("【テスト 3】連鎖反応 — 3指標が同時に高いと SILENCE になるか")
 print("="*50)
@@ -170,36 +165,41 @@ test_decision(
 )
 
 
-# テスト 5: 二重ゆらぎ（EMA）の蓄積効果
+# テスト 5: スコア補助倍率（EMA）の蓄積効果
 #
 # 【狙い】
 #   単独では SILENCE にならない「中程度の負荷」を複数回送り続けると、
-#   EMA が蓄積されて τ が大きくなり、徐々に R が上昇していくことを確認します。
+#   専用スコープを低負荷で初期化してから中程度の負荷を反復します。
+#   EMAとスコアが上昇することを確認します。
 #
 #   これが「山の尖りを丸める」効果です。
 #   急な尖りではなく、じわじわと閾値に近づく挙動になります。
 #
 #   【注意】
-#     このテストは HOLD 期間（2秒）が明けてから実行する必要があります。
-#     スクリプトは 3 秒待機します。
+#     専用スコープを使うため、先のテストのHOLDの影響は受けません。
 print("\n" + "="*50)
-print("【テスト 5】二重ゆらぎ — 中程度の負荷が続くと R が上昇していくか")
+print("【テスト 5】補助倍率 — 中程度の負荷が続くとスコアが変わるか")
 print("="*50)
-print("  HOLD 期間（2秒）が明けるのを待ちます...")
-time.sleep(3)
+test_decision(
+    "EMA初期化用の低負荷",
+    {"retry_rate": 0.1, "queue_depth": 5, "dep_timeout_rate": 0.1},
+    expected="PASS",
+    scope_name="validation-ema-test",
+)
 
-print("  同じ中程度テレメトリを 5 回送ります。R の変化を観察してください。")
-print("  EMA が蓄積されるにつれて R が上昇するはずです。\n")
+print("  同じ中程度テレメトリを 5 回送ります。スコアの変化を観察してください。")
+print("  EMA が蓄積されるにつれて補助倍率が変化します。\n")
 
 mid_telemetry = {"retry_rate": 5.0, "queue_depth": 200, "dep_timeout_rate": 3.0}
-# r_raw = (5/10)×(200/500)×(3/5) = 0.5×0.4×0.6 = 0.12
-# 静的τ版: R = 0.12 × 1.5 = 0.18（PASS のまま）
-# 動的τ版: EMA が蓄積されると τ が膨らみ R が上昇していく
+# cooccurrence = (5/10)×(200/500)×(3/5) = 0.5×0.4×0.6 = 0.12
+# 固定倍率版: chain_score = 0.12 × 1.5 = 0.18（PASS のまま）
+# 低負荷で初期化した同一スコープのEMAが 0.12 に近づき、スコアが上昇する
 
 for i in range(1, 6):
     result = test_decision(
         f"中程度負荷 ({i}回目)",
         mid_telemetry,
+        scope_name="validation-ema-test",
     )
     time.sleep(0.2)
 

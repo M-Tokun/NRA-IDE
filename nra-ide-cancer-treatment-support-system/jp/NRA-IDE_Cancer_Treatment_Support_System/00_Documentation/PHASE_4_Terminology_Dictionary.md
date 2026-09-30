@@ -74,6 +74,8 @@
 | `0x04` | ERR_OVERFLOW | 演算オーバーフロー | FPGA | システム点検 |
 | `0x05` | ERR_COMM | 3回再送後も応答不正 | Host のみ | 結線・電源点検 |
 | `0x06` | ERR_UNSUPPORTED | 未実装の癌腫タイプ（Type B） | FPGA / Host | Type A で再評価 |
+| `0x07` | ERR_UNSUPPORTED_INPUT | 現行FPGA通信で搬送できない変形速度 | Host のみ | 入力を却下し、プロトコルを確認 |
+| `0x08` | ERR_DISCREPANCY | FPGA と参照実装の結果不一致 | Host のみ | 判定を無効化し、原因調査 |
 
 ※ `0x04 ERR_OVERFLOW` について: Phase 4 の有効入力範囲内では理論最大でも
 σ_total ≈ 5200（20.3 kPa）であり、16bit Q8.8（上限65535）を大きく下回るため、
@@ -122,7 +124,7 @@ $\eta = 0$ は範囲外（0.01 未満）でもあるが、律環公理の明示�
 
 | 語 | 意味 | 使用箇所 |
 |:---|:---|:---|
-| `BLOCKED` | 抵抗応力 > 駆動圧。細胞は隙間を通過できない | FPGA 出力 `o_is_jammed = 1` |
+| `BLOCKED` | モデル上、抵抗応力 > 駆動圧。現実の通過不能は未確認 | FPGA 出力 `o_is_jammed = 1` |
 | `PASSABLE` | 抵抗応力 ≤ 駆動圧。細胞は変形通過しうる | FPGA 出力 `o_is_jammed = 0` |
 
 

@@ -110,11 +110,11 @@ All demos run directly in a browser. No installation is required.
 
 | # | File | Content |
 |---|---------|------|
-| 07 | [07_HAN_gate_live_EN.html](./07_HAN_gate_live_EN.html) | **Live simulation of cascade failure and HAN Gate SILENCE activation.** As load spikes propagate, the chain-reaction score R rises in real time. When R crosses the operational boundary, the screen flashes red and SILENCE is declared. |
+| 07 | [07_HAN_gate_live_EN.html](./07_HAN_gate_live_EN.html) | **Live simulation of cascade failure and HAN Gate SILENCE activation.** The non-canonical chain-warning score rises with the load spike; SILENCE starts when it reaches the local score limit. This is not canonical R = δ/τ. |
 
 > **Why this demo is different:**  
 
-> The waveform is not a static graph. It behaves like a real cascade failure: slow at first, then suddenly crossing the boundary. It also visualizes the dual-fluctuation structure, where the τ line begins to expand before the R peak becomes obvious.
+> The waveform is not a static graph. The orange line shows an EMA-based score gain, not canonical absorption thickness τ. The illustrative simulation uses different normalization and EMA inputs from the deployed HAN Gate service.
 
 ---
 

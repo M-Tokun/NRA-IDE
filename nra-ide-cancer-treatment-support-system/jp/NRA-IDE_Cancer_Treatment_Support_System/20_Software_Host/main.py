@@ -40,7 +40,7 @@ class NRA_IDEMaster:
         自己診断（Self-Diagnostic）モード
         Phase 30 の期待値を用いて演算回路の健全性を検証する
         """
-        print("--- [DIAGNOSTIC] Starting Hardware Integrity Check ---")
+        print("--- [DIAGNOSTIC] Starting Backend Test-Case Check ---")
 
         # 検証用ゴールデン・テストケース (TC001: 正常, TC004: 異常系)
         test_cases = [
@@ -69,10 +69,13 @@ class NRA_IDEMaster:
                 print("[OK]")
             else:
                 print(f"[FAIL] (Actual: 0x{actual:02X}, Expected: 0x{tc['expected']:02X})")
-                print("[FATAL] Ritsukan Axiom compromised. System Locking Down.")
+                print("[FATAL] Backend test-case mismatch. Session blocked.")
                 return False
 
-        print("--- [DIAGNOSTIC] Hardware Integrity Verified. System Ready. ---\n")
+        if self.fpga.serial:
+            print("--- [DIAGNOSTIC] Hardware Protocol Cases Passed. ---\n")
+        else:
+            print("--- [DIAGNOSTIC] Reference Model Cases Passed; FPGA NOT TESTED. ---\n")
         return True
 
     def run_clinical_session(self, data_path: str, out_dir: str) -> bool:
@@ -113,22 +116,39 @@ class NRA_IDEMaster:
 
         # 3. 判定（FPGA、未接続時は参照実装）
         result = self.fpga.send_query(data, c_type)
+        source = self._source()
+        if result['error_code'] == core.ERR_UNSUPPORTED_INPUT:
+            source = "Host protocol guard (FPGA query not sent)"
+        elif self.fpga.serial and result['error_code'] != core.ERR_COMM:
+            ref = core.evaluate(data, c_type)
+            if (result['is_jammed'], result['error_code']) != \
+                    (ref['is_jammed'], ref['error_code']):
+                result = {
+                    'is_jammed': False,
+                    'error_code': core.ERR_DISCREPANCY,
+                    'fpga_result': result,
+                    'reference_result': ref,
+                }
+                source = "FPGA / reference mismatch (invalidated)"
         judgement = ("INVALID" if result['error_code'] != core.ERR_NONE
                      else ("BLOCKED" if result['is_jammed'] else "PASSABLE"))
         print(f"  Judgement : {judgement} "
-              f"(error 0x{result['error_code']:02X}, source: {self._source()})")
+              f"(error 0x{result['error_code']:02X}, source: {source})")
 
         # 4. レポート生成
-        report = self.generator.generate(data, result, source=self._source())
+        report = self.generator.generate(data, result, source=source)
         print()
         print(report)
         self.generator.save(report, base + ".txt")
 
         # 5. ジャミングマップ生成
-        try:
-            self.visualizer.generate_map(data, base + ".png")
-        except Exception as e:
-            print(f"[WARN] Map generation skipped: {e}")
+        if result['error_code'] == core.ERR_NONE:
+            try:
+                self.visualizer.generate_map(data, base + ".png")
+            except Exception as e:
+                print(f"[WARN] Map generation skipped: {e}")
+        else:
+            print("[WARN] Map generation skipped: judgement INVALID")
 
         return result['error_code'] == core.ERR_NONE
 

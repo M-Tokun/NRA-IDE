@@ -47,6 +47,8 @@
 cd 20_Software_Host
 
 pip install -r requirements.txt
+# 実機FPGA / UART を使う場合のみ
+pip install -r requirements-hardware.txt
 
 ```
 

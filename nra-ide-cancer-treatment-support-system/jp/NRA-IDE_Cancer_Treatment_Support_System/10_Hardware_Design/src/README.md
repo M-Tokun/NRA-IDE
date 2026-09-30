@@ -51,7 +51,7 @@ sigma_el + sigma_v > dP   =>   BLOCKED
 * 除算器を持たず、定数ROM（`1/D` を Q0.16、`0.012/d^2` を Q0.24）で逆数を与える。
 * 全段リセット同期。Stage 1 で全入力を同時にラッチする。
 * エラーは `0x03`（粘性ゼロ）→ `0x02`（範囲外）→ `0x01`（幾何）の順に評価する。
-* 異常時は `o_is_jammed = 0`（PASSABLE）へ倒す。転移リスクが有る側が安全側である。
+* 異常時はエラーを出し、`o_is_jammed = 0` は有効な `PASSABLE` 判定と解釈しない。ホストは `INVALID` として扱う。
 
 詳細は `00_Documentation/PHASE_6_FPGA_Spec.md` を参照。
 

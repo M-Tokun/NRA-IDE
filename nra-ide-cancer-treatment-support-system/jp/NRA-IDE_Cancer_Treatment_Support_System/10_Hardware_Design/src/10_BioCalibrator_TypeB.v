@@ -54,7 +54,7 @@ module BioCalibrator_TypeB_Collective (
         end else begin
             v_pipe      <= {v_pipe[3:0], i_in_valid};
             o_out_valid <= v_pipe[4];
-            // Fail-Closed: 判定せず、転移リスク側（PASSABLE）へ倒す
+            // 判定しない。エラー時の jammed=0 は有効な PASSABLE 判定ではない。
             o_is_jammed <= 1'b0;
             o_error_code<= ERR_UNSUPPORTED;
         end

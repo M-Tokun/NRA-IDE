@@ -44,7 +44,7 @@ If any nuance differences arise from translation, the Japanese version (`README_
 
 
 
-**NRA-IDE** (Nomological Ring Axioms - Intensional Dynamics Engine) is a research-purpose computation engine that analyzes the physical properties of cancer cells and deterministically evaluates metastasis risk.
+**NRA-IDE** (Nomological Ring Axioms - Intensional Dynamics Engine) is a research-purpose computation engine that returns a deterministic, unvalidated model result for single-cell passage through a specified constriction. It does not evaluate a patient's metastasis risk.
 
 
 
@@ -78,13 +78,15 @@ The system answers exactly one question:
 
 
 
-> **Can a cancer cell pass through a gap (pore) in the vascular endothelium?**
+> **Under the specified inputs, which side of the model's single-cell passage boundary is the case on?**
+
+The result is a calculation within an experimentally unvalidated model, not an observed passage event or a prediction of metastasis in a patient.
 
 
 
 | Question | This system |
 |:---|:---|
-| Can the cancer cell escape through the vessel gap? | **Judged** |
+| Which side of the modeled passage boundary is the case on? | **Calculated within the model** |
 | Can the drug penetrate the tumor interstitium? | **Not judged** — see §5, motivation only |
 
 
@@ -99,12 +101,12 @@ Drug penetration is fluid transport through a porous medium (Darcy flow, diffusi
 
 | Output | Physical meaning |
 |:---|:---|
-| `BLOCKED` | Resisting stress exceeds driving pressure; the cell cannot pass |
-| `PASSABLE` | The cell can deform and pass through (escape route is open) |
+| `BLOCKED` | Within the model, resisting stress exceeds driving pressure; actual passage has not been established |
+| `PASSABLE` | Within the model, resisting stress does not exceed driving pressure; actual passage has not been established |
 
 
 
-**The words `SAFE` and `DANGER` are not used.** "The cell is physically contained" and "it is safe to administer treatment" are different propositions. Collapsing them into one word turns a computation into a treatment authorization, violating the Gate Axiom.
+**The words `SAFE` and `DANGER` are not used.** "Model resistance exceeds driving pressure" and "it is safe to administer treatment" are different propositions. Collapsing them into one word turns a computation into a treatment authorization, violating the Gate Axiom.
 
 
 
@@ -130,7 +132,7 @@ Drug penetration is fluid transport through a porous medium (Darcy flow, diffusi
 
 - The system **fails to the safe side** and issues an **Error warning**
 
-- Here the safe side means **assuming metastasis risk exists** (`PASSABLE`)
+- The safe handling is **INVALID with no passage classification**: risk is not ruled out, and no treatment guidance is issued. `o_is_jammed = 0` accompanied by an error code is not a valid `PASSABLE` result.
 
 
 
@@ -194,7 +196,7 @@ Drug penetration is fluid transport through a porous medium (Darcy flow, diffusi
 
 
 
-The decision logic in `20_Software_Host/nra_core_model.py` (reference model) and `10_Hardware_Design/src/10_BioCalibrator_TypeA.v` (FPGA) are **bit-identical**. The visualizer derives its boundary from that same reference model and holds no approximation of its own.
+The reference model reproduces the Type A Q8.8 computation used by the RTL. The visualizer uses the reference model; an FPGA query uses a fixed deformation velocity of 200 μm/s, and any other supplied velocity is rejected before transmission. Matching test cases do not establish experimental validity.
 
 
 
@@ -273,12 +275,12 @@ Input parameters are processed in Q8.8 fixed point, and the decision boundary is
 
 | Zone | Condition | Meaning |
 |:---|:---|:---|
-| 🟩 BLOCKED | $\sigma_{resist} > \Delta P$ | The cell cannot pass through the gap |
-| 🟥 PASSABLE | $\sigma_{resist} \le \Delta P$ | The cell may deform and pass |
+| 🟩 BLOCKED | $\sigma_{resist} > \Delta P$ | Model resistance exceeds pressure; actual passage is unverified |
+| 🟥 PASSABLE | $\sigma_{resist} \le \Delta P$ | Model pressure is at least resistance; actual passage is unverified |
 
 
 
-The plotted boundary is not an approximation — it is **the FPGA decision boundary itself**, computed with identical Q8.8 arithmetic.
+The plotted boundary is the reference-model boundary, not an observed biological boundary. It must not be identified with an FPGA result when the inputs or validity checks differ.
 
 
 
@@ -299,6 +301,7 @@ The plotted boundary is not an approximation — it is **the FPGA decision bound
 cd jp/NRA-IDE_Cancer_Treatment_Support_System/20_Software_Host
 
 pip install -r requirements.txt
+# Physical FPGA / UART only: pip install -r requirements-hardware.txt
 
 
 
@@ -314,7 +317,7 @@ cd ../30_Test_Data && python run_validation.py
 
 
 
-# Clinical session (emits report and jamming map)
+# Research simulation session (emits report and jamming map; not for clinical use)
 
 cd ../20_Software_Host
 
@@ -418,7 +421,7 @@ NRA-IDE_CancerTreatmentSupport_System/
 
 - **For research use, not clinical use**
 
-- **Not a medical device** under Japanese pharmaceutical and medical device law
+- **No medical-device approval, certification, or notification has been obtained**; applicability under Japanese law requires a case-specific assessment of intended use and claims
 
 - **Final treatment decisions must be made by qualified physicians**
 

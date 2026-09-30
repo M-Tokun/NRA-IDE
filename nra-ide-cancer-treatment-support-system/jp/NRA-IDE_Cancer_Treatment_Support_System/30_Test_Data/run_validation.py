@@ -7,14 +7,15 @@
 import csv
 import json
 import sys
-import os
+from pathlib import Path
 
 # Windows(cp932)コンソールでの UnicodeEncodeError を防ぐ
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(errors="replace")
     sys.stderr.reconfigure(errors="replace")
 
-sys.path.append('../20_Software_Host')
+BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR.parent / '20_Software_Host'))
 from fpga_interface import FPGAInterface
 
 def run_automated_test():
@@ -22,23 +23,24 @@ def run_automated_test():
 
     # 1. Load Expected Oracle
     try:
-        with open('expected_results.json', 'r', encoding='utf-8') as f:
+        with open(BASE_DIR / 'expected_results.json', 'r', encoding='utf-8') as f:
             oracle = json.load(f)['test_case_expectations']
     except Exception as e:
         print(f"[ERR] Oracle Load Error: {e}")
-        return
+        return False
 
     # 2. Initialize Interface
     fpga = FPGAInterface()
 
     # 3. Process CSV Test Cases
-    results = []
+    tested_count = 0
     passed_count = 0
 
     # utf-8-sig: CSV に UTF-8 BOM があり、utf-8 だと先頭列名が '\uFEFFtest_id' になる
-    with open('validation_test_cases.csv', 'r', encoding='utf-8-sig') as f:
+    with open(BASE_DIR / 'validation_test_cases.csv', 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         for row in reader:
+            tested_count += 1
             tid = row['test_id']
             print(f"Testing {tid}: {row['note']}...", end=' ')
 
@@ -67,11 +69,13 @@ def run_automated_test():
                 print(f"[FAIL] (Actual: 0x{actual_hex:02X}, Expected: 0x{expected_hex:02X})")
 
     # 4. Final Summary
-    print(f"\nSummary: {passed_count} / {len(oracle)} cases passed.")
-    if passed_count == len(oracle):
-        print("[OK] SYSTEM INTEGRITY VERIFIED (Ritsukan Level 1)")
+    print(f"\nSummary: {passed_count} / {tested_count} cases passed.")
+    if tested_count > 0 and passed_count == tested_count == len(oracle):
+        print("[OK] Tested backend matches all listed expectations; model validity not established")
+        return True
     else:
-        print("[WARN] SYSTEM INTEGRITY COMPROMISED")
+        print("[WARN] Validation failed or CSV/oracle case counts differ")
+        return False
 
 if __name__ == "__main__":
-    run_automated_test()
+    sys.exit(0 if run_automated_test() else 1)
