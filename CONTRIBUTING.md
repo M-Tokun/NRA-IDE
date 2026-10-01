@@ -71,6 +71,10 @@ git config core.hooksPath .githooks
 
 The hook depends on `pwsh` (PowerShell 7+) being on `PATH`, and on `unicode_gate_policy.json` and `unicode_gate_baseline.json` existing at the repository root — both are tracked files, not local state. `unicode_gate_baseline.json` records exact, hash-pinned exceptions (see `scripts/unicode_review.py`); a missing policy file fails the gate closed, and a missing baseline file is treated as "no exceptions yet" rather than an error.
 
+Fetch the target remote immediately before reviewing a push. Existing remote branches are accepted only for fast-forward updates. Remote ref deletion, non-fast-forward updates, new tags, and other new non-branch refs are blocked by default.
+
+A new pull-request branch is allowed only when the hook can resolve the fetched remote default branch and compute a merge base with the local commit. The Malware / Unicode Gate scans the complete `merge-base..local_oid` range. If the remote default branch or merge base cannot be established, the push fails closed. Do not use `--no-verify` to bypass this result.
+
 To review and update Unicode findings, use `scripts/unicode_review.py` (`scan`, `decide`, `apply`, `baseline`, `restore` subcommands). Never approve a finding without confirming the file hash, path, and codepoint match what was actually scanned.
 
 Known limitation: at push time, `scripts/malware_gate.py` materializes outgoing blobs under content-addressed temporary filenames before `unicode_gate.py` scans them, so the `PATH_*` rules (mixed-script or control characters in a real repository path) are not meaningfully evaluated against the pushed paths in that flow. Run `python scripts/unicode_gate.py --all` periodically (or in CI) to cover path-based checks against real tracked paths.

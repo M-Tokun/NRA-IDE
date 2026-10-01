@@ -79,8 +79,9 @@ def command_reads_agents_md(command_value: str) -> bool:
 
 
 REASON_MESSAGE = (
-    "AGENTS.mdをまだ読んでいません。先にリポジトリルートの AGENTS.md を"
-    "読んでから再試行してください（AGENTS.md 第1章・第11章参照）。"
+    "AGENTS.mdのSessionStart読込を確認できません。現在の操作を停止し、"
+    "Codexのproject hookが信頼済みで有効か確認してください"
+    "（AGENTS.md 第1章・第11章参照）。"
 )
 
 MISSING_REASON_MESSAGE = (
@@ -89,7 +90,22 @@ MISSING_REASON_MESSAGE = (
     "（ブートストラップ手順 ステップ4）。"
 )
 
+INVALID_PAYLOAD_MESSAGE = (
+    "Codex hook入力を検証できません。未確認状態を許可せず、現在の操作を停止します。"
+)
+
 AGENTS_MD_PATH = _repo_path("AGENTS.md")
+
+
+def read_agents_md() -> str:
+    """AGENTS.md全文をUTF-8で読み、空または読取不能なら例外にする。"""
+    if not os.path.isfile(AGENTS_MD_PATH):
+        raise FileNotFoundError(AGENTS_MD_PATH)
+    with open(AGENTS_MD_PATH, "r", encoding="utf-8") as f:
+        content = f.read()
+    if not content.strip():
+        raise ValueError("AGENTS.md is empty")
+    return content
 
 
 def agents_md_status() -> str:
@@ -99,13 +115,10 @@ def agents_md_status() -> str:
     空である場合。guard側はこの2つを「まだ読んでいない」（is_markedがFalse）
     とは区別して扱う。
     """
-    if not os.path.isfile(AGENTS_MD_PATH):
-        return "missing"
     try:
-        with open(AGENTS_MD_PATH, "r", encoding="utf-8") as f:
-            content = f.read()
-    except OSError:
-        return "unreadable"
-    if not content.strip():
+        read_agents_md()
+    except FileNotFoundError:
+        return "missing"
+    except (OSError, UnicodeError, ValueError):
         return "unreadable"
     return "ok"

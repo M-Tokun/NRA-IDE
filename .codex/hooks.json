@@ -1,13 +1,16 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "SessionStart": [
       {
-        "matcher": "Bash|apply_patch|Edit|Write|read_file",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
-            "command": "python skills/agents-md-guard/codex_mark.py",
-            "timeout": 10
+            "command": "python3 \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_session_start.py\"",
+            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python (Join-Path $root 'skills/agents-md-guard/codex_session_start.py')\"",
+            "timeout": 10,
+            "statusMessage": "Loading AGENTS.md",
+            "additionalContextLimit": 12000
           }
         ]
       }
@@ -18,7 +21,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python skills/agents-md-guard/codex_guard.py",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_guard.py\"",
+            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python (Join-Path $root 'skills/agents-md-guard/codex_guard.py')\"",
             "timeout": 10
           }
         ]

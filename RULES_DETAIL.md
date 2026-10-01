@@ -49,17 +49,27 @@ Git操作は次の順で進める。
 5. cached差分と対象ファイル一覧を確認する。
 6. 内容に対応したcommitメッセージを決める。
 7. commitする。
-8. 現在branch、upstream、remoteを確認する。
-9. remoteへ送信される全コミットを列挙する。
-10. exact remote/branchと送信コミットを提示してpush確認を得る。
-11. 通常の非force pushを実行する。
-12. remote追跡状態を確認する。
+8. exact remoteとbase branchを確定し、対象remoteをfresh fetchする。
+9. 現在branch、upstream、remote、HEADのcommit IDを確認する。
+10. incoming/outgoingの件数と両方向の全コミットを列挙する。
+11. incomingが存在する場合は停止し、自動でmerge、rebase、cherry-pickしない。
+12. exact remote/branch、HEAD、送信コミットを提示してpush確認を得る。
+13. 通常の非force pushを実行する。
+14. 対象remoteを再fetchし、localとremoteのcommit IDおよびahead/behindを確認する。
 
-push前には、原則として次を確認する。
+既存remote branchへのpush前には、原則として次を確認する。
 
 ```text
-git log --oneline <remote>/<branch>..<branch>
+git fetch <remote> <branch>
+git rev-list --left-right --count <remote>/<branch>...HEAD
+git log --oneline <remote>/<branch>..HEAD
+git log --oneline HEAD..<remote>/<branch>
+git diff --stat <remote>/<branch>..HEAD
 ```
+
+新規PR branchでは、fresh fetchしたremote既定branchとのmerge-baseを確定し、`merge-base..HEAD`を送信範囲として同じ確認を行う。merge-baseを確定できない場合はpushしない。
+
+commit作成前または上記確認前の包括的なpush依頼は、最終push確認を代替しない。
 
 pushはファイル単位ではなくコミット単位で行われる。ファイル数によってpushを分割してはならない。
 
@@ -67,7 +77,9 @@ pushはファイル単位ではなくコミット単位で行われる。ファ�
 
 その場合は、remote側の基点から専用branchを作成し、今回必要なコミットだけをcherry-pickして検証後にpushする。
 
-force-push、rebase、filter-repo、履歴削除は、利用者が対象範囲と目的を個別に明示した場合に限る。
+AIの通常push経路では、force-push、`--force-with-lease`、先頭`+`付きrefspec、non-fast-forward更新、remote ref削除を行わない。履歴改変が必要な場合は通常pushから分離し、対象OIDと影響を提示して利用者管理の手順へ返す。rebase、filter-repo、履歴削除も、利用者が対象範囲と目的を個別に明示した場合に限る。
+
+push後は対象remoteを再fetchし、対象remote branchとlocal HEADのcommit IDが一致し、`git rev-list --left-right --count <remote>/<branch>...HEAD`が`0 0`であることを成功条件とする。
 
 ## 4. 秘密情報
 

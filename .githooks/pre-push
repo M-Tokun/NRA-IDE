@@ -19,16 +19,11 @@ cd -- "$repository_root" || {
     exit 2
 }
 
-while IFS=' ' read -r local_ref local_oid remote_ref remote_oid
-do
-    if is_zero_oid "$local_oid"; then
-        continue
-    fi
+remote_name=${1:-}
 
-    if is_zero_oid "$remote_oid"; then
-        echo "pre-push gate: new remote refs require an explicitly reviewed base" >&2
-        exit 2
-    fi
+run_malware_gate() {
+    base_oid=$1
+    head_oid=$2
 
     if ! command -v pwsh >/dev/null 2>&1; then
         echo "pre-push gate: pwsh is required for the Malware Gate" >&2
@@ -36,13 +31,61 @@ do
     fi
 
     pwsh -NoProfile -File scripts/malware_gate.ps1 \
-        -Base "$remote_oid" \
-        -Head "$local_oid"
+        -Base "$base_oid" \
+        -Head "$head_oid"
     gate_exit=$?
     if [ "$gate_exit" -ne 0 ]; then
         echo "pre-push gate: push blocked with exit code $gate_exit" >&2
         exit "$gate_exit"
     fi
+}
+
+while IFS=' ' read -r local_ref local_oid remote_ref remote_oid
+do
+    if is_zero_oid "$local_oid"; then
+        echo "pre-push gate: remote ref deletion is blocked by default" >&2
+        exit 2
+    fi
+
+    if is_zero_oid "$remote_oid"; then
+        case "$remote_ref" in
+            refs/heads/*) ;;
+            *)
+                echo "pre-push gate: new non-branch refs are blocked by default" >&2
+                exit 2
+                ;;
+        esac
+
+        default_remote_ref=$(git symbolic-ref --quiet "refs/remotes/$remote_name/HEAD") || {
+            echo "pre-push gate: new branch requires a fetched remote default branch" >&2
+            exit 2
+        }
+        default_remote_oid=$(git rev-parse --verify "${default_remote_ref}^{commit}") || {
+            echo "pre-push gate: unable to resolve the fetched remote default branch" >&2
+            exit 2
+        }
+        reviewed_base=$(git merge-base "$default_remote_oid" "$local_oid") || {
+            echo "pre-push gate: new branch has no reviewed merge base" >&2
+            exit 2
+        }
+        run_malware_gate "$reviewed_base" "$local_oid"
+        continue
+    fi
+
+    case "$remote_ref" in
+        refs/heads/*) ;;
+        *)
+            echo "pre-push gate: updates to existing non-branch refs are blocked by default" >&2
+            exit 2
+            ;;
+    esac
+
+    if ! git merge-base --is-ancestor "$remote_oid" "$local_oid"; then
+        echo "pre-push gate: non-fast-forward updates are blocked by default" >&2
+        exit 2
+    fi
+
+    run_malware_gate "$remote_oid" "$local_oid"
 done
 
 exit 0

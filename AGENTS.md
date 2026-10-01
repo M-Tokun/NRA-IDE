@@ -96,6 +96,8 @@ AIは、修正前の規則文書に含まれる曖昧な自己保護解釈によ
 
 利用者が対象と操作を明示的に依頼済みの場合、その依頼を確認として扱える。ただし、確認後に対象範囲または影響が拡大した場合は、拡大部分について再確認する。
 
+Git pushについては、commit作成前または送信範囲確定前の包括的な依頼を、最終確認として扱ってはならない。exact remote、branch、HEADのcommit ID、送信される全commitをfresh fetch後に提示し、その提示後にpush確認を得る。
+
 履歴改変は既定では行わない。過去の記録を隠す、消す、または責任追跡を困難にする目的で提案してはならない。
 
 ## 7. Gitの基本原則
@@ -106,9 +108,11 @@ stage、commit、pushはそれぞれ対象を分離して確認する。
 
 commit前にはcached差分を確認し、今回対象だけがstageされていることを確認する。
 
-push前には、remote、branch、送信される全コミットを確認する。
+push前には対象remoteをfetchし、remote、branch、HEAD、送信される全コミット、incoming/outgoingの両方向を確認する。incomingが存在する場合はpushを停止し、merge、rebase、cherry-pickを自動実行せず利用者へ報告する。
 
 今回の対象外コミットがpush対象に含まれる場合、そのままpushしてはならない。remote側の基点から専用ブランチを作成し、必要なコミットだけを移植するなど、対象外履歴を送信しない方法を用いる。
+
+AIの通常push経路では、force push、`--force-with-lease`、先頭`+`付きrefspec、non-fast-forward更新、remote ref削除を実行しない。履歴改変が必要な場合は通常pushから分離し、対象OIDと影響を提示して利用者管理の手順へ返す。
 
 ## 8. 検証と報告
 
@@ -165,7 +169,7 @@ Git、外部通信、外部操作は、依頼された場合または実行し�
 **第2層（機械的ゲート）**
 重要な読込・Skill適用の要否は、AIの自己申告ではなく外部の仕組みで検証する。hooksのPreToolUseなどで、対象の読込実績・Skill呼び出し実績をtranscriptまたはログから確認し、確認できない場合は後続のEdit・Write・Bash等をブロックする。
 
-AGENTS.md読込に関する実装は`skills/agents-md-guard/`に置く。共通判定ロジックは`_common.py`とし、Claude Code・Codex CLI・Gemini CLIはそれぞれの入出力形式に合わせた薄いラッパー（`{tool}_mark.py`／`{tool}_guard.py`）を通じてこれを呼び出す。設定は各ツールのhooks設定（`.claude/settings.local.json`、`.codex/hooks.json`、`.gemini/settings.json`）に登録する。Codexは既定で専用の読取ツールを持たずシェル経由でファイルを読むため、コマンド文字列のヒューリスティック検知（ベストエフォート、確実な検知ではない）を併用する。Clineは`.clinerules/hooks/`に配置するが、公式には**macOS/Linuxのみ対応でWindowsでは動作しない**（2026-08時点）。この機構は自己申告に依存しないゲートであり、それ自体が唯一の保証ではない。
+AGENTS.md読込に関する実装は`skills/agents-md-guard/`に置く。共通判定ロジックは`_common.py`とし、Claude Code・Codex CLI・Gemini CLIはそれぞれの入出力形式に合わせた薄いラッパーを通じてこれを呼び出す。設定は各ツールのhooks設定（`.claude/settings.local.json`、`.codex/hooks.json`、`.gemini/settings.json`）に登録する。Codexは`SessionStart`でリポジトリルートの`AGENTS.md`全文を追加コンテキストへ渡し、その成功後だけセッション別読了マーカーを作成する。`PreToolUse`はマーカーがないBash・編集操作を拒否し、許可時は未対応フィールドを返さず無出力で成功する。project hookが未信頼、無効、非対応経路の場合はこの機構が動作しないため、単独の強制境界として扱わない。Clineは`.clinerules/hooks/`に配置するが、公式には**macOS/Linuxのみ対応でWindowsでは動作しない**（2026-08時点）。この機構は自己申告に依存しないゲートであり、それ自体が唯一の保証ではない。
 
 **第3層（強制的な可視化）**
 高リスクな作業、または結果が条件分岐に依存する作業では、検討した文書・Skillの一覧と、適用した・しなかった理由を、作業結果とは別に明示的なテキストとして出力する。内部で完結する暗黙の判断のまま先へ進めてはならない。この一覧は§8の精査報告における俯瞰視点の一部として扱う。
