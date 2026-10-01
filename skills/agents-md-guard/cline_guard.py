@@ -24,7 +24,7 @@ def main():
         return 0
 
     task_id = payload.get("taskId") or ""
-    if not task_id or _common.is_marked("cline", task_id):
+    if task_id and _common.is_marked("cline", task_id):
         print(json.dumps({"cancel": False}))
         return 0
 

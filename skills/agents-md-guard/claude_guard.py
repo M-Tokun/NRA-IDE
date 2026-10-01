@@ -27,7 +27,7 @@ def main():
         return 0
 
     session_id = payload.get("session_id") or ""
-    if not session_id or _common.is_marked("claude", session_id):
+    if session_id and _common.is_marked("claude", session_id):
         print(json.dumps({"continue": True}))
         return 0
 

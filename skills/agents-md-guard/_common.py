@@ -79,9 +79,9 @@ def command_reads_agents_md(command_value: str) -> bool:
 
 
 REASON_MESSAGE = (
-    "AGENTS.mdのSessionStart読込を確認できません。現在の操作を停止し、"
-    "Codexのproject hookが信頼済みで有効か確認してください"
-    "（AGENTS.md 第1章・第11章参照）。"
+    "このセッションでAGENTS.mdの読込を確認できません。現在の操作を停止し、"
+    "リポジトリルートのAGENTS.mdを読んでから再試行するか、project hookの"
+    "設定が信頼済みで有効か確認してください（AGENTS.md 第1章・第11章参照）。"
 )
 
 MISSING_REASON_MESSAGE = (

@@ -20,7 +20,7 @@ def main():
         return 0
 
     session_id = payload.get("session_id") or ""
-    if not session_id or _common.is_marked("gemini", session_id):
+    if session_id and _common.is_marked("gemini", session_id):
         print(json.dumps({"decision": "allow"}))
         return 0
 
