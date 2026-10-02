@@ -1,6 +1,7 @@
-# 逆行接地方針（Inverse Grounding Policy）Rev.2.1
+# 逆行接地方針（Inverse Grounding Policy）Rev.2.2
 <!-- FILE: ground/policies/inverse_grounding_policy.md 26-0629 -->
 <!-- 前版：26-0628-1855 → 型分離・FAIL-CLOSED精密化・ハード制約化 -->
+<!-- Rev.2.2 26-1002：記号衝突の解消（R→y_obs、δ_inv→d_inv） -->
 
 ステータス：**active**
 
@@ -56,19 +57,19 @@ $$\mathcal{A} = \varnothing \Rightarrow \mathrm{FAIL\text{-}CLOSED}$$
 
 ### 逆算実行（ $\mathcal{A} \neq \varnothing$ の場合のみ）
 
-$$\hat{x} = \arg\min_{x \in \mathcal{A}}\ \mathcal{L}(F(x),\ R)$$
+$$\hat{x} = \arg\min_{x \in \mathcal{A}}\ \mathcal{L}(F(x),\ y_{\mathrm{obs}})$$
 
-- $R$ ：現実観察値（物理直接計測値のみ有効）
+- $y_{\mathrm{obs}}$ ：現実観察値（物理直接計測値のみ有効）。NRA-IDE の $R$（境界接近比 $R=\delta/\tau$）とは別の量
 - $\hat{x}$ ：物理制約内で観測値に最も近い原因状態
 
-### 横軸スコア $\delta_{inv}$
+### 横軸スコア $d_{inv}$
 
-$$\mathcal{I}_{phys}(R) = \left\{x \mid x \in \mathcal{C}_{phys},\ F(x) \approx R\right\}$$
+$$\mathcal{I}_{phys}(y_{\mathrm{obs}}) = \left\{x \mid x \in \mathcal{C}_{phys},\ F(x) \approx y_{\mathrm{obs}}\right\}$$
 
-$$\delta_{inv} = \inf_{x \in \mathcal{I}_{phys}(R)}\ d(\hat{x}_{AI},\ x)$$
+$$d_{inv} = \inf_{x \in \mathcal{I}_{phys}(y_{\mathrm{obs}})}\ d(\hat{x}_{AI},\ x)$$
 
 - $\hat{x}_{AI}$ ：AIが提案する原因状態
-- $\delta_{inv}$ ：AI案が物理的許容集合からどれだけ外れているか
+- $d_{inv}$ ：AI案が物理的許容集合からどれだけ外れているか
 
 **「もっともらしい説明」ではなく「物理的許容集合への距離」が横軸スコアの実体。**
 
@@ -155,6 +156,7 @@ $$P_{ground} = \frac{A_{valid} \cdot C_{trace}}{\kappa_{compute}}$$
 | Rev.1 | 26-0628-1855 | 初版 |
 | Rev.2 | 26-0628-1913 | 型分離・FAIL-CLOSED精密化・ハード制約化・τ→κ |
 | Rev.2.1 | 26-0629 | 公理扱いを撤回し、IDE側の接地・境界制御方針として再定義 |
+| Rev.2.2 | 26-1002 | 記号衝突の解消：現実観察値 $R$ → $y_{\mathrm{obs}}$、横軸スコア $\delta_{inv}$ → $d_{inv}$（FORMULA §7）。137行目の $R=\delta/\tau$ は正典の意味のまま |
 
 ---
 

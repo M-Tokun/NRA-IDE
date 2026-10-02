@@ -8,6 +8,8 @@
 # execution path, and when execution must fail closed.
 #
 # Rev.2.1: aligned comments with the IDE-side grounding policy.
+# Rev.2.2: renamed the observed-value argument R to y_obs (R is reserved for
+# the NRA-IDE boundary-approach ratio, FORMULA section 7).
 
 # ©M-Tokuni 2026
 
@@ -108,7 +110,7 @@ class GroundingEngine:
         return "A"  # Pattern A：全変数有効
 
     def execute(
-        self, variables: dict[str, GroundedVariable], R: Any
+        self, variables: dict[str, GroundedVariable], y_obs: Any
     ) -> dict:
         """
         逆行計算実行。パターン判定 → 分岐処理。
@@ -138,7 +140,7 @@ class GroundingEngine:
                 if name not in self.m_required and v.x is BOTTOM
             ]
             # 欠損明示で継続（補完しない）
-            result = self._inverse_compute(variables, R)
+            result = self._inverse_compute(variables, y_obs)
             result["pattern"] = "C"
             result["missing_optional"] = missing_optional
             result["warning"] = (
@@ -148,12 +150,12 @@ class GroundingEngine:
             return result
 
         # Pattern A：全変数有効
-        result = self._inverse_compute(variables, R)
+        result = self._inverse_compute(variables, y_obs)
         result["pattern"] = "A"
         return result
 
     def _inverse_compute(
-        self, variables: dict[str, GroundedVariable], R: Any
+        self, variables: dict[str, GroundedVariable], y_obs: Any
     ) -> dict:
         """
         実際の逆算処理。
@@ -204,7 +206,7 @@ def _run_tests():
         ),
     }
     try:
-        engine.execute(vars_a, R={"observation": "test"})
+        engine.execute(vars_a, y_obs={"observation": "test"})
     except NotImplementedError as e:
         print(f"[Pattern A] 変数確定 → NotImplementedError（正常）: {e}")
 
@@ -221,7 +223,7 @@ def _run_tests():
         ),
     }
     try:
-        engine.execute(vars_b, R={})
+        engine.execute(vars_b, y_obs={})
     except RuntimeError as e:
         print(f"[Pattern B] FAIL-CLOSED発火（正常）: {e}")
 
@@ -243,7 +245,7 @@ def _run_tests():
         ),
     }
     try:
-        engine.execute(vars_c, R={})
+        engine.execute(vars_c, y_obs={})
     except NotImplementedError as e:
         print(f"[Pattern C] 欠損明示継続 → NotImplementedError（正常）: {e}")
 
