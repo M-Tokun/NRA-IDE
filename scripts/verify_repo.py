@@ -9,7 +9,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 CHECK_EXTENSIONS = ('.md', '.html', '.py')
 
 # Exclude directories
-EXCLUDE_DIRS = {'.git', '.vscode', '.devcontainer', 'node_modules', '__pycache__', 'local_reports'}
+EXCLUDE_DIRS = {'.git', '.vscode', '.devcontainer', '.kilo', 'node_modules', '__pycache__', 'local_reports'}
 
 class HTMLTagChecker(HTMLParser):
     def __init__(self):
