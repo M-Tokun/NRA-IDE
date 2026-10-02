@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FILE: nra-docs-viewer-resizable-20261003-002248.html | JST: 20261003-002248 -->
 <!--
   FILE : nra-docs-viewer-20260904-2049.html  (推奨配置名: docs/index.html)
   TITLE: NRA-IDE Docs Viewer — ?file=theory/THEORY.md 方式の Markdown ビューア
@@ -46,6 +47,19 @@ main{display:flex;padding-top:var(--header-h);height:100%}
 aside{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);border-right:1px solid var(--line);background:var(--bg-soft);
   overflow-y:auto;height:calc(100vh - var(--header-h));position:sticky;top:var(--header-h)}
 aside.hidden{display:none}
+#splitter{width:12px;flex:0 0 12px;cursor:col-resize;touch-action:none;
+ background:var(--bg-soft);border-left:1px solid var(--line);
+ border-right:1px solid var(--line);position:relative;z-index:16}
+#splitter::after{content:"⋮";position:absolute;top:45%;left:0;width:100%;
+ text-align:center;color:var(--fg-muted);font-size:20px;line-height:24px}
+#splitter:hover,#splitter:focus-visible,#splitter.dragging{background:var(--line);outline:2px solid var(--link);outline-offset:-2px}
+body.resizing{cursor:col-resize!important;user-select:none!important}
+body.resizing *{cursor:col-resize!important}
+#splitter.hidden{display:none}
+aside{min-width:180px;max-width:75vw}
+.side-sec li a{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:820px){aside{position:relative;left:auto;top:auto;z-index:auto}#splitter{z-index:16}}
+@media print{#splitter{display:none!important}}
 .side-sec{padding:10px 12px;border-bottom:1px solid var(--line)}
 .side-sec h2{font-size:11px;letter-spacing:.04em;color:var(--fg-muted);margin:0 0 6px;font-weight:600}
 #filter{width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-size:13px}
@@ -132,6 +146,7 @@ footer.docfoot{max-width:76ch;margin:32px auto 0;padding-top:14px;border-top:1px
     </div>
   </aside>
 
+  <div id="splitter" role="separator" aria-label="目次の幅を変更" aria-orientation="vertical" aria-valuemin="180" tabindex="0" title="左右にドラッグして幅を変更 ⇔"></div>
   <div id="viewport">
     <div id="doc"></div>
     <footer class="docfoot" id="docfoot" hidden></footer>
@@ -292,13 +307,18 @@ const CFG = {
     viewport.scrollTop = target ? target.offsetTop - 12 : 0;
   }
 
-  const CODE_LANG = { py: "python", html: "html" };
+  const CODE_LANG = {
+    py: "python", html: "html", json: "json", yaml: "yaml", yml: "yaml",
+    js: "javascript", css: "css", ps1: "powershell", bat: "dos",
+    ini: "ini", conf: "ini", svg: "xml", v: "verilog"
+  };
   function renderCode(src, path) {
     currentPath = path;
     const ext = (path.split(".").pop() || "").toLowerCase();
     const lang = CODE_LANG[ext] || "";
     const esc = src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    doc.innerHTML = '<pre><code class="language-' + lang + '">' + esc + "</code></pre>";
+    const cls = lang ? ' class="language-' + lang + '"' : "";
+    doc.innerHTML = "<pre><code" + cls + ">" + esc + "</code></pre>";
     decorate();
     buildToc();
     setChrome(path);
@@ -419,7 +439,8 @@ const CFG = {
         const r = await fetch(API_TREE, { headers: { Accept: "application/vnd.github+json" } });
         if (!r.ok) throw new Error(r.status === 403 ? "GitHub API の回数制限に達しました（1 時間あたり 60 回）" : r.status + " " + r.statusText);
         const j = await r.json();
-        paths = (j.tree || []).filter((n) => n.type === "blob" && /\.(md|py|html)$/i.test(n.path) && !CFG.exclude.test(n.path)).map((n) => n.path);
+        const BINARY_EXT = /\.(png|jpe?g|gif|ico|pdf|woff2?|ttf|eot|zip|7z|exe|dll|bin)$/i;
+        paths = (j.tree || []).filter((n) => n.type === "blob" && !BINARY_EXT.test(n.path) && !CFG.exclude.test(n.path)).map((n) => n.path);
         try { sessionStorage.setItem(cacheKey, JSON.stringify(paths)); } catch (e) {}
       } catch (e) {
         fileListEl.innerHTML = '<p class="notice">一覧を取得できませんでした。' + String(e.message || e) + "</p>";
@@ -487,9 +508,51 @@ const CFG = {
     navigate(p, false, location.hash.slice(1));
   });
 
+  /* ---------- 目次幅ドラッグ・キーボード変更 ---------- */
+  const splitter = $("splitter"), sidebar = $("sidebar");
+  let dragging = false;
+  function setSidebarWidth(w) {
+    const max = Math.max(180, Math.min(window.innerWidth * .75, window.innerWidth - 220));
+    const width = Math.round(Math.max(180, Math.min(max, w)));
+    document.documentElement.style.setProperty("--sidebar-w", width + "px");
+    splitter.setAttribute("aria-valuenow", String(width));
+    try { localStorage.setItem("nra-docs-sidebar-width", String(width)); } catch(e) {}
+  }
+  try {
+    const saved = Number(localStorage.getItem("nra-docs-sidebar-width"));
+    if (Number.isFinite(saved) && saved >= 180) setSidebarWidth(saved);
+  } catch(e) {}
+  splitter.addEventListener("pointerdown", e => {
+    if (sidebar.classList.contains("hidden")) return;
+    dragging = true; splitter.classList.add("dragging");
+    document.body.classList.add("resizing");
+    splitter.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  splitter.addEventListener("pointermove", e => {
+    if (dragging) setSidebarWidth(e.clientX - document.querySelector("main").getBoundingClientRect().left);
+  });
+  function stopDrag() {
+    dragging = false; splitter.classList.remove("dragging");
+    document.body.classList.remove("resizing");
+  }
+  splitter.addEventListener("pointerup", stopDrag);
+  splitter.addEventListener("pointercancel", stopDrag);
+  splitter.addEventListener("lostpointercapture", stopDrag);
+  splitter.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      setSidebarWidth(sidebar.getBoundingClientRect().width + (e.key === "ArrowRight" ? 20 : -20));
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (!sidebar.classList.contains("hidden")) setSidebarWidth(sidebar.getBoundingClientRect().width);
+  });
+
   /* ---------- ヘッダー操作 ---------- */
   $("btn-side").addEventListener("click", (ev) => {
     const hidden = $("sidebar").classList.toggle("hidden");
+    splitter.classList.toggle("hidden", hidden);
     ev.currentTarget.setAttribute("aria-pressed", String(!hidden));
   });
   $("btn-print").addEventListener("click", () => window.print());
