@@ -256,7 +256,7 @@ const CFG = {
         const r = await fetch(url, { cache: "no-cache" });
         if (!r.ok) { lastErr = new Error(r.status + " " + r.statusText); continue; }
         const t = await r.text();
-        if (/^\s*<(!doctype|html)/i.test(t)) { lastErr = new Error("HTML が返りました"); continue; }
+        if (!/\.html?$/i.test(path) && /^\s*<(!doctype|html)/i.test(t)) { lastErr = new Error("HTML が返りました"); continue; }
         try { sessionStorage.setItem(key, t); } catch (e) {}
         return t;
       } catch (e) { lastErr = e; }
@@ -290,6 +290,19 @@ const CFG = {
     const hash = location.hash.slice(1);
     const target = hash ? document.getElementById(decodeURIComponent(hash)) : null;
     viewport.scrollTop = target ? target.offsetTop - 12 : 0;
+  }
+
+  const CODE_LANG = { py: "python", html: "html" };
+  function renderCode(src, path) {
+    currentPath = path;
+    const ext = (path.split(".").pop() || "").toLowerCase();
+    const lang = CODE_LANG[ext] || "";
+    const esc = src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    doc.innerHTML = '<pre><code class="language-' + lang + '">' + esc + "</code></pre>";
+    decorate();
+    buildToc();
+    setChrome(path);
+    viewport.scrollTop = 0;
   }
 
   function decorate() {
@@ -383,7 +396,7 @@ const CFG = {
     footEl.innerHTML = "";
     const src = document.createElement("a");
     src.className = "btn"; src.href = RAW + path; src.target = "_blank"; src.rel = "noopener noreferrer";
-    src.textContent = "Markdown 原文";
+    src.textContent = /\.md$/i.test(path) ? "Markdown 原文" : "原文";
     const edit = document.createElement("a");
     edit.className = "btn"; edit.target = "_blank"; edit.rel = "noopener noreferrer";
     edit.href = "https://github.com/" + CFG.owner + "/" + CFG.repo + "/edit/" + CFG.branch + "/" + path;
@@ -406,7 +419,7 @@ const CFG = {
         const r = await fetch(API_TREE, { headers: { Accept: "application/vnd.github+json" } });
         if (!r.ok) throw new Error(r.status === 403 ? "GitHub API の回数制限に達しました（1 時間あたり 60 回）" : r.status + " " + r.statusText);
         const j = await r.json();
-        paths = (j.tree || []).filter((n) => n.type === "blob" && /\.md$/i.test(n.path) && !CFG.exclude.test(n.path)).map((n) => n.path);
+        paths = (j.tree || []).filter((n) => n.type === "blob" && /\.(md|py|html)$/i.test(n.path) && !CFG.exclude.test(n.path)).map((n) => n.path);
         try { sessionStorage.setItem(cacheKey, JSON.stringify(paths)); } catch (e) {}
       } catch (e) {
         fileListEl.innerHTML = '<p class="notice">一覧を取得できませんでした。' + String(e.message || e) + "</p>";
@@ -456,7 +469,7 @@ const CFG = {
     if (push) history.pushState({ path }, "", viewUrl(path) + (frag ? "#" + frag : ""));
     try {
       const text = await fetchText(path);
-      renderMarkdown(text, path);
+      if (/\.md$/i.test(path)) renderMarkdown(text, path); else renderCode(text, path);
       if (frag) {
         const t = document.getElementById(decodeURIComponent(frag));
         if (t) viewport.scrollTop = t.offsetTop - 12;
