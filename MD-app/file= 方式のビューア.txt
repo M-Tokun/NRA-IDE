@@ -7,7 +7,8 @@ https://m-tokun.github.io/NRA-IDE/docs/?file=FORMULA.md#definition-2
 
 動作
 
-左のサイドバーは GitHub API（git/trees?recursive=1）でリポジトリ内の .md を自動収集し、ディレクトリ単位で並べます。ファイルが増えても手作業は不要です。絞り込み欄も付けています。
+左のサイドバーは GitHub API（git/trees?recursive=1）でリポジトリ内のファイルを自動収集し、ディレクトリ単位で並べます。png/jpg/gif/ico/pdf/woff/ttf/eot/zip/7z/exe/dll/bin など明らかなバイナリ拡張子だけを除外するため、.md 以外（.py/.html/.json/.yaml など）も一覧・閲覧できます。ファイルが増えても手作業は不要です。絞り込み欄も付けています。
+サイドバーとビューポートの境界はドラッグ、またはキーボードの左右矢印キーで幅を変更でき、幅は次回訪問時も記憶されます（localStorage）。
 本文取得は同一オリジンの相対パスを先に試し、失敗した場合のみ raw.githubusercontent.com へ切り替えます。ローカルの file:// から開いても raw 経由で表示できます。
 README.md 内の GitHub blob リンク（https://github.com/.../blob/master/theory/THEORY.md 形式）も、同一リポジトリかつ .md であればビューア内遷移に自動変換します。相対リンクも同様です。.md 以外の相対リンクは GitHub 側へ飛ばします。
 画像は docs/NRA-IDE_git.jpg のような相対指定を raw URL に解決します。
@@ -16,4 +17,4 @@ $$ R = \frac{\delta}{\tau} $$ のような数式は KaTeX で描画します。\
 
 留意点
 
-CDN 依存のため閲覧にはネット接続が必要です。また examples/ 配下は HTML デモですので一覧には出ません。デモへの導線が要る場合は、CFG の対象拡張子を広げるより、docs/DEMOS.md に一覧を書いてビューアで開く形が扱いやすい。
+CDN 依存のため閲覧にはネット接続が必要です。examples/ 配下の HTML デモも一覧に含まれます（.md は Markdown 描画、それ以外はシンタックスハイライト付きのソース表示で、.html もレンダリングはせずソースとして表示します）。
