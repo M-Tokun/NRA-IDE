@@ -474,10 +474,10 @@ let silHoldUntil = 0;
 // Pull-out slip s_po = r2/x2 gives maximum torque
 // Beyond s > s_po, positive feedback collapse occurs
 // ─────────────────────────────────────────────
-const SYNC_RPM = 1500;      // Synchronous speed (2-pole 50Hz)
+const SYNC_RPM = 1500;      // Synchronous speed (4-pole 50Hz)
 const R2       = 0.08;      // Secondary resistance (pu)
 const X2       = 0.12;      // Secondary reactance (pu)
-const K_TORQUE = 2.8;       // Torque coefficient (adjusted so max torque ≈ 2.8 pu)
+const K_TORQUE = 2 * 2.8 * 0.08 * 0.12;  // Torque coefficient. T_max = K/(2·R2·X2), so this gives max torque ≈ 2.8 pu (≈0.054)
 const J_INERTIA= 0.35;      // Moment of inertia coefficient (affects RPM change rate)
 
 // Motor torque (pu): function of slip s
@@ -500,6 +500,8 @@ function getValues(t) {
   const loadRatio = parseFloat(document.getElementById('sl-load').value) / 100;
   const setRPM    = parseFloat(document.getElementById('sl-rpm').value);   // Operator set value
   const noise     = () => (Math.random() - .5) * .18;
+  // Phase-current fluctuation is proportional to the current (a fixed width inflated the imbalance ratio at light load)
+  const pnoise    = () => 1 + (Math.random() - .5) * .018;
 
   // ─── RPM dynamics ───────────────────────────────
   // Slip s = (sync speed - actual speed) / sync speed
@@ -531,7 +533,8 @@ function getValues(t) {
     actualRPM += rpmDelta;
     // Pull toward set RPM (simulating inverter drive)
     actualRPM += (setRPM - actualRPM) * 0.015;
-    actualRPM  = Math.max(0, Math.min(SYNC_RPM * 1.05, actualRPM));
+    // An induction motor in motoring mode does not exceed synchronous speed, so cap at synchronous speed
+    actualRPM  = Math.max(0, Math.min(SYNC_RPM, actualRPM));
   }
 
   // Pull-out detection: slip exceeds pull-out point and speed is falling
@@ -547,9 +550,9 @@ function getValues(t) {
   // Current ripple increases at lower speed (PWM carrier component)
   const ripple = (1 - actualRPM / SYNC_RPM) * 0.8 + 1.0;
 
-  let u = baseA * ripple + noise();
-  let v = baseA * ripple + noise();
-  let w = baseA * ripple + noise();
+  let u = baseA * ripple * pnoise();
+  let v = baseA * ripple * pnoise();
+  let w = baseA * ripple * pnoise();
 
   // Fault injection
   switch (fault) {
@@ -587,7 +590,8 @@ function getValues(t) {
   const cooling = Math.max(0.2, actualRPM / SYNC_RPM);   // Cooling by rotation speed
   const heatIn  = (u + v + w) * 0.4 * (1 / cooling);
   const heatOut = (tempAccum - 25) * 0.15;
-  tempAccum = Math.max(20, tempAccum + (heatIn - heatOut) * 0.035);
+  // Cut off near the insulation burn-out temperature (250°C); above that is outside this thermal model's description domain
+  tempAccum = Math.min(250, Math.max(20, tempAccum + (heatIn - heatOut) * 0.035));
 
   // Record RPM history
   if (rpmHistory.length >= HIST) rpmHistory.shift();
@@ -605,10 +609,14 @@ function getValues(t) {
 // ─────────────────────────────────────────────
 // Band Gate
 // ─────────────────────────────────────────────
+// The phase-current reference is the current expected at the operator's load setting (rated × load ratio,
+// floor 10%), treated as a constraint declared as a gauge input (FORMULA §4.5). With a fixed rated-current
+// reference, light-load operation itself counted as a lower-side deviation and tripped the lower side.
+const currentRef = () => RATED_A * Math.max(parseFloat(document.getElementById('sl-load').value) / 100, 0.1);
 const GATE_PARAMS = {
-  u:    { ref: RATED_A, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
-  v:    { ref: RATED_A, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
-  w:    { ref: RATED_A, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  u:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  v:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  w:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
   temp: { ref: 40,      th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
   imb:  { ref: 0,       th: TAU_HIGH_IMB, tl: null,        au: 0.50, al: 0.10 },
 };
@@ -617,7 +625,7 @@ const HOLD_MS = 2000;
 // Side gate-width shape transform, fixed before evaluation. τ shrinks only by the part of EMA above
 // 50% of τ0 and stops at floor×τ0; no widening. Floors 0.8 (upper, conservative) / 0.25 (lower,
 // sensitive) are demo values. δ is the deviation from the reference ref (FORMULA §4.1); τ0 is the distance
-// from ref to the declared limit. ref: rated current for phase currents, 40°C (start-up value) for winding
+// from ref to the declared limit. ref: load-setting current (currentRef) for phase currents, 40°C (start-up value) for winding
 // temperature, 0% for phase imbalance (a one-sided quantity with no lower side).
 const SHRINK_START = 0.5, FLOOR_UPPER = 0.8, FLOOR_LOWER = 0.25;
 function shrinkTau(tau0, ema, floor) {
@@ -626,10 +634,11 @@ function shrinkTau(tau0, ema, floor) {
 
 function bandGate(sensor, v, p) {
   const hasLower = p.tl !== null;
-  const tau0_u = p.th - p.ref;
-  const tau0_l = hasLower ? p.ref - p.tl : 1;
-  const d_u  = Math.max(0, v - p.ref);
-  const d_l  = hasLower ? Math.max(0, p.ref - v) : 0;
+  const ref = typeof p.ref === 'function' ? p.ref() : p.ref;
+  const tau0_u = p.th - ref;
+  const tau0_l = hasLower ? ref - p.tl : 1;
+  const d_u  = Math.max(0, v - ref);
+  const d_l  = hasLower ? Math.max(0, ref - v) : 0;
 
   sensor.ema_u = p.au * d_u + (1 - p.au) * sensor.ema_u;
   sensor.ema_l = p.al * d_l + (1 - p.al) * sensor.ema_l;
@@ -651,8 +660,8 @@ function bandGate(sensor, v, p) {
     sensor.lastDir = dir;
   }
 
-  const upper_band = p.ref + tau_u;
-  const lower_band = hasLower ? p.ref - tau_l : p.ref;
+  const upper_band = ref + tau_u;
+  const lower_band = hasLower ? ref - tau_l : ref;
   return { v, R, silence, dir, upper_band, lower_band };
 }
 

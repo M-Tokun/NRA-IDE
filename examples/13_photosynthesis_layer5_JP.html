@@ -245,7 +245,7 @@ button.stress:hover { background: #1a1000; }
 // ============================================================
 
 // --- FvCBモデル パラメータ（C3植物標準値）---
-// 温度依存は Arrhenius 簡略版
+// 温度依存：Vcmax・Jmax はピーク型 Arrhenius（高温失活つき）、Rd・Γ* は Q10 近似
 const FvCB = {
   Vcmax25: 120,     // μmol/m²/s  RuBisCO最大カルボキシル化速度（25°C）
   Jmax25:  210,     // μmol/m²/s  最大電子伝達速度（25°C）
@@ -254,9 +254,11 @@ const FvCB = {
   Km25:    650,     // μmol/mol   ミカエリス定数 Km（25°C）
   alpha:   0.3,     // 量子収率（光→電子伝達効率）
   theta:   0.7,     // 電子伝達の曲率パラメータ
-  // Arrhenius 活性化エネルギー（簡略 Q10近似）
-  Q10_Vcmax: 2.2,
-  Q10_Jmax:  1.8,
+  // Vcmax・Jmax の温度依存：高温での失活項を持つピーク型 Arrhenius 式。
+  // 値は Kattge & Knorr (2007, Plant Cell Environ. 30:1176) の式で生育温度25°Cとした場合。
+  // Q10 だけの指数式では高温ほど光合成が増え続け、高温ストレスが見えなかったため置き換えた。
+  Ha_Vcmax: 71513,  Hd_Vcmax: 200000, dS_Vcmax: 641.6,   // J/mol, J/mol, J/mol/K
+  Ha_Jmax:  49884,  Hd_Jmax:  200000, dS_Jmax:  640.95,
   Q10_Rd:    2.0,
   Q10_Gamma: 1.4,
 };
@@ -264,7 +266,15 @@ const FvCB = {
 // NRA-IDE τ（光合成速度の許容低下幅）
 const TAU_A = 8.0;   // μmol/m²/s
 
-// --- 温度補正（Q10近似）---
+// --- 温度補正：ピーク型 Arrhenius（25°Cで1、高温側で失活して低下）---
+function peakedArrhenius(val25, Ha, Hd, dS, T) {
+  const Rg = 8.314, Tk = T + 273.15, Tr = 298.15;
+  return val25 * Math.exp(Ha * (Tk - Tr) / (Tr * Rg * Tk))
+               * (1 + Math.exp((Tr * dS - Hd) / (Tr * Rg)))
+               / (1 + Math.exp((Tk * dS - Hd) / (Rg * Tk)));
+}
+
+// --- 温度補正（Q10近似：Rd・Γ* に使用）---
 function q10(val25, Q10, T) {
   return val25 * Math.pow(Q10, (T - 25) / 10);
 }
@@ -279,8 +289,8 @@ function calcJ(PPFD, Jmax, alpha, theta) {
 
 // --- FvCB コア計算 ---
 function calcFvCB(PPFD, Ci, T) {
-  const Vcmax = q10(FvCB.Vcmax25, FvCB.Q10_Vcmax, T);
-  const Jmax  = q10(FvCB.Jmax25,  FvCB.Q10_Jmax,  T);
+  const Vcmax = peakedArrhenius(FvCB.Vcmax25, FvCB.Ha_Vcmax, FvCB.Hd_Vcmax, FvCB.dS_Vcmax, T);
+  const Jmax  = peakedArrhenius(FvCB.Jmax25,  FvCB.Ha_Jmax,  FvCB.Hd_Jmax,  FvCB.dS_Jmax,  T);
   const Rd    = q10(FvCB.Rd25,    FvCB.Q10_Rd,    T);
   const Gamma = q10(FvCB.Gamma25, FvCB.Q10_Gamma, T);
   const Km    = FvCB.Km25; // 簡略：Km温度依存は省略

@@ -146,6 +146,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
   <div class="ctrl-row">
     <button class="pill on"       id="btnRun"  onclick="toggleRun()">RUN</button>
+    <button class="pill" id="btnNewEval" onclick="startNewEvaluation()">New evaluation</button>
     <button class="pill pill-load" id="btnLoad" onclick="toggleLoad()">LOAD INCREASE OFF</button>
   </div>
 </div>
@@ -325,6 +326,10 @@ function resize(){
 }
 
 // ── Controls ──
+// Irreversible latch state. Released only by the user's 'New evaluation' action.
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; }
+
 function toggleRun(){
   running = !running;
   const b = document.getElementById('btnRun');
@@ -343,7 +348,9 @@ function onI(v){ I = parseFloat(v); document.getElementById('iDisp').innerHTML =
 function calcIDE(p){
   const delta = p - P_OPT;
   const absDelta = Math.abs(delta);
-  const rHi = delta > 0 ? delta / TAU_HI : 0;
+  // Heat accumulation shrinks the effective upper τ (up to 50%): sustained over-power raises R for the same power (conservative side).
+  const tauHiEff = TAU_HI * (1 - 0.5 * heatAccum / 100);
+  const rHi = delta > 0 ? delta / tauHiEff : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
   if(rHi >= R_RUPTURE)      { status='fail-hi'; action='Overpower: RUPTURE_BOUNDARY — Breaker trip'; }
@@ -351,6 +358,10 @@ function calcIDE(p){
   else if(rHi >= R_WARN) { status='warn-hi'; action='Overpower warning: Load reduction recommended'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='Underpower warning: Check voltage and current'; }
   else                   { status='safe';    action='Normal operation continues'; }
+  // Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
+  // The R values keep showing current readings; only the classification is held.
+  if (status.startsWith('fail') && !ruptureLatch) ruptureLatch = { status, action };
+  if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + " (latched: press 'New evaluation' to release)"; }
   return { delta, absDelta, rHi, rLo, status, action };
 }
 
@@ -379,8 +390,11 @@ function tick(dt){
   const ide = calcIDE(pSmooth);
 
   // Thermal accumulation: increases during overpower; decreases by heat dissipation in normal state
-  if(ide.rHi > 0){
-    heatAccum = Math.min(100, heatAccum + ide.rHi * 12 * dt);
+  // Heat input is the observed over-power (δ/τ_HI with the fixed design τ_HI). Using R (an evaluation output)
+  // would create a self-adjusting R→heat→τ→R path (reverse derivation B), so it is not used.
+  const overP = Math.max(0, pSmooth - P_OPT) / TAU_HI;
+  if(overP > 0){
+    heatAccum = Math.min(100, heatAccum + overP * 12 * dt);
   } else {
     heatAccum = Math.max(0, heatAccum - 8 * dt);
   }

@@ -603,7 +603,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <button class="ctrl" id="sc-severe"  onclick="setScenario('severe')">🔥 重度干ばつ</button>
       <button class="ctrl" id="sc-storm"   onclick="setScenario('storm')">⛈ 嵐後急乾燥</button>
     </div>
-    <div class="scenario-note" id="scenarioNote">通常の畑環境。定期的に小さな外乱が来ます。</div>
+    <div class="scenario-note" id="scenarioNote">通常の畑環境。定期的に外乱が来ます。外乱のピークは宣言した上下限を一時的に超えるため、その間は Lv.3 以上になります。</div>
   </div>
 
   <div class="log-panel">
@@ -1011,10 +1011,10 @@ function tick() {
 // シナリオ
 // ─────────────────────────────────────────────
 const SCENARIO_NOTES = {
-  normal:  '🌱 通常の畑環境。定期的に小さな外乱が来ます。',
+  normal:  '🌱 通常の畑環境。定期的に外乱が来ます。外乱のピークは宣言した上下限（土壌水分25%・日射900W/m²・地温32°Cなど）を一時的に超えるため、その間は Lv.3 以上になります。',
   drought: '🏜 軽度干ばつ。土壌水分が徐々に低下し始めています。EMAの上昇に注目してください。',
   severe:  '🔥 重度干ばつ。土壌水分・日射・風速が同時に限界に向かっています。複数指標が連動する様子を観察してください。',
-  storm:   '⛈ 嵐後の急速乾燥。雨で一時的に回復したあと、蒸発が加速して急激に乾燥します。EMAが「勢い」を先読みする様子がわかります。',
+  storm:   '⛈ 嵐後の急速乾燥。雨で一時的に回復したあと、蒸発が加速して急激に乾燥します。EMAが「勢い」を先読みする様子がわかります。風速は蒸散を進める干ばつ側の指標として数えるため、降雨中でも強風（上限8m/s超）だけで Lv が上がります。',
 };
 
 function setScenario(name) {

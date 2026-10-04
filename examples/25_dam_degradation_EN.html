@@ -128,7 +128,7 @@
       <div class="deg-stat-val" id="tau-init" style="color:var(--yellow);">1.000</div>
     </div>
     <div class="deg-stat">
-      <div class="deg-stat-label">Current τ (Degraded)</div>
+      <div class="deg-stat-label">Structural thickness τ_s (degraded; judgment uses τ_eff = 0.25·τ_s + 0.02)</div>
       <div class="deg-stat-val" id="tau-current" style="color:var(--orange);">1.000</div>
     </div>
     <div class="deg-stat">
@@ -196,6 +196,10 @@ let degSensitivity = 5;
 const TAU_INIT = 1.0;
 let tauCurrent = TAU_INIT;
 let deltaAccum = 0;
+let tauLoss = 0;   // 累積したτ損失（不可逆） / cumulative τ loss (irreversible)
+// Effective τ (τ_eff) used for the judgment: not the structural thickness tauCurrent itself but 0.25× + 0.02 (demo values).
+// The on-screen R explanations show this τ_eff.
+function effectiveTau(ts) { return ts * 0.25 + 0.02; }
 let tauHistory = [];   
 let rHistory = [];
 const HISTORY_LEN = 300;
@@ -230,6 +234,7 @@ document.querySelectorAll('.sc-btn').forEach(btn => {
 function reset() {
   tauCurrent = TAU_INIT;
   deltaAccum = 0;
+  tauLoss = 0;
   tauHistory = [];
   rHistory = [];
   frameCount = 0;
@@ -438,7 +443,7 @@ function updateUI(R, delta) {
   } else if (R >= 0.7) {
     rEl.style.color = '#ff9100'; zn.textContent = 'CRITICAL — Approaching Limit';
     rj.style.borderColor = '#ff9100'; rj.style.color = '#ff9100';
-    rj.textContent = `⚠ R ≥ 0.7 — Immediate action required regardless of water level. τ = ${tauCurrent.toFixed(3)}`;
+    rj.textContent = `⚠ R ≥ 0.7 — Immediate action required regardless of water level. τ_eff = ${effectiveTau(tauCurrent).toFixed(3)} (τ_s = ${tauCurrent.toFixed(3)})`;
   } else if (R >= 0.4) {
     rEl.style.color = '#ffd740'; zn.textContent = 'ELASTIC — Monitoring';
     rj.style.borderColor = '#ffd740'; rj.style.color = '#ffd740';
@@ -446,7 +451,7 @@ function updateUI(R, delta) {
   } else {
     rEl.style.color = '#00e676'; zn.textContent = 'NIRVANA — Stable';
     rj.style.borderColor = '#00e676'; rj.style.color = '#00e676';
-    rj.textContent = `✓ R < 0.4 — Stable. Current τ = ${tauCurrent.toFixed(3)} (${(100 - degRate).toFixed(1)}% of init)`;
+    rj.textContent = `✓ R < 0.4 — Stable. τ_eff = ${effectiveTau(tauCurrent).toFixed(3)} (τ_s ${(100 - degRate).toFixed(1)}% of init)`;
   }
 
   document.getElementById('tau-current').textContent = tauCurrent.toFixed(3);
@@ -460,8 +465,9 @@ function updateUI(R, delta) {
   // floor (matching the tauCurrent floor) and 3600 are basis unknown / demo tuning values.
   // The display label reads "units", not "years", signaling this is not a real-time conversion.
   if (deltaAccum > 0.001) {
-    const ratePerFrame = deltaAccum / frameCount;
-    const framesLeft = (tauCurrent - 0.1) / (ratePerFrame * degSensitivity * 0.0001);
+    // Remaining life: frames until τ_s reaches the 0.1 floor at the average loss rate so far (tauLoss / frameCount)
+    const lossPerFrame = tauLoss / frameCount;
+    const framesLeft = (tauCurrent - 0.1) / lossPerFrame;
     const yearsLeft = (framesLeft / 3600).toFixed(1);
     document.getElementById('remaining-life').textContent = `~ ${yearsLeft} units`;
     document.getElementById('remaining-life').style.color = parseFloat(yearsLeft) < 5 ? '#ff3d00' : parseFloat(yearsLeft) < 20 ? '#ff9100' : '#40c4ff';
@@ -502,13 +508,15 @@ function loop() {
   // structure's effective thickness τ. deltaAccum is the cumulative load counter; the 0.001*degSensitivity
   // factor (degSensitivity is the 1-20 UI slider) sets the accumulation rate.
   deltaAccum += delta * 0.001 * degSensitivity;
-  // tauCurrent decreases from TAU_INIT (=1.0) in proportion to deltaAccum, floored at 0.1.
-  // The 0.0001*degSensitivity*10 factor and the 0.1 floor are both basis unknown / demo tuning values.
-  tauCurrent = Math.max(0.1, TAU_INIT - deltaAccum * 0.0001 * degSensitivity * 10);
+  // tauCurrent (structural thickness τ_s) decreases from TAU_INIT (=1.0) by the cumulative loss tauLoss, floored at 0.1.
+  // τ loss accumulates step by step at the sensitivity in effect at that moment (lowering the sensitivity later
+  // does not restore τ: irreversible). The per-step loss δ×0.001×sens×0.001×sens equals the previous magnitude (demo values).
+  tauLoss += delta * 0.001 * degSensitivity * 0.001 * degSensitivity;
+  tauCurrent = Math.max(0.1, TAU_INIT - tauLoss);
 
   // The effective τ used for judgment/drawing is not tauCurrent directly, but tauCurrent*0.25 + 0.02.
   // Both 0.25 and 0.02 are basis unknown / demo tuning values.
-  const tau = tauCurrent * 0.25 + 0.02;
+  const tau = effectiveTau(tauCurrent);
   const R = delta / tau; // Implements the right-panel heading "R = δ/τ"; the left panel (conventional management) watches water level only, as the point of contrast
 
   if (frameCount % 2 === 0) {

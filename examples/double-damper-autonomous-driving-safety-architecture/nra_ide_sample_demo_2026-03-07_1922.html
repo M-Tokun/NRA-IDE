@@ -332,6 +332,7 @@
   let shortWindow = [];
   let longDamage = 0;
   let spike = 0;
+  let silenceLatched = false;
   let rawHistory = [];
   let shortHistory = [];
   let damageHistory = [];
@@ -352,6 +353,7 @@
     shortWindow = [];
     longDamage = 0;
     spike = 0;
+    silenceLatched = false;
     rawHistory = [];
     shortHistory = [];
     damageHistory = [];
@@ -429,6 +431,9 @@
     let state = 'PASS';
     if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE';
     else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP';
+    // 不可逆ラッチ：一度 SILENCE に入ったら、「初期化」で解除するまで固定する。
+    if (state === 'SILENCE') silenceLatched = true;
+    if (silenceLatched) state = 'SILENCE';
 
     metrics.rNow.textContent = rNow.toFixed(2);
     metrics.rShort.textContent = rShort.toFixed(2);

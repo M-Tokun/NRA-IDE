@@ -245,7 +245,7 @@
       <span class="debt-value" id="debt-val">0.000</span>
     </div>
     <div id="debt-gauge-bg"><div id="debt-gauge"></div></div>
-    <div class="debt-note" id="debt-note">一時回復後も消えない蓄積</div>
+    <div class="debt-note" id="debt-note">一時回復後もすぐには消えず、ゆっくり減る蓄積</div>
   </div>
 
   <div class="panel-title">Event Log</div>
@@ -328,7 +328,7 @@
 // FILE: NRA_IDE_Demo15_OR_ICU_Continuum_26-0321.html
 // 経過蓄積型：時間が経つほどRの精度が上がる構造
 // 新患・救急 = ウォームアップ期間（威力なし）
-// 経過あり   = residual_debtが消えない構造的負債として機能
+// 経過あり   = residual_debtが、すぐには消えずゆっくり減る構造的負債として機能
 // ================================================================
 
 const WARMUP_SEC = 90;   // ウォームアップ秒数（実時間換算）
@@ -807,7 +807,7 @@ function triggerIntervene() {
   document.getElementById('btn-anesthesia').disabled = false;
   document.getElementById('btn-vasospasm').disabled = false;
   addLog('✚ 医師介入 — Cause-Side制御開始 (人間判断)', 'ev-ok');
-  addLog('  ※ residual_debtは介入後も残存', 'ev-warn');
+  addLog('  ※ residual_debtは介入後もすぐには消えず、ゆっくり減る', 'ev-warn');
 }
 
 function startNewPatientEvaluation() {

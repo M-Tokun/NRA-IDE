@@ -245,7 +245,7 @@
       <span class="debt-value" id="debt-val">0.000</span>
     </div>
     <div id="debt-gauge-bg"><div id="debt-gauge"></div></div>
-    <div class="debt-note" id="debt-note">Accumulation that remains after temporary recovery</div>
+    <div class="debt-note" id="debt-note">Accumulation that persists after temporary recovery and decays only slowly</div>
   </div>
 
   <div class="panel-title">Event Log</div>
@@ -328,7 +328,7 @@
 // FILE: 15_or_icu_continuum_EN_20260515_185524.html
 // Longitudinal accumulation type: R accuracy improves as time passes
 // New / emergency patients = warm-up period（威力なし）
-// With time-course history = residual_debt functions as persistent structural debt
+// With time-course history = residual_debt functions as structural debt that persists and decays only slowly
 // ================================================================
 
 const WARMUP_SEC = 90;   // Warm-up duration in seconds (real-time equivalent)
@@ -807,7 +807,7 @@ function triggerIntervene() {
   document.getElementById('btn-anesthesia').disabled = false;
   document.getElementById('btn-vasospasm').disabled = false;
   addLog('✚ Physician Intervention — Cause-Side制御開始 (人間判断)', 'ev-ok');
-  addLog('  Note: residual_debt remains after intervention', 'ev-warn');
+  addLog('  Note: residual_debt persists after intervention and decays only slowly', 'ev-warn');
 }
 
 function startNewPatientEvaluation() {

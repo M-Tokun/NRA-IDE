@@ -283,6 +283,7 @@
     <div class="logo">NRA‑IDE</div>
     <div class="sub">// ロボットアーム 安全ゲート POC v0.1 — 6軸トルク × 電力 × 電流</div>
     <div class="gear-status gear-ok" id="gearStatus">⚙ ギア正常</div>
+    <button id="btnNewEval" onclick="startNewEvaluation()">新しい評価</button>
 </header>
 
 <!-- Left: Controls -->
@@ -452,6 +453,9 @@ let tick = 0;
 let failCount = 0;
 let startTime = Date.now();
 let prevGlobalFail = false;
+// 不可逆ラッチ：一度 R ≥ 1.0（フェイルクローズド域）に入ったら、「新しい評価」で解除するまで固定する。
+let globalFailLatched = false;
+function startNewEvaluation(){ globalFailLatched = false; }
 let prevZones = {};
 
 const dynStyle = document.createElement('style');
@@ -758,7 +762,8 @@ function doTick() {
 
     // Global fail: any axis OR power OR current
     const allR = [...axisStates.map(s => s.R), pw3R, curR];
-    const globalFail = allR.some(r => r >= 1.0);
+    if (allR.some(r => r >= 1.0)) globalFailLatched = true;
+    const globalFail = globalFailLatched;
     const maxR = Math.max(...allR);
 
     dynCssRules = [];

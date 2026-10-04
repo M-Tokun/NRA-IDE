@@ -704,8 +704,8 @@ body.en span.en-text { display: inline; }
       <td>21</td>
       <td><div class="demo-links"><a href="21_cabg_monitor_JP.html" class="badge-jp">JP</a><a href="21_cabg_monitor_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>CABG（冠動脈バイパス）モニター。</strong> バイパス手術中の血流・圧力・温度を監視。教育用安全デモ。Fail-Closed 時は手術中断を推奨。</span>
-        <span class="en-text"><strong>CABG monitor.</strong> Monitors blood flow, pressure, and temperature during bypass surgery as an educational safety demo.</span>
+        <span class="jp-text"><strong>CABG（冠動脈バイパス）モニター。</strong> バイパス手術中のグラフト血流（MGF）・拍動指数（PI）・拡張期充満（DF）を監視し、温度と血流量で許容幅を補正。教育用安全デモ。Fail-Closed 時は手術中断を推奨。</span>
+        <span class="en-text"><strong>CABG monitor.</strong> Monitors graft flow (MGF), pulsatility index (PI), and diastolic filling (DF) during bypass surgery, with the tolerance adjusted by temperature and blood flow, as an educational safety demo.</span>
       </td>
     </tr>
     <tr>
@@ -1016,27 +1016,13 @@ body.en span.en-text { display: inline; }
 
   <pre><code><span class="cmt">// <span class="jp-text">最小構成の例</span><span class="en-text">Minimal example</span></span>
 <span class="kw">function</span> <span class="fn">gate</span>(delta, tau) {
+    <span class="kw">if</span> (!Number.isFinite(delta) || !Number.isFinite(tau) || delta < <span class="num">0</span> || tau < <span class="num">0</span>) <span class="kw">return</span> <span class="str">"CONFESSION"</span>;
+    <span class="kw">if</span> (tau === <span class="num">0</span>) <span class="kw">return</span> <span class="str">"OUT_OF_DESCRIPTION_DOMAIN"</span>;
     <span class="kw">const</span> R = delta / tau;
     <span class="kw">if</span> (R >= <span class="num">1.0</span>) <span class="kw">return</span> <span class="str">"RUPTURE_BOUNDARY"</span>;
-    <span class="kw">return</span> <span class="str">"SAFE"</span>;
-}</code></pre>
-
-  <div class="jp-text">
-    <p><strong>実装例：医療AI（薬剤投与制御）</strong></p>
-  </div>
-  <div class="en-text">
-    <p><strong>Implementation example: medical AI support</strong></p>
-  </div>
-
-  <pre><code><span class="cmt">// <span class="jp-text">腫瘍への薬剤到達可能性を物理的に検証</span><span class="en-text">Physically verify drug delivery reachability</span></span>
-<span class="kw">const</span> tumorResistance = <span class="fn">measureResistance</span>();  <span class="cmt">// δ</span>
-<span class="kw">const</span> infusionPressure = <span class="fn">getPumpCapacity</span>();   <span class="cmt">// τ</span>
-<span class="kw">const</span> deliveryStatus = <span class="fn">gate</span>(tumorResistance, infusionPressure);
-
-<span class="kw">if</span> (deliveryStatus === <span class="str">"RUPTURE_BOUNDARY"</span>) {
-    <span class="fn">alert</span>(<span class="str">"<span class="jp-text">物理的到達不能を検出。医師の判断が必要です。</span><span class="en-text">Physical reachability failure detected. Human medical judgment is required.</span>"</span>);
-    <span class="cmt">// <span class="jp-text">AIは判断を停止し、人間に最終決定を委ねる</span><span class="en-text">AI stops judgment and transfers authority to a qualified human</span></span>
-}</code></pre>
+    <span class="kw">return</span> <span class="str">"PERMIT"</span>;
+}
+<span class="cmt">// <span class="jp-text">呼び出し側は PERMIT 以外をすべて停止側として扱う</span><span class="en-text">Callers treat every state other than PERMIT as the stop side</span></span></code></pre>
 
   <div class="jp-text">
     <p class="note-text">具体的な実装パターンは各デモのソースコード内に記載されています。</p>
@@ -1055,18 +1041,11 @@ body.en span.en-text { display: inline; }
 
   <div class="domain-grid">
     <div class="domain-card">
-      <div class="domain-icon">🏥</div>
-      <h4><span class="jp-text">医療AI</span><span class="en-text">Medical AI</span></h4>
-      <div class="domain-row"><strong><span class="jp-text">課題：</span><span class="en-text">Problem:</span></strong> <span class="jp-text">腫瘍への薬剤到達可能性の不確実性</span><span class="en-text">Uncertainty of physical drug reachability to the target</span></div>
-      <div class="domain-row"><strong><span class="jp-text">解決策：</span><span class="en-text">Solution:</span></strong> <span class="jp-text">投与経路の物理的整合性を検証</span><span class="en-text">Verify physical consistency of the delivery path</span></div>
-      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（腫瘍抵抗力）/（投与圧力）</span><span class="en-text">target-side resistance / delivery pressure</span></div>
-    </div>
-    <div class="domain-card">
       <div class="domain-icon">🚗</div>
       <h4><span class="jp-text">自動運転</span><span class="en-text">Autonomous Driving</span></h4>
       <div class="domain-row"><strong><span class="jp-text">課題：</span><span class="en-text">Problem:</span></strong> <span class="jp-text">ブラックボックス判断による安全性問題</span><span class="en-text">Safety issues caused by black-box decisions</span></div>
       <div class="domain-row"><strong><span class="jp-text">解決策：</span><span class="en-text">Solution:</span></strong> <span class="jp-text">衝突回避の構造的制約検証</span><span class="en-text">Verify structural constraints for collision avoidance</span></div>
-      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（衝突余裕時間）/（制動能力）</span><span class="en-text">obstacle margin / braking capability</span></div>
+      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（停止距離が安全余裕帯へ入り込んだ量）/（安全余裕距離）</span><span class="en-text">intrusion of the stopping distance into the safety-margin band / safety-margin distance</span></div>
     </div>
     <div class="domain-card">
       <div class="domain-icon">🖥️</div>
@@ -1085,16 +1064,10 @@ body.en span.en-text { display: inline; }
       <th>R ≥ 1.0 <span class="jp-text">の意味</span><span class="en-text">Meaning</span></th>
     </tr>
     <tr>
-      <td><span class="jp-text">医療AI</span><span class="en-text">Medical AI</span></td>
-      <td><span class="jp-text">腫瘍抵抗力</span><span class="en-text">Target-side resistance</span></td>
-      <td><span class="jp-text">投与圧力</span><span class="en-text">Delivery pressure</span></td>
-      <td><span class="jp-text">薬剤が物理的に届かない</span><span class="en-text">The drug physically cannot reach the target</span></td>
-    </tr>
-    <tr>
       <td><span class="jp-text">自動運転</span><span class="en-text">Autonomous driving</span></td>
-      <td><span class="jp-text">障害物までの余裕</span><span class="en-text">Obstacle time/distance margin</span></td>
-      <td><span class="jp-text">制動距離</span><span class="en-text">Braking distance/capability</span></td>
-      <td><span class="jp-text">衝突危険 → 緊急停止</span><span class="en-text">Collision danger → emergency stop</span></td>
+      <td><span class="jp-text">停止距離が安全余裕帯（車間距離の手前 τ）へ入り込んだ量</span><span class="en-text">Intrusion of the stopping distance into the safety-margin band (the last τ before the gap)</span></td>
+      <td><span class="jp-text">安全余裕距離（設計時固定）</span><span class="en-text">Safety-margin distance (fixed at design time)</span></td>
+      <td><span class="jp-text">停止距離 ≥ 車間距離：衝突危険 → 緊急停止</span><span class="en-text">Stopping distance ≥ gap: collision danger → emergency stop</span></td>
     </tr>
     <tr>
       <td><span class="jp-text">インフラ</span><span class="en-text">Infrastructure</span></td>

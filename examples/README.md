@@ -79,6 +79,8 @@ All demos run directly in a browser. No installation is required.
 
 > In many demos, the red line indicates R = 1.0. This is not a warning line; it is the structural limit line. The practical judgment limit must be placed before that line. Its value is not fixed, and should be configured according to the operating site and target domain.
 
+> Demos that enter RUPTURE_BOUNDARY, FAIL, or FALLBACK keep that state until "New evaluation" ("Reset" in #23) is pressed (irreversible latch). The R value keeps showing the current reading. The SILENCE in demos 08–11 is a temporary cut-off released after the HOLD time; it is a different concept from latching the rupture boundary.
+
 ### 📚 STEP 1 — First Understand “Why?”
 
 | # | File | Content |
@@ -157,7 +159,7 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 | 18 | [JP](./18_chain_tension_JP.html) / [EN](./18_chain_tension_EN.html) | **Chain tension with polygon effect and automatic adjustment.** Uses dR/dt prediction before limit arrival. |
 | 19 | [JP](./19_air_pressure_JP.html) / [EN](./19_air_pressure_EN.html) | **Air pressure management with compressible fluid and dynamic τ.** τ_hi shrinks with temperature via gas-law behavior. |
 | 20 | [JP](./20_water_pressure_JP.html) / [EN](./20_water_pressure_EN.html) | **Water pressure management with incompressible fluid and water hammer.** Simulates pump pulsation and valve-closing impact. |
-| 21 | [JP](./21_cabg_monitor_JP.html) / [EN](./21_cabg_monitor_EN.html) | **CABG monitor.** Monitors blood flow, pressure, and temperature during bypass surgery as an educational safety demo. |
+| 21 | [JP](./21_cabg_monitor_JP.html) / [EN](./21_cabg_monitor_EN.html) | **CABG monitor.** Monitors graft flow (MGF), pulsatility index (PI), and diastolic filling (DF) during bypass surgery, with the tolerance adjusted by temperature and blood flow, as an educational safety demo. |
 | 22 | [JP](./22_vascular_monitor_JP.html) / [EN](./22_vascular_monitor_EN.html) | **Vascular intervention monitor.** Six physical quantities integrated with dual fluctuation and dynamic τ. |
 
 ---
@@ -262,41 +264,12 @@ function gate(delta, tau) {
 
 ```
 
-**Implementation example: medical AI support**
-
-```javascript
-
-// Physically verify drug delivery reachability
-
-const tumorResistance = measureResistance();  // δ: tumor-side resistance
-
-const infusionPressure = getPumpCapacity();   // τ: available pump pressure
-
-const deliveryStatus = gate(tumorResistance, infusionPressure);
-
-if (deliveryStatus !== "PERMIT") {   // every state other than PERMIT stops (fail-closed)
-
-    alert("Physical reachability failure detected. Human medical judgment is required.");
-
-    // AI stops judgment and transfers authority to a qualified human.
-
-}
-
-```
 
 Specific implementation patterns are documented inside each demo source file.
 
 ---
 
 ## Application Areas
-
-### 🏥 Medical AI
-
-- **Problem:** Uncertainty of physical drug reachability to the target.
-
-- **NRA solution:** Verify physical consistency of the delivery path.
-
-- **Threshold:** R = target-side resistance / delivery pressure.
 
 ### 🚗 Autonomous Driving
 
@@ -316,7 +289,6 @@ Specific implementation patterns are documented inside each demo source file.
 
 | Area | δ (Deviation from constraint) | τ (Tolerance thickness) | Meaning of R ≥ 1.0 |
 |------|-------------------------------|--------------------------|--------------------|
-| Medical AI | Target-side resistance | Delivery pressure | The drug physically cannot reach the target |
 | Autonomous driving | Intrusion of the stopping distance into the safety-margin band (the last τ before the gap) | Safety-margin distance (fixed at design time) | Stopping distance ≥ gap: collision danger → emergency stop |
 | Infrastructure | Excess load | Buffer capacity | Server overload → isolation |
 

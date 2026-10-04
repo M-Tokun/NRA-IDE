@@ -168,6 +168,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
   <div class="ctrl-row">
     <button class="pill on" id="btnRun" onclick="toggleRun()">RUN</button>
+    <button class="pill" id="btnNewEval" onclick="startNewEvaluation()">New evaluation</button>
     <button class="pill pill-heat" id="btnHeat" onclick="toggleHeat()">HEAT OFF</button>
     <button class="pill pill-cool" id="btnCool" onclick="toggleCool()">COOL OFF</button>
   </div>
@@ -382,6 +383,10 @@ function resize(){
 }
 
 // ── Controls ──
+// Irreversible latch state. Released only by the user's 'New evaluation' action.
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; }
+
 function toggleRun(){
   running = !running;
   const b = document.getElementById('btnRun');
@@ -441,6 +446,10 @@ function calcIDE(t){
   } else {
     status = 'safe';    action = 'Continue normal operation';
   }
+  // Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
+  // The R values keep showing current readings; only the classification is held.
+  if (status.startsWith('fail') && !ruptureLatch) ruptureLatch = { status, action };
+  if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + " (latched: press 'New evaluation' to release)"; }
   return { delta, absDelta, tauHi, tauLo, rHi, rLo, rMax, status, action };
 }
 

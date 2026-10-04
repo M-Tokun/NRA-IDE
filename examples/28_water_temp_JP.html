@@ -168,6 +168,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
   <div class="ctrl-row">
     <button class="pill on" id="btnRun" onclick="toggleRun()">RUN</button>
+    <button class="pill" id="btnNewEval" onclick="startNewEvaluation()">新しい評価</button>
     <button class="pill pill-heat" id="btnHeat" onclick="toggleHeat()">加熱 OFF</button>
     <button class="pill pill-cool" id="btnCool" onclick="toggleCool()">冷却 OFF</button>
   </div>
@@ -382,6 +383,10 @@ function resize(){
 }
 
 // ── コントロール ──
+// 不可逆ラッチの状態。解除は利用者の「新しい評価」操作だけ。
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; }
+
 function toggleRun(){
   running = !running;
   const b = document.getElementById('btnRun');
@@ -441,6 +446,10 @@ function calcIDE(t){
   } else {
     status = 'safe';    action = '正常稼働継続';
   }
+  // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
+  // R の値は現在値を表示し続け、判定区分だけを固定する。
+  if (status.startsWith('fail') && !ruptureLatch) ruptureLatch = { status, action };
+  if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + '（固定中：「新しい評価」で解除）'; }
   return { delta, absDelta, tauHi, tauLo, rHi, rLo, rMax, status, action };
 }
 

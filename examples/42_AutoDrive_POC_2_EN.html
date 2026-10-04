@@ -252,6 +252,7 @@
             <div class="btn-row">
                 <button class="sel-btn" id="btn-summer" onclick="setTire('summer')">🔴 Summer Tire</button>
                 <button class="sel-btn" id="btn-studs"  onclick="setTire('studs')">🔵 Winter (Studless)</button>
+                <button class="sel-btn" id="btnNewEval" onclick="startNewEvaluation()">New evaluation</button>
             </div>
         </div>
     </div>
@@ -420,7 +421,12 @@ function computeR(v_kmh, d_m, t_m) {
     const R     = t_m > 0 ? delta / t_m : Infinity;
     return { delta, R, sd };
 }
+// Irreversible latch: once R ≥ 1.0 (fail-closed zone) is reached, it stays fixed until 'New evaluation' is pressed.
+let zoneLatched = false;
+function startNewEvaluation(){ zoneLatched = false; prevZone = ''; update(); }
 function zoneFromR(R) {
+    if (R >= 1.00) zoneLatched = true;
+    if (zoneLatched) return 'D';
     // Flag boundary: 4-tier judgment on R=δ/τ. R<0.40 -> A (PERMIT), R<0.70 -> B (PERMIT_WITH_CAVEAT),
     // R<1.00 -> C (WARNING), R>=1.00 -> D (RUPTURE_BOUNDARY; operational response: emergency stop).
     // The thresholds 0.40/0.70/1.00 themselves have no cited basis (accident statistics, engineering standard, etc.) in this file — demo tuning values.

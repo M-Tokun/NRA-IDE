@@ -638,29 +638,31 @@ function calcCorrMatrix(){
     C[i] = [];
     for(let j=0;j<FACTORS.length;j++){
       if(i===j){ C[i][j]=1; continue; }
-      const hi = historyREff[i].slice(-CORR_WIN);
-      const hj = historyREff[j].slice(-CORR_WIN);
-      if(hi.length < 12 || hj.length < 12){
-        C[i][j] = CORR_BASE[i][j];
+      // 相関は物理量の履歴（historyVals）で計算する。基準相関も物理量の向きで定義しているため。
+      // R_effの履歴は片側でゼロに張り付き、符号の向きも失うので、基準との比較に使わない。
+      const hi = historyVals[i].slice(-CORR_WIN);
+      const hj = historyVals[j].slice(-CORR_WIN);
+      // 登録時と同じ窓幅が揃うまでは基準値を使う（少数標本の相関は揺れが大きく、登録した幅と比べられないため）
+      if(hi.length < CORR_WIN || hj.length < CORR_WIN){
+        C[i][j] = corrBaseReg[i][j];
       } else {
         // 実測R相関を基準相関と少し混ぜて、過剰なランダム揺れを抑える
         // 0.65/0.35はブレンド比率のデモ用チューニング値（実測側を優勢にしつつ基準線でならす）。
         const p = pearson(hi,hj);
-        C[i][j] = 0.65 * p + 0.35 * CORR_BASE[i][j];
+        C[i][j] = 0.65 * p + 0.35 * corrBaseReg[i][j];
       }
     }
   }
   return C;
 }
-// tauC: R_corrの正規化定数。ここではトップレベル定数ではなく関数の既定引数として定義されている。
-// 呼び出し側（calcAll呼び出し後のupdate()内 `calcRCorr(C)`）は引数を渡していないため常に0.32が使われる。
+// R_corrの正規化幅はペアごとのtauCReg（registerCorrBaseline()で正常運転から登録、下限0.32）。
 // EN版（35_..._EN.html）はモジュール直下の`const tauC = 0.24`を使う別実装であり、値をそろえる意図はない。
-function calcRCorr(C, tauC=0.32){
+function calcRCorr(C){
   let maxR = 0;
   const alerts = [];
   for(let i=0;i<FACTORS.length;i++){
     for(let j=i+1;j<FACTORS.length;j++){
-      const Rij = Math.abs(C[i][j] - CORR_BASE[i][j]) / tauC;
+      const Rij = Math.abs(C[i][j] - corrBaseReg[i][j]) / tauCReg[i][j];
       if(Rij > maxR) maxR = Rij;
       if(Rij >= 1.0){
         alerts.push(`${FACTORS[i].name}—${FACTORS[j].name} R_corr=${Rij.toFixed(2)}`);
@@ -958,7 +960,7 @@ function updateUI(eff, C, rCorr, corrAlerts){
     for(let j=0;j<FACTORS.length;j++){
       const cell = document.getElementById(`cm_${i}_${j}`);
       const v = C[i][j];
-      const Rij = i===j ? 0 : Math.abs(v - CORR_BASE[i][j]) / 0.32;
+      const Rij = i===j ? 0 : Math.abs(v - corrBaseReg[i][j]) / tauCReg[i][j];
       cell.textContent = v.toFixed(2);
       if(i===j){
         cell.style.background = 'rgba(0,229,255,.16)';
@@ -1094,9 +1096,41 @@ function resetSim(){
   addLog('システムリセット。個体設備の基準線から再追跡開始。', 'info');
 }
 
+// 評価開始前の基準相関の登録。正常運転（scenario='normal'）の合成値をREG_TICKS分だけ生成し、
+// CORR_WIN窓の相関の平均を基準線、そのゆらぎ幅（標準偏差のREG_K倍、下限TAU_C_MIN）を各ペアのτ_Cとして固定する
+// （評価中は更新しない）。CORR_BASE（想定値）は合成データの正常時の相関と一致しておらず、
+// 正常運転でもR_corrが1を超えていたため、観測した正常時の値で登録し直す。REG_K・TAU_C_MINはデモ用の値。
+const REG_TICKS = 600, REG_K = 2.5, TAU_C_MIN = 0.32;
+let corrBaseReg = CORR_BASE.map(row => row.slice());
+let tauCReg = CORR_BASE.map(row => row.map(()=> TAU_C_MIN));
+function registerCorrBaseline(){
+  const saved = { scenario, tick, vals };
+  scenario = 'normal'; tick = 0;
+  const hist = FACTORS.map(()=> []);
+  const samples = FACTORS.map(()=> FACTORS.map(()=> []));
+  for(let k=0; k<REG_TICKS; k++){
+    tick++;
+    synthValues().forEach((v,i)=>hist[i].push(v));
+    if(k >= CORR_WIN){
+      for(let i=0;i<FACTORS.length;i++) for(let j=0;j<FACTORS.length;j++){
+        if(i!==j) samples[i][j].push(pearson(hist[i].slice(-CORR_WIN), hist[j].slice(-CORR_WIN)));
+      }
+    }
+  }
+  corrBaseReg = samples.map((row,i)=>row.map((s,j)=> i===j ? 1 : s.reduce((a,b)=>a+b,0)/s.length));
+  tauCReg = samples.map((row,i)=>row.map((s,j)=>{
+    if(i===j) return TAU_C_MIN;
+    const m = corrBaseReg[i][j];
+    const sd = Math.sqrt(s.reduce((a,b)=>a+(b-m)*(b-m),0)/s.length);
+    return Math.max(TAU_C_MIN, REG_K * 0.65 * sd);
+  }));
+  scenario = saved.scenario; tick = saved.tick; vals = saved.vals;
+}
+
 // ────────────────────────────────────────────────
 // 初期化
 // ────────────────────────────────────────────────
+registerCorrBaseline();
 buildFactorCards();
 buildCorrMatrix();
 buildCouplingList();

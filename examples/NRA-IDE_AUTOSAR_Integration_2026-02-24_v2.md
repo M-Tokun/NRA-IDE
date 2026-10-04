@@ -599,6 +599,12 @@ static float32 NRA_Gate_ComputeR(float32 delta)
 
 
 
+/* 不可逆ラッチ（起動時の初期化でのみ FALSE に戻す） */
+
+static boolean NRA_Gate_FailLatched = FALSE;
+
+
+
 /* Gate メイン関数 — 最高優先度タスクから呼び出し */
 
 void NRA_Gate_MainFunction(void)
@@ -619,23 +625,21 @@ void NRA_Gate_MainFunction(void)
 
 
 
-    /* Fail-Closed suppression 判定（非有限の R も停止側） */
+    /* Fail-Closed suppression 判定（非有限の R も停止側）。
+
+       不可逆ラッチ：一度 TRUE になったら、この関数の中では FALSE に戻さない。
+
+       解除は、外部の点検後に新しい評価を開始する手順（再初期化）だけで行う */
 
     if (!isfinite(R) || R >= 1.0f)
 
     {
 
-        Rte_IWrite_Gate_GateDecision_FailCmd(TRUE);
+        NRA_Gate_FailLatched = TRUE;
 
     }
 
-    else
-
-    {
-
-        Rte_IWrite_Gate_GateDecision_FailCmd(FALSE);
-
-    }
+    Rte_IWrite_Gate_GateDecision_FailCmd(NRA_Gate_FailLatched);
 
 
 

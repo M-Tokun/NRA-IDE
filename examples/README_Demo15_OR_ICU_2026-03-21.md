@@ -84,7 +84,7 @@ This is the pre-shock warning that point-in-time monitors cannot generate.
 
 NRA-IDE:
 
-  イベント → R上昇 → 波形回復 → residual_debt 残存 → "表面回復・構造負債継続"
+  イベント → R上昇 → 波形回復 → residual_debt はゆっくり減る → "表面回復・構造負債継続"
 
 ```
 
@@ -158,7 +158,7 @@ Waveform brightness increases while fail-closed operational suppression is activ
 | 経過蓄積 / Baseline確立 | Warmup progress. τ is being established from observation history. |
 | Phase Box | Current FSM state |
 | HR / SpO₂ / RR / BP | Current vital values with individual R bars |
-| residual_debt | **Structural debt. Does not reset after recovery.** |
+| residual_debt | **Structural debt. Does not reset after recovery; decays only slowly while R_total stays low.** |
 | Event Log | Timestamped event and transition record |
 
 ### Right Panel

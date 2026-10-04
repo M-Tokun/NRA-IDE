@@ -48,17 +48,14 @@ input[type=range]{flex:1;}
       <span class="live">MGF: <span id="mgfLive">35.0</span> mL/min</span><br>
       <span class="live">PI: <span id="piLive">2.80</span></span><br>
       <span class="live">DF%: <span id="dfLive">65</span>%</span><br>
-      <span class="live" id="status">SAFE</span>
+      <span class="live" id="status">SAFE</span> <button id="btnNewEval" onclick="startNewEvaluation()">新しい評価</button>
     </div>
   </div>
 
   <div class="controls">
     <h3 class="panel-title">パラメータ調整</h3>
-    <div class="slider-row"><label>内圧 P</label><input aria-label="内圧 P" type="range" id="p" min="60" max="180" value="120"></div>
     <div class="slider-row"><label>温度 T</label><input aria-label="温度 T" type="range" id="t" min="30" max="42" value="37"></div>
     <div class="slider-row"><label>血流 Flow</label><input aria-label="血流量" type="range" id="f" min="10" max="120" value="80"></div>
-    <div class="slider-row"><label>接着性 Adh</label><input aria-label="粘着性 Adh" type="range" id="a" min="0.2" max="2.5" step="0.1" value="1.0"></div>
-    <div class="slider-row"><label>せん断 Shear</label><input aria-label="剪断応力" type="range" id="s" min="0" max="30" value="12"></div>
     <div class="slider-row"><label>壁張力 Tension</label><input aria-label="壁張力" type="range" id="w" min="40" max="180" value="90"></div>
 
     <h3 class="panel-title-mt">閾値調整（破線移動）</h3>
@@ -72,12 +69,15 @@ input[type=range]{flex:1;}
 
 <script>
 // 変数
-// 注意: P・Adh・Shearはスライダー（下のupdateAll参照）から取得されるが、
-// calcIDE()のR計算では一切参照されていない。R計算に使われるのはT・Flow（tau経由）と
-// GraftMGF・PI・DF（各delta項経由）のみ。Tensionは血管断面を描画するdrawVessel()で
-// 半径計算に使われるだけで、こちらもRには寄与しない。
-let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
+// R計算に使うのはT・Flow（tau経由）とGraftMGF・PI・DF（各delta項経由）だけ。
+// 判定に使っていなかった内圧P・接着性Adh・せん断Shearのスライダーは外した。
+// Tensionは血管断面を描画するdrawVessel()の半径計算だけに使い、Rには寄与しない。
+let T=37, Flow=80, Tension=90;
 let GraftMGF=35, PI=2.8, DF=65;
+const DF_REF = 65;
+// 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; }
 let PI_THRESH=5.0, MGF_THRESH=20, R_RUPTURE=1.0;
 let lastStatus = 'SAFE';
 
@@ -123,7 +123,9 @@ function calcIDE() {
   const tau = 1.0 * (310/(T+273)) * (1 + Flow/200);
   const deltaMGF = Math.abs(GraftMGF - 35)/15;   // 基準値35mL/minからの偏差を/15で正規化（根拠不明・デモ用チューニング値）
   const deltaPI = Math.max(0, PI - 2.8)/3;        // 基準値2.8を超えた片側偏差を/3で正規化（根拠不明・デモ用チューニング値）
-  const deltaDF = Math.max(0, 100 - DF)/30;       // 100%からの片側不足分を/30で正規化（根拠不明・デモ用チューニング値）
+  // DFは基準値DF_REF（監視開始時の値として宣言）からの片側不足分。100%を基準にすると、
+  // 表示範囲[30,90]では常に0.33以上の偏差が残り、平常でもRが高く出るため改めた。/30はデモ用の正規化値。
+  const deltaDF = Math.max(0, DF_REF - DF)/30;
   const R = (deltaMGF + deltaPI + deltaDF) / tau; // R = 境界接近比。3つの正規化偏差を均等加重で合算しtauで除算
 
   let st = 'SAFE', col = '#88ffcc', msg = '';
@@ -136,6 +138,9 @@ function calcIDE() {
     // 0.8・1.2の倍率はこのファイル内に根拠の記載がなく、デモ用チューニング値。
     st = 'WARNING'; col = '#ffcc00'; msg = `WARN — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)}`;
   }
+
+  if (st === 'RUPTURE_BOUNDARY' && !ruptureLatch) ruptureLatch = { st, col, msg };
+  if (ruptureLatch) { st = ruptureLatch.st; col = ruptureLatch.col; msg = ruptureLatch.msg; }
 
   safeSet('status', st);
   els.status.style.color = col;
@@ -206,11 +211,8 @@ function drawTTFMWave() {
 
 // 全更新
 function updateAll() {
-  P = parseFloat(document.getElementById('p')?.value || 120);
   T = parseFloat(document.getElementById('t')?.value || 37);
   Flow = parseFloat(document.getElementById('f')?.value || 80);
-  Adh = parseFloat(document.getElementById('a')?.value || 1.0);
-  Shear = parseFloat(document.getElementById('s')?.value || 12);
   Tension = parseFloat(document.getElementById('w')?.value || 90);
 
   PI_THRESH = parseFloat(document.getElementById('piThresh')?.value || 5);
@@ -232,7 +234,7 @@ function updateAll() {
 }
 
 // イベント
-['p','t','f','a','s','w','piThresh','mgfThresh','rFail'].forEach(id => {
+['t','f','w','piThresh','mgfThresh','rFail'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updateAll);
 });

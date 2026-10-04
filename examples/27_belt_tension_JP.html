@@ -391,6 +391,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   <div class="mode-toggle">
     <button class="mode-btn active" onclick="setMode('conveyor',this)">コンベアー</button>
     <button class="mode-btn"        onclick="setMode('vbelt',this)">Vベルト</button>
+    <button class="mode-btn" id="btnNewEval" onclick="startNewEvaluation()">新しい評価</button>
   </div>
 </div>
 
@@ -538,12 +539,18 @@ function calcIDE(t, m) {
     status = 'safe';
     action = '正常稼働継続';
   }
+  // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
+  if (status === 'fail' && !ruptureLatch) ruptureLatch = { status, action };
+  if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + '（固定中：「新しい評価」で解除）'; }
   return { delta, tau, R, status, action, outOfRange };
 }
 
 // ────────────────────────────────────────────────
 // モード切替
 // ────────────────────────────────────────────────
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; updateUI(); }
+
 function setMode(m, btn) {
   mode = m;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));

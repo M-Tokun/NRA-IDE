@@ -346,6 +346,8 @@ let autoRunning = false;
 let autoTimer   = null;
 let forceBreach = false;
 let inputVal    = 65536;  // Q16.16: 1.0
+// Hold the value observed in S_OBSERVE; validation (S_VALIDATE) and output (S_EMIT) use that same value.
+let heldVal = null;
 let thrLo       = 32768;  // Q16.16: 0.5
 let thrHi       = 98304;  // Q16.16: 1.5
 let scopeData   = [];
@@ -544,7 +546,8 @@ function drawScope() {
 
 // === FSM transition logic ===
 function nextState() {
-  const breach = forceBreach || (inputVal < thrLo) || (inputVal > thrHi);
+  const v = heldVal ?? inputVal;
+  const breach = forceBreach || (v < thrLo) || (v > thrHi);
   switch (state) {
     case 'S_IDLE':     return 'S_OBSERVE';
     case 'S_OBSERVE':  return 'S_COMPUTE';
@@ -560,14 +563,17 @@ function step() {
   cycleCount++;
   const prev = state;
   state = nextState();
+  if (state === 'S_OBSERVE') heldVal = inputVal;
+  if (state === 'S_IDLE') heldVal = null;
 
   if (state === 'S_EMIT')    emitCount++;
   if (state === 'S_CONFESS') confessCount++;
 
   // Update pipeline display
-  const hex = '0x' + inputVal.toString(16).padStart(4,'0').toUpperCase();
-  const q   = (inputVal / 65536).toFixed(4);
-  const breach = (inputVal < thrLo) || (inputVal > thrHi) || forceBreach;
+  const shown = heldVal ?? inputVal;
+  const hex = '0x' + shown.toString(16).padStart(4,'0').toUpperCase();
+  const q   = (shown / 65536).toFixed(4);
+  const breach = (shown < thrLo) || (shown > thrHi) || forceBreach;
 
   document.getElementById('pd-diode').textContent = hex;
   document.getElementById('pd-pipe').textContent  = q;
@@ -662,7 +668,7 @@ function addLog(cur, prev, breach) {
   let cls = 'ok', msg = `${prev} → ${cur}`;
   if (cur === 'S_CONFESS') { cls = 'err'; msg = `CONFESS — Limit Declaration breach detected`; }
   else if (breach && cur === 'S_VALIDATE') { cls = 'warn'; msg = `BREACH DETECTED — threshold violated`; }
-  else if (cur === 'S_EMIT') msg = `EMIT — output: 0x${inputVal.toString(16).toUpperCase()} (${(inputVal/65536).toFixed(4)})`;
+  else if (cur === 'S_EMIT') msg = `EMIT — output: 0x${(heldVal ?? inputVal).toString(16).toUpperCase()} (${((heldVal ?? inputVal)/65536).toFixed(4)})`;
 
   div.innerHTML = `<span class="ts">[${ts}]</span><span class="${cls}">${msg}</span>`;
   el.insertBefore(div, el.firstChild);
@@ -704,9 +710,10 @@ function triggerBreach() {
 }
 
 function triggerConfess() {
+  // Reach CONFESS from any state: advance to S_VALIDATE, set breach just before, then step once
+  let guard = 0;
+  while (state !== 'S_VALIDATE' && guard++ < 6) step();
   forceBreach = true;
-  // Fast-track to CONFESS
-  while (state !== 'S_IDLE' && state !== 'S_VALIDATE') step();
   step();
 }
 
@@ -715,7 +722,7 @@ function resetSim() {
   autoRunning = false;
   document.getElementById('runDot').classList.remove('running');
   document.getElementById('btnAuto').classList.remove('active');
-  state = 'S_IDLE'; cycleCount = 0; emitCount = 0; confessCount = 0; forceBreach = false;
+  state = 'S_IDLE'; heldVal = null; cycleCount = 0; emitCount = 0; confessCount = 0; forceBreach = false;
   scopeData = [];
   document.getElementById('confessOverlay').classList.remove('visible');
   document.getElementById('confessBanner').classList.remove('visible');

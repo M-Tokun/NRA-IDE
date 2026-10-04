@@ -268,7 +268,7 @@ canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:
 <div class="formula-box">
   <span class="eq-a">R_i = δ_i / τ_i(profile,t)</span>：各観察項目の構造比率　|　
   <span class="eq-b">R_infection_like</span>：発熱・呼吸・炎症様マーカーの媒介圧　|　
-  <span class="eq-c">R_person = max(R_i, R_profile, R_corr)</span>：平均で薄めない個体別判定　|　
+  <span class="eq-c">R_person = max(R_i, R_corr)</span>：平均で薄めない個体別判定　|　
   <span class="eq-f">Human Review = 自動決定ではなく人間確認</span>
 </div>
 
@@ -405,9 +405,10 @@ const BASE = {temp:36.8, rr:16, hr:76, spo2:97, hyd:70, inf:0.15};
 let scenario = 'normal';
 let tick = 0;
 let running = true;
-let selected = 0;
+// 個体は並べ替え後の添字ではなく person.id で追う（R順の並べ替えで添字が別人を指すため）。
+let selected = null;
 let logLines = [];
-let lastBuckets = [];
+let lastBuckets = {};
 
 const SCENARIOS = {
   normal: {desc:'通常範囲内で個体差を表示', shift:{temp:0,rr:0,hr:0,spo2:0,hyd:0,inf:0}, amp:{temp:.18,rr:1.5,hr:5,spo2:.8,hyd:3,inf:.08}},
@@ -486,7 +487,9 @@ function makeState(p, index){
   const infPressure = clamp((rs.temp.R*.32 + rs.rr.R*.26 + rs.hr.R*.20 + rs.spo2.R*.30 + rs.inf.R*.42 + rs.hyd.R*.18), 0, 1.65);
   const corr = clamp(Math.max((rs.temp.R+rs.hr.R)*.32, (rs.rr.R+rs.spo2.R)*.36, (rs.temp.R+rs.inf.R)*.40, infPressure), 0, 1.65);
   const vitalMax = Math.max(...Object.values(rs).map(x=>x.R));
-  const personR = Math.max(vitalMax, prof, corr);
+  // 年齢・虚弱度・既往による profile 圧は観測された物理量のズレ（δ/τ）ではないため、R の最大値には入れない。
+  // τ を縮める効果（τ_i(profile)）は残し、profile 圧は別の指標として表示する。
+  const personR = Math.max(vitalMax, corr);
 
   return {person:p, vit, rs, profile:prof, infPressure, corr, vitalMax, personR};
 }
@@ -507,8 +510,8 @@ function renderCards(states){
   states.forEach((s,i)=>{
     const b = bucketOf(s.personR);
     const div = document.createElement('div');
-    div.className = 'card' + (s.personR>=1?' fail':s.personR>=.75?' warn':'') + (i===selected?' selected':'');
-    div.onclick = () => {selected=i; render(states);};
+    div.className = 'card' + (s.personR>=1?' fail':s.personR>=.75?' warn':'') + (s.person.id===selected?' selected':'');
+    div.onclick = () => {selected=s.person.id; render(states);};
     const bclass = b.key==='ok'?'b-ok':b.key==='watch'?'b-watch':b.key==='warn'?'b-warn':'b-fail';
     div.innerHTML = `
       <div class="badge ${bclass}">${b.badge}</div>
@@ -629,9 +632,8 @@ function applyScenario(){
 }
 
 function render(states){
-  if(selected>=states.length) selected=0;
   renderCards(states);
-  renderDetail(states[selected]);
+  renderDetail(states.find(s => s.person.id === selected) || states[0]);
   renderBuckets(states);
   drawDistribution(states);
 
@@ -645,10 +647,11 @@ function render(states){
     b.key==='watch'?'WATCH — 経過注意群あり':'SAFE — 教育用観察群';
   document.getElementById('cohort-status').style.color=b.color;
 
-  const nowBuckets = states.map(s=>bucketOf(s.personR).key);
-  nowBuckets.forEach((bk,i)=>{
-    if(lastBuckets[i] && lastBuckets[i]!==bk){
-      const s = states[i];
+  const nowBuckets = {};
+  states.forEach((s,i)=>{
+    const bk = bucketOf(s.personR).key;
+    nowBuckets[s.person.id] = bk;
+    if(lastBuckets[s.person.id] && lastBuckets[s.person.id]!==bk){
       if(bk==='fail') addLog(`Human Reviewへ移行: ${s.person.name} R=${s.personR.toFixed(3)}`, 'fail');
       else if(bk==='warn') addLog(`Cautionへ移行: ${s.person.name} R=${s.personR.toFixed(3)}`, 'warn');
       else if(bk==='watch') addLog(`Watchへ移行: ${s.person.name} R=${s.personR.toFixed(3)}`, 'watch');
@@ -674,8 +677,8 @@ function toggleRun(){
 
 function resetSim(){
   tick=0;
-  selected=0;
-  lastBuckets=[];
+  selected=null;
+  lastBuckets={};
   scenario='normal';
   document.getElementById('scenario-sel').value='normal';
   document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
@@ -685,7 +688,7 @@ function resetSim(){
   addLog('個体別観察区分の表示を開始', 'ok');
   const states=PEOPLE.map((p,i)=>makeState(p,i)).sort((a,b)=>b.personR-a.personR);
   render(states);
-  lastBuckets=states.map(s=>bucketOf(s.personR).key);
+  lastBuckets=Object.fromEntries(states.map(s=>[s.person.id, bucketOf(s.personR).key]));
 }
 
 resetSim();

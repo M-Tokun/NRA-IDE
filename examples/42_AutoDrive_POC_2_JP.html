@@ -252,6 +252,7 @@
             <div class="btn-row">
                 <button class="sel-btn" id="btn-summer" onclick="setTire('summer')">🔴 夏タイヤ（サマー）</button>
                 <button class="sel-btn" id="btn-studs"  onclick="setTire('studs')">🔵 スタッドレス</button>
+                <button class="sel-btn" id="btnNewEval" onclick="startNewEvaluation()">新しい評価</button>
             </div>
         </div>
     </div>
@@ -418,7 +419,12 @@ function computeR(v_kmh, d_m, t_m) {
     const R     = t_m > 0 ? delta / t_m : Infinity;
     return { delta, R, sd };
 }
+// 不可逆ラッチ：一度 R ≥ 1.0（フェイルクローズド域）に入ったら、「新しい評価」で解除するまで固定する。
+let zoneLatched = false;
+function startNewEvaluation(){ zoneLatched = false; prevZone = ''; update(); }
 function zoneFromR(R) {
+    if (R >= 1.00) zoneLatched = true;
+    if (zoneLatched) return 'D';
     // フラグ境界：R=δ/τの4段階判定。R<0.40→A(許可)、R<0.70→B(注意付き許可)、R<1.00→C(警告)、R>=1.00→D(フェイルクローズド/緊急停止)。
     // 閾値0.40/0.70/1.00自体の根拠（事故統計・工学基準等）は本ファイル内に記載なし・デモ用チューニング値。
     if (R < 0.40) return 'A';

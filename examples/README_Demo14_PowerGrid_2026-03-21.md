@@ -59,7 +59,7 @@ NRA-IDEが答える問いは「どの速さで閾値に近づいているか、�
 | τ | Absorption thickness (adjustable via slider) |
 | R = δ/τ | Structural approach ratio |
 | FSM State | Current gate state |
-| residual_debt | Accumulated structural debt — **does not reset on recovery** |
+| residual_debt | Accumulated structural debt — **does not reset on recovery; decays only slowly while R stays low** |
 
 ### Right Panel — Generator Units
 
@@ -114,7 +114,7 @@ When a generator trips, the frequency recovers naturally as other units compensa
 
 The waveform returns to near-normal. Conventional monitors reset.
 
-NRA-IDE does not reset. `residual_debt` continues to hold the accumulated structural stress.  
+NRA-IDE does not reset. `residual_debt` keeps the accumulated structural stress and only decays slowly while R stays low.  
 
 The system "remembers" that it was under severe load, even after the visible spike subsides.
 
@@ -122,7 +122,7 @@ The system "remembers" that it was under severe load, even after the visible spi
 
 既存モニター：  スパイク → 回復 → リセット → "正常"
 
-NRA-IDE：      スパイク → 回復 → residual_debt 残存 → "表面は正常、構造は負債を抱えている"
+NRA-IDE：      スパイク → 回復 → residual_debt はゆっくり減る → "表面は正常、構造は負債を抱えている"
 
 ```
 
@@ -154,7 +154,9 @@ $$R = \frac{\delta_f}{\tau}$$
 
 $$\delta_f = |f_{current} - f_{nominal}|$$
 
-$$\text{residual}\_\text{debt}(t) = \int_0^t (R - R \cdot k_{recovery}) \, dt$$
+$$\frac{d}{dt}\,\text{residual}\_\text{debt} = \begin{cases} 0.08\,(1-k_{recovery})\,R & (R > 0.4) \\ -0.03 & (R \le 0.4,\ \text{debt} > 0) \end{cases}$$
+
+（上限 2.0、下限 0。0.08・0.03・k_recovery = 0.12 はデモ用の値 / cap 2.0, floor 0; 0.08, 0.03 and k_recovery = 0.12 are demo values）
 
 $$R_{\mathrm{target}} \geq 1.0 \Rightarrow \mathrm{RUPTURE\_BOUNDARY}$$
 

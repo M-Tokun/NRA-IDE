@@ -392,6 +392,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   <div class="mode-toggle">
     <button class="mode-btn active" onclick="setMode('conveyor',this)">Conveyor</button>
     <button class="mode-btn"        onclick="setMode('vbelt',this)">V-Belt</button>
+    <button class="mode-btn" id="btnNewEval" onclick="startNewEvaluation()">New evaluation</button>
   </div>
 </div>
 
@@ -539,12 +540,18 @@ function calcIDE(t, m) {
     status = 'safe';
     action = 'Continue normal operation';
   }
+  // Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
+  if (status === 'fail' && !ruptureLatch) ruptureLatch = { status, action };
+  if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + " (latched: press 'New evaluation' to release)"; }
   return { delta, tau, R, status, action, outOfRange };
 }
 
 // ────────────────────────────────────────────────
 // Mode switching
 // ────────────────────────────────────────────────
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; updateUI(); }
+
 function setMode(m, btn) {
   mode = m;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));

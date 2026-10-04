@@ -255,8 +255,8 @@ canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);bord
 
 <div class="formula-box">
   <span class="eq-a">R_i = δ_i / τ_i(profile,t)</span>：各項目の構造比率　|　
-  <span class="eq-b">R_profile</span>：年齢・脆弱性・既往による余裕圧縮　|　
-  <span class="eq-c">R_patient = max(R_i, R_profile, R_corr)</span>：個体単位の判定　|　
+  <span class="eq-b">profile 圧</span>：年齢・脆弱性・既往による余裕圧縮（τ を縮める。R には入れず別表示）　|　
+  <span class="eq-c">R_patient = max(R_i, R_corr)</span>：個体単位の判定　|　
   <span class="eq-f">bucket = Observe / Watch / Caution / Human-Review</span>
 </div>
 
@@ -431,7 +431,8 @@ const FACTORS = [
 let scenario = 'normal';
 let tick = 0;
 let running = true;
-let selected = 0;
+// 個体は並べ替え後の添字ではなく person.id で追う（R順の並べ替えで添字が別人を指すため）。
+let selected = null;
 let logLines = [];
 const history = [];
 
@@ -529,7 +530,9 @@ function makePatientState(person, i){
   );
   const pPressure = profilePressure(person);
   const vitalMax = Math.max(...Object.values(rs).map(x=>x.R));
-  const patientR = Math.max(vitalMax, corr, pPressure);
+  // 年齢・虚弱度・既往による profile 圧は観測された物理量のズレ（δ/τ）ではないため、R の最大値には入れない。
+  // τ を縮める効果（τ_i(profile)）は残し、profile 圧は別の指標として表示する。
+  const patientR = Math.max(vitalMax, corr);
 
   return {person, vitals, rs, corr, profile:pPressure, vitalMax, patientR};
 }
@@ -547,8 +550,8 @@ function buildCards(states){
   states.forEach((s, i)=>{
     const b = bucketOf(s.patientR);
     const card = document.createElement('div');
-    card.className = 'pcard' + (s.patientR >= 1.0 ? ' fail' : s.patientR >= 0.75 ? ' warn' : '') + (selected === i ? ' selected' : '');
-    card.onclick = () => { selected = i; render(states); };
+    card.className = 'pcard' + (s.patientR >= 1.0 ? ' fail' : s.patientR >= 0.75 ? ' warn' : '') + (selected === s.person.id ? ' selected' : '');
+    card.onclick = () => { selected = s.person.id; render(states); };
     card.innerHTML = `
       <div class="pbadge ${
         b.key === 'ok' ? 'b-ok' :
@@ -683,12 +686,11 @@ function applyScenario(){
   addLog(`[SCENARIO] ${SCENARIOS[scenario].desc}`, 'info');
 }
 
-let lastBuckets = [];
+let lastBuckets = {};
 
 function render(states){
   buildCards(states);
-  if(selected >= states.length) selected = 0;
-  renderDetail(states[selected]);
+  renderDetail(states.find(s => s.person.id === selected) || states[0]);
   renderBuckets(states);
   drawDistribution(states);
 
@@ -705,9 +707,11 @@ function render(states){
     'SAFE — 教育用観察群';
   statusEl.style.color = cb.color;
 
-  const currentBuckets = states.map(s => bucketOf(s.patientR).key);
-  currentBuckets.forEach((b,i)=>{
-    if(lastBuckets[i] && lastBuckets[i] !== b){
+  const currentBuckets = {};
+  states.forEach((s,i)=>{
+    const b = bucketOf(s.patientR).key;
+    currentBuckets[s.person.id] = b;
+    if(lastBuckets[s.person.id] && lastBuckets[s.person.id] !== b){
       const name = states[i].person.name;
       if(b==='fail') addLog(`Human Reviewへ移行: ${name} R=${states[i].patientR.toFixed(3)}`, 'fail');
       else if(b==='warn') addLog(`Cautionへ移行: ${name} R=${states[i].patientR.toFixed(3)}`, 'warn');
@@ -723,9 +727,9 @@ function step(){
   tick++;
   const states = PEOPLE.map((p,i)=>makePatientState(p,i));
   states.sort((a,b)=>b.patientR-a.patientR);
-  if(selected >= states.length) selected = 0;
   render(states);
-  history.push(states.map(s=>s.patientR));
+  // 履歴は個体の並び（PEOPLEの順）で記録する
+  history.push(PEOPLE.map(p => states.find(s => s.person.id === p.id).patientR));
   if(history.length > 120) history.shift();
 }
 
@@ -738,9 +742,9 @@ function toggleRun(){
 
 function resetSim(){
   tick = 0;
-  selected = 0;
+  selected = null;
   history.length = 0;
-  lastBuckets = [];
+  lastBuckets = {};
   scenario = 'normal';
   document.getElementById('scenario-sel').value = 'normal';
   document.getElementById('scen-desc').textContent = SCENARIOS.normal.desc;
@@ -750,7 +754,7 @@ function resetSim(){
   addLog('個体別振り分け監視を開始', 'ok');
   const states = PEOPLE.map((p,i)=>makePatientState(p,i)).sort((a,b)=>b.patientR-a.patientR);
   render(states);
-  lastBuckets = states.map(s=>bucketOf(s.patientR).key);
+  lastBuckets = Object.fromEntries(states.map(s=>[s.person.id, bucketOf(s.patientR).key]));
 }
 
 resetSim();

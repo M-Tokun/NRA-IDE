@@ -120,7 +120,7 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 </div>
 
 <div class="overall">
-  <div class="overall-label">SYSTEM R_composite = δ_composite / τ_composite</div>
+  <div class="overall-label">SYSTEM R_total = max(R_i, R_corr)</div>
   <div class="overall-val" id="overall-r">0.00</div>
   <div id="overall-status" class="sys-stat-safe">SAFE — All factors normal</div>
 </div>
@@ -396,7 +396,7 @@ function update(){
     if(gOpen>70){ gStat.textContent='Full Corr.'; gStat.style.background='rgba(255,34,85,.1)'; gStat.style.color='var(--f)'; gStat.style.border='1px solid rgba(255,34,85,.3)'; }
     else if(gOpen>30){ gStat.textContent='Correcting'; gStat.style.background='rgba(255,215,0,.1)'; gStat.style.color='var(--w)'; gStat.style.border='1px solid rgba(255,215,0,.3)'; }
     else { gStat.textContent='Silent'; gStat.style.background='rgba(57,255,133,.1)'; gStat.style.color='var(--ok)'; gStat.style.border='1px solid rgba(57,255,133,.3)'; }
-    compositeR+=R;
+    compositeR=Math.max(compositeR,R); // take the worst factor instead of diluting by averaging
     // zone change log
     const zone=R>=1.0?'fail':R>=0.7?'warn':'ok';
     if(zone!==prevZones[i]){
@@ -424,7 +424,8 @@ function update(){
     ca.innerHTML=`<span class="corr-alert-ok">✓ Correlation normal  R_corr=${rCorrMax.toFixed(3)}</span>`;
   }
   // overall
-  const Rcomp=compositeR/4;
+  // R_total = max(R_i, R_corr), as stated in the README (no averaging that dilutes danger)
+  const Rcomp=Math.max(compositeR,rCorrMax);
   const oEl=document.getElementById('overall-r');
   oEl.textContent=Rcomp.toFixed(3); oEl.style.color=getColor(Rcomp);
   const oSt=document.getElementById('overall-status');

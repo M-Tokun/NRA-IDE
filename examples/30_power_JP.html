@@ -146,6 +146,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
   <div class="ctrl-row">
     <button class="pill on"       id="btnRun"  onclick="toggleRun()">RUN</button>
+    <button class="pill" id="btnNewEval" onclick="startNewEvaluation()">新しい評価</button>
     <button class="pill pill-load" id="btnLoad" onclick="toggleLoad()">負荷増加 OFF</button>
   </div>
 </div>
@@ -325,6 +326,10 @@ function resize(){
 }
 
 // ── コントロール ──
+// 不可逆ラッチの状態。解除は利用者の「新しい評価」操作だけ。
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; }
+
 function toggleRun(){
   running = !running;
   const b = document.getElementById('btnRun');
@@ -343,7 +348,9 @@ function onI(v){ I = parseFloat(v); document.getElementById('iDisp').innerHTML =
 function calcIDE(p){
   const delta = p - P_OPT;
   const absDelta = Math.abs(delta);
-  const rHi = delta > 0 ? delta / TAU_HI : 0;
+  // 熱蓄積で上限側の実効τを縮める（最大50%）。過電力が続くほど同じ電力でも R が上がる（保守側）。
+  const tauHiEff = TAU_HI * (1 - 0.5 * heatAccum / 100);
+  const rHi = delta > 0 ? delta / tauHiEff : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
   if(rHi >= R_RUPTURE)      { status='fail-hi'; action='過電力：RUPTURE_BOUNDARY — 遮断器トリップ'; }
@@ -351,6 +358,10 @@ function calcIDE(p){
   else if(rHi >= R_WARN) { status='warn-hi'; action='過電力警告：負荷低減推奨'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='電力不足警告：電圧・電流確認'; }
   else                   { status='safe';    action='正常稼働継続'; }
+  // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
+  // R の値は現在値を表示し続け、判定区分だけを固定する。
+  if (status.startsWith('fail') && !ruptureLatch) ruptureLatch = { status, action };
+  if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + '（固定中：「新しい評価」で解除）'; }
   return { delta, absDelta, rHi, rLo, status, action };
 }
 
@@ -379,8 +390,11 @@ function tick(dt){
   const ide = calcIDE(pSmooth);
 
   // 熱蓄積：過電力が続くと増大、正常時は放熱で減少
-  if(ide.rHi > 0){
-    heatAccum = Math.min(100, heatAccum + ide.rHi * 12 * dt);
+  // 熱の入力は観測した過電力（δ/τ_HI、τ_HIは固定の設計値）。R（評価出力）を使うと、R→熱→τ→R の
+  // 自己調整の経路（逆導出B）になるため使わない。
+  const overP = Math.max(0, pSmooth - P_OPT) / TAU_HI;
+  if(overP > 0){
+    heatAccum = Math.min(100, heatAccum + overP * 12 * dt);
   } else {
     heatAccum = Math.max(0, heatAccum - 8 * dt);
   }

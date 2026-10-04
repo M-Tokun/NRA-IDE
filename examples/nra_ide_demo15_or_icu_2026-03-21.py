@@ -15,7 +15,7 @@
 #   - HR / SpO₂ / RR / BP の4チャンネル同時監視
 #   - 経過蓄積によって τ が確立される（ウォームアップ構造）
 #   - R_total = √(ΣR²) — チャンネル間相関を使わない O(n) 合成
-#   - residual_debt = 一時回復後も消えない構造的負債
+#   - residual_debt = 一時回復後もすぐには消えず、ゆっくり減る構造的負債
 #   - 新患・救急 → ウォームアップ期間（威力なし）
 #   - 経過あり → 時間が経つほど精度が上がる
 #
@@ -327,7 +327,7 @@ class VitalSignNRA:
         """
         医師介入（人間操作）。
         外部実行権限による処置を開始するが、旧RUPTURE_BOUNDARYは解除しない。
-        residual_debt は介入後も残存する。
+        residual_debt は介入後もすぐには消えず、ゆっくり減る。
         """
         self._intervene = True
 
@@ -430,7 +430,7 @@ def main():
     print("=== 構造設計のポイント ===")
     print("  warmup_pct:    経過が積まれるほどτが確立 → R精度が上がる")
     print("  R_total:       √ΣR² 合成 — 各値が正常範囲内でも上昇しうる")
-    print("  residual_debt: 介入後も消えない構造的負債")
+    print("  residual_debt: 介入後もすぐには消えず、ゆっくり減る構造的負債")
     print("  RUPTURE_BOUNDARY:   医師介入後も旧状態を保持。後続はstart_new_patient_evaluation()で開始")
 
 

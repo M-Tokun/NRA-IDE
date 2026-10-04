@@ -246,7 +246,7 @@ button.stress:hover { background: #1a1000; }
 // ============================================================
 
 // --- FvCB model parameters (standard C3 plant values) ---
-// Temperature dependence uses a simplified Arrhenius/Q10 approximation
+// Temperature dependence: peaked Arrhenius (with high-temperature deactivation) for Vcmax/Jmax; Q10 approximation for Rd and Γ*
 const FvCB = {
   Vcmax25: 120,     // μmol/m²/s  maximum RuBisCO carboxylation rate at 25°C
   Jmax25:  210,     // μmol/m²/s  maximum electron transport rate at 25°C
@@ -255,15 +255,25 @@ const FvCB = {
   Km25:    650,     // μmol/mol   Michaelis constant Km at 25°C
   alpha:   0.3,     // quantum yield (light-to-electron-transport efficiency)
   theta:   0.7,     // curvature parameter for electron transport
-  // Arrhenius activation behavior (simplified Q10 approximation)
-  Q10_Vcmax: 2.2,
-  Q10_Jmax:  1.8,
+  // Temperature response of Vcmax and Jmax: peaked Arrhenius with a high-temperature deactivation term.
+  // Values follow Kattge & Knorr (2007, Plant Cell Environ. 30:1176) for a growth temperature of 25°C.
+  // A plain Q10 exponential kept increasing photosynthesis with temperature and hid heat stress, so it was replaced.
+  Ha_Vcmax: 71513,  Hd_Vcmax: 200000, dS_Vcmax: 641.6,   // J/mol, J/mol, J/mol/K
+  Ha_Jmax:  49884,  Hd_Jmax:  200000, dS_Jmax:  640.95,
   Q10_Rd:    2.0,
   Q10_Gamma: 1.4,
 };
 
 // NRA-IDE τ (allowable decline width for photosynthetic assimilation rate)
 const TAU_A = 8.0;   // μmol/m²/s
+
+// --- Temperature correction: peaked Arrhenius (1 at 25°C, declines at high temperature by deactivation) ---
+function peakedArrhenius(val25, Ha, Hd, dS, T) {
+  const Rg = 8.314, Tk = T + 273.15, Tr = 298.15;
+  return val25 * Math.exp(Ha * (Tk - Tr) / (Tr * Rg * Tk))
+               * (1 + Math.exp((Tr * dS - Hd) / (Tr * Rg)))
+               / (1 + Math.exp((Tk * dS - Hd) / (Rg * Tk)));
+}
 
 // --- Temperature correction (Q10 approximation) ---
 function q10(val25, Q10, T) {
@@ -280,8 +290,8 @@ function calcJ(PPFD, Jmax, alpha, theta) {
 
 // --- FvCB core calculation ---
 function calcFvCB(PPFD, Ci, T) {
-  const Vcmax = q10(FvCB.Vcmax25, FvCB.Q10_Vcmax, T);
-  const Jmax  = q10(FvCB.Jmax25,  FvCB.Q10_Jmax,  T);
+  const Vcmax = peakedArrhenius(FvCB.Vcmax25, FvCB.Ha_Vcmax, FvCB.Hd_Vcmax, FvCB.dS_Vcmax, T);
+  const Jmax  = peakedArrhenius(FvCB.Jmax25,  FvCB.Ha_Jmax,  FvCB.Hd_Jmax,  FvCB.dS_Jmax,  T);
   const Rd    = q10(FvCB.Rd25,    FvCB.Q10_Rd,    T);
   const Gamma = q10(FvCB.Gamma25, FvCB.Q10_Gamma, T);
   const Km    = FvCB.Km25; // Simplification: temperature dependence of Km is omitted

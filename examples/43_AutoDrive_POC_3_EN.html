@@ -118,6 +118,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
       <div class="btn-row">
         <button class="sel-btn" id="btn-summer" onclick="setTire('summer')">🔴 Summer Tire</button>
         <button class="sel-btn" id="btn-studs"  onclick="setTire('studs')">🔵 Winter (Studless)</button>
+        <button class="sel-btn" id="btnNewEval" onclick="startNewEvaluation()">New evaluation</button>
       </div>
     </div>
   </div>
@@ -199,7 +200,12 @@ function stopDist(v){const ms=v/3.6;return ms*REACT+(ms*ms)/(2*getDecel());}
 // R = 1.0 when stopping distance equals the gap (collision boundary).
 function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-(d-t));const R=t>0?delta/t:Infinity;return{delta,R,sd};}
 
+// Irreversible latch: once R ≥ 1.0 (fail-closed zone) is reached, it stays fixed until 'New evaluation' is pressed.
+let zoneLatched = false;
+function startNewEvaluation(){ zoneLatched = false; prevZone = ''; update(); }
 function zoneFromR(R){
+  if(R>=TH.D)zoneLatched=true;
+  if(zoneLatched)return'E';
   if(R<TH.A)return'A';
   if(R<TH.B)return'B';
   if(R<TH.C)return'C';

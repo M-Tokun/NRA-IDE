@@ -129,7 +129,7 @@
       <div class="deg-stat-val" id="tau-init" style="color:var(--yellow);">1.000</div>
     </div>
     <div class="deg-stat">
-      <div class="deg-stat-label">現在τ（劣化後）</div>
+      <div class="deg-stat-label">構造厚み τ_s（劣化後。判定は τ_eff = 0.25·τ_s + 0.02）</div>
       <div class="deg-stat-val" id="tau-current" style="color:var(--orange);">1.000</div>
     </div>
     <div class="deg-stat">
@@ -195,6 +195,10 @@ let degSensitivity = 5;
 const TAU_INIT = 1.0;
 let tauCurrent = TAU_INIT;
 let deltaAccum = 0;
+let tauLoss = 0;   // 累積したτ損失（不可逆） / cumulative τ loss (irreversible)
+// 判定に使う実効τ（τ_eff）。構造厚み tauCurrent をそのまま使わず 0.25倍+0.02 とする（デモ用の値）。
+// 画面の R の説明にも、この τ_eff を表示する。
+function effectiveTau(ts) { return ts * 0.25 + 0.02; }
 let tauHistory = [];   // for graph
 let rHistory = [];
 const HISTORY_LEN = 300;
@@ -229,6 +233,7 @@ document.querySelectorAll('.sc-btn').forEach(btn => {
 function reset() {
   tauCurrent = TAU_INIT;
   deltaAccum = 0;
+  tauLoss = 0;
   tauHistory = [];
   rHistory = [];
   frameCount = 0;
@@ -450,7 +455,7 @@ function updateUI(R, delta) {
   } else if (R >= 0.7) {
     rEl.style.color = '#ff9100'; zn.textContent = 'CRITICAL — 限界接近';
     rj.style.borderColor = '#ff9100'; rj.style.color = '#ff9100';
-    rj.textContent = `⚠ R ≥ 0.7 — 水位に関わらず今すぐ対応が必要です。τ = ${tauCurrent.toFixed(3)}`;
+    rj.textContent = `⚠ R ≥ 0.7 — 水位に関わらず今すぐ対応が必要です。τ_eff = ${effectiveTau(tauCurrent).toFixed(3)}（τ_s = ${tauCurrent.toFixed(3)}）`;
   } else if (R >= 0.4) {
     rEl.style.color = '#ffd740'; zn.textContent = 'ELASTIC — 監視中';
     rj.style.borderColor = '#ffd740'; rj.style.color = '#ffd740';
@@ -458,7 +463,7 @@ function updateUI(R, delta) {
   } else {
     rEl.style.color = '#00e676'; zn.textContent = 'NIRVANA — 安定';
     rj.style.borderColor = '#00e676'; rj.style.color = '#00e676';
-    rj.textContent = `✓ R < 0.4 — 安定。現在τ = ${tauCurrent.toFixed(3)}（初期比 ${(100 - degRate).toFixed(1)}%）`;
+    rj.textContent = `✓ R < 0.4 — 安定。τ_eff = ${effectiveTau(tauCurrent).toFixed(3)}（τ_s 初期比 ${(100 - degRate).toFixed(1)}%）`;
   }
 
   // Degradation stats
@@ -473,8 +478,9 @@ function updateUI(R, delta) {
   // 表示ラベルは「年」ではなく「単位」としており、実時間換算ではないことを示している。
   // Remaining life estimate
   if (deltaAccum > 0.001) {
-    const ratePerFrame = deltaAccum / frameCount;
-    const framesLeft = (tauCurrent - 0.1) / (ratePerFrame * degSensitivity * 0.0001);
+    // 残余寿命：これまでの平均損失速度（tauLoss / frameCount）で、τ_s が下限0.1に達するまでのフレーム数を見積もる
+    const lossPerFrame = tauLoss / frameCount;
+    const framesLeft = (tauCurrent - 0.1) / lossPerFrame;
     const yearsLeft = (framesLeft / 3600).toFixed(1);
     document.getElementById('remaining-life').textContent = `約 ${yearsLeft} 単位`;
     document.getElementById('remaining-life').style.color = parseFloat(yearsLeft) < 5 ? '#ff3d00' : parseFloat(yearsLeft) < 20 ? '#ff9100' : '#40c4ff';
@@ -516,13 +522,15 @@ function loop() {
   // deltaAccumは負荷の累積カウンタで、係数0.001*degSensitivity（degSensitivityはUIスライダー1〜20）で積算速度が決まる。
   // Tau degradation: δ accumulation erodes τ
   deltaAccum += delta * 0.001 * degSensitivity;
-  // tauCurrentはTAU_INIT(=1.0)からdeltaAccumに比例して減少し、下限0.1でフロアする。
-  // 係数0.0001*degSensitivity*10、および下限0.1はいずれも根拠不明・デモ用チューニング値。
-  tauCurrent = Math.max(0.1, TAU_INIT - deltaAccum * 0.0001 * degSensitivity * 10);
+  // tauCurrent（構造厚み τ_s）は TAU_INIT(=1.0) から累積損失 tauLoss だけ減り、下限0.1でフロアする。
+  // τの損失は、その時点の感度で1ステップずつ積み上げる（後から感度を下げてもτは戻らない＝不可逆）。
+  // 1ステップの損失 δ×0.001×感度×0.001×感度 は、修正前と同じ大きさ（デモ用の値）。
+  tauLoss += delta * 0.001 * degSensitivity * 0.001 * degSensitivity;
+  tauCurrent = Math.max(0.1, TAU_INIT - tauLoss);
 
   // 判定・描画に使う実効τは、tauCurrentをそのまま使わず0.25倍+0.02のオフセットを掛けた値。
   // 0.25・0.02とも根拠不明・デモ用チューニング値。
-  const tau = tauCurrent * 0.25 + 0.02;
+  const tau = effectiveTau(tauCurrent);
   const R = delta / tau; // 右パネル見出し「R = δ/τ」の実装値。左パネル（従来管理）は水位のみを見る対比構造
 
   // History

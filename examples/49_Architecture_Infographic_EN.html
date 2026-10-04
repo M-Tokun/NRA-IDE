@@ -249,30 +249,30 @@
     <section class="math-section">
         <div class="grid2">
             <div class="chart-box" class="ord-2">
-                <div class="chart-title">Structural Stability Index (R)</div>
+                <div class="chart-title">Constraint traceability vs. unbounded output (illustrative)</div>
                 <div class="chart-container"><canvas id="mathChart"></canvas></div>
             </div>
             <div class="ord-1">
                 <div class="accent-bar"><div class="bar bar-cyan"></div><h2 class="title-14">NRA Mathematical Definition</h2></div>
                 <p class="desc-p">
-                    We redefine "success" not as proximity to a center, but as <strong>Structural Stability (R)</strong>.
+                    We judge not by proximity to a center but by the <strong>boundary-approach ratio R</strong>.
                 </p>
                 <div class="formula-box">
                     <div class="formula">R = <span class="d">δ</span> / <span class="t">τ</span></div>
                     <div class="formula-legend">
                         <div class="legend-item">
                             <div class="legend-label cyan">δ (Delta)</div>
-                            <div class="legend-sub">Invariant Constraints</div>
+                            <div class="legend-sub">Deviation from the constraint (observed displacement)</div>
                         </div>
                         <div class="legend-item">
                             <div class="legend-label purple">τ (Tau)</div>
-                            <div class="legend-sub">Information Noise / Thickness</div>
+                            <div class="legend-sub">Tolerance thickness (margin declared before evaluation)</div>
                         </div>
                     </div>
                 </div>
                 <p class="desc-sm">
-                    To maximize stability (R), we fix invariants (δ) and minimize noise (τ).
-                    Traditional AI maximizes τ (hallucination) while ignoring δ.
+                    R shows how much of the declared tolerance τ the deviation δ has used.
+                    At R ≥ 1.0 the declared boundary is reached.
                 </p>
             </div>
         </div>
@@ -304,7 +304,7 @@
                 <div class="layer-badge">LAYER 03</div>
                 <h3>Post-NRA</h3>
                 <div class="sub">Boundary Control (R)</div>
-                <p>Output is measured against Layer 01's δ. If R drops below threshold: <strong>Fail-Closed</strong>.</p>
+                <p>Output is measured against the constraints fixed in Layer 01. When R reaches 1.0: <strong>Fail-Closed</strong>.</p>
                 <div class="layer-icon">🛑</div>
             </div>
         </div>
@@ -402,8 +402,8 @@ new Chart(c2, {
     data: {
         labels: ['Standard AI\n(Optimization)', 'NRA Model\n(Boundary Control)'],
         datasets: [
-            { label: 'δ Invariant Strength', data: [30,90], backgroundColor: '#06b6d4', borderRadius: 4 },
-            { label: 'τ Noise / Hallucination', data: [80,20], backgroundColor: '#8b5cf6', borderRadius: 4 }
+            { label: 'Constraint traceability (illustrative)', data: [30,90], backgroundColor: '#06b6d4', borderRadius: 4 },
+            { label: 'Unbounded output / hallucination (illustrative)', data: [80,20], backgroundColor: '#8b5cf6', borderRadius: 4 }
         ]
     },
     options: {

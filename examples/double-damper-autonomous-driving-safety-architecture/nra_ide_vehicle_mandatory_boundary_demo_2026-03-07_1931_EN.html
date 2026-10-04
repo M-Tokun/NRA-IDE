@@ -525,6 +525,7 @@
           <button data-scene="ghost">Ghost reflection</button>
           <button data-scene="drift">Ego-motion drift</button>
           <button data-scene="mixed">Compound anomaly</button>
+          <button id="btnNewEval">New evaluation</button>
         </div>
       </div>
       <div class="control-group">
@@ -809,6 +810,9 @@
       } else {
         state.decision = 'PASS';
       }
+      // Irreversible latch: once in FALLBACK, the decision stays fixed until 'New evaluation' is pressed (no override).
+      if (state.decision === 'FALLBACK') state.fallbackLatched = true;
+      if (state.fallbackLatched) state.decision = 'FALLBACK';
       // DANGER display fires when the composite value exceeds the slider-set dangerThreshold, OR when the
       // example-only dangerInject slider (per the danger-card note, absent from any real implementation)
       // is forced above the threshold.
@@ -1072,6 +1076,7 @@
       ui.dangerInjectRange.addEventListener(evt, syncControls);
     });
 
+    document.getElementById('btnNewEval').addEventListener('click', () => { state.fallbackLatched = false; });
     document.querySelectorAll('[data-scene]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.scene = btn.dataset.scene;

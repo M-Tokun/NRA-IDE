@@ -602,7 +602,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <button class="ctrl" id="sc-severe"  onclick="setScenario('severe')">🔥 Severe Drought</button>
       <button class="ctrl" id="sc-storm"   onclick="setScenario('storm')">⛈ Post-Storm</button>
     </div>
-    <div class="scenario-note" id="scenarioNote">Normal field environment. Periodic small disturbances occur.</div>
+    <div class="scenario-note" id="scenarioNote">Normal field environment. Periodic disturbances occur. Their peaks briefly exceed the declared limits, so the level reaches Lv.3+ during them.</div>
   </div>
 
   <div class="log-panel">
@@ -1011,10 +1011,10 @@ function tick() {
 // Scenarios
 // ─────────────────────────────────────────────
 const SCENARIO_NOTES = {
-  normal:  '🌱 Normal field environment. Periodic small disturbances occur.',
+  normal:  '🌱 Normal field environment. Periodic disturbances occur. Their peaks briefly exceed the declared limits (soil moisture 25%, solar 900 W/m², ground temp 32°C, etc.), so the level reaches Lv.3+ during them.',
   drought: '🏜 Mild Drought. Soil moisture begins to drop gradually. Watch the EMA rise.',
   severe:  '🔥 Severe Drought. Soil moisture, solar, and wind are heading to limits simultaneously. Observe the correlation.',
-  storm:   '⛈ Post-Storm Dry. Rapid drying after rain recovery. EMA predicts the "momentum" before thresholds are hit.',
+  storm:   '⛈ Post-Storm Dry. Rapid drying after rain recovery. EMA predicts the "momentum" before thresholds are hit. Wind counts as a drought-side factor (it drives evaporation), so strong wind alone (above the 8 m/s limit) raises the level even during rain.',
 };
 
 function setScenario(name) {

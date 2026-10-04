@@ -143,7 +143,7 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 
 <!-- overall -->
 <div class="overall">
-  <div class="overall-label">SYSTEM R_composite = δ_composite / τ_composite</div>
+  <div class="overall-label">SYSTEM R_total = max(R_i, R_corr)</div>
   <div class="overall-val" id="overall-r">0.00</div>
   <div id="overall-status" class="sys-stat-safe">SAFE — 全要素正常</div>
 </div>
@@ -502,7 +502,7 @@ function update(){
       gStat.textContent='沈黙'; gStat.style.background='rgba(57,255,133,.1)'; gStat.style.color='var(--ok)'; gStat.style.border='1px solid rgba(57,255,133,.3)';
     }
 
-    compositeR += R;
+    compositeR = Math.max(compositeR, R); // 平均で薄めず、最悪の要素を採る
 
     // zone change log
     const zone = R>=1.0?'fail':R>=0.7?'warn':'ok';
@@ -537,7 +537,8 @@ function update(){
   }
 
   // overall
-  const Rcomp = compositeR / 4;
+  // R_total = max(R_i, R_corr)（README記載どおり。平均で危険を薄めない）
+  const Rcomp = Math.max(compositeR, rCorrMax);
   const oEl = document.getElementById('overall-r');
   oEl.textContent = Rcomp.toFixed(3);
   oEl.style.color = getColor(Rcomp);

@@ -328,6 +328,7 @@
   let shortWindow = [];
   let longDamage = 0;
   let spike = 0;
+  let silenceLatched = false;
   let rawHistory = [];
   let shortHistory = [];
   let damageHistory = [];
@@ -348,6 +349,7 @@
     shortWindow = [];
     longDamage = 0;
     spike = 0;
+    silenceLatched = false;
     rawHistory = [];
     shortHistory = [];
     damageHistory = [];
@@ -430,6 +432,9 @@
     let state = 'PASS';
     if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE'; // hard stop: instantaneous R or long-term damage past 1.0
     else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP'; // pre-alarm / cautious band before SILENCE
+    // Irreversible latch: once in SILENCE, the state stays fixed until Reset is pressed.
+    if (state === 'SILENCE') silenceLatched = true;
+    if (silenceLatched) state = 'SILENCE';
 
     metrics.rNow.textContent = rNow.toFixed(2);
     metrics.rShort.textContent = rShort.toFixed(2);

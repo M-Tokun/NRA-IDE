@@ -140,6 +140,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   <div class="ctrl-row">
     <button class="pill on" id="btnRun" onclick="toggleRun()">RUN</button>
     <button class="pill pill-adj on" id="btnAdj" onclick="toggleAdj()">AUTO-ADJ ON</button>
+    <button class="pill" id="btnNewEval" onclick="startNewEvaluation()">New evaluation</button>
   </div>
 </div>
 
@@ -286,6 +287,10 @@ function toggleRun(){
   document.getElementById('btnRun').classList.toggle('on',running);
   document.getElementById('btnRun').textContent=running?'RUN':'PAUSE';
 }
+// Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
+let ruptureLatched=false;
+function startNewEvaluation(){ ruptureLatched=false; }
+
 function toggleAdj(){
   autoAdj=!autoAdj;
   const b=document.getElementById('btnAdj');
@@ -309,7 +314,7 @@ function calcIDE(t){
 }
 
 function calcAdj(R,drdt,amp,tSmooth){
-  if(R>=R_RUPTURE) return {adj:0,reason:'RUPTURE_BOUNDARY: adjustment authority returned'};
+  if(ruptureLatched||R>=R_RUPTURE) return {adj:0,reason:'RUPTURE_BOUNDARY: adjustment authority returned'};
   // ampRatio/ampWarn: flags vibration amplitude >150% of POLY_AMP baseline as anomalous,
   // independent of the tension-based R value — threshold 1.5 is a demo value, uncited.
   const ampRatio=amp/(POLY_AMP||1);
@@ -358,22 +363,23 @@ function tick(dt){
   rBuf.push(ide.R); if(rBuf.length>RBUF) rBuf.shift();
   drdt=rBuf.length>=2?(rBuf[rBuf.length-1]-rBuf[rBuf.length-2])/dt:0;
   R=ide.R;
+  if(R>=R_RUPTURE) ruptureLatched=true;
 
   // Auto-adjustment
   const adjResult=autoAdj?calcAdj(R,drdt,polyAmp,tSmooth):{adj:0,reason:'Manual mode'};
   adjOut=adjResult.adj;
-  if(autoAdj&&R<R_RUPTURE) tCurrent+=adjOut*dt*8;
+  if(autoAdj&&!ruptureLatched&&R<R_RUPTURE) tCurrent+=adjOut*dt*8;
 
   // Waveform history
   waveHistory.push({raw:tRaw,smooth:tSmooth,adj:adjOut});
   if(waveHistory.length>WAVE_LEN) waveHistory.shift();
 
   // Phase
-  const speed=R>=R_RUPTURE?0:Math.max(0.5,1.5-R);
+  const speed=(ruptureLatched||R>=R_RUPTURE)?0:Math.max(0.5,1.5-R);
   sprPhase+=speed*dt*120;
 
   // UI update
-  const status=R>=R_RUPTURE?'fail':R>=R_WARN?'warning':'safe';
+  const status=(ruptureLatched||R>=R_RUPTURE)?'fail':R>=R_WARN?'warning':'safe';
   const col={safe:'#00e5a0',warning:'#f0a500',fail:'#ff3b5c'}[status];
 
   document.getElementById('rNum').textContent=Math.min(R,9.999).toFixed(3);
@@ -423,7 +429,7 @@ function setMark(id,t){
 function drawChain(){
   const W=chainC.width,H=chainC.height;
   cc.clearRect(0,0,W,H);
-  const status=R>=R_RUPTURE?'fail':R>=R_WARN?'warning':'safe';
+  const status=(ruptureLatched||R>=R_RUPTURE)?'fail':R>=R_WARN?'warning':'safe';
   const col={safe:'#00e5a0',warning:'#f0a500',fail:'#ff3b5c'}[status];
 
   // Sprocket definitions
@@ -564,7 +570,7 @@ function drawWave(){
   const W=waveC.width,H=waveC.height;
   wc.clearRect(0,0,W,H);
   if(waveHistory.length<2) return;
-  const status=R>=R_RUPTURE?'fail':R>=R_WARN?'warning':'safe';
+  const status=(ruptureLatched||R>=R_RUPTURE)?'fail':R>=R_WARN?'warning':'safe';
   const col={safe:'#00e5a0',warning:'#f0a500',fail:'#ff3b5c'}[status];
 
   const tMin=T_MIN-20,tMax=T_MAX+20,tRange=tMax-tMin;

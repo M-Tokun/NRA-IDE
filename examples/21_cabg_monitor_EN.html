@@ -48,17 +48,14 @@ input[type=range]{flex:1;}
       <span class="live">MGF: <span id="mgfLive">35.0</span> mL/min</span><br>
       <span class="live">PI: <span id="piLive">2.80</span></span><br>
       <span class="live">DF%: <span id="dfLive">65</span>%</span><br>
-      <span class="live" id="status">SAFE</span>
+      <span class="live" id="status">SAFE</span> <button id="btnNewEval" onclick="startNewEvaluation()">New evaluation</button>
     </div>
   </div>
 
   <div class="controls">
     <h3 class="panel-title">Parameter Adjustment</h3>
-    <div class="slider-row"><label>Internal Pressure P</label><input aria-label="Internal Pressure P" type="range" id="p" min="60" max="180" value="120"></div>
     <div class="slider-row"><label>Temperature T</label><input aria-label="Temperature T" type="range" id="t" min="30" max="42" value="37"></div>
     <div class="slider-row"><label>Blood Flow</label><input aria-label="Blood Flow" type="range" id="f" min="10" max="120" value="80"></div>
-    <div class="slider-row"><label>Adhesion Adh</label><input aria-label="Adhesion Adh" type="range" id="a" min="0.2" max="2.5" step="0.1" value="1.0"></div>
-    <div class="slider-row"><label>Shear Stress</label><input aria-label="Shear Stress" type="range" id="s" min="0" max="30" value="12"></div>
     <div class="slider-row"><label>Wall Tension</label><input aria-label="Wall Tension" type="range" id="w" min="40" max="180" value="90"></div>
 
     <h3 class="panel-title-mt">Threshold Adjustment (dashed lines)</h3>
@@ -72,12 +69,15 @@ input[type=range]{flex:1;}
 
 <script>
 // Variables
-// NOTE: P, Adh and Shear are read from their sliders (see updateAll below) but are NOT
-// referenced anywhere inside calcIDE()'s R calculation. Only T and Flow (via tau) and
-// GraftMGF/PI/DF (via the delta terms) feed R. Tension is used only in drawVessel() to
-// size the drawn vessel radius; it does not affect R either.
-let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
+// R uses only T and Flow (via tau) and GraftMGF/PI/DF (via the delta terms).
+// The Internal Pressure P, Adhesion Adh and Shear sliders were not used by the judgment and were removed.
+// Tension is used only to size the vessel drawn by drawVessel(); it does not affect R.
+let T=37, Flow=80, Tension=90;
 let GraftMGF=35, PI=2.8, DF=65;
+const DF_REF = 65;
+// Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
+let ruptureLatch = null;
+function startNewEvaluation(){ ruptureLatch = null; }
 let PI_THRESH=5.0, MGF_THRESH=20, R_RUPTURE=1.0;
 let lastStatus = 'SAFE';
 
@@ -123,7 +123,10 @@ function calcIDE() {
   const tau = 1.0 * (310/(T+273)) * (1 + Flow/200);
   const deltaMGF = Math.abs(GraftMGF - 35)/15;   // deviation from 35 mL/min baseline MGF; /15 normalization has no documented basis (demo tuning)
   const deltaPI = Math.max(0, PI - 2.8)/3;        // one-sided deviation above 2.8 baseline PI; /3 normalization has no documented basis (demo tuning)
-  const deltaDF = Math.max(0, 100 - DF)/30;       // one-sided deficit below 100% DF; /30 normalization has no documented basis (demo tuning)
+  // DF is the one-sided deficit below DF_REF (declared as the value at monitoring start). Measuring from
+  // 100% left a permanent deviation of at least 0.33 within the displayed range [30,90], so R read high even
+  // in normal conditions. /30 is a demo normalization value.
+  const deltaDF = Math.max(0, DF_REF - DF)/30;
   const R = (deltaMGF + deltaPI + deltaDF) / tau; // R = boundary-approach ratio; the three deviations are summed with equal weight
 
   let st = 'SAFE', col = '#88ffcc', msg = '';
@@ -137,6 +140,9 @@ function calcIDE() {
     // documented elsewhere in this file — demo tuning values.
     st = 'WARNING'; col = '#ffcc00'; msg = `WARN — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)}`;
   }
+
+  if (st === 'RUPTURE_BOUNDARY' && !ruptureLatch) ruptureLatch = { st, col, msg };
+  if (ruptureLatch) { st = ruptureLatch.st; col = ruptureLatch.col; msg = ruptureLatch.msg; }
 
   safeSet('status', st);
   els.status.style.color = col;
@@ -207,11 +213,8 @@ function drawTTFMWave() {
 
 // Update all
 function updateAll() {
-  P = parseFloat(document.getElementById('p')?.value || 120);
   T = parseFloat(document.getElementById('t')?.value || 37);
   Flow = parseFloat(document.getElementById('f')?.value || 80);
-  Adh = parseFloat(document.getElementById('a')?.value || 1.0);
-  Shear = parseFloat(document.getElementById('s')?.value || 12);
   Tension = parseFloat(document.getElementById('w')?.value || 90);
 
   PI_THRESH = parseFloat(document.getElementById('piThresh')?.value || 5);
@@ -233,7 +236,7 @@ function updateAll() {
 }
 
 // Events
-['p','t','f','a','s','w','piThresh','mgfThresh','rFail'].forEach(id => {
+['t','f','w','piThresh','mgfThresh','rFail'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updateAll);
 });

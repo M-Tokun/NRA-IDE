@@ -525,6 +525,7 @@
           <button data-scene="ghost">ゴースト反射</button>
           <button data-scene="drift">自己運動ドリフト</button>
           <button data-scene="mixed">複合異常</button>
+          <button id="btnNewEval">新しい評価</button>
         </div>
       </div>
       <div class="control-group">
@@ -806,6 +807,9 @@
       } else {
         state.decision = 'PASS';
       }
+      // 不可逆ラッチ：一度 FALLBACK に入ったら、「新しい評価」で解除するまで固定する（上書き不可）。
+      if (state.decision === 'FALLBACK') state.fallbackLatched = true;
+      if (state.fallbackLatched) state.decision = 'FALLBACK';
       // DANGER表示: composite合成値がスライダー設定のdangerThresholdを超える、
       // または見本用のdangerInject（danger-cardの説明の通り実運用には存在しないスライダー）が閾値を超えると強制点灯する。
       const dangerNow = composite >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
@@ -1063,6 +1067,7 @@
       ui.dangerInjectRange.addEventListener(evt, syncControls);
     });
 
+    document.getElementById('btnNewEval').addEventListener('click', () => { state.fallbackLatched = false; });
     document.querySelectorAll('[data-scene]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.scene = btn.dataset.scene;

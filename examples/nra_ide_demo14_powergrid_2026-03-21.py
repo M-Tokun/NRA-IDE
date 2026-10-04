@@ -55,7 +55,7 @@ class PowerGridNRA:
     設計原則:
       - τ は系統慣性エネルギーに基づく設計値（スライダーで調整可）
       - δ = |f_current - 50.0Hz|
-      - residual_debt: スパイク後も消えない構造的負債
+      - residual_debt: スパイク後もすぐには消えず、R が低い間にゆっくり減る構造的負債
       - RUPTURE_BOUNDARY 後は start_new_evaluation() で独立した新履歴を開始
 
     Parameters
@@ -85,7 +85,6 @@ class PowerGridNRA:
         # イベント状態（Cause-Side のみ）
         self._trip_decay:  float = 0.0
         self._surge_decay: float = 0.0
-        self._recover:     bool  = False
 
         # 出力ログ
         self.history: List[dict] = []
@@ -136,14 +135,9 @@ class PowerGridNRA:
             self._surge_decay = max(0.0, self._surge_decay - dt * 0.25)
             event_delta += self._surge_decay * 0.5
 
-        # 復旧力（人間操作で有効化）
-        recover_force = 0.35 * dt if self._recover else 0.0
-
-        # δ合成
+        # δ合成（Python 版には復旧操作を実装していない。HTML 版の「系統復旧」は画面操作のみ）
         raw_delta = micro + macro + event_delta
-        delta = max(0.0,
-            abs(raw_delta) - recover_force
-        ) * math.copysign(1.0, raw_delta + 1e-9)
+        delta = abs(raw_delta) * math.copysign(1.0, raw_delta + 1e-9)
 
         # 周波数更新
         self.freq = max(47.0, min(53.0, self.F_NOM - delta * 4.0))
@@ -203,10 +197,6 @@ class PowerGridNRA:
         """FSM 遷移ロジック（組み合わせ回路相当）"""
         if self.fsm == FSMState.RUPTURE_BOUNDARY:
             return
-        if self._recover and self.R < 0.8:
-            self.fsm = FSMState.CRITICAL
-            return
-
         if self.R >= self.TH_RUPTURE_BOUNDARY or self.residual_debt > 0.8:
             self.fsm = FSMState.RUPTURE_BOUNDARY
         elif self.R >= self.TH_CAVEAT:
@@ -306,7 +296,7 @@ def main():
 
     print()
     print("=== 構造設計のポイント ===")
-    print("  residual_debt: スパイク後も消えない構造的負債")
+    print("  residual_debt: スパイク後もすぐには消えず、ゆっくり減る構造的負債")
     print("  RUPTURE_BOUNDARY : 同一履歴では解除せず、start_new_evaluation()で新履歴を開始")
     print("  波形が正常に見えても debt が残れば構造は回復していない")
 
