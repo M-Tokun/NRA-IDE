@@ -61,7 +61,6 @@ input[type=range]{flex:1;}
     <h3 class="panel-title-mt">Threshold Adjustment (dashed lines)</h3>
     <div class="slider-row"><label>PI Upper Limit</label><input aria-label="PI Upper Limit" type="range" id="piThresh" min="2" max="8" step="0.1" value="5"><span id="piThreshVal">5.0</span></div>
     <div class="slider-row"><label>MGF Lower Limit</label><input aria-label="MGF Lower Limit" type="range" id="mgfThresh" min="5" max="50" step="1" value="20"><span id="mgfThreshVal">20</span></div>
-    <div class="slider-row"><label>R Fail Threshold</label><input aria-label="R Fail Threshold" type="range" id="rFail" min="0.6" max="1.8" step="0.05" value="1.0"><span id="rFailVal">1.0</span></div>
   </div>
 </div>
 
@@ -78,7 +77,8 @@ const DF_REF = 65;
 // Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
 let ruptureLatch = null;
 function startNewEvaluation(){ ruptureLatch = null; }
-let PI_THRESH=5.0, MGF_THRESH=20, R_RUPTURE=1.0;
+// The rupture boundary is fixed at R = 1.0 (the common README threshold). It used to be adjustable in 0.6–1.8 by a slider, but a movable boundary removes the meaning of R = 1.0.
+let PI_THRESH=5.0, MGF_THRESH=20; const R_RUPTURE=1.0;
 let lastStatus = 'SAFE';
 
 // DOM
@@ -89,8 +89,7 @@ const els = {
   dfLive: document.getElementById('dfLive'),
   status: document.getElementById('status'),
   piThreshVal: document.getElementById('piThreshVal'),
-  mgfThreshVal: document.getElementById('mgfThreshVal'),
-  rFailVal: document.getElementById('rFailVal')
+  mgfThreshVal: document.getElementById('mgfThreshVal')
 };
 
 // Add log entry
@@ -219,7 +218,6 @@ function updateAll() {
 
   PI_THRESH = parseFloat(document.getElementById('piThresh')?.value || 5);
   MGF_THRESH = parseFloat(document.getElementById('mgfThresh')?.value || 20);
-  R_RUPTURE = parseFloat(document.getElementById('rFail')?.value || 1.0);
 
   // Simulated random-walk steps (Math.random()-0.5 per tick), clamped to demo ranges below.
   // Not driven by any physical model — purely for the live-demo animation.
@@ -229,14 +227,13 @@ function updateAll() {
 
   safeSet('piThreshVal', PI_THRESH.toFixed(1));
   safeSet('mgfThreshVal', MGF_THRESH);
-  safeSet('rFailVal', R_RUPTURE.toFixed(2));
 
   drawVessel();
   drawTTFMWave();
 }
 
 // Events
-['t','f','w','piThresh','mgfThresh','rFail'].forEach(id => {
+['t','f','w','piThresh','mgfThresh'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updateAll);
 });

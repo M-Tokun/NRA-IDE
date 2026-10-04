@@ -61,7 +61,6 @@ input[type=range]{flex:1;}
     <h3 class="panel-title-mt">閾値調整（破線移動）</h3>
     <div class="slider-row"><label>PI上限</label><input aria-label="PI上限しきい値" type="range" id="piThresh" min="2" max="8" step="0.1" value="5"><span id="piThreshVal">5.0</span></div>
     <div class="slider-row"><label>MGF下限</label><input aria-label="MGF下限しきい値" type="range" id="mgfThresh" min="5" max="50" step="1" value="20"><span id="mgfThreshVal">20</span></div>
-    <div class="slider-row"><label>R Fail閾値</label><input aria-label="R異常しきい値" type="range" id="rFail" min="0.6" max="1.8" step="0.05" value="1.0"><span id="rFailVal">1.0</span></div>
   </div>
 </div>
 
@@ -78,7 +77,8 @@ const DF_REF = 65;
 // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
 let ruptureLatch = null;
 function startNewEvaluation(){ ruptureLatch = null; }
-let PI_THRESH=5.0, MGF_THRESH=20, R_RUPTURE=1.0;
+// 破断境界は R = 1.0 に固定（README の共通閾値）。以前はスライダーで 0.6〜1.8 に動かせたが、境界を動かせると R = 1.0 の意味が消える。
+let PI_THRESH=5.0, MGF_THRESH=20; const R_RUPTURE=1.0;
 let lastStatus = 'SAFE';
 
 // DOM
@@ -89,8 +89,7 @@ const els = {
   dfLive: document.getElementById('dfLive'),
   status: document.getElementById('status'),
   piThreshVal: document.getElementById('piThreshVal'),
-  mgfThreshVal: document.getElementById('mgfThreshVal'),
-  rFailVal: document.getElementById('rFailVal')
+  mgfThreshVal: document.getElementById('mgfThreshVal')
 };
 
 // ログ追加関数
@@ -217,7 +216,6 @@ function updateAll() {
 
   PI_THRESH = parseFloat(document.getElementById('piThresh')?.value || 5);
   MGF_THRESH = parseFloat(document.getElementById('mgfThresh')?.value || 20);
-  R_RUPTURE = parseFloat(document.getElementById('rFail')?.value || 1.0);
 
   // 疑似ランダムウォーク（Math.random()-0.5を毎ティック加算）。下記の範囲にクランプ。
   // 物理モデルに基づくものではなく、ライブデモのアニメーション用。
@@ -227,14 +225,13 @@ function updateAll() {
 
   safeSet('piThreshVal', PI_THRESH.toFixed(1));
   safeSet('mgfThreshVal', MGF_THRESH);
-  safeSet('rFailVal', R_RUPTURE.toFixed(2));
 
   drawVessel();
   drawTTFMWave();
 }
 
 // イベント
-['t','f','w','piThresh','mgfThresh','rFail'].forEach(id => {
+['t','f','w','piThresh','mgfThresh'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updateAll);
 });

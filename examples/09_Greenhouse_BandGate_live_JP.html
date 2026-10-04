@@ -448,11 +448,11 @@ footer a { color:var(--co2); text-decoration:none; }
 
       <!-- 水圧 -->
       <div class="pg-item">
-        <div class="sensor-title text-water">💧 水圧 τ_high / τ_low</div>
-        <div class="pg-head"><span class="pg-name">τ_high (kPa)</span><span class="pg-val" id="v-wh">70</span></div>
-        <input type="range" class="water" id="sl-wh" min="40" max="120" value="70" title="τ_high (water)">
-        <div class="pg-head mt-6"><span class="pg-name">τ_low (kPa)</span><span class="pg-val" id="v-wl">30</span></div>
-        <input type="range" class="water" id="sl-wl" min="5" max="60" value="30" title="τ_low (water)">
+        <div class="sensor-title text-water">💧 水圧 上限 / 下限</div>
+        <div class="pg-head"><span class="pg-name">上限 (kPa)</span><span class="pg-val" id="v-wh">70</span></div>
+        <input type="range" class="water" id="sl-wh" min="40" max="120" value="70" title="上限 (water)">
+        <div class="pg-head mt-6"><span class="pg-name">下限 (kPa)</span><span class="pg-val" id="v-wl">30</span></div>
+        <input type="range" class="water" id="sl-wl" min="5" max="60" value="30" title="下限 (water)">
         <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.20/0.50</span></div>
         <input type="range" class="water" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.20" title="α_upper (water)">
         <input type="range" class="water mt-3" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.50" title="α_lower (water)">
@@ -460,11 +460,11 @@ footer a { color:var(--co2); text-decoration:none; }
 
       <!-- 気温 -->
       <div class="pg-item">
-        <div class="sensor-title text-temp">🌡 気温 τ_high / τ_low</div>
-        <div class="pg-head"><span class="pg-name">τ_high (°C)</span><span class="pg-val" id="v-th">35</span></div>
-        <input type="range" class="temp" id="sl-th" min="20" max="50" value="35" title="τ_high (temp)">
-        <div class="pg-head mt-6"><span class="pg-name">τ_low (°C)</span><span class="pg-val" id="v-tl">10</span></div>
-        <input type="range" class="temp" id="sl-tl" min="0" max="25" value="10" title="τ_low (temp)">
+        <div class="sensor-title text-temp">🌡 気温 上限 / 下限</div>
+        <div class="pg-head"><span class="pg-name">上限 (°C)</span><span class="pg-val" id="v-th">35</span></div>
+        <input type="range" class="temp" id="sl-th" min="20" max="50" value="35" title="上限 (temp)">
+        <div class="pg-head mt-6"><span class="pg-name">下限 (°C)</span><span class="pg-val" id="v-tl">10</span></div>
+        <input type="range" class="temp" id="sl-tl" min="0" max="25" value="10" title="下限 (temp)">
         <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ta">0.25/0.45</span></div>
         <input type="range" class="temp" id="sl-tau" min="0.01" max="0.99" step="0.01" value="0.25" title="α_upper (temp)">
         <input type="range" class="temp mt-3" id="sl-tal" min="0.01" max="0.99" step="0.01" value="0.45" title="α_lower (temp)">
@@ -472,11 +472,11 @@ footer a { color:var(--co2); text-decoration:none; }
 
       <!-- CO2 -->
       <div class="pg-item">
-        <div class="sensor-title text-co2">🌿 CO₂ τ_high / τ_low</div>
-        <div class="pg-head"><span class="pg-name">τ_high (ppm)</span><span class="pg-val" id="v-ch">1200</span></div>
-        <input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200" title="τ_high (co2)">
-        <div class="pg-head mt-6"><span class="pg-name">τ_low (ppm)</span><span class="pg-val" id="v-cl">400</span></div>
-        <input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400" title="τ_low (co2)">
+        <div class="sensor-title text-co2">🌿 CO₂ 上限 / 下限</div>
+        <div class="pg-head"><span class="pg-name">上限 (ppm)</span><span class="pg-val" id="v-ch">1200</span></div>
+        <input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200" title="上限 (co2)">
+        <div class="pg-head mt-6"><span class="pg-name">下限 (ppm)</span><span class="pg-val" id="v-cl">400</span></div>
+        <input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400" title="下限 (co2)">
         <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ca">0.30/0.40</span></div>
         <input type="range" class="co2" id="sl-cau" min="0.01" max="0.99" step="0.01" value="0.30" title="α_upper (co2)">
         <input type="range" class="co2 mt-3" id="sl-cal" min="0.01" max="0.99" step="0.01" value="0.40" title="α_lower (co2)">
@@ -484,11 +484,11 @@ footer a { color:var(--co2); text-decoration:none; }
 
       <!-- EC -->
       <div class="pg-item">
-        <div class="sensor-title text-ec">⚗ 養液EC τ_high / τ_low</div>
-        <div class="pg-head"><span class="pg-name">τ_high (mS/cm)</span><span class="pg-val" id="v-eh">3.5</span></div>
-        <input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5" title="τ_high (ec)">
-        <div class="pg-head mt-6"><span class="pg-name">τ_low (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div>
-        <input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8" title="τ_low (ec)">
+        <div class="sensor-title text-ec">⚗ 養液EC 上限 / 下限</div>
+        <div class="pg-head"><span class="pg-name">上限 (mS/cm)</span><span class="pg-val" id="v-eh">3.5</span></div>
+        <input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5" title="上限 (ec)">
+        <div class="pg-head mt-6"><span class="pg-name">下限 (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div>
+        <input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8" title="下限 (ec)">
         <div class="pg-head mt-6"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ea">0.20/0.55</span></div>
         <input type="range" class="ec" id="sl-eau" min="0.01" max="0.99" step="0.01" value="0.20" title="α_upper (ec)">
         <input type="range" class="ec mt-3" id="sl-eal" min="0.01" max="0.99" step="0.01" value="0.55" title="α_lower (ec)">

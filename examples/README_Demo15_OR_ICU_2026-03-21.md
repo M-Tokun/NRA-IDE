@@ -96,15 +96,15 @@ A patient who survived a hemorrhagic event 20 minutes ago is not structurally eq
 
 This is the most important design element of Demo #15.
 
-When the demo starts (equivalent to a new patient or emergency arrival), the accuracy indicator shows ☆☆☆☆☆. τ has not been established. R values displayed are reference-only.
+When the procedure starts (equivalent to a new patient or emergency arrival), the accuracy indicator shows ☆☆☆☆☆. The patient's own course is not yet accumulated, so the displayed R values are reference-only. τ itself is fixed at the design value; the warmup does not scale τ or R.
 
-As procedure time accumulates, τ is progressively established from the patient's own baseline.  
+Warmup is counted from the start of the procedure (waiting time before it is not counted). As the course accumulates, the accuracy indicator rises and the residual_debt weight $w_f$ grows.
 
-At 100% warmup, the accuracy reaches ★★★★★ and R operates at full structural reliability.
+At 100% warmup, the accuracy reaches ★★★★★ and residual_debt operates at full weight. The rupture judgment (R_eff ≥ 1.0) is not suppressed during warmup.
 
 ```
 
-00:00  新患状態 / τ未確立 / R = 参考値のみ
+00:00  新患状態 / 経過なし / R = 参考値のみ（τは設計値で固定）
 
   ↓
 
@@ -112,7 +112,7 @@ At 100% warmup, the accuracy reaches ★★★★★ and R operates at full stru
 
   ↓
 
-τ確立完了 / R = 最高精度 / residual_debt が構造的意味を持つ
+経過の蓄積完了 / 精度 最高 / residual_debt が全重みで効く
 
 ```
 
@@ -155,7 +155,7 @@ Waveform brightness increases while fail-closed operational suppression is activ
 
 | Display | Meaning |
 |---|---|
-| 経過蓄積 / Baseline確立 | Warmup progress. τ is being established from observation history. |
+| 経過蓄積 / Baseline確立 | Warmup progress (counted from procedure start). Raises the accuracy indicator and the residual_debt weight; τ stays at the design value. |
 | Phase Box | Current FSM state |
 | HR / SpO₂ / RR / BP | Current vital values with individual R bars |
 | residual_debt | **Structural debt. Does not reset after recovery; decays only slowly while R_total stays low.** |
@@ -176,7 +176,7 @@ Waveform brightness increases while fail-closed operational suppression is activ
 
 | State | Condition | Meaning |
 |---|---|---|
-| WARMING UP | warmupPct < 15% | τ not established. Observation phase. |
+| WARMING UP | warmupPct < 15% and R_eff < 1.0 | Course not yet accumulated. Observation phase (R is reference-only; a rupture judgment is still applied). |
 | ACTIVE | R_eff < 0.35 | Structural stability confirmed. |
 | CAVEAT ⚠ | 0.35 ≤ R_eff < 0.6 | δ accumulation detected. Monitor closely. |
 | CRITICAL 🔴 | 0.6 ≤ R_eff < 1.0 | Approaching threshold. Pre-intervention zone. |
@@ -306,9 +306,9 @@ Effect-Side recovery (the waveform returning to normal) does not constitute Caus
 
 | Context | NRA-IDE Applicable | Reason |
 |---|---|---|
-| New patient, first contact | ✗ No | No baseline. τ not established. |
-| Emergency arrival (first 15 min) | ✗ Limited | Warmup phase. Reference only. |
-| Intraoperative monitoring (after start) | ✓ Yes | δ accumulates from incision. τ established progressively. |
+| New patient, first contact | ✗ No | No accumulated course. R is reference-only. |
+| Emergency arrival (first 15% of the 90 s warmup) | ✗ Limited | Warmup phase. Reference only. |
+| Intraoperative monitoring (after start) | ✓ Yes | δ accumulates from incision; the course accuracy rises progressively. |
 | ICU continuous monitoring | ✓ Yes | Hours of history. Highest structural reliability. |
 | Post-op recovery room | ✓ Yes | Transition from intraoperative baseline. |
 | Chronic disease outpatient follow-up | ✓ Yes | Long history. residual_debt highly meaningful. |

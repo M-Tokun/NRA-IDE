@@ -336,6 +336,7 @@ const BUF = 500;
 
 let speed = 2;
 let simTime = 0;         // Seconds inside the simulation
+let procSec = 0;         // Seconds since procedure start (basis of the warm-up)
 let animId = null;
 let running = false;
 let procedureStarted = false;
@@ -448,14 +449,16 @@ function physicsStep() {
     return;
   }
 
-  // Warm-up progression
-  st.warmupPct = Math.min(100, (simTime / WARMUP_SEC) * 100);
-  // τ is gradually established and reaches its design value when warm-up completes
+  // Warm-up progress (counted from procedure start; waiting time before the procedure is not counted)
+  procSec += dt;
+  st.warmupPct = Math.min(100, (procSec / WARMUP_SEC) * 100);
+  // τ is fixed at the design value. Warm-up only changes the accuracy of the course (wf); neither τ nor R is scaled.
+  // (Previously wf scaled both τ and R and cancelled, so warm-up progress had no effect on the judgment.)
   const wf = st.warmupPct / 100;
-  tau.hr   = tauBase.hr   * wf;
-  tau.spo2 = tauBase.spo2 * wf;
-  tau.rr   = tauBase.rr   * wf;
-  tau.bp   = tauBase.bp   * wf;
+  tau.hr   = tauBase.hr;
+  tau.spo2 = tauBase.spo2;
+  tau.rr   = tauBase.rr;
+  tau.bp   = tauBase.bp;
 
   // ── Natural fluctuations ──
   const micro = (Math.random()-0.5);
@@ -525,8 +528,7 @@ function physicsStep() {
   st.Rtotal = Math.sqrt(
     st.R.hr**2 + st.R.spo2**2 + st.R.rr**2 + st.R.bp**2
   );
-  // Accuracy correction: apply an accuracy coefficient before warm-up completes
-  st.Rtotal *= wf;
+  // R during warm-up is a reference value. The accuracy coefficient wf is not applied to the judged R; it only weights the residual debt.
 
   // Residual debt becomes more meaningful as time-course history accumulates
   const k_rec = 0.10 + recoverF;
@@ -543,12 +545,13 @@ function physicsStep() {
 
   if (prevPhase === 'RUPTURE_BOUNDARY') {
     st.phase = 'RUPTURE_BOUNDARY';
+  } else if (Reff >= 1.0 || st.residualDebt > 1.2) {
+    // The rupture judgment is not suppressed during warm-up or intervention (conservative side).
+    st.phase = 'RUPTURE_BOUNDARY';
   } else if (st.warmupPct < 15) {
     st.phase = 'WARMUP';
   } else if (st.intervene) {
     st.phase = 'CRITICAL';
-  } else if (Reff >= 1.0 || st.residualDebt > 1.2) {
-    st.phase = 'RUPTURE_BOUNDARY';
   } else if (Reff >= 0.6 || st.residualDebt > 0.7) {
     st.phase = 'CRITICAL';
   } else if (Reff >= 0.35) {
@@ -753,7 +756,7 @@ function updateUI() {
   const mm = String(Math.floor(simTime/60)).padStart(2,'0');
   const ss = String(Math.floor(simTime%60)).padStart(2,'0');
   document.getElementById('elapsed-time').textContent = mm + ':' + ss;
-  const rem = Math.max(0, WARMUP_SEC - simTime);
+  const rem = Math.max(0, WARMUP_SEC - procSec);
   const rm = String(Math.floor(rem/60)).padStart(2,'0');
   const rs = String(Math.floor(rem%60)).padStart(2,'0');
   document.getElementById('warmup-remain').textContent = st.warmupPct >= 100 ? 'Established' : rm + ':' + rs;
@@ -819,7 +822,7 @@ function startNewPatientEvaluation() {
     });
   }
   procedureStarted = false;
-  simTime = 0; bufIdx = 0;
+  simTime = 0; procSec = 0; bufIdx = 0;
   st = {
     hr:72, spo2:99, rr:14, bp:120,
     delta:{hr:0,spo2:0,rr:0,bp:0},

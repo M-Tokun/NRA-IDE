@@ -20,7 +20,7 @@
 - `14_powergrid_transition_EN.html`, `14_powergrid_transition_JP.html`
 - `15_or_icu_continuum_EN.html`, `15_or_icu_continuum_JP.html`
 - `17_water_ice_phase_transition_EN.html`, `17_water_ice_phase_transition_JP.html`
-- `18_chain_tension_EN1.html`, `18_chain_tension_JP.html`
+- `18_chain_tension_EN.html`, `18_chain_tension_JP.html`
 - `19_air_pressure_EN.html`, `19_air_pressure_JP.html`
 - `20_water_pressure_EN.html`, `20_water_pressure_JP.html`
 - `21_cabg_monitor_EN.html`, `21_cabg_monitor_JP.html`
@@ -52,5 +52,7 @@
 ### 2. 変更差分の整合性確認
 
 `git diff` を用いて、意図しないタグ構成の変更や破壊的変更がなく、スライダー入力タグ部分のみに `aria-label` が追加されていることを確認しました。
-これで、アクセシビリティ標準を満たした状態でシミュレータが動作することを確認いたしました。
+これで、`<input type="range">` の `aria-label`／`title` 属性の欠落（アクセシビリティ警告）が監査スクリプト上で0件になったことを確認しました。
+
+**確認の範囲：** この監査は属性の有無だけを見ています。シミュレータの計算・状態遷移・判定の正しさ、ブラウザでの実際の動作は、この確認の対象外です（判定の意味の検証は `local_reports/examples_audit_2026-10-04/` の再現スクリプトで別に行っています）。
 

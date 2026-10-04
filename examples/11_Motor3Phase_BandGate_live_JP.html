@@ -710,7 +710,7 @@ function drawMain() {
   mctx.strokeStyle = 'rgba(255,34,68,.3)'; mctx.lineWidth = 1;
   const yTau = yp(TAU_HIGH_A);
   mctx.beginPath(); mctx.moveTo(pad.l, yTau); mctx.lineTo(pad.l + pW, yTau); mctx.stroke();
-  mctx.fillStyle = 'rgba(255,34,68,.6)'; mctx.fillText('τ_high ' + TAU_HIGH_A + 'A', pad.l + 4, yTau - 3);
+  mctx.fillStyle = 'rgba(255,34,68,.6)'; mctx.fillText('上限 ' + TAU_HIGH_A + 'A', pad.l + 4, yTau - 3);
   mctx.setLineDash([]);
 
   // SILENCE塗り（電流系）

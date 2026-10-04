@@ -28,7 +28,7 @@
 
 デモンストレーション実装は以下のファイルで提供されます：  
 
-`nra_ide_vehicle_mandatory_boundary_demo_20260307_193100.html`
+`nra_ide_vehicle_mandatory_boundary_demo_2026-03-07_1931.html`
 
 ---
 
@@ -214,7 +214,7 @@ IDE検証
 
 ```
 
-nra_ide_vehicle_mandatory_boundary_demo_20260307_193100.html
+nra_ide_vehicle_mandatory_boundary_demo_2026-03-07_1931.html
 
 ```
 

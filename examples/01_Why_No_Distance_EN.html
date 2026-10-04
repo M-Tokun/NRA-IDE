@@ -498,7 +498,12 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
 
     <script>
         // Tab Switcher
+        // Keep exactly one animation loop running; stop the previous one so loops do not pile up on every tab switch.
+        let vizRaf = null;
+        function stopViz() { if (vizRaf) cancelAnimationFrame(vizRaf); vizRaf = null; }
+
         function showTab(tabName) {
+            stopViz();
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
             
@@ -558,8 +563,10 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                 ctx.strokeRect(constraintX - 80, constraintY - 80, 160, 160);
                 ctx.fillText('Definitive Constraint', constraintX - 70, constraintY - 90);
                 
-                const dataX2 = constraintX + Math.cos(angle) * 60;
-                const dataY2 = constraintY + Math.sin(angle) * 60;
+                // Data point: the radius periodically exceeds the constraint (±80); the excess is the violation δ (it used to stay at 60 and never reached this display)
+                const r2 = 60 + 45 * Math.abs(Math.sin(frame * 0.013));
+                const dataX2 = constraintX + Math.cos(angle) * r2;
+                const dataY2 = constraintY + Math.sin(angle) * r2;
                 ctx.fillStyle = '#fff';
                 ctx.beginPath(); ctx.arc(dataX2, dataY2, 5, 0, Math.PI * 2); ctx.fill();
                 
@@ -569,7 +576,7 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                     ctx.fillStyle = '#ff5555';
                     ctx.fillText('δ (violation)', constraintX + 85, dataY2 - 10);
                 }
-                requestAnimationFrame(animate);
+                vizRaf = requestAnimationFrame(animate);
             }
             animate();
         }
@@ -602,7 +609,7 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                 ctx.beginPath(); ctx.moveTo(450, 200 - threshold); ctx.lineTo(750, 200 - threshold); ctx.stroke();
                 ctx.fillStyle = value > threshold ? '#ff5555' : '#00ff88';
                 ctx.beginPath(); ctx.arc(600, 200 - value, 8, 0, Math.PI * 2); ctx.fill();
-                requestAnimationFrame(animate);
+                vizRaf = requestAnimationFrame(animate);
             }
             animate();
         }
@@ -638,7 +645,7 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                 ctx.fillText(`Integer Lock: ${integerPhase}`, centerX - 60, centerY + radius + 40);
                 ctx.fillStyle = '#ff5555';
                 ctx.fillText(`Residual Noise: ${residual.toFixed(4)} (Discarded)`, centerX - 80, centerY + radius + 60);
-                requestAnimationFrame(animate);
+                vizRaf = requestAnimationFrame(animate);
             }
             animate();
         }

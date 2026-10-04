@@ -13,7 +13,7 @@
 #
 # このファイルが扱うもの:
 #   - HR / SpO₂ / RR / BP の4チャンネル同時監視
-#   - 経過蓄積によって τ が確立される（ウォームアップ構造）
+#   - 経過蓄積によって経過の精度が上がる（ウォームアップ構造。τは設計値で固定）
 #   - R_total = √(ΣR²) — チャンネル間相関を使わない O(n) 合成
 #   - residual_debt = 一時回復後もすぐには消えず、ゆっくり減る構造的負債
 #   - 新患・救急 → ウォームアップ期間（威力なし）
@@ -81,18 +81,18 @@ class VitalSignNRA:
     R_total = √(ΣR²) で構造的接近比を合成する。
 
     ウォームアップ構造:
-      - 観測開始直後: τ = 0（経過なし → R の精度なし）
-      - 観測継続中: τ が徐々に確立 → R 精度が上がる
-      - WARMUP_SEC 経過後: τ 確立完了 → 最高精度
+      - 執刀開始直後: 経過なし → R は参考値（τ は設計値で固定）
+      - 観測継続中: 経過の精度と残留負債の重みが上がる
+      - WARMUP_SEC 経過後: 精度 最高（執刀開始から数える。破断判定はウォームアップ中も抑えない）
 
     これが「新患・救急に威力なし、経過あり症例に威力あり」の構造的理由。
 
     Parameters
     ----------
-    warmup_sec : τ確立に要する秒数（デフォルト 90 秒）
+    warmup_sec : 経過の精度が最高になるまでの秒数（執刀開始から。デフォルト 90 秒）
     """
 
-    WARMUP_SEC  = 90.0   # τ確立秒数
+    WARMUP_SEC  = 90.0   # 経過の蓄積秒数（執刀開始から）
     K_RECOVERY  = 0.10   # 復元係数
 
     # FSM 遷移閾値
@@ -103,7 +103,7 @@ class VitalSignNRA:
     def __init__(self, warmup_sec: float = WARMUP_SEC):
         self.warmup_sec = warmup_sec
 
-        # チャンネル初期化（τ=0 からスタート）
+        # チャンネル初期化（τは執刀開始時に設計値を設定する）
         self.channels: Dict[str, NRAChannel] = {
             name: NRAChannel(
                 name=name,
@@ -118,6 +118,7 @@ class VitalSignNRA:
         self.residual_debt: float    = 0.0
         self.warmup_pct:    float    = 0.0
         self.elapsed:       float    = 0.0
+        self.proc_elapsed:  float    = 0.0   # 執刀開始からの秒（ウォームアップの基準）
         self.fsm:           FSMState = FSMState.WARMUP
         self.procedure_started: bool = False
 
@@ -150,13 +151,15 @@ class VitalSignNRA:
             self._apply_resting_fluctuation(dt)
             return NRASystemState(fsm=FSMState.WARMUP, elapsed=self.elapsed)
 
-        # ── ウォームアップ進行 ──
-        self.warmup_pct = min(100.0, (self.elapsed / self.warmup_sec) * 100.0)
+        # ── ウォームアップ進行（執刀開始からの経過。執刀前の待機は数えない）──
+        self.proc_elapsed += dt
+        self.warmup_pct = min(100.0, (self.proc_elapsed / self.warmup_sec) * 100.0)
         wf = self.warmup_pct / 100.0   # 精度係数 0.0→1.0
 
-        # τを段階的に確立（経過が積まれるほどτが設計値に近づく）
+        # τは設計値に固定する。ウォームアップで変わるのは精度係数wfだけで、τもRも縮小しない。
+        # （以前はτにもRにもwfを掛けて相殺し、ウォームアップの進み具合が判定に効いていなかった）
         for name, ch in self.channels.items():
-            ch.tau = TAU_BASE[name] * wf
+            ch.tau = TAU_BASE[name]
 
         # ── バイタル更新 ──
         dv = self._compute_delta_vitals(dt)
@@ -178,9 +181,9 @@ class VitalSignNRA:
                 elapsed=self.elapsed,
             )
 
-        # ── R_total ノルム合成 × 精度係数 ──
+        # ── R_total ノルム合成（ウォームアップ中は参考値。wfは残留負債の重みにだけ使う）──
         sum_r2 = sum(ch.R ** 2 for ch in self.channels.values())
-        self.R_total = math.sqrt(sum_r2) * wf
+        self.R_total = math.sqrt(sum_r2)
 
         # ── 残留負債更新 ──
         recover_force = 0.5 * dt if self._intervene else 0.0
@@ -284,10 +287,11 @@ class VitalSignNRA:
 
         if self.fsm == FSMState.RUPTURE_BOUNDARY:
             return
-        if self.warmup_pct < 15.0:
-            self.fsm = FSMState.WARMUP
-        elif R_eff >= self.TH_RUPTURE_BOUNDARY or self.residual_debt > 1.2:
+        if R_eff >= self.TH_RUPTURE_BOUNDARY or self.residual_debt > 1.2:
+            # 破断判定はウォームアップ中でも抑えない（保守側）
             self.fsm = FSMState.RUPTURE_BOUNDARY
+        elif self.warmup_pct < 15.0:
+            self.fsm = FSMState.WARMUP
         elif R_eff >= self.TH_CRITICAL:
             self.fsm = FSMState.CRITICAL
         elif R_eff >= self.TH_CAVEAT:
@@ -300,7 +304,7 @@ class VitalSignNRA:
     def start_procedure(self):
         """
         執刀開始。
-        δ蓄積・τ確立 が始まる。
+        δ蓄積・経過の蓄積 が始まる。
         これ以前は「新患・救急相当」（ウォームアップ前）。
         """
         self.procedure_started = True
@@ -362,7 +366,7 @@ def main():
     print(f"WARMUP = {VitalSignNRA.WARMUP_SEC}s  |  4チャンネル合成  |  RUPTURE_BOUNDARY 閾値 R ≥ 1.00")
     print()
     print("  新患・救急相当: ウォームアップ期間（経過なし → R 精度なし）")
-    print("  経過あり:       τ確立後 → 時間が経つほど精度が上がる")
+    print("  経過あり:       経過が積まれるほど精度が上がる（τは設計値で固定）")
     print()
 
     vital = VitalSignNRA()
@@ -374,7 +378,7 @@ def main():
     print(f"  HR={ch['hr'].value:.1f}  SpO₂={ch['spo2'].value:.1f}"
           f"  RR={ch['rr'].value:.1f}  BP={ch['bp'].value:.1f}")
     print(f"  warmup={vital.warmup_pct:.1f}%  FSM={vital.fsm.value}")
-    print(f"  → R計算精度なし（τ未確立）\n")
+    print(f"  → R は参考値（経過なし）\n")
 
     print("--- フェーズ2: 執刀開始 → ウォームアップ進行 ---")
     vital.start_procedure()
@@ -428,7 +432,7 @@ def main():
 
     print()
     print("=== 構造設計のポイント ===")
-    print("  warmup_pct:    経過が積まれるほどτが確立 → R精度が上がる")
+    print("  warmup_pct:    経過が積まれるほど精度が上がり、残留負債の重みが増す（τは固定）")
     print("  R_total:       √ΣR² 合成 — 各値が正常範囲内でも上昇しうる")
     print("  residual_debt: 介入後もすぐには消えず、ゆっくり減る構造的負債")
     print("  RUPTURE_BOUNDARY:   医師介入後も旧状態を保持。後続はstart_new_patient_evaluation()で開始")

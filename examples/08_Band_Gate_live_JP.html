@@ -379,8 +379,8 @@ footer a { color: var(--lower); text-decoration: none; }
 <!-- 波形キャンバス -->
 <div class="legend">
   <div class="li"><div class="ll bg-white"></div>観測値</div>
-  <div class="li"><div class="ll bg-upper"></div>上限 τ_high + 動的幅</div>
-  <div class="li"><div class="ll bg-lower"></div>下限 τ_low − 動的幅</div>
+  <div class="li"><div class="ll bg-upper"></div>上限（動的境界）</div>
+  <div class="li"><div class="ll bg-lower"></div>下限（動的境界）</div>
   <div class="li"><div class="ll bg-upper-dim"></div>上限 SILENCE 域</div>
   <div class="li"><div class="ll bg-lower-dim"></div>下限 SILENCE 域</div>
 </div>
@@ -430,10 +430,10 @@ footer a { color: var(--lower); text-decoration: none; }
         <div class="param-col-title upper">UPPER SIDE ↑</div>
         <div class="param-row">
           <div class="param-lbl">
-            <span class="param-name">τ_high</span>
+            <span class="param-name">上限</span>
             <span class="param-val" id="v-th">—</span>
           </div>
-          <input type="range" class="upper" id="sl-th" min="0" max="150" step="1" value="70" title="τ_high">
+          <input type="range" class="upper" id="sl-th" min="0" max="150" step="1" value="70" title="上限">
         </div>
         <div class="param-row">
           <div class="param-lbl">
@@ -456,10 +456,10 @@ footer a { color: var(--lower); text-decoration: none; }
         <div class="param-col-title lower">LOWER SIDE ↓</div>
         <div class="param-row">
           <div class="param-lbl">
-            <span class="param-name">τ_low</span>
+            <span class="param-name">下限</span>
             <span class="param-val" id="v-tl">—</span>
           </div>
-          <input type="range" class="lower" id="sl-tl" min="0" max="100" step="1" value="30" title="τ_low">
+          <input type="range" class="lower" id="sl-tl" min="0" max="100" step="1" value="30" title="下限">
         </div>
         <div class="param-row">
           <div class="param-lbl">
@@ -732,7 +732,7 @@ function drawWave(p) {
     }
   }
 
-  // τ_high 帯（上限バンド）
+  // 上限 帯（上限バンド）
   wctx.strokeStyle = 'rgba(255,107,53,.5)';
   wctx.lineWidth = 1;
   wctx.setLineDash([4,4]);
@@ -743,7 +743,7 @@ function drawWave(p) {
   });
   wctx.stroke();
 
-  // τ_low 帯（下限バンド）
+  // 下限 帯（下限バンド）
   wctx.strokeStyle = 'rgba(0,201,255,.5)';
   wctx.beginPath();
   hist.forEach((h,i) => {

@@ -413,7 +413,7 @@ function renderGenList() {
 let logCount = 0;
 function addLog(msg, cls='ev-info') {
   const el = document.getElementById('event-log');
-  const ts = `[${(t*0.016).toFixed(1)}s]`;
+  const ts = `[${t.toFixed(1)}s]`;   // t is already simulated seconds
   el.innerHTML = `<div class="${cls}">${ts} ${msg}</div>` + el.innerHTML;
   if (++logCount > 40) el.innerHTML = el.innerHTML.slice(0, el.innerHTML.lastIndexOf('<div'));
 }
@@ -428,7 +428,7 @@ function addTransitionLog(from, to, R) {
 
 // ── Physical simulation ──
 function physicsStep() {
-  const dt = 0.016 * speed;
+  const dt = 0.016;   // time per step. The speed factor is expressed only by the number of iterations in loop() (it used to scale dt as well, making time advance with speed squared)
   t += dt;
 
   // Dual fluctuations
@@ -463,12 +463,12 @@ function physicsStep() {
   const rawDelta = state.microDelta + state.macroDelta + state.spikeDelta;
   state.delta = Math.max(0, Math.abs(rawDelta) - recoverForce) * Math.sign(rawDelta + 0.001);
 
-  // Frequency update
-  state.freq = F_NOM - state.delta * 4.0;
+  // Frequency update: δ is the frequency deviation [Hz] itself (δf = |f − f_nominal|, same definition as README_Demo14 and the Python version)
+  state.freq = F_NOM - state.delta;
   state.freq = Math.max(47.0, Math.min(53.0, state.freq));
 
-  // R calculation
-  state.R = Math.abs(state.delta) / tau;
+  // R calculation: R = δf / τ (τ in Hz too), on the same scale as the displayed frequency
+  state.R = Math.abs(F_NOM - state.freq) / tau;
 
   // Residual debt
   // k_recovery=0.12 and the 0.08/0.03 accrual/decay rates are demo-tuned constants with
@@ -495,11 +495,8 @@ function physicsStep() {
   } else if (state.R >= 0.4) {
     state.fsm = 'CAVEAT';
   } else {
-    if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'RECOVERING') {
-      // Automatic recovery from RUPTURE_BOUNDARY is forbidden → wait for human operation
-    } else {
-      state.fsm = 'PERMIT';
-    }
+    // RUPTURE_BOUNDARY is already held by the first branch. A RECOVERING state whose recovery has finished returns to PERMIT when R is low.
+    state.fsm = 'PERMIT';
   }
 
   if (state.fsm !== prevFsm) {
@@ -588,7 +585,7 @@ function drawRCanvas() {
   ctxR.beginPath(); ctxR.moveTo(0,yTau); ctxR.lineTo(W,yTau); ctxR.stroke();
   ctxR.setLineDash([]);
   ctxR.fillStyle = '#ff4444'; ctxR.font = '9px Courier New';
-  ctxR.fillText('τ = 1.0  RUPTURE_BOUNDARY', 6, yTau - 3);
+  ctxR.fillText('R = 1.0  RUPTURE_BOUNDARY', 6, yTau - 3);
 
   // ZONE-B line (0.4)
   const yB = H - (0.4 / 2.0) * H;

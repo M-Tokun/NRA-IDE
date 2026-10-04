@@ -661,7 +661,12 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
         // ========================================
         // タブ切り替え機能
         // ========================================
+        // 実行中のアニメーションループは1本だけにする。タブを切り替えるたびにループが増えないよう、前のループを止める。
+        let vizRaf = null;
+        function stopViz() { if (vizRaf) cancelAnimationFrame(vizRaf); vizRaf = null; }
+
         function showTab(tabName) {
+            stopViz();
             // 全てのタブコンテンツを非表示
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
@@ -746,8 +751,10 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                 ctx.fillText('制約（明確に定義）', constraintX - 70, constraintY - 90);
                 
                 // データ点
-                const dataX2 = constraintX + Math.cos(angle) * 60;
-                const dataY2 = constraintY + Math.sin(angle) * 60;
+                // データ点：半径が周期的に制約（±80）を越える。越えた分が違反δ（以前は半径60固定で、この表示に到達しなかった）
+                const r2 = 60 + 45 * Math.abs(Math.sin(frame * 0.013));
+                const dataX2 = constraintX + Math.cos(angle) * r2;
+                const dataY2 = constraintY + Math.sin(angle) * r2;
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
                 ctx.arc(dataX2, dataY2, 5, 0, Math.PI * 2);
@@ -761,7 +768,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                     ctx.fillText('δ (violation)', constraintX + 85, dataY2 - 10);
                 }
                 
-                requestAnimationFrame(animate);
+                vizRaf = requestAnimationFrame(animate);
             }
             
             animate();
@@ -821,7 +828,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                 ctx.fillStyle = '#fff';
                 ctx.fillText('δ (measured)', 610, 200 - value);
                 
-                requestAnimationFrame(animate);
+                vizRaf = requestAnimationFrame(animate);
             }
             
             animate();
@@ -894,7 +901,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                 ctx.fillStyle = '#ff5555';
                 ctx.fillText(`Residual: ${residual.toFixed(4)} (破棄)`, centerX - 80, centerY + radius + 60);
                 
-                requestAnimationFrame(animate);
+                vizRaf = requestAnimationFrame(animate);
             }
             
             animate();

@@ -85,6 +85,7 @@ const vars = [
 ];
 
 let t = 0, running = true;
+let lastLogSlot = -1;
 
 function getValues(t) {
   // pは短周期(sin(t/8))と長周期(sin(t/25))の合成揺らぎ。振幅0.6/0.4・周期8/25は根拠不明・デモ用チューニング値。
@@ -153,15 +154,15 @@ function update() {
   document.getElementById('fillInd').style.width = Math.min(100, rI*100) + '%';
   document.getElementById('fillCorr').style.width = Math.min(100, rC*100) + '%';
 
-  // 状態（フラグ境界）：rC（相関R）・rI（個別R）ともτで正規化済み。rC>=1.05またはrI>=1.1でFail-Closed（bad）、
-  // rC>=0.7またはrI>=0.8で注意（warn）、それ未満は正常（ok）。相関R側の閾値が個別R側より低く、
-  // 「相関Rが個別Rより先行して悪化を検知する」設計意図がUI文言に明記されている。ただし閾値の具体数値
-  // （1.05/1.1/0.7/0.8）自体の根拠は不明・デモ用チューニング値。
+  // 状態（フラグ境界）：rC（相関R）・rI（個別R）ともτで正規化済み。rC>=1.0またはrI>=1.0でFail-Closed（bad。README共通の破断境界）、
+  // rC>=0.7またはrI>=0.7で注意（warn。このデモが宣言した判断限界R_J）、それ未満は正常（ok）。閾値は相関・個別で同じ。
+  // 「相関Rが個別Rより先に上がる」ことは、閾値の差ではなく係数（rCorr×1.05、rInd×0.78）と合成データの作りに依る。
+  // 0.7・1.0 のうち 0.7 の根拠は不明・デモ用の値。
   let statusEl = document.getElementById('status');
-  if (rC >= 1.05 || rI >= 1.1) {
+  if (rC >= 1.0 || rI >= 1.0) {
     statusEl.className = 'status-box bad';
     statusEl.textContent = 'Fail-Closed領域。関係が遊び幅を超えました。';
-  } else if (rC >= 0.7 || rI >= 0.8) {
+  } else if (rC >= 0.7 || rI >= 0.7) {
     statusEl.className = 'status-box warn';
     statusEl.textContent = '注意域。相関Rが先行して上昇しています。';
   } else {
@@ -170,7 +171,10 @@ function update() {
   }
 
   // ログ
-  if (Math.floor(t)%7 === 0) {
+  // 7秒ごとに1回だけ記録する（以前は floor(t)%7===0 の間、毎フレーム同じ行が追加されていた）
+  const logSlot = Math.floor(t / 7);
+  if (logSlot !== lastLogSlot) {
+    lastLogSlot = logSlot;
     const log = document.getElementById('log');
     const line = document.createElement('div');
     line.textContent = `[${t.toFixed(0)}] 深部${vals[0].toFixed(1)}℃ 心拍${vals[2].toFixed(0)} 相関R:${rC.toFixed(2)}`;
@@ -194,7 +198,7 @@ document.getElementById('toggle').onclick = () => {
   running = !running;
   document.getElementById('toggle').textContent = running ? '一時停止' : '再生';
 };
-document.getElementById('reset').onclick = () => { t = 0; };
+document.getElementById('reset').onclick = () => { t = 0; lastLogSlot = -1; };
 document.getElementById('tau').oninput = update;
 document.getElementById('speed').oninput = () => {};
 

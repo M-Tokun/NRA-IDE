@@ -4,7 +4,7 @@
 
 
 
-**FILE: NRA-IDE_AUTOSAR_Integration_0224_v02.md**  
+**FILE: NRA-IDE_AUTOSAR_Integration_2026-02-24_v2.md**  
 
 **Author: M-Tokuni / KEN**  
 
@@ -16,9 +16,9 @@
 
 **依存文書 / Depends on:**  
 
-- `NRA-IDE_Automotive_Scope_0224_v02.md`  
+- `NRA-IDE_Automotive_Scope_2026-02-24_v2.md`  
 
-- `NRA-IDE_OTA_Gate_Verification_0224_v01.md`
+- `NRA-IDE_OTA_Gate_Verification_2026-02-24_v1.md`
 
 
 
@@ -447,7 +447,7 @@ Gate SWC のメモリ領域:
 
     τ 値の格納領域
 
-    アクセス権: Gate SWC のみ READ/WRITE
+    アクセス権: 起動時の初期化中だけ Gate SWC が WRITE、初期化後は READ-ONLY
 
                他 SWC は READ 禁止（存在を知らせない）
 
@@ -471,17 +471,20 @@ Gate SWC のメモリ領域:
 
 
 
+τ の保持方式（本書で統一する1方式）:
+
+  1. 正本は NvM ブロック NRA_GATE_TAU_BLOCK（4.1節）。CRC と設計範囲を起動時に検証する。
+  2. 検証に通った値を、.gate_config セクションの RAM 変数へ起動時に1回だけコピーする。
+  3. コピー直後に、MPU でこのセクションを Gate SWC の READ-ONLY に切り替える。以降の書き込みはハードウェアが遮断する。
+  4. 書き換えられる時間窓は起動時の初期化の間だけ。τ を変える唯一の経路は OTA クラス A（4.3節）。
+
 MPU 設定例（AUTOSAR MemMap）:
 
   #pragma ghs section data=".gate_config"
-
-  static volatile float32 tau_value = 8.0f;  /* τ 固定値 */
-
+  static float32 NRA_Gate_Tau;     /* 起動時に NvM から1回だけ設定。設定後は MPU で READ-ONLY */
   #pragma ghs section
 
-
-
-  /* τ への外部書き込みは MPU ハードウェアで遮断 */
+  /* 初期化後のτへの書き込みは MPU ハードウェアで遮断 */
 
 ```
 
@@ -557,23 +560,32 @@ C 実装例（AUTOSAR Classic SWC）:
 
 
 
-/* τ は const で宣言 — コンパイル時点で書き込み禁止 */
+/* τ は NvM から起動時に1回だけ読み込み、MPU で READ-ONLY にする（3.3節の保持方式）。
+   const 初期化子（= 8.0f）は使わない。値の正本は NvM ブロックで、コード中に二重に持たない */
 
-/* 実行時の変更は構造的に不可能 */
+#pragma ghs section data=".gate_config"
+static float32 NRA_Gate_Tau;      /* 単位: m  根拠: NvM ブロック NRA_GATE_TAU_BLOCK */
+#pragma ghs section
 
-static const float32 NRA_GATE_TAU = 8.0f;  /* 単位: m  根拠: NvM から読込 */
+/* 起動時の初期化 — 失敗したら Gate は起動しない（Fail-Closed） */
+boolean NRA_Gate_Init(void)
+{
+    float32 tau;
+    if (NvM_ReadBlock(NRA_GATE_TAU_BLOCK, &tau) != E_OK) { return FALSE; }
+    if (!isfinite(tau) || tau <= 0.0f || tau > NRA_GATE_TAU_MAX) { return FALSE; }   /* CRC 検証後に設計範囲を確認 */
+    NRA_Gate_Tau = tau;
+    Mpu_SetReadOnly(NRA_GATE_CONFIG_REGION);     /* 以降、書き込みはハードウェアが遮断 */
+    return TRUE;
+}
 
-
-
-/* R 計算関数 — 入力のみ受け取り、τ は内部定数を使用 */
+/* R 計算関数 — 入力のみ受け取り、τ は保護された変数を使用 */
 
 static float32 NRA_Gate_ComputeR(float32 delta)
 
 {
 
-    /* NRA_GATE_TAU は外部から変更不可 */
-
-    if (NRA_GATE_TAU <= 0.0f)
+    /* NRA_Gate_Tau は初期化後、MPU により外部から変更不可 */
+    if (NRA_Gate_Tau <= 0.0f)
 
     {
 
@@ -593,7 +605,7 @@ static float32 NRA_Gate_ComputeR(float32 delta)
 
     }
 
-    return delta / NRA_GATE_TAU;
+    return delta / NRA_Gate_Tau;
 
 }
 
@@ -655,7 +667,7 @@ void NRA_Gate_MainFunction(void)
 
 
 
-`NRA-IDE_OTA_Gate_Verification_0224_v01.md` のクラス A プロセスを通過した場合のみ  
+`NRA-IDE_OTA_Gate_Verification_2026-02-24_v1.md` のクラス A プロセスを通過した場合のみ  
 
 τ の NvM 書き込みが許可される。
 
@@ -851,11 +863,11 @@ R値の外部読み取り = 接続（OK）
 
 
 
-- `NRA-IDE_Automotive_Scope_0224_v02.md` — 適用範囲定義書
+- `NRA-IDE_Automotive_Scope_2026-02-24_v2.md` — 適用範囲定義書
 
-- `NRA-IDE_OTA_Gate_Verification_0224_v01.md` — OTA 検証プロセス
+- `NRA-IDE_OTA_Gate_Verification_2026-02-24_v1.md` — OTA 検証プロセス
 
-- `NRA-IDE_AutoDrive_POC_02_JP.html` / `_EN.html` — 自動運転 Gate POC
+- `42_AutoDrive_POC_2_JP.html` / `42_AutoDrive_POC_2_EN.html` — 自動運転 Gate POC
 
 - AUTOSAR Classic Platform Specification R22-11
 
@@ -873,7 +885,7 @@ R値の外部読み取り = 接続（OK）
 
 
 
-*FILE: NRA-IDE_AUTOSAR_Integration_0224_v02.md*  
+*FILE: NRA-IDE_AUTOSAR_Integration_2026-02-24_v2.md*  
 
 *© M-Tokuni — MIT License (非商用・教育・研究目的)*
 

@@ -195,8 +195,8 @@ footer a { color: var(--lower); text-decoration: none; }
         <div class="param-col-title upper">UPPER SIDE ↑</div>
         <div class="col-desc">τ shrinks only slightly when EMA accumulates (conservative)</div>
         <div class="param-row">
-          <div class="param-lbl"><span class="param-name">τ_high</span><span class="param-val" id="v-th">—</span></div>
-          <input type="range" class="upper" id="sl-th" min="0" max="150" value="70" title="τ_high">
+          <div class="param-lbl"><span class="param-name">Upper limit</span><span class="param-val" id="v-th">—</span></div>
+          <input type="range" class="upper" id="sl-th" min="0" max="150" value="70" title="Upper limit">
         </div>
         <div class="param-row">
           <div class="param-lbl"><span class="param-name">α_upper (EMA rate)</span><span class="param-val" id="v-au">0.30</span></div>
@@ -211,8 +211,8 @@ footer a { color: var(--lower); text-decoration: none; }
         <div class="param-col-title lower">LOWER SIDE ↓</div>
         <div class="col-desc">τ shrinks when EMA accumulates — sharpens dropout detection (sensitive)</div>
         <div class="param-row">
-          <div class="param-lbl"><span class="param-name">τ_low</span><span class="param-val" id="v-tl">—</span></div>
-          <input type="range" class="lower" id="sl-tl" min="0" max="100" value="30" title="τ_low">
+          <div class="param-lbl"><span class="param-name">Lower limit</span><span class="param-val" id="v-tl">—</span></div>
+          <input type="range" class="lower" id="sl-tl" min="0" max="100" value="30" title="Lower limit">
         </div>
         <div class="param-row">
           <div class="param-lbl"><span class="param-name">α_lower (EMA rate)</span><span class="param-val" id="v-al">0.50</span></div>

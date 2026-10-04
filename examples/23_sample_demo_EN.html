@@ -400,10 +400,11 @@
     upperEMA = upperEMA * (1 - alphaUpper) + upperDev * alphaUpper;
     lowerEMA = lowerEMA * (1 - alphaLower) + lowerDev * alphaLower;
 
-    // Dynamic boundary (tau_dyn_upper / tau_dyn_lower in the UI): the EMA-smoothed deviation
-    // widens the upper bound and narrows the lower bound around tauBase. The 0.65 / 0.35
-    // weighting coefficients and the 2.0 floor are undocumented demo tuning values.
-    const tauDynUpper = tauBase + upperEMA * 0.65;
+    // Dynamic boundary (tau_dyn_upper / tau_dyn_lower in the UI): the EMA-smoothed deviation only
+    // narrows each bound around tauBase; it never widens (FORMULA §4.4: no path that widens the gate
+    // width from evaluation outputs). The upper side shrinks little (0.15, floor tauBase×0.8); the lower
+    // side shrinks more (0.35, floor 2.0). These coefficients and floors are undocumented demo tuning values.
+    const tauDynUpper = Math.max(tauBase * 0.8, tauBase - upperEMA * 0.15);
     const tauDynLower = Math.max(2.0, tauBase - lowerEMA * 0.35);
 
     // R = delta/tau boundary-approach ratio (cf. FORMULA.md), computed separately for each

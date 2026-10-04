@@ -138,7 +138,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 
 <div class="hdr">
   <div class="hdr-sub">NRA-IDE / AIR PRESSURE  Compressible Fluid · Dynamic τ · Dual-Fluctuation
-    <h1>Air Pressure Management System ③ Boyle-Charles Law × NRA-IDE</h1>
+    <h1>Air Pressure Management System ③ Temperature–Pressure Relation × NRA-IDE</h1>
   </div>
   <div class="ctrl-row">
     <button class="pill on"        id="btnRun"  onclick="toggleRun()">RUN</button>
@@ -206,7 +206,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
           <span class="tau-key">τ = τ_base × (T_ref / T_current)</span>
           <span class="tau-val" id="tauFactor">×1.000</span>
         </div>
-        <div class="tau-note">Temperature rise → τ narrows → R increases (Boyle-Charles Law)</div>
+        <div class="tau-note">Temperature rise → τ narrows → R increases (assumed loss of material strength)</div>
       </div>
     </div>
 
@@ -297,11 +297,13 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 // ── Parameters ──
 const P_OPT   = 0.50;   // MPa design pressure
 const P_MAX_BASE = 0.80; // MPa rupture limit at reference temperature
-const P_MIN   = 0.20;   // MPa inoperability limit (approaching vacuum)
+const P_MIN   = 0.20;   // MPa inoperability limit (declared value; below it the required pressure cannot be held)
 const T_REF   = 298.15; // K  reference temperature (25°C)
 const R_WARN  = 0.75, R_RUPTURE = 1.0;
 
-// Dynamic τ calculation (Boyle-Charles Law)
+// Dynamic τ calculation (demo model assuming the strength of the vessel/piping falls with temperature)
+// The proportional form T_REF/T is not a measured strength law, only an assumption to show the trend.
+// The pressure rise of the gas with temperature is already counted on the δ side (in tick), so it is not counted again on the τ side.
 // Temperature rise → gas expansion → effective rupture pressure decreases → τ_hi narrows
 function calcTauHi(T_kelvin){
   // τ_hi = (P_MAX_BASE - P_OPT) × (T_REF / T_current)
@@ -397,7 +399,7 @@ function tick(dt){
   // Pressure target
   let pTarget = compTarget;
   if(heatOn){
-    // Heating → pressure rise by Boyle-Charles Law P1/T1 = P2/T2
+    // Heating → pressure rise of a constant-volume gas (Gay-Lussac's law P1/T1 = P2/T2). This is a change on the δ side.
     pTarget *= T_kelvin / T_REF;
   }
   if(ventOn) pTarget *= 0.55;  // pressure drops on venting

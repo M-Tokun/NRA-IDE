@@ -42,11 +42,11 @@ NRA-IDEが答える問いは「どの速さで閾値に近づいているか、�
 
 ### Lower Waveform — R = δ/τ
 
-- **τ = 1.0 line (red dashed)**: the RUPTURE_BOUNDARY threshold
+- **R = 1.0 line (red dashed)**: the RUPTURE_BOUNDARY threshold
 
 - **0.4 line (yellow dashed)**: ZONE-B entry point
 
-- The shaded region to the left of the τ line is the safe operating zone
+- The shaded region below the R = 1.0 line is the safe operating zone
 
 - When R crosses 1.0, a red flash fires and the FSM transitions to RUPTURE_BOUNDARY
 

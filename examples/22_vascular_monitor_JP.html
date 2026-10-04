@@ -48,6 +48,17 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
 .trio-lbl-pressure{color:#ff6b6b;}
 .trio-lbl-shear{color:#ffaa44;}
 .trio-lbl-tension{color:#ffaa44;}
+
+.panel-lbl,.card-lbl,.log-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:#ffaa44;margin:8px 0 6px;}
+.trio-unit{font-size:9px;color:#6a7490;}
+.dual-r .r-item{flex:1;text-align:center;}
+.r-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;}
+.log-list{max-height:180px;overflow:auto;}
+.badge.warn-lo{color:var(--warn);border-color:var(--warn);background:rgba(255,204,0,.06);}
+.badge.fail-lo{color:var(--fail-lo);border-color:var(--fail-lo);background:rgba(102,136,255,.09);animation:pf .7s infinite;}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.btn-row button{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 12px;cursor:pointer;font-family:inherit;}
+.btn-row button:hover{border-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -67,11 +78,14 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
     <div class="slider-grid">
       <!-- スライダー群（手術モード） -->
       <div>圧力 P <input aria-label="内圧 P" type="range" id="pSlider" min="40" max="180" value="120" class="full-width"></div>
-      <div>温度 T <input aria-label="張力" type="range" id="tSlider" min="30" max="42" value="37" class="full-width"></div>
+      <div>温度 T <input aria-label="温度 T" type="range" id="tSlider" min="30" max="42" value="37" class="full-width"></div>
       <div>血流 Flow <input aria-label="血流量" type="range" id="fSlider" min="0" max="120" value="80" class="full-width"></div>
       <div>粘着力 Adh <input aria-label="粘着性 Adh" type="range" id="aSlider" min="0.2" max="2.5" value="1.0" class="full-width"></div>
       <div>せん断応力 Shear <input aria-label="剪断応力" type="range" id="sSlider" min="0" max="25" value="12" class="full-width"></div>
       <div>壁張力 Tension <input aria-label="壁張力" type="range" id="wSlider" min="0" max="180" value="90" class="full-width"></div>
+    </div>
+    <div class="btn-row">
+      <button id="btnBalloon">バルーン展開</button><button id="btnStasis">血流停滞</button><button id="btnCryo">冷却（クライオ）</button><button id="btnNormal">基準値に戻す</button><button id="btnNew">新しい評価</button>
     </div>
   </div>
 
@@ -88,8 +102,8 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
     <div class="card">
       <div class="card-lbl">APPROACH RATIO  R = δ / τ（動的・二重ゆらぎ）</div>
       <div class="dual-r">
-        <div class="r-item"><svg viewBox="0 0 120 65" class="r-arc-w">...</svg><div class="r-num" id="rHiN">0.000</div><div>↑ 破裂/拡張 R_hi</div></div>
-        <div class="r-item"><svg viewBox="0 0 120 65" class="r-arc-w">...</svg><div class="r-num" id="rLoN">0.000</div><div>↓ 血栓/狭窄 R_lo</div></div>
+        <div class="r-item"><div class="bar-bg"><div class="bar-fill" id="rHiBar"></div></div><div class="r-num" id="rHiN">0.000</div><div>↑ 破裂/拡張 R_hi</div></div>
+        <div class="r-item"><div class="bar-bg"><div class="bar-fill" id="rLoBar"></div></div><div class="r-num" id="rLoN">0.000</div><div>↓ 血栓/狭窄 R_lo</div></div>
       </div>
     </div>
 
@@ -97,7 +111,7 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
 
     <div class="card">
       <div class="card-lbl">δ / τ BREAKDOWN（二重ゆらぎ）</div>
-      <!-- バー表示省略（実際コードでは5本バー） -->
+      <div class="metrics" id="breakdown"></div>
     </div>
   </div>
 </div>
@@ -108,95 +122,142 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
 </div>
 
 <script>
-// ── NRA-IDEコア変数（既存デモと同じ構造） ──
-let P=120, T=37, Flow=80, Adh=1.0, Shear=12, Tension=90;
-let tauBase=1.0, delta=0, R_hi=0, R_lo=0;
-let status='safe';
-const R_RUPTURE=1.0, R_WARN=0.75;
+// ── NRA-IDE 血管インターベンションモニター / Vascular Intervention Monitor ──
+// Each of the six quantities is evaluated as R_i = δ_i / τ_i. δ_i is the one-sided deviation from the reference
+// value, and τ_i is the distance from the reference to the declared limit (FORMULA §4.1). The upper side (↑) and
+// the lower side (↓) are evaluated separately; R_hi and R_lo are the maxima over the factors (no averaging).
+// Double fluctuation: δ moves with the observations, τ shrinks with temperature (a constraint declared as a gauge
+// input, FORMULA §4.5). τ is never widened.
+// 基準値・限界値はデモ用の値で、臨床の基準ではありません。
+const L = {P:"圧力 P",Flow:"血流 Flow",Shear:"せん断応力",Tension:"壁張力",Adh:"粘着力 Adh",Tmp:"温度 T",ok:"正常",warnHi:"WARNING — 上側（破裂/拡張）へ接近",warnLo:"WARNING — 下側（血栓/狭窄）へ接近",failHi:"RUPTURE_BOUNDARY — 緊急停止（破裂/拡張側）",failLo:"RUPTURE_BOUNDARY — 緊急停止（血栓/狭窄側）",bad:"評価不能な入力 — 停止側（CONFESSION）",latched:"（固定中：「新しい評価」で解除）",safe:"SAFE",warn:"WARNING",fail:"RUPTURE_BOUNDARY",hi:"上側",lo:"下側",dom:"支配要素",logHdr:"状態変化",start:"監視開始 — スライダーまたは操作ボタンで状態を変えてください",latchRel:"新しい評価を開始（固定を解除）",btnBalloon:"バルーン展開",btnStasis:"血流停滞",btnCryo:"冷却（クライオ）",btnNormal:"基準値に戻す",btnNew:"新しい評価"};
+const FACTORS = [
+  {id:'P',       name:L.P,       unit:'mmHg',    ref:120, tauHi:30,  tauLo:40},
+  {id:'Flow',    name:L.Flow,    unit:'mL/min',  ref:80,  tauHi:40,  tauLo:50},
+  {id:'Shear',   name:L.Shear,   unit:'dyn/cm²', ref:12,  tauHi:10,  tauLo:8},
+  {id:'Tension', name:L.Tension, unit:'dyn/cm',  ref:90,  tauHi:60,  tauLo:70},
+  {id:'Adh',     name:L.Adh,     unit:'',        ref:1.0, tauHi:0.8, tauLo:0.6},
+  {id:'T',       name:L.Tmp,     unit:'°C',      ref:37,  tauHi:3,   tauLo:5},
+];
+const SLIDERS = {P:'pSlider', T:'tSlider', Flow:'fSlider', Adh:'aSlider', Shear:'sSlider', Tension:'wSlider'};
+const DEFAULTS = {P:120, T:37, Flow:80, Adh:1.0, Shear:12, Tension:90};
+const V = Object.assign({}, DEFAULTS);
+const R_RUPTURE = 1.0, R_WARN = 0.75;
+let ruptureLatch = null, lastStatus = 'safe', frame = 0, particles = [];
+const HLEN = 240, hist = {P:[], Shear:[], Tension:[], R:[]};
 
-// ── 動的τ（温度・血流で縮小・拡張）＋二重ゆらぎ ──
+// τ の温度による縮小率（高温ほど縮む。1を超えて広げない）
+function kTemp(){ return Math.min(1, 310 / (V.T + 273)); }
+
 function calcIDE(){
-  // 第1ゆらぎ：圧力・血流偏差
-  const deltaP = Math.abs(P-120)/30;
-  const deltaF = Math.abs(Flow-80)/40;
-  // 第2ゆらぎ：せん断応力・壁張力・接着
-  const deltaS = Shear/20;
-  const deltaT = Math.max(0, Tension/120);
-  const deltaA = Adh-1.0;
-
-  // 温度でτ縮小（高温→粘度↓・破裂リスク↑）
-  const tau = tauBase * (310/(T+273)) * (1 + Flow/200); // 血流で厚み増
-
-  const R = (deltaP + deltaS + deltaT + deltaA) / tau;
-  R_hi = Math.max(0, R);
-  R_lo = Math.max(0, (1-Adh) / (tau*0.8)); // 下限側（血栓リスク）
-
-  // 入力が数値でない・τが正でない場合は評価不能。許可側に倒さず停止側にする。
-  if(!Number.isFinite(R_hi) || !Number.isFinite(R_lo) || !(tau > 0)){
-    status = 'fail-hi';
-    return {R_hi, R_lo, status, action:'評価不能な入力 — 停止側（CONFESSION）'};
-  }
-  let st = 'safe', act='正常';
-  if(R_hi >= R_RUPTURE || R_lo >= R_RUPTURE){ st='fail-hi'; act='RUPTURE_BOUNDARY — 緊急停止（破裂/血栓）'; }
-  else if(R_hi >= R_WARN || R_lo >= R_WARN){ st='warn-hi'; act='WARNING — 壁張力/せん断強化'; }
-  status = st;
-  return {R_hi, R_lo, status:st, action:act};
-}
-
-// ── 血管アニメーション（血流粒子＋壁変形＋血栓） ──
-const tc = document.getElementById('tankCanvas'); const tctx=tc.getContext('2d');
-tc.width=800; tc.height=280;
-let particles=[];
-function drawVessel(){
-  tctx.clearRect(0,0,tc.width,tc.height);
-  const ide=calcIDE();
-
-  // 血管壁
-  const radius = 80 + (Tension-90)*0.4; // 張力で膨張
-  tctx.strokeStyle = ide.status==='fail-hi'?'#ff4060':'#ff6b6b';
-  tctx.lineWidth=18;
-  tctx.beginPath(); tctx.ellipse(400,140, radius, 80, 0, 0, Math.PI*2); tctx.stroke();
-
-  // 血流粒子（赤血球）
-  if(Math.random()<0.6){
-    particles.push({x:100+Math.random()*200, y:100+Math.random()*80, vx:Flow/8 + Math.random()*2, life:1});
-  }
-  particles = particles.filter(p=>p.life>0);
-  particles.forEach(p=>{
-    p.x += p.vx;
-    if(p.x>700) p.x=100;
-    tctx.fillStyle = '#ff9999';
-    tctx.globalAlpha = p.life;
-    tctx.fillRect(p.x, p.y, 8, 6);
-    p.life-=0.008;
+  const k = kTemp();
+  let R_hi = 0, R_lo = 0, bad = false, domHi = '', domLo = '';
+  const rows = FACTORS.map(f => {
+    const v = V[f.id];
+    if (!Number.isFinite(v)) bad = true;
+    const sc = f.id === 'T' ? 1 : k;            // 温度そのものの許容幅は温度で縮めない
+    const rHi = Math.max(0, v - f.ref) / (f.tauHi * sc);
+    const rLo = Math.max(0, f.ref - v) / (f.tauLo * sc);
+    if (rHi > R_hi) { R_hi = rHi; domHi = f.name; }
+    if (rLo > R_lo) { R_lo = rLo; domLo = f.name; }
+    return {f, v, rHi, rLo};
   });
-
-  // 血栓（接着性で壁に蓄積）
-  if(Adh>1.3){
-    tctx.fillStyle='rgba(255,180,120,0.6)';
-    tctx.fillRect(420,110,30,30);
-  }
-
-  updateUI(ide);
+  let st = 'safe', act = L.ok;
+  if (bad || !Number.isFinite(R_hi) || !Number.isFinite(R_lo) || !(k > 0)) { st = 'fail-hi'; act = L.bad; }
+  else if (R_hi >= R_RUPTURE) { st = 'fail-hi'; act = L.failHi; }
+  else if (R_lo >= R_RUPTURE) { st = 'fail-lo'; act = L.failLo; }
+  else if (R_hi >= R_WARN || R_lo >= R_WARN) { st = R_hi >= R_lo ? 'warn-hi' : 'warn-lo'; act = R_hi >= R_lo ? L.warnHi : L.warnLo; }
+  // 不可逆ラッチ：RUPTURE_BOUNDARY は「新しい評価」で解除するまで固定する
+  if (st.startsWith('fail') && !ruptureLatch) ruptureLatch = {st, act};
+  if (ruptureLatch) { st = ruptureLatch.st; act = ruptureLatch.act + L.latched; }
+  return {R_hi, R_lo, rows, status: st, action: act, domHi, domLo};
 }
 
-// UI・波形・ログ（既存デモとほぼ同一ロジック）略（実際の完全版ではここに全関数実装）
-function updateUI(ide){ /* R表示・バッジ更新・ログ追加 */ }
+// ── 血管アニメーション ──
+const tc = document.getElementById('tankCanvas'), tctx = tc.getContext('2d');
+tc.width = 800; tc.height = 280;
+function drawVessel(ide){
+  tctx.clearRect(0, 0, tc.width, tc.height);
+  const radius = 80 + (V.Tension - 90) * 0.4;                 // 壁張力で膨張
+  tctx.strokeStyle = ide.status.startsWith('fail') ? '#ff4060' : ide.status.startsWith('warn') ? '#ffcc00' : '#ff6b6b';
+  tctx.lineWidth = 18;
+  tctx.beginPath(); tctx.ellipse(400, 140, Math.max(20, radius), 80, 0, 0, Math.PI * 2); tctx.stroke();
+  if (Math.random() < 0.6 && V.Flow > 2) particles.push({x:100 + Math.random() * 200, y:100 + Math.random() * 80, vx:V.Flow / 8 + Math.random() * 2, life:1});
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => { p.x += p.vx; if (p.x > 700) p.x = 100; tctx.fillStyle = '#ff9999'; tctx.globalAlpha = p.life; tctx.fillRect(p.x, p.y, 8, 6); p.life -= 0.008; });
+  tctx.globalAlpha = 1;
+  if (V.Adh > 1.3) { tctx.fillStyle = 'rgba(255,180,120,0.6)'; tctx.fillRect(420, 110, 30, 30); }   // 高接着：血栓
+}
 
-// ループ
+// ── トレンド波形 ──
+const wc = document.getElementById('waveCanvas'), wctx = wc.getContext('2d');
+wc.width = 800; wc.height = 90;
+function drawWave(){
+  wctx.clearRect(0, 0, wc.width, wc.height);
+  const y = (v, mx) => 85 - Math.min(Math.max(v, 0), mx) / mx * 80;
+  wctx.setLineDash([4, 4]); wctx.strokeStyle = '#ff406088'; wctx.beginPath(); wctx.moveTo(0, y(1.0, 1.5)); wctx.lineTo(wc.width, y(1.0, 1.5)); wctx.stroke(); wctx.setLineDash([]);
+  const line = (arr, mx, col) => { if (arr.length < 2) return; wctx.strokeStyle = col; wctx.lineWidth = 1.5; wctx.beginPath();
+    arr.forEach((v, i) => { const x = i / (HLEN - 1) * wc.width; i ? wctx.lineTo(x, y(v, mx)) : wctx.moveTo(x, y(v, mx)); }); wctx.stroke(); };
+  line(hist.P, 200, '#ff6b6b'); line(hist.Shear, 30, '#ffaa44'); line(hist.Tension, 200, '#cc88ff'); line(hist.R, 1.5, '#88ffcc');
+}
+
+// ── 表示 ──
+const COL = {safe:'#88ffcc', 'warn-hi':'#ffcc00', 'warn-lo':'#ffcc00', 'fail-hi':'#ff4060', 'fail-lo':'#6688ff'};
+function rColor(r){ return r >= R_RUPTURE ? '#ff4060' : r >= R_WARN ? '#ffcc00' : '#88ffcc'; }
+const bd = document.getElementById('breakdown');
+bd.innerHTML = FACTORS.map(f => `<div class="met-row"><div class="met-hdr"><span>${f.name}</span><span id="bv-${f.id}">—</span><span id="br-${f.id}">—</span></div>` +
+  `<div class="bar-bg"><div class="bar-fill" id="bb-${f.id}" style="width:0%"></div></div></div>`).join('');
+function addLog(msg, col){
+  const el = document.createElement('div');
+  el.style.color = col || '#b8c0d8'; el.style.fontFamily = "'JetBrains Mono',monospace"; el.style.fontSize = '11px';
+  el.textContent = `[${String(frame).padStart(6, '0')}] ${msg}`;
+  const list = document.getElementById('logList'); list.prepend(el);
+  while (list.children.length > 60) list.removeChild(list.lastChild);
+}
+function updateUI(ide){
+  document.getElementById('pLive').textContent = Number.isFinite(V.P) ? V.P.toFixed(0) : '—';
+  document.getElementById('shearLive').textContent = Number.isFinite(V.Shear) ? V.Shear.toFixed(1) : '—';
+  document.getElementById('tensLive').textContent = Number.isFinite(V.Tension) ? V.Tension.toFixed(0) : '—';
+  const fmt = r => Number.isFinite(r) ? Math.min(r, 9.999).toFixed(3) : '—';
+  document.getElementById('rHiN').textContent = fmt(ide.R_hi); document.getElementById('rLoN').textContent = fmt(ide.R_lo);
+  document.getElementById('rHiN').style.color = rColor(ide.R_hi); document.getElementById('rLoN').style.color = rColor(ide.R_lo);
+  document.getElementById('rHiBar').style.width = Math.min(ide.R_hi / 1.5, 1) * 100 + '%'; document.getElementById('rHiBar').style.background = rColor(ide.R_hi);
+  document.getElementById('rLoBar').style.width = Math.min(ide.R_lo / 1.5, 1) * 100 + '%'; document.getElementById('rLoBar').style.background = rColor(ide.R_lo);
+  const badge = document.getElementById('badge');
+  badge.className = 'badge ' + ide.status;
+  badge.textContent = (ide.status === 'safe' ? L.safe : ide.status.startsWith('warn') ? L.warn : L.fail) + ' — ' + ide.action;
+  ide.rows.forEach(({f, v, rHi, rLo}) => {
+    const side = rHi >= rLo ? L.hi : L.lo, r = Math.max(rHi, rLo);
+    document.getElementById('bv-' + f.id).textContent = Number.isFinite(v) ? (f.id === 'Adh' || f.id === 'T' ? v.toFixed(1) : v.toFixed(0)) + ' ' + f.unit : '—';
+    document.getElementById('br-' + f.id).textContent = r > 0 ? `${side} R=${fmt(r)}` : 'R=0.000';
+    const b = document.getElementById('bb-' + f.id); b.style.width = Math.min(r / 1.5, 1) * 100 + '%'; b.style.background = rColor(r);
+  });
+}
+
 function loop(){
-  drawVessel();
+  frame++;
+  const ide = calcIDE();
+  drawVessel(ide);
+  if (frame % 3 === 0) {
+    [['P', V.P], ['Shear', V.Shear], ['Tension', V.Tension], ['R', Math.max(ide.R_hi, ide.R_lo)]].forEach(([k, v]) => { hist[k].push(Number.isFinite(v) ? v : 0); if (hist[k].length > HLEN) hist[k].shift(); });
+  }
+  drawWave(); updateUI(ide);
+  if (ide.status !== lastStatus) {
+    addLog(`${L.logHdr}: ${lastStatus} → ${ide.status}  R_hi=${Number.isFinite(ide.R_hi) ? ide.R_hi.toFixed(3) : '—'}  R_lo=${Number.isFinite(ide.R_lo) ? ide.R_lo.toFixed(3) : '—'}  (${ide.R_hi >= ide.R_lo ? ide.domHi : ide.domLo})`, COL[ide.status]);
+    lastStatus = ide.status;
+  }
   requestAnimationFrame(loop);
 }
+
+// ── 操作 ──
+function setValues(vals){ Object.entries(vals).forEach(([k, v]) => { const el = document.getElementById(SLIDERS[k]); el.value = v; V[k] = Number(el.value); }); }
+Object.entries(SLIDERS).forEach(([k, id]) => { const el = document.getElementById(id); V[k] = Number(el.value); el.addEventListener('input', e => { V[k] = Number(e.target.value); }); });
+document.getElementById('btnBalloon').onclick = () => setValues({Tension:150, P:150});
+document.getElementById('btnStasis').onclick  = () => setValues({Flow:15, Shear:4});
+document.getElementById('btnCryo').onclick    = () => setValues({T:31});
+document.getElementById('btnNormal').onclick  = () => setValues(DEFAULTS);
+document.getElementById('btnNew').onclick     = () => { ruptureLatch = null; addLog(L.latchRel, '#6688ff'); };
+addLog(L.start);
 loop();
-
-// スライダー連動（手術モード）
-document.getElementById('pSlider').oninput = e=> {P=Number(e.target.value);};
-document.getElementById('tSlider').oninput = e=> {T=Number(e.target.value);};
-// 残りスライダーも同様（Shear, Tension, Adh, Flow）
-
-// 手術ボタン例（部分適用）
-// 「バルーン展開」ボタンで Tension急増 → R_hiスパイク → RUPTURE_BOUNDARY
 </script>
 </body>
 </html>

@@ -486,8 +486,8 @@ body.en span.en-text { display: inline; }
       <td>03</td>
       <td><div class="demo-links"><a href="03_HAN_vs_Legacy_JP.html" class="badge-jp">JP</a><a href="03_HAN_vs_Legacy_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>HAN vs Legacy リアルタイム比較。</strong> 外乱・突発負荷に対する追従性と安定性の差を、波形グラフで実証。</span>
-        <span class="en-text"><strong>HAN vs Legacy real-time comparison.</strong> Demonstrates tracking and stability differences under disturbance and sudden load.</span>
+        <span class="jp-text"><strong>HAN vs Legacy リアルタイム比較。</strong> 外乱・突発負荷に対する追従性と安定性の差を波形グラフで比較（簡易モデルの例示。限界超過の完全な防止を保証するものではない）。</span>
+        <span class="en-text"><strong>HAN vs Legacy real-time comparison.</strong> Compares tracking and stability under disturbance and sudden load on a simplified model (no guarantee that the limit is never crossed).</span>
       </td>
     </tr>
     <tr>
@@ -514,8 +514,8 @@ body.en span.en-text { display: inline; }
       <td>05</td>
       <td><div class="demo-links"><a href="05_IDE_Threshold_Visualizer_JP.html" class="badge-jp">JP</a><a href="05_IDE_Threshold_Visualizer_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>R = δ/τ の動的変化を位相スコープで表示。</strong> 整数位相ロック・残差破棄のメカニズムをリアルタイムに確認。</span>
-        <span class="en-text"><strong>Dynamic visualization of R = δ/τ.</strong> Confirms integer phase lock and residual discard in real time.</span>
+        <span class="jp-text"><strong>位相スコープで整数位相ロック・残差破棄の仕組みを表示。</strong> R・δ・τ そのものは計算せず、離散化の様子を示す図。</span>
+        <span class="en-text"><strong>Phase scope of integer phase lock and residual discard.</strong> Does not compute R, δ or τ themselves; it illustrates the discretization.</span>
       </td>
     </tr>
   </table>
@@ -672,8 +672,8 @@ body.en span.en-text { display: inline; }
       <td>17</td>
       <td><div class="demo-links"><a href="17_water_ice_phase_transition_JP.html" class="badge-jp">JP</a><a href="17_water_ice_phase_transition_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>水→氷 相転移。</strong> 相変化境界（0°C）への接近を R で追跡。潜熱と温度が構造閾値を越える過程を可視化。</span>
-        <span class="en-text"><strong>Water → ice phase transition.</strong> Tracks approach to the 0°C phase boundary using R.</span>
+        <span class="jp-text"><strong>水→氷 相転移。</strong> 取り出した熱量 Q を入力に、0°C で潜熱（334 kJ/kg）の間だけ温度が止まる様子を再現。R = 1.0 は凝固の始まり（0°C）に一致し、その後は「境界到達・相転移進行中」。動的τモデルの R ≥ 1 は、モデル上の警戒境界であり物理的な相転移ではない。</span>
+        <span class="en-text"><strong>Water → ice phase transition.</strong> The input is the heat Q removed; the temperature stops at 0°C for the latent heat (334 kJ/kg). R = 1.0 coincides with the start of freezing (0°C); beyond it the state is "boundary reached, transition in progress". In the dynamic τ model R ≥ 1 is a model-side alert boundary, not the physical phase transition.</span>
       </td>
     </tr>
     <tr>
@@ -688,8 +688,8 @@ body.en span.en-text { display: inline; }
       <td>19</td>
       <td><div class="demo-links"><a href="19_air_pressure_JP.html" class="badge-jp">JP</a><a href="19_air_pressure_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>空気圧管理（圧縮性流体・動的τ・二重ゆらぎ）。</strong> ボイル・シャルル則でτ_hi が温度依存で縮小。δとτが独立にゆらぐシリーズ最深構造。</span>
-        <span class="en-text"><strong>Air pressure management with compressible fluid and dynamic τ.</strong> τ_hi shrinks with temperature via gas-law behavior.</span>
+        <span class="jp-text"><strong>空気圧管理（圧縮性流体・動的τ・二重ゆらぎ）。</strong> 温度上昇は圧力上昇（δ側）として計上し、τ_hi は材料強度の温度低下を仮定して縮小（デモ用の仮定）。δとτが独立にゆらぐシリーズ最深構造。</span>
+        <span class="en-text"><strong>Air pressure management with compressible fluid and dynamic τ.</strong> Temperature rise raises the pressure (δ side); τ_hi shrinks under an assumed loss of material strength with temperature (demo assumption).</span>
       </td>
     </tr>
     <tr>
@@ -712,8 +712,8 @@ body.en span.en-text { display: inline; }
       <td>22</td>
       <td><div class="demo-links"><a href="22_vascular_monitor_JP.html" class="badge-jp">JP</a><a href="22_vascular_monitor_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>血管インターベンションモニター。</strong> 6物理量（圧力・せん断・壁張力・血流・温度・接着性）を二重ゆらぎ＋動的τで統合監視。</span>
-        <span class="en-text"><strong>Vascular intervention monitor.</strong> Six physical quantities integrated with dual fluctuation and dynamic τ.</span>
+        <span class="jp-text"><strong>血管インターベンションモニター。</strong> 6物理量を、基準値からのズレ／限界までの距離で上下別々に評価し、温度でτを縮める（二重ゆらぎ）。最大値で合成し、破断は固定。教育用で、基準値は臨床基準ではありません。</span>
+        <span class="en-text"><strong>Vascular intervention monitor.</strong> Six quantities, each evaluated against a reference and a declared limit (upper and lower sides separately), with τ shrinking with temperature. Combined by the maximum; rupture is latched. Educational; reference values are not clinical criteria.</span>
       </td>
     </tr>
   </table>
@@ -810,16 +810,16 @@ body.en span.en-text { display: inline; }
       <td>31</td>
       <td><div class="demo-links"><a href="31_move_water_or_ice_JP.html" class="badge-jp">JP</a><a href="31_move_water_or_ice_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>水・氷 状態ナビゲーション。</strong> インタラクティブな相転移制御。液体と固体の間をスライドしながら相境界での R を追跡。</span>
-        <span class="en-text"><strong>Water/ice state navigation.</strong> Interactive phase-transition navigation while tracking R at the boundary.</span>
+        <span class="jp-text"><strong>水・氷 状態ナビゲーション。</strong> インタラクティブな相転移制御。熱量 Q を取り出す（凝固系）／加える（融解系）操作で、潜熱の区間を含めて相境界での R を追跡。</span>
+        <span class="en-text"><strong>Water/ice state navigation.</strong> Interactive phase-transition navigation: remove (freezing) or add (melting) the heat Q and track R at the boundary, including the latent-heat interval.</span>
       </td>
     </tr>
     <tr>
       <td>32</td>
       <td><div class="demo-links"><a href="32_nra_ide_water_ice_JP.html" class="badge-jp">JP</a><a href="32_nra_ide_ice_water_EN.html" class="badge-en">EN</a></div></td>
       <td>
-        <span class="jp-text"><strong>氷→水 相転移。</strong> Demo 17 の逆方向：氷が 0°C を超えて潜熱を吸収しながら相変化する構造 R を追跡。</span>
-        <span class="en-text"><strong>Ice → water phase transition.</strong> Reverse direction of Demo 17: ice absorbs latent heat after crossing 0°C.</span>
+        <span class="jp-text"><strong>氷→水 相転移。</strong> Demo 17 の逆方向：加えた熱量 Q で氷が 0°C に達し、潜熱を吸収しながら融解する間の R を追跡（R = 1.0 は融解の始まり）。</span>
+        <span class="en-text"><strong>Ice → water phase transition.</strong> Reverse direction of Demo 17: heat Q added to ice brings it to 0°C, and R is tracked while it absorbs latent heat and melts (R = 1.0 at the start of melting).</span>
       </td>
     </tr>
   </table>

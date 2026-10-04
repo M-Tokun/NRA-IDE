@@ -542,10 +542,10 @@ footer a { color:var(--soil); text-decoration:none; }
 
       <div>
         <div class="sensor-title text-soil">🌱 土壌水分 (%)</div>
-        <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-sh">70</span></div>
-        <input type="range" class="soil" id="sl-sh" min="30" max="95" value="70" title="τ_high (soil)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low（下限重要）</span><span class="pg-val" id="v-sl">25</span></div>
-        <input type="range" class="soil" id="sl-sl" min="5" max="50" value="25" title="τ_low (soil)">
+        <div class="pg-head"><span class="pg-name">上限</span><span class="pg-val" id="v-sh">70</span></div>
+        <input type="range" class="soil" id="sl-sh" min="30" max="95" value="70" title="上限 (soil)">
+        <div class="pg-head mt-5"><span class="pg-name">下限（下限重要）</span><span class="pg-val" id="v-sl">25</span></div>
+        <input type="range" class="soil" id="sl-sl" min="5" max="50" value="25" title="下限 (soil)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-sa">0.15/0.60</span></div>
         <input type="range" class="soil" id="sl-sau" min="0.01" max="0.99" step="0.01" value="0.15" title="α_upper (soil)">
         <input type="range" class="soil mt-3" id="sl-sal" min="0.01" max="0.99" step="0.01" value="0.60" title="α_lower (soil)">
@@ -553,10 +553,10 @@ footer a { color:var(--soil); text-decoration:none; }
 
       <div>
         <div class="sensor-title text-ground">🌡 地温 (°C)</div>
-        <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-gh">32</span></div>
-        <input type="range" class="ground" id="sl-gh" min="20" max="50" value="32" title="τ_high (ground)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low</span><span class="pg-val" id="v-gl">5</span></div>
-        <input type="range" class="ground" id="sl-gl" min="0" max="20" value="5" title="τ_low (ground)">
+        <div class="pg-head"><span class="pg-name">上限</span><span class="pg-val" id="v-gh">32</span></div>
+        <input type="range" class="ground" id="sl-gh" min="20" max="50" value="32" title="上限 (ground)">
+        <div class="pg-head mt-5"><span class="pg-name">下限</span><span class="pg-val" id="v-gl">5</span></div>
+        <input type="range" class="ground" id="sl-gl" min="0" max="20" value="5" title="下限 (ground)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ga">0.25/0.35</span></div>
         <input type="range" class="ground" id="sl-gau" min="0.01" max="0.99" step="0.01" value="0.25" title="α_upper (ground)">
         <input type="range" class="ground mt-3" id="sl-gal" min="0.01" max="0.99" step="0.01" value="0.35" title="α_lower (ground)">
@@ -564,10 +564,10 @@ footer a { color:var(--soil); text-decoration:none; }
 
       <div>
         <div class="sensor-title text-sun">☀ 日射量 (W/m²)</div>
-        <div class="pg-head"><span class="pg-name">τ_high</span><span class="pg-val" id="v-uh">900</span></div>
-        <input type="range" class="sun" id="sl-uh" min="500" max="1400" step="10" value="900" title="τ_high (sun)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low</span><span class="pg-val" id="v-ul">80</span></div>
-        <input type="range" class="sun" id="sl-ul" min="10" max="300" step="5" value="80" title="τ_low (sun)">
+        <div class="pg-head"><span class="pg-name">上限</span><span class="pg-val" id="v-uh">900</span></div>
+        <input type="range" class="sun" id="sl-uh" min="500" max="1400" step="10" value="900" title="上限 (sun)">
+        <div class="pg-head mt-5"><span class="pg-name">下限</span><span class="pg-val" id="v-ul">80</span></div>
+        <input type="range" class="sun" id="sl-ul" min="10" max="300" step="5" value="80" title="下限 (sun)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ua">0.35/0.20</span></div>
         <input type="range" class="sun" id="sl-uau" min="0.01" max="0.99" step="0.01" value="0.35" title="α_upper (sun)">
         <input type="range" class="sun mt-3" id="sl-ual" min="0.01" max="0.99" step="0.01" value="0.20" title="α_lower (sun)">
@@ -575,10 +575,10 @@ footer a { color:var(--soil); text-decoration:none; }
 
       <div>
         <div class="sensor-title text-wind">💨 風速 (m/s)</div>
-        <div class="pg-head"><span class="pg-name">τ_high（蒸散加速）</span><span class="pg-val" id="v-wh">8</span></div>
-        <input type="range" class="wind" id="sl-wh" min="3" max="20" value="8" title="τ_high (wind)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low</span><span class="pg-val" id="v-wl">0.3</span></div>
-        <input type="range" class="wind" id="sl-wl" min="0.1" max="3" step="0.1" value="0.3" title="τ_low (wind)">
+        <div class="pg-head"><span class="pg-name">上限（蒸散加速）</span><span class="pg-val" id="v-wh">8</span></div>
+        <input type="range" class="wind" id="sl-wh" min="3" max="20" value="8" title="上限 (wind)">
+        <div class="pg-head mt-5"><span class="pg-name">下限</span><span class="pg-val" id="v-wl">0.3</span></div>
+        <input type="range" class="wind" id="sl-wl" min="0.1" max="3" step="0.1" value="0.3" title="下限 (wind)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.45/0.15</span></div>
         <input type="range" class="wind" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.45" title="α_upper (wind)">
         <input type="range" class="wind mt-3" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.15" title="α_lower (wind)">

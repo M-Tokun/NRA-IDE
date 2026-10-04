@@ -190,7 +190,8 @@ function update() {
     
     // THE FORMULA: F = k * v / (1 - R²)
     // As R -> 1.0, Denominator -> 0, Force -> Infinity.
-    // This creates an "Unbreakable Wall" mathematically.
+    // This approximates a wall that pulls back harder the closer the load gets to the limit.
+    // The implementation clamps the ratio at 0.99 and the force at ±20, so it is not a mathematically perfect wall (no guarantee that the limit is never crossed).
     let force = (CONFIG.han.k * violation) / (1 - Math.pow(ratio, 2));
     
     // Clamping for simulation stability

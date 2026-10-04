@@ -203,8 +203,8 @@ footer a{color:var(--co2);text-decoration:none;}
       <div>
         <div class="sensor-title text-water">💧 Water Pressure</div>
         <div class="pg-desc">α_lower higher → detect water cutoff early · α_upper lower → avoid pipe shock</div>
-        <div class="pg-head"><span class="pg-name">τ_high (kPa)</span><span class="pg-val" id="v-wh">70</span></div><input type="range" class="water" id="sl-wh" min="40" max="120" value="70" title="τ_high (water)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low (kPa)</span><span class="pg-val" id="v-wl">30</span></div><input type="range" class="water" id="sl-wl" min="5" max="60" value="30" title="τ_low (water)">
+        <div class="pg-head"><span class="pg-name">Upper limit (kPa)</span><span class="pg-val" id="v-wh">70</span></div><input type="range" class="water" id="sl-wh" min="40" max="120" value="70" title="Upper limit (water)">
+        <div class="pg-head mt-5"><span class="pg-name">Lower limit (kPa)</span><span class="pg-val" id="v-wl">30</span></div><input type="range" class="water" id="sl-wl" min="5" max="60" value="30" title="Lower limit (water)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.20/0.50</span></div>
         <input type="range" class="water" id="sl-wau" min="0.01" max="0.99" step="0.01" value="0.20" title="α_upper (water)">
         <input type="range" class="water mt-3" id="sl-wal" min="0.01" max="0.99" step="0.01" value="0.50" title="α_lower (water)">
@@ -212,8 +212,8 @@ footer a{color:var(--co2);text-decoration:none;}
       <div>
         <div class="sensor-title text-temp">🌡 Temperature</div>
         <div class="pg-desc">α_lower higher → catch nighttime frost earlier</div>
-        <div class="pg-head"><span class="pg-name">τ_high (°C)</span><span class="pg-val" id="v-th">35</span></div><input type="range" class="temp" id="sl-th" min="20" max="50" value="35" title="τ_high (temp)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low (°C)</span><span class="pg-val" id="v-tl">10</span></div><input type="range" class="temp" id="sl-tl" min="0" max="25" value="10" title="τ_low (temp)">
+        <div class="pg-head"><span class="pg-name">Upper limit (°C)</span><span class="pg-val" id="v-th">35</span></div><input type="range" class="temp" id="sl-th" min="20" max="50" value="35" title="Upper limit (temp)">
+        <div class="pg-head mt-5"><span class="pg-name">Lower limit (°C)</span><span class="pg-val" id="v-tl">10</span></div><input type="range" class="temp" id="sl-tl" min="0" max="25" value="10" title="Lower limit (temp)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ta">0.25/0.45</span></div>
         <input type="range" class="temp" id="sl-tau" min="0.01" max="0.99" step="0.01" value="0.25" title="α_upper (temp)">
         <input type="range" class="temp mt-3" id="sl-tal" min="0.01" max="0.99" step="0.01" value="0.45" title="α_lower (temp)">
@@ -221,8 +221,8 @@ footer a{color:var(--co2);text-decoration:none;}
       <div>
         <div class="sensor-title text-co2">🌿 CO₂</div>
         <div class="pg-desc">α balanced → detect both ventilation spike and CO₂ depletion</div>
-        <div class="pg-head"><span class="pg-name">τ_high (ppm)</span><span class="pg-val" id="v-ch">1200</span></div><input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200" title="τ_high (co2)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low (ppm)</span><span class="pg-val" id="v-cl">400</span></div><input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400" title="τ_low (co2)">
+        <div class="pg-head"><span class="pg-name">Upper limit (ppm)</span><span class="pg-val" id="v-ch">1200</span></div><input type="range" class="co2" id="sl-ch" min="800" max="2000" step="50" value="1200" title="Upper limit (co2)">
+        <div class="pg-head mt-5"><span class="pg-name">Lower limit (ppm)</span><span class="pg-val" id="v-cl">400</span></div><input type="range" class="co2" id="sl-cl" min="200" max="700" step="10" value="400" title="Lower limit (co2)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ca">0.30/0.40</span></div>
         <input type="range" class="co2" id="sl-cau" min="0.01" max="0.99" step="0.01" value="0.30" title="α_upper (co2)">
         <input type="range" class="co2 mt-3" id="sl-cal" min="0.01" max="0.99" step="0.01" value="0.40" title="α_lower (co2)">
@@ -230,8 +230,8 @@ footer a{color:var(--co2);text-decoration:none;}
       <div>
         <div class="sensor-title text-ec">⚗ Nutrient EC</div>
         <div class="pg-desc">α_lower higher → catch silent salt concentration rise early</div>
-        <div class="pg-head"><span class="pg-name">τ_high (mS/cm)</span><span class="pg-val" id="v-eh">3.5</span></div><input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5" title="τ_high (ec)">
-        <div class="pg-head mt-5"><span class="pg-name">τ_low (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div><input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8" title="τ_low (ec)">
+        <div class="pg-head"><span class="pg-name">Upper limit (mS/cm)</span><span class="pg-val" id="v-eh">3.5</span></div><input type="range" class="ec" id="sl-eh" min="2.0" max="6.0" step="0.1" value="3.5" title="Upper limit (ec)">
+        <div class="pg-head mt-5"><span class="pg-name">Lower limit (mS/cm)</span><span class="pg-val" id="v-el">0.8</span></div><input type="range" class="ec" id="sl-el" min="0.2" max="2.0" step="0.1" value="0.8" title="Lower limit (ec)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-ea">0.20/0.55</span></div>
         <input type="range" class="ec" id="sl-eau" min="0.01" max="0.99" step="0.01" value="0.20" title="α_upper (ec)">
         <input type="range" class="ec mt-3" id="sl-eal" min="0.01" max="0.99" step="0.01" value="0.55" title="α_lower (ec)">

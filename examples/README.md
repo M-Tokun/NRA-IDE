@@ -79,6 +79,24 @@ All demos run directly in a browser. No installation is required.
 
 > In many demos, the red line indicates R = 1.0. This is not a warning line; it is the structural limit line. The practical judgment limit must be placed before that line. Its value is not fixed, and should be configured according to the operating site and target domain.
 
+### Judgment limits (R_J) per demo
+
+**Common:** R = 1.0 is the rupture boundary (RUPTURE_BOUNDARY / FAIL / FALLBACK) in every demo. 0.4 is the start of WATCH in many demos. The warning threshold in between (the judgment limit R_J) is a value declared per demo, not a fixed axiom value (see the note above).
+
+| Demo | Warning / judgment limit | Note |
+|---|---|---|
+| #08–#11 | WARN 0.65 (log); colors at 0.7 | Upper and lower sides evaluated separately. SILENCE at R ≥ 1.0 |
+| #12, #13, #17, #18–#20, #27–#32, #36–#39 | WARN 0.75 | #36 also uses WATCH 0.4 |
+| #14 | CAUTION 0.4 | Rupture at R ≥ 1.0 or debt > 0.8 |
+| #15 | CAUTION 0.35, CRITICAL 0.6 | Judged on R_eff (R_total + debt × 0.4) |
+| #23, #24 | DAMP 0.72 | Rupture (SILENCE / FALLBACK) at 1.0 |
+| #34, #35 JP, #48 | WARNING 0.7 | #35 EN uses WATCH 0.40 / WARN 0.75 (separate implementation) |
+| #40, #41 | Watch 0.40, Caution 0.75 | Human Review at 1.0 |
+| #42, #46 | ZONE B 0.40, C 0.70 | D (FAIL-CLOSED) at 1.0 |
+| #43 | ZONE B 0.40, C 0.70, D 0.85 | E (FAIL-CLOSED) at 1.0 |
+
+All values are demo-declared; in operation they are set from the target, the sensor delay, and the time needed to stop.
+
 > Demos that enter RUPTURE_BOUNDARY, FAIL, or FALLBACK keep that state until "New evaluation" ("Reset" in #23) is pressed (irreversible latch). The R value keeps showing the current reading. The SILENCE in demos 08–11 is a temporary cut-off released after the HOLD time; it is a different concept from latching the rupture boundary.
 
 ### 📚 STEP 1 — First Understand “Why?”
@@ -93,20 +111,20 @@ All demos run directly in a browser. No installation is required.
 
 | # | File | Content |
 |---|---------|------|
-| 03 | [03_HAN_vs_Legacy_EN.html](./03_HAN_vs_Legacy_EN.html) | **HAN vs Legacy real-time comparison.** Demonstrates tracking and stability differences under disturbance and sudden load. |
+| 03 | [03_HAN_vs_Legacy_EN.html](./03_HAN_vs_Legacy_EN.html) | **HAN vs Legacy real-time comparison.** Compares tracking and stability under disturbance and sudden load on a simplified model (the ratio is clamped at 0.99 and the force at ±20, so it does not guarantee that the limit is never crossed). |
 | 04 | [04_HAN_Stress_Test_EN.html](./04_HAN_Stress_Test_EN.html) | **Extreme 80 ms load test.** Legacy blindly executes commands and collapses in FPS; HAN detects tension and adapts load. |
 
 ### 📊 STEP 3 — Visualize the Threshold Mechanism
 
 | # | File | Content |
 |---|---------|------|
-| 05 | [05_IDE_Threshold_Visualizer_EN.html](./05_IDE_Threshold_Visualizer_EN.html) | **Dynamic visualization of R = δ/τ.** Confirms integer phase lock and residual discard in real time. |
+| 05 | [05_IDE_Threshold_Visualizer_EN.html](./05_IDE_Threshold_Visualizer_EN.html) | **Phase scope of integer phase lock and residual discard.** Does not compute R, δ or τ themselves; it illustrates the discretization. |
 
 ### ⚙️ STEP 4 — Escapement Principle
 
 | # | File | Content |
 |---|---------|------|
-| 06 | `06_Escapement_Principle_EN.html` *（./06_Escapement_Principle_EN.html）* | **Why gears do not accumulate error.** Floating-point drift vs integer phase lock animation. |
+| 06 | [06_Escapement_Principle_JP.html](./06_Escapement_Principle_JP.html) | **Why gears do not accumulate error.** Floating-point drift vs integer phase lock animation. (Japanese only; there is no EN page yet.) |
 
 ### 🔴 STEP 5 — Cascade Failure: Watching the Moment Collapse Begins
 
@@ -155,12 +173,12 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 
 | # | File | Content |
 |---|---------|------|
-| 17 | [JP](./17_water_ice_phase_transition_JP.html) / [EN](./17_water_ice_phase_transition_EN.html) | **Water → ice phase transition.** Tracks approach to the 0°C phase boundary using R. |
+| 17 | [JP](./17_water_ice_phase_transition_JP.html) / [EN](./17_water_ice_phase_transition_EN.html) | **Water → ice phase transition.** The input is the heat Q removed; the temperature stops at 0°C for the latent heat (334 kJ/kg). R = 1.0 coincides with the start of freezing (0°C); beyond it the state is "boundary reached, transition in progress". In the dynamic τ model R ≥ 1 is a model-side alert boundary, not the physical phase transition. |
 | 18 | [JP](./18_chain_tension_JP.html) / [EN](./18_chain_tension_EN.html) | **Chain tension with polygon effect and automatic adjustment.** Uses dR/dt prediction before limit arrival. |
-| 19 | [JP](./19_air_pressure_JP.html) / [EN](./19_air_pressure_EN.html) | **Air pressure management with compressible fluid and dynamic τ.** τ_hi shrinks with temperature via gas-law behavior. |
+| 19 | [JP](./19_air_pressure_JP.html) / [EN](./19_air_pressure_EN.html) | **Air pressure management with compressible fluid and dynamic τ.** Temperature rise raises the pressure (δ side); τ_hi shrinks under an assumed loss of material strength with temperature (demo assumption). |
 | 20 | [JP](./20_water_pressure_JP.html) / [EN](./20_water_pressure_EN.html) | **Water pressure management with incompressible fluid and water hammer.** Simulates pump pulsation and valve-closing impact. |
 | 21 | [JP](./21_cabg_monitor_JP.html) / [EN](./21_cabg_monitor_EN.html) | **CABG monitor.** Monitors graft flow (MGF), pulsatility index (PI), and diastolic filling (DF) during bypass surgery, with the tolerance adjusted by temperature and blood flow, as an educational safety demo. |
-| 22 | [JP](./22_vascular_monitor_JP.html) / [EN](./22_vascular_monitor_EN.html) | **Vascular intervention monitor.** Six physical quantities integrated with dual fluctuation and dynamic τ. |
+| 22 | [JP](./22_vascular_monitor_JP.html) / [EN](./22_vascular_monitor_EN.html) | **Vascular intervention monitor.** Six quantities (pressure, shear, wall tension, flow, temperature, adhesion) are each evaluated against a reference and a declared limit, upper and lower sides separately, with τ shrinking with temperature (dual fluctuation). Combined by the maximum; rupture is latched. Action buttons: balloon inflation, flow stasis, cooling. Educational; reference values are not clinical criteria. |
 
 ---
 
@@ -185,8 +203,8 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 | 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN.html) | Water temperature upper/lower management | Evaluates R_hi and R_lo independently. |
 | 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN.html) | Light / illuminance management | Measures the receiving side in lux and increases shading from the precursor stage. |
 | 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN.html) | Power management using V × I | Integrates voltage and current as P = V × I; sustained over-power raises R over time. |
-| 31 | [JP](./31_move_water_or_ice_JP.html) / [EN](./31_move_water_or_ice_EN.html) | Water/ice state navigation | Interactive phase-transition navigation while tracking R at the boundary. |
-| 32 | [JP](./32_nra_ide_water_ice_JP.html) / [EN](./32_nra_ide_ice_water_EN.html) | Ice → water phase transition | Reverse direction of Demo 17: ice absorbs latent heat after crossing 0°C. |
+| 31 | [JP](./31_move_water_or_ice_JP.html) / [EN](./31_move_water_or_ice_EN.html) | Water/ice state navigation | Interactive phase-transition navigation: remove (freezing) or add (melting) the heat Q and track R at the boundary, including the latent-heat interval. |
+| 32 | [JP](./32_nra_ide_water_ice_JP.html) / [EN](./32_nra_ide_ice_water_EN.html) | Ice → water phase transition | Reverse direction of Demo 17: heat Q added to ice brings it to 0°C, and R is tracked while it absorbs latent heat and melts (R = 1.0 at the start of melting). |
 
 ---
 
@@ -201,7 +219,9 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 
 ### 🔗 STEP 11 — Correlation and Multi-Factor Templates (34–41)
 
-From Demo 34 onward, the sample set develops from single-quantity R judgment into multi-layer correlation, mediated variables, closed loops, and individual baseline differences. The basic safety form is **R_total = max(R_i, R_corr, R_coupling)** so that a dangerous layer is not diluted by averaging. Medical examples are kept as **Medical Education Templates**, not operational clinical systems.
+From Demo 34 onward, the sample set develops from single-quantity R judgment into multi-layer correlation, mediated variables, closed loops, and individual baseline differences.
+
+> **The JP and EN pages of Demos 35–41 and 49 are separate implementations.** Their factor sets, warning thresholds, correlation normalization widths, and state names differ (e.g. in Demo 35 the JP page warns at 0.70 while the EN page uses WATCH 0.40 / WARN 0.75). Running both with the same input does not give the same result. The differences are noted in the comment at the top of each page's code. The basic safety form is **R_total = max(R_i, R_corr, R_coupling)** so that a dangerous layer is not diluted by averaging. Medical examples are kept as **Medical Education Templates**, not operational clinical systems.
 
 | # | File | Domain | Key Point |
 |---|---------|---------|---------|

@@ -2,7 +2,7 @@
 
 ## Gate Verification Process for OTA (Over-The-Air) Updates
 
-**FILE: NRA-IDE_OTA_Gate_Verification_0224_v01.md**  
+**FILE: NRA-IDE_OTA_Gate_Verification_2026-02-24_v1.md**  
 
 **Author: M-Tokuni / KEN**  
 
@@ -10,7 +10,7 @@
 
 **Date: 2026-02-24**  
 
-**依存文書 / Depends on:** `NRA-IDE_Automotive_Scope_0224_v02.md`
+**依存文書 / Depends on:** `NRA-IDE_Automotive_Scope_2026-02-24_v2.md`
 
 ---
 
@@ -372,7 +372,7 @@ UI/ログのみ（クラス D）:
 
 
 
-`NRA-IDE_Automotive_Scope_0224_v02.md` Section 5.3 で示した通り、  
+`NRA-IDE_Automotive_Scope_2026-02-24_v2.md` Section 5.3 で示した通り、  
 
 NRA-IDE は ISO 26262 の補完関係にある。OTA においては以下の点が追加で適用される。
 
@@ -466,11 +466,11 @@ OTA で失ってはならないもの:
 
 
 
-- `NRA-IDE_Automotive_Scope_0224_v02.md` — 自動車システム適用範囲定義書
+- `NRA-IDE_Automotive_Scope_2026-02-24_v2.md` — 自動車システム適用範囲定義書
 
-- `NRA-IDE_AutoDrive_POC_02_JP.html` / `_EN.html` — 自動運転 Gate POC
+- `42_AutoDrive_POC_2_JP.html` / `42_AutoDrive_POC_2_EN.html` — 自動運転 Gate POC
 
-- `NRA-IDE_Connection_vs_Mixing_20260224.html` — 接続 vs 混用 デモ
+- `46_Connection_vs_Mixing_JP.html` / `46_Connection_vs_Mixing_EN.html` — 接続 vs 混用 デモ
 
 - ISO 26262: Road vehicles — Functional safety (Part 8: Supporting processes)
 
@@ -482,7 +482,7 @@ OTA で失ってはならないもの:
 
 
 
-*FILE: NRA-IDE_OTA_Gate_Verification_0224_v01.md*  
+*FILE: NRA-IDE_OTA_Gate_Verification_2026-02-24_v1.md*  
 
 *© M-Tokuni — MIT License (非商用・教育・研究目的)*
 

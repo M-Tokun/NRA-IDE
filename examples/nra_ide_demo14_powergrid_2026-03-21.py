@@ -140,7 +140,8 @@ class PowerGridNRA:
         delta = abs(raw_delta) * math.copysign(1.0, raw_delta + 1e-9)
 
         # 周波数更新
-        self.freq = max(47.0, min(53.0, self.F_NOM - delta * 4.0))
+        # δ は周波数偏差 [Hz] そのもの（δf = |f − f_nominal|）。HTML版と同じ尺度。
+        self.freq = max(47.0, min(53.0, self.F_NOM - delta))
 
         # R 計算（Cause-Side）
         self.channel.compute_R(self.freq)

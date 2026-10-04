@@ -402,8 +402,11 @@
     upperEMA = upperEMA * (1 - alphaUpper) + upperDev * alphaUpper;
     lowerEMA = lowerEMA * (1 - alphaLower) + lowerDev * alphaLower;
 
-    // 動的境界τ：基準厚みtauBaseにEMAを加減して境界を伸縮させる。係数0.65/0.35と下限2.0は根拠不明・デモ用チューニング値
-    const tauDynUpper = tauBase + upperEMA * 0.65;
+    // 動的境界（UIのτ_dyn_upper／τ_dyn_lower）: EMAで平滑化した偏差により、tauBaseを
+    // 基準に両側とも「狭まる」だけで、広げない（FORMULA §4.4：評価出力でゲート幅を広げる経路を持たない）。
+    // 上限側は縮みにくく（0.15、下限はtauBase×0.8）、下限側は大きく縮む（0.35、下限2.0）。
+    // これらの係数とフロア値は根拠不明・デモ用チューニング値。
+    const tauDynUpper = Math.max(tauBase * 0.8, tauBase - upperEMA * 0.15);
     const tauDynLower = Math.max(2.0, tauBase - lowerEMA * 0.35);
 
     // R = δ/τ（ヘッダー文言の定義どおり）を上限側・下限側それぞれで算出し、大きい方を瞬間Rとして採用

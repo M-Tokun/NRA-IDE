@@ -336,6 +336,7 @@ const BUF = 500;
 
 let speed = 2;
 let simTime = 0;         // シミュレーション内秒
+let procSec = 0;         // 執刀開始からの秒（ウォームアップの基準）
 let animId = null;
 let running = false;
 let procedureStarted = false;
@@ -415,7 +416,7 @@ function updateAccuracy(pct) {
     stars >= 4 ? '#00ff88' : stars >= 2 ? '#ffcc00' : '#445566';
 
   const notes = [
-    'τ未確立 — R値は参考値のみ',
+    'τは設計値で固定 — R値は参考値（執刀開始から15%未満）',
     'Baseline確立中 — 低精度',
     'Baseline 40% — 中精度',
     'Baseline 60% — 実用精度',
@@ -448,14 +449,16 @@ function physicsStep() {
     return;
   }
 
-  // ウォームアップ進行
-  st.warmupPct = Math.min(100, (simTime / WARMUP_SEC) * 100);
-  // τは徐々に確立される（ウォームアップ完了で設計値に到達）
+  // ウォームアップ進行（執刀開始からの経過。執刀前の待機時間は数えない）
+  procSec += dt;
+  st.warmupPct = Math.min(100, (procSec / WARMUP_SEC) * 100);
+  // τは設計値に固定する。ウォームアップで変わるのは「経過の精度（wf）」だけで、τもRも縮小・拡大しない。
+  // （以前はτにもRにもwfを掛けて相殺し、ウォームアップの進み具合が判定に効いていなかった）
   const wf = st.warmupPct / 100;
-  tau.hr   = tauBase.hr   * wf;
-  tau.spo2 = tauBase.spo2 * wf;
-  tau.rr   = tauBase.rr   * wf;
-  tau.bp   = tauBase.bp   * wf;
+  tau.hr   = tauBase.hr;
+  tau.spo2 = tauBase.spo2;
+  tau.rr   = tauBase.rr;
+  tau.bp   = tauBase.bp;
 
   // ── 自然ゆらぎ ──
   const micro = (Math.random()-0.5);
@@ -525,8 +528,7 @@ function physicsStep() {
   st.Rtotal = Math.sqrt(
     st.R.hr**2 + st.R.spo2**2 + st.R.rr**2 + st.R.bp**2
   );
-  // 精度補正（ウォームアップ完了前は精度係数をかける）
-  st.Rtotal *= wf;
+  // ウォームアップ中のRは参考値。精度係数wfは判定のRには掛けず、残留負債の重み付けにだけ使う。
 
   // 残留負債（経過があるほど効いてくる）
   const k_rec = 0.10 + recoverF;
@@ -543,12 +545,13 @@ function physicsStep() {
 
   if (prevPhase === 'RUPTURE_BOUNDARY') {
     st.phase = 'RUPTURE_BOUNDARY';
+  } else if (Reff >= 1.0 || st.residualDebt > 1.2) {
+    // 破断判定はウォームアップ中・介入中でも抑えない（保守側）。
+    st.phase = 'RUPTURE_BOUNDARY';
   } else if (st.warmupPct < 15) {
     st.phase = 'WARMUP';
   } else if (st.intervene) {
     st.phase = 'CRITICAL';
-  } else if (Reff >= 1.0 || st.residualDebt > 1.2) {
-    st.phase = 'RUPTURE_BOUNDARY';
   } else if (Reff >= 0.6 || st.residualDebt > 0.7) {
     st.phase = 'CRITICAL';
   } else if (Reff >= 0.35) {
@@ -753,7 +756,7 @@ function updateUI() {
   const mm = String(Math.floor(simTime/60)).padStart(2,'0');
   const ss = String(Math.floor(simTime%60)).padStart(2,'0');
   document.getElementById('elapsed-time').textContent = mm + ':' + ss;
-  const rem = Math.max(0, WARMUP_SEC - simTime);
+  const rem = Math.max(0, WARMUP_SEC - procSec);
   const rm = String(Math.floor(rem/60)).padStart(2,'0');
   const rs = String(Math.floor(rem%60)).padStart(2,'0');
   document.getElementById('warmup-remain').textContent = st.warmupPct >= 100 ? '確立済み' : rm + ':' + rs;
@@ -819,7 +822,7 @@ function startNewPatientEvaluation() {
     });
   }
   procedureStarted = false;
-  simTime = 0; bufIdx = 0;
+  simTime = 0; procSec = 0; bufIdx = 0;
   st = {
     hr:72, spo2:99, rr:14, bp:120,
     delta:{hr:0,spo2:0,rr:0,bp:0},

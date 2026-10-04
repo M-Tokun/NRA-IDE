@@ -130,6 +130,7 @@
   .bad .panel-title  { color: var(--red);  background: rgba(255,51,85,0.08);  border: 1px solid rgba(255,51,85,0.25); }
   .good .panel-title { color: var(--cyan); background: rgba(0,220,255,0.06); border: 1px solid rgba(0,220,255,0.25); }
 
+  .note-synth { color: #ffaa00; font-size: 0.85em; }
   .panel-subtitle {
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 11px;
@@ -407,7 +408,7 @@
   <!-- ─── 左：連続近似（Bad） ─── -->
   <div class="clock-panel bad" id="panel-bad">
     <div class="panel-title">× CONTINUOUS — 連続近似</div>
-    <div class="panel-subtitle">浮動小数点による滑らかな回転<br>残差を次ステップへ持ち越す</div>
+    <div class="panel-subtitle">浮動小数点による滑らかな回転<br>残差を次ステップへ持ち越す<br><span class="note-synth">※ ゆらぎは誤差を誇張した演出（実測値ではありません）</span></div>
 
     <div class="clock-wrap">
       <canvas id="clock-bad" class="clock-canvas" width="200" height="200"></canvas>
@@ -534,6 +535,7 @@
 const TICK_DEG      = 6;          // 1秒 = 6°
 const FRAME_MS      = 16;
 let   speed         = 1;
+let   simSec        = 0;          // シミュレーション内の経過秒（リセットで0）
 let   running       = true;
 let   lastTime      = null;
 
@@ -740,22 +742,24 @@ function loop(ts) {
   const dt = Math.min((ts - lastTime) * speed, 100);
   lastTime = ts;
 
-  const dtSec = dt / 1000;
+  const dtSec = dt / 1000;   // dt は速度倍率を掛けた後の値（シミュレーション内の秒）
+  simSec += dtSec;           // 開始（リセット）からのシミュレーション時間。理論値と良い時計の基準にする
 
   // ── Bad clock ──
-  // 意図的な浮動小数点ゆらぎを注入
-  const drift = noiseOffset(ts) * speed;
-  badAngle   += dtSec * 360 * drift;            // ゆらぎ成分
-  const nominalInc = dtSec * 360 / 60 * speed; // 1分で360°
+  // 注入しているゆらぎは「現実の浮動小数点誤差を誇張した演出」であり、実測した誤差ではない。
+  // 速度倍率は dtSec にすでに含まれているので、ここでは掛けない。
+  const drift = noiseOffset(ts);
+  badAngle   += dtSec * 6 * drift;              // ゆらぎ成分：公称速度（6°/秒）に対する割合（表示のDRIFT閾値0.5°・2°の尺度に合わせる）
+  const nominalInc = dtSec * 360 / 60;          // 1分で360°
   badAngle   += nominalInc;
-  const trueAngle = (ts / 1000 * 6 * speed) % 360;  // 理論値
+  const trueAngle = (simSec * 6) % 360;         // 理論値（同じ開始時刻・同じ速度）
   badAccumErr = Math.abs(badAngle % 360 - trueAngle % 360);
   if (badAccumErr > 180) badAccumErr = 360 - badAccumErr;
   badSteps    = Math.floor(badAngle / TICK_DEG);
 
   // ── Good clock ──
   // 1秒ごとに厳密に離散ステップ（整数）
-  const elapsedSec = ts / 1000 * speed;
+  const elapsedSec = simSec;
   const newSec = Math.floor(elapsedSec);
   if (newSec !== goodLastSec) {
     goodDiscrete = (goodDiscrete + 1) % 60;
@@ -787,7 +791,7 @@ function loop(ts) {
 //  CONTROLS
 // ─────────────────────────────────────────────
 function resetAll() {
-  badAngle = 0; badAccumErr = 0; badSteps = 0;
+  badAngle = 0; badAccumErr = 0; badSteps = 0; simSec = 0;
   goodDiscrete = 0; goodSteps = 0; goodHeat = 0;
   goodLastSec = -1; goodTickFlash = 0;
   heatParticles = [];

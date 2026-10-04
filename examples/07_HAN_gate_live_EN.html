@@ -775,7 +775,7 @@ function addLog(msg, cls) {
 }
 
 function checkLog(isSilence, chain_score, dynamic_gain, params) {
-  if (isSilence && lastDecision === 'PASS') {
+  if (isSilence && lastDecision !== 'SILENCE') {
     addLog(`SILENCE  score=${chain_score.toFixed(4)} > CHAIN_SCORE_LIMIT=${params.limit.toFixed(2)}  gain=${dynamic_gain.toFixed(3)}`, 'silence');
     holdLogged = false;
   } else if (!isSilence && lastDecision === 'SILENCE' && !holdLogged) {
@@ -783,7 +783,8 @@ function checkLog(isSilence, chain_score, dynamic_gain, params) {
   } else if (chain_score >= params.limit * 0.7 && chain_score < params.limit && lastDecision !== 'warn') {
     addLog(`WARN  score=${chain_score.toFixed(4)}  Approaching (CHAIN_SCORE_LIMIT×70%)`, 'warn');
   }
-  lastDecision = isSilence ? 'SILENCE' : 'PASS';
+  // Remember WARN as a state too (otherwise the same log is emitted every step while in the WARN zone)
+  lastDecision = isSilence ? 'SILENCE' : (chain_score >= params.limit * 0.7 ? 'warn' : 'PASS');
 }
 
 // ─────────────────────────────────────────────────

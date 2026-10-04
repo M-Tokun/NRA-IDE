@@ -20,7 +20,7 @@ examples フォルダ内の HTML ファイル (14_*.html から 30_*.html まで
 - `14_powergrid_transition_EN.html`, `14_powergrid_transition_JP.html`
 - `15_or_icu_continuum_EN.html`, `15_or_icu_continuum_JP.html`
 - `17_water_ice_phase_transition_EN.html`, `17_water_ice_phase_transition_JP.html`
-- `18_chain_tension_EN1.html`, `18_chain_tension_JP.html`
+- `18_chain_tension_EN.html`, `18_chain_tension_JP.html`
 - `19_air_pressure_EN.html`, `19_air_pressure_JP.html`
 - `20_water_pressure_EN.html`, `20_water_pressure_JP.html`
 - `21_cabg_monitor_EN.html`, `21_cabg_monitor_JP.html`

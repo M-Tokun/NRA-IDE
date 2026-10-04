@@ -114,12 +114,12 @@
   </div>
 
   <div class="card">
-    <div class="card-label">τ計算モデルと温度設定</div>
+    <div class="card-label" id="ctrlLabel">τ計算モデルと温度設定</div>
     <div class="controls">
       <div class="slider-group">
-        <label>温度 T</label>
-        <input aria-label="温度" type="range" id="tempSlider" min="-5" max="20" step="0.5" value="15">
-        <span id="tempOut">15.0℃</span>
+        <label id="qLabel">取り出した熱量 Q</label>
+        <input aria-label="取り出した熱量 Q" type="range" id="tempSlider" min="0" max="430" step="1" value="0">
+        <span id="tempOut">0 kJ/kg</span>
       </div>
       <div class="toggle-group">
         <button class="tog-btn active" id="btnStatic" onclick="setTauModel('static')">静的τ（直線）</button>
@@ -132,11 +132,11 @@
     <div class="card-label">リアルタイム構造比</div>
     <div class="metrics">
       <div class="metric">
-        <div class="metric-label">δ（蓄積ズレ）</div>
+        <div class="metric-label" id="lblDelta">δ（蓄積ズレ）</div>
         <div class="metric-val" id="mDelta">0.00</div>
       </div>
       <div class="metric">
-        <div class="metric-label">τ（吸収余裕）</div>
+        <div class="metric-label" id="lblTau">τ（吸収余裕）</div>
         <div class="metric-val" id="mTau">20.0</div>
       </div>
       <div class="metric">
@@ -146,6 +146,10 @@
       <div class="metric">
         <div class="metric-label">状態判定</div>
         <div><span class="phase-badge" id="phaseBadge">液体</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">温度 T ／ 氷の割合</div>
+        <div class="metric-val" id="mTF">—</div>
       </div>
     </div>
 
@@ -190,272 +194,174 @@
 </div>
 
 <script>
-// ── システム状態 ──
-let phaseMode = 'freezing'; // 'freezing' (水→氷) or 'melting' (氷→水)
-let tauModel  = 'static';   // 'static' or 'dynamic'
-let chartInst = null;
+// ── 水と氷の相転移（潜熱つき） / Water-ice phase transition with latent heat ──
+// 入力は、試料から取り出した（凝固系）／加えた（融解系）熱量 Q [kJ/kg]。温度は Q から決まり、0℃では潜熱の間だけ動かない。
+// Input is the heat Q [kJ/kg] removed from (freezing) or added to (melting) the sample. Temperature follows from Q and
+// stays at 0 °C for the duration of the latent heat. Specific heats and heat of fusion are standard textbook values.
+const C_W = 4.18, C_I = 2.09, L_F = 334;          // kJ/(kg·K), kJ/(kg·K), kJ/kg
+const T_WATER_REF = 20, T_ICE_REF = -20, T_MELT = 0;
+const Q_MAX = 430, Q_STEP = 5;
+const L = {"freezing": "凝固系（水 → 氷）", "melting": "融解系（氷 → 水）", "qFreeze": "取り出した熱量 Q", "qMelt": "加えた熱量 Q", "ctrlFreeze": "モデル選択と熱量設定（水の基準：20℃ → 凝固点：0℃。熱を取り出す）", "ctrlMelt": "モデル選択と熱量設定（氷の基準：-20℃ → 融解点：0℃。熱を加える）", "chartFreeze": "R 値と温度のグラフ（横軸：取り出した熱量 Q）", "chartMelt": "R 値と温度のグラフ（横軸：加えた熱量 Q）", "mTF": "温度 T ／ 氷の割合", "liquid": "水（液体）", "solid": "氷（固体）", "critical": "臨界域", "alarm": "警戒境界（モデル上）", "freezingNow": "凝固中（0℃で潜熱を放出）", "meltingNow": "融解中（0℃で潜熱を吸収）", "deltaS": "δ（取り出した熱量）", "deltaSM": "δ（加えた熱量）", "deltaD": "δ（温度差）", "tauS": "τ（境界までの熱量）", "tauD": "τ（境界までの温度差）", "undef": "τ = 0：R は定義されない（OUT_OF_DESCRIPTION_DOMAIN）", "fS_title": "静的τモデル（熱量・直線型）", "fD_title": "動的τモデル（温度・双曲線型）", "xAxis": "Q [kJ/kg]", "yT": "T [℃]", "rLabel": "R値", "tLabel": "温度 T", "noteStatic": "スライダーは熱量 Q です。温度は Q から決まり、0℃では潜熱の分だけ温度が動かなくなります（水の比熱 4.18、氷の比熱 2.09、融解熱 334 kJ/kg）。R = 1.0 は相転移の始まり（T = 0℃）に一致し、その後は「境界到達・相転移進行中」です。", "noteDynamic": "動的τモデルの R ≥ 1.0 は、モデル上の警戒境界（凝固系は T = 10℃、融解系は T = −10℃）であり、物理的な相転移（T = 0℃）とは別です。0℃の平らな区間では τ = 0 になり、R は定義されません。", "iceWord": "氷"};
+const HAS_TABS = !!document.getElementById('tabFreezing');
+let phaseMode = 'freezing';       // 'freezing' | 'melting'
+let tauModel = 'static';          // 'static' | 'dynamic'
+let myChart = null;
 
-// ── 基準定数 ──
-const T_WATER_REF = 20;  // 凝固系の液体基準
-const T_ICE_REF   = -20; // 融解系の固体基準
-const T_MELT      = 0;   // 相転移点
-
-// ── コア計算ロジック ──
-// phaseModeに応じてδ, τ, Rを算出。式を混同しない。
-function calculateNRA(T) {
-  let delta, tau, R;
-
-  if (phaseMode === 'freezing') {
-    // 【凝固系】基準=水(20℃)からの温度降下
-    delta = Math.max(0, T_WATER_REF - T);
-    if (tauModel === 'static') {
-      tau = T_WATER_REF - T_MELT; // 20
-    } else {
-      tau = Math.max(0.01, T - T_MELT); // T
-    }
-  } else {
-    // 【融解系】基準=氷(-20℃)からの温度上昇
-    delta = Math.max(0, T - T_ICE_REF);
-    if (tauModel === 'static') {
-      tau = T_MELT - T_ICE_REF; // 20
-    } else {
-      tau = Math.max(0.01, T_MELT - T); // -T
-    }
+function stateFor(mode, Q) {
+  if (mode === 'freezing') {
+    const Q1 = C_W * (T_WATER_REF - T_MELT);
+    if (Q <= Q1)        return { T: T_WATER_REF - Q / C_W, ice: 0, Q1, stage: 'before' };
+    if (Q <= Q1 + L_F)  return { T: T_MELT, ice: (Q - Q1) / L_F, Q1, stage: 'transition' };
+    return { T: T_MELT - (Q - Q1 - L_F) / C_I, ice: 1, Q1, stage: 'after' };
   }
-  
-  R = delta / tau;
-  return { delta, tau, R };
+  const Q1 = C_I * (T_MELT - T_ICE_REF);
+  if (Q <= Q1)          return { T: T_ICE_REF + Q / C_I, ice: 1, Q1, stage: 'before' };
+  if (Q <= Q1 + L_F)    return { T: T_MELT, ice: 1 - (Q - Q1) / L_F, Q1, stage: 'transition' };
+  return { T: T_MELT + (Q - Q1 - L_F) / C_W, ice: 0, Q1, stage: 'after' };
 }
 
-// ── R値に基づくUI色と状態判定 ──
-function getStatus(T, R) {
-  // 色の定義
-  const cSafeFreezing = '#1D9E75'; // 緑
-  const cSafeMelting  = '#185FA5'; // 青
-  const cWarn = '#EF9F27';         // 橙
-  const cFail = '#E24B4A';         // 赤
-
-  let color = cWarn;
-  if (R >= 1.0) color = cFail;
-  else if (R < 0.75) color = (phaseMode === 'freezing') ? cSafeFreezing : cSafeMelting;
-
-  // 状態ラベルの定義
-  let label, bg, tc;
-  if (phaseMode === 'freezing') {
-    if (T <= 0) { label = '氷（固体）'; bg = '#B5D4F4'; tc = '#0C447C'; }
-    else if (R >= 0.75) { label = '臨界域'; bg = '#FAC775'; tc = '#633806'; }
-    else { label = '水（液体）'; bg = '#9FE1CB'; tc = '#085041'; }
-  } else {
-    if (T >= 0) { label = '水（液体）'; bg = '#9FE1CB'; tc = '#085041'; }
-    else if (R >= 0.75) { label = '臨界域'; bg = '#FAC775'; tc = '#633806'; }
-    else { label = '氷（固体）'; bg = '#B5D4F4'; tc = '#0C447C'; }
-  }
-
-  return { color, label, bg, tc };
+// 静的τ：δ = Q（取り出した／加えた熱量）、τ = 相転移の始まりまでに必要な熱量 Q1。R = 1.0 は T = 0℃ の到達点。
+// 動的τ：δ = 基準温度からの差、τ = 相転移点までの温度差。τ ≤ 0 では R を定義しない（null）。
+function calcR(mode, Q, model) {
+  const s = stateFor(mode, Q);
+  if (model === 'static') return { s, delta: Q, tau: s.Q1, R: Q / s.Q1 };
+  const delta = mode === 'freezing' ? T_WATER_REF - s.T : s.T - T_ICE_REF;
+  const tau = mode === 'freezing' ? s.T - T_MELT : T_MELT - s.T;
+  return { s, delta, tau, R: tau > 0 ? delta / tau : null };
 }
 
-// ── UIアップデート系 ──
-function updateMetrics() {
-  const T = parseFloat(document.getElementById('tempSlider').value);
-  document.getElementById('tempOut').textContent = T.toFixed(1) + '℃';
-
-  const { delta, tau, R } = calculateNRA(T);
-  const status = getStatus(T, R);
-
-  // 数値更新
-  document.getElementById('mDelta').textContent = delta.toFixed(2);
-  document.getElementById('mTau').textContent   = tau.toFixed(tauModel === 'static' ? 1 : 2);
-  document.getElementById('mR').textContent     = R > 10 ? '>10' : R.toFixed(3);
-  
-  // 色適用
-  document.getElementById('mDelta').style.color = (phaseMode === 'freezing') ? '#378ADD' : '#E24B4A';
-  document.getElementById('mTau').style.color   = (phaseMode === 'freezing') ? '#1D9E75' : '#185FA5';
-  document.getElementById('mR').style.color     = status.color;
-
-  // バッジ更新
-  const badge = document.getElementById('phaseBadge');
-  badge.textContent = status.label;
-  badge.style.background = status.bg;
-  badge.style.color = status.tc;
-
-  // プログレスバー
-  document.getElementById('barDelta').style.width = Math.min(100, (delta / 20) * 100) + '%';
-  document.getElementById('barDelta').style.background = (phaseMode === 'freezing') ? '#378ADD' : '#E24B4A';
-  document.getElementById('barDeltaNum').textContent = delta.toFixed(1);
-
-  document.getElementById('barTau').style.width = (tauModel === 'static') ? '100%' : Math.min(100, (tau / 20) * 100) + '%';
-  document.getElementById('barTau').style.background = (phaseMode === 'freezing') ? '#1D9E75' : '#185FA5';
-  document.getElementById('barTauNum').textContent = tau.toFixed(1);
-
-  document.getElementById('barR').style.width = Math.min(100, (R / 2.5) * 100) + '%';
-  document.getElementById('barR').style.background = status.color;
-  document.getElementById('barRNum').textContent = R > 10 ? '>10' : R.toFixed(2);
-
-  // グラフ上の現在点ハイライト
-  updateChartPoint(T, status.color);
+function getColor(R) {
+  if (R === null || !Number.isFinite(R)) return '#8a98a8';
+  if (R >= 1.0) return '#E24B4A';
+  if (R >= 0.75) return '#EF9F27';
+  return phaseMode === 'freezing' ? '#1D9E75' : '#185FA5';
 }
 
-function updateFormulaText() {
-  const box = document.getElementById('formulaBox');
-  if (phaseMode === 'freezing') {
-    if (tauModel === 'static') {
-      box.innerHTML = `<strong>【凝固系】静的τモデル（直線型）</strong><br>
-        <code>δ = 20 − T</code>　→　液体基準(20℃)からの温度低下（蓄積ズレ）<br>
-        <code>τ = 20</code>　→　固定定数（液体構造の総余裕）<br>
-        <code>R = δ / τ = (20 − T) / 20</code>`;
-    } else {
-      box.innerHTML = `<strong>【凝固系】動的τモデル（双曲線型）</strong><br>
-        <code>δ = 20 − T</code>　→　液体基準(20℃)からの温度低下<br>
-        <code>τ = T</code>　→　凝固点(0℃)までの残余距離（動的余裕）<br>
-        <code>R = δ / τ = (20 − T) / T</code>`;
-    }
-  } else {
-    if (tauModel === 'static') {
-      box.innerHTML = `<strong>【融解系】静的τモデル（直線型）</strong><br>
-        <code>δ = T − (−20) = T + 20</code>　→　固体基準(-20℃)からの温度上昇<br>
-        <code>τ = 20</code>　→　固定定数（固体格子構造の総余裕）<br>
-        <code>R = δ / τ = (T + 20) / 20</code>`;
-    } else {
-      box.innerHTML = `<strong>【融解系】動的τモデル（双曲線型）</strong><br>
-        <code>δ = T + 20</code>　→　固体基準(-20℃)からの温度上昇<br>
-        <code>τ = 0 − T = −T</code>　→　融解点(0℃)までの残余距離<br>
-        <code>R = δ / τ = (T + 20) / (−T)</code>`;
-    }
+function getPhase(r) {
+  const { s, R } = r;
+  const liquid = { label: L.liquid, bg: '#9FE1CB', color: '#085041' }, solid = { label: L.solid, bg: '#B5D4F4', color: '#0C447C' };
+  const crit = { label: L.critical, bg: '#FAC775', color: '#633806' };
+  if (s.stage === 'transition') {
+    const pct = Math.round(s.ice * 100);
+    return { label: (phaseMode === 'freezing' ? L.freezingNow : L.meltingNow) + ` — ${L.iceWord} ${pct}%`, bg: '#F5C4B3', color: '#712B13' };
   }
+  if (s.stage === 'after') return phaseMode === 'freezing' ? solid : liquid;
+  const base = phaseMode === 'freezing' ? liquid : solid;
+  if (R !== null && R >= 1.0 && tauModel === 'dynamic') return { label: L.alarm, bg: '#FAC775', color: '#633806' };
+  if (R !== null && R >= 0.75) return crit;
+  return base;
 }
 
-// ── グラフ処理（Chart.js） ──
-function getChartData() {
-  const temps = [], rVals = [];
-  // モードによりX軸の生成方向を変える
-  if (phaseMode === 'freezing') {
-    for (let T = 20; T >= -5; T -= 0.5) {
-      temps.push(T.toFixed(1) + '℃');
-      rVals.push(Math.min(calculateNRA(T).R, 3.0));
-    }
-  } else {
-    for (let T = -20; T <= 5; T += 0.5) {
-      temps.push(T.toFixed(1) + '℃');
-      rVals.push(Math.min(calculateNRA(T).R, 3.0));
-    }
+function buildChartData() {
+  const qs = [], rVals = [], tVals = [];
+  for (let Q = 0; Q <= Q_MAX; Q += Q_STEP) {
+    const r = calcR(phaseMode, Q, tauModel);
+    qs.push(String(Q));
+    rVals.push(r.R === null ? null : parseFloat(Math.min(r.R, 3.0).toFixed(3)));   // 表示用に3.0で打ち切る
+    tVals.push(parseFloat(r.s.T.toFixed(2)));
   }
-  return { temps, rVals };
+  return { qs, rVals, tVals };
 }
 
 function initChart() {
-  const { temps, rVals } = getChartData();
+  const { qs, rVals, tVals } = buildChartData();
   const ctx = document.getElementById('phaseChart').getContext('2d');
-  
-  chartInst = new Chart(ctx, {
+  myChart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: temps,
-      datasets: [
-        {
-          label: 'R値', data: rVals,
-          borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5,
-          tension: 0.3, fill: false,
-          segment: {
-            borderColor: ctx => getStatus(parseFloat(ctx.p0.parsed.x), ctx.p0.parsed.y).color
-          }
-        },
-        {
-          label: 'FAIL (R=1.0)', data: new Array(temps.length).fill(1.0),
-          borderColor: '#E24B4A', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0, fill: false
-        },
-        {
-          label: 'WARN (R=0.75)', data: new Array(temps.length).fill(0.75),
-          borderColor: '#EF9F27', borderDash: [3, 3], borderWidth: 1, pointRadius: 0, fill: false
-        }
-      ]
-    },
+    data: { labels: qs, datasets: [
+      { label: L.rLabel, data: rVals, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, tension: 0, fill: false, spanGaps: false, yAxisID: 'y',
+        segment: { borderColor: c => getColor(c.p0.parsed.y) } },
+      { label: 'RUPTURE_BOUNDARY (R=1.0)', data: new Array(qs.length).fill(1.0), borderColor: '#E24B4A', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0, fill: false, yAxisID: 'y' },
+      { label: 'WARNING (R=0.75)', data: new Array(qs.length).fill(0.75), borderColor: '#EF9F27', borderDash: [3, 3], borderWidth: 1, pointRadius: 0, fill: false, yAxisID: 'y' },
+      { label: L.tLabel, data: tVals, borderColor: '#7a9ab5', borderDash: [2, 3], borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0, yAxisID: 'y2' },
+    ] },
     options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 200 },
-      plugins: { legend: { display: false } },
+      responsive: true, maintainAspectRatio: false, animation: { duration: 150 },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.datasetIndex === 0 ? 'R = ' + (c.parsed.y === null ? '—' : c.parsed.y.toFixed(3)) : c.datasetIndex === 3 ? 'T = ' + c.parsed.y.toFixed(1) + '℃' : c.dataset.label } } },
       scales: {
-        x: { ticks: { maxTicksLimit: 11, font: { size: 11 } } },
-        y: { min: 0, max: 2.5, title: { display: true, text: 'R = δ / τ' } }
-      }
-    }
+        x: { title: { display: true, text: L.xAxis, color: '#7a9ab5' }, ticks: { maxTicksLimit: 11, maxRotation: 0, font: { size: 11 }, color: '#7a9ab5' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { min: 0, max: 2.5, ticks: { stepSize: 0.25, font: { size: 11 }, color: '#7a9ab5' }, grid: { color: 'rgba(0,0,0,0.05)' }, title: { display: true, text: 'R = δ / τ', font: { size: 12 }, color: '#7a9ab5' } },
+        y2: { position: 'right', min: -25, max: 25, ticks: { font: { size: 11 }, color: '#7a9ab5' }, grid: { drawOnChartArea: false }, title: { display: true, text: L.yT, font: { size: 12 }, color: '#7a9ab5' } },
+      },
+    },
   });
 }
 
-function updateChart() {
-  const { temps, rVals } = getChartData();
-  chartInst.data.labels = temps;
-  chartInst.data.datasets[0].data = rVals;
-  chartInst.data.datasets[1].data = new Array(temps.length).fill(1.0);
-  chartInst.data.datasets[2].data = new Array(temps.length).fill(0.75);
-  
-  // セグメント色の再評価
-  chartInst.data.datasets[0].segment.borderColor = ctx => {
-    // x軸のインデックスから温度を逆算
-    const idx = ctx.p0DataIndex;
-    const T = (phaseMode === 'freezing') ? (20 - idx * 0.5) : (-20 + idx * 0.5);
-    return getStatus(T, ctx.p0.parsed.y).color;
-  };
-  
-  chartInst.update();
-}
-
-function updateChartPoint(T, color) {
-  if (!chartInst) return;
-  // 現在温度のインデックスを算出
-  const idx = (phaseMode === 'freezing') 
-    ? Math.round((20 - T) / 0.5) 
-    : Math.round((T - -20) / 0.5);
-    
-  const rVals = chartInst.data.datasets[0].data;
-  const radii = rVals.map((_, i) => i === idx ? 6 : 0);
-  const colors = rVals.map((_, i) => i === idx ? color : 'transparent');
-  
-  chartInst.data.datasets[0].pointRadius = radii;
-  chartInst.data.datasets[0].pointBackgroundColor = colors;
-  chartInst.update('none'); // アニメーションなしで即時反映
-}
-
-// ── インタラクション制御 ──
-window.setMode = function(m) {
-  phaseMode = m;
-  document.body.className = `mode-${m}`;
-  
-  // タブUI更新
-  document.getElementById('tabFreezing').classList.toggle('active', m === 'freezing');
-  document.getElementById('tabMelting').classList.toggle('active', m === 'melting');
-  
-  // スライダー範囲の変更
-  const slider = document.getElementById('tempSlider');
-  if (m === 'freezing') {
-    slider.min = -5; slider.max = 20; slider.value = 15;
-    document.getElementById('chartLabel').textContent = 'R値グラフ（20℃ → -5℃ 冷却）';
-  } else {
-    slider.min = -20; slider.max = 5; slider.value = -15;
-    document.getElementById('chartLabel').textContent = 'R値グラフ（-20℃ → 5℃ 加熱）';
+function formulaHtml() {
+  const f = phaseMode === 'freezing';
+  if (tauModel === 'static') {
+    return f
+      ? `<strong>${L.fS_title}</strong><br><code>δ = Q</code>　→　水(20℃)から取り出した熱量 [kJ/kg]<br><code>τ = Q₁ = c_w·(20 − 0) = ${(C_W * 20).toFixed(1)} kJ/kg</code>　→　凝固点(0℃)に達するまでに取り出せる熱量<br><code>R = δ / τ = Q / Q₁</code><br>R = 1.0 は T = 0℃（凝固の始まり）に一致。0℃では潜熱 ${L_F} kJ/kg の間、温度が動かず氷の割合だけが増える。`
+      : `<strong>${L.fS_title}</strong><br><code>δ = Q</code>　→　氷(−20℃)へ加えた熱量 [kJ/kg]<br><code>τ = Q₁ = c_i·(0 − (−20)) = ${(C_I * 20).toFixed(1)} kJ/kg</code>　→　融解点(0℃)に達するまでに加えられる熱量<br><code>R = δ / τ = Q / Q₁</code><br>R = 1.0 は T = 0℃（融解の始まり）に一致。0℃では潜熱 ${L_F} kJ/kg の間、温度が動かず水の割合だけが増える。`;
   }
-  
-  updateFormulaText();
-  updateChart();
-  updateMetrics();
-};
+  return f
+    ? `<strong>${L.fD_title}</strong><br><code>δ = 20 − T</code>　→　基準温度(20℃)との差<br><code>τ = T − 0</code>　→　凝固点までの温度差<br><code>R = δ / τ = (20 − T) / T</code><br>T = 0℃（潜熱の区間）では τ = 0 で R は定義されない。R ≥ 1.0 は T ≤ 10℃ で、モデル上の警戒境界。`
+    : `<strong>${L.fD_title}</strong><br><code>δ = T − (−20)</code>　→　基準温度(−20℃)との差<br><code>τ = 0 − T</code>　→　融解点までの温度差<br><code>R = δ / τ = (T + 20) / (−T)</code><br>T = 0℃（潜熱の区間）では τ = 0 で R は定義されない。R ≥ 1.0 は T ≥ −10℃ で、モデル上の警戒境界。`;
+}
 
-window.setTauModel = function(m) {
+function updateLabels() {
+  const f = phaseMode === 'freezing';
+  const q = document.getElementById('qLabel'); if (q) q.textContent = f ? L.qFreeze : L.qMelt;
+  const c = document.getElementById('chartLabel'); if (c) c.textContent = f ? L.chartFreeze : L.chartMelt;
+  const k = document.getElementById('ctrlLabel'); if (k && !HAS_TABS) k.textContent = f ? L.ctrlFreeze : L.ctrlMelt;
+  const fb = document.getElementById('formulaBox'); if (fb) fb.innerHTML = formulaHtml();
+  const mn = document.getElementById('modelNote'); if (mn) mn.textContent = tauModel === 'static' ? L.noteStatic : L.noteStatic + ' ' + L.noteDynamic;
+  document.getElementById('lblDelta').textContent = tauModel === 'static' ? (f ? L.deltaS : L.deltaSM) : L.deltaD;
+  document.getElementById('lblTau').textContent = tauModel === 'static' ? L.tauS : L.tauD;
+}
+
+function updateAll() {
+  const Q = parseFloat(document.getElementById('tempSlider').value);
+  document.getElementById('tempOut').textContent = Q.toFixed(0) + ' kJ/kg';
+  const r = calcR(phaseMode, Q, tauModel);
+  const { s, delta, tau, R } = r;
+  const color = getColor(R), phase = getPhase(r);
+  const unit = tauModel === 'static' ? ' kJ/kg' : ' ℃';
+  const dTxt = tauModel === 'static' ? delta.toFixed(1) : delta.toFixed(2);
+  const tTxt = tauModel === 'static' ? tau.toFixed(1) : Math.max(0, tau).toFixed(2);
+  const rTxt = R === null ? '—' : (R > 10 ? '>10' : R.toFixed(3));
+  document.getElementById('mDelta').textContent = dTxt + unit;
+  document.getElementById('mTau').textContent = tTxt + unit;
+  document.getElementById('mR').textContent = rTxt; document.getElementById('mR').style.color = color;
+  document.getElementById('mTF').textContent = `${s.T.toFixed(1)}℃ ／ ${Math.round(s.ice * 100)}%`;
+  const b = document.getElementById('phaseBadge'); b.textContent = phase.label; b.style.background = phase.bg; b.style.color = phase.color;
+  const dPct = Math.min(100, tauModel === 'static' ? Q / Q_MAX * 100 : delta / 20 * 100);
+  const tPct = tauModel === 'static' ? Math.min(100, tau / Q_MAX * 100) : Math.min(100, Math.max(0, tau) / 20 * 100);
+  const rPct = R === null ? 0 : Math.min(100, R / 2.5 * 100);
+  document.getElementById('barDelta').style.width = dPct + '%'; document.getElementById('barDeltaNum').textContent = dTxt;
+  document.getElementById('barTau').style.width = tPct + '%';   document.getElementById('barTauNum').textContent = tTxt;
+  document.getElementById('barR').style.width = rPct + '%'; document.getElementById('barR').style.background = color;
+  document.getElementById('barRNum').textContent = R === null ? '—' : (R > 10 ? '>10' : R.toFixed(2));
+  if (myChart) {
+    const { qs, rVals, tVals } = buildChartData();
+    myChart.data.datasets[0].data = rVals; myChart.data.datasets[3].data = tVals; myChart.data.labels = qs;
+    const idx = Math.round(Q / Q_STEP);
+    myChart.data.datasets[0].pointRadius = rVals.map((_, i) => i === idx ? 6 : 0);
+    myChart.data.datasets[0].pointBackgroundColor = rVals.map((_, i) => i === idx ? color : 'transparent');
+    myChart.update('none');
+  }
+}
+
+function setTauModel(m) {
   tauModel = m;
   document.getElementById('btnStatic').classList.toggle('active', m === 'static');
   document.getElementById('btnDynamic').classList.toggle('active', m === 'dynamic');
-  
-  updateFormulaText();
-  updateChart();
-  updateMetrics();
-};
+  updateLabels(); updateAll();
+}
+function setModel(m) { setTauModel(m); }          // 17・32 のボタン名との互換
+function setMode(m) {                            // 31：凝固系 / 融解系の切り替え
+  phaseMode = m;
+  document.body.className = 'mode-' + m;
+  document.getElementById('tabFreezing').classList.toggle('active', m === 'freezing');
+  document.getElementById('tabMelting').classList.toggle('active', m === 'melting');
+  document.getElementById('tempSlider').value = 0;
+  updateLabels(); updateAll();
+}
 
-// スライダーイベント
-document.getElementById('tempSlider').addEventListener('input', updateMetrics);
-
-// 初期化
+document.getElementById('tempSlider').addEventListener('input', updateAll);
+updateLabels();
 initChart();
-updateFormulaText();
-updateMetrics();
-
+updateAll();
 </script>
 </body>
 </html>

@@ -28,7 +28,7 @@ The proposed structure separates **AI intelligence from physical safety verifica
 
 A demonstration implementation is provided in
 
-`nra_ide_vehicle_mandatory_boundary_demo_20260307_193100.html`.
+`nra_ide_vehicle_mandatory_boundary_demo_2026-03-07_1931.html`.
 
 ---
 
@@ -238,7 +238,7 @@ A live architecture demonstration is implemented in the following file.
 
 ```
 
-nra_ide_vehicle_mandatory_boundary_demo_20260307_193100.html
+nra_ide_vehicle_mandatory_boundary_demo_2026-03-07_1931.html
 
 ```
 

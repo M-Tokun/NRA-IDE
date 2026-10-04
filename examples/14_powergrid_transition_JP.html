@@ -413,7 +413,7 @@ function renderGenList() {
 let logCount = 0;
 function addLog(msg, cls='ev-info') {
   const el = document.getElementById('event-log');
-  const ts = `[${(t*0.016).toFixed(1)}s]`;
+  const ts = `[${t.toFixed(1)}s]`;   // t はすでにシミュレーション秒
   el.innerHTML = `<div class="${cls}">${ts} ${msg}</div>` + el.innerHTML;
   if (++logCount > 40) el.innerHTML = el.innerHTML.slice(0, el.innerHTML.lastIndexOf('<div'));
 }
@@ -428,7 +428,7 @@ function addTransitionLog(from, to, R) {
 
 // ── 物理シミュレーション ──
 function physicsStep() {
-  const dt = 0.016 * speed;
+  const dt = 0.016;   // 1ステップの時間。速度倍率はloop()の反復回数だけで表す（以前はdtにも掛けて速度の二乗になっていた）
   t += dt;
 
   // 二重ゆらぎ
@@ -463,12 +463,12 @@ function physicsStep() {
   const rawDelta = state.microDelta + state.macroDelta + state.spikeDelta;
   state.delta = Math.max(0, Math.abs(rawDelta) - recoverForce) * Math.sign(rawDelta + 0.001);
 
-  // 周波数更新
-  state.freq = F_NOM - state.delta * 4.0;
+  // 周波数更新：δ は周波数偏差 [Hz] そのもの（δf = |f − f_nominal|、README_Demo14・Python版と同じ定義）
+  state.freq = F_NOM - state.delta;
   state.freq = Math.max(47.0, Math.min(53.0, state.freq));
 
-  // R計算
-  state.R = Math.abs(state.delta) / tau;
+  // R計算：R = δf / τ（τもHz）。表示周波数と同じ尺度で計算する
+  state.R = Math.abs(F_NOM - state.freq) / tau;
 
   // 残留負債
   // k_recovery=0.12、および蓄積/減衰レート0.08/0.03は、根拠となる工学的仕様のないデモ用
@@ -495,11 +495,8 @@ function physicsStep() {
   } else if (state.R >= 0.4) {
     state.fsm = 'CAVEAT';
   } else {
-    if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'RECOVERING') {
-      // RUPTURE_BOUNDARYからの自動回復は禁止 → 人間操作待ち
-    } else {
-      state.fsm = 'PERMIT';
-    }
+    // RUPTURE_BOUNDARYは先頭の分岐で固定済み。復旧操作が完了したRECOVERINGは、Rが低ければPERMITへ戻る。
+    state.fsm = 'PERMIT';
   }
 
   if (state.fsm !== prevFsm) {
@@ -588,7 +585,7 @@ function drawRCanvas() {
   ctxR.beginPath(); ctxR.moveTo(0,yTau); ctxR.lineTo(W,yTau); ctxR.stroke();
   ctxR.setLineDash([]);
   ctxR.fillStyle = '#ff4444'; ctxR.font = '9px Courier New';
-  ctxR.fillText('τ = 1.0  RUPTURE_BOUNDARY', 6, yTau - 3);
+  ctxR.fillText('R = 1.0  RUPTURE_BOUNDARY', 6, yTau - 3);
 
   // ZONE-B ライン (0.4)
   const yB = H - (0.4 / 2.0) * H;

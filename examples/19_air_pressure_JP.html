@@ -140,7 +140,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 
 <div class="hdr">
   <div class="hdr-sub">NRA-IDE / AIR PRESSURE  圧縮性流体・動的τ・二重ゆらぎ
-    <h1>空気圧管理システム ③ ボイル・シャルル則 × NRA-IDE</h1>
+    <h1>空気圧管理システム ③ 温度と圧力の関係 × NRA-IDE</h1>
   </div>
   <div class="ctrl-row">
     <button class="pill on"        id="btnRun"  onclick="toggleRun()">RUN</button>
@@ -210,7 +210,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
           <span class="tau-key">τ = τ_base × (T_ref / T_current)</span>
           <span class="tau-val" id="tauFactor">×1.000</span>
         </div>
-        <div class="tau-note">温度上昇 → τ縮小 → R上昇（ボイル・シャルル則）</div>
+        <div class="tau-note">温度上昇 → τ縮小 → R上昇（材料強度の温度低下を仮定）</div>
       </div>
     </div>
 
@@ -303,12 +303,14 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 // ── パラメータ ──
 const P_OPT   = 0.50;   // MPa 設計圧力
 const P_MAX_BASE = 0.80; // MPa 基準温度での破裂限界
-const P_MIN   = 0.20;   // MPa 動作不能限界（真空接近）
+const P_MIN   = 0.20;   // MPa 動作不能限界（宣言値。これ未満では必要な圧力を保てない）
 const T_REF   = 298.15; // K  基準温度 (25°C)
 const R_WARN  = 0.75, R_RUPTURE = 1.0;
 
-// τの動的計算（ボイル・シャルル則）
-// 温度上昇 → 気体膨張 → 破裂圧力が実効的に低下 → τ_hi が縮む
+// τの動的計算（材料強度の温度低下を仮定したデモ用モデル）
+// 温度上昇 → 容器・配管の許容圧力が下がる（強度低下）→ τ_hi が縮む。
+// 比例式 T_REF/T は強度低下の実測式ではなく、傾向を見せるための仮定。
+// 気体の温度上昇による圧力上昇は δ（下のtick）で計上済みなので、τ側では数えない（二重計上しない）。
 function calcTauHi(T_kelvin){
   // τ_hi = (P_MAX_BASE - P_OPT) × (T_REF / T_current)
   // 温度が上がるほど余裕が縮む
@@ -403,7 +405,7 @@ function tick(dt){
   // 圧力目標
   let pTarget = compTarget;
   if(heatOn){
-    // 加熱 → ボイル・シャルル則で圧力上昇 P1/T1 = P2/T2
+    // 加熱 → 定容積の気体の圧力上昇（ゲイ・リュサックの法則 P1/T1 = P2/T2）。これはδ側の変化。
     pTarget *= T_kelvin / T_REF;
   }
   if(ventOn) pTarget *= 0.55;  // 排気で圧力低下

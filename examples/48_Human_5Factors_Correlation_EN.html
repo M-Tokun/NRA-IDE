@@ -86,6 +86,7 @@ const vars = [
 ];
 
 let t = 0, running = true;
+let lastLogSlot = -1;
 
 function getValues(t) {
   // p combines a short-period wobble (sin(t/8)) and a long-period wobble (sin(t/25)). Amplitudes 0.6/0.4 and periods
@@ -157,15 +158,14 @@ function update() {
   document.getElementById('fillCorr').style.width = Math.min(100, rC*100) + '%';
 
   // status (state-transition boundary): rC (correlation R) and rI (individual R) are both already normalized by tau.
-  // rC>=1.05 or rI>=1.1 -> Fail-Closed (bad); rC>=0.7 or rI>=0.8 -> caution (warn); below both -> normal (ok).
-  // The correlation-side threshold is lower than the individual-side threshold, matching the UI text's stated intent
-  // that correlation R is designed to rise ahead of the individual values. The specific threshold values
-  // (1.05/1.1/0.7/0.8) themselves have no cited basis (demo tuning values).
+  // rC>=1.0 or rI>=1.0 -> Fail-Closed (bad; the common README rupture boundary); rC>=0.7 or rI>=0.7 -> caution (warn; this demo's declared judgment limit R_J); below both -> normal (ok).
+  // The thresholds are the same for correlation and individual R. That correlation R rises first comes from the coefficients
+  // (rCorr×1.05, rInd×0.78) and the synthetic data, not from a threshold gap. The 0.7 value has no cited basis (demo value).
   let statusEl = document.getElementById('status');
-  if (rC >= 1.05 || rI >= 1.1) {
+  if (rC >= 1.0 || rI >= 1.0) {
     statusEl.className = 'status-box bad';
     statusEl.textContent = 'Fail-Closed region. The relationship exceeded the slack width.';
-  } else if (rC >= 0.7 || rI >= 0.8) {
+  } else if (rC >= 0.7 || rI >= 0.7) {
     statusEl.className = 'status-box warn';
     statusEl.textContent = 'Caution zone. Correlation R is rising ahead of the individual values.';
   } else {
@@ -174,7 +174,10 @@ function update() {
   }
 
   // log
-  if (Math.floor(t)%7 === 0) {
+  // Log once per 7 s (it used to add the same line on every frame while floor(t)%7===0)
+  const logSlot = Math.floor(t / 7);
+  if (logSlot !== lastLogSlot) {
+    lastLogSlot = logSlot;
     const log = document.getElementById('log');
     const line = document.createElement('div');
     line.textContent = `[${t.toFixed(0)}] Core ${vals[0].toFixed(1)}°C HR ${vals[2].toFixed(0)} CorrR:${rC.toFixed(2)}`;
@@ -198,7 +201,7 @@ document.getElementById('toggle').onclick = () => {
   running = !running;
   document.getElementById('toggle').textContent = running ? 'Pause' : 'Resume';
 };
-document.getElementById('reset').onclick = () => { t = 0; };
+document.getElementById('reset').onclick = () => { t = 0; lastLogSlot = -1; };
 document.getElementById('tau').oninput = update;
 document.getElementById('speed').oninput = () => {};
 
