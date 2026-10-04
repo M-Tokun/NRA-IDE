@@ -645,19 +645,31 @@ function getParams() {
   };
 }
 
+// 側別ゲート幅の形状変換（評価前に固定）。EMAがτ0の50%を超えた分だけτを縮め、floor倍で止める。
+// 広げる方向の変換は持たない。上限側floor 0.8（縮みにくい＝慎重）、下限側floor 0.3（敏感）はデモ用の値。
+const SHRINK_START = 0.5, FLOOR_UPPER = 0.8, FLOOR_LOWER = 0.3;
+function shrinkTau(tau0, ema, floor) {
+  return tau0 * Math.max(floor, 1 - Math.max(0, ema - SHRINK_START * tau0) / tau0);
+}
+
 function bandGate(sensor, v, p, nowMs) {
-  const half    = (p.th - p.tl) / 2;
-  const d_upper = Math.max(0, v - p.th);
-  const d_lower = Math.max(0, p.tl - v);
+  // δは基準値（sensor.nominal）からのズレ（FORMULA §4.1）。τ0は基準値から宣言上限・下限までの距離。
+  const ref     = sensor.nominal;
+  const tau0_u  = p.th - ref;
+  const tau0_l  = ref - p.tl;
+  const d_upper = Math.max(0, v - ref);
+  const d_lower = Math.max(0, ref - v);
 
   sensor.ema_u = p.au * d_upper + (1 - p.au) * sensor.ema_u;
   sensor.ema_l = p.al * d_lower + (1 - p.al) * sensor.ema_l;
 
-  const tau_u = half * Math.min(1 + sensor.ema_u / (half+.001), 2.5);
-  const tau_l = half * Math.max(1 - sensor.ema_l / (half+.001), 0.3);
+  const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
+  const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
 
-  const R_u = d_upper > 0 ? d_upper / tau_u : 0;
-  const R_l = d_lower > 0 ? d_lower / tau_l : 0;
+  // 基準値が上下限の外にある設定（スライダーの組み合わせ）は評価不能。停止側に倒す。
+  const valid = tau0_u > 0 && tau0_l > 0;
+  const R_u = valid ? d_upper / tau_u : Infinity;
+  const R_l = valid ? d_lower / tau_l : Infinity;
   const R   = Math.max(R_u, R_l);
 
   const held = nowMs < sensor.holdUntil;
@@ -673,8 +685,8 @@ function bandGate(sensor, v, p, nowMs) {
   }
 
   // 動的バンド
-  const upper_band = p.th + (tau_u - half);
-  const lower_band = p.tl - (half - tau_l);
+  const upper_band = ref + tau_u;
+  const lower_band = ref - tau_l;
 
   return { v, R, silence, dir, upper_band, lower_band };
 }

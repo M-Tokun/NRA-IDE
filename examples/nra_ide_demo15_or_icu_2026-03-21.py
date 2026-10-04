@@ -166,6 +166,18 @@ class VitalSignNRA:
         for ch in self.channels.values():
             ch.compute_R(ch.value)
 
+        # τ = 0 のチャンネルがあれば R_total は定義されない。破断済みなら固定を保つ。
+        if any(ch.R is None for ch in self.channels.values()):
+            if self.fsm != FSMState.RUPTURE_BOUNDARY:
+                self.fsm = FSMState.OUT_OF_DESCRIPTION_DOMAIN
+            return NRASystemState(
+                fsm=self.fsm,
+                R_total=float("nan"),
+                residual_debt=self.residual_debt,
+                warmup_pct=self.warmup_pct,
+                elapsed=self.elapsed,
+            )
+
         # ── R_total ノルム合成 × 精度係数 ──
         sum_r2 = sum(ch.R ** 2 for ch in self.channels.values())
         self.R_total = math.sqrt(sum_r2) * wf

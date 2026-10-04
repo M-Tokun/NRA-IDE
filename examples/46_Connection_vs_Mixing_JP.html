@@ -316,7 +316,7 @@
         <div class="gate-wrap">
             <div class="gate-title">Gate Parameters</div>
             <div class="gate-row">
-                <span class="gate-key">δ (violation)</span>
+                <span class="gate-key">δ（余裕帯侵入量）</span>
                 <span class="gate-val" id="ok-delta">0.0 m</span>
             </div>
             <div class="gate-row">
@@ -371,7 +371,7 @@
         <div class="gate-wrap">
             <div class="gate-title">Gate Parameters <span class="gate-t-warn">⚠ τ が動的変化中 / τ is being modified</span></div>
             <div class="gate-row">
-                <span class="gate-key">δ (violation)</span>
+                <span class="gate-key">δ（余裕帯侵入量）</span>
                 <span class="gate-val" id="ng-delta">0.0 m</span>
             </div>
             <div class="gate-row">
@@ -460,7 +460,9 @@ function computeR(delta, tau) {
     return tau > 0 ? delta / tau : Infinity;
 }
 function delta_from(v, d) {
-    return Math.max(0, stopDist(v) - d);
+    // δ：停止距離が安全余裕帯（車間距離の手前 TAU_FIXED m）へ入り込んだ量。設計τで定めたCause-Side量で、
+    // 混用版も同じδを使う（混用版が書き換えるのは割る側のτだけ）。R=1.0 は停止距離＝車間距離（衝突境界）。
+    return Math.max(0, stopDist(v) - (d - TAU_FIXED));
 }
 function zoneFromR(R) {
     if (R < 0.40) return 'A';

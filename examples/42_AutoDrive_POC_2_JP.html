@@ -231,7 +231,7 @@
             <div class="sb-val" id="sb-stopdist">0 m</div>
         </div>
         <div class="sb-cell">
-            <div class="sb-label">違反量 δ</div>
+            <div class="sb-label">余裕帯侵入量 δ</div>
             <div class="sb-val" id="sb-delta">0 m</div>
         </div>
     </div>
@@ -304,7 +304,7 @@
 
     <div id="metrics">
         <div class="metric">
-            <div class="m-key">δ（違反量）</div>
+            <div class="m-key">δ（余裕帯侵入量）</div>
             <div class="m-val" id="m-delta">0.0 m</div>
         </div>
         <div class="metric">
@@ -413,7 +413,8 @@ function stopDist(v_kmh) {
 }
 function computeR(v_kmh, d_m, t_m) {
     const sd    = stopDist(v_kmh);
-    const delta = Math.max(0, sd - d_m);
+    // δ：停止距離が安全余裕帯（車間距離の手前 τ m）へ入り込んだ量。R=1.0 は停止距離＝車間距離（衝突境界）。
+    const delta = Math.max(0, sd - (d_m - t_m));
     const R     = t_m > 0 ? delta / t_m : Infinity;
     return { delta, R, sd };
 }

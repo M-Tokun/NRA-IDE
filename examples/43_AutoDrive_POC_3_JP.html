@@ -101,7 +101,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <div class="sb-cell"><div class="sb-label">速度</div><div class="sb-val" id="sb-speed">60 km/h</div></div>
     <div class="sb-cell"><div class="sb-label">前方車両距離</div><div class="sb-val" id="sb-dist">80 m</div></div>
     <div class="sb-cell"><div class="sb-label">停止距離</div><div class="sb-val" id="sb-stopdist">0 m</div></div>
-    <div class="sb-cell"><div class="sb-label">違反量 δ</div><div class="sb-val" id="sb-delta">0 m</div></div>
+    <div class="sb-cell"><div class="sb-label">余裕帯侵入量 δ</div><div class="sb-val" id="sb-delta">0 m</div></div>
   </div>
   <div id="selectors">
     <div class="sel-group">
@@ -146,7 +146,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <div id="zoneLabel">ZONE A — PERMIT</div>
   </div>
   <div id="metrics">
-    <div class="metric"><div class="m-key">δ（違反量）</div><div class="m-val" id="m-delta">0.0 m</div></div>
+    <div class="metric"><div class="m-key">δ（余裕帯侵入量）</div><div class="m-val" id="m-delta">0.0 m</div></div>
     <div class="metric"><div class="m-key">τ（吸収厚み）</div><div class="m-val" id="m-tau">8.0 m</div></div>
     <div class="metric"><div class="m-key">μ × g ＝ 減速度</div><div class="m-val" id="m-accel">7.84 m/s²</div></div>
     <div class="metric"><div class="m-key">停止距離</div><div class="m-val" id="m-stop">0.0 m</div></div>
@@ -195,7 +195,8 @@ const banner=document.getElementById('handoffBanner');
 function getMu(){return MU[road][tire];}
 function getDecel(){return getMu()*G;}
 function stopDist(v){const ms=v/3.6;return ms*REACT+(ms*ms)/(2*getDecel());}
-function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-d);const R=t>0?delta/t:Infinity;return{delta,R,sd};}
+// δ：停止距離が安全余裕帯（車間距離の手前 τ m）へ入り込んだ量。R=1.0 は停止距離＝車間距離（衝突境界）。
+function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-(d-t));const R=t>0?delta/t:Infinity;return{delta,R,sd};}
 
 function zoneFromR(R){
   if(R<TH.A)return'A';

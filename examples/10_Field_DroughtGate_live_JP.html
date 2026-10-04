@@ -637,10 +637,10 @@ footer a { color:var(--soil); text-decoration:none; }
 // センサー定義
 // ─────────────────────────────────────────────
 const SENSORS = {
-  soil:   { key:'soil',   label:'土壌水分', unit:'%',    color:'#c8a46e', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
-  ground: { key:'ground', label:'地温',     unit:'°C',   color:'#7cb87a', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
-  sun:    { key:'sun',    label:'日射量',   unit:'W/m²', color:'#ffe066', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
-  wind:   { key:'wind',   label:'風速',     unit:'m/s',  color:'#80d8ff', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  soil:   { key:'soil',   ref:50,   label:'土壌水分', unit:'%',    color:'#c8a46e', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  ground: { key:'ground', ref:18, label:'地温',     unit:'°C',   color:'#7cb87a', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  sun:    { key:'sun',    ref:500,    label:'日射量',   unit:'W/m²', color:'#ffe066', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
+  wind:   { key:'wind',   ref:4,   label:'風速',     unit:'m/s',  color:'#80d8ff', hist:[], ema_u:0, ema_l:0, holdUntil:0, lastDec:'' },
 };
 
 const HIST = 160;
@@ -730,19 +730,31 @@ function getParams() {
   };
 }
 
+// 側別ゲート幅の形状変換（評価前に固定）。EMAがτ0の50%を超えた分だけτを縮め、floor倍で止める。
+// 広げる方向の変換は持たない。上限側floor 0.8（慎重）、下限側floor 0.25（敏感）はデモ用の値。
+const SHRINK_START = 0.5, FLOOR_UPPER = 0.8, FLOOR_LOWER = 0.25;
+function shrinkTau(tau0, ema, floor) {
+  return tau0 * Math.max(floor, 1 - Math.max(0, ema - SHRINK_START * tau0) / tau0);
+}
+
 function bandGate(sensor, v, p, nowMs) {
-  const half    = Math.max((p.th - p.tl) / 2, 0.001);
-  const d_upper = Math.max(0, v - p.th);
-  const d_lower = Math.max(0, p.tl - v);
+  // δは基準値（sensor.ref：通常時の代表値として宣言）からのズレ（FORMULA §4.1）。
+  // τ0は基準値から宣言上限・下限までの距離。基準値が上下限の外にある設定は評価不能として停止側に倒す。
+  const ref     = sensor.ref;
+  const tau0_u  = p.th - ref;
+  const tau0_l  = ref - p.tl;
+  const d_upper = Math.max(0, v - ref);
+  const d_lower = Math.max(0, ref - v);
 
   sensor.ema_u = p.au * d_upper + (1-p.au) * sensor.ema_u;
   sensor.ema_l = p.al * d_lower + (1-p.al) * sensor.ema_l;
 
-  const tau_u = half * Math.min(1 + sensor.ema_u/(half), 2.5);
-  const tau_l = half * Math.max(1 - sensor.ema_l/(half), 0.25);
+  const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
+  const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
 
-  const R_u = d_upper>0 ? d_upper/tau_u : 0;
-  const R_l = d_lower>0 ? d_lower/tau_l : 0;
+  const valid = tau0_u > 0 && tau0_l > 0;
+  const R_u = valid ? d_upper/tau_u : Infinity;
+  const R_l = valid ? d_lower/tau_l : Infinity;
   const R   = Math.max(R_u, R_l);
 
   const held    = nowMs < sensor.holdUntil;
@@ -756,11 +768,13 @@ function bandGate(sensor, v, p, nowMs) {
     sensor.lastDir = dir;
   }
 
-  const upper_band = p.th + (tau_u - half);
-  const lower_band = p.tl - (half - tau_l);
+  const upper_band = ref + tau_u;
+  const lower_band = ref - tau_l;
 
   return { v, R, R_u, R_l, silence, dir, upper_band, lower_band,
-           ema_lower: sensor.ema_l, ema_upper: sensor.ema_u };
+           ema_lower: sensor.ema_l, ema_upper: sensor.ema_u,
+           ema_lower_ratio: valid ? sensor.ema_l / tau0_l : Infinity,
+           ema_upper_ratio: valid ? sensor.ema_u / tau0_u : Infinity };
 }
 
 // ─────────────────────────────────────────────
@@ -769,23 +783,24 @@ function bandGate(sensor, v, p, nowMs) {
 let prevLv = -1;
 
 function calcDroughtLevel(results) {
-  // 複合スコア：各指標のRと下限EMAを重み付け合成
-  // 土壌水分の下限が一番重要なので weight=2
+  // 複合スコア：干ばつ方向の側だけのRとEMA比（EMA/τ0、無次元）を重み付け合成。
+  // 干ばつ方向：土壌水分は下側、地温・日射・風速は上側。反対側（降雨時の水分増・日射減など）は数えない。
+  // 土壌水分の下側が一番重要なので weight=2、さらに下側は1.3倍で重視する。
   const weights = { soil:2.0, ground:1.0, sun:1.2, wind:1.1 };
+  const side    = { soil:'lower', ground:'upper', sun:'upper', wind:'upper' };
   const keys    = ['soil','ground','sun','wind'];
   let score = 0, wsum = 0;
   keys.forEach(k=>{
     const r = results[k];
-    // 下限割れ方向を重視
-    const rScore = r.dir==='lower' ? r.R * 1.3 : r.R;
-    const emaScore = r.ema_lower * 0.4;
+    const rScore   = side[k]==='lower' ? r.R_l * 1.3 : r.R_u;
+    const emaScore = (side[k]==='lower' ? r.ema_lower_ratio : r.ema_upper_ratio) * 0.4;
     score += (rScore + emaScore) * weights[k];
     wsum  += weights[k];
   });
   score /= wsum;
 
-  // SILENCE中の指標数
-  const silCount = keys.filter(k=>results[k].silence).length;
+  // 干ばつ方向でSILENCE中の指標数
+  const silCount = keys.filter(k=>results[k].silence && results[k].dir===side[k]).length;
   if (silCount >= 3) return Math.max(score, 1.5);
   if (silCount >= 2) return Math.max(score, 1.0);
 

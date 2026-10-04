@@ -35,6 +35,7 @@ class FSMState(Enum):
     CAVEAT      = "CAVEAT"       # 0.35〜0.40 ≤ R < 0.60  警告
     CRITICAL    = "CRITICAL"     # 0.60 ≤ R < 1.00  臨界接近
     RUPTURE_BOUNDARY = "RUPTURE_BOUNDARY"  # R_target ≥ 1.00 → 破断後固定証言
+    OUT_OF_DESCRIPTION_DOMAIN = "OUT_OF_DESCRIPTION_DOMAIN"  # τ = 0 → R が定義されない（FORMULA §0.5）
 
 
 # ============================================================
@@ -62,19 +63,25 @@ class NRAChannel:
     baseline: float
     value:    float = 0.0
     delta:    float = 0.0
-    R:        float = 0.0
+    R:        Optional[float] = 0.0
 
-    def compute_R(self, current_value: float) -> float:
+    def compute_R(self, current_value: float) -> Optional[float]:
         """
         現在値を受け取り R を計算して返す。
-        τ = 0（ウォームアップ中）の場合は R = 0 を返す。
+
+        入力規則は正規参照実装（nra-core/foundations/NRA-IDE_Architecture_public.py）に合わせる。
+        - 現在値・基準値・τ が有限でない、または τ < 0 → ValueError（評価不能な入力。CONFESSION 相当）
+        - τ = 0 → R を定義せず None を返す（OUT_OF_DESCRIPTION_DOMAIN）
+        τ = 0 を R = 0 として扱うと、評価できない状態が「安全」に見えるため、そうしない。
         """
+        values = (current_value, self.baseline, self.tau)
+        if not all(isinstance(x, (int, float)) and math.isfinite(x) for x in values):
+            raise ValueError(f"{self.name}: value, baseline and tau must be finite numbers")
+        if self.tau < 0.0:
+            raise ValueError(f"{self.name}: tau must not be negative")
         self.value = current_value
         self.delta = abs(current_value - self.baseline)
-        if self.tau <= 0.0:
-            self.R = 0.0
-        else:
-            self.R = self.delta / self.tau
+        self.R = None if self.tau == 0.0 else self.delta / self.tau
         return self.R
 
 
@@ -111,6 +118,15 @@ if __name__ == "__main__":
         r = ch.compute_R(v)
         zone = ("FAIL" if r >= 1.0 else "CAVEAT" if r >= 0.4 else "PERMIT")
         print(f"  HR={v:3d}  δ={ch.delta:5.1f}  R={r:.4f}  [{zone}]")
+
+    print()
+    print("=== 異常入力 ===")
+    print(f"  tau=0   -> R={NRAChannel(name='hr', tau=0.0, baseline=72.0).compute_R(80)}  [OUT_OF_DESCRIPTION_DOMAIN]")
+    for bad_tau, bad_value in [(-1.0, 80.0), (18.0, float("nan"))]:
+        try:
+            NRAChannel(name="hr", tau=bad_tau, baseline=72.0).compute_R(bad_value)
+        except ValueError as error:
+            print(f"  tau={bad_tau} value={bad_value} -> ValueError: {error}  [CONFESSION]")
 
     print()
 

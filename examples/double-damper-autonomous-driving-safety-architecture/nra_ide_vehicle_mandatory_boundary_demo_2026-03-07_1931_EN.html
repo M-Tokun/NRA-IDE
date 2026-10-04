@@ -480,8 +480,7 @@
           <div class="bar"><div id="dLongFill" class="fill ide"></div></div>
           <div class="kv" style="margin-top:10px;"><span>Current boundary ratio R_now</span><strong id="rNow">0.00</strong></div>
           <div class="bar"><div id="rNowFill" class="fill ide"></div></div>
-          <div class="kv" style="margin-top:12px;"><span>Upper bound τ_upper</span><strong id="tauUpper">1.00</strong></div>
-          <div class="kv"><span>Lower bound τ_lower</span><strong id="tauLower">1.00</strong></div>
+          <div class="kv" style="margin-top:12px;"><span>Boundary width τ (fixed)</span><strong id="tauUpper">1.00</strong></div>
           <div class="kv"><span>Final decision</span><span id="decision" class="decision pass">PASS</span></div>
           <div class="inline-note">
             Not mixing with the legacy system means not embedding the equations inside the existing AI. Connections are not prohibited. The adapter receives the input, the IDE makes an independent judgment, and only the final output is allowed or rejected.
@@ -530,14 +529,10 @@
       </div>
       <div class="control-group">
         <h3>Parameters</h3>
-        <p>Adjust the upper and lower dampers, reconstruction strength, and danger-zone threshold. The structure is asymmetric: the lower side is sensitive, while the upper side is conservative.</p>
+        <p>Adjust the boundary width τ (fixed as a design value), reconstruction strength, and danger-zone threshold. τ is never changed from evaluation results.</p>
         <div class="slider-row">
-          <div class="slider-head"><span>Upper damper</span><span id="upperVal">1.00</span></div>
+          <div class="slider-head"><span>Boundary width τ (design value)</span><span id="upperVal">1.00</span></div>
           <input id="upperRange" type="range" min="0.6" max="1.8" value="1.0" step="0.01" />
-        </div>
-        <div class="slider-row">
-          <div class="slider-head"><span>Lower damper</span><span id="lowerVal">1.00</span></div>
-          <input id="lowerRange" type="range" min="0.4" max="1.4" value="1.0" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>Short-term reconstruction sensitivity</span><span id="reconVal">0.55</span></div>
@@ -613,19 +608,16 @@
       rShortFill: document.getElementById('rShortFill'),
       dLongFill: document.getElementById('dLongFill'),
       tauUpper: document.getElementById('tauUpper'),
-      tauLower: document.getElementById('tauLower'),
       decision: document.getElementById('decision'),
       dangerDisplay: document.getElementById('dangerDisplay'),
       dangerMain: document.getElementById('dangerMain'),
       dangerSub: document.getElementById('dangerSub'),
       upperRange: document.getElementById('upperRange'),
-      lowerRange: document.getElementById('lowerRange'),
       reconRange: document.getElementById('reconRange'),
       degRange: document.getElementById('degRange'),
       dangerThresholdRange: document.getElementById('dangerThresholdRange'),
       dangerInjectRange: document.getElementById('dangerInjectRange'),
       upperVal: document.getElementById('upperVal'),
-      lowerVal: document.getElementById('lowerVal'),
       reconVal: document.getElementById('reconVal'),
       degVal: document.getElementById('degVal'),
       dangerThresholdVal: document.getElementById('dangerThresholdVal'),
@@ -653,7 +645,6 @@
       shortMemory: [],
       log: [],
       upperDamper: 1.0,
-      lowerDamper: 1.0,
       recon: 0.55,
       deg: 0.15,
       dangerThreshold: 0.92,
@@ -853,16 +844,12 @@
       const pair3 = Math.abs(state.radar - state.imu);
       const disagreement = (pair1 + pair2 + pair3) / 3;
 
-      // Upper damper: relaxes by a factor of 0.35 for whatever amount rShort exceeds 0.4.
-      // Lower damper: tightens by a factor of 0.20 for whatever amount dLong exceeds 0.25 (floored at 0.25).
-      // This implements the asymmetric structure described in the parameter panel copy ("the lower side is
-      // sensitive, while the upper side is conservative"); the figures 0.4/0.35/0.25/0.20 are basis unknown /
-      // demo tuning values.
-      // Note: tauLower is used only for the UI display (ui.tauLower) — it is not used in rNow or any decision math.
-      const tauUpper = state.upperDamper + Math.max(0, state.rShort - 0.4) * 0.35;
-      const tauLower = Math.max(0.25, state.lowerDamper - Math.max(0, state.dLong - 0.25) * 0.20);
+      // τ (boundary width) is fixed at the design value (slider). Changing τ from evaluation outputs
+      // (rShort, dLong) would route outputs back into the same target's gate width (reverse derivation B,
+      // FORMULA §4.4), so no such path exists.
+      const tauUpper = state.upperDamper;
 
-      state.rNow = Math.max(disagreement / tauUpper, 0); // R_now = disagreement / upper damper
+      state.rNow = Math.max(disagreement / tauUpper, 0); // R_now = disagreement / boundary width τ (fixed)
 
       // Short-term memory: keeps the last 24 frames of rNow and averages them (window length 24 is basis
       // unknown / demo tuning value).
@@ -906,7 +893,6 @@
       ui.rShortFill.style.width = `${clamp(state.rShort / 1.2, 0, 1) * 100}%`;
       ui.dLongFill.style.width = `${clamp(state.dLong / 1.2, 0, 1) * 100}%`;
       ui.tauUpper.textContent = tauUpper.toFixed(2);
-      ui.tauLower.textContent = tauLower.toFixed(2);
 
       ui.decision.className = 'decision ' + (state.decision === 'PASS' ? 'pass' : state.decision === 'DAMP' ? 'warn' : 'stop');
       ui.decision.textContent = state.decision;
@@ -1067,13 +1053,11 @@
 
     function syncControls() {
       state.upperDamper = parseFloat(ui.upperRange.value);
-      state.lowerDamper = parseFloat(ui.lowerRange.value);
       state.recon = parseFloat(ui.reconRange.value);
       state.deg = parseFloat(ui.degRange.value);
       state.dangerThreshold = parseFloat(ui.dangerThresholdRange.value);
       state.dangerInject = parseFloat(ui.dangerInjectRange.value);
       ui.upperVal.textContent = state.upperDamper.toFixed(2);
-      ui.lowerVal.textContent = state.lowerDamper.toFixed(2);
       ui.reconVal.textContent = state.recon.toFixed(2);
       ui.degVal.textContent = state.deg.toFixed(2);
       ui.dangerThresholdVal.textContent = state.dangerThreshold.toFixed(2);
@@ -1082,7 +1066,6 @@
 
     ['input', 'change'].forEach(evt => {
       ui.upperRange.addEventListener(evt, syncControls);
-      ui.lowerRange.addEventListener(evt, syncControls);
       ui.reconRange.addEventListener(evt, syncControls);
       ui.degRange.addEventListener(evt, syncControls);
       ui.dangerThresholdRange.addEventListener(evt, syncControls);

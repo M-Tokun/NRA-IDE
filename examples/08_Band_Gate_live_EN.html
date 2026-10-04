@@ -9,8 +9,9 @@
   NRA-IDE / Band Gate — 08 (EN)
   Asymmetric Damper Structure: Band Gate Live Demo
   --------------------------------------------------
-  Upper-side EMA accumulates → τ expands → peak is rounded (conservative).
-  Lower-side EMA accumulates → τ shrinks → detection sharpens (sensitive).
+  δ is the deviation from the declared reference; τ0 is the distance from the reference to the declared upper/lower limit (R = 1.0 at the limits).
+  When side EMA accumulates, τ only shrinks; it never widens past the declared limits.
+  Upper side shrinks little (conservative); lower side shrinks more (sensitive).
   R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
   R_dir is an aggregate of two independent R = δ/τ evaluations (upper/lower), not a redefinition of canonical R.
   Same asymmetric structure as heart valves, car suspension, pressure regulators.
@@ -192,18 +193,18 @@ footer a { color: var(--lower); text-decoration: none; }
     <div class="dual-params">
       <div>
         <div class="param-col-title upper">UPPER SIDE ↑</div>
-        <div class="col-desc">τ expands when EMA accumulates — cushions surges (conservative)</div>
+        <div class="col-desc">τ shrinks only slightly when EMA accumulates (conservative)</div>
         <div class="param-row">
           <div class="param-lbl"><span class="param-name">τ_high</span><span class="param-val" id="v-th">—</span></div>
-          <input type="range" class="upper" id="sl-th" min="0" max="100" value="70" title="τ_high">
+          <input type="range" class="upper" id="sl-th" min="0" max="150" value="70" title="τ_high">
         </div>
         <div class="param-row">
           <div class="param-lbl"><span class="param-name">α_upper (EMA rate)</span><span class="param-val" id="v-au">0.30</span></div>
           <input type="range" class="upper" id="sl-au" min="0.01" max="0.99" step="0.01" value="0.30" title="α_upper">
         </div>
         <div class="param-row">
-          <div class="param-lbl"><span class="param-name">AMP_upper</span><span class="param-val" id="v-amu">2.0</span></div>
-          <input type="range" class="upper" id="sl-amu" min="1.0" max="4.0" step="0.1" value="2.0" title="AMP_upper">
+          <div class="param-lbl"><span class="param-name">AMP_upper</span><span class="param-val" id="v-amu">1.3</span></div>
+          <input type="range" class="upper" id="sl-amu" min="1.0" max="4.0" step="0.1" value="1.3" title="AMP_upper">
         </div>
       </div>
       <div>
@@ -218,8 +219,8 @@ footer a { color: var(--lower); text-decoration: none; }
           <input type="range" class="lower" id="sl-al" min="0.01" max="0.99" step="0.01" value="0.50" title="α_lower">
         </div>
         <div class="param-row">
-          <div class="param-lbl"><span class="param-name">AMP_lower</span><span class="param-val" id="v-aml">1.3</span></div>
-          <input type="range" class="lower" id="sl-aml" min="1.0" max="4.0" step="0.1" value="1.3" title="AMP_lower">
+          <div class="param-lbl"><span class="param-name">AMP_lower</span><span class="param-val" id="v-aml">2.0</span></div>
+          <input type="range" class="lower" id="sl-aml" min="1.0" max="4.0" step="0.1" value="2.0" title="AMP_lower">
         </div>
       </div>
     </div>
@@ -236,8 +237,10 @@ footer a { color: var(--lower); text-decoration: none; }
     <div class="principle-box">
       <div class="principle-title">WHY ASYMMETRIC?</div>
       <p>
-        <span class="text-upper">Upper</span>: EMA pressure accumulates → τ widens → peak rounded (absorbs shock).<br>
-        <span class="text-lower">Lower</span>: EMA drain accumulates → τ narrows → dropout caught early (sensitive).<br>
+        δ is the deviation from the reference; τ is the distance from the reference to the declared limit (R = 1.0 at the limit).<br>
+        <span class="text-upper">Upper</span>: sustained deviation shrinks τ only slightly (conservative).<br>
+        <span class="text-lower">Lower</span>: sustained deviation shrinks τ more → dropout caught early (sensitive).<br>
+        AMP is the maximum shrink factor (down to τ0/AMP). τ is never widened.<br>
         Identical to heart valves, car suspension, and pressure-relief valves.
       </p>
     </div>
@@ -259,16 +262,16 @@ footer a { color: var(--lower); text-decoration: none; }
    Scenario definitions
    ───────────────────────────────────────────── */
 const SCENARIOS = {
-  elec:  { label:'Voltage (V)',          unit:'V',   th_default:70, tl_default:30, color:'#f0c040',
+  elec:  { label:'Voltage (V)',          unit:'V',   nominal:50, th_default:70, tl_default:30, color:'#f0c040',
     // Spike pattern: overvoltage (t=80), leakage drop (t=200)
     getValue(t){let v=50+Math.sin(t*.04)*4+Math.random()*2-1;const p=t%300;if(p>=80&&p<=110)v+=28*Math.sin((p-80)/30*Math.PI);if(p>=200&&p<=260)v-=26*Math.sin((p-200)/60*Math.PI);return v;}},
-  temp:  { label:'Temperature (°C)',     unit:'°C',  th_default:38, tl_default:5,  color:'#ff6b35',
+  temp:  { label:'Temperature (°C)',     unit:'°C',  nominal:22, th_default:38, tl_default:5,  color:'#ff6b35',
     // Spike pattern: heat wave (t=60), sudden cooling (t=220)
     getValue(t){let v=22+Math.sin(t*.03)*5+Math.random()*1.5-.75;const p=t%320;if(p>=60&&p<=100)v+=20*Math.sin((p-60)/40*Math.PI);if(p>=220&&p<=270)v-=20*Math.sin((p-220)/50*Math.PI);return v;}},
-  water: { label:'Water Pressure (kPa)', unit:'kPa', th_default:72, tl_default:25, color:'#00c9ff',
+  water: { label:'Water Pressure (kPa)', unit:'kPa', nominal:50, th_default:72, tl_default:25, color:'#00c9ff',
     // Spike pattern: pressure surge (t=70), flow loss (t=190)
     getValue(t){let v=50+Math.sin(t*.05)*6+Math.random()*2-1;const p=t%280;if(p>=70&&p<=105)v+=30*Math.sin((p-70)/35*Math.PI);if(p>=190&&p<=240)v-=28*Math.sin((p-190)/50*Math.PI);return v;}},
-  pulse: { label:'Heart Rate (bpm)',     unit:'bpm', th_default:110,tl_default:45, color:'#ff3d5a',
+  pulse: { label:'Heart Rate (bpm)',     unit:'bpm', nominal:70, th_default:110,tl_default:45, color:'#ff3d5a',
     // Spike pattern: tachycardia (t=80), bradycardia (t=230)
     getValue(t){let v=70+Math.sin(t*.06)*8+Math.random()*3-1.5;const p=t%350;if(p>=80&&p<=120)v+=50*Math.sin((p-80)/40*Math.PI);if(p>=230&&p<=290)v-=35*Math.sin((p-230)/60*Math.PI);return v;}},
 };
@@ -297,25 +300,37 @@ function gP(){
   };
 }
 
+// Side gate-width shape transform, fixed before evaluation. τ shrinks only by the part of EMA above
+// 50% of τ0, and stops at floor×τ0. 0.5 is a demo value. There is no widening transform.
+const SHRINK_START=0.5;
+function shrinkTau(tau0,ema,floor){ return tau0*Math.max(floor,1-Math.max(0,ema-SHRINK_START*tau0)/tau0); }
+
 function stepSim(p){
   st.t++;
+  // δ is the deviation from the declared reference (scenario.nominal), per FORMULA §4.1.
+  // τ0 is the distance from the reference to the declared limit, so R = 1.0 coincides with the limit.
   const v=scenario.getValue(st.t),
         nowMs=st.t*40,
-        half=(p.th-p.tl)/2;
+        ref=scenario.nominal,
+        tau0_u=p.th-ref,
+        tau0_l=ref-p.tl;
 
   // Upper δ / lower δ
-  const d_u=Math.max(0,v-p.th),
-        d_l=Math.max(0,p.tl-v);
+  const d_u=Math.max(0,v-ref),
+        d_l=Math.max(0,ref-v);
 
-  // Upper-side EMA (accumulates → τ grows); lower-side EMA (accumulates → τ shrinks)
+  // Side EMAs (smoothed Cause-Side side deviations)
   st.ema_u=p.au*d_u+(1-p.au)*st.ema_u;
   st.ema_l=p.al*d_l+(1-p.al)*st.ema_l;
 
-  const tau_u=half*Math.min(1+st.ema_u/half,p.amu),
-        tau_l=half*Math.max(1-st.ema_l/half,1/p.aml);
+  // Dynamic gate widths only shrink (never past τ0). AMP is the maximum shrink factor.
+  const tau_u=shrinkTau(tau0_u,st.ema_u,1/p.amu),
+        tau_l=shrinkTau(tau0_l,st.ema_l,1/p.aml);
 
-  const R_u=d_u>0?d_u/tau_u:0,
-        R_l=d_l>0?d_l/tau_l:0,
+  // A reference outside the limits cannot be evaluated; fail toward stop.
+  const valid=tau0_u>0&&tau0_l>0;
+  const R_u=valid?d_u/tau_u:Infinity,
+        R_l=valid?d_l/tau_l:Infinity,
         R=Math.max(R_u,R_l);
 
   // HOLD check
@@ -333,7 +348,7 @@ function stepSim(p){
 
   // history (also carries the dynamic band values, used for drawing)
   if(st.hist.length>=HISTORY) st.hist.shift();
-  st.hist.push({v,upper_band:p.th+(tau_u-half),lower_band:p.tl-(half-tau_l),R,silence,dir});
+  st.hist.push({v,upper_band:ref+tau_u,lower_band:ref-tau_l,R,silence,dir});
   return{v,R,silence,dir};
 }
 

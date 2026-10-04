@@ -331,7 +331,7 @@
         <div class="gate-wrap">
             <div class="gate-title">Gate Parameters</div>
             <div class="gate-row">
-                <span class="gate-key">δ (violation)</span>
+                <span class="gate-key">δ (margin intrusion)</span>
                 <span class="gate-val" id="ok-delta">0.0 m</span>
             </div>
             <div class="gate-row">
@@ -386,7 +386,7 @@
         <div class="gate-wrap">
             <div class="gate-title">Gate Parameters <span class="c-ng fs-9">⚠ τ is being modified dynamically</span></div>
             <div class="gate-row">
-                <span class="gate-key">δ (violation)</span>
+                <span class="gate-key">δ (margin intrusion)</span>
                 <span class="gate-val" id="ng-delta">0.0 m</span>
             </div>
             <div class="gate-row">
@@ -478,7 +478,10 @@ function computeR(delta, tau) {
     return tau > 0 ? delta / tau : Infinity;
 }
 function delta_from(v, d) {
-    return Math.max(0, stopDist(v) - d);
+    // δ: intrusion of the stopping distance into the safety-margin band (the last TAU_FIXED m before the gap).
+    // It is a Cause-Side quantity fixed by the design τ; the mixing version uses the same δ and rewrites only
+    // the τ it divides by. R = 1.0 when stopping distance equals the gap (collision boundary).
+    return Math.max(0, stopDist(v) - (d - TAU_FIXED));
 }
 function zoneFromR(R) {
     if (R < 0.40) return 'A';

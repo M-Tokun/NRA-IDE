@@ -101,7 +101,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <div class="sb-cell"><div class="sb-label">Speed</div><div class="sb-val" id="sb-speed">60 km/h</div></div>
     <div class="sb-cell"><div class="sb-label">Actual Distance</div><div class="sb-val" id="sb-dist">80 m</div></div>
     <div class="sb-cell"><div class="sb-label">Stop Distance</div><div class="sb-val" id="sb-stopdist">0 m</div></div>
-    <div class="sb-cell"><div class="sb-label">Violation δ</div><div class="sb-val" id="sb-delta">0 m</div></div>
+    <div class="sb-cell"><div class="sb-label">Margin intrusion δ</div><div class="sb-val" id="sb-delta">0 m</div></div>
   </div>
   <div id="selectors">
     <div class="sel-group">
@@ -146,7 +146,7 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     <div id="zoneLabel">ZONE A — PERMIT</div>
   </div>
   <div id="metrics">
-    <div class="metric"><div class="m-key">δ (violation)</div><div class="m-val" id="m-delta">0.0 m</div></div>
+    <div class="metric"><div class="m-key">δ (margin intrusion)</div><div class="m-val" id="m-delta">0.0 m</div></div>
     <div class="metric"><div class="m-key">τ (thickness)</div><div class="m-val" id="m-tau">8.0 m</div></div>
     <div class="metric"><div class="m-key">μ × g = decel</div><div class="m-val" id="m-accel">7.84 m/s²</div></div>
     <div class="metric"><div class="m-key">stop_dist</div><div class="m-val" id="m-stop">0.0 m</div></div>
@@ -195,7 +195,9 @@ const banner=document.getElementById('handoffBanner');
 function getMu(){return MU[road][tire];}
 function getDecel(){return getMu()*G;}
 function stopDist(v){const ms=v/3.6;return ms*REACT+(ms*ms)/(2*getDecel());}
-function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-d);const R=t>0?delta/t:Infinity;return{delta,R,sd};}
+// δ: intrusion of the stopping distance into the safety-margin band (the last τ m before the gap).
+// R = 1.0 when stopping distance equals the gap (collision boundary).
+function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-(d-t));const R=t>0?delta/t:Infinity;return{delta,R,sd};}
 
 function zoneFromR(R){
   if(R<TH.A)return'A';

@@ -148,7 +148,7 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 
 | # | ファイル | ドメイン | ポイント |
 |---|---------|---------|---------|
-| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | 電気・気温・水圧・脈動（JP） | **非対称ダンパー構造** — 上限側τは拡大（慎重）、下限側τは縮小（敏感）。左のダンパーアニメーションで2つのスプリングが逆方向に動く様子を確認できます。 |
+| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | 電気・気温・水圧・脈動（JP） | **非対称ダンパー構造** — δは基準値からのズレ、R = 1.0 が宣言上下限。ズレが続くとτを縮めて検知を早める（広げない）。上限側は縮みにくく（慎重）、下限側は大きく縮む（敏感）。左のダンパーアニメーションで2つのスプリングが逆方向に動く様子を確認できます。 |
 | 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | 同上 — 英語版 | English labels and explanations. |
 | 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | 温室農業 4指標同時監視（JP） | 灌漑水圧・気温・CO₂・養液ECを同時監視。**🏜 干ばつシミュレーション**で複数指標が同時低下する様子を観察できます。 |
 | 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | 同上 — 英語版 | English labels and explanations. |
@@ -274,13 +274,21 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 ```javascript
 
-// 最小構成の例
+// 最小構成の例（正規参照実装と同じ入力規則）
 
 function gate(delta, tau) {
 
+    if (!Number.isFinite(delta) || !Number.isFinite(tau) || delta < 0 || tau < 0) {
+
+        return "CONFESSION";                   // 評価できない入力
+
+    }
+
+    if (tau === 0) return "OUT_OF_DESCRIPTION_DOMAIN";   // R が定義されない
+
     const R = delta / tau;
 
-    if (R >= 1.0) return "STOP";   // RUPTURE_BOUNDARY
+    if (R >= 1.0) return "RUPTURE_BOUNDARY";
 
     return "PERMIT";
 
@@ -300,7 +308,7 @@ const infusionPressure = getPumpCapacity();   // τ（ポンプの投与圧力�
 
 const deliveryStatus = gate(tumorResistance, infusionPressure);
 
-if (deliveryStatus === "STOP") {
+if (deliveryStatus !== "PERMIT") {   // PERMIT 以外はすべて停止側（fail-closed）
 
     alert("物理的到達不能を検出。医師の判断が必要です。");
 
@@ -330,7 +338,7 @@ if (deliveryStatus === "STOP") {
 
 - **NRA解決策**: 衝突回避の構造的制約検証
 
-- **閾値**: R = （衝突余裕時間） / （制動能力）
+- **閾値**: R = （停止距離が安全余裕帯へ入り込んだ量） / （安全余裕距離）。R = 1.0 は停止距離＝車間距離
 
 ### 🖥️ インフラ耐障害性
 
@@ -343,7 +351,7 @@ if (deliveryStatus === "STOP") {
 | 領域 | δ（制約からのズレ） | τ（許容範囲） | R ≥ 1.0 の意味 |
 |------|---------------------|---------------|-----------------|
 | 医療AI | 腫瘍抵抗力 | 投与圧力 | 薬剤が物理的に届かない |
-| 自動運転 | 障害物までの余裕 | 制動距離 | 衝突危険 → 緊急停止 |
+| 自動運転 | 停止距離が安全余裕帯（車間距離の手前 τ）へ入り込んだ量 | 安全余裕距離（設計時固定） | 停止距離 ≥ 車間距離：衝突危険 → 緊急停止 |
 | インフラ | 負荷超過量 | バッファサイズ | サーバー過負荷 → 遮断 |
 
 ---

@@ -151,6 +151,25 @@ class PowerGridNRA:
         # R 計算（Cause-Side）
         self.channel.compute_R(self.freq)
 
+        # τ = 0 では R が定義されない。破断済みなら固定を保ち、それ以外は記述域外として報告する。
+        if self.R is None:
+            if self.fsm != FSMState.RUPTURE_BOUNDARY:
+                self.fsm = FSMState.OUT_OF_DESCRIPTION_DOMAIN
+            self.history.append({
+                "t":    round(self.elapsed, 3),
+                "freq": round(self.freq, 4),
+                "delta": round(self.channel.delta, 5),
+                "R":    None,
+                "debt": round(self.residual_debt, 5),
+                "fsm":  self.fsm.value,
+            })
+            return NRASystemState(
+                fsm=self.fsm,
+                R_total=float("nan"),
+                residual_debt=self.residual_debt,
+                elapsed=self.elapsed,
+            )
+
         # 残留負債更新
         if self.R > self.TH_CAVEAT:
             self.residual_debt += (

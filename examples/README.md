@@ -124,7 +124,7 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 
 | # | File | Domain | Key Point |
 |---|---------|---------|---------|
-| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | Electricity, air temperature, water pressure, pulsation — JP | **Asymmetric damper structure.** Upper τ expands cautiously, lower τ shrinks sensitively. |
+| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | Electricity, air temperature, water pressure, pulsation — JP | **Asymmetric damper structure.** δ is the deviation from the reference; R = 1.0 at the declared limits. Sustained deviation shrinks τ for earlier detection (never widens). Upper side shrinks little (cautious), lower side shrinks more (sensitive). |
 | 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | Same — English | English labels and explanations. |
 | 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | Greenhouse agriculture, four-sensor monitoring — JP | Monitors irrigation pressure, air temperature, CO₂, and nutrient EC. |
 | 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | Same — English | English labels and explanations. |
@@ -240,9 +240,17 @@ Physical control begins by defining the target’s deviation (δ) and tolerance 
 
 ```javascript
 
-// Minimal example
+// Minimal example (same input rules as the normative reference implementation)
 
 function gate(delta, tau) {
+
+    if (!Number.isFinite(delta) || !Number.isFinite(tau) || delta < 0 || tau < 0) {
+
+        return "CONFESSION";                   // input cannot be evaluated
+
+    }
+
+    if (tau === 0) return "OUT_OF_DESCRIPTION_DOMAIN";   // R is undefined
 
     const R = delta / tau;
 
@@ -266,7 +274,7 @@ const infusionPressure = getPumpCapacity();   // τ: available pump pressure
 
 const deliveryStatus = gate(tumorResistance, infusionPressure);
 
-if (deliveryStatus === "RUPTURE_BOUNDARY") {
+if (deliveryStatus !== "PERMIT") {   // every state other than PERMIT stops (fail-closed)
 
     alert("Physical reachability failure detected. Human medical judgment is required.");
 
@@ -296,7 +304,7 @@ Specific implementation patterns are documented inside each demo source file.
 
 - **NRA solution:** Verify structural constraints for collision avoidance.
 
-- **Threshold:** R = obstacle margin / braking capability.
+- **Threshold:** R = (intrusion of the stopping distance into the safety-margin band) / (safety-margin distance). R = 1.0 when stopping distance equals the gap.
 
 ### 🖥️ Infrastructure Resilience
 
@@ -309,7 +317,7 @@ Specific implementation patterns are documented inside each demo source file.
 | Area | δ (Deviation from constraint) | τ (Tolerance thickness) | Meaning of R ≥ 1.0 |
 |------|-------------------------------|--------------------------|--------------------|
 | Medical AI | Target-side resistance | Delivery pressure | The drug physically cannot reach the target |
-| Autonomous driving | Obstacle time/distance margin | Braking distance/capability | Collision danger → emergency stop |
+| Autonomous driving | Intrusion of the stopping distance into the safety-margin band (the last τ before the gap) | Safety-margin distance (fixed at design time) | Stopping distance ≥ gap: collision danger → emergency stop |
 | Infrastructure | Excess load | Buffer capacity | Server overload → isolation |
 
 ---

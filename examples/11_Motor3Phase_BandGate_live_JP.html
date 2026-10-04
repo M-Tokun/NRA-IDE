@@ -606,26 +606,38 @@ function getValues(t) {
 // Band Gate
 // ─────────────────────────────────────────────
 const GATE_PARAMS = {
-  u:    { th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
-  v:    { th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
-  w:    { th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
-  temp: { th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
-  imb:  { th: TAU_HIGH_IMB, tl: TAU_LOW_IMB, au: 0.50, al: 0.10 },
+  u:    { ref: RATED_A, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  v:    { ref: RATED_A, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  w:    { ref: RATED_A, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
+  temp: { ref: 40,      th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
+  imb:  { ref: 0,       th: TAU_HIGH_IMB, tl: null,        au: 0.50, al: 0.10 },
 };
 const HOLD_MS = 2000;
 
+// 側別ゲート幅の形状変換（評価前に固定）。EMAがτ0の50%を超えた分だけτを縮め、floor倍で止める。
+// 広げる方向の変換は持たない。floor 0.8（上側・慎重）／0.25（下側・敏感）はデモ用の値。
+// δは基準値refからのズレ（FORMULA §4.1）、τ0はrefから宣言上限・下限までの距離。
+// ref：電流は定格電流、巻線温度は運転開始時の代表値40°C、相不平衡率は0%（下側を持たない片側量）。
+const SHRINK_START = 0.5, FLOOR_UPPER = 0.8, FLOOR_LOWER = 0.25;
+function shrinkTau(tau0, ema, floor) {
+  return tau0 * Math.max(floor, 1 - Math.max(0, ema - SHRINK_START * tau0) / tau0);
+}
+
 function bandGate(sensor, v, p) {
-  const half = Math.max((p.th - p.tl) / 2, .001);
-  const d_u  = Math.max(0, v - p.th);
-  const d_l  = Math.max(0, p.tl - v);
+  const hasLower = p.tl !== null;
+  const tau0_u = p.th - p.ref;
+  const tau0_l = hasLower ? p.ref - p.tl : 1;
+  const d_u  = Math.max(0, v - p.ref);
+  const d_l  = hasLower ? Math.max(0, p.ref - v) : 0;
 
   sensor.ema_u = p.au * d_u + (1 - p.au) * sensor.ema_u;
   sensor.ema_l = p.al * d_l + (1 - p.al) * sensor.ema_l;
 
-  const tau_u = half * Math.min(1 + sensor.ema_u / half, 2.5);
-  const tau_l = half * Math.max(1 - sensor.ema_l / half, 0.25);
-  const R_u   = d_u > 0 ? d_u / tau_u : 0;
-  const R_l   = d_l > 0 ? d_l / tau_l : 0;
+  const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
+  const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
+  const valid = tau0_u > 0 && tau0_l > 0;
+  const R_u   = valid ? d_u / tau_u : Infinity;
+  const R_l   = valid ? d_l / tau_l : Infinity;
   const R     = Math.max(R_u, R_l);
 
   const nowMs  = t * 40;
@@ -638,8 +650,8 @@ function bandGate(sensor, v, p) {
     sensor.lastDir = dir;
   }
 
-  const upper_band = p.th + (tau_u - half);
-  const lower_band = p.tl - (half - tau_l);
+  const upper_band = p.ref + tau_u;
+  const lower_band = hasLower ? p.ref - tau_l : p.ref;
   return { v, R, silence, dir, upper_band, lower_band };
 }
 

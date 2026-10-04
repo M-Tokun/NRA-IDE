@@ -583,6 +583,16 @@ static float32 NRA_Gate_ComputeR(float32 delta)
 
     }
 
+    if (!isfinite(delta) || delta < 0.0f)
+
+    {
+
+        /* δ 異常（センサー断・NaN・負値）→ 評価不能。許可側に倒さず Fail-Closed suppression */
+
+        return NRA_GATE_R_MAX;
+
+    }
+
     return delta / NRA_GATE_TAU;
 
 }
@@ -599,15 +609,19 @@ void NRA_Gate_MainFunction(void)
 
     float32 distance = Rte_IRead_Gate_SensorData_DistanceM();
 
+    /* δ = max(0, 停止距離 − (車間距離 − τ))：停止距離が安全余裕帯へ入り込んだ量。
+
+       R = 1.0 ⇔ 停止距離 = 車間距離（衝突境界）。入力が非有限なら NaN を返し、ComputeR で停止側に倒す */
+
     float32 delta    = NRA_Gate_ComputeDelta(speed, distance);
 
     float32 R        = NRA_Gate_ComputeR(delta);
 
 
 
-    /* Fail-Closed suppression 判定 */
+    /* Fail-Closed suppression 判定（非有限の R も停止側） */
 
-    if (R >= 1.0f)
+    if (!isfinite(R) || R >= 1.0f)
 
     {
 

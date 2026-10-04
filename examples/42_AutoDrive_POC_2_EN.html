@@ -231,7 +231,7 @@
             <div class="sb-val" id="sb-stopdist">0 m</div>
         </div>
         <div class="sb-cell">
-            <div class="sb-label">Violation δ</div>
+            <div class="sb-label">Margin intrusion δ</div>
             <div class="sb-val" id="sb-delta">0 m</div>
         </div>
     </div>
@@ -304,7 +304,7 @@
 
     <div id="metrics">
         <div class="metric">
-            <div class="m-key">δ (violation)</div>
+            <div class="m-key">δ (margin intrusion)</div>
             <div class="m-val" id="m-delta">0.0 m</div>
         </div>
         <div class="metric">
@@ -414,7 +414,9 @@ function stopDist(v_kmh) {
 }
 function computeR(v_kmh, d_m, t_m) {
     const sd    = stopDist(v_kmh);
-    const delta = Math.max(0, sd - d_m);
+    // δ: how far the stopping distance intrudes into the safety-margin band (the last τ m before the gap).
+    // R = 1.0 when stopping distance equals the gap (collision boundary).
+    const delta = Math.max(0, sd - (d_m - t_m));
     const R     = t_m > 0 ? delta / t_m : Infinity;
     return { delta, R, sd };
 }

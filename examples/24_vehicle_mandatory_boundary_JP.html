@@ -339,8 +339,7 @@
           <div class="bar"><div id="dLongFill" class="fill ide"></div></div>
           <div class="kv" style="margin-top:10px;"><span>現在の境界比 R_now</span><strong id="rNow">0.00</strong></div>
           <div class="bar"><div id="rNowFill" class="fill ide"></div></div>
-          <div class="kv" style="margin-top:12px;"><span>上限 τ_upper</span><strong id="tauUpper">1.00</strong></div>
-          <div class="kv"><span>下限 τ_lower</span><strong id="tauLower">1.00</strong></div>
+          <div class="kv" style="margin-top:12px;"><span>境界幅 τ（固定）</span><strong id="tauUpper">1.00</strong></div>
           <div class="kv"><span>最終判定</span><span id="decision" class="decision pass">PASS</span></div>
           <div class="inline-note">
             既存システムと混用しないとは、既存AIの内部に式を埋め込まないという意味です。接続は制限しません。Adapterで受け、IDEが独立判定し、最終出力だけを許可または拒否します。
@@ -389,14 +388,10 @@
       </div>
       <div class="control-group">
         <h3>パラメータ</h3>
-        <p>上限下限ダンパーと再構成強度に加え、危険域しきい値を調整します。下限側は敏感、上限側は慎重という非対称構造です。</p>
+        <p>境界幅 τ（設計値として固定）と再構成強度に加え、危険域しきい値を調整します。τは判定結果からは変えません。</p>
         <div class="slider-row">
-          <div class="slider-head"><span>上限ダンパー</span><span id="upperVal">1.00</span></div>
+          <div class="slider-head"><span>境界幅 τ（設計値）</span><span id="upperVal">1.00</span></div>
           <input aria-label="上限境界" id="upperRange" type="range" min="0.6" max="1.8" value="1.0" step="0.01" />
-        </div>
-        <div class="slider-row">
-          <div class="slider-head"><span>下限ダンパー</span><span id="lowerVal">1.00</span></div>
-          <input aria-label="下限境界" id="lowerRange" type="range" min="0.4" max="1.4" value="1.0" step="0.01" />
         </div>
         <div class="slider-row">
           <div class="slider-head"><span>短期再構成感度</span><span id="reconVal">0.55</span></div>
@@ -472,19 +467,16 @@
       rShortFill: document.getElementById('rShortFill'),
       dLongFill: document.getElementById('dLongFill'),
       tauUpper: document.getElementById('tauUpper'),
-      tauLower: document.getElementById('tauLower'),
       decision: document.getElementById('decision'),
       dangerDisplay: document.getElementById('dangerDisplay'),
       dangerMain: document.getElementById('dangerMain'),
       dangerSub: document.getElementById('dangerSub'),
       upperRange: document.getElementById('upperRange'),
-      lowerRange: document.getElementById('lowerRange'),
       reconRange: document.getElementById('reconRange'),
       degRange: document.getElementById('degRange'),
       dangerThresholdRange: document.getElementById('dangerThresholdRange'),
       dangerInjectRange: document.getElementById('dangerInjectRange'),
       upperVal: document.getElementById('upperVal'),
-      lowerVal: document.getElementById('lowerVal'),
       reconVal: document.getElementById('reconVal'),
       degVal: document.getElementById('degVal'),
       dangerThresholdVal: document.getElementById('dangerThresholdVal'),
@@ -512,7 +504,6 @@
       shortMemory: [],
       log: [],
       upperDamper: 1.0,
-      lowerDamper: 1.0,
       recon: 0.55,
       deg: 0.15,
       dangerThreshold: 0.92,
@@ -710,15 +701,11 @@
       const pair3 = Math.abs(state.radar - state.imu);
       const disagreement = (pair1 + pair2 + pair3) / 3;
 
-      // 上限ダンパー: 短期再構成値rShortが0.4を超えた分だけ0.35倍で緩める。
-      // 下限ダンパー: 長期劣化dLongが0.25を超えた分だけ0.20倍で締める（下限0.25でフロア）。
-      // 「下限側は敏感、上限側は慎重」という非対称構造（パラメータ操作パネルの説明文参照）に対応する演算で、
-      // 数値0.4/0.35/0.25/0.20は根拠不明・デモ用チューニング値。
-      // 注記: tauLowerはUI表示(ui.tauLower)にのみ使われ、rNow等の判定計算には使用されていない。
-      const tauUpper = state.upperDamper + Math.max(0, state.rShort - 0.4) * 0.35;
-      const tauLower = Math.max(0.25, state.lowerDamper - Math.max(0, state.dLong - 0.25) * 0.20);
+      // τ（境界幅）は設計値（スライダー）で固定する。判定結果（rShort・dLong）からτを変えると、
+      // 評価出力が同じ評価対象のゲート幅へ戻る経路（逆導出B：FORMULA §4.4）になるため持たない。
+      const tauUpper = state.upperDamper;
 
-      state.rNow = Math.max(disagreement / tauUpper, 0); // R_now = 不一致度 / 上限ダンパー
+      state.rNow = Math.max(disagreement / tauUpper, 0); // R_now = 不一致度 / 境界幅τ（固定）
 
       // 短期記憶: 直近24フレーム分のrNowを保持し平均する（ウィンドウ長24は根拠不明・デモ用チューニング値）。
       state.shortMemory.push(state.rNow);
@@ -760,7 +747,6 @@
       ui.rShortFill.style.width = `${clamp(state.rShort / 1.2, 0, 1) * 100}%`;
       ui.dLongFill.style.width = `${clamp(state.dLong / 1.2, 0, 1) * 100}%`;
       ui.tauUpper.textContent = tauUpper.toFixed(2);
-      ui.tauLower.textContent = tauLower.toFixed(2);
 
       ui.decision.className = 'decision ' + (state.decision === 'PASS' ? 'pass' : state.decision === 'DAMP' ? 'warn' : 'stop');
       ui.decision.textContent = state.decision;
@@ -921,13 +907,11 @@
 
     function syncControls() {
       state.upperDamper = parseFloat(ui.upperRange.value);
-      state.lowerDamper = parseFloat(ui.lowerRange.value);
       state.recon = parseFloat(ui.reconRange.value);
       state.deg = parseFloat(ui.degRange.value);
       state.dangerThreshold = parseFloat(ui.dangerThresholdRange.value);
       state.dangerInject = parseFloat(ui.dangerInjectRange.value);
       ui.upperVal.textContent = state.upperDamper.toFixed(2);
-      ui.lowerVal.textContent = state.lowerDamper.toFixed(2);
       ui.reconVal.textContent = state.recon.toFixed(2);
       ui.degVal.textContent = state.deg.toFixed(2);
       ui.dangerThresholdVal.textContent = state.dangerThreshold.toFixed(2);
@@ -936,7 +920,6 @@
 
     ['input', 'change'].forEach(evt => {
       ui.upperRange.addEventListener(evt, syncControls);
-      ui.lowerRange.addEventListener(evt, syncControls);
       ui.reconRange.addEventListener(evt, syncControls);
       ui.degRange.addEventListener(evt, syncControls);
       ui.dangerThresholdRange.addEventListener(evt, syncControls);

@@ -9,8 +9,9 @@
   NRA-IDE / Band Gate — 08 (JP)
   非対称ダンパー構造 Band Gate ライブデモ
   --------------------------------------------------
-  上限側EMAが蓄積されると τ が拡大 → ピークを丸める（慎重）
-  下限側EMAが蓄積されると τ が縮小 → 検知を早める（敏感）
+  δは基準値からのズレ、τ0は基準値から宣言上限・下限までの距離（R=1.0が上下限と一致）
+  側別EMAが蓄積されると τ が縮小する。広げる方向はない（宣言上下限の外へ境界を動かさない）
+  上限側は縮みにくく（慎重）、下限側は大きく縮む（敏感）
   R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
   R_dirは上限・下限それぞれ独立したR=δ/τ評価の集約値であり、正典のRを再定義するものではない。
   心臓弁・サスペンション・調圧弁と同じ非対称構造。
@@ -432,7 +433,7 @@ footer a { color: var(--lower); text-decoration: none; }
             <span class="param-name">τ_high</span>
             <span class="param-val" id="v-th">—</span>
           </div>
-          <input type="range" class="upper" id="sl-th" min="0" max="100" step="1" value="70" title="τ_high">
+          <input type="range" class="upper" id="sl-th" min="0" max="150" step="1" value="70" title="τ_high">
         </div>
         <div class="param-row">
           <div class="param-lbl">
@@ -444,9 +445,9 @@ footer a { color: var(--lower); text-decoration: none; }
         <div class="param-row">
           <div class="param-lbl">
             <span class="param-name">AMP_upper</span>
-            <span class="param-val" id="v-amu">2.0</span>
+            <span class="param-val" id="v-amu">1.3</span>
           </div>
-          <input type="range" class="upper" id="sl-amu" min="1.0" max="4.0" step="0.1" value="2.0" title="AMP_upper">
+          <input type="range" class="upper" id="sl-amu" min="1.0" max="4.0" step="0.1" value="1.3" title="AMP_upper">
         </div>
       </div>
 
@@ -470,9 +471,9 @@ footer a { color: var(--lower); text-decoration: none; }
         <div class="param-row">
           <div class="param-lbl">
             <span class="param-name">AMP_lower</span>
-            <span class="param-val" id="v-aml">1.3</span>
+            <span class="param-val" id="v-aml">2.0</span>
           </div>
-          <input type="range" class="lower" id="sl-aml" min="1.0" max="4.0" step="0.1" value="1.3" title="AMP_lower">
+          <input type="range" class="lower" id="sl-aml" min="1.0" max="4.0" step="0.1" value="2.0" title="AMP_lower">
         </div>
       </div>
     </div>
@@ -497,8 +498,9 @@ footer a { color: var(--lower); text-decoration: none; }
     <div class="principle-box">
       <div class="principle-title">非対称ダンパーの原理</div>
       <div class="principle-text">
-        上限側は τ を<span class="text-upper">大きく</span>して山を丸める（慎重）。<br>
-        下限側は τ を<span class="text-lower">小さく</span>して検知を早める（敏感）。<br>
+        δは基準値からのズレ、τは基準値から宣言上限・下限までの距離です（R=1.0が上下限）。<br>
+        ズレが続くとτを縮めて検知を早めます。上限側は<span class="text-upper">縮みにくく</span>（慎重）、下限側は<span class="text-lower">大きく縮む</span>（敏感）。<br>
+        AMPは最大縮小倍率（τ0/AMPまで）。τを広げることはありません。<br>
         心臓弁・サスペンション・調圧弁と同じ構造です。
       </div>
     </div>
@@ -617,28 +619,40 @@ function getP() {
   };
 }
 
+// 側別ゲート幅の形状変換（評価前に固定）。EMAがτ0の50%を超えた分だけτを縮め、floor倍で止める。
+// 0.5は縮小を始める位置のデモ用の値。広げる方向の変換は持たない。
+const SHRINK_START = 0.5;
+function shrinkTau(tau0, ema, floor) {
+  return tau0 * Math.max(floor, 1 - Math.max(0, ema - SHRINK_START * tau0) / tau0);
+}
+
 function step(p) {
   st.t++;
   const v    = scenario.getValue(st.t);
   const nowMs = st.t * 40;
 
-  const nominal = (p.th + p.tl) / 2;
-  const half    = (p.th - p.tl) / 2;
+  // δは基準値（シナリオの宣言値 nominal）からのズレ（FORMULA §4.1）。
+  // τ0は基準値から宣言上限・下限までの距離。R=1.0が宣言上下限と一致する。
+  const ref     = scenario.nominal;
+  const tau0_up = p.th - ref;
+  const tau0_lo = ref - p.tl;
 
   // 上限δ・下限δ
-  const d_upper = Math.max(0, v - p.th);
-  const d_lower = Math.max(0, p.tl - v);
+  const d_upper = Math.max(0, v - ref);
+  const d_lower = Math.max(0, ref - v);
 
-  // 上限EMA（蓄積 → τ大きく）
+  // 側別EMA（Cause-Sideの側別ズレの平滑値）
   st.ema_upper = p.au * d_upper + (1 - p.au) * st.ema_upper;
-  // 下限EMA（蓄積 → τ小さく）
   st.ema_lower = p.al * d_lower + (1 - p.al) * st.ema_lower;
 
-  const tau_upper_dyn = half * Math.min(1 + st.ema_upper / half, p.amu);
-  const tau_lower_dyn = half * Math.max(1 - st.ema_lower / half, 1 / p.aml);
+  // 動的ゲート幅は縮める方向だけ（τ0を超えて広げない）。AMPは最大縮小倍率（τ0/AMPまで）。
+  const tau_upper_dyn = shrinkTau(tau0_up, st.ema_upper, 1 / p.amu);
+  const tau_lower_dyn = shrinkTau(tau0_lo, st.ema_lower, 1 / p.aml);
 
-  const R_upper = d_upper > 0 ? d_upper / tau_upper_dyn : 0;
-  const R_lower = d_lower > 0 ? d_lower / tau_lower_dyn : 0;
+  // 基準値が上下限の外にある設定は評価不能。停止側に倒す。
+  const valid   = tau0_up > 0 && tau0_lo > 0;
+  const R_upper = valid ? d_upper / tau_upper_dyn : Infinity;
+  const R_lower = valid ? d_lower / tau_lower_dyn : Infinity;
   const R       = Math.max(R_upper, R_lower);
 
   // HOLDチェック
@@ -655,8 +669,8 @@ function step(p) {
   }
 
   // 動的バンド（可視化用）
-  const upper_band = p.th + (tau_upper_dyn - half);
-  const lower_band = p.tl - (half - tau_lower_dyn);
+  const upper_band = ref + tau_upper_dyn;
+  const lower_band = ref - tau_lower_dyn;
 
   // 履歴
   if (st.hist.length >= HISTORY) st.hist.shift();

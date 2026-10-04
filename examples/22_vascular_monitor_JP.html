@@ -131,6 +131,11 @@ function calcIDE(){
   R_hi = Math.max(0, R);
   R_lo = Math.max(0, (1-Adh) / (tau*0.8)); // 下限側（血栓リスク）
 
+  // 入力が数値でない・τが正でない場合は評価不能。許可側に倒さず停止側にする。
+  if(!Number.isFinite(R_hi) || !Number.isFinite(R_lo) || !(tau > 0)){
+    status = 'fail-hi';
+    return {R_hi, R_lo, status, action:'評価不能な入力 — 停止側（CONFESSION）'};
+  }
   let st = 'safe', act='正常';
   if(R_hi >= R_RUPTURE || R_lo >= R_RUPTURE){ st='fail-hi'; act='RUPTURE_BOUNDARY — 緊急停止（破裂/血栓）'; }
   else if(R_hi >= R_WARN || R_lo >= R_WARN){ st='warn-hi'; act='WARNING — 壁張力/せん断強化'; }
@@ -186,8 +191,8 @@ function loop(){
 loop();
 
 // スライダー連動（手術モード）
-document.getElementById('pSlider').oninput = v=> {P=Number(v);};
-document.getElementById('tSlider').oninput = v=> {T=Number(v);};
+document.getElementById('pSlider').oninput = e=> {P=Number(e.target.value);};
+document.getElementById('tSlider').oninput = e=> {T=Number(e.target.value);};
 // 残りスライダーも同様（Shear, Tension, Adh, Flow）
 
 // 手術ボタン例（部分適用）
