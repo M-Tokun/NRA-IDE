@@ -424,6 +424,7 @@ footer a { color:var(--v); text-decoration:none; }
     <div class="font-11 text-white opacity-75 mt-8 line-height-1-7" id="fault-note">
       Normal operation. Move the load slider to experience the "gradual buildup → sudden trip" phenomenon.
     </div>
+    <div class="demo-caveat" style="margin-top:10px;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The motor and thermal models are simplified demo models, not the characteristics of a real machine.<br>• The winding-temperature reference interpolates a table of the steady temperatures of this model run long at each load ratio (demo values). It is not a real thermal characteristic.<br>• For load settings of 110% and above, the reference is held at 90% of the limit (120°C) = 108°C. This is treated as an overload whose expected temperature is itself near the limit, and it triggers as soon as the measurement heads for the limit.<br>• The reference values, limits, and gate-width coefficients for current, temperature, and phase imbalance are all demo-declared values, not an operational basis.</div>
   </div>
 </div>
 
@@ -475,10 +476,10 @@ let silHoldUntil = 0;
 // Beyond s > s_po, positive feedback collapse occurs
 // ─────────────────────────────────────────────
 const SYNC_RPM = 1500;      // Synchronous speed (4-pole 50Hz)
-const R2       = 0.08;      // Secondary resistance (pu)
+const R2       = 0.03;      // Secondary resistance (pu). Gives a rated slip of about 5% (the former 0.08 let the speed fall to 66% at rated load)
 const X2       = 0.12;      // Secondary reactance (pu)
-const K_TORQUE = 2 * 2.8 * 0.08 * 0.12;  // Torque coefficient. T_max = K/(2·R2·X2), so this gives max torque ≈ 2.8 pu (≈0.054)
-const J_INERTIA= 0.35;      // Moment of inertia coefficient (affects RPM change rate)
+const K_TORQUE = 2 * 2.8 * R2 * X2;  // Torque coefficient. T_max = K/(2·R2·X2), so this gives max torque ≈ 2.8 pu
+const J_INERTIA= 0.03;      // Inertia coefficient (RPM change per step). With 0.35 the speed jumped 525 rpm per step and oscillated right after start-up, falsely tripping the over-current side. Loop gain J·K/R2² ≈ 0.7 (stable)
 
 // Motor torque (pu): function of slip s
 function motorTorque(s) {
@@ -613,11 +614,27 @@ function getValues(t) {
 // floor 10%), treated as a constraint declared as a gauge input (FORMULA §4.5). With a fixed rated-current
 // reference, light-load operation itself counted as a lower-side deviation and tripped the lower side.
 const currentRef = () => RATED_A * Math.max(parseFloat(document.getElementById('sl-load').value) / 100, 0.1);
+// The winding-temperature reference (upper side) is the steady temperature expected at the set load. A table of the
+// steady values of this thermal model run long enough at each load ratio (demo values) is linearly interpolated as a rule
+// fixed before evaluation, treated as a constraint declared as a gauge input (FORMULA §4.5). With a fixed 40°C start-up
+// reference, even the normal temperature rise at rated load (106°C) counted as upper-side deviation, and since the margin
+// is small (limit 120°C) a warning appeared in normal operation. A reference above 90% of the limit (108°C) is held at
+// 108°C (a load setting beyond that is an overload whose expected temperature is itself near the limit; it triggers
+// as soon as the measurement heads for the limit).
+// The lower side (sensor-break detection) uses the ambient 25°C as a fixed reference independent of the load.
+const TEMP_EQ = [[10,27.9],[20,31.9],[30,36.9],[40,43.0],[50,50.3],[60,58.8],[70,68.5],[80,79.5],[90,91.9],[100,105.7],[110,121.1],[120,131.0],[130,140.9],[150,161.4]];
+const tempRef = () => {
+  const L = parseFloat(document.getElementById('sl-load').value);
+  let T = TEMP_EQ[TEMP_EQ.length - 1][1];
+  if (L <= TEMP_EQ[0][0]) T = TEMP_EQ[0][1];
+  else for (let i = 1; i < TEMP_EQ.length; i++) if (L <= TEMP_EQ[i][0]) { const [x0, y0] = TEMP_EQ[i-1], [x1, y1] = TEMP_EQ[i]; T = y0 + (y1 - y0) * (L - x0) / (x1 - x0); break; }
+  return Math.min(T, TAU_HIGH_T * 0.9);
+};
 const GATE_PARAMS = {
   u:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
   v:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
   w:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
-  temp: { ref: 40,      th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
+  temp: { ref: tempRef, refLo: 25, th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
   imb:  { ref: 0,       th: TAU_HIGH_IMB, tl: null,        au: 0.50, al: 0.10 },
 };
 const HOLD_MS = 2000;
@@ -625,8 +642,8 @@ const HOLD_MS = 2000;
 // Side gate-width shape transform, fixed before evaluation. τ shrinks only by the part of EMA above
 // 50% of τ0 and stops at floor×τ0; no widening. Floors 0.8 (upper, conservative) / 0.25 (lower,
 // sensitive) are demo values. δ is the deviation from the reference ref (FORMULA §4.1); τ0 is the distance
-// from ref to the declared limit. ref: load-setting current (currentRef) for phase currents, 40°C (start-up value) for winding
-// temperature, 0% for phase imbalance (a one-sided quantity with no lower side).
+// from ref to the declared limit. ref: load-setting current (currentRef) for phase currents; for winding temperature the expected steady
+// temperature at the set load (tempRef) on the upper side and the ambient 25°C on the lower side; 0% for phase imbalance (a one-sided quantity).
 const SHRINK_START = 0.5, FLOOR_UPPER = 0.8, FLOOR_LOWER = 0.25;
 function shrinkTau(tau0, ema, floor) {
   return tau0 * Math.max(floor, 1 - Math.max(0, ema - SHRINK_START * tau0) / tau0);
@@ -636,9 +653,10 @@ function bandGate(sensor, v, p) {
   const hasLower = p.tl !== null;
   const ref = typeof p.ref === 'function' ? p.ref() : p.ref;
   const tau0_u = p.th - ref;
-  const tau0_l = hasLower ? ref - p.tl : 1;
+  const refL   = p.refLo !== undefined ? p.refLo : ref;     // 下側だけ別の基準を持てる / the lower side may have its own reference
+  const tau0_l = hasLower ? refL - p.tl : 1;
   const d_u  = Math.max(0, v - ref);
-  const d_l  = hasLower ? Math.max(0, ref - v) : 0;
+  const d_l  = hasLower ? Math.max(0, refL - v) : 0;
 
   sensor.ema_u = p.au * d_u + (1 - p.au) * sensor.ema_u;
   sensor.ema_l = p.al * d_l + (1 - p.al) * sensor.ema_l;
@@ -661,7 +679,7 @@ function bandGate(sensor, v, p) {
   }
 
   const upper_band = ref + tau_u;
-  const lower_band = hasLower ? ref - tau_l : ref;
+  const lower_band = hasLower ? refL - tau_l : ref;
   return { v, R, silence, dir, upper_band, lower_band };
 }
 

@@ -250,28 +250,28 @@ strong{color:var(--text-primary);}
 <!-- ===== SEC 3: R = δ/τ ===== -->
 <section id="formula">
   <div class="sec-header">
-    <span class="sec-num">Section 03 — Structural Stability</span>
-    <h2 class="sec-title">構造的安定度 R</h2>
+    <span class="sec-num">Section 03 — Boundary-Approach Ratio</span>
+    <h2 class="sec-title">境界接近比 R</h2>
     <p class="sec-desc">
-      NRAは「最適解」を探さない。代わりに「生存可能な境界」を定義し、その内部での構造的安定度を測定する。
+      NRAは「最適解」を探さない。代わりに「生存可能な境界」を定義し、その境界にどれだけ近づいているかを測定する。
     </p>
   </div>
 
   <div class="formula-box">
-    <div class="formula-label">Structural Stability Formula</div>
+    <div class="formula-label">Boundary-Approach Ratio</div>
     <div class="formula-main">R = δ / τ</div>
     <div class="formula-vars">
       <div class="formula-var">
         <div class="sym tc-safe">δ</div>
-        <div class="def">不変の因果単位<br>（制約・境界条件）</div>
+        <div class="def">制約からのズレ<br>（観測された変位）</div>
       </div>
       <div class="formula-var">
         <div class="sym tc-blue">τ</div>
-        <div class="def">情報の厚み<br>（ノイズ・不確実性）</div>
+        <div class="def">許容厚み<br>（評価前に宣言した余裕）</div>
       </div>
       <div class="formula-var">
         <div class="sym tc-cyan">R</div>
-        <div class="def">構造的安定度<br>（生存可能性指標）</div>
+        <div class="def">境界接近比<br>（1.0 で境界に到達）</div>
       </div>
     </div>
   </div>
@@ -282,16 +282,16 @@ strong{color:var(--text-primary);}
     </div>
     <div class="flex-col-center-16">
       <div class="panel panel-accent panel-emerald">
-        <h4 class="tc-safe fw-700 mb-8">R ≥ 1.0 — 安定稼働</h4>
-        <p class="text-sm text-sec">制約がノイズを上回る。生存核内での正常動作。</p>
+        <h4 class="tc-safe fw-700 mb-8">R &lt; 0.4 — 安全域</h4>
+        <p class="text-sm text-sec">ズレが許容厚みに対して小さい。生存核内での正常動作。</p>
       </div>
       <div class="panel panel-accent panel-amber">
-        <h4 class="tc-amber fw-700 mb-8">0.5 ≤ R < 1.0 — 警戒域</h4>
-        <p class="text-sm text-sec">制約の浸食が進行中。出力信頼度の低下を検知。</p>
+        <h4 class="tc-amber fw-700 mb-8">0.4 ≤ R &lt; 1.0 — 警戒・判断限界域</h4>
+        <p class="text-sm text-sec">境界へ接近中。履歴・傾向を確認し、判断限界（デモごとの宣言値）を越える前に人間判断へ移す。</p>
       </div>
       <div class="panel panel-accent panel-red">
-        <h4 class="tc-danger fw-700 mb-8">R < 0.5 — Fail-Closed発動</h4>
-        <p class="text-sm text-sec">整合性が維持不能。誤った出力より「沈黙」を選択。</p>
+        <h4 class="tc-danger fw-700 mb-8">R ≥ 1.0 — 破断境界（Fail-Closed）</h4>
+        <p class="text-sm text-sec">宣言した境界に到達。誤った出力より「沈黙」を選択。</p>
       </div>
     </div>
   </div>
@@ -437,7 +437,7 @@ strong{color:var(--text-primary);}
     <div class="panel panel-accent panel-emerald">
       <h4 class="tc-safe fw-700 mb-8">NRAの応答</h4>
       <p class="text-sm text-sec">
-        R値が閾値を下回った場合、<strong>能動的沈黙（Active Silence）</strong>を選択する。
+        R が 1.0 に達した（宣言した境界に到達した）場合、<strong>能動的沈黙（Active Silence）</strong>を選択する。
         → 「この問いに対して、現在の制約条件では整合的な回答を構成できません」
         これは崩壊ではなく、次なる安定相への移行のための戦略的停止である。
       </p>
@@ -463,7 +463,7 @@ strong{color:var(--text-primary);}
     <div class="flex-col-center-16">
       <div class="panel panel-accent panel-emerald">
         <h4 class="tc-safe fw-700 mb-8">Viability Kernel（緑）</h4>
-        <p class="text-sm text-sec">構造的安定度Rが維持されている安全な状態空間。AIはこの境界内でのみ稼働を許可される。</p>
+        <p class="text-sm text-sec">R < 1（宣言した境界の内側）にある安全な状態空間。AIはこの境界内でのみ稼働を許可される。</p>
       </div>
       <div class="panel panel-accent panel-red">
         <h4 class="tc-danger fw-700 mb-8">Collapse Zone（赤）</h4>
@@ -581,9 +581,9 @@ const ctx3 = document.getElementById('gaugeChart').getContext('2d');
 new Chart(ctx3, {
   type: 'doughnut',
   data: {
-    labels: ['Stable (R ≥ 1.0)','Warning (0.5-1.0)','Collapse (R < 0.5)'],
+    labels: ['Safe (R < 0.4)','Watch / Judgment limit (0.4 ≤ R < 1.0)','Rupture boundary (R ≥ 1.0)'],
     datasets: [{
-      data: [60,20,20],
+      data: [40,60,20],   // R の範囲 0〜1.2 の区間幅（0.4 / 0.6 / 0.2）
       backgroundColor: ['#10B981','#F59E0B','#EF4444'],
       borderWidth: 0,
       circumference: 180,
@@ -596,7 +596,7 @@ new Chart(ctx3, {
     cutout: '72%',
     plugins: {
       legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:10}}},
-      title:{display:true,text:'Structural Stability Monitor (R)',color:'#f1f5f9',font:{size:13}}
+      title:{display:true,text:'Boundary-Approach Monitor (R)',color:'#f1f5f9',font:{size:13}}
     }
   }
 });

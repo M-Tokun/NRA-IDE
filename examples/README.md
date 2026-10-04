@@ -305,12 +305,12 @@ Specific implementation patterns are documented inside each demo source file.
 
 - **NRA solution:** Prevent propagation by monitoring load-limit approach.
 
-- **Threshold:** R = excess load / buffer capacity.
+- **Threshold:** R = (increase over the reference load) / (margin from the reference load to the allowed upper limit). R = 1.0 when the load equals the allowed limit.
 
 | Area | δ (Deviation from constraint) | τ (Tolerance thickness) | Meaning of R ≥ 1.0 |
 |------|-------------------------------|--------------------------|--------------------|
 | Autonomous driving | Intrusion of the stopping distance into the safety-margin band (the last τ before the gap) | Safety-margin distance (fixed at design time) | Stopping distance ≥ gap: collision danger → emergency stop |
-| Infrastructure | Excess load | Buffer capacity | Server overload → isolation |
+| Infrastructure | max(0, load − reference load) | Allowed limit − reference load | Load = allowed limit: server overload → isolation |
 
 ---
 

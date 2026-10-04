@@ -250,24 +250,24 @@ strong{color:var(--text-primary);}
 <!-- ===== SEC 3: R = δ/τ ===== -->
 <section id="formula">
   <div class="sec-header">
-    <span class="sec-num">Section 03 — Structural Stability</span>
-    <h2 class="sec-title">Structural Stability R</h2>
+    <span class="sec-num">Section 03 — Boundary-Approach Ratio</span>
+    <h2 class="sec-title">Boundary-Approach Ratio R</h2>
     <p class="sec-desc">
       NRA does not search for an “optimal answer.” Instead, it defines viable boundaries and measures structural stability inside them.
     </p>
   </div>
 
   <div class="formula-box">
-    <div class="formula-label">Structural Stability Formula</div>
+    <div class="formula-label">Boundary-Approach Ratio</div>
     <div class="formula-main">R = δ / τ</div>
     <div class="formula-vars">
       <div class="formula-var">
         <div class="sym tc-safe">δ</div>
-        <div class="def">Invariant causal unit<br>(constraints / boundary conditions)</div>
+        <div class="def">Deviation from the constraint<br>(observed displacement)</div>
       </div>
       <div class="formula-var">
         <div class="sym tc-blue">τ</div>
-        <div class="def">Thickness of information<br>(noise / uncertainty)</div>
+        <div class="def">Tolerance thickness<br>(margin declared before evaluation)</div>
       </div>
       <div class="formula-var">
         <div class="sym tc-cyan">R</div>
@@ -282,16 +282,16 @@ strong{color:var(--text-primary);}
     </div>
     <div class="flex-col-center-16">
       <div class="panel panel-accent panel-emerald">
-        <h4 class="tc-safe fw-700 mb-8">R ≥ 1.0 — Stable Operation</h4>
-        <p class="text-sm text-sec">Constraints exceed noise. Normal operation inside the viability kernel.</p>
+        <h4 class="tc-safe fw-700 mb-8">R &lt; 0.4 — Safe</h4>
+        <p class="text-sm text-sec">The deviation is small against the tolerance. Normal operation inside the viability kernel.</p>
       </div>
       <div class="panel panel-accent panel-amber">
-        <h4 class="tc-amber fw-700 mb-8">0.5 ≤ R < 1.0 — Warning Zone</h4>
-        <p class="text-sm text-sec">Constraint erosion is underway. A drop in output reliability is detected.</p>
+        <h4 class="tc-amber fw-700 mb-8">0.4 ≤ R &lt; 1.0 — Watch / Judgment-Limit Zone</h4>
+        <p class="text-sm text-sec">Approaching the boundary. Check the history and trend, and hand over to human judgment before the judgment limit (a value declared per demo) is crossed.</p>
       </div>
       <div class="panel panel-accent panel-red">
-        <h4 class="tc-danger fw-700 mb-8">R &lt; 0.5 — Fail-Closed Triggered</h4>
-        <p class="text-sm text-sec">Consistency can no longer be maintained. Silence is chosen over false output.</p>
+        <h4 class="tc-danger fw-700 mb-8">R ≥ 1.0 — Rupture Boundary (Fail-Closed)</h4>
+        <p class="text-sm text-sec">The declared boundary is reached. Silence is chosen over false output.</p>
       </div>
     </div>
   </div>
@@ -437,7 +437,7 @@ strong{color:var(--text-primary);}
     <div class="panel panel-accent panel-emerald">
       <h4 class="tc-safe fw-700 mb-8">NRA Response</h4>
       <p class="text-sm text-sec">
-        When the R value falls below the threshold, choose <strong>Active Silence</strong>.
+        When R reaches 1.0 (the declared boundary is reached), choose <strong>Active Silence</strong>.
         → “Under the current constraints, a consistent answer cannot be constructed for this question.”
         This is not collapse. It is a strategic stop for transition to the next stable phase.
       </p>
@@ -463,7 +463,7 @@ strong{color:var(--text-primary);}
     <div class="flex-col-center-16">
       <div class="panel panel-accent panel-emerald">
         <h4 class="tc-safe fw-700 mb-8">Viability Kernel (Green)</h4>
-        <p class="text-sm text-sec">A safe state space in which structural stability R is maintained. The AI is permitted to operate only within this boundary.</p>
+        <p class="text-sm text-sec">The state space with R < 1 (inside the declared boundary). The AI is permitted to operate only within this boundary.</p>
       </div>
       <div class="panel panel-accent panel-red">
         <h4 class="tc-danger fw-700 mb-8">Collapse Zone (Red)</h4>
@@ -581,9 +581,9 @@ const ctx3 = document.getElementById('gaugeChart').getContext('2d');
 new Chart(ctx3, {
   type: 'doughnut',
   data: {
-    labels: ['Stable (R ≥ 1.0)','Warning (0.5-1.0)','Collapse (R < 0.5)'],
+    labels: ['Safe (R < 0.4)','Watch / Judgment limit (0.4 ≤ R < 1.0)','Rupture boundary (R ≥ 1.0)'],
     datasets: [{
-      data: [60,20,20],
+      data: [40,60,20],   // widths of the R ranges 0–1.2 (0.4 / 0.6 / 0.2)
       backgroundColor: ['#10B981','#F59E0B','#EF4444'],
       borderWidth: 0,
       circumference: 180,
@@ -596,7 +596,7 @@ new Chart(ctx3, {
     cutout: '72%',
     plugins: {
       legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:10}}},
-      title:{display:true,text:'Structural Stability Monitor (R)',color:'#f1f5f9',font:{size:13}}
+      title:{display:true,text:'Boundary-Approach Monitor (R)',color:'#f1f5f9',font:{size:13}}
     }
   }
 });

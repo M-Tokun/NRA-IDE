@@ -1052,7 +1052,7 @@ body.en span.en-text { display: inline; }
       <h4><span class="jp-text">インフラ耐障害性</span><span class="en-text">Infrastructure Resilience</span></h4>
       <div class="domain-row"><strong><span class="jp-text">課題：</span><span class="en-text">Problem:</span></strong> <span class="jp-text">分散システムのカスケード障害</span><span class="en-text">Cascade failure in distributed systems</span></div>
       <div class="domain-row"><strong><span class="jp-text">解決策：</span><span class="en-text">Solution:</span></strong> <span class="jp-text">負荷限界監視による障害伝播防止</span><span class="en-text">Prevent propagation by monitoring load-limit approach</span></div>
-      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（負荷超過量）/（バッファ容量）</span><span class="en-text">excess load / buffer capacity</span></div>
+      <div class="domain-row"><strong><span class="jp-text">閾値：</span><span class="en-text">Threshold:</span></strong> R = <span class="jp-text">（基準負荷からの増加分）/（基準負荷から許容上限までの余裕）。R = 1.0 は負荷＝許容上限</span><span class="en-text">(increase over the reference load) / (margin from the reference load to the allowed limit). R = 1.0 when the load equals the limit</span></div>
     </div>
   </div>
 
@@ -1071,9 +1071,9 @@ body.en span.en-text { display: inline; }
     </tr>
     <tr>
       <td><span class="jp-text">インフラ</span><span class="en-text">Infrastructure</span></td>
-      <td><span class="jp-text">負荷超過量</span><span class="en-text">Excess load</span></td>
-      <td><span class="jp-text">バッファサイズ</span><span class="en-text">Buffer capacity</span></td>
-      <td><span class="jp-text">サーバー過負荷 → 遮断</span><span class="en-text">Server overload → isolation</span></td>
+      <td><span class="jp-text">max(0, 負荷 − 基準負荷)</span><span class="en-text">max(0, load − reference load)</span></td>
+      <td><span class="jp-text">許容上限 − 基準負荷</span><span class="en-text">Allowed limit − reference load</span></td>
+      <td><span class="jp-text">負荷＝許容上限：サーバー過負荷 → 遮断</span><span class="en-text">Load = allowed limit: server overload → isolation</span></td>
     </tr>
   </table>
 </section>

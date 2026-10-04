@@ -102,7 +102,7 @@
     <div class="side-header">✓ NRA-IDE — R = δ/τ を見る（τは劣化する）</div>
     <canvas id="cv-right" width="460" height="230"></canvas>
     <div class="side-status">
-      <div class="status-metric">R = δ / τ（ゆらぎ / 現在の厚み）</div>
+      <div class="status-metric">R = δ / τ（ゆらぎ / 現在の厚み）<br><span style="font-size:.85em;opacity:.8">※ 水位は左の従来管理だけが見る量で、この R には入れていません（越流余裕は別の指標として扱う想定）。</span></div>
       <div class="status-big" id="right-r" style="color:var(--green);">0.000</div>
       <div class="status-metric" id="right-zone">NIRVANA — 安定</div>
       <div class="judgment-box" id="right-judgment" style="border-color:var(--green);color:var(--green);">待機中</div>
@@ -553,5 +553,6 @@ function loop() {
 
 loop();
 </script>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・τ劣化の係数と、残余寿命の換算（3600フレーム＝1「単位」）はデモ用で、実際の耐用年数の予測ではありません。<br>・水位は左の従来管理だけが見る量で、右のRには入れていません（越流余裕は別の指標として扱う想定）。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
 </body>
 </html>

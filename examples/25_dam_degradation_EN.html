@@ -102,7 +102,7 @@
     <div class="side-header">✓ NRA-IDE — Monitoring R = δ/τ (τ degrades over time)</div>
     <canvas id="cv-right" width="460" height="230"></canvas>
     <div class="side-status">
-      <div class="status-metric">R = δ / τ (Fluctuation / Current Thickness)</div>
+      <div class="status-metric">R = δ / τ (Fluctuation / Current Thickness)<br><span style="font-size:.85em;opacity:.8">Note: the water level is seen only by the conventional panel on the left and is not part of this R (spill margin would be treated as a separate indicator).</span></div>
       <div class="status-big" id="right-r" style="color:var(--green);">0.000</div>
       <div class="status-metric" id="right-zone">NIRVANA — Stable</div>
       <div class="judgment-box" id="right-judgment" style="border-color:var(--green);color:var(--green);">Standby</div>
@@ -538,5 +538,6 @@ function loop() {
 
 loop();
 </script>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The τ-degradation coefficients and the remaining-life conversion (3600 frames = 1 "unit") are demo values, not a prediction of real service life.<br>• The water level is seen only by the conventional panel on the left and is not part of the R on the right (spill margin would be a separate indicator).<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
 </body>
 </html>

@@ -424,6 +424,7 @@ footer a { color:var(--v); text-decoration:none; }
     <div class="font-11 text-white opacity-75 mt-8 line-height-1-7" id="fault-note">
       正常運転中。負荷スライダーを動かして「じわじわ→こつ然」を確認してください。
     </div>
+    <div class="demo-caveat" style="margin-top:10px;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・モーター・熱モデルはデモ用の簡易モデルです。実機の特性ではありません。<br>・巻線温度の基準値は、このモデルを各負荷率で長く回した定常温度の表（デモ用の値）を補間して使っています。実機の熱特性ではありません。<br>・110%以上の負荷設定では、基準を上限（120℃）の90%＝108℃に抑えています。想定温度そのものが上限に近い過負荷として扱い、実測が上限へ向かうと発動します。<br>・電流・温度・相不平衡の基準値、限界値、ゲート幅の係数は、すべてデモ用の宣言値で、運用の根拠ではありません。</div>
   </div>
 </div>
 
@@ -475,10 +476,10 @@ let silHoldUntil = 0;
 // s > s_po を超えると正帰還崩壊
 // ─────────────────────────────────────────────
 const SYNC_RPM = 1500;      // 同期速度（4極50Hz）
-const R2       = 0.08;      // 二次抵抗（pu）
+const R2       = 0.03;      // 二次抵抗（pu）。定格すべりが約5%になる値（以前の0.08では定格負荷で回転数が66%まで落ちていた）
 const X2       = 0.12;      // 二次リアクタンス（pu）
-const K_TORQUE = 2 * 2.8 * 0.08 * 0.12;  // トルク係数。T_max = K/(2·R2·X2) なので、最大トルク≒2.8pu になる値（≒0.054）
-const J_INERTIA= 0.35;      // 慣性モーメント係数（RPM変化速度に影響）
+const K_TORQUE = 2 * 2.8 * R2 * X2;  // トルク係数。T_max = K/(2·R2·X2) なので、最大トルク≒2.8pu になる値
+const J_INERTIA= 0.03;      // 慣性係数（1ステップあたりのRPM変化の大きさ）。0.35では1ステップで525rpm動き、起動直後に振動して過電流側が誤発動していた。ループゲインJ·K/R2²≈0.7（安定）
 
 // モータートルク(pu): すべりsの関数
 function motorTorque(s) {
@@ -613,11 +614,25 @@ function getValues(t) {
 // 評価宣言で計器への入力と定めた制約（FORMULA §4.5）として扱う。定格電流を固定の基準にすると、
 // 軽負荷運転そのものが下側のズレとして数えられ、空転でもないのに下限側が発動したため。
 const currentRef = () => RATED_A * Math.max(parseFloat(document.getElementById('sl-load').value) / 100, 0.1);
+// 巻線温度の基準値（上側）は、負荷設定に対応する想定の定常温度。この熱モデルを各負荷率で十分長く回したときの
+// 定常値の表（デモ用）を、評価前に固定した規則として線形補間する。評価宣言で計器への入力と定めた制約（FORMULA §4.5）。
+// 運転開始時の40℃を固定の基準にすると、定格負荷の正常な温度上昇（106℃）まで上側のズレとして数えられ、
+// 余裕が小さい（上限120℃）ため正常運転で警告が出ていた。基準が上限の90%（108℃）を超える設定は、基準を108℃に抑える
+// （それ以上の負荷設定は、想定温度そのものが上限に近い過負荷であり、実測が上限へ向かえば発動する）。
+// 下側（センサー断線検知）の基準は周囲温度25℃で、負荷によらない固定値。
+const TEMP_EQ = [[10,27.9],[20,31.9],[30,36.9],[40,43.0],[50,50.3],[60,58.8],[70,68.5],[80,79.5],[90,91.9],[100,105.7],[110,121.1],[120,131.0],[130,140.9],[150,161.4]];
+const tempRef = () => {
+  const L = parseFloat(document.getElementById('sl-load').value);
+  let T = TEMP_EQ[TEMP_EQ.length - 1][1];
+  if (L <= TEMP_EQ[0][0]) T = TEMP_EQ[0][1];
+  else for (let i = 1; i < TEMP_EQ.length; i++) if (L <= TEMP_EQ[i][0]) { const [x0, y0] = TEMP_EQ[i-1], [x1, y1] = TEMP_EQ[i]; T = y0 + (y1 - y0) * (L - x0) / (x1 - x0); break; }
+  return Math.min(T, TAU_HIGH_T * 0.9);
+};
 const GATE_PARAMS = {
   u:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
   v:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
   w:    { ref: currentRef, th: TAU_HIGH_A,   tl: TAU_LOW_A,   au: 0.40, al: 0.30 },
-  temp: { ref: 40,      th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
+  temp: { ref: tempRef, refLo: 25, th: TAU_HIGH_T,   tl: TAU_LOW_T,   au: 0.15, al: 0.25 },
   imb:  { ref: 0,       th: TAU_HIGH_IMB, tl: null,        au: 0.50, al: 0.10 },
 };
 const HOLD_MS = 2000;
@@ -625,7 +640,7 @@ const HOLD_MS = 2000;
 // 側別ゲート幅の形状変換（評価前に固定）。EMAがτ0の50%を超えた分だけτを縮め、floor倍で止める。
 // 広げる方向の変換は持たない。floor 0.8（上側・慎重）／0.25（下側・敏感）はデモ用の値。
 // δは基準値refからのズレ（FORMULA §4.1）、τ0はrefから宣言上限・下限までの距離。
-// ref：電流は負荷設定に対応する電流（currentRef）、巻線温度は運転開始時の代表値40°C、相不平衡率は0%（下側を持たない片側量）。
+// ref：電流は負荷設定に対応する電流（currentRef）、巻線温度の上側は負荷設定に対応する想定の定常温度（tempRef）・下側は周囲温度25°C、相不平衡率は0%（下側を持たない片側量）。
 const SHRINK_START = 0.5, FLOOR_UPPER = 0.8, FLOOR_LOWER = 0.25;
 function shrinkTau(tau0, ema, floor) {
   return tau0 * Math.max(floor, 1 - Math.max(0, ema - SHRINK_START * tau0) / tau0);
@@ -635,9 +650,10 @@ function bandGate(sensor, v, p) {
   const hasLower = p.tl !== null;
   const ref = typeof p.ref === 'function' ? p.ref() : p.ref;
   const tau0_u = p.th - ref;
-  const tau0_l = hasLower ? ref - p.tl : 1;
+  const refL   = p.refLo !== undefined ? p.refLo : ref;     // 下側だけ別の基準を持てる / the lower side may have its own reference
+  const tau0_l = hasLower ? refL - p.tl : 1;
   const d_u  = Math.max(0, v - ref);
-  const d_l  = hasLower ? Math.max(0, ref - v) : 0;
+  const d_l  = hasLower ? Math.max(0, refL - v) : 0;
 
   sensor.ema_u = p.au * d_u + (1 - p.au) * sensor.ema_u;
   sensor.ema_l = p.al * d_l + (1 - p.al) * sensor.ema_l;
@@ -660,7 +676,7 @@ function bandGate(sensor, v, p) {
   }
 
   const upper_band = ref + tau_u;
-  const lower_band = hasLower ? ref - tau_l : ref;
+  const lower_band = hasLower ? refL - tau_l : ref;
   return { v, R, silence, dir, upper_band, lower_band };
 }
 
