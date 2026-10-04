@@ -99,10 +99,10 @@
     </div>
   </div>
   <div class="side side-right">
-    <div class="side-header">✓ NRA-IDE — Monitoring R = δ/τ (τ degrades over time)</div>
+    <div class="side-header">✓ NRA-IDE — Monitoring R = max(δ/τ, spill-margin R) (τ degrades over time)</div>
     <canvas id="cv-right" width="460" height="230"></canvas>
     <div class="side-status">
-      <div class="status-metric">R = δ / τ (Fluctuation / Current Thickness)<br><span style="font-size:.85em;opacity:.8">Note: the water level is seen only by the conventional panel on the left and is not part of this R (spill margin would be treated as a separate indicator).</span></div>
+      <div class="status-metric">R = max (fluctuation δ/τ, spill margin of the water level)<br><span id="r-breakdown" style="font-size:.85em;opacity:.8">—</span></div>
       <div class="status-big" id="right-r" style="color:var(--green);">0.000</div>
       <div class="status-metric" id="right-zone">NIRVANA — Stable</div>
       <div class="judgment-box" id="right-judgment" style="border-color:var(--green);color:var(--green);">Standby</div>
@@ -196,6 +196,10 @@ let degSensitivity = 5;
 const TAU_INIT = 1.0;
 let tauCurrent = TAU_INIT;
 let deltaAccum = 0;
+// Spill-margin R of the water level: the rise above the reference level divided by the margin to the spill limit (same form as δ/τ in FORMULA §4.1).
+// The reference level 50% and the spill limit 100% are demo-declared values. The combined R is the maximum of the fluctuation R and the level R (no averaging).
+const LEVEL_REF = 0.5, LEVEL_LIMIT = 1.0;
+let gRf = 0, gRl = 0;   // latest fluctuation R and level R (for the display in updateUI)
 let tauLoss = 0;   // 累積したτ損失（不可逆） / cumulative τ loss (irreversible)
 // Effective τ (τ_eff) used for the judgment: not the structural thickness tauCurrent itself but 0.25× + 0.02 (demo values).
 // The on-screen R explanations show this τ_eff.
@@ -430,6 +434,7 @@ function updateUI(R, delta) {
 
   const rEl = document.getElementById('right-r');
   rEl.textContent = R.toFixed(3);
+  document.getElementById('r-breakdown').textContent = `Fluctuation δ/τ = ${gRf.toFixed(3)} / spill margin = ${gRl.toFixed(3)} (the larger one is R)`;
   const rj = document.getElementById('right-judgment');
   const zn = document.getElementById('right-zone');
   const degRate = (1 - tauCurrent / TAU_INIT) * 100;
@@ -439,11 +444,11 @@ function updateUI(R, delta) {
   if (R >= 1.0) {
     rEl.style.color = '#ff3d00'; zn.textContent = 'ABSTAIN — Limit Exceeded';
     rj.style.borderColor = '#ff3d00'; rj.style.color = '#ff3d00';
-    rj.textContent = `⚡ R ≥ 1.0 — Exceeded. Influenced by τ degradation of ${degRate.toFixed(1)}%.`;
+    rj.textContent = gRl >= gRf ? `⚡ R ≥ 1.0 — Exceeded. The water level has reached the spill limit (level R ${gRl.toFixed(2)}).` : `⚡ R ≥ 1.0 — Exceeded. Influenced by τ degradation of ${degRate.toFixed(1)}%.`;
   } else if (R >= 0.7) {
     rEl.style.color = '#ff9100'; zn.textContent = 'CRITICAL — Approaching Limit';
     rj.style.borderColor = '#ff9100'; rj.style.color = '#ff9100';
-    rj.textContent = `⚠ R ≥ 0.7 — Immediate action required regardless of water level. τ_eff = ${effectiveTau(tauCurrent).toFixed(3)} (τ_s = ${tauCurrent.toFixed(3)})`;
+    rj.textContent = gRl >= gRf ? `⚠ R ≥ 0.7 — The water level is approaching the spill limit (level R ${gRl.toFixed(2)}).` : `⚠ R ≥ 0.7 — Immediate action required regardless of water level. τ_eff = ${effectiveTau(tauCurrent).toFixed(3)} (τ_s = ${tauCurrent.toFixed(3)})`;
   } else if (R >= 0.4) {
     rEl.style.color = '#ffd740'; zn.textContent = 'ELASTIC — Monitoring';
     rj.style.borderColor = '#ffd740'; rj.style.color = '#ffd740';
@@ -517,7 +522,11 @@ function loop() {
   // The effective τ used for judgment/drawing is not tauCurrent directly, but tauCurrent*0.25 + 0.02.
   // Both 0.25 and 0.02 are basis unknown / demo tuning values.
   const tau = effectiveTau(tauCurrent);
-  const R = delta / tau; // Implements the right-panel heading "R = δ/τ"; the left panel (conventional management) watches water level only, as the point of contrast
+  // Combined R = max(fluctuation δ/τ, spill-margin R of the level). The left panel (conventional management) watches the water level only, as the point of contrast.
+  const Rf = delta / tau;
+  const Rl = Math.max(0, waterLevel - LEVEL_REF) / (LEVEL_LIMIT - LEVEL_REF);
+  gRf = Rf; gRl = Rl;
+  const R = Math.max(Rf, Rl);
 
   if (frameCount % 2 === 0) {
     tauHistory.push(tauCurrent);
@@ -538,6 +547,6 @@ function loop() {
 
 loop();
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The τ-degradation coefficients and the remaining-life conversion (3600 frames = 1 "unit") are demo values, not a prediction of real service life.<br>• The water level is seen only by the conventional panel on the left and is not part of the R on the right (spill margin would be a separate indicator).<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The τ-degradation coefficients and the remaining-life conversion (3600 frames = 1 "unit") are demo values, not a prediction of real service life.<br>• The R on the right is the maximum of the fluctuation R (δ/τ) and the spill-margin R of the water level (reference level 50% to spill limit 100%). The reference level and the spill limit are demo-declared values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
 </body>
 </html>
