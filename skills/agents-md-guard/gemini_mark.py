@@ -1,25 +1,14 @@
 #!/usr/bin/env python
-"""Gemini CLI: AfterTool hook (matcher: "read_file")."""
-import json
+"""gemini: shared mark logic with host-specific decision output."""
+import os
 import sys
 
-sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))
-import _common  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common
 
 
 def main():
-    try:
-        payload = json.load(sys.stdin)
-    except (ValueError, json.JSONDecodeError):
-        return 0
-
-    session_id = payload.get("session_id") or ""
-    tool_input = payload.get("tool_input") or {}
-    file_path = tool_input.get("absolute_path") or tool_input.get("path") or ""
-
-    if _common.path_targets_agents_md(file_path):
-        _common.write_marker("gemini", session_id)
-    return 0
+    return _common.mark_verified_read("gemini")
 
 
 if __name__ == "__main__":

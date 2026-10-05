@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cline PreToolUse hook. macOS/Linux only (Cline hooks do not run on Windows).
+# Cline Unix PreToolUse hook. Cline 4.1.22 on Windows uses PreToolUse.ps1.
 # Delegates to the shared AGENTS.md-read guard (AGENTS.md 第11章 Layer 2).
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PY="$(command -v python3 || command -v python)"

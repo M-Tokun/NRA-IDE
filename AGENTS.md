@@ -179,7 +179,7 @@ Git、外部通信、外部操作は、依頼された場合または実行し�
 **第2層（機械的ゲート）**
 重要な読込・Skill適用の要否は、AIの自己申告ではなく外部の仕組みで検証する。hooksのPreToolUseなどで、対象の読込実績・Skill呼び出し実績をtranscriptまたはログから確認し、確認できない場合は後続のEdit・Write・Bash等をブロックする。
 
-AGENTS.md読込に関する実装は`skills/agents-md-guard/`に置く。共通判定ロジックは`_common.py`とし、Claude Code・Codex CLI・Gemini CLIはそれぞれの入出力形式に合わせた薄いラッパーを通じてこれを呼び出す。設定は各ツールのhooks設定（`.claude/settings.local.json`、`.codex/hooks.json`、`.gemini/settings.json`）に登録する。Codexは`SessionStart`でリポジトリルートの`AGENTS.md`全文を追加コンテキストへ渡し、その成功後だけセッション別読了マーカーを作成する。`PreToolUse`はマーカーがないBash・編集操作を拒否し、許可時は未対応フィールドを返さず無出力で成功する。project hookが未信頼、無効、非対応経路の場合はこの機構が動作しないため、単独の強制境界として扱わない。Clineは`.clinerules/hooks/`に配置するが、公式には**macOS/Linuxのみ対応でWindowsでは動作しない**（2026-08時点）。この機構は自己申告に依存しないゲートであり、それ自体が唯一の保証ではない。
+AGENTS.md読込に関する実装は`skills/agents-md-guard/`に置く。共通判定ロジックは`_common.py`とし、Claude Code・Codex CLI・Gemini CLIはそれぞれの入出力形式に合わせた薄いラッパーを通じてこれを呼び出す。設定は各ツールのhooks設定（`.claude/settings.local.json`、`.codex/hooks.json`、`.gemini/settings.json`）に登録する。Codexは`SessionStart`でリポジトリルートの`AGENTS.md`全文を追加コンテキストへ渡し、その成功後だけセッション別読了マーカーを作成する。`PreToolUse`はマーカーがないBash・編集操作を拒否し、許可時は未対応フィールドを返さず無出力で成功する。project hookが未信頼、無効、非対応経路の場合はこの機構が動作しないため、単独の強制境界として扱わない。Clineは`.clinerules/hooks/`に配置する。2026-08時点の説明ではWindows非対応だったが、導入済みCline 4.1.22ではWindows用に`TaskStart.ps1`・`TaskResume.ps1`・`PreToolUse.ps1`・`PostToolUse.ps1`を探索する実装を確認した（2026-10-05）。開始時・再開時の全文読込と、Cline固有の入出力形式を変換するアダプターを通じて共通判定へ接続する。実クライアントのhook発火・追加コンテキストの配送は、局所テストと分けて確認する。この機構は自己申告に依存しないゲートであり、それ自体が唯一の保証ではない。
 
 **第3層（強制的な可視化）**
 高リスクな作業、または結果が条件分岐に依存する作業では、検討した文書・Skillの一覧と、適用した・しなかった理由を、作業結果とは別に明示的なテキストとして出力する。内部で完結する暗黙の判断のまま先へ進めてはならない。この一覧は§8の精査報告における俯瞰視点の一部として扱う。

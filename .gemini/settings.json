@@ -1,24 +1,24 @@
 {
   "hooks": {
-    "AfterTool": [
+    "BeforeTool": [
       {
-        "matcher": "read_file",
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "python skills/agents-md-guard/gemini_mark.py",
+            "command": "python -c \"import os,runpy; runpy.run_path(os.path.join(os.environ['GEMINI_PROJECT_DIR'],'skills','agents-md-guard','gemini_guard.py'),run_name='__main__')\"",
             "timeout": 10000
           }
         ]
       }
     ],
-    "BeforeTool": [
+    "SessionStart": [
       {
-        "matcher": "run_shell_command|write_file|edit|replace",
         "hooks": [
           {
+            "name": "nra-contract-load",
             "type": "command",
-            "command": "python skills/agents-md-guard/gemini_guard.py",
+            "command": "python -c \"import os,runpy; runpy.run_path(os.path.join(os.environ['GEMINI_PROJECT_DIR'],'skills','agents-md-guard','gemini_session_start.py'),run_name='__main__')\"",
             "timeout": 10000
           }
         ]

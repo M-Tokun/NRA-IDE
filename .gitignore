@@ -83,6 +83,7 @@ env/
 !/skills/nra-depth-guard/
 !/skills/axis-boundary-reasoning/
 !/skills/agents-md-guard/
+!/skills/operation-approval/
 
 # NRA-IDE clinical session outputs
 output/

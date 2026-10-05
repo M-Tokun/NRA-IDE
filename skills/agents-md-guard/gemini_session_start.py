@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""cline: shared mark logic with host-specific decision output."""
+"""gemini SessionStart: emit the full contract before recording its hash."""
 import os
 import sys
 
@@ -8,7 +8,7 @@ import _common
 
 
 def main():
-    return _common.mark_verified_read("cline")
+    return _common.run_session_start("gemini")
 
 
 if __name__ == "__main__":
