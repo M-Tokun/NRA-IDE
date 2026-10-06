@@ -1,7 +1,8 @@
-"""AGENTS.md 読了ガードの共通ロジック。
+"""AGENTS.md 全文出力記録・更新検知ガードの共通ロジック。
 
 Claude Code / Codex CLI / Gemini CLI / Cline の各hookスクリプトから読み込まれる。
-AGENTS.md §11「重要文書・Skillの読込保証」第2層（機械的ゲート）の実装。
+AGENTS.md §11第2層のうち、AGENTS.md全文の出力記録と更新検知を実装する。
+他の重要文書・Skillの実績検証、モデルの理解、ホストの配送完了、操作承認は扱わない。
 
 マーカーファイルは、AIツールごとのセッション/タスクIDをファイル名として
 `.agent_state/agents_md_read/<tool>/<id>` に作成する。ツールを分けるのは、

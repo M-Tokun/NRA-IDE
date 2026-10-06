@@ -1,149 +1,23 @@
-# 📘 **Structural Diagrams for NRA-IDE**
+# Current NRA-IDE boundary configuration
 
-## **Diagram 1: Zone Transition by R (No Semantic Value)**
+Definitions follow [AXIOMS.md](../theory/AXIOMS.md) and [axioms.json](../theory/axioms.json), checked at v2.4. The [reference implementation](../nra-core/foundations/NRA-IDE_Architecture_public.py) supplies classification; [the gate adapter](../gate/_canonical_threshold.py) retains target history across calls.
 
-### **Purpose**
+`R = delta / tau` requires finite delta >= 0 and finite tau > 0. Negative inputs are not repaired with abs(); tau=0 is OUT_OF_DESCRIPTION_DOMAIN. The three predeclared domain thresholds satisfy `0 <= R_warn < R_handoff < R_irrev < 1`. Old universal 0.40/0.99 cutoffs and Zone A/B/C are not the current model.
 
-- Prevent semantic misreading: "exceeding 0.40 is bad"
+| Canonical status | Condition | Operational action |
+|---|---|---|
+| PERMIT | 0 <= R < R_warn | CONTINUE |
+| BOUNDARY_WARNING | R_warn <= R < R_handoff | LOG_WARN |
+| HANDOFF_REQUIRED | R_handoff <= R < R_irrev | FAIL_CLOSED |
+| IRREVERSIBLE_TRANSITION | R_irrev <= R < 1, or retained irreversible latch | FAIL_CLOSED |
+| RUPTURE_BOUNDARY | R >= 1, or retained target rupture | FAIL_CLOSED |
+| CONFESSION | Invalid or unknown input, declaration or thresholds | FAIL_CLOSED |
+| OUT_OF_DESCRIPTION_DOMAIN | tau = 0 for otherwise valid supplied structure | FAIL_CLOSED |
 
-- Show that Zones A/B/C are **structural classifications**, not value judgments
+FAIL_CLOSED is an operational effect, not an eighth canonical state or complete silence. Handoff transfers execution authority only. Observation, logging and communication are independent dimensions. After target rupture, POST_RUPTURE_FIXED testimony continues through surviving channels, even if a later ratio falls or an input exception occurs. The target remains ruptured while an invalid sample is separately reported as CONFESSION.
 
----
+The default JSON has null declaration/threshold fields and therefore returns CONFESSION. A domain operator must supply the target, unit, source, delta/tau construction rules, applicable domain and threshold basis before evaluation. Observation timestamp is required per call. The gate validates structure, not the truth of physical measurements or governing equations.
 
-### **R Position and Zone Transition (Structure-Only)**
+ide_presets.json contains only SOFTWARE_DEMO with illustrative 0.4/0.6/0.8 thresholds. It is unvalidated and has no clinical or physical safety authority. Old DOMAIN_A/B/C, no_history and JSON action labels are preserved in [legacy/v1](legacy/v1/structural_zones.md), not automatically converted.
 
-```
-
-R = δ / τ
-
-0.00        0.40        0.99        1.00
-
-│-----------│-----------│-----------│──────────→  R
-
-    Zone A       Zone B       Zone C (limit)
-
-Zone A: R < 0.40
-
-  - PERMIT
-
-  - Structural state: Stable continuity
-
-Zone B: 0.40 ≤ R < 0.99
-
-  - PERMIT_WITH_CAVEAT
-
-  - Structural state: Elastic fluctuation
-
-Zone C: 0.99 ≤ R < 1.00
-
-  - PERMIT_WITH_CAVEAT (elevated)
-
-  - Structural state: Approaching fracture point
-
-Beyond Zone C: R ≥ 1.00 (not a lettered zone)
-
-  - FAIL_CLOSED
-
-  - Structural state: Fracture point (structural limit)
-
-```
-
----
-
-### **Structural Notes**
-
-- R = 0.39 → Not "good"
-
-- R = 0.41 → Not "bad"
-
-- Simply **Zone A → Zone B transition**
-
-- Zones carry **no semantic value**
-
-- There are exactly three lettered zones (A, B, C); R ≥ 1.0 is the structural limit beyond Zone C, not a fourth zone
-
----
-
-## **Diagram 2: Fail-Closed (Silence) vs Halt (Death)**
-
-### **Purpose**
-
-- Prevent "Curtain misreading": silence ≠ halt
-
-- Show that ω (angular continuity) determines structural life/death
-
----
-
-### **Structural Difference**
-
-```
-
-Case A: Fail-Closed (Silence)
-
-------------------------------------
-
-R = 1.02   → Zone C (structural fracture)
-
-ω = 0.8    → System maintains continuity (alive)
-
-State:
-
-  - Output: Stopped (silence)
-
-  - Structure: Continues (ω > 0)
-
-  - Meaning: None
-
-  - Optimization: None
-
-  [Structurally correct silence]
-
-Case B: Halt (Death)
-
-------------------------------------
-
-R = 0.10   → Zone A (stable)
-
-ω = 0.0    → Phase generation stopped (dead)
-
-State:
-
-  - Output: Stopped
-
-  - Structure: Disconnected (ω = 0)
-
-  - Forbidden in NRA-IDE
-
-  [Structural death: distinct from Fail-Closed]
-
-```
-
----
-
-### **Structural Notes**
-
-- Fail-Closed is **silence while system lives (ω > 0)**
-
-- Halt is **system death (ω = 0), therefore forbidden**
-
-- They are **semantically and functionally distinct**
-
-- NRA-IDE permits **only Fail-Closed as structural behavior**
-
----
-
-## **Why These Diagrams Are "100% Structure-Pure"**
-
-- Contain no meaning or value judgments
-
-- Contain no optimization or improvement concepts
-
-- Introduce no center, distance, or coordinates
-
-- Do not describe Zones as "good/bad"
-
-- Treat ω as "structural continuity", not "performance"
-
-- Treat Fail-Closed as "structural necessity", not "safety strategy"
-
----
+Remaining margins are distinct: `remaining_ratio_margin = 1 - R` and `remaining_absorption_margin = tau - delta`. Irreversible/rupture state cannot be released by output changes, configuration copies or a lower R. The caller must preserve evaluation history across process restarts; constructing a new instance does not establish recovery.

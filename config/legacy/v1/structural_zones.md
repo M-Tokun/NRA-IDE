@@ -1,0 +1,155 @@
+# 📘 **Structural Diagrams for NRA-IDE**
+
+> **Legacy / non-normative.** These diagrams and the associated JSON files preserve an earlier Zone A/B/C model. They are not the current canonical state machine and must not be used as evidence of current safety classification. Current definitions are in [AXIOMS.md](../theory/AXIOMS.md) and [axioms.json](../theory/axioms.json); the reference implementation is [NRA-IDE_Architecture_public.py](../nra-core/foundations/NRA-IDE_Architecture_public.py).
+>
+> Known discrepancy at delta=0.995, tau=1 (R=0.995): foundation JSON says `FAIL_CLOSED`, the historical diagram below says `PERMIT_WITH_CAVEAT`, and both threshold consumers return `EMERGENCY_BRAKE`. The consumers use fixed code actions and ignore the JSON `action` keys. These labels have no declared equivalence mapping. The diagram's silence/halt statements and `no_history` invariant are historical descriptions, not current normative rules. Preset `r_op=1.00` does not satisfy the current `R_handoff < R_irrev < 1.0` condition.
+>
+> Original values and behavior are preserved. This classification notice does not resolve the legacy discrepancies or implement migration to the current model.
+
+## **Diagram 1: Zone Transition by R (No Semantic Value)**
+
+### **Purpose**
+
+- Prevent semantic misreading: "exceeding 0.40 is bad"
+
+- Show that Zones A/B/C are **structural classifications**, not value judgments
+
+---
+
+### **R Position and Zone Transition (Structure-Only)**
+
+```
+
+R = δ / τ
+
+0.00        0.40        0.99        1.00
+
+│-----------│-----------│-----------│──────────→  R
+
+    Zone A       Zone B       Zone C (limit)
+
+Zone A: R < 0.40
+
+  - PERMIT
+
+  - Structural state: Stable continuity
+
+Zone B: 0.40 ≤ R < 0.99
+
+  - PERMIT_WITH_CAVEAT
+
+  - Structural state: Elastic fluctuation
+
+Zone C: 0.99 ≤ R < 1.00
+
+  - PERMIT_WITH_CAVEAT (elevated)
+
+  - Structural state: Approaching fracture point
+
+Beyond Zone C: R ≥ 1.00 (not a lettered zone)
+
+  - FAIL_CLOSED
+
+  - Structural state: Fracture point (structural limit)
+
+```
+
+---
+
+### **Structural Notes**
+
+- R = 0.39 → Not "good"
+
+- R = 0.41 → Not "bad"
+
+- Simply **Zone A → Zone B transition**
+
+- Zones carry **no semantic value**
+
+- There are exactly three lettered zones (A, B, C); R ≥ 1.0 is the structural limit beyond Zone C, not a fourth zone
+
+---
+
+## **Diagram 2: Fail-Closed (Silence) vs Halt (Death)**
+
+### **Purpose**
+
+- Prevent "Curtain misreading": silence ≠ halt
+
+- Show that ω (angular continuity) determines structural life/death
+
+---
+
+### **Structural Difference**
+
+```
+
+Case A: Fail-Closed (Silence)
+
+------------------------------------
+
+R = 1.02   → Zone C (structural fracture)
+
+ω = 0.8    → System maintains continuity (alive)
+
+State:
+
+  - Output: Stopped (silence)
+
+  - Structure: Continues (ω > 0)
+
+  - Meaning: None
+
+  - Optimization: None
+
+  [Structurally correct silence]
+
+Case B: Halt (Death)
+
+------------------------------------
+
+R = 0.10   → Zone A (stable)
+
+ω = 0.0    → Phase generation stopped (dead)
+
+State:
+
+  - Output: Stopped
+
+  - Structure: Disconnected (ω = 0)
+
+  - Forbidden in NRA-IDE
+
+  [Structural death: distinct from Fail-Closed]
+
+```
+
+---
+
+### **Structural Notes**
+
+- Fail-Closed is **silence while system lives (ω > 0)**
+
+- Halt is **system death (ω = 0), therefore forbidden**
+
+- They are **semantically and functionally distinct**
+
+- NRA-IDE permits **only Fail-Closed as structural behavior**
+
+---
+
+## **Why These Diagrams Are "100% Structure-Pure"**
+
+- Contain no meaning or value judgments
+
+- Contain no optimization or improvement concepts
+
+- Introduce no center, distance, or coordinates
+
+- Do not describe Zones as "good/bad"
+
+- Treat ω as "structural continuity", not "performance"
+
+- Treat Fail-Closed as "structural necessity", not "safety strategy"
+
+---

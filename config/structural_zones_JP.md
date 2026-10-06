@@ -1,147 +1,23 @@
-# 📘 **NRA-IDE 構造図版**
+# 現行NRA-IDE境界設定
 
-## **図版 1：R の位置による Zone 遷移（意味なし・価値なし）**
+定義は[AXIOMS.md](../theory/AXIOMS.md)と[axioms.json](../theory/axioms.json)による。照合時点はv2.4。[参照実装](../nra-core/foundations/NRA-IDE_Architecture_public.py)を分類に用い、[gateアダプター](../gate/_canonical_threshold.py)が呼出し間の対象履歴を保持する。
 
-### **目的**
+`R = delta / tau`の定義域は有限のdelta >= 0、有限のtau > 0。負値を絶対値で補正しない。tau=0はOUT_OF_DESCRIPTION_DOMAINである。ドメインごとに評価前に定める閾値は`0 <= R_warn < R_handoff < R_irrev < 1`。旧来の共通0.40/0.99閾値とZone A/B/Cを現行モデルへ流用しない。
 
-- 「0.40 を超えたら"悪い"」という **意味的誤読** を防ぐ
+| 正規状態 | 条件 | 運用動作 |
+|---|---|---|
+| PERMIT | 0 <= R < R_warn | CONTINUE |
+| BOUNDARY_WARNING | R_warn <= R < R_handoff | LOG_WARN |
+| HANDOFF_REQUIRED | R_handoff <= R < R_irrev | FAIL_CLOSED |
+| IRREVERSIBLE_TRANSITION | R_irrev <= R < 1, または不可逆ラッチ保持 | FAIL_CLOSED |
+| RUPTURE_BOUNDARY | R >= 1, または対象破断保持 | FAIL_CLOSED |
+| CONFESSION | 入力・宣言・閾値が不正または不明 | FAIL_CLOSED |
+| OUT_OF_DESCRIPTION_DOMAIN | tau = 0 （他の必要条件を満たす入力） | FAIL_CLOSED |
 
-- Zone A/B/C は **価値ではなく構造分類** であることを示す
+FAIL_CLOSEDは運用動作であり、8番目の正規状態や完全沈黙ではない。Handoffで移るのは実行権限だけである。観測・記録・通信は別次元として保持する。対象破断後は、生存経路でPOST_RUPTURE_FIXEDの構造証言を継続する。後続Rの低下や入力異常によって破断を解除せず、不正サンプルはCONFESSIONとして対象破断とは別に報告する。
 
----
+既定JSONの宣言・閾値はnullであり、未設定の評価はCONFESSIONとなる。対象・単位・出所・delta/tau構成規則・適用領域・閾値根拠をドメイン担当者が評価前に設定し、各呼出しに観測時点を渡す。実装が検証するのは入力構造であり、物理測定・支配方程式の真実性や安全性を保証しない。
 
-### **R の位置による Zone 遷移（構造のみ）**
+ide_presets.jsonは0.4/0.6/0.8の例示閾値を使うSOFTWARE_DEMOだけを持つ。未検証のソフトウェアデモであり、物理的・臨床的安全性の根拠はない。旧DOMAIN_A/B/C、no_history、JSON actionは[legacy/v1](legacy/v1/structural_zones_JP.md)へ保存し、自動変換しない。
 
-```
-
-R = δ / τ
-
-0.00        0.40        0.99        1.00
-
-│-----------│-----------│-----------│──────────→  R
-
-    Zone A       Zone B       Zone C (limit)
-
-Zone A: R < 0.40
-
-  - PERMIT
-
-  - 構造状態：安定連続性
-
-Zone B: 0.40 ≤ R < 0.99
-
-  - PERMIT_WITH_CAVEAT
-
-  - 構造状態：弾性ゆらぎ
-
-Zone C: 0.99 ≤ R < 1.00
-
-  - PERMIT_WITH_CAVEAT（高度警戒）
-
-  - 構造状態：破断点への接近
-
-Zone C を超えて: R ≥ 1.00（アルファベットのZoneではない）
-
-  - FAIL_CLOSED
-
-  - 構造状態：破断点（構造限界）
-
-```
-
----
-
-### **構造的説明**
-
-- R = 0.39 → "良い"ではない
-
-- R = 0.41 → "悪い"ではない
-
-- ただ **Zone A → Zone B に移行しただけ**
-
-- Zone は **意味的価値を持たない**
-
-- アルファベットのZoneはA・B・Cの3つだけであり、R ≥ 1.0はZone Cを超えた構造的限界であって4つ目のZoneではない
-
----
-
-## **図版 2：Fail-Closed（沈黙）と Halt（停止）の違い**
-
-### **目的**
-
-- 「沈黙＝停止」という **Curtain 誤読** を防ぐ
-
-- ω（角的連続性）が **構造の生死** を決めることを示す
-
----
-
-### **構造的違い**
-
-```
-
-Case A: Fail-Closed（沈黙）
-
-------------------------------------
-
-R = 1.02   → Zone C（構造破断点）
-
-ω = 0.8    → 系は連続性を維持（alive）
-
-状態：
-
-  - 出力：停止（沈黙）
-
-  - 構造：継続（ω > 0）
-
-  - 意味：なし
-
-  - 最適化：なし
-
-  [構造的に正しい沈黙]
-
-Case B: Halt（停止）
-
-------------------------------------
-
-R = 0.10   → Zone A（安定）
-
-ω = 0.0    → 位相生成停止（dead）
-
-状態：
-
-  - 出力：停止
-
-  - 構造：断絶（ω = 0）
-
-  - NRA-IDE では禁止
-
-  [構造死：Fail-Closed とは別物]
-
-```
-
----
-
-### **構造的説明**
-
-- Fail-Closed は **沈黙するが、系は生きている（ω > 0）**
-
-- Halt は **系が死ぬ（ω = 0）ため禁止**
-
-- 両者は **意味的にも機能的にも同じではない**
-
-- NRA-IDE では **Fail-Closed のみが許可される構造的挙動**
-
----
-
-## **この図版が「構造純度 100%」である理由**
-
-- 意味・価値判断を一切含まない
-
-- 最適化・改善の概念を含まない
-
-- 中心・距離・座標を導入していない
-
-- Zone を「良い／悪い」と表現していない
-
-- ω を「性能」ではなく「構造連続性」として扱っている
-
-- Fail-Closed を「安全戦略」ではなく「構造必然」として扱っている
+残存余白は`remaining_ratio_margin = 1 - R`と`remaining_absorption_margin = tau - delta`を区別する。出力や設定コピーの変更、R低下で不可逆・破断履歴を解除しない。プロセス再起動をまたぐ履歴保存は呼出し側の責任であり、新規instanceの生成は回復の根拠にならない。

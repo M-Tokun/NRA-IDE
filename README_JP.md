@@ -1,5 +1,5 @@
 <!-- TARGET: /README_JP.md -->
-<!-- UPDATED: 2026-07-15 JST -->
+<!-- UPDATED: 2026-10-06 JST -->
 
 # NRA-IDE：律環公理 — 内包性動力学エンジン
 
@@ -88,7 +88,7 @@ NRA-IDEの定義は、次の順序で参照します。
 python -m unittest discover -v
 ```
 
-期待結果は、`Ran 65 tests`に続いて`OK`と表示されることです。
+探索された全試験が成功し、最後に`OK`と表示されることを確認します。試験件数は回帰試験の追加に伴って変わるため、固定件数ではなく実行時の集計を確認してください。
 
 正規参照試験だけを実行するには、次を実行します。
 
@@ -96,11 +96,31 @@ python -m unittest discover -v
 python -m unittest tests.test_nra_ide_reference -v
 ```
 
-正規参照試験の期待結果は、`Ran 38 tests`に続いて`OK`と表示されることです。
+正規参照試験も最後に`OK`と表示されることを確認し、件数は実行時の集計を参照してください。
 
 [NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)は、pushおよびPull Requestで全試験探索を実行し、line coverageとbranch coverageをGitHub Actionsログへ表示します。
 
 `nra-core/`配下のその他のコード、可視化、論文、量子拡張は、正規記録によって明示的に昇格されない限り、研究・説明・例示・履歴資料です。
+
+---
+
+## 現行v2.4のgateと設定
+
+このREADMEの定義は[AXIOMS v2.4](./theory/AXIOMS.md)と[機械可読表現](./theory/axioms.json)に従います。これは正典定義の版を示すもので、公開状況やドメイン検証の完了を表すものではありません。
+
+[英語gate入口](./gate/en/README.md)と[日本語gate入口](./gate/jp/README_JP.md)は、同じ[履歴保持アダプター](./gate/_canonical_threshold.py)を公開し、状態分類を正規参照実装へ委譲します。アダプターは下位の実装コードであり、追加の正典定義ではありません。
+
+[既定設定](./config/ide_foundation_config.json)ではドメイン宣言と閾値を未設定とし、`CONFESSION`で遮断します。評価前に対象、単位、情報源、delta/tau構成規則、適用領域、閾値根拠を宣言し、各呼出しで観測時点を指定してください。[preset](./config/ide_presets.json)は説明用の0.4/0.6/0.8を使う`SOFTWARE_DEMO`のみで、物理的・臨床的な用途では未検証です。
+
+同一アダプターインスタンスは不可逆・対象破断の履歴を保持します。比率の低下では解除せず、生存する観測・記録・通信経路を独立に扱います。再起動をまたぐ履歴は呼出し側で保存する必要があります。アダプターにはresetや履歴永続化サービスはありません。
+
+移行回帰試験：
+
+```powershell
+python -m unittest tests.test_gate_canonical_migration -v
+```
+
+移行前の[設定](./config/legacy/v1/structural_zones_JP.md)と[gate snapshot](./gate/legacy/v1/README.md)は、非正典の履歴記録です。旧公理・力学・空間モジュールは履歴ファイルとして残し、現行gate packageの公開exportから外しています。
 
 ---
 
@@ -501,7 +521,7 @@ PID制御、信号処理、統計、機械学習、既存の連続力学と比�
 実装、使用例、インタラクティブなHTMLデモは、次を参照してください。
 
 - [`src/`](./src/) — ソースコード
-- [`nra-core/`](./nra-core/) — コア実装
+- [`nra-core/`](./nra-core/) — 正規参照ソースと研究・説明・履歴資料
 - [`gate/`](./gate/) — ゲート実装
 - [`examples/`](./examples/) — 使用例・可視化デモ
 - [`examples/README_JP.md`](./examples/README_JP.md) — 日本語デモ一覧

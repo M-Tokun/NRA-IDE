@@ -24,52 +24,37 @@ Other examples in this directory preserve research, explanatory, illustrative, d
 
 **Nomological Ring Axioms — Intensional Dynamics Engine**
 
-NRA-IDE is a deterministic control and structural judgment engine based on **tension structure**: constraint → force → displacement. It deliberately avoids making continuity, distance, or semantic interpretation the primary basis of safety judgment. In practical terms, it is a framework centered on nonlinear, physically grounded structure.
-
-Where conventional methods can become black boxes in high-risk areas such as medical AI, autonomous driving, and infrastructure control, NRA-IDE provides an explainable judgment mechanism based on directly observed structural deviation.
+NRA-IDE describes the present boundary state of a declared target from Cause-Side accumulated deviation and absorption thickness. Domain-specific observations and construction rules determine those variables. This evaluation structure does not provide a universal physical model or a safety guarantee. See the [root introduction](../README.md) and [canonical definitions](../theory/AXIOMS.md).
 
 ---
 
-## Why NRA-IDE Does Not Accumulate Error
+## Numerical Residuals and Integer Phase Lock
 
-A mechanical clock keeps time not because every gear is perfect, but because the escapement advances in a discrete step: exactly one tooth at a time. Residual fractions are not carried forward into the next step.
+Integer phase lock is a design principle for preventing rounding errors and residuals from being inherited by the next state without audit. It does not establish that all physical or numerical error is absent, and individual demos require their own verification.
 
-NRA-IDE implements this principle. State transitions are not treated as an endlessly drifting floating-point continuum. Instead, they are handled as structurally closed phase steps. Each step is completed as a bounded transition, and residual fragments are not inherited as causal state.
-
-> **Error does not fail to accumulate because it is corrected afterward.  
-
-> It does not accumulate because the structure does not allow it to be carried forward.**
-
-The demos below are designed to visualize and quantify this difference. For implementation details such as integer phase lock and residual discard, see `nra-core/`.
+Known rounding, approximation and discarded residuals with established values and provenance belong in `STRUCTURAL_DISCLOSURE_LOG`. Unknown, invalid, ambiguous, non-finite or unsupported structural information is `CONFESSION`; it belongs in `INPUT_EXCEPTION_LOG`, separately from known numeric progression.
 
 ---
 
-## Principle of the Threshold System
+## Current Canonical Threshold System
 
-$$R = \frac{\delta}{\tau}$$
+`R = delta / tau`: delta is accumulated deviation, tau is absorption thickness, and R is the boundary-approach ratio. Finite delta >= 0 and finite tau > 0 are required. The three predeclared domain thresholds satisfy `0 <= R_warn < R_handoff < R_irrev < 1`.
 
-| Symbol | Meaning | Description |
-|------|------|------|
-| **δ (delta)** | Deviation / fluctuation from constraint | Physically observed displacement or deviation |
-| **τ (tau)** | Absorption thickness / allowable margin | Structurally defined threshold width |
-| **R** | Structural ratio | Judgment value calculated as δ ÷ τ |
+| Canonical state | Condition | Adapter operational action |
+|---|---|---|
+| `PERMIT` | 0 <= R < R_warn | CONTINUE |
+| `BOUNDARY_WARNING` | R_warn <= R < R_handoff | LOG_WARN |
+| `HANDOFF_REQUIRED` | R_handoff <= R < R_irrev | Fail-Closed |
+| `IRREVERSIBLE_TRANSITION` | R_irrev <= R < 1, or retained irreversible latch | Fail-Closed |
+| `RUPTURE_BOUNDARY` | R >= 1, or retained target rupture | Fail-Closed |
+| `CONFESSION` | Invalid or unknown structural input/declaration | Fail-Closed |
+| `OUT_OF_DESCRIPTION_DOMAIN` | tau = 0 for otherwise valid structure | Fail-Closed |
 
-| R Range | Judgment | Meaning | Action |
-|--------|------|------|------|
-| R < 0.40 | **SAFE** | Sufficient structural margin remains | AI may continue processing with physical basis shown |
-| 0.40 ≤ R < R_J | **WATCH / CAUTION** | The system is approaching the boundary and may require preparation for intervention | Continue monitoring. Check history, correlation, and dR/dt. Gradually restrict automatic intervention if needed |
-| R_J ≤ R < 1.00 | **JUDGMENT LIMIT** | Under the actual operating conditions, further progression may reach R = 1.0 due to delay, inertia, or residual fluctuation | Stop or strongly restrict automatic judgment and transfer authority to humans |
-| R_target ≥ 1.00 | **RUPTURE_BOUNDARY** | The declared target reaches its complete rupture boundary | Stop free-form generation and autonomous action; continue predefined post-rupture fixed testimony over surviving channels |
+The adapter retains irreversible and target-rupture history across calls. A lower R does not clear either state. Invalid new samples are disclosed separately without clearing the target history. Fail-Closed suppresses affected new autonomous judgment and operation; it is not an eighth state or complete silence. Surviving observation, logging and communication continue independently, with continuing `POST_RUPTURE_FIXED` testimony after target rupture.
 
-> **Important:** R = 1.0 is not a warning value.  
+Remaining margins are distinct: `M_R = 1 - R` is dimensionless; `M_tau = tau - delta` has the same unit as delta and tau. Concrete thresholds require a domain basis. The SOFTWARE_DEMO values 0.4/0.6/0.8 are unvalidated illustrative values.
 
-> R = 1.0 is the structural boundary corresponding to phase transition, rupture, breach, or collapse. Therefore, real safety design must not wait until R reaches 1.0.  
-
-> NRA-IDE places a **Judgment Limit (R_J)** before that boundary.  
-
-> R_J is not a fixed axiom value. It is set according to the operating site, target object, sensor delay, stopping time, and required safety margin.
-
-> **Design principle:** AI performs computation. Ethical and final judgment belongs to humans. This is the responsibility boundary.
+The tables below describe local behavior of historical or domain-specific demos. Their SAFE/WATCH/CAUTION/R_J labels and reset controls do not define current canonical states, thresholds or recovery authorization.
 
 ---
 
@@ -81,7 +66,7 @@ All demos run directly in a browser. No installation is required.
 
 ### Judgment limits (R_J) per demo
 
-**Common:** R = 1.0 is the rupture boundary (RUPTURE_BOUNDARY / FAIL / FALLBACK) in every demo. 0.4 is the start of WATCH in many demos. The warning threshold in between (the judgment limit R_J) is a value declared per demo, not a fixed axiom value (see the note above).
+**Historical demo conventions:** Many ratio-based demos use R = 1.0 for a local rupture or suppression boundary; non-canonical scores and other exceptions are described in their source files. 0.4 is the start of WATCH in many demos. The warning threshold in between (the judgment limit R_J) is a value declared per demo, not a fixed axiom value (see the note above).
 
 | Demo | Warning / judgment limit | Note |
 |---|---|---|
@@ -92,8 +77,8 @@ All demos run directly in a browser. No installation is required.
 | #23, #24 | DAMP 0.72 | Rupture (SILENCE / FALLBACK) at 1.0 |
 | #34, #35 JP, #48 | WARNING 0.7 | #35 EN uses WATCH 0.40 / WARN 0.75 (separate implementation) |
 | #40, #41 | Watch 0.40, Caution 0.75 | Human Review at 1.0 |
-| #42, #46 | ZONE B 0.40, C 0.70 | D (FAIL-CLOSED) at 1.0 |
-| #43 | ZONE B 0.40, C 0.70, D 0.85 | E (FAIL-CLOSED) at 1.0 |
+| #42, #46 | ZONE B 0.40, C 0.70 | D (RUPTURE_BOUNDARY; Fail-Closed suppression) at 1.0 |
+| #43 | ZONE B 0.40, C 0.70, D 0.85 | E (RUPTURE_BOUNDARY; Fail-Closed suppression) at 1.0 |
 
 All values are demo-declared; in operation they are set from the target, the sensor delay, and the time needed to stop.
 
@@ -258,34 +243,21 @@ From Demo 42 onward, the demos cover POCs for autonomous driving, robot control,
 
 ## How to Embed
 
-Physical control begins by defining the target’s deviation (δ) and tolerance thickness (τ).
+Run this unvalidated software example from the repository root. It uses the current adapter rather than a separate two-state evaluator.
 
-```javascript
+```python
+import json
+from pathlib import Path
+from gate.en import ThresholdGuardian
 
-// Minimal example (same input rules as the normative reference implementation)
-
-function gate(delta, tau) {
-
-    if (!Number.isFinite(delta) || !Number.isFinite(tau) || delta < 0 || tau < 0) {
-
-        return "CONFESSION";                   // input cannot be evaluated
-
-    }
-
-    if (tau === 0) return "OUT_OF_DESCRIPTION_DOMAIN";   // R is undefined
-
-    const R = delta / tau;
-
-    if (R >= 1.0) return "RUPTURE_BOUNDARY";
-
-    return "PERMIT";
-
-}
-
+demo = json.loads(Path('config/ide_presets.json').read_text(encoding='utf-8'))['presets']['SOFTWARE_DEMO']
+gate = ThresholdGuardian(config=demo)
+notice = gate.evaluate(0.995, 1.0, timestamp='DEMO_T0').as_dict()
+assert notice['status'] == 'IRREVERSIBLE_TRANSITION'
+assert notice['fail_closed'] is True
 ```
 
-
-Specific implementation patterns are documented inside each demo source file.
+The default configuration is deliberately undeclared and returns `CONFESSION`. Real evaluation requires predeclared target, unit, source, delta/tau rules, applicable domain, threshold basis and per-call observation time. Retain the same instance and preserve its history across restarts; creating a new instance does not establish recovery. See [current gate documentation](../gate/en/README.md). Physical control and domain safety are not established by this example.
 
 ---
 

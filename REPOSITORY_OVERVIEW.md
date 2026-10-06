@@ -51,10 +51,10 @@ The normative source and docs mirror must have identical SHA-256 values. Locatio
 | [`.devcontainer/`](./.devcontainer/) | Dev Container and sandbox configuration |
 | [`.github/`](./.github/) | CI workflows and GitHub templates |
 | [`cascade-failure-prevention/`](./cascade-failure-prevention/) | Domain or experimental gate modules; not canonical by location |
-| [`config/`](./config/) | Configuration files; domain values do not redefine canonical order |
+| [`config/`](./config/) | v2.4 declaration-based configuration; unset defaults fail closed, SOFTWARE_DEMO is unvalidated, legacy/v1 preserves old snapshots |
 | [`docs/`](./docs/) | Public documentation, generated mirrors, and explanatory assets |
 | [`examples/`](./examples/) | Illustrative demos under predefined assumptions; not measuring instruments or safety proofs |
-| [`gate/`](./gate/) | Gate implementations and historical variants; conformance must be established separately |
+| [`gate/`](./gate/) | Current EN/JP entry points share a stateful adapter to the normative reference; other variants and legacy/v1 snapshots remain historical |
 | [`ground/`](./ground/) | Grounding and operational rules for facts, provenance, missing values, physical constraints, and thresholds |
 | [`multi-physics-safety-gate/`](./multi-physics-safety-gate/) | Domain implementation; name does not guarantee safety or canonical conformance |
 | [`note/`](./note/) | Development history, conversations, and architecture exploration; non-canonical unless explicitly promoted |
@@ -172,9 +172,29 @@ output gate
 canonical-state-controlled Effect-Side output
 ```
 
-Ordinary explanation is permitted only in states and fields allowed by the pre-fixed canonical behavior. Fixed Handoff or final testimony is not supplemented by newly generated free-form explanation.
+Ordinary explanation is permitted only in states and fields allowed by the pre-fixed canonical behavior. Fixed Handoff or continuing post-rupture testimony is not supplemented by newly generated free-form explanation.
 
 Only Cause-Side observation or a Cause-Side transformation fixed before evaluation may determine $\delta$, $\tau$, or $R$. LLM output, semantic scores, selected output, discarded output, and prior generated text remain Effect-Side and must not update structural variables.
+
+---
+
+## Current Gate Entry Points
+
+The definitions in this README follow [AXIOMS v2.4](./theory/AXIOMS.md) and its [machine-readable counterpart](./theory/axioms.json). This identifies the canonical definitions, not a publication or domain-validation status.
+
+The [English gate entry](./gate/en/README.md) and [Japanese gate entry](./gate/jp/README_JP.md) expose the same [stateful adapter](./gate/_canonical_threshold.py), which delegates classification to the normative reference implementation. It is subordinate implementation code, not an additional canonical definition.
+
+The [default configuration](./config/ide_foundation_config.json) leaves domain declarations and thresholds unset and therefore fails closed as `CONFESSION`. Before evaluation, declare the target, unit, source, delta/tau construction rules, applicable domain and threshold basis; supply the observation timestamp on every call. The only [preset](./config/ide_presets.json), `SOFTWARE_DEMO`, uses illustrative 0.4/0.6/0.8 thresholds and is unvalidated for physical or clinical use.
+
+One adapter instance retains irreversible and target-rupture history. A lower ratio does not release either state; surviving observation, logging and communication remain independent. The caller must preserve history across process restarts. The adapter provides no reset or durable history service.
+
+Migration regression checks:
+
+```powershell
+python -m unittest tests.test_gate_canonical_migration -v
+```
+
+Pre-migration [configuration](./config/legacy/v1/structural_zones.md) and [gate snapshots](./gate/legacy/v1/README.md) are historical, non-normative records. Old axiom/dynamics/spatial modules remain historical files and are excluded from current gate package exports.
 
 ---
 

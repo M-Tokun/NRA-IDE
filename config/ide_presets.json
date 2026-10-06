@@ -1,63 +1,55 @@
 {
+  "meta": {
+    "canonical_version": "2.4",
+    "status": "unvalidated_demo_only"
+  },
   "presets": {
-    "DOMAIN_A": {
-      "description": "Boundary width adjustment only (narrow)",
-      "inherits_from_foundation": true,
-      "tuning": {
-        "tau": 20,
-        "r_op": 0.90
+    "SOFTWARE_DEMO": {
+      "meta": {
+        "system": "NRA-IDE",
+        "schema_version": 2,
+        "canonical_version": "2.4",
+        "status": "unvalidated_demo",
+        "usage_notice": "Software demonstration only. No physical or clinical safety validation; these numerical thresholds must not be transferred to another domain."
       },
-      "tuning_constraints": {
-        "tau_min": 10,
-        "tau_max": 50,
-        "r_op_min": 0.80,
-        "r_op_max": 1.00
+      "evaluation_declaration": {
+        "declared_target": "SYNTHETIC_DEMO_TARGET",
+        "unit": "synthetic_test_unit",
+        "source": "synthetic_demo_fixture",
+        "delta_rule": "Supplied nonnegative synthetic delta",
+        "tau_rule": "Supplied positive synthetic tau",
+        "applicable_domain": "software demonstration only",
+        "threshold_basis": "Regression example values only; no domain safety evidence"
       },
-      "actions": {
-        "zone_A": "PERMIT",
-        "zone_B": "PERMIT_WITH_CAVEAT",
-        "zone_C": "FAIL_CLOSED"
-      }
-    },
-
-    "DOMAIN_B": {
-      "description": "Boundary width adjustment only (medium)",
-      "inherits_from_foundation": true,
-      "tuning": {
-        "tau": 30,
-        "r_op": 1.00
+      "thresholds": {
+        "R_warn": 0.4,
+        "R_handoff": 0.6,
+        "R_irrev": 0.8
       },
-      "tuning_constraints": {
-        "tau_min": 10,
-        "tau_max": 50,
-        "r_op_min": 0.80,
-        "r_op_max": 1.00
+      "canonical_states": [
+        "PERMIT",
+        "BOUNDARY_WARNING",
+        "HANDOFF_REQUIRED",
+        "IRREVERSIBLE_TRANSITION",
+        "RUPTURE_BOUNDARY",
+        "CONFESSION",
+        "OUT_OF_DESCRIPTION_DOMAIN"
+      ],
+      "operational_actions": {
+        "PERMIT": "CONTINUE",
+        "BOUNDARY_WARNING": "LOG_WARN",
+        "HANDOFF_REQUIRED": "FAIL_CLOSED",
+        "IRREVERSIBLE_TRANSITION": "FAIL_CLOSED",
+        "RUPTURE_BOUNDARY": "FAIL_CLOSED",
+        "CONFESSION": "FAIL_CLOSED",
+        "OUT_OF_DESCRIPTION_DOMAIN": "FAIL_CLOSED"
       },
-      "actions": {
-        "zone_A": "PERMIT",
-        "zone_B": "PERMIT_WITH_CAVEAT",
-        "zone_C": "FAIL_CLOSED"
-      }
-    },
-
-    "DOMAIN_C": {
-      "description": "Boundary width adjustment only (wide)",
-      "inherits_from_foundation": true,
-      "tuning": {
-        "tau": 40,
-        "r_op": 1.00
-      },
-      "tuning_constraints": {
-        "tau_min": 10,
-        "tau_max": 50,
-        "r_op_min": 0.80,
-        "r_op_max": 1.00
-      },
-      "actions": {
-        "zone_A": "PERMIT",
-        "zone_B": "PERMIT_WITH_CAVEAT",
-        "zone_C": "FAIL_CLOSED"
-      }
+      "reference_implementation": "nra-core/foundations/NRA-IDE_Architecture_public.py",
+      "history_policy": "Retain irreversible and rupture state for the same target; no reset or Effect-Side threshold update.",
+      "structural_testimony_modes": [
+        "CONTINUOUS",
+        "POST_RUPTURE_FIXED"
+      ]
     }
   }
 }

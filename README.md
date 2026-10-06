@@ -1,6 +1,6 @@
 <!-- FILE: README_20260711_0348.md -->
 <!-- TARGET: /README.md -->
-<!-- UPDATED: 2026-07-15 JST -->
+<!-- UPDATED: 2026-10-06 JST -->
 
 # NRA-IDE: Nomological Ring Axioms — Intensional Dynamics Engine
 
@@ -89,7 +89,7 @@ To run the complete current suite, including the canonical reference tests and l
 python -m unittest discover -v
 ```
 
-The expected result is `Ran 106 tests` followed by `OK`.
+All discovered tests must pass and the run must end with `OK`. The test count changes as regression coverage is added; use the actual run summary rather than a fixed count.
 
 To run only the canonical reference suite, run:
 
@@ -97,11 +97,31 @@ To run only the canonical reference suite, run:
 python -m unittest tests.test_nra_ide_reference -v
 ```
 
-The expected result for the canonical reference suite is `Ran 38 tests` followed by `OK`.
+The canonical reference suite must also end with `OK`; use its actual run summary for the test count.
 
 The [NRA-IDE Watchdog workflow](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml) runs the complete discovery suite on pushes and pull requests and reports line and branch coverage in the GitHub Actions log.
 
 Other code, visualizations, papers, and quantum extensions under `nra-core/` remain research, explanatory, illustrative, or historical unless a canonical record explicitly promotes them.
+
+---
+
+## Current v2.4 Gate and Configuration
+
+The definitions in this README follow [AXIOMS v2.4](./theory/AXIOMS.md) and its [machine-readable counterpart](./theory/axioms.json). This identifies the canonical definitions, not a publication or domain-validation status.
+
+The [English gate entry](./gate/en/README.md) and [Japanese gate entry](./gate/jp/README_JP.md) expose the same [stateful adapter](./gate/_canonical_threshold.py), which delegates classification to the normative reference implementation. It is subordinate implementation code, not an additional canonical definition.
+
+The [default configuration](./config/ide_foundation_config.json) leaves domain declarations and thresholds unset and therefore fails closed as `CONFESSION`. Before evaluation, declare the target, unit, source, delta/tau construction rules, applicable domain and threshold basis; supply the observation timestamp on every call. The only [preset](./config/ide_presets.json), `SOFTWARE_DEMO`, uses illustrative 0.4/0.6/0.8 thresholds and is unvalidated for physical or clinical use.
+
+One adapter instance retains irreversible and target-rupture history. A lower ratio does not release either state; surviving observation, logging and communication remain independent. The caller must preserve history across process restarts. The adapter provides no reset or durable history service.
+
+Migration regression checks:
+
+```powershell
+python -m unittest tests.test_gate_canonical_migration -v
+```
+
+Pre-migration [configuration](./config/legacy/v1/structural_zones.md) and [gate snapshots](./gate/legacy/v1/README.md) are historical, non-normative records. Old axiom/dynamics/spatial modules remain historical files and are excluded from current gate package exports.
 
 ---
 
@@ -498,7 +518,7 @@ In particular, the following interpretations are prohibited:
 For implementations, examples, and interactive HTML demos, see:
 
 - [`src/`](./src/) — source code
-- [`nra-core/`](./nra-core/) — core implementation
+- [`nra-core/`](./nra-core/) — normative reference source plus research, explanatory, and historical assets
 - [`gate/`](./gate/) — gate implementations
 - [`examples/`](./examples/) — usage examples and visualization demos
 - [`examples/README_JP.md`](./examples/README_JP.md) — Japanese demo index

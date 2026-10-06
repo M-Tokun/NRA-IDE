@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "system": "NRA-IDE",
+    "version": "1.0.0",
+    "type": "FOUNDATION",
+    "status": "legacy_non_normative",
+    "usage_notice": "Historical configuration; not the current canonical state machine. See config/structural_zones.md. ThresholdGuardian ignores action keys and uses fixed code actions. no_history is an undefined legacy invariant, not authority to discard canonical structural history.",
+    "structure_purity": "100%"
+  },
+  "invariants": {
+    "no_center": true,
+    "no_distance": true,
+    "no_similarity": true,
+    "no_history": true,
+    "no_optimization": true,
+    "pi_inverse_forbidden": true,
+    "fail_closed_required": true,
+    "three_layer_isolation": true,
+    "symbol_only_principle": true
+  },
+  "physics_constants": {
+    "stiffness_k": 1000.0,
+    "fracture_limit_ratio": 1.0
+  },
+  "gate_structure": {
+    "zone_A": {
+      "ratio_max": 0.40,
+      "action": "PERMIT"
+    },
+    "zone_B": {
+      "ratio_max": 0.99,
+      "action": "PERMIT_WITH_CAVEAT"
+    },
+    "zone_C": {
+      "ratio_max": 1.00,
+      "action": "FAIL_CLOSED"
+    }
+  },
+  "discard_log": {
+    "record_r": true,
+    "record_delta": true,
+    "record_timestamp": true,
+    "contains_meaning": false
+  }
+}
