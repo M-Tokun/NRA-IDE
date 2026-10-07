@@ -60,3 +60,9 @@ CLIやproviderが別の実行経路を使う場合、これらのVS Code用hook�
 ## Clineの空引数シリアライズ対応（2026-10-05）
 
 導入済みCline 4.1.22は、hook入力のprotobuf toJSONで空のparameters mapを省略する。引数なしMCPのlist_allowed_directoriesではpreToolUseにtoolNameだけが残るため、アダプターはparametersが省略された場合だけ{}へ補う。明示的なnull・配列・文字列は拒否する。引数が空でも有効な契約記録がなければMCPは拒否し、読取ツールも契約対象パスが不明なら拒否する。有効記録後はcancel=falseでホスト確認へ戻す。MCP自動承認は変更しない。
+
+## Codex実操作前のShell起動検証（2026-10-07）
+
+Codexでは、最初のShell・スクリプト実行やファイル変更の直前に、無害な最小コマンドで起動を検証する補助hookを追加した（codex_sandbox_status.py、.codex/hooks.jsonのSessionStart / PreToolUse / PostToolUse）。AGENTS.md読込ガードとは別の役割で、既存の契約ガードの呼出しは保持し、自動承認は返さない。手順・保存先・限界は[CODEX_SANDBOX_STATUS.md](CODEX_SANDBOX_STATUS.md)を参照する。
+
+この検証が示すのはShellの最小起動の成功だけである。Sandboxの実効設定は不明、隔離制限は未検証として別に表示する。局所テストは`python -B -m unittest tests.test_codex_sandbox_status -v`で実行する（上の検証コマンドの対象外）。Codex実クライアントでのhook発火・追加コンテキストの配送・UI表示は未検証である。.codex/hooks.jsonを変更したため、/hooksで変更した定義を確認して信頼する必要がある。
