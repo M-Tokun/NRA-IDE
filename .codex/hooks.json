@@ -13,6 +13,17 @@
             "additionalContextLimit": 12000
           }
         ]
+      },
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -B \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_sandbox_status.py\"",
+            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python -B (Join-Path $root 'skills/agents-md-guard/codex_sandbox_status.py')\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -24,6 +35,32 @@
             "command": "python3 \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_guard.py\"",
             "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python (Join-Path $root 'skills/agents-md-guard/codex_guard.py')\"",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "^(Bash|exec_command|shell_command|shell|apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -B \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_sandbox_status.py\"",
+            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python -B (Join-Path $root 'skills/agents-md-guard/codex_sandbox_status.py')\"",
+            "timeout": 10,
+            "additionalContextLimit": 1500
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(Bash|exec_command|shell_command|shell|apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -B \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_sandbox_status.py\"",
+            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python -B (Join-Path $root 'skills/agents-md-guard/codex_sandbox_status.py')\"",
+            "timeout": 10,
+            "additionalContextLimit": 1500
           }
         ]
       }
