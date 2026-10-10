@@ -1,0 +1,379 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ポアンカレ円板の模式図</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 縦に3つの模型。各模型＝図（左）＋短い説明と操作（右）。狭い画面では縦積み。 */
+:root {
+  --bg: #f3f5f6;
+  --panel: #ffffff;
+  --ink: #1b2329;
+  --muted: #5d6b74;
+  --line: #d3dade;
+  --disk: #e8eef1;
+  --ring: #b9c6cd;
+  --accent: #1f6f8b;
+  --accent-soft: #cfe3ea;
+  --hit: #2f8a4e;
+  --miss: #c7731d;
+  --false: #c2384a;
+  --other: #a3afb6;
+  --query: #1b2329;
+  --font-display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12181c; --panel: #1a2228; --ink: #e3e9ec; --muted: #94a3ab; --line: #2c3840;
+    --disk: #1f2a31; --ring: #3c4c56; --accent: #5fb3d0; --accent-soft: #24414d;
+    --hit: #5cc27d; --miss: #e3994a; --false: #ec6a7b; --other: #5d6d77; --query: #e3e9ec;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12181c; --panel: #1a2228; --ink: #e3e9ec; --muted: #94a3ab; --line: #2c3840;
+  --disk: #1f2a31; --ring: #3c4c56; --accent: #5fb3d0; --accent-soft: #24414d;
+  --hit: #5cc27d; --miss: #e3994a; --false: #ec6a7b; --other: #5d6d77; --query: #e3e9ec;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.75;
+  padding-block: 28px 56px; padding-inline: 16px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 28px; }
+header { display: grid; gap: 8px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; line-height: 1.3; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; padding: 2px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+section.model {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 20px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start;
+}
+@media (max-width: 760px) { section.model { grid-template-columns: minmax(0, 1fr); padding: 16px; } }
+.no { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; line-height: 1.4; margin: 2px 0 10px; text-wrap: balance; }
+.text { display: grid; gap: 14px; min-width: 0; }
+.text p { margin: 0; }
+.figs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-width: 0; }
+.figs.single { grid-template-columns: 1fr; }
+figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 13px; color: var(--muted); text-align: center; }
+svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; }
+.ctrl { display: grid; gap: 6px; }
+.ctrl label { font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.ctrl output { font-family: var(--font-mono); color: var(--ink); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+button {
+  font: inherit; font-size: 13px; font-family: var(--font-mono);
+  background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.readout { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; }
+.readout dt { color: var(--muted); }
+.readout dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--muted); border-left: 2px solid var(--line); padding-left: 10px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.key { font-weight: 700; }
+.bad { color: var(--false); }
+/* SVG classes */
+.s-frame { fill: var(--disk); stroke: var(--ring); stroke-width: 1; }
+.s-ring { fill: none; stroke: var(--ring); stroke-width: .8; stroke-dasharray: 2 3; }
+.s-edge { fill: none; stroke: var(--muted); stroke-width: .6; opacity: .55; }
+.s-node { fill: var(--accent); }
+.s-root { fill: var(--ink); }
+.s-path { fill: none; stroke: var(--miss); stroke-width: 2.2; }
+.s-chord { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+.s-hcirc { fill: var(--accent-soft); fill-opacity: .55; stroke: var(--accent); stroke-width: 1.4; }
+.s-ghost { fill: none; stroke: var(--accent); stroke-width: 1; stroke-dasharray: 3 3; opacity: .7; }
+.s-handle { fill: var(--accent); stroke: var(--panel); stroke-width: 2; cursor: grab; }
+.s-label { fill: var(--muted); font: 11px var(--font-mono); }
+.s-hit { fill: var(--hit); }
+.s-miss { fill: none; stroke: var(--miss); stroke-width: 2; }
+.s-false { fill: var(--false); }
+.s-other { fill: var(--other); }
+.s-query { fill: var(--query); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>ポアンカレ円板の模式図</h1>
+    <p class="lede">図を先に見て、説明は短く読むための3枚です。円板は双曲空間を平面に描く方法の一つで、実物の姿ではありません。</p>
+    <div class="tags"><span class="tag">模式図</span><span class="tag">2次元</span><span class="tag">座標は説明用</span><span class="tag">EXP-GE03 関連</span></div>
+  </header>
+
+  <!-- 模型1 -->
+  <section class="model" aria-labelledby="m1h">
+    <div class="figs">
+      <figure><svg id="flat" viewBox="0 0 400 400" role="img" aria-label="平らな正方形に描いた三分木"></svg><figcaption>平らな面</figcaption></figure>
+      <figure><svg id="disk1" viewBox="0 0 400 400" role="img" aria-label="ポアンカレ円板に描いた三分木"></svg><figcaption>双曲円板</figcaption></figure>
+    </div>
+    <div class="text">
+      <div><div class="no">模型 1</div><h2 id="m1h">外側ほど部屋が増える</h2></div>
+      <p>同じ三分木を2通りに描いています。木は1段深くなるごとに枝先が3倍に増えます。平らな面では外周の長さが段数に比例してしか伸びないので、深くすると枝先が重なります。</p>
+      <p>円板では外側ほど空間が指数的に広く、枝先は詰まりません。外側の点が小さく見えるのは、そこが広いからです。</p>
+      <p>橙の線は2つの枝先を結ぶ最短路です。直線（破線）ではなく、共通の祖先がいる中心側へ曲がります。</p>
+      <div class="ctrl">
+        <label for="depth">木の深さ <output id="depthOut">4</output></label>
+        <input id="depth" type="range" min="1" max="5" step="1" value="4">
+      </div>
+      <dl class="readout">
+        <dt>平らな面</dt><dd id="flatGap"></dd>
+        <dt>双曲円板</dt><dd id="diskGap"></dd>
+      </dl>
+      <p class="note">数値は「隣の枝先との間隔 ÷ 点の幅」。1未満は重なりを意味します。円板の外側の点は小さすぎるため、最小サイズで描いています。</p>
+    </div>
+  </section>
+
+  <!-- 模型2 -->
+  <section class="model" aria-labelledby="m2h">
+    <div class="figs single">
+      <figure><svg id="disk2" viewBox="0 0 400 400" role="img" aria-label="同じ双曲半径の円を動かす模型"></svg><figcaption>青い点をドラッグ（タップでも移動）</figcaption></figure>
+    </div>
+    <div class="text">
+      <div><div class="no">模型 2</div><h2 id="m2h">同じ距離でも、外側では小さく見える</h2></div>
+      <p>青い円は、中心の点から双曲距離で同じ半径の範囲です。点を外側へ動かすと、円は見た目だけ小さくなります。中心の破線の円と同じ広さです。</p>
+      <p>点線の輪は、原点から双曲距離 1・2・3・4 の位置です。外側ほど輪が詰まって見えます。縁は無限に遠く、到達できません。</p>
+      <div class="ctrl">
+        <label for="rho">双曲半径 <output id="rhoOut">0.80</output></label>
+        <input id="rho" type="range" min="0.2" max="2" step="0.05" value="0.8">
+      </div>
+      <dl class="readout">
+        <dt>原点からの双曲距離</dt><dd id="m2dist"></dd>
+        <dt>見た目の大きさ</dt><dd id="m2size"></dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 模型3 -->
+  <section class="model" aria-labelledby="m3h">
+    <div class="figs single">
+      <figure><svg id="disk3" viewBox="0 0 400 400" role="img" aria-label="GE-03 検索半径の模型"></svg><figcaption>PoC の15件と問い合わせ点（黒）</figcaption></figure>
+    </div>
+    <div class="text">
+      <div><div class="no">模型 3 · GE-03</div><h2 id="m3h">近さは半径の決め方で変わる</h2></div>
+      <p>エラー修正15件を3つの種類に分けて置き、黒い点（新しいゼロ除算エラー）から一定の双曲距離内を拾います。拾いたいのは右側のゼロ除算5件です。</p>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--hit)"></i>拾えた</span>
+        <span><i class="sw" style="border:2px solid var(--miss)"></i>見落とし</span>
+        <span><i class="sw" style="background:var(--false)"></i>誤って拾った</span>
+        <span><i class="sw" style="background:var(--other)"></i>対象外</span>
+      </div>
+      <div class="ctrl">
+        <label for="th">検索半径 <output id="thOut">2.50</output></label>
+        <input id="th" type="range" min="0" max="5" step="0.05" value="2.5">
+      </div>
+      <div class="btns" aria-label="記録にある半径">
+        <button type="button" data-th="0.3">0.3</button>
+        <button type="button" data-th="0.8">0.8</button>
+        <button type="button" data-th="2.5">2.5</button>
+        <button type="button" data-th="4.5">4.5</button>
+      </div>
+      <dl class="readout">
+        <dt>拾えた</dt><dd id="m3hit"></dd>
+        <dt>誤って拾った</dt><dd id="m3false"></dd>
+        <dt>AI Studio 記録の主張</dt><dd id="m3claim"></dd>
+      </dl>
+      <p class="note">座標は種類ごとに手で配置したもので、データから学習した埋め込みではありません。そのため「近い＝同じ種類」は最初から作り込まれています。この模型が示すのは、半径の選び方で見落としと誤りが入れ替わることだけです。</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  const C = 200, R = 180;               // 円板の中心と半径（viewBox単位）
+  const el = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const clear = s => { while (s.firstChild) s.removeChild(s.firstChild); };
+  const px = z => [C + R * z[0], C - R * z[1]];
+
+  // 複素数（[re, im]）
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+  const mul = (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]];
+  const conj = a => [a[0], -a[1]];
+  const div = (a, b) => { const d = b[0] * b[0] + b[1] * b[1]; return [(a[0] * b[0] + a[1] * b[1]) / d, (a[1] * b[0] - a[0] * b[1]) / d]; };
+  const abs = a => Math.hypot(a[0], a[1]);
+  // p を原点へ送るメビウス変換と、その逆
+  const toO = (z, p) => div(sub(z, p), sub([1, 0], mul(conj(p), z)));
+  const fromO = (w, p) => div(add(w, p), add([1, 0], mul(conj(p), w)));
+  const hdist = (u, v) => {
+    const d2 = (u[0] - v[0]) ** 2 + (u[1] - v[1]) ** 2;
+    const a = (1 - (u[0] ** 2 + u[1] ** 2)) * (1 - (v[0] ** 2 + v[1] ** 2));
+    return Math.acosh(1 + 2 * d2 / a);
+  };
+  // 測地線（u から v）：u を原点へ送ると直線になる
+  const geodesicD = (u, v, n = 48) => {
+    const w = toO(v, u);
+    let d = "";
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const z = fromO([w[0] * t, w[1] * t], u);
+      const [x, y] = px(z);
+      d += (i ? "L" : "M") + x.toFixed(2) + " " + y.toFixed(2);
+    }
+    return d;
+  };
+  // 双曲円（中心 c、双曲半径 rho）→ ユークリッド円
+  const hcircle = (c, rho) => {
+    const t = Math.tanh(rho / 2), a = abs(c);
+    if (a < 1e-9) return { cx: 0, cy: 0, r: t };
+    const e1 = (a + t) / (1 + a * t), e2 = (a - t) / (1 - a * t);
+    const m = (e1 + e2) / 2, u = [c[0] / a, c[1] / a];
+    return { cx: u[0] * m, cy: u[1] * m, r: (e1 - e2) / 2 };
+  };
+  const drawHCircle = (svg, c, rho, cls) => {
+    const h = hcircle(c, rho), p = px([h.cx, h.cy]);
+    return el("circle", { cx: p[0], cy: p[1], r: R * h.r, class: cls }, svg);
+  };
+  const disk = svg => el("circle", { cx: C, cy: C, r: R, class: "s-frame" }, svg);
+
+  /* ---------- 模型1 ---------- */
+  const B = 3, STEP_FLAT = 34, S = 1.3, DOT = 5;
+  const flatSvg = document.getElementById("flat"), d1 = document.getElementById("disk1");
+  const angle = (k, i) => 2 * Math.PI * (i + 0.5) / B ** k;
+  function drawModel1(depth) {
+    clear(flatSvg); clear(d1);
+    // 平らな面
+    el("rect", { x: 10, y: 10, width: 380, height: 380, class: "s-frame" }, flatSvg);
+    for (let k = depth; k >= 1; k--) {
+      const n = B ** k;
+      for (let i = 0; i < n; i++) {
+        const a = angle(k, i), r = k * STEP_FLAT;
+        const pa = angle(k - 1, Math.floor(i / B)), pr = (k - 1) * STEP_FLAT;
+        el("line", { x1: C + pr * Math.cos(pa), y1: C - pr * Math.sin(pa), x2: C + r * Math.cos(a), y2: C - r * Math.sin(a), class: "s-edge" }, flatSvg);
+      }
+    }
+    for (let k = 1; k <= depth; k++) {
+      const n = B ** k;
+      for (let i = 0; i < n; i++) {
+        const a = angle(k, i), r = k * STEP_FLAT;
+        el("circle", { cx: C + r * Math.cos(a), cy: C - r * Math.sin(a), r: DOT, class: "s-node" }, flatSvg);
+      }
+    }
+    el("circle", { cx: C, cy: C, r: DOT, class: "s-root" }, flatSvg);
+
+    // 双曲円板
+    disk(d1);
+    const pos = (k, i) => { const r = Math.tanh(k * S / 2), a = angle(k, i); return [r * Math.cos(a), r * Math.sin(a)]; };
+    for (let k = 1; k <= depth; k++) {
+      const n = B ** k;
+      for (let i = 0; i < n; i++) {
+        const p = pos(k, i), q = k === 1 ? [0, 0] : pos(k - 1, Math.floor(i / B));
+        el("path", { d: geodesicD(q, p, 16), class: "s-edge" }, d1);
+      }
+    }
+    for (let k = 1; k <= depth; k++) {
+      const n = B ** k, r = Math.tanh(k * S / 2), size = Math.max(0.9, DOT * (1 - r * r));
+      for (let i = 0; i < n; i++) {
+        const [x, y] = px(pos(k, i));
+        el("circle", { cx: x, cy: y, r: size, class: "s-node" }, d1);
+      }
+    }
+    el("circle", { cx: C, cy: C, r: DOT, class: "s-root" }, d1);
+    // 2つの枝先を結ぶ最短路
+    const n = B ** depth, a = pos(depth, Math.floor(n / 6)), b = pos(depth, Math.floor(n / 2));
+    const pa = px(a), pb = px(b);
+    el("line", { x1: pa[0], y1: pa[1], x2: pb[0], y2: pb[1], class: "s-chord" }, d1);
+    el("path", { d: geodesicD(a, b), class: "s-path" }, d1);
+
+    // 間隔 ÷ 点の幅
+    const flatRatio = (2 * Math.PI * depth * STEP_FLAT / n) / (2 * DOT);
+    const hDot = 2 * 2 * Math.atanh(DOT / R / 1);      // 原点での点の双曲直径（λ=2 換算）
+    const diskRatio = (2 * Math.PI * Math.sinh(depth * S) / n) / hDot;
+    document.getElementById("flatGap").textContent = flatRatio.toFixed(2) + (flatRatio < 1 ? "  重なる" : "");
+    document.getElementById("diskGap").textContent = diskRatio.toFixed(1);
+    document.getElementById("depthOut").textContent = depth;
+  }
+  const depthIn = document.getElementById("depth");
+  depthIn.addEventListener("input", () => drawModel1(+depthIn.value));
+  drawModel1(+depthIn.value);
+
+  /* ---------- 模型2 ---------- */
+  const d2 = document.getElementById("disk2");
+  let p2 = [0.55, 0.25];
+  const rhoIn = document.getElementById("rho");
+  function drawModel2() {
+    clear(d2); disk(d2);
+    for (let d = 1; d <= 4; d++) {
+      el("circle", { cx: C, cy: C, r: R * Math.tanh(d / 2), class: "s-ring" }, d2);
+      el("text", { x: C + R * Math.tanh(d / 2) * Math.cos(-2.4) + 3, y: C - R * Math.tanh(d / 2) * Math.sin(-2.4) + 12, class: "s-label" }, d2).textContent = d;
+    }
+    const rho = +rhoIn.value;
+    drawHCircle(d2, [0, 0], rho, "s-ghost");
+    drawHCircle(d2, p2, rho, "s-hcirc");
+    const [x, y] = px(p2);
+    el("circle", { cx: x, cy: y, r: 8, class: "s-handle" }, d2);
+    const h0 = hcircle([0, 0], rho).r, h1 = hcircle(p2, rho).r;
+    document.getElementById("rhoOut").textContent = rho.toFixed(2);
+    document.getElementById("m2dist").textContent = hdist([0, 0], p2).toFixed(2);
+    document.getElementById("m2size").textContent = "中心の円の " + Math.round(100 * h1 / h0) + "%";
+  }
+  rhoIn.addEventListener("input", drawModel2);
+  let dragging = false;
+  const toDisk = ev => {
+    const pt = d2.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const q = pt.matrixTransform(d2.getScreenCTM().inverse());
+    let z = [(q.x - C) / R, -(q.y - C) / R];
+    const m = abs(z), lim = 0.97;
+    if (m > lim) z = [z[0] / m * lim, z[1] / m * lim];
+    return z;
+  };
+  d2.addEventListener("pointerdown", ev => { dragging = true; d2.setPointerCapture(ev.pointerId); p2 = toDisk(ev); drawModel2(); });
+  d2.addEventListener("pointermove", ev => { if (dragging) { p2 = toDisk(ev); drawModel2(); } });
+  d2.addEventListener("pointerup", () => { dragging = false; });
+  d2.addEventListener("pointercancel", () => { dragging = false; });
+  drawModel2();
+
+  /* ---------- 模型3 ---------- */
+  // poc_ge03.py（random.seed(42)）が生成した座標をそのまま使用
+  const DATA = [["Z",0.82273,-0.11804],["Z",0.79924,-0.06652],["Z",0.83774,0.04445],["Z",0.84485,-0.10523],["Z",0.80567,-0.11441],["I",-0.39985,0.69001],["I",-0.32835,0.70986],["I",-0.42567,0.71485],["I",-0.41717,0.67985],["I",-0.30984,0.78588],["T",-0.37804,-0.75512],["T",-0.47358,-0.6537],["T",-0.46412,-0.71994],["T",-0.47313,-0.62942],["T",-0.40085,-0.74705]];
+  const Q = [0.85 * Math.cos(0.05), 0.85 * Math.sin(0.05)];
+  const CLAIM = { "0.3": "2/5、混入0（実測と不一致）", "0.8": "5/5、混入0（実測と不一致）", "2.5": "誤発火あり（実測と不一致）" };
+  const d3 = document.getElementById("disk3"), thIn = document.getElementById("th");
+  function drawModel3() {
+    const th = +thIn.value;
+    clear(d3); disk(d3);
+    [["ゼロ除算", 0], ["Index", 2 * Math.PI / 3], ["型", 4 * Math.PI / 3]].forEach(([t, a]) => {
+      const r = 0.45, [x, y] = px([r * Math.cos(a), r * Math.sin(a)]);
+      el("text", { x: x, y: y, "text-anchor": "middle", class: "s-label" }, d3).textContent = t;
+    });
+    if (th > 0) drawHCircle(d3, Q, th, "s-hcirc");
+    let hit = 0, fp = 0;
+    DATA.forEach(([c, x, y]) => {
+      const inside = hdist(Q, [x, y]) <= th, [sx, sy] = px([x, y]);
+      let cls;
+      if (c === "Z") { cls = inside ? "s-hit" : "s-miss"; if (inside) hit++; }
+      else { cls = inside ? "s-false" : "s-other"; if (inside) fp++; }
+      el("circle", { cx: sx, cy: sy, r: 5, class: cls }, d3);
+    });
+    const [qx, qy] = px(Q);
+    el("circle", { cx: qx, cy: qy, r: 4.5, class: "s-query" }, d3);
+    document.getElementById("thOut").textContent = th.toFixed(2);
+    document.getElementById("m3hit").textContent = hit + " / 5";
+    const f = document.getElementById("m3false");
+    f.textContent = fp + " 件"; f.className = fp ? "bad" : "";
+    const key = String(+th.toFixed(2));
+    document.getElementById("m3claim").textContent = CLAIM[key] || "—";
+  }
+  thIn.addEventListener("input", drawModel3);
+  document.querySelectorAll("[data-th]").forEach(b => b.addEventListener("click", () => { thIn.value = b.dataset.th; drawModel3(); }));
+  drawModel3();
+})();
+</script>
+
+</body></html>
