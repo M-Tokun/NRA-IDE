@@ -1,66 +1,14 @@
 {
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup|resume|clear|compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_session_start.py\"",
-            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python (Join-Path $root 'skills/agents-md-guard/codex_session_start.py')\"",
-            "timeout": 10,
-            "statusMessage": "Loading AGENTS.md",
-            "additionalContextLimit": 12000
-          }
-        ]
-      },
-      {
-        "matcher": "startup|resume|clear|compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 -B \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_sandbox_status.py\"",
-            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python -B (Join-Path $root 'skills/agents-md-guard/codex_sandbox_status.py')\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_guard.py\"",
-            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python (Join-Path $root 'skills/agents-md-guard/codex_guard.py')\"",
+            "command": "python3 -B \"$(git rev-parse --show-toplevel)/.codex/hooks/check.py\"",
+            "commandWindows": "python -B -c \"import subprocess,runpy,os; r=subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip(); runpy.run_path(os.path.join(r,'.codex','hooks','check.py'),run_name='__main__')\"",
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "^(Bash|exec_command|shell_command|shell|apply_patch|Edit|Write)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 -B \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_sandbox_status.py\"",
-            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python -B (Join-Path $root 'skills/agents-md-guard/codex_sandbox_status.py')\"",
-            "timeout": 10,
-            "additionalContextLimit": 1500
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "^(Bash|exec_command|shell_command|shell|apply_patch|Edit|Write)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 -B \"$(git rev-parse --show-toplevel)/skills/agents-md-guard/codex_sandbox_status.py\"",
-            "commandWindows": "pwsh -NoProfile -Command \"$root = git rev-parse --show-toplevel; & python -B (Join-Path $root 'skills/agents-md-guard/codex_sandbox_status.py')\"",
-            "timeout": 10,
-            "additionalContextLimit": 1500
           }
         ]
       }
