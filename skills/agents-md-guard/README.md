@@ -66,3 +66,11 @@ CLIやproviderが別の実行経路を使う場合、これらのVS Code用hook�
 Codexでは、最初のShell・スクリプト実行やファイル変更の直前に、無害な最小コマンドで起動を検証する補助hookを追加した（codex_sandbox_status.py、.codex/hooks.jsonのSessionStart / PreToolUse / PostToolUse）。AGENTS.md読込ガードとは別の役割で、既存の契約ガードの呼出しは保持し、自動承認は返さない。手順・保存先・限界は[CODEX_SANDBOX_STATUS.md](CODEX_SANDBOX_STATUS.md)を参照する。
 
 この検証が示すのはShellの最小起動の成功だけである。Sandboxの実効設定は不明、隔離制限は未検証として別に表示する。局所テストは`python -B -m unittest tests.test_codex_sandbox_status -v`で実行する（上の検証コマンドの対象外）。Codex実クライアントでのhook発火・追加コンテキストの配送・UI表示は未検証である。.codex/hooks.jsonを変更したため、/hooksで変更した定義を確認して信頼する必要がある。
+
+## シェルの禁止パターン（2026-10-11）
+
+共通ガード（_common.py）に、シェルのコマンド文字列に対する禁止パターンを追加した。対象はClaude / Codex / Gemini / Clineのシェルツール（Bash、PowerShell、exec_command、shell_command、shell、run_shell_command、cline_tool:execute_command）で、AGENTS.md読込の確認を通った後に判定し、禁止に当たれば拒否する。禁止するのは、履歴改変（git filter-repo / filter-branch / reflog expire / gc --prune）、強制送信と参照削除（git pushの--force・-f・--force-with-lease・--delete・-d・先頭が+や:の指定）、フック回避（--no-verify、core.hooksPathの変更）で、.claude/settings.jsonのdenyと同じ範囲である。作業内容を破棄するgit reset --hardとgit cleanは対象にしていない。通過時は自動承認を返さず、ホストの通常の権限確認へ戻る。
+
+判定はコマンド文字列だけを見る。;・&&・||・|・改行で区切った各区間の先頭語がgitのものを調べ、git -C、-c、--no-pagerなどのグローバルオプションは読み飛ばす。pwsh / powershell / bash / sh / zsh / cmdの-Command・-c・-lc・/cで包まれた中身も再判定する（入れ子は3段まで）。引用符内の語（コミットメッセージなど）はオプションとして読まない。スクリプトファイルの中、python -cの本文、別名、変数経由は見えない。誤操作の歯止めであり、意図的な回避は防げない。
+
+hookは「確認（ask）」を表現できないため、Claude以外の確認はAGENTS.mdの規則と各ホストの既定の確認動作に依存する。局所テストは`python -B -m unittest tests.test_shell_deny -v`で実行する（上の検証コマンドの対象外）。Claudeは実セッションで、包んだ禁止コマンドの拒否を確認した。Codex・Gemini・Clineのhookが渡すコマンド文字列がこの想定どおりかは未検証である。

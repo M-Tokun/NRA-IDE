@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import sys
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,6 +26,18 @@ INVALID_PAYLOAD_MESSAGE = ('hook入力を検証できません。未確認状態
 READ_ONLY_TOOLS = frozenset({'Read', 'Glob', 'Grep', 'LS', 'WebFetch', 'WebSearch',
     'read_file', 'read_many_files', 'list_directory', 'glob', 'search_file_content',
     'google_web_search', 'web_fetch'})
+# AGENTS.md §7: history rewrite and forced sending are not run on the AI route.
+SHELL_COMMAND_TOOLS = frozenset({'Bash', 'PowerShell', 'exec_command', 'shell_command',
+    'shell', 'run_shell_command', 'cline_tool:execute_command'})
+SHELL_DENY_MESSAGE = ('{}は実行しません（AGENTS.md §7）。履歴改変・強制送信・フック回避・'
+                      'リモート参照の削除は通常経路で行わず、対象と影響を提示して'
+                      '利用者管理の手順へ返してください。')
+SHELL_INVALID_MESSAGE = 'シェルコマンドを文字列として確認できません。操作を停止します。'
+_SEGMENT_SPLIT = re.compile(r'&&|\|\||[;&|\r\n]')
+_WRAPPER_SHELLS = frozenset({'pwsh', 'powershell', 'bash', 'sh', 'zsh', 'cmd'})
+_WRAPPER_FLAGS = frozenset({'-c', '-lc', '-ic', '-command', '/c', '/k'})
+_LEADING_WORDS = frozenset({'call', 'command', 'exec', 'sudo', 'time', 'nohup', 'env'})
+_ENV_ASSIGNMENT = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*=')
 
 
 def valid_session_id(value):
@@ -162,12 +175,133 @@ def reads_only_current_contract(payload, tool):
     return path_targets_agents_md(value)
 
 
+def _unquote(text):
+    text = text.strip()
+    if len(text) >= 2 and text[0] in '\'"' and text[-1] == text[0]:
+        return text[1:-1]
+    return text
+
+
+def _command_words(segment):
+    # Quoted arguments stay single words, so message text is not read as options.
+    try:
+        # A stray quote at a word edge comes from splitting inside a quoted script.
+        words = [word if len(word) >= 2 and word[0] in '\'"' and word[-1] == word[0]
+                 else word.strip('\'"') for word in shlex.split(segment, posix=False)]
+    except ValueError:
+        # An unbalanced quote comes from splitting inside a quoted script; drop the strays.
+        words = [word.strip('\'"') for word in re.findall(r'\S+', segment)]
+    return [word for word in words if word]
+
+
+def _program_name(word):
+    name = _unquote(word).replace('\\', '/').rsplit('/', 1)[-1].lower()
+    return name[:-4] if name.endswith('.exe') else name
+
+
+def _git_label(args):
+    index = 0
+    while index < len(args):
+        arg = _unquote(args[index])
+        low = arg.lower()
+        if arg == '-c':
+            value = _unquote(args[index + 1]).lower() if index + 1 < len(args) else ''
+            if value.startswith('core.hookspath='):
+                return 'git -c core.hooksPath'
+            index += 2
+        elif arg == '-C' or low in {'--git-dir', '--work-tree', '--namespace',
+                                    '--super-prefix', '--config-env'}:
+            if low == '--config-env' and index + 1 < len(args) and \
+                    _unquote(args[index + 1]).lower().startswith('core.hookspath='):
+                return 'git --config-env core.hooksPath'
+            index += 2
+        elif low.startswith('--config-env=') and 'core.hookspath' in low:
+            return 'git --config-env core.hooksPath'
+        elif arg.startswith('-'):
+            index += 1
+        else:
+            break
+    if index >= len(args):
+        return None
+    sub = _unquote(args[index]).lower()
+    raw = args[index + 1:]
+    rest = [_unquote(word) for word in raw]
+    low_rest = [word.lower() for word in rest]
+    # Quoted words (commit messages) are skipped; only bare options count.
+    if any(word.lower().startswith('--no-verify') for word in raw):
+        return 'git --no-verify'
+    if sub in {'filter-repo', 'filter-branch'}:
+        return 'git ' + sub
+    if sub == 'reflog' and next((w for w in low_rest if not w.startswith('-')), '') == 'expire':
+        return 'git reflog expire'
+    if sub == 'gc' and any(word.startswith('--prune') for word in low_rest):
+        return 'git gc --prune'
+    if sub == 'config' and any(word == 'core.hookspath' or word.startswith('core.hookspath=')
+                               for word in low_rest):
+        return 'git config core.hooksPath'
+    if sub == 'push':
+        for word, low in zip(rest, low_rest):
+            if low.startswith('--force'):
+                return 'git push --force'
+            if low == '--delete' or re.fullmatch(r'-[a-z]*d[a-z]*', low):
+                return 'git push --delete'
+            if re.fullmatch(r'-[a-z]*f[a-z]*', low):
+                return 'git push --force'
+            if word.startswith('+') or word.startswith(':'):
+                return 'git push +refspec/:ref'
+    return None
+
+
+def dangerous_git_command(command, depth=0):
+    """Return a label if the command string runs a denied git operation, else None.
+
+    A pattern guard against mistakes. It reads only the command text, so scripts,
+    aliases, variables and `python -c` bodies are not visible to it.
+    """
+    for segment in _SEGMENT_SPLIT.split(command):
+        words = _command_words(segment)
+        index = 0
+        while index < len(words) and (_unquote(words[index]).lower() in _LEADING_WORDS
+                                      or _ENV_ASSIGNMENT.match(words[index])):
+            index += 1
+        if index >= len(words):
+            continue
+        program = _program_name(words[index])
+        label = None
+        if program == 'git':
+            label = _git_label(words[index + 1:])
+        elif program == 'git-filter-repo':
+            label = 'git filter-repo'
+        elif program in _WRAPPER_SHELLS and depth < 3:
+            for position in range(index + 1, len(words)):
+                if _unquote(words[position]).lower() in _WRAPPER_FLAGS:
+                    label = dangerous_git_command(
+                        _unquote(' '.join(words[position + 1:])), depth + 1)
+                    break
+        if label:
+            return label
+    return None
+
+
+def shell_deny_reason(payload, tool):
+    if payload.get('tool_name') not in SHELL_COMMAND_TOOLS:
+        return None
+    args = payload.get('parameters' if tool == 'cline' else 'tool_input', {})
+    if 'command' not in args and 'cmd' not in args:
+        return None  # No command text was sent, so there is nothing to inspect.
+    command = args.get('command', args.get('cmd'))
+    if not isinstance(command, str):
+        return SHELL_INVALID_MESSAGE
+    label = dangerous_git_command(command)
+    return SHELL_DENY_MESSAGE.format(label) if label else None
+
+
 def guard_reason(payload, tool):
     if agents_md_status() != 'ok':
         return MISSING_REASON_MESSAGE
     key = 'taskId' if tool == 'cline' else 'session_id'
     if is_marked(tool, payload[key]) or reads_only_current_contract(payload, tool):
-        return None
+        return shell_deny_reason(payload, tool)
     return REASON_MESSAGE
 
 
