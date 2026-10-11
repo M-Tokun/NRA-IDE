@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import sys
 import tempfile
+import types
 import unittest
 from unittest import mock
 
@@ -210,20 +211,24 @@ class OperationApprovalTests(unittest.TestCase):
             result = approval.check_request(self.request, self.request, b'test-only-authenticated-receipt', now=1000, **kwargs)
             self.assertEqual(result.reason, 'APPROVAL_BACKEND_FAILURE')
     def test_read_race_rejected(self):
-        original = os.lstat
-        calls = 0
+        # lstat の呼出し回数は OS で違う（POSIX の realpath も lstat を呼ぶ）。
+        # 回数ではなく「読取り後（fstat が2回済んだ後）の lstat」で差し替える。
+        original_lstat, original_fstat = os.lstat, os.fstat
+        fstat_calls = 0
+        def counting_fstat(fd):
+            nonlocal fstat_calls
+            fstat_calls += 1
+            return original_fstat(fd)
         def changed(path):
-            nonlocal calls
-            info = original(path)
-            calls += 1
-            if calls == 2:
-                replacement = mock.Mock(wraps=info)
-                for key in ('st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns'):
-                    setattr(replacement, key, getattr(info, key))
+            info = original_lstat(path)
+            if fstat_calls >= 2:
+                keys = ('st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns', 'st_mode')
+                replacement = types.SimpleNamespace(**{key: getattr(info, key) for key in keys})
                 replacement.st_ino += 1
                 return replacement
             return info
-        with mock.patch.object(approval.os, 'lstat', side_effect=changed):
+        with mock.patch.object(approval.os, 'fstat', side_effect=counting_fstat), \
+                mock.patch.object(approval.os, 'lstat', side_effect=changed):
             with self.assertRaises(git.ManifestError) as caught:
                 approval.snapshot_file(self.file)
         self.assertEqual(str(caught.exception), 'TARGET_CHANGED_DURING_READ')

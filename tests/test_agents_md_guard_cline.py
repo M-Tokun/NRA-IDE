@@ -125,6 +125,8 @@ class ClineGuardTests(unittest.TestCase):
         p=subprocess.run([exe,'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',str(self.root/'.clinerules'/'hooks'/(event+'.ps1'))],input=json.dumps(payload),text=True,encoding='utf-8',capture_output=True,cwd=cwd,env=env,timeout=20)
         self.assertEqual(p.returncode,0,p.stderr)
         return json.loads(p.stdout.lstrip('\ufeff'))
+    # .ps1 フックは Windows 用（パスを '\' 区切りで組み立てる）。Linux の pwsh では解決できない。
+    @unittest.skipUnless(os.name=='nt','Windows hook entrypoints are Windows-only')
     def test_windows_entrypoints_from_nested_directory(self):
         nested=self.prepare_windows()
         shells=[path for name in ('pwsh','powershell.exe') if (path:=shutil.which(name))]
