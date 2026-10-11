@@ -2607,7 +2607,7 @@ k
 ICRA 2020 - Super-Pixel Sampler: a Data-Driven Approach for Depth Sampling and Reconstruction.
 YouTube
  · 
-Ilya Tсenov
+Ilya Tcenov
 「IMU誤差ベクトルをポアンカレ球上の座標へ写像する」最小数理モデルを見ますか？
 
 はい
