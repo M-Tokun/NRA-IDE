@@ -14,7 +14,7 @@ PreToolUse / BeforeToolは全ツール名に適用する。未読時に通すの
 
 ## 起動と有効化
 
-ClaudeとGeminiの起動コマンドは、それぞれCLAUDE_PROJECT_DIR / GEMINI_PROJECT_DIRからスクリプトの絶対パスを組み立てる。Codexは既存のgitルート取得コマンドを維持する。Pythonが必要であり、CodexのWindows用コマンドではpwshも必要になる。ClineのWindows入口はPSScriptRootでhelperを解決し、UTF-8入出力でPythonを呼ぶ。Pythonの起動・結果の検証に失敗するとcancel:trueを返す。Windows PowerShellとPowerShell 7で入口を局所検証した。
+ClaudeとGeminiの起動コマンドは、それぞれCLAUDE_PROJECT_DIR / GEMINI_PROJECT_DIRからスクリプトの絶対パスを組み立てる。Codexはgitでリポジトリルートを取得して起動する。CodexのWindows用コマンド（commandWindows）は、起動するシェルに依存しないよう`$`を含まない`python -B -c`の形にした（2026-10-11）。外側のシェルがPowerShellだと`$root`が展開されて起動に失敗し、Codexではhookの失敗がツール呼出しを止めないため、ガードが黙って無効になりうる。PythonとGitが必要で、pwshは不要である。ClineのWindows入口はPSScriptRootでhelperを解決し、UTF-8入出力でPythonを呼ぶ。Pythonの起動・結果の検証に失敗するとcancel:trueを返す。Windows PowerShellとPowerShell 7で入口を局所検証した。
 
 設定更新後は、各クライアントで設定を再読込し、セッション開始・再開のhookを発火させる。Codexではhook定義を変更したため、/hooksで変更した定義を確認して信頼する必要がある。AIがtrusted_hashを自動更新する手順は採用しない。
 
