@@ -2,7 +2,7 @@
 
 > このノートと `sections/` は `scripts/generate_obsidian_map.ps1` による生成物です。既存の Markdown 本文は変更しません。
 
-対象 Markdown: 417 ファイル
+対象 Markdown: 418 ファイル
 
 ## セクション
 
@@ -19,7 +19,7 @@
 - [ground](sections/11_ground.md) — 20 ファイル
 - [local_reportsDirectory](sections/12_local_reportsDirectory.md) — 122 ファイル
 - [multi-physics-safety-gate](sections/13_multi-physics-safety-gate.md) — 4 ファイル
-- [note](sections/14_note.md) — 104 ファイル
+- [note](sections/14_note.md) — 105 ファイル
 - [nra-core](sections/15_nra-core.md) — 21 ファイル
 - [nra-ide-cancer-treatment-support-system](sections/16_nra-ide-cancer-treatment-support-system.md) — 29 ファイル
 - [nra-tcm-parser](sections/17_nra-tcm-parser.md) — 2 ファイル
