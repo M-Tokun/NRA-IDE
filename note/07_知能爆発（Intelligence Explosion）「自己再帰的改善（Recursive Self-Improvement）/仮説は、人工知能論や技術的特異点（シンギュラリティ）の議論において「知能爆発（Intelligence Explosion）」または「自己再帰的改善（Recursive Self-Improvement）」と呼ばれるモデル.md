@@ -1,5 +1,11 @@
 ---
 id: EXP-DIALOG-20261010
+kind: dialogue-log
+created: 2026-10-10
+status: merged
+title: 知能爆発・自己再帰的改善の仮説についての対話
+evidence: generated
+related: [EXP-GEMINI-20261010]
 ---
 
 Gemini との会話

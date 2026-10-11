@@ -1,5 +1,11 @@
 ---
 id: EXP-AISTUDIO-20261010
+kind: poc-log
+created: 2026-10-10
+status: merged
+title: GE-01/GE-04・GE-03 の PoC と個別記録案
+evidence: generated
+related: [EXP-GEMINI-20261010, EXP-REVIEW-20261010]
 ---
 AI_Studio会話
 

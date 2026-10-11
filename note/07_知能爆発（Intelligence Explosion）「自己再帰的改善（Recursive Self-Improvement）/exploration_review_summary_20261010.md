@@ -9,7 +9,7 @@ origin: Gemini対話 → 結（ChatGPT）による評価 → AI Studio による
 evidence: executed   # 本記録の数値はすべて実行ログに基づく（生成値・未実行値を含まない）
 triggers: [可能性探索, 双曲空間, ポアンカレ円板, 模式図, 実行検証, 証拠水準, 検索半径, AST差分, 局所パッチ]
 aliases: [総括, 精査記録, 三段階評価, 生成と実証の分離]
-related: [EXP-GEMINI-20261010, EXP-GE01-04, EXP-GE03, possibility_exploration_record_method_20261010-1904.md]
+related: [EXP-GEMINI-20261010, EXP-GE01-04, EXP-GE03, EXP-METHOD-20261010]
 ---
 
 # 計算構造を変える可能性の探索 — 総体の纏めと精査結果

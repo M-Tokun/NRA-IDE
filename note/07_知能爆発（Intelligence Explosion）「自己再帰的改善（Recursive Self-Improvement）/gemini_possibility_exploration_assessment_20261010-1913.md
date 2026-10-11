@@ -8,7 +8,7 @@ title: 計算構造を変える可能性の探索
 origin: Gemini対話 → 結による評価 → 記録方法の再検討
 triggers: [可能性探索, 計算構造, メタ構造, 情報の隣接化, 差分更新, 局所更新, 多元的正解, 分散エッジ, 自己改善]
 aliases: [最適化の追求, 計算パラダイム, 双曲空間, ポアンカレ, メタデータ, 構造的探索]
-related: [possibility_exploration_record_method_20261010-1904.md]
+related: [EXP-METHOD-20261010]
 ---
 
 # 計算構造を変える可能性の探索 — 現時点の判断記録
