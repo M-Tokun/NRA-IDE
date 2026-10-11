@@ -135,7 +135,9 @@ def command_reads_agents_md(value):
 
 
 def load_payload(stream, tool):
-    payload = json.load(stream)
+    # Hosts send UTF-8; the locale default (cp932 on Japanese Windows) breaks non-ASCII paths.
+    raw = stream.buffer.read() if hasattr(stream, 'buffer') else stream.read()
+    payload = json.loads(raw.decode('utf-8') if isinstance(raw, bytes) else raw)
     if not isinstance(payload, dict):
         raise ValueError('Hook payload must be an object')
     if tool == 'cline':
