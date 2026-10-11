@@ -16,6 +16,8 @@ SPEC.loader.exec_module(status)
 
 class SandboxStatusTests(unittest.TestCase):
     def setUp(self):
+        # local_reports/ は .gitignore で除外されており、clone 直後（CI）には存在しない。
+        (ROOT / 'local_reports').mkdir(exist_ok=True)
         self.temporary = tempfile.TemporaryDirectory(dir=ROOT / 'local_reports', prefix='sandbox-test-')
         self.addCleanup(self.temporary.cleanup)
         self.store = status.Store(Path(self.temporary.name) / 'state')

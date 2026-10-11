@@ -154,6 +154,8 @@ class ClineGuardTests(unittest.TestCase):
         (self.root/'skills'/'agents-md-guard'/'cline_session_start.py').write_text('import sys; print(\'{"cancel":false,"contextModification":"unrecorded"}\'); sys.exit(2)',encoding='utf-8')
         out = self.ps(exe,'TaskStart',{'taskId':'test-1'},nested)
         self.assertTrue(out['cancel']);self.assertEqual(out.get('contextModification'),'')
+    # .kilo/ は個人設定で .gitignore 対象のため、clone 直後や未導入の環境では存在しない。
+    @unittest.skipUnless((ROOT/'.kilo/kilo.jsonc').is_file(),'.kilo/kilo.jsonc is local-only and not present')
     def test_kilo_project_shell_asks(self):
         cfg=json.loads((ROOT/'.kilo/kilo.jsonc').read_text(encoding='utf-8'))
         self.assertEqual(cfg['permission']['bash'],'ask')
