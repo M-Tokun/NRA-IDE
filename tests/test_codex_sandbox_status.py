@@ -196,6 +196,27 @@ class SandboxStatusTests(unittest.TestCase):
         self.assertEqual(records[-1]['verified_call'], 'call-1')
         self.assertNotIn(status.PROBE, audit)
 
+    def test_plain_stdout_response_without_exit_code_is_accepted_only_with_token_and_location(self):
+        # VS Code版Codexは標準出力だけの文字列を返す（2026-10-11観測）。
+        observed = status.TOKEN + '\r\n\r\nPath\r\n----\r\n' + str(ROOT) + '\r\n\r\n'
+        self.probe_result(observed)
+        self.assertEqual(self.record()['result'], 'success')
+        self.assertEqual(self.record()['reason'], 'probe_completed_exit_code_unavailable')
+
+    def test_plain_stdout_response_missing_token_or_location_stays_unverified(self):
+        for text in (status.TOKEN + '\r\n', str(ROOT) + '\r\n', '# AGENTS.md\r\n本文',
+                     status.TOKEN + '\r\nC:\\other\r\n'):
+            with self.subTest(text=text):
+                self.store = status.Store(Path(self.temporary.name) / ('state-' + str(abs(hash(text)))))
+                self.probe_result(text)
+                self.assertEqual(self.record()['result'], 'unknown')
+                self.assertEqual(self.record()['reason'], 'probe_result_unverified')
+
+    def test_plain_stdout_start_error_is_a_failure(self):
+        self.probe_result('exec_command failed: CreateProcess helper_unknown_error: setup refresh had errors')
+        self.assertEqual(self.record()['result'], 'failure')
+        self.assertEqual(self.record()['reason'], 'sandbox_start_error')
+
     def test_redirected_state_directory_is_rejected_before_mkdir(self):
         with mock.patch.object(Path, 'resolve', return_value=ROOT):
             with self.assertRaises(ValueError):

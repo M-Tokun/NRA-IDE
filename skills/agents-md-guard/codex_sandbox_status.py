@@ -194,6 +194,20 @@ def failed_to_start(response):
     return any(item in text for item in FAILURES)
 
 
+def plain_output(response):
+    """VS Code版Codexは標準出力だけの文字列を返す（終了コードなし、2026-10-11観測）。"""
+    if not isinstance(response, str):
+        return None
+    # 起動確認の本物の出力に完了見出しは現れない。見出しらしい行を含む出力は成功の根拠にしない。
+    if re.search(r'^(Chunk ID:|Wall time:|Process exited with code|Final output:)', response, re.M):
+        return None
+    try:
+        json.loads(response)
+    except (ValueError, TypeError):
+        return response
+    return None
+
+
 def result_of_probe(payload):
     response = payload.get('tool_response')
     output, code = response_parts(response)
@@ -201,11 +215,18 @@ def result_of_probe(payload):
         return 'failure', 'sandbox_start_error'
     if code is not None and code != 0:
         return 'failure', 'probe_nonzero_exit'
+    plain = plain_output(response) if code is None else None
+    if plain is not None:
+        output = plain
     lines = [line.strip() for line in output.splitlines()]
     directory = payload['tool_input'].get('workdir', payload['cwd'])
     location_seen = any(os.path.normcase(line) == os.path.normcase(directory) for line in lines)
-    if code == 0 and TOKEN in lines and location_seen:
-        return 'success', 'probe_completed'
+    if TOKEN in lines and location_seen:
+        if code == 0:
+            return 'success', 'probe_completed'
+        if plain is not None:
+            # 終了コードは得られない。トークンと作業場所の両方が出力された事実だけを根拠にする。
+            return 'success', 'probe_completed_exit_code_unavailable'
     return 'unknown', 'probe_result_unverified'
 
 
