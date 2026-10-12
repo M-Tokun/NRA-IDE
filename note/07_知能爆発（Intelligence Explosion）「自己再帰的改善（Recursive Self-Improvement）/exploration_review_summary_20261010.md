@@ -260,6 +260,7 @@ related: [EXP-GEMINI-20261010, EXP-REVIEW-20261010]
 ## 10. 未確認事項
 
 - Nickel & Kiela（NeurIPS 2017）、Gupta et al.（Findings of ACL 2024）の書誌は今回照合していない。
+- 注記（2026-10-12 追加、承認済み）：Nickel & Kiela は照合済み。Poincaré Embeddings for Learning Hierarchical Representations, NeurIPS 2017, arXiv:1705.08039（Niels Nickel と Douwe Kiela、Facebook AI Research / University of Oxford）。Gupta et al. は未照合のまま。
 - 学習した埋め込みでの GE-03 の見落とし率。
 - 統合システムの性能、現実の自己改善連鎖の成立。
 
