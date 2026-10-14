@@ -1,8 +1,8 @@
 # Gate: NRA-IDEの公理的基盤
 
-> **旧体系・非正典。** このディレクトリは旧gateモデルを保存している。下記の強制・不変・通過必須やゾーン説明は当時の記述であり、現行のAI作業規則や安全性の保証ではない。操作契約は[AGENTS.md](../../AGENTS.md)、現行定義は[AXIOMS.md](../../theory/AXIOMS.md)、状態機械は[参照実装](../../nra-core/foundations/NRA-IDE_Architecture_public.py)による。
+> **旧体系・非正典。** このディレクトリは旧gateモデルを保存している。下記の強制・不変・通過必須やゾーン説明は当時の記述であり、現行のAI作業規則や安全性の保証ではない。操作契約は[AGENTS.md](../../../../AGENTS.md)、現行定義は[AXIOMS.md](../../../../theory/AXIOMS.md)、状態機械は[参照実装](../../../../nra-core/foundations/NRA-IDE_Architecture_public.py)による。
 >
-> 既定の閾値JSONの境界は0.40・0.99・1.00であり、下記の0.70やゾーンDは旧記述である。R=0.995でコードは`EMERGENCY_BRAKE`、JSONは`FAIL_CLOSED`、図版は`PERMIT_WITH_CAVEAT`となる。コードはJSONの`action`を参照しない。[不一致と位置付け](../../config/structural_zones_JP.md)を参照する。動作の現行化や旧体系内部の不一致解消は未実装である。
+> 既定の閾値JSONの境界は0.40・0.99・1.00であり、下記の0.70やゾーンDは旧記述である。R=0.995でコードは`EMERGENCY_BRAKE`、JSONは`FAIL_CLOSED`、図版は`PERMIT_WITH_CAVEAT`となる。コードはJSONの`action`を参照しない。[不一致と位置付け](../../../../config/legacy/v1/structural_zones_JP.md)を参照する。動作の現行化や旧体系内部の不一致解消は未実装である。
 
 ## [メタデータ]
 
@@ -232,7 +232,7 @@ new_state, telemetry = wrapper.update(state, context)
 
    責任=人間 / AI=道具 / 決定権限=人間のみ
 
-完全な公理定義: [nra_gate_axiom_JP.md](./nra_gate_axiom_JP.md)参照
+完全な公理定義: [nra_gate_axiom_JP.md](../../../jp/nra_gate_axiom_JP.md)参照
 
 ---
 

@@ -1,6 +1,6 @@
 # 📘 **NRA-IDE 構造図版**
 
-> **旧体系・非正典。** 本図版と関連JSONは旧Zone A/B/Cモデルの資料であり、現行正典の状態機械や安全判定の根拠として使用しない。現行定義は[AXIOMS.md](../theory/AXIOMS.md)と[axioms.json](../theory/axioms.json)、参照実装は[NRA-IDE_Architecture_public.py](../nra-core/foundations/NRA-IDE_Architecture_public.py)による。
+> **旧体系・非正典。** 本図版と関連JSONは旧Zone A/B/Cモデルの資料であり、現行正典の状態機械や安全判定の根拠として使用しない。現行定義は[AXIOMS.md](../../../theory/AXIOMS.md)と[axioms.json](../../../theory/axioms.json)、参照実装は[NRA-IDE_Architecture_public.py](../../../nra-core/foundations/NRA-IDE_Architecture_public.py)による。
 >
 > 既知の不一致: delta=0.995、tau=1（R=0.995）で、基盤JSONは`FAIL_CLOSED`、下記の旧図版は`PERMIT_WITH_CAVEAT`、日英の閾値consumerは`EMERGENCY_BRAKE`を返す。consumerはJSONの`action`を参照せず、コードに固定された動作を使う。これらの名称の同値対応は定義されていない。沈黙・停止の説明や`no_history`は旧資料の記述であり、現行の規範ではない。プリセットの`r_op=1.00`は現行の`R_handoff < R_irrev < 1.0`を満たさない。
 >

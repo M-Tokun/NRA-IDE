@@ -1,8 +1,8 @@
 # Gate: Axiomatic Foundation of NRA-IDE
 
-> **Legacy / non-normative.** This directory preserves an earlier gate model. Mandatory/immutable labels and zone descriptions below are historical text, not current agent operating rules or canonical safety guarantees. Follow [AGENTS.md](../../AGENTS.md) for operations, [AXIOMS.md](../../theory/AXIOMS.md) for current definitions, and [the reference implementation](../../nra-core/foundations/NRA-IDE_Architecture_public.py) for the current state machine.
+> **Legacy / non-normative.** This directory preserves an earlier gate model. Mandatory/immutable labels and zone descriptions below are historical text, not current agent operating rules or canonical safety guarantees. Follow [AGENTS.md](../../../../AGENTS.md) for operations, [AXIOMS.md](../../../../theory/AXIOMS.md) for current definitions, and [the reference implementation](../../../../nra-core/foundations/NRA-IDE_Architecture_public.py) for the current state machine.
 >
-> The default threshold JSON has cutoffs 0.40, 0.99 and 1.00; the 0.70 and Zone D descriptions below are legacy text. At R=0.995 the code returns `EMERGENCY_BRAKE`, while JSON says `FAIL_CLOSED` and the diagram says `PERMIT_WITH_CAVEAT`. The code ignores JSON `action` keys. See [the discrepancy notice](../../config/structural_zones.md). No runtime migration or resolution of these legacy differences is claimed.
+> The default threshold JSON has cutoffs 0.40, 0.99 and 1.00; the 0.70 and Zone D descriptions below are legacy text. At R=0.995 the code returns `EMERGENCY_BRAKE`, while JSON says `FAIL_CLOSED` and the diagram says `PERMIT_WITH_CAVEAT`. The code ignores JSON `action` keys. See [the discrepancy notice](../../../../config/legacy/v1/structural_zones.md). No runtime migration or resolution of these legacy differences is claimed.
 
 ## [METADATA]
 
@@ -230,7 +230,7 @@ new_state, telemetry = wrapper.update(state, context)
 
    RESPONSIBILITY=HUMAN / AI=TOOL / DECISION_AUTHORITY=HUMAN_ONLY
 
-For complete axiom definitions: See [nra_gate_axiom.md](./nra_gate_axiom.md)
+For complete axiom definitions: See [nra_gate_axiom.md](../../../en/nra_gate_axiom.md)
 
 ---
 

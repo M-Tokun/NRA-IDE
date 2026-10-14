@@ -1,6 +1,6 @@
 # 📘 **Structural Diagrams for NRA-IDE**
 
-> **Legacy / non-normative.** These diagrams and the associated JSON files preserve an earlier Zone A/B/C model. They are not the current canonical state machine and must not be used as evidence of current safety classification. Current definitions are in [AXIOMS.md](../theory/AXIOMS.md) and [axioms.json](../theory/axioms.json); the reference implementation is [NRA-IDE_Architecture_public.py](../nra-core/foundations/NRA-IDE_Architecture_public.py).
+> **Legacy / non-normative.** These diagrams and the associated JSON files preserve an earlier Zone A/B/C model. They are not the current canonical state machine and must not be used as evidence of current safety classification. Current definitions are in [AXIOMS.md](../../../theory/AXIOMS.md) and [axioms.json](../../../theory/axioms.json); the reference implementation is [NRA-IDE_Architecture_public.py](../../../nra-core/foundations/NRA-IDE_Architecture_public.py).
 >
 > Known discrepancy at delta=0.995, tau=1 (R=0.995): foundation JSON says `FAIL_CLOSED`, the historical diagram below says `PERMIT_WITH_CAVEAT`, and both threshold consumers return `EMERGENCY_BRAKE`. The consumers use fixed code actions and ignore the JSON `action` keys. These labels have no declared equivalence mapping. The diagram's silence/halt statements and `no_history` invariant are historical descriptions, not current normative rules. Preset `r_op=1.00` does not satisfy the current `R_handoff < R_irrev < 1.0` condition.
 >
