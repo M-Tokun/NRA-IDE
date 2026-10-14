@@ -7,5 +7,7 @@
   "editor.unicodeHighlight.allowedLocales": {
     "ja": true
   },
-  "git.path": "C:\\git\\cmd\\git.exe"
+  "git.path": "C:\\git\\cmd\\git.exe",
+  // .agent_state/ 内のAI作業用worktreeを別リポジトリとして検出しない（ソース管理に2つ目が出る原因）
+  "git.repositoryScanIgnoredFolders": ["node_modules", ".agent_state"]
 }
