@@ -48,20 +48,31 @@ The normative source and docs mirror must have identical SHA-256 values. Locatio
 
 | Directory | Contents and authority |
 |---|---|
+| [`.claude/`](./.claude/) | Claude Code hook settings registered for the shared AGENTS.md read guard |
+| [`.clinerules/`](./.clinerules/) | Cline bootstrap rules and Windows hook scripts for the shared AGENTS.md read guard |
+| [`.codex/`](./.codex/) | Codex CLI hook settings and hook commands for the shared AGENTS.md read guard |
 | [`.devcontainer/`](./.devcontainer/) | Dev Container and sandbox configuration |
+| [`.gemini/`](./.gemini/) | Gemini CLI hook settings registered for the shared AGENTS.md read guard |
 | [`.github/`](./.github/) | CI workflows and GitHub templates |
+| [`.githooks/`](./.githooks/) | Repository Git hooks, including the pre-push guard |
+| [`audit/`](./audit/) | Dated audit and completion records; non-canonical unless explicitly promoted |
 | [`cascade-failure-prevention/`](./cascade-failure-prevention/) | Domain or experimental gate modules; not canonical by location |
 | [`config/`](./config/) | v2.4 declaration-based configuration; unset defaults fail closed, SOFTWARE_DEMO is unvalidated, legacy/v1 preserves old snapshots |
+| [`dictionary/`](./dictionary/) | Bilingual NRA-IDE dictionary; explanatory reference subordinate to canonical documents |
 | [`docs/`](./docs/) | Public documentation, generated mirrors, and explanatory assets |
 | [`examples/`](./examples/) | Illustrative demos under predefined assumptions; not measuring instruments or safety proofs |
 | [`gate/`](./gate/) | Current EN/JP entry points share a stateful adapter to the normative reference; other variants and legacy/v1 snapshots remain historical |
 | [`ground/`](./ground/) | Grounding and operational rules for facts, provenance, missing values, physical constraints, and thresholds |
+| [`local_reportsDirectory/`](./local_reportsDirectory/) | Dated local review reports; working records, non-canonical unless explicitly promoted |
+| [`MD-app/`](./MD-app/) | Local HTML document viewer utilities; not normative |
 | [`multi-physics-safety-gate/`](./multi-physics-safety-gate/) | Domain implementation; name does not guarantee safety or canonical conformance |
 | [`note/`](./note/) | Development history, conversations, and architecture exploration; non-canonical unless explicitly promoted |
 | [`nra-core/`](./nra-core/) | Research history, papers, examples, visualizations, extensions, and the explicitly identified normative reference source |
 | [`nra-ide-cancer-treatment-support-system/`](./nra-ide-cancer-treatment-support-system/) | High-risk domain research/application material; not a substitute for qualified clinical judgment and not validated by location |
 | [`nra-tcm-parser/`](./nra-tcm-parser/) | Text-processing and long-document tools; not a structural measurement authority |
+| [`obsidian-map/`](./obsidian-map/) | Obsidian vault map sections; navigation aid, not canonical |
 | [`scripts/`](./scripts/) | Utility and automation scripts |
+| [`skills/`](./skills/) | Shared AI-agent skills and helper tools referenced by `AGENTS.md`; not canonical by location |
 | [`src/`](./src/) | Implementation and pipeline variants; non-normative unless explicitly promoted and tested |
 | [`tests/`](./tests/) | Conformance and regression tests |
 | [`theory/`](./theory/) | Canonical and high-precedence theory documents; internal precedence still follows the order above |
@@ -87,6 +98,8 @@ The normative source and docs mirror must have identical SHA-256 values. Locatio
 | [llms.md](./llms.md) | AI interpretation and operational gate subordinate to higher canonical documents |
 | [llms.txt](./llms.txt) | Compact plain-text AI context entry |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guidelines |
+| [WEB_RESEARCH_PROTOCOL.md](./WEB_RESEARCH_PROTOCOL.md) | Public-Web research boundary and evidence-state classification |
+| [CODEX_CLI_BROWSER_WORKFLOW.md](./CODEX_CLI_BROWSER_WORKFLOW.md) | Codex CLI and browser division-of-work, verification, and fix procedure |
 | [CITATION.cff](./CITATION.cff) | Citation metadata |
 | [LICENSE](./LICENSE) | MIT License |
 

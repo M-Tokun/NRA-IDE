@@ -1,4 +1,3 @@
-<!-- FILE: README_20260711_0348.md -->
 <!-- TARGET: /README.md -->
 <!-- UPDATED: 2026-10-06 JST -->
 
