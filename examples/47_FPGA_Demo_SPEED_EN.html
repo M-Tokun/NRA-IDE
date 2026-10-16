@@ -330,7 +330,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 const STATES = {
   S_IDLE:     {jp:'Idle State',    color:'#00c9a0', desc:'Reset-safe state. Waiting for valid_in. Starting point of the NRA process.',                   badge:[['SAFE','teal']]},
   S_OBSERVE:  {jp:'Input Observation',    color:'#40a0e8', desc:'Capture input data. Accept only values that pass through the Causal Diode.',           badge:[['CAPTURE','blue']]},
-  S_COMPUTE:  {jp:'Intensional Computation',  color:'#a060e8', desc:'IDE four-stage pipeline processing. Q16.16 fixed-point computation. No error accumulation.',        badge:[['PIPE×4','purple']]},
+  S_COMPUTE:  {jp:'Intensional Computation',  color:'#a060e8', desc:'Four-stage educational FSM; values are displayed as Q16.16. Arithmetic accuracy and hardware speed are unverified.',        badge:[['PIPE×4','purple']]},
   S_VALIDATE: {jp:'Integrity Validation',  color:'#e8a020', desc:'Evaluate THR_LO ≤ value ≤ THR_HI with the threshold detector. Complete boundary check.',        badge:[['CHECK','amber']]},
   S_EMIT:     {jp:'Output',        color:'#40d860', desc:'Integrity confirmed. Emit result. Irreversibility: this path does not return to S_OBSERVE.',   badge:[['VALID','green']]},
   S_CONFESS:  {jp:'Limit Declaration',    color:'#e84040', desc:'Integrity violation detected. confess_flag=1. Force output to zero. Do not conceal inconsistency.', badge:[['Fail-Closed suppression','coral'],['confess_flag=1','coral']]}
@@ -348,6 +348,7 @@ let forceBreach = false;
 let inputVal    = 65536;  // Q16.16: 1.0
 // Hold the value observed in S_OBSERVE; validation (S_VALIDATE) and output (S_EMIT) use that same value.
 let heldVal = null;
+let heldLo=null, heldHi=null;
 let thrLo       = 32768;  // Q16.16: 0.5
 let thrHi       = 98304;  // Q16.16: 1.5
 let scopeData   = [];
@@ -547,7 +548,8 @@ function drawScope() {
 // === FSM transition logic ===
 function nextState() {
   const v = heldVal ?? inputVal;
-  const breach = forceBreach || (v < thrLo) || (v > thrHi);
+  const lo=heldLo??thrLo, hi=heldHi??thrHi;
+  const breach = forceBreach || ![v,lo,hi].every(Number.isSafeInteger) || lo>hi || v<lo || v>hi;
   switch (state) {
     case 'S_IDLE':     return 'S_OBSERVE';
     case 'S_OBSERVE':  return 'S_COMPUTE';
@@ -563,17 +565,18 @@ function step() {
   cycleCount++;
   const prev = state;
   state = nextState();
-  if (state === 'S_OBSERVE') heldVal = inputVal;
-  if (state === 'S_IDLE') heldVal = null;
+  if (state === 'S_OBSERVE') {heldVal=inputVal;heldLo=thrLo;heldHi=thrHi;}
+  if (state === 'S_IDLE') {heldVal=null;heldLo=null;heldHi=null;}
 
   if (state === 'S_EMIT')    emitCount++;
   if (state === 'S_CONFESS') confessCount++;
 
   // Update pipeline display
   const shown = heldVal ?? inputVal;
-  const hex = '0x' + shown.toString(16).padStart(4,'0').toUpperCase();
-  const q   = (shown / 65536).toFixed(4);
-  const breach = (shown < thrLo) || (shown > thrHi) || forceBreach;
+  const hex = Number.isSafeInteger(shown)?'0x'+shown.toString(16).padStart(4,'0').toUpperCase():'INVALID';
+  const q   = Number.isSafeInteger(shown)?(shown/65536).toFixed(4):'INVALID';
+  const lo=heldLo??thrLo,hi=heldHi??thrHi;
+  const breach=forceBreach||![shown,lo,hi].every(Number.isSafeInteger)||lo>hi||shown<lo||shown>hi;
 
   document.getElementById('pd-diode').textContent = hex;
   document.getElementById('pd-pipe').textContent  = q;
@@ -722,7 +725,7 @@ function resetSim() {
   autoRunning = false;
   document.getElementById('runDot').classList.remove('running');
   document.getElementById('btnAuto').classList.remove('active');
-  state = 'S_IDLE'; heldVal = null; cycleCount = 0; emitCount = 0; confessCount = 0; forceBreach = false;
+  state = 'S_IDLE'; heldVal = null; heldLo=null; heldHi=null; cycleCount = 0; emitCount = 0; confessCount = 0; forceBreach = false;
   scopeData = [];
   document.getElementById('confessOverlay').classList.remove('visible');
   document.getElementById('confessBanner').classList.remove('visible');
@@ -768,5 +771,6 @@ window.addEventListener('load', () => {
 });
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The state-transition timing and thresholds are illustrative, not performance figures of real hardware.<br>• The value observed in S_OBSERVE is held and used for both validation and output.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<p class="demo-caveat">FSM states are distinct from canonical boundary states. INTEGRITY RATE is emit/(emit+confess). Hardware performance and rounding errors are unverified.</p>
 </body>
 </html>

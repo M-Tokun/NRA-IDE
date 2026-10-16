@@ -159,7 +159,7 @@
         <div class="card-box">
           <div class="card-title">|r| ≪ k</div>
           <div class="color-ok">G(r) ≈ 0</div>
-          <div class="card-sub">Classical layer silent. No error explosion.</div>
+          <div class="card-sub">Small residuals suppress correction; stability needs separate validation.</div>
         </div>
         <div class="card-box">
           <div class="card-title">|r| ≫ k</div>
@@ -187,7 +187,7 @@
           <div class="stat-row"><span class="stat-key">G/r at r=0.1</span><span class="stat-val" id="stat-small">—</span></div>
           <div class="stat-row"><span class="stat-key">G/r at r=1.0</span><span class="stat-val" id="stat-mid">—</span></div>
           <div class="stat-row"><span class="stat-key">G/r at r=5.0</span><span class="stat-val" id="stat-large">—</span></div>
-          <div class="stat-row"><span class="stat-key">Saturation |r| ></span><span class="stat-val" id="stat-knee">—</span></div>
+          <div class="stat-row"><span class="stat-key">Linear asymptote |r| ></span><span class="stat-val" id="stat-knee">—</span></div>
         </div>
         <div class="leg-wrap">
           <span class="leg-ide">─</span> G(r) (NRA-IDE)<br>
@@ -204,7 +204,7 @@
   </div>
 
   <div id="tab-insights" class="tab-pane">
-    <div class="section-label">WHY NRA-IDE HYBRID IS SUPERIOR</div>
+    <div class="section-label">UNVALIDATED DESIGN AIMS</div>
     <div class="insight-grid" id="insight-grid"></div>
   </div>
 
@@ -285,31 +285,9 @@ const PATTERNS = [
     methods:['FDM','Spectral','RK4'] },
 ];
 
-const COMPARE_ROWS = [
-  ['Error accumulation (long-time)', 'Discretization error grows linearly/exponentially', 'F_IDE retains global state — no accumulation pathway'],
-  ['Double-estimation chain', 'Structurally generated in VQE etc.', 'x_{t-τ} is a recorded value — no chain possible'],
-  ['Curse of dimensionality', 'Exponential explosion in DMRG, QMC', 'IDE comprehensive computation handles the whole'],
-  ['Local precision vs global stability', 'One is always sacrificed', 'G(r) invokes classical only at local deviations'],
-  ['Stiffness / CFL condition', 'Human must design step sizes', 'G(r) auto-opens/closes gate from system residual'],
-  ['Discontinuities / phase transitions', 'Gibbs phenomenon / divergence', 'G(r) saturation responds automatically'],
-  ['Sign problem (QMC)', 'Unsolvable in principle', 'No dependency on statistical sampling'],
-  ['Reference baseline', 'Estimate vs estimate', 'Prediction vs past measured record (no back-calc)'],
-];
+const COMPARE_ROWS = [["Long-time error", "Depends on method, problem and step size", "Aim: reduce accumulation; not demonstrated here"], ["Estimation chains", "Depend on the algorithm and observations", "Recorded references aid traceability; they do not eliminate error propagation"], ["Scaling", "Problem- and method-dependent cost", "No complexity advantage is demonstrated"], ["Local precision / global stability", "Require method-specific analysis", "The proposed complement requires domain validation"], ["Stiffness / CFL restrictions", "Belong to the selected numerical realization", "G does not replace integration stability conditions"], ["Discontinuities", "May require specialized discretization", "G approaches r at large residuals; this is not a proof of shock handling"], ["Sampling / sign problems", "Depend on the model and formulation", "This visualization demonstrates no general solution"], ["Reference", "Determined by each algorithm", "The illustration compares a prediction with a retained past record"]];
 
-const INSIGHTS = [
-  { n:'01', title:'Foundation Is Never Released',
-    body:'F_IDE continuously holds the global state space. The classical layer only intervenes temporarily at locations of large deviation. Not handing the whole system to classical computation prevents explosion.' },
-  { n:'02', title:'Reference Point Is a Measured Record',
-    body:'r = x̃_{t+1} − x_{t-τ}. The comparison is "prediction vs past record" — not "estimate vs estimate". There is no pathway by design through which errors can mutate.' },
-  { n:'03', title:'System-Self-Determining Gate',
-    body:'G(r) removes the need for humans to design "where to call classical." The system\'s own residual auto-opens and closes the gate. Structurally resolves FDM\'s CFL condition and RK4\'s stiffness problem.' },
-  { n:'04', title:'Single Continuously Differentiable Function',
-    body:'"Small-fluctuation suppression" and "large-deviation tolerance" are realized in a single continuously differentiable function G(r). No discontinuity from artificial if-clause cutoffs.' },
-  { n:'05', title:'Mutual Weakness Coverage',
-    body:'IDE\'s weakness ("broad but coarse") is covered by classical assistance; classical\'s weakness ("error explosion") is avoided because IDE holds the whole. Mutual complementarity at the computational architecture layer.' },
-  { n:'06', title:'Single k Parameter Covers All Use Cases',
-    body:'Rough global survey (k large) · Precise phase transition tracking (k small) · Real-time control (middle). Not a binary switch — a continuous lever across the full application range.' },
-];
+const INSIGHTS = [{"n": "01", "title": "Declared global term", "body": "The global term has a proposed role. The displayed gate alone does not establish stability."}, {"n": "02", "title": "Retained reference", "body": "A past record aids provenance. Measurement and numerical errors still require analysis."}, {"n": "03", "title": "Residual-dependent gain", "body": "The gain depends on the residual and predeclared k. This does not remove stiffness or CFL constraints."}, {"n": "04", "title": "Continuous gate", "body": "G suppresses small residuals without an exact zero cutoff, and approaches r for large residuals."}, {"n": "05", "title": "Complementary design", "body": "The combination is a design proposal. Solver comparisons and accuracy validation are not implemented here."}, {"n": "06", "title": "Problem-specific parameters", "body": "Parameter choices and applicable domains require declaration and validation for each model."}];
 
 // ── Render ────────────────────────────────────────────
 const grid = document.getElementById('method-grid');
@@ -418,5 +396,6 @@ function switchTab(name){
   if(name==='gr') setTimeout(drawGr,50);
 }
 </script>
+<p>The comparison table lists unvalidated design aims, not executed solver benchmarks. G is nonzero for nonzero residuals and unbounded at large residuals. Legacy R(·) and delay τ are distinct from canonical R and absorption thickness.</p>
 </body>
 </html>

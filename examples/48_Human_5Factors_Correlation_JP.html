@@ -57,7 +57,7 @@ h1{margin:0;font-size:24px;}
       
       <h2 class="mt-24">NRA-IDE 監視</h2>
       <div class="meter">
-        <div>個別R（平均） <span id="rInd" class="float-r">0.00</span></div>
+        <div>個別比の最大 <span id="rInd" class="float-r">0.00</span></div>
         <div class="bar"><div id="fillInd" class="fill bg-green-grad" style="width:0%"></div></div>
       </div>
       <div class="meter">
@@ -74,7 +74,10 @@ h1{margin:0;font-size:24px;}
   </div>
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.70,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // 5要素: base=基準値、range=個別偏差(indDevs)の正規化に用いる想定変動幅。出典・実測データへの較正根拠は不記載（デモ用の仮定値）。
 const vars = [
   {name:"深部体温", unit:"°C", base:36.8, range:1.4},
@@ -108,7 +111,7 @@ function computeR(vals) {
   // 個別偏差：|実測値-base|をvars[i].range（想定変動幅）で正規化し、最大値のみ採用。
   const indDevs = vals.map((v,i) => Math.abs(v - vars[i].base) / vars[i].range);
   // 係数0.78の根拠不明・デモ用チューニング値（後段でτ除算されるスケール調整と推測されるが未確認）。
-  const rInd = Math.max(...indDevs) * 0.78;
+  const rInd = Math.max(...indDevs);
 
   // 相関期待からのずれ（概要相関）：core（深部体温）からskin/HR/waterを線形式で予測。
   // 係数1.15, 20, -0.6, -1.3, -0.7は生理学的出典を確認できず、根拠不明・デモ用の仮想相関モデル。
@@ -124,7 +127,7 @@ function computeR(vals) {
     Math.abs(water - expWater)/15
   ];
   // 係数1.05の根拠不明・デモ用チューニング値。
-  const rCorr = Math.max(...corrDevs) * 1.05;
+  const rCorr = Math.max(...corrDevs);
 
   return {rInd, rCorr};
 }
@@ -164,7 +167,7 @@ function update() {
     statusEl.textContent = 'Fail-Closed領域。関係が遊び幅を超えました。';
   } else if (rC >= 0.7 || rI >= 0.7) {
     statusEl.className = 'status-box warn';
-    statusEl.textContent = '注意域。相関Rが先行して上昇しています。';
+    statusEl.textContent = '注意域。'+(rI>=.7?'個別比が閾値以上。':'')+(rC>=.7?'相関比が閾値以上。':'');
   } else {
     statusEl.className = 'status-box ok';
     statusEl.textContent = '正常域。5要素の関係は遊びの中にあります。';
@@ -181,6 +184,8 @@ function update() {
     log.appendChild(line);
     if (log.children.length > 30) log.removeChild(log.firstChild);
   }
+
+boundary.observe('individual',rInd,tau,t);boundary.observe('correlation',rCorr,tau,t);NRADemoBoundary.paint(boundary,false,[],['status']);
 }
 
 function tick(stamp) {
@@ -198,13 +203,14 @@ document.getElementById('toggle').onclick = () => {
   running = !running;
   document.getElementById('toggle').textContent = running ? '一時停止' : '再生';
 };
-document.getElementById('reset').onclick = () => { t = 0; lastLogSlot = -1; };
-document.getElementById('tau').oninput = update;
+document.getElementById('reset').onclick = () => { t = 0; lastLogSlot = -1; boundary.newTrial(); update(); };
+document.getElementById('tau').oninput = ()=>{boundary.newTrial();update();};
 document.getElementById('speed').oninput = () => {};
 
 update();
 requestAnimationFrame(tick);
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・生理データは合成で、実測ではありません。5要素の関係式の係数に生理学の出典はありません。診断には使えません。</div>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>教材用の仮閾値です。現在の観測値と到達履歴を分けて表示します。AUX_STOPは補助条件であり対象破断ではありません。新試行でも前試行の記録は残り、構造復元を意味しません。</p><button type="button" onclick="startBoundaryTrial()">新しい教材試行</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

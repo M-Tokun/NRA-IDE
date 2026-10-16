@@ -4,385 +4,1065 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NRA-IDE Greenhouse VPD Mediated Correlation Simulation</title>
+<title>NRA-IDE Greenhouse VPD Correlation JP</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
 :root {
-  --bg:#050914; --s1:#0b1220; --s2:#111b2a; --bd:#24344c;
-  --tx:#d6e4f2; --mu:#62768a; --ok:#3dff9c; --watch:#69d6ff;
-  --warn:#ffd24a; --fail:#ff315f; --accent:#58d7ff;
+  --bg:#06100b;
+  --s1:#0b1711;
+  --s2:#112218;
+  --s3:#172d20;
+  --bd:#234532;
+  --tx:#cde8d6;
+  --mu:#587260;
+  --ok:#39ff85;
+  --warn:#ffd24a;
+  --fail:#ff3b5c;
+  --accent:#72ffb8;
+  --temp:#ff8c42;
+  --hum:#46c6ff;
+  --vpd:#ff4fb0;
+  --co2:#b7ff4a;
+  --light:#ffe066;
+  --water:#39ff85;
+  --ec:#b58cff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(88,215,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(88,215,255,.025) 1px,transparent 1px);background-size:34px 34px;pointer-events:none;}
-.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 36px;}
-header{text-align:center;margin-bottom:24px;}
-.h-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.78;margin-bottom:10px;}
-h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
-h1 em{font-style:normal;color:#ff4fb0;}
-.h-desc{font-size:.86rem;color:var(--mu);line-height:1.75;max-width:920px;margin:0 auto;}
-.notice{border:1px solid rgba(255,210,74,.34);background:rgba(255,210,74,.055);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#e8d89d;font-size:.78rem;line-height:1.72;}
-.ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
-button,.select{padding:8px 14px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;font-family:Inter,system-ui,sans-serif;}
-button:hover,.select:hover{border-color:var(--accent);color:var(--accent);}
-button.active{background:var(--accent);color:#001018;border-color:var(--accent);font-weight:700;}
-.label{font-size:.8rem;color:var(--mu);}
-.scen{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
-.formula{background:var(--s1);border:1px solid rgba(88,215,255,.45);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:2;}
-.formula .a{color:var(--accent)} .formula .b{color:var(--warn)} .formula .c{color:var(--ok)} .formula .f{color:var(--fail)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:520px){.stats{grid-template-columns:1fr;}}
-.stat{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;}
-.stat-l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
-.stat-v{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
-.stat-s{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
-.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
-@media(max-width:980px){.grid{grid-template-columns:1fr;}}
-.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
-.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
-.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-@media(max-width:980px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
-.fc{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:.25s;}
-.fc.warn{border-color:var(--warn)} .fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
-@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,.05)}to{box-shadow:0 0 16px rgba(255,49,95,.28)}}
-.badge{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;letter-spacing:.08em;}
-.b-ok{background:rgba(61,255,156,.10);color:var(--ok);border:1px solid rgba(61,255,156,.30)} .b-watch{background:rgba(105,214,255,.10);color:var(--watch);border:1px solid rgba(105,214,255,.30)} .b-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35)} .b-fail{background:rgba(255,49,95,.14);color:var(--fail);border:1px solid rgba(255,49,95,.45)}
-.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
-.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:700;margin-bottom:8px;}
-.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
-.fc-lbl{color:var(--mu)} .fc-r{font-size:.98rem;font-weight:700}
-.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
-.bar{height:100%;border-radius:2px;transition:.25s;}
-.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
-.visual{height:330px;background:radial-gradient(circle at 50% 22%, rgba(255,49,95,.12), transparent 34%),linear-gradient(180deg,rgba(88,215,255,.06),rgba(255,210,74,.04)),var(--s2);border:1px solid var(--bd);border-radius:12px;position:relative;overflow:hidden;}
-.visual-title{position:absolute;left:18px;top:16px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;}
-.rings{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;border:2px solid rgba(88,215,255,.18);}
-.rings::before,.rings::after{content:'';position:absolute;inset:28px;border-radius:50%;border:1px dashed rgba(255,210,74,.24);}
-.rings::after{inset:66px;border-color:rgba(255,49,95,.30);}
-.dot{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);left:calc(50% - 8px);top:calc(50% - 8px);transform:rotate(var(--ang)) translateX(var(--rad));transform-origin:center;opacity:.9;}
-.pressure{position:absolute;left:22px;right:22px;bottom:44px;height:10px;background:var(--bd);border-radius:5px;overflow:hidden;}
-.pressure-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--fail));transition:.25s;}
-.visual-status{position:absolute;left:18px;bottom:18px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);}
-.visual-note{position:absolute;right:18px;bottom:18px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.70rem;color:var(--warn);line-height:1.7;}
-.corr-grid{display:grid;grid-template-columns:repeat(var(--ncols),1fr);gap:3px;}
-.corr-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.50rem;font-weight:600;transition:.25s;}
-.corr-head{background:transparent;color:var(--mu);font-size:.48rem;line-height:1.1;text-align:center;}
-.chain{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;}
-.chain-flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
-.node{border:1px solid var(--bd);background:rgba(255,255,255,.025);border-radius:9px;padding:10px 8px;text-align:center;min-height:72px;}
-.node-name{font-size:.70rem;color:var(--mu);margin-bottom:5px} .node-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700}
-.arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.25rem}
-.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
-.coup-row{display:flex;align-items:center;gap:10px} .coup-name{font-size:.74rem;min-width:118px;color:var(--tx)} .coup-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden} .coup-bar{height:100%;border-radius:4px;transition:.25s} .coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right}
-canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
-.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap} .legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem}
-.log{height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
-.log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)}
-.footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(114,255,184,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(114,255,184,0.025) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding:28px 20px 34px;}
 
-.scenario-code-txt { font-size:1.35rem; }
-.chain-desc { font-size:.74rem;color:var(--mu);line-height:1.7; }
-.corr-alert-wrap { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
-.corr-fail-txt { color:var(--fail); }
-.corr-ok-txt { color:var(--ok); }
-.legend-fail { color:rgba(255,49,95,.75); }
+header{text-align:center;margin-bottom:26px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.75;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.25rem,3.5vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--vpd);font-style:normal;}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.7;}
+
+.notice{
+  border:1px solid rgba(114,255,184,.32);
+  background:rgba(114,255,184,.055);
+  border-left:4px solid var(--accent);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#bfe8cf;
+  font-size:.78rem;
+  line-height:1.7;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);
+  color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#00140a;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:7px;
+  color:var(--tx);font-family:'Noto Sans JP',sans-serif;font-size:.82rem;cursor:pointer;
+}
+.scenario-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(114,255,184,.45);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--vpd);}
+.eq-c{color:var(--warn);}
+.eq-f{color:var(--fail);}
+
+.overall{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:950px){.overall{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.overall{grid-template-columns:1fr;}}
+.over-card{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.over-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;
+  letter-spacing:.16em;
+  color:var(--mu);
+  margin-bottom:6px;
+}
+.over-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:2.0rem;
+  font-weight:700;
+  line-height:1.05;
+}
+.over-sub{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.main-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
+@media(max-width:960px){.main-grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:18px;
+}
+.panel-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  letter-spacing:.18em;
+  color:var(--accent);
+  margin-bottom:16px;
+}
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:960px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
+.fc{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  transition:.25s;
+}
+.fc.warn{border-color:var(--warn);}
+.fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,59,92,.05);}to{box-shadow:0 0 16px rgba(255,59,92,.28);}}
+.fc-badge{
+  position:absolute;top:10px;right:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;
+  padding:2px 6px;
+  border-radius:4px;
+  letter-spacing:.08em;
+}
+.badge-ok{background:rgba(57,255,133,.10);color:var(--ok);border:1px solid rgba(57,255,133,.30);}
+.badge-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35);}
+.badge-fail{background:rgba(255,59,92,.14);color:var(--fail);border:1px solid rgba(255,59,92,.45);}
+.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.32rem;font-weight:700;margin-bottom:8px;}
+.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:.98rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.r-bar{height:100%;border-radius:2px;transition:.25s;}
+.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
+
+.greenhouse-box{
+  height:315px;
+  background:linear-gradient(180deg,rgba(70,198,255,.10),rgba(57,255,133,.06)),var(--s2);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+.house-frame{
+  position:absolute;left:50%;top:54%;
+  transform:translate(-50%,-50%);
+  width:78%;height:68%;
+  border:2px solid rgba(114,255,184,.28);
+  border-top:none;
+  border-radius:0 0 12px 12px;
+}
+.house-roof{
+  position:absolute;left:50%;top:14%;
+  transform:translateX(-50%);
+  width:62%;height:32%;
+  clip-path:polygon(50% 0%,100% 100%,0% 100%);
+  border:2px solid rgba(114,255,184,.28);
+  background:rgba(114,255,184,.035);
+}
+.sun{
+  position:absolute;right:34px;top:28px;width:42px;height:42px;border-radius:50%;
+  background:radial-gradient(circle,#fff4b0,#ffe066 45%,rgba(255,224,102,.05) 72%);
+  box-shadow:0 0 30px rgba(255,224,102,.45);
+  opacity:var(--sun,.75);
+}
+.fog{
+  position:absolute;left:0;right:0;top:0;bottom:0;
+  background:radial-gradient(circle at 35% 45%, rgba(70,198,255,var(--fog,.05)), transparent 42%),
+             radial-gradient(circle at 65% 60%, rgba(70,198,255,var(--fog,.05)), transparent 38%);
+  pointer-events:none;
+}
+.plant-row{
+  position:absolute;left:12%;right:12%;bottom:32px;
+  display:flex;justify-content:space-between;align-items:flex-end;
+}
+.plant{position:relative;width:44px;height:58px;}
+.stem{position:absolute;left:50%;bottom:0;width:3px;height:42px;background:#39ff85;transform:translateX(-50%);opacity:.75;}
+.leaf{
+  position:absolute;width:26px;height:14px;background:rgba(57,255,133,.72);
+  border-radius:100% 0 100% 0;bottom:22px;left:18px;transform:rotate(-25deg);
+}
+.leaf.l2{left:1px;bottom:30px;transform:rotate(205deg);}
+.leaf.l3{left:15px;bottom:39px;transform:rotate(-8deg);width:20px;}
+.stress-overlay{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 55%,rgba(255,59,92,.0),rgba(255,59,92,var(--stress,.0)));
+  pointer-events:none;
+}
+.gauge-line{
+  position:absolute;left:20px;bottom:18px;right:20px;
+  height:8px;border-radius:4px;background:var(--bd);overflow:hidden;
+}
+.gauge-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--fail));transition:.25s;}
+.pack-label{
+  position:absolute;left:18px;top:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;
+}
+.pack-status{
+  position:absolute;left:18px;bottom:34px;
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);
+}
+.vpd-box{
+  position:absolute;right:18px;bottom:34px;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--vpd);text-align:right;line-height:1.7;
+}
+
+.corr-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
+.corr-cell{
+  aspect-ratio:1;
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.52rem;
+  font-weight:600;
+  transition:.25s;
+}
+.corr-head{background:transparent;color:var(--mu);font-size:.49rem;line-height:1.1;text-align:center;}
+
+.mediator{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;
+}
+.med-flow{display:grid;grid-template-columns:1fr 42px 1fr 42px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+.med-node{
+  border:1px solid var(--bd);
+  background:rgba(255,255,255,.025);
+  border-radius:9px;
+  padding:10px 8px;
+  text-align:center;
+  min-height:74px;
+}
+.med-name{font-size:.72rem;color:var(--mu);margin-bottom:5px;}
+.med-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;}
+.med-arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.4rem;}
+.med-note{font-size:.74rem;color:var(--mu);line-height:1.7;}
+.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.coup-row{display:flex;align-items:center;gap:10px;}
+.coup-name{font-size:.74rem;min-width:102px;color:var(--tx);}
+.coup-bar-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.coup-bar{height:100%;border-radius:4px;transition:.25s;}
+.coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+
+canvas.ts-canvas{width:100%;height:150px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+
+.log-area{
+  height:150px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);
+  border-radius:9px;padding:10px;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;
+}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+
+.footer{
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
+}
+
+.color-temp { color:var(--temp); }
+.color-hum { color:var(--hum); }
+.color-vpd { color:var(--vpd); }
+.corr-alert-txt { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:8px; }
+.leg-temp { color:var(--temp); }
+.leg-hum { color:var(--hum); }
+.leg-vpd { color:var(--vpd); }
+.leg-co2 { color:var(--co2); }
+.leg-light { color:var(--light); }
+.leg-water { color:var(--water); }
+.leg-ec { color:var(--ec); }
+.legend-fail { color:rgba(255,59,92,.7); }
+.fc-tau-txt { color:var(--mu); }
+.corr-fail-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail); }
+.corr-ok-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
 </style>
 </head>
 <body>
-<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Synthetic data (unverified): values and correlation matrices are generated from "reference + scenario script + noise" for education. This is not correlation detection on measured data.</div>
+<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Unvalidated synthetic data: observations and correlation entries are generated from baselines, scripted scenarios and noise. This is not measured-data correlation detection.</div>
 <div class="wrap">
+
 <header>
   <div class="h-sub">NRA-IDE / GREENHOUSE VPD CORRELATION SAMPLE</div>
-  <h1>Greenhouse <em>VPD-Mediated Correlation</em> Simulation</h1>
-  <p class="h-desc">Temperature and humidity are not averaged directly. They are mapped into VPD first, and VPD then compresses the margins of water, CO₂, light, and EC layers.</p>
+  <h1>Greenhouse <em>VPDMediated correlation</em> Simulation</h1>
+  <p class="h-desc">Synthetic temperature and humidity are mapped to VPD; correlation drift and auxiliary gate widths are displayed separately.</p>
 </header>
 
-<div class="notice">Agricultural education and structural visualization only. Real irrigation, ventilation, CO₂, and fertilization decisions require crop variety, growth stage, calibrated sensors, local conditions, and expert judgment.</div>
-
-<div class="ctrl">
-  <button class="active" id="btn-run" onclick="toggleRun()">▶ Running</button>
-  <button onclick="resetSim()">↺ Reset</button>
-  <span class="label">Scenario:</span>
-  <select class="select" id="scenario-sel" onchange="applyScenario()"></select>
-  <span class="scen" id="scen-desc">Normal operation</span>
+<div class="notice">
+  Agricultural education using synthetic data only. Irrigation, ventilation, CO2 and nutrient decisions require crop, growth-stage and local-environment validation and calibrated observations.
 </div>
 
-<div class="formula">
-  <span class="a">R_i = δ_i / τ_i(t)</span> — structural ratio per factor |
-  <span class="b">R_corr = |C(t)-C(t₀)| / τ_C</span> — correlation drift |
-  <span class="c">VPD = e_s(T) × (1 − RH/100)</span> |
-  <span class="f">R_total = max(R_i, R_corr, R_coupling)</span>
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ Running</button>
+  <button class="btn" onclick="resetSim()">↺ Reset trial</button>
+  <label class="small">Scenario:</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">Normal operation</option>
+    <option value="hotdry">Hot and dry</option>
+    <option value="humid">High humidity</option>
+    <option value="shadewet">Cloudy and wet</option>
+    <option value="co2drop">CO₂deficit</option>
+    <option value="irrigation">Irrigation delay</option>
+    <option value="collapse">Correlation breakdown</option>
+  </select>
+  <span class="scenario-label" id="scen-desc">Within declared synthetic ranges</span>
 </div>
 
-<div class="stats">
-  <div class="stat"><div class="stat-l">SYSTEM R_TOTAL</div><div class="stat-v" id="r-total">0.000</div><div class="stat-s" id="r-status">SAFE — structural margin remains</div></div>
-  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">VPD / water / CO₂ / light coupling</div></div>
-  <div class="stat"><div class="stat-l">R_CORR MAX</div><div class="stat-v" id="r-corr">0.000</div><div class="stat-s">maximum correlation drift</div></div>
-  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v scenario-code-txt" id="scenario-code">NORMAL</div><div class="stat-s">synthetic data only</div></div>
+<div class="formula-box">
+  <span class="eq-a">VPD = e_s(T) × (1 − RH/100)</span>：Temperature / humidity mediator |
+  <span class="eq-b">R_vpd = |VPD − VPD_opt| / τ_vpd</span>：Plant-stress illustration |
+  <span class="eq-c">τ_i(t) = τ_base × S_vpd × S_coupling</span>：Mediator narrows auxiliary gates |
+  <span class="eq-f">aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>
 </div>
 
-<div class="grid">
-  <div class="panel"><div class="panel-title">FACTOR STATE — R_i = δ_i / τ_i(t)</div><div class="factor-grid" id="factor-grid"></div></div>
+<div class="overall">
+  <div class="over-card">
+    <div class="over-label">GREENHOUSE R_TOTAL</div>
+    <div class="over-val" id="overall-r">0.000</div>
+    <div class="over-sub" id="overall-status">SAFE — Within declared baseline</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">VPD MEDIATOR PRESSURE (aux)</div>
+    <div class="over-val" id="vpd-r">0.000</div>
+    <div class="over-sub">Mediator derived from temperature and humidity</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">COUPLING PRESSURE</div>
+    <div class="over-val" id="coup-r">0.000</div>
+    <div class="over-sub">VPD/ water, light and CO2 coupling</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">R_CORR MAX</div>
+    <div class="over-val" id="corr-r">0.000</div>
+    <div class="over-sub">Difference from baseline correlation</div>
+  </div>
+</div>
+
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">STRUCTURAL VISUALIZATION</div>
-    <div class="visual">
-      <div class="visual-title">SYNTHETIC GREENHOUSE VIEW</div>
-      <div class="rings" id="rings"></div>
-      <div id="dots"></div>
-      <div class="pressure"><div class="pressure-fill" id="pressure-fill"></div></div>
-      <div class="visual-status" id="visual-status">● SAFE</div>
-      <div class="visual-note" id="visual-note">temperature + humidity ⇒ VPD</div>
+    <div class="panel-title">FACTOR STATE — R_gate (aux)</div>
+    <div class="factor-grid" id="factor-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">GREENHOUSE VISUALIZATION — VPDMediator state</div>
+    <div class="greenhouse-box" id="greenhouse-box">
+      <div class="house-roof"></div>
+      <div class="house-frame"></div>
+      <div class="sun" id="sun"></div>
+      <div class="fog" id="fog"></div>
+      <div class="pack-label">SYNTHETIC GREENHOUSE / SEEDLING STRESS VIEW</div>
+      <div class="plant-row">
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+        <div class="plant"><div class="stem"></div><div class="leaf"></div><div class="leaf l2"></div><div class="leaf l3"></div></div>
+      </div>
+      <div class="stress-overlay" id="stress-overlay"></div>
+      <div class="gauge-line"><div class="gauge-fill" id="stress-gauge"></div></div>
+      <div class="pack-status" id="pack-status">● SAFE GREENHOUSE</div>
+      <div class="vpd-box" id="vpd-box">VPD 0.00 kPa<br>mediator stable</div>
     </div>
   </div>
 </div>
 
-<div class="grid">
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">MEDIATION / COUPLING LAYER</div>
-    <div class="chain">
-      <div class="chain-flow">
-        <div class="node"><div class="node-name" id="node-a-name">Temperature</div><div class="node-val" id="node-a">0.000</div></div>
-        <div class="arrow">→</div>
-        <div class="node"><div class="node-name" id="node-b-name">Humidity</div><div class="node-val" id="node-b">0.000</div></div>
-        <div class="arrow">⇒</div>
-        <div class="node"><div class="node-name" id="node-c-name">VPD mediator</div><div class="node-val" id="node-c">0.000</div></div>
+    <div class="panel-title">MEDIATOR LAYER — Do not add temperature and humidity directly</div>
+    <div class="mediator">
+      <div class="med-flow">
+        <div class="med-node">
+          <div class="med-name">Temperature T</div>
+          <div class="med-val color-temp" id="med-temp">—</div>
+        </div>
+        <div class="med-arrow">→</div>
+        <div class="med-node">
+          <div class="med-name">Humidity RH</div>
+          <div class="med-val color-hum" id="med-hum">—</div>
+        </div>
+        <div class="med-arrow">⇒</div>
+        <div class="med-node">
+          <div class="med-name">VPD</div>
+          <div class="med-val color-vpd" id="med-vpd">—</div>
+        </div>
       </div>
-      <div class="chain-desc">The sample separates apparent correlation from mediated structure: temperature and humidity become VPD, then VPD affects water and photosynthetic reserve.</div>
+      <div class="med-note">
+        Temperature and humidity are mapped to VPD. VPD is then an auxiliary contributor to water, CO2 and light-related gates in this synthetic model.
+      </div>
       <div class="coupling-list" id="coupling-list"></div>
     </div>
   </div>
+
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div id="corr-alert" class="corr-alert-wrap">✓ Correlation stable.</div>
+    <div class="corr-alert-txt">
+      R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。Red cells denote drift after VPD mediation.
+    </div>
+    <div id="corr-alert" class="corr-alert-wrap"></div>
   </div>
 </div>
 
-<div class="grid">
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">TIME SERIES — R VALUES</div>
-    <canvas id="chart" width="590" height="152"></canvas>
-    <div class="legend" id="legend"></div>
+    <div class="panel-title">TIME SERIES — RValue history</div>
+    <canvas id="ts-canvas" class="ts-canvas" width="580" height="150"></canvas>
+    <div class="legend">
+      <span class="leg-temp">─ Temperature</span>
+      <span class="leg-hum">─ Humidity</span>
+      <span class="leg-vpd">─ VPD</span>
+      <span class="leg-co2">─ CO₂</span>
+      <span class="leg-light">─ Light</span>
+      <span class="leg-water">─ Soil water</span>
+      <span class="leg-ec">─ EC</span>
+      <span class="legend-fail">- - Fail</span>
+    </div>
   </div>
+
   <div class="panel">
     <div class="panel-title">GATE LOG</div>
-    <div class="log" id="log"></div>
+    <div class="log-area" id="log-area"></div>
   </div>
 </div>
 
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span>37_greenhouse_vpd_correlation_EN</span>
-  <span>R_total=max(R_i,R_corr,R_coupling) / no averaging dilution</span>
-</div>
+  <span>VPD mediator / aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>
 </div>
 
+</div>
+
+<script src="demo_boundary.js"></script>
 <script>
-// FACTORS: per-variable structural parameters (opt=target value, tau=base structural
-// time-constant, dir=direction that counts as "delta" (both/hi/lo), amp=noise amplitude).
-// weight/group/shrink/coupledBy/coupledGain drive the coupling model in pressure()/
-// dynamicTau()/updateValues() below. corr_base is the reference correlation row used by
-// calcCorr()/corrR() as the "normal" correlation baseline. None of weight, group-average
-// blending, shrink magnitudes, or corr_base numbers have a cited physical/statistical
-// source — they are demo-tuning values chosen to make the sample react visibly.
-// NOTE: This EN file is NOT a translation of the JP sibling (37_greenhouse_vpd_correlation_JP.html).
-// JP uses a different coupling mechanism (pairwise dynamicTau conditions + a separate
-// "mediator" pressure formula) and a different calcCorr() drift rule. Both are internally
-// consistent standalone implementations; they were not unified per working policy for this pass.
-const FACTORS = [{"id":"temp","name":"Air Temperature","short":"T","unit":"℃","opt":24,"tau":6,"min":8,"max":42,"dir":"both","amp":0.8,"weight":0.18,"group":"thermal","shrink":"main","desc":"Mapped into VPD rather than judged alone.","corr_base":[1,0.5,0.4,0.3,0.25,0.2,0.18]},{"id":"humidity","name":"Relative Humidity","short":"RH","unit":"%","opt":68,"tau":18,"min":20,"max":100,"dir":"both","amp":2.5,"weight":0.2,"group":"thermal","shrink":"main","desc":"Combines with temperature to form VPD.","corr_base":[0.5,1,0.55,0.42,0.3,0.25,0.2]},{"id":"vpd","name":"VPD","short":"VPD","unit":"kPa","opt":1.05,"tau":0.55,"min":0,"max":4,"dir":"both","amp":0.05,"weight":0.34,"group":"thermal","shrink":"main","fmt":"2","desc":"Mediator layer for plant stress.","corr_base":[0.4,0.55,1,0.5,0.45,0.35,0.25]},{"id":"co2","name":"CO₂","short":"CO2","unit":"ppm","opt":800,"tau":350,"min":250,"max":1500,"dir":"both","amp":45,"weight":0.15,"group":"supply","shrink":"main","fmt":"int","desc":"Ventilation and photosynthesis factor.","corr_base":[0.3,0.42,0.5,1,0.48,0.4,0.22]},{"id":"light","name":"Light","short":"LX","unit":"lx","opt":18000,"tau":9000,"min":1000,"max":42000,"dir":"both","amp":900,"weight":0.17,"group":"supply","shrink":"main","fmt":"int","desc":"Receiver-side illuminance.","corr_base":[0.25,0.3,0.45,0.48,1,0.38,0.28]},{"id":"water","name":"Soil Water","short":"W","unit":"%","opt":62,"tau":18,"min":15,"max":95,"dir":"both","amp":2,"weight":0.24,"group":"supply","shrink":"supply","coupledBy":"main","coupledGain":-1.2,"desc":"Root-zone water reserve.","corr_base":[0.2,0.25,0.35,0.4,0.38,1,0.24]},{"id":"ec","name":"EC","short":"EC","unit":"mS/cm","opt":1.45,"tau":0.55,"min":0.3,"max":3.2,"dir":"both","amp":0.05,"weight":0.14,"group":"supply","shrink":"supply","fmt":"2","desc":"Nutrient concentration; stress rises when water drops.","corr_base":[0.18,0.2,0.25,0.22,0.28,0.24,1]}];
-// SCENARIOS: drift = target offset per factor ramped in over ~90 ticks (see updateValues()),
-// pressureBoost/corrBoost = flat additions to pressure().main / calcCorr() drift respectively.
-// No cited basis for these magnitudes; demo tuning only.
-// NOTE (dead-ish branch): updateValues() reads `sc.amp && sc.amp[f.id]` as a per-scenario
-// noise-amplitude override, but no entry below defines an `amp` field, so that lookup is
-// always falsy and the code always falls back to the per-factor default `f.amp`. Scenario
-// selection therefore never changes noise amplitude in this file (only drift/pressureBoost/
-// corrBoost do). Left as-is per no-logic-change constraint; flagged here for future review.
-const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable greenhouse state."},"hotdry":{"label":"Hot dry","desc":"High temperature and low humidity lift VPD.","drift":{"temp":8,"humidity":-22,"co2":-60,"light":8000,"water":-14,"ec":0.28},"pressureBoost":0.18,"corrBoost":0.1},"humid":{"label":"High humidity","desc":"VPD drops and transpiration stagnates.","drift":{"temp":2,"humidity":23,"co2":-120,"light":-1000,"water":9,"ec":-0.1},"pressureBoost":0.12,"corrBoost":0.08},"shadeWet":{"label":"Cloudy and wet","desc":"Low light plus low VPD.","drift":{"temp":-3,"humidity":16,"co2":-90,"light":-12500,"water":6,"ec":-0.05},"pressureBoost":0.14,"corrBoost":0.08},"co2drop":{"label":"CO₂ drop","desc":"Ventilation-like CO₂ loss changes light/CO₂ relation.","drift":{"temp":-1,"humidity":-5,"co2":-430,"light":3000,"water":-3,"ec":0.02},"pressureBoost":0.18,"corrBoost":0.16},"irrigation":{"label":"Irrigation delay","desc":"Water drops and EC rises under VPD pressure.","drift":{"temp":3,"humidity":-10,"co2":-30,"light":4000,"water":-24,"ec":0.7},"pressureBoost":0.28,"corrBoost":0.18},"collapse":{"label":"Correlation collapse","desc":"VPD, water, CO₂, and light drift together.","drift":{"temp":9,"humidity":-26,"co2":-500,"light":-9500,"water":-25,"ec":0.85},"pressureBoost":0.38,"corrBoost":0.25}};
-const COLORS = ["#ff8c42","#46c6ff","#ff4fb0","#b7ff4a","#ffe066","#39ff85","#b58cff"];
-const HIST_LEN = 136;
-// tauC: structural time-constant for correlation drift, R_corr = |C(t)-C(t0)| / tauC (see corrR()).
-// No cited basis — demo tuning value shared verbatim with the 38_datacenter sibling file.
+const boundary = new NRADemoBoundary.Tracker(.75,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
+// ── VPD calculation ───────────────────────────────────────────
+// Saturation vapor pressure approximation in kPa.
+function saturationVaporPressure(T){
+  return 0.6108 * Math.exp((17.27 * T) / (T + 237.3));
+}
+function calcVPD(T, RH){
+  const es = saturationVaporPressure(T);
+  const ea = es * RH / 100;
+  return Math.max(0, es - ea);
+}
+
+// EN is generated from this repaired JP computation model.
+const FACTORS = [
+  {
+    id:'temp', name:'Air temperature', short:'T', unit:'℃', color:'var(--temp)',
+    opt:24, tau:6, min:8, max:42, dir:'both',
+    desc:'Greenhouse air temperature, mapped with humidity to VPD.',
+    corr_base:[1.0,0.62,0.72,0.22,0.45,0.35,0.20]
+  },
+  {
+    id:'hum', name:'Humidity', short:'RH', unit:'%', color:'var(--hum)',
+    opt:68, tau:18, min:20, max:100, dir:'both',
+    desc:'Relative humidity; combined with temperature to calculate VPD.',
+    corr_base:[0.62,1.0,0.78,0.15,0.25,0.55,0.18]
+  },
+  {
+    id:'vpd', name:'VPD', short:'VPD', unit:'kPa', color:'var(--vpd)',
+    opt:1.05, tau:0.55, min:0, max:4.0, dir:'both',
+    desc:'VPD mediator for the synthetic plant-stress example.',
+    corr_base:[0.72,0.78,1.0,0.25,0.42,0.62,0.28]
+  },
+  {
+    id:'co2', name:'CO₂', short:'CO2', unit:'ppm', color:'var(--co2)',
+    opt:800, tau:350, min:250, max:1500, dir:'both',
+    desc:'CO₂concentration; affected by ventilation and photosynthesis in the synthetic scenario.',
+    corr_base:[0.22,0.15,0.25,1.0,0.35,0.20,0.18]
+  },
+  {
+    id:'light', name:'Light', short:'LX', unit:'lx', color:'var(--light)',
+    opt:18000, tau:9000, min:1000, max:42000, dir:'both',
+    desc:'Incident light; an auxiliary contributor in hot, dry conditions.',
+    corr_base:[0.45,0.25,0.42,0.35,1.0,0.18,0.14]
+  },
+  {
+    id:'water', name:'Soil water', short:'W', unit:'%', color:'var(--water)',
+    opt:62, tau:18, min:15, max:95, dir:'both',
+    desc:'Root-zone water; sustained VPD narrows the auxiliary width.',
+    corr_base:[0.35,0.55,0.62,0.20,0.18,1.0,0.48]
+  },
+  {
+    id:'ec', name:'EC', short:'EC', unit:'mS/cm', color:'var(--ec)',
+    opt:1.45, tau:0.55, min:0.3, max:3.2, dir:'both',
+    desc:'Nutrient concentration; water loss raises modeled stress.',
+    corr_base:[0.20,0.18,0.28,0.18,0.14,0.48,1.0]
+  }
+];
+
+
+
+
+const BASE = {
+  temp:24, hum:68, co2:800, light:18000, water:62, ec:1.45
+};
+
+let vals = {
+  temp:24, hum:68, vpd:calcVPD(24,68), co2:800, light:18000, water:62, ec:1.45
+};
+let running = true;
+let tick = 0;
+let scenario = 'normal';
+let driftTarget = {temp:0,hum:0,co2:0,light:0,water:0,ec:0};
+let noiseAmp = {temp:0.8,hum:2.5,co2:45,light:900,water:2.0,ec:0.05};
+let rHistory = FACTORS.map(()=>[]);
+let prevZones = FACTORS.map(()=>'ok');
+let logLines = [];
+const HIST_LEN = 132;
+
 const tauC = 0.24;
-let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
-let vals = {};
-let history = FACTORS.map(()=>[]);
-let prevZone = FACTORS.map(()=>'ok');
 let corrBase = FACTORS.map(f => [...f.corr_base]);
 
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
-function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
-function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
-// Standard NRA-IDE 4-zone thresholds used throughout this repo's examples: R>=1.0
-// RUPTURE_BOUNDARY(fail), R>=.75 WARNING(warn), R>=.4 WATCH(watch), else SAFE(ok).
-function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
-function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
-function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
 
-function init(){
-  Object.keys(SCENARIOS).forEach(k=>{
-    const opt=document.createElement('option'); opt.value=k; opt.textContent=SCENARIOS[k].label; document.getElementById('scenario-sel').appendChild(opt);
-  });
-  FACTORS.forEach(f=>vals[f.id]=f.opt);
-  buildFactorCards(); buildCorrMatrix(); buildCouplingList(); buildDots(); resetSim();
+
+const SCENARIOS = {
+  normal: {
+    desc:'Within declared synthetic ranges',
+    drift:{temp:0,hum:0,co2:0,light:0,water:0,ec:0},
+    amp:{temp:0.8,hum:2.5,co2:45,light:900,water:2.0,ec:0.05}
+  },
+  hotdry: {
+    desc:'Hot/dry conditions raise VPD and narrow the water gate',
+    drift:{temp:8,hum:-22,co2:-60,light:8000,water:-14,ec:0.28},
+    amp:{temp:1.6,hum:4.5,co2:55,light:1700,water:3.0,ec:0.08}
+  },
+  humid: {
+    desc:'High humidity reduces VPD and transpiration in the scenario',
+    drift:{temp:2,hum:23,co2:-120,light:-1000,water:9,ec:-0.10},
+    amp:{temp:1.0,hum:5.0,co2:80,light:1100,water:2.5,ec:0.06}
+  },
+  shadewet: {
+    desc:'Cloudy, wet conditions reduce light and VPD',
+    drift:{temp:-3,hum:16,co2:-90,light:-12500,water:6,ec:-0.05},
+    amp:{temp:0.7,hum:3.5,co2:70,light:1600,water:2.0,ec:0.05}
+  },
+  co2drop: {
+    desc:'Excess ventilation / low CO2 changes the light relationship',
+    drift:{temp:-1,hum:-5,co2:-430,light:3000,water:-3,ec:0.02},
+    amp:{temp:1.0,hum:3.2,co2:110,light:1400,water:2.2,ec:0.06}
+  },
+  irrigation: {
+    desc:'Irrigation delay: falling water, rising EC and VPD pressure',
+    drift:{temp:3,hum:-10,co2:-30,light:4000,water:-24,ec:0.70},
+    amp:{temp:1.3,hum:4.0,co2:60,light:1700,water:4.0,ec:0.12}
+  },
+  collapse: {
+    desc:'VPD, water, CO2 and light change together',
+    drift:{temp:9,hum:-26,co2:-500,light:-9500,water:-25,ec:0.85},
+    amp:{temp:2.5,hum:7.0,co2:140,light:2600,water:5.0,ec:0.18}
+  }
+};
+
+function applyScenario(){
+  scenario = document.getElementById('scenario-sel').value;
+  const s = SCENARIOS[scenario];
+  driftTarget = {...s.drift};
+  noiseAmp = {...s.amp};
+  document.getElementById('scen-desc').textContent = s.desc;
+  addLog(`[SCENARIO] ${s.desc}`, 'info');
 }
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+function factorIndexById(id){return FACTORS.findIndex(f=>f.id===id);}
+
+
+
+function calcRawRById(id){
+  const i = factorIndexById(id);
+  const f = FACTORS[i];
+  const val = vals[id];
+  const delta = calcDelta(val, f);
+  return {delta, tau:f.tau, R:delta / f.tau};
+}
+
+function dynamicTau(i){
+  const f = FACTORS[i];
+  const vpdR = calcRawRById('vpd').R;
+  const waterR = calcRawRById('water').R;
+  const lightR = calcRawRById('light').R;
+  const co2R = calcRawRById('co2').R;
+  let shrink = 1.0;
+
+  // VPD compresses water, CO2, and EC margins.
+
+
+
+  if(f.id === 'water') shrink -= Math.min(0.48, Math.max(0,vpdR-0.45) * 0.18);
+  if(f.id === 'co2')   shrink -= Math.min(0.30, Math.max(0,lightR-0.55) * 0.10 + Math.max(0,vpdR-0.65)*0.08);
+  if(f.id === 'ec')    shrink -= Math.min(0.42, Math.max(0,waterR-0.55) * 0.15);
+  if(f.id === 'vpd')   shrink -= Math.min(0.25, Math.max(0,waterR-0.75) * 0.08);
+  if(f.id === 'temp')  shrink -= Math.min(0.18, Math.max(0,lightR-0.75) * 0.06);
+
+  return Math.max(f.tau * shrink, f.tau * 0.38);
+}
+
+function calcDelta(val, f){
+  if(f.dir === 'hi') return Math.max(0, val - f.opt);
+  if(f.dir === 'lo') return Math.max(0, f.opt - val);
+  return Math.abs(val - f.opt);
+}
+
+function calcRById(id){
+  const i = factorIndexById(id);
+  const f = FACTORS[i];
+  const val = vals[id];
+  const delta = calcDelta(val, f);
+  const tau = dynamicTau(i);
+  return {delta, tau, R: delta / tau};
+}
+
+function calcR(i){
+  const f = FACTORS[i];
+  const val = vals[f.id];
+  const delta = calcDelta(val, f);
+  const tau = dynamicTau(i);
+  return {delta, tau, R: delta / tau};
+}
+
+
+
+function getColor(R){
+  if(R >= 1.0) return 'var(--fail)';
+  if(R >= 0.75) return 'var(--warn)';
+  return 'var(--ok)';
+}
+function getBadge(R){
+  if(R >= 1.0) return ['AUX_STOP','badge-fail','fail'];
+  if(R >= 0.75) return ['WARNING','badge-warn','warn'];
+  return ['SAFE','badge-ok','ok'];
+}
+
 function buildFactorCards(){
-  const root=document.getElementById('factor-grid'); root.innerHTML='';
+  const root = document.getElementById('factor-grid');
+  root.innerHTML = '';
   FACTORS.forEach((f,i)=>{
-    const card=document.createElement('div'); card.className='fc'; card.id='fc-'+i;
-    card.innerHTML=`<div class="badge b-ok" id="badge-${i}">SAFE</div>
-      <div class="fc-name">${f.name}</div><div class="fc-val" id="val-${i}" style="color:${COLORS[i%COLORS.length]}">—</div>
+    const div = document.createElement('div');
+    div.className='fc';
+    div.id=`fc-${i}`;
+    div.innerHTML = `
+      <div class="fc-badge badge-ok" id="badge-${i}">SAFE</div>
+      <div class="fc-name">${f.name}</div>
+      <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
-      <div class="barbg"><div class="bar" id="bar-${i}"></div></div>
-      <div class="fc-desc">${f.desc}</div>`;
-    root.appendChild(card);
+      <div class="fc-row"><span class="fc-lbl">gate_width</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_gate (aux)</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
+      <div class="fc-desc">${f.desc}</div>
+    `;
+    root.appendChild(div);
   });
 }
+
 function buildCorrMatrix(){
-  const root=document.getElementById('corr-matrix'); root.innerHTML='';
-  const n=FACTORS.length+1; const grid=document.createElement('div'); grid.className='corr-grid'; grid.style.setProperty('--ncols', n);
+  const root = document.getElementById('corr-matrix');
+  root.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className='corr-grid';
   grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
-  FACTORS.forEach(f=>grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
-  FACTORS.forEach((fi,i)=>{ grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`; FACTORS.forEach((_,j)=>grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`); });
+  FACTORS.forEach(f => grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
+  FACTORS.forEach((fi,i)=>{
+    grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`;
+    FACTORS.forEach((_,j)=>{
+      grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`;
+    });
+  });
   root.appendChild(grid);
 }
-function buildCouplingList(){
-  const root=document.getElementById('coupling-list'); root.innerHTML='';
-  ["VPD pressure","Water pressure","Light pressure","CO₂ pressure"].forEach((row,idx)=>{
-    root.innerHTML += `<div class="coup-row"><div class="coup-name">${row}</div><div class="coup-bg"><div class="coup-bar" id="cbar-${idx}" style="background:${COLORS[idx%COLORS.length]};width:0%"></div></div><div class="coup-val" id="cval-${idx}">0.000</div></div>`;
-  });
-}
-function buildDots(){
-  const root=document.getElementById('dots'); root.innerHTML='';
-  FACTORS.forEach((f,i)=>{
-    const dot=document.createElement('div'); dot.className='dot'; dot.id='dot-'+i; dot.style.background=COLORS[i%COLORS.length]; dot.style.boxShadow=`0 0 18px ${COLORS[i%COLORS.length]}`; dot.style.setProperty('--ang', (i*360/FACTORS.length)+'deg'); dot.style.setProperty('--rad','70px'); root.appendChild(dot);
-  });
-}
 
-// pressure(): core coupling metric. "main" = weight-weighted sum of every raw R_i (uses
-// f.weight, fixed tau — NOT the dynamic tau below, so this call is non-recursive with
-// dynamicTau()). "thermal"/"supply" = simple average of raw R_i within each FACTORS.group.
-// scenarioBoost adds SCENARIOS[scenario].pressureBoost as a flat offset. Output clamped to
-// [0,2.2] (2.2 ceiling is an arbitrary display/stability cap, no cited basis).
-function pressure(){
-  let p=0, thermal=0, supply=0;
-  FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
-  const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
-  return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
+function buildCouplingList(){
+  const root = document.getElementById('coupling-list');
+  const rows = [
+    ['VPDpressure','vpd-coup','var(--vpd)'],
+    ['Water pressure','water-coup','var(--water)'],
+    ['Light pressure','light-coup','var(--light)'],
+    ['CO₂pressure','co2-coup','var(--co2)'],
+    ['Mediator pressure','mediator-coup','var(--fail)']
+  ];
+  root.innerHTML = rows.map(([name,id,col])=>`
+    <div class="coup-row">
+      <div class="coup-name">${name}</div>
+      <div class="coup-bar-bg"><div class="coup-bar" id="${id}-bar" style="background:${col};width:0%"></div></div>
+      <div class="coup-val" id="${id}-val">0.000</div>
+    </div>
+  `).join('');
 }
-// dynamicTau(): shrinks a factor's tau (structural margin) according to which pressure
-// group it belongs to (f.shrink: 'main'/'thermal'/'supply'). This is the mechanism by which
-// system-wide stress compresses an individual factor's tolerance band before its own R_i
-// crosses a threshold — i.e. the "margin compression under coupling" flag point. The
-// per-group multipliers (.18/.20/.08/.18/.08) and caps (.58/.56/.50) and the floor .35 are
-// demo tuning values with no cited physical basis. tau is never allowed to shrink below 35%
-// of its base value (floor), preventing runaway R_i growth from tau alone.
-function dynamicTau(f){
-  const p=pressure(); let shrink=1;
-  if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
-  if(f.shrink==='thermal') shrink -= Math.min(.56, p.thermal*.20 + p.main*.08);
-  if(f.shrink==='supply') shrink -= Math.min(.50, p.supply*.18 + p.main*.08);
-  return Math.max(f.tau*shrink, f.tau*.35);
-}
-function calcR(f){ const d=delta(vals[f.id],f); const tau=dynamicTau(f); return {delta:d,tau,R:d/tau}; }
 
 function updateValues(){
   tick++;
-  const sc=SCENARIOS[scenario]; const ramp=Math.min(1,tick/90);
-  FACTORS.forEach((f,i)=>{
-    let base=f.opt, drift=(sc.drift&&sc.drift[f.id]||0)*ramp, amp=(sc.amp&&sc.amp[f.id]||f.amp||1);
-    let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
-    vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
+  const ramp = Math.min(1, tick/90);
+  const collapseRamp = scenario === 'collapse' ? Math.min(1, Math.max(0,(tick-38)/72)) : 0;
+
+  ['temp','hum','co2','light','water','ec'].forEach((id,idx)=>{
+    const base = BASE[id];
+    const drift = driftTarget[id] * ramp;
+    const amp = noiseAmp[id];
+    const noise = (Math.random()-0.5)*2*amp;
+    const wave = Math.sin(tick*0.045 + idx*0.85) * amp * 0.45;
+
+
+    let extra = 0;
+    if(id === 'temp') extra += collapseRamp * 5;
+    if(id === 'hum') extra -= collapseRamp * 8;
+    if(id === 'water') extra -= collapseRamp * 8;
+    if(id === 'co2') extra -= collapseRamp * 120;
+    if(id === 'ec') extra += collapseRamp * 0.25;
+
+    const f = FACTORS[factorIndexById(id)];
+    vals[id] = clamp(base + drift + noise + wave + extra, f.min, f.max);
   });
-  // Optional derived VPD for greenhouse sample.
-  // This block is LIVE in this file (FACTORS contains an id==='vpd' entry, and vals.temp /
-  // vals.humidity are populated above), so vpd is recomputed from temp+humidity every tick
-  // via the Tetens/FAO-56-style saturation-vapor-pressure approximation
-  // es(T)=0.6108*exp(17.27T/(T+237.3)) kPa, VPD=es*(1-RH/100). This overwrites whatever
-  // vpd value the generic drift/wave/noise loop above produced for the "vpd" factor entry,
-  // i.e. vpd's own opt/tau/amp settings only matter for its R_i display, not for its value.
-  // The identical `FACTORS.some(f=>f.id==='vpd')` guard also exists verbatim in the sibling
-  // 38_datacenter_cascade_correlation_EN.html, where FACTORS has no "vpd" id — there the
-  // guard is always false and this whole block is dead code (see note in that file).
-  if(FACTORS.some(f=>f.id==='vpd') && vals.temp!==undefined && vals.humidity!==undefined){
-    const es = 0.6108 * Math.exp((17.27*vals.temp)/(vals.temp+237.3));
-    vals.vpd = clamp(es*(1-vals.humidity/100), 0, 4);
-  }
-  const p=pressure();
-  FACTORS.forEach(f=>{
-    if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='thermal') vals[f.id]=clamp(vals[f.id] + p.thermal*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
-  });
+
+  vals.vpd = clamp(calcVPD(vals.temp, vals.hum), 0, 4.0);
 }
-// calcCorr(): synthesizes a live correlation matrix C(t) by nudging each pair's baseline
-// corr_base toward 1 as system pressure (p.main) rises, plus scenario corrBoost and small
-// random jitter (±.017). Pairs sharing the same FACTORS.group get the full driftBase; other
-// pairs get driftBase*.55. The .14 pressure-to-drift scale, the .55 cross-group discount,
-// and the .034 jitter width are demo tuning values with no cited basis.
+
+
+
+
+
+function couplingPressures(){
+  const vr = calcRById('vpd').R;
+  const wr = calcRById('water').R;
+  const lr = calcRById('light').R;
+  const cr = calcRById('co2').R;
+  const mediator = Math.min(1.8, 0.55*Math.max(0,vr-0.35) + 0.35*Math.max(0,wr-0.45) + 0.25*Math.max(0,lr-0.6) + 0.25*Math.max(0,cr-0.65));
+  return {vpd:vr, water:wr, light:lr, co2:cr, mediator};
+}
+
 function calcCorr(){
-  const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
-  for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
+  const C = [];
+  const cp = couplingPressures();
+  for(let i=0;i<FACTORS.length;i++){
+    C[i]=[];
+    for(let j=0;j<FACTORS.length;j++){
+      if(i===j){C[i][j]=1.0;continue;}
+      const ids = [FACTORS[i].id, FACTORS[j].id].sort().join('-');
+      let drift = 0;
+
+      // VPD-mediated pairs become more tightly coupled under stress.
+
+
+
+
+      if(['hum-temp','temp-vpd','hum-vpd','vpd-water','co2-vpd','light-vpd','ec-water'].includes(ids)){
+        drift += cp.mediator * 0.18;
+      }
+      if(['co2-light','co2-temp','light-temp'].includes(ids) && (scenario === 'co2drop' || scenario === 'collapse')) {
+        drift += 0.18 + Math.min(0.25, tick*0.003);
+      }
+      if(scenario === 'collapse' && tick > 35) drift += Math.min(0.38, (tick-35)*0.005);
+
+      C[i][j] = clamp(corrBase[i][j] + drift + (Math.random()-0.5)*0.035, 0, 1);
+    }
+  }
   return C;
 }
-// corrR(): converts correlation drift into a structural ratio, R_corr = |C(t)-C(t0)|/tauC,
-// mirroring the R_i=delta/tau form used for individual factors. r>=1 is the same
-// RUPTURE_BOUNDARY threshold used everywhere else in this file (see zoneFor()/badgeFor()).
-function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
 
-function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
+function calcRCorr(C){
+  let maxR=0;
+  const alerts=[];
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=i+1;j<FACTORS.length;j++){
+      const Rij = Math.abs(C[i][j] - corrBase[i][j]) / tauC;
+      if(Rij > maxR) maxR = Rij;
+      if(Rij >= 1.0) alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${Rij.toFixed(2)}`);
+    }
+  }
+  return {maxR, alerts};
+}
+
+function fmtVal(v,i){
+  const f = FACTORS[i];
+  if(f.id === 'vpd') return v.toFixed(2)+f.unit;
+  if(f.id === 'ec') return v.toFixed(2)+f.unit;
+  if(f.id === 'light' || f.id === 'co2') return Math.round(v).toLocaleString()+f.unit;
+  return v.toFixed(1)+f.unit;
+}
+
+function setCoup(id,val){
+  document.getElementById(`${id}-bar`).style.width = Math.min(100,val*100).toFixed(1)+'%';
+  document.getElementById(`${id}-val`).textContent = val.toFixed(3);
+}
+
 function updateUI(){
-  // R_total = max(R_i, R_corr, R_coupling): the composition rule is a MAX across all
-  // structural ratios, never an average — a single factor, correlation pair, or coupling
-  // pressure crossing 1.0 drives the whole-system status, so risk cannot be diluted by
-  // averaging with unrelated "safe" factors. This is the core flag/state-transition point
-  // for the whole simulation (see zoneFor()/badgeFor()/setStatusText() for the 3 zones).
-  const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
+  const C = calcCorr();
+  const {maxR:rCorr, alerts} = calcRCorr(C);
+  const cp = couplingPressures();
+
+  let rTotal = rCorr;
+  let failAny = false;
+  let warnAny = false;
+
   FACTORS.forEach((f,i)=>{
-    const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();
-    const z=zoneFor(r.R), [bt,bc]=badgeFor(r.R), col=colorFor(r.R);
-    document.getElementById('val-'+i).textContent=fmt(vals[f.id],f);
-    document.getElementById('delta-'+i).textContent=(f.fmt==='int'?Math.round(r.delta).toLocaleString():f.fmt==='2'?r.delta.toFixed(2):f.fmt==='3'?r.delta.toFixed(3):r.delta.toFixed(1))+f.unit;
-    document.getElementById('tau-'+i).textContent=(f.fmt==='int'?Math.round(r.tau).toLocaleString():f.fmt==='2'?r.tau.toFixed(2):f.fmt==='3'?r.tau.toFixed(3):r.tau.toFixed(1))+f.unit;
-    document.getElementById('r-'+i).textContent=r.R.toFixed(3); document.getElementById('r-'+i).style.color=col;
-    document.getElementById('bar-'+i).style.width=Math.min(100,r.R*100).toFixed(1)+'%'; document.getElementById('bar-'+i).style.background=col;
-    document.getElementById('badge-'+i).textContent=bt; document.getElementById('badge-'+i).className='badge '+bc;
-    document.getElementById('fc-'+i).className='fc'+(r.R>=1?' fail':r.R>=.75?' warn':'');
-    document.getElementById('dot-'+i).style.setProperty('--rad', (60+Math.min(90,r.R*70)).toFixed(1)+'px');
-    if(prevZone[i]!==z){ addLog(`${f.name} moved to ${z.toUpperCase()} R=${r.R.toFixed(3)}`, z==='fail'?'fail':z==='warn'?'warn':z==='watch'?'watch':'ok'); prevZone[i]=z; }
+    const {delta,tau,R} = calcR(i);
+    rTotal = Math.max(rTotal, calcDelta(vals[f.id],f)/f.tau);
+    rHistory[i].push(R);
+    if(rHistory[i].length > HIST_LEN) rHistory[i].shift();
+
+    const col = getColor(R);
+    const [bText,bCls,zone] = getBadge(R);
+
+    document.getElementById(`val-${i}`).textContent = fmtVal(vals[f.id],i);
+    document.getElementById(`delta-${i}`).textContent = (f.id==='vpd'||f.id==='ec' ? delta.toFixed(2) : f.id==='light'||f.id==='co2' ? Math.round(delta).toLocaleString() : delta.toFixed(1)) + f.unit;
+    document.getElementById(`tau-${i}`).textContent = (f.id==='vpd'||f.id==='ec' ? tau.toFixed(2) : f.id==='light'||f.id==='co2' ? Math.round(tau).toLocaleString() : tau.toFixed(1)) + f.unit;
+    document.getElementById(`r-${i}`).textContent = R.toFixed(3);
+    document.getElementById(`r-${i}`).style.color = col;
+    document.getElementById(`rbar-${i}`).style.width = Math.min(100,R*100).toFixed(1)+'%';
+    document.getElementById(`rbar-${i}`).style.background = col;
+
+    const card = document.getElementById(`fc-${i}`);
+    card.className = 'fc' + (R>=1.0?' fail':R>=0.75?' warn':'');
+    const badge = document.getElementById(`badge-${i}`);
+    badge.textContent = bText;
+    badge.className = 'fc-badge ' + bCls;
+
+    if(R>=1.0) failAny = true;
+    if(R>=0.75) warnAny = true;
+
+    if(zone !== prevZones[i]){
+      if(zone==='fail') addLog(`AUX_GATE_EXCEEDEDcandidate: ${f.name} R=${R.toFixed(3)}`, 'fail');
+      else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      prevZones[i] = zone;
+    }
   });
-  for(let i=0;i<FACTORS.length;i++) for(let j=0;j<FACTORS.length;j++){ const cell=document.getElementById(`cm-${i}-${j}`); const v=C[i][j]; const rij=i!==j?Math.abs(v-corrBase[i][j])/tauC:0; if(i===j){cell.style.background='rgba(88,215,255,.14)';cell.style.color='var(--accent)';cell.textContent='1.00';} else if(rij>=1){cell.style.background='rgba(255,49,95,.44)';cell.style.color='#ffb2c4';cell.textContent=v.toFixed(2);} else if(rij>=.75){cell.style.background='rgba(255,210,74,.25)';cell.style.color='var(--warn)';cell.textContent=v.toFixed(2);} else {cell.style.background=`rgba(61,255,156,${v*.25})`;cell.style.color=`rgba(255,255,255,${.35+v*.5})`;cell.textContent=v.toFixed(2);} }
-  document.getElementById('r-total').textContent=total.toFixed(3); document.getElementById('r-total').style.color=colorFor(total); setStatusText(document.getElementById('r-status'),total,'SAFE — structural margin remains');
-  document.getElementById('r-coupling').textContent=p.main.toFixed(3); document.getElementById('r-coupling').style.color=colorFor(p.main);
-  document.getElementById('r-corr').textContent=cr.max.toFixed(3); document.getElementById('r-corr').style.color=colorFor(cr.max);
-  document.getElementById('pressure-fill').style.width=Math.min(100,total*100).toFixed(1)+'%';
-  document.getElementById('visual-status').textContent=total>=1?'✕ RUPTURE_BOUNDARY':total>=.75?'▲ WARNING':total>=.4?'● WATCH':'● SAFE';
-  document.getElementById('visual-status').style.color=colorFor(total);
-  document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
-  [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });
-  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('') : `<span class="corr-ok-txt">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
-  if(cr.alerts.length && tick%24===0) addLog('Correlation drift detected: '+cr.alerts[0],'fail');
-  drawChart(); 
+
+  // Mediator UI
+  document.getElementById('med-temp').textContent = vals.temp.toFixed(1)+'℃';
+  document.getElementById('med-hum').textContent = vals.hum.toFixed(1)+'%';
+  document.getElementById('med-vpd').textContent = vals.vpd.toFixed(2)+'kPa';
+  document.getElementById('vpd-r').textContent = cp.vpd.toFixed(3);
+  document.getElementById('vpd-r').style.color = getColor(cp.vpd);
+  document.getElementById('coup-r').textContent = cp.mediator.toFixed(3);
+  document.getElementById('coup-r').style.color = getColor(cp.mediator);
+  setCoup('vpd-coup', cp.vpd);
+  setCoup('water-coup', cp.water);
+  setCoup('light-coup', cp.light);
+  setCoup('co2-coup', cp.co2);
+  setCoup('mediator-coup', cp.mediator);
+
+  // correlation matrix
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=0;j<FACTORS.length;j++){
+      const cell = document.getElementById(`cm-${i}-${j}`);
+      const v = C[i][j];
+      const Rij = i!==j ? Math.abs(v-corrBase[i][j])/tauC : 0;
+      if(i===j){
+        cell.style.background='rgba(114,255,184,.14)';
+        cell.style.color='var(--accent)';
+        cell.textContent='1.00';
+      } else if(Rij >= 1.0){
+        cell.style.background='rgba(255,59,92,.44)';
+        cell.style.color='#ffb2c2';
+        cell.textContent=v.toFixed(2);
+      } else if(Rij >= 0.75){
+        cell.style.background='rgba(255,210,74,.25)';
+        cell.style.color='var(--warn)';
+        cell.textContent=v.toFixed(2);
+      } else {
+        cell.style.background=`rgba(57,255,133,${v*0.26})`;
+        cell.style.color=`rgba(255,255,255,${0.35+v*0.5})`;
+        cell.textContent=v.toFixed(2);
+      }
+    }
+  }
+
+  const corrAlert = document.getElementById('corr-alert');
+  if(alerts.length){
+    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('');
+    if(tick % 24 === 0) addLog(`Correlation drift: ${alerts[0]}`, 'fail');
+  } else {
+    corrAlert.innerHTML = `<span class="corr-ok-txt">✓ Correlation within baseline R_corr=${rCorr.toFixed(3)}</span>`;
+  }
+
+
+
+  // Mediator is an auxiliary stop condition, not a canonical ratio.
+  document.getElementById('overall-r').textContent = rTotal.toFixed(3);
+  document.getElementById('overall-r').style.color = getColor(rTotal);
+  document.getElementById('corr-r').textContent = rCorr.toFixed(3);
+  document.getElementById('corr-r').style.color = getColor(rCorr);
+
+  const st = document.getElementById('overall-status');
+  const pack = document.getElementById('pack-status');
+  const stress = Math.min(1.0, rTotal);
+  document.getElementById('stress-overlay').style.setProperty('--stress', (stress*0.25).toFixed(3));
+  document.getElementById('stress-gauge').style.width = Math.min(100,rTotal*100).toFixed(1)+'%';
+  document.getElementById('sun').style.setProperty('--sun', clamp(vals.light / 26000, .16, 1).toFixed(2));
+  document.getElementById('fog').style.setProperty('--fog', clamp((vals.hum-60)/70, .02, .42).toFixed(3));
+  document.getElementById('vpd-box').innerHTML = `VPD ${vals.vpd.toFixed(2)} kPa<br>R_vpd=${cp.vpd.toFixed(3)}`;
+
+  if(rTotal >= 1.0){
+    st.textContent = 'RUPTURE_BOUNDARY — Suppress autonomous decisions; continue post-rupture testimony';
+    st.style.color = 'var(--fail)';
+    pack.textContent = '✕ RUPTURE_BOUNDARY GREENHOUSE';
+    pack.style.color = 'var(--fail)';
+  } else if(rTotal >= 0.75){
+    st.textContent = 'WARNING — Increased precursor monitoring';
+    st.style.color = 'var(--warn)';
+    pack.textContent = '▲ WARNING GREENHOUSE';
+    pack.style.color = 'var(--warn)';
+  } else {
+    st.textContent = 'SAFE — Within declared baseline';
+    st.style.color = 'var(--ok)';
+    pack.textContent = '● SAFE GREENHOUSE';
+    pack.style.color = 'var(--ok)';
+  }
+
+  drawTimeSeries();
+
+const auxiliaryStop=FACTORS.some((f,i)=>calcR(i).R>=1)||(couplingPressures().mediator>=1);
+  FACTORS.forEach((f,i)=>boundary.observe('factor'+i,calcDelta(vals[f.id],f),f.tau,tick));
+  for(let i=0;i<FACTORS.length;i++)for(let j=i+1;j<FACTORS.length;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBase[i][j]),tauC,tick);
+  NRADemoBoundary.paint(boundary,auxiliaryStop,FACTORS.map((_,i)=>'badge-'+i),['overall-status']);
 }
-function drawChart(){
-  const cv=document.getElementById('chart'), ctx=cv.getContext('2d'), W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#111b2a'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#24344c'; [0.4,.75,1].forEach(r=>{const y=H-r/1.6*(H-24)-10; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();});
-  const fy=H-1/1.6*(H-24)-10; ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(255,49,95,.55)'; ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke(); ctx.setLineDash([]);
-  history.forEach((hist,i)=>{ if(hist.length<2)return; ctx.strokeStyle=COLORS[i%COLORS.length]; ctx.lineWidth=1.7; ctx.beginPath(); hist.forEach((v,x)=>{const px=x/(HIST_LEN-1)*W, py=H-Math.min(v,1.6)/1.6*(H-24)-10; x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}); ctx.stroke(); });
-  ctx.fillStyle='rgba(255,49,95,.75)'; ctx.font='10px JetBrains Mono, monospace'; ctx.fillText('R=1.0',6,fy-4);
+
+const tsCanvas = document.getElementById('ts-canvas');
+const tsCtx = tsCanvas.getContext('2d');
+const TS_COLORS = ['#ff8c42','#46c6ff','#ff4fb0','#b7ff4a','#ffe066','#39ff85','#b58cff'];
+
+function drawTimeSeries(){
+  const W=tsCanvas.width,H=tsCanvas.height;
+  tsCtx.clearRect(0,0,W,H);
+  tsCtx.fillStyle='#112218';
+  tsCtx.fillRect(0,0,W,H);
+
+  tsCtx.strokeStyle='#234532';
+  tsCtx.lineWidth=1;
+  [0.25,0.5,0.75,1.0].forEach(y=>{
+    const py = H - y*(H*.84) - 10;
+    tsCtx.beginPath();tsCtx.moveTo(0,py);tsCtx.lineTo(W,py);tsCtx.stroke();
+  });
+
+  const failY = H - 1.0*(H*.84) - 10;
+  tsCtx.strokeStyle='rgba(255,59,92,.55)';
+  tsCtx.setLineDash([5,4]);
+  tsCtx.beginPath();tsCtx.moveTo(0,failY);tsCtx.lineTo(W,failY);tsCtx.stroke();
+  tsCtx.setLineDash([]);
+
+  rHistory.forEach((hist,i)=>{
+    if(hist.length<2) return;
+    tsCtx.strokeStyle=TS_COLORS[i];
+    tsCtx.lineWidth=i===2?2.4:1.7;
+    tsCtx.beginPath();
+    hist.forEach((v,x)=>{
+      const px = x/(HIST_LEN-1)*W;
+      const py = H - Math.min(v,1.6)/1.6*(H*.84) - 10;
+      x===0 ? tsCtx.moveTo(px,py) : tsCtx.lineTo(px,py);
+    });
+    tsCtx.stroke();
+  });
+
+  tsCtx.font='10px JetBrains Mono, monospace';
+  tsCtx.fillStyle='rgba(255,59,92,.75)';
+  tsCtx.fillText('R_gate=1.0 (aux)',6,failY-4);
 }
-function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span class="legend-fail">- - Fail</span>'; }
-function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
-function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
-function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
-function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
-function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Greenhouse VPD Mediated Correlation Simulation initialized.','ok'); updateUI(); }
-buildLegend(); init(); setInterval(update,300);
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const t=(tick+'').padStart(4,'0');
+  const div=document.createElement('div');
+  div.className='log-'+type;
+  div.textContent=`[t=${t}] ${msg}`;
+  area.insertBefore(div,area.firstChild);
+  logLines.push(div);
+  if(logLines.length>80){
+    const old=logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function update(){
+  if(!running) return;
+  updateValues();
+  updateUI();
+}
+
+function toggleRun(){
+  running=!running;
+  const btn=document.getElementById('btn-run');
+  btn.textContent = running ? '▶ Running' : '⏸ Paused';
+  btn.className = running ? 'btn active' : 'btn';
+}
+
+function resetSim(){
+  tick=0;
+  vals={temp:24, hum:68, vpd:calcVPD(24,68), co2:800, light:18000, water:62, ec:1.45};
+  driftTarget={temp:0,hum:0,co2:0,light:0,water:0,ec:0};
+  noiseAmp={temp:0.8,hum:2.5,co2:45,light:900,water:2.0,ec:0.05};
+  scenario='normal';
+  rHistory=FACTORS.map(()=>[]);
+  prevZones=FACTORS.map(()=>'ok');
+  document.getElementById('scenario-sel').value='normal';
+  document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML='';
+  logLines=[];
+  addLog('New simulation trial', 'info');
+  addLog('VPDMediated correlation observation started', 'ok');
+
+boundary.newTrial();
+}
+
+buildFactorCards();
+buildCorrMatrix();
+buildCouplingList();
+addLog('Greenhouse VPD example initialized', 'ok');
+addLog('Map temperature and humidity to VPD rather than add them', 'info');
+setInterval(update, 300);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds. Current observations and arrival history are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial retains prior records and does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
+<p class="demo-caveat">Base thickness is declared separately from temporary auxiliary gate widths. A wider auxiliary gate does not restore the structure. Cards and histories display auxiliary R_gate. The main aggregate is a maximum across independent base/correlation targets; it does not redefine a single target's canonical R. AUX_STOP and retained arrival records are separate.</p>
 </body>
 </html>

@@ -431,7 +431,10 @@
     </div>
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.40,.70,.85);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // FILE: NRA-IDE_Connection_vs_Mixing_20260224.html
 
 const G = 9.8, REACT = 1.0, MU = 0.7;
@@ -457,7 +460,7 @@ function stopDist(v) {
     return ms * REACT + (ms * ms) / (2 * MU * G);
 }
 function computeR(delta, tau) {
-    return tau > 0 ? delta / tau : Infinity;
+    return NRADemoBoundary.ratio(delta,tau).R;
 }
 function delta_from(v, d) {
     // δ：停止距離が安全余裕帯（車間距離の手前 TAU_FIXED m）へ入り込んだ量。設計τで定めたCause-Side量で、
@@ -603,6 +606,7 @@ function flash() {
 
 // ── Update side ──
 function updateOK(delta) {
+ if(!Number.isFinite(delta)||NRADemoBoundary.ratio(delta,TAU_FIXED).state){boundary.observe('vehicle',delta,TAU_FIXED,Date.now());document.getElementById('ok-r').textContent='—';NRADemoBoundary.paint(boundary,false,[],['ok-zone-name','ok-badge','status-ok']);return;}
     const R    = computeR(delta, TAU_FIXED);
     const zone = zoneFromR(R);
     const col  = getColor(R);
@@ -650,6 +654,8 @@ function updateOK(delta) {
         addLog('log-ok', `${mark} Zone${zone}  R=${R.toFixed(3)}  δ=${delta.toFixed(1)}m  τ=${TAU_FIXED}m（固定）`, cls);
         prevOkZone = zone;
     }
+
+boundary.observe('vehicle',delta,TAU_FIXED,Date.now());NRADemoBoundary.paint(boundary,false,[],['ok-zone-name','ok-badge','status-ok']);
 }
 
 function updateNG(delta) {
@@ -801,5 +807,6 @@ setInterval(() => {
 }, 300);
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・路面の摩擦係数μ・反応時間・安全余裕距離τは、デモ用の代表値で、実車の停止距離ではありません。<br>・δは、停止距離が安全余裕帯（車間距離の手前τ）へ入り込んだ量です。R=1.0は停止距離＝車間距離です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>教材用の仮閾値です。現在の観測値と到達履歴を分けて表示します。AUX_STOPは補助条件であり対象破断ではありません。新試行でも前試行の記録は残り、構造復元を意味しません。</p><button type="button" onclick="startBoundaryTrial()">新しい教材試行</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

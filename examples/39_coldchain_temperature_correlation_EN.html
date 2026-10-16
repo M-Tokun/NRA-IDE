@@ -4,356 +4,1028 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NRA-IDE Cold Chain Temperature Excursion Correlation Simulation</title>
+<title>NRA-IDE Cold Chain Temperature Correlation JP</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
 :root {
-  --bg:#050914; --s1:#0b1220; --s2:#111b2a; --bd:#24344c;
-  --tx:#d6e4f2; --mu:#62768a; --ok:#3dff9c; --watch:#69d6ff;
-  --warn:#ffd24a; --fail:#ff315f; --accent:#58d7ff;
+  --bg:#060d12;
+  --s1:#0c151c;
+  --s2:#121e27;
+  --s3:#172833;
+  --bd:#274150;
+  --tx:#d1e3ee;
+  --mu:#637b8a;
+  --ok:#41ff9b;
+  --warn:#ffd257;
+  --fail:#ff476d;
+  --accent:#67d8ff;
+  --ambient:#ff9f43;
+  --cargo:#67d8ff;
+  --door:#ff8ad3;
+  --comp:#ffe066;
+  --battery:#8bff7a;
+  --humid:#5be0c4;
+  --delay:#c89bff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(88,215,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(88,215,255,.025) 1px,transparent 1px);background-size:34px 34px;pointer-events:none;}
-.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 36px;}
-header{text-align:center;margin-bottom:24px;}
-.h-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.78;margin-bottom:10px;}
-h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
-h1 em{font-style:normal;color:#67d8ff;}
-.h-desc{font-size:.86rem;color:var(--mu);line-height:1.75;max-width:920px;margin:0 auto;}
-.notice{border:1px solid rgba(255,210,74,.34);background:rgba(255,210,74,.055);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#e8d89d;font-size:.78rem;line-height:1.72;}
-.ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
-button,.select{padding:8px 14px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;font-family:Inter,system-ui,sans-serif;}
-button:hover,.select:hover{border-color:var(--accent);color:var(--accent);}
-button.active{background:var(--accent);color:#001018;border-color:var(--accent);font-weight:700;}
-.label{font-size:.8rem;color:var(--mu);}
-.scen{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
-.formula{background:var(--s1);border:1px solid rgba(88,215,255,.45);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:2;}
-.formula .a{color:var(--accent)} .formula .b{color:var(--warn)} .formula .c{color:var(--ok)} .formula .f{color:var(--fail)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:520px){.stats{grid-template-columns:1fr;}}
-.stat{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;}
-.stat-l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
-.stat-v{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
-.stat-s{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
-.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
-@media(max-width:980px){.grid{grid-template-columns:1fr;}}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(103,216,255,0.024) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(103,216,255,0.024) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 34px;}
+header{text-align:center;margin-bottom:26px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.78;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.25rem,3.5vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--cargo);font-style:normal;}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.7;}
+
+.notice{
+  border:1px solid rgba(103,216,255,.34);
+  background:rgba(103,216,255,.055);
+  border-left:4px solid var(--accent);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#bfe3f0;
+  font-size:.78rem;
+  line-height:1.72;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);
+  color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#00131c;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:7px;
+  color:var(--tx);font-family:'Noto Sans JP',sans-serif;font-size:.82rem;cursor:pointer;
+}
+.scenario-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(103,216,255,.45);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--cargo);}
+.eq-c{color:var(--warn);}
+.eq-f{color:var(--fail);}
+
+.overall{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:980px){.overall{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.overall{grid-template-columns:1fr;}}
+.over-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;
+}
+.over-label{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;
+}
+.over-val{
+  font-family:'JetBrains Mono',monospace;font-size:2.0rem;font-weight:700;line-height:1.05;
+}
+.over-sub{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.main-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
+@media(max-width:980px){.main-grid{grid-template-columns:1fr;}}
 .panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
-.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
+.panel-title{
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;
+}
+
 .factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 @media(max-width:980px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
-.fc{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:.25s;}
-.fc.warn{border-color:var(--warn)} .fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
-@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,.05)}to{box-shadow:0 0 16px rgba(255,49,95,.28)}}
-.badge{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;letter-spacing:.08em;}
-.b-ok{background:rgba(61,255,156,.10);color:var(--ok);border:1px solid rgba(61,255,156,.30)} .b-watch{background:rgba(105,214,255,.10);color:var(--watch);border:1px solid rgba(105,214,255,.30)} .b-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35)} .b-fail{background:rgba(255,49,95,.14);color:var(--fail);border:1px solid rgba(255,49,95,.45)}
+.fc{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:.25s;
+}
+.fc.warn{border-color:var(--warn);}
+.fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,71,109,.05);}to{box-shadow:0 0 16px rgba(255,71,109,.28);}}
+.fc-badge{
+  position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.58rem;
+  padding:2px 6px;border-radius:4px;letter-spacing:.08em;
+}
+.badge-ok{background:rgba(65,255,155,.10);color:var(--ok);border:1px solid rgba(65,255,155,.30);}
+.badge-warn{background:rgba(255,210,87,.10);color:var(--warn);border:1px solid rgba(255,210,87,.35);}
+.badge-fail{background:rgba(255,71,109,.14);color:var(--fail);border:1px solid rgba(255,71,109,.45);}
 .fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
-.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:700;margin-bottom:8px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.32rem;font-weight:700;margin-bottom:8px;}
 .fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
-.fc-lbl{color:var(--mu)} .fc-r{font-size:.98rem;font-weight:700}
-.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
-.bar{height:100%;border-radius:2px;transition:.25s;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:.98rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.r-bar{height:100%;border-radius:2px;transition:.25s;}
 .fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
-.visual{height:330px;background:radial-gradient(circle at 50% 22%, rgba(255,49,95,.12), transparent 34%),linear-gradient(180deg,rgba(88,215,255,.06),rgba(255,210,74,.04)),var(--s2);border:1px solid var(--bd);border-radius:12px;position:relative;overflow:hidden;}
-.visual-title{position:absolute;left:18px;top:16px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;}
-.rings{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;border:2px solid rgba(88,215,255,.18);}
-.rings::before,.rings::after{content:'';position:absolute;inset:28px;border-radius:50%;border:1px dashed rgba(255,210,74,.24);}
-.rings::after{inset:66px;border-color:rgba(255,49,95,.30);}
-.dot{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);left:calc(50% - 8px);top:calc(50% - 8px);transform:rotate(var(--ang)) translateX(var(--rad));transform-origin:center;opacity:.9;}
-.pressure{position:absolute;left:22px;right:22px;bottom:44px;height:10px;background:var(--bd);border-radius:5px;overflow:hidden;}
-.pressure-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--fail));transition:.25s;}
-.visual-status{position:absolute;left:18px;bottom:18px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);}
-.visual-note{position:absolute;right:18px;bottom:18px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.70rem;color:var(--warn);line-height:1.7;}
-.corr-grid{display:grid;grid-template-columns:repeat(var(--ncols),1fr);gap:3px;}
-.corr-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.50rem;font-weight:600;transition:.25s;}
-.corr-head{background:transparent;color:var(--mu);font-size:.48rem;line-height:1.1;text-align:center;}
-.chain{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;}
-.chain-flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
-.node{border:1px solid var(--bd);background:rgba(255,255,255,.025);border-radius:9px;padding:10px 8px;text-align:center;min-height:72px;}
-.node-name{font-size:.70rem;color:var(--mu);margin-bottom:5px} .node-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700}
-.arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.25rem}
-.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
-.coup-row{display:flex;align-items:center;gap:10px} .coup-name{font-size:.74rem;min-width:118px;color:var(--tx)} .coup-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden} .coup-bar{height:100%;border-radius:4px;transition:.25s} .coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right}
-canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
-.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap} .legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem}
-.log{height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
-.log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)}
-.footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
 
-.scenario-code-txt { font-size:1.35rem; }
-.chain-desc { font-size:.74rem;color:var(--mu);line-height:1.7; }
-.corr-alert-wrap { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
-.corr-fail-txt { color:var(--fail); }
-.corr-ok-txt { color:var(--ok); }
-.legend-fail { color:rgba(255,49,95,.75); }
+.truck-box{
+  height:330px;
+  background:
+    radial-gradient(circle at 72% 20%, rgba(255,224,102,.08), transparent 28%),
+    linear-gradient(180deg, rgba(103,216,255,.06), rgba(255,159,67,.05)),
+    var(--s2);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+.truck-label{
+  position:absolute;left:18px;top:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;
+}
+.road{
+  position:absolute;left:0;right:0;bottom:52px;height:44px;
+  background:linear-gradient(180deg,#223342,#17232e);
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.road::after{
+  content:'';position:absolute;left:-20%;right:-20%;top:20px;height:4px;
+  background:repeating-linear-gradient(90deg, transparent 0 30px, rgba(255,255,255,.35) 30px 54px);
+  animation:roadmove 1.5s linear infinite;
+}
+@keyframes roadmove{from{transform:translateX(0)}to{transform:translateX(-84px)}}
+
+.truck{
+  position:absolute;left:10%;bottom:70px;width:78%;height:150px;
+}
+.cabin{
+  position:absolute;left:0;bottom:0;width:22%;height:72px;background:#2e4658;border:1px solid #45627a;border-radius:10px 10px 8px 8px;
+}
+.cabin::before{
+  content:'';position:absolute;left:14px;top:12px;width:44px;height:22px;
+  background:rgba(103,216,255,.18);border:1px solid rgba(103,216,255,.35);border-radius:4px;
+}
+.boxbody{
+  position:absolute;left:18%;bottom:0;width:70%;height:112px;background:linear-gradient(180deg,#173746,#112732);
+  border:1px solid #3d687b;border-radius:10px;
+}
+.boxbody::before{
+  content:'';position:absolute;left:12px;right:12px;top:12px;bottom:12px;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 38px);
+  opacity:.7;
+}
+.door-panel{
+  position:absolute;right:8px;top:8px;bottom:8px;width:34%;
+  border:1px dashed rgba(255,138,211,.55);border-radius:6px;
+  background:rgba(255,138,211,var(--dooropen,.02));
+  transform-origin:right center;
+  transform:perspective(300px) rotateY(var(--doorangle,0deg));
+}
+.cool-cloud{
+  position:absolute;left:24%;top:36px;width:40%;height:44px;
+  background:radial-gradient(circle at 20% 50%, rgba(103,216,255,var(--cool,.12)), transparent 32%),
+             radial-gradient(circle at 48% 50%, rgba(103,216,255,var(--cool,.12)), transparent 34%),
+             radial-gradient(circle at 76% 50%, rgba(103,216,255,var(--cool,.12)), transparent 30%);
+}
+.hot-layer{
+  position:absolute;right:8%;top:18px;width:30%;height:66px;
+  background:radial-gradient(circle, rgba(255,71,109,var(--heat,.05)), transparent 60%);
+}
+.pallet-row{
+  position:absolute;left:25%;right:18%;bottom:12px;height:44px;display:flex;gap:8px;align-items:flex-end;
+}
+.pallet{
+  flex:1;height:36px;background:linear-gradient(180deg,#8cc6db,#5c9cb4);border:1px solid rgba(255,255,255,.14);border-radius:4px;position:relative;
+}
+.pallet::after{
+  content:'';position:absolute;left:0;right:0;bottom:-6px;height:6px;background:#7c6036;border-radius:0 0 4px 4px;
+}
+.wheel{
+  position:absolute;bottom:-16px;width:28px;height:28px;border-radius:50%;
+  background:#10151d;border:4px solid #4c6175;
+}
+.w1{left:12%;} .w2{left:32%;} .w3{left:60%;} .w4{left:80%;}
+.temp-gauge{
+  position:absolute;right:18px;top:18px;width:62px;height:182px;border:1px solid var(--bd);
+  border-radius:10px;background:rgba(0,0,0,.15);padding:8px;display:flex;flex-direction:column;justify-content:flex-end;
+}
+.temp-col{
+  width:100%;height:100%;border-radius:8px;background:linear-gradient(180deg,var(--cargo),var(--warn),var(--fail));
+  overflow:hidden;position:relative;
+}
+.temp-mask{
+  position:absolute;left:0;right:0;top:0;height:0%;background:rgba(5,13,18,.76);transition:.25s;
+}
+.temp-read{
+  position:absolute;left:50%;top:10px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--tx);
+}
+.truck-status{
+  position:absolute;left:18px;bottom:14px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);
+}
+.chain-note{
+  position:absolute;right:90px;bottom:16px;text-align:right;font-family:'JetBrains Mono',monospace;
+  font-size:.69rem;color:var(--cargo);line-height:1.7;
+}
+
+.corr-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
+.corr-cell{
+  aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:.52rem;font-weight:600;transition:.25s;
+}
+.corr-head{background:transparent;color:var(--mu);font-size:.49rem;line-height:1.1;text-align:center;}
+
+.mediator-panel{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;}
+.med-flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+.med-node{
+  border:1px solid var(--bd);background:rgba(255,255,255,.025);border-radius:9px;
+  padding:10px 8px;text-align:center;min-height:72px;
+}
+.med-name{font-size:.72rem;color:var(--mu);margin-bottom:5px;}
+.med-val{font-family:'JetBrains Mono',monospace;font-size:1.06rem;font-weight:700;}
+.med-arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.3rem;}
+.med-note{font-size:.74rem;color:var(--mu);line-height:1.7;}
+.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.coup-row{display:flex;align-items:center;gap:10px;}
+.coup-name{font-size:.74rem;min-width:120px;color:var(--tx);}
+.coup-bar-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.coup-bar{height:100%;border-radius:4px;transition:.25s;}
+.coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+
+canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+
+.log-area{
+  height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;
+}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+
+.footer{
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
+}
+
+.color-ambient { color:var(--ambient); }
+.color-comp { color:var(--comp); }
+.color-cargo { color:var(--cargo); }
+.corr-alert-txt { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:8px; }
+.leg-ambient { color:var(--ambient); }
+.leg-cargo { color:var(--cargo); }
+.leg-door { color:var(--door); }
+.leg-comp { color:var(--comp); }
+.leg-battery { color:var(--battery); }
+.leg-humid { color:var(--humid); }
+.leg-delay { color:var(--delay); }
+.legend-fail { color:rgba(255,71,109,.7); }
+.fc-tau-txt { color:var(--mu); }
+.corr-fail-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail); }
+.corr-ok-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
 </style>
 </head>
 <body>
-<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Synthetic data (unverified): values and correlation matrices are generated from "reference + scenario script + noise" for education. This is not correlation detection on measured data.</div>
+<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Unvalidated synthetic data: observations and correlation entries are generated from baselines, scripted scenarios and noise. This is not measured-data correlation detection.</div>
 <div class="wrap">
+
 <header>
   <div class="h-sub">NRA-IDE / COLD CHAIN TEMPERATURE CORRELATION SAMPLE</div>
-  <h1>Cold Chain <em>Temperature Excursion Correlation</em> Simulation</h1>
-  <p class="h-desc">A synthetic refrigerated transport sample connecting ambient temperature, cargo temperature, door opening, compressor load, battery level, humidity, and delivery delay.</p>
+  <h1>Cold chain <em>Temperature-excursion correlation</em> Simulation</h1>
+  <p class="h-desc">Synthetic ambient, cargo, door, compressor, battery, humidity and delay observations; cooling-chain auxiliary pressures remain separate from target ratios.</p>
 </header>
 
-<div class="notice">Educational and structural visualization only. This is not suitable for real pharmaceutical, food, or frozen-goods transport operations.</div>
-
-<div class="ctrl">
-  <button class="active" id="btn-run" onclick="toggleRun()">▶ Running</button>
-  <button onclick="resetSim()">↺ Reset</button>
-  <span class="label">Scenario:</span>
-  <select class="select" id="scenario-sel" onchange="applyScenario()"></select>
-  <span class="scen" id="scen-desc">Normal operation</span>
+<div class="notice">
+  Educational synthetic data only. Do not use this example to operate pharmaceutical, food or frozen-goods transport. Actual use requires product-specific validation, calibrated sensors, packaging conditions and qualified human decisions.
 </div>
 
-<div class="formula">
-  <span class="a">R_i = δ_i / τ_i(t)</span> — structural ratio per factor |
-  <span class="b">R_corr = |C(t)-C(t₀)| / τ_C</span> — correlation drift |
-  <span class="c">door + ambient → compressor reserve → cargo temperature</span> |
-  <span class="f">R_total = max(R_i, R_corr, R_coupling)</span>
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ Running</button>
+  <button class="btn" onclick="resetSim()">↺ Reset trial</button>
+  <label class="small">Scenario:</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">Normal transport</option>
+    <option value="summer">Hot ambient</option>
+    <option value="doorfreq">Frequent door opening</option>
+    <option value="compdegrade">Compressor degradation</option>
+    <option value="battery">Low battery</option>
+    <option value="delay">Transport delay</option>
+    <option value="break">Cold-chain break</option>
+  </select>
+  <span class="scenario-label" id="scen-desc">Within declared synthetic ranges</span>
 </div>
 
-<div class="stats">
-  <div class="stat"><div class="stat-l">SYSTEM R_TOTAL</div><div class="stat-v" id="r-total">0.000</div><div class="stat-s" id="r-status">SAFE — structural margin remains</div></div>
-  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">door / compressor / battery / delay chain</div></div>
-  <div class="stat"><div class="stat-l">R_CORR MAX</div><div class="stat-v" id="r-corr">0.000</div><div class="stat-s">maximum correlation drift</div></div>
-  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v scenario-code-txt" id="scenario-code">NORMAL</div><div class="stat-s">synthetic data only</div></div>
+<div class="formula-box">
+  <span class="eq-a">R_gate = δ / gate_width</span>：Individual structural ratios |
+  <span class="eq-b">door + ambient → compressor → cargo temperature</span>：Cooling mediation chain |
+  <span class="eq-c">τ_cargo(t) ↓ when battery↓ & compressor↓ & door↑</span>：Dynamic auxiliary cooling gate |
+  <span class="eq-f">aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>
 </div>
 
-<div class="grid">
-  <div class="panel"><div class="panel-title">FACTOR STATE — R_i = δ_i / τ_i(t)</div><div class="factor-grid" id="factor-grid"></div></div>
+<div class="overall">
+  <div class="over-card">
+    <div class="over-label">COLDCHAIN PRESSURE (aux)_TOTAL</div>
+    <div class="over-val" id="overall-r">0.000</div>
+    <div class="over-sub" id="overall-status">SAFE — Within declared baseline</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">CHAIN PRESSURE</div>
+    <div class="over-val" id="chain-r">0.000</div>
+    <div class="over-sub">Door, compressor, battery and ambient chain pressure</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">COOLING PRESSURE</div>
+    <div class="over-val" id="cooling-r">0.000</div>
+    <div class="over-sub">Auxiliary cooling-deficit pressure</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">R_CORR MAX</div>
+    <div class="over-val" id="corr-r">0.000</div>
+    <div class="over-sub">Difference from baseline correlation</div>
+  </div>
+</div>
+
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">STRUCTURAL VISUALIZATION</div>
-    <div class="visual">
-      <div class="visual-title">SYNTHETIC REFRIGERATED TRANSPORT VIEW</div>
-      <div class="rings" id="rings"></div>
-      <div id="dots"></div>
-      <div class="pressure"><div class="pressure-fill" id="pressure-fill"></div></div>
-      <div class="visual-status" id="visual-status">● SAFE</div>
-      <div class="visual-note" id="visual-note">ambient + door → cargo temp</div>
+    <div class="panel-title">FACTOR STATE — R_gate (aux)</div>
+    <div class="factor-grid" id="factor-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">TRUCK VISUALIZATION — Refrigerated transport state</div>
+    <div class="truck-box" id="truck-box">
+      <div class="truck-label">SYNTHETIC REFRIGERATED TRANSPORT VIEW</div>
+      <div class="truck">
+        <div class="cabin"></div>
+        <div class="boxbody">
+          <div class="door-panel" id="door-panel"></div>
+          <div class="cool-cloud" id="cool-cloud"></div>
+          <div class="hot-layer" id="hot-layer"></div>
+          <div class="pallet-row">
+            <div class="pallet"></div><div class="pallet"></div><div class="pallet"></div><div class="pallet"></div>
+          </div>
+        </div>
+        <div class="wheel w1"></div><div class="wheel w2"></div><div class="wheel w3"></div><div class="wheel w4"></div>
+      </div>
+      <div class="road"></div>
+      <div class="temp-gauge">
+        <div class="temp-read" id="temp-read">2.0℃</div>
+        <div class="temp-col"><div class="temp-mask" id="temp-mask"></div></div>
+      </div>
+      <div class="truck-status" id="truck-status">● SAFE COLD CHAIN</div>
+      <div class="chain-note" id="chain-note">ambient → compressor<br>compressor → cargo temp</div>
     </div>
   </div>
 </div>
 
-<div class="grid">
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">MEDIATION / COUPLING LAYER</div>
-    <div class="chain">
-      <div class="chain-flow">
-        <div class="node"><div class="node-name" id="node-a-name">Ambient + Door</div><div class="node-val" id="node-a">0.000</div></div>
-        <div class="arrow">→</div>
-        <div class="node"><div class="node-name" id="node-b-name">Compressor reserve</div><div class="node-val" id="node-b">0.000</div></div>
-        <div class="arrow">⇒</div>
-        <div class="node"><div class="node-name" id="node-c-name">Cargo temperature</div><div class="node-val" id="node-c">0.000</div></div>
+    <div class="panel-title">MEDIATOR LAYER — Cooling mediation chain</div>
+    <div class="mediator-panel">
+      <div class="med-flow">
+        <div class="med-node">
+          <div class="med-name">Ambient + door</div>
+          <div class="med-val color-ambient" id="med-load">—</div>
+        </div>
+        <div class="med-arrow">→</div>
+        <div class="med-node">
+          <div class="med-name">Compressor gate</div>
+          <div class="med-val color-comp" id="med-comp">—</div>
+        </div>
+        <div class="med-arrow">⇒</div>
+        <div class="med-node">
+          <div class="med-name">Cargo temperature</div>
+          <div class="med-val color-cargo" id="med-cargo">—</div>
+        </div>
       </div>
-      <div class="chain-desc">Ambient temperature and door opening are mapped into cooling load first. That load compresses cargo-temperature tolerance rather than being averaged away.</div>
+      <div class="med-note">
+        This example maps ambient heat and door openings to cooling-load and compressor auxiliary pressures. The chain is tracked separately from the cargo-temperature ratio.
+      </div>
       <div class="coupling-list" id="coupling-list"></div>
     </div>
   </div>
+
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div id="corr-alert" class="corr-alert-wrap">✓ Correlation stable.</div>
+    <div class="corr-alert-txt">
+      R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。Scripted ambient, door, compressor and cargo relationships; red cells denote correlation drift.
+    </div>
+    <div id="corr-alert" class="corr-alert-wrap"></div>
   </div>
 </div>
 
-<div class="grid">
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">TIME SERIES — R VALUES</div>
-    <canvas id="chart" width="590" height="152"></canvas>
-    <div class="legend" id="legend"></div>
+    <div class="panel-title">TIME SERIES — RValue history</div>
+    <canvas id="ts-canvas" class="ts-canvas" width="590" height="152"></canvas>
+    <div class="legend">
+      <span class="leg-ambient">─ Ambient temperature</span>
+      <span class="leg-cargo">─ Cargo temperature</span>
+      <span class="leg-door">─ Door activity</span>
+      <span class="leg-comp">─ Compressor load</span>
+      <span class="leg-battery">─ Battery</span>
+      <span class="leg-humid">─ Humidity</span>
+      <span class="leg-delay">─ Delay</span>
+      <span class="legend-fail">- - Fail</span>
+    </div>
   </div>
+
   <div class="panel">
     <div class="panel-title">GATE LOG</div>
-    <div class="log" id="log"></div>
+    <div class="log-area" id="log-area"></div>
   </div>
 </div>
 
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span>39_coldchain_temperature_correlation_EN</span>
-  <span>R_total=max(R_i,R_corr,R_coupling) / no averaging dilution</span>
-</div>
+  <span>aggregate = max(R_base_i, R_corr); AUX_STOP separate / no averaging dilution</span>
 </div>
 
+</div>
+
+<script src="demo_boundary.js"></script>
 <script>
-// NOTE: This EN file is an independently-built implementation, not a translation of the
-// JP sibling (39_coldchain_temperature_correlation_JP.html). The JP version composes three
-// named pressures (load/cooling/chain) with per-factor tau-shrink formulas and a hardcoded
-// correlation-pair list; this EN version instead uses generic per-factor "weight"/"group"/
-// "shrink"/"coupledBy"/"coupledGain" fields to drive a single weighted pressure model. Both
-// follow the same R_i = delta_i / tau_i(t) structure but are NOT numerically equivalent.
-// Per repository policy (see examples/35, 36) the two are documented separately rather than unified.
-// FACTORS: opt/tau/min/max are demo-tuned constants with no cited cold-chain sensor spec.
-// weight = this factor's share of the composite "main" pressure (see pressure()).
-// group = "thermal" or "supply", used to average into p.thermal / p.supply subtotals.
-// shrink = which pressure category dynamicTau() uses to shrink this factor's tau.
-// coupledBy/coupledGain = feedback: this factor's value is nudged each tick by that pressure.
-const FACTORS = [{"id":"ambient","name":"Ambient Temp","short":"AMB","unit":"℃","opt":18,"tau":18,"min":-10,"max":42,"dir":"hi","amp":1.5,"weight":0.22,"group":"thermal","shrink":"main","desc":"Outside heat load.","corr_base":[1,0.5,0.4,0.3,0.25,0.2,0.18]},{"id":"cargo","name":"Cargo Temp","short":"CARGO","unit":"℃","opt":4,"tau":4,"min":-5,"max":18,"dir":"both","amp":0.4,"weight":0.34,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.55,"desc":"Core monitored value; τ shrinks under cooling pressure.","corr_base":[0.5,1,0.55,0.42,0.3,0.25,0.2]},{"id":"door","name":"Door Opening","short":"DOOR","unit":"%","opt":8,"tau":18,"min":0,"max":100,"dir":"hi","amp":4,"weight":0.26,"group":"thermal","shrink":"main","desc":"Warm-air intrusion and humidity disturbance.","corr_base":[0.4,0.55,1,0.5,0.45,0.35,0.25]},{"id":"comp","name":"Compressor Load","short":"COMP","unit":"%","opt":52,"tau":30,"min":15,"max":100,"dir":"both","amp":4,"weight":0.22,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.0,"desc":"Cooling reaction and remaining reserve.","corr_base":[0.3,0.42,0.5,1,0.48,0.4,0.22]},{"id":"battery","name":"Battery Level","short":"BAT","unit":"%","opt":74,"tau":26,"min":0,"max":100,"dir":"lo","amp":0.6,"weight":0.22,"group":"supply","shrink":"supply","coupledBy":"main","coupledGain":-0.5,"desc":"Low-side power margin.","corr_base":[0.25,0.3,0.45,0.48,1,0.38,0.28]},{"id":"humidity","name":"Cargo Humidity","short":"HUM","unit":"%","opt":68,"tau":20,"min":20,"max":98,"dir":"both","amp":2,"weight":0.15,"group":"supply","shrink":"main","desc":"Condensation and quality support indicator.","corr_base":[0.2,0.25,0.35,0.4,0.38,1,0.24]},{"id":"delay","name":"Delivery Delay","short":"DLY","unit":"min","opt":10,"tau":40,"min":0,"max":300,"dir":"hi","amp":3,"weight":0.2,"group":"supply","shrink":"main","fmt":"int","desc":"More delay increases opening chances and thermal exposure.","corr_base":[0.18,0.2,0.25,0.22,0.28,0.24,1]}];
-const SCENARIOS = {"normal":{"label":"Normal","desc":"Normal synthetic transport."},"summer":{"label":"High ambient","desc":"Ambient heat raises cooling load.","drift":{"ambient":14,"cargo":2.4,"door":3,"comp":18,"battery":-6,"humidity":-5,"delay":8},"pressureBoost":0.15,"corrBoost":0.08},"doorfreq":{"label":"Frequent doors","desc":"Door openings drive warm intrusion.","drift":{"ambient":5,"cargo":3.6,"door":36,"comp":22,"battery":-4,"humidity":9,"delay":18},"pressureBoost":0.24,"corrBoost":0.12},"compdegrade":{"label":"Compressor degradation","desc":"Cooling reserve is reduced.","drift":{"ambient":4,"cargo":5.2,"door":6,"comp":-18,"battery":-5,"humidity":6,"delay":10},"pressureBoost":0.26,"corrBoost":0.14},"battery":{"label":"Low battery","desc":"Battery level shrinks compressor reserve.","drift":{"ambient":3,"cargo":4.4,"door":5,"comp":-10,"battery":-30,"humidity":4,"delay":12},"pressureBoost":0.25,"corrBoost":0.12},"delay":{"label":"Delivery delay","desc":"Delay increases thermal exposure.","drift":{"ambient":5,"cargo":3.8,"door":14,"comp":14,"battery":-10,"humidity":5,"delay":85},"pressureBoost":0.24,"corrBoost":0.13},"break":{"label":"Cold-chain break","desc":"Temperature excursion becomes a coupled chain.","drift":{"ambient":18,"cargo":8.5,"door":32,"comp":-22,"battery":-38,"humidity":12,"delay":120},"pressureBoost":0.45,"corrBoost":0.28}};
-const COLORS = ["#ff9f43","#67d8ff","#ff8ad3","#ffe066","#8bff7a","#5be0c4","#c89bff"];
+const boundary = new NRADemoBoundary.Tracker(.75,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
+
+
+const FACTORS = [
+  {
+    id:'ambient', name:'Ambient temperature', short:'AMB', unit:'℃', color:'var(--ambient)',
+    opt:18, tau:18, min:-10, max:42, dir:'hi',
+    desc:'Ambient thermal load narrows modeled cooling gates.',
+    corr_base:[1.0,0.52,0.34,0.42,0.18,0.24,0.12]
+  },
+  {
+    id:'cargo', name:'Cargo temperature', short:'CARGO', unit:'℃', color:'var(--cargo)',
+    opt:4, tau:4, min:-5, max:18, dir:'both',
+    desc:'Cargo temperature is the central observation; cooling conditions narrow its auxiliary width.',
+    corr_base:[0.52,1.0,0.58,0.66,0.22,0.30,0.18]
+  },
+  {
+    id:'door', name:'Door activity', short:'DOOR', unit:'%', color:'var(--door)',
+    opt:8, tau:18, min:0, max:100, dir:'hi',
+    desc:'Door-opening frequency; models ambient-air entry.',
+    corr_base:[0.34,0.58,1.0,0.44,0.12,0.20,0.28]
+  },
+  {
+    id:'comp', name:'Compressor load', short:'COMP', unit:'%', color:'var(--comp)',
+    opt:52, tau:30, min:15, max:100, dir:'both',
+    desc:'Cooling response; deviations in either direction are represented.',
+    corr_base:[0.42,0.66,0.44,1.0,0.36,0.24,0.22]
+  },
+  {
+    id:'battery', name:'Battery level', short:'BAT', unit:'%', color:'var(--battery)',
+    opt:74, tau:26, min:0, max:100, dir:'lo',
+    desc:'Low-side battery observation; the example narrows other gate widths.',
+    corr_base:[0.18,0.22,0.12,0.36,1.0,0.12,0.20]
+  },
+  {
+    id:'humid', name:'Cargo humidity', short:'HUM', unit:'%', color:'var(--humid)',
+    opt:68, tau:20, min:20, max:98, dir:'both',
+    desc:'Cargo humidity; an auxiliary condensation/quality contributor.',
+    corr_base:[0.24,0.30,0.20,0.24,0.12,1.0,0.14]
+  },
+  {
+    id:'delay', name:'Transport delay', short:'DLY', unit:'min', color:'var(--delay)',
+    opt:10, tau:40, min:0, max:300, dir:'hi',
+    desc:'Transport delay adds scripted cooling load and door-opening opportunities.',
+    corr_base:[0.12,0.18,0.28,0.22,0.20,0.14,1.0]
+  }
+];
+
+const BASE = {ambient:18, cargo:4, door:8, comp:52, battery:74, humid:68, delay:10};
+let vals = {...BASE};
+let running = true;
+let tick = 0;
+let scenario = 'normal';
+let driftTarget = {ambient:0,cargo:0,door:0,comp:0,battery:0,humid:0,delay:0};
+let noiseAmp = {ambient:1.5,cargo:0.4,door:4,comp:4,battery:0.6,humid:2.0,delay:3};
+let rHistory = FACTORS.map(()=>[]);
+let prevZones = FACTORS.map(()=>'ok');
+let logLines = [];
 const HIST_LEN = 136;
-// tauC: fixed tau for correlation-drift R (R_corr), on a different scale from each
-// FACTORS[i].tau (4-40). Demo-tuned constant with no cited reference; coincidentally
-// the same numeric value as the JP sibling's tauC, but the two files' R_corr inputs differ.
+
+
 const tauC = 0.24;
-let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
-let vals = {};
-let history = FACTORS.map(()=>[]);
-let prevZone = FACTORS.map(()=>'ok');
-let corrBase = FACTORS.map(f => [...f.corr_base]);
+const corrBase = FACTORS.map(f => [...f.corr_base]);
+
+const SCENARIOS = {
+  normal: {
+    desc:'Within declared synthetic ranges',
+    drift:{ambient:0,cargo:0,door:0,comp:0,battery:0,humid:0,delay:0},
+    amp:{ambient:1.5,cargo:0.4,door:4,comp:4,battery:0.6,humid:2.0,delay:3}
+  },
+  summer: {
+    desc:'Hot ambient increases cooling load',
+    drift:{ambient:14,cargo:2.4,door:3,comp:18,battery:-6,humid:-5,delay:8},
+    amp:{ambient:2.5,cargo:0.7,door:5,comp:6,battery:0.8,humid:2.6,delay:4}
+  },
+  doorfreq: {
+    desc:'Frequent door opening increases ambient-air entry',
+    drift:{ambient:5,cargo:3.6,door:36,comp:22,battery:-4,humid:9,delay:18},
+    amp:{ambient:1.8,cargo:0.9,door:10,comp:6,battery:0.9,humid:4.0,delay:6}
+  },
+  compdegrade: {
+    desc:'Compressor degradation reduces modeled cooling capacity',
+    drift:{ambient:4,cargo:5.2,door:6,comp:-18,battery:-5,humid:6,delay:10},
+    amp:{ambient:1.6,cargo:1.0,door:4,comp:7,battery:0.8,humid:3.0,delay:4}
+  },
+  battery: {
+    desc:'Low battery compresses the compressor gate width',
+    drift:{ambient:3,cargo:4.4,door:5,comp:-10,battery:-30,humid:4,delay:12},
+    amp:{ambient:1.4,cargo:0.9,door:5,comp:6,battery:1.2,humid:2.4,delay:4}
+  },
+  delay: {
+    desc:'Transport delay adds door-opening opportunities and cooling load',
+    drift:{ambient:5,cargo:3.8,door:14,comp:14,battery:-10,humid:5,delay:85},
+    amp:{ambient:2.0,cargo:0.9,door:6,comp:6,battery:1.0,humid:2.8,delay:12}
+  },
+  break: {
+    desc:'Cold-chain break: cascading temperature excursion',
+    drift:{ambient:18,cargo:8.5,door:32,comp:-22,battery:-38,humid:12,delay:120},
+    amp:{ambient:3.0,cargo:1.2,door:10,comp:8,battery:1.4,humid:4.2,delay:18}
+  }
+};
+
+function applyScenario(){
+  scenario = document.getElementById('scenario-sel').value;
+  const s = SCENARIOS[scenario];
+  driftTarget = {...s.drift};
+  noiseAmp = {...s.amp};
+  document.getElementById('scen-desc').textContent = s.desc;
+  addLog(`[SCENARIO] ${s.desc}`, 'info');
+}
 
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
-function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
-function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
-// Note: this EN version has 4 zones (ok/watch/warn/fail, watch at R>=.4) while the JP
-// sibling has only 3 (ok/warn/fail, no watch tier) — a genuine behavioral difference,
-// not just a translation gap. RUPTURE_BOUNDARY(fail)/WARNING(warn) thresholds (1.0/.75)
-// match the shared NRA-IDE sample convention.
-function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
-function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
-function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
+function factorIndexById(id){ return FACTORS.findIndex(f => f.id === id); }
 
-function init(){
-  Object.keys(SCENARIOS).forEach(k=>{
-    const opt=document.createElement('option'); opt.value=k; opt.textContent=SCENARIOS[k].label; document.getElementById('scenario-sel').appendChild(opt);
-  });
-  FACTORS.forEach(f=>vals[f.id]=f.opt);
-  buildFactorCards(); buildCorrMatrix(); buildCouplingList(); buildDots(); resetSim();
+function calcDelta(val, f){
+  if(f.dir === 'hi') return Math.max(0, val - f.opt);
+  if(f.dir === 'lo') return Math.max(0, f.opt - val);
+  return Math.abs(val - f.opt);
 }
+
+function calcRawRById(id){
+  const i = factorIndexById(id);
+  const f = FACTORS[i];
+  const delta = calcDelta(vals[id], f);
+  return {delta, tau:f.tau, R:delta / f.tau};
+}
+
+
+
+
+
+
+function chainPressures(){
+  const amb = calcRawRById('ambient').R;
+  const car = calcRawRById('cargo').R;
+  const dor = calcRawRById('door').R;
+  const cmp = calcRawRById('comp').R;
+  const bat = calcRawRById('battery').R;
+  const hum = calcRawRById('humid').R;
+  const dly = calcRawRById('delay').R;
+  const load = Math.min(2.2, 0.40*amb + 0.42*dor + 0.22*dly);
+  const cooling = Math.min(2.2, 0.45*load + 0.35*bat + 0.35*cmp);
+  const chain = Math.min(2.2, 0.28*load + 0.28*cmp + 0.24*bat + 0.20*car + 0.12*dly);
+  return {amb,car,dor,cmp,bat,hum,dly,load,cooling,chain};
+}
+
+
+
+
+
+function dynamicTau(i){
+  const f = FACTORS[i];
+  const p = chainPressures();
+  let shrink = 1.0;
+
+  if(f.id === 'cargo')   shrink -= Math.min(0.60, p.cooling*0.18 + p.load*0.10);
+  if(f.id === 'comp')    shrink -= Math.min(0.36, p.bat*0.12 + p.load*0.08);
+  if(f.id === 'battery') shrink -= Math.min(0.24, p.cmp*0.10 + p.dly*0.06);
+  if(f.id === 'door')    shrink -= Math.min(0.20, p.dly*0.08);
+  if(f.id === 'humid')   shrink -= Math.min(0.30, p.dor*0.10 + p.car*0.08);
+  if(f.id === 'delay')   shrink -= Math.min(0.22, Math.min(2.2,.40*p.amb+.42*p.dor)*.07);
+
+  return Math.max(f.tau * shrink, f.tau * 0.35);
+}
+
+function calcR(i){
+  const f = FACTORS[i];
+  const delta = calcDelta(vals[f.id], f);
+  const tau = dynamicTau(i);
+  return {delta, tau, R: delta / tau};
+}
+
+
+
+function getColor(R){
+  if(R >= 1.0) return 'var(--fail)';
+  if(R >= 0.75) return 'var(--warn)';
+  return 'var(--ok)';
+}
+function getBadge(R){
+  if(R >= 1.0) return ['AUX_STOP','badge-fail','fail'];
+  if(R >= 0.75) return ['WARNING','badge-warn','warn'];
+  return ['SAFE','badge-ok','ok'];
+}
+
 function buildFactorCards(){
-  const root=document.getElementById('factor-grid'); root.innerHTML='';
+  const root = document.getElementById('factor-grid');
+  root.innerHTML = '';
   FACTORS.forEach((f,i)=>{
-    const card=document.createElement('div'); card.className='fc'; card.id='fc-'+i;
-    card.innerHTML=`<div class="badge b-ok" id="badge-${i}">SAFE</div>
-      <div class="fc-name">${f.name}</div><div class="fc-val" id="val-${i}" style="color:${COLORS[i%COLORS.length]}">—</div>
+    const div = document.createElement('div');
+    div.className = 'fc';
+    div.id = `fc-${i}`;
+    div.innerHTML = `
+      <div class="fc-badge badge-ok" id="badge-${i}">SAFE</div>
+      <div class="fc-name">${f.name}</div>
+      <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
-      <div class="barbg"><div class="bar" id="bar-${i}"></div></div>
-      <div class="fc-desc">${f.desc}</div>`;
-    root.appendChild(card);
+      <div class="fc-row"><span class="fc-lbl">gate_width</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_gate (aux)</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
+      <div class="fc-desc">${f.desc}</div>
+    `;
+    root.appendChild(div);
   });
 }
+
 function buildCorrMatrix(){
-  const root=document.getElementById('corr-matrix'); root.innerHTML='';
-  const n=FACTORS.length+1; const grid=document.createElement('div'); grid.className='corr-grid'; grid.style.setProperty('--ncols', n);
+  const root = document.getElementById('corr-matrix');
+  root.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'corr-grid';
   grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
-  FACTORS.forEach(f=>grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
-  FACTORS.forEach((fi,i)=>{ grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`; FACTORS.forEach((_,j)=>grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`); });
+  FACTORS.forEach(f => grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
+  FACTORS.forEach((fi,i)=>{
+    grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`;
+    FACTORS.forEach((_,j)=> {
+      grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`;
+    });
+  });
   root.appendChild(grid);
 }
-function buildCouplingList(){
-  const root=document.getElementById('coupling-list'); root.innerHTML='';
-  ["Ambient-door load","Cooling pressure","Chain pressure","Delay pressure"].forEach((row,idx)=>{
-    root.innerHTML += `<div class="coup-row"><div class="coup-name">${row}</div><div class="coup-bg"><div class="coup-bar" id="cbar-${idx}" style="background:${COLORS[idx%COLORS.length]};width:0%"></div></div><div class="coup-val" id="cval-${idx}">0.000</div></div>`;
-  });
-}
-function buildDots(){
-  const root=document.getElementById('dots'); root.innerHTML='';
-  FACTORS.forEach((f,i)=>{
-    const dot=document.createElement('div'); dot.className='dot'; dot.id='dot-'+i; dot.style.background=COLORS[i%COLORS.length]; dot.style.boxShadow=`0 0 18px ${COLORS[i%COLORS.length]}`; dot.style.setProperty('--ang', (i*360/FACTORS.length)+'deg'); dot.style.setProperty('--rad','70px'); root.appendChild(dot);
-  });
-}
 
-// pressure(): composes one weighted "main" pressure from every factor's raw R
-// (weight field, default 0.18 if unset) plus a per-scenario flat pressureBoost,
-// then separately averages the "thermal" and "supply" group members. This is a
-// different composition strategy from the JP sibling's named load/cooling/chain chain.
-function pressure(){
-  let p=0, thermal=0, supply=0;
-  FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
-  const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
-  return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
+function buildCouplingList(){
+  const root = document.getElementById('coupling-list');
+  const rows = [
+    ['Ambient / door load','load-coup','var(--ambient)'],
+    ['Cooling pressure','cooling-coup','var(--cargo)'],
+    ['Chain pressure','chain-coup','var(--fail)'],
+    ['Battery ratio','bat-coup','var(--battery)'],
+    ['Delay ratio','delay-coup','var(--delay)']
+  ];
+  root.innerHTML = rows.map(([name,id,col]) => `
+    <div class="coup-row">
+      <div class="coup-name">${name}</div>
+      <div class="coup-bar-bg"><div class="coup-bar" id="${id}-bar" style="background:${col};width:0%"></div></div>
+      <div class="coup-val" id="${id}-val">0.000</div>
+    </div>
+  `).join('');
 }
-// dynamicTau(): shrinks tau by category (f.shrink: "main"/"thermal"/"supply") rather
-// than per-factor formulas. Coefficients (.58/.18, .56/.20/.08, .50/.18/.08) and the
-// f.tau*.35 floor are demo-tuned; the floor prevents tau collapsing toward 0.
-function dynamicTau(f){
-  const p=pressure(); let shrink=1;
-  if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
-  if(f.shrink==='thermal') shrink -= Math.min(.56, p.thermal*.20 + p.main*.08);
-  if(f.shrink==='supply') shrink -= Math.min(.50, p.supply*.18 + p.main*.08);
-  return Math.max(f.tau*shrink, f.tau*.35);
-}
-function calcR(f){ const d=delta(vals[f.id],f); const tau=dynamicTau(f); return {delta:d,tau,R:d/tau}; }
 
 function updateValues(){
   tick++;
-  const sc=SCENARIOS[scenario]; const ramp=Math.min(1,tick/90);
-  FACTORS.forEach((f,i)=>{
-    let base=f.opt, drift=(sc.drift&&sc.drift[f.id]||0)*ramp, amp=(sc.amp&&sc.amp[f.id]||f.amp||1);
-    let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
-    vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
+  const ramp = Math.min(1, tick / 90);
+  const breakRamp = scenario === 'break' ? Math.min(1, Math.max(0, (tick-40)/72)) : 0;
+
+  Object.keys(BASE).forEach((id, idx) => {
+    const f = FACTORS[factorIndexById(id)];
+    const base = BASE[id];
+    const drift = driftTarget[id] * ramp;
+    const amp = noiseAmp[id];
+    const noise = (Math.random() - 0.5) * 2 * amp;
+    const wave = Math.sin(tick * 0.045 + idx * 0.83) * amp * 0.45;
+    let extra = 0;
+    if(id === 'ambient') extra += breakRamp * 6;
+    if(id === 'cargo') extra += breakRamp * 2.2;
+    if(id === 'door') extra += breakRamp * 14;
+    if(id === 'comp') extra -= breakRamp * 10;
+    if(id === 'battery') extra -= breakRamp * 10;
+    if(id === 'delay') extra += breakRamp * 40;
+    if(id === 'humid') extra += breakRamp * 4;
+
+    vals[id] = clamp(base + drift + noise + wave + extra, f.min, f.max);
   });
-  const p=pressure();
-  FACTORS.forEach(f=>{
-    if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='thermal') vals[f.id]=clamp(vals[f.id] + p.thermal*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
-  });
+
+
+
+
+  const p = chainPressures();
+  vals.comp = clamp(vals.comp + p.load*4.6 - p.bat*2.8, FACTORS[3].min, FACTORS[3].max);
+  vals.cargo = clamp(vals.cargo + p.load*0.55 - p.cmp*0.28 + p.bat*0.20, FACTORS[1].min, FACTORS[1].max);
+  vals.humid = clamp(vals.humid + p.dor*1.6 + p.car*1.0, FACTORS[5].min, FACTORS[5].max);
+  vals.battery = clamp(vals.battery - (p.cmp*0.6 + p.dly*0.3), FACTORS[4].min, FACTORS[4].max);
 }
-// calcCorr(): correlation drift here is group-based (same-group pairs drift by the full
-// driftBase, cross-group pairs by driftBase*.55), unlike the JP sibling's hardcoded list
-// of specific factor-id pairs. driftBase mixes p.main*.14 with the scenario's corrBoost.
+
+
+
+
+
+
 function calcCorr(){
-  const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
-  for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
+  const C = [];
+  const p = chainPressures();
+  for(let i=0;i<FACTORS.length;i++){
+    C[i] = [];
+    for(let j=0;j<FACTORS.length;j++){
+      if(i === j){ C[i][j] = 1.0; continue; }
+      const ids = [FACTORS[i].id, FACTORS[j].id].sort().join('-');
+      let drift = 0;
+
+      if(['ambient-cargo','cargo-comp','cargo-door','ambient-comp','battery-comp','delay-door'].includes(ids)){
+        drift += p.chain * 0.16 + p.cooling * 0.07;
+      }
+      if(['battery-cargo','battery-delay','comp-door'].includes(ids)){
+        drift += p.cooling * 0.12;
+      }
+      if(scenario === 'break' && tick > 35) drift += Math.min(0.42, (tick-35)*0.0055);
+
+      C[i][j] = clamp(corrBase[i][j] + drift + (Math.random()-0.5)*0.034, 0, 1);
+    }
+  }
   return C;
 }
-function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
 
-function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
+function calcRCorr(C){
+  let maxR = 0;
+  const alerts = [];
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=i+1;j<FACTORS.length;j++){
+      const Rij = Math.abs(C[i][j] - corrBase[i][j]) / tauC;
+      if(Rij > maxR) maxR = Rij;
+      if(Rij >= 1.0) alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${Rij.toFixed(2)}`);
+    }
+  }
+  return {maxR, alerts};
+}
+
+function fmtVal(v, i){
+  const f = FACTORS[i];
+  if(f.id === 'delay') return Math.round(v).toLocaleString() + f.unit;
+  return v.toFixed(1) + f.unit;
+}
+
+function setCoup(id, val){
+  document.getElementById(`${id}-bar`).style.width = Math.min(100, val*100).toFixed(1) + '%';
+  document.getElementById(`${id}-val`).textContent = val.toFixed(3);
+}
+
 function updateUI(){
-  const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
-  FACTORS.forEach((f,i)=>{
-    const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();
-    const z=zoneFor(r.R), [bt,bc]=badgeFor(r.R), col=colorFor(r.R);
-    document.getElementById('val-'+i).textContent=fmt(vals[f.id],f);
-    document.getElementById('delta-'+i).textContent=(f.fmt==='int'?Math.round(r.delta).toLocaleString():f.fmt==='2'?r.delta.toFixed(2):f.fmt==='3'?r.delta.toFixed(3):r.delta.toFixed(1))+f.unit;
-    document.getElementById('tau-'+i).textContent=(f.fmt==='int'?Math.round(r.tau).toLocaleString():f.fmt==='2'?r.tau.toFixed(2):f.fmt==='3'?r.tau.toFixed(3):r.tau.toFixed(1))+f.unit;
-    document.getElementById('r-'+i).textContent=r.R.toFixed(3); document.getElementById('r-'+i).style.color=col;
-    document.getElementById('bar-'+i).style.width=Math.min(100,r.R*100).toFixed(1)+'%'; document.getElementById('bar-'+i).style.background=col;
-    document.getElementById('badge-'+i).textContent=bt; document.getElementById('badge-'+i).className='badge '+bc;
-    document.getElementById('fc-'+i).className='fc'+(r.R>=1?' fail':r.R>=.75?' warn':'');
-    document.getElementById('dot-'+i).style.setProperty('--rad', (60+Math.min(90,r.R*70)).toFixed(1)+'px');
-    if(prevZone[i]!==z){ addLog(`${f.name} moved to ${z.toUpperCase()} R=${r.R.toFixed(3)}`, z==='fail'?'fail':z==='warn'?'warn':z==='watch'?'watch':'ok'); prevZone[i]=z; }
+  const C = calcCorr();
+  const {maxR:rCorr, alerts} = calcRCorr(C);
+  const p = chainPressures();
+
+
+  let rTotal = rCorr;
+
+  FACTORS.forEach((f,i) => {
+    const {delta, tau, R} = calcR(i);
+    rTotal = Math.max(rTotal, calcDelta(vals[f.id],f)/f.tau);
+    rHistory[i].push(R);
+    if(rHistory[i].length > HIST_LEN) rHistory[i].shift();
+
+    const col = getColor(R);
+    const [bText, bCls, zone] = getBadge(R);
+
+    document.getElementById(`val-${i}`).textContent = fmtVal(vals[f.id], i);
+    document.getElementById(`delta-${i}`).textContent = (f.id === 'delay' ? Math.round(delta).toLocaleString() : delta.toFixed(1)) + f.unit;
+    document.getElementById(`tau-${i}`).textContent = (f.id === 'delay' ? Math.round(tau).toLocaleString() : tau.toFixed(1)) + f.unit;
+    document.getElementById(`r-${i}`).textContent = R.toFixed(3);
+    document.getElementById(`r-${i}`).style.color = col;
+    document.getElementById(`rbar-${i}`).style.width = Math.min(100, R*100).toFixed(1) + '%';
+    document.getElementById(`rbar-${i}`).style.background = col;
+
+    const card = document.getElementById(`fc-${i}`);
+    card.className = 'fc' + (R >= 1.0 ? ' fail' : R >= 0.75 ? ' warn' : '');
+    const badge = document.getElementById(`badge-${i}`);
+    badge.textContent = bText;
+    badge.className = 'fc-badge ' + bCls;
+
+    if(zone !== prevZones[i]){
+      if(zone === 'fail') addLog(`AUX_GATE_EXCEEDEDcandidate: ${f.name} R=${R.toFixed(3)}`, 'fail');
+      else if(zone === 'warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      prevZones[i] = zone;
+    }
   });
-  for(let i=0;i<FACTORS.length;i++) for(let j=0;j<FACTORS.length;j++){ const cell=document.getElementById(`cm-${i}-${j}`); const v=C[i][j]; const rij=i!==j?Math.abs(v-corrBase[i][j])/tauC:0; if(i===j){cell.style.background='rgba(88,215,255,.14)';cell.style.color='var(--accent)';cell.textContent='1.00';} else if(rij>=1){cell.style.background='rgba(255,49,95,.44)';cell.style.color='#ffb2c4';cell.textContent=v.toFixed(2);} else if(rij>=.75){cell.style.background='rgba(255,210,74,.25)';cell.style.color='var(--warn)';cell.textContent=v.toFixed(2);} else {cell.style.background=`rgba(61,255,156,${v*.25})`;cell.style.color=`rgba(255,255,255,${.35+v*.5})`;cell.textContent=v.toFixed(2);} }
-  document.getElementById('r-total').textContent=total.toFixed(3); document.getElementById('r-total').style.color=colorFor(total); setStatusText(document.getElementById('r-status'),total,'SAFE — structural margin remains');
-  document.getElementById('r-coupling').textContent=p.main.toFixed(3); document.getElementById('r-coupling').style.color=colorFor(p.main);
-  document.getElementById('r-corr').textContent=cr.max.toFixed(3); document.getElementById('r-corr').style.color=colorFor(cr.max);
-  document.getElementById('pressure-fill').style.width=Math.min(100,total*100).toFixed(1)+'%';
-  document.getElementById('visual-status').textContent=total>=1?'✕ RUPTURE_BOUNDARY':total>=.75?'▲ WARNING':total>=.4?'● WATCH':'● SAFE';
-  document.getElementById('visual-status').style.color=colorFor(total);
-  document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
-  [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });
-  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('') : `<span class="corr-ok-txt">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
-  if(cr.alerts.length && tick%24===0) addLog('Correlation drift detected: '+cr.alerts[0],'fail');
-  drawChart(); 
+
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=0;j<FACTORS.length;j++){
+      const cell = document.getElementById(`cm-${i}-${j}`);
+      const v = C[i][j];
+      const Rij = i !== j ? Math.abs(v - corrBase[i][j]) / tauC : 0;
+      if(i === j){
+        cell.style.background = 'rgba(103,216,255,.14)';
+        cell.style.color = 'var(--accent)';
+        cell.textContent = '1.00';
+      } else if(Rij >= 1.0){
+        cell.style.background = 'rgba(255,71,109,.44)';
+        cell.style.color = '#ffb7c8';
+        cell.textContent = v.toFixed(2);
+      } else if(Rij >= 0.75){
+        cell.style.background = 'rgba(255,210,87,.25)';
+        cell.style.color = 'var(--warn)';
+        cell.textContent = v.toFixed(2);
+      } else {
+        cell.style.background = `rgba(65,255,155,${v*0.25})`;
+        cell.style.color = `rgba(255,255,255,${0.35+v*0.5})`;
+        cell.textContent = v.toFixed(2);
+      }
+    }
+  }
+
+  const corrAlert = document.getElementById('corr-alert');
+  if(alerts.length){
+    corrAlert.innerHTML = alerts.slice(0,4).map(a => `<div class="corr-fail-txt">⚠ ${a}</div>`).join('');
+    if(tick % 24 === 0) addLog(`Correlation drift: ${alerts[0]}`, 'fail');
+  } else {
+    corrAlert.innerHTML = `<span class="corr-ok-txt">✓ Correlation within baseline R_corr=${rCorr.toFixed(3)}</span>`;
+  }
+
+  document.getElementById('overall-r').textContent = rTotal.toFixed(3);
+  document.getElementById('overall-r').style.color = getColor(rTotal);
+  document.getElementById('chain-r').textContent = p.chain.toFixed(3);
+  document.getElementById('chain-r').style.color = getColor(p.chain);
+  document.getElementById('cooling-r').textContent = p.cooling.toFixed(3);
+  document.getElementById('cooling-r').style.color = getColor(p.cooling);
+  document.getElementById('corr-r').textContent = rCorr.toFixed(3);
+  document.getElementById('corr-r').style.color = getColor(rCorr);
+
+  document.getElementById('med-load').textContent = p.load.toFixed(3);
+  document.getElementById('med-comp').textContent = p.cmp.toFixed(3);
+  document.getElementById('med-cargo').textContent = vals.cargo.toFixed(1) + '℃';
+
+  setCoup('load-coup', p.load);
+  setCoup('cooling-coup', p.cooling);
+  setCoup('chain-coup', p.chain);
+  setCoup('bat-coup', p.bat);
+  setCoup('delay-coup', p.dly);
+
+  const st = document.getElementById('overall-status');
+  const truckSt = document.getElementById('truck-status');
+  document.getElementById('temp-read').textContent = vals.cargo.toFixed(1) + '℃';
+
+  const gaugePct = clamp((vals.cargo + 5) / 23 * 100, 0, 100);
+  document.getElementById('temp-mask').style.height = (100 - gaugePct).toFixed(1) + '%';
+
+  const doorPct = clamp(vals.door / 100, 0, 1);
+  document.getElementById('door-panel').style.setProperty('--dooropen', (doorPct * 0.22).toFixed(3));
+  document.getElementById('door-panel').style.setProperty('--doorangle', (doorPct * 48).toFixed(1) + 'deg');
+  document.getElementById('cool-cloud').style.setProperty('--cool', clamp(0.03 + (vals.comp/100)*0.22, 0.02, 0.28).toFixed(3));
+  document.getElementById('hot-layer').style.setProperty('--heat', clamp((vals.cargo - 2) / 10 * 0.35, 0.03, 0.35).toFixed(3));
+
+  document.getElementById('chain-note').innerHTML = `load=${p.load.toFixed(3)}<br>cooling=${p.cooling.toFixed(3)}`;
+
+  if(rTotal >= 1.0){
+    st.textContent = 'RUPTURE_BOUNDARY — Suppress autonomous decisions; continue post-rupture testimony';
+    st.style.color = 'var(--fail)';
+    truckSt.textContent = '✕ RUPTURE_BOUNDARY COLD CHAIN';
+    truckSt.style.color = 'var(--fail)';
+  } else if(rTotal >= 0.75){
+    st.textContent = 'WARNING — Increased temperature-excursion monitoring';
+    st.style.color = 'var(--warn)';
+    truckSt.textContent = '▲ WARNING COLD CHAIN';
+    truckSt.style.color = 'var(--warn)';
+  } else {
+    st.textContent = 'SAFE — Within declared baseline';
+    st.style.color = 'var(--ok)';
+    truckSt.textContent = '● SAFE COLD CHAIN';
+    truckSt.style.color = 'var(--ok)';
+  }
+
+  drawTimeSeries();
+
+const auxiliaryStop=FACTORS.some((f,i)=>calcR(i).R>=1)||(chainPressures().chain>=1);
+  FACTORS.forEach((f,i)=>boundary.observe('factor'+i,calcDelta(vals[f.id],f),f.tau,tick));
+  for(let i=0;i<FACTORS.length;i++)for(let j=i+1;j<FACTORS.length;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBase[i][j]),tauC,tick);
+  NRADemoBoundary.paint(boundary,auxiliaryStop,FACTORS.map((_,i)=>'badge-'+i),['overall-status']);
 }
-function drawChart(){
-  const cv=document.getElementById('chart'), ctx=cv.getContext('2d'), W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#111b2a'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#24344c'; [0.4,.75,1].forEach(r=>{const y=H-r/1.6*(H-24)-10; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();});
-  const fy=H-1/1.6*(H-24)-10; ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(255,49,95,.55)'; ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke(); ctx.setLineDash([]);
-  history.forEach((hist,i)=>{ if(hist.length<2)return; ctx.strokeStyle=COLORS[i%COLORS.length]; ctx.lineWidth=1.7; ctx.beginPath(); hist.forEach((v,x)=>{const px=x/(HIST_LEN-1)*W, py=H-Math.min(v,1.6)/1.6*(H-24)-10; x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}); ctx.stroke(); });
-  ctx.fillStyle='rgba(255,49,95,.75)'; ctx.font='10px JetBrains Mono, monospace'; ctx.fillText('R=1.0',6,fy-4);
+
+const tsCanvas = document.getElementById('ts-canvas');
+const tsCtx = tsCanvas.getContext('2d');
+const TS_COLORS = ['#ff9f43','#67d8ff','#ff8ad3','#ffe066','#8bff7a','#5be0c4','#c89bff'];
+
+function drawTimeSeries(){
+  const W = tsCanvas.width, H = tsCanvas.height;
+  tsCtx.clearRect(0,0,W,H);
+  tsCtx.fillStyle = '#121e27';
+  tsCtx.fillRect(0,0,W,H);
+
+  tsCtx.strokeStyle = '#274150';
+  tsCtx.lineWidth = 1;
+  [0.25,0.5,0.75,1.0].forEach(y => {
+    const py = H - y*(H*.84) - 10;
+    tsCtx.beginPath(); tsCtx.moveTo(0,py); tsCtx.lineTo(W,py); tsCtx.stroke();
+  });
+
+  const failY = H - 1.0*(H*.84) - 10;
+  tsCtx.strokeStyle = 'rgba(255,71,109,.55)';
+  tsCtx.setLineDash([5,4]);
+  tsCtx.beginPath(); tsCtx.moveTo(0, failY); tsCtx.lineTo(W, failY); tsCtx.stroke();
+  tsCtx.setLineDash([]);
+
+  rHistory.forEach((hist, i) => {
+    if(hist.length < 2) return;
+    tsCtx.strokeStyle = TS_COLORS[i];
+    tsCtx.lineWidth = 1.7;
+    tsCtx.beginPath();
+    hist.forEach((v, x) => {
+      const px = x/(HIST_LEN-1)*W;
+      const py = H - Math.min(v,1.65)/1.65*(H*.84) - 10;
+      x === 0 ? tsCtx.moveTo(px, py) : tsCtx.lineTo(px, py);
+    });
+    tsCtx.stroke();
+  });
+
+  tsCtx.font = '10px JetBrains Mono, monospace';
+  tsCtx.fillStyle = 'rgba(255,71,109,.75)';
+  tsCtx.fillText('R_gate=1.0 (aux)', 6, failY-4);
 }
-function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span class="legend-fail">- - Fail</span>'; }
-function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
-function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
-// Note: tick is incremented twice per animation frame here — once inside updateValues()
-// (tick++ at its top) and again on the line below — unlike the JP sibling, which
-// increments tick only inside updateValues(). Reported as an observed fact per review;
-// logic left unchanged.
-function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
-function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
-function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Cold Chain Temperature Excursion Correlation Simulation initialized.','ok'); updateUI(); }
-buildLegend(); init(); setInterval(update,300);
+
+function addLog(msg, type='info'){
+  const area = document.getElementById('log-area');
+  const t = (tick + '').padStart(4, '0');
+  const div = document.createElement('div');
+  div.className = 'log-' + type;
+  div.textContent = `[t=${t}] ${msg}`;
+  area.insertBefore(div, area.firstChild);
+  logLines.push(div);
+  if(logLines.length > 86){
+    const old = logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function update(){
+  if(!running) return;
+  updateValues();
+  updateUI();
+}
+
+function toggleRun(){
+  running = !running;
+  const btn = document.getElementById('btn-run');
+  btn.textContent = running ? '▶ Running' : '⏸ Paused';
+  btn.className = running ? 'btn active' : 'btn';
+}
+
+function resetSim(){
+  tick = 0;
+  vals = {...BASE};
+  driftTarget = {ambient:0,cargo:0,door:0,comp:0,battery:0,humid:0,delay:0};
+  noiseAmp = {ambient:1.5,cargo:0.4,door:4,comp:4,battery:0.6,humid:2.0,delay:3};
+  scenario = 'normal';
+  rHistory = FACTORS.map(() => []);
+  prevZones = FACTORS.map(() => 'ok');
+  document.getElementById('scenario-sel').value = 'normal';
+  document.getElementById('scen-desc').textContent = SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML = '';
+  logLines = [];
+  addLog('New simulation trial', 'info');
+  addLog('Cold-chain temperature observation started', 'ok');
+
+boundary.newTrial();
+}
+
+buildFactorCards();
+buildCorrMatrix();
+buildCouplingList();
+addLog('Cold-chain temperature example initialized', 'ok');
+addLog('aggregate = max(R_base_i, R_corr); AUX_STOP separate / No dilution by averaging', 'info');
+setInterval(update, 300);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds. Current observations and arrival history are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial retains prior records and does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
+<p class="demo-caveat">Base thickness is declared separately from temporary auxiliary gate widths. A wider auxiliary gate does not restore the structure. Cards and histories display auxiliary R_gate. The main aggregate is a maximum across independent base/correlation targets; it does not redefine a single target's canonical R. AUX_STOP and retained arrival records are separate.</p>
 </body>
 </html>

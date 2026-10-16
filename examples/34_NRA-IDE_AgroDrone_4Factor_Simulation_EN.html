@@ -169,7 +169,10 @@ canvas.ts-canvas{width:100%;height:130px;display:block;background:var(--s2);bord
 
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.70,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // ── Factor definitions ────────────────────────────────
 // opt/tau feed R_i = δ_i / τ_i (see panel-title "FACTOR STATE — R_i = δ_i / τ_i").
 // tau is the per-factor tolerance width shown in each card's desc (e.g. temp: ±5°C ⇒ tau:5).
@@ -301,11 +304,11 @@ function drawTimeSeries(){
   // grid
   tsCtx.strokeStyle='#1a2e42'; tsCtx.lineWidth=1;
   [0.25,0.5,0.75,1.0].forEach(y=>{
-    const py=H-y*H*0.85-8; // 0.85/8: demo layout constants mapping R∈[0,~1.18] onto the canvas height
+    const py=H - y/1.5*H*0.85 - 8; // 0.85/8: demo layout constants mapping R∈[0,~1.18] onto the canvas height
     tsCtx.beginPath(); tsCtx.moveTo(0,py); tsCtx.lineTo(W,py); tsCtx.stroke();
   });
   // fail line
-  const failY=H-1.0*(H*0.85)-8;
+  const failY=H - 1.0/1.5*(H*0.85) - 8;
   tsCtx.strokeStyle='rgba(255,34,85,0.4)'; tsCtx.lineWidth=1.5;
   tsCtx.setLineDash([4,3]);
   tsCtx.beginPath(); tsCtx.moveTo(0,failY); tsCtx.lineTo(W,failY); tsCtx.stroke();
@@ -370,7 +373,8 @@ function update(){
   let compositeR=0;
   vals.forEach((v,i)=>{
     const f=FACTORS[i];
-    const R=calcR(v,f);
+    const R = calcR(v, f);
+    boundary.observe('factor'+i,Math.abs(v-f.opt),f.tau,tick);
     rHistory[i].push(R);
     if(rHistory[i].length>HIST_LEN) rHistory[i].shift();
     const delta=Math.abs(v-f.opt);
@@ -387,9 +391,9 @@ function update(){
     const card=document.getElementById('fc-'+i);
     card.className='fc'+(R>=1.0?' fail':R>=0.7?' warn':'');
     // G(r) gate
-    const refVal=valHistory[i].length>=tau_delay?valHistory[i][0]:vals[i]; // x_{t-τ}: reference record from tau_delay steps ago (falls back to the current value until enough history exists)
-    const r_residual=(v-refVal)/f.tau; // normalized residual
-    const gOpen=gateOpen(r_residual,k_gate)*100;
+    const refVal=valHistory[i].length > tau_delay ? valHistory[i][valHistory[i].length-1-tau_delay] : null; // x_{t-τ}: reference record from tau_delay steps ago (falls back to the current value until enough history exists)
+    const r_residual = refVal === null ? null : (v - refVal) / f.tau; // normalized residual
+    const gOpen=refVal === null ? 0 : gateOpen(r_residual, k_gate) * 100;
     document.getElementById('gbar-'+i).style.width=gOpen.toFixed(1)+'%';
     document.getElementById('gval-'+i).textContent=gOpen.toFixed(1)+'%';
     const gStat=document.getElementById('gstat-'+i);
@@ -403,7 +407,7 @@ function update(){
     if(zone!==prevZones[i]){
       if(zone==='fail') addLog(`RUPTURE_BOUNDARY: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'fail');
       else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} (δ=${delta.toFixed(1)}${f.unit})`,'warn');
-      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`,'ok');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`,'ok');
       prevZones[i]=zone;
     }
   });
@@ -426,7 +430,8 @@ function update(){
   }
   // overall
   // R_total = max(R_i, R_corr), as stated in the README (no averaging that dilutes danger)
-  const Rcomp=Math.max(compositeR,rCorrMax);
+  for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBase_snapshot[i][j]),.25,tick);
+  const Rcomp = Math.max(compositeR, rCorrMax);
   const oEl=document.getElementById('overall-r');
   oEl.textContent=Rcomp.toFixed(3); oEl.style.color=getColor(Rcomp);
   const oSt=document.getElementById('overall-status');
@@ -434,6 +439,9 @@ function update(){
   else if(Rcomp>=0.7){ oSt.textContent='WARNING — Monitoring intensified'; oSt.style.color='var(--w)'; }
   else { oSt.textContent='SAFE — All factors normal'; oSt.style.color='var(--ok)'; }
   drawTimeSeries();
+
+NRADemoBoundary.paint(boundary,false,FACTORS.map((_,i)=>'badge-'+i),['overall-status']);
+  if(valHistory[0].length<=tau_delay)FACTORS.forEach((_,i)=>{document.getElementById('gstat-'+i).textContent='NOT_OBSERVABLE: warm-up';document.getElementById('gval-'+i).textContent='—';});
 }
 
 // ── Controls ──────────────────────────────────────────
@@ -454,6 +462,8 @@ function resetSim(){
   scenario='normal'; logLines=[];
   document.getElementById('log-area').innerHTML='';
   addLog('System reset','info');
+
+boundary.newTrial();
 }
 
 // ── Init & Loop ───────────────────────────────────────
@@ -462,5 +472,6 @@ addLog('NRA-IDE Seedling House Simulation started','ok');
 addLog('R = δ/τ tracking active | G(r) gate on standby | Correlation monitoring active','info');
 setInterval(update,300);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds; current observations and retained arrival records are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial preserves prior records; it does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

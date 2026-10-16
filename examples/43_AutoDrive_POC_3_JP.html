@@ -166,7 +166,10 @@ tr.row-label td:first-child{text-align:left;color:var(--muted);}
     </table>
   </div>
 </div>
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.40,.70,.85);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // FILE: NRA-IDE_AutoDrive_POC_03_JP.html  2026-02-28
 // NRA-IDE AutoDrive Safety Gate v0.3
 // 5-Zone: A=PERMIT B=CAVEAT C=HANDOFF-WARNING D=EMERGENCY E=RUPTURE_BOUNDARY
@@ -197,20 +200,12 @@ function getMu(){return MU[road][tire];}
 function getDecel(){return getMu()*G;}
 function stopDist(v){const ms=v/3.6;return ms*REACT+(ms*ms)/(2*getDecel());}
 // δ：停止距離が安全余裕帯（車間距離の手前 τ m）へ入り込んだ量。R=1.0 は停止距離＝車間距離（衝突境界）。
-function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-(d-t));const R=t>0?delta/t:Infinity;return{delta,R,sd};}
+function computeR(v,d,t){const sd=stopDist(v);const delta=Math.max(0,sd-(d-t));const R=NRADemoBoundary.ratio(delta,t).R;return{delta,R,sd};}
 
 // 不可逆ラッチ：一度 R ≥ 1.0（フェイルクローズド域）に入ったら、「新しい評価」で解除するまで固定する。
 let zoneLatched = false;
-function startNewEvaluation(){ zoneLatched = false; prevZone = ''; update(); }
-function zoneFromR(R){
-  if(R>=TH.D)zoneLatched=true;
-  if(zoneLatched)return'E';
-  if(R<TH.A)return'A';
-  if(R<TH.B)return'B';
-  if(R<TH.C)return'C';
-  if(R<TH.D)return'D';
-  return'E';
-}
+function startNewEvaluation(){ boundary.newTrial(); zoneLatched = false; prevZone = ''; update(); }
+function zoneFromR(R){if(!Number.isFinite(R))return 'INVALID';if(R>=.85)zoneLatched=true;if(zoneLatched)return 'E';return R<TH.A?'A':R<TH.B?'B':R<TH.C?'C':'D';}
 function getColor(R){
   if(R<TH.A)return'#00ff88';
   if(R<TH.B)return'#ffd600';
@@ -387,6 +382,9 @@ function flash(){flashEl.style.opacity='1';setTimeout(()=>{flashEl.style.opacity
 function update(){
   const mu=getMu(),a=mu*G;
   const{delta,R,sd}=computeR(speed_kmh,dist_m,tau_m);
+const input=NRADemoBoundary.ratio(delta,tau_m);
+  boundary.observe('vehicle',delta,tau_m,Date.now());
+  if(input.state){document.getElementById('rValue').textContent='—';document.getElementById('zoneLabel').textContent=input.state;NRADemoBoundary.paint(boundary,false,[],['m-gate']);return;}
   const zone=zoneFromR(R);
   document.getElementById('sb-speed').textContent=speed_kmh+' km/h';
   document.getElementById('sb-dist').textContent=dist_m+' m';
@@ -400,19 +398,22 @@ function update(){
   document.getElementById('m-stop').textContent=sd.toFixed(1)+' m';
   drawGauge(R);updateZoneUI(zone,R);highlightMatrix();
   if(zone!==prevZone){addLog(zone,R,delta,mu,now());if(zone==='D'||zone==='E')flash();prevZone=zone;}
+
+NRADemoBoundary.paint(boundary,false,[],['zoneLabel','m-gate']);
 }
 
 slSpeed.addEventListener('input',()=>{speed_kmh=+slSpeed.value;document.getElementById('lbl-speed').textContent=speed_kmh+' km/h';update();});
 slDist.addEventListener('input',()=>{dist_m=+slDist.value;document.getElementById('lbl-dist').textContent=dist_m+' m';update();});
-slTau.addEventListener('input',()=>{tau_m=+slTau.value;document.getElementById('lbl-tau').textContent=tau_m+' m';update();});
+slTau.addEventListener('input',()=>{boundary.newTrial();zoneLatched=false;tau_m=+slTau.value;document.getElementById('lbl-tau').textContent=tau_m+' m';update();});
 
 function resizeRoad(){roadCanvas.width=roadCanvas.offsetWidth;roadCanvas.height=roadCanvas.offsetHeight;}
 window.addEventListener('resize',resizeRoad);resizeRoad();
 
-function loop(){const{delta,R,sd}=computeR(speed_kmh,dist_m,tau_m);drawRoad(delta,R,sd,dist_m);drawGauge(R);requestAnimationFrame(loop);}
+function loop(){const{delta,R,sd}=computeR(speed_kmh,dist_m,tau_m);if(!Number.isFinite(R)){requestAnimationFrame(loop);return;}drawRoad(delta,R,sd,dist_m);drawGauge(R);requestAnimationFrame(loop);}
 
 setRoad('dry');setTire('summer');update();loop();
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・路面の摩擦係数μ・反応時間・安全余裕距離τは、デモ用の代表値で、実車の停止距離ではありません。<br>・δは、停止距離が安全余裕帯（車間距離の手前τ）へ入り込んだ量です。R=1.0は停止距離＝車間距離です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>教材用の仮閾値です。現在の観測値と到達履歴を分けて表示します。AUX_STOPは補助条件であり対象破断ではありません。新試行でも前試行の記録は残り、構造復元を意味しません。</p><button type="button" onclick="startBoundaryTrial()">新しい教材試行</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

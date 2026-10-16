@@ -427,9 +427,11 @@ body.en span.en-text { display: inline; }
 
   <div class="jp-text">
     <p class="note-text">ブラウザで開くだけで動作します（インストール不要）。多くのデモでは赤線が R = 1.0 を示しますが、これは「警告線」ではなく構造限界線です。実務上の判断限界はその手前に置く必要があります。</p>
+    <p class="note-text">01〜20のサンプルの考え方と正典の根拠：<a href="README_canon_basis_JP.md">README_canon_basis_JP.md</a>（先に読むと勘違いを防げます）。</p>
   </div>
   <div class="en-text">
     <p class="note-text">All demos run directly in a browser. No installation is required. In many demos, the red line indicates R = 1.0. This is not a warning line; it is the structural limit line. The practical judgment limit must be placed before that line.</p>
+    <p class="note-text">Concept and canonical basis of samples 01–20: <a href="README_canon_basis_EN.md">README_canon_basis_EN.md</a> (reading it first helps avoid misunderstandings).</p>
   </div>
 
   <!-- STEP 1 -->
@@ -836,10 +838,11 @@ body.en span.en-text { display: inline; }
     <tr><th>#</th><th><span class="jp-text">リンク</span><span class="en-text">Links</span></th><th><span class="jp-text">内容</span><span class="en-text">Content</span></th></tr>
     <tr>
       <td>33</td>
-      <td><div class="demo-links"><a href="33_nra_ide_6d_layer_viz_JP.html" class="badge-jp">JP</a><a href="33_nra_ide_6d_layer_viz_EN.html" class="badge-en">EN</a></div></td>
+      <td><div class="demo-links"><a href="33_boundary_and_history/README.md" class="badge-jp">Guide (JP)</a><a href="33_boundary_and_history/01_simultaneous_boundary_JP.html" class="badge-jp">1 (JP)</a><a href="33_boundary_and_history/02_pre_rupture_history_JP.html" class="badge-jp">2 (JP)</a></div></td>
       <td>
-        <span class="jp-text"><strong>6次元多重レイヤービジュアライザー。</strong> 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。</span>
-        <span class="en-text"><strong>6D multi-layer visualizer.</strong> Displays six R-value surfaces simultaneously. Opacity, saturation, and monochrome modes are available.</span>
+        <span class="jp-text"><strong>境界への到達と、そこへ至る履歴。</strong> ①多層の同時境界到達、②破断前の蓄積・厚み損失・介入を、異なる合成モデルで示します。新しい2本と共通説明は日本語版です。初期6層可視化は履歴資料として保存：</span>
+        <span class="en-text"><strong>Boundary arrival and the history leading to it.</strong> Two separate schematic models show simultaneous boundary arrival and accumulation, thickness loss, and intervention before rupture. The new demos and guide are Japanese only. Original 6D visualizers are retained as historical material:</span>
+        <a href="33_nra_ide_6d_layer_viz_JP.html" class="badge-jp">6D JP</a> <a href="33_nra_ide_6d_layer_viz_EN.html" class="badge-en">6D EN</a>
       </td>
     </tr>
     <tr>
@@ -970,7 +973,7 @@ body.en span.en-text { display: inline; }
     <tr>
       <td>47</td>
       <td><div class="demo-links"><a href="47_FPGA_Demo_SPEED_JP.html" class="badge-jp">JP</a><a href="47_FPGA_Demo_SPEED_EN.html" class="badge-en">EN</a></div></td>
-      <td><span class="jp-text">FPGA ハードウェア実装スピードデモ</span><span class="en-text">FPGA Hardware Implementation Speed Demo</span></td>
+      <td><span class="jp-text">FPGA教育用FSM（実機速度未検証）</span><span class="en-text">Educational FPGA FSM (hardware speed unverified)</span></td>
     </tr>
     <tr>
       <td>48</td>
@@ -1116,5 +1119,8 @@ function setLang(lang) {
   } catch(e) {}
 })();
 </script>
+<!-- examples-34plus-20261016 -->
+<aside style="margin:20px auto;max-width:1100px;padding:12px;border:1px solid #b8860b">34番以降：現在の比率・補助ゲート比・到達履歴を区別します。AUX_STOPは対象破断ではありません。35〜41番の日英は同じ計算です。40・41は未検証・研究用途・臨床使用不可。47は教育用FSMで実機速度未検証、52は正規Rを計算しない演出、53は上下別のゆらぎ検出です。<br>Current ratios, auxiliary gates and arrival history are separate. AUX_STOP is not target rupture. Examples 35–41 use matching JP/EN computations. 40/41: unvalidated research/education only, no clinical use. 47: educational FSM, hardware speed unverified. 52: visual state, no canonical R. 53: directional fluctuation detection.</aside>
+<!-- /examples-34plus-20261016 -->
 </body>
 </html>

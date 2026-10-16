@@ -93,7 +93,7 @@ Date: 26-0223-0115 JST
     </style>
 </head>
 <body>
-<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">概念図：表示している τ・R は演出用の疑似値で、動力学の計算とは無関係です。</div>
+<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">概念図：演出状態と演出幅は可視化専用です。正規δ・τ・Rおよび正規境界状態を計算するモデルではありません。</div>
 
     <div id="info-panel" class="panel">
         <h1>NRA-IDE v1.8 Hybrid</h1>
@@ -112,9 +112,9 @@ Date: 26-0223-0115 JST
 
         <h2>Structural Stability</h2>
         <div class="meter-container"><div id="viability-meter" class="meter-fill bg-green"></div></div>
-        <div class="row"><span class="label">δ (Core)</span><span id="delta-val" class="value">0.800</span></div>
-        <div class="row"><span class="label">τ (Noise)</span><span id="tau-val" class="value">0.100</span></div>
-        <div class="row"><span class="label">R=δ/τ</span><span id="r-val" class="value c-purple">8.000</span></div>
+        <div class="row"><span class="label">演出状態量</span><span id="delta-val" class="value">0.800</span></div>
+        <div class="row"><span class="label">演出幅</span><span id="tau-val" class="value">0.100</span></div>
+        <div class="row"><span class="label">モデル分類</span><span id="r-val" class="value c-purple">VISUAL_ONLY</span></div>
     </div>
 
     <div id="entropy-panel" class="panel">
@@ -541,10 +541,10 @@ Date: 26-0223-0115 JST
         UI.rodRad.textContent = rodRadius.toFixed(1);
         UI.deltaVal.textContent = state.value.toFixed(3);
         // 注意：これは表示演出用の疑似変動値であり、実際のτ計算（CONFIG.tauBase等）とは無関係。
-        // R=δ/τ表示に使われるが、実体のτとは接続していない見せかけの値。
+        // モデル分類表示に使われるが、実体のτとは接続していない見せかけの値。
         const tau = 0.1 + Math.abs(Math.sin(time)) * 0.05;
         UI.tauVal.textContent = tau.toFixed(3);
-        UI.rVal.textContent = (state.value / tau).toFixed(3);
+        UI.rVal.textContent = 'VISUAL_ONLY'; // No canonical R is defined by this animation.
 
         // Contact status
         if (isCorrecting) {

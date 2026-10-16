@@ -226,6 +226,7 @@ canvas.ts-canvas{width:100%;height:170px;display:block;background:var(--s2);bord
 </style>
 </head>
 <body>
+<div class="notice">未検証・研究用途・臨床使用不可。係数とプロフィールは合成の仮定です。プロフィールが合成バイタルとゲート幅の両方に効くことを仮定しています。Observe等は教育上の観察区分で、正規破断状態・臨床的安全性を意味しません。不正値は区分を出しません。<div id="medical-input-state"></div></div>
 <div class="wrap">
 
 <header>
@@ -490,6 +491,8 @@ function profilePressure(person){
 }
 
 function makePatientState(person, i){
+if(![person.age,person.frailty,person.chronic].every(Number.isFinite)||person.age<0||person.frailty<0||person.frailty>1||person.chronic<0||person.chronic>1)return {person:person,invalid:true,reason:'Invalid synthetic profile',patientR:NaN,personR:NaN};
+
   const sc = SCENARIOS[scenario];
   const phase = tick*0.06 + i*0.73;
   const vitals = {};
@@ -538,6 +541,7 @@ function makePatientState(person, i){
 }
 
 function bucketOf(R){
+ if(!Number.isFinite(R))return {key:'invalid',label:'INVALID',badge:'INVALID',color:'var(--fail)'};
   if(R >= 1.0) return {key:'fail', label:'Human Review', color:'var(--fail)', badge:'HUMAN'};
   if(R >= 0.75) return {key:'warn', label:'Caution', color:'var(--warn)', badge:'CAUTION'};
   if(R >= 0.40) return {key:'watch', label:'Watch', color:'var(--watch)', badge:'WATCH'};
@@ -689,6 +693,18 @@ function applyScenario(){
 let lastBuckets = {};
 
 function render(states){
+  const invalid=states.filter(s=>s.invalid||!Number.isFinite(s.patientR));
+  const aux=states.filter(s=>s.auxiliaryReview);
+  document.getElementById('medical-input-state').textContent=invalid.length?'INVALID — no observation bucket: '+invalid.map(s=>s.person.id||'?').join(', '):aux.length?'AUX_REVIEW — supplementary pressure; independent of individual ratio':'SYNTHETIC EDUCATIONAL SNAPSHOT';
+  states=states.filter(s=>!s.invalid&&Number.isFinite(s.patientR));
+  if(!states.length){
+    document.getElementById('cohort-r').textContent='—';document.getElementById('cohort-status').textContent='INVALID — no observation bucket';
+    document.getElementById('patient-grid').innerHTML='';
+    document.getElementById('detail-r').textContent='—';document.getElementById('route-bucket').textContent='INVALID';
+    ['ok','watch','warn','fail'].forEach(k=>{document.getElementById('bucket-'+k).innerHTML='';document.getElementById('cnt-'+k).textContent='0';});
+    return;
+  }
+
   buildCards(states);
   renderDetail(states.find(s => s.person.id === selected) || states[0]);
   renderBuckets(states);

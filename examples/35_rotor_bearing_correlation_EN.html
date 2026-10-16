@@ -4,363 +4,1134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NRA-IDE Rotor/Bearing Correlation Simulation</title>
+<title>NRA-IDE Rotor / bearing correlation template 35</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
-:root {
-  --bg:#050914; --s1:#0b1220; --s2:#111b2a; --bd:#24344c;
-  --tx:#d6e4f2; --mu:#62768a; --ok:#3dff9c; --watch:#69d6ff;
-  --warn:#ffd24a; --fail:#ff315f; --accent:#58d7ff;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root{
+  --bg:#06080d;
+  --s1:#0d121b;
+  --s2:#121b28;
+  --s3:#172334;
+  --bd:#243349;
+  --tx:#c8d6e5;
+  --mu:#52667f;
+  --ok:#39ff95;
+  --warn:#ffd044;
+  --fail:#ff315f;
+  --cyan:#00e5ff;
+  --violet:#b66cff;
+  --orange:#ff9b42;
+  --blue:#55a7ff;
+  --gray:#7d8fa8;
+  --vib:#00e5ff;
+  --temp:#ff6b42;
+  --curr:#ffd044;
+  --lube:#39ff95;
+  --noise:#b66cff;
+  --rpm:#55a7ff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(88,215,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(88,215,255,.025) 1px,transparent 1px);background-size:34px 34px;pointer-events:none;}
-.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 36px;}
-header{text-align:center;margin-bottom:24px;}
-.h-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.78;margin-bottom:10px;}
-h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
-h1 em{font-style:normal;color:#58d7ff;}
-.h-desc{font-size:.86rem;color:var(--mu);line-height:1.75;max-width:920px;margin:0 auto;}
-.notice{border:1px solid rgba(255,210,74,.34);background:rgba(255,210,74,.055);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#e8d89d;font-size:.78rem;line-height:1.72;}
-.ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
-button,.select{padding:8px 14px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;font-family:Inter,system-ui,sans-serif;}
-button:hover,.select:hover{border-color:var(--accent);color:var(--accent);}
-button.active{background:var(--accent);color:#001018;border-color:var(--accent);font-weight:700;}
-.label{font-size:.8rem;color:var(--mu);}
-.scen{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
-.formula{background:var(--s1);border:1px solid rgba(88,215,255,.45);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:2;}
-.formula .a{color:var(--accent)} .formula .b{color:var(--warn)} .formula .c{color:var(--ok)} .formula .f{color:var(--fail)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:520px){.stats{grid-template-columns:1fr;}}
-.stat{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;}
-.stat-l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
-.stat-v{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
-.stat-s{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
-.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
-@media(max-width:980px){.grid{grid-template-columns:1fr;}}
-.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
-.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
-.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-@media(max-width:980px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
-.fc{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:.25s;}
-.fc.warn{border-color:var(--warn)} .fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
-@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,.05)}to{box-shadow:0 0 16px rgba(255,49,95,.28)}}
-.badge{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;letter-spacing:.08em;}
-.b-ok{background:rgba(61,255,156,.10);color:var(--ok);border:1px solid rgba(61,255,156,.30)} .b-watch{background:rgba(105,214,255,.10);color:var(--watch);border:1px solid rgba(105,214,255,.30)} .b-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35)} .b-fail{background:rgba(255,49,95,.14);color:var(--fail);border:1px solid rgba(255,49,95,.45)}
-.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
-.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:700;margin-bottom:8px;}
-.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
-.fc-lbl{color:var(--mu)} .fc-r{font-size:.98rem;font-weight:700}
-.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
-.bar{height:100%;border-radius:2px;transition:.25s;}
-.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
-.visual{height:330px;background:radial-gradient(circle at 50% 22%, rgba(255,49,95,.12), transparent 34%),linear-gradient(180deg,rgba(88,215,255,.06),rgba(255,210,74,.04)),var(--s2);border:1px solid var(--bd);border-radius:12px;position:relative;overflow:hidden;}
-.visual-title{position:absolute;left:18px;top:16px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;}
-.rings{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;border:2px solid rgba(88,215,255,.18);}
-.rings::before,.rings::after{content:'';position:absolute;inset:28px;border-radius:50%;border:1px dashed rgba(255,210,74,.24);}
-.rings::after{inset:66px;border-color:rgba(255,49,95,.30);}
-.dot{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);left:calc(50% - 8px);top:calc(50% - 8px);transform:rotate(var(--ang)) translateX(var(--rad));transform-origin:center;opacity:.9;}
-.pressure{position:absolute;left:22px;right:22px;bottom:44px;height:10px;background:var(--bd);border-radius:5px;overflow:hidden;}
-.pressure-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--fail));transition:.25s;}
-.visual-status{position:absolute;left:18px;bottom:18px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);}
-.visual-note{position:absolute;right:18px;bottom:18px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.70rem;color:var(--warn);line-height:1.7;}
-.corr-grid{display:grid;grid-template-columns:repeat(var(--ncols),1fr);gap:3px;}
-.corr-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.50rem;font-weight:600;transition:.25s;}
-.corr-head{background:transparent;color:var(--mu);font-size:.48rem;line-height:1.1;text-align:center;}
-.chain{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;}
-.chain-flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
-.node{border:1px solid var(--bd);background:rgba(255,255,255,.025);border-radius:9px;padding:10px 8px;text-align:center;min-height:72px;}
-.node-name{font-size:.70rem;color:var(--mu);margin-bottom:5px} .node-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700}
-.arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.25rem}
-.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
-.coup-row{display:flex;align-items:center;gap:10px} .coup-name{font-size:.74rem;min-width:118px;color:var(--tx)} .coup-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden} .coup-bar{height:100%;border-radius:4px;transition:.25s} .coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right}
-canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
-.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap} .legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem}
-.log{height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
-.log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)}
-.footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--tx);
+  font-family:'Noto Sans JP',sans-serif;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,0.018) 1px,transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding:28px 18px 34px;}
 
-.scenario-code-txt { font-size:1.35rem; }
-.chain-desc { font-size:.74rem;color:var(--mu);line-height:1.7; }
-.corr-alert-wrap { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
+header{text-align:center;margin-bottom:26px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--cyan);
+  opacity:.74;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.25rem,3.5vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--cyan);font-style:normal;}
+.h-desc{font-size:.83rem;color:var(--mu);line-height:1.7;}
+
+.ctrl-bar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  background:rgba(13,18,27,.75);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:16px;
+}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:6px;
+  background:var(--s2);color:var(--tx);
+  font-family:'Noto Sans JP',sans-serif;font-size:.82rem;
+  cursor:pointer;transition:.18s;
+}
+.btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn.active{background:var(--cyan);color:#001016;border-color:var(--cyan);}
+.ctrl-label{font-size:.8rem;color:var(--mu);}
+select{
+  padding:7px 12px;background:var(--s2);border:1px solid var(--bd);
+  border-radius:6px;color:var(--tx);font-family:'Noto Sans JP',sans-serif;
+  font-size:.82rem;cursor:pointer;
+}
+.scenario-desc{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;color:var(--mu);
+}
+
+.formula-box{
+  background:var(--s1);border:1px solid rgba(0,229,255,.45);
+  border-radius:10px;padding:14px 18px;margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2;
+}
+.eq-c{color:var(--cyan);}
+.eq-w{color:var(--warn);}
+.eq-o{color:var(--ok);}
+.eq-f{color:var(--fail);}
+
+.main-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr;}}
+
+.panel{
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:12px;padding:16px;
+}
+.panel-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;letter-spacing:.18em;color:var(--cyan);
+  margin-bottom:14px;
+}
+
+/* rotor canvas */
+.rotor-panel{display:flex;flex-direction:column;gap:12px;}
+#rotorCanvas{
+  width:100%;height:310px;display:block;background:#07101a;
+  border:1px solid var(--bd);border-radius:10px;
+}
+.overall{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+}
+@media(max-width:680px){.overall{grid-template-columns:1fr;}}
+.over-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:12px 14px;text-align:center;
+}
+.over-label{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  letter-spacing:.16em;color:var(--mu);margin-bottom:4px;
+}
+.over-val{
+  font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;
+}
+.over-sub{font-size:.72rem;color:var(--mu);line-height:1.5;margin-top:4px;}
+
+/* factor cards */
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:900px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.factor-grid{grid-template-columns:1fr;}}
+.fc{
+  position:relative;overflow:hidden;
+  background:var(--s2);border:1px solid var(--bd);
+  border-radius:10px;padding:13px;transition:.25s;
+}
+.fc.warn{border-color:var(--warn);}
+.fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,0);}to{box-shadow:0 0 16px rgba(255,49,95,.22);}}
+.fc-name{font-size:.76rem;color:var(--mu);margin-bottom:3px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.32rem;font-weight:700;margin-bottom:6px;}
+.fc-row{display:flex;justify-content:space-between;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin:3px 0;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:.95rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;overflow:hidden;margin-top:7px;}
+.r-bar{height:100%;border-radius:2px;transition:width .25s,background .25s;}
+.fc-badge{
+  position:absolute;top:9px;right:9px;
+  font-family:'JetBrains Mono',monospace;font-size:.57rem;
+  padding:2px 6px;border-radius:3px;letter-spacing:.09em;
+}
+.badge-ok{background:rgba(57,255,149,.1);color:var(--ok);border:1px solid rgba(57,255,149,.32);}
+.badge-warn{background:rgba(255,208,68,.1);color:var(--warn);border:1px solid rgba(255,208,68,.34);}
+.badge-fail{background:rgba(255,49,95,.15);color:var(--fail);border:1px solid rgba(255,49,95,.45);}
+
+/* correlation */
+.corr-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.corr-cell{
+  aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:600;
+  transition:background .25s,color .25s;
+}
+.corr-head{background:transparent;color:var(--mu);font-size:.54rem;word-break:keep-all;}
+.alert-box{
+  margin-top:10px;min-height:38px;font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;line-height:1.7;color:var(--mu);
+}
+
+/* coupling and lead-lag */
+.coupling-list,.lag-list{display:flex;flex-direction:column;gap:8px;}
+.c-row,.lag-row{display:flex;align-items:center;gap:9px;}
+.c-name,.lag-name{font-size:.74rem;min-width:94px;color:var(--tx);}
+.c-bar-bg,.lag-bar-bg{flex:1;height:7px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.c-bar,.lag-bar{height:100%;border-radius:4px;transition:width .25s,background .25s;}
+.c-val,.lag-val{font-family:'JetBrains Mono',monospace;font-size:.68rem;min-width:56px;text-align:right;color:var(--mu);}
+.note{
+  margin-top:10px;
+  color:var(--mu);
+  font-size:.75rem;
+  line-height:1.7;
+}
+
+/* time series */
+#tsCanvas{
+  width:100%;height:155px;display:block;background:var(--s2);
+  border:1px solid var(--bd);border-radius:9px;
+}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+.leg{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--mu);}
+
+/* log */
+.log-area{
+  height:150px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);
+  border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;line-height:1.7;
+}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+.footer{
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
+}
+
+.fc-en-txt { font-family:'JetBrains Mono',monospace;color:var(--mu);font-size:.65rem; }
+.fc-tau-txt { color:var(--mu); }
+.fc-desc-txt { font-size:.62rem;color:var(--mu);line-height:1.5;margin-top:7px; }
 .corr-fail-txt { color:var(--fail); }
 .corr-ok-txt { color:var(--ok); }
-.legend-fail { color:rgba(255,49,95,.75); }
+.legend-fail { color:rgba(255,49,95,.65); }
 </style>
 </head>
 <body>
-<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Synthetic data (unverified): values and correlation matrices are generated from "reference + scenario script + noise" for education. This is not correlation detection on measured data.</div>
+<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Unvalidated synthetic observations. Pearson correlations are computed from those synthetic series, not measured equipment data.</div>
 <div class="wrap">
+
 <header>
-  <div class="h-sub">NRA-IDE / ROTATING MACHINERY CORRELATION SAMPLE</div>
-  <h1>Rotor / Bearing <em>Correlation</em> Simulation</h1>
-  <p class="h-desc">A six-factor educational simulation for rotating machinery: vibration, bearing temperature, motor current, lubrication pressure, acoustic noise, and RPM deviation. Vibration leads, heat and current follow, and correlation drift is kept as an independent R value.</p>
+  <div class="h-sub">NRA-IDE / ROTOR-BEARING CORRELATION TEMPLATE</div>
+  <h1>Rotor / bearing <em>Correlation gate</em> example</h1>
+  <p class="h-desc">Synthetic vibration, temperature, current, lubrication, acoustic and RPM observations are compared with declared baselines. Base ratios, auxiliary widths and retained states are displayed separately.</p>
 </header>
 
-<div class="notice">Educational and structural visualization only. This file is not a certified machine protection system and must not be used for real industrial shutdown decisions.</div>
-
-<div class="ctrl">
-  <button class="active" id="btn-run" onclick="toggleRun()">▶ Running</button>
-  <button onclick="resetSim()">↺ Reset</button>
-  <span class="label">Scenario:</span>
-  <select class="select" id="scenario-sel" onchange="applyScenario()"></select>
-  <span class="scen" id="scen-desc">Normal operation</span>
+<div class="ctrl-bar">
+  <button class="btn active" id="btnRun" onclick="toggleRun()">▶ Running</button>
+  <button class="btn" onclick="resetSim()">↺ Reset trial</button>
+  <span class="ctrl-label">Scenario:</span>
+  <select id="scenarioSel" onchange="applyScenario()">
+    <option value="normal">Normal operation</option>
+    <option value="imbalance">Increasing imbalance</option>
+    <option value="lube_drop">Lubrication loss</option>
+    <option value="misalignment">Misalignment</option>
+    <option value="wear">Bearing wear</option>
+    <option value="cascade">Cascading correlation breakdown</option>
+  </select>
+  <span class="scenario-desc" id="scenarioDesc">Stable synthetic observations around the baseline</span>
 </div>
 
-<div class="formula">
-  <span class="a">R_i = δ_i / τ_i(t)</span> — structural ratio per factor |
-  <span class="b">R_corr = |C(t)-C(t₀)| / τ_C</span> — correlation drift |
-  <span class="c">R_coupling tracks vibration → heat/current/noise propagation</span> |
-  <span class="f">R_total = max(R_i, R_corr, R_coupling)</span>
+<div class="formula-box">
+  <span class="eq-c">R_i = δ_i / τ_i</span>：Individual structural ratios |
+  <span class="eq-w">τ_eff = τ_base / (1 + coupling pressure)</span>：Correlation narrows the auxiliary gate width　|
+  <span class="eq-o">aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>：Independent maxima |
+  <span class="eq-f">R ≥ 1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
-<div class="stats">
-  <div class="stat"><div class="stat-l">SYSTEM R_TOTAL</div><div class="stat-v" id="r-total">0.000</div><div class="stat-s" id="r-status">SAFE — structural margin remains</div></div>
-  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">vibration / lubrication / thermal coupling</div></div>
-  <div class="stat"><div class="stat-l">R_CORR MAX</div><div class="stat-v" id="r-corr">0.000</div><div class="stat-s">maximum correlation drift</div></div>
-  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v scenario-code-txt" id="scenario-code">NORMAL</div><div class="stat-s">synthetic data only</div></div>
-</div>
-
-<div class="grid">
-  <div class="panel"><div class="panel-title">FACTOR STATE — R_i = δ_i / τ_i(t)</div><div class="factor-grid" id="factor-grid"></div></div>
-  <div class="panel">
-    <div class="panel-title">STRUCTURAL VISUALIZATION</div>
-    <div class="visual">
-      <div class="visual-title">SYNTHETIC ROTOR / BEARING VIEW</div>
-      <div class="rings" id="rings"></div>
-      <div id="dots"></div>
-      <div class="pressure"><div class="pressure-fill" id="pressure-fill"></div></div>
-      <div class="visual-status" id="visual-status">● SAFE</div>
-      <div class="visual-note" id="visual-note">vibration → heat → current</div>
-    </div>
-  </div>
-</div>
-
-<div class="grid">
-  <div class="panel">
-    <div class="panel-title">MEDIATION / COUPLING LAYER</div>
-    <div class="chain">
-      <div class="chain-flow">
-        <div class="node"><div class="node-name" id="node-a-name">Vibration</div><div class="node-val" id="node-a">0.000</div></div>
-        <div class="arrow">→</div>
-        <div class="node"><div class="node-name" id="node-b-name">Lubrication</div><div class="node-val" id="node-b">0.000</div></div>
-        <div class="arrow">⇒</div>
-        <div class="node"><div class="node-name" id="node-c-name">Thermal load</div><div class="node-val" id="node-c">0.000</div></div>
+<div class="main-grid">
+  <div class="panel rotor-panel">
+    <div class="panel-title">ROTOR VISUALIZATION — Bearing / rotor state</div>
+    <canvas id="rotorCanvas" width="720" height="310"></canvas>
+    <div class="overall">
+      <div class="over-card">
+        <div class="over-label">R_MAX</div>
+        <div class="over-val" id="rMaxVal">0.000</div>
+        <div class="over-sub">Largest individual ratio</div>
       </div>
-      <div class="chain-desc">The sample shows delayed coupling: vibration rises first, then temperature, current, and acoustic noise follow. The overall decision is not averaged.</div>
-      <div class="coupling-list" id="coupling-list"></div>
+      <div class="over-card">
+        <div class="over-label">R_CORR</div>
+        <div class="over-val" id="rCorrVal">0.000</div>
+        <div class="over-sub">Drift from baseline correlation</div>
+      </div>
+      <div class="over-card">
+        <div class="over-label">SYSTEM</div>
+        <div class="over-val" id="rTotalVal">0.000</div>
+        <div class="over-sub" id="systemStatus">SAFE — Within declared baseline</div>
+      </div>
     </div>
   </div>
+
   <div class="panel">
-    <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
-    <div id="corr-matrix"></div>
-    <div id="corr-alert" class="corr-alert-wrap">✓ Correlation stable.</div>
+    <div class="panel-title">FACTOR STATE — R_gate / gate_width (aux)</div>
+    <div class="factor-grid" id="factorGrid"></div>
   </div>
 </div>
 
-<div class="grid">
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">TIME SERIES — R VALUES</div>
-    <canvas id="chart" width="590" height="152"></canvas>
+    <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C₀</div>
+    <div id="corrMatrix"></div>
+    <div class="alert-box" id="corrAlert">Correlation observation started.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">COUPLING PRESSURE — τWidth contributors</div>
+    <div class="coupling-list" id="couplingList"></div>
+    <div class="note">
+      Example: lubrication and vibration affect other factors' auxiliary gate widths. This displays narrowed gates rather than averaging a deviation away.
+    </div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">LEAD-LAG CORRELATION — Lead-lag correlation</div>
+    <div class="lag-list" id="lagList"></div>
+    <div class="note">
+      Synthetic vibration may rise before temperature, current and acoustic responses. These are scripted lead-lag observations, not validated forecasts.
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">TIME SERIES — RValue history</div>
+    <canvas id="tsCanvas" width="560" height="155"></canvas>
     <div class="legend" id="legend"></div>
   </div>
-  <div class="panel">
-    <div class="panel-title">GATE LOG</div>
-    <div class="log" id="log"></div>
-  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">GATE LOG</div>
+  <div class="log-area" id="logArea"></div>
 </div>
 
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
-  <span>35_rotor_bearing_correlation_EN</span>
-  <span>R_total=max(R_i,R_corr,R_coupling) / no averaging dilution</span>
-</div>
+  <span>35_rotor_bearing_correlation_EN_20260425_024602_JST.html</span>
+  <span>aggregate = max(R_base_i, R_corr); AUX_STOP separate ｜ R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
+</div>
+
+<script src="demo_boundary.js"></script>
 <script>
-// FACTORS: 6-factor model, one object per physical signal (single-line literal for compactness).
-// weight   -> this factor's share of pressure().main (a weighted sum, not an explicit coupling matrix).
-// group    -> 'thermal' or 'supply'; pressure() averages R within each group to get p.thermal / p.supply.
-// shrink   -> which pressure term (main/thermal/supply) shrinks this factor's dynamic tau in dynamicTau().
-// coupledBy/coupledGain -> how much this factor's raw value is nudged by pressure() output each tick (updateValues()).
-// corr_base -> this factor's row of the baseline correlation matrix C(t0), consumed by calcCorr()/corrR().
-// opt/tau/amp values are demo tuning constants for this sample; not derived from a real bearing dataset.
-// Note: 'oilPressure' uses kPa here; the JP counterpart (35_..._JP.html) models the same physical signal in MPa — independent implementations, not a shared unit.
-const FACTORS = [{"id":"vibration","name":"Vibration","short":"VIB","unit":"mm/s","opt":2.5,"tau":3.0,"min":0,"max":14,"dir":"hi","amp":0.5,"weight":0.32,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.05,"fmt":"2","desc":"Leading indicator of imbalance or bearing damage.","corr_base":[1,0.55,0.35,0.25,0.3,0.2]},{"id":"bearingTemp","name":"Bearing Temp","short":"TEMP","unit":"℃","opt":58,"tau":22,"min":25,"max":115,"dir":"hi","amp":1.8,"weight":0.25,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.9,"desc":"Delayed heat response after vibration or lubrication stress.","corr_base":[0.55,1,0.5,0.3,0.4,0.25]},{"id":"current","name":"Motor Current","short":"AMP","unit":"A","opt":42,"tau":26,"min":10,"max":120,"dir":"hi","amp":2.2,"weight":0.2,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.6,"desc":"Load response from friction or mechanical resistance.","corr_base":[0.35,0.5,1,0.45,0.55,0.3]},{"id":"oilPressure","name":"Lubrication Pressure","short":"OIL","unit":"kPa","opt":420,"tau":95,"min":120,"max":650,"dir":"lo","amp":10,"weight":0.23,"group":"supply","shrink":"supply","coupledBy":"supply","coupledGain":-1.8,"fmt":"int","desc":"Low-side margin for lubrication loss.","corr_base":[0.25,0.3,0.45,1,0.5,0.42]},{"id":"acoustic","name":"Acoustic Noise","short":"NOISE","unit":"dB","opt":62,"tau":18,"min":40,"max":110,"dir":"hi","amp":2.4,"weight":0.18,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":0.4,"desc":"Secondary signature of vibration and contact instability.","corr_base":[0.3,0.4,0.55,0.5,1,0.48]},{"id":"rpmDev","name":"RPM Deviation","short":"RPM","unit":"%","opt":0,"tau":8,"min":-20,"max":25,"dir":"both","amp":1.0,"weight":0.16,"group":"supply","shrink":"main","coupledBy":"main","coupledGain":0.04,"desc":"Deviation from commanded rotation speed.","corr_base":[0.2,0.25,0.3,0.42,0.48,1]}];
-// SCENARIOS: per-scenario drift targets and boost constants (demo tuning values, no dataset behind them).
-// drift[id]      -> ramped (over ~90 ticks, see updateValues()) additive offset applied to that factor's optimum.
-// pressureBoost  -> added directly into pressure().main, i.e. raises R_coupling and shrinks every dynamic tau.
-// corrBoost      -> added into calcCorr()'s driftBase, i.e. raises the synthetic correlation drift directly.
-const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable operation within structural margin.","drift":{},"amp":{}},"imbalance":{"label":"Rotor imbalance","desc":"Vibration leads; noise and temperature follow.","drift":{"vibration":5,"acoustic":12,"bearingTemp":10,"current":8,"rpmDev":3},"pressureBoost":0.1,"corrBoost":0.08},"lubrication":{"label":"Lubrication loss","desc":"Oil pressure drops and bearing heat rises.","drift":{"oilPressure":-150,"bearingTemp":18,"vibration":3,"current":10,"acoustic":10},"pressureBoost":0.18,"corrBoost":0.1},"overload":{"label":"Overload","desc":"Current and heat rise with load.","drift":{"current":35,"bearingTemp":16,"vibration":2,"rpmDev":5},"pressureBoost":0.16,"corrBoost":0.08},"resonance":{"label":"Resonance","desc":"Vibration and acoustic noise couple strongly.","drift":{"vibration":7,"acoustic":24,"rpmDev":8,"bearingTemp":8},"pressureBoost":0.22,"corrBoost":0.12},"cascade":{"label":"Cascade","desc":"Multiple factors couple into a fail-closed path.","drift":{"vibration":8,"bearingTemp":32,"current":45,"oilPressure":-170,"acoustic":26,"rpmDev":11},"pressureBoost":0.35,"corrBoost":0.22}};
-const COLORS = ["#58d7ff","#ff7a1a","#ffd24a","#39ff85","#ff4fb0","#b58cff"];
-const HIST_LEN = 136; // time-series buffer length (ticks kept for the chart); demo tuning value.
-// tauC: normalizer for correlation-drift R in corrR() (R_corr = |C(t)-C(t0)| / tauC). Demo tuning value.
-// The JP counterpart (35_..._JP.html) uses a different constant (tauC=0.32, passed as a default function
-// parameter rather than a module-level constant) — independent tuning, not meant to match.
-const tauC = 0.24;
-let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
-let vals = {};
-let history = FACTORS.map(()=>[]);
-let prevZone = FACTORS.map(()=>'ok');
-let corrBase = FACTORS.map(f => [...f.corr_base]);
+const boundary = new NRADemoBoundary.Tracker(.70,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
+// EN is generated from this repaired JP computation model.
+const FACTORS = [
+  {
+    id:'vib', name:'Vibration', en:'VIB', unit:'mm/s', color:'#00e5ff',
+    opt:1.2, tauHi:3.2, tauLo:1.0, min:0, max:8, direction:'hi',
+    desc:'Bearing vibration; a leading synthetic contributor.'
+  },
+  {
+    id:'temp', name:'Bearing temperature', en:'TEMP', unit:'°C', color:'#ff6b42',
+    opt:55, tauHi:25, tauLo:10, min:20, max:110, direction:'hi',
+    desc:'Delayed friction / lubrication response.'
+  },
+  {
+    id:'curr', name:'Current', en:'CURR', unit:'A', color:'#ffd044',
+    opt:12, tauHi:8, tauLo:4, min:0, max:30, direction:'hi',
+    desc:'Load and misalignment increase the synthetic observation.'
+  },
+  {
+    id:'lube', name:'Lubrication pressure', en:'LUBE', unit:'MPa', color:'#39ff95',
+    opt:0.35, tauHi:0.12, tauLo:0.12, min:0.05, max:0.55, direction:'lo',
+    desc:'Assumed lubrication loss precedes vibration and temperature increases.'
+  },
+  {
+    id:'noise', name:'Acoustic level', en:'NOISE', unit:'dB', color:'#b66cff',
+    opt:62, tauHi:18, tauLo:8, min:45, max:100, direction:'hi',
+    desc:'Synthetic contact, wear and acoustic precursor.'
+  },
+  {
+    id:'rpm', name:'RPM deviation', en:'RPM', unit:'rpm', color:'#55a7ff',
+    opt:1500, tauHi:120, tauLo:120, min:1200, max:1800, direction:'band',
+    desc:'RPM ripple and eccentricity observation.'
+  },
+];
 
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
-function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
-function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
-// Zone thresholds for this file: OK (R<0.4) -> WATCH (R>=0.4) -> WARN (R>=0.75) -> FAIL (R>=1.0).
-// This implementation keeps a WATCH tier at 0.4. The JP counterpart (35_..._JP.html) has no WATCH
-// tier and gates WARN at 0.70 instead of 0.75 — a separately tuned threshold set, not a shared spec.
-function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
-function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
-function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
+// EN is generated from this repaired JP computation model.
+const COUPLING = [
+  // from: vib temp curr lube noise rpm
+  [0.00,0.10,0.05,0.70,0.25,0.42], // target vib
+  [0.42,0.00,0.20,0.48,0.18,0.10], // target temp
+  [0.30,0.20,0.00,0.18,0.10,0.34], // target curr
+  [0.08,0.12,0.10,0.00,0.05,0.05], // target lube
+  [0.55,0.12,0.08,0.25,0.00,0.18], // target noise
+  [0.22,0.10,0.25,0.12,0.20,0.00], // target rpm
+];
 
-function init(){
-  Object.keys(SCENARIOS).forEach(k=>{
-    const opt=document.createElement('option'); opt.value=k; opt.textContent=SCENARIOS[k].label; document.getElementById('scenario-sel').appendChild(opt);
-  });
-  FACTORS.forEach(f=>vals[f.id]=f.opt);
-  buildFactorCards(); buildCorrMatrix(); buildCouplingList(); buildDots(); resetSim();
-}
+
+
+
+
+const CORR_BASE = [
+  [1.00,0.30,0.28,-0.38,0.58,0.35],
+  [0.30,1.00,0.42,-0.44,0.36,0.18],
+  [0.28,0.42,1.00,-0.22,0.25,0.45],
+  [-0.38,-0.44,-0.22,1.00,-0.30,-0.18],
+  [0.58,0.36,0.25,-0.30,1.00,0.28],
+  [0.35,0.18,0.45,-0.18,0.28,1.00],
+];
+
+const SCENARIOS = {
+  normal:{
+    desc:'Stable synthetic observations around the baseline',
+    label:'Normal operation'
+  },
+  imbalance:{
+    desc:'Imbalance raises vibration and acoustic observations first',
+    label:'Increasing imbalance'
+  },
+  lube_drop:{
+    desc:'Lubrication loss precedes vibration and delayed temperature changes',
+    label:'Lubrication loss'
+  },
+  misalignment:{
+    desc:'Misalignment raises current, RPM deviation and vibration',
+    label:'Misalignment'
+  },
+  wear:{
+    desc:'Scripted bearing wear moves acoustic level and vibration from baseline',
+    label:'Bearing wear'
+  },
+  cascade:{
+    desc:'Lubrication loss, vibration and temperature form a scripted chain',
+    label:'Cascading correlation breakdown'
+  },
+};
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+let running = true;
+let scenario = 'normal';
+let tick = 0;
+let vals = FACTORS.map(f => f.opt);
+let prevZones = FACTORS.map(()=> 'safe');
+let historyVals = FACTORS.map(()=> []);
+let historyR = FACTORS.map(()=> []);
+let historyREff = FACTORS.map(()=> []);
+const HIST_LEN = 150;
+const CORR_WIN = 44;
+let logItems = [];
+
+// UI
+const rotorCanvas = document.getElementById('rotorCanvas');
+const rc = rotorCanvas.getContext('2d');
+const tsCanvas = document.getElementById('tsCanvas');
+const tc = tsCanvas.getContext('2d');
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
 function buildFactorCards(){
-  const root=document.getElementById('factor-grid'); root.innerHTML='';
+  const root = document.getElementById('factorGrid');
+  root.innerHTML = '';
   FACTORS.forEach((f,i)=>{
-    const card=document.createElement('div'); card.className='fc'; card.id='fc-'+i;
-    card.innerHTML=`<div class="badge b-ok" id="badge-${i}">SAFE</div>
-      <div class="fc-name">${f.name}</div><div class="fc-val" id="val-${i}" style="color:${COLORS[i%COLORS.length]}">—</div>
-      <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
-      <div class="barbg"><div class="bar" id="bar-${i}"></div></div>
-      <div class="fc-desc">${f.desc}</div>`;
-    root.appendChild(card);
+    const div = document.createElement('div');
+    div.className = 'fc';
+    div.id = `fc_${i}`;
+    div.innerHTML = `
+      <div class="fc-badge badge-ok" id="badge_${i}">SAFE</div>
+      <div class="fc-name">${f.name} <span class="fc-en-txt">${f.en}</span></div>
+      <div class="fc-val" id="val_${i}" style="color:${f.color}">—</div>
+      <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta_${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">gate_width</span><span id="tau_${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">coupling</span><span id="cp_${i}" class="fc-tau-txt">0.00</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_gate (aux)</span><span class="fc-r" id="r_${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="bar_${i}"></div></div>
+      <div class="fc-desc-txt">${f.desc}</div>
+    `;
+    root.appendChild(div);
   });
 }
 function buildCorrMatrix(){
-  const root=document.getElementById('corr-matrix'); root.innerHTML='';
-  const n=FACTORS.length+1; const grid=document.createElement('div'); grid.className='corr-grid'; grid.style.setProperty('--ncols', n);
+  const root = document.getElementById('corrMatrix');
+  root.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'corr-grid';
   grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
-  FACTORS.forEach(f=>grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
-  FACTORS.forEach((fi,i)=>{ grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`; FACTORS.forEach((_,j)=>grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`); });
+  FACTORS.forEach(f => grid.innerHTML += `<div class="corr-cell corr-head">${f.en}</div>`);
+  FACTORS.forEach((f,i)=>{
+    grid.innerHTML += `<div class="corr-cell corr-head">${f.en}</div>`;
+    FACTORS.forEach((_,j)=>{
+      grid.innerHTML += `<div class="corr-cell" id="cm_${i}_${j}">—</div>`;
+    });
+  });
   root.appendChild(grid);
 }
 function buildCouplingList(){
-  const root=document.getElementById('coupling-list'); root.innerHTML='';
-  ["Vibration pressure","Thermal pressure","Lubrication pressure","Correlation pressure"].forEach((row,idx)=>{
-    root.innerHTML += `<div class="coup-row"><div class="coup-name">${row}</div><div class="coup-bg"><div class="coup-bar" id="cbar-${idx}" style="background:${COLORS[idx%COLORS.length]};width:0%"></div></div><div class="coup-val" id="cval-${idx}">0.000</div></div>`;
-  });
-}
-function buildDots(){
-  const root=document.getElementById('dots'); root.innerHTML='';
+  const root = document.getElementById('couplingList');
+  root.innerHTML = '';
   FACTORS.forEach((f,i)=>{
-    const dot=document.createElement('div'); dot.className='dot'; dot.id='dot-'+i; dot.style.background=COLORS[i%COLORS.length]; dot.style.boxShadow=`0 0 18px ${COLORS[i%COLORS.length]}`; dot.style.setProperty('--ang', (i*360/FACTORS.length)+'deg'); dot.style.setProperty('--rad','70px'); root.appendChild(dot);
+    root.innerHTML += `
+      <div class="c-row">
+        <div class="c-name" style="color:${f.color}">${f.name}</div>
+        <div class="c-bar-bg"><div class="c-bar" id="cbar_${i}" style="width:0%;background:${f.color}"></div></div>
+        <div class="c-val" id="cval_${i}">0.00</div>
+      </div>
+    `;
   });
 }
+function buildLagList(){
 
-// pressure(): weighted-sum coupling model — this file's implementation of "R_coupling".
-// p.main    = Σ(factor.weight * rawR) + scenario.pressureBoost, clamped to [0,2.2].
-//             Used directly as one of the three terms in R_total's max() (see updateUI()),
-//             as an input to dynamicTau() below, and to nudge coupled factor values in updateValues().
-// p.thermal/p.supply = mean rawR within each 'group', each shrinking only that group's dynamic tau.
-// This is a weighted-sum design, not an explicit factor-to-factor matrix — contrast with the JP
-// counterpart (35_..._JP.html), which uses an explicit 6x6 COUPLING matrix gated at R>=0.70.
-function pressure(){
-  let p=0, thermal=0, supply=0;
-  FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
-  const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
-  return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
-}
-// dynamicTau(): shrinks a factor's tau under coupling pressure so its structural ratio R rises faster
-// as neighboring signals worsen. Each shrink term is capped (.58/.56/.50) and floored so tau never
-// drops below 35% of its base value (f.tau*.35) — both the caps and the .18/.20/.08 multipliers are
-// demo tuning constants with no external derivation.
-function dynamicTau(f){
-  const p=pressure(); let shrink=1;
-  if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
-  if(f.shrink==='thermal') shrink -= Math.min(.56, p.thermal*.20 + p.main*.08);
-  if(f.shrink==='supply') shrink -= Math.min(.50, p.supply*.18 + p.main*.08);
-  return Math.max(f.tau*shrink, f.tau*.35);
-}
-function calcR(f){ const d=delta(vals[f.id],f); const tau=dynamicTau(f); return {delta:d,tau,R:d/tau}; }
 
-function updateValues(){
-  tick++;
-  const sc=SCENARIOS[scenario]; const ramp=Math.min(1,tick/90);
-  FACTORS.forEach((f,i)=>{
-    let base=f.opt, drift=(sc.drift&&sc.drift[f.id]||0)*ramp, amp=(sc.amp&&sc.amp[f.id]||f.amp||1);
-    let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
-    vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
+  const pairs = [
+    ['vib','temp',12,'Vibration to temperature'],
+    ['vib','curr',8,'Vibration to current'],
+    ['lube','vib',10,'Lubrication loss to vibration'],
+    ['vib','noise',4,'Vibration to acoustic level'],
+    ['rpm','vib',6,'RPM deviation to vibration'],
+  ];
+  const root = document.getElementById('lagList');
+  root.innerHTML = '';
+  pairs.forEach((p,idx)=>{
+    root.innerHTML += `
+      <div class="lag-row" data-pair="${p.join('|')}">
+        <div class="lag-name">${p[3]}</div>
+        <div class="lag-bar-bg"><div class="lag-bar" id="lagbar_${idx}" style="width:0%;background:var(--cyan)"></div></div>
+        <div class="lag-val" id="lagval_${idx}">0.00</div>
+      </div>
+    `;
   });
-  const p=pressure();
+  window.LAG_PAIRS = pairs;
+}
+function buildLegend(){
+  const root = document.getElementById('legend');
+  root.innerHTML = '';
   FACTORS.forEach(f=>{
-    if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='thermal') vals[f.id]=clamp(vals[f.id] + p.thermal*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
+    root.innerHTML += `<span class="leg"><span style="color:${f.color};">─</span> ${f.name}</span>`;
   });
+  root.innerHTML += `<span class="leg"><span class="legend-fail">- -</span> Failline</span>`;
 }
-// calcCorr(): synthetic correlation matrix — NOT a measured statistical correlation.
-// Each off-diagonal cell drifts from its corrBase by driftBase (same 'group' pair) or driftBase*.55
-// (different-group pair), plus uniform random jitter (+/-0.017). driftBase itself scales with
-// coupling pressure (p.main*.14) and the active scenario's corrBoost.
-// Contrast: the JP counterpart (35_..._JP.html) computes a real Pearson correlation from R_eff
-// history (see pearson()/calcCorrMatrix() there) and blends it with its own baseline matrix.
-function calcCorr(){
-  const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
-  for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function ramp(start, span){
+  return clamp((tick - start) / span, 0, 1);
+}
+function noise(scale){ return (Math.random() - 0.5) * 2 * scale; }
+function fmtVal(v, f){
+  if(f.id === 'lube') return v.toFixed(3) + f.unit;
+  if(f.id === 'vib') return v.toFixed(2) + f.unit;
+  if(f.id === 'rpm') return Math.round(v) + f.unit;
+  if(f.id === 'temp') return v.toFixed(1) + f.unit;
+  if(f.id === 'curr') return v.toFixed(1) + f.unit;
+  return v.toFixed(1) + f.unit;
+}
+
+
+function calcRaw(f, value){
+  let delta = 0, tauBase = f.tauHi, signed = value - f.opt;
+  if(f.direction === 'hi'){
+    delta = Math.max(0, signed);
+    tauBase = f.tauHi;
+  } else if(f.direction === 'lo'){
+    delta = Math.max(0, -signed);
+    tauBase = f.tauLo;
+  } else {
+    delta = Math.abs(signed);
+    tauBase = signed >= 0 ? f.tauHi : f.tauLo;
+  }
+  return {delta, tauBase, signed, R: delta / Math.max(tauBase, 0.0001)};
+}
+
+
+
+function calcCoupling(rawR){
+  const pressure = [];
+  for(let target=0; target<FACTORS.length; target++){
+    let p = 0;
+    for(let source=0; source<FACTORS.length; source++){
+      if(target === source) continue;
+      p += COUPLING[target][source] * Math.max(0, rawR[source] - 0.70);
+    }
+    pressure[target] = p;
+  }
+  return pressure;
+}
+// EN is generated from this repaired JP computation model.
+function calcAll(){
+  const raw = vals.map((v,i)=>calcRaw(FACTORS[i], v));
+  const rawR = raw.map(r=>r.R);
+  const pressure = calcCoupling(rawR);
+  const eff = raw.map((r,i)=>{
+    const tauEff = r.tauBase / (1 + pressure[i]);
+    const R = r.delta / Math.max(tauEff, 0.0001);
+    return {...r, tauEff, pressure:pressure[i], R_eff:R};
+  });
+  return {raw, eff, pressure};
+}
+// EN is generated from this repaired JP computation model.
+function getColor(R){
+  if(R >= 1.0) return 'var(--fail)';
+  if(R >= 0.70) return 'var(--warn)';
+  return 'var(--ok)';
+}
+function getZone(R){
+  if(R >= 1.0) return 'fail';
+  if(R >= 0.70) return 'warn';
+  return 'safe';
+}
+function badgeText(zone){
+  if(zone === 'fail') return ['AUX_STOP','badge-fail'];
+  if(zone === 'warn') return ['WARNING','badge-warn'];
+  return ['SAFE','badge-ok'];
+}
+
+// Pearson correlation
+
+
+function pearson(a,b){
+  const n = Math.min(a.length,b.length);
+  if(n < 8) return 0;
+  const aa = a.slice(a.length-n), bb = b.slice(b.length-n);
+  const ma = aa.reduce((s,x)=>s+x,0)/n;
+  const mb = bb.reduce((s,x)=>s+x,0)/n;
+  let num=0, da=0, db=0;
+  for(let i=0;i<n;i++){
+    const x=aa[i]-ma, y=bb[i]-mb;
+    num += x*y; da += x*x; db += y*y;
+  }
+  const den = Math.sqrt(da*db);
+  if(den < 1e-9) return 0;
+  return clamp(num/den, -1, 1);
+}
+function calcCorrMatrix(){
+  const C = [];
+  for(let i=0;i<FACTORS.length;i++){
+    C[i] = [];
+    for(let j=0;j<FACTORS.length;j++){
+      if(i===j){ C[i][j]=1; continue; }
+
+
+      const hi = historyVals[i].slice(-CORR_WIN);
+      const hj = historyVals[j].slice(-CORR_WIN);
+
+      if(hi.length < CORR_WIN || hj.length < CORR_WIN){
+        C[i][j] = corrBaseReg[i][j];
+      } else {
+
+
+        const p = pearson(hi,hj);
+        C[i][j] = 0.65 * p + 0.35 * corrBaseReg[i][j];
+      }
+    }
+  }
   return C;
 }
-// corrR(): per-pair correlation-drift ratio R_corr = |C(t)-C(t0)| / tauC (tauC defined above).
-// Returns the worst pair's R plus a text list of pairs that individually crossed R_corr>=1.
-function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
+// EN is generated from this repaired JP computation model.
+function calcRCorr(C){
+  let maxR = 0;
+  const alerts = [];
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=i+1;j<FACTORS.length;j++){
+      const Rij = Math.abs(C[i][j] - corrBaseReg[i][j]) / tauCReg[i][j];
+      if(Rij > maxR) maxR = Rij;
+      if(Rij >= 1.0){
+        alerts.push(`${FACTORS[i].name}—${FACTORS[j].name} R_corr=${Rij.toFixed(2)}`);
+      }
+    }
+  }
+  return {maxR, alerts};
+}
+// EN is generated from this repaired JP computation model.
+function lagCorr(sourceId, targetId, lag){
+  const si = FACTORS.findIndex(f=>f.id===sourceId);
+  const ti = FACTORS.findIndex(f=>f.id===targetId);
+  const hs = historyREff[si];
+  const ht = historyREff[ti];
+  if(hs.length < lag + 14 || ht.length < lag + 14) return 0;
+  const a = hs.slice(0, hs.length-lag).slice(-40);
+  const b = ht.slice(lag).slice(-40);
+  return Math.max(0, pearson(a,b));
+}
 
-function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
-function updateUI(){
-  // R_total = max(R_corr, coupling pressure p.main, every per-factor R_i) — a 3-term max matching the
-  // footer/header formula "R_total=max(R_i,R_corr,R_coupling)". Fail-closed by construction: the worst
-  // single signal decides the system status, never a weighted average of all six factors.
-  const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
-  FACTORS.forEach((f,i)=>{
-    const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();
-    const z=zoneFor(r.R), [bt,bc]=badgeFor(r.R), col=colorFor(r.R);
-    document.getElementById('val-'+i).textContent=fmt(vals[f.id],f);
-    document.getElementById('delta-'+i).textContent=(f.fmt==='int'?Math.round(r.delta).toLocaleString():f.fmt==='2'?r.delta.toFixed(2):f.fmt==='3'?r.delta.toFixed(3):r.delta.toFixed(1))+f.unit;
-    document.getElementById('tau-'+i).textContent=(f.fmt==='int'?Math.round(r.tau).toLocaleString():f.fmt==='2'?r.tau.toFixed(2):f.fmt==='3'?r.tau.toFixed(3):r.tau.toFixed(1))+f.unit;
-    document.getElementById('r-'+i).textContent=r.R.toFixed(3); document.getElementById('r-'+i).style.color=col;
-    document.getElementById('bar-'+i).style.width=Math.min(100,r.R*100).toFixed(1)+'%'; document.getElementById('bar-'+i).style.background=col;
-    document.getElementById('badge-'+i).textContent=bt; document.getElementById('badge-'+i).className='badge '+bc;
-    document.getElementById('fc-'+i).className='fc'+(r.R>=1?' fail':r.R>=.75?' warn':'');
-    document.getElementById('dot-'+i).style.setProperty('--rad', (60+Math.min(90,r.R*70)).toFixed(1)+'px');
-    if(prevZone[i]!==z){ addLog(`${f.name} moved to ${z.toUpperCase()} R=${r.R.toFixed(3)}`, z==='fail'?'fail':z==='warn'?'warn':z==='watch'?'watch':'ok'); prevZone[i]=z; }
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+function synthValues(){
+  const t = tick;
+  const sin = Math.sin, PI = Math.PI;
+  const base = FACTORS.map(f=>f.opt);
+
+  let vib = base[0] + 0.18*sin(t*0.16) + noise(0.12);
+  let temp = base[1] + 0.7*sin(t*0.035 + 1.5) + noise(0.35);
+  let curr = base[2] + 0.25*sin(t*0.08 + 0.3) + noise(0.12);
+  let lube = base[3] + 0.010*sin(t*0.06 + 2.0) + noise(0.004);
+  let noiz = base[4] + 1.2*sin(t*0.11 + 0.8) + noise(0.8);
+  let rpm = base[5] + 15*sin(t*0.07) + noise(5);
+
+  if(scenario === 'imbalance'){
+    const r = ramp(8,90);
+    vib  += r*3.1 + 0.50*sin(t*0.55);
+    noiz += r*13  + 2.5*sin(t*0.50+0.4);
+    curr += r*2.0;
+    temp += Math.max(0,r-0.35)*9;
+    rpm  += r*45*sin(t*0.22);
+  }
+
+  if(scenario === 'lube_drop'){
+    const r = ramp(10,95);
+    lube -= r*0.16 + 0.015*sin(t*0.09);
+    vib  += Math.max(0,r-0.18)*2.8 + 0.35*sin(t*0.42);
+    temp += Math.max(0,r-0.35)*20;
+    curr += Math.max(0,r-0.45)*2.2;
+    noiz += Math.max(0,r-0.25)*9;
+  }
+
+  if(scenario === 'misalignment'){
+    const r = ramp(10,85);
+    rpm  += r*95*sin(t*0.20);
+    curr += r*4.4 + 0.4*sin(t*0.21+1.2);
+    vib  += r*2.3 + 0.65*Math.abs(sin(t*0.38));
+    noiz += r*7;
+    temp += Math.max(0,r-0.45)*8;
+  }
+
+  if(scenario === 'wear'){
+    const r = ramp(0,150);
+    vib  += r*2.2 + 0.25*sin(t*0.34);
+    noiz += r*16 + 2.0*sin(t*0.31);
+    temp += r*12;
+    curr += r*1.6;
+    lube -= r*0.035;
+  }
+
+  if(scenario === 'cascade'){
+    const r = ramp(8,85);
+    lube -= r*0.18;
+    vib  += r*3.6 + 0.65*sin(t*0.50);
+    temp += Math.max(0,r-0.20)*27;
+    curr += Math.max(0,r-0.28)*6.8;
+    noiz += r*18 + 2.5*sin(t*0.43);
+    rpm  += r*115*sin(t*0.23);
+  }
+
+  return [vib,temp,curr,lube,noiz,rpm].map((v,i)=>clamp(v, FACTORS[i].min, FACTORS[i].max));
+}
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+function drawRotor(eff, rTotal){
+  const W = rotorCanvas.width, H = rotorCanvas.height;
+  rc.clearRect(0,0,W,H);
+
+  // background
+  const bg = rc.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#07101a'); bg.addColorStop(1,'#05080d');
+  rc.fillStyle = bg; rc.fillRect(0,0,W,H);
+
+  // grid
+  rc.strokeStyle = 'rgba(0,229,255,0.05)';
+  rc.lineWidth = 1;
+  for(let x=0;x<W;x+=40){rc.beginPath();rc.moveTo(x,0);rc.lineTo(x,H);rc.stroke();}
+  for(let y=0;y<H;y+=40){rc.beginPath();rc.moveTo(0,y);rc.lineTo(W,y);rc.stroke();}
+
+  const vibR = eff[0].R_eff, tempR = eff[1].R_eff, currR = eff[2].R_eff, lubeR = eff[3].R_eff, rpmR = eff[5].R_eff;
+  const col = rTotal >= 1 ? '#ff315f' : rTotal >= .70 ? '#ffd044' : '#39ff95';
+  const cx = W/2, cy = H/2 + 12;
+  const amp = Math.min(24, vibR*18);
+  const phase = tick*0.22;
+  const wobX = Math.sin(phase)*amp;
+  const wobY = Math.cos(phase*1.3)*amp*0.55;
+
+  // base stand
+  rc.fillStyle = '#0d1522';
+  rc.strokeStyle = '#243349';
+  rc.lineWidth = 2;
+  rc.beginPath();
+  rc.roundRect(70,H-56,W-140,30,8);
+  rc.fill(); rc.stroke();
+
+  // bearing blocks
+  const bx1 = 160, bx2 = W-160, by = cy;
+  [bx1,bx2].forEach((bx,idx)=>{
+    const heat = Math.min(1, tempR);
+    const aura = rc.createRadialGradient(bx,by,10,bx,by,80);
+    aura.addColorStop(0,`rgba(255,107,66,${0.10+heat*0.22})`);
+    aura.addColorStop(1,'rgba(255,107,66,0)');
+    rc.fillStyle = aura; rc.beginPath();rc.arc(bx,by,82,0,Math.PI*2);rc.fill();
+
+    rc.fillStyle = '#101a28';
+    rc.strokeStyle = idx===0 ? '#00e5ff' : '#55a7ff';
+    rc.lineWidth = 2;
+    rc.beginPath(); rc.roundRect(bx-42,by-42,84,84,12); rc.fill(); rc.stroke();
+    rc.fillStyle = '#070b10';
+    rc.beginPath(); rc.arc(bx,by,24,0,Math.PI*2); rc.fill();
+    rc.strokeStyle = col; rc.lineWidth = 2;
+    rc.beginPath(); rc.arc(bx,by,24,0,Math.PI*2); rc.stroke();
   });
-  for(let i=0;i<FACTORS.length;i++) for(let j=0;j<FACTORS.length;j++){ const cell=document.getElementById(`cm-${i}-${j}`); const v=C[i][j]; const rij=i!==j?Math.abs(v-corrBase[i][j])/tauC:0; if(i===j){cell.style.background='rgba(88,215,255,.14)';cell.style.color='var(--accent)';cell.textContent='1.00';} else if(rij>=1){cell.style.background='rgba(255,49,95,.44)';cell.style.color='#ffb2c4';cell.textContent=v.toFixed(2);} else if(rij>=.75){cell.style.background='rgba(255,210,74,.25)';cell.style.color='var(--warn)';cell.textContent=v.toFixed(2);} else {cell.style.background=`rgba(61,255,156,${v*.25})`;cell.style.color=`rgba(255,255,255,${.35+v*.5})`;cell.textContent=v.toFixed(2);} }
-  document.getElementById('r-total').textContent=total.toFixed(3); document.getElementById('r-total').style.color=colorFor(total); setStatusText(document.getElementById('r-status'),total,'SAFE — structural margin remains');
-  document.getElementById('r-coupling').textContent=p.main.toFixed(3); document.getElementById('r-coupling').style.color=colorFor(p.main);
-  document.getElementById('r-corr').textContent=cr.max.toFixed(3); document.getElementById('r-corr').style.color=colorFor(cr.max);
-  document.getElementById('pressure-fill').style.width=Math.min(100,total*100).toFixed(1)+'%';
-  document.getElementById('visual-status').textContent=total>=1?'✕ RUPTURE_BOUNDARY':total>=.75?'▲ WARNING':total>=.4?'● WATCH':'● SAFE';
-  document.getElementById('visual-status').style.color=colorFor(total);
-  document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
-  [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });
-  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('') : `<span class="corr-ok-txt">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
-  if(cr.alerts.length && tick%24===0) addLog('Correlation drift detected: '+cr.alerts[0],'fail');
-  drawChart(); 
+
+  // shaft
+  rc.save();
+  rc.translate(wobX,wobY);
+  rc.strokeStyle = col;
+  rc.lineWidth = 16;
+  rc.lineCap = 'round';
+  rc.beginPath(); rc.moveTo(bx1,cy); rc.lineTo(bx2,cy); rc.stroke();
+  rc.strokeStyle = 'rgba(255,255,255,.18)';
+  rc.lineWidth = 2;
+  rc.beginPath(); rc.moveTo(bx1,cy-5); rc.lineTo(bx2,cy-5); rc.stroke();
+
+  // rotor disc
+  const rotorX = cx, rotorY = cy;
+  const r = 52;
+  const grad = rc.createRadialGradient(rotorX-16,rotorY-16,8,rotorX,rotorY,r);
+  grad.addColorStop(0,'#34445a'); grad.addColorStop(1,'#0c1420');
+  rc.fillStyle = grad; rc.beginPath(); rc.arc(rotorX,rotorY,r,0,Math.PI*2); rc.fill();
+  rc.strokeStyle = col; rc.lineWidth = 2; rc.stroke();
+
+  // rotation markers
+  rc.save();
+  rc.translate(rotorX,rotorY);
+  rc.rotate(tick*0.10);
+  for(let i=0;i<6;i++){
+    rc.rotate(Math.PI/3);
+    rc.strokeStyle = 'rgba(255,255,255,.25)';
+    rc.lineWidth = 2;
+    rc.beginPath();rc.moveTo(0,0);rc.lineTo(r-10,0);rc.stroke();
+  }
+  rc.restore();
+  rc.restore();
+
+  // lube line
+  const lubeGood = 1 - Math.min(lubeR,1);
+  rc.strokeStyle = `rgba(57,255,149,${0.25 + lubeGood*0.65})`;
+  rc.lineWidth = 5;
+  rc.setLineDash(lubeR >= .7 ? [6,5] : []);
+  rc.beginPath(); rc.moveTo(90,64); rc.lineTo(bx1,by-52); rc.lineTo(bx2,by-52); rc.lineTo(W-90,64); rc.stroke();
+  rc.setLineDash([]);
+  rc.fillStyle = lubeR >= 1 ? '#ff315f' : '#39ff95';
+  rc.font = '12px JetBrains Mono';
+  rc.textAlign = 'center';
+  rc.fillText(`LUBE ${vals[3].toFixed(3)} MPa`, cx, 57);
+
+  // current load ring
+  const loadAlpha = Math.min(1, currR);
+  rc.strokeStyle = `rgba(255,208,68,${0.25+loadAlpha*0.55})`;
+  rc.lineWidth = 2;
+  rc.beginPath(); rc.arc(cx,cy,82+loadAlpha*20,0,Math.PI*2); rc.stroke();
+
+  // vibration trace
+  rc.strokeStyle = `rgba(0,229,255,${0.25+Math.min(vibR,1)*0.55})`;
+  rc.lineWidth = 1.5;
+  rc.beginPath();
+  for(let x=80;x<W-80;x+=6){
+    const y = 36 + Math.sin(x*0.045 + tick*0.2)*Math.min(32,vibR*22);
+    x===80 ? rc.moveTo(x,y) : rc.lineTo(x,y);
+  }
+  rc.stroke();
+
+  // status overlay
+  rc.font = 'bold 13px JetBrains Mono';
+  rc.fillStyle = col;
+  rc.textAlign = 'left';
+  rc.fillText(`R_total = ${rTotal.toFixed(3)}`, 14, 22);
+  rc.font = '10px JetBrains Mono';
+  rc.textAlign = 'right';
+  const label = rTotal>=1 ? '✕ RUPTURE_BOUNDARY' : rTotal>=.70 ? '▲ WARNING' : 'CURRENT_RATIO_BELOW_WARNING';
+  rc.fillText(label, W-14, 22);
 }
-function drawChart(){
-  const cv=document.getElementById('chart'), ctx=cv.getContext('2d'), W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#111b2a'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#24344c'; [0.4,.75,1].forEach(r=>{const y=H-r/1.6*(H-24)-10; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();});
-  const fy=H-1/1.6*(H-24)-10; ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(255,49,95,.55)'; ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke(); ctx.setLineDash([]);
-  history.forEach((hist,i)=>{ if(hist.length<2)return; ctx.strokeStyle=COLORS[i%COLORS.length]; ctx.lineWidth=1.7; ctx.beginPath(); hist.forEach((v,x)=>{const px=x/(HIST_LEN-1)*W, py=H-Math.min(v,1.6)/1.6*(H-24)-10; x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}); ctx.stroke(); });
-  ctx.fillStyle='rgba(255,49,95,.75)'; ctx.font='10px JetBrains Mono, monospace'; ctx.fillText('R=1.0',6,fy-4);
+function drawTimeSeries(){
+  const W = tsCanvas.width, H = tsCanvas.height;
+  tc.clearRect(0,0,W,H);
+  tc.fillStyle = '#121b28'; tc.fillRect(0,0,W,H);
+
+  // grid
+  tc.strokeStyle = 'rgba(255,255,255,.05)';
+  tc.lineWidth = 1;
+  [0.25,0.5,0.75,1.0].forEach(r=>{
+    const y = H - r/1.5 * H*0.82 - 10;
+    tc.beginPath(); tc.moveTo(0,y); tc.lineTo(W,y); tc.stroke();
+  });
+
+  const failY = H - 1.0/1.5 * H*0.82 - 10;
+  tc.strokeStyle = 'rgba(255,49,95,.5)';
+  tc.setLineDash([5,4]); tc.beginPath();tc.moveTo(0,failY);tc.lineTo(W,failY);tc.stroke(); tc.setLineDash([]);
+  tc.fillStyle = 'rgba(255,49,95,.75)';
+  tc.font = '10px JetBrains Mono';
+  tc.fillText('R_gate=1.0 (aux)', 5, failY-4);
+
+  FACTORS.forEach((f,i)=>{
+    const hist = historyREff[i];
+    if(hist.length < 2) return;
+    tc.strokeStyle = f.color;
+    tc.lineWidth = 1.8;
+    tc.beginPath();
+    hist.forEach((v,idx)=>{
+      const x = idx/(HIST_LEN-1)*W;
+      const y = H - Math.min(v,1.5)/1.5 * H*0.82 - 10;
+      idx === 0 ? tc.moveTo(x,y) : tc.lineTo(x,y);
+    });
+    tc.stroke();
+  });
 }
-function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span class="legend-fail">- - Fail</span>'; }
-function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
-function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
-function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
-function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
-function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Rotor/Bearing Correlation Simulation initialized.','ok'); updateUI(); }
-buildLegend(); init(); setInterval(update,300);
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+function updateUI(eff, C, rCorr, corrAlerts){
+  let rMax = 0;
+  eff.forEach(e=>{ if(e.R > rMax) rMax = e.R; });
+
+
+  const rTotal = Math.max(rMax, rCorr.maxR);
+  const systemColor = getColor(rTotal);
+
+  // factor cards
+  eff.forEach((e,i)=>{
+    const f = FACTORS[i];
+    const R = e.R_eff;
+    const zone = getZone(R);
+    const color = getColor(R);
+    const [bText,bCls] = badgeText(zone);
+
+    document.getElementById(`val_${i}`).textContent = fmtVal(vals[i], f);
+    document.getElementById(`delta_${i}`).textContent = fmtVal(e.delta, {...f, opt:0});
+    document.getElementById(`tau_${i}`).textContent = fmtVal(e.tauEff, {...f, opt:0});
+    document.getElementById(`cp_${i}`).textContent = e.pressure.toFixed(2);
+    document.getElementById(`r_${i}`).textContent = R.toFixed(3);
+    document.getElementById(`r_${i}`).style.color = color;
+    document.getElementById(`bar_${i}`).style.width = Math.min(R*100,100).toFixed(1)+'%';
+    document.getElementById(`bar_${i}`).style.background = color;
+
+    const card = document.getElementById(`fc_${i}`);
+    card.className = 'fc' + (zone==='fail' ? ' fail' : zone==='warn' ? ' warn' : '');
+    const badge = document.getElementById(`badge_${i}`);
+    badge.textContent = bText;
+    badge.className = 'fc-badge ' + bCls;
+
+    // coupling bar
+    const cp = Math.min(e.pressure, 1.5);
+    document.getElementById(`cbar_${i}`).style.width = Math.min(cp/1.5*100,100).toFixed(1)+'%';
+    document.getElementById(`cbar_${i}`).style.background = cp>=0.6 ? 'var(--fail)' : cp>=0.25 ? 'var(--warn)' : f.color;
+    document.getElementById(`cval_${i}`).textContent = e.pressure.toFixed(2);
+
+    if(zone !== prevZones[i]){
+      if(zone === 'fail') addLog(`AUX_GATE_EXCEEDED: ${f.name} R=${R.toFixed(3)} δ=${fmtVal(e.delta,{...f,opt:0})}`, 'fail');
+      else if(zone === 'warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} τ_eff=${fmtVal(e.tauEff,{...f,opt:0})}`, 'warn');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      prevZones[i] = zone;
+    }
+  });
+
+  // correlation matrix
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=0;j<FACTORS.length;j++){
+      const cell = document.getElementById(`cm_${i}_${j}`);
+      const v = C[i][j];
+      const Rij = i===j ? 0 : Math.abs(v - corrBaseReg[i][j]) / tauCReg[i][j];
+      cell.textContent = v.toFixed(2);
+      if(i===j){
+        cell.style.background = 'rgba(0,229,255,.16)';
+        cell.style.color = 'var(--cyan)';
+      } else if(Rij >= 1.0){
+        cell.style.background = 'rgba(255,49,95,.42)';
+        cell.style.color = '#ff9bb0';
+      } else if(Rij >= .70){
+        cell.style.background = 'rgba(255,208,68,.25)';
+        cell.style.color = '#ffe08a';
+      } else {
+        const a = Math.min(.38, Math.abs(v)*.34);
+        cell.style.background = v >= 0 ? `rgba(57,255,149,${a})` : `rgba(85,167,255,${a})`;
+        cell.style.color = 'rgba(255,255,255,.72)';
+      }
+    }
+  }
+
+  const alertEl = document.getElementById('corrAlert');
+  if(corrAlerts.length){
+    alertEl.innerHTML = corrAlerts.map(a=>`<span class="corr-fail-txt">⚠ ${a}</span>`).join('<br>');
+    if(tick % 26 === 0) addLog(`Correlation drift: ${corrAlerts[0]}`, 'fail');
+  } else {
+    alertEl.innerHTML = `<span class="corr-ok-txt">✓ Correlation within declared baseline R_corr=${rCorr.maxR.toFixed(3)}</span>`;
+  }
+
+  // lead-lag
+  if(window.LAG_PAIRS){
+    window.LAG_PAIRS.forEach((p,idx)=>{
+      const score = lagCorr(p[0],p[1],p[2]);
+      const col = score>=.75 ? 'var(--fail)' : score>=.45 ? 'var(--warn)' : 'var(--cyan)';
+      document.getElementById(`lagbar_${idx}`).style.width = Math.min(score*100,100).toFixed(1)+'%';
+      document.getElementById(`lagbar_${idx}`).style.background = col;
+      document.getElementById(`lagval_${idx}`).textContent = score.toFixed(2);
+      document.getElementById(`lagval_${idx}`).style.color = col;
+    });
+  }
+
+  // overall
+  document.getElementById('rMaxVal').textContent = rMax.toFixed(3);
+  document.getElementById('rMaxVal').style.color = getColor(rMax);
+  document.getElementById('rCorrVal').textContent = rCorr.maxR.toFixed(3);
+  document.getElementById('rCorrVal').style.color = getColor(rCorr.maxR);
+  document.getElementById('rTotalVal').textContent = rTotal.toFixed(3);
+  document.getElementById('rTotalVal').style.color = systemColor;
+
+  const st = document.getElementById('systemStatus');
+  if(rTotal >= 1.0){
+    st.textContent = 'RUPTURE_BOUNDARY — inspection / suspension notice';
+    st.style.color = 'var(--fail)';
+  } else if(rTotal >= .70){
+    st.textContent = 'WARNING — Observe correlation and leading contributors';
+    st.style.color = 'var(--warn)';
+  } else {
+    st.textContent = 'SAFE — Within declared baseline';
+    st.style.color = 'var(--ok)';
+  }
+
+  drawRotor(eff, rTotal);
+  drawTimeSeries();
+
+const auxiliaryStop=eff.some(e=>e.R_eff>=1);
+  eff.forEach((e,i)=>boundary.observe('factor'+i,e.delta,e.tauBase,tick));
+  for(let i=0;i<FACTORS.length;i++)for(let j=i+1;j<FACTORS.length;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBaseReg[i][j]),tauCReg[i][j],tick);
+  NRADemoBoundary.paint(boundary,auxiliaryStop,FACTORS.map((_,i)=>'badge_'+i),['systemStatus']);
+}
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+function addLog(msg, type='info'){
+  const area = document.getElementById('logArea');
+  const div = document.createElement('div');
+  div.className = 'log-' + type;
+  div.textContent = `[t=${String(tick).padStart(4,'0')}] ${msg}`;
+  area.insertBefore(div, area.firstChild);
+  logItems.push(div);
+  if(logItems.length > 80){
+    const old = logItems.shift();
+    old.remove();
+  }
+}
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+function update(){
+  if(!running) return;
+  tick++;
+
+  vals = synthValues();
+
+  const {eff} = calcAll();
+
+  // history
+  vals.forEach((v,i)=>{
+    historyVals[i].push(v);
+    if(historyVals[i].length > HIST_LEN) historyVals[i].shift();
+
+    historyR[i].push(eff[i].R);
+    if(historyR[i].length > HIST_LEN) historyR[i].shift();
+
+    historyREff[i].push(eff[i].R_eff);
+    if(historyREff[i].length > HIST_LEN) historyREff[i].shift();
+  });
+
+  const C = calcCorrMatrix();
+  const rCorr = calcRCorr(C);
+  updateUI(eff, C, rCorr, rCorr.alerts);
+}
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+function toggleRun(){
+  running = !running;
+  const b = document.getElementById('btnRun');
+  b.textContent = running ? '▶ Running' : '⏸ Paused';
+  b.className = running ? 'btn active' : 'btn';
+}
+function applyScenario(){
+  scenario = document.getElementById('scenarioSel').value;
+  document.getElementById('scenarioDesc').textContent = SCENARIOS[scenario].desc;
+  addLog(`[SCENARIO] ${SCENARIOS[scenario].label} — ${SCENARIOS[scenario].desc}`, 'info');
+}
+function resetSim(){
+  tick = 0;
+  vals = FACTORS.map(f=>f.opt);
+  historyVals = FACTORS.map(()=> []);
+  historyR = FACTORS.map(()=> []);
+  historyREff = FACTORS.map(()=> []);
+  prevZones = FACTORS.map(()=> 'safe');
+  scenario = 'normal';
+  document.getElementById('scenarioSel').value = 'normal';
+  document.getElementById('scenarioDesc').textContent = SCENARIOS.normal.desc;
+  document.getElementById('logArea').innerHTML = '';
+  logItems = [];
+  addLog('New trial from the declared equipment baseline; prior arrival records are retained.', 'info');
+
+boundary.newTrial();
+}
+
+
+
+
+
+const REG_TICKS = 600, REG_K = 2.5, TAU_C_MIN = 0.32;
+let corrBaseReg = CORR_BASE.map(row => row.slice());
+let tauCReg = CORR_BASE.map(row => row.map(()=> TAU_C_MIN));
+function registerCorrBaseline(){
+  const saved = { scenario, tick, vals };
+  scenario = 'normal'; tick = 0;
+  const hist = FACTORS.map(()=> []);
+  const samples = FACTORS.map(()=> FACTORS.map(()=> []));
+  for(let k=0; k<REG_TICKS; k++){
+    tick++;
+    synthValues().forEach((v,i)=>hist[i].push(v));
+    if(k >= CORR_WIN){
+      for(let i=0;i<FACTORS.length;i++) for(let j=0;j<FACTORS.length;j++){
+        if(i!==j) samples[i][j].push(pearson(hist[i].slice(-CORR_WIN), hist[j].slice(-CORR_WIN)));
+      }
+    }
+  }
+  corrBaseReg = samples.map((row,i)=>row.map((s,j)=> i===j ? 1 : s.reduce((a,b)=>a+b,0)/s.length));
+  tauCReg = samples.map((row,i)=>row.map((s,j)=>{
+    if(i===j) return TAU_C_MIN;
+    const m = corrBaseReg[i][j];
+    const sd = Math.sqrt(s.reduce((a,b)=>a+(b-m)*(b-m),0)/s.length);
+    return Math.max(TAU_C_MIN, REG_K * 0.65 * sd);
+  }));
+  scenario = saved.scenario; tick = saved.tick; vals = saved.vals;
+}
+
+// ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+registerCorrBaseline();
+buildFactorCards();
+buildCorrMatrix();
+buildCouplingList();
+buildLagList();
+buildLegend();
+addLog('NRA-IDE Rotor / bearing correlation template initialized', 'ok');
+addLog('aggregate = max(R_base_i, R_corr); AUX_STOP separate uses independent maxima rather than an average', 'info');
+addLog('Observe scripted vibration leads and delayed thermal/current responses', 'info');
+
+setInterval(update, 250);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds. Current observations and arrival history are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial retains prior records and does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
+<p class="demo-caveat">Base thickness is declared separately from temporary auxiliary gate widths. A wider auxiliary gate does not restore the structure. Cards and histories display auxiliary R_gate. The main aggregate is a maximum across independent base/correlation targets; it does not redefine a single target's canonical R. AUX_STOP and retained arrival records are separate.</p>
 </body>
 </html>

@@ -446,7 +446,10 @@
     </div>
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.40,.70,.85);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // FILE: NRA-IDE_Connection_vs_Mixing_EN.html
 
 const G = 9.8, REACT = 1.0, MU = 0.7;
@@ -475,7 +478,7 @@ function stopDist(v) {
     return ms * REACT + (ms * ms) / (2 * MU * G);
 }
 function computeR(delta, tau) {
-    return tau > 0 ? delta / tau : Infinity;
+    return NRADemoBoundary.ratio(delta,tau).R;
 }
 function delta_from(v, d) {
     // δ: intrusion of the stopping distance into the safety-margin band (the last TAU_FIXED m before the gap).
@@ -622,6 +625,7 @@ function flash() {
 
 // ── Update side ──
 function updateOK(delta) {
+ if(!Number.isFinite(delta)||NRADemoBoundary.ratio(delta,TAU_FIXED).state){boundary.observe('vehicle',delta,TAU_FIXED,Date.now());document.getElementById('ok-r').textContent='—';NRADemoBoundary.paint(boundary,false,[],['ok-zone-name','ok-badge','status-ok']);return;}
     const R    = computeR(delta, TAU_FIXED);
     const zone = zoneFromR(R);
     const col  = getColor(R);
@@ -663,6 +667,8 @@ function updateOK(delta) {
         addLog('log-ok', `${mark} Zone${zone}  R=${R.toFixed(3)}  δ=${delta.toFixed(1)}m  τ=${TAU_FIXED}m (Fixed)`, cls);
         prevOkZone = zone;
     }
+
+boundary.observe('vehicle',delta,TAU_FIXED,Date.now());NRADemoBoundary.paint(boundary,false,[],['ok-zone-name','ok-badge','status-ok']);
 }
 
 function updateNG(delta) {
@@ -821,5 +827,6 @@ setInterval(() => {
 }, 300);
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The road friction μ, the reaction time, and the safety-margin distance τ are representative demo values, not the stopping distance of a real vehicle.<br>• δ is how far the stopping distance intrudes into the safety-margin band (the last τ before the gap). R = 1.0 when the stopping distance equals the gap.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds; current observations and retained arrival records are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial preserves prior records; it does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

@@ -18,6 +18,8 @@ python examples/nra_ide_reference_quick_demo.py
 
 このディレクトリのその他の例は、研究・説明・例示・ドメイン固有・履歴資料を保存しており、旧状態名を使用する場合があります。
 
+01〜20のサンプルが正典のどこを起点に作られ、何が中心で何が補助かは、[examples 01〜20 の考え方と正典の根拠](./README_canon_basis_JP.md)にまとめています。サンプルを開く前に読むと、勘違いを防げます。
+
 ---
 
 ## NRA-IDE とは
@@ -143,7 +145,7 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 
 | # | ファイル | ドメイン | ポイント |
 |---|---------|---------|---------|
-| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | 電気・気温・水圧・脈動（JP） | **非対称ダンパー構造** — δは基準値からのズレ、R = 1.0 が宣言上下限。ズレが続くとτを縮めて検知を早める（広げない）。上限側は縮みにくく（慎重）、下限側は大きく縮む（敏感）。左のダンパーアニメーションで2つのスプリングが逆方向に動く様子を確認できます。 |
+| 08 | [08_Band_Gate_live_JP.html](./08_Band_Gate_live_JP.html) | 電気・気温・水圧・脈動（JP） | **非対称ダンパー構造** — δは基準値からのズレ、R = 1.0 が宣言上下限。ズレが続くとτを縮めて検知を早める（広げない）。上限側は縮みにくく（慎重）、下限側は大きく縮む（敏感）。左のダンパーアニメーションで、上下2つのスプリングがそれぞれ基準値の側へ縮む様子（上限側は小さく、下限側は大きく）を確認できます。 |
 | 08 | [08_Band_Gate_live_EN.html](./08_Band_Gate_live_EN.html) | 同上 — 英語版 | English labels and explanations. |
 | 09 | [09_Greenhouse_BandGate_live_JP.html](./09_Greenhouse_BandGate_live_JP.html) | 温室農業 4指標同時監視（JP） | 灌漑水圧・気温・CO₂・養液ECを同時監視。**🏜 干ばつシミュレーション**で複数指標が同時低下する様子を観察できます。 |
 | 09 | [09_Greenhouse_BandGate_live_EN.html](./09_Greenhouse_BandGate_live_EN.html) | 同上 — 英語版 | English labels and explanations. |
@@ -166,7 +168,7 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 | # | ファイル | 内容 |
 |---|---------|------|
 | 11 | [JP](./11_Motor3Phase_BandGate_live_JP.html) / [EN](./11_Motor3Phase_BandGate_live_EN.html) | **三相モーター Band Gate ライブ監視。** 三相モーターの負荷バランスと過負荷検知に R = δ/τ をリアルタイム適用。 |
-| 12 | [JP](./12_agri_mol_antagonism_JP.html) / [EN](./12_agri_mol_antagonism_EN.html) | **農業イオン監視 + Mg²⁺/K⁺ 拮抗連鎖 Band Gate。** 黒ぼく土（Andosol）/一般農耕地プロファイル切替対応。動的τ＋非対称EMA。Mg障害時にK⁺τ連結ゲートが発動。 |
+| 12 | [JP](./12_agri_mol_antagonism_JP.html) / [EN](./12_agri_mol_antagonism_EN.html) | **農業イオン監視 + K⁺/Mg²⁺ 拮抗 Band Gate。** 黒ぼく土（Andosol）/一般農耕地プロファイル切替対応。動的τ＋非対称EMA。K⁺過剰時にMg²⁺の下限側τを狭める連結ゲートが発動（植物・土壌の向き。人の体内とは逆）。 |
 | 13 | [JP](./13_photosynthesis_layer5_JP.html) / [EN](./13_photosynthesis_layer5_EN.html) | **光合成監視 Layer 5。** Farquhar-von Caemmerer-Berry（FvCB）モデルを外部δ生成装置として使用 → R = δ/τ。非線形プリプロセッサとしての Layer 5 実装。 |
 | 14 | [JP](./14_powergrid_transition_JP.html) / [EN](./14_powergrid_transition_EN.html) | **電力系統・遷移点監視。** 電力系統における構造的遷移点を検知。固定閾値では見逃す早期乖離をNRA-IDEが捕捉する。 |
 | 15 | [JP](./15_or_icu_continuum_JP.html) / [EN](./15_or_icu_continuum_EN.html) | **OR/ICU 経過蓄積型モニタリング。** 手術〜ICU フェーズを通じた累積ズレを追跡。R は瞬間値ではなく継続的な構造的負荷を反映。 |
@@ -194,7 +196,7 @@ Band Gate（R = δ/τ）を物理計測ドメインに適用したデモ群で�
 | 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **状態境界・短期ログ・長期再構成。** 短期ゆらぎ追跡と長期構造傾向の再構成をNRA-IDEがどう分離するかを実証。 |
 | 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **自動運転 必須限界構成デモ。** 衝突余裕時間・制動距離・横方向余裕を物理量監視。R ≥ 1.0 で上書き不可の強制 Fail-Closed。 |
 | 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **ダム管理比較 + τ劣化曲線。** 固定閾値監視 vs NRA-IDE τ劣化追跡を比較。構造余裕の侵食によるτ縮小を時系列で可視化。 |
-| 26 | [JP](./26_escapement_contactpoint_JP.html) | **Phase-Gap エンジン — 接触点のみ熱排出。** 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生することを実証。 |
+| 26 | [JP](./26_escapement_contactpoint_JP.html) / [EN](./26_escapement_contactpoint_EN.html) | **Phase-Gap エンジン — 接触点のみ熱排出。** 誤差・熱は連続計算全体ではなく位相境界の接触点のみで発生する、という考え方の概念アニメーション。1歯ごとの端数を記録として残す。 |
 
 ---
 
@@ -206,7 +208,7 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 | # | ファイル | ドメイン | ポイント |
 |---|---------|---------|---------|
-| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN.html) | ベルトコンベアー・Vベルト張力 | τを「最適値から限界までの全余裕」と定義 → Rが自然に [0,1] に正規化。Fail-Closed でベルト停止。 |
+| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN.html) | ベルトコンベアー・Vベルト張力 | τ を最適値から限界までの吸収厚み（上側と下側で別）とし、R = δ/τ が 1.0 に達すると RUPTURE_BOUNDARY。R は 1.0 を超えても続く。R≥1 でベルトを止める（Fail-Closed）。 |
 | 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN.html) | 水温 上下限管理 | R_hi と R_lo を独立評価。熱対流ゆらぎ（3周波数合成）。Fail-Closed で逆方向動作を自動停止。 |
 | 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN.html) | 光量（照度）管理 | 受光側（ルクス）で計測。R_hi > 0.75 から比例的に遮光率増加 — 予兆段階からの段階的介入。 |
 | 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN.html) | 電力管理（V×I 統合） | 電流・電圧を P = V×I として一本化。熱蓄積：過電力継続時間が R を時間的に押し上げる。 |
@@ -219,7 +221,7 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 
 | ファイル | 内容 |
 |---------|------|
-| [JP](./33_nra_ide_6d_layer_viz_JP.html) / [EN](./33_nra_ide_6d_layer_viz_EN.html) | **6次元多重レイヤービジュアライザー。** 6つの R 値サーフェスを同時表示。透過度・彩度・白黒モードで観察可能。各レイヤー＝1物理ドメインのゆらぎ×閾値面。全次元同時に Fail-Closed への構造的接近を時間軸で追跡。 |
+| [共通説明](./33_boundary_and_history/README.md) / [視点1](./33_boundary_and_history/01_simultaneous_boundary_JP.html) / [視点2](./33_boundary_and_history/02_pre_rupture_history_JP.html) | **33：境界への到達と、そこへ至る履歴。** ①多層の同時境界到達、②破断前の蓄積・厚み損失・介入を、異なる合成モデルで示す2つの模式図です。新しい2本と共通説明は日本語版です。初期6層可視化は履歴資料として保存：[JP](./33_nra_ide_6d_layer_viz_JP.html) / [EN](./33_nra_ide_6d_layer_viz_EN.html)。 |
 | [JP](../docs/ja-JP/figures/causal_diode_fail_closed_JP.html) / [EN](../docs/en-US/figures/causal_diode_fail_closed_EN.html) | **因果ダイオード & Fail-Closed 可視化。** AIが結果から原因側（閾値）を操作しようとする「逆流（Π⁻¹）」を構造的にブロックするアニメーションと、限界到達時の自律的遮断を体感できる直感的なデモ。 |
 
 ---
@@ -256,7 +258,7 @@ R = δ/τ を産業設備・施設監視の一般的ドメインに適用した�
 | 44 | [JP](./44_RobotArm_POC_1_JP.html) / [EN](./44_RobotArm_POC_1_EN.html) | 産業用ロボットアーム制御 POC 1 |
 | 45 | [JP](./45_HybridCalc_vs_Traditional_JP.html) / [EN](./45_HybridCalc_vs_Traditional_EN.html) | ハイブリッド計算 vs 従来手法の比較 |
 | 46 | [JP](./46_Connection_vs_Mixing_JP.html) / [EN](./46_Connection_vs_Mixing_EN.html) | Connection vs Mixing（接続と混合のリスク評価） |
-| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) / [EN](./47_FPGA_Demo_SPEED_EN.html) | FPGA ハードウェア実装スピードデモ |
+| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) / [EN](./47_FPGA_Demo_SPEED_EN.html) | FPGA教育用FSM（実機速度未検証） |
 | 48 | [JP](./48_Human_5Factors_Correlation_JP.html) / [EN](./48_Human_5Factors_Correlation_EN.html) | 人体5要素相関 実数値推移デモ（医療系テンプレートの初期軽量版） |
 | 49 | [JP](./49_Architecture_Infographic_JP.html) / [EN](./49_Architecture_Infographic_EN.html) | NRA-IDE アーキテクチャ・インフォグラフィック |
 | 50 | [JP](./50_Constraint_Philosophy_JP.html) / [EN](./50_Constraint_Philosophy_EN.html) | 哲学コンセプト「制約は制限ではない。制約こそが知性を駆動する力である。」 |
@@ -325,3 +327,9 @@ assert notice['fail_closed'] is True
 - **GitHub:** https://github.com/M-Tokun/NRA-IDE
 
 ---
+
+<!-- examples-34plus-20261016 -->
+34番以降の教材について：35〜41番の日英版は同じ初期値・シナリオ・計算を使います。35〜39番では、宣言した基礎厚みによる比、補助ゲート幅による比、媒介・連鎖圧を分けます。補助条件の `AUX_STOP` は対象の破断状態を意味しません。境界履歴を扱う教材は現在値が低下しても到達記録を保持し、新しい試行でも前試行の記録を残します。
+
+40・41番は未検証・研究用途・臨床使用不可の合成教材です。観察区分は臨床判断や正規破断分類ではなく、不正入力には区分を出しません。47番は観測値と閾値を保持する帯域検証のFSM教材で、実機速度・演算精度を検証するものではありません。52番は演出状態を扱い、正規Rを表示しません。53番は上下それぞれの増加と幅の減少を検出します。
+<!-- /examples-34plus-20261016 -->

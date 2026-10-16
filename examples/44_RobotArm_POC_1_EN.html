@@ -430,7 +430,10 @@
     </div>
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.40,.70,.85);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // FILE: NRA-IDE_RobotArm_POC_01_EN.html  2026-02-24
 
 // ── 軸定義 ──
@@ -455,7 +458,7 @@ let startTime = Date.now();
 let prevGlobalFail = false;
 // Irreversible latch: once R ≥ 1.0 (fail-closed zone) is reached, it stays fixed until 'New evaluation' is pressed.
 let globalFailLatched = false;
-function startNewEvaluation(){ globalFailLatched = false; }
+function startNewEvaluation(){ boundary.newTrial(); globalFailLatched = false; }
 let prevZones = {};
 
 const dynStyle = document.createElement('style');
@@ -465,7 +468,7 @@ let dynCssRules = [];
 // ── Compute R ──
 function computeR(val, rated, tau) {
     const delta = Math.max(0, val - rated);
-    return tau > 0 ? delta / tau : Infinity;
+    return NRADemoBoundary.ratio(delta,tau).R;
 }
 function zoneFromR(R) {
     if (R < 0.40) return 'A';
@@ -760,9 +763,14 @@ function doTick() {
     }, 0) + manualPw3 / 60;
     const curR = computeR(baseCurrent, CUR_RATED, CUR_TAU);
 
+if([...axisStates.map(x=>x.R),pw3R,curR].some(r=>r===null)){
+      axisStates.forEach((x,i)=>boundary.observe(x.id,Math.max(0,x.torque-AXES[i].rated),AXES[i].tau,tick));
+      boundary.observe('power',Math.max(0,manualPw3-PW3_RATED),PW3_TAU,tick);boundary.observe('current',Math.max(0,baseCurrent-CUR_RATED),CUR_TAU,tick);
+      NRADemoBoundary.paint(boundary,false,[],['gearStatus']);return {axisStates,globalFail:true};
+    }
     // Global fail: any axis OR power OR current
     const allR = [...axisStates.map(s => s.R), pw3R, curR];
-    if (allR.some(r => r >= 1.0)) globalFailLatched = true;
+    if (allR.some(r => Number.isFinite(r) && r >= .85)) globalFailLatched = true;
     const globalFail = globalFailLatched;
     const maxR = Math.max(...allR);
 
@@ -858,13 +866,20 @@ function doTick() {
     document.getElementById('r-pw3-mini').textContent = rPw3.toFixed(3);
     document.getElementById('r-pw3-mini').style.color = getColor(rPw3);
 
-    return { axisStates, globalFail };
+
+
+axisStates.forEach((x,i)=>boundary.observe(x.id,Math.max(0,x.torque-AXES[i].rated),AXES[i].tau,tick));
+  boundary.observe('power',Math.max(0,manualPw3-PW3_RATED),PW3_TAU,tick);
+  boundary.observe('current',Math.max(0,baseCurrent-CUR_RATED),CUR_TAU,tick);
+  NRADemoBoundary.paint(boundary,false,[],['gearStatus']);
+
+ return {axisStates,globalFail};
 }
 
 // ── Animation loop ──
 function loop() {
     const { axisStates, globalFail } = doTick();
-    drawArm(axisStates, globalFail);
+    if(axisStates.every(x=>x.R!==null))drawArm(axisStates, globalFail);
     requestAnimationFrame(loop);
 }
 
@@ -889,5 +904,6 @@ addLog('✓ System online — NRA-IDE Robot Arm Safety Gate v0.1', 'log-ok');
 loop();
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The rated torque, power, current, and the τ of each axis are demo values, not specifications of a real machine.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds; current observations and retained arrival records are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial preserves prior records; it does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

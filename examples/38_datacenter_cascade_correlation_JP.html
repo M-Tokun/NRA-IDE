@@ -351,10 +351,10 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
 </div>
 
 <div class="formula-box">
-  <span class="eq-a">R_i = δ_i / τ_i(t)</span>：各物理量の構造比率　|　
+  <span class="eq-a">R_gate = δ / gate_width</span>：各物理量の構造比率　|　
   <span class="eq-b">τ_temp(t) ↓ when airflow↓ & power↑</span>：冷却余裕の動的圧縮　|　
   <span class="eq-c">feedback: power → heat → fan → power</span>：正のフィードバック環　|　
-  <span class="eq-f">R_total = max(R_i, R_corr, R_loop)</span>
+  <span class="eq-f">aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>
 </div>
 
 <div class="overall">
@@ -369,7 +369,7 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
     <div class="over-sub">空気流量不足・吸気温度・ラック熱</div>
   </div>
   <div class="over-card">
-    <div class="over-label">FEEDBACK LOOP R</div>
+    <div class="over-label">FEEDBACK LOOP PRESSURE (aux)</div>
     <div class="over-val" id="loop-r">0.000</div>
     <div class="over-sub">電力→熱→ファン→電力の閉ループ圧</div>
   </div>
@@ -382,7 +382,7 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
 
 <div class="main-grid">
   <div class="panel">
-    <div class="panel-title">FACTOR STATE — 個別 R_i</div>
+    <div class="panel-title">FACTOR STATE — R_gate (aux)</div>
     <div class="factor-grid" id="factor-grid"></div>
   </div>
 
@@ -429,7 +429,7 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
         </div>
       </div>
       <div class="loop-note2">
-        ファンが上がると冷却は強くなりますが、同時に電力消費も増えます。電力増加は熱を増やし、さらに冷却負荷を増やします。このsampleでは、この閉ループ圧を平均ではなく独立Rとして表示します。
+        ファンが上がると冷却は強くなりますが、同時に電力消費も増えます。電力増加は熱を増やし、さらに冷却負荷を増やします。このsampleでは、この閉ループ圧を正規Rと分離した補助圧として表示します。
       </div>
       <div class="coupling-list" id="coupling-list"></div>
     </div>
@@ -470,22 +470,16 @@ canvas.ts-canvas{width:100%;height:152px;display:block;background:var(--s2);bord
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span>38_datacenter_cascade_correlation_JP</span>
-  <span>R_total=max(R_i,R_corr,R_loop) / no averaging dilution</span>
+  <span>aggregate = max(R_base_i, R_corr); AUX_STOP separate / no averaging dilution</span>
 </div>
 
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
-// FACTORS: 各変数の構造パラメータ（opt=目標値、tau=基準τ、dir=δの向き、corr_base=
-// この変数と他変数の「基準相関」行）。pressures()・dynamicTau()・calcCorr()がこれらを
-// 使って結合圧・動的τ・相関ドリフトを計算する。
-// 注：本JP版は38_datacenter_cascade_correlation_EN.htmlの翻訳版ではなく別実装。
-// EN版はweight/group/shrink/coupledByベースの汎用結合モデル（37_greenhouseと共通の
-// pressure()実装）を使うのに対し、JP版はpressures()内のfactor別重み付き圧力合成、
-// dynamicTau()の変数別個別条件、calcCorr()内のペアID直接判定という、変数ごとに
-// 手書きされた結合則を使う。どちらも内部的には一貫しているが、係数・重みに出典はなく
-// デモ用チューニング値。今回の対応方針として、両実装の統一は行わず、各ファイルへ
-// 実装内容の説明コメントを付す。
+const boundary = new NRADemoBoundary.Tracker(.75,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
+// EN is generated from this repaired JP computation model.
 const FACTORS = [
   {
     id:'cpu', name:'CPU負荷', short:'CPU', unit:'%', color:'var(--cpu)',
@@ -619,7 +613,7 @@ function calcRawRById(id){
 // pressures(): cooling/thermal/loop/serviceの4つの合成圧力を、各変数の固定τベースR
 // （calcRawRById）の重み付き和として算出（重み合計は各式で1.0にはならず、そのまま
 // 2.0/2.2で頭打ち）。loopがpower→heat(rack)→fan→powerの正のフィードバックループ圧に
-// 相当し、UI上のFEEDBACK LOOP RおよびR_total = max(R_i, R_corr, R_loop)の第3項として
+// 相当し、UI上のFEEDBACK LOOP PRESSURE (aux)およびaggregate = max(R_base_i, R_corr); AUX_STOP separateの第3項として
 // 使われる（updateUI()参照）。重み（0.45/0.35/0.30/0.40/0.45/0.25/0.33/0.25/0.24/0.18/
 // 0.45/0.28/0.20）と上限（2.0/2.2）はいずれも出典なし、デモ用チューニング値。
 function pressures(){
@@ -647,9 +641,9 @@ function dynamicTau(i){
   const p = pressures();
   let shrink = 1.0;
 
-  if(f.id === 'rack')  shrink -= Math.min(0.58, p.cooling*0.18 + p.power*0.08);
+  if(f.id === 'rack')  shrink -= Math.min(0.58, (.45*p.air+.35*p.inlet)*.18+p.power*.08);
   if(f.id === 'inlet') shrink -= Math.min(0.40, p.air*0.16);
-  if(f.id === 'power') shrink -= Math.min(0.30, p.loop*0.08);
+  if(f.id === 'power') shrink -= Math.min(0.30, Math.min(2.2,.33*p.rack+.25*p.fan+.24*p.air+.18*p.cpu)*.08);
   if(f.id === 'fan')   shrink -= Math.min(0.42, p.thermal*0.12);
   if(f.id === 'air')   shrink -= Math.min(0.45, p.fan*0.10 + p.inlet*0.08);
   if(f.id === 'lat')   shrink -= Math.min(0.32, p.cpu*0.10 + p.power*0.06);
@@ -672,7 +666,7 @@ function getColor(R){
   return 'var(--ok)';
 }
 function getBadge(R){
-  if(R >= 1.0) return ['RUPTURE_BOUNDARY','badge-fail','fail'];
+  if(R >= 1.0) return ['AUX_STOP','badge-fail','fail'];
   if(R >= 0.75) return ['WARNING','badge-warn','warn'];
   return ['SAFE','badge-ok','ok'];
 }
@@ -689,8 +683,8 @@ function buildFactorCards(){
       <div class="fc-name">${f.name}</div>
       <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">gate_width</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_gate (aux)</span><span class="fc-r" id="r-${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
       <div class="fc-desc">${f.desc}</div>
     `;
@@ -832,13 +826,13 @@ function updateUI(){
 
   // R_total = max(R_corr, R_loop, R_i全体)：平均ではなくmaxで合成する（危険を薄めない）。
   // これがこのsample全体の状態判定（フラグ）の核心。
-  let rTotal = Math.max(rCorr, p.loop);
+  let rTotal = rCorr;
   let failAny = false;
   let warnAny = false;
 
   FACTORS.forEach((f,i)=>{
     const {delta,tau,R} = calcR(i);
-    rTotal = Math.max(rTotal, R);
+    rTotal = Math.max(rTotal, calcDelta(vals[f.id],f)/f.tau);
     rHistory[i].push(R);
     if(rHistory[i].length > HIST_LEN) rHistory[i].shift();
 
@@ -863,9 +857,9 @@ function updateUI(){
     if(R>=0.75) warnAny = true;
 
     if(zone !== prevZones[i]){
-      if(zone==='fail') addLog(`RUPTURE_BOUNDARY候補: ${f.name} R=${R.toFixed(3)}`, 'fail');
+      if(zone==='fail') addLog(`AUX_GATE_EXCEEDED候補: ${f.name} R=${R.toFixed(3)}`, 'fail');
       else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
-      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`, 'ok');
       prevZones[i] = zone;
     }
   });
@@ -956,6 +950,11 @@ function updateUI(){
   }
 
   drawTimeSeries();
+
+const auxiliaryStop=FACTORS.some((f,i)=>calcR(i).R>=1)||(pressures().loop>=1);
+  FACTORS.forEach((f,i)=>boundary.observe('factor'+i,calcDelta(vals[f.id],f),f.tau,tick));
+  for(let i=0;i<FACTORS.length;i++)for(let j=i+1;j<FACTORS.length;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBase[i][j]),tauC,tick);
+  NRADemoBoundary.paint(boundary,auxiliaryStop,FACTORS.map((_,i)=>'badge-'+i),['overall-status']);
 }
 
 const tsCanvas = document.getElementById('ts-canvas');
@@ -996,7 +995,7 @@ function drawTimeSeries(){
 
   tsCtx.font='10px JetBrains Mono, monospace';
   tsCtx.fillStyle='rgba(255,49,95,.75)';
-  tsCtx.fillText('R=1.0',6,failY-4);
+  tsCtx.fillText('R_gate=1.0 (aux)',6,failY-4);
 }
 
 function addLog(msg,type='info'){
@@ -1040,14 +1039,18 @@ function resetSim(){
   logLines=[];
   addLog('システムリセット', 'info');
   addLog('データセンター・カスケード相関監視を開始', 'ok');
+
+boundary.newTrial();
 }
 
 buildFactorCards();
 buildCorrMatrix();
 buildCouplingList();
 addLog('データセンター・カスケード相関sample開始', 'ok');
-addLog('R_total=max(R_i,R_corr,R_loop) / 平均で危険を薄めない', 'info');
+addLog('aggregate = max(R_base_i, R_corr); AUX_STOP separate / 平均で危険を薄めない', 'info');
 setInterval(update, 300);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>教材用の仮閾値です。現在の観測値と到達履歴を分けて表示します。AUX_STOPは補助条件であり対象破断ではありません。新試行でも前試行の記録は残り、構造復元を意味しません。</p><button type="button" onclick="startBoundaryTrial()">新しい教材試行</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
+<p class="demo-caveat">基礎厚みτは宣言値です。τ_effは一時的な補助ゲート幅であり、その復帰は構造復元ではありません。カードと時系列のR_gateは補助比です。主表示は独立した評価対象の基礎比・相関比の最大であり、単一対象の正規Rを再定義しません。AUX_STOPと到達履歴を別表示します。</p>
 </body>
 </html>

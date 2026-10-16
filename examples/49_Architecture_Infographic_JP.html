@@ -168,11 +168,11 @@
                     <div class="text-left w-full space-y-2 text-sm">
                         <div class="flex justify-between border-b border-slate-700 pb-1">
                             <span class="text-emerald-300 font-bold">&delta; (Delta)</span>
-                            <span class="text-slate-400">制約からのズレ（観測された変位）</span>
+                            <span class="text-slate-400">基準状態からの蓄積ズレ（可逆成分と残留成分）</span>
                         </div>
                         <div class="flex justify-between pt-1">
                             <span class="text-blue-300 font-bold">&tau; (Tau)</span>
-                            <span class="text-slate-400">許容厚み（評価前に宣言した余裕）</span>
+                            <span class="text-slate-400">吸収厚み（評価前に宣言）</span>
                         </div>
                     </div>
                 </div>
@@ -180,10 +180,10 @@
                 <!-- Explanation -->
                 <div class="md:col-span-2 text-left space-y-6">
                     <p class="text-lg text-slate-300 leading-relaxed">
-                        NRAは「中心（最適解）」を目指しません。代わりに<strong>「境界（Viability Kernel）」</strong>を定義します。境界接近比 $R$ は、制約からのズレ $\delta$ が、宣言した許容厚み $\tau$ をどれだけ使ったかを表します。
+                        NRAは「中心（最適解）」を目指しません。代わりに<strong>「境界（Viability Kernel）」</strong>を定義します。境界接近比 $R$ は、制約からのズレ $\delta$ が、宣言した吸収厚み $\tau$ をどれだけ使ったかを表します。
                     </p>
                     <p class="text-lg text-slate-300 leading-relaxed">
-                        $R$ が 1.0 に達した（宣言した境界に到達した）瞬間、システムは無理な出力を生成するのではなく、<strong>自律的に停止（Fail-Closed）</strong>します。これは「崩壊」ではなく、次なる安定相への「移行」のための能動的沈黙です。
+                        $R$ が 1.0 に達した（宣言した境界に到達した）瞬間、システムは無理な出力を生成するのではなく、<strong>自律生成を抑止し構造証言を継続（Fail-Closed）</strong>します。これは安定相への自動移行を意味せず、破断後の観測・固定形式の証言を生存経路で継続します。
                     </p>
                     
                     <!-- Gauge Chart for R-Value -->
@@ -194,9 +194,9 @@
             </div>
         </section>
 
-        <!-- SECTION 4: Architecture (RNA Sandwich) -->
+        <!-- SECTION 4: Architecture (NRA Sandwich) -->
         <section id="architecture" class="bg-gradient-to-b from-slate-900 to-slate-800 p-8 rounded-3xl border border-blue-500/20">
-            <h2 class="text-3xl font-bold text-center text-white mb-12">4. 物理実装：RNAサンドイッチ構造</h2>
+            <h2 class="text-3xl font-bold text-center text-white mb-12">4. 物理実装：NRAサンドイッチ構造</h2>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <!-- Diagram using HTML/CSS (NO SVG) -->
@@ -278,7 +278,7 @@
                 <div class="flex flex-col justify-center space-y-4">
                     <div class="p-4 border-l-4 border-emerald-500 bg-slate-800/50">
                         <h4 class="font-bold text-emerald-400">Viability Kernel (緑の領域)</h4>
-                        <p class="text-sm text-slate-400">$R < 1$（宣言した境界の内側）にある状態空間。AIはこの中でのみ稼働を許される。</p>
+                        <p class="text-sm text-slate-400">R<1でも人間委譲・不可逆遷移を含む。自律処理の可否は各正規状態に従う。</p>
                     </div>
                     <div class="p-4 border-l-4 border-red-500 bg-slate-800/50">
                         <h4 class="font-bold text-red-400">Collapse Zone (赤の領域)</h4>
@@ -286,7 +286,7 @@
                     </div>
                     <div class="p-4 border-l-4 border-blue-500 bg-slate-800/50">
                         <h4 class="font-bold text-blue-400">Safe Shutdown (停止)</h4>
-                        <p class="text-sm text-slate-400">NRAは境界に接触した時点で「Fail-Closed」を発動。誤った出力を出す前に沈黙し、次のフェーズへ移行する準備を行う。</p>
+                        <p class="text-sm text-slate-400">NRAは境界に接触した時点で「Fail-Closed」を発動。自律生成を抑止し、構造証言を継続して、次のフェーズへ移行する準備を行う。</p>
                     </div>
                 </div>
             </div>
@@ -390,7 +390,7 @@
                         beginAtZero: true,
                         grid: { color: '#334155' },
                         ticks: { color: '#94a3b8' },
-                        title: { display: true, text: 'Model Coherence / R-Value', color: '#94a3b8' }
+                        title: { display: true, text: 'Illustrative stability (not canonical R)', color: '#94a3b8' }
                     },
                     x: {
                         grid: { color: '#334155' },
@@ -557,5 +557,6 @@
       
       No SVG used. No Mermaid used. Tailwind CSS used.
     -->
+<p class="demo-caveat">Fail-Closedで抑止するのは許可されない自律処理で、観測・構造証言は継続します。人間委譲・不可逆遷移はR=1より前です。破断は自動回復や検証済み安定相への移行ではありません。δは観測から得る蓄積ズレで、固定制約ではありません。グラフは模式であり性能証拠ではありません。</p>
 </body>
 </html>

@@ -7,6 +7,7 @@
   let timer = null;
   let step = 0;
   let previousDelta = null;
+  let previousUpper=null, previousLower=null;
   let previousTau = null;
   let upperHistory = [];
   let lowerHistory = [];
@@ -124,15 +125,20 @@
     const currentDelta = Math.max(upper, lower);
     const deltaChange = previousDelta === null ? 0 : currentDelta - previousDelta;
     const tauChange = previousTau === null ? 0 : width - previousTau;
-    const detected = deltaChange > 0 && tauChange < 0;
+    const upperChange=previousUpper===null?0:upper-previousUpper;
+    const lowerChange=previousLower===null?0:lower-previousLower;
+    const upperDetected=upperChange>0&&tauChange<0;
+    const lowerDetected=lowerChange>0&&tauChange<0;
+    const detected=upperDetected||lowerDetected;
 
     $("detectIcon").classList.toggle("active", detected);
     $("detectTitle").textContent = detected ? "二重ゆらぎを検出" : "二重ゆらぎは未検出";
-    $("detectFormula").textContent = `Δδ = ${signed(deltaChange)}　·　Δτ = ${signed(tauChange)}`;
+    $("detectFormula").textContent = `Δδ_upper = ${signed(upperChange)} · Δδ_lower = ${signed(lowerChange)} · Δτ = ${signed(tauChange)} · ${upperDetected?"upper ":""}${lowerDetected?"lower":""}`;
     $("secondaryJudge").classList.toggle("active", detected);
     setState(detected
       ? { text: "二重ゆらぎ検出", className: "limit" }
       : stateForRatio(maximumRatio));
+    previousUpper=upper;previousLower=lower;
     previousDelta = currentDelta;
     previousTau = width;
   }
@@ -170,7 +176,7 @@
   function resetSecondary(shouldStop = true) {
     if (shouldStop) stopAnimation();
     step = 0;
-    previousDelta = null;
+    previousDelta = null; previousUpper=null;previousLower=null;
     previousTau = null;
     upperHistory = [];
     lowerHistory = [];

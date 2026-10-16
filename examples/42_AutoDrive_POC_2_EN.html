@@ -363,7 +363,10 @@
     </div>
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.40,.70,.85);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // FILE: NRA-IDE_AutoDrive_POC_02_EN.html  2026-02-24
 
 // ── μ table ──
@@ -418,23 +421,13 @@ function computeR(v_kmh, d_m, t_m) {
     // δ: how far the stopping distance intrudes into the safety-margin band (the last τ m before the gap).
     // R = 1.0 when stopping distance equals the gap (collision boundary).
     const delta = Math.max(0, sd - (d_m - t_m));
-    const R     = t_m > 0 ? delta / t_m : Infinity;
+    const R     = NRADemoBoundary.ratio(delta,t_m).R;
     return { delta, R, sd };
 }
 // Irreversible latch: once R ≥ 1.0 (fail-closed zone) is reached, it stays fixed until 'New evaluation' is pressed.
 let zoneLatched = false;
-function startNewEvaluation(){ zoneLatched = false; prevZone = ''; update(); }
-function zoneFromR(R) {
-    if (R >= 1.00) zoneLatched = true;
-    if (zoneLatched) return 'D';
-    // Flag boundary: 4-tier judgment on R=δ/τ. R<0.40 -> A (PERMIT), R<0.70 -> B (PERMIT_WITH_CAVEAT),
-    // R<1.00 -> C (WARNING), R>=1.00 -> D (RUPTURE_BOUNDARY; operational response: emergency stop).
-    // The thresholds 0.40/0.70/1.00 themselves have no cited basis (accident statistics, engineering standard, etc.) in this file — demo tuning values.
-    if (R < 0.40) return 'A';
-    if (R < 0.70) return 'B';
-    if (R < 1.00) return 'C';
-    return 'D';
-}
+function startNewEvaluation(){ boundary.newTrial(); zoneLatched = false; prevZone = ''; update(); }
+function zoneFromR(R){if(!Number.isFinite(R))return 'INVALID';if(R>=.85)zoneLatched=true;if(zoneLatched)return 'D';return R<.4?'A':R<.7?'B':'C';}
 function getColor(R) {
     // Reuses the same thresholds as zoneFromR() (0.40/0.70/1.00) for gauge/road-drawing colors (values duplicated, functions kept separate).
     if (R < 0.40) return '#00ff88';
@@ -765,6 +758,9 @@ function update() {
     const mu   = getMu();
     const a    = mu * G;
     const { delta, R, sd } = computeR(speed_kmh, dist_m, tau_m);
+const input=NRADemoBoundary.ratio(delta,tau_m);
+  boundary.observe('vehicle',delta,tau_m,Date.now());
+  if(input.state){document.getElementById('rValue').textContent='—';document.getElementById('zoneLabel').textContent=input.state;NRADemoBoundary.paint(boundary,false,[],['m-gate']);return;}
     const zone = zoneFromR(R);
 
     // Status bar
@@ -794,6 +790,8 @@ function update() {
         if (zone === 'D') flash();
         prevZone = zone;
     }
+
+NRADemoBoundary.paint(boundary,false,[],['zoneLabel','m-gate']);
 }
 
 // ── Sliders ──
@@ -808,7 +806,7 @@ slDist.addEventListener('input', () => {
     update();
 });
 slTau.addEventListener('input', () => {
-    tau_m = +slTau.value;
+    boundary.newTrial();zoneLatched=false;tau_m = +slTau.value;
     document.getElementById('lbl-tau').textContent = tau_m + ' m';
     update();
 });
@@ -822,7 +820,7 @@ resizeRoad();
 
 function loop() {
     const { delta, R, sd } = computeR(speed_kmh, dist_m, tau_m);
-    drawRoad(delta, R, sd, dist_m);
+    if(!Number.isFinite(R)){requestAnimationFrame(loop);return;}drawRoad(delta, R, sd, dist_m);
     drawGauge(R);
     requestAnimationFrame(loop);
 }
@@ -834,5 +832,6 @@ update();
 loop();
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The road friction μ, the reaction time, and the safety-margin distance τ are representative demo values, not the stopping distance of a real vehicle.<br>• δ is how far the stopping distance intrudes into the safety-margin band (the last τ before the gap). R = 1.0 when the stopping distance equals the gap.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds; current observations and retained arrival records are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial preserves prior records; it does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

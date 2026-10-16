@@ -12,43 +12,73 @@ if (-not (Test-Path -LiteralPath $examplesRoot)) {
 }
 
 $indexFiles = @('README.md', 'README_JP.md', 'index.html')
+# 33番の内部案内も検査する。他のサブプロジェクトを再帰走査する指定ではない。
+$documentFiles = $indexFiles + @(
+    '33_boundary_and_history/README.md',
+    '33_boundary_and_history/01_simultaneous_boundary_JP.html',
+    '33_boundary_and_history/02_pre_rupture_history_JP.html'
+)
 
-function Get-LocalHtmlLinks {
-    param([Parameter(Mandatory)][string]$Text)
+function Get-LocalDocumentLinks {
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
 
     $links = New-Object System.Collections.Generic.List[string]
 
-    foreach ($m in [regex]::Matches($Text, '\]\(([^)]+?\.html)\)')) {
+    foreach ($m in [regex]::Matches($Text, '\]\(([^)]+)\)')) {
         $links.Add($m.Groups[1].Value)
     }
-    foreach ($m in [regex]::Matches($Text, 'href="([^"]+?\.html)"')) {
+    foreach ($m in [regex]::Matches($Text, '(?i)\bhref\s*=\s*["'']([^"'']+)["'']')) {
         $links.Add($m.Groups[1].Value)
     }
 
-    return $links | Where-Object { $_ -notmatch '^https?://' }
+    foreach ($raw in $links) {
+        $link = [System.Net.WebUtility]::HtmlDecode($raw.Trim())
+        # Markdownの <path> と任意の引用符付きタイトルを分離する。
+        if ($link -match '^<([^>]+)>') {
+            $link = $Matches[1]
+        } else {
+            $link = $link -replace '\s+["''].*$', ''
+        }
+        # 外部URLやページ内アンカーはローカルファイルの存在検査に含めない。
+        if ($link -match '^(?:[a-z][a-z0-9+.-]*:|//|#)') { continue }
+        $pathPart = ($link -split '[?#]', 2)[0]
+        if ($pathPart -notmatch '\.(?:html|md)$') { continue }
+        [PSCustomObject]@{
+            Link = $raw
+            Path = [System.Uri]::UnescapeDataString($pathPart)
+        }
+    }
 }
 
 $brokenLinks = @()
 $referencedNames = New-Object System.Collections.Generic.HashSet[string]
+$checkedDocuments = 0
+$checkedLinks = 0
 
-foreach ($indexFile in $indexFiles) {
-    $path = Join-Path $examplesRoot $indexFile
-    if (-not (Test-Path -LiteralPath $path)) {
-        Write-Warning "索引ファイルが見つかりません: $indexFile"
+foreach ($documentFile in $documentFiles) {
+    $path = Join-Path $examplesRoot $documentFile
+    # 検査対象が欠落したまま「リンク切れなし」と報告しない。
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+        $brokenLinks += [PSCustomObject]@{ IndexFile = $documentFile; Link = '(検査対象ファイルがありません)' }
         continue
     }
 
+    $checkedDocuments++
+    $sourceDirectory = Split-Path -Parent $path
     $text = Get-Content -LiteralPath $path -Raw -Encoding UTF8
-    foreach ($link in (Get-LocalHtmlLinks -Text $text)) {
-        $resolvedTarget = Join-Path $examplesRoot $link
-        if (-not (Test-Path -LiteralPath $resolvedTarget)) {
-            $brokenLinks += [PSCustomObject]@{ IndexFile = $indexFile; Link = $link }
+    # Get-Content -Raw は空ファイルで null を返すことがある。
+    foreach ($link in (Get-LocalDocumentLinks -Text ([string]$text))) {
+        $checkedLinks++
+        $resolvedTarget = [System.IO.Path]::GetFullPath((Join-Path $sourceDirectory $link.Path))
+        if (-not (Test-Path -LiteralPath $resolvedTarget -PathType Leaf)) {
+            $brokenLinks += [PSCustomObject]@{ IndexFile = $documentFile; Link = $link.Link }
         }
 
-        # examples/ 直下のファイルへの参照だけを孤立検出の対象にする
-        # (../docs/... のような examples/ 外へのリンクは対象外)
-        if ($link -notmatch '/' -or $link.StartsWith('./')) {
-            $baseName = Split-Path -Leaf $link
+        # 孤立検出の意味は維持する。索引3点から直下HTMLへの参照だけを数える。
+        if (($indexFiles -contains $documentFile) -and
+            ([System.IO.Path]::GetDirectoryName($resolvedTarget) -eq $examplesRoot) -and
+            ([System.IO.Path]::GetExtension($resolvedTarget) -eq '.html')) {
+            $baseName = Split-Path -Leaf $resolvedTarget
             [void]$referencedNames.Add($baseName)
         }
     }
@@ -64,7 +94,7 @@ Write-Output '=== examples/ リンク整合性チェック ==='
 Write-Output ''
 
 if ($brokenLinks.Count -eq 0) {
-    Write-Output "[OK] リンク切れなし(索引3点が参照する examples/ 内リンクは全て実在)"
+    Write-Output "[OK] リンク切れなし(索引3点と33番の3文書から参照するローカルHTML/MD)"
 } else {
     Write-Output "[NG] リンク切れ $($brokenLinks.Count) 件:"
     foreach ($b in $brokenLinks) {
@@ -84,7 +114,7 @@ if ($orphanFiles.Count -eq 0) {
 }
 
 Write-Output ''
-Write-Output "summary: broken=$($brokenLinks.Count) orphan=$($orphanFiles.Count) checked_files=$($actualFiles.Count)"
+Write-Output "summary: broken=$($brokenLinks.Count) orphan=$($orphanFiles.Count) checked_files=$($actualFiles.Count) checked_documents=$checkedDocuments checked_links=$checkedLinks"
 
 if ($brokenLinks.Count -gt 0) {
     exit 1

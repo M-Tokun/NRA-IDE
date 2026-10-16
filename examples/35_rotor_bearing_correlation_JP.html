@@ -224,7 +224,7 @@ select{
 </style>
 </head>
 <body>
-<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">合成データ（未検証）：値と相関行列は「基準値＋シナリオの台本＋ノイズ」で生成した教育用の例示です。実測データの相関検出ではありません。</div>
+<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">合成データ（未検証）：値は合成系列です。相関行列はその系列のPearson相関から計算した教育用の例示です。実測データの相関検出ではありません。</div>
 <div class="wrap">
 
 <header>
@@ -250,8 +250,8 @@ select{
 
 <div class="formula-box">
   <span class="eq-c">R_i = δ_i / τ_i</span>：各物理量の個別構造比　|　
-  <span class="eq-w">τ_eff = τ_base / (1 + coupling pressure)</span>：相関悪化で吸収余裕を圧縮　|　
-  <span class="eq-o">R_total = max(R_i, R_corr)</span>：平均化禁止の安全側ゲート　|　
+  <span class="eq-w">τ_eff = τ_base / (1 + coupling pressure)</span>：相関に応じて補助ゲート幅を縮小　|　
+  <span class="eq-o">aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>：平均化禁止の安全側ゲート　|　
   <span class="eq-f">R ≥ 1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
@@ -279,7 +279,7 @@ select{
   </div>
 
   <div class="panel">
-    <div class="panel-title">FACTOR STATE — 個別Rと動的τ</div>
+    <div class="panel-title">FACTOR STATE — R_gate / gate_width (aux)</div>
     <div class="factor-grid" id="factorGrid"></div>
   </div>
 </div>
@@ -324,24 +324,16 @@ select{
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span>35_rotor_bearing_correlation_JP_20260425_024602_JST.html</span>
-  <span>R_total = max(R_i, R_corr) ｜ R≥1.0 → RUPTURE_BOUNDARY</span>
+  <span>aggregate = max(R_base_i, R_corr); AUX_STOP separate ｜ R≥1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
-// ────────────────────────────────────────────────
-// ファクター定義
-// direction:
-//   "hi"   = 上限側のみ危険
-//   "lo"   = 下限側のみ危険
-//   "band" = 基準から上下どちらも危険
-// ────────────────────────────────────────────────
-// FACTORS: 6要素モデル。tauHi/tauLoを個別に持ち、direction='band'（rpmのみ）では
-// signed(=value-opt)の符号でどちらのtauを使うか切り替える（calcRaw()参照）。
-// 'lube'（潤滑圧）はこの実装ではMPa単位。EN版（35_..._EN.html）の同一物理量'oilPressure'は
-// kPa単位・別のopt/tau値を持つ独立実装であり、単位・数値をそろえる意図はない。
-// opt/tauHi/tauLo等はデモ用チューニング値であり、外部データセットに基づく値ではない。
+const boundary = new NRADemoBoundary.Tracker(.70,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
+// EN is generated from this repaired JP computation model.
 const FACTORS = [
   {
     id:'vib', name:'振動', en:'VIB', unit:'mm/s', color:'#00e5ff',
@@ -375,12 +367,7 @@ const FACTORS = [
   },
 ];
 
-// coupling[target][source]
-// sourceのRが0.70を超えると、targetのτを縮める。
-// 0.70はgetZone()のWARN閾値と同じ値（このファイル内で意図的に共通化）。
-// 行列は非対称（例: vib→noiseの重み0.55 と noise→vibの重み0.25は異なる値）。
-// EN版（35_..._EN.html）は明示的な行列を持たず、pressure()による重み付き合算（weighted-sum）で
-// 結合を表現する別設計であり、この行列と対応関係を持たせる意図はない。
+// EN is generated from this repaired JP computation model.
 const COUPLING = [
   // from: vib temp curr lube noise rpm
   [0.00,0.10,0.05,0.70,0.25,0.42], // target vib
@@ -467,9 +454,9 @@ function buildFactorCards(){
       <div class="fc-name">${f.name} <span class="fc-en-txt">${f.en}</span></div>
       <div class="fc-val" id="val_${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta_${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ_eff</span><span id="tau_${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">gate_width</span><span id="tau_${i}" class="fc-tau-txt">—</span></div>
       <div class="fc-row"><span class="fc-lbl">coupling</span><span id="cp_${i}" class="fc-tau-txt">0.00</span></div>
-      <div class="fc-row"><span class="fc-lbl">R_eff</span><span class="fc-r" id="r_${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_gate (aux)</span><span class="fc-r" id="r_${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="bar_${i}"></div></div>
       <div class="fc-desc-txt">${f.desc}</div>
     `;
@@ -583,9 +570,7 @@ function calcCoupling(rawR){
   }
   return pressure;
 }
-// calcAll(): τ_eff = τ_base / (1 + pressure) という反比例形の圧縮式（formula-boxの表記どおり）。
-// EN版（35_..._EN.html）のdynamicTau()は「上限付き線形減算＋下限floor」という別形の式であり、
-// 同じ意図（結合圧でτを縮める）を異なる数式で実装している。
+// EN is generated from this repaired JP computation model.
 function calcAll(){
   const raw = vals.map((v,i)=>calcRaw(FACTORS[i], v));
   const rawR = raw.map(r=>r.R);
@@ -597,8 +582,7 @@ function calcAll(){
   });
   return {raw, eff, pressure};
 }
-// このファイルの閾値: SAFE(R<0.70) -> WARNING(R>=0.70) -> RUPTURE_BOUNDARY(R>=1.0)。WATCH段階はない。
-// EN版（35_..._EN.html）はWATCH段階を持ち、WARN閾値も0.75と異なる（各ファイル独自のチューニング）。
+// EN is generated from this repaired JP computation model.
 function getColor(R){
   if(R >= 1.0) return 'var(--fail)';
   if(R >= 0.70) return 'var(--warn)';
@@ -610,7 +594,7 @@ function getZone(R){
   return 'safe';
 }
 function badgeText(zone){
-  if(zone === 'fail') return ['RUPTURE_BOUNDARY','badge-fail'];
+  if(zone === 'fail') return ['AUX_STOP','badge-fail'];
   if(zone === 'warn') return ['WARNING','badge-warn'];
   return ['SAFE','badge-ok'];
 }
@@ -656,8 +640,7 @@ function calcCorrMatrix(){
   }
   return C;
 }
-// R_corrの正規化幅はペアごとのtauCReg（registerCorrBaseline()で正常運転から登録、下限0.32）。
-// EN版（35_..._EN.html）はモジュール直下の`const tauC = 0.24`を使う別実装であり、値をそろえる意図はない。
+// EN is generated from this repaired JP computation model.
 function calcRCorr(C){
   let maxR = 0;
   const alerts = [];
@@ -672,9 +655,7 @@ function calcRCorr(C){
   }
   return {maxR, alerts};
 }
-// lagCorr(): sourceのR_eff履歴をlag tick分だけ過去にずらし、targetの現在のR_eff履歴と相関を取る。
-// 「振動が先に上がり、遅れて温度が上がる」といった先行・遅延関係を可視化するための指標で、
-// EN版（35_..._EN.html）には対応する機能はない（このJP実装固有のロジック）。
+// EN is generated from this repaired JP computation model.
 function lagCorr(sourceId, targetId, lag){
   const si = FACTORS.findIndex(f=>f.id===sourceId);
   const ti = FACTORS.findIndex(f=>f.id===targetId);
@@ -870,7 +851,7 @@ function drawRotor(eff, rTotal){
   rc.fillText(`R_total = ${rTotal.toFixed(3)}`, 14, 22);
   rc.font = '10px JetBrains Mono';
   rc.textAlign = 'right';
-  const label = rTotal>=1 ? '✕ RUPTURE_BOUNDARY' : rTotal>=.70 ? '▲ WARNING' : '● SAFE';
+  const label = rTotal>=1 ? '✕ RUPTURE_BOUNDARY' : rTotal>=.70 ? '▲ WARNING' : 'CURRENT_RATIO_BELOW_WARNING';
   rc.fillText(label, W-14, 22);
 }
 function drawTimeSeries(){
@@ -891,7 +872,7 @@ function drawTimeSeries(){
   tc.setLineDash([5,4]); tc.beginPath();tc.moveTo(0,failY);tc.lineTo(W,failY);tc.stroke(); tc.setLineDash([]);
   tc.fillStyle = 'rgba(255,49,95,.75)';
   tc.font = '10px JetBrains Mono';
-  tc.fillText('R=1.0', 5, failY-4);
+  tc.fillText('R_gate=1.0 (aux)', 5, failY-4);
 
   FACTORS.forEach((f,i)=>{
     const hist = historyREff[i];
@@ -913,8 +894,8 @@ function drawTimeSeries(){
 // ────────────────────────────────────────────────
 function updateUI(eff, C, rCorr, corrAlerts){
   let rMax = 0;
-  eff.forEach(e=>{ if(e.R_eff > rMax) rMax = e.R_eff; });
-  // R_total = max(rMax, R_corr) — formula-boxの「R_total = max(R_i, R_corr)」どおり、
+  eff.forEach(e=>{ if(e.R > rMax) rMax = e.R; });
+  // R_total = max(rMax, R_corr) — formula-boxの「aggregate = max(R_base_i, R_corr); AUX_STOP separate」どおり、
   // 平均せず最悪値で決定するfail-closed設計。
   const rTotal = Math.max(rMax, rCorr.maxR);
   const systemColor = getColor(rTotal);
@@ -949,9 +930,9 @@ function updateUI(eff, C, rCorr, corrAlerts){
     document.getElementById(`cval_${i}`).textContent = e.pressure.toFixed(2);
 
     if(zone !== prevZones[i]){
-      if(zone === 'fail') addLog(`RUPTURE_BOUNDARY: ${f.name} R=${R.toFixed(3)} δ=${fmtVal(e.delta,{...f,opt:0})}`, 'fail');
+      if(zone === 'fail') addLog(`AUX_GATE_EXCEEDED: ${f.name} R=${R.toFixed(3)} δ=${fmtVal(e.delta,{...f,opt:0})}`, 'fail');
       else if(zone === 'warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)} τ_eff=${fmtVal(e.tauEff,{...f,opt:0})}`, 'warn');
-      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`, 'ok');
       prevZones[i] = zone;
     }
   });
@@ -1022,6 +1003,11 @@ function updateUI(eff, C, rCorr, corrAlerts){
 
   drawRotor(eff, rTotal);
   drawTimeSeries();
+
+const auxiliaryStop=eff.some(e=>e.R_eff>=1);
+  eff.forEach((e,i)=>boundary.observe('factor'+i,e.delta,e.tauBase,tick));
+  for(let i=0;i<FACTORS.length;i++)for(let j=i+1;j<FACTORS.length;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBaseReg[i][j]),tauCReg[i][j],tick);
+  NRADemoBoundary.paint(boundary,auxiliaryStop,FACTORS.map((_,i)=>'badge_'+i),['systemStatus']);
 }
 
 // ────────────────────────────────────────────────
@@ -1095,6 +1081,8 @@ function resetSim(){
   document.getElementById('logArea').innerHTML = '';
   logItems = [];
   addLog('システムリセット。個体設備の基準線から再追跡開始。', 'info');
+
+boundary.newTrial();
 }
 
 // 評価開始前の基準相関の登録。正常運転（scenario='normal'）の合成値をREG_TICKS分だけ生成し、
@@ -1138,10 +1126,12 @@ buildCouplingList();
 buildLagList();
 buildLegend();
 addLog('NRA-IDE 回転機械・軸受相関テンプレート開始', 'ok');
-addLog('R_total = max(R_i, R_corr) で平均化しない安全側ゲートを使用', 'info');
+addLog('aggregate = max(R_base_i, R_corr); AUX_STOP separate で平均化しない安全側ゲートを使用', 'info');
 addLog('振動先行・温度遅延・潤滑低下連鎖の観察を開始', 'info');
 
 setInterval(update, 250);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>教材用の仮閾値です。現在の観測値と到達履歴を分けて表示します。AUX_STOPは補助条件であり対象破断ではありません。新試行でも前試行の記録は残り、構造復元を意味しません。</p><button type="button" onclick="startBoundaryTrial()">新しい教材試行</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
+<p class="demo-caveat">基礎厚みτは宣言値です。τ_effは一時的な補助ゲート幅であり、その復帰は構造復元ではありません。カードと時系列のR_gateは補助比です。主表示は独立した評価対象の基礎比・相関比の最大であり、単一対象の正規Rを再定義しません。AUX_STOPと到達履歴を別表示します。</p>
 </body>
 </html>

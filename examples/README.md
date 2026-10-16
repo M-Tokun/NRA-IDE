@@ -18,6 +18,8 @@ Its thresholds are explicit demonstration values, not inferred defaults. The dem
 
 Other examples in this directory preserve research, explanatory, illustrative, domain-specific, or historical work and may use legacy state names.
 
+Where in the canon samples 01–20 were built from, and what is central and what is auxiliary, is summarized in [Canonical basis of examples 01–20](./README_canon_basis_EN.md). Reading it before opening the samples helps avoid misunderstandings.
+
 ---
 
 ## What is NRA-IDE?
@@ -146,7 +148,7 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 | # | File | Content |
 |---|---------|------|
 | 11 | [JP](./11_Motor3Phase_BandGate_live_JP.html) / [EN](./11_Motor3Phase_BandGate_live_EN.html) | **Three-phase motor Band Gate live monitor.** Applies R = δ/τ to load balance and overload detection. |
-| 12 | [JP](./12_agri_mol_antagonism_JP.html) / [EN](./12_agri_mol_antagonism_EN.html) | **Agricultural ion monitoring + Mg²⁺/K⁺ antagonistic chain Band Gate.** Dynamic τ and asymmetric EMA. |
+| 12 | [JP](./12_agri_mol_antagonism_JP.html) / [EN](./12_agri_mol_antagonism_EN.html) | **Agricultural ion monitoring + K⁺/Mg²⁺ antagonism Band Gate.** Dynamic τ and asymmetric EMA. Under K⁺ excess, a linked gate narrows the lower-side τ of Mg²⁺ (plant / soil direction; the reverse of the human body). |
 | 13 | [JP](./13_photosynthesis_layer5_JP.html) / [EN](./13_photosynthesis_layer5_EN.html) | **Photosynthesis Layer 5 monitor.** Uses the FvCB model as an external δ generator, then evaluates R = δ/τ. |
 | 14 | [JP](./14_powergrid_transition_JP.html) / [EN](./14_powergrid_transition_EN.html) | **Power-grid transition-point monitor.** Detects early structural divergence missed by fixed thresholds. |
 | 15 | [JP](./15_or_icu_continuum_JP.html) / [EN](./15_or_icu_continuum_EN.html) | **OR/ICU cumulative monitoring.** Tracks accumulated structural deviation across surgery and ICU phases. |
@@ -174,7 +176,7 @@ These demos apply Band Gate logic, R = δ/τ, to physical measurement domains. U
 | 23 | [23_sample_demo_JP.html](./23_sample_demo_JP.html) / [EN](./23_sample_demo_EN.html) | **State boundary, short-term logs, and long-term reconstruction.** Demonstrates separation of short-term fluctuation and long-term structural trend. |
 | 24 | [24_vehicle_mandatory_boundary_JP.html](./24_vehicle_mandatory_boundary_JP.html) / [EN](./24_vehicle_mandatory_boundary_EN.html) | **Autonomous-driving mandatory boundary demo.** Monitors collision time margin, braking distance, and lateral margin. |
 | 25 | [25_dam_degradation_JP.html](./25_dam_degradation_JP.html) / [EN](./25_dam_degradation_EN.html) | **Dam management comparison + τ degradation curve.** Fixed-threshold monitoring vs NRA-IDE τ degradation tracking. |
-| 26 | [JP](./26_escapement_contactpoint_JP.html) | **Phase-Gap Engine — heat release only at contact points.** Demonstrates that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. (Japanese only) |
+| 26 | [JP](./26_escapement_contactpoint_JP.html) / [EN](./26_escapement_contactpoint_EN.html) | **Phase-Gap Engine — heat release only at contact points.** A conceptual animation of the idea that error/heat occurs at phase-boundary contact points, not across the whole continuous calculation. The remainder of each tooth is kept as a record. |
 
 ---
 
@@ -184,7 +186,7 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 
 | # | File | Domain | Key Point |
 |---|---------|---------|---------|
-| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN.html) | Belt conveyor / V-belt tension | Defines τ as the full margin from optimal value to structural limit. Fail-Closed stops the belt. |
+| 27 | [JP](./27_belt_tension_JP.html) / [EN](./27_belt_tension_EN.html) | Belt conveyor / V-belt tension | Defines τ as the absorption thickness from the optimal value to the structural limit (separately for the upper and lower sides); R = δ/τ reaching 1.0 is RUPTURE_BOUNDARY, and R keeps going above 1.0. Fail-Closed stops the belt at R ≥ 1. |
 | 28 | [JP](./28_water_temp_JP.html) / [EN](./28_water_temp_EN.html) | Water temperature upper/lower management | Evaluates R_hi and R_lo independently. |
 | 29 | [JP](./29_light_lux_JP.html) / [EN](./29_light_lux_EN.html) | Light / illuminance management | Measures the receiving side in lux and increases shading from the precursor stage. |
 | 30 | [JP](./30_power_JP.html) / [EN](./30_power_EN.html) | Power management using V × I | Integrates voltage and current as P = V × I; sustained over-power raises R over time. |
@@ -197,7 +199,7 @@ These demos apply R = δ/τ to general equipment and facility monitoring domains
 
 | File | Content |
 |---------|------|
-| [JP](./33_nra_ide_6d_layer_viz_JP.html) / [EN](./33_nra_ide_6d_layer_viz_EN.html) | **6D multi-layer visualizer.** Displays six R-value surfaces simultaneously. Opacity, saturation, and monochrome modes are available. |
+| [Guide (JP)](./33_boundary_and_history/README.md) / [View 1 (JP)](./33_boundary_and_history/01_simultaneous_boundary_JP.html) / [View 2 (JP)](./33_boundary_and_history/02_pre_rupture_history_JP.html) | **33: Boundary arrival and the history leading to it.** Two schematic models show simultaneous boundary arrival across layers, and accumulation, thickness loss, and intervention before rupture. The new guide and demos are Japanese only. Original 6D visualizers are retained as historical material: [JP](./33_nra_ide_6d_layer_viz_JP.html) / [EN](./33_nra_ide_6d_layer_viz_EN.html). |
 | [EN](../docs/en-US/figures/causal_diode_fail_closed_EN.html) / [JP](../docs/ja-JP/figures/causal_diode_fail_closed_JP.html) | **Causal Diode & Fail-Closed Visualizer.** An intuitive animation demonstrating how NRA-IDE structurally blocks AI from manipulating physical thresholds (Π⁻¹ backward flow) and how it autonomously shuts down upon reaching the limit. |
 
 ---
@@ -232,7 +234,7 @@ From Demo 42 onward, the demos cover POCs for autonomous driving, robot control,
 | 44 | [JP](./44_RobotArm_POC_1_JP.html) / [EN](./44_RobotArm_POC_1_EN.html) | Industrial Robot Arm Control POC 1 |
 | 45 | [JP](./45_HybridCalc_vs_Traditional_JP.html) / [EN](./45_HybridCalc_vs_Traditional_EN.html) | Hybrid Calculation vs. Traditional Method Comparison |
 | 46 | [JP](./46_Connection_vs_Mixing_JP.html) / [EN](./46_Connection_vs_Mixing_EN.html) | Connection vs Mixing (Risk evaluation of connection and mixing) |
-| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) / [EN](./47_FPGA_Demo_SPEED_EN.html) | FPGA Hardware Implementation Speed Demo |
+| 47 | [JP](./47_FPGA_Demo_SPEED_JP.html) / [EN](./47_FPGA_Demo_SPEED_EN.html) | Educational FPGA FSM (hardware speed unverified) |
 | 48 | [JP](./48_Human_5Factors_Correlation_JP.html) / [EN](./48_Human_5Factors_Correlation_EN.html) | Human 5-Factor Correlation Real-Value Transition Demo (Initial lightweight medical template) |
 | 49 | [JP](./49_Architecture_Infographic_JP.html) / [EN](./49_Architecture_Infographic_EN.html) | NRA-IDE Architecture Infographic |
 | 50 | [JP](./50_Constraint_Philosophy_JP.html) / [EN](./50_Constraint_Philosophy_EN.html) | Philosophy Concept "Constraint is not a limitation. Constraint is the force that drives intelligence." |
@@ -297,3 +299,9 @@ This project is provided under the **MIT License**. It may be used, modified, an
 For the latest information, see the official repository:
 
 - **GitHub:** https://github.com/M-Tokun/NRA-IDE
+
+<!-- examples-34plus-20261016 -->
+For examples 34 onward: JP/EN pages 35–41 use matching initial values, scenarios and computations. Examples 35–39 separate ratios based on declared base thickness, auxiliary gate-width ratios, and mediator/chain pressures. `AUX_STOP` denotes an auxiliary suppression rule, not target rupture. Historical boundary records remain when current values fall; a new demonstration trial retains the previous trial records.
+
+Examples 40/41 are unvalidated synthetic research/education materials, with no clinical use. Their observation buckets are neither clinical judgments nor canonical rupture classifications; invalid input receives no bucket. Example 47 is an educational band-validation FSM that holds observations and thresholds, not a hardware speed or arithmetic-accuracy benchmark. Example 52 displays visual state rather than canonical R. Example 53 detects directional growth and narrowing separately for each side.
+<!-- /examples-34plus-20261016 -->

@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<!-- FILE: 02_pre_rupture_history_JP.html -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NRA-IDE 視点2：破断前の履歴と介入（模式）</title>
+<style>
+:root{
+  --bg:#06070c;--surface:#0c0e18;--border:#1c2133;
+  --text:#c3cddd;--muted:#6b7590;--accent:#88ffcc;--warn:#e6c36a;
+  --acc:#ffb020;--blind:#b46cff;--fc:#ff2d55;--fcd:#ff8a65;--weld:#2fd6c3;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+  font-size:13px;line-height:1.6;padding:16px;}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+.wrap{max-width:1200px;margin:0 auto;}
+
+.note{border:1px solid #b8860b;background:rgba(184,134,11,.12);color:var(--warn);
+  padding:8px 12px;border-radius:6px;font-size:12px;margin-bottom:14px;}
+.nav{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;margin-bottom:12px;}
+.nav a{color:var(--accent);}
+header{border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px;}
+header .sub{font-size:10px;letter-spacing:.16em;color:var(--muted);}
+header h1{font-size:18px;font-weight:500;margin-top:4px;letter-spacing:.03em;}
+header .def{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.7;}
+.msg{border-left:3px solid var(--blind);background:rgba(180,108,255,.08);
+  padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:14px;font-size:14px;line-height:1.8;}
+.msg b{color:var(--blind);font-weight:600;}
+.msg .fc{color:var(--fc);}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;}
+.stage{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.ptitle{font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:8px;}
+canvas{display:block;width:100%;border-radius:4px;background:#050608;}
+.cap{font-size:11px;color:var(--muted);margin-top:6px;}
+
+.maps{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.maps canvas{cursor:crosshair;}
+.maphead{font-size:12px;margin-bottom:6px;}
+.maphead small{display:block;font-size:10px;color:var(--muted);}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:10px;font-size:11px;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.sw{width:14px;height:10px;border-radius:2px;display:inline-block;}
+
+#selInfo{font-size:12px;margin-bottom:8px;}
+#leadInfo{font-size:12px;margin-top:8px;line-height:1.7;}
+#leadInfo .v{color:var(--blind);font-weight:600;}
+.gaugelbl{font-size:10px;color:var(--muted);margin:10px 0 4px;}
+
+#c3d{touch-action:none;cursor:grab;}
+#c3d:active{cursor:grabbing;}
+
+aside{display:flex;flex-direction:column;gap:10px;min-width:0;}
+.ctl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.ctl-row label{font-size:11px;color:var(--muted);min-width:78px;}
+input[type=range]{flex:1;min-width:0;accent-color:var(--accent);}
+.val{font-size:11px;min-width:48px;text-align:right;}
+button{font:inherit;font-size:11px;background:transparent;color:var(--text);
+  border:1px solid var(--border);border-radius:4px;padding:5px 10px;cursor:pointer;}
+button.on{background:var(--accent);color:#03130c;border-color:var(--accent);}
+button.weld{border-color:var(--weld);color:var(--weld);width:100%;padding:7px 10px;}
+.sep{border-top:1px solid var(--border);margin:10px 0;}
+.tbar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;}
+.tbar div{height:100%;background:var(--accent);width:0;}
+#tVal{font-size:12px;}
+#weldMsg{font-size:11px;color:var(--weld);min-height:16px;margin-top:6px;}
+#warn{font-size:11px;color:var(--warn);min-height:0;}
+.hint{font-size:10px;color:var(--muted);}
+
+.lcard{background:var(--surface);border:1px solid var(--border);border-radius:6px;
+  padding:8px 10px;cursor:pointer;margin-bottom:6px;}
+.lcard.sel{border-color:#ffffff55;background:#111526;}
+.lhead{display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.lnum{font-size:10px;color:var(--muted);margin-top:2px;}
+.sbar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--border);margin-top:5px;}
+.sbar div{height:100%;}
+
+.scope li{font-size:11px;color:var(--muted);margin-left:16px;margin-bottom:3px;}
+footer{margin-top:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  font-size:10px;color:var(--muted);}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;}
+}
+@media (max-width:560px){
+  .maps{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="note">模式アニメーション：数値はすべて式から作った合成値です。荷重の形と各パラメータは、説明のために選んだものです。実測値でも検証済みモデルでもありません。</div>
+<nav class="nav" aria-label="33番の2つの視点">
+  <a href="README.md">共通説明・履歴資料</a>
+  <a href="01_simultaneous_boundary_JP.html">視点1：境界への到達</a>
+  <span>視点2：破断前の履歴と介入</span>
+</nav>
+
+<header>
+  <div class="sub mono">NRA-IDE / BLIND INTERVAL — SCHEMATIC</div>
+  <h1>視点2：破断前の履歴と介入 — 介入必須点と死角区間（模式）</h1>
+  <div class="def mono">
+    R = δ/τ ・ τ/τ0 = max(0.05, 1 − κ·A) + 追加厚み比 ・ 蓄積 A：R &gt; r_on の間だけ加算し、減らさない<br>
+    介入必須点：δ平常/τ &gt; r_on（平常の荷重だけで蓄積が止まらなくなる） ・ 破断境界到達点：R ≥ 1.0（手動リセットまで保持）
+  </div>
+</header>
+
+<div class="msg">
+  本模式の持続蓄積型では、R が 1.0 に達する前に、平常荷重だけでも蓄積が続く点（<b>介入必須点</b>）へ入ります。
+  そこから <span class="fc">破断境界到達点</span> までの間（<b>死角区間</b>）は、R ≥ 1.0 だけを警報条件にした監視では警報されません。厚みと平常荷重を併せて見ると区別できます。
+</div>
+
+<div class="layout">
+
+  <section class="stage">
+    <div class="panel">
+      <div class="ptitle mono" id="mapTitle">選択中の層</div>
+      <div class="maps">
+        <div>
+          <div class="maphead">R だけを見た場合<small>閾値監視の見え方：R ≥ 1.0 だけが赤</small></div>
+          <canvas id="mapR" aria-label="Rだけを見た場合の平面図"></canvas>
+        </div>
+        <div>
+          <div class="maphead">蓄積を見た場合<small>状態の見え方：死角区間が紫で現れる</small></div>
+          <canvas id="mapS" aria-label="蓄積を見た場合の平面図"></canvas>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:linear-gradient(90deg,#4a3a12,#ffb020)"></i>蓄積（介入必須点への進み）</span>
+        <span><i class="sw" style="background:var(--blind)"></i>死角区間</span>
+        <span><i class="sw" style="background:var(--fc)"></i>破断境界到達（死角区間を経由）</span>
+        <span><i class="sw" style="background:var(--fcd)"></i>破断境界到達（直接到達）</span>
+        <span><i class="sw" style="background:transparent;border:2px solid var(--weld)"></i>介入済み</span>
+      </div>
+      <div class="cap">地図をクリックすると、その地点の推移を下に表示します。破断境界へ到達した地点の R・厚み・蓄積は、到達時の保存値として固定します。</div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle mono">選択地点の推移</div>
+      <div id="selInfo" class="mono"></div>
+      <canvas id="chart" aria-label="選択地点の時系列"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:#ffffff;height:2px"></i>R</span>
+        <span><i class="sw" style="background:#7fd1ff;height:2px"></i>厚み比 τ/τ0</span>
+        <span><i class="sw" style="background:var(--acc);height:2px"></i>r_on</span>
+        <span><i class="sw" style="background:var(--fc);height:2px"></i>R = 1.0</span>
+        <span><i class="sw" style="background:rgba(180,108,255,.35)"></i>死角区間</span>
+        <span><i class="sw" style="background:var(--weld);height:6px;width:6px"></i>介入</span>
+      </div>
+      <div class="gaugelbl mono">厚みゲージ（左ほど厚い。上段：合計と境界、下段：既存要素＋追加分）</div>
+      <canvas id="gauge" aria-label="厚みゲージ"></canvas>
+      <div id="gaugeInfo" class="cap mono"></div>
+      <div id="leadInfo"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle mono">全6層の積層ビュー</div>
+      <canvas id="c3d" aria-label="積層ビュー"></canvas>
+      <div class="cap">各層の状態を重ねて表示（ドラッグで回転）。白い輪は選択地点です。</div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="panel">
+      <div class="ptitle mono">操作</div>
+      <div id="tVal" class="mono">t = 0</div>
+      <div class="tbar"><div id="tFill"></div></div>
+      <div class="ctl-row" style="margin-top:10px">
+        <button id="btnPlay" class="on">再生中</button>
+        <button id="btnReset">最初から</button>
+      </div>
+      <div class="ctl-row">
+        <label for="speed">速度</label>
+        <input type="range" id="speed" min="0" max="100" value="67">
+        <span class="val mono" id="speedVal">×4</span>
+      </div>
+      <div class="sep"></div>
+      <button class="weld" id="btnWeld">介入：死角区間の地点に厚みを加える（+0.25）</button>
+      <div id="weldMsg" class="mono"></div>
+      <div class="hint">+0.25 で自己持続条件を解消できるかは、その時点の厚みと荷重によります。現在荷重による蓄積が続く場合もあります。元の厚み損失と蓄積記録は戻りません。破断境界到達後には効きません。</div>
+      <div class="sep"></div>
+      <div class="hint" style="margin-bottom:6px">境目の調整（変更すると最初からやり直します）</div>
+      <div class="ctl-row">
+        <label for="rOn">蓄積開始 r_on</label>
+        <input type="range" id="rOn" min="0.34" max="0.60" step="0.01" value="0.40">
+        <span class="val mono" id="rOnVal">0.40</span>
+      </div>
+      <div class="ctl-row">
+        <label for="kappa">減り方 κ</label>
+        <input type="range" id="kappa" min="0.0020" max="0.0080" step="0.0002" value="0.0042">
+        <span class="val mono" id="kappaVal">0.0042</span>
+      </div>
+      <div id="warn"></div>
+    </div>
+
+    <div>
+      <div class="ptitle mono" style="margin:2px 0 6px">層の状態（クリックで選択）</div>
+      <div id="cards"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle mono">この図で扱わないこと</div>
+      <ul class="scope">
+        <li>x, y は模式空間の座標で、物理的な位置は定義していません。</li>
+        <li>介入必須点は本モデルの自己持続条件です。元の厚み損失の不可逆性、正規の R_handoff・R_irrev とは別の概念です。十分な厚みの追加で自己持続条件を解消できる場合があります。</li>
+        <li>介入履歴のない既定例では、平常荷重が続けば自己持続開始後に破断境界へ至ります。追加厚みがある場合は厚み下限も確認する必要があります。</li>
+        <li>破断境界到達は表示上の状態です。Fail-Closed は自律処理を抑止する運用原則であり、その制御や正規状態分類は実装していません。</li>
+        <li>d = δ/τ0 を合成した荷重比、A を本模式専用の蓄積量とする仮定を置いています。各物理ドメインで検証した換算式ではありません。</li>
+        <li>到達後の地点は保存値を表示し、一巡終了時は全体を停止・保持します。新しい試行は「最初から」またはパラメータ変更で始めます。</li>
+        <li>層の間に結合はありません。平均値は使っていません。</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<footer class="mono">
+  <span>NRA-IDE / M-Tokuni ・ 模式図</span>
+  <span id="footSeed"></span>
+</footer>
+</div>
+
+<script>
+'use strict';
+// ===== CORE BEGIN =====
+// ─────────────────────────────
+// 定数
+// ─────────────────────────────
+const G = 40, M = G + 1, NN = M * M;   // 格子
+const DT = 0.5;                         // 1ステップの時間幅
+const T_END = 2400;                     // 一巡の長さ
+const TH = 1.0;                         // 破断境界到達：R ≥ 1.0
+const WELD = 0.25;                      // 介入で加える厚み（τ0 に対する比）
+const THICK_FLOOR = 0.05;
+const SEED = 33;
+
+const ST_NORMAL = 0, ST_ACCUM = 1, ST_BLIND = 2, ST_FC_DIRECT = 3, ST_FC_VIA = 4;
+
+const LAYERS = [
+  { key:'TEMP',  name:'温度', color:'#ff6a4a' },
+  { key:'PRESS', name:'圧力', color:'#4aa8ff' },
+  { key:'POWER', name:'電力', color:'#ffcc33' },
+  { key:'LIGHT', name:'照度', color:'#9be84a' },
+  { key:'FLOW',  name:'流量', color:'#c45cff' },
+  { key:'VIB',   name:'振動', color:'#ff4fa8' },
+];
+
+// 境目（変更すると最初からやり直し）
+const P = { rOn: 0.40, kappa: 0.0042 };
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ─────────────────────────────
+// 荷重（δ/τ0）の構成：平常荷重 + 持続型の山2つ + スパイク1つ。すべて場所は固定。
+// ─────────────────────────────
+function setupLayers(){
+  const rnd = mulberry32(SEED);
+  LAYERS.forEach(L => {
+    L.dBase = new Float64Array(NN);
+    const b0 = 0.33 + rnd()*0.03, kx = 1 + rnd()*1.5, ky = 1 + rnd()*1.5, ph = rnd()*Math.PI*2;
+    for(let j = 0; j < M; j++) for(let i = 0; i < M; i++){
+      const x = i/G, y = j/G;
+      L.dBase[j*M + i] = b0 + 0.02*Math.sin(2*Math.PI*(kx*x + ky*y) + ph);
+    }
+    // 互いに離れた3地点
+    const centers = [];
+    while(centers.length < 3){
+      const c = [0.15 + rnd()*0.7, 0.15 + rnd()*0.7];
+      if(centers.every(q => Math.hypot(q[0]-c[0], q[1]-c[1]) > 0.28)) centers.push(c);
+    }
+    L.sites = [
+      { type:'creep', cx:centers[0][0], cy:centers[0][1], sig:0.09 + rnd()*0.04,
+        amp:0.22 + rnd()*0.08, start:rnd()*250, dur:220 + rnd()*160 },
+      { type:'creep', cx:centers[1][0], cy:centers[1][1], sig:0.09 + rnd()*0.04,
+        amp:0.10 + rnd()*0.10, start:rnd()*250, dur:220 + rnd()*160 },
+      { type:'spike', cx:centers[2][0], cy:centers[2][1], sig:0.045,
+        amp:0.80, width:5, times:[] },
+    ];
+    const t1 = 40 + rnd()*200;
+    L.sites[2].times = [t1, t1 + 150 + rnd()*200];
+    for(const s of L.sites){
+      s.W = new Float64Array(NN);
+      const inv = 1/(2*s.sig*s.sig);
+      for(let j = 0; j < M; j++) for(let i = 0; i < M; i++){
+        const dx = i/G - s.cx, dy = j/G - s.cy;
+        s.W[j*M + i] = Math.exp(-(dx*dx + dy*dy)*inv);
+      }
+    }
+    L.A = new Float64Array(NN);
+    L.thick = new Float64Array(NN);
+    L.added = new Float64Array(NN);
+    L.R = new Float64Array(NN);
+    L.st = new Uint8Array(NN);
+    L.blindStart = new Int32Array(NN);
+    L.fcTick = new Int32Array(NN);
+    L.nInt = new Uint8Array(NN);
+  });
+}
+
+function siteAmp(s, t){
+  if(s.type === 'creep'){
+    if(t < s.start || t > s.start + s.dur) return 0;
+    const v = Math.sin(Math.PI*(t - s.start)/s.dur);
+    return s.amp*v*v;
+  }
+  let a = 0;
+  for(const tc of s.times){ const z = (t - tc)/s.width; a += Math.exp(-z*z); }
+  return s.amp*a;
+}
+
+function loadAt(L, n, amps){
+  let d = L.dBase[n];
+  for(let i = 0; i < amps.length; i++) if(amps[i] > 0) d += amps[i]*L.sites[i].W[n];
+  return d;
+}
+
+// ─────────────────────────────
+// 状態
+// ─────────────────────────────
+let tick = 0;
+// tick は次の積分ステップ番号。介入はその境界で直ちに適用する。
+// 荷重は最後に計算した時刻の値を保ち、介入だけで時間や A を進めない。
+const interventions = [];
+
+function thickOf(A, added){ return Math.max(THICK_FLOOR, 1 - P.kappa*A) + added; }
+
+// 介入必須点：平常荷重だけで R が r_on を超える（＝蓄積が止まらない）
+function isSelfSustaining(dBase, thick){ return dBase/thick > P.rOn; }
+
+function classify(L, n, k){
+  if(isSelfSustaining(L.dBase[n], L.thick[n])){
+    if(L.st[n] !== ST_BLIND){ L.st[n] = ST_BLIND; L.blindStart[n] = k; }
+  } else {
+    L.st[n] = L.A[n] > 0 ? ST_ACCUM : ST_NORMAL;
+    L.blindStart[n] = -1;
+  }
+}
+
+function resetSim(){
+  for(const L of LAYERS){
+    L.A.fill(0); L.added.fill(0); L.thick.fill(1);
+    L.st.fill(ST_NORMAL); L.blindStart.fill(-1); L.fcTick.fill(-1); L.nInt.fill(0);
+    for(let n = 0; n < NN; n++) L.R[n] = L.dBase[n];
+  }
+  tick = 0;
+  interventions.length = 0;
+}
+
+function stepSim(){
+  const t = tick*DT;
+  for(const L of LAYERS){
+    const amps = L.sites.map(s => siteAmp(s, t));
+    for(let n = 0; n < NN; n++){
+      if(L.st[n] >= ST_FC_DIRECT) continue;               // 破断境界到達 は手動リセットまで保持
+      const d = loadAt(L, n, amps);
+      let r = d/L.thick[n];
+      if(r > P.rOn){                                       // 蓄積：減らさない
+        L.A[n] += (r - P.rOn)*DT;
+        L.thick[n] = thickOf(L.A[n], L.added[n]);
+        r = d/L.thick[n];
+      }
+      L.R[n] = r;
+      if(r >= TH){
+        L.st[n] = L.st[n] === ST_BLIND ? ST_FC_VIA : ST_FC_DIRECT;
+        L.fcTick[n] = tick;
+        continue;
+      }
+      classify(L, n, tick);
+    }
+  }
+  tick++;
+}
+
+// 介入：死角区間にある地点に厚みを加える（元の厚みは戻らない。蓄積の記録も残る）
+function intervene(){
+  let count = 0, sustaining = 0, accumulating = 0;
+  const observedTime = Math.max(0, tick - 1)*DT;
+  for(const L of LAYERS){
+    const amps = L.sites.map(s => siteAmp(s, observedTime));
+    for(let n = 0; n < NN; n++){
+      if(L.st[n] !== ST_BLIND) continue;
+      L.added[n] += WELD;
+      L.thick[n] = thickOf(L.A[n], L.added[n]);
+      L.R[n] = loadAt(L, n, amps)/L.thick[n];
+      L.nInt[n]++;
+      classify(L, n, tick);
+      count++;
+      if(L.st[n] === ST_BLIND) sustaining++;
+      if(L.R[n] > P.rOn) accumulating++;
+    }
+  }
+  interventions.push(tick);
+  return { count, sustaining, accumulating };
+}
+
+// 1地点だけを最初から計算し直す（時系列表示用。ライブ計算と同じ手順）
+function simNode(li, n, upto){
+  const L = LAYERS[li];
+  let A = 0, added = 0, thick = 1, st = ST_NORMAL, blind = -1, fc = -1, r = L.dBase[n];
+  // 最後の1点は現在の境界スナップショット。停止中の介入もここへ反映する。
+  const Rs = new Float64Array(upto + 1), Ts = new Float64Array(upto + 1);
+  const intTicks = [], blindSpans = [];
+  let ev = 0;
+  const reclass = k => {
+    if(L.dBase[n]/thick > P.rOn){ if(st !== ST_BLIND){ st = ST_BLIND; blind = k; } }
+    else {
+      if(st === ST_BLIND) blindSpans.push([blind, k]);
+      st = A > 0 ? ST_ACCUM : ST_NORMAL; blind = -1;
+    }
+  };
+  const applyInterventions = k => {
+    while(ev < interventions.length && interventions[ev] <= k){
+      if(interventions[ev] === k && st === ST_BLIND){
+        added += WELD; thick = thickOf(A, added);
+        const amps = L.sites.map(s => siteAmp(s, Math.max(0, k - 1)*DT));
+        r = loadAt(L, n, amps)/thick;
+        intTicks.push(k); reclass(k);
+      }
+      ev++;
+    }
+  };
+  for(let k = 0; k < upto; k++){
+    applyInterventions(k);
+    if(st < ST_FC_DIRECT){
+      const t = k*DT;
+      const amps = L.sites.map(s => siteAmp(s, t));
+      const d = loadAt(L, n, amps);
+      r = d/thick;
+      if(r > P.rOn){ A += (r - P.rOn)*DT; thick = thickOf(A, added); r = d/thick; }
+      if(r >= TH){ st = st === ST_BLIND ? ST_FC_VIA : ST_FC_DIRECT; fc = k; }
+      else reclass(k);
+    }
+    Rs[k] = r; Ts[k] = thick;
+  }
+  // upto の介入は次の積分を待たず描く。同一 tick の複数介入も順番通り適用。
+  applyInterventions(upto);
+  Rs[upto] = r; Ts[upto] = thick;
+  return { Rs, Ts, st, blind, fc, intTicks, blindSpans, A, added, thick, r, dBase: L.dBase[n] };
+}
+// ===== CORE END =====
+
+
+// ─────────────────────────────
+// 表示
+// ─────────────────────────────
+const COL = {
+  normal:'#0b0e17', accLo:[74,58,18], accHi:[255,176,32],
+  blindLo:[120,70,190], blindHi:[214,150,255],
+  fc:'#ff2d55', fcd:'#ff8a65', weld:'#2fd6c3'
+};
+const mix = (a, b, u) => `rgb(${Math.round(a[0]+(b[0]-a[0])*u)},${Math.round(a[1]+(b[1]-a[1])*u)},${Math.round(a[2]+(b[2]-a[2])*u)})`;
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+
+function nodeColor(L, n){
+  const s = L.st[n];
+  if(s === ST_NORMAL) return null;
+  if(s === ST_FC_VIA) return COL.fc;
+  if(s === ST_FC_DIRECT) return COL.fcd;
+  const crit = L.dBase[n]/P.rOn;
+  if(s === ST_BLIND){
+    const q = clamp01((crit - L.thick[n])/(crit - L.dBase[n]));
+    return mix(COL.blindLo, COL.blindHi, q);
+  }
+  const p = clamp01((1 - L.thick[n])/(1 - crit));
+  return mix(COL.accLo, COL.accHi, p);
+}
+
+let selLayer = 2, selNode = 0;
+let playing = true, speed = 4, tAcc = 0;
+
+const mapR = document.getElementById('mapR'), xR = mapR.getContext('2d');
+const mapS = document.getElementById('mapS'), xS = mapS.getContext('2d');
+const chart = document.getElementById('chart'), xC = chart.getContext('2d');
+const gauge = document.getElementById('gauge'), xG = gauge.getContext('2d');
+const c3 = document.getElementById('c3d'), x3 = c3.getContext('2d');
+const dims = {};
+
+function fit(cv, ctx, h){
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth;
+  const hh = h === 'square' ? w : h(w);
+  cv.style.height = hh + 'px';
+  cv.width = Math.round(w*dpr); cv.height = Math.round(hh*dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return [w, hh];
+}
+function resize(){
+  dims.R = fit(mapR, xR, 'square');
+  dims.S = fit(mapS, xS, 'square');
+  dims.C = fit(chart, xC, w => Math.max(180, Math.min(240, Math.round(w*0.32))));
+  dims.G = fit(gauge, xG, () => 100);
+  dims.D = fit(c3, x3, w => Math.max(260, Math.min(420, Math.round(w*0.55))));
+}
+
+// ── 平面図 ──
+function drawMaps(){
+  const L = LAYERS[selLayer];
+  const W = dims.R[0], cell = W/M;
+  // R だけを見た場合
+  xR.fillStyle = '#050608'; xR.fillRect(0, 0, W, W);
+  for(let j = 0; j < M; j++) for(let i = 0; i < M; i++){
+    const n = j*M + i, r = L.R[n];
+    if(r >= TH) xR.fillStyle = COL.fc;
+    else { const v = Math.round(18 + 150*clamp01(r)); xR.fillStyle = `rgb(${v},${v},${v+6})`; }
+    xR.fillRect(i*cell, (M-1-j)*cell, cell + 0.5, cell + 0.5);
+  }
+  // 蓄積を見た場合
+  const W2 = dims.S[0], c2 = W2/M;
+  xS.fillStyle = COL.normal; xS.fillRect(0, 0, W2, W2);
+  for(let j = 0; j < M; j++) for(let i = 0; i < M; i++){
+    const n = j*M + i, col = nodeColor(L, n);
+    if(col){ xS.fillStyle = col; xS.fillRect(i*c2, (M-1-j)*c2, c2 + 0.5, c2 + 0.5); }
+  }
+  xS.strokeStyle = COL.weld; xS.lineWidth = 1.2;
+  for(let n = 0; n < NN; n++){
+    if(!L.nInt[n]) continue;
+    const i = n % M, j = (n - i)/M;
+    xS.strokeRect(i*c2 + 1, (M-1-j)*c2 + 1, c2 - 2, c2 - 2);
+  }
+  // 選択地点
+  for(const [ctx, w] of [[xR, W], [xS, W2]]){
+    const cc = w/M, i = selNode % M, j = (selNode - i)/M;
+    const X = (i + 0.5)*cc, Y = (M - 1 - j + 0.5)*cc;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(X, Y, Math.max(6, cc*1.8), 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = 'rgba(170,180,200,0.7)'; ctx.font = '9px ui-monospace,Menlo,Consolas,monospace';
+    ctx.textAlign = 'left'; ctx.fillText('x →', w - 26, w - 4); ctx.fillText('↑ y', 4, 12);
+  }
+}
+
+// ── 選択地点の時系列 ──
+let selHist = null;
+function drawChart(){
+  const [W, H] = dims.C, ctx = xC;
+  ctx.fillStyle = '#050608'; ctx.fillRect(0, 0, W, H);
+  const padL = 34, padR = 10, padT = 10, padB = 20;
+  const steps = T_END/DT, h = selHist;
+  let YMAX = 1.3;
+  for(const v of h.Ts) if(v > YMAX) YMAX = v;
+  YMAX = Math.ceil(YMAX*10)/10;
+  const X = k => padL + (W - padL - padR)*k/steps;
+  const Y = v => padT + (H - padT - padB)*(1 - Math.min(v, YMAX)/YMAX);
+
+  // 死角区間
+  const spans = h.blindSpans.slice();
+  if(h.st === ST_BLIND) spans.push([h.blind, tick]);
+  if(h.st === ST_FC_VIA) spans.push([h.blind, h.fc]);
+  ctx.fillStyle = 'rgba(180,108,255,0.18)';
+  for(const [a, b] of spans) ctx.fillRect(X(a), padT, Math.max(1, X(b) - X(a)), H - padT - padB);
+
+  // 軸・基準線
+  ctx.strokeStyle = 'rgba(160,175,205,0.18)'; ctx.lineWidth = 1;
+  ctx.font = '9px ui-monospace,Menlo,Consolas,monospace'; ctx.fillStyle = 'rgba(160,175,205,0.6)';
+  ctx.textAlign = 'right';
+  for(const v of [0, 0.5, 1.0]){
+    ctx.beginPath(); ctx.moveTo(padL, Y(v)); ctx.lineTo(W - padR, Y(v)); ctx.stroke();
+    ctx.fillText(v.toFixed(1), padL - 4, Y(v) + 3);
+  }
+  ctx.textAlign = 'center';
+  for(let tt = 0; tt <= T_END; tt += 400) ctx.fillText(String(tt), X(tt/DT), H - 6);
+  const hline = (v, col) => {
+    ctx.strokeStyle = col; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, Y(v)); ctx.lineTo(W - padR, Y(v)); ctx.stroke(); ctx.setLineDash([]);
+  };
+  hline(TH, COL.fc);
+  hline(P.rOn, '#ffb020');
+
+  // 線
+  const line = (arr, col, dash) => {
+    ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.setLineDash(dash || []);
+    ctx.beginPath();
+    for(let k = 0; k <= tick; k++){ const px = X(k), py = Y(arr[k]); k ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.stroke(); ctx.setLineDash([]);
+  };
+  if(tick > 0){
+    line(h.Ts, '#7fd1ff', [5, 3]);
+    line(h.Rs, '#ffffff');
+  }
+  // 印
+  ctx.font = '600 10px ui-monospace,Menlo,Consolas,monospace';
+  const vmark = (k, col, label) => {
+    ctx.strokeStyle = col; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(X(k), padT); ctx.lineTo(X(k), H - padB); ctx.stroke();
+    ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.fillText(label, X(k) + 3, padT + 10);
+  };
+  for(const [a] of spans) vmark(a, '#b46cff', '介入必須点');
+  if(h.fc >= 0) vmark(h.fc, COL.fc, '破断境界到達');
+  ctx.fillStyle = COL.weld;
+  for(const k of h.intTicks){ ctx.beginPath(); ctx.moveTo(X(k), H - padB); ctx.lineTo(X(k) - 4, H - padB + 7); ctx.lineTo(X(k) + 4, H - padB + 7); ctx.fill(); }
+  // 現在
+  ctx.strokeStyle = 'rgba(136,255,204,0.6)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(X(tick), padT); ctx.lineTo(X(tick), H - padB); ctx.stroke();
+}
+
+// ── 厚みゲージ ──
+function drawGauge(){
+  const [W, H] = dims.G, ctx = xG;
+  ctx.fillStyle = '#050608'; ctx.fillRect(0, 0, W, H);
+  const L = LAYERS[selLayer], n = selNode;
+  const dB = L.dBase[n], crit = dB/P.rOn, th = L.thick[n];
+  const existing = Math.max(THICK_FLOOR, 1 - P.kappa*L.A[n]);
+  // 追加分を含む合計と、初期値 1.00 の両方を範囲内に保つ。
+  const max = Math.ceil(Math.max(1.25, th + 0.1, crit + 0.1)*10)/10;
+  const pad = 10, y0 = 14, bh = 14;
+  const X = v => pad + (W - 2*pad)*(1 - v/max);
+  ctx.fillStyle = '#123b36'; ctx.fillRect(X(max), y0, X(1) - X(max), bh);
+  const g = ctx.createLinearGradient(X(1), 0, X(crit), 0);
+  g.addColorStop(0, '#4a3a12'); g.addColorStop(1, '#ffb020');
+  ctx.fillStyle = g; ctx.fillRect(X(1), y0, X(crit) - X(1), bh);
+  ctx.fillStyle = '#8a55d0'; ctx.fillRect(X(crit), y0, X(dB) - X(crit), bh);
+  ctx.fillStyle = '#7a1428'; ctx.fillRect(X(dB), y0, X(0) - X(dB), bh);
+  // 初期値・自己持続境界・平常荷重の破断境界。値の説明は折返せる欄へ出す。
+  ctx.fillStyle = 'rgba(200,210,230,0.75)'; ctx.font = '9px ui-monospace,Menlo,Consolas,monospace';
+  for(const v of [1, crit, dB]) ctx.fillRect(X(v) - 0.5, y0 - 3, 1, bh + 6);
+  ctx.textAlign = 'left'; ctx.fillText('初期値 1.00', X(1), 43);
+  // 白い三角は現在の合計。1を超えても切り詰めない。
+  const xc = X(th);
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.moveTo(xc, y0 - 2); ctx.lineTo(xc - 5, y0 - 8); ctx.lineTo(xc + 5, y0 - 8); ctx.fill();
+  ctx.fillRect(xc - 1, y0, 2, bh);
+  // 下段は既存要素と追加分の内訳。同じ尺度で、右端の0から左へ積む。
+  ctx.fillStyle = '#c08a1c'; ctx.fillRect(X(existing), 56, X(0) - X(existing), 10);
+  ctx.fillStyle = COL.weld; ctx.fillRect(X(th), 56, X(existing) - X(th), 10);
+  ctx.fillStyle = 'rgba(200,210,230,0.75)';
+  ctx.textAlign = 'left'; ctx.fillText('既存要素（橙）＋追加分（青緑）', pad, 85);
+  document.getElementById('gaugeInfo').textContent =
+    `初期 1.000 ／ 既存 ${existing.toFixed(3)} ＋ 追加 ${L.added[n].toFixed(3)} ＝ 合計 ${th.toFixed(3)}。` +
+    `自己持続境界 ${crit.toFixed(3)} ／ 平常荷重での破断境界 ${dB.toFixed(3)}（いずれも合計厚み比）。`;
+}
+
+function stateName(s){
+  return ['通常','蓄積履歴あり','死角区間','破断境界到達（直接到達）','破断境界到達（死角区間を経由）'][s];
+}
+
+function updateSelInfo(){
+  const L = LAYERS[selLayer], n = selNode, i = n % M, j = (n - i)/M, h = selHist;
+  document.getElementById('selInfo').innerHTML =
+    `<span style="color:${L.color}">${L.name}</span> (${(i/G).toFixed(2)}, ${(j/G).toFixed(2)}) ・ ` +
+    `状態：<b>${stateName(L.st[n])}</b> ・ R=${L.R[n].toFixed(3)} ・ 厚み比=${L.thick[n].toFixed(3)} ・ 蓄積A=${L.A[n].toFixed(1)}`;
+  let html = '';
+  let a = -1, b = -1, open = false;
+  if(h.st === ST_FC_VIA){ a = h.blind; b = h.fc; }
+  else if(h.st === ST_BLIND){ a = h.blind; b = tick; open = true; }
+  if(a >= 0){
+    let rmax = 0;
+    for(let k = a; k < b && k < tick; k++) if(h.Rs[k] > rmax) rmax = h.Rs[k];
+    html += `死角区間：t=${(a*DT).toFixed(1)} から ${open ? '継続中' : 't=' + (b*DT).toFixed(1)}` +
+            `（長さ <span class="v">${((b - a)*DT).toFixed(1)}</span>）<br>` +
+            `この区間の R の最大値 <span class="v">${rmax.toFixed(3)}</span>（区間内では R &lt; 1.0 のため、R ≥ 1.0 だけの警報条件では警報しない）`;
+  } else if(h.st === ST_FC_DIRECT){
+    html += '死角区間を経ずに破断境界へ到達（急な荷重。R ≥ 1.0 の警報条件で捉えられる型）';
+  } else if(h.intTicks.length){
+    html += '自己持続条件は解消しています。元の厚み損失と蓄積記録は戻っていません。';
+  } else if(h.st === ST_ACCUM){
+    const crit = L.dBase[n]/P.rOn;
+    html += `蓄積履歴あり：介入必須点まで厚み比あと ${(L.thick[n] - crit).toFixed(3)}`;
+  } else {
+    html += '蓄積なし';
+  }
+  if(h.intTicks.length) html += `<br>介入 ${h.intTicks.length} 回（履歴は保持）。`;
+  if(h.st < ST_FC_DIRECT){
+    html += `<br>平常荷重による自己持続：${h.st === ST_BLIND ? '継続' : 'なし'} ／ ` +
+      `現在荷重による蓄積：${L.R[n] > P.rOn ? '継続' : '停止'}。`;
+  } else {
+    html += '<br>破断境界到達時の保存値を表示しています。';
+  }
+  document.getElementById('leadInfo').innerHTML = html;
+}
+
+// ── 積層ビュー ──
+let elev = 34, rot = 28;
+const GAP = 0.16;
+function drawStack(){
+  const [W, H] = dims.D, ctx = x3;
+  ctx.fillStyle = '#050608'; ctx.fillRect(0, 0, W, H);
+  const e = elev*Math.PI/180, r = rot*Math.PI/180;
+  const ce = Math.cos(e), se = Math.sin(e), cr = Math.cos(r), sr = Math.sin(r);
+  const stackH = GAP*(LAYERS.length - 1);
+  const S = Math.min(W/1.55, (H - 24)/(se*1.42 + ce*stackH + 0.05));
+  const ox = W/2, oy = H/2 + ce*stackH*S/2;
+  const P3 = (x, y, z) => {
+    const cx = x - 0.5, cy = y - 0.5;
+    const rx = cx*cr - cy*sr, ry = cx*sr + cy*cr;
+    return [ox + rx*S, oy - ry*se*S - z*ce*S];
+  };
+  const quad = (x0, y0, x1, y1, z) => {
+    const a = P3(x0, y0, z), b = P3(x1, y0, z), c = P3(x1, y1, z), d = P3(x0, y1, z);
+    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
+  };
+  const hh = 0.5/G;
+  LAYERS.forEach((L, l) => {
+    const z = l*GAP, dim = l === selLayer ? 1 : 0.55;
+    quad(0, 0, 1, 1, z);
+    ctx.fillStyle = 'rgba(255,255,255,0.025)'; ctx.fill();
+    ctx.strokeStyle = l === selLayer ? 'rgba(255,255,255,0.45)' : 'rgba(160,175,205,0.2)';
+    ctx.lineWidth = 0.8; ctx.stroke();
+    ctx.globalAlpha = dim;
+    for(let n = 0; n < NN; n++){
+      const col = nodeColor(L, n);
+      if(!col) continue;
+      const i = n % M, j = (n - i)/M, x = i/G, y = j/G;
+      ctx.fillStyle = col;
+      quad(Math.max(0, x - hh), Math.max(0, y - hh), Math.min(1, x + hh), Math.min(1, y + hh), z);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    const lp = P3(1, 0, z);
+    ctx.font = '600 10px ui-monospace,Menlo,Consolas,monospace';
+    ctx.fillStyle = L.color; ctx.textAlign = 'left';
+    ctx.fillText(`${l+1}.${L.key}`, lp[0] + 6, lp[1] + 3);
+    if(l === selLayer){
+      const i = selNode % M, j = (selNode - i)/M, p = P3(i/G, j/G, z);
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(p[0], p[1], 6, 0, Math.PI*2); ctx.stroke();
+    }
+  });
+}
+
+// ── 層カード ──
+function buildCards(){
+  const box = document.getElementById('cards');
+  box.innerHTML = '';
+  LAYERS.forEach((L, i) => {
+    const d = document.createElement('div');
+    d.className = 'lcard'; d.id = `card_${i}`;
+    d.style.borderLeft = `3px solid ${L.color}`;
+    d.innerHTML = `<div class="lhead"><span style="color:${L.color}">${i+1}. ${L.name}
+      <span class="mono" style="color:var(--muted);font-size:10px">${L.key}</span></span>
+      <span class="mono" id="cardBlind_${i}" style="font-size:10px"></span></div>
+      <div class="sbar" id="sbar_${i}"></div>
+      <div class="lnum mono" id="cnum_${i}"></div>`;
+    d.addEventListener('click', () => selectLayer(i));
+    box.appendChild(d);
+  });
+}
+function updateCards(){
+  LAYERS.forEach((L, i) => {
+    const c = [0,0,0,0,0];
+    for(let n = 0; n < NN; n++) c[L.st[n]]++;
+    const tot = c[1] + c[2] + c[3] + c[4];
+    const w = v => tot ? (100*v/tot).toFixed(1) + '%' : '0%';
+    document.getElementById(`sbar_${i}`).innerHTML =
+      `<div style="width:${w(c[1])};background:#c08a1c"></div><div style="width:${w(c[2])};background:var(--blind)"></div>` +
+      `<div style="width:${w(c[4])};background:var(--fc)"></div><div style="width:${w(c[3])};background:var(--fcd)"></div>`;
+    document.getElementById(`cnum_${i}`).textContent =
+      `蓄積 ${c[1]} ・ 死角 ${c[2]} ・ 到達 経由 ${c[4]} / 直接 ${c[3]}`;
+    const b = document.getElementById(`cardBlind_${i}`);
+    b.textContent = c[2] ? `死角 ${c[2]}` : '';
+    b.style.color = 'var(--blind)';
+    document.getElementById(`card_${i}`).classList.toggle('sel', i === selLayer);
+  });
+}
+
+function selectLayer(i){
+  selLayer = i;
+  document.getElementById('mapTitle').textContent = `選択中の層：${i+1}. ${LAYERS[i].name}（${LAYERS[i].key}）`;
+}
+function defaultNode(li){
+  const s = LAYERS[li].sites[0];
+  return Math.round(s.cy*G)*M + Math.round(s.cx*G);
+}
+
+// ── 入力 ──
+function mapClick(cv){
+  cv.addEventListener('click', e => {
+    const rc = cv.getBoundingClientRect();
+    const cc = rc.width/M;
+    const i = Math.max(0, Math.min(M-1, Math.floor((e.clientX - rc.left)/cc)));
+    const j = Math.max(0, Math.min(M-1, M - 1 - Math.floor((e.clientY - rc.top)/cc)));
+    selNode = j*M + i;
+  });
+}
+mapClick(mapR); mapClick(mapS);
+
+const btnPlay = document.getElementById('btnPlay');
+function setPlaying(value){
+  playing = value;
+  btnPlay.classList.toggle('on', playing);
+  btnPlay.textContent = playing ? '再生中' : '停止中';
+}
+btnPlay.addEventListener('click', () => {
+  if(tick < MAX_TICK) setPlaying(!playing);
+});
+function restart(){
+  const ended = tick >= MAX_TICK;
+  resetSim(); tAcc = 0;
+  btnPlay.disabled = false;
+  if(ended) setPlaying(true);
+  document.getElementById('weldMsg').textContent = '';
+}
+document.getElementById('btnReset').addEventListener('click', restart);
+
+const speedEl = document.getElementById('speed');
+function readSpeed(){
+  speed = 0.25*Math.pow(2, 6*speedEl.value/100);
+  document.getElementById('speedVal').textContent = '×' + (speed < 1 ? speed.toFixed(2) : speed.toFixed(1).replace(/\.0$/, ''));
+}
+speedEl.addEventListener('input', readSpeed);
+
+document.getElementById('btnWeld').addEventListener('click', () => {
+  const result = intervene();
+  document.getElementById('weldMsg').textContent =
+    result.count ? `t=${(tick*DT).toFixed(1)}：${result.count} 地点に +0.25。自己持続継続 ${result.sustaining} ／ 現在荷重による蓄積継続 ${result.accumulating} 地点` : `t=${(tick*DT).toFixed(1)}：死角区間の地点はありません`;
+  // 停止中でも、次の積分を待たず全表示を同じスナップショットに揃える。
+  renderFrame();
+});
+
+const rOnEl = document.getElementById('rOn'), kEl = document.getElementById('kappa');
+let maxBase = 0;
+function readBounds(){
+  P.rOn = parseFloat(rOnEl.value); P.kappa = parseFloat(kEl.value);
+  document.getElementById('rOnVal').textContent = P.rOn.toFixed(2);
+  document.getElementById('kappaVal').textContent = P.kappa.toFixed(4);
+  document.getElementById('warn').textContent = P.rOn <= maxBase
+    ? `r_on が平常荷重の最大値（${maxBase.toFixed(3)}）以下です。平常の荷重だけで蓄積が始まる設定になります。` : '';
+  restart();
+}
+rOnEl.addEventListener('input', readBounds);
+kEl.addEventListener('input', readBounds);
+
+let drag = null;
+c3.addEventListener('pointerdown', e => { drag = { x:e.clientX, y:e.clientY, rot, elev }; c3.setPointerCapture(e.pointerId); });
+c3.addEventListener('pointermove', e => {
+  if(!drag) return;
+  rot = ((drag.rot + (e.clientX - drag.x)*0.5) % 360 + 360) % 360;
+  elev = Math.max(15, Math.min(85, drag.elev - (e.clientY - drag.y)*0.3));
+});
+c3.addEventListener('pointerup', () => drag = null);
+c3.addEventListener('pointercancel', () => drag = null);
+
+// ─────────────────────────────
+// ループ（個別地点の到達後も他地点は進む。終端では全体を停止・保持する）
+// ─────────────────────────────
+const MAX_TICK = T_END/DT;
+let last = performance.now();
+function loop(now){
+  const dt = Math.min((now - last)/1000, 0.05);
+  last = now;
+  if(playing){
+    if(tick < MAX_TICK){
+      tAcc += dt*12*speed;
+      let guard = 0;
+      while(tAcc >= DT && tick < MAX_TICK && guard < 60){ stepSim(); tAcc -= DT; guard++; }
+      if(guard >= 60) tAcc = 0;
+    }
+  }
+  if(tick >= MAX_TICK){
+    setPlaying(false); btnPlay.disabled = true; tAcc = 0;
+  }
+  renderFrame();
+  requestAnimationFrame(loop);
+}
+
+function renderFrame(){
+  selHist = simNode(selLayer, selNode, tick);
+  document.getElementById('tVal').textContent =
+    tick >= MAX_TICK ? `t = ${T_END}（一巡終了・保持中。「最初から」で新しい試行）` : `t = ${(tick*DT).toFixed(1)} / ${T_END}`;
+  document.getElementById('tFill').style.width = (100*tick/MAX_TICK).toFixed(2) + '%';
+  drawMaps(); drawChart(); drawGauge(); drawStack();
+  updateSelInfo(); updateCards();
+}
+
+setupLayers();
+for(const L of LAYERS) for(let n = 0; n < NN; n++) if(L.dBase[n] > maxBase) maxBase = L.dBase[n];
+document.getElementById('footSeed').textContent = `seed ${SEED} ・ 一巡 t = ${T_END} ・ 格子 ${M}×${M}`;
+buildCards();
+readSpeed();
+readBounds();
+selectLayer(selLayer);
+selNode = defaultNode(selLayer);
+resize();
+window.addEventListener('resize', resize);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

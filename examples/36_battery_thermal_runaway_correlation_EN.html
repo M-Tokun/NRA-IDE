@@ -4,370 +4,959 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NRA-IDE Battery Thermal Runaway Correlation Simulation</title>
+<title>NRA-IDE Battery Thermal Runaway Correlation JP</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
 :root {
-  --bg:#050914; --s1:#0b1220; --s2:#111b2a; --bd:#24344c;
-  --tx:#d6e4f2; --mu:#62768a; --ok:#3dff9c; --watch:#69d6ff;
-  --warn:#ffd24a; --fail:#ff315f; --accent:#58d7ff;
+  --bg:#06080d;
+  --s1:#0d121c;
+  --s2:#121b28;
+  --s3:#172233;
+  --bd:#223248;
+  --tx:#cbd9e8;
+  --mu:#536b82;
+  --ok:#39ff9b;
+  --warn:#ffd24a;
+  --fail:#ff2d5f;
+  --crit:#ff7a1a;
+  --accent:#58d7ff;
+  --v:#72a7ff;
+  --i:#ffd24a;
+  --t:#ff7a1a;
+  --r:#ff4f89;
+  --p:#c084fc;
+  --g:#39ff9b;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(88,215,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(88,215,255,.025) 1px,transparent 1px);background-size:34px 34px;pointer-events:none;}
-.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 20px 36px;}
-header{text-align:center;margin-bottom:24px;}
-.h-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.78;margin-bottom:10px;}
-h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
-h1 em{font-style:normal;color:#ff7a1a;}
-.h-desc{font-size:.86rem;color:var(--mu);line-height:1.75;max-width:920px;margin:0 auto;}
-.notice{border:1px solid rgba(255,210,74,.34);background:rgba(255,210,74,.055);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#e8d89d;font-size:.78rem;line-height:1.72;}
-.ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
-button,.select{padding:8px 14px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;font-family:Inter,system-ui,sans-serif;}
-button:hover,.select:hover{border-color:var(--accent);color:var(--accent);}
-button.active{background:var(--accent);color:#001018;border-color:var(--accent);font-weight:700;}
-.label{font-size:.8rem;color:var(--mu);}
-.scen{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
-.formula{background:var(--s1);border:1px solid rgba(88,215,255,.45);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:2;}
-.formula .a{color:var(--accent)} .formula .b{color:var(--warn)} .formula .c{color:var(--ok)} .formula .f{color:var(--fail)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:520px){.stats{grid-template-columns:1fr;}}
-.stat{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;}
-.stat-l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
-.stat-v{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
-.stat-s{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
-.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin-bottom:16px;}
-@media(max-width:980px){.grid{grid-template-columns:1fr;}}
-.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
-.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
-.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-@media(max-width:980px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:540px){.factor-grid{grid-template-columns:1fr;}}
-.fc{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:.25s;}
-.fc.warn{border-color:var(--warn)} .fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
-@keyframes pulse{from{box-shadow:0 0 0 rgba(255,49,95,.05)}to{box-shadow:0 0 16px rgba(255,49,95,.28)}}
-.badge{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;letter-spacing:.08em;}
-.b-ok{background:rgba(61,255,156,.10);color:var(--ok);border:1px solid rgba(61,255,156,.30)} .b-watch{background:rgba(105,214,255,.10);color:var(--watch);border:1px solid rgba(105,214,255,.30)} .b-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35)} .b-fail{background:rgba(255,49,95,.14);color:var(--fail);border:1px solid rgba(255,49,95,.45)}
-.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
-.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:700;margin-bottom:8px;}
-.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
-.fc-lbl{color:var(--mu)} .fc-r{font-size:.98rem;font-weight:700}
-.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
-.bar{height:100%;border-radius:2px;transition:.25s;}
-.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
-.visual{height:330px;background:radial-gradient(circle at 50% 22%, rgba(255,49,95,.12), transparent 34%),linear-gradient(180deg,rgba(88,215,255,.06),rgba(255,210,74,.04)),var(--s2);border:1px solid var(--bd);border-radius:12px;position:relative;overflow:hidden;}
-.visual-title{position:absolute;left:18px;top:16px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;}
-.rings{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;border:2px solid rgba(88,215,255,.18);}
-.rings::before,.rings::after{content:'';position:absolute;inset:28px;border-radius:50%;border:1px dashed rgba(255,210,74,.24);}
-.rings::after{inset:66px;border-color:rgba(255,49,95,.30);}
-.dot{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);left:calc(50% - 8px);top:calc(50% - 8px);transform:rotate(var(--ang)) translateX(var(--rad));transform-origin:center;opacity:.9;}
-.pressure{position:absolute;left:22px;right:22px;bottom:44px;height:10px;background:var(--bd);border-radius:5px;overflow:hidden;}
-.pressure-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--fail));transition:.25s;}
-.visual-status{position:absolute;left:18px;bottom:18px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);}
-.visual-note{position:absolute;right:18px;bottom:18px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.70rem;color:var(--warn);line-height:1.7;}
-.corr-grid{display:grid;grid-template-columns:repeat(var(--ncols),1fr);gap:3px;}
-.corr-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.50rem;font-weight:600;transition:.25s;}
-.corr-head{background:transparent;color:var(--mu);font-size:.48rem;line-height:1.1;text-align:center;}
-.chain{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;}
-.chain-flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin-bottom:14px;}
-.node{border:1px solid var(--bd);background:rgba(255,255,255,.025);border-radius:9px;padding:10px 8px;text-align:center;min-height:72px;}
-.node-name{font-size:.70rem;color:var(--mu);margin-bottom:5px} .node-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700}
-.arrow{font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent);font-size:1.25rem}
-.coupling-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
-.coup-row{display:flex;align-items:center;gap:10px} .coup-name{font-size:.74rem;min-width:118px;color:var(--tx)} .coup-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden} .coup-bar{height:100%;border-radius:4px;transition:.25s} .coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right}
-canvas{width:100%;height:152px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
-.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap} .legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem}
-.log{height:152px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
-.log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)}
-.footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(88,215,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(88,215,255,0.025) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:28px 20px 34px;}
 
-.scenario-code-txt { font-size:1.35rem; }
-.chain-desc { font-size:.74rem;color:var(--mu);line-height:1.7; }
-.corr-alert-wrap { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
-.corr-fail-txt { color:var(--fail); }
-.corr-ok-txt { color:var(--ok); }
-.legend-fail { color:rgba(255,49,95,.75); }
+header{text-align:center;margin-bottom:26px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.75;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.25rem,3.5vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{color:var(--crit);font-style:normal;}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.7;}
+
+.notice{
+  border:1px solid rgba(255,210,74,.35);
+  background:rgba(255,210,74,.06);
+  border-left:4px solid var(--warn);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#e7d69b;
+  font-size:.78rem;
+  line-height:1.7;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);
+  color:var(--tx);font-size:.82rem;cursor:pointer;transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#001018;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:7px;
+  color:var(--tx);font-family:'Noto Sans JP',sans-serif;font-size:.82rem;cursor:pointer;
+}
+.scenario-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(88,215,255,.45);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.8rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--warn);}
+.eq-c{color:var(--ok);}
+.eq-f{color:var(--fail);}
+
+.overall{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:800px){.overall{grid-template-columns:1fr;}}
+.over-card{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.over-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;
+  letter-spacing:.18em;
+  color:var(--mu);
+  margin-bottom:6px;
+}
+.over-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:2.15rem;
+  font-weight:700;
+  line-height:1.05;
+}
+.over-sub{font-size:.76rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.main-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:18px;
+}
+.panel-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.66rem;
+  letter-spacing:.18em;
+  color:var(--accent);
+  margin-bottom:16px;
+}
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:900px){.factor-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.factor-grid{grid-template-columns:1fr;}}
+.fc{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  transition:.25s;
+}
+.fc.warn{border-color:var(--warn);}
+.fc.fail{border-color:var(--fail);animation:pulse .65s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,45,95,.05);}to{box-shadow:0 0 16px rgba(255,45,95,.28);}}
+.fc-badge{
+  position:absolute;top:10px;right:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;
+  padding:2px 6px;
+  border-radius:4px;
+  letter-spacing:.08em;
+}
+.badge-ok{background:rgba(57,255,155,.10);color:var(--ok);border:1px solid rgba(57,255,155,.30);}
+.badge-warn{background:rgba(255,210,74,.10);color:var(--warn);border:1px solid rgba(255,210,74,.35);}
+.badge-fail{background:rgba(255,45,95,.14);color:var(--fail);border:1px solid rgba(255,45,95,.45);}
+.fc-name{font-size:.78rem;color:var(--mu);margin-bottom:4px;}
+.fc-val{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:700;margin-bottom:8px;}
+.fc-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:4px;gap:8px;}
+.fc-lbl{color:var(--mu);}
+.fc-r{font-size:.98rem;font-weight:700;}
+.r-bar-bg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.r-bar{height:100%;border-radius:2px;transition:.25s;}
+.fc-desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.55;}
+
+.battery-box{
+  height:286px;
+  background:radial-gradient(circle at 50% 10%, rgba(255,122,26,.14), transparent 35%), var(--s2);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+.cell-stack{
+  position:absolute;left:50%;top:48%;
+  transform:translate(-50%,-50%);
+  width:270px;height:150px;
+  display:grid;grid-template-columns:repeat(6,1fr);gap:6px;
+}
+.cell{
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(180deg,#1e3146,#0c121b);
+  position:relative;
+  overflow:hidden;
+}
+.cell::before{
+  content:'';
+  position:absolute;left:0;right:0;bottom:0;
+  height:var(--heat,20%);
+  background:linear-gradient(180deg,rgba(255,210,74,.4),rgba(255,45,95,.7));
+  transition:height .25s;
+}
+.cell::after{
+  content:'';
+  position:absolute;left:35%;top:8px;
+  width:30%;height:10px;border-radius:2px;
+  background:rgba(255,255,255,.14);
+}
+.thermal-ring{
+  position:absolute;left:50%;top:48%;
+  transform:translate(-50%,-50%);
+  width:190px;height:190px;border-radius:50%;
+  border:2px solid rgba(255,45,95,.0);
+  opacity:0;
+  pointer-events:none;
+}
+.thermal-ring.active{animation:thermal 1.2s infinite;}
+@keyframes thermal{
+  0%{width:130px;height:130px;opacity:.75;border-color:rgba(255,45,95,.5);}
+  100%{width:310px;height:310px;opacity:0;border-color:rgba(255,45,95,0);}
+}
+.pack-label{
+  position:absolute;left:18px;top:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);letter-spacing:.12em;
+}
+.pack-status{
+  position:absolute;left:18px;bottom:16px;
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ok);
+}
+.heat-arrow{
+  position:absolute;right:24px;top:62px;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--crit);
+  font-size:.72rem;
+  line-height:1.8;
+}
+
+.corr-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.corr-cell{
+  aspect-ratio:1;
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;
+  font-weight:600;
+  transition:.25s;
+}
+.corr-head{background:transparent;color:var(--mu);font-size:.53rem;line-height:1.1;text-align:center;}
+
+.coupling-list{display:flex;flex-direction:column;gap:8px;}
+.coup-row{display:flex;align-items:center;gap:10px;}
+.coup-name{font-size:.76rem;min-width:90px;color:var(--tx);}
+.coup-bar-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.coup-bar{height:100%;border-radius:4px;transition:.25s;}
+.coup-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+
+canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+
+.log-area{
+  height:145px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);
+  border-radius:9px;padding:10px;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;
+}
+.log-ok{color:var(--ok);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+
+.footer{
+  margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mu);
+}
+
+.corr-alert-txt { margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mu);line-height:1.7; }
+.corr-alert-wrap { margin-top:8px; }
+.lag-note { font-size:.74rem;color:var(--mu);line-height:1.7;margin-top:14px; }
+.leg-v { color:var(--v); }
+.leg-i { color:var(--i); }
+.leg-t { color:var(--t); }
+.leg-r { color:var(--r); }
+.leg-p { color:var(--p); }
+.leg-g { color:var(--g); }
+.legend-fail { color:rgba(255,45,95,.7); }
+.fc-tau-txt { color:var(--mu); }
+.corr-fail-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--fail); }
+.corr-ok-txt { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ok); }
 </style>
 </head>
 <body>
-<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Synthetic data (unverified): values and correlation matrices are generated from "reference + scenario script + noise" for education. This is not correlation detection on measured data.</div>
+<div class="synth-note" style="margin:8px auto;max-width:1100px;padding:6px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:12px/1.5 sans-serif;border-radius:6px;text-align:center;">Unvalidated synthetic data: observations and correlation entries are generated from baselines, scripted scenarios and noise. This is not measured-data correlation detection.</div>
 <div class="wrap">
+
 <header>
   <div class="h-sub">NRA-IDE / BATTERY DOMAIN CORRELATION SAMPLE</div>
-  <h1>Battery <em>Thermal Runaway Correlation</em> Simulation</h1>
-  <p class="h-desc">A synthetic battery safety education sample. Internal resistance and dT/dt act as leading indicators, then surface temperature, swelling pressure, and voltage deviation follow.</p>
+  <h1>Battery <em>Thermal-runaway correlation</em> Simulation</h1>
+  <p class="h-desc">Synthetic voltage, current, temperature, temperature-rise rate, resistance and swelling-pressure observations; base ratios and auxiliary gate widths are separate.</p>
 </header>
 
-<div class="notice">Educational and structural visualization only. This is not a battery management system and must not be used for real charging, discharging, certification, or product safety decisions.</div>
-
-<div class="ctrl">
-  <button class="active" id="btn-run" onclick="toggleRun()">▶ Running</button>
-  <button onclick="resetSim()">↺ Reset</button>
-  <span class="label">Scenario:</span>
-  <select class="select" id="scenario-sel" onchange="applyScenario()"></select>
-  <span class="scen" id="scen-desc">Normal operation</span>
+<div class="notice">
+  Educational synthetic data only. Do not use this example for battery control, charging, safety certification or incident decisions. Real equipment requires validated protection circuits and expert safety engineering.
 </div>
 
-<div class="formula">
-  <span class="a">R_i = δ_i / τ_i(t)</span> — structural ratio per factor |
-  <span class="b">R_corr = |C(t)-C(t₀)| / τ_C</span> — correlation drift |
-  <span class="c">dynamic τ shrink from internal resistance and dT/dt</span> |
-  <span class="f">R_total = max(R_i, R_corr, R_coupling)</span>
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ Running</button>
+  <button class="btn" onclick="resetSim()">↺ Reset trial</button>
+  <label class="small">Scenario:</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">Normal operation</option>
+    <option value="fastcharge">Fast-charge stress</option>
+    <option value="coolingloss">Cooling loss</option>
+    <option value="agedcell">Aged-cell mix</option>
+    <option value="short">Internal-short precursor</option>
+    <option value="runaway">Thermal-runaway chain</option>
+  </select>
+  <span class="scenario-label" id="scen-desc">Within declared synthetic ranges</span>
 </div>
 
-<div class="stats">
-  <div class="stat"><div class="stat-l">SYSTEM R_TOTAL</div><div class="stat-v" id="r-total">0.000</div><div class="stat-s" id="r-status">SAFE — structural margin remains</div></div>
-  <div class="stat"><div class="stat-l">COUPLING R</div><div class="stat-v" id="r-coupling">0.000</div><div class="stat-s">resistance / dT/dt / gas pressure</div></div>
-  <div class="stat"><div class="stat-l">R_CORR MAX</div><div class="stat-v" id="r-corr">0.000</div><div class="stat-s">maximum correlation drift</div></div>
-  <div class="stat"><div class="stat-l">ACTIVE SCENARIO</div><div class="stat-v scenario-code-txt" id="scenario-code">NORMAL</div><div class="stat-s">synthetic data only</div></div>
+<div class="formula-box">
+  <span class="eq-a">R_i = δ_i / τ_i</span>：Individual structural ratios |
+  <span class="eq-b">τ_i(t) = τ_base × S_reserve × S_coupling</span>：Resistance and temperature-rise-rate auxiliary coupling |
+  <span class="eq-c">aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>：No dilution by averaging |
+  <span class="eq-f">R ≥ 1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
-<div class="grid">
-  <div class="panel"><div class="panel-title">FACTOR STATE — R_i = δ_i / τ_i(t)</div><div class="factor-grid" id="factor-grid"></div></div>
-  <div class="panel">
-    <div class="panel-title">STRUCTURAL VISUALIZATION</div>
-    <div class="visual">
-      <div class="visual-title">SYNTHETIC CELL PACK VIEW</div>
-      <div class="rings" id="rings"></div>
-      <div id="dots"></div>
-      <div class="pressure"><div class="pressure-fill" id="pressure-fill"></div></div>
-      <div class="visual-status" id="visual-status">● SAFE</div>
-      <div class="visual-note" id="visual-note">R_int → dT/dt → temperature</div>
-    </div>
+<div class="overall">
+  <div class="over-card">
+    <div class="over-label">PACK R_TOTAL</div>
+    <div class="over-val" id="overall-r">0.000</div>
+    <div class="over-sub" id="overall-status">SAFE — Within declared baseline</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">THERMAL COUPLING PRESSURE</div>
+    <div class="over-val" id="coupling-pressure">0.000</div>
+    <div class="over-sub">Resistance, rise-rate and temperature coupling</div>
+  </div>
+  <div class="over-card">
+    <div class="over-label">R_CORR MAX</div>
+    <div class="over-val" id="corr-r">0.000</div>
+    <div class="over-sub">Difference from baseline correlation</div>
   </div>
 </div>
 
-<div class="grid">
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">MEDIATION / COUPLING LAYER</div>
-    <div class="chain">
-      <div class="chain-flow">
-        <div class="node"><div class="node-name" id="node-a-name">Resistance</div><div class="node-val" id="node-a">0.000</div></div>
-        <div class="arrow">→</div>
-        <div class="node"><div class="node-name" id="node-b-name">dT/dt</div><div class="node-val" id="node-b">0.000</div></div>
-        <div class="arrow">⇒</div>
-        <div class="node"><div class="node-name" id="node-c-name">Pack pressure</div><div class="node-val" id="node-c">0.000</div></div>
+    <div class="panel-title">FACTOR STATE — R_gate (aux)</div>
+    <div class="factor-grid" id="factor-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">BATTERY PACK VISUALIZATION</div>
+    <div class="battery-box">
+      <div class="pack-label">SYNTHETIC CELL PACK / 6-CELL VIEW</div>
+      <div class="cell-stack" id="cell-stack">
+        <div class="cell" id="cell-0"></div>
+        <div class="cell" id="cell-1"></div>
+        <div class="cell" id="cell-2"></div>
+        <div class="cell" id="cell-3"></div>
+        <div class="cell" id="cell-4"></div>
+        <div class="cell" id="cell-5"></div>
       </div>
-      <div class="chain-desc">Temperature value alone is late. This sample lets internal resistance and temperature rise-rate compress the tolerance of the thermal layer.</div>
-      <div class="coupling-list" id="coupling-list"></div>
+      <div class="thermal-ring" id="thermal-ring"></div>
+      <div class="heat-arrow" id="heat-arrow">heat path<br>R_int → dT/dt<br>dT/dt → Temp<br>Temp → Pressure</div>
+      <div class="pack-status" id="pack-status">● SAFE PACK</div>
     </div>
   </div>
+</div>
+
+<div class="main-grid">
   <div class="panel">
     <div class="panel-title">CORRELATION MATRIX — C[i][j](t) vs C[i][j](t₀)</div>
     <div id="corr-matrix"></div>
-    <div id="corr-alert" class="corr-alert-wrap">✓ Correlation stable.</div>
+    <div class="corr-alert-txt">
+      R_corr = |C[i][j](t) − C[i][j](t₀)| / τ_C。Red cells denote correlation drift in the resistance, rise-rate and swelling chain.
+    </div>
+    <div id="corr-alert" class="corr-alert-wrap"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">COUPLING PRESSURE — τWidth contribution</div>
+    <div class="coupling-list" id="coupling-list"></div>
+    <div class="lag-note">
+      Changes in resistance and temperature-rise rate narrow auxiliary thermal and pressure gates. These synthetic dynamics are not validated predictions of boundary arrival.
+    </div>
   </div>
 </div>
 
-<div class="grid">
+<div class="main-grid">
   <div class="panel">
-    <div class="panel-title">TIME SERIES — R VALUES</div>
-    <canvas id="chart" width="590" height="152"></canvas>
-    <div class="legend" id="legend"></div>
+    <div class="panel-title">TIME SERIES — RValue history</div>
+    <canvas id="ts-canvas" class="ts-canvas" width="560" height="145"></canvas>
+    <div class="legend">
+      <span class="leg-v">─ Voltage</span>
+      <span class="leg-i">─ Current</span>
+      <span class="leg-t">─ Temperature</span>
+      <span class="leg-r">─ dT/dt</span>
+      <span class="leg-p">─ Internal resistance</span>
+      <span class="leg-g">─ Swelling pressure</span>
+      <span class="legend-fail">- - Fail</span>
+    </div>
   </div>
+
   <div class="panel">
     <div class="panel-title">GATE LOG</div>
-    <div class="log" id="log"></div>
+    <div class="log-area" id="log-area"></div>
   </div>
 </div>
 
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span>36_battery_thermal_runaway_correlation_EN</span>
-  <span>R_total=max(R_i,R_corr,R_coupling) / no averaging dilution</span>
-</div>
+  <span>aggregate = max(R_base_i, R_corr); AUX_STOP separate / no averaging dilution</span>
 </div>
 
+</div>
+
+<script src="demo_boundary.js"></script>
 <script>
-// FACTORS: 6-factor battery model, one object per signal (single-line literal for compactness).
-// dir:'both' (voltage only) means both directions count as risk (over-voltage AND sudden drop);
-// all other factors are dir:'hi' (only a rise above opt is risky).
-// weight   -> this factor's share of pressure().main (a weighted sum, not an explicit coupling matrix).
-// group    -> 'thermal' or 'supply'; pressure() averages R within each group to get p.thermal / p.supply.
-// shrink   -> which pressure term shrinks this factor's dynamic tau in dynamicTau().
-// coupledBy/coupledGain -> how much this factor's raw value is nudged by pressure() output each tick.
-// corr_base -> this factor's row of the baseline correlation matrix C(t0), used by calcCorr()/corrR().
-// dtdt (Temperature Rise Rate) has the shortest tau (1.2) of the set — modeled as the fastest-moving
-// leading precursor, ahead of surfaceTemp (tau 18) which lags behind it physically.
-// opt/tau/amp values are demo tuning constants for this sample; not derived from real cell test data.
-const FACTORS = [{"id":"voltage","name":"Cell Voltage","short":"V","unit":"V","opt":3.7,"tau":0.3,"min":2.8,"max":4.35,"dir":"both","amp":0.025,"weight":0.16,"group":"supply","shrink":"main","fmt":"3","desc":"Both over-voltage and sudden drop are watched.","corr_base":[1,0.55,0.35,0.25,0.3,0.2]},{"id":"current","name":"Current","short":"I","unit":"A","opt":35,"tau":25,"min":0,"max":130,"dir":"hi","amp":2.8,"weight":0.18,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.0,"desc":"High current pushes heat and stress.","corr_base":[0.55,1,0.5,0.3,0.4,0.25]},{"id":"surfaceTemp","name":"Surface Temp","short":"T","unit":"℃","opt":32,"tau":18,"min":10,"max":95,"dir":"hi","amp":0.8,"weight":0.22,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":2.2,"desc":"Thermal layer; τ shrinks under coupling pressure.","corr_base":[0.35,0.5,1,0.45,0.55,0.3]},{"id":"dtdt","name":"Temperature Rise Rate","short":"dT","unit":"℃/min","opt":0,"tau":1.2,"min":-1.5,"max":8,"dir":"hi","amp":0.1,"weight":0.3,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":0.3,"fmt":"2","desc":"Leading precursor before absolute temperature crosses limits.","corr_base":[0.25,0.3,0.45,1,0.5,0.42]},{"id":"rint","name":"Internal Resistance","short":"Rint","unit":"mΩ","opt":22,"tau":12,"min":12,"max":80,"dir":"hi","amp":0.8,"weight":0.31,"group":"thermal","shrink":"main","coupledBy":"main","coupledGain":1.1,"desc":"Aging or short-circuit precursor.","corr_base":[0.3,0.4,0.55,0.5,1,0.48]},{"id":"pressure","name":"Swelling Pressure","short":"P","unit":"kPa","opt":0,"tau":18,"min":0,"max":95,"dir":"hi","amp":0.7,"weight":0.23,"group":"thermal","shrink":"thermal","coupledBy":"thermal","coupledGain":1.8,"desc":"Synthetic gas/swelling indicator.","corr_base":[0.2,0.25,0.3,0.42,0.48,1]}];
-// SCENARIOS: per-scenario drift targets and boost constants (demo tuning values, no dataset behind them).
-// drift[id]      -> ramped (over ~90 ticks, see updateValues()) additive offset applied to that factor's optimum.
-// pressureBoost  -> added directly into pressure().main, i.e. raises R_coupling and shrinks every dynamic tau.
-// corrBoost      -> added into calcCorr()'s driftBase, i.e. raises the synthetic correlation drift directly.
-// Escalation across scenarios (fastcharge -> coolingloss -> agedcell -> short -> runaway) is a demo
-// narrative ordering, not a calibrated risk ranking.
-const SCENARIOS = {"normal":{"label":"Normal","desc":"Stable synthetic pack state."},"fastcharge":{"label":"Fast charge stress","desc":"High current drives delayed thermal response.","drift":{"current":52,"surfaceTemp":9,"dtdt":1.1,"rint":5,"pressure":6},"pressureBoost":0.1,"corrBoost":0.08},"coolingloss":{"label":"Cooling loss","desc":"dT/dt and temperature rise first.","drift":{"current":10,"surfaceTemp":22,"dtdt":2.1,"rint":7,"pressure":11},"pressureBoost":0.2,"corrBoost":0.1},"agedcell":{"label":"Aged cell mix","desc":"Internal resistance rises and shrinks thermal margin.","drift":{"voltage":-0.06,"current":14,"surfaceTemp":12,"dtdt":1.4,"rint":24,"pressure":10},"pressureBoost":0.26,"corrBoost":0.12},"short":{"label":"Internal short precursor","desc":"Voltage drops while resistance, dT/dt, and pressure rise.","drift":{"voltage":-0.38,"current":46,"surfaceTemp":28,"dtdt":3.4,"rint":32,"pressure":24},"pressureBoost":0.35,"corrBoost":0.18},"runaway":{"label":"Runaway cascade","desc":"Resistance, dT/dt, pressure, and temperature couple together.","drift":{"voltage":-0.42,"current":72,"surfaceTemp":46,"dtdt":5.8,"rint":46,"pressure":55},"pressureBoost":0.48,"corrBoost":0.26}};
-const COLORS = ["#72a7ff","#ffd24a","#ff7a1a","#ff4f89","#c084fc","#39ff9b"];
-const HIST_LEN = 136; // time-series buffer length (ticks kept for the chart); demo tuning value.
-// tauC: normalizer for correlation-drift R in corrR() (R_corr = |C(t)-C(t0)| / tauC). Demo tuning value.
-// The JP counterpart (36_..._JP.html) uses tauC=0.23 (module-level constant there too) — a separately
-// tuned value, not meant to match.
-const tauC = 0.24;
-let running = true, tick = 0, scenario = Object.keys(SCENARIOS)[0];
-let vals = {};
-let history = FACTORS.map(()=>[]);
-let prevZone = FACTORS.map(()=>'ok');
+const boundary = new NRADemoBoundary.Tracker(.75,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
+// EN is generated from this repaired JP computation model.
+const FACTORS = [
+  {
+    id:'volt', name:'Cell voltage', short:'V', unit:'V', color:'var(--v)',
+    opt:3.70, tau:0.30, min:2.80, max:4.35, dir:'both',
+    desc:'Declared 3.70 V baseline; observes deviations in both directions.',
+    corr_base:[1.0,0.35,0.20,0.15,0.28,0.12]
+  },
+  {
+    id:'curr', name:'Current', short:'I', unit:'A', color:'var(--i)',
+    opt:35, tau:25, min:0, max:130, dir:'hi',
+    desc:'High-side current; increases in the fast-charge scenario.',
+    corr_base:[0.35,1.0,0.45,0.35,0.38,0.20]
+  },
+  {
+    id:'temp', name:'Surface temperature', short:'T', unit:'℃', color:'var(--t)',
+    opt:32, tau:18, min:10, max:95, dir:'hi',
+    desc:'High-side temperature observation with an auxiliary gate width.',
+    corr_base:[0.20,0.45,1.0,0.62,0.55,0.48]
+  },
+  {
+    id:'dtdt', name:'Temperature-rise rate', short:'dT', unit:'℃/min', color:'var(--r)',
+    opt:0.0, tau:1.2, min:-1.5, max:8.0, dir:'hi',
+    desc:'Synthetic temperature-rise precursor.',
+    corr_base:[0.15,0.35,0.62,1.0,0.70,0.58]
+  },
+  {
+    id:'rint', name:'Internal resistance', short:'Rint', unit:'mΩ', color:'var(--p)',
+    opt:22, tau:12, min:12, max:80, dir:'hi',
+    desc:'Degradation precursor; couples resistance and temperature-rise rate.',
+    corr_base:[0.28,0.38,0.55,0.70,1.0,0.52]
+  },
+  {
+    id:'press', name:'Swelling pressure', short:'P', unit:'kPa', color:'var(--g)',
+    opt:0, tau:18, min:0, max:95, dir:'hi',
+    desc:'Synthetic swelling-pressure indicator, rising late in the scripted scenario.',
+    corr_base:[0.12,0.20,0.48,0.58,0.52,1.0]
+  }
+];
+
+const BASE_VALS = [3.70,35,32,0.0,22,0];
+let vals = [...BASE_VALS];
+let prevTemp = BASE_VALS[2];
+let tick = 0;
+let running = true;
+let scenario = 'normal';
+let driftTarget = [0,0,0,0,0,0];
+let noiseAmp = [0.025,2.8,0.8,0.10,0.8,0.7];
+let rHistory = FACTORS.map(()=>[]);
+let prevZones = FACTORS.map(()=>'ok');
+let logLines = [];
+const HIST_LEN = 130;
+// EN is generated from this repaired JP computation model.
+const tauC = 0.23;
 let corrBase = FACTORS.map(f => [...f.corr_base]);
 
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-function delta(v,f){ if(f.dir==='lo') return Math.max(0,f.opt-v); if(f.dir==='hi') return Math.max(0,v-f.opt); return Math.abs(v-f.opt); }
-function rawR(id){ const i=FACTORS.findIndex(f=>f.id===id); const f=FACTORS[i]; const d=delta(vals[id],f); return {delta:d,tau:f.tau,R:d/f.tau}; }
-function fmt(v,f){ if(f.fmt==='int') return Math.round(v).toLocaleString()+f.unit; if(f.fmt==='2') return v.toFixed(2)+f.unit; if(f.fmt==='3') return v.toFixed(3)+f.unit; return v.toFixed(1)+f.unit; }
-// Zone thresholds for this file: OK (R<0.4) -> WATCH (R>=0.4) -> WARN (R>=0.75) -> FAIL (R>=1.0).
-// This implementation keeps a WATCH tier at 0.4; the JP counterpart (36_..._JP.html) has no WATCH
-// tier (only SAFE/WARNING/RUPTURE_BOUNDARY) but shares the same 0.75/1.0 WARN/FAIL cut points.
-function colorFor(R){ return R>=1?'var(--fail)':R>=.75?'var(--warn)':R>=.4?'var(--watch)':'var(--ok)'; }
-function zoneFor(R){ return R>=1?'fail':R>=.75?'warn':R>=.4?'watch':'ok'; }
-function badgeFor(R){ const z=zoneFor(R); return z==='fail'?['FAIL','b-fail']:z==='warn'?['WARN','b-warn']:z==='watch'?['WATCH','b-watch']:['SAFE','b-ok']; }
 
-function init(){
-  Object.keys(SCENARIOS).forEach(k=>{
-    const opt=document.createElement('option'); opt.value=k; opt.textContent=SCENARIOS[k].label; document.getElementById('scenario-sel').appendChild(opt);
-  });
-  FACTORS.forEach(f=>vals[f.id]=f.opt);
-  buildFactorCards(); buildCorrMatrix(); buildCouplingList(); buildDots(); resetSim();
+
+
+
+const SCENARIOS = {
+  normal: {
+    desc:'Within declared synthetic ranges',
+    drift:[0,0,0,0,0,0],
+    amp:[0.025,2.8,0.8,0.10,0.8,0.7]
+  },
+  fastcharge: {
+    desc:'High current precedes heat and resistance changes',
+    drift:[0.10,52,9,1.1,5,6],
+    amp:[0.035,7,1.8,0.28,1.4,1.2]
+  },
+  coolingloss: {
+    desc:'Cooling loss: temperature and rise-rate increase',
+    drift:[0.03,10,22,2.1,7,11],
+    amp:[0.03,4,3.0,0.45,1.7,2.0]
+  },
+  agedcell: {
+    desc:'Aged cells: high resistance and narrower temperature gate',
+    drift:[-0.06,14,12,1.4,24,10],
+    amp:[0.045,5,2.2,0.35,3.5,2.0]
+  },
+  short: {
+    desc:'Internal short: voltage decline and rising resistance and temperature rate',
+    drift:[-0.38,46,28,3.4,32,24],
+    amp:[0.07,9,4.5,0.75,5.0,4.2]
+  },
+  runaway: {
+    desc:'Thermal chain: resistance, rise rate and swelling pressure rise together',
+    drift:[-0.42,72,46,5.8,46,55],
+    amp:[0.10,14,7.5,1.15,7.0,8.0]
+  }
+};
+
+function applyScenario(){
+  scenario = document.getElementById('scenario-sel').value;
+  const s = SCENARIOS[scenario];
+  driftTarget = [...s.drift];
+  noiseAmp = [...s.amp];
+  document.getElementById('scen-desc').textContent = s.desc;
+  addLog(`[SCENARIO] ${s.desc}`, 'info');
 }
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+
+
+
+
+function calcCouplingBase(){
+  // resistance and dT/dt pressure. 0..~1.5
+  const rIntPressure = Math.max(0,(vals[4]-FACTORS[4].opt)/FACTORS[4].tau);
+  const dtdtPressure = Math.max(0,(vals[3]-FACTORS[3].opt)/FACTORS[3].tau);
+  const tempPressure = Math.max(0,(vals[2]-FACTORS[2].opt)/FACTORS[2].tau);
+  return {
+    rIntPressure,
+    dtdtPressure,
+    tempPressure,
+    thermal: Math.min(1.8, 0.45*rIntPressure + 0.65*dtdtPressure + 0.35*tempPressure),
+    gas: Math.min(1.8, 0.25*rIntPressure + 0.35*dtdtPressure + 0.50*tempPressure)
+  };
+}
+
+// EN is generated from this repaired JP computation model.
+function dynamicTau(i){
+  const f = FACTORS[i];
+  const c = calcCouplingBase();
+  let shrink = 1.0;
+  // Temperature, dT/dt, pressure receive dynamic shrink under coupling.
+  if(f.id === 'temp') shrink -= Math.min(.55,(.45*c.rIntPressure+.65*c.dtdtPressure)*.18); // Exclude this target's own ratio.
+  if(f.id === 'dtdt')  shrink -= Math.min(0.35, c.rIntPressure * 0.12);
+  if(f.id === 'press') shrink -= Math.min(0.60, c.gas * 0.20);
+  if(f.id === 'volt')  shrink -= Math.min(0.25, c.rIntPressure * 0.06);
+  return Math.max(f.tau * shrink, f.tau * 0.35);
+}
+
+function calcDelta(val, f){
+  if(f.dir === 'hi') return Math.max(0, val - f.opt);
+  if(f.dir === 'lo') return Math.max(0, f.opt - val);
+  return Math.abs(val - f.opt);
+}
+
+function calcR(val, i){
+  const f = FACTORS[i];
+  const delta = calcDelta(val, f);
+  const tau = dynamicTau(i);
+  return {delta, tau, R: delta / tau};
+}
+
+// EN is generated from this repaired JP computation model.
+function getColor(R){
+  if(R >= 1.0) return 'var(--fail)';
+  if(R >= 0.75) return 'var(--warn)';
+  return 'var(--ok)';
+}
+function getBadge(R){
+  if(R >= 1.0) return ['AUX_STOP','badge-fail','fail'];
+  if(R >= 0.75) return ['WARNING','badge-warn','warn'];
+  return ['SAFE','badge-ok','ok'];
+}
+
 function buildFactorCards(){
-  const root=document.getElementById('factor-grid'); root.innerHTML='';
+  const root = document.getElementById('factor-grid');
+  root.innerHTML = '';
   FACTORS.forEach((f,i)=>{
-    const card=document.createElement('div'); card.className='fc'; card.id='fc-'+i;
-    card.innerHTML=`<div class="badge b-ok" id="badge-${i}">SAFE</div>
-      <div class="fc-name">${f.name}</div><div class="fc-val" id="val-${i}" style="color:${COLORS[i%COLORS.length]}">—</div>
+    const div = document.createElement('div');
+    div.className='fc';
+    div.id=`fc-${i}`;
+    div.innerHTML = `
+      <div class="fc-badge badge-ok" id="badge-${i}">SAFE</div>
+      <div class="fc-name">${f.name}</div>
+      <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
-      <div class="barbg"><div class="bar" id="bar-${i}"></div></div>
-      <div class="fc-desc">${f.desc}</div>`;
-    root.appendChild(card);
+      <div class="fc-row"><span class="fc-lbl">gate_width</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_gate (aux)</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
+      <div class="fc-desc">${f.desc}</div>
+    `;
+    root.appendChild(div);
   });
 }
+
 function buildCorrMatrix(){
-  const root=document.getElementById('corr-matrix'); root.innerHTML='';
-  const n=FACTORS.length+1; const grid=document.createElement('div'); grid.className='corr-grid'; grid.style.setProperty('--ncols', n);
+  const root = document.getElementById('corr-matrix');
+  root.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className='corr-grid';
   grid.innerHTML += `<div class="corr-cell corr-head"></div>`;
-  FACTORS.forEach(f=>grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
-  FACTORS.forEach((fi,i)=>{ grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`; FACTORS.forEach((_,j)=>grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`); });
+  FACTORS.forEach(f => grid.innerHTML += `<div class="corr-cell corr-head">${f.short}</div>`);
+  FACTORS.forEach((fi,i)=>{
+    grid.innerHTML += `<div class="corr-cell corr-head">${fi.short}</div>`;
+    FACTORS.forEach((_,j)=>{
+      grid.innerHTML += `<div class="corr-cell" id="cm-${i}-${j}">—</div>`;
+    });
+  });
   root.appendChild(grid);
 }
+
 function buildCouplingList(){
-  const root=document.getElementById('coupling-list'); root.innerHTML='';
-  ["Internal resistance pressure","dT/dt pressure","Thermal pressure","Correlation pressure"].forEach((row,idx)=>{
-    root.innerHTML += `<div class="coup-row"><div class="coup-name">${row}</div><div class="coup-bg"><div class="coup-bar" id="cbar-${idx}" style="background:${COLORS[idx%COLORS.length]};width:0%"></div></div><div class="coup-val" id="cval-${idx}">0.000</div></div>`;
-  });
-}
-function buildDots(){
-  const root=document.getElementById('dots'); root.innerHTML='';
-  FACTORS.forEach((f,i)=>{
-    const dot=document.createElement('div'); dot.className='dot'; dot.id='dot-'+i; dot.style.background=COLORS[i%COLORS.length]; dot.style.boxShadow=`0 0 18px ${COLORS[i%COLORS.length]}`; dot.style.setProperty('--ang', (i*360/FACTORS.length)+'deg'); dot.style.setProperty('--rad','70px'); root.appendChild(dot);
-  });
+  const root = document.getElementById('coupling-list');
+  const rows = [
+    ['Resistance pressure','rint-coup','var(--p)'],
+    ['Rise-rate pressure','dtdt-coup','var(--r)'],
+    ['Temperature pressure','temp-coup','var(--t)'],
+    ['Thermal coupling pressure','thermal-coup','var(--fail)'],
+    ['Swelling coupling pressure','gas-coup','var(--g)'],
+  ];
+  root.innerHTML = rows.map(([name,id,col])=>`
+    <div class="coup-row">
+      <div class="coup-name">${name}</div>
+      <div class="coup-bar-bg"><div class="coup-bar" id="${id}-bar" style="background:${col};width:0%"></div></div>
+      <div class="coup-val" id="${id}-val">0.000</div>
+    </div>
+  `).join('');
 }
 
-// pressure(): weighted-sum coupling model — this file's implementation of "R_coupling".
-// p.main    = Σ(factor.weight * rawR) + scenario.pressureBoost, clamped to [0,2.2].
-//             Used as one of the three terms in R_total's max() (see updateUI()), as an input to
-//             dynamicTau() below, and to nudge coupled factor values in updateValues().
-// p.thermal/p.supply = mean rawR within each 'group' (5 of 6 factors are 'thermal'; only voltage is
-//             'supply'), each shrinking only that group's dynamic tau.
-// This is a weighted-sum design, not an explicit factor-to-factor matrix — contrast with the JP
-// counterpart (36_..._JP.html), which derives coupling pressure from rIntPressure/dtdtPressure/
-// tempPressure and blends them with fixed coefficients (calcCouplingBase()).
-function pressure(){
-  let p=0, thermal=0, supply=0;
-  FACTORS.forEach(f=>{ const r=rawR(f.id).R; p += (f.weight||0.18)*r; if(f.group==='thermal') thermal+=r; if(f.group==='supply') supply+=r; });
-  const scenarioBoost = SCENARIOS[scenario].pressureBoost || 0;
-  return {main:clamp(p+scenarioBoost,0,2.2), thermal:clamp(thermal/Math.max(1,FACTORS.filter(f=>f.group==='thermal').length),0,2.2), supply:clamp(supply/Math.max(1,FACTORS.filter(f=>f.group==='supply').length),0,2.2)};
+// EN is generated from this repaired JP computation model.
+function calcCorr(){
+  const C = [];
+  const c = calcCouplingBase();
+  for(let i=0;i<FACTORS.length;i++){
+    C[i]=[];
+    for(let j=0;j<FACTORS.length;j++){
+      if(i===j){ C[i][j]=1.0; continue; }
+      let drift = 0;
+      const ids = [FACTORS[i].id, FACTORS[j].id].sort().join('-');
+      if(['dtdt-rint','rint-temp','dtdt-temp','press-temp','dtdt-press','press-rint'].includes(ids)){
+        drift += c.thermal * 0.20 + c.gas * 0.08;
+      }
+
+
+      if(scenario === 'runaway' && tick > 35) drift += Math.min(0.45, (tick-35)*0.006);
+      if(scenario === 'short' && tick > 30) drift += Math.min(0.35, (tick-30)*0.005);
+      if(scenario === 'agedcell' && ['dtdt-rint','rint-temp'].includes(ids)) drift += 0.16;
+      C[i][j] = clamp(corrBase[i][j] + drift + (Math.random()-0.5)*0.035, 0, 1);
+    }
+  }
+  return C;
 }
-// dynamicTau(): shrinks a factor's tau under coupling pressure so its structural ratio R rises faster
-// as neighboring signals worsen. Each shrink term is capped (.58/.56/.50) and floored so tau never
-// drops below 35% of its base value (f.tau*.35) — both the caps and the .18/.20/.08 multipliers are
-// demo tuning constants with no external derivation.
-function dynamicTau(f){
-  const p=pressure(); let shrink=1;
-  if(f.shrink==='main') shrink -= Math.min(.58, p.main*.18);
-  if(f.shrink==='thermal') shrink -= Math.min(.56, p.thermal*.20 + p.main*.08);
-  if(f.shrink==='supply') shrink -= Math.min(.50, p.supply*.18 + p.main*.08);
-  return Math.max(f.tau*shrink, f.tau*.35);
+
+function calcRCorr(C){
+  let maxR=0;
+  const alerts=[];
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=i+1;j<FACTORS.length;j++){
+      const Rij = Math.abs(C[i][j] - corrBase[i][j]) / tauC;
+      if(Rij > maxR) maxR = Rij;
+      if(Rij >= 1.0) alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${Rij.toFixed(2)}`);
+    }
+  }
+  return {maxR, alerts};
 }
-function calcR(f){ const d=delta(vals[f.id],f); const tau=dynamicTau(f); return {delta:d,tau,R:d/tau}; }
+
+function fmtVal(v,i){
+  const f=FACTORS[i];
+  if(f.id==='volt') return v.toFixed(3)+f.unit;
+  if(f.id==='dtdt') return v.toFixed(2)+f.unit;
+  if(f.id==='rint') return v.toFixed(1)+f.unit;
+  return v.toFixed(1)+f.unit;
+}
 
 function updateValues(){
   tick++;
-  const sc=SCENARIOS[scenario]; const ramp=Math.min(1,tick/90);
-  FACTORS.forEach((f,i)=>{
-    let base=f.opt, drift=(sc.drift&&sc.drift[f.id]||0)*ramp, amp=(sc.amp&&sc.amp[f.id]||f.amp||1);
-    let wave=Math.sin(tick*.045+i*.83)*amp*.45, noise=(Math.random()-.5)*2*amp;
-    vals[f.id]=clamp(base+drift+wave+noise, f.min, f.max);
-  });
-  const p=pressure();
-  FACTORS.forEach(f=>{
-    if(f.coupledBy==='main') vals[f.id]=clamp(vals[f.id] + p.main*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='thermal') vals[f.id]=clamp(vals[f.id] + p.thermal*(f.coupledGain||0), f.min, f.max);
-    if(f.coupledBy==='supply') vals[f.id]=clamp(vals[f.id] + p.supply*(f.coupledGain||0), f.min, f.max);
-  });
-}
-// calcCorr(): synthetic correlation matrix — NOT a measured statistical correlation.
-// Each off-diagonal cell drifts from its corrBase by driftBase (same 'group' pair) or driftBase*.55
-// (different-group pair), plus uniform random jitter (+/-0.017). driftBase itself scales with
-// coupling pressure (p.main*.14) and the active scenario's corrBoost.
-// Contrast: the JP counterpart (36_..._JP.html) drives drift from specific factor-id pairs tied to
-// the thermal runaway chain (e.g. 'dtdt-rint','rint-temp') plus scenario/tick-based ramps.
-function calcCorr(){
-  const C=[]; const p=pressure(); const driftBase=p.main*.14 + (SCENARIOS[scenario].corrBoost||0);
-  for(let i=0;i<FACTORS.length;i++){ C[i]=[]; for(let j=0;j<FACTORS.length;j++){ if(i===j){C[i][j]=1; continue;} let coupled=(FACTORS[i].group&&FACTORS[i].group===FACTORS[j].group)?driftBase:driftBase*.55; C[i][j]=clamp(corrBase[i][j]+coupled+(Math.random()-.5)*.034,0,1); } }
-  return C;
-}
-// corrR(): per-pair correlation-drift ratio R_corr = |C(t)-C(t0)| / tauC (tauC defined above).
-// Returns the worst pair's R plus a text list of pairs that individually crossed R_corr>=1.
-function corrR(C){ let max=0, alerts=[]; for(let i=0;i<FACTORS.length;i++) for(let j=i+1;j<FACTORS.length;j++){ const r=Math.abs(C[i][j]-corrBase[i][j])/tauC; if(r>max)max=r; if(r>=1)alerts.push(`${FACTORS[i].short}-${FACTORS[j].short} R_corr=${r.toFixed(2)}`); } return {max,alerts}; }
+  const ramp = Math.min(1, tick/90);
 
-function setStatusText(el,R,base){ el.textContent = R>=1?'RUPTURE_BOUNDARY — human review required':R>=.75?'WARNING — precursor state':R>=.4?'WATCH — monitor trend':base; el.style.color=colorFor(R); }
-function updateUI(){
-  // R_total = max(R_corr, coupling pressure p.main, every per-factor R_i) — a 3-term max matching the
-  // footer/header formula "R_total=max(R_i,R_corr,R_coupling)". Fail-closed by construction: the worst
-  // single signal decides the system status, never a weighted average of all six factors.
-  const C=calcCorr(), cr=corrR(C), p=pressure(); let total=Math.max(cr.max,p.main);
-  FACTORS.forEach((f,i)=>{
-    const r=calcR(f); total=Math.max(total,r.R); history[i].push(r.R); if(history[i].length>HIST_LEN)history[i].shift();
-    const z=zoneFor(r.R), [bt,bc]=badgeFor(r.R), col=colorFor(r.R);
-    document.getElementById('val-'+i).textContent=fmt(vals[f.id],f);
-    document.getElementById('delta-'+i).textContent=(f.fmt==='int'?Math.round(r.delta).toLocaleString():f.fmt==='2'?r.delta.toFixed(2):f.fmt==='3'?r.delta.toFixed(3):r.delta.toFixed(1))+f.unit;
-    document.getElementById('tau-'+i).textContent=(f.fmt==='int'?Math.round(r.tau).toLocaleString():f.fmt==='2'?r.tau.toFixed(2):f.fmt==='3'?r.tau.toFixed(3):r.tau.toFixed(1))+f.unit;
-    document.getElementById('r-'+i).textContent=r.R.toFixed(3); document.getElementById('r-'+i).style.color=col;
-    document.getElementById('bar-'+i).style.width=Math.min(100,r.R*100).toFixed(1)+'%'; document.getElementById('bar-'+i).style.background=col;
-    document.getElementById('badge-'+i).textContent=bt; document.getElementById('badge-'+i).className='badge '+bc;
-    document.getElementById('fc-'+i).className='fc'+(r.R>=1?' fail':r.R>=.75?' warn':'');
-    document.getElementById('dot-'+i).style.setProperty('--rad', (60+Math.min(90,r.R*70)).toFixed(1)+'px');
-    if(prevZone[i]!==z){ addLog(`${f.name} moved to ${z.toUpperCase()} R=${r.R.toFixed(3)}`, z==='fail'?'fail':z==='warn'?'warn':z==='watch'?'watch':'ok'); prevZone[i]=z; }
+
+  const thermalRamp = scenario === 'runaway' ? Math.min(1, Math.max(0,(tick-45)/70)) : 0;
+  const shortRamp = scenario === 'short' ? Math.min(1, Math.max(0,(tick-35)/65)) : 0;
+  const agedPulse = scenario === 'agedcell' ? Math.sin(tick*0.11)*0.5+0.5 : 0;
+
+  vals = vals.map((v,i)=>{
+    const f = FACTORS[i];
+    const drift = driftTarget[i] * ramp;
+    const noise = (Math.random()-0.5)*2*noiseAmp[i];
+    const wave = Math.sin(tick*0.045 + i*0.9) * noiseAmp[i]*0.45;
+
+    let extra = 0;
+    if(f.id==='temp') extra += thermalRamp * 18 + shortRamp * 10 + agedPulse * 1.8;
+    if(f.id==='dtdt') extra += thermalRamp * 2.4 + shortRamp * 1.7 + agedPulse * 0.25;
+    if(f.id==='press') extra += thermalRamp * 26 + shortRamp * 12;
+    if(f.id==='rint') extra += shortRamp * 10 + agedPulse * 4.0;
+    if(f.id==='volt') extra -= shortRamp * 0.12 + thermalRamp * 0.08;
+
+    return clamp(BASE_VALS[i] + drift + noise + wave + extra, f.min, f.max);
   });
-  for(let i=0;i<FACTORS.length;i++) for(let j=0;j<FACTORS.length;j++){ const cell=document.getElementById(`cm-${i}-${j}`); const v=C[i][j]; const rij=i!==j?Math.abs(v-corrBase[i][j])/tauC:0; if(i===j){cell.style.background='rgba(88,215,255,.14)';cell.style.color='var(--accent)';cell.textContent='1.00';} else if(rij>=1){cell.style.background='rgba(255,49,95,.44)';cell.style.color='#ffb2c4';cell.textContent=v.toFixed(2);} else if(rij>=.75){cell.style.background='rgba(255,210,74,.25)';cell.style.color='var(--warn)';cell.textContent=v.toFixed(2);} else {cell.style.background=`rgba(61,255,156,${v*.25})`;cell.style.color=`rgba(255,255,255,${.35+v*.5})`;cell.textContent=v.toFixed(2);} }
-  document.getElementById('r-total').textContent=total.toFixed(3); document.getElementById('r-total').style.color=colorFor(total); setStatusText(document.getElementById('r-status'),total,'SAFE — structural margin remains');
-  document.getElementById('r-coupling').textContent=p.main.toFixed(3); document.getElementById('r-coupling').style.color=colorFor(p.main);
-  document.getElementById('r-corr').textContent=cr.max.toFixed(3); document.getElementById('r-corr').style.color=colorFor(cr.max);
-  document.getElementById('pressure-fill').style.width=Math.min(100,total*100).toFixed(1)+'%';
-  document.getElementById('visual-status').textContent=total>=1?'✕ RUPTURE_BOUNDARY':total>=.75?'▲ WARNING':total>=.4?'● WATCH':'● SAFE';
-  document.getElementById('visual-status').style.color=colorFor(total);
-  document.getElementById('node-a').textContent=p.thermal.toFixed(3); document.getElementById('node-b').textContent=p.supply.toFixed(3); document.getElementById('node-c').textContent=p.main.toFixed(3);
-  [p.thermal,p.supply,p.main,cr.max].forEach((v,idx)=>{ const b=document.getElementById('cbar-'+idx), t=document.getElementById('cval-'+idx); if(b) b.style.width=Math.min(100,v*100).toFixed(1)+'%'; if(t) t.textContent=v.toFixed(3); });
-  document.getElementById('corr-alert').innerHTML = cr.alerts.length ? cr.alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('') : `<span class="corr-ok-txt">✓ Correlation stable. R_corr=${cr.max.toFixed(3)}</span>`;
-  if(cr.alerts.length && tick%24===0) addLog('Correlation drift detected: '+cr.alerts[0],'fail');
-  drawChart(); 
+
+  // dT/dt has physical relation to temperature delta. Synthetic but coupled.
+
+
+  const tempNow = vals[2];
+  const observedDtdt = (tempNow - prevTemp) * 2.2 + vals[3]*0.55;
+  vals[3] = clamp(observedDtdt, FACTORS[3].min, FACTORS[3].max);
+  prevTemp = tempNow;
 }
-function drawChart(){
-  const cv=document.getElementById('chart'), ctx=cv.getContext('2d'), W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#111b2a'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#24344c'; [0.4,.75,1].forEach(r=>{const y=H-r/1.6*(H-24)-10; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();});
-  const fy=H-1/1.6*(H-24)-10; ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(255,49,95,.55)'; ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke(); ctx.setLineDash([]);
-  history.forEach((hist,i)=>{ if(hist.length<2)return; ctx.strokeStyle=COLORS[i%COLORS.length]; ctx.lineWidth=1.7; ctx.beginPath(); hist.forEach((v,x)=>{const px=x/(HIST_LEN-1)*W, py=H-Math.min(v,1.6)/1.6*(H-24)-10; x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}); ctx.stroke(); });
-  ctx.fillStyle='rgba(255,49,95,.75)'; ctx.font='10px JetBrains Mono, monospace'; ctx.fillText('R=1.0',6,fy-4);
+
+function updateUI(){
+  const C = calcCorr();
+  const {maxR:rCorr, alerts} = calcRCorr(C);
+
+
+
+  let rTotal = rCorr;
+  let maxFactorR = 0;
+  let failAny = false;
+  let warnAny = false;
+
+  FACTORS.forEach((f,i)=>{
+    const {delta,tau,R} = calcR(vals[i],i);
+    maxFactorR = Math.max(maxFactorR, R);
+    rTotal = Math.max(rTotal, calcDelta(vals[i],f)/f.tau);
+    rHistory[i].push(R);
+    if(rHistory[i].length > HIST_LEN) rHistory[i].shift();
+
+    const col = getColor(R);
+    const [bText,bCls,zone] = getBadge(R);
+
+    document.getElementById(`val-${i}`).textContent = fmtVal(vals[i],i);
+    document.getElementById(`delta-${i}`).textContent = (f.id==='volt' ? delta.toFixed(3) : delta.toFixed(2)) + f.unit;
+    document.getElementById(`tau-${i}`).textContent = (f.id==='volt' ? tau.toFixed(3) : tau.toFixed(2)) + f.unit;
+    document.getElementById(`r-${i}`).textContent = R.toFixed(3);
+    document.getElementById(`r-${i}`).style.color = col;
+    document.getElementById(`rbar-${i}`).style.width = Math.min(100,R*100).toFixed(1)+'%';
+    document.getElementById(`rbar-${i}`).style.background = col;
+
+    const card = document.getElementById(`fc-${i}`);
+    card.className = 'fc' + (R>=1.0?' fail':R>=0.75?' warn':'');
+    const badge = document.getElementById(`badge-${i}`);
+    badge.textContent = bText;
+    badge.className = 'fc-badge ' + bCls;
+
+    if(R>=1.0) failAny = true;
+    if(R>=0.75) warnAny = true;
+
+    if(zone !== prevZones[i]){
+      if(zone==='fail') addLog(`AUX_GATE_EXCEEDEDcandidate: ${f.name} R=${R.toFixed(3)} δ=${delta.toFixed(2)}${f.unit}`, 'fail');
+      else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      prevZones[i] = zone;
+    }
+  });
+
+  // correlation matrix
+  for(let i=0;i<FACTORS.length;i++){
+    for(let j=0;j<FACTORS.length;j++){
+      const cell = document.getElementById(`cm-${i}-${j}`);
+      const v = C[i][j];
+      const Rij = i!==j ? Math.abs(v-corrBase[i][j])/tauC : 0;
+      if(i===j){
+        cell.style.background='rgba(88,215,255,.14)';
+        cell.style.color='var(--accent)';
+        cell.textContent='1.00';
+      } else if(Rij >= 1.0){
+        cell.style.background='rgba(255,45,95,.44)';
+        cell.style.color='#ffb0c6';
+        cell.textContent=v.toFixed(2);
+      } else if(Rij >= 0.75){
+        cell.style.background='rgba(255,210,74,.25)';
+        cell.style.color='var(--warn)';
+        cell.textContent=v.toFixed(2);
+      } else {
+        cell.style.background=`rgba(57,255,155,${v*0.28})`;
+        cell.style.color=`rgba(255,255,255,${0.35+v*0.5})`;
+        cell.textContent=v.toFixed(2);
+      }
+    }
+  }
+
+  const corrAlert = document.getElementById('corr-alert');
+  if(alerts.length){
+    corrAlert.innerHTML = alerts.slice(0,4).map(a=>`<div class="corr-fail-txt">⚠ ${a}</div>`).join('');
+    if(tick % 24 === 0) addLog(`Correlation drift: ${alerts[0]}`, 'fail');
+  } else {
+    corrAlert.innerHTML = `<span class="corr-ok-txt">✓ Correlation within baseline R_corr=${rCorr.toFixed(3)}</span>`;
+  }
+
+  const c = calcCouplingBase();
+  setCoup('rint-coup', c.rIntPressure);
+  setCoup('dtdt-coup', c.dtdtPressure);
+  setCoup('temp-coup', c.tempPressure);
+  setCoup('thermal-coup', c.thermal);
+  setCoup('gas-coup', c.gas);
+
+  document.getElementById('overall-r').textContent = rTotal.toFixed(3);
+  document.getElementById('overall-r').style.color = getColor(rTotal);
+  document.getElementById('coupling-pressure').textContent = c.thermal.toFixed(3);
+  document.getElementById('coupling-pressure').style.color = c.thermal>=1?'var(--fail)':c.thermal>=.75?'var(--warn)':'var(--ok)';
+  document.getElementById('corr-r').textContent = rCorr.toFixed(3);
+  document.getElementById('corr-r').style.color = getColor(rCorr);
+
+  const st = document.getElementById('overall-status');
+  const packSt = document.getElementById('pack-status');
+  const ring = document.getElementById('thermal-ring');
+
+  if(rTotal >= 1.0){
+    st.textContent = 'RUPTURE_BOUNDARY — Suspend autonomous charging decisions; continue post-rupture testimony';
+    st.style.color = 'var(--fail)';
+    packSt.textContent = '✕ RUPTURE_BOUNDARY PACK';
+    packSt.style.color = 'var(--fail)';
+    ring.classList.add('active');
+  } else if(rTotal >= 0.75){
+    st.textContent = 'WARNING — Increased precursor monitoring';
+    st.style.color = 'var(--warn)';
+    packSt.textContent = '▲ WARNING PACK';
+    packSt.style.color = 'var(--warn)';
+    ring.classList.remove('active');
+  } else {
+    st.textContent = 'SAFE — Within declared baseline';
+    st.style.color = 'var(--ok)';
+    packSt.textContent = '● SAFE PACK';
+    packSt.style.color = 'var(--ok)';
+    ring.classList.remove('active');
+  }
+
+  updateCells(maxFactorR, c.thermal);
+  drawTimeSeries();
+
+const auxiliaryStop=FACTORS.some((f,i)=>calcR(vals[i],i).R>=1)||(calcCouplingBase().thermal>=1||calcCouplingBase().gas>=1);
+  FACTORS.forEach((f,i)=>boundary.observe('factor'+i,calcDelta(vals[i],f),f.tau,tick));
+  for(let i=0;i<FACTORS.length;i++)for(let j=i+1;j<FACTORS.length;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBase[i][j]),tauC,tick);
+  NRADemoBoundary.paint(boundary,auxiliaryStop,FACTORS.map((_,i)=>'badge-'+i),['overall-status']);
 }
-function buildLegend(){ const root=document.getElementById('legend'); root.innerHTML=''; FACTORS.forEach((f,i)=>root.innerHTML+=`<span style="color:${COLORS[i%COLORS.length]}">─ ${f.short}</span>`); root.innerHTML+='<span class="legend-fail">- - Fail</span>'; }
-function addLog(msg,type='info'){ const root=document.getElementById('log'); const div=document.createElement('div'); div.className='log-'+type; div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`; root.insertBefore(div,root.firstChild); while(root.children.length>90) root.removeChild(root.lastChild); }
-function applyScenario(){ scenario=document.getElementById('scenario-sel').value; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info'); }
-function update(){ if(!running)return; updateValues(); updateUI(); tick++; }
-function toggleRun(){ running=!running; const b=document.getElementById('btn-run'); b.textContent=running?'▶ Running':'⏸ Paused'; b.className=running?'active':''; }
-function resetSim(){ tick=0; scenario=Object.keys(SCENARIOS)[0]; document.getElementById('scenario-sel').value=scenario; document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc; document.getElementById('scenario-code').textContent=scenario.toUpperCase(); FACTORS.forEach((f,i)=>{vals[f.id]=f.opt; history[i]=[]; prevZone[i]='ok';}); document.getElementById('log').innerHTML=''; addLog('NRA-IDE Battery Thermal Runaway Correlation Simulation initialized.','ok'); updateUI(); }
-buildLegend(); init(); setInterval(update,300);
+
+function setCoup(id, val){
+  const width = Math.min(100, val*100);
+  document.getElementById(`${id}-bar`).style.width = width.toFixed(1)+'%';
+  document.getElementById(`${id}-val`).textContent = val.toFixed(3);
+}
+
+function updateCells(maxR, thermal){
+  for(let i=0;i<6;i++){
+    const local = clamp((maxR*55 + thermal*22 + i*3 + Math.sin(tick*.15+i)*5), 8, 100);
+    document.getElementById(`cell-${i}`).style.setProperty('--heat', local.toFixed(1)+'%');
+  }
+}
+
+const tsCanvas = document.getElementById('ts-canvas');
+const tsCtx = tsCanvas.getContext('2d');
+const TS_COLORS = ['#72a7ff','#ffd24a','#ff7a1a','#ff4f89','#c084fc','#39ff9b'];
+
+function drawTimeSeries(){
+  const W=tsCanvas.width,H=tsCanvas.height;
+  tsCtx.clearRect(0,0,W,H);
+  tsCtx.fillStyle='#121b28';
+  tsCtx.fillRect(0,0,W,H);
+
+  tsCtx.strokeStyle='#223248';
+  tsCtx.lineWidth=1;
+  [0.25,0.5,0.75,1.0].forEach(y=>{
+    const py = H - y*(H*.84) - 10;
+    tsCtx.beginPath();tsCtx.moveTo(0,py);tsCtx.lineTo(W,py);tsCtx.stroke();
+  });
+
+  const failY = H - 1.0*(H*.84) - 10;
+  tsCtx.strokeStyle='rgba(255,45,95,.55)';
+  tsCtx.setLineDash([5,4]);
+  tsCtx.beginPath();tsCtx.moveTo(0,failY);tsCtx.lineTo(W,failY);tsCtx.stroke();
+  tsCtx.setLineDash([]);
+
+  rHistory.forEach((hist,i)=>{
+    if(hist.length<2) return;
+    tsCtx.strokeStyle=TS_COLORS[i];
+    tsCtx.lineWidth=1.8;
+    tsCtx.beginPath();
+    hist.forEach((v,x)=>{
+      const px = x/(HIST_LEN-1)*W;
+      const py = H - Math.min(v,1.6)/1.6*(H*.84) - 10;
+      x===0 ? tsCtx.moveTo(px,py) : tsCtx.lineTo(px,py);
+    });
+    tsCtx.stroke();
+  });
+
+  tsCtx.font='10px JetBrains Mono, monospace';
+  tsCtx.fillStyle='rgba(255,45,95,.75)';
+  tsCtx.fillText('R_gate=1.0 (aux)',6,failY-4);
+}
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const t=(tick+'').padStart(4,'0');
+  const div=document.createElement('div');
+  div.className='log-'+type;
+  div.textContent=`[t=${t}] ${msg}`;
+  area.insertBefore(div,area.firstChild);
+  logLines.push(div);
+  if(logLines.length>80){
+    const old=logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function update(){
+  if(!running) return;
+  updateValues();
+  updateUI();
+}
+
+function toggleRun(){
+  running=!running;
+  const btn=document.getElementById('btn-run');
+  btn.textContent = running ? '▶ Running' : '⏸ Paused';
+  btn.className = running ? 'btn active' : 'btn';
+}
+
+function resetSim(){
+  tick=0;
+  vals=[...BASE_VALS];
+  prevTemp=BASE_VALS[2];
+  driftTarget=[0,0,0,0,0,0];
+  noiseAmp=[0.025,2.8,0.8,0.10,0.8,0.7];
+  scenario='normal';
+  rHistory=FACTORS.map(()=>[]);
+  prevZones=FACTORS.map(()=>'ok');
+  document.getElementById('scenario-sel').value='normal';
+  document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML='';
+  logLines=[];
+  addLog('New simulation trial', 'info');
+  addLog('aggregate = max(R_base_i, R_corr); AUX_STOP separate Observation started', 'ok');
+
+boundary.newTrial();
+}
+
+buildFactorCards();
+buildCorrMatrix();
+buildCouplingList();
+addLog('Battery thermal example initialized', 'ok');
+addLog('Synthetic data only; no equipment control.', 'info');
+setInterval(update, 280);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>Educational thresholds. Current observations and arrival history are separate. AUX_STOP is an auxiliary rule, not target rupture. A new trial retains prior records and does not restore a structure.</p><button type="button" onclick="startBoundaryTrial()">New demonstration trial</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
+<p class="demo-caveat">Base thickness is declared separately from temporary auxiliary gate widths. A wider auxiliary gate does not restore the structure. Cards and histories display auxiliary R_gate. The main aggregate is a maximum across independent base/correlation targets; it does not redefine a single target's canonical R. AUX_STOP and retained arrival records are separate.</p>
 </body>
 </html>

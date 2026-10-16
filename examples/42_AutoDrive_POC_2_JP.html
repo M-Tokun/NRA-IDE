@@ -363,7 +363,10 @@
     </div>
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
+const boundary = new NRADemoBoundary.Tracker(.40,.70,.85);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
 // FILE: NRA-IDE_AutoDrive_POC_02_JP.html  2026-02-24
 
 // ── μ テーブル ──
@@ -416,22 +419,13 @@ function computeR(v_kmh, d_m, t_m) {
     const sd    = stopDist(v_kmh);
     // δ：停止距離が安全余裕帯（車間距離の手前 τ m）へ入り込んだ量。R=1.0 は停止距離＝車間距離（衝突境界）。
     const delta = Math.max(0, sd - (d_m - t_m));
-    const R     = t_m > 0 ? delta / t_m : Infinity;
+    const R     = NRADemoBoundary.ratio(delta,t_m).R;
     return { delta, R, sd };
 }
 // 不可逆ラッチ：一度 R ≥ 1.0（フェイルクローズド域）に入ったら、「新しい評価」で解除するまで固定する。
 let zoneLatched = false;
-function startNewEvaluation(){ zoneLatched = false; prevZone = ''; update(); }
-function zoneFromR(R) {
-    if (R >= 1.00) zoneLatched = true;
-    if (zoneLatched) return 'D';
-    // フラグ境界：R=δ/τの4段階判定。R<0.40→A(許可)、R<0.70→B(注意付き許可)、R<1.00→C(警告)、R>=1.00→D(フェイルクローズド/緊急停止)。
-    // 閾値0.40/0.70/1.00自体の根拠（事故統計・工学基準等）は本ファイル内に記載なし・デモ用チューニング値。
-    if (R < 0.40) return 'A';
-    if (R < 0.70) return 'B';
-    if (R < 1.00) return 'C';
-    return 'D';
-}
+function startNewEvaluation(){ boundary.newTrial(); zoneLatched = false; prevZone = ''; update(); }
+function zoneFromR(R){if(!Number.isFinite(R))return 'INVALID';if(R>=.85)zoneLatched=true;if(zoneLatched)return 'D';return R<.4?'A':R<.7?'B':'C';}
 function getColor(R) {
     // zoneFromR()と同一の閾値（0.40/0.70/1.00）をゲージ・道路描画の配色判定にも再利用（値は複製、関数は別）。
     if (R < 0.40) return '#00ff88';
@@ -762,6 +756,9 @@ function update() {
     const mu   = getMu();
     const a    = mu * G;
     const { delta, R, sd } = computeR(speed_kmh, dist_m, tau_m);
+const input=NRADemoBoundary.ratio(delta,tau_m);
+  boundary.observe('vehicle',delta,tau_m,Date.now());
+  if(input.state){document.getElementById('rValue').textContent='—';document.getElementById('zoneLabel').textContent=input.state;NRADemoBoundary.paint(boundary,false,[],['m-gate']);return;}
     const zone = zoneFromR(R);
 
     // Status bar
@@ -791,6 +788,8 @@ function update() {
         if (zone === 'D') flash();
         prevZone = zone;
     }
+
+NRADemoBoundary.paint(boundary,false,[],['zoneLabel','m-gate']);
 }
 
 // ── Sliders ──
@@ -805,7 +804,7 @@ slDist.addEventListener('input', () => {
     update();
 });
 slTau.addEventListener('input', () => {
-    tau_m = +slTau.value;
+    boundary.newTrial();zoneLatched=false;tau_m = +slTau.value;
     document.getElementById('lbl-tau').textContent = tau_m + ' m';
     update();
 });
@@ -819,7 +818,7 @@ resizeRoad();
 
 function loop() {
     const { delta, R, sd } = computeR(speed_kmh, dist_m, tau_m);
-    drawRoad(delta, R, sd, dist_m);
+    if(!Number.isFinite(R)){requestAnimationFrame(loop);return;}drawRoad(delta, R, sd, dist_m);
     drawGauge(R);
     requestAnimationFrame(loop);
 }
@@ -831,5 +830,6 @@ update();
 loop();
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・路面の摩擦係数μ・反応時間・安全余裕距離τは、デモ用の代表値で、実車の停止距離ではありません。<br>・δは、停止距離が安全余裕帯（車間距離の手前τ）へ入り込んだ量です。R=1.0は停止距離＝車間距離です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>教材用の仮閾値です。現在の観測値と到達履歴を分けて表示します。AUX_STOPは補助条件であり対象破断ではありません。新試行でも前試行の記録は残り、構造復元を意味しません。</p><button type="button" onclick="startBoundaryTrial()">新しい教材試行</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
 </body>
 </html>

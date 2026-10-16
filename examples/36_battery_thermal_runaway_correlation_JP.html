@@ -329,7 +329,7 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
 <div class="formula-box">
   <span class="eq-a">R_i = δ_i / τ_i</span>：各物理量の構造比率　|　
   <span class="eq-b">τ_i(t) = τ_base × S_reserve × S_coupling</span>：内部抵抗・dT/dtで動的τ圧縮　|　
-  <span class="eq-c">R_total = max(R_i, R_corr)</span>：平均で危険を薄めない　|　
+  <span class="eq-c">aggregate = max(R_base_i, R_corr); AUX_STOP separate</span>：平均で危険を薄めない　|　
   <span class="eq-f">R ≥ 1.0 → RUPTURE_BOUNDARY</span>
 </div>
 
@@ -353,7 +353,7 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
 
 <div class="main-grid">
   <div class="panel">
-    <div class="panel-title">FACTOR STATE — 個別 R_i</div>
+    <div class="panel-title">FACTOR STATE — R_gate (aux)</div>
     <div class="factor-grid" id="factor-grid"></div>
   </div>
 
@@ -419,18 +419,16 @@ canvas.ts-canvas{width:100%;height:145px;display:block;background:var(--s2);bord
 <div class="footer">
   <span>NRA-IDE / M-Tokuni</span>
   <span>36_battery_thermal_runaway_correlation_JP</span>
-  <span>R_total=max(R_i,R_corr) / no averaging dilution</span>
+  <span>aggregate = max(R_base_i, R_corr); AUX_STOP separate / no averaging dilution</span>
 </div>
 
 </div>
 
+<script src="demo_boundary.js"></script>
 <script>
-// ── Factor definitions ─────────────────────────────────────────
-// dir: 'both' = optimum deviation, 'hi' = high-side risk, 'lo' = low-side risk
-// FACTORS: 6要素バッテリーモデル。dir:'both'はvoltのみ（過充電・急低下の両方向がリスク）で、
-// 他はdir:'hi'（上昇のみリスク）。tauはEN版と異なりtauHi/tauLoの分離がなく単一のtauを共有。
-// dtdt（温度上昇率, tau=1.2）が最短のtauを持ち、temp（tau=18）より速く反応する先行指標という設計。
-// opt/tau等はデモ用チューニング値であり、実セルの試験データに基づくものではない。
+const boundary = new NRADemoBoundary.Tracker(.75,.85,.95);
+function startBoundaryTrial(){boundary.newTrial();if(typeof zoneLatched!=="undefined")zoneLatched=false;if(typeof globalFailLatched!=="undefined")globalFailLatched=false;if(typeof update==="function")update();else if(typeof doTick==="function")doTick();NRADemoBoundary.paint(boundary);}
+// EN is generated from this repaired JP computation model.
 const FACTORS = [
   {
     id:'volt', name:'セル電圧', short:'V', unit:'V', color:'var(--v)',
@@ -482,8 +480,7 @@ let rHistory = FACTORS.map(()=>[]);
 let prevZones = FACTORS.map(()=>'ok');
 let logLines = [];
 const HIST_LEN = 130; // 時系列チャート用バッファ長（tick数）。デモ用チューニング値。
-// tauC: R_corrの正規化定数（モジュール直下の定数）。EN版（36_..._EN.html）はtauC=0.24を使う
-// 別実装であり、値をそろえる意図はない。
+// EN is generated from this repaired JP computation model.
 const tauC = 0.23;
 let corrBase = FACTORS.map(f => [...f.corr_base]);
 
@@ -553,15 +550,13 @@ function calcCouplingBase(){
   };
 }
 
-// dynamicTau(): factor.idごとに個別のshrink式（EN版のような'shrink'グループ分類ではなくid直指定）。
-// 上限（0.55/0.35/0.60/0.25）と下限floor（f.tau*0.35）はデモ用チューニング値で根拠データはない。
-// currは結合による動的τ圧縮の対象外（このリストにcurr向けの分岐がない）。
+// EN is generated from this repaired JP computation model.
 function dynamicTau(i){
   const f = FACTORS[i];
   const c = calcCouplingBase();
   let shrink = 1.0;
   // Temperature, dT/dt, pressure receive dynamic shrink under coupling.
-  if(f.id === 'temp')  shrink -= Math.min(0.55, c.thermal * 0.18);
+  if(f.id === 'temp') shrink -= Math.min(.55,(.45*c.rIntPressure+.65*c.dtdtPressure)*.18); // Exclude this target's own ratio.
   if(f.id === 'dtdt')  shrink -= Math.min(0.35, c.rIntPressure * 0.12);
   if(f.id === 'press') shrink -= Math.min(0.60, c.gas * 0.20);
   if(f.id === 'volt')  shrink -= Math.min(0.25, c.rIntPressure * 0.06);
@@ -581,15 +576,14 @@ function calcR(val, i){
   return {delta, tau, R: delta / tau};
 }
 
-// このファイルの閾値: SAFE(R<0.75) -> WARNING(R>=0.75) -> RUPTURE_BOUNDARY(R>=1.0)。WATCH段階はない。
-// EN版（36_..._EN.html）はWATCH段階(R>=0.4)を追加で持つが、WARN/FAILの0.75/1.0自体は共通。
+// EN is generated from this repaired JP computation model.
 function getColor(R){
   if(R >= 1.0) return 'var(--fail)';
   if(R >= 0.75) return 'var(--warn)';
   return 'var(--ok)';
 }
 function getBadge(R){
-  if(R >= 1.0) return ['RUPTURE_BOUNDARY','badge-fail','fail'];
+  if(R >= 1.0) return ['AUX_STOP','badge-fail','fail'];
   if(R >= 0.75) return ['WARNING','badge-warn','warn'];
   return ['SAFE','badge-ok','ok'];
 }
@@ -606,8 +600,8 @@ function buildFactorCards(){
       <div class="fc-name">${f.name}</div>
       <div class="fc-val" id="val-${i}" style="color:${f.color}">—</div>
       <div class="fc-row"><span class="fc-lbl">δ</span><span id="delta-${i}">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">τ(t)</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
-      <div class="fc-row"><span class="fc-lbl">R</span><span class="fc-r" id="r-${i}">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">gate_width</span><span id="tau-${i}" class="fc-tau-txt">—</span></div>
+      <div class="fc-row"><span class="fc-lbl">R_gate (aux)</span><span class="fc-r" id="r-${i}">—</span></div>
       <div class="r-bar-bg"><div class="r-bar" id="rbar-${i}"></div></div>
       <div class="fc-desc">${f.desc}</div>
     `;
@@ -649,10 +643,7 @@ function buildCouplingList(){
   `).join('');
 }
 
-// calcCorr(): 合成相関行列。id-idの組（アルファベット順にsortして作るキー）を熱暴走連鎖に
-// 関与するペア（dtdt-rint等6組）と、それ以外（volt/currを含むペア）とで扱いを分けている点が
-// この実装固有のロジック。volt-currのようなペアはthermal/gas由来のdriftを受けない。
-// EN版（36_..._EN.html）は 'group' 属性が同じか否かだけでdrift量を切り替える単純な設計。
+// EN is generated from this repaired JP computation model.
 function calcCorr(){
   const C = [];
   const c = calcCouplingBase();
@@ -735,7 +726,7 @@ function updateUI(){
   const C = calcCorr();
   const {maxR:rCorr, alerts} = calcRCorr(C);
 
-  // R_total = max(R_corr, 各要素のR) — formula-boxの「R_total = max(R_i, R_corr)」どおり、
+  // R_total = max(R_corr, 各要素のR) — formula-boxの「aggregate = max(R_base_i, R_corr); AUX_STOP separate」どおり、
   // 平均せず最悪値で決定するfail-closed設計。以下のFACTORS.forEach内でmaxFactorRと共に更新する。
   let rTotal = rCorr;
   let maxFactorR = 0;
@@ -745,7 +736,7 @@ function updateUI(){
   FACTORS.forEach((f,i)=>{
     const {delta,tau,R} = calcR(vals[i],i);
     maxFactorR = Math.max(maxFactorR, R);
-    rTotal = Math.max(rTotal, R);
+    rTotal = Math.max(rTotal, calcDelta(vals[i],f)/f.tau);
     rHistory[i].push(R);
     if(rHistory[i].length > HIST_LEN) rHistory[i].shift();
 
@@ -770,9 +761,9 @@ function updateUI(){
     if(R>=0.75) warnAny = true;
 
     if(zone !== prevZones[i]){
-      if(zone==='fail') addLog(`RUPTURE_BOUNDARY候補: ${f.name} R=${R.toFixed(3)} δ=${delta.toFixed(2)}${f.unit}`, 'fail');
+      if(zone==='fail') addLog(`AUX_GATE_EXCEEDED候補: ${f.name} R=${R.toFixed(3)} δ=${delta.toFixed(2)}${f.unit}`, 'fail');
       else if(zone==='warn') addLog(`WARNING: ${f.name} R=${R.toFixed(3)}`, 'warn');
-      else addLog(`RECOVERED: ${f.name} R=${R.toFixed(3)}`, 'ok');
+      else addLog(`CURRENT_VALUE_WITHIN_BASELINE: ${f.name} R=${R.toFixed(3)}`, 'ok');
       prevZones[i] = zone;
     }
   });
@@ -851,6 +842,11 @@ function updateUI(){
 
   updateCells(maxFactorR, c.thermal);
   drawTimeSeries();
+
+const auxiliaryStop=FACTORS.some((f,i)=>calcR(vals[i],i).R>=1)||(calcCouplingBase().thermal>=1||calcCouplingBase().gas>=1);
+  FACTORS.forEach((f,i)=>boundary.observe('factor'+i,calcDelta(vals[i],f),f.tau,tick));
+  for(let i=0;i<FACTORS.length;i++)for(let j=i+1;j<FACTORS.length;j++)boundary.observe('correlation_'+i+'_'+j,Math.abs(C[i][j]-corrBase[i][j]),tauC,tick);
+  NRADemoBoundary.paint(boundary,auxiliaryStop,FACTORS.map((_,i)=>'badge-'+i),['overall-status']);
 }
 
 function setCoup(id, val){
@@ -904,7 +900,7 @@ function drawTimeSeries(){
 
   tsCtx.font='10px JetBrains Mono, monospace';
   tsCtx.fillStyle='rgba(255,45,95,.75)';
-  tsCtx.fillText('R=1.0',6,failY-4);
+  tsCtx.fillText('R_gate=1.0 (aux)',6,failY-4);
 }
 
 function addLog(msg,type='info'){
@@ -948,7 +944,9 @@ function resetSim(){
   document.getElementById('log-area').innerHTML='';
   logLines=[];
   addLog('システムリセット', 'info');
-  addLog('R_total=max(R_i,R_corr) 監視開始', 'ok');
+  addLog('aggregate = max(R_base_i, R_corr); AUX_STOP separate 監視開始', 'ok');
+
+boundary.newTrial();
 }
 
 buildFactorCards();
@@ -958,5 +956,7 @@ addLog('バッテリー熱暴走相関sample開始', 'ok');
 addLog('合成データのみ。実機制御不可。', 'info');
 setInterval(update, 280);
 </script>
+<section id="demo-boundary-panel" style="margin:14px auto;padding:12px;max-width:1100px;border:1px solid #b8860b;font:12px/1.6 sans-serif"><p>教材用の仮閾値です。現在の観測値と到達履歴を分けて表示します。AUX_STOPは補助条件であり対象破断ではありません。新試行でも前試行の記録は残り、構造復元を意味しません。</p><button type="button" onclick="startBoundaryTrial()">新しい教材試行</button><pre id="demo-boundary-state" style="max-height:240px;overflow:auto;white-space:pre-wrap"></pre></section>
+<p class="demo-caveat">基礎厚みτは宣言値です。τ_effは一時的な補助ゲート幅であり、その復帰は構造復元ではありません。カードと時系列のR_gateは補助比です。主表示は独立した評価対象の基礎比・相関比の最大であり、単一対象の正規Rを再定義しません。AUX_STOPと到達履歴を別表示します。</p>
 </body>
 </html>

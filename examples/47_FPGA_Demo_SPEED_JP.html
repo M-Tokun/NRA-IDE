@@ -330,9 +330,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 const STATES = {
   S_IDLE:     {jp:'待機状態',    color:'#00c9a0', desc:'リセット安全状態。valid_in待機中。律環公理の出発点。',                   badge:[['SAFE','teal']]},
   S_OBSERVE:  {jp:'入力観測',    color:'#40a0e8', desc:'入力データをキャプチャ。因果ダイオードを通過した値のみ受理。',           badge:[['CAPTURE','blue']]},
-  S_COMPUTE:  {jp:'内包性演算',  color:'#a060e8', desc:'IDEパイプライン4段処理中。Q16.16固定小数点演算。誤差蓄積なし。',        badge:[['PIPE×4','purple']]},
+  S_COMPUTE:  {jp:'内包性演算',  color:'#a060e8', desc:'4段の説明用FSM。値はQ16.16として表示。実際の演算・精度・速度は未検証。',        badge:[['PIPE×4','purple']]},
   S_VALIDATE: {jp:'整合性検証',  color:'#e8a020', desc:'閾値検出器でTHR_LO ≤ value ≤ THR_HIを判定。完全境界チェック。',        badge:[['CHECK','amber']]},
-  S_EMIT:     {jp:'出力',        color:'#40d860', desc:'整合性確認済み。結果を出力。不可逆性：この後S_OBSERVEへは戻らない。',   badge:[['VALID','green']]},
+  S_EMIT:     {jp:'出力',        color:'#40d860', desc:'整合性確認済み。結果を出力。この取引を完了し、次の取引は新しい観測から開始。',   badge:[['VALID','green']]},
   S_CONFESS:  {jp:'限界告白',    color:'#e84040', desc:'整合性違反を検出。confess_flag=1。出力強制ゼロ。不整合を隠蔽しない。', badge:[['Fail-Closed suppression','coral'],['confess_flag=1','coral']]}
 };
 const ORDER = ['S_IDLE','S_OBSERVE','S_COMPUTE','S_VALIDATE','S_EMIT','S_CONFESS'];
@@ -348,6 +348,7 @@ let forceBreach = false;
 let inputVal    = 65536;  // Q16.16: 1.0
 // S_OBSERVE で観測した値を保持し、検証（S_VALIDATE）と出力（S_EMIT）は同じ値で行う。
 let heldVal = null;
+let heldLo=null, heldHi=null;
 let thrLo       = 32768;  // Q16.16: 0.5
 let thrHi       = 98304;  // Q16.16: 1.5
 let scopeData   = [];
@@ -547,7 +548,8 @@ function drawScope() {
 // === FSM transition logic ===
 function nextState() {
   const v = heldVal ?? inputVal;
-  const breach = forceBreach || (v < thrLo) || (v > thrHi);
+  const lo=heldLo??thrLo, hi=heldHi??thrHi;
+  const breach = forceBreach || ![v,lo,hi].every(Number.isSafeInteger) || lo>hi || v<lo || v>hi;
   switch (state) {
     case 'S_IDLE':     return 'S_OBSERVE';
     case 'S_OBSERVE':  return 'S_COMPUTE';
@@ -563,17 +565,18 @@ function step() {
   cycleCount++;
   const prev = state;
   state = nextState();
-  if (state === 'S_OBSERVE') heldVal = inputVal;
-  if (state === 'S_IDLE') heldVal = null;
+  if (state === 'S_OBSERVE') {heldVal=inputVal;heldLo=thrLo;heldHi=thrHi;}
+  if (state === 'S_IDLE') {heldVal=null;heldLo=null;heldHi=null;}
 
   if (state === 'S_EMIT')    emitCount++;
   if (state === 'S_CONFESS') confessCount++;
 
   // Update pipeline display
   const shown = heldVal ?? inputVal;
-  const hex = '0x' + shown.toString(16).padStart(4,'0').toUpperCase();
-  const q   = (shown / 65536).toFixed(4);
-  const breach = (shown < thrLo) || (shown > thrHi) || forceBreach;
+  const hex = Number.isSafeInteger(shown)?'0x'+shown.toString(16).padStart(4,'0').toUpperCase():'INVALID';
+  const q   = Number.isSafeInteger(shown)?(shown/65536).toFixed(4):'INVALID';
+  const lo=heldLo??thrLo,hi=heldHi??thrHi;
+  const breach=forceBreach||![shown,lo,hi].every(Number.isSafeInteger)||lo>hi||shown<lo||shown>hi;
 
   document.getElementById('pd-diode').textContent = hex;
   document.getElementById('pd-pipe').textContent  = q;
@@ -722,7 +725,7 @@ function resetSim() {
   autoRunning = false;
   document.getElementById('runDot').classList.remove('running');
   document.getElementById('btnAuto').classList.remove('active');
-  state = 'S_IDLE'; heldVal = null; cycleCount = 0; emitCount = 0; confessCount = 0; forceBreach = false;
+  state = 'S_IDLE'; heldVal = null; heldLo=null; heldHi=null; cycleCount = 0; emitCount = 0; confessCount = 0; forceBreach = false;
   scopeData = [];
   document.getElementById('confessOverlay').classList.remove('visible');
   document.getElementById('confessBanner').classList.remove('visible');
@@ -768,5 +771,6 @@ window.addEventListener('load', () => {
 });
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・状態遷移のタイミングとしきい値は説明用です。実機の性能値ではありません。<br>・S_OBSERVEで観測した値を保持し、検証と出力には同じ値を使います。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<p class="demo-caveat">FSM内部状態は正規境界分類とは別です。INTEGRITY RATEはemit/(emit+confess)の表示割合です。実機性能・丸め誤差の検証は行っていません。</p>
 </body>
 </html>

@@ -4,27 +4,215 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NRA-IDE Medical Education Infection Observation Template</title>
+<title>NRA-IDE Medical Education Infection Observation Template JP</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
-:root{--bg:#071019;--s1:#0d1722;--s2:#12202d;--bd:#294158;--tx:#d7e6f2;--mu:#71879a;--ok:#45ff9e;--watch:#69d6ff;--warn:#ffd45a;--fail:#ff4d73;--accent:#7ee3ff;--c1:#63d8ff;--c2:#ffb862;--c3:#8bff83;--c4:#ff8fca;--c5:#ffe86c;--c6:#55e7c6;}
-*{box-sizing:border-box;margin:0;padding:0} body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden} body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(126,227,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(126,227,255,.025) 1px,transparent 1px);background-size:34px 34px;pointer-events:none}
-.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:28px 20px 36px} header{text-align:center;margin-bottom:24px} .sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--accent);opacity:.82;margin-bottom:10px} h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px} h1 em{font-style:normal;color:var(--warn)} .desc{font-size:.84rem;color:var(--mu);line-height:1.75;max-width:940px;margin:0 auto}
-.notice{border:1px solid rgba(255,212,90,.35);background:rgba(255,212,90,.06);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:18px;color:#eedfa1;font-size:.78rem;line-height:1.74}
-.ctrl{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap} button,select{padding:8px 14px;border:1px solid var(--bd);border-radius:7px;background:var(--s1);color:var(--tx);font-size:.82rem;cursor:pointer;font-family:Inter,system-ui,sans-serif} button.active{background:var(--accent);color:#00151d;border-color:var(--accent);font-weight:700} .small{font-size:.8rem;color:var(--mu)} .scen{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto}
-.formula{background:var(--s1);border:1px solid rgba(126,227,255,.42);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:2} .a{color:var(--accent)} .b{color:var(--watch)} .c{color:var(--warn)} .f{color:var(--fail)}
-.stats{display:grid;grid-template-columns:1.1fr repeat(4,1fr);gap:12px;margin-bottom:16px} @media(max-width:1120px){.stats{grid-template-columns:repeat(3,1fr)}} @media(max-width:640px){.stats{grid-template-columns:1fr 1fr}}
-.stat{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center} .sl{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px} .sv{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05} .ss{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5}
-.grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;margin-bottom:16px} @media(max-width:1040px){.grid{grid-template-columns:1fr}} .panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px} .pt{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px} @media(max-width:1040px){.cards{grid-template-columns:repeat(2,1fr)}} @media(max-width:640px){.cards{grid-template-columns:1fr}}
-.card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;cursor:pointer;transition:.2s} .card.selected{outline:2px solid var(--accent);box-shadow:0 0 0 1px rgba(126,227,255,.35) inset} .card.warn{border-color:var(--warn)} .card.fail{border-color:var(--fail);animation:pulse .7s infinite alternate} @keyframes pulse{from{box-shadow:0 0 0 rgba(255,77,115,.05)}to{box-shadow:0 0 16px rgba(255,77,115,.22)}}
-.badge{position:absolute;right:10px;top:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px} .ok{background:rgba(69,255,158,.10);border:1px solid rgba(69,255,158,.30);color:var(--ok)} .watch{background:rgba(105,214,255,.10);border:1px solid rgba(105,214,255,.30);color:var(--watch)} .warn{background:rgba(255,212,90,.10);border:1px solid rgba(255,212,90,.35);color:var(--warn)} .fail{background:rgba(255,77,115,.12);border:1px solid rgba(255,77,115,.40);color:var(--fail)}
-.pid{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-bottom:4px} .pname{font-size:.95rem;font-weight:700;margin-bottom:8px} .row{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;margin-bottom:5px} .lbl{color:var(--mu)} .val{font-family:'JetBrains Mono',monospace} .pr{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin-top:8px} .pdesc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.58} .barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden} .bar{height:100%;border-radius:2px;transition:.25s}
-.detail{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:16px} .dh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap} .did{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mu);margin-bottom:4px} .dn{font-size:1.2rem;font-weight:700} .dp{font-size:.76rem;color:var(--mu);line-height:1.7}
-.flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin:14px 0} @media(max-width:640px){.flow{grid-template-columns:1fr}} .node{background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:9px;padding:12px;text-align:center;min-height:72px} .nn{font-size:.72rem;color:var(--mu);margin-bottom:6px} .nv{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700} .arrow{text-align:center;font-family:'JetBrains Mono',monospace;font-size:1.25rem;color:var(--accent)}
-.risks{display:flex;flex-direction:column;gap:8px;margin-top:10px} .rr{display:flex;align-items:center;gap:10px} .rn{font-size:.75rem;min-width:118px;color:var(--tx)} .rbg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden} .rbar{height:100%;border-radius:4px;transition:.25s} .rv{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right} .note{font-size:.73rem;color:var(--mu);line-height:1.75;margin-top:12px}
-.buckets{display:grid;grid-template-columns:repeat(4,1fr);gap:10px} @media(max-width:880px){.buckets{grid-template-columns:repeat(2,1fr)}} @media(max-width:560px){.buckets{grid-template-columns:1fr}} .bucket{border:1px solid var(--bd);border-radius:10px;padding:12px;background:var(--s2);min-height:180px} .bucket h3{font-size:.82rem;margin-bottom:10px;font-weight:700} .bucket ul{list-style:none;display:flex;flex-direction:column;gap:8px} .bucket li{font-size:.72rem;line-height:1.5;padding:8px;border-radius:7px;background:rgba(255,255,255,.03)} .bucket li strong{font-family:'JetBrains Mono',monospace}
-canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd)} .legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap} .legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem} .log{height:170px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75} .log-ok{color:var(--ok)} .log-watch{color:var(--watch)} .log-warn{color:var(--warn)} .log-fail{color:var(--fail)} .log-info{color:var(--mu)} .footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu)}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg:#081014;
+  --s1:#0e171d;
+  --s2:#14222a;
+  --bd:#2a4551;
+  --tx:#d8e8ef;
+  --mu:#738993;
+  --ok:#47ff9e;
+  --watch:#6bd9ff;
+  --warn:#ffd15d;
+  --fail:#ff4b71;
+  --accent:#7de7ff;
+  --temp:#ff8b55;
+  --rr:#6bd9ff;
+  --hr:#78ff8b;
+  --spo2:#8cb7ff;
+  --bp:#ff92d0;
+  --hyd:#55e7c6;
+  --inf:#ffe26c;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(125,231,255,.024) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(125,231,255,.024) 1px,transparent 1px);
+  background-size:34px 34px;
+  pointer-events:none;
+}
+.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:28px 20px 36px;}
+
+header{text-align:center;margin-bottom:24px;}
+.h-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.28em;
+  color:var(--accent);
+  opacity:.82;
+  margin-bottom:10px;
+}
+h1{font-size:clamp(1.22rem,3.4vw,2rem);font-weight:700;margin-bottom:8px;}
+h1 em{font-style:normal;color:var(--inf);}
+.h-desc{font-size:.84rem;color:var(--mu);line-height:1.75;}
+
+.notice{
+  border:1px solid rgba(255,209,93,.35);
+  background:rgba(255,209,93,.06);
+  border-left:4px solid var(--warn);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#eedfa7;
+  font-size:.78rem;
+  line-height:1.74;
+}
+
+.ctrl-bar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.btn{
+  padding:8px 18px;
+  border:1px solid var(--bd);
+  border-radius:7px;
+  background:var(--s1);
+  color:var(--tx);
+  font-size:.82rem;
+  cursor:pointer;
+  transition:.18s;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:#00151d;border-color:var(--accent);font-weight:700;}
+label.small{font-size:.8rem;color:var(--mu);}
+select{
+  padding:8px 12px;
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:7px;
+  color:var(--tx);
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:.82rem;
+  cursor:pointer;
+}
+.scen-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-left:auto;}
+
+.formula-box{
+  background:var(--s1);
+  border:1px solid rgba(125,231,255,.42);
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  line-height:2;
+}
+.eq-a{color:var(--accent);}
+.eq-b{color:var(--inf);}
+.eq-c{color:var(--warn);}
+.eq-f{color:var(--fail);}
+
+.stats{
+  display:grid;
+  grid-template-columns:1.1fr repeat(4,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+@media(max-width:1120px){.stats{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:640px){.stats{grid-template-columns:1fr 1fr;}}
+.stat{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;color:var(--mu);margin-bottom:6px;}
+.stat-v{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1.05;}
+.stat-s{font-size:.74rem;color:var(--mu);margin-top:6px;line-height:1.5;}
+
+.grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;margin-bottom:16px;}
+@media(max-width:1040px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px;}
+.panel-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--accent);margin-bottom:16px;}
+
+.person-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:1040px){.person-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.person-grid{grid-template-columns:1fr;}}
+.card{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  position:relative;
+  cursor:pointer;
+  transition:.2s;
+}
+.card.selected{outline:2px solid var(--accent);box-shadow:0 0 0 1px rgba(125,231,255,.35) inset;}
+.card.warn{border-color:var(--warn);}
+.card.fail{border-color:var(--fail);animation:pulse .7s infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,75,113,.05);}to{box-shadow:0 0 16px rgba(255,75,113,.22);}}
+.badge{position:absolute;right:10px;top:10px;font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:2px 6px;border-radius:4px;}
+.b-ok{background:rgba(71,255,158,.10);border:1px solid rgba(71,255,158,.30);color:var(--ok);}
+.b-watch{background:rgba(107,217,255,.10);border:1px solid rgba(107,217,255,.30);color:var(--watch);}
+.b-warn{background:rgba(255,209,93,.10);border:1px solid rgba(255,209,93,.35);color:var(--warn);}
+.b-fail{background:rgba(255,75,113,.12);border:1px solid rgba(255,75,113,.40);color:var(--fail);}
+.pid{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mu);margin-bottom:4px;}
+.pname{font-size:.95rem;font-weight:700;margin-bottom:8px;}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;margin-bottom:5px;}
+.lbl{color:var(--mu);}
+.val{font-family:'JetBrains Mono',monospace;}
+.pr{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin-top:8px;}
+.desc{font-size:.63rem;color:var(--mu);margin-top:7px;line-height:1.58;}
+.barbg{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden;}
+.bar{height:100%;border-radius:2px;transition:.25s;}
+
+.detail{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:16px;
+}
+.detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;}
+.detail-id{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mu);margin-bottom:4px;}
+.detail-name{font-size:1.2rem;font-weight:700;}
+.detail-profile{font-size:.76rem;color:var(--mu);line-height:1.7;}
+.flow{display:grid;grid-template-columns:1fr 38px 1fr 38px 1fr;gap:8px;align-items:center;margin:14px 0;}
+@media(max-width:640px){.flow{grid-template-columns:1fr;}}
+.node{background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:9px;padding:12px;text-align:center;min-height:72px;}
+.node-name{font-size:.72rem;color:var(--mu);margin-bottom:6px;}
+.node-val{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700;}
+.arrow{text-align:center;font-family:'JetBrains Mono',monospace;font-size:1.25rem;color:var(--accent);}
+.risk-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.risk-row{display:flex;align-items:center;gap:10px;}
+.risk-name{font-size:.75rem;min-width:112px;color:var(--tx);}
+.risk-bg{flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden;}
+.risk-bar{height:100%;border-radius:4px;transition:.25s;}
+.risk-val{font-family:'JetBrains Mono',monospace;font-size:.7rem;min-width:54px;text-align:right;}
+.note{font-size:.73rem;color:var(--mu);line-height:1.75;margin-top:12px;}
+
+.bucket-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:880px){.bucket-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.bucket-grid{grid-template-columns:1fr;}}
+.bucket{border:1px solid var(--bd);border-radius:10px;padding:12px;background:var(--s2);min-height:180px;}
+.bucket h3{font-size:.82rem;margin-bottom:10px;font-weight:700;}
+.bucket ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.bucket li{font-size:.72rem;line-height:1.5;padding:8px;border-radius:7px;background:rgba(255,255,255,.03);}
+.bucket li strong{font-family:'JetBrains Mono',monospace;}
+
+canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:9px;border:1px solid var(--bd);}
+.legend{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{font-family:'JetBrains Mono',monospace;font-size:.65rem;}
+.log-area{height:170px;overflow-y:auto;background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;}
+.log-ok{color:var(--ok);}
+.log-watch{color:var(--watch);}
+.log-warn{color:var(--warn);}
+.log-fail{color:var(--fail);}
+.log-info{color:var(--mu);}
+.footer{margin-top:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--mu);}
 
 .text-right { text-align:right; }
 .detail-r-text { font-family:'JetBrains Mono',monospace;color:var(--accent); }
@@ -49,73 +237,479 @@ canvas{width:100%;height:170px;display:block;background:var(--s2);border-radius:
 </style>
 
 </head>
-<body><div class="wrap">
-<header><div class="sub">NRA-IDE / MEDICAL EDUCATION INFECTION OBSERVATION TEMPLATE</div><h1>Medical Education <em>Infection Observation</em> Template</h1><p class="desc">An educational observation template using synthetic data for fever, respiration, circulation, hydration, and inflammation-like markers. It visualizes observation buckets only and does not diagnose infection.</p></header>
-<div class="notice">This template is for medical education and structural visualization only. It does not diagnose, treat, predict, or recommend clinical action. All displayed values are synthetic examples. Real clinical decisions must be made by qualified medical professionals.</div>
-<div class="ctrl"><button class="active" id="run" onclick="toggleRun()">▶ Running</button><button onclick="resetSim()">↺ Reset</button><span class="small">Education scenario:</span><select id="scenario" onchange="applyScenario()"></select><span class="scen" id="scen-desc">Normal observation</span></div>
-<div class="formula"><span class="a">R_i = δ_i / τ_i(profile,t)</span> | <span class="b">R_infection_like — fever, respiration, hydration, and inflammation-like pressure</span> | <span class="c">R_person = max(R_i, R_corr)</span> | <span class="f">Human Review = return to qualified humans</span></div>
-<div class="stats"><div class="stat"><div class="sl">COHORT R_MAX</div><div class="sv" id="cohort-r">0.000</div><div class="ss" id="cohort-status">SAFE — educational cohort</div></div><div class="stat"><div class="sl">OBSERVE</div><div class="sv" id="cnt-ok">0</div><div class="ss">routine observation</div></div><div class="stat"><div class="sl">WATCH</div><div class="sv" id="cnt-watch">0</div><div class="ss">watch trend</div></div><div class="stat"><div class="sl">CAUTION</div><div class="sv" id="cnt-warn">0</div><div class="ss">needs attention</div></div><div class="stat"><div class="sl">HUMAN REVIEW</div><div class="sv" id="cnt-fail">0</div><div class="ss">qualified review</div></div></div>
-<div class="grid"><div class="panel"><div class="pt">INDIVIDUAL CARDS</div><div class="cards" id="cards"></div></div><div class="panel"><div class="pt">SELECTED INDIVIDUAL</div><div class="detail"><div class="dh"><div><div class="did" id="detail-id">P-01</div><div class="dn" id="detail-name">—</div><div class="dp" id="detail-profile">—</div></div><div class="text-right"><div class="did">PERSON R</div><div class="dn" id="detail-r" class="detail-name detail-r-text">0.000</div></div></div><div class="flow"><div class="node"><div class="nn">vital max</div><div class="nv" id="node-vital" class="node-val color-watch">0.000</div></div><div class="arrow">→</div><div class="node"><div class="nn">infection-like pressure</div><div class="nv" id="node-med" class="node-val color-warn">0.000</div></div><div class="arrow">⇒</div><div class="node"><div class="nn">bucket</div><div class="nv" id="node-bucket">—</div></div></div><div class="risks" id="risks"></div><div class="note" id="detail-note">Select a person to inspect the structural contributors.</div></div></div></div>
-<div class="grid"><div class="panel"><div class="pt">BUCKET VIEW</div><div class="buckets"><div class="bucket"><h3 class="color-ok">OBSERVE</h3><ul id="bucket-ok"></ul></div><div class="bucket"><h3 class="color-watch">WATCH</h3><ul id="bucket-watch"></ul></div><div class="bucket"><h3 class="color-warn">CAUTION</h3><ul id="bucket-warn"></ul></div><div class="bucket"><h3 class="color-fail">HUMAN REVIEW</h3><ul id="bucket-fail"></ul></div></div></div><div class="panel"><div class="pt">R DISTRIBUTION</div><canvas id="dist" width="560" height="170"></canvas><div class="legend"><span class="color-ok">■ Observe</span><span class="color-watch">■ Watch</span><span class="color-warn">■ Caution</span><span class="color-fail">■ Human Review</span></div></div></div>
-<div class="grid"><div class="panel"><div class="pt">GATE LOG</div><div class="log" id="log"></div></div><div class="panel"><div class="pt">EDUCATIONAL NOTE</div><div class="desc-mu">This sample does not classify disease. It shows how fever, respiratory change, circulation, hydration, and inflammation-like markers can move together and how individual reserve changes the observation bucket. Human Review is an educational fail-closed return to qualified humans.</div></div></div>
-<div class="footer"><span>NRA-IDE / M-Tokuni</span><span>41_medical_education_infection_observation_template_EN</span><span>Educational only / synthetic data / no diagnosis</span></div>
+<body>
+<div class="notice">Unvalidated research/education only; no clinical use. Profiles and coefficients are synthetic assumptions affecting both generated vital signs and gate widths. Observe and other buckets are educational categories, not canonical rupture states or clinical safety judgments. Invalid data receive no observation bucket.<div id="medical-input-state"></div></div>
+<div class="wrap">
+
+<header>
+  <div class="h-sub">NRA-IDE / MEDICAL EDUCATION INFECTION OBSERVATION TEMPLATE</div>
+  <h1>Medical education <em>Infection observation cohort</em> Template</h1>
+  <p class="h-desc">Synthetic temperature, respiratory, circulation, hydration and inflammation-like observations illustrate educational buckets, not diagnosis.</p>
+</header>
+
+<div class="notice">
+  Medical education and structural visualization only. No diagnosis, treatment, prediction or clinical recommendation. All displayed people and values are synthetic. Clinical decisions belong to qualified professionals.
 </div>
+
+<div class="ctrl-bar">
+  <button class="btn active" id="btn-run" onclick="toggleRun()">▶ Running</button>
+  <button class="btn" onclick="resetSim()">↺ Reset trial</button>
+  <label class="small">Educational scenario:</label>
+  <select id="scenario-sel" onchange="applyScenario()">
+    <option value="normal">Observe</option>
+    <option value="fever">Fever scenario</option>
+    <option value="resp">Respiratory scenario</option>
+    <option value="dehyd">Dehydration scenario</option>
+    <option value="elder">Older frail profile</option>
+    <option value="mixed">Mixed stress</option>
+  </select>
+  <span class="scen-label" id="scen-desc">Normal synthetic observations with individual model differences</span>
+</div>
+
+<div class="formula-box">
+  <span class="eq-a">R_i = δ_i / τ_i(profile,t)</span>：Individual observation ratios |
+  <span class="eq-b">R_infection_like</span>：Temperature / respiration / inflammation-like auxiliary pressure |
+  <span class="eq-c">R_person = max(R_i, R_corr)</span>：Individual observations without averaging |
+  <span class="eq-f">Human Review = Qualified review rather than an automatic decision</span>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-l">COHORT R_MAX</div>
+    <div class="stat-v" id="cohort-r">0.000</div>
+    <div class="stat-s" id="cohort-status">SAFE — educational observation cohort</div>
+  </div>
+  <div class="stat"><div class="stat-l">OBSERVE</div><div class="stat-v" id="cnt-ok">0</div><div class="stat-s">Observe</div></div>
+  <div class="stat"><div class="stat-l">WATCH</div><div class="stat-v" id="cnt-watch">0</div><div class="stat-s">Watch</div></div>
+  <div class="stat"><div class="stat-l">CAUTION</div><div class="stat-v" id="cnt-warn">0</div><div class="stat-s">Caution</div></div>
+  <div class="stat"><div class="stat-l">HUMAN REVIEW</div><div class="stat-v" id="cnt-fail">0</div><div class="stat-s">Qualified human review</div></div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">INDIVIDUAL OBSERVATION CARDS</div>
+    <div class="person-grid" id="person-grid"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">SELECTED INDIVIDUAL</div>
+    <div class="detail">
+      <div class="detail-head">
+        <div>
+          <div class="detail-id" id="detail-id">P-01</div>
+          <div class="detail-name" id="detail-name">—</div>
+          <div class="detail-profile" id="detail-profile">—</div>
+        </div>
+        <div class="text-right">
+          <div class="detail-id">PERSON R</div>
+          <div class="detail-name detail-r-text" id="detail-r">0.000</div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="node"><div class="node-name">vital max</div><div class="node-val color-watch" id="node-vital">0.000</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="node-name">infection-like pressure</div><div class="node-val color-inf" id="node-inf">0.000</div></div>
+        <div class="arrow">⇒</div>
+        <div class="node"><div class="node-name">bucket</div><div class="node-val color-warn" id="node-bucket">—</div></div>
+      </div>
+
+      <div class="risk-list">
+        <div class="risk-row"><div class="risk-name">Temperature</div><div class="risk-bg"><div class="risk-bar bg-temp" id="rb-temp" style="width:0%"></div></div><div class="risk-val" id="rv-temp">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Respiratory rate</div><div class="risk-bg"><div class="risk-bar bg-rr" id="rb-rr" style="width:0%"></div></div><div class="risk-val" id="rv-rr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Heart rate</div><div class="risk-bg"><div class="risk-bar bg-hr" id="rb-hr" style="width:0%"></div></div><div class="risk-val" id="rv-hr">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">SpO₂</div><div class="risk-bg"><div class="risk-bar bg-spo2" id="rb-spo2" style="width:0%"></div></div><div class="risk-val" id="rv-spo2">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Hydration index</div><div class="risk-bg"><div class="risk-bar bg-hyd" id="rb-hyd" style="width:0%"></div></div><div class="risk-val" id="rv-hyd">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Inflammation-like index</div><div class="risk-bg"><div class="risk-bar bg-inf" id="rb-inf" style="width:0%"></div></div><div class="risk-val" id="rv-inf">0.000</div></div>
+        <div class="risk-row"><div class="risk-name">Profilepressure</div><div class="risk-bg"><div class="risk-bar bg-fail" id="rb-prof" style="width:0%"></div></div><div class="risk-val" id="rv-prof">0.000</div></div>
+      </div>
+
+      <div class="note" id="detail-note">Select an individual to inspect the synthetic contributors.</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">BUCKET VIEW — Observation buckets</div>
+    <div class="bucket-grid">
+      <div class="bucket"><h3 class="color-ok">OBSERVE</h3><ul id="bucket-ok"></ul></div>
+      <div class="bucket"><h3 class="color-watch">WATCH</h3><ul id="bucket-watch"></ul></div>
+      <div class="bucket"><h3 class="color-warn">CAUTION</h3><ul id="bucket-warn"></ul></div>
+      <div class="bucket"><h3 class="color-fail">HUMAN REVIEW</h3><ul id="bucket-fail"></ul></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">R DISTRIBUTION</div>
+    <canvas id="dist-canvas" width="560" height="170"></canvas>
+    <div class="legend">
+      <span class="color-ok">■ Observe</span>
+      <span class="color-watch">■ Watch</span>
+      <span class="color-warn">■ Caution</span>
+      <span class="color-fail">■ Human Review</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="panel-title">GATE LOG</div>
+    <div class="log-area" id="log-area"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">EDUCATIONAL NOTE</div>
+    <div class="desc-mu">
+      This synthetic example illustrates how simultaneous changes in temperature, respiration, circulation, hydration and inflammation-like markers affect educational observation buckets. Human Review denotes qualified human review, not an automatic diagnosis or a canonical rupture state.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>NRA-IDE / M-Tokuni</span>
+  <span>41_medical_education_infection_observation_template_EN</span>
+  <span>Educational only / synthetic data / no diagnosis</span>
+</div>
+
+</div>
+
 <script>
-// NOTE: This EN file is a close but not fully identical counterpart to the JP sibling
-// (41_medical_education_infection_observation_template_JP.html). PEOPLE, FACTORS
-// opt/tau/min/max, profilePressure() age thresholds, and SCENARIOS shift/amp values are
-// numerically identical between the two files (same demo-tuned constants, no clinical
-// citation). However makeState()'s tau calculation and its infection-like/correlation
-// pressure formula differ — see comments below at those exact points. Per repository
-// policy (see examples/35, 36) the two are documented separately rather than unified.
-// PEOPLE: 12 synthetic profiles (age/frailty/chronic). Not real patient data; illustrates
-// age-band / frailty / chronic-load combinations for educational purposes only.
-const PEOPLE=[{"id":"P-01","name":"Individual A","age":22,"frailty":0.08,"chronic":0.05,"note":"Young baseline with relatively wide reserve."},{"id":"P-02","name":"Individual B","age":78,"frailty":0.66,"chronic":0.42,"note":"Older profile with chronic background; margin shrinks easily."},{"id":"P-03","name":"Individual C","age":41,"frailty":0.18,"chronic":0.14,"note":"Middle-aged profile with light prior condition."},{"id":"P-04","name":"Individual D","age":84,"frailty":0.78,"chronic":0.48,"note":"Older frail profile; small deviations can raise R."},{"id":"P-05","name":"Individual E","age":9,"frailty":0.1,"chronic":0.04,"note":"Pediatric synthetic profile with age adjustment."},{"id":"P-06","name":"Individual F","age":56,"frailty":0.28,"chronic":0.36,"note":"Metabolic background assumed."},{"id":"P-07","name":"Individual G","age":69,"frailty":0.5,"chronic":0.22,"note":"Older adult profile; reserve varies."},{"id":"P-08","name":"Individual H","age":34,"frailty":0.12,"chronic":0.08,"note":"Young adult profile."},{"id":"P-09","name":"Individual I","age":73,"frailty":0.6,"chronic":0.38,"note":"Chronic respiratory background assumed."},{"id":"P-10","name":"Individual J","age":47,"frailty":0.22,"chronic":0.16,"note":"Middle-aged profile."},{"id":"P-11","name":"Individual K","age":63,"frailty":0.4,"chronic":0.44,"note":"Cardiovascular background assumed."},{"id":"P-12","name":"Individual L","age":30,"frailty":0.1,"chronic":0.06,"note":"Young adult profile."}];
-// FACTORS: opt/tau are demo-tuned, not clinically cited. profileGain is the per-factor
-// magnitude of profile-pressure push (matches the JP sibling's hardcoded `pe` if-chain
-// numerically: temp .18, rr 2.5, hr 7.5, spo2 1.9, hyd 4.5, inf .18). medWeight is this
-// factor's share of the infection-like "med" pressure below (also numeric-matches the JP
-// sibling's infPressure weights: temp .32, rr .26, hr .2, spo2 .3, hyd .18, inf .42).
-const FACTORS=[{"id":"temp","name":"Temperature","opt":36.8,"tau":2.0,"min":34,"max":41.5,"dir":"both","profile":"up","profileGain":0.18,"medWeight":0.32},{"id":"rr","name":"Resp. Rate","opt":16,"tau":11,"min":8,"max":38,"dir":"both","profile":"up","profileGain":2.5,"medWeight":0.26},{"id":"hr","name":"Heart Rate","opt":76,"tau":34,"min":42,"max":160,"dir":"both","profile":"up","profileGain":7.5,"medWeight":0.2},{"id":"spo2","name":"SpO₂","opt":97,"tau":5,"min":82,"max":100,"dir":"lo","profile":"down","profileGain":1.9,"medWeight":0.3},{"id":"hyd","name":"Hydration Index","opt":70,"tau":22,"min":20,"max":100,"dir":"lo","profile":"down","profileGain":4.5,"medWeight":0.18},{"id":"inf","name":"Inflammation-like Index","opt":0.15,"tau":0.75,"min":0,"max":3.5,"dir":"hi","profile":"up","profileGain":0.18,"medWeight":0.42}];
-const SCENARIOS={"normal":{"label":"Normal observation","desc":"Show individual baseline differences.","shift":{},"amp":{"temp":0.18,"rr":1.5,"hr":5,"spo2":0.8,"hyd":3,"inf":0.08}},"fever":{"label":"Fever wave","desc":"Temperature, heart rate, and inflammation-like marker rise.","shift":{"temp":1.5,"rr":2.5,"hr":12,"spo2":-0.8,"hyd":-5,"inf":0.75},"amp":{"temp":0.28,"rr":1.8,"hr":7,"spo2":0.9,"hyd":4,"inf":0.15}},"resp":{"label":"Respiratory trend","desc":"SpO₂ decreases and respiratory rate rises.","shift":{"temp":0.6,"rr":6,"hr":8,"spo2":-3.2,"hyd":-3,"inf":0.45},"amp":{"temp":0.22,"rr":2.2,"hr":7,"spo2":1.2,"hyd":4,"inf":0.12}},"dehyd":{"label":"Hydration loss","desc":"Hydration index drops and heart rate rises.","shift":{"temp":0.4,"rr":2,"hr":14,"spo2":-0.6,"hyd":-18,"inf":0.28},"amp":{"temp":0.18,"rr":1.5,"hr":8,"spo2":0.8,"hyd":6,"inf":0.1}},"older":{"label":"Older frail group","desc":"Profile pressure compresses tolerance.","shift":{"temp":0.7,"rr":3,"hr":8,"spo2":-1.4,"hyd":-7,"inf":0.38},"amp":{"temp":0.22,"rr":1.8,"hr":6,"spo2":1,"hyd":4,"inf":0.12},"profileBoost":0.2},"mixed":{"label":"Mixed stress","desc":"Multiple mild factors overlap.","shift":{"temp":1,"rr":4,"hr":10,"spo2":-2,"hyd":-10,"inf":0.55},"amp":{"temp":0.25,"rr":2,"hr":7,"spo2":1.1,"hyd":5,"inf":0.14}}};
-const BASE={"temp":36.8,"rr":16,"hr":76,"spo2":97,"hyd":70,"inf":0.15};
-const COLORS=['#63d8ff','#ffb862','#8bff83','#ff8fca','#ffe86c','#55e7c6'];
-let scenario=Object.keys(SCENARIOS)[0], tick=0, running=true, selected=null, lastBuckets={};
-function clamp(v,min,max){return Math.max(min,Math.min(max,v));} function rand(a){return (Math.random()-.5)*2*a;}
+
+
+
+const PEOPLE = [
+  {id:'P-01', name:'Individual A', age:22, frailty:.08, chronic:.05, note:'Synthetic young profile with a wider assumed baseline.'},
+  {id:'P-02', name:'Individual B', age:78, frailty:.66, chronic:.42, note:'Synthetic older profile with assumed chronic history.'},
+  {id:'P-03', name:'Individual C', age:41, frailty:.18, chronic:.14, note:'Synthetic middle-aged adult with a mild assumed history.'},
+  {id:'P-04', name:'Individual D', age:84, frailty:.78, chronic:.48, note:'Synthetic older frail profile; small changes increase the model ratio.'},
+  {id:'P-05', name:'Individual E', age:9,  frailty:.10, chronic:.04, note:'Synthetic child profile with an unvalidated age adjustment.'},
+  {id:'P-06', name:'Individual F', age:56, frailty:.28, chronic:.36, note:'Assumed metabolic history.'},
+  {id:'P-07', name:'Individual G', age:69, frailty:.50, chronic:.22, note:'Synthetic older adult; individual model differences.'},
+  {id:'P-08', name:'Individual H', age:34, frailty:.12, chronic:.08, note:'Synthetic young adult.'},
+  {id:'P-09', name:'Individual I', age:73, frailty:.60, chronic:.38, note:'Assumed respiratory history.'},
+  {id:'P-10', name:'Individual J', age:47, frailty:.22, chronic:.16, note:'Synthetic middle-aged adult.'},
+  {id:'P-11', name:'Individual K', age:63, frailty:.40, chronic:.44, note:'Assumed cardiovascular history.'},
+  {id:'P-12', name:'Individual L', age:30, frailty:.10, chronic:.06, note:'Synthetic young adult.'}
+];
+
+
+
+
+const FACTORS = [
+  {id:'temp', name:'Temperature', opt:36.8, tau:2.0, min:34.0, max:41.5, dir:'both', color:'var(--temp)'},
+  {id:'rr', name:'Respiratory rate', opt:16, tau:11, min:8, max:38, dir:'both', color:'var(--rr)'},
+  {id:'hr', name:'Heart rate', opt:76, tau:34, min:42, max:160, dir:'both', color:'var(--hr)'},
+  {id:'spo2', name:'SpO₂', opt:97, tau:5, min:82, max:100, dir:'lo', color:'var(--spo2)'},
+  {id:'hyd', name:'Hydration index', opt:70, tau:22, min:20, max:100, dir:'lo', color:'var(--hyd)'},
+  {id:'inf', name:'Inflammation-like index', opt:0.15, tau:0.75, min:0, max:3.5, dir:'hi', color:'var(--inf)'}
+];
+
+const BASE = {temp:36.8, rr:16, hr:76, spo2:97, hyd:70, inf:0.15};
+let scenario = 'normal';
+let tick = 0;
+let running = true;
+
+let selected = null;
+let logLines = [];
+let lastBuckets = {};
+
+const SCENARIOS = {
+  normal: {desc:'Normal synthetic observations with individual model differences', shift:{temp:0,rr:0,hr:0,spo2:0,hyd:0,inf:0}, amp:{temp:.18,rr:1.5,hr:5,spo2:.8,hyd:3,inf:.08}},
+  fever:  {desc:'Fever scenario: temperature, heart rate and inflammation-like index rise', shift:{temp:1.5,rr:2.5,hr:12,spo2:-.8,hyd:-5,inf:.75}, amp:{temp:.28,rr:1.8,hr:7,spo2:.9,hyd:4,inf:.15}},
+  resp:   {desc:'Respiratory scenario: lower SpO2 and higher respiratory rate', shift:{temp:.6,rr:6.0,hr:8,spo2:-3.2,hyd:-3,inf:.45}, amp:{temp:.22,rr:2.2,hr:7,spo2:1.2,hyd:4,inf:.12}},
+  dehyd:  {desc:'Dehydration scenario: hydration falls and heart rate rises', shift:{temp:.4,rr:2,hr:14,spo2:-.6,hyd:-18,inf:.28}, amp:{temp:.18,rr:1.5,hr:8,spo2:.8,hyd:6,inf:.10}},
+  elder:  {desc:'Older frail group; higher synthetic profile pressure', shift:{temp:.7,rr:3,hr:8,spo2:-1.4,hyd:-7,inf:.38}, amp:{temp:.22,rr:1.8,hr:6,spo2:1.0,hyd:4,inf:.12}, profileBoost:.20},
+  mixed:  {desc:'Mixed stress: several mild synthetic contributors overlap', shift:{temp:1.0,rr:4.0,hr:10,spo2:-2.0,hyd:-10,inf:.55}, amp:{temp:.25,rr:2.0,hr:7,spo2:1.1,hyd:5,inf:.14}}
+};
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function rand(a){return (Math.random()-0.5)*2*a;}
 function delta(v,f){return f.dir==='lo'?Math.max(0,f.opt-v):f.dir==='hi'?Math.max(0,v-f.opt):Math.abs(v-f.opt);}
-// Age thresholds (80/70/60/12) and ageP/frailty/chronic weights (.46/.32/.20/.12, .46, .35)
-// are demo-tuned values with no clinical citation; identical to the JP sibling's
-// profilePressure(). Note the "elder" scenario key in the JP file is named "older" here —
-// same profileBoost value (.20), different key string only.
-function profilePressure(p){let ageP=0;if(p.age>=80)ageP=.46;else if(p.age>=70)ageP=.32;else if(p.age>=60)ageP=.20;else if(p.age<=12)ageP=.12;const sc=SCENARIOS[scenario];return clamp(ageP+p.frailty*.46+p.chronic*.35+(sc.profileBoost||0),0,1.4);}
-// tau here is only tauScale-shrunk (Math.max(f.tau*tauScale, f.tau*.38)). Unlike the JP
-// sibling's makeState(), there is NO extra per-vital coupling term (JP additionally shrinks
-// SpO2's tau when respiratory rate>23, and hydration/heart-rate tau when temp>38); this EN
-// version omits those interaction effects. "med" (infection-like pressure) is a weighted
-// sum over medWeight, numerically equivalent in its per-factor weights to the JP sibling's
-// infPressure, but "corr" here is max(med, vitalMax*.55+profile*.25) — a different formula
-// from the JP sibling's max of three specific vital-pair sums plus infPressure — and the
-// clamp ceiling is 1.75 here vs 1.65 in the JP file. These differences mean personR can
-// diverge numerically between the two files for the same inputs.
-function makeState(p,index){const sc=SCENARIOS[scenario], phase=tick*.055+index*.71, prof=profilePressure(p), vit={}; FACTORS.forEach((f,i)=>{const shift=(sc.shift&&sc.shift[f.id]||0), amp=(sc.amp&&sc.amp[f.id]||1); let pe=0; if(f.profile==='up')pe=prof*(f.profileGain||1); if(f.profile==='down')pe=-prof*(f.profileGain||1); vit[f.id]=clamp(BASE[f.id]+shift+pe+Math.sin(phase+i*.92)*amp*.45+rand(amp),f.min,f.max);}); const rs={}; const tauScale=clamp(1-prof*.36,.45,1); FACTORS.forEach(f=>{let tau=Math.max(f.tau*tauScale,f.tau*.38); const d=delta(vit[f.id],f); rs[f.id]={delta:d,tau,R:d/tau};}); const vitalMax=Math.max(...Object.values(rs).map(x=>x.R)); const med=clamp(FACTORS.reduce((s,f)=>s+(f.medWeight||.15)*rs[f.id].R,0),0,1.75); const corr=clamp(Math.max(med, vitalMax*.55+prof*.25),0,1.75); const personR=Math.max(vitalMax,corr); /* profile pressure (age, frailty, history) is not an observed δ/τ, so it is not in the max; it still shrinks τ and is shown separately */ return {person:p,vit,rs,profile:prof,med,corr,vitalMax,personR};}
-// 4-tier bucket, same thresholds (1.0/.75/.4) as the JP sibling. R>=1.0 (Human Review) is
-// the fail-closed return to a qualified human described in the EDUCATIONAL NOTE panel, not
-// an automated diagnosis. The .75/.4 intermediate thresholds are demo-tuned, not a cited
-// clinical triage scale.
-function bucketOf(R){if(R>=1)return {key:'fail',label:'Human Review',badge:'HUMAN',color:'var(--fail)'};if(R>=.75)return {key:'warn',label:'Caution',badge:'CAUTION',color:'var(--warn)'};if(R>=.4)return {key:'watch',label:'Watch',badge:'WATCH',color:'var(--watch)'};return {key:'ok',label:'Observe',badge:'OBSERVE',color:'var(--ok)'};}
-function buildRiskRows(){const r=document.getElementById('risks'); r.innerHTML=''; FACTORS.forEach((f,i)=>{r.innerHTML+=`<div class="rr"><div class="rn">${f.name}</div><div class="rbg"><div class="rbar" id="rb-${f.id}" style="background:${COLORS[i%COLORS.length]};width:0%"></div></div><div class="rv" id="rv-${f.id}">0.000</div></div>`;}); r.innerHTML+=`<div class="rr"><div class="rn">Profile pressure</div><div class="rbg"><div class="rbar" id="rb-prof" class="risk-bar bg-fail" style="width:0%"></div></div><div class="rv" id="rv-prof">0.000</div></div>`;}
-function renderCards(states){const root=document.getElementById('cards'); root.innerHTML=''; states.forEach((s,i)=>{const b=bucketOf(s.personR), bc=b.key; const div=document.createElement('div'); div.className='card '+(s.personR>=1?'fail ':s.personR>=.75?'warn ':'')+(s.person.id===selected?'selected':''); div.onclick=()=>{selected=s.person.id;render(states)}; const main1=FACTORS[0], main2=FACTORS[1], main3=FACTORS[2]; div.innerHTML=`<div class="badge ${bc}">${b.badge}</div><div class="pid">${s.person.id}</div><div class="pname">${s.person.name}</div><div class="row"><span class="lbl">Age</span><span class="val">${s.person.age}</span></div><div class="row"><span class="lbl">${main1.name} / ${main2.name}</span><span class="val">${s.vit[main1.id].toFixed(1)} / ${s.vit[main2.id].toFixed(1)}</span></div><div class="row"><span class="lbl">${main3.name}</span><span class="val">${s.vit[main3.id].toFixed(1)}</span></div><div class="pr" style="color:${b.color}">R = ${s.personR.toFixed(3)}</div><div class="barbg"><div class="bar" style="width:${Math.min(100,s.personR*100).toFixed(1)}%;background:${b.color}"></div></div><div class="pdesc">${s.person.note}</div>`; root.appendChild(div);});}
-function setRisk(id,val){document.getElementById('rb-'+id).style.width=Math.min(100,val*100).toFixed(1)+'%';document.getElementById('rv-'+id).textContent=val.toFixed(3);}
-function renderDetail(s){const b=bucketOf(s.personR);document.getElementById('detail-id').textContent=s.person.id;document.getElementById('detail-name').textContent=s.person.name;document.getElementById('detail-profile').textContent=`Age ${s.person.age} / frailty=${s.person.frailty.toFixed(2)} / chronic=${s.person.chronic.toFixed(2)}`;document.getElementById('detail-r').textContent=s.personR.toFixed(3);document.getElementById('detail-r').style.color=b.color;document.getElementById('node-vital').textContent=s.vitalMax.toFixed(3);document.getElementById('node-med').textContent=s.med.toFixed(3);document.getElementById('node-bucket').textContent=b.label;document.getElementById('node-bucket').style.color=b.color;FACTORS.forEach(f=>setRisk(f.id,s.rs[f.id].R));setRisk('prof',s.profile);const top=Object.entries(s.rs).sort((a,b)=>b[1].R-a[1].R)[0];const topName=FACTORS.find(f=>f.id===top[0]).name;document.getElementById('detail-note').textContent=`Largest contributor: ${topName}. Mediator pressure=${s.med.toFixed(3)}, profile pressure=${s.profile.toFixed(3)}, correlation pressure=${s.corr.toFixed(3)}. This is an educational view of structural contributors, not a diagnosis.`;}
-function renderBuckets(states){const roots={ok:document.getElementById('bucket-ok'),watch:document.getElementById('bucket-watch'),warn:document.getElementById('bucket-warn'),fail:document.getElementById('bucket-fail')};Object.values(roots).forEach(r=>r.innerHTML='');const counts={ok:0,watch:0,warn:0,fail:0};states.slice().sort((a,b)=>b.personR-a.personR).forEach(s=>{const b=bucketOf(s.personR);counts[b.key]++;const li=document.createElement('li');li.innerHTML=`<strong>${s.person.id}</strong> ${s.person.name} / R=${s.personR.toFixed(3)} / med=${s.med.toFixed(3)}`;roots[b.key].appendChild(li);});document.getElementById('cnt-ok').textContent=counts.ok;document.getElementById('cnt-watch').textContent=counts.watch;document.getElementById('cnt-warn').textContent=counts.warn;document.getElementById('cnt-fail').textContent=counts.fail;}
-function draw(states){const cv=document.getElementById('dist'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);ctx.fillStyle='#12202d';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#294158';[.4,.75,1].forEach(r=>{const y=H-r/1.4*(H-24)-12;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();});const fy=H-1/1.4*(H-24)-12;ctx.setLineDash([5,4]);ctx.strokeStyle='rgba(255,77,115,.75)';ctx.beginPath();ctx.moveTo(0,fy);ctx.lineTo(W,fy);ctx.stroke();ctx.setLineDash([]);const bw=(W-30)/states.length;states.forEach((s,i)=>{const b=bucketOf(s.personR), h=Math.min(1.4,s.personR)/1.4*(H-28), x=16+i*bw+3, y=H-h-12;ctx.fillStyle=b.color;ctx.fillRect(x,y,bw-6,h);ctx.fillStyle='#d7e6f2';ctx.font='9px JetBrains Mono, monospace';ctx.fillText(s.person.id.replace('P-',''),x+2,H-2);});ctx.fillStyle='rgba(255,77,115,.75)';ctx.font='10px JetBrains Mono, monospace';ctx.fillText('R=1.0',6,fy-4);}
-function addLog(msg,type='info'){const area=document.getElementById('log');const div=document.createElement('div');div.className='log-'+type;div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`;area.insertBefore(div,area.firstChild);while(area.children.length>90)area.removeChild(area.lastChild);}
-function render(states){renderCards(states);renderDetail(states.find(s=>s.person.id===selected)||states[0]);renderBuckets(states);draw(states);const maxR=Math.max(...states.map(s=>s.personR)), b=bucketOf(maxR);document.getElementById('cohort-r').textContent=maxR.toFixed(3);document.getElementById('cohort-r').style.color=b.color;document.getElementById('cohort-status').textContent=b.key==='fail'?'HUMAN REVIEW — at least one person requires qualified review':b.key==='warn'?'CAUTION — attention bucket present':b.key==='watch'?'WATCH — trend monitoring bucket present':'SAFE — educational cohort';document.getElementById('cohort-status').style.color=b.color;const now=states.map(s=>bucketOf(s.personR).key);const nowMap={};states.forEach((s,i)=>{const bk=now[i];nowMap[s.person.id]=bk;if(lastBuckets[s.person.id]&&lastBuckets[s.person.id]!==bk){addLog(`${s.person.name} moved to ${bk.toUpperCase()} R=${s.personR.toFixed(3)}`,bk==='fail'?'fail':bk==='warn'?'warn':bk==='watch'?'watch':'ok');}});lastBuckets=nowMap;}
-function step(){if(!running)return;tick++;const states=PEOPLE.map((p,i)=>makeState(p,i)).sort((a,b)=>b.personR-a.personR);render(states);}
-function applyScenario(){scenario=document.getElementById('scenario').value;document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc;addLog('[SCENARIO] '+SCENARIOS[scenario].desc,'info');}
-function toggleRun(){running=!running;const b=document.getElementById('run');b.textContent=running?'▶ Running':'⏸ Paused';b.className=running?'active':'';}
-function resetSim(){tick=0;selected=null;lastBuckets={};scenario=Object.keys(SCENARIOS)[0];document.getElementById('scenario').value=scenario;document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc;document.getElementById('log').innerHTML='';addLog('NRA-IDE Medical Education Infection Observation Template initialized.','ok');const states=PEOPLE.map((p,i)=>makeState(p,i)).sort((a,b)=>b.personR-a.personR);render(states);lastBuckets=Object.fromEntries(states.map(s=>[s.person.id,bucketOf(s.personR).key]));}
-Object.keys(SCENARIOS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=SCENARIOS[k].label;document.getElementById('scenario').appendChild(o);});
-buildRiskRows();resetSim();setInterval(step,380);
-</script><div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• An educational template. Do not use it for diagnosis, treatment, or triage decisions.<br>• Vitals and individuals are synthetic. The margin compression by age and frailty is an educational assumption and is not in the maximum R (shown separately).</div>
-</body></html>
+
+
+
+
+
+function profilePressure(p){
+  let ageP = 0;
+  if(p.age >= 80) ageP = .46;
+  else if(p.age >= 70) ageP = .32;
+  else if(p.age >= 60) ageP = .20;
+  else if(p.age <= 12) ageP = .12;
+  const sc = SCENARIOS[scenario];
+  return clamp(ageP + p.frailty*.46 + p.chronic*.35 + (sc.profileBoost || 0), 0, 1.4);
+}
+
+function makeState(p, index){
+if(![p.age,p.frailty,p.chronic].every(Number.isFinite)||p.age<0||p.frailty<0||p.frailty>1||p.chronic<0||p.chronic>1)return {person:p,invalid:true,reason:'Invalid synthetic profile',patientR:NaN,personR:NaN};
+
+  const sc = SCENARIOS[scenario];
+  const phase = tick*.055 + index*.71;
+  const vit = {};
+  const prof = profilePressure(p);
+
+  FACTORS.forEach((f,i)=>{
+    const base = BASE[f.id];
+    const shift = sc.shift[f.id] || 0;
+    const amp = sc.amp[f.id] || 0;
+
+
+
+
+    let pe = 0;
+    if(f.id==='temp') pe = prof*.18;
+    if(f.id==='rr') pe = prof*2.5;
+    if(f.id==='hr') pe = prof*7.5;
+    if(f.id==='spo2') pe = -prof*1.9;
+    if(f.id==='hyd') pe = -prof*4.5;
+    if(f.id==='inf') pe = prof*.18;
+    vit[f.id] = clamp(base + shift + pe + Math.sin(phase+i*.92)*amp*.45 + rand(amp), f.min, f.max);
+  });
+
+  const rs = {};
+
+  const tauScale = clamp(1 - prof*.36, .45, 1);
+  FACTORS.forEach(f=>{
+    let tau = f.tau * tauScale;
+
+
+
+
+
+    if(f.id==='spo2' && vit.rr > 23) tau *= .90;
+    if(f.id==='hyd' && vit.temp > 38) tau *= .92;
+    if(f.id==='hr' && vit.temp > 38) tau *= .92;
+    tau = Math.max(tau, f.tau*.38);
+    const d = delta(vit[f.id], f);
+    rs[f.id] = {delta:d, tau, R:d/tau};
+  });
+
+
+
+
+
+
+  const infPressure = clamp((rs.temp.R*.32 + rs.rr.R*.26 + rs.hr.R*.20 + rs.spo2.R*.30 + rs.inf.R*.42 + rs.hyd.R*.18), 0, 1.65);
+  const corr = clamp(Math.max((rs.temp.R+rs.hr.R)*.32, (rs.rr.R+rs.spo2.R)*.36, (rs.temp.R+rs.inf.R)*.40, infPressure), 0, 1.65);
+  const vitalMax = Math.max(...Object.values(rs).map(x=>x.R));
+
+
+  const personR = vitalMax; // Supplementary review pressure is displayed separately.
+
+  return {person:p, vit, rs, profile:prof, infPressure, corr, vitalMax, personR, auxiliaryReview:corr>=1};
+}
+
+
+
+
+function bucketOf(R){
+ if(!Number.isFinite(R))return {key:'invalid',label:'INVALID',badge:'INVALID',color:'var(--fail)'};
+  if(R>=1.0) return {key:'fail', label:'Human Review', badge:'HUMAN', color:'var(--fail)'};
+  if(R>=.75) return {key:'warn', label:'Caution', badge:'CAUTION', color:'var(--warn)'};
+  if(R>=.40) return {key:'watch', label:'Watch', badge:'WATCH', color:'var(--watch)'};
+  return {key:'ok', label:'Observe', badge:'OBSERVE', color:'var(--ok)'};
+}
+
+function renderCards(states){
+  const root = document.getElementById('person-grid');
+  root.innerHTML = '';
+  states.forEach((s,i)=>{
+    const b = bucketOf(s.personR);
+    const div = document.createElement('div');
+    div.className = 'card' + (s.personR>=1?' fail':s.personR>=.75?' warn':'') + (s.person.id===selected?' selected':'');
+    div.onclick = () => {selected=s.person.id; render(states);};
+    const bclass = b.key==='ok'?'b-ok':b.key==='watch'?'b-watch':b.key==='warn'?'b-warn':'b-fail';
+    div.innerHTML = `
+      <div class="badge ${bclass}">${b.badge}</div>
+      <div class="pid">${s.person.id}</div>
+      <div class="pname">${s.person.name}</div>
+      <div class="row"><span class="lbl">Age</span><span class="val">${s.person.age}years</span></div>
+      <div class="row"><span class="lbl">Temperature / SpO2</span><span class="val">${s.vit.temp.toFixed(1)}℃ / ${s.vit.spo2.toFixed(1)}%</span></div>
+      <div class="row"><span class="lbl">Respiration / heart rate</span><span class="val">${s.vit.rr.toFixed(1)} / ${s.vit.hr.toFixed(0)}</span></div>
+      <div class="row"><span class="lbl">Hydration / inflammation-like</span><span class="val">${s.vit.hyd.toFixed(0)} / ${s.vit.inf.toFixed(2)}</span></div>
+      <div class="pr" style="color:${b.color}">R = ${s.personR.toFixed(3)}</div>
+      <div class="barbg"><div class="bar" style="width:${Math.min(100,s.personR*100).toFixed(1)}%;background:${b.color}"></div></div>
+      <div class="desc">${s.person.note}</div>
+    `;
+    root.appendChild(div);
+  });
+}
+
+function setRisk(id, val){
+  document.getElementById(`rb-${id}`).style.width = Math.min(100,val*100).toFixed(1)+'%';
+  document.getElementById(`rv-${id}`).textContent = val.toFixed(3);
+}
+
+function renderDetail(s){
+  const b = bucketOf(s.personR);
+  document.getElementById('detail-id').textContent = s.person.id;
+  document.getElementById('detail-name').textContent = s.person.name;
+  document.getElementById('detail-profile').textContent = `Age ${s.person.age}years / frailty=${s.person.frailty.toFixed(2)} / chronic=${s.person.chronic.toFixed(2)}`;
+  document.getElementById('detail-r').textContent = s.personR.toFixed(3);
+  document.getElementById('detail-r').style.color = b.color;
+  document.getElementById('node-vital').textContent = s.vitalMax.toFixed(3);
+  document.getElementById('node-inf').textContent = s.infPressure.toFixed(3);
+  document.getElementById('node-bucket').textContent = b.label;
+  document.getElementById('node-bucket').style.color = b.color;
+
+  setRisk('temp',s.rs.temp.R);
+  setRisk('rr',s.rs.rr.R);
+  setRisk('hr',s.rs.hr.R);
+  setRisk('spo2',s.rs.spo2.R);
+  setRisk('hyd',s.rs.hyd.R);
+  setRisk('inf',s.rs.inf.R);
+  setRisk('prof',s.profile);
+
+  const top = Object.entries(s.rs).sort((a,b)=>b[1].R-a[1].R)[0];
+  const topName = FACTORS.find(f=>f.id===top[0]).name;
+  document.getElementById('detail-note').textContent =
+    `Largest contributor: ${topName}」. infection-like auxiliary pressure=${s.infPressure.toFixed(3)}、Profilepressure=${s.profile.toFixed(3)}、Correlation pressure=${s.corr.toFixed(3)}。An educational contributor display, not a diagnosis.`;
+}
+
+function renderBuckets(states){
+  const roots = {ok:document.getElementById('bucket-ok'), watch:document.getElementById('bucket-watch'), warn:document.getElementById('bucket-warn'), fail:document.getElementById('bucket-fail')};
+  Object.values(roots).forEach(r=>r.innerHTML='');
+  const counts = {ok:0,watch:0,warn:0,fail:0};
+  states.slice().sort((a,b)=>b.personR-a.personR).forEach(s=>{
+    const b=bucketOf(s.personR);
+    counts[b.key]++;
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${s.person.id}</strong> ${s.person.name} / R=${s.personR.toFixed(3)} / inf=${s.infPressure.toFixed(3)}`;
+    roots[b.key].appendChild(li);
+  });
+  document.getElementById('cnt-ok').textContent = counts.ok;
+  document.getElementById('cnt-watch').textContent = counts.watch;
+  document.getElementById('cnt-warn').textContent = counts.warn;
+  document.getElementById('cnt-fail').textContent = counts.fail;
+}
+
+const canvas = document.getElementById('dist-canvas');
+const ctx = canvas.getContext('2d');
+
+function drawDistribution(states){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#14222a';
+  ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#2a4551';
+  [0.4,0.75,1.0].forEach(r=>{
+    const y=H-r/1.4*(H-24)-12;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  });
+  const fy=H-1.0/1.4*(H-24)-12;
+  ctx.setLineDash([5,4]);
+  ctx.strokeStyle='rgba(255,75,113,.75)';
+  ctx.beginPath();ctx.moveTo(0,fy);ctx.lineTo(W,fy);ctx.stroke();
+  ctx.setLineDash([]);
+  const bw=(W-30)/states.length;
+  states.forEach((s,i)=>{
+    const b=bucketOf(s.personR);
+    const h=Math.min(1.4,s.personR)/1.4*(H-28);
+    const x=16+i*bw+3;
+    const y=H-h-12;
+    ctx.fillStyle=b.color;
+    ctx.fillRect(x,y,bw-6,h);
+    ctx.fillStyle='#d8e8ef';
+    ctx.font='9px JetBrains Mono, monospace';
+    ctx.fillText(s.person.id.replace('P-',''), x+2, H-2);
+  });
+  ctx.fillStyle='rgba(255,75,113,.75)';
+  ctx.font='10px JetBrains Mono, monospace';
+  ctx.fillText('R=1.0', 6, fy-4);
+}
+
+function addLog(msg,type='info'){
+  const area=document.getElementById('log-area');
+  const div=document.createElement('div');
+  div.className='log-'+type;
+  div.textContent=`[t=${String(tick).padStart(4,'0')}] ${msg}`;
+  area.insertBefore(div,area.firstChild);
+  logLines.push(div);
+  if(logLines.length>90){
+    const old=logLines.shift();
+    if(old) old.remove();
+  }
+}
+
+function applyScenario(){
+  scenario=document.getElementById('scenario-sel').value;
+  document.getElementById('scen-desc').textContent=SCENARIOS[scenario].desc;
+  addLog(`[SCENARIO] ${SCENARIOS[scenario].desc}`, 'info');
+}
+
+function render(states){
+  const invalid=states.filter(s=>s.invalid||!Number.isFinite(s.personR));
+  const aux=states.filter(s=>s.auxiliaryReview);
+  document.getElementById('medical-input-state').textContent=invalid.length?'INVALID — no observation bucket: '+invalid.map(s=>s.person.id||'?').join(', '):aux.length?'AUX_REVIEW — supplementary pressure; independent of individual ratio':'SYNTHETIC EDUCATIONAL SNAPSHOT';
+  states=states.filter(s=>!s.invalid&&Number.isFinite(s.personR));
+  if(!states.length){
+    document.getElementById('cohort-r').textContent='—';document.getElementById('cohort-status').textContent='INVALID — no observation bucket';
+    document.getElementById('person-grid').innerHTML='';
+    document.getElementById('detail-r').textContent='—';document.getElementById('node-bucket').textContent='INVALID';
+    ['ok','watch','warn','fail'].forEach(k=>{document.getElementById('bucket-'+k).innerHTML='';document.getElementById('cnt-'+k).textContent='0';});
+    return;
+  }
+
+  renderCards(states);
+  renderDetail(states.find(s => s.person.id === selected) || states[0]);
+  renderBuckets(states);
+  drawDistribution(states);
+
+  const maxR = Math.max(...states.map(s=>s.personR));
+  const b = bucketOf(maxR);
+  document.getElementById('cohort-r').textContent=maxR.toFixed(3);
+  document.getElementById('cohort-r').style.color=b.color;
+  document.getElementById('cohort-status').textContent =
+    b.key==='fail'?'HUMAN REVIEW — at least one individual requests human review':
+    b.key==='warn'?'CAUTION — caution bucket present':
+    b.key==='watch'?'WATCH — watch bucket present':'SAFE — educational observation cohort';
+  document.getElementById('cohort-status').style.color=b.color;
+
+  const nowBuckets = {};
+  states.forEach((s,i)=>{
+    const bk = bucketOf(s.personR).key;
+    nowBuckets[s.person.id] = bk;
+    if(lastBuckets[s.person.id] && lastBuckets[s.person.id]!==bk){
+      if(bk==='fail') addLog(`Human Reviewmoved to observation bucket: ${s.person.name} R=${s.personR.toFixed(3)}`, 'fail');
+      else if(bk==='warn') addLog(`Cautionmoved to observation bucket: ${s.person.name} R=${s.personR.toFixed(3)}`, 'warn');
+      else if(bk==='watch') addLog(`Watchmoved to observation bucket: ${s.person.name} R=${s.personR.toFixed(3)}`, 'watch');
+      else addLog(`Observereturned to current observation bucket: ${s.person.name} R=${s.personR.toFixed(3)}`, 'ok');
+    }
+  });
+  lastBuckets = nowBuckets;
+}
+
+function step(){
+  if(!running) return;
+  tick++;
+  const states = PEOPLE.map((p,i)=>makeState(p,i)).sort((a,b)=>b.personR-a.personR);
+  render(states);
+}
+
+function toggleRun(){
+  running=!running;
+  const btn=document.getElementById('btn-run');
+  btn.textContent=running?'▶ Running':'⏸ Paused';
+  btn.className=running?'btn active':'btn';
+}
+
+function resetSim(){
+  tick=0;
+  selected=null;
+  lastBuckets={};
+  scenario='normal';
+  document.getElementById('scenario-sel').value='normal';
+  document.getElementById('scen-desc').textContent=SCENARIOS.normal.desc;
+  document.getElementById('log-area').innerHTML='';
+  logLines=[];
+  addLog('Infection observation template initialized', 'info');
+  addLog('Individual observation buckets initialized', 'ok');
+  const states=PEOPLE.map((p,i)=>makeState(p,i)).sort((a,b)=>b.personR-a.personR);
+  render(states);
+  lastBuckets=Object.fromEntries(states.map(s=>[s.person.id, bucketOf(s.personR).key]));
+}
+
+resetSim();
+setInterval(step, 380);
+</script>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limitations</strong><br>Educational template; no diagnosis, treatment or triage use.<br>All vital signs and people are synthetic. Profile effects on both observations and widths are unvalidated educational assumptions, not clinical coefficients.</div>
+</body>
+</html>
