@@ -1,0 +1,305 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>動的API 移行フロー</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 単一カラムの技術メモ。状態ラベル（事実/推定/未確定）を左の札で示し、図は横スクロール枠に収める */
+:root {
+  --bg: #f6f7f5;
+  --surface: #ffffff;
+  --fg: #1d2421;
+  --muted: #5b6661;
+  --line: #d5dbd7;
+  --accent: #1f6f5c;
+  --fact: #1f6f5c;
+  --est: #9a6a12;
+  --unk: #a33a3a;
+  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141917; --surface: #1c2320; --fg: #e3e9e5; --muted: #9aa7a1; --line: #2f3a35;
+    --accent: #5fc3a6; --fact: #5fc3a6; --est: #e0b45a; --unk: #ef8a8a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141917; --surface: #1c2320; --fg: #e3e9e5; --muted: #9aa7a1; --line: #2f3a35;
+  --accent: #5fc3a6; --fact: #5fc3a6; --est: #e0b45a; --unk: #ef8a8a; color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.75;
+}
+.wrap {
+  max-width: 960px; margin: 0 auto;
+  padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 44px;
+}
+header { display: grid; gap: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+h1 { font-size: 28px; line-height: 1.35; margin: 0; text-wrap: balance; font-weight: 600; }
+h2 { font-size: 19px; margin: 0; text-wrap: balance; font-weight: 600; }
+p { margin: 0; max-width: 70ch; }
+section { display: grid; gap: 14px; min-width: 0; }
+code { font-family: var(--font-mono); font-size: .9em; background: var(--surface); border: 1px solid var(--line); padding: 0 4px; border-radius: 3px; overflow-wrap: anywhere; }
+.status { display: grid; gap: 10px; }
+.row { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: start; }
+.tag { font-family: var(--font-mono); font-size: 12px; font-weight: 500; padding: 2px 0; text-align: center; border: 1px solid currentColor; border-radius: 3px; }
+.tag.fact { color: var(--fact); } .tag.est { color: var(--est); } .tag.unk { color: var(--unk); }
+.row > div { min-width: 0; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; min-width: 680px; }
+.src { font-size: 13px; color: var(--muted); }
+ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; max-width: 72ch; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 560px; }
+th, td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 13px; }
+.key { border-left: 3px solid var(--accent); padding-left: 14px; }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">note/08_セキュリティ · 移行フロー · 2026-10-16</div>
+  <h1>静的APIキーから動的API認証への移行フロー</h1>
+  <p>根拠は 08 の 3 原文（A 標準仕様書・B 移行計画書・C 統合設計案）と、同日の精査記録（F01〜F12）・具体的提言です。骨格には提言が推奨する C の「防御・縮退・復旧の分離」を使い、精査で問題とされた A/B の近道は採用していません。</p>
+</header>
+
+<section>
+  <h2>前提と状態区分</h2>
+  <div class="status">
+    <div class="row"><span class="tag unk">位置付け</span><div>08 の 3 原文と提言はどれも<b>非正典・未承認・未実装</b>です。この図は設計検討用で、本番仕様ではありません。精査の判定は「精査完了／解消未完了（未解消 12 項目）」です。</div></div>
+    <div class="row"><span class="tag fact">事実</span><div>08 の「現況」は、モバイルアプリが<b>静的APIキーと長期セッショントークン</b>でバックエンドを呼ぶ構成です（B:7、A:23）。NRA-IDE の <code>src/nra_llm_pipeline_*.py</code> にある LLM プロバイダ用キーは、これとは別の境界です。前回版の図1はこの 2 つを混同していたため、差し替えました。</div></div>
+    <div class="row"><span class="tag fact">事実</span><div>移行段階 M0〜M5、登録状態 PENDING〜REVOKED、受付順序、障害時の許可表は、提言 §2・§3・§5・§7・§10 にある候補案です。名前はすべて候補名で、導入済みの機能ではありません。</div></div>
+    <div class="row"><span class="tag est">推定</span><div>図の分岐の書き方と、段階の間を矢印でつないだ部分は、提言の文章を図にしたものです。差戻しの矢印は、提言の「次へ進む条件」を満たさない場合を表した解釈です。</div></div>
+    <div class="row"><span class="tag unk">未確定</span><div>対象サービス、端末 OS の分布、処理容量、認証製品、法的な本人確認要件はまだ示されていません（C:58）。そのため図には数値の閾値を入れていません。</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>図1　現況（静的APIキー方式）</h2>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  APP["モバイルアプリ<br/>静的APIキーを内蔵<br/>長期セッショントークンを保持"] -->|"X-API-Key ＋ 旧Session"| GW["APIゲートウェイ"]
+  GW --> BE["業務ロジック・DB"]
+  APP -. "逆コンパイルでキー抽出" .-> ATK["外部スクリプト"]
+  ATK -->|"同じキーで直接呼出"| GW
+  BE -. "認可不備があれば他人のデータも返る" .-> BOLA["BOLA / IDOR"]
+  </pre></div>
+  <p class="src">出典: A §1.1–1.2、B 冒頭の前提条件。BOLA はキー方式とは別に存在する問題です（精査 F01、C:60）。</p>
+</section>
+
+<section>
+  <h2>図2　移行全体フロー（M0 → M5）</h2>
+  <div class="diagram"><pre class="mermaid">
+flowchart TD
+  START(["現況：静的APIキー＋長期セッション"]) --> M0
+
+  subgraph PRE["先行して行うこと"]
+    M0["M0 棚卸し<br/>API台帳を作成（未分類は保護API扱い）<br/>BOLAを是正し、旧資格を棚卸し<br/>対応端末と本人復旧経路を準備"]
+  end
+  M0 --> G0{"未分類の経路がないか<br/>保護APIの認可試験と<br/>復旧受付手順が成立したか"}
+  G0 -- "否" --> M0
+  G0 -- "可" --> M1
+
+  M1["M1 候補登録<br/>既存セッションを保ったまま<br/>候補鍵を生成して提出（PENDING）"] --> G1{"本人承認の前に<br/>業務権限が増えないか"}
+  G1 -- "増える" --> M1
+  G1 -- "増えない" --> M2
+
+  M2["M2 並行観測<br/>旧方式の最低条件を維持したまま<br/>新方式を観測"] --> G2{"失敗原因を端末群・経路別に説明でき<br/>登録できない人も集計できたか"}
+  G2 -- "否" --> M2
+  G2 -- "可" --> M3
+
+  M3["M3 限定強制<br/>承認済み端末・セッションと<br/>指定APIから新方式を必須にする"] --> G3{"新ヘッダーの欠落・偽装で<br/>legacyへ降格できないか<br/>別端末への影響は宣言どおりか"}
+  G3 -- "否" --> M3
+  G3 -- "可" --> M4
+
+  M4["M4 対象拡大<br/>サービス責任者が影響と試験結果を確認"] --> G4{"負荷・障害・本人復旧・<br/>問い合わせ体制が受入条件を満たすか"}
+  G4 -- "否" --> M4
+  G4 -- "可" --> M5
+
+  M5["M5 旧方式終了<br/>事前通知と代替手段を伴って<br/>旧資格を無効化"] --> G5{"残っている旧利用者を特定し<br/>対応計画・終了承認・監査記録があるか"}
+  G5 -- "否" --> M5
+  G5 -- "可" --> DONE(["移行完了：静的キーをサーバー設定から削除"])
+
+  REC["紙・対面の独立復旧経路"] -. "M5 より前に利用可能にする" .-> M5
+  NO1["禁止：強制済み境界を shadow へ戻す操作を<br/>通常の切戻しにしない"] -.- M3
+  </pre></div>
+  <p class="src">出典: 提言 §10（M0〜M5 と次へ進む条件）、§11（復旧経路を移行終了前に用意）、精査 F08。M0〜M5 は C の資源状態 N/M/D/H とは別物です。</p>
+</section>
+
+<section>
+  <h2>図3　新しい鍵の登録（旧セッションから直接有効化しない）</h2>
+  <div class="diagram"><pre class="mermaid">
+flowchart TD
+  R0(["端末が新しい鍵の登録を要求"]) --> R1{"旧セッションが有効か"}
+  R1 -- "無効" --> RV["復旧審査へ"]
+  R1 -- "有効" --> R2["サーバー側の主体に結び付けた<br/>registration_id を作成<br/>状態：PENDING"]
+  R2 --> R3["registration_id・目的・新公開鍵に<br/>結び付けた単回 challenge を発行"]
+  R3 --> R4{"OS別の証明と鍵所持を検証<br/>iOS：App Attest<br/>Android：Key Attestation"}
+  R4 -- "不成立・未確認" --> R4N["正式な鍵としては登録しない<br/>PENDING のまま"]
+  R4 -- "成立" --> R5["状態：DEVICE_VERIFIED<br/>業務権限はまだ付与しない"]
+  R5 --> R6{"独立した既存の認証器で<br/>新しい鍵の追加を承認したか<br/>（Passkey など）"}
+  R6 -- "認証器がない" --> RV
+  R6 -- "承認なし・期限切れ" --> R5
+  R6 -- "承認" --> R7["状態：ACTIVE<br/>旧資格の失効・監査記録・<br/>登録通知（outbox で再送可能）"]
+  R7 --> R8(["台帳で許可した範囲の資格を発行"])
+
+  SUS["SUSPENDED<br/>調査・障害・整合性不明"] -. "新しい保護資格の発行を停止" .-> R8
+  REV["REVOKED<br/>自動では ACTIVE に戻さない"]
+  </pre></div>
+  <p class="src">出典: 提言 §3（登録状態と手順 1〜6）、§4（OS 別の実装契約）、精査 F02・F05。B の「旧セッションを身元保証人にして無操作で登録する」案は採用していません。IP/ASN/OS の一致は補助的な観測にとどめます。</p>
+</section>
+
+<section>
+  <h2>図4　移行後の日常リクエスト受付</h2>
+  <div class="diagram"><pre class="mermaid">
+flowchart TD
+  Q0(["要求が到着"]) --> Q1{"入口の安価な上限判定<br/>通信量・サイズ・同時接続"}
+  Q1 -- "超過" --> NA["未受理：503 ＋ Retry-After<br/>業務データの保存・ジョブ投入なし"]
+  Q1 -- "受入" --> Q2{"経路の種別"}
+  Q2 -- "公開API" --> PUB["公開用の処理枠<br/>→ 公開専用データ"]
+  Q2 -- "登録・資格発行" --> AUTH["認証用の処理枠<br/>→ 本人資格・証明・状態を検証<br/>→ 永続確定"]
+  Q2 -- "保護API" --> V1{"署名・期限・iss/aud<br/>DPoP証明と cnf.jkt の一致<br/>jti の再利用なし・失効なし"}
+  V1 -- "期限切れ" --> SF["共有の更新処理に合流<br/>Single-Flight"]
+  SF -- "更新成功" --> V1
+  SF -- "更新後も不成立" --> E401["自動更新を打ち切り、理由を表示"]
+  V1 -- "不正" --> DENY["防御拒否と監査"]
+  V1 -- "成立" --> Q3{"主体ごとの処理枠・応答量の上限"}
+  Q3 -- "超過" --> R429["429"]
+  Q3 -- "範囲内" --> Q4{"業務認可<br/>主体×tenant×対象×操作×業務状態"}
+  Q4 -- "権限なし" --> DENY
+  Q4 -- "権限あり" --> Q5["業務処理<br/>操作記録と業務変更を同じトランザクションで確定"]
+  Q5 --> OK(["結果確定"])
+  Q5 -. "応答消失" .-> UNK["端末側：RESULT_UNKNOWN<br/>同じ operation_id で照会し、新しいIDで再実行しない"]
+  </pre></div>
+  <p class="src">出典: 提言 §2（受付順序）、§5（受入条件 1〜7、401 の扱い）、§6（同じ確定単位での冪等性）、§9（状態表示）、精査 F03・F07・F11。縮退制御は入口の枠だけを変えられ、認証・認可の条件は変えられません（C §2）。</p>
+</section>
+
+<section>
+  <h2>障害時に許可すること（提言 §7 の要約）</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>障害</th><th>保護API（既発行資格）</th><th>新規登録・資格発行</th><th>復帰の条件</th></tr></thead>
+    <tbody>
+      <tr><td>Apple/Google 等の証明基盤が停止</td><td>その外部サービスを毎回必要とせず、他の必須検証がすべて成立する範囲だけ継続</td><td>必要な証明を取れない登録は保留</td><td>外部証明の正常化と再検証</td></tr>
+      <tr><td>Redis（任意キャッシュ）が停止</td><td>正本DBで同じ検証を続けられ、負荷上限内なら継続</td><td>同じ条件を満たす場合だけ継続</td><td>正本との整合と負荷を確認</td></tr>
+      <tr><td>Redis が唯一の再利用防止正本で停止</td><td>再利用防止を検証できない保護要求は停止</td><td>停止</td><td>正本の復旧と整合確認。検証の省略で代替しない</td></tr>
+      <tr><td>counter・失効の正本DBが停止、または巻き戻りの疑い</td><td>照合できない保護要求は停止。独立した公開経路だけ継続</td><td>停止</td><td>証拠照合、失効処理、必要なら強い再登録</td></tr>
+      <tr><td>端末の鍵を喪失</td><td>失った鍵が必要な操作は不可</td><td>別の本人証明または復旧審査で新規登録</td><td>新しい鍵の承認と旧資格の失効</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>A/B 原文から採用しなかった近道</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>原文の案</th><th>採用しない理由（精査）</th><th>この図での扱い</th></tr></thead>
+    <tbody>
+      <tr><td>旧セッションだけで新端末を自動登録（B:83, 164）</td><td>漏えいした旧セッションが新しい鍵の信頼に昇格する（F05）</td><td>図3：独立した認証器の承認か復旧審査を必須にする</td></tr>
+      <tr><td>障害時に署名や signCount の検証を省略（B:266, 329）</td><td>同じ署名の再利用や counter の巻き戻しが通る（F04）</td><td>障害表：省略せず、保留または停止</td></tr>
+      <tr><td>短命 Bearer ＋ IP/TLS 指紋で盗用を防ぐ（B:346）</td><td>秘密鍵を持っていることの証明にならない（F03）</td><td>図4：DPoP などの送信者拘束を受入条件にする</td></tr>
+      <tr><td>UUID 化・端末署名で BOLA を解消（A:99）</td><td>正規の端末でも他人の ID を要求して署名できる（F01）</td><td>図4：業務認可を独立した判定として残す</td></tr>
+      <tr><td>Redis の TTL だけで冪等性を確保（A:171–173）</td><td>停止のタイミングによっては、正当な再送が拒否される（F07）</td><td>図4：操作記録を同じトランザクションで確定する</td></tr>
+      <tr><td>enforced から shadow への切戻し（B:183）</td><td>強制済みの境界が緩む（F08）</td><td>図2：通常の切戻し手段にしない</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>大事な部分のまとめ</h2>
+  <ul class="key">
+    <li>防御（不正を止める）、縮退（処理しきれないものを受け付けない）、復旧（デジタル資格を失った後の権利回復）は、それぞれ別の系統として持ちます。縮退を理由に認証・認可を緩めることはしません。</li>
+    <li>新しい鍵は、旧セッションだけでは ACTIVE になりません。独立した本人承認か、復旧審査を通します。</li>
+    <li>BOLA の是正と復旧経路の準備は、移行の後ではなく前に済ませます（M0、M5 の前提）。</li>
+    <li>検証できない状態では、新しい資格を発行せず、保護された操作も通しません。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>要点（要約）</h2>
+  <p>棚卸し・BOLA 是正（M0）→ 候補鍵の登録（M1）→ 並行観測（M2）→ 限定強制（M3）→ 対象拡大（M4）→ 旧方式終了（M5）の順に進め、各段階のゲートを満たさなければ次に進みません。図の数値や段階名はすべて未承認の候補で、受入試験 AT01〜AT20 も未実行です。</p>
+</section>
+</div>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+
+</body></html>
