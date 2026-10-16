@@ -11,9 +11,9 @@
   --------------------------------------------------
   監視指標: 土壌水分 / 地温 / 日射量 / 風速
   干ばつレベル Lv.0〜4 = 複合スコア（加重Rスコア + 下限EMA）
-  Lv.0 正常 / Lv.1 注意(EMA上昇) / Lv.2 警告(R>0.7)
-  Lv.3 危険(SILENCE) / Lv.4 緊急(複数指標SILENCE)
-  嵐後シナリオ: 雨後の蒸発加速をEMAが値が閾値を割る前に先読み。
+  Lv.0 正常 / Lv.1 注意(加重スコア≥0.2) / Lv.2 警告(加重スコア≥0.5)
+  Lv.3 危険(干ばつ側SILENCE 1指標以上、またはスコア≥1.0) / Lv.4 緊急(同3指標以上、またはスコア≥1.5)
+  嵐後シナリオ: 雨後の急乾燥で、ズレの蓄積（EMA）が τ を縮め、下限より手前で検知する。
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
 <style>
@@ -228,7 +228,7 @@ header p  { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.8;
 .r-fill  { height:100%; border-radius:2px; transition:width .1s,background .15s; }
 .r-val   { font-family:var(--mono); font-size:9px; min-width:42px; text-align:right; }
 
-/* EMA進行バー（下限の勢いゲージ） */
+/* 蓄積（EMA）バー */
 .ema-row { display:flex; align-items:center; gap:8px; margin-top:5px; }
 .ema-label { font-family:var(--mono); font-size:8px; color:var(--muted); white-space:nowrap; }
 .ema-bar  { flex:1; height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
@@ -349,8 +349,8 @@ footer a { color:var(--soil); text-decoration:none; }
     <div class="h-tag">NRA-IDE / Band Gate — 10 / FIELD AGRICULTURE</div>
     <h1>屋外畑 干ばつ進行監視<br>Band Gate + 干ばつレベルゲージ</h1>
     <p>
-      土壌水分・地温・日射量・風速を同時監視し、干ばつの「進行速度」を検知します。<br>
-      現在値が閾値を割る前に、EMAが「乾き始めの勢い」を捉えて予兆段階で警告します。<br>
+      土壌水分・地温・日射量・風速を同時監視し、干ばつの進み具合を見ます。<br>
+      ズレの蓄積（EMA の平滑値）が大きくなると τ を縮め、宣言した下限より手前で検知します。<br>
       無線土壌センサーからのデータをそのままこのゲートに通す構成を想定しています。
     </p>
   </div>
@@ -432,7 +432,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-soil">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">乾燥勢い</span>
+      <span class="ema-label">乾燥の蓄積</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-soil"></div></div>
       <span class="ema-val" id="ev-soil">0.000</span>
     </div>
@@ -463,7 +463,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-ground">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">上昇勢い</span>
+      <span class="ema-label">上昇の蓄積</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-ground"></div></div>
       <span class="ema-val" id="ev-ground">0.000</span>
     </div>
@@ -494,7 +494,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-sun">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">過剰照射</span>
+      <span class="ema-label">強日射の蓄積</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-sun"></div></div>
       <span class="ema-val" id="ev-sun">0.000</span>
     </div>
@@ -525,7 +525,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-wind">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">蒸散加速</span>
+      <span class="ema-label">強風の蓄積</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-wind"></div></div>
       <span class="ema-val" id="ev-wind">0.000</span>
     </div>
@@ -608,13 +608,15 @@ footer a { color:var(--soil); text-decoration:none; }
 
   <div class="log-panel">
     <div class="p-title">フィールドイベントログ</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
     <div class="note-box">
       <div class="note-title">屋外畑の非対称設定</div>
       <div class="note-text">
-        土壌水分: α_lower を高く → 乾き始めを素早く検知、補水トリガーを早める<br>
-        日射量: α_upper を高く → 強日射の蒸散加速を早期捕捉<br>
-        風速: α_upper を高く → 蒸散急増を即検知して灌漑判断に活用<br>
+        α は τ を縮める速さだけを変えます（判定の R は生の値で行う）。<br>
+        土壌水分: α_lower を高く → 乾燥側の τ が早く縮み、下限より手前で検知<br>
+        日射量: α_upper を高く → 強日射が続くと τ が早く縮む<br>
+        風速: α_upper を高く → 強風が続くと τ が早く縮み、灌漑判断に早く届く<br>
         地温: α を対称に近く → 上下どちらの異常も同じ感度で監視
       </div>
     </div>
@@ -634,6 +636,27 @@ footer a { color:var(--soil); text-decoration:none; }
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────
 // センサー定義
 // ─────────────────────────────────────────────
@@ -651,10 +674,10 @@ let scenario = 'normal';
 // 干ばつレベル定義
 const LV_INFO = [
   { lv:0, label:'Lv.0  正常',   col:'#aed581', desc:'Lv.0 — 正常範囲内。全指標が適正域に収まっています。補水不要です。' },
-  { lv:1, label:'Lv.1  注意',   col:'#fff176', desc:'Lv.1 — 注意。EMAが上昇し始めました。乾燥の「勢い」が出てきています。補水の準備を始めてください。' },
-  { lv:2, label:'Lv.2  警告',   col:'#ffb74d', desc:'Lv.2 — 警告。複数指標でRが閾値の70%を超えています。このまま進むと補水が必要になります。' },
-  { lv:3, label:'Lv.3  危険',   col:'#ff7043', desc:'Lv.3 — 危険。SILENCE 発動中。土壌水分が限界に近づいています。補水を実施してください。' },
-  { lv:4, label:'Lv.4  緊急',   col:'#b71c1c', desc:'Lv.4 — 緊急。複数指標が同時に SILENCE 状態です。即時補水が必要です。作物へのダメージリスクがあります。' },
+  { lv:1, label:'Lv.1  注意',   col:'#fff176', desc:'Lv.1 — 注意。干ばつ側の R とズレの蓄積（EMA）を重み付けしたスコアが 0.2 以上です。補水の準備を始めてください。' },
+  { lv:2, label:'Lv.2  警告',   col:'#ffb74d', desc:'Lv.2 — 警告。重み付けしたスコアが 0.5 以上です。このまま進むと補水が必要になります。' },
+  { lv:3, label:'Lv.3  危険',   col:'#ff7043', desc:'Lv.3 — 危険。干ばつ側の指標が1つ以上 SILENCE（またはスコア 1.0 以上）。補水を実施してください。' },
+  { lv:4, label:'Lv.4  緊急',   col:'#b71c1c', desc:'Lv.4 — 緊急。干ばつ側の指標が3つ以上 SILENCE（またはスコア 1.5 以上）。即時補水が必要です。作物へのダメージリスクがあります。' },
 ];
 
 // ─────────────────────────────────────────────
@@ -753,29 +776,31 @@ function bandGate(sensor, v, p, nowMs) {
   const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
   const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
 
-  const valid = tau0_u > 0 && tau0_l > 0;
-  const R_u = valid ? d_upper/tau_u : Infinity;
-  const R_l = valid ? d_lower/tau_l : Infinity;
-  const R   = Math.max(R_u, R_l);
+  // τ0≤0 は、正典どおり R を定義しない（OUT_OF_DESCRIPTION_DOMAIN。AXIOMS §6）。無限大の R に置き換えず null とし、停止側に倒す。
+  const undef = !(tau0_u > 0 && tau0_l > 0);
+  const R_u = undef ? null : d_upper/tau_u;
+  const R_l = undef ? null : d_lower/tau_l;
+  const R   = undef ? null : Math.max(R_u, R_l);
 
   const held    = nowMs < sensor.holdUntil;
   let silence   = held;
   let dir       = held ? (sensor.lastDir||'') : '';
 
-  if (!held && R>=1.0) {
+  if (!held && (undef || R>=1.0)) {
     sensor.holdUntil = nowMs + parseInt(document.getElementById('sl-hold').value);
     silence = true;
-    dir = R_u>=R_l ? 'upper' : 'lower';
+    dir = undef ? 'undef' : (R_u>=R_l ? 'upper' : 'lower');
     sensor.lastDir = dir;
+    BoundaryRecord.hit({ time: `t=${t}`, channel: `${sensor.label}・${dir==='undef'?'定義域外':dir==='upper'?'上限側':'下限側'}`, value: v.toFixed(sensor.key==='sun'?0:1) + sensor.unit, R });
   }
 
   const upper_band = ref + tau_u;
   const lower_band = ref - tau_l;
 
-  return { v, R, R_u, R_l, silence, dir, upper_band, lower_band,
+  return { v, R, R_u, R_l, silence, dir, undef, upper_band, lower_band,
            ema_lower: sensor.ema_l, ema_upper: sensor.ema_u,
-           ema_lower_ratio: valid ? sensor.ema_l / tau0_l : Infinity,
-           ema_upper_ratio: valid ? sensor.ema_u / tau0_u : Infinity };
+           ema_lower_ratio: undef ? null : sensor.ema_l / tau0_l,
+           ema_upper_ratio: undef ? null : sensor.ema_u / tau0_u };
 }
 
 // ─────────────────────────────────────────────
@@ -801,9 +826,11 @@ function calcDroughtLevel(results) {
   score /= wsum;
 
   // 干ばつ方向でSILENCE中の指標数
-  const silCount = keys.filter(k=>results[k].silence && results[k].dir===side[k]).length;
+  // 定義域外（τ0≤0）の指標も停止側として数える
+  const silCount = keys.filter(k=>results[k].undef || (results[k].silence && results[k].dir===side[k])).length;
+  // 加重平均のスコアがRの判定を軽くしないよう、干ばつ側でSILENCEの指標が1つでもあれば Lv.3 以上にする。
   if (silCount >= 3) return Math.max(score, 1.5);
-  if (silCount >= 2) return Math.max(score, 1.0);
+  if (silCount >= 1) return Math.max(score, 1.0);
 
   return score;
 }
@@ -912,7 +939,7 @@ function updateCard(key, res, p) {
 
   const decEl = document.getElementById('dec-'+key);
   if (silence) {
-    decEl.textContent = dir==='upper'?'↑ UPPER':'↓ LOWER';
+    decEl.textContent = dir==='undef'?'定義域外':dir==='upper'?'↑ UPPER':'↓ LOWER';
     decEl.className   = 'card-decision '+dir;
   } else if (R>0.65) {
     decEl.textContent = 'WARN'; decEl.className = 'card-decision warn';
@@ -926,11 +953,12 @@ function updateCard(key, res, p) {
   const rFillCol = silence?(dir==='upper'?'#ff7043':'#80d8ff'):R>0.65?'#ffca28':col;
   document.getElementById('rf-'+key).style.width = Math.min(R/1.5,1)*100+'%';
   document.getElementById('rf-'+key).style.background = rFillCol;
-  document.getElementById('rv-'+key).textContent = R.toFixed(4);
+  document.getElementById('rv-'+key).textContent = R === null ? '定義域外' : R.toFixed(4);
   document.getElementById('rv-'+key).style.color = rFillCol;
 
-  // EMA進行バー（下限は乾燥勢い、上限は上昇勢い）
-  const emaKey = (key==='soil'||key==='wind') ? ema_lower : ema_upper;
+  // 蓄積（EMA）バー：干ばつ側のズレの平滑値
+  // 干ばつ側のEMAを表示する：土壌水分は下側、地温・日射・風速は上側（calcDroughtLevel の side と同じ）
+  const emaKey = key==='soil' ? ema_lower : ema_upper;
   const emaMax = (p.th - p.tl) * 0.8;
   document.getElementById('ef-'+key).style.width = Math.min(emaKey/emaMax,1)*100+'%';
   document.getElementById('ev-'+key).textContent = emaKey.toFixed(3);
@@ -954,7 +982,9 @@ function updateCard(key, res, p) {
 
   // ログ
   if (silence && s.lastDec!=='SILENCE') {
-    addLog(`[${s.label}] ${dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
+    addLog(dir==='undef'
+      ? `[${s.label}] OUT_OF_DESCRIPTION_DOMAIN（τ0≤0：基準値が上限・下限の外。R は定義しない）→ 停止側`
+      : `[${s.label}] ${dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
   } else if (!silence && s.lastDec==='SILENCE') {
     addLog(`[${s.label}] HOLD終了 → PASS`, 'safe');
   } else if (R>0.65 && R<1.0 && s.lastDec!=='warn') {
@@ -1015,7 +1045,7 @@ const SCENARIO_NOTES = {
   normal:  '🌱 通常の畑環境。定期的に外乱が来ます。外乱のピークは宣言した上下限（土壌水分25%・日射900W/m²・地温32°Cなど）を一時的に超えるため、その間は Lv.3 以上になります。',
   drought: '🏜 軽度干ばつ。土壌水分が徐々に低下し始めています。EMAの上昇に注目してください。',
   severe:  '🔥 重度干ばつ。土壌水分・日射・風速が同時に限界に向かっています。複数指標が連動する様子を観察してください。',
-  storm:   '⛈ 嵐後の急速乾燥。雨で一時的に回復したあと、蒸発が加速して急激に乾燥します。EMAが「勢い」を先読みする様子がわかります。風速は蒸散を進める干ばつ側の指標として数えるため、降雨中でも強風（上限8m/s超）だけで Lv が上がります。',
+  storm:   '⛈ 嵐後の急速乾燥。雨で一時的に回復したあと、蒸発が加速して急激に乾燥します。ズレの蓄積（EMA）で τ が縮み、下限より手前で検知する様子がわかります。風速は蒸散を進める干ばつ側の指標として数えるため、降雨中でも強風（上限8m/s超）だけで Lv が上がります。',
 };
 
 function setScenario(name) {
@@ -1060,6 +1090,7 @@ function resetSim() {
   t=0; prevLv=-1;
   Object.values(SENSORS).forEach(s=>{ s.hist=[]; s.ema_u=0; s.ema_l=0; s.holdUntil=0; s.lastDec=''; });
   document.getElementById('logArea').innerHTML = '';
+  BoundaryRecord.newTrial();
   addLog('フィールド監視システム起動 — 4指標同時監視開始', 'safe');
 }
 

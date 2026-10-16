@@ -213,7 +213,7 @@
                 <strong>Experiment:</strong><br>
                 Starting from an identical value (1.0), we compare the state after 100,000 steps.<br>
                 <span class="text-red">■ RED Line</span>: Conventional (Linear Approx + Averaging + Float)<br>
-                <span class="text-green">■ GREEN Line</span>: NRA-IDE (Integer Phase Lock)<br>
+                <span class="text-green">■ GREEN Line</span>: NRA-IDE (Integer Phase Lock; constant display, not a comparison calculation)<br>
                 <span class="text-orange">■ YELLOW Line</span>: Theoretical (True Value)
             </div>
         </div>
@@ -244,7 +244,6 @@
             <div class="metric metric-highlight">
                 <div class="metric-label">Failure Status (By Domain)</div>
                 <div id="failure-status" class="status-container">
-                    <div>Medical AI (1%): <span id="medical-status" class="metric-value safe status-val">SAFE</span></div>
                     <div>Auto Safety (5%): <span id="auto-status" class="metric-value safe status-val">SAFE</span></div>
                     <div>Finance AI (10%): <span id="finance-status" class="metric-value safe status-val">SAFE</span></div>
                     <div>General Sys (30%): <span id="general-status" class="metric-value safe status-val">SAFE</span></div>
@@ -277,28 +276,26 @@
                     IEEE 754 precision issues (0.1+0.1+0.1 ≠ 0.3) → Rounding drift.</li>
                 </ol>
                 <p class="outcome-bad">
-                    <strong>Outcome:</strong> Exponential Error Growth<br>
-                    1,000 steps: ~10% Error<br>
-                    10,000 steps: ~200% Error<br>
-                    100,000 steps: Total Collapse
+                    <strong>Outcome:</strong> error builds up like a random walk and differs from run to run<br>
+                    (with this screen's coefficients, roughly a few % to about 40% after 100,000 steps)
                 </p>
             </div>
             
             <div class="comparison-box good">
                 <h4>NRA-IDE: The Solution</h4>
                 <ol class="list-spaced">
-                    <li><strong>Non-linear Retention:</strong>
-                    Preserves structural integrity → No approximation needed.</li>
-                    
-                    <li><strong>No Averaging:</strong>
-                    Directly measures constraint deviation (δ) → Zero information loss.</li>
-                    
+                    <li><strong>Approximations are recorded:</strong>
+                    Approximation may be used; any approximation used is recorded (Thesis §9.1).</li>
+
+                    <li><strong>Missing values are not filled by averages:</strong>
+                    Averages may be used as intermediate computation, but never as the subject of judgment (THEORY, FORMULA §4).</li>
+
                     <li><strong>Integer Phase Lock:</strong>
-                    Logic based on integer phases → Eliminates precision drift.</li>
+                    State steps are counted in integers; remainders are not carried over and are recorded.</li>
                 </ol>
                 <p class="outcome-good">
-                    <strong>Outcome:</strong> Absolute Stability<br>
-                    Steady at 0% error regardless of step count.
+                    <strong>Outcome:</strong> the NRA-IDE line is not a comparison calculation.<br>
+                    It is a display of the design principle: count state steps in integers and do not carry remainders to the next state.
                 </p>
             </div>
         </div>
@@ -309,11 +306,6 @@
                 <th class="table-th">Domain</th>
                 <th class="table-th">Tolerance</th>
                 <th class="table-th">Impact of Error Accumulation</th>
-            </tr>
-            <tr>
-                <td class="table-td-border">Medical AI</td>
-                <td class="table-td-border"><strong class="text-red">&lt; 1%</strong></td>
-                <td class="table-td-border">Dosage miscalculation → <strong class="text-red">Fatal Patient Risk</strong></td>
             </tr>
             <tr>
                 <td class="table-td-border">Autonomous Driving</td>
@@ -418,11 +410,10 @@
             const convElem = document.getElementById('conventional-value');
             convElem.className = error < 1 ? 'metric-value safe' : error < 10 ? 'metric-value warning' : 'metric-value danger';
             
-            // Domain collapse thresholds (1/5/10/30%): illustrative tiers for the demo
-            // narrative (medical stricter than finance stricter than general), not sourced
+            // Domain collapse thresholds (5/10/30%): illustrative tiers for the demo
+            // narrative (automotive stricter than finance stricter than general), not sourced
             // from an actual regulatory or engineering tolerance spec.
             const thresholds = [
-                { limit: 1, elem: 'medical-status' },
                 { limit: 5, elem: 'auto-status' },
                 { limit: 10, elem: 'finance-status' },
                 { limit: 30, elem: 'general-status' }
@@ -437,8 +428,7 @@
                 }
             });
             
-            let warningText = error < 1 ? '✅ Safe in all domains.' : 
-                              error < 5 ? '🔴 MEDICAL COLLAPSE! Critical risk detected.' :
+            let warningText = error < 5 ? '✅ Safe in all domains.' :
                               error < 10 ? '🔴 AUTO SAFETY COLLAPSE! Hazard detected.' :
                               error < 30 ? '🔴 FINANCE COLLAPSE! Loss risk detected.' :
                               '☠️ TOTAL COLLAPSE! Zero reliability.';
@@ -482,6 +472,6 @@
         
         resetSim();
     </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The magnitudes of the conventional error (0.002, 0.001, 0.01) are demo values tuned so that the difference is visible, not errors of a measured sensor or model.<br>• The per-use collapse lines (1, 5, 10, 30%) illustrate the order of strictness (medical < automotive < finance < general); they have no regulatory or engineering tolerance source.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The magnitudes of the conventional error (0.002, 0.001, 0.01) are demo values tuned so that the difference is visible, not errors of a measured sensor or model.<br>• The per-use collapse lines (5, 10, 30%) illustrate the order of strictness (automotive < finance < general); they have no regulatory or engineering tolerance source.<br>• The floating-point term on this screen is tiny; almost all of the error comes from the random linear-approximation and averaging terms.</div>
 </body>
 </html>

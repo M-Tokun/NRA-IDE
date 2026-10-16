@@ -289,6 +289,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
 </div>
 
+<div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
+
 <div class="log-panel">
   <div class="log-title">TRACE LOG — δゆらぎ × τ変動 二重追跡</div>
   <div class="log-list" id="logList"></div>
@@ -300,6 +302,27 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── パラメータ ──
 const P_OPT   = 0.50;   // MPa 設計圧力
 const P_MAX_BASE = 0.80; // MPa 基準温度での破裂限界
@@ -328,6 +351,7 @@ function calcTauLo(T_kelvin){
 let running = true, heatOn = false, ventOn = false;
 let compTarget = 0.5, T_celsius = 25;
 let pCurrent = P_OPT, pRaw = P_OPT, pSmooth = P_OPT;
+let pJudge = P_OPT;   // 判定に使った圧力（生値と平滑値のうち R が重い方）
 let tauHiCurrent = 0.30, tauLoCurrent = 0.20;
 let smoothBuf = [], tauHiBuf = [], tauLoBuf = [];
 let waveHist = [], logTimer = 0;
@@ -349,7 +373,8 @@ function resize(){
 // ── コントロール ──
 // 不可逆ラッチの状態。解除は利用者の「新しい評価」操作だけ。
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; }
+let prevOver = false;   // 境界を越えた瞬間を見つけるための前回値
+function startNewEvaluation(){ ruptureLatch = null; prevOver = false; BoundaryRecord.newTrial(); }
 
 function toggleRun(){
   running = !running;
@@ -384,8 +409,8 @@ function calcIDE(p, tauHi, tauLo){
   const rHi = delta > 0 ? delta / Math.max(tauHi, 0.01) : 0;
   const rLo = delta < 0 ? absDelta / Math.max(tauLo, 0.01) : 0;
   let status, action;
-  if(rHi >= R_RUPTURE)       { status='fail-hi'; action='過圧RUPTURE_BOUNDARY — 安全弁・コンプレッサー停止'; }
-  else if(rLo >= R_RUPTURE)  { status='fail-lo'; action='減圧RUPTURE_BOUNDARY — コンプレッサー最大出力'; }
+  if(rHi >= R_RUPTURE)       { status='fail-hi'; action='過圧RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる（安全弁は機械的に作動）'; }
+  else if(rLo >= R_RUPTURE)  { status='fail-lo'; action='減圧RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる'; }
   else if(rHi >= R_WARN)  { status='warn-hi'; action='過圧警告：排気または加熱停止推奨'; }
   else if(rLo >= R_WARN)  { status='warn-lo'; action='減圧警告：コンプレッサー出力増加推奨'; }
   else                    { status='safe';    action='正常稼働継続'; }
@@ -400,14 +425,19 @@ function calcIDE(p, tauHi, tauLo){
 function tick(dt){
   if(!running) return;
   const t = performance.now()/1000;
+  // 加熱ボタン：温度を少しずつ上げる（毎秒5℃、120℃まで）。温度スライダーの表示も合わせる。
+  if(heatOn && T_celsius < 120){
+    T_celsius = Math.min(120, T_celsius + 5*dt);
+    document.getElementById('tempSlider').value = T_celsius;
+    document.getElementById('tempDisp').innerHTML =
+      T_celsius.toFixed(0)+'<small style="font-size:11px;font-weight:300;color:var(--muted)">°C</small>';
+  }
   const T_kelvin = T_celsius + 273.15;
 
-  // 圧力目標
-  let pTarget = compTarget;
-  if(heatOn){
-    // 加熱 → 定容積の気体の圧力上昇（ゲイ・リュサックの法則 P1/T1 = P2/T2）。これはδ側の変化。
-    pTarget *= T_kelvin / T_REF;
-  }
+  // 圧力目標：定容積の気体は温度の比で圧力が変わる（ゲイ・リュサックの法則 P1/T1 = P2/T2）。これはδ側の変化。
+  // 温度はスライダーでも加熱ボタンでも、常に圧力へ反映する（以前は加熱ボタンONのときだけ反映していた）。
+  // コンプレッサー設定は基準温度25℃での圧力。
+  let pTarget = compTarget * T_kelvin / T_REF;
   if(ventOn) pTarget *= 0.55;  // 排気で圧力低下
   pCurrent += (pTarget - pCurrent) * Math.min(dt*2.0, 1);
   pCurrent = Math.max(0.01, Math.min(1.2, pCurrent));
@@ -442,7 +472,16 @@ function tick(dt){
   const fluctAmp = smoothBuf.length>1
     ? Math.max(...smoothBuf)-Math.min(...smoothBuf) : 0;
 
-  const ide = calcIDE(pSmooth, tauHiMean, tauLoMean);
+  // 判定は、生の圧力のRと平滑値のRの重い方で行う（平滑化という補助計算で上限超過を見逃さない）。
+  const ideS   = calcIDE(pSmooth, tauHiMean, tauLoMean);
+  const ideRaw = calcIDE(pRaw,    tauHiMean, tauLoMean);
+  const useRaw = Math.max(ideRaw.rHi, ideRaw.rLo) > Math.max(ideS.rHi, ideS.rLo);
+  const ide    = useRaw ? ideRaw : ideS;
+  pJudge = useRaw ? pRaw : pSmooth;
+  // 越えた瞬間（時刻・判定に使った圧力・上側か下側か・R）を、定期ログとは別に残す
+  const rJudge = Math.max(ide.rHi, ide.rLo), over = rJudge >= R_RUPTURE;
+  if (over && !prevOver) BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: ide.rHi >= ide.rLo ? '圧力・上限側（過圧）' : '圧力・下限側（減圧）', value: pJudge.toFixed(3) + ' MPa', R: rJudge });
+  prevOver = over;
 
   // 分子生成
   const W = tc.width;
@@ -549,7 +588,7 @@ function setMarkSVG(id,t,cy,r){
 function drawTank(){
   const W=tc.width, H=tc.height;
   tctx.clearRect(0,0,W,H);
-  const ide = calcIDE(pSmooth, tauHiCurrent, tauLoCurrent);
+  const ide = calcIDE(pJudge, tauHiCurrent, tauLoCurrent);
   const col = statusColor(ide.status);
   const T_kelvin = T_celsius + 273.15;
 
@@ -798,8 +837,9 @@ window.addEventListener('resize',resize);
 resize();
 setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
 addLog(calcIDE(pSmooth,tauHiCurrent,tauLoCurrent),tauHiCurrent,0);
+BoundaryRecord.render();
 requestAnimationFrame(loop);
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・温度上昇による圧力上昇は定容積の気体の関係（δ側）として計上し、τ_hiの温度依存は「材料強度が温度で下がる」という仮定（比例式）で、実測の強度式ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・温度上昇による圧力上昇は定容積の気体の関係（δ側）として計上し（温度はスライダーでも「加熱」ボタン＝毎秒5℃ずつ120℃まで上げる、でも常に圧力へ反映）、τ_hiの温度依存は「材料強度が温度で下がる」という仮定（比例式）で、実測の強度式ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・τ_hi（動的）は、温度を制約 C として宣言して縮める側別有効ゲート幅です（FORMULA §4.4）。冷えると元に戻るので、吸収厚み τ の回復ではありません。<br>・「二重ゆらぎ」は正典（FORMULA §4.7）の検出条件 Δδ&gt;0 かつ Δτ&lt;0 を指す言葉です。この画面は δ のゆらぎと τ の変動を並べて見せますが、この検出条件そのものの判定は実装していません。</div>
 </body>
 </html>

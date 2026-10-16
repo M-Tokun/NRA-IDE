@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NRA-IDE #05: Threshold Visualizer</title>
+    <title>NRA-IDE #05: Integer Phase Lock Visualizer</title>
     <style>
         body {
             background-color: #0d1117;
@@ -95,7 +95,7 @@
 <body>
 
     <header>
-        <h1>NRA-IDE Threshold Visualizer v3.0</h1>
+        <h1>NRA-IDE Integer Phase Lock Visualizer v3.0</h1>
         <div class="subtitle">Intensional Dynamics Engine / Phase Lock Monitor</div>
     </header>
 
@@ -104,9 +104,12 @@
             <h3>👁️ Phase Scope</h3>
             <canvas id="scopeCanvas" width="300" height="300"></canvas>
             <div class="scope-legend">
-                <span class="legend-green">█ DARK GREEN RING</span> : Integer Phase (N)<br>
-                <span class="legend-white">● WHITE DOT</span> : Current State<br>
-                <span class="legend-red">● RED TRACE</span> : Discarded Residual (ε)
+                <span class="legend-green">█ DARK GREEN RING</span> : one whole step (N advances by 1 per turn)<br>
+                <span class="legend-white">● WHITE DOT</span> : position within the current step<br>
+                <span class="legend-red">● RED TRACE</span> : remainder ε below one step (not carried over; recorded)
+            </div>
+            <div class="logic-info">
+                <strong>Relation to the central axis:</strong> a diagram of the design principle that counts state steps in integers and does not carry remainders to the next state (Thesis §9.1). It does not calculate R = δ/τ.
             </div>
         </div>
 
@@ -121,7 +124,7 @@
                 <span class="label">Total Phase (φ)</span>
                 <div>
                     <span id="phaseVal" class="value">0.00</span>
-                    <span class="unit">rad</span>
+                    <span class="unit">steps</span>
                 </div>
             </div>
             <div class="status-row">
@@ -129,14 +132,15 @@
                 <span id="intLockVal" class="value status-running">0</span>
             </div>
             <div class="status-row">
-                <span class="label">Discarded Residual (ε)</span>
+                <span class="label">Remainder (ε, recorded)</span>
                 <span id="residualVal" class="value status-danger">0.0000</span>
             </div>
             
             <div class="logic-info">
                 <strong>Logic:</strong><br>
-                N = floor(φ)<br>
-                ε = φ - N<br>
+                ticks += 15 (integer)<br>
+                N = floor(ticks / 1000)<br>
+                ε = (ticks mod 1000) / 1000<br>
                 if (ε ≈ 0) → <strong>LOCK EVENT</strong>
             </div>
 
@@ -155,8 +159,9 @@
         const residDisplay = document.getElementById('residualVal');
         
         let isRunning = true;
-        let phase = 0.0;
-        let speed = 0.015; // Slightly faster for visual impact
+        // Steps are counted in integers (no floating-point accumulation). 15/1000 of a step per frame.
+        let ticks = 0;
+        const STEPS_PER_PHASE = 1000, TICKS_PER_FRAME = 15;
         
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
@@ -170,9 +175,10 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // 2. Calculate NRA Mechanics
-            phase += speed;
-            let integerPhase = Math.floor(phase);
-            let residual = phase - integerPhase; // 0.0 to 0.999... (The Noise)
+            ticks += TICKS_PER_FRAME;
+            const phase = ticks / STEPS_PER_PHASE;                  // for display only
+            let integerPhase = Math.floor(ticks / STEPS_PER_PHASE);
+            let residual = (ticks % STEPS_PER_PHASE) / STEPS_PER_PHASE; // 0.0 to 0.999... (remainder within one step)
 
             // Update Telemetry
             phaseDisplay.innerText = phase.toFixed(4);

@@ -11,9 +11,9 @@
   --------------------------------------------------
   Metrics: Soil Moisture / Ground Temp / Solar Rad / Wind Speed
   Drought Level Lv.0-4 = Composite Score (Weighted R Score + Lower EMA)
-  Lv.0 Normal / Lv.1 Notice (EMA Rising) / Lv.2 Warning (R>0.7)
-  Lv.3 Danger (SILENCE) / Lv.4 Critical (Multiple SILENCE)
-  Post-Storm Scenario: EMA predicts evaporation acceleration after rain before thresholds are breached.
+  Lv.0 Normal / Lv.1 Notice (weighted score ≥ 0.2) / Lv.2 Warning (weighted score ≥ 0.5)
+  Lv.3 Danger (≥1 drought-side SILENCE, or score ≥ 1.0) / Lv.4 Critical (≥3 drought-side SILENCE, or score ≥ 1.5)
+  Post-Storm Scenario: in rapid drying after rain, accumulated deviation (EMA) shrinks τ, so detection comes before the lower limit.
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
 <style>
@@ -349,8 +349,8 @@ footer a { color:var(--soil); text-decoration:none; }
     <div class="h-tag">NRA-IDE / Band Gate — 10 / FIELD AGRICULTURE</div>
     <h1>Field Drought Progression Monitoring<br>Band Gate + Drought Level Gauge</h1>
     <p>
-      Simultaneous monitoring of soil moisture, ground temperature, solar radiation, and wind speed to detect the "velocity" of drought progression.<br>
-      The EMA captures the "momentum of drying" before current values hit thresholds, warning in the precursor stage.<br>
+      Simultaneous monitoring of soil moisture, ground temperature, solar radiation, and wind speed to follow how far drought has progressed.<br>
+      When accumulated deviation (the EMA smoothed value) grows, τ shrinks, so detection comes before the declared lower limit.<br>
       Designed to pass data from wireless soil sensors directly through this gate.
     </p>
   </div>
@@ -432,7 +432,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-soil">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">Dry Momentum</span>
+      <span class="ema-label">Dry Accumulation</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-soil"></div></div>
       <span class="ema-val" id="ev-soil">0.000</span>
     </div>
@@ -463,7 +463,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-ground">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">Rise Momentum</span>
+      <span class="ema-label">Rise Accumulation</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-ground"></div></div>
       <span class="ema-val" id="ev-ground">0.000</span>
     </div>
@@ -494,7 +494,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-sun">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">Excess Heat</span>
+      <span class="ema-label">Strong Sun Accum.</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-sun"></div></div>
       <span class="ema-val" id="ev-sun">0.000</span>
     </div>
@@ -525,7 +525,7 @@ footer a { color:var(--soil); text-decoration:none; }
       <span class="r-val" id="rv-wind">0.000</span>
     </div>
     <div class="ema-row">
-      <span class="ema-label">Evaporation</span>
+      <span class="ema-label">Strong Wind Accum.</span>
       <div class="ema-bar"><div class="ema-fill w-0" id="ef-wind"></div></div>
       <span class="ema-val" id="ev-wind">0.000</span>
     </div>
@@ -607,13 +607,15 @@ footer a { color:var(--soil); text-decoration:none; }
 
   <div class="log-panel">
     <div class="p-title">Field Event Log</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
     <div class="note-box">
       <div class="note-title">Asymmetric Field Settings</div>
       <div class="note-text">
-        Soil Moisture: High α_lower → Detect drying onset quickly, trigger irrigation early.<br>
-        Solar Rad: High α_upper → Early capture of transpiration acceleration due to strong sun.<br>
-        Wind Speed: High α_upper → Immediately detect evaporation spikes for irrigation logic.<br>
+        α changes only how fast τ shrinks (the judgment R uses raw values).<br>
+        Soil Moisture: High α_lower → τ on the drying side shrinks early, so detection comes before the lower limit.<br>
+        Solar Rad: High α_upper → τ shrinks early when strong sun persists.<br>
+        Wind Speed: High α_upper → τ shrinks early when strong wind persists, reaching the irrigation decision sooner.<br>
         Ground Temp: Balanced α → Monitor both anomalies with similar sensitivity.
       </div>
     </div>
@@ -633,6 +635,27 @@ footer a { color:var(--soil); text-decoration:none; }
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────
 // Sensor Definitions
 // ─────────────────────────────────────────────
@@ -650,10 +673,10 @@ let scenario = 'normal';
 // Drought Levels
 const LV_INFO = [
   { lv:0, label:'Lv.0  NORMAL',   col:'#aed581', desc:'Lv.0 — Normal range. All metrics are within appropriate limits. No irrigation needed.' },
-  { lv:1, label:'Lv.1  NOTICE',   col:'#fff176', desc:'Lv.1 — Notice. EMA is rising. "Momentum" of drying is appearing. Prepare for irrigation.' },
-  { lv:2, label:'Lv.2  WARNING',  col:'#ffb74d', desc:'Lv.2 — Warning. Multiple metrics show R > 70%. Irrigation will be needed soon if this continues.' },
-  { lv:3, label:'Lv.3  DANGER',   col:'#ff7043', desc:'Lv.3 — Danger. SILENCE active. Soil moisture is nearing critical limits. Execute irrigation.' },
-  { lv:4, label:'Lv.4  CRITICAL', col:'#b71c1c', desc:'Lv.4 — Critical. Multiple metrics are in SILENCE state. Immediate irrigation required. Risk of crop damage.' },
+  { lv:1, label:'Lv.1  NOTICE',   col:'#fff176', desc:'Lv.1 — Notice. The score weighting drought-side R and accumulated deviation (EMA) is 0.2 or more. Prepare for irrigation.' },
+  { lv:2, label:'Lv.2  WARNING',  col:'#ffb74d', desc:'Lv.2 — Warning. The weighted score is 0.5 or more. Irrigation will be needed soon if this continues.' },
+  { lv:3, label:'Lv.3  DANGER',   col:'#ff7043', desc:'Lv.3 — Danger. One or more drought-side metrics are in SILENCE (or score ≥ 1.0). Execute irrigation.' },
+  { lv:4, label:'Lv.4  CRITICAL', col:'#b71c1c', desc:'Lv.4 — Critical. Three or more drought-side metrics are in SILENCE (or score ≥ 1.5). Immediate irrigation required. Risk of crop damage.' },
 ];
 
 // ─────────────────────────────────────────────
@@ -753,29 +776,31 @@ function bandGate(sensor, v, p, nowMs) {
   const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
   const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
 
-  const valid = tau0_u > 0 && tau0_l > 0;
-  const R_u = valid ? d_upper/tau_u : Infinity;
-  const R_l = valid ? d_lower/tau_l : Infinity;
-  const R   = Math.max(R_u, R_l);
+  // τ0≤0: as in the canon, R is not defined (OUT_OF_DESCRIPTION_DOMAIN, AXIOMS §6). R is not replaced by infinity; it is null, and the gate fails toward stop.
+  const undef = !(tau0_u > 0 && tau0_l > 0);
+  const R_u = undef ? null : d_upper/tau_u;
+  const R_l = undef ? null : d_lower/tau_l;
+  const R   = undef ? null : Math.max(R_u, R_l);
 
   const held    = nowMs < sensor.holdUntil;
   let silence   = held;
   let dir       = held ? (sensor.lastDir||'') : '';
 
-  if (!held && R>=1.0) {
+  if (!held && (undef || R>=1.0)) {
     sensor.holdUntil = nowMs + parseInt(document.getElementById('sl-hold').value);
     silence = true;
-    dir = R_u>=R_l ? 'upper' : 'lower';
+    dir = undef ? 'undef' : (R_u>=R_l ? 'upper' : 'lower');
     sensor.lastDir = dir;
+    BoundaryRecord.hit({ time: `t=${t}`, channel: `${sensor.label} / ${dir==='undef'?'out of domain':dir==='upper'?'upper side':'lower side'}`, value: v.toFixed(sensor.key==='sun'?0:1) + sensor.unit, R });
   }
 
   const upper_band = ref + tau_u;
   const lower_band = ref - tau_l;
 
-  return { v, R, R_u, R_l, silence, dir, upper_band, lower_band,
+  return { v, R, R_u, R_l, silence, dir, undef, upper_band, lower_band,
            ema_lower: sensor.ema_l, ema_upper: sensor.ema_u,
-           ema_lower_ratio: valid ? sensor.ema_l / tau0_l : Infinity,
-           ema_upper_ratio: valid ? sensor.ema_u / tau0_u : Infinity };
+           ema_lower_ratio: undef ? null : sensor.ema_l / tau0_l,
+           ema_upper_ratio: undef ? null : sensor.ema_u / tau0_u };
 }
 
 // ─────────────────────────────────────────────
@@ -801,9 +826,11 @@ function calcDroughtLevel(results) {
   score /= wsum;
 
   // Count metrics in SILENCE on the drought side
-  const silCount = keys.filter(k=>results[k].silence && results[k].dir===side[k]).length;
+  // A metric out of the description domain (τ0≤0) is also counted on the stop side
+  const silCount = keys.filter(k=>results[k].undef || (results[k].silence && results[k].dir===side[k])).length;
+  // So that the weighted-average score never lightens the R judgment, any single drought-side metric in SILENCE raises the level to Lv.3 or higher.
   if (silCount >= 3) return Math.max(score, 1.5);
-  if (silCount >= 2) return Math.max(score, 1.0);
+  if (silCount >= 1) return Math.max(score, 1.0);
 
   return score;
 }
@@ -912,7 +939,7 @@ function updateCard(key, res, p) {
 
   const decEl = document.getElementById('dec-'+key);
   if (silence) {
-    decEl.textContent = dir==='upper'?'↑ UPPER':'↓ LOWER';
+    decEl.textContent = dir==='undef'?'OUT OF DOMAIN':dir==='upper'?'↑ UPPER':'↓ LOWER';
     decEl.className   = 'card-decision '+dir;
   } else if (R>0.65) {
     decEl.textContent = 'WARN'; decEl.className = 'card-decision warn';
@@ -926,11 +953,12 @@ function updateCard(key, res, p) {
   const rFillCol = silence?(dir==='upper'?'#ff7043':'#80d8ff'):R>0.65?'#ffca28':col;
   document.getElementById('rf-'+key).style.width = Math.min(R/1.5,1)*100+'%';
   document.getElementById('rf-'+key).style.background = rFillCol;
-  document.getElementById('rv-'+key).textContent = R.toFixed(4);
+  document.getElementById('rv-'+key).textContent = R === null ? 'out of domain' : R.toFixed(4);
   document.getElementById('rv-'+key).style.color = rFillCol;
 
   // EMA Bar
-  const emaKey = (key==='soil'||key==='wind') ? ema_lower : ema_upper;
+  // Show the drought-side EMA: lower side for soil moisture, upper side for soil temperature, solar radiation, and wind (same as side in calcDroughtLevel)
+  const emaKey = key==='soil' ? ema_lower : ema_upper;
   const emaMax = (p.th - p.tl) * 0.8;
   document.getElementById('ef-'+key).style.width = Math.min(emaKey/emaMax,1)*100+'%';
   document.getElementById('ev-'+key).textContent = emaKey.toFixed(3);
@@ -954,7 +982,9 @@ function updateCard(key, res, p) {
 
   // Log
   if (silence && s.lastDec!=='SILENCE') {
-    addLog(`[${s.label}] ${dir==='upper'?'↑ UPPER EXCEEDED':'↓ LOWER BREACH'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
+    addLog(dir==='undef'
+      ? `[${s.label}] OUT_OF_DESCRIPTION_DOMAIN (τ0≤0: reference outside the upper/lower limits; R is not defined) → stop side`
+      : `[${s.label}] ${dir==='upper'?'↑ UPPER EXCEEDED':'↓ LOWER BREACH'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
   } else if (!silence && s.lastDec==='SILENCE') {
     addLog(`[${s.label}] HOLD END → PASS`, 'safe');
   } else if (R>0.65 && R<1.0 && s.lastDec!=='warn') {
@@ -1015,7 +1045,7 @@ const SCENARIO_NOTES = {
   normal:  '🌱 Normal field environment. Periodic disturbances occur. Their peaks briefly exceed the declared limits (soil moisture 25%, solar 900 W/m², ground temp 32°C, etc.), so the level reaches Lv.3+ during them.',
   drought: '🏜 Mild Drought. Soil moisture begins to drop gradually. Watch the EMA rise.',
   severe:  '🔥 Severe Drought. Soil moisture, solar, and wind are heading to limits simultaneously. Observe the correlation.',
-  storm:   '⛈ Post-Storm Dry. Rapid drying after rain recovery. EMA predicts the "momentum" before thresholds are hit. Wind counts as a drought-side factor (it drives evaporation), so strong wind alone (above the 8 m/s limit) raises the level even during rain.',
+  storm:   '⛈ Post-Storm Dry. Rapid drying after rain recovery. Accumulated deviation (EMA) shrinks τ, so detection comes before the lower limit. Wind counts as a drought-side factor (it drives evaporation), so strong wind alone (above the 8 m/s limit) raises the level even during rain.',
 };
 
 function setScenario(name) {
@@ -1060,6 +1090,7 @@ function resetSim() {
   t=0; prevLv=-1;
   Object.values(SENSORS).forEach(s=>{ s.hist=[]; s.ema_u=0; s.ema_l=0; s.holdUntil=0; s.lastDec=''; });
   document.getElementById('logArea').innerHTML = '';
+  BoundaryRecord.newTrial();
   addLog('Field Monitoring System Started — 4 Metrics Live', 'safe');
 }
 

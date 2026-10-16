@@ -262,7 +262,7 @@ footer a { color:var(--v); text-decoration:none; }
       <span>空転 0%</span><span>定格 100%</span><span class="text-danger">過負荷 150%</span>
     </div>
     <div class="font-11 text-white opacity-75 mt-6 line-height-1-6">
-      100%以上で電流が定格超過。<br>150%付近で「こつ然」が起きます。
+      100%以上で電流が定格超過。<br>定格の120%以上では電流の基準が上限に達し、評価宣言の範囲外（定義域外）になります。
     </div>
   </div>
 
@@ -415,6 +415,7 @@ footer a { color:var(--v); text-decoration:none; }
 
   <div class="log-panel">
     <div class="i-title">モーターイベントログ</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
     <div class="btn-row">
       <button class="ctrl" onclick="setFault('normal')">✓ 正常に戻す</button>
@@ -424,7 +425,7 @@ footer a { color:var(--v); text-decoration:none; }
     <div class="font-11 text-white opacity-75 mt-8 line-height-1-7" id="fault-note">
       正常運転中。負荷スライダーを動かして「じわじわ→こつ然」を確認してください。
     </div>
-    <div class="demo-caveat" style="margin-top:10px;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・モーター・熱モデルはデモ用の簡易モデルです。実機の特性ではありません。<br>・巻線温度の基準値は、このモデルを各負荷率で長く回した定常温度の表（デモ用の値）を補間して使っています。実機の熱特性ではありません。<br>・110%以上の負荷設定では、基準を上限（120℃）の90%＝108℃に抑えています。想定温度そのものが上限に近い過負荷として扱い、実測が上限へ向かうと発動します。<br>・電流・温度・相不平衡の基準値、限界値、ゲート幅の係数は、すべてデモ用の宣言値で、運用の根拠ではありません。</div>
+    <div class="demo-caveat" style="margin-top:10px;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・モーター・熱モデルはデモ用の簡易モデルです。実機の特性ではありません。<br>・回転数スライダーは、インバーターの出力周波数（同期速度）の設定として扱います。冷却ファンは軸に付いている想定で、低速ほど冷えにくくなります。<br>・巻線温度の基準値は、このモデルを各負荷率で長く回した定常温度の表（デモ用の値）を補間して使っています。実機の熱特性ではありません。<br>・110%以上の負荷設定では、基準を上限（120℃）の90%＝108℃に抑えています。想定温度そのものが上限に近い過負荷として扱い、実測が上限へ向かうと発動します。<br>・電流・温度・相不平衡の基準値、限界値、ゲート幅の係数は、すべてデモ用の宣言値で、運用の根拠ではありません。</div>
   </div>
 </div>
 
@@ -439,6 +440,27 @@ footer a { color:var(--v); text-decoration:none; }
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────
 // モーター定数
 // ─────────────────────────────────────────────
@@ -475,7 +497,8 @@ let silHoldUntil = 0;
 // プルアウトすべり s_po = r2/x2 でトルク最大
 // s > s_po を超えると正帰還崩壊
 // ─────────────────────────────────────────────
-const SYNC_RPM = 1500;      // 同期速度（4極50Hz）
+const SYNC_RPM = 1500;      // 定格周波数での同期速度（4極50Hz）。運転中の同期速度はインバーターの設定回転数に合わせる（getValues）
+const RPM_AXIS_MAX = 3000;  // 回転数の表示範囲（スライダーの上限）
 const R2       = 0.03;      // 二次抵抗（pu）。定格すべりが約5%になる値（以前の0.08では定格負荷で回転数が66%まで落ちていた）
 const X2       = 0.12;      // 二次リアクタンス（pu）
 const K_TORQUE = 2 * 2.8 * R2 * X2;  // トルク係数。T_max = K/(2·R2·X2) なので、最大トルク≒2.8pu になる値
@@ -488,7 +511,7 @@ function motorTorque(s) {
 }
 
 // プルアウトすべり（最大トルク点）
-const S_PULLOUT = R2 / X2;  // ≒ 0.667
+const S_PULLOUT = R2 / X2;  // = 0.25
 const T_PULLOUT = motorTorque(S_PULLOUT);
 
 // 実際のRPM状態（動的）
@@ -505,15 +528,18 @@ function getValues(t) {
   const pnoise    = () => 1 + (Math.random() - .5) * .018;
 
   // ─── RPM動力学 ───────────────────────────────
+  // インバーター駆動：出力周波数を設定回転数に合わせるので、同期速度 = 設定回転数。
+  // （以前は同期速度を1500rpmに固定し、設定回転数へ弱く引き寄せるだけだったため、スライダーがほぼ効かなかった）
+  const sync = Math.max(1, setRPM);
   // すべり s = (同期速度 - 実回転数) / 同期速度
-  const slip = Math.max(0.001, (SYNC_RPM - actualRPM) / SYNC_RPM);
+  const slip = Math.max(0.001, (sync - actualRPM) / sync);
 
   // モーターが発生するトルク(pu)
   let motTorque = motorTorque(slip);
 
   // 負荷トルク(pu)：負荷率×定格 + 設定RPMによる速度差補正
   // 低速設定では同じ負荷でもトルク需要が増える
-  const speedFactor = 0.6 + (setRPM / SYNC_RPM) * 0.4;
+  const speedFactor = 0.6 + (setRPM / RATED_RPM) * 0.4;
   let loadTorque = loadRatio * speedFactor;
 
   // 故障による補正
@@ -528,18 +554,16 @@ function getValues(t) {
 
   // トルク差 → RPM変化（慣性モーメントで平滑化）
   const torqueDiff = motTorque - loadTorque;
-  const rpmDelta   = torqueDiff * J_INERTIA * SYNC_RPM;
+  const rpmDelta   = torqueDiff * J_INERTIA * sync;
 
   if (fault !== 'locked') {
     actualRPM += rpmDelta;
-    // 設定RPM方向へも引き寄せ（インバーター駆動の模擬）
-    actualRPM += (setRPM - actualRPM) * 0.015;
     // 誘導電動機は電動機運転で同期速度を超えないため、上限は同期速度とする
-    actualRPM  = Math.max(0, Math.min(SYNC_RPM, actualRPM));
+    actualRPM  = Math.max(0, Math.min(sync, actualRPM));
   }
 
   // プルアウト検知：すべりがプルアウト点を超えて下降中
-  const newSlip = Math.max(0.001, (SYNC_RPM - actualRPM) / SYNC_RPM);
+  const newSlip = Math.max(0.001, (sync - actualRPM) / sync);
   pulloutFlag = (newSlip > S_PULLOUT * 1.05 && torqueDiff < 0);
 
   // ─── 電流計算 ───────────────────────────────
@@ -548,8 +572,8 @@ function getValues(t) {
   const slipRatio  = Math.min(newSlip / 0.05, 1);  // 0.05 = 定格すべり
   let baseA = RATED_A * (0.3 + slipRatio * 0.7) * Math.max(loadRatio, 0.1);
 
-  // 低速ほど電流リップルが大きくなる（PWMキャリア成分）
-  const ripple = (1 - actualRPM / SYNC_RPM) * 0.8 + 1.0;
+  // 定格回転数から離れるほど電流リップルが大きくなる（低速側はPWMキャリア成分、高速側は弱め界磁の簡易表現）
+  const ripple = 1.0 + 0.8 * Math.abs(1 - actualRPM / RATED_RPM);
 
   let u = baseA * ripple * pnoise();
   let v = baseA * ripple * pnoise();
@@ -588,7 +612,7 @@ function getValues(t) {
     : 0;
 
   // 巻線温度（熱蓄積モデル）
-  const cooling = Math.max(0.2, actualRPM / SYNC_RPM);   // 回転数で冷却
+  const cooling = Math.max(0.2, Math.min(2, actualRPM / RATED_RPM));   // 軸に付いた冷却ファン：回転数で冷却（定格で1）
   const heatIn  = (u + v + w) * 0.4 * (1 / cooling);
   const heatOut = (tempAccum - 25) * 0.15;
   // 絶縁焼損温度付近（250°C）で打ち切る。これより上はこの熱モデルの記述域外
@@ -660,18 +684,20 @@ function bandGate(sensor, v, p) {
 
   const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
   const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
-  const valid = tau0_u > 0 && tau0_l > 0;
-  const R_u   = valid ? d_u / tau_u : Infinity;
-  const R_l   = valid ? d_l / tau_l : Infinity;
-  const R     = Math.max(R_u, R_l);
+  // τ0≤0（負荷設定に対応する基準値が上限以上になった場合など）は、正典どおり R を定義しない
+  // （OUT_OF_DESCRIPTION_DOMAIN。AXIOMS §6）。無限大の R に置き換えず null とし、停止側に倒す。
+  const undef = !(tau0_u > 0 && tau0_l > 0);
+  const R_u   = undef ? null : d_u / tau_u;
+  const R_l   = undef ? null : d_l / tau_l;
+  const R     = undef ? null : Math.max(R_u, R_l);
 
   const nowMs  = t * 40;
   const held   = nowMs < sensor.holdUntil;
   let silence  = held, dir = held ? (sensor.lastDir || '') : '';
-  if (!held && R >= 1.0) {
+  if (!held && (undef || R >= 1.0)) {
     sensor.holdUntil = nowMs + HOLD_MS;
     silence = true;
-    dir = R_u >= R_l ? 'upper' : 'lower';
+    dir = undef ? 'undef' : (R_u >= R_l ? 'upper' : 'lower');
     sensor.lastDir = dir;
   }
 
@@ -764,10 +790,10 @@ function drawMain() {
   if (rpmVals.length > 1) {
     // 右軸スケール
     mctx.strokeStyle = 'rgba(255,204,0,.25)'; mctx.lineWidth = 1; mctx.setLineDash([2,3]);
-    const yrp0 = yp(0), yrpS = yp(RATED_A * 1.5); // RPM 0〜SYNC_RPM を電流軸に重ねる
-    const yrpm = v => pad.t + pH - (v / SYNC_RPM) * pH;
+    const yrp0 = yp(0), yrpS = yp(RATED_A * 1.5); // RPM 0〜RPM_AXIS_MAX を電流軸に重ねる
+    const yrpm = v => pad.t + pH - (v / RPM_AXIS_MAX) * pH;
     // RPMグリッドラベル（右側）
-    [0, 500, 1000, 1500].forEach(r => {
+    [0, 1000, 2000, 3000].forEach(r => {
       const y = yrpm(r);
       mctx.fillStyle = 'rgba(255,204,0,.5)'; mctx.font = '8px Share Tech Mono'; mctx.textAlign = 'left';
       mctx.fillText(r, pad.l + pW + 4, y + 3);
@@ -809,7 +835,7 @@ function updateCard(key, res) {
     ? (dir === 'upper' ? 'var(--danger)' : 'var(--v)') : col;
 
   const rEl = document.getElementById('r-' + key);
-  rEl.textContent = 'R: ' + R.toFixed(4);
+  rEl.textContent = R === null ? 'R: 定義域外' : 'R: ' + R.toFixed(4);
   const rCol = silence ? 'var(--danger)' : R > 0.65 ? 'var(--warn)' : 'var(--muted)';
   rEl.style.color = rCol;
 
@@ -817,7 +843,7 @@ function updateCard(key, res) {
   document.getElementById('rf-' + key).style.background = rCol;
 
   const decEl = document.getElementById('dec-' + key);
-  decEl.textContent = silence ? (dir === 'upper' ? '↑ SILENCE' : '↓ SILENCE') : R > 0.65 ? 'WARN' : 'PASS';
+  decEl.textContent = silence ? (dir === 'undef' ? '定義域外' : dir === 'upper' ? '↑ SILENCE' : '↓ SILENCE') : R > 0.65 ? 'WARN' : 'PASS';
   decEl.style.color = silence ? 'var(--danger)' : R > 0.65 ? 'var(--warn)' : 'var(--safe)';
 
   document.getElementById('mc-' + key).style.boxShadow = silence
@@ -828,7 +854,7 @@ function updateCard(key, res) {
 // RPMカード更新
 function updateRpmCard(rpm, slip) {
   document.getElementById('v-rpm-card').textContent = Math.round(rpm);
-  const pct = rpm / SYNC_RPM;
+  const pct = Math.min(1, rpm / RPM_AXIS_MAX);
   document.getElementById('rf-rpm').style.width = pct * 100 + '%';
   const isDropping = pulloutFlag;
   const col = rpm < 200 ? 'var(--danger)' : isDropping ? 'var(--danger)' : rpm < 600 ? 'var(--warn)' : 'var(--safe)';
@@ -900,7 +926,10 @@ function tick() {
     const labels = { u:'U相', v:'V相', w:'W相', temp:'巻線温度', imb:'相不平衡率' };
     const units  = { u:'A', v:'A', w:'A', temp:'°C', imb:'%' };
     if (res.silence && sensor.lastDec !== 'SILENCE') {
-      addLog(`[${labels[key]}] ${res.dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  ${keyMap[key].toFixed(1)}${units[key]}  R=${res.R.toFixed(3)}`, key === 'temp' ? 'temp' : key === 'imb' ? 'imb' : 'danger');
+      BoundaryRecord.hit({ time: `t=${t}`, channel: `${labels[key]}・${res.dir==='undef'?'定義域外':res.dir==='upper'?'上限側':'下限側'}`, value: keyMap[key].toFixed(1) + units[key], R: res.R });
+      addLog(res.dir==='undef'
+        ? `[${labels[key]}] OUT_OF_DESCRIPTION_DOMAIN（τ0≤0：基準値が上限以上。R は定義しない）→ 停止側`
+        : `[${labels[key]}] ${res.dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  ${keyMap[key].toFixed(1)}${units[key]}  R=${res.R.toFixed(3)}`, key === 'temp' ? 'temp' : key === 'imb' ? 'imb' : 'danger');
     } else if (!res.silence && sensor.lastDec === 'SILENCE') {
       addLog(`[${labels[key]}] HOLD終了 → PASS`, 'safe');
     } else if (res.R > 0.65 && res.R < 1.0 && sensor.lastDec !== 'warn') {
@@ -974,6 +1003,7 @@ function resetSim() {
   document.getElementById('fb-normal').classList.add('active');
   actualRPM = RATED_RPM; pulloutFlag = false; rpmHistory.length = 0;
   document.getElementById('fault-note').textContent = FAULT_NOTES.normal;
+  BoundaryRecord.newTrial();
   addLog('モーター監視システム起動 — 三相5指標同時監視開始', 'safe');
 }
 

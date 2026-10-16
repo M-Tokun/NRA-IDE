@@ -235,6 +235,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <!-- Log -->
+<div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="log-panel">
   <div class="log-title mono">TRACE LOG</div>
   <div class="log-list" id="logList"></div>
@@ -247,12 +248,37 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── Parameters ──
 // T_OPT/T_MIN/T_MAX (chain tension, N) and POLY_AMP/POLY_FREQ (pulley-vibration wave)
 // are demo-tuned display values, no cited chain/sprocket spec.
 const T_OPT=800,T_MIN=620,T_MAX=1000;
 const R_WARN=0.75,R_RUPTURE=1.0;
-const POLY_AMP=35,POLY_FREQ=5;
+const POLY_AMP=35;
+const POLY_PP_NORMAL=2*POLY_AMP*1.4;   // normal peak-to-peak swing of the polygon effect (about 98 N). Amplitude abnormal means above 150% of this
+// The fundamental frequency of the polygon effect is set by drive-sprocket teeth × revolutions per second (tooth-synchronized).
+// Previously it was fixed at 5 Hz, unrelated to sprocket rotation.
+const DRIVE_TEETH=17;
 // ADJ_GAIN_FINE/ADJ_GAIN_AHEAD (auto-adjust proportional gains) and ADJ_MAX (adjustment
 // clamp, N) are demo tuning values only — not derived from an actuator/controller spec.
 const ADJ_GAIN_FINE=0.12,ADJ_GAIN_AHEAD=0.32,ADJ_MAX=22;
@@ -261,6 +287,7 @@ const ADJ_GAIN_FINE=0.12,ADJ_GAIN_AHEAD=0.32,ADJ_MAX=22;
 let running=true, autoAdj=true;
 let tCurrent=700, tSmooth=700, bias=800;
 let phase=0, sprPhase=0;
+let polyPhase=0, sprSpeed=1;   // polygon-effect phase and the sprocket speed of the previous frame
 let R=0, drdt=0, polyAmp=0;
 let adjOut=0;
 let smoothBuf=[], rawBuf=[], rBuf=[];
@@ -289,7 +316,8 @@ function toggleRun(){
 }
 // Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
 let ruptureLatched=false;
-function startNewEvaluation(){ ruptureLatched=false; }
+let prevOver=false;   // previous value used to find the moment of crossing the boundary
+function startNewEvaluation(){ ruptureLatched=false; prevOver=false; BoundaryRecord.newTrial(); }
 
 function toggleAdj(){
   autoAdj=!autoAdj;
@@ -315,9 +343,9 @@ function calcIDE(t){
 
 function calcAdj(R,drdt,amp,tSmooth){
   if(ruptureLatched||R>=R_RUPTURE) return {adj:0,reason:'RUPTURE_BOUNDARY: adjustment authority returned'};
-  // ampRatio/ampWarn: flags vibration amplitude >150% of POLY_AMP baseline as anomalous,
+  // ampRatio/ampWarn: flags vibration amplitude >150% of the normal swing (POLY_PP_NORMAL) as anomalous,
   // independent of the tension-based R value — threshold 1.5 is a demo value, uncited.
-  const ampRatio=amp/(POLY_AMP||1);
+  const ampRatio=amp/POLY_PP_NORMAL;
   const ampWarn=ampRatio>1.5;
   const dir=tSmooth<T_OPT?1:-1;
   const dev=Math.abs(tSmooth-T_OPT);
@@ -343,10 +371,12 @@ function tick(dt){
   if(!running) return;
 
   // Polygon-effect fluctuation
-  const t=performance.now()/1000;
-  const fluct=POLY_AMP*Math.sin(2*Math.PI*POLY_FREQ*t)
-             +POLY_AMP*0.3*Math.sin(2*Math.PI*POLY_FREQ*2*t+0.4)
-             +POLY_AMP*0.1*Math.sin(2*Math.PI*POLY_FREQ*3*t+0.9);
+  // Drive-sprocket revolutions per second = sprSpeed×120°/s ÷ 360°. Mesh frequency = teeth × revolutions per second
+  const meshHz=DRIVE_TEETH*sprSpeed*120/360;
+  polyPhase+=2*Math.PI*meshHz*dt;
+  const fluct=POLY_AMP*Math.sin(polyPhase)
+             +POLY_AMP*0.3*Math.sin(2*polyPhase+0.4)
+             +POLY_AMP*0.1*Math.sin(3*polyPhase+0.9);
 
   // Slowly track the bias toward the target
   tCurrent+=(bias-tCurrent)*0.03;
@@ -359,11 +389,18 @@ function tick(dt){
   polyAmp=rawBuf.length>1?Math.max(...rawBuf)-Math.min(...rawBuf):0;
 
   // NRA-IDE
-  const ide=calcIDE(tSmooth);
-  rBuf.push(ide.R); if(rBuf.length>RBUF) rBuf.shift();
+  // Judgment uses the heavier of R from the raw tension and R from the smoothed value (smoothing, an auxiliary computation, must not hide a limit excess).
+  // dR/dt is an auxiliary quantity for the auto-adjustment look-ahead, so it is built from the smoothed R.
+  const ideS=calcIDE(tSmooth), ideRaw=calcIDE(tRaw);
+  const ide=ideRaw.R>ideS.R?ideRaw:ideS;
+  rBuf.push(ideS.R); if(rBuf.length>RBUF) rBuf.shift();
   drdt=rBuf.length>=2?(rBuf[rBuf.length-1]-rBuf[rBuf.length-2])/dt:0;
   R=ide.R;
   if(R>=R_RUPTURE) ruptureLatched=true;
+  // Keep the moment of crossing (time, tension used for judgment, upper or lower side, R), separate from the periodic log
+  const over=R>=R_RUPTURE, tJudge=ide===ideRaw?tRaw:tSmooth;
+  if(over&&!prevOver) BoundaryRecord.hit({time:new Date().toTimeString().slice(0,8),channel:tJudge>=T_OPT?'Tension / upper side (excess)':'Tension / lower side (slack)',value:tJudge.toFixed(0)+' N',R});
+  prevOver=over;
 
   // Auto-adjustment
   const adjResult=autoAdj?calcAdj(R,drdt,polyAmp,tSmooth):{adj:0,reason:'Manual mode'};
@@ -377,6 +414,7 @@ function tick(dt){
   // Phase
   const speed=(ruptureLatched||R>=R_RUPTURE)?0:Math.max(0.5,1.5-R);
   sprPhase+=speed*dt*120;
+  sprSpeed=speed;
 
   // UI update
   const status=(ruptureLatched||R>=R_RUPTURE)?'fail':R>=R_WARN?'warning':'safe';
@@ -399,7 +437,7 @@ function tick(dt){
   document.getElementById('dBar').style.width=Math.min(ide.delta/maxN*100,100).toFixed(1)+'%';
   document.getElementById('dBar').style.background=col;
   document.getElementById('tauBar').style.width=Math.min(ide.tau/maxN*100,100).toFixed(1)+'%';
-  document.getElementById('ampBar').style.width=Math.min(polyAmp/(POLY_AMP*3)*100,100).toFixed(1)+'%';
+  document.getElementById('ampBar').style.width=Math.min(polyAmp/(POLY_PP_NORMAL*3)*100,100).toFixed(1)+'%';
   document.getElementById('adjVal').textContent=(adjOut>=0?'+':'')+adjOut.toFixed(1)+' N';
 
   document.getElementById('clk').textContent=new Date().toTimeString().slice(0,8);
@@ -433,7 +471,7 @@ function drawChain(){
   const col={safe:'#00e5a0',warning:'#f0a500',fail:'#ff3b5c'}[status];
 
   // Sprocket definitions
-  const s1={x:W*.22,y:H*.52,r:52,teeth:17}; // large
+  const s1={x:W*.22,y:H*.52,r:52,teeth:DRIVE_TEETH}; // large (drive side)
   const s2={x:W*.78,y:H*.48,r:30,teeth:11}; // small
 
   // Sprocket rendering
@@ -525,7 +563,7 @@ function drawChainLinks(ctx,s1,s2,col,ph){
   drawLinkRow(ctx,p3,p4,botLen,linkPitch,(ph*0.8+linkPitch/2)%linkPitch,col);
 
   // Sag visualization during FAIL state
-  const sag=R>=R_RUPTURE?12:R>=R_WARN?4:0;
+  const sag=tSmooth<T_OPT?(R>=R_RUPTURE?12:R>=R_WARN?4:0):0;
   if(sag>0){
     const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2+sag;
     ctx.beginPath();
@@ -644,6 +682,7 @@ resize();
 setMark('wMark',0.75/1.5);
 setMark('fMark',1.0/1.5);
 addLog(0,0,0,'safe');
+BoundaryRecord.render();
 requestAnimationFrame(loop);
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The chain tension, the polygon-effect amplitude, and the auto-adjust gains are not specifications of a real chain or actuator.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>

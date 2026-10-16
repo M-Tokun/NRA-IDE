@@ -372,8 +372,9 @@ footer a { color: var(--accent); text-decoration: none; }
 <header>
   <div class="header-left">
     <div class="header-label">NRA-IDE / HAN Gate — Live Simulation</div>
-    <h1>How Cascade Failure Begins<br>— And How HAN Gate Stops It</h1>
+    <h1>How Cascade Failure Begins<br>— And How HAN Gate Responds with SILENCE</h1>
     <p>The non-canonical chain-warning score triggers SILENCE when it crosses its threshold. This is not a canonical R=δ/τ demonstration.<br>
+       SILENCE does not change the load (telemetry) on this screen. What actually stops the load is the external response that receives SILENCE.<br>
        Adjust parameters to experience the difference between a "safe wave" and a "missed detection."</p>
   </div>
   <div class="header-right">
@@ -498,6 +499,7 @@ footer a { color: var(--accent); text-decoration: none; }
     </div>
 
     <div class="log-title">Event Log</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
   </div>
 
@@ -515,6 +517,27 @@ footer a { color: var(--accent); text-decoration: none; }
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────────
 // Simulator State
 // ─────────────────────────────────────────────────
@@ -829,6 +852,7 @@ function tick() {
       state.holdUntil = nowMs + HOLD_MS;
       isSilence = true;
       state.silenceCount++;
+      BoundaryRecord.hit({ time: `t=${state.t}`, channel: 'Chain precursor score', value: `${result.chain_score.toFixed(4)} ≥ limit ${params.limit.toFixed(2)}` });
     }
 
     // Push to history (remove first, add last)
@@ -889,6 +913,7 @@ function resetSim() {
   document.getElementById('m-count').textContent = '0';
   document.getElementById('silenceOverlay').classList.remove('active');
   document.getElementById('silenceStamp').classList.remove('active');
+  BoundaryRecord.newTrial();
   addLog('Simulation started.', 'pass');
 }
 

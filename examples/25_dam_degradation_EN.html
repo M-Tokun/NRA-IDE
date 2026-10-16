@@ -114,7 +114,7 @@
   <div class="deg-title">◆ τ Degradation Curve — Cumulative Load Erodes Structural Margin</div>
   <div class="deg-grid">
     <div class="deg-canvas-wrap">
-      <div class="deg-label">τ (Effective Thickness) Trend — Shrinks with every storm</div>
+      <div class="deg-label">τ_s (structural thickness; the judgment uses τ_eff = 0.25·τ_s + 0.02) Trend — Shrinks with every storm</div>
       <canvas id="cv-deg-tau" width="450" height="140"></canvas>
     </div>
     <div class="deg-canvas-wrap">
@@ -140,7 +140,7 @@
       <div class="deg-stat-val" id="deg-rate" style="color:var(--orange);">0.0%</div>
     </div>
     <div class="deg-stat">
-      <div class="deg-stat-label">Est. Remaining Life</div>
+      <div class="deg-stat-label">Until τ_s reaches the 0.1 floor (estimate)</div>
       <div class="deg-stat-val" id="remaining-life" style="color:var(--blue);">---</div>
     </div>
     <div class="deg-stat">
@@ -169,11 +169,33 @@
   <button class="reset-btn" id="btn-reset">RESET</button>
 </div>
 
+<div id="boundaryRecord" style="max-width:1100px;margin:10px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="insight" id="insight-box">
   Select Scenario 3 "Level 60%, Storm" and increase degradation sensitivity. As τ shrinks, notice how R continues to rise even under the same water level.
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // fill/delta/waterInit are the per-scenario preset values. No basis is given for the specific figures;
 // basis unknown / demo tuning values.
 // Scenario 3 "Level 60%, Storm" keeps the water level low while raising only delta, making it the core
@@ -199,6 +221,7 @@ let deltaAccum = 0;
 // Spill-margin R of the water level: the rise above the reference level divided by the margin to the spill limit (same form as δ/τ in FORMULA §4.1).
 // The reference level 50% and the spill limit 100% are demo-declared values. The combined R is the maximum of the fluctuation R and the level R (no averaging).
 const LEVEL_REF = 0.5, LEVEL_LIMIT = 1.0;
+let rLatch = false;   // irreversible latch for R≥1 (released by RESET or a scenario change)
 let gRf = 0, gRl = 0;   // latest fluctuation R and level R (for the display in updateUI)
 let tauLoss = 0;   // 累積したτ損失（不可逆） / cumulative τ loss (irreversible)
 // Effective τ (τ_eff) used for the judgment: not the structural thickness tauCurrent itself but 0.25× + 0.02 (demo values).
@@ -236,6 +259,7 @@ document.querySelectorAll('.sc-btn').forEach(btn => {
 });
 
 function reset() {
+  rLatch = false; BoundaryRecord.newTrial();
   tauCurrent = TAU_INIT;
   deltaAccum = 0;
   tauLoss = 0;
@@ -291,7 +315,7 @@ function drawDam(ctx, W, H, isRight, delta, R, tauRatio) {
     ctx.fillText('τ', DR + tauPx / 2 - 3, DT + 12);
   }
 
-  const overflow = !isRight ? waterLevel >= 0.97 : R >= 1.0;
+  const overflow = !isRight ? waterLevel >= 0.97 : (R >= 1.0 || rLatch);
   if (!overflow) {
     const wg = ctx.createLinearGradient(0, waterY, 0, DB);
     const wc = R > 0.7 ? '#802010' : R > 0.4 ? '#1a5070' : '#1a6080';
@@ -325,7 +349,7 @@ function drawDam(ctx, W, H, isRight, delta, R, tauRatio) {
     ctx.lineTo(fx + flen, fy + 14); ctx.quadraticCurveTo(fx + flen * 0.5, fy + 20, fx, fy + 16);
     ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#00e676cc'; ctx.font = `bold 9px 'Share Tech Mono'`;
-    ctx.fillText('→ Handoff', fx + 4, fy + 5);
+    ctx.fillText('→ R≥1 reached (hand over)', fx + 4, fy + 5);
     ctx.fillStyle = '#00e67660'; ctx.font = `9px 'Share Tech Mono'`;
     ctx.fillText('Water escapes', fx + 4, fy + 16);
   }
@@ -441,10 +465,10 @@ function updateUI(R, delta) {
 
   // The R zone thresholds (1.0/0.7/0.4) are the same constants shared with the wall-color branches in
   // drawDam (R>1.0, R>0.7) and the R-graph threshold line in drawDegGraph (1.0 = LIMIT).
-  if (R >= 1.0) {
-    rEl.style.color = '#ff3d00'; zn.textContent = 'ABSTAIN — Limit Exceeded';
+  if (R >= 1.0 || rLatch) {
+    rEl.style.color = '#ff3d00'; zn.textContent = 'RUPTURE_BOUNDARY — Limit Exceeded (latched)';
     rj.style.borderColor = '#ff3d00'; rj.style.color = '#ff3d00';
-    rj.textContent = gRl >= gRf ? `⚡ R ≥ 1.0 — Exceeded. The water level has reached the spill limit (level R ${gRl.toFixed(2)}).` : `⚡ R ≥ 1.0 — Exceeded. Influenced by τ degradation of ${degRate.toFixed(1)}%.`;
+    rj.textContent = R < 1.0 ? `⚡ R reached 1.0 (latched; press RESET to release). Current R = ${R.toFixed(3)}` : gRl >= gRf ? `⚡ R ≥ 1.0 — Exceeded. The water level has reached the spill limit (level R ${gRl.toFixed(2)}).` : `⚡ R ≥ 1.0 — Exceeded. Influenced by τ degradation of ${degRate.toFixed(1)}%.`;
   } else if (R >= 0.7) {
     rEl.style.color = '#ff9100'; zn.textContent = 'CRITICAL — Approaching Limit';
     rj.style.borderColor = '#ff9100'; rj.style.color = '#ff9100';
@@ -527,6 +551,10 @@ function loop() {
   const Rl = Math.max(0, waterLevel - LEVEL_REF) / (LEVEL_LIMIT - LEVEL_REF);
   gRf = Rf; gRl = Rl;
   const R = Math.max(Rf, Rl);
+  if (R >= 1.0 && !rLatch) {
+    rLatch = true;
+    BoundaryRecord.hit({ time: 'frame ' + frameCount, channel: Rl >= Rf ? 'water-level spill margin' : 'fluctuation (with τ degradation)', value: `level ${(waterLevel * 100).toFixed(0)}% / τ_s ${tauCurrent.toFixed(3)}`, R });
+  }
 
   if (frameCount % 2 === 0) {
     tauHistory.push(tauCurrent);
@@ -547,6 +575,6 @@ function loop() {
 
 loop();
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The τ-degradation coefficients and the remaining-life conversion (3600 frames = 1 "unit") are demo values, not a prediction of real service life.<br>• The R on the right is the maximum of the fluctuation R (δ/τ) and the spill-margin R of the water level (reference level 50% to spill limit 100%). The reference level and the spill limit are demo-declared values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The τ-degradation coefficients and the remaining-life conversion (3600 frames = 1 "unit") are demo values, not a prediction of real service life.<br>• The R on the right is the maximum of the fluctuation R (δ/τ) and the spill-margin R of the water level (reference level 50% to spill limit 100%). The reference level and the spill limit are demo-declared values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.<br>• The moment R first reaches 1.0 is kept in the boundary-arrival record and the state is latched as RUPTURE_BOUNDARY (RESET or a scenario change starts a new trial).<br>• CRITICAL / ELASTIC / NIRVANA are display-zone names of this demo, not canonical states.<br>• The fluctuation side of R is the instantaneous fluctuation δ divided by τ_eff. The accumulated load is shown separately as "δ accumulation" and acts on R through the shrinking of τ_s.<br>• The "until τ_s reaches the 0.1 floor" estimate is not a prediction of when R reaches 1.</div>
 </body>
 </html>

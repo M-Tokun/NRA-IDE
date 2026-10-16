@@ -6,16 +6,16 @@
   (c) 2026 M-Tokuni | Principle: L∧P∧C∧D Verified
   
   概要: 4タブ構成で律環公理の基本原理を視覚的に解説
-    Tab1 - 距離を使わない理由（制約ベース判定 vs 距離ベース判定）
-    Tab2 - 微分積分を使わない理由（測定値直接比較 vs PID制御）
-    Tab3 - 浮動小数点を使わない理由（整数位相ロック方式）
-    Tab4 - 応用領域（医療AI・自動運転・インフラ）
+    Tab1 - 距離を判定の主語にしない理由（基準からのズレと吸収厚みの比 vs 中心からの距離）
+    Tab2 - 微分積分との違い（判定は R = δ/τ。微分・差分は補助として使う）
+    Tab3 - 整数の歩み（整数位相ロック：端数は持ち越さず記録する）
+    Tab4 - 応用領域（自動運転・インフラ）
 -->
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NRA-IDE #01: なぜ「距離」を使わないのか？</title>
+    <title>NRA-IDE #01: なぜ「距離」を判定の主語にしないのか？</title>
     <style>
         /* ========================================
            基本レイアウト
@@ -209,9 +209,9 @@
          ヘッダーセクション
          ======================================== -->
     <header>
-        <h1>🎯 NRA-IDE: なぜ「距離」を使わないのか？</h1>
+        <h1>🎯 NRA-IDE: なぜ「距離」を判定の主語にしないのか？</h1>
         <div class="subtitle">
-            Why Nomological Ring Axioms Don't Use Distance, Calculus, or Floating-Point
+            距離・微分積分・小数は使ってよい。ただし判定の主語は R = δ/τ（境界接近比）
         </div>
     </header>
 
@@ -220,9 +220,9 @@
          各タブが1つの概念を説明
          ======================================== -->
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="showTab('distance')">❓ なぜ距離を使わない？</button>
-        <button class="tab-btn" onclick="showTab('calculus')">🧮 微分積分を使わない？</button>
-        <button class="tab-btn" onclick="showTab('floating')">🔢 浮動小数点を使わない？</button>
+        <button class="tab-btn active" onclick="showTab('distance')">❓ 距離と何が違う？</button>
+        <button class="tab-btn" onclick="showTab('calculus')">🧮 微分積分と何が違う？</button>
+        <button class="tab-btn" onclick="showTab('floating')">🔢 整数の歩みとは？</button>
         <button class="tab-btn" onclick="showTab('usage')">🎯 何に使える？</button>
     </div>
 
@@ -235,7 +235,8 @@
              タブ1: なぜ距離を使わないのか？
              ============================================================ -->
         <div id="tab-distance" class="tab-content active">
-            <h2>❓ なぜ「距離」を使わないのか？</h2>
+            <h2>❓ なぜ「距離」を判定の主語にしないのか？</h2>
+            <p class="note-text">距離そのものは否定しません。物理的に意味のある距離は、観測値として使います（THEORY「距離」：距離を無条件の原因としない ≠ 距離データを削除する）。違うのは、何を判定の主語にするかです。</p>
             
             <!-- 従来手法の問題点 -->
             <div class="explanation problem-box">
@@ -273,8 +274,8 @@
                         <td>なぜその距離なのか説明不可能</td>
                     </tr>
                     <tr>
-                        <td>原点が必要</td>
-                        <td>座標系の定義が恣意的</td>
+                        <td>中心を学習データから作る</td>
+                        <td>データが変わると中心も動く（基準が評価中に動く）</td>
                     </tr>
                 </table>
             </div>
@@ -282,15 +283,15 @@
             <!-- 律環公理のアプローチ -->
             <div class="explanation solution-box">
                 <h3>✅ 律環公理のアプローチ</h3>
-                <p><strong>距離を使わず、「制約からのズレ」を測定：</strong></p>
+                <p><strong>中心からの距離ではなく、「宣言した基準からのズレ」と「吸収厚み」の比で見る：</strong></p>
                 <div class="code-block">
 <span class="code-comment">// 律環公理の判定（NRA-IDE）</span>
-<span class="code-keyword">function</span> nraIDE(input, constraints) {
-    <span class="code-comment">// 1. 制約違反を直接測定（距離ではない！）</span>
-    <span class="code-keyword">const</span> delta = measureViolation(input, constraints);
-    
-    <span class="code-comment">// 2. 許容範囲と比較</span>
-    <span class="code-keyword">const</span> tau = allowedTolerance;
+<span class="code-keyword">function</span> nraIDE(input, declaration) {
+    <span class="code-comment">// 1. 評価前に宣言した基準状態から、破断方向へのズレ（δ ≥ 0）</span>
+    <span class="code-keyword">const</span> delta = deviationFromReference(input, declaration);
+
+    <span class="code-comment">// 2. 吸収厚み（基準から破断までの幅）</span>
+    <span class="code-keyword">const</span> tau = declaration.absorptionThickness;
     
     <span class="code-comment">// 3. 比率を計算（R = δ/τ）</span>
     <span class="code-keyword">const</span> R = delta / tau;
@@ -310,16 +311,16 @@
                         <th>利点</th>
                     </tr>
                     <tr>
-                        <td>「中心」不要</td>
-                        <td>制約だけを定義すればよい</td>
+                        <td>中心からの距離ではなく比で見る</td>
+                        <td>宣言した基準から破断方向へのズレ δ と、吸収厚み τ の比 R</td>
                     </tr>
                     <tr>
                         <td>計算が完全に説明可能</td>
                         <td>δとτは物理的測定値</td>
                     </tr>
                     <tr>
-                        <td>原点が存在しない</td>
-                        <td>座標系の恣意性がない</td>
+                        <td>基準状態は評価前に宣言して固定する</td>
+                        <td>評価中に基準を動かさないので、過去のズレが今の値に残る（AXIOMS §4）</td>
                     </tr>
                 </table>
             </div>
@@ -363,7 +364,8 @@
              タブ2: 微分積分を使わないとは？
              ============================================================ -->
         <div id="tab-calculus" class="tab-content">
-            <h2>🧮 微分積分を使わないとは？</h2>
+            <h2>🧮 微分積分と何が違うのか？</h2>
+            <p class="note-text">微分・差分は、二次式の二重ゆらぎ検出（FORMULA §4.7）や補完式（§5）で、補助の計算として使います。古典的な理論は否定しません（Thesis §6.1）。違うのは、判定の主語を「変化の速さ」ではなく「境界への接近 R」に置くことです。</p>
             
             <div class="explanation">
                 <h3>従来の数学的アプローチ</h3>
@@ -395,15 +397,15 @@
             
             <div class="explanation solution-box">
                 <h3>律環公理のアプローチ</h3>
-                <p>微分積分ではなく、「測定値の直接比較」：</p>
+                <p>判定の主語は「測定値と基準の比較」：</p>
                 <div class="code-block">
-<span class="code-comment">// NRA-IDE: 微分積分を使わない制御</span>
-<span class="code-keyword">function</span> nraControl(input, constraint) {
-    <span class="code-comment">// δ: 制約からのズレ（直接測定）</span>
-    <span class="code-keyword">const</span> delta = input - constraint;  <span class="code-comment">// これは引き算だけ</span>
-    
-    <span class="code-comment">// τ: 許容範囲（設計時に決定済み）</span>
-    <span class="code-keyword">const</span> tau = <span class="code-number">10.0</span>;  <span class="code-comment">// 固定値</span>
+<span class="code-comment">// NRA-IDE: 判定は R = δ/τ で行う</span>
+<span class="code-keyword">function</span> nraControl(input, reference) {
+    <span class="code-comment">// δ: 宣言した基準から破断方向へのズレ（負にしない）</span>
+    <span class="code-keyword">const</span> delta = Math.max(<span class="code-number">0</span>, input - reference);
+
+    <span class="code-comment">// τ: 吸収厚み（基準から破断までの幅。評価前に宣言）</span>
+    <span class="code-keyword">const</span> tau = <span class="code-number">10.0</span>;
     
     <span class="code-comment">// R: 比率計算（割り算だけ）</span>
     <span class="code-keyword">const</span> R = delta / tau;
@@ -415,8 +417,8 @@
     <span class="code-keyword">return</span> <span class="code-string">"CONTINUE"</span>;
 }
 
-<span class="code-comment">// 微分も積分も使っていない！
-// 使っているのは：引き算、割り算、比較、だけ</span>
+<span class="code-comment">// 判定に使うのは：引き算、割り算、比較
+// （変化の速さや平滑値は、必要なら補助として使い、判定を軽くする向きには使わない）</span>
                 </div>
                 
                 <p><strong class="text-success">これの利点：</strong></p>
@@ -430,8 +432,8 @@
                         <td>安定（四則演算のみ）</td>
                     </tr>
                     <tr>
-                        <td>誤差が累積</td>
-                        <td>誤差が累積しない</td>
+                        <td>積分項に誤差を持ち越す</td>
+                        <td>状態遷移を越えて端数を持ち越さない（記録はする）</td>
                     </tr>
                     <tr>
                         <td>計算コストが高い</td>
@@ -439,7 +441,7 @@
                     </tr>
                     <tr>
                         <td>説明が困難</td>
-                        <td>圧倒的な差</td>
+                        <td>δ・τ・R の三つで説明できる</td>
                     </tr>
                 </table>
             </div>
@@ -453,7 +455,7 @@
              タブ3: 浮動小数点を使わない？
              ============================================================ -->
         <div id="tab-floating" class="tab-content">
-            <h2>🔢 浮動小数点演算を使わないとは？</h2>
+            <h2>🔢 整数の歩みとは？（浮動小数点との関係）</h2>
             
             <div class="explanation problem-box">
                 <h3>浮動小数点の問題</h3>
@@ -466,41 +468,41 @@
 }
 
 console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
-                   <span class="code-comment">// 実際: 100000.00000123456... (誤差！)</span>
+                   <span class="code-comment">// 実際: 100000.00000133288 (誤差！)</span>
                 </div>
-                
-                <p><strong class="text-error">医療・自動運転では致命的：</strong></p>
+
+                <p><strong class="text-error">安全に関わる判定では問題になる：</strong></p>
                 <ul>
-                    <li>誤差が累積 → 判定ミス</li>
-                    <li>再現性がない → デバッグ不可能</li>
-                    <li>環境依存 → CPUによって結果が変わる</li>
+                    <li>誤差が積み上がる → 境界の手前・向こうの判定がずれる</li>
+                    <li>小数の位相を足し上げてから整数部を取ると、整数部そのものがずれることがある</li>
+                    <li>計算の順序や実装が変わると、結果が変わる</li>
                 </ul>
             </div>
             
             <div class="explanation solution-box">
-                <h3>NRA-IDEの解決策：整数位相ロック</h3>
-                <p>浮動小数点を使わず、整数だけで動作：</p>
+                <h3>NRA-IDEの設計原則：整数位相ロック</h3>
+                <p>状態の歩みは整数で数え、1歩に満たない端数は次の状態へ持ち越さず、記録に残します。すべての量を整数にするものではありません（Thesis §9.1）。</p>
                 <div class="code-block">
 <span class="code-comment">// NRA-IDE: 整数位相ロック方式</span>
-<span class="code-keyword">let</span> phase = <span class="code-number">0.0</span>;  <span class="code-comment">// 内部では浮動小数点</span>
+<span class="code-keyword">let</span> ticks = <span class="code-number">0</span>;                 <span class="code-comment">// 歩みは整数で数える</span>
+<span class="code-keyword">const</span> STEPS_PER_PHASE = <span class="code-number">100</span>;
 
 <span class="code-keyword">function</span> update() {
-    phase += <span class="code-number">0.01</span>;  <span class="code-comment">// 位相が進む</span>
-    
-    <span class="code-comment">// ここが重要：整数部分だけを使う</span>
-    <span class="code-keyword">const</span> integerPhase = Math.floor(phase);
-    
-    <span class="code-comment">// 小数部分は破棄される（Discarded Residual）</span>
-    <span class="code-keyword">const</span> residual = phase - integerPhase;
-    
-    <span class="code-comment">// システムが使うのは integerPhase だけ</span>
-    <span class="code-keyword">return</span> integerPhase;  <span class="code-comment">// 0, 1, 2, 3, ... （整数のみ）</span>
+    ticks += <span class="code-number">1</span>;                    <span class="code-comment">// 整数の足し算なので積算誤差は出ない</span>
+
+    <span class="code-comment">// 状態の歩み（整数部）</span>
+    <span class="code-keyword">const</span> integerPhase = Math.floor(ticks / STEPS_PER_PHASE);
+
+    <span class="code-comment">// 1歩に満たない端数：次の状態へ持ち越さない。値と出所は記録する（構造開示ログ）</span>
+    <span class="code-keyword">const</span> residual = (ticks % STEPS_PER_PHASE) / STEPS_PER_PHASE;
+
+    <span class="code-keyword">return</span> integerPhase;  <span class="code-comment">// 0, 1, 2, 3, ...</span>
 }
 
 <span class="code-comment">// 利点：
-// - 浮動小数点誤差が累積しない
-// - 完全に決定論的
-// - どんなCPUでも同じ結果</span>
+// - 状態の歩みに浮動小数点の積算誤差が入らない
+// - 同じ入力なら同じ歩み（決定論的）
+// - 端数は捨てるのではなく、記録して追跡できる</span>
                 </div>
                 
                 <p><strong class="text-success">実例：</strong></p>
@@ -508,7 +510,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                     <tr>
                         <th>Phase（内部）</th>
                         <th>Integer Lock</th>
-                        <th>Residual（破棄）</th>
+                        <th>Residual（持ち越さず記録）</th>
                     </tr>
                     <tr>
                         <td>0.95</td>
@@ -537,8 +539,8 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
             <h3>📊 位相ロックの視覚化</h3>
             <canvas id="floatingCanvas" width="800" height="400"></canvas>
             <p class="viz-caption">
-                緑の環：整数位相（システムが使う）<br>
-                赤の点：浮動小数点ノイズ（破棄される）
+                緑の線と白い点：1歩の中の端数（次へ持ち越さず、記録する）<br>
+                外側の光る環：整数の歩みが1つ進んだ瞬間
             </p>
         </div>
         
@@ -549,48 +551,23 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
             <h2>🎯 何に使えるのか？</h2>
             
             <div class="explanation">
-                <h3>🏥 1. 医療AI（がん治療支援）</h3>
-                <p><strong>問題：</strong>従来AIは「薬が効くか」を統計的に予測</p>
-                <p><strong>NRA-IDE：</strong>「薬が物理的に届くか」を判定</p>
-                <div class="code-block">
-<span class="code-comment">// がん治療での応用例</span>
-<span class="code-keyword">function</span> checkDrugPenetration(tumor) {
-    <span class="code-comment">// δ: 腫瘍の抵抗力（物理測定値）</span>
-    <span class="code-keyword">const</span> delta = tumor.stiffness * tumor.thickness;
-    
-    <span class="code-comment">// τ: 投与圧力（設定値）</span>
-    <span class="code-keyword">const</span> tau = drug.pressure * drug.area;
-    
-    <span class="code-comment">// R: 抵抗比率</span>
-    <span class="code-keyword">const</span> R = delta / tau;
-    
-    <span class="code-comment">// 判定</span>
-    <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
-        <span class="code-keyword">return</span> <span class="code-string">"薬剤が物理的に届かない → 投与中止"</span>;
-    }
-    <span class="code-keyword">return</span> <span class="code-string">"薬剤到達可能 → 投与継続"</span>;
-}
-                </div>
-            </div>
-            
-            <div class="explanation">
-                <h3>🚗 2. 自動運転安全</h3>
+                <h3>🚗 1. 自動運転安全</h3>
                 <p><strong>問題：</strong>従来AIは「最適な経路」を探索 → ブラックボックス</p>
                 <p><strong>NRA-IDE：</strong>「構造的に安全な経路」を選択 → 説明可能</p>
                 <div class="code-block">
 <span class="code-comment">// ブレーキ判定の例</span>
 <span class="code-keyword">function</span> brakeSafetyGate(vehicle, obstacle) {
-    <span class="code-comment">// δ: 衝突までの時間的余裕</span>
-    <span class="code-keyword">const</span> delta = (obstacle.distance - vehicle.speed * reactionTime);
-    
-    <span class="code-comment">// τ: 最小安全距離</span>
-    <span class="code-keyword">const</span> tau = vehicle.brakingDistance;
-    
-    <span class="code-comment">// R: 安全マージン</span>
+    <span class="code-comment">// δ: 止まるのに必要な距離（空走距離＋制動距離）</span>
+    <span class="code-keyword">const</span> delta = vehicle.speed * reactionTime + vehicle.brakingDistance;
+
+    <span class="code-comment">// τ: 使える車間距離</span>
+    <span class="code-keyword">const</span> tau = obstacle.distance;
+
+    <span class="code-comment">// R: 境界接近比（R = 1.0 で止まりきれない）</span>
     <span class="code-keyword">const</span> R = delta / tau;
-    
-    <span class="code-comment">// 判定</span>
-    <span class="code-keyword">if</span> (R < <span class="code-number">1.0</span>) {
+
+    <span class="code-comment">// 判定（実際の運用では R = 1.0 より手前の閾値で止める）</span>
+    <span class="code-keyword">if</span> (R >= <span class="code-number">1.0</span>) {
         <span class="code-keyword">return</span> <span class="code-string">"緊急ブレーキ作動"</span>;  <span class="code-comment">// RUPTURE_BOUNDARY</span>
     }
     <span class="code-keyword">return</span> <span class="code-string">"安全継続"</span>;
@@ -599,17 +576,17 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
             </div>
             
             <div class="explanation">
-                <h3>🖥️ 3. インフラ故障防止</h3>
+                <h3>🖥️ 2. インフラ故障防止</h3>
                 <p><strong>問題：</strong>サーバーのカスケード故障（1台の故障が連鎖）</p>
                 <p><strong>NRA-IDE：</strong>物理的負荷制約による予防</p>
                 <div class="code-block">
 <span class="code-comment">// HAN Gate（カスケード防止）</span>
 <span class="code-keyword">function</span> hanGate(server, incomingLoad) {
-    <span class="code-comment">// δ: 現在の負荷超過量</span>
-    <span class="code-keyword">const</span> delta = incomingLoad - server.capacity;
-    
-    <span class="code-comment">// τ: 許容バッファ</span>
-    <span class="code-keyword">const</span> tau = server.bufferSize;
+    <span class="code-comment">// δ: 平常負荷からの超過（負にしない）</span>
+    <span class="code-keyword">const</span> delta = Math.max(<span class="code-number">0</span>, incomingLoad - server.normalLoad);
+
+    <span class="code-comment">// τ: 平常負荷から限界負荷までの幅</span>
+    <span class="code-keyword">const</span> tau = server.maxLoad - server.normalLoad;
     
     <span class="code-comment">// R: 負荷比率</span>
     <span class="code-keyword">const</span> R = delta / tau;
@@ -627,26 +604,20 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
             <table>
                 <tr>
                     <th>領域</th>
-                    <th>δ（制約からのズレ）</th>
-                    <th>τ（許容範囲）</th>
+                    <th>δ（基準からのズレ）</th>
+                    <th>τ（吸収厚み）</th>
                     <th>R ≥ 1.0 の意味</th>
                 </tr>
                 <tr>
-                    <td>医療</td>
-                    <td>腫瘍抵抗力</td>
-                    <td>投与圧力</td>
-                    <td>薬剤が届かない</td>
-                </tr>
-                <tr>
                     <td>自動運転</td>
-                    <td>障害物までの余裕</td>
-                    <td>制動距離</td>
-                    <td>衝突危険</td>
+                    <td>止まるのに必要な距離</td>
+                    <td>使える車間距離</td>
+                    <td>止まりきれない</td>
                 </tr>
                 <tr>
                     <td>インフラ</td>
-                    <td>負荷超過量</td>
-                    <td>バッファサイズ</td>
+                    <td>平常負荷からの超過</td>
+                    <td>平常負荷から限界負荷までの幅</td>
                     <td>サーバー過負荷</td>
                 </tr>
             </table>
@@ -760,12 +731,20 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                 ctx.arc(dataX2, dataY2, 5, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // 違反測定（透明）
-                if (dataX2 > constraintX + 80) {
+                // 越えた分を δ として描く（4辺のどこから出ても描く。以前は右辺だけだった）
+                const dx = dataX2 - constraintX, dy = dataY2 - constraintY;
+                const over = Math.max(Math.abs(dx), Math.abs(dy)) - 80;
+                if (over > 0) {
                     ctx.fillStyle = 'rgba(255, 85, 85, 0.3)';
-                    ctx.fillRect(constraintX + 80, dataY2 - 5, dataX2 - (constraintX + 80), 10);
+                    if (Math.abs(dx) >= Math.abs(dy)) {
+                        const edge = constraintX + Math.sign(dx) * 80;
+                        ctx.fillRect(Math.min(edge, dataX2), dataY2 - 5, Math.abs(dataX2 - edge), 10);
+                    } else {
+                        const edge = constraintY + Math.sign(dy) * 80;
+                        ctx.fillRect(dataX2 - 5, Math.min(edge, dataY2), 10, Math.abs(dataY2 - edge));
+                    }
                     ctx.fillStyle = '#ff5555';
-                    ctx.fillText('δ (violation)', constraintX + 85, dataY2 - 10);
+                    ctx.fillText('δ (violation)', dataX2 + 10, dataY2 - 10);
                 }
                 
                 vizRaf = requestAnimationFrame(animate);
@@ -809,17 +788,24 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                 ctx.fillStyle = '#00ff88';
                 ctx.fillText('NRA-IDE：測定値比較（シンプル）', 450, 30);
                 
-                // シンプルな閾値判定
-                const value = Math.sin(t) * 80;
+                // δ（基準からのズレ、0以上）と τ（吸収厚み）の比較：δ が τ に届くと R = 1
+                const value = Math.abs(Math.sin(t)) * 80;
                 const threshold = 50;
-                
+
+                ctx.strokeStyle = '#335544';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(450, 200);
+                ctx.lineTo(750, 200);
+                ctx.stroke();
+                ctx.fillText('基準（δ = 0）', 755, 200);
                 ctx.strokeStyle = '#00ff88';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(450, 200 - threshold);
                 ctx.lineTo(750, 200 - threshold);
                 ctx.stroke();
-                ctx.fillText('τ (threshold)', 755, 200 - threshold);
+                ctx.fillText('τ（吸収厚み）：R = 1', 755, 200 - threshold);
                 
                 ctx.fillStyle = value > threshold ? '#ff5555' : '#00ff88';
                 ctx.beginPath();
@@ -842,10 +828,12 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            let phase = 0.0;
-            
+            // 歩みは整数で数える（浮動小数点の積算をしない）。1フレームで 3/100 歩進む
+            let ticks = 0;
+            const STEPS_PER_PHASE = 100;
+
             function animate() {
-                phase += 0.03;
+                ticks += 3;
                 
                 // 残像効果
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
@@ -862,9 +850,9 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                 ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                 ctx.stroke();
                 
-                // 整数位相とResidual
-                const integerPhase = Math.floor(phase);
-                const residual = phase - integerPhase;
+                // 整数位相と Residual（端数）
+                const integerPhase = Math.floor(ticks / STEPS_PER_PHASE);
+                const residual = (ticks % STEPS_PER_PHASE) / STEPS_PER_PHASE;
                 
                 // 位相カーソル
                 const angle = (residual * Math.PI * 2) - (Math.PI / 2);
@@ -899,7 +887,7 @@ console.log(sum);  <span class="code-comment">// 期待: 100000.0</span>
                 ctx.font = '16px Courier';
                 ctx.fillText(`Integer Lock: ${integerPhase}`, centerX - 60, centerY + radius + 40);
                 ctx.fillStyle = '#ff5555';
-                ctx.fillText(`Residual: ${residual.toFixed(4)} (破棄)`, centerX - 80, centerY + radius + 60);
+                ctx.fillText(`Residual: ${residual.toFixed(2)}（次へ持ち越さず記録）`, centerX - 110, centerY + radius + 60);
                 
                 vizRaf = requestAnimationFrame(animate);
             }

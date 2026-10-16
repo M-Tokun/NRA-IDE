@@ -115,7 +115,7 @@
   <div class="deg-title">◆ τ劣化曲線 — 負荷の積算が構造の余裕を蝕む</div>
   <div class="deg-grid">
     <div class="deg-canvas-wrap">
-      <div class="deg-label">τ（堤防の実効厚み）の推移　— 嵐のたびに縮小する</div>
+      <div class="deg-label">τ_s（構造厚み。判定は τ_eff = 0.25·τ_s + 0.02）の推移　— 嵐のたびに縮小する</div>
       <canvas id="cv-deg-tau" width="450" height="140"></canvas>
     </div>
     <div class="deg-canvas-wrap">
@@ -141,7 +141,7 @@
       <div class="deg-stat-val" id="deg-rate" style="color:var(--orange);">0.0%</div>
     </div>
     <div class="deg-stat">
-      <div class="deg-stat-label">予測残余寿命</div>
+      <div class="deg-stat-label">τ_s が下限0.1に達するまで（目安）</div>
       <div class="deg-stat-val" id="remaining-life" style="color:var(--blue);">---</div>
     </div>
     <div class="deg-stat">
@@ -170,11 +170,33 @@
   <button class="reset-btn" id="btn-reset">RESET</button>
 </div>
 
+<div id="boundaryRecord" style="max-width:1100px;margin:10px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="insight" id="insight-box">
   シナリオ３「水位60%・嵐発生」を選び、劣化感度を上げてみてください。τが縮むにつれ、同じ水位でもRが上昇していきます。
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // fill/delta/waterInitはシナリオボタン用の初期値。数値そのものの根拠は記載なし・デモ用チューニング値。
 // シナリオ３「水位60%・嵐発生」は水位を低く保ったままdeltaのみ大きくし、τ劣化の効果を際立たせる本デモの核心シナリオ（insight-boxの案内文が指すシナリオ）。
 const scenarios = [
@@ -198,6 +220,7 @@ let deltaAccum = 0;
 // 水位の越流余裕R：基準水位からの上昇分を、越流限界までの余裕で割る（FORMULA §4.1 の δ/τ と同じ形）。
 // 基準水位50%・越流限界100%はデモ用の宣言値。総合のRは、ゆらぎのRと水位のRの最大値（平均で薄めない）。
 const LEVEL_REF = 0.5, LEVEL_LIMIT = 1.0;
+let rLatch = false;   // R≥1 の不可逆ラッチ（RESET またはシナリオ切替で解除）
 let gRf = 0, gRl = 0;   // 直近のゆらぎR・水位R（updateUIの表示用）
 let tauLoss = 0;   // 累積したτ損失（不可逆） / cumulative τ loss (irreversible)
 // 判定に使う実効τ（τ_eff）。構造厚み tauCurrent をそのまま使わず 0.25倍+0.02 とする（デモ用の値）。
@@ -235,6 +258,7 @@ document.querySelectorAll('.sc-btn').forEach(btn => {
 });
 
 function reset() {
+  rLatch = false; BoundaryRecord.newTrial();
   tauCurrent = TAU_INIT;
   deltaAccum = 0;
   tauLoss = 0;
@@ -298,7 +322,7 @@ function drawDam(ctx, W, H, isRight, delta, R, tauRatio) {
   }
 
   // Water
-  const overflow = !isRight ? waterLevel >= 0.97 : R >= 1.0;
+  const overflow = !isRight ? waterLevel >= 0.97 : (R >= 1.0 || rLatch);
   if (!overflow) {
     const wg = ctx.createLinearGradient(0, waterY, 0, DB);
     const wc = R > 0.7 ? '#802010' : R > 0.4 ? '#1a5070' : '#1a6080';
@@ -332,7 +356,7 @@ function drawDam(ctx, W, H, isRight, delta, R, tauRatio) {
     ctx.lineTo(fx + flen, fy + 14); ctx.quadraticCurveTo(fx + flen * 0.5, fy + 20, fx, fy + 16);
     ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#00e676cc'; ctx.font = `bold 9px 'Share Tech Mono'`;
-    ctx.fillText('→ Handoff証言', fx + 4, fy + 5);
+    ctx.fillText('→ R≥1 到達（人間へ委ねる）', fx + 4, fy + 5);
     ctx.fillStyle = '#00e67660'; ctx.font = `9px 'Share Tech Mono'`;
     ctx.fillText('水は止まらない', fx + 4, fy + 16);
   }
@@ -453,10 +477,10 @@ function updateUI(R, delta) {
   const degRate = (1 - tauCurrent / TAU_INIT) * 100;
 
   // R判定のゾーン閾値(1.0/0.7/0.4)は、drawDam内の壁色分岐(R>1.0, R>0.7)およびdrawDegGraphのRグラフ閾値線(1.0=LIMIT)と共通の定数。
-  if (R >= 1.0) {
-    rEl.style.color = '#ff3d00'; zn.textContent = 'ABSTAIN — 限界超過';
+  if (R >= 1.0 || rLatch) {
+    rEl.style.color = '#ff3d00'; zn.textContent = 'RUPTURE_BOUNDARY — 限界超過（固定）';
     rj.style.borderColor = '#ff3d00'; rj.style.color = '#ff3d00';
-    rj.textContent = gRl >= gRf ? `⚡ R ≥ 1.0 — 超過。水位が越流限界に達しています（水位R ${gRl.toFixed(2)}）。` : `⚡ R ≥ 1.0 — 超過。τ劣化 ${degRate.toFixed(1)}% が影響しています。`;
+    rj.textContent = R < 1.0 ? `⚡ R ≥ 1.0 に達しました（固定中。RESET で解除）。現在 R = ${R.toFixed(3)}` : gRl >= gRf ? `⚡ R ≥ 1.0 — 超過。水位が越流限界に達しています（水位R ${gRl.toFixed(2)}）。` : `⚡ R ≥ 1.0 — 超過。τ劣化 ${degRate.toFixed(1)}% が影響しています。`;
   } else if (R >= 0.7) {
     rEl.style.color = '#ff9100'; zn.textContent = 'CRITICAL — 限界接近';
     rj.style.borderColor = '#ff9100'; rj.style.color = '#ff9100';
@@ -541,6 +565,10 @@ function loop() {
   const Rl = Math.max(0, waterLevel - LEVEL_REF) / (LEVEL_LIMIT - LEVEL_REF);
   gRf = Rf; gRl = Rl;
   const R = Math.max(Rf, Rl);
+  if (R >= 1.0 && !rLatch) {
+    rLatch = true;
+    BoundaryRecord.hit({ time: 'frame ' + frameCount, channel: Rl >= Rf ? '水位の越流余裕' : 'ゆらぎ（τ劣化込み）', value: `水位 ${(waterLevel * 100).toFixed(0)}% / τ_s ${tauCurrent.toFixed(3)}`, R });
+  }
 
   // History
   if (frameCount % 2 === 0) {
@@ -562,6 +590,6 @@ function loop() {
 
 loop();
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・τ劣化の係数と、残余寿命の換算（3600フレーム＝1「単位」）はデモ用で、実際の耐用年数の予測ではありません。<br>・右のRは、ゆらぎのR（δ/τ）と水位の越流余裕R（基準水位50%〜越流限界100%）の最大値です。基準水位と越流限界はデモ用の宣言値です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・τ劣化の係数と、残余寿命の換算（3600フレーム＝1「単位」）はデモ用で、実際の耐用年数の予測ではありません。<br>・右のRは、ゆらぎのR（δ/τ）と水位の越流余裕R（基準水位50%〜越流限界100%）の最大値です。基準水位と越流限界はデモ用の宣言値です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・R がはじめて 1.0 に達した瞬間は境界到達記録に残り、RUPTURE_BOUNDARY として固定されます（RESET またはシナリオ切替で新しい試行になります）。<br>・CRITICAL／ELASTIC／NIRVANA はこのデモの表示ゾーン名で、正典の状態名ではありません。<br>・R のゆらぎ側は、その瞬間のゆらぎ δ を τ_eff で割った値です。累積した負荷は「δ積算」に別に出て、τ_s の縮小を通して R に効きます。<br>・「τ_s が下限0.1に達するまで」の見積りは、R=1 に達するまでの予測ではありません。</div>
 </body>
 </html>

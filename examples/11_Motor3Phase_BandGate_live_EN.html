@@ -262,7 +262,7 @@ footer a { color:var(--v); text-decoration:none; }
       <span>No Load 0%</span><span>Rated 100%</span><span class="text-danger">Overload 150%</span>
     </div>
     <div class="font-11 text-white opacity-75 mt-6 line-height-1-6">
-      Current exceeds rated value above 100%.<br>Sudden trip occurs near 150%.
+      Current exceeds rated value above 100%.<br>At 120% of rated or more, the current reference reaches the upper limit and the evaluation is outside its declared range (out of domain).
     </div>
   </div>
 
@@ -415,6 +415,7 @@ footer a { color:var(--v); text-decoration:none; }
 
   <div class="log-panel">
     <div class="i-title">Motor Event Log</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
     <div class="btn-row">
       <button class="ctrl" onclick="setFault('normal')">✓ Return to Normal</button>
@@ -424,7 +425,7 @@ footer a { color:var(--v); text-decoration:none; }
     <div class="font-11 text-white opacity-75 mt-8 line-height-1-7" id="fault-note">
       Normal operation. Move the load slider to experience the "gradual buildup → sudden trip" phenomenon.
     </div>
-    <div class="demo-caveat" style="margin-top:10px;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The motor and thermal models are simplified demo models, not the characteristics of a real machine.<br>• The winding-temperature reference interpolates a table of the steady temperatures of this model run long at each load ratio (demo values). It is not a real thermal characteristic.<br>• For load settings of 110% and above, the reference is held at 90% of the limit (120°C) = 108°C. This is treated as an overload whose expected temperature is itself near the limit, and it triggers as soon as the measurement heads for the limit.<br>• The reference values, limits, and gate-width coefficients for current, temperature, and phase imbalance are all demo-declared values, not an operational basis.</div>
+    <div class="demo-caveat" style="margin-top:10px;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The motor and thermal models are simplified demo models, not the characteristics of a real machine.<br>• The RPM slider is treated as the inverter output frequency (synchronous speed) setting. The cooling fan is assumed to be shaft-mounted, so cooling weakens at low speed.<br>• The winding-temperature reference interpolates a table of the steady temperatures of this model run long at each load ratio (demo values). It is not a real thermal characteristic.<br>• For load settings of 110% and above, the reference is held at 90% of the limit (120°C) = 108°C. This is treated as an overload whose expected temperature is itself near the limit, and it triggers as soon as the measurement heads for the limit.<br>• The reference values, limits, and gate-width coefficients for current, temperature, and phase imbalance are all demo-declared values, not an operational basis.</div>
   </div>
 </div>
 
@@ -439,6 +440,27 @@ footer a { color:var(--v); text-decoration:none; }
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────
 // Motor constants
 // ─────────────────────────────────────────────
@@ -475,7 +497,8 @@ let silHoldUntil = 0;
 // Pull-out slip s_po = r2/x2 gives maximum torque
 // Beyond s > s_po, positive feedback collapse occurs
 // ─────────────────────────────────────────────
-const SYNC_RPM = 1500;      // Synchronous speed (4-pole 50Hz)
+const SYNC_RPM = 1500;      // Synchronous speed at rated frequency (4-pole 50Hz). During operation the synchronous speed follows the inverter set speed (getValues)
+const RPM_AXIS_MAX = 3000;  // RPM display range (slider maximum)
 const R2       = 0.03;      // Secondary resistance (pu). Gives a rated slip of about 5% (the former 0.08 let the speed fall to 66% at rated load)
 const X2       = 0.12;      // Secondary reactance (pu)
 const K_TORQUE = 2 * 2.8 * R2 * X2;  // Torque coefficient. T_max = K/(2·R2·X2), so this gives max torque ≈ 2.8 pu
@@ -488,7 +511,7 @@ function motorTorque(s) {
 }
 
 // Pull-out slip (maximum torque point)
-const S_PULLOUT = R2 / X2;  // ≈ 0.667
+const S_PULLOUT = R2 / X2;  // = 0.25
 const T_PULLOUT = motorTorque(S_PULLOUT);
 
 // Actual RPM state (dynamic)
@@ -505,15 +528,18 @@ function getValues(t) {
   const pnoise    = () => 1 + (Math.random() - .5) * .018;
 
   // ─── RPM dynamics ───────────────────────────────
+  // Inverter drive: the output frequency follows the set speed, so synchronous speed = set speed.
+  // (Previously the synchronous speed was fixed at 1500 rpm with only a weak pull toward the set speed, so the slider had almost no effect.)
+  const sync = Math.max(1, setRPM);
   // Slip s = (sync speed - actual speed) / sync speed
-  const slip = Math.max(0.001, (SYNC_RPM - actualRPM) / SYNC_RPM);
+  const slip = Math.max(0.001, (sync - actualRPM) / sync);
 
   // Motor generated torque (pu)
   let motTorque = motorTorque(slip);
 
   // Load torque (pu): load ratio × rated + speed correction from set RPM
   // Higher torque demand at lower speed settings
-  const speedFactor = 0.6 + (setRPM / SYNC_RPM) * 0.4;
+  const speedFactor = 0.6 + (setRPM / RATED_RPM) * 0.4;
   let loadTorque = loadRatio * speedFactor;
 
   // Fault corrections
@@ -528,18 +554,16 @@ function getValues(t) {
 
   // Torque difference → RPM change (smoothed by moment of inertia)
   const torqueDiff = motTorque - loadTorque;
-  const rpmDelta   = torqueDiff * J_INERTIA * SYNC_RPM;
+  const rpmDelta   = torqueDiff * J_INERTIA * sync;
 
   if (fault !== 'locked') {
     actualRPM += rpmDelta;
-    // Pull toward set RPM (simulating inverter drive)
-    actualRPM += (setRPM - actualRPM) * 0.015;
     // An induction motor in motoring mode does not exceed synchronous speed, so cap at synchronous speed
-    actualRPM  = Math.max(0, Math.min(SYNC_RPM, actualRPM));
+    actualRPM  = Math.max(0, Math.min(sync, actualRPM));
   }
 
   // Pull-out detection: slip exceeds pull-out point and speed is falling
-  const newSlip = Math.max(0.001, (SYNC_RPM - actualRPM) / SYNC_RPM);
+  const newSlip = Math.max(0.001, (sync - actualRPM) / sync);
   pulloutFlag = (newSlip > S_PULLOUT * 1.05 && torqueDiff < 0);
 
   // ─── Current calculation ───────────────────────────────
@@ -548,8 +572,8 @@ function getValues(t) {
   const slipRatio  = Math.min(newSlip / 0.05, 1);  // 0.05 = rated slip
   let baseA = RATED_A * (0.3 + slipRatio * 0.7) * Math.max(loadRatio, 0.1);
 
-  // Current ripple increases at lower speed (PWM carrier component)
-  const ripple = (1 - actualRPM / SYNC_RPM) * 0.8 + 1.0;
+  // Current ripple grows the farther the speed is from rated (PWM carrier component at low speed; a simple stand-in for field weakening at high speed)
+  const ripple = 1.0 + 0.8 * Math.abs(1 - actualRPM / RATED_RPM);
 
   let u = baseA * ripple * pnoise();
   let v = baseA * ripple * pnoise();
@@ -588,7 +612,7 @@ function getValues(t) {
     : 0;
 
   // Winding temperature (thermal accumulation model)
-  const cooling = Math.max(0.2, actualRPM / SYNC_RPM);   // Cooling by rotation speed
+  const cooling = Math.max(0.2, Math.min(2, actualRPM / RATED_RPM));   // Shaft-mounted cooling fan: cooling by rotation speed (1 at rated)
   const heatIn  = (u + v + w) * 0.4 * (1 / cooling);
   const heatOut = (tempAccum - 25) * 0.15;
   // Cut off near the insulation burn-out temperature (250°C); above that is outside this thermal model's description domain
@@ -663,18 +687,20 @@ function bandGate(sensor, v, p) {
 
   const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
   const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
-  const valid = tau0_u > 0 && tau0_l > 0;
-  const R_u   = valid ? d_u / tau_u : Infinity;
-  const R_l   = valid ? d_l / tau_l : Infinity;
-  const R     = Math.max(R_u, R_l);
+  // τ0≤0 (for example, when the reference for the load setting reaches or exceeds the upper limit): as in the canon,
+  // R is not defined (OUT_OF_DESCRIPTION_DOMAIN, AXIOMS §6). R is not replaced by infinity; it is null, and the gate fails toward stop.
+  const undef = !(tau0_u > 0 && tau0_l > 0);
+  const R_u   = undef ? null : d_u / tau_u;
+  const R_l   = undef ? null : d_l / tau_l;
+  const R     = undef ? null : Math.max(R_u, R_l);
 
   const nowMs  = t * 40;
   const held   = nowMs < sensor.holdUntil;
   let silence  = held, dir = held ? (sensor.lastDir || '') : '';
-  if (!held && R >= 1.0) {
+  if (!held && (undef || R >= 1.0)) {
     sensor.holdUntil = nowMs + HOLD_MS;
     silence = true;
-    dir = R_u >= R_l ? 'upper' : 'lower';
+    dir = undef ? 'undef' : (R_u >= R_l ? 'upper' : 'lower');
     sensor.lastDir = dir;
   }
 
@@ -766,9 +792,9 @@ function drawMain() {
   if (rpmVals.length > 1) {
     // Right axis scale
     mctx.strokeStyle = 'rgba(255,204,0,.25)'; mctx.lineWidth = 1; mctx.setLineDash([2,3]);
-    const yrpm = v => pad.t + pH - (v / SYNC_RPM) * pH;
+    const yrpm = v => pad.t + pH - (v / RPM_AXIS_MAX) * pH;
     // RPM grid labels (right side)
-    [0, 500, 1000, 1500].forEach(r => {
+    [0, 1000, 2000, 3000].forEach(r => {
       const y = yrpm(r);
       mctx.fillStyle = 'rgba(255,204,0,.5)'; mctx.font = '8px Share Tech Mono'; mctx.textAlign = 'left';
       mctx.fillText(r, pad.l + pW + 4, y + 3);
@@ -810,7 +836,7 @@ function updateCard(key, res) {
     ? (dir === 'upper' ? 'var(--danger)' : 'var(--v)') : col;
 
   const rEl = document.getElementById('r-' + key);
-  rEl.textContent = 'R: ' + R.toFixed(4);
+  rEl.textContent = R === null ? 'R: out of domain' : 'R: ' + R.toFixed(4);
   const rCol = silence ? 'var(--danger)' : R > 0.65 ? 'var(--warn)' : 'var(--muted)';
   rEl.style.color = rCol;
 
@@ -818,7 +844,7 @@ function updateCard(key, res) {
   document.getElementById('rf-' + key).style.background = rCol;
 
   const decEl = document.getElementById('dec-' + key);
-  decEl.textContent = silence ? (dir === 'upper' ? '↑ SILENCE' : '↓ SILENCE') : R > 0.65 ? 'WARN' : 'PASS';
+  decEl.textContent = silence ? (dir === 'undef' ? 'OUT OF DOMAIN' : dir === 'upper' ? '↑ SILENCE' : '↓ SILENCE') : R > 0.65 ? 'WARN' : 'PASS';
   decEl.style.color = silence ? 'var(--danger)' : R > 0.65 ? 'var(--warn)' : 'var(--safe)';
 
   document.getElementById('mc-' + key).style.boxShadow = silence
@@ -829,7 +855,7 @@ function updateCard(key, res) {
 // RPM card update
 function updateRpmCard(rpm, slip) {
   document.getElementById('v-rpm-card').textContent = Math.round(rpm);
-  const pct = rpm / SYNC_RPM;
+  const pct = Math.min(1, rpm / RPM_AXIS_MAX);
   document.getElementById('rf-rpm').style.width = pct * 100 + '%';
   const isDropping = pulloutFlag;
   const col = rpm < 200 ? 'var(--danger)' : isDropping ? 'var(--danger)' : rpm < 600 ? 'var(--warn)' : 'var(--safe)';
@@ -901,7 +927,10 @@ function tick() {
     const labels = { u:'Phase U', v:'Phase V', w:'Phase W', temp:'Winding Temp', imb:'Phase Imbalance' };
     const units  = { u:'A', v:'A', w:'A', temp:'°C', imb:'%' };
     if (res.silence && sensor.lastDec !== 'SILENCE') {
-      addLog(`[${labels[key]}] ${res.dir==='upper'?'↑ Over Upper Limit':'↓ Below Lower Limit'}  ${keyMap[key].toFixed(1)}${units[key]}  R=${res.R.toFixed(3)}`, key === 'temp' ? 'temp' : key === 'imb' ? 'imb' : 'danger');
+      BoundaryRecord.hit({ time: `t=${t}`, channel: `${labels[key]} / ${res.dir==='undef'?'out of domain':res.dir==='upper'?'upper side':'lower side'}`, value: keyMap[key].toFixed(1) + units[key], R: res.R });
+      addLog(res.dir==='undef'
+        ? `[${labels[key]}] OUT_OF_DESCRIPTION_DOMAIN (τ0≤0: reference at or above the upper limit; R is not defined) → stop side`
+        : `[${labels[key]}] ${res.dir==='upper'?'↑ Over Upper Limit':'↓ Below Lower Limit'}  ${keyMap[key].toFixed(1)}${units[key]}  R=${res.R.toFixed(3)}`, key === 'temp' ? 'temp' : key === 'imb' ? 'imb' : 'danger');
     } else if (!res.silence && sensor.lastDec === 'SILENCE') {
       addLog(`[${labels[key]}] HOLD ended → PASS`, 'safe');
     } else if (res.R > 0.65 && res.R < 1.0 && sensor.lastDec !== 'warn') {
@@ -975,6 +1004,7 @@ function resetSim() {
   document.getElementById('fb-normal').classList.add('active');
   actualRPM = RATED_RPM; pulloutFlag = false; rpmHistory.length = 0;
   document.getElementById('fault-note').textContent = FAULT_NOTES.normal;
+  BoundaryRecord.newTrial();
   addLog('Motor monitoring system started — Three-phase 5-metric simultaneous monitoring', 'safe');
 }
 

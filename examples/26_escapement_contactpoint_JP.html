@@ -301,6 +301,10 @@
       Last dump:<br>
       <span id="last-dump" style="color:var(--heat);">—</span>
     </div>
+    <div style="margin-top:12px; font-size:11px; color:var(--dim);">
+      端数の記録（1歯ごと）:
+      <pre id="tooth-archive" style="margin:4px 0 0;max-height:120px;overflow-y:auto;font:10px/1.5 'Share Tech Mono',monospace;color:var(--heat);white-space:pre-wrap;">（まだありません）</pre>
+    </div>
   </div>
 
   <!-- 歯数スライダー -->
@@ -350,6 +354,8 @@ const tau    = 1.0;
 let rotation = 0;
 let jumps    = 0;
 let heatTotal = 0;
+const toothArchive = [];   // 1歯ごとの端数の記録（消さない）
+const toothArchiveEl = document.getElementById('tooth-archive');
 
 const gearPath    = document.getElementById('gear-path');
 const gearGroup   = document.getElementById('gear-group');
@@ -534,11 +540,14 @@ function animate(now) {
       lastDumpEl.textContent  = `−${residual.toFixed(4)}`;
       heatTotalEl.textContent = heatTotal.toFixed(3);
       jumpVal.textContent     = jumps;
+      toothArchive.push(`#${jumps}　−${residual.toFixed(4)}　合計 ${heatTotal.toFixed(3)}`);
+      toothArchiveEl.textContent = toothArchive.join('\n');
+      toothArchiveEl.scrollTop = toothArchiveEl.scrollHeight;
 
       stateBadge.textContent = 'PHASE-JUMP  //  HEAT EXPELLED';
       stateBadge.classList.add('jump');
 
-      delta = 0; // 端数廃棄
+      delta = 0; // 端数は上の toothArchive に保管したうえで、次の歯の位相へ進む
     }
   }
 
@@ -565,6 +574,6 @@ slider.addEventListener('input', () => {
   rebuildGear();
 });
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・歯車・熱粒子の動きは、考え方を示す概念アニメーションです。測定した現象ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・歯車・熱粒子の動きは、考え方を示す概念アニメーションです。測定した現象ではありません。<br>・この画面の R は、1つの歯の中の位相の比（δ/τ）で、境界ではありません。R が 1.0 に達すると1歯だけ進み、δ を 0 に戻して次の歯へ進みます。正典の R≥1（RUPTURE_BOUNDARY・固定）とは別のものです。<br>・歯送りで δ を戻すのは、評価と評価のあいだの遷移を示す比喩（導出文書 第3部 段6。正典化前）で、累積した偏差が消えるという意味ではありません。1歯ごとの端数は右の「端数の記録」に残ります。</div>
 </body>
 </html>

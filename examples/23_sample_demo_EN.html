@@ -145,6 +145,7 @@
     }
     .status-pass { color: var(--safe); border-color: rgba(47,211,139,.35); background: rgba(47,211,139,.08); }
     .status-damp { color: var(--warn); border-color: rgba(255,191,71,.35); background: rgba(255,191,71,.08); }
+    .status-aux { color: #ff9f43; border-color: rgba(255,159,67,.4); background: rgba(255,159,67,.08); }
     .status-silence { color: var(--danger); border-color: rgba(255,91,110,.35); background: rgba(255,91,110,.08); }
     canvas {
       width: 100%;
@@ -246,7 +247,7 @@
           <div class="metric"><div class="name">Dynamic lower bound τ_dyn_lower</div><div class="value safe" id="tauLower">12.00</div></div>
         </div>
 
-        <div class="note">The judgment has three stages. First, if the instantaneous R is high, the system stops immediately. Even before it reaches that point, if the reconstructed short-term log value rises, the system enters the damping region. In addition, as the long-term degradation index rises, the same disturbance becomes more likely to push the system toward danger.</div>
+        <div class="note">The judgment has three stages. First, if the instantaneous R is high, the system stops immediately. Even before it reaches that point, if the reconstructed short-term log value rises, the system enters the damping region. In addition, when the long-term degradation index (an auxiliary quantity that does not come back once it has advanced) reaches 1.0, the system enters AUX_STOP (a stop by an auxiliary quantity), shown separately from the stop by R (SILENCE).</div>
       </aside>
 
       <main>
@@ -277,7 +278,8 @@
               <tbody>
                 <tr><td>PASS</td><td>R_now &lt; 0.72 and R_short is low</td><td>Normal passage</td></tr>
                 <tr><td>DAMP</td><td>R_now ≥ 0.72 or R_short is rising</td><td>Damp, become more cautious, shift to the conservative side</td></tr>
-                <tr><td>SILENCE</td><td>R_now ≥ 1.00 or cascading deterioration in D_long</td><td>Refuse output, stop, fail-safe</td></tr>
+                <tr><td>SILENCE</td><td>R_now ≥ 1.00</td><td>Refuse output, stop, fail-safe</td></tr>
+                <tr><td>AUX_STOP</td><td>D_long ≥ 1.00 (auxiliary quantity; shown separately from the judgment by R)</td><td>Stop by an auxiliary quantity; distinguished from SILENCE (the stop by R)</td></tr>
               </tbody>
             </table>
             <div class="note">What matters here is that SILENCE is not the only goal. By introducing DAMP, the system suppresses back-and-forth oscillation near the boundary.</div>
@@ -286,10 +288,32 @@
       </main>
     </div>
 
+<div id="boundaryRecord" style="margin:12px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="footer">FILE: nra_ide_sample_demo_20260307_192203.html / 2026-03-07 19:22:03 JST</div>
   </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 (() => {
   const $ = (id) => document.getElementById(id);
   const waveCanvas = $('waveCanvas');
@@ -329,6 +353,7 @@
   let longDamage = 0;
   let spike = 0;
   let silenceLatched = false;
+  let auxLatched = false;
   let rawHistory = [];
   let shortHistory = [];
   let damageHistory = [];
@@ -350,6 +375,8 @@
     longDamage = 0;
     spike = 0;
     silenceLatched = false;
+    auxLatched = false;
+    BoundaryRecord.newTrial();
     rawHistory = [];
     shortHistory = [];
     damageHistory = [];
@@ -360,6 +387,7 @@
     if (state === 'PASS') metrics.stateBadge.classList.add('status-pass');
     if (state === 'DAMP') metrics.stateBadge.classList.add('status-damp');
     if (state === 'SILENCE') metrics.stateBadge.classList.add('status-silence');
+    if (state === 'AUX_STOP') metrics.stateBadge.classList.add('status-aux');
     metrics.stateBadge.textContent = state;
   }
 
@@ -421,21 +449,27 @@
 
     // Long-term degradation index (D_long in the UI). Accumulates only once rShort exceeds
     // a 0.58 "wear onset" threshold, weighted up by disturbance intensity; also gets a small
-    // extra penalty once rNow itself exceeds 1.0. Decays ~0.5%/frame (*0.995) and is capped
-    // at 1.8. The 0.58 / 0.8 / 0.35 / 0.995 / 0.02 / 1.8 constants are all undocumented
+    // extra penalty once rNow itself exceeds 1.0. Does not decay (degradation does not come back: AXIOMS §7, §8) and is capped
+    // at 1.8. The 0.58 / 0.8 / 0.35 / 0.02 / 1.8 constants are all undocumented
     // demo tuning values with no cited basis.
     const wearInput = Math.max(0, rShort - 0.58) * (0.8 + disturbance * 0.35);
-    longDamage = Math.min(1.8, longDamage * 0.995 + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
+    longDamage = Math.min(1.8, longDamage + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
 
     // State flags — thresholds here mirror the "Decision Ladder" table above (PASS/DAMP/
     // SILENCE). Each condition is OR-combined: any single trigger is enough, independent
     // of the others.
     let state = 'PASS';
-    if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE'; // hard stop: instantaneous R or long-term damage past 1.0
+    if (rNow >= 1.0) state = 'SILENCE';   // stop by R (R is the subject of the judgment)
+    else if (longDamage >= 1.0) state = 'AUX_STOP';   // stop by the auxiliary quantity (D_long), shown separately from the stop by R (AXIOMS §4.5)
     else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP'; // pre-alarm / cautious band before SILENCE
-    // Irreversible latch: once in SILENCE, the state stays fixed until Reset is pressed.
-    if (state === 'SILENCE') silenceLatched = true;
+    // Irreversible latch: once in SILENCE, the state stays fixed until Reset is pressed. The moment of arrival is kept in BoundaryRecord.
+    if (state === 'SILENCE' && !silenceLatched) {
+      silenceLatched = true;
+      BoundaryRecord.hit({ time: 't=' + t.toFixed(1) + 's', channel: rUpper >= rLower ? 'upper side' : 'lower side', value: raw.toFixed(2), R: rNow });
+    }
+    if (state === 'AUX_STOP') auxLatched = true;
     if (silenceLatched) state = 'SILENCE';
+    else if (auxLatched) state = 'AUX_STOP';
 
     metrics.rNow.textContent = rNow.toFixed(2);
     metrics.rShort.textContent = rShort.toFixed(2);
@@ -519,6 +553,8 @@
   }
 
   Object.values(sliders).forEach(el => el.addEventListener('input', syncLabels));
+  // τ_base is a declaration of the evaluation, so moving it resets the demo (no loophole of widening it to lower R)
+  sliders.tauBase.addEventListener('input', () => { resetAll(); setBadge('PASS'); });
   $('toggleRun').addEventListener('click', () => {
     running = !running;
     $('toggleRun').textContent = running ? 'Pause' : 'Resume';
@@ -541,6 +577,6 @@
   requestAnimationFrame(loop);
 })();
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The signal is a pseudo demo signal (sine waves, noise, and drift), not measured data.<br>• The short-log window, the degradation coefficients, and the DAMP/SILENCE thresholds are demo values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The signal is a pseudo demo signal (sine waves, noise, and drift), not measured data.<br>• The short-log window, the degradation coefficients, and the DAMP/SILENCE thresholds are demo values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.<br>• D_long does not come back once it has advanced (degradation does not recover). A stop by D_long is AUX_STOP, shown separately from the stop by R (SILENCE).<br>• Moving the τ_base slider changes the declaration of the evaluation, so it resets the demo.</div>
 </body>
 </html>

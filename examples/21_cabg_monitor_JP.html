@@ -48,6 +48,7 @@ input[type=range]{flex:1;}
       <span class="live">MGF: <span id="mgfLive">35.0</span> mL/min</span><br>
       <span class="live">PI: <span id="piLive">2.80</span></span><br>
       <span class="live">DF%: <span id="dfLive">65</span>%</span><br>
+      <span class="live" id="rLive">R: 0.000</span><br>
       <span class="live" id="status">SAFE</span> <button id="btnNewEval" onclick="startNewEvaluation()">新しい評価</button>
     </div>
   </div>
@@ -55,7 +56,6 @@ input[type=range]{flex:1;}
   <div class="controls">
     <h3 class="panel-title">パラメータ調整</h3>
     <div class="slider-row"><label>温度 T</label><input aria-label="温度 T" type="range" id="t" min="30" max="42" value="37"></div>
-    <div class="slider-row"><label>血流 Flow</label><input aria-label="血流量" type="range" id="f" min="10" max="120" value="80"></div>
     <div class="slider-row"><label>壁張力 Tension</label><input aria-label="壁張力" type="range" id="w" min="40" max="180" value="90"></div>
 
     <h3 class="panel-title-mt">閾値調整（破線移動）</h3>
@@ -64,21 +64,44 @@ input[type=range]{flex:1;}
   </div>
 </div>
 
+<div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;max-width:800px;"></div>
 <div id="logArea"></div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // 変数
-// R計算に使うのはT・Flow（tau経由）とGraftMGF・PI・DF（各delta項経由）だけ。
-// 判定に使っていなかった内圧P・接着性Adh・せん断Shearのスライダーは外した。
-// Tensionは血管断面を描画するdrawVessel()の半径計算だけに使い、Rには寄与しない。
-let T=37, Flow=80, Tension=90;
+// R は 3チャンネル（MGF・PI・DF）を個別に R_i = δ_i/τ_i とし、判定の R はその最大値にする（合算も平均もしない）。
+// τ_i は「基準値から宣言した限界までの厚み」。体温は厚みを縮める向きだけに使い、広げない（AXIOMS §7）。
+// 血流 Flow のスライダーは、以前 τ を広げる係数だけに使われていたため外した。
+// Tension は血管断面を描画する drawVessel() の半径計算だけに使い、R には寄与しない。
+let T=37, Tension=90;
 let GraftMGF=35, PI=2.8, DF=65;
 const DF_REF = 65;
 // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; }
+function startNewEvaluation(){ ruptureLatch = null; lastStatus = 'SAFE'; BoundaryRecord.newTrial(); }
 // 破断境界は R = 1.0 に固定（README の共通閾値）。以前はスライダーで 0.6〜1.8 に動かせたが、境界を動かせると R = 1.0 の意味が消える。
-let PI_THRESH=5.0, MGF_THRESH=20; const R_RUPTURE=1.0;
+let PI_THRESH=5.0, MGF_THRESH=20; const R_RUPTURE=1.0, R_WARN=0.75;
 let lastStatus = 'SAFE';
 
 // DOM
@@ -88,6 +111,7 @@ const els = {
   piLive: document.getElementById('piLive'),
   dfLive: document.getElementById('dfLive'),
   status: document.getElementById('status'),
+  rLive: document.getElementById('rLive'),
   piThreshVal: document.getElementById('piThreshVal'),
   mgfThreshVal: document.getElementById('mgfThreshVal')
 };
@@ -113,36 +137,42 @@ function safeSet(id, value) {
 }
 
 // 計算
-// 境界接近比の中核計算: R = (正規化偏差の合計) / tau（FORMULA.mdの一般形 R = δ/τ と同型）。
-// この式に使われるのはT・Flow・GraftMGF・PI・DFのみ。
+// チャンネルごとの境界接近比 R_i = δ_i / τ_i（FORMULA.md の R = δ/τ と同型）。
+// 基準値・限界値・正規化の幅はデモ用に宣言した値。
+function channelR() {
+  const k = Math.min(1, 310/(T+273));   // 体温が高いと厚みを縮める。37℃以下でも 1 を超えて広げない
+  const tauMgfLo = Math.max(35 - MGF_THRESH, 0.01) * k;   // MGF 下限側：基準 35 から下限しきい値まで
+  const tauMgfHi = 15 * k;                                  // MGF 上限側：宣言した幅 15
+  const tauPI = Math.max(PI_THRESH - 2.8, 0.01) * k;       // PI：基準 2.8 から上限しきい値まで
+  const tauDF = 30 * k;                                     // DF：基準 DF_REF から 30 ポイント下まで
+  return [
+    {id:'MGF', R:Math.max(Math.max(0, 35 - GraftMGF)/tauMgfLo, Math.max(0, GraftMGF - 35)/tauMgfHi), value:GraftMGF.toFixed(1)+' mL/min'},
+    {id:'PI',  R:Math.max(0, PI - 2.8)/tauPI, value:PI.toFixed(2)},
+    {id:'DF',  R:Math.max(0, DF_REF - DF)/tauDF, value:DF.toFixed(0)+'%'},
+  ];
+}
 function calcIDE() {
-  // tau: 310は37℃をケルビン換算した値で、310/(T+273)は体温37℃ちょうどで1.0となり、
-  // Tが37℃からずれると増減する。Flow/200のスケーリング項はこのファイル内に臨床的根拠の
-  // 記載がなく、根拠不明・デモ用チューニング値として扱う。
-  const tau = 1.0 * (310/(T+273)) * (1 + Flow/200);
-  const deltaMGF = Math.abs(GraftMGF - 35)/15;   // 基準値35mL/minからの偏差を/15で正規化（根拠不明・デモ用チューニング値）
-  const deltaPI = Math.max(0, PI - 2.8)/3;        // 基準値2.8を超えた片側偏差を/3で正規化（根拠不明・デモ用チューニング値）
-  // DFは基準値DF_REF（監視開始時の値として宣言）からの片側不足分。100%を基準にすると、
-  // 表示範囲[30,90]では常に0.33以上の偏差が残り、平常でもRが高く出るため改めた。/30はデモ用の正規化値。
-  const deltaDF = Math.max(0, DF_REF - DF)/30;
-  const R = (deltaMGF + deltaPI + deltaDF) / tau; // R = 境界接近比。3つの正規化偏差を均等加重で合算しtauで除算
+  const rows = channelR();
+  let dom = rows[0];
+  for (const r of rows) if (r.R > dom.R) dom = r;
+  const R = dom.R;   // 判定の R は各チャンネルの R_i の最大値
 
   let st = 'SAFE', col = '#88ffcc', msg = '';
-  if (PI >= PI_THRESH || GraftMGF <= MGF_THRESH || R >= R_RUPTURE) {
-    // FAILフラグ: PI・MGF・RはOR条件で結合されており、いずれか1つでも自身の閾値を
-    // 超えればRUPTURE_BOUNDARYへ遷移する（他の2つとは独立）。
-    st = 'RUPTURE_BOUNDARY'; col = '#ff4060'; msg = `FAIL — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)} R:${R.toFixed(3)}`;
-  } else if (PI >= PI_THRESH*0.8 || GraftMGF <= MGF_THRESH*1.2) {
-    // WARNINGフラグ: PI閾値の80%／MGF閾値の120%で予告アラーム（FAILまでの余裕20%）。
-    // 0.8・1.2の倍率はこのファイル内に根拠の記載がなく、デモ用チューニング値。
-    st = 'WARNING'; col = '#ffcc00'; msg = `WARN — PI:${PI.toFixed(2)} MGF:${GraftMGF.toFixed(1)}`;
+  if (R >= R_RUPTURE) {
+    st = 'RUPTURE_BOUNDARY'; col = '#ff4060'; msg = `FAIL — ${dom.id} R:${R.toFixed(3)}（${dom.value}）`;
+  } else if (R >= R_WARN) {
+    st = 'WARNING'; col = '#ffcc00'; msg = `WARN — ${dom.id} R:${R.toFixed(3)}`;
   }
 
-  if (st === 'RUPTURE_BOUNDARY' && !ruptureLatch) ruptureLatch = { st, col, msg };
+  if (st === 'RUPTURE_BOUNDARY' && !ruptureLatch) {
+    ruptureLatch = { st, col, msg };
+    BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: dom.id, value: dom.value, R });
+  }
   if (ruptureLatch) { st = ruptureLatch.st; col = ruptureLatch.col; msg = ruptureLatch.msg; }
 
   safeSet('status', st);
   els.status.style.color = col;
+  safeSet('rLive', 'R: ' + R.toFixed(3) + '（' + dom.id + '）');
 
   // 状態変化を検知してログ
   if (st !== lastStatus) {
@@ -211,7 +241,6 @@ function drawTTFMWave() {
 // 全更新
 function updateAll() {
   T = parseFloat(document.getElementById('t')?.value || 37);
-  Flow = parseFloat(document.getElementById('f')?.value || 80);
   Tension = parseFloat(document.getElementById('w')?.value || 90);
 
   PI_THRESH = parseFloat(document.getElementById('piThresh')?.value || 5);
@@ -231,9 +260,12 @@ function updateAll() {
 }
 
 // イベント
-['t','f','w','piThresh','mgfThresh'].forEach(id => {
+['t','w','piThresh','mgfThresh'].forEach(id => {
   const el = document.getElementById(id);
-  if (el) el.addEventListener('input', updateAll);
+  if (el) el.addEventListener('input', () => {
+    if (id === 'piThresh' || id === 'mgfThresh') startNewEvaluation();   // 境界の宣言を変えたので新しい評価
+    updateAll();
+  });
 });
 
 // 初期化
@@ -241,6 +273,6 @@ addLog('監視開始 — スライダー操作でログが蓄積されます', '
 updateAll();
 setInterval(updateAll, 150);  // 約6-7fps
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・MGF・PI・DFの基準値と正規化（/15・/3・/30）はデモ用で、臨床の基準ではありません。診断・治療の判断には使えません。<br>・DFの基準（DF_REF）は監視開始時の値として宣言した値です。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・MGF・PI・DFの基準値と、基準から限界までの厚み（MGF 15、PI はしきい値−2.8、DF 30）はデモ用の宣言値で、臨床の基準ではありません。診断・治療の判断には使えません。<br>・Rは3つの量それぞれの R_i = δ_i/τ_i の最大値です（合算も平均もしません）。<br>・PI上限・MGF下限のスライダーは、境界の宣言を変えるので、動かすと新しい評価になります（固定は解除され、到達記録は保管されます）。<br>・体温は厚みを縮める向きにだけ使います（高温で縮み、低温でも広げません）。<br>・DFの基準（DF_REF）は監視開始時の値として宣言した値です。</div>
 </body>
 </html>

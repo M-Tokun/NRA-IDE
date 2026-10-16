@@ -277,12 +277,12 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
           <div class="bar-bg"><div class="bar-fill bar-w0" id="dBar"></div></div>
         </div>
         <div class="met-row">
-          <div class="met-hdr"><span class="met-k">τ_hi Over-illumination margin</span>
+          <div class="met-hdr"><span class="met-k">τ_hi Upper Absorption Thickness (over-illumination)</span>
             <span class="met-v" id="tauHiVal">30000 lx</span></div>
           <div class="bar-bg"><div class="bar-fill bar-tau-hi" id="tauHiBar"></div></div>
         </div>
         <div class="met-row">
-          <div class="met-hdr"><span class="met-k">τ_lo Low-light margin</span>
+          <div class="met-hdr"><span class="met-k">τ_lo Lower Absorption Thickness (low light)</span>
             <span class="met-v" id="tauLoVal">15000 lx</span></div>
           <div class="bar-bg"><div class="bar-fill bar-tau-lo" id="tauLoBar"></div></div>
         </div>
@@ -321,6 +321,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
 </div>
 
+<div id="boundaryRecord" style="max-width:980px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="log-panel">
   <div class="log-title">TRACE LOG</div>
   <div class="log-list" id="logList"></div>
@@ -333,6 +334,27 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── Parameters (for agriculture, greenhouses, and indoor plant factories) ──
 const L_OPT = 20000;  // lx : optimal illuminance
 const L_MAX = 50000;  // lx : over-illumination limit (heat stress / leaf scorch)
@@ -375,7 +397,9 @@ function resize(){
 // ── Controls ──
 // Irreversible latch state. Released only by the user's 'New evaluation' action.
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; }
+let luxJudge = null;   // the value used for the judgment (the heavier of the raw and smoothed values)
+function judgeVal(){ return luxJudge === null ? luxSmooth : luxJudge; }
+function startNewEvaluation(){ ruptureLatch = null; BoundaryRecord.newTrial(); }
 
 function toggleRun(){
   running = !running;
@@ -449,9 +473,9 @@ function calcIDE(lux){
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
   if(rHi >= R_RUPTURE){
-    status = 'fail-hi'; action = 'Over-illumination: RUPTURE_BOUNDARY — deploy shade panel to maximum';
+    status = 'fail-hi'; action = 'Over-illumination: RUPTURE_BOUNDARY — autonomous operation stops and hands over to a human (the shade panel is deployed to maximum as physical control)';
   } else if(rLo >= R_RUPTURE){
-    status = 'fail-lo'; action = 'Insufficient light: RUPTURE_BOUNDARY — switch auxiliary lighting ON';
+    status = 'fail-lo'; action = 'Insufficient light: RUPTURE_BOUNDARY — autonomous operation stops and hands over to a human (the shade is withdrawn)';
   } else if(rHi >= R_WARN){
     status = 'warn-hi'; action = 'Over-illumination warning: shade panel deployment recommended';
   } else if(rLo >= R_WARN){
@@ -461,7 +485,10 @@ function calcIDE(lux){
   }
   // Irreversible latch: once in RUPTURE_BOUNDARY, the state stays fixed until 'New evaluation' is pressed.
   // The R values keep showing current readings; only the classification is held.
-  if (status.startsWith('fail') && !ruptureLatch) ruptureLatch = { status, action };
+  if (status.startsWith('fail') && !ruptureLatch) {
+    ruptureLatch = { status, action };
+    BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: 'illuminance・' + (delta > 0 ? 'upper side' : 'lower side'), value: Math.round(lux) + ' lx', R: Math.max(rHi, rLo) });
+  }
   if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + " (latched: press 'New evaluation' to release)"; }
   return { delta, absDelta, rHi, rLo, status, action };
 }
@@ -505,8 +532,11 @@ function tick(dt){
   smoothBuf.push(luxRaw);
   if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
   luxSmooth = smoothBuf.reduce((a,b)=>a+b,0) / smoothBuf.length;
+  // The judgment uses the heavier of the raw value and the smoothed value (smoothing, an auxiliary calculation, must not hide an excess of either limit).
+  { const rOf = v => v > L_OPT ? (v - L_OPT) / TAU_HI : (L_OPT - v) / TAU_LO;
+    luxJudge = rOf(luxRaw) >= rOf(luxSmooth) ? luxRaw : luxSmooth; }
 
-  const ide = calcIDE(luxSmooth);
+  const ide = calcIDE(judgeVal());
 
   // Auto-shade
   shadeTarget = calcShadeTarget(ide);
@@ -627,7 +657,7 @@ function drawSky(){
   const W=skyC.width, H=skyC.height;
   sc.clearRect(0,0,W,H);
 
-  const ide = calcIDE(luxSmooth);
+  const ide = calcIDE(judgeVal());
   const col = statusColor(ide.status);
 
   // Sky gradient (changes with elevation and cloud cover)
@@ -876,9 +906,9 @@ window.addEventListener('resize',resize);
 resize();
 setMarkPair('wMarkHi','fMarkHi');
 setMarkPair('wMarkLo','fMarkLo');
-addLog(calcIDE(luxSmooth));
+addLog(calcIDE(judgeVal()));
 requestAnimationFrame(loop);
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The optimum and limits of the illuminance and the shading behavior are illustrative, not cultivation recommendations.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The optimum and limits of the illuminance and the shading behavior are illustrative, not cultivation recommendations.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.<br>• The judgment uses whichever of the raw and smoothed illuminance has the heavier R (smoothing is auxiliary and is not a reason to miss an excess).<br>• The automatic shading is physical control. Read it separately from the meaning of RUPTURE (autonomous operation stops and is handed over to a human).</div>
 </body>
 </html>

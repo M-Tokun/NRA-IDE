@@ -397,8 +397,9 @@ footer a { color: var(--accent); text-decoration: none; }
 <header>
   <div class="header-left">
     <div class="header-label">NRA-IDE / HAN Gate — Live Simulation</div>
-    <h1>連鎖崩壊はこうして始まる<br>— そして HAN Gate が止める</h1>
+    <h1>連鎖崩壊はこうして始まる<br>— HAN Gate は SILENCE で応答する</h1>
     <p>非正典の連鎖予兆スコアが閾値を超えると SILENCE が発動します。正規R=δ/τのデモではありません。<br>
+       SILENCE はこの画面の負荷（テレメトリ）を変えません。負荷を実際に止めるのは、SILENCE を受けた外部の対応です。<br>
        パラメータを変えて「安全な波形」と「見逃す波形」の違いを体験してください。</p>
   </div>
   <div class="header-right">
@@ -524,6 +525,7 @@ footer a { color: var(--accent); text-decoration: none; }
     </div>
 
     <div class="log-title">イベントログ</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
   </div>
 
@@ -541,6 +543,27 @@ footer a { color: var(--accent); text-decoration: none; }
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────────
 // シミュレーター状態
 // ─────────────────────────────────────────────────
@@ -855,6 +878,7 @@ function tick() {
       state.holdUntil = nowMs + HOLD_MS;
       isSilence = true;
       state.silenceCount++;
+      BoundaryRecord.hit({ time: `t=${state.t}`, channel: '連鎖予兆スコア', value: `${result.chain_score.toFixed(4)} ≥ 閾値 ${params.limit.toFixed(2)}` });
     }
 
     // 履歴に積む（先頭を捨てて末尾に追加）
@@ -915,6 +939,7 @@ function resetSim() {
   document.getElementById('m-count').textContent = '0';
   document.getElementById('silenceOverlay').classList.remove('active');
   document.getElementById('silenceStamp').classList.remove('active');
+  BoundaryRecord.newTrial();
   addLog('シミュレーション開始', 'pass');
 }
 

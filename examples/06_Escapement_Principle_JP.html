@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NRA: Phase-Gap Engine — TIME-GEAR</title>
+<title>NRA-IDE #06: 脱進機の原理 — 一歯＝一つの評価</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap');
 
@@ -271,35 +271,39 @@
   <!-- 左上ステータス -->
   <div class="panel-left">
     <div class="panel-title">Phase-Gap Engine</div>
-    <div class="row"><span class="lbl">δ Accumulum</span><span class="val" id="d-val">0.000</span></div>
-    <div class="row"><span class="lbl">τ Gap Thickness</span><span class="val" id="t-val">1.000</span></div>
-    <div class="row"><span class="lbl">Step (θ)</span><span class="val" id="step-val">22.5°</span></div>
-    <div class="row"><span class="lbl">Jumps</span><span class="val amber" id="jump-val">0</span></div>
+    <div class="row"><span class="lbl">δ 蓄積ズレ</span><span class="val" id="d-val">0.000</span></div>
+    <div class="row"><span class="lbl">τ 吸収厚み（一歯ぶん）</span><span class="val" id="t-val">1.000</span></div>
+    <div class="row"><span class="lbl">一歯の角度 θ</span><span class="val" id="step-val">22.5°</span></div>
+    <div class="row"><span class="lbl">一歯送り（評価の数）</span><span class="val amber" id="jump-val">0</span></div>
     <div class="gauge-wrap">
       <div class="gauge-fill" id="gauge"></div>
     </div>
-    <div class="gauge-label"><span>R=0</span><span>R=1.0 → JUMP</span></div>
+    <div class="gauge-label"><span>R=0</span><span>R=1.0 → 一歯進む</span></div>
     <div class="row mt-4">
       <span class="lbl">R = δ/τ</span>
       <span class="val red" id="r-val">0.000</span>
     </div>
-    <div class="state-badge" id="state-badge">STEADY — Latent Tension</div>
+    <div class="state-badge" id="state-badge">待機 — 蓄積中</div>
   </div>
 
   <!-- 右上 熱散逸 -->
   <div class="panel-right">
-    <div class="heat-title">Heat Dissipated</div>
+    <div class="heat-title">排出した端数（熱の比喩）</div>
     <div class="heat-val" id="heat-total">0.000</div>
-    <div class="heat-sub">Σ discarded residuals</div>
+    <div class="heat-sub">Σ 端数（記録済み）</div>
     <div class="heat-dump-info">
-      Last dump:<br>
+      直近の端数：<br>
       <span id="last-dump" class="text-heat">—</span>
+    </div>
+    <div class="heat-dump-info">
+      保管記録（一歯＝一つの評価）：<span id="tooth-count">0</span>件<br>
+      <span id="tooth-archive" class="text-heat">—</span>
     </div>
   </div>
 
   <!-- 歯数スライダー -->
   <div class="panel-bottom">
-    <label>TEETH</label>
+    <label>歯数</label>
     <input type="range" id="teeth-slider" min="8" max="32" value="24" step="4" title="Teeth Count">
     <span id="teeth-val">24</span>
   </div>
@@ -307,7 +311,7 @@
   <!-- 公理 -->
   <div class="axiom">
     <div class="axiom-en">Residuals are not corrected — they are expelled as heat.</div>
-    <div class="axiom-jp">端数は補正されない。熱として外部に放出される。</div>
+    <div class="axiom-jp">端数は次の歯へ持ち越さない（熱として散る、は比喩）。記録には残す。</div>
   </div>
 
 </div>
@@ -344,6 +348,7 @@ const tau    = 1.0;
 let rotation = 0;
 let jumps    = 0;
 let heatTotal = 0;
+const toothArchive = [];   // 一歯ごとの保管記録（評価番号 j と端数）。減らさない
 
 const gearPath    = document.getElementById('gear-path');
 const gearGroup   = document.getElementById('gear-group');
@@ -471,7 +476,8 @@ function triggerGearJump(residual) {
   jumpStart = performance.now();
 
   // 熱散逸演出（ジャンプ開始と同時）
-  spawnHeatParticles(370, 370, 24 + Math.floor(residual * 80), residual);
+  // 熱パーティクルは接触点（パレットが歯を放す位置：SVG座標(150,50) → 画面座標(370,123)）から出す
+  spawnHeatParticles(370, 123, 24 + Math.floor(residual * 80), residual);
   triggerHeatWave();
   showDiscardText(residual);
   contactDot.setAttribute('opacity', '1');
@@ -497,7 +503,7 @@ function animate(now) {
       gearGroup.setAttribute('transform', `rotate(${rotation},150,150)`);
       jumping  = false;
 
-      stateBadge.textContent = 'STEADY — Latent Tension';
+      stateBadge.textContent = '待機 — 蓄積中';
       stateBadge.classList.remove('jump');
     }
   }
@@ -515,11 +521,16 @@ function animate(now) {
 
       // UI
       jumps++;
+      // 一歯ごとの評価の記録を保管する。端数は次の歯へ持ち込まないが、記録からは消さない（導出文書 第3部 段6）。
+      toothArchive.push({ j: jumps, residual });
+      document.getElementById('tooth-count').textContent = toothArchive.length;
+      document.getElementById('tooth-archive').innerHTML = toothArchive.slice(-5).reverse()
+        .map(a => `#${a.j}　端数 −${a.residual.toFixed(4)}`).join('<br>');
       lastDumpEl.textContent  = `−${residual.toFixed(4)}`;
       heatTotalEl.textContent = heatTotal.toFixed(3);
       jumpVal.textContent     = jumps;
 
-      stateBadge.textContent = 'PHASE-JUMP  //  HEAT EXPELLED';
+      stateBadge.textContent = '一歯送り // 端数を排出（記録）';
       stateBadge.classList.add('jump');
 
       delta = 0; // 端数廃棄
@@ -549,6 +560,7 @@ slider.addEventListener('input', () => {
   rebuildGear();
 });
 </script>
+<div style="position:fixed;left:12px;bottom:12px;max-width:340px;padding:8px 12px;border:1px solid rgba(0,232,255,.35);background:rgba(6,12,20,.9);color:#b8c4ce;font:11px/1.7 'Zen Kaku Gothic New',sans-serif;border-radius:6px;z-index:5;"><strong style="color:#00e8ff">この画面の読み方</strong><br>各歯を一つの評価として読みます。δ が τ（一歯ぶん）に達すると一歯進み、はみ出した端数は次の歯へ持ち込まず、保管記録に残します（導出文書 第3部 段6。正典化の判断前）。この R = 1.0 はその歯の評価の境界で、機構全体の破断ではありません。「熱として放出」は比喩で、残差が消える・熱になることの証明ではありません（Thesis §4.1）。</div>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・考え方を示す概念アニメーションです。測定した現象や検証した性能ではありません。<br>・表示される数値は、説明用に式から作った値です。</div>
 </body>
 </html>

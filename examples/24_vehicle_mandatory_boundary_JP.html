@@ -366,7 +366,7 @@
             2. 5つの物理量は差し替えではなく別途監視する。<br/>
             3. 3系統は連動するが、同一真理値へ圧縮しない。<br/>
             4. IDEは既存制御の外に置き、入力接続だけを受ける。<br/>
-            5. 出力は PASS / DAMP / FALLBACK と DANGER表示 に分離する。
+            5. 出力は PASS / DAMP / FALLBACK / AUX_STOP と DANGER表示 に分離する。
           </div>
         </div>
       </div>
@@ -409,13 +409,14 @@
       </div>
     </section>
 
+    <div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <section class="log-panel">
       <div class="log-head">
         <div>
           <div class="section-title" style="margin-bottom:4px;">Decision log</div>
           <div class="small">短期ログからの再構成と、長期ログへの蓄積を同時表示</div>
         </div>
-        <button id="clearLog">ログ消去</button>
+        <button id="clearLog">ログ消去（到達記録は消えません）</button>
       </div>
       <div id="logBody" class="log-body"></div>
     </section>
@@ -441,6 +442,27 @@
   </div>
 
   <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
     const canvas = document.getElementById('systemCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -643,7 +665,7 @@
     // 5つの物理監視量から個別リスク値（0〜1.4）を算出し、最大値で合成する。
     // 各正規化式の分母(18, 12, 7.5, 0.75, 2.2)は「リスク=1.0相当」とみなす基準値で、
     // HTML本文のmetric-desc（下限監視型/上限監視型の説明）に対応する量だが、具体的な基準値の根拠は記載されておらず、根拠不明・デモ用チューニング値。
-    // compositeの重み(rRel*0.85, rStop*1.05)も同様に根拠不明・デモ用チューニング値。
+    // compositeの重み rStop*1.05 は停止余裕のリスクを重くする向きだけで、根拠不明・デモ用チューニング値。どのリスクも軽くしない（以前の rRel*0.85 は外した）。
     function metricRisk(distance, relSpeed, yawError, laneConfidence, stopMargin) {
       const rDist = clamp((18 - distance) / 18, 0, 1.4);
       const rRel = clamp(relSpeed / 12, 0, 1.4);
@@ -652,7 +674,7 @@
       const rStop = clamp((2.2 - stopMargin) / 2.2, 0, 1.4);
       return {
         rDist, rRel, rYaw, rLane, rStop,
-        composite: Math.max(rDist, rRel * 0.85, rYaw, rLane, rStop * 1.05)
+        composite: Math.max(rDist, rRel, rYaw, rLane, rStop * 1.05)
       };
     }
 
@@ -661,21 +683,30 @@
     // 重み0.92/0.45、閾値1.0(FALLBACK)/0.72(DAMP)は、HTML本文「Design policy」5番（PASS/DAMP/FALLBACKへの分離）に対応する運用閾値だが、
     // 具体的な数値の根拠は記載されておらず、根拠不明・デモ用チューニング値。
     function setDecision(rNow, rShort, dLong, metricComposite) {
-      const composite = Math.max(rNow, rShort * 0.92 + dLong * 0.45, metricComposite);
+      // 判定の主語は R（rNow と、物理量ごとの R_i の最大値）。補助量（rShort・dLong）は止める向きにだけ使い、AUX_STOP として別に表示する（AXIOMS §4.5）。
+      const composite = Math.max(rNow, metricComposite);
+      const aux = rShort * 0.92 + dLong * 0.45;
       const prev = state.decision;
       if (composite >= 1.0) {
         state.decision = 'FALLBACK';
-      } else if (composite >= 0.72) {
+      } else if (aux >= 1.0) {
+        state.decision = 'AUX_STOP';
+      } else if (composite >= 0.72 || aux >= 0.72) {
         state.decision = 'DAMP';
       } else {
         state.decision = 'PASS';
       }
-      // 不可逆ラッチ：一度 FALLBACK に入ったら、「新しい評価」で解除するまで固定する（上書き不可）。
-      if (state.decision === 'FALLBACK') state.fallbackLatched = true;
+      // 不可逆ラッチ：一度 FALLBACK に入ったら、「新しい評価」で解除するまで固定する。到達の瞬間は BoundaryRecord に残す。
+      if (state.decision === 'FALLBACK' && !state.fallbackLatched) {
+        state.fallbackLatched = true;
+        BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: state.dom.name, value: state.dom.value, R: composite });
+      }
+      if (state.decision === 'AUX_STOP') state.auxLatched = true;
       if (state.fallbackLatched) state.decision = 'FALLBACK';
+      else if (state.auxLatched) state.decision = 'AUX_STOP';
       // DANGER表示: composite合成値がスライダー設定のdangerThresholdを超える、
       // または見本用のdangerInject（danger-cardの説明の通り実運用には存在しないスライダー）が閾値を超えると強制点灯する。
-      const dangerNow = composite >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
+      const dangerNow = Math.max(composite, aux) >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
       if (dangerNow !== state.dangerActive) {
         state.dangerActive = dangerNow;
         pushLog(dangerNow ? 'stop' : 'pass', dangerNow ? `DANGER点灯: Composite=${composite.toFixed(2)} / Inject=${state.dangerInject.toFixed(2)}` : 'DANGER消灯');
@@ -698,12 +729,12 @@
       state.laneConfidence = s.laneConfidence;
       state.stopMargin = s.stopMargin;
 
-      // 3系統(cam/radar/imu)の不一致度を算出する。2系統間の絶対差3組の平均であり、
+      // 3系統(cam/radar/imu)の不一致度を算出する。2系統間の絶対差3組のうち最大の1組（最悪のペア）で、平均はしない。
       // 「一致させるのではなく不一致の度合いを危険境界として扱う」という inline-note（Mandatory sensor boundaryカード）の実装。本デモの中核アルゴリズム。
       const pair1 = Math.abs(state.cam - state.radar);
       const pair2 = Math.abs(state.cam - state.imu);
       const pair3 = Math.abs(state.radar - state.imu);
-      const disagreement = (pair1 + pair2 + pair3) / 3;
+      const disagreement = Math.max(pair1, pair2, pair3);   // 最も大きい1組の差（平均で薄めない）
 
       // τ（境界幅）は設計値（スライダー）で固定する。判定結果（rShort・dLong）からτを変えると、
       // 評価出力が同じ評価対象のゲート幅へ戻る経路（逆導出B：FORMULA §4.4）になるため持たない。
@@ -719,10 +750,20 @@
       state.rShort = lerp(state.rShort, recentAvg, state.recon);
       // dLongはrShortへstate.deg*0.12の割合でlerp追従する。0.12は根拠不明の固定スケール定数で、
       // degスライダー(0.01〜0.50)と掛け合わさることで長期劣化が短期再構成より大幅に遅く更新されるよう作用する。
-      state.dLong = lerp(state.dLong, state.rShort, state.deg * 0.12);
+      state.dLong = Math.max(state.dLong, lerp(state.dLong, state.rShort, state.deg * 0.12));   // 劣化は戻らない（下がらない）：AXIOMS §7・§8
 
       const mr = metricRisk(state.distance, state.relSpeed, state.yawError, state.laneConfidence, state.stopMargin);
       state.metricRisk = mr.composite;
+      // 到達記録に使う、最も重いチャンネル
+      const domCands = [
+        { name: 'センサー不一致', R: state.rNow, value: '不一致度 ' + disagreement.toFixed(2) },
+        { name: '距離', R: mr.rDist, value: state.distance.toFixed(1) + 'm' },
+        { name: '相対速度', R: mr.rRel, value: state.relSpeed.toFixed(1) + 'm/s' },
+        { name: 'ヨー誤差', R: mr.rYaw, value: state.yawError.toFixed(1) + '°/s' },
+        { name: '車線信頼', R: mr.rLane, value: Math.round(state.laneConfidence * 100) + '%' },
+        { name: '停止余裕', R: mr.rStop * 1.05, value: state.stopMargin.toFixed(1) + 's' },
+      ];
+      state.dom = domCands.reduce((a, b) => b.R > a.R ? b : a);
 
       setDecision(state.rNow, state.rShort, state.dLong, state.metricRisk);
 
@@ -862,7 +903,7 @@
         '計画値を出し続ける'
       ]);
 
-      drawBox(640, 285, 230, 170, state.decision === 'FALLBACK' ? '#ff5f7a' : state.decision === 'DAMP' ? '#ffd166' : '#7dff9b', 'Final Safety Gate', [
+      drawBox(640, 285, 230, 170, state.decision === 'FALLBACK' ? '#ff5f7a' : state.decision === 'AUX_STOP' ? '#ff9f43' : state.decision === 'DAMP' ? '#ffd166' : '#7dff9b', 'Final Safety Gate', [
         'IDEだけが最終拒否権を持つ',
         'PASS: 通過',
         'DAMP: 出力減衰',
@@ -930,7 +971,10 @@
       ui.dangerInjectRange.addEventListener(evt, syncControls);
     });
 
-    document.getElementById('btnNewEval').addEventListener('click', () => { state.fallbackLatched = false; });
+    function startNewEvaluation() { state.fallbackLatched = false; state.auxLatched = false; BoundaryRecord.newTrial(); }
+    document.getElementById('btnNewEval').addEventListener('click', startNewEvaluation);
+    // 境界幅 τ は評価の宣言なので、動かしたら新しい評価にする（広げて R を下げる抜け道にしない）
+    ui.upperRange.addEventListener('input', startNewEvaluation);
     document.querySelectorAll('[data-scene]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.scene = btn.dataset.scene;
@@ -947,6 +991,6 @@
     pushLog('pass', '起動: 必須限界構成 + 物理監視量 + DANGER文字表示 をロードしました');
     requestAnimationFrame(loop);
   </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・3系統のセンサー値とシーンは合成で、実車のデータではありません。<br>・5つの物理量の正規化の分母と重みはデモ用で、自動運転の安全基準ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・3系統のセンサー値とシーンは合成で、実車のデータではありません。<br>・5つの物理量の正規化の分母と重みはデモ用で、自動運転の安全基準ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・判定の R は、3系統の不一致度（3組の差のうち最大）と、5つの物理量それぞれのリスクの最大値です（平均も合算もしません）。<br>・短期再構成と長期劣化は補助量で、止める向きにだけ使い、AUX_STOP として別に表示します。長期劣化は戻りません。<br>・PASS/DAMP/FALLBACK は旧状態名です。FALLBACK は R による停止（正典の RUPTURE_BOUNDARY に当たる）、AUX_STOP は補助量による停止です。<br>・境界幅 τ のスライダーを動かすと評価の宣言が変わるので、新しい評価になります。「ログ消去」を押しても、境界到達記録は消えません。</div>
 </body>
 </html>

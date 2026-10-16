@@ -14,7 +14,7 @@
   Upper side shrinks little (conservative); lower side shrinks more (sensitive).
   R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
   R_dir is an aggregate of two independent R = δ/τ evaluations (upper/lower), not a redefinition of canonical R.
-  Same asymmetric structure as heart valves, car suspension, pressure regulators.
+  A similar asymmetric idea to heart valves, car suspension, pressure regulators.
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
 <style>
@@ -147,7 +147,7 @@ footer a { color: var(--lower); text-decoration: none; }
   <div class="h-left">
     <div class="h-label">NRA-IDE / Band Gate — 08 / EN</div>
     <h1>ASYMMETRIC DAMPER STRUCTURE<br>Upper &amp; Lower Band Gate — Live</h1>
-    <p>Over-threshold (surge) and under-threshold (dropout) are each detected by an independent R = δ/τ evaluation; the displayed R_dir is the max of the two. Upper and lower τ move in <em>opposite</em> directions — this is the asymmetric damper.</p>
+    <p>Over-threshold (surge) and under-threshold (dropout) are each detected by an independent R = δ/τ evaluation; the displayed R_dir is the max of the two. Upper and lower τ each shrink toward the reference — by different amounts on each side; this is the asymmetric damper.</p>
   </div>
   <div class="live-row">
     <div class="live-badge"><div class="live-dot"></div>LIVE</div>
@@ -241,17 +241,18 @@ footer a { color: var(--lower); text-decoration: none; }
         <span class="text-upper">Upper</span>: sustained deviation shrinks τ only slightly (conservative).<br>
         <span class="text-lower">Lower</span>: sustained deviation shrinks τ more → dropout caught early (sensitive).<br>
         AMP is the maximum shrink factor (down to τ0/AMP). τ is never widened.<br>
-        Identical to heart valves, car suspension, and pressure-relief valves.
+        A similar asymmetric idea to heart valves, car suspension, and pressure-relief valves. The spring compression on the left shows how far τ has shrunk.
       </p>
     </div>
     <div class="mt-10">
       <div class="log-title">Event Log</div>
+      <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
       <div class="log-wrap" id="logArea"></div>
     </div>
   </div>
 </div>
 
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The scenario waveforms of the sensor values are synthetic.<br>• The coefficients of the dynamic gate-width shrink (shrinks by the part of the EMA above 50% of τ0, stopping at 0.8× on the upper side and 0.25× on the lower side) are demo values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The scenario waveforms of the sensor values are synthetic.<br>• The coefficients of the dynamic gate-width shrink (shrinks by the part of the EMA above 50% of τ0, stopping at 1/AMP_upper (default 0.77×) on the upper side and 1/AMP_lower (default 0.5×) on the lower side) are demo values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
 <footer>
   <span>NRA-IDE / Band Gate — Asymmetric Damper Structure (EN)</span>
   <span><a href="https://github.com/M-Tokun/NRA-IDE" target="_blank" rel="noopener">github.com/M-Tokun/NRA-IDE</a> | <a href="https://x.com/m_tokuni" target="_blank" rel="noopener">@m_tokuni</a></span>
@@ -259,6 +260,27 @@ footer a { color: var(--lower); text-decoration: none; }
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 /* ─────────────────────────────────────────────
    Scenario definitions
    ───────────────────────────────────────────── */
@@ -327,24 +349,29 @@ function stepSim(p){
   // Dynamic gate widths only shrink (never past τ0). AMP is the maximum shrink factor.
   const tau_u=shrinkTau(tau0_u,st.ema_u,1/p.amu),
         tau_l=shrinkTau(tau0_l,st.ema_l,1/p.aml);
+  // For the damper display: how far τ has shrunk (0 = no shrink, 1 = shrunk to the floor τ0/AMP)
+  st.shrinkUp=(tau0_u>0&&p.amu>1)?(1-tau_u/tau0_u)/(1-1/p.amu):0;
+  st.shrinkLo=(tau0_l>0&&p.aml>1)?(1-tau_l/tau0_l)/(1-1/p.aml):0;
 
-  // A reference outside the limits cannot be evaluated; fail toward stop.
-  const valid=tau0_u>0&&tau0_l>0;
-  const R_u=valid?d_u/tau_u:Infinity,
-        R_l=valid?d_l/tau_l:Infinity,
-        R=Math.max(R_u,R_l);
+  // A reference outside the limits (τ0≤0): as in the canon, R is not defined (OUT_OF_DESCRIPTION_DOMAIN, AXIOMS §6).
+  // R is not replaced by infinity; it is null, and the gate fails toward stop (SILENCE).
+  const undef=!(tau0_u>0&&tau0_l>0);
+  const R_u=undef?null:d_u/tau_u,
+        R_l=undef?null:d_l/tau_l,
+        R=undef?null:Math.max(R_u,R_l);
 
   // HOLD check
   const held=nowMs<st.holdUntil;
   let silence=held,
       dir=held?st.lastDir:'';
 
-  if(!held&&R>=1.0){
+  if(!held&&(undef||R>=1.0)){
     st.holdUntil=nowMs+p.hold;
     silence=true;
-    dir=R_u>=R_l?'upper':'lower';
+    dir=undef?'undef':(R_u>=R_l?'upper':'lower');
     st.lastDir=dir;
     st.silCount++;
+    BoundaryRecord.hit({time:`t=${st.t}`,channel:`${scenario.label} / ${dir==='undef'?'out of domain':dir==='upper'?'upper side':'lower side'}`,value:v.toFixed(1)+scenario.unit,R});
   }
 
   // history (also carries the dynamic band values, used for drawing)
@@ -432,9 +459,10 @@ function drawDamper(R,dir){
   dctx.fillStyle='rgba(122,176,204,.6)'; dctx.font='8px Orbitron'; dctx.textAlign='center';
   dctx.fillText('ASYMMETRIC DAMPER',cx,16);
 
-  const isSil=R>=1.0,baseH=70,
-        uc=Math.min(st.ema_u*20,baseH*.6),
-        lc=Math.min(st.ema_l*20,baseH*.6);
+  const isSil=R===null||R>=1.0,baseH=70,
+        // Spring compression is drawn from how far τ has shrunk (previously EMA×20px, unrelated to the τ shrink)
+        uc=Math.max(0,Math.min(1,st.shrinkUp||0))*baseH*.6,
+        lc=Math.max(0,Math.min(1,st.shrinkLo||0))*baseH*.6;
   const uy=midY-baseH+uc,
         ly=midY+baseH-lc,
         top=30,bot=H-30,cw=18,nc=7;
@@ -473,7 +501,7 @@ function drawDamper(R,dir){
   // R readout
   const rc=isSil?(dir==='upper'?'#ff6b35':'#00c9ff'):R>.6?'#f0c040':'#00e5a0';
   dctx.fillStyle=rc; dctx.font='bold 15px Orbitron'; dctx.textAlign='center';
-  dctx.fillText('R = '+R.toFixed(3),cx,H-10);
+  dctx.fillText(R===null?'R: out of domain':'R = '+R.toFixed(3),cx,H-10);
 
   // upper/lower labels
   dctx.fillStyle='rgba(255,107,53,.6)'; dctx.font='8px Orbitron'; dctx.fillText('UPPER ↑',cx,top+10);
@@ -494,7 +522,7 @@ function updateUI(v,R,silence,dir,p){
   document.getElementById('mf-val').style.width=(valPct*100)+'%';
   document.getElementById('mf-val').style.background=col;
 
-  document.getElementById('mv-r').textContent=R.toFixed(4);
+  document.getElementById('mv-r').textContent=R===null?'out of domain':R.toFixed(4);
   document.getElementById('mv-r').style.color=col;
   document.getElementById('mf-r').style.width=Math.min(R/1.5,1)*100+'%';
   document.getElementById('mf-r').style.background=col;
@@ -511,7 +539,7 @@ function updateUI(v,R,silence,dir,p){
   const ov=document.getElementById('flashOverlay'),fs=document.getElementById('flashStamp');
   if(silence){
     ov.className=dir;
-    fs.textContent=dir==='upper'?'— UPPER SILENCE —':'— LOWER SILENCE —';
+    fs.textContent=dir==='undef'?'— OUT_OF_DESCRIPTION_DOMAIN —':dir==='upper'?'— UPPER SILENCE —':'— LOWER SILENCE —';
     fs.style.color=dir==='upper'?'var(--upper)':'var(--lower)';
     fs.classList.add('active');
     clearTimeout(flashTimer);
@@ -519,7 +547,7 @@ function updateUI(v,R,silence,dir,p){
   }
 
   // event log
-  if(silence&&lastLogDec!=='SILENCE') addLog(dir==='upper'?`UPPER SILENCE  R=${R.toFixed(3)}`:`LOWER SILENCE  R=${R.toFixed(3)}`,dir);
+  if(silence&&lastLogDec!=='SILENCE') addLog(dir==='undef'?'OUT_OF_DESCRIPTION_DOMAIN (τ0≤0: reference outside the upper/lower limits; R is not defined) → stop side':dir==='upper'?`UPPER SILENCE  R=${R.toFixed(3)}`:`LOWER SILENCE  R=${R.toFixed(3)}`,dir);
   else if(!silence&&lastLogDec==='SILENCE') addLog('HOLD end → PASS','safe');
   else if(R>=.65&&R<1&&lastLogDec!=='warn') addLog(`WARN R=${R.toFixed(3)} approaching threshold`,'warn');
   lastLogDec=silence?'SILENCE':R>=.65?'warn':'PASS';
@@ -594,6 +622,7 @@ function resetSim(){
   document.getElementById('logArea').innerHTML='';
   document.getElementById('flashOverlay').className='';
   document.getElementById('flashStamp').classList.remove('active');
+  BoundaryRecord.newTrial();
   addLog('Simulation started — '+scenario.label,'safe');
 }
 

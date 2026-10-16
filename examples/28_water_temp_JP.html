@@ -283,14 +283,14 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
         </div>
         <div class="met-row">
           <div class="met-hdr">
-            <span class="met-k">τ_hi 上限余裕</span>
+            <span class="met-k">τ_hi 上側の吸収厚み</span>
             <span class="met-v" id="tauHiVal">15.0 ℃</span>
           </div>
           <div class="bar-bg"><div class="bar-fill bar-hi-init" id="tauHiBar"></div></div>
         </div>
         <div class="met-row">
           <div class="met-hdr">
-            <span class="met-k">τ_lo 下限余裕</span>
+            <span class="met-k">τ_lo 下側の吸収厚み</span>
             <span class="met-v" id="tauLoVal">20.0 ℃</span>
           </div>
           <div class="bar-bg"><div class="bar-fill bar-lo-init" id="tauLoBar"></div></div>
@@ -327,6 +327,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <!-- ログ -->
+<div id="boundaryRecord" style="max-width:980px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="log-panel">
   <div class="log-title">TRACE LOG</div>
   <div class="log-list" id="logList"></div>
@@ -339,6 +340,27 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── パラメータ ──
 let T_OPT = 60;
 const T_RANGE = 35; // 上下限は最適値から±で自動計算
@@ -385,7 +407,9 @@ function resize(){
 // ── コントロール ──
 // 不可逆ラッチの状態。解除は利用者の「新しい評価」操作だけ。
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; }
+let tJudge = null;   // 判定に使う値（生の値と平滑値の重い方）
+function judgeVal(){ return tJudge === null ? tCurrent : tJudge; }
+function startNewEvaluation(){ ruptureLatch = null; BoundaryRecord.newTrial(); }
 
 function toggleRun(){
   running = !running;
@@ -407,6 +431,7 @@ function toggleCool(){
 }
 function onTarget(v){
   T_OPT = parseFloat(v);
+  ruptureLatch = null; BoundaryRecord.newTrial();   // 目標温度は基準値と上下限を決める宣言なので、変えたら新しい評価
   document.getElementById('targetDisp').innerHTML =
     T_OPT.toFixed(0) + '<small style="font-size:12px;font-weight:300;color:var(--muted)"> ℃</small>';
   document.getElementById('setOpt').textContent = T_OPT + ' ℃';
@@ -422,8 +447,8 @@ function onDist(v){
 
 // ── NRA-IDE計算（上下限 独立評価） ──
 function calcIDE(t){
-  const tauHi = T_MAX() - T_OPT;  // 上限余裕
-  const tauLo = T_OPT - T_MIN();  // 下限余裕
+  const tauHi = T_MAX() - T_OPT;  // 上側の吸収厚み
+  const tauLo = T_OPT - T_MIN();  // 下側の吸収厚み
   const delta  = t - T_OPT;       // 符号付き偏差（正=上昇方向）
   const absDelta = Math.abs(delta);
 
@@ -436,9 +461,9 @@ function calcIDE(t){
   const rMax = Math.max(rHi, rLo);
   let status, action;
   if(rHi >= R_RUPTURE){
-    status = 'fail-hi'; action = '上限超過：RUPTURE_BOUNDARY — 緊急冷却 / 加熱停止';
+    status = 'fail-hi'; action = '上限超過：RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる（加熱は停止）';
   } else if(rLo >= R_RUPTURE){
-    status = 'fail-lo'; action = '下限超過：RUPTURE_BOUNDARY — 緊急加熱 / 冷却停止';
+    status = 'fail-lo'; action = '下限超過：RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる（冷却は停止）';
   } else if(rHi >= R_WARN){
     status = 'warn-hi'; action = '上限接近：冷却強化を推奨';
   } else if(rLo >= R_WARN){
@@ -448,7 +473,10 @@ function calcIDE(t){
   }
   // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
   // R の値は現在値を表示し続け、判定区分だけを固定する。
-  if (status.startsWith('fail') && !ruptureLatch) ruptureLatch = { status, action };
+  if (status.startsWith('fail') && !ruptureLatch) {
+    ruptureLatch = { status, action };
+    BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: '水温・' + (delta > 0 ? '上限側' : '下限側'), value: t.toFixed(1) + ' ℃', R: Math.max(rHi, rLo) });
+  }
   if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + '（固定中：「新しい評価」で解除）'; }
   return { delta, absDelta, tauHi, tauLo, rHi, rLo, rMax, status, action };
 }
@@ -456,7 +484,7 @@ function calcIDE(t){
 // ── 物理シミュレーション ──
 function tick(dt){
   if(!running) return;
-  const ide = calcIDE(tCurrent);
+  const ide = calcIDE(judgeVal());
 
   // 加熱・冷却・外乱・自然放熱
   let dT = 0;
@@ -481,9 +509,13 @@ function tick(dt){
   smoothBuf.push(tRaw);
   if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
   tSmooth = smoothBuf.reduce((a,b) => a+b, 0) / smoothBuf.length;
+  // 判定は生の値と平滑値の重い方で行う（平滑化という補助計算で上限・下限の超過を見逃さない）。
+  { const rOf = v => v > T_OPT ? (v - T_OPT) / Math.max(T_MAX() - T_OPT, 0.01) : (T_OPT - v) / Math.max(T_OPT - T_MIN(), 0.01);
+    tJudge = rOf(tRaw) >= rOf(tSmooth) ? tRaw : tSmooth; }
 
   // 波形履歴（生・平滑両方記録）
-  waveHist.push({ raw: tRaw, smooth: tSmooth, status: ide.status });
+  const ideNow = calcIDE(judgeVal());
+  waveHist.push({ raw: tRaw, smooth: tSmooth, status: ideNow.status });
   if(waveHist.length > WAVE_LEN) waveHist.shift();
 
   // 気泡生成（高温時・ゆらぎ込み温度で判定）
@@ -504,7 +536,7 @@ function tick(dt){
     b.x += (Math.random() - 0.5) * 8 * dt;
   });
 
-  updateUI(ide);
+  updateUI(ideNow);
 }
 
 function getTankBottom(){ return tankC.height - 30; }
@@ -589,7 +621,7 @@ function setMarkSVG(id, t, cy, r){
 function drawTank(){
   const W = tankC.width, H = tankC.height;
   tc.clearRect(0, 0, W, H);
-  const ide = calcIDE(tCurrent);
+  const ide = calcIDE(judgeVal());
   const col = statusColor(ide.status);
 
   // タンク外形
@@ -891,9 +923,9 @@ window.addEventListener('resize', resize);
 resize();
 setMarkPair('wMarkHi','fMarkHi');
 setMarkPair('wMarkLo','fMarkLo');
-addLog(calcIDE(tCurrent));
+addLog(calcIDE(judgeVal()));
 requestAnimationFrame(loop);
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・ベルト張力の最適値・上下限は説明用の値で、実際のベルトの仕様ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・ベルト張力の最適値・上下限は説明用の値で、実際のベルトの仕様ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・表示する温度はゆらぎ込みの値です。判定は、生の値と平滑値のうち R が重い方で行います（平滑化は補助で、超過を見逃す理由にはしません）。<br>・目標温度のスライダーは基準値と上下限（目標＋15／−20）を決めるので、動かすと新しい評価になります（固定は解除され、到達記録は保管されます）。<br>・RUPTURE では、加熱（上限側）または冷却（下限側）を止めます。止めた後の対応は人間に委ねます。</div>
 </body>
 </html>

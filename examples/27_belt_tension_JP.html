@@ -491,6 +491,7 @@ input[type=range]::-webkit-slider-thumb:hover {
 </div>
 
 <!-- ログ -->
+<div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="log-panel">
   <div class="log-title">TRACE LOG</div>
   <div class="log-list" id="logList"></div>
@@ -504,6 +505,27 @@ input[type=range]::-webkit-slider-thumb:hover {
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ────────────────────────────────────────────────
 // パラメータ定義
 // ────────────────────────────────────────────────
@@ -540,7 +562,10 @@ function calcIDE(t, m) {
     action = '正常稼働継続';
   }
   // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
-  if (status === 'fail' && !ruptureLatch) ruptureLatch = { status, action };
+  if (status === 'fail' && !ruptureLatch) {
+    ruptureLatch = { status, action };
+    BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: m.label + '・' + (t >= m.T_OPT ? '上側' : '下側'), value: t.toFixed(0) + ' N', R });
+  }
   if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + '（固定中：「新しい評価」で解除）'; }
   return { delta, tau, R, status, action, outOfRange };
 }
@@ -549,10 +574,11 @@ function calcIDE(t, m) {
 // モード切替
 // ────────────────────────────────────────────────
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; updateUI(); }
+function startNewEvaluation(){ ruptureLatch = null; BoundaryRecord.newTrial(); updateUI(); }
 
 function setMode(m, btn) {
   mode = m;
+  ruptureLatch = null; BoundaryRecord.newTrial();   // 別の評価対象への切替は新しい評価（固定は解除し、到達記録は保管する）
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const pm = MODES[m];
@@ -943,6 +969,6 @@ updateUI();
 addLog(calcIDE(T_CURRENT, MODES[mode]));
 loop();
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・ベルト張力の最適値・上下限は説明用の値で、実際のベルトの仕様ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・ベルト張力の最適値・上下限は説明用の値で、実際のベルトの仕様ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・R は 1.0 を超えても続きます（[0,1] に収まる量ではありません）。τ は最適値から限界までの吸収厚みで、上側と下側で別の値です。<br>・コンベアーと V ベルトの切り替えは別の評価対象への切替なので、新しい評価になります（固定は解除され、到達記録は保管されます）。</div>
 </body>
 </html>

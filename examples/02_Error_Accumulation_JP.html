@@ -10,9 +10,10 @@
         律環公理（整数位相ロック）の誤差蓄積を比較。
   
   要点: 従来手法は3重の誤差源（線形近似・平均化・浮動小数点丸め）が
-        指数関数的に累積し、医療AI(1%)→自動運転(5%)→金融(10%)→
-        一般(30%)の順に各閾値を超過して破綻する。
-        律環公理は整数位相ロックにより全ステップで誤差0%を維持。
+        乱数のように積み上がり、試行によっては自動運転(5%)→金融(10%)→
+        一般(30%)の順に各閾値を超える。
+        律環公理側の線は比較計算ではなく、整数位相ロック（状態の歩みを整数で数え、
+        端数を持ち越さず記録する設計原則）を示す定数表示。
 -->
 <html lang="ja">
 <head>
@@ -279,7 +280,7 @@
                 <strong>実験内容：</strong><br>
                 同じ初期値（1.0）から開始し、100,000ステップ後の値を比較します。<br>
                 <span class="text-red">■ 赤線</span>: 従来手法（線形近似 + 平均化 + 浮動小数点）<br>
-                <span class="text-green">■ 緑線</span>: 律環公理（整数位相ロック）<br>
+                <span class="text-green">■ 緑線</span>: 律環公理（整数位相ロック。比較計算ではない定数表示）<br>
                 <span class="text-orange">■ 黄線</span>: 理論値（真の値）
             </div>
         </div>
@@ -311,7 +312,6 @@
             <div class="metric metric-highlight">
                 <div class="metric-label">破綻判定（用途別）</div>
                 <div id="failure-status" class="status-container">
-                    <div>医療AI（1%）: <span id="medical-status" class="metric-value safe status-val">安全</span></div>
                     <div>自動運転（5%）: <span id="auto-status" class="metric-value safe status-val">安全</span></div>
                     <div>金融AI（10%）: <span id="finance-status" class="metric-value safe status-val">安全</span></div>
                     <div>一般システム（30%）: <span id="general-status" class="metric-value safe status-val">安全</span></div>
@@ -348,31 +348,27 @@
                 </ol>
                 
                 <p class="outcome-bad">
-                    <strong>結果：</strong>誤差が指数関数的に増大<br>
-                    1,000ステップで 10%<br>
-                    10,000ステップで 200%<br>
-                    100,000ステップで完全破綻
+                    <strong>結果：</strong>誤差は乱数のように積み上がり、試行ごとに違う<br>
+                    （この画面の係数では、10万ステップで数%〜40%程度）
                 </p>
             </div>
             
             <div class="comparison-box good">
                 <h4>律環公理の対策</h4>
                 <ol class="list-spaced">
-                    <li><strong>非線形保持：</strong>
-                    構造をそのまま保持 → 近似不要</li>
-                    
-                    <li><strong>平均化禁止：</strong>
-                    制約からのズレ（δ）を直接測定 → 情報損失なし</li>
-                    
+                    <li><strong>近似は記録する：</strong>
+                    近似は使ってよい。使った近似は記録する（Thesis §9.1）</li>
+
+                    <li><strong>欠けた値を平均で埋めない：</strong>
+                    平均は途中の計算として使うことがあるが、判定の主語にはしない（THEORY・FORMULA §4）</li>
+
                     <li><strong>整数位相ロック：</strong>
-                    整数部分のみ使用 → 浮動小数点誤差が累積しない</li>
+                    状態の歩みを整数で数え、端数は持ち越さず記録する</li>
                 </ol>
-                
+
                 <p class="outcome-good">
-                    <strong>結果：</strong>誤差がゼロ<br>
-                    1,000ステップで 0%<br>
-                    10,000ステップで 0%<br>
-                    100,000ステップでも 0%
+                    <strong>結果：</strong>律環公理側の線は比較計算ではありません。<br>
+                    状態を整数の歩みで数え、端数を次へ持ち越さない設計原則を示す表示です。
                 </p>
             </div>
         </div>
@@ -383,13 +379,6 @@
                 <th class="table-th">領域</th>
                 <th class="table-th">許容誤差</th>
                 <th class="table-th">誤差積算の結果</th>
-            </tr>
-            <tr>
-                <td class="table-td-border">医療AI</td>
-                <td class="table-td-border"><strong class="text-red">1%未満</strong></td>
-                <td class="table-td-border">
-                    薬剤投与量の計算ミス → <strong class="text-red">患者死亡</strong>
-                </td>
             </tr>
             <tr>
                 <td class="table-td-border">自動運転</td>
@@ -417,7 +406,7 @@
         <p class="info-box">
             <strong class="text-orange">重要：</strong>
             「破綻」の定義は用途によって異なります。<br>
-            医療・安全システムでは<strong>1%の誤差</strong>でも致命的ですが、<br>
+            安全に関わるシステムでは<strong>数%の誤差</strong>でも致命的ですが、<br>
             一般的なシステムでは30%程度まで許容される場合もあります。<br>
             <br>
             <strong class="text-white">用途別の推奨閾値：</strong><br>
@@ -425,7 +414,7 @@
             • 一般業務システム: 30%<br>
             • 非クリティカル処理: 40-50%<br>
             <br>
-            <strong class="text-red">律環公理はどの用途でも誤差0%を維持します。</strong>
+            <strong class="text-red">律環公理側の表示は誤差の比較計算ではなく、設計原則を示す定数です。</strong>
         </p>
     </div>
 
@@ -575,10 +564,9 @@
             }
             
             // 用途別の破綻判定
-            // 閾値（1/5/10/30%）は「医療＜自動運転＜金融＜一般」という物語上の厳しさ順序を
+            // 閾値（5/10/30%）は「自動運転＜金融＜一般」という物語上の厳しさ順序を
             // 示すための例示であり、実際の規制・工学的許容誤差の出典があるわけではない。
             const thresholds = {
-                medical: { limit: 1, name: '医療AI（1%）', elem: 'medical-status' },
                 auto: { limit: 5, name: '自動運転（5%）', elem: 'auto-status' },
                 finance: { limit: 10, name: '金融AI（10%）', elem: 'finance-status' },
                 general: { limit: 30, name: '一般システム（30%）', elem: 'general-status' }
@@ -597,10 +585,8 @@
             
             // 警告メッセージ
             let warningText = '';
-            if (error < 1) {
+            if (error < 5) {
                 warningText = '✅ 全ての用途で安全範囲内です。';
-            } else if (error < 5) {
-                warningText = '🔴 医療AI基準（1%）を超過！医療分野では使用不可。';
             } else if (error < 10) {
                 warningText = '🔴 自動運転基準（5%）を超過！安全システムでは使用不可。';
             } else if (error < 30) {
@@ -685,6 +671,6 @@
         resetSim();
     </script>
 
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・従来手法の誤差の大きさ（0.002・0.001・0.01）は、視覚的に差が分かるよう調整したデモ用の値で、実測したセンサー・モデルの誤差ではありません。<br>・用途別の破綻ライン（1・5・10・30%）は、「医療＜自動運転＜金融＜一般」の厳しさの順序を示す例示で、規制や工学上の許容誤差の出典はありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・従来手法の誤差の大きさ（0.002・0.001・0.01）は、視覚的に差が分かるよう調整したデモ用の値で、実測したセンサー・モデルの誤差ではありません。<br>・用途別の破綻ライン（5・10・30%）は、「自動運転＜金融＜一般」の厳しさの順序を示す例示で、規制や工学上の許容誤差の出典はありません。<br>・この画面の浮動小数点の項はごく小さく、誤差のほとんどは線形近似・平均化の乱数項によるものです。</div>
 </body>
 </html>

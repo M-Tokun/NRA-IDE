@@ -2,26 +2,24 @@
 <!-- FILE: 05_IDE_Threshold_Visualizer_JP.html -->
 <!--
   FILE: 05_IDE_Threshold_Visualizer_JP.html
-  NRA-IDE 実証デモ #05 — 閾値システム可視化（位相スコープ）
+  NRA-IDE 実証デモ #05 — 整数位相ロックの可視化（位相スコープ）
   (c) 2026 M-Tokuni | Principle: L∧P∧C∧D Verified
-  
-  概要: 位相スコープで整数位相ロック・残差破棄を表示。
+
+  概要: 位相スコープで整数位相ロックを表示。
         （R・δ・τ は計算していない。R = δ/τ の基準式そのものではなく、整数位相ロックの様子を示す図）
-        位相(φ)は連続的に増加するが、システムが使用するのは
-        整数部分(Integer Lock = N)のみ。
-        小数部分(Residual = ε)は毎回破棄される。
-  
+        歩みは整数カウンタで数え、状態として使うのは整数部分(Integer Lock = N)。
+        1歩に満たない端数(Residual = ε)は次の状態へ持ち越さず、記録する（Thesis §9.1）。
+
   表示要素:
-    - 緑リング: 量子化された整数位相（システムが信頼する値）
-    - 白ドット: 現在の位相カーソル
-    - ε(赤): 破棄される浮動小数点残差
-    - PHASE LOCKED: residual ≈ 0 のロックイベント発生時に点灯
+    - 暗い緑のリング: 1歩（1周で N が1つ進む）
+    - 白ドット: 今の1歩の中の位置
+    - PHASE LOCKED: 整数の歩みが1つ進んだ直後に点灯
 -->
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NRA-IDE #05: 閾値システム可視化</title>
+    <title>NRA-IDE #05: 整数位相ロックの可視化</title>
     <style>
         body {
             background-color: #0d1117;
@@ -99,7 +97,7 @@
 <body>
 
     <header>
-        <h1>NRA-IDE 閾値システム可視化 v3.0</h1>
+        <h1>NRA-IDE 整数位相ロックの可視化 v3.0</h1>
         <div class="subtitle">Intensional Dynamics Engine / 位相ロック モニター</div>
     </header>
 
@@ -108,8 +106,12 @@
             <h3>👁️ 位相スコープ</h3>
             <canvas id="scopeCanvas" width="300" height="300"></canvas>
             <div class="scope-legend">
-                緑リング: 量子化された整数位相<br>
-                赤ドット: 浮動小数点ノイズ（破棄対象）
+                暗い緑のリング: 1歩（1周で整数 N が1つ進む）<br>
+                白い点と緑の線: 今の1歩の中の位置<br>
+                外側の光る環: 整数の歩みが1つ進んだ瞬間（PHASE LOCKED）
+            </div>
+            <div class="scope-legend">
+                <strong>中心軸との関係：</strong>状態の歩みを整数で数え、1歩に満たない端数を次へ持ち越さない設計原則の図です（Thesis §9.1）。端数は捨てずに記録します。R = δ/τ の計算はしません。
             </div>
         </div>
 
@@ -129,7 +131,7 @@
                 <span id="intLockVal" class="value">0</span>
             </div>
             <div class="status-row">
-                <span>破棄残差 (ε):</span>
+                <span>端数 (ε、記録する):</span>
                 <span id="residualVal" class="value status-danger">0.0000</span>
             </div>
             
@@ -149,8 +151,9 @@
         const residDisplay = document.getElementById('residualVal');
         
         let isRunning = true;
-        let phase = 0.0;
-        let speed = 0.01;
+        // 歩みは整数で数える（浮動小数点の積算をしない）。1フレームで 1/100 歩進む
+        let ticks = 0;
+        const STEPS_PER_PHASE = 100;
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const radius = 100;
@@ -163,9 +166,10 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // 2. Calculate NRA Mechanics
-            phase += speed;
-            let integerPhase = Math.floor(phase);
-            let residual = phase - integerPhase; // 0.0 to 0.999...
+            ticks += 1;
+            const phase = ticks / STEPS_PER_PHASE;                     // 表示用
+            let integerPhase = Math.floor(ticks / STEPS_PER_PHASE);
+            let residual = (ticks % STEPS_PER_PHASE) / STEPS_PER_PHASE; // 0.0〜0.99（1歩の中の端数）
 
             // Update UI
             phaseDisplay.innerText = phase.toFixed(4);

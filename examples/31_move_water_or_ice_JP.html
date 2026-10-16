@@ -101,7 +101,7 @@
 
   <header>
     <h1>NRA-IDE — 水と氷の相転移 統合モデル</h1>
-    <p>R = δ / τ　構造追跡対象の切り替えによる独立公理系の比較</p>
+    <p>R = δ / τ　基準にする構造（追跡対象）の切り替えによる比較</p>
   </header>
 
   <div class="mode-tabs">
@@ -136,7 +136,7 @@
         <div class="metric-val" id="mDelta">0.00</div>
       </div>
       <div class="metric">
-        <div class="metric-label" id="lblTau">τ（吸収余裕）</div>
+        <div class="metric-label" id="lblTau">τ（吸収厚み）</div>
         <div class="metric-val" id="mTau">20.0</div>
       </div>
       <div class="metric">
@@ -160,7 +160,7 @@
         <span class="bar-num" id="barDeltaNum">0.0</span>
       </div>
       <div class="bar-row">
-        <span class="bar-lbl">τ 余裕</span>
+        <span class="bar-lbl">τ 吸収厚み</span>
         <div class="bar-track"><div class="bar-fill bar-w100" id="barTau"></div></div>
         <span class="bar-num" id="barTauNum">20.0</span>
       </div>
@@ -180,14 +180,14 @@
   </div>
 
   <div class="card">
-    <div class="card-label">選択中の公理系（計算式）</div>
+    <div class="card-label">選択中の計算式</div>
     <div class="formula-box" id="formulaBox">
       </div>
     <div class="note">
-      <strong>【律環公理の独立性】</strong><br>
-      水と氷は、物理的には同じH₂Oですが、NRA-IDEにおいては「追跡する基準構造」が異なります。<br>
-      凝固系は「水（20℃）」を基準にエントロピー低下を測り、融解系は「氷（-20℃）」を基準に熱量蓄積を測ります。<br>
-      両者の式を数学的に逆算・代入してはならないのが、このフレームワークの安全設計（Fail-Closed）の要です。
+      <strong>【基準にする構造の独立性】</strong><br>
+      水と氷は、物理的には同じH₂Oですが、このデモでは評価の基準にする構造が異なります。<br>
+      凝固系は「水（20℃）」を基準に、取り出した熱量 Q（または基準温度との差）を δ とします。融解系は「氷（-20℃）」を基準に、加えた熱量 Q（または基準温度との差）を δ とします。<br>
+      基準が違うので、一方の式を逆算して他方へ代入しません（評価の前に基準を宣言して固定する、という考え方です）。
     </div>
   </div>
 
@@ -201,7 +201,7 @@
 const C_W = 4.18, C_I = 2.09, L_F = 334;          // kJ/(kg·K), kJ/(kg·K), kJ/kg
 const T_WATER_REF = 20, T_ICE_REF = -20, T_MELT = 0;
 const Q_MAX = 430, Q_STEP = 5;
-const L = {"freezing": "凝固系（水 → 氷）", "melting": "融解系（氷 → 水）", "qFreeze": "取り出した熱量 Q", "qMelt": "加えた熱量 Q", "ctrlFreeze": "モデル選択と熱量設定（水の基準：20℃ → 凝固点：0℃。熱を取り出す）", "ctrlMelt": "モデル選択と熱量設定（氷の基準：-20℃ → 融解点：0℃。熱を加える）", "chartFreeze": "R 値と温度のグラフ（横軸：取り出した熱量 Q）", "chartMelt": "R 値と温度のグラフ（横軸：加えた熱量 Q）", "mTF": "温度 T ／ 氷の割合", "liquid": "水（液体）", "solid": "氷（固体）", "critical": "臨界域", "alarm": "警戒境界（モデル上）", "freezingNow": "凝固中（0℃で潜熱を放出）", "meltingNow": "融解中（0℃で潜熱を吸収）", "deltaS": "δ（取り出した熱量）", "deltaSM": "δ（加えた熱量）", "deltaD": "δ（温度差）", "tauS": "τ（境界までの熱量）", "tauD": "τ（境界までの温度差）", "undef": "τ = 0：R は定義されない（OUT_OF_DESCRIPTION_DOMAIN）", "fS_title": "静的τモデル（熱量・直線型）", "fD_title": "動的τモデル（温度・双曲線型）", "xAxis": "Q [kJ/kg]", "yT": "T [℃]", "rLabel": "R値", "tLabel": "温度 T", "noteStatic": "スライダーは熱量 Q です。温度は Q から決まり、0℃では潜熱の分だけ温度が動かなくなります（水の比熱 4.18、氷の比熱 2.09、融解熱 334 kJ/kg）。R = 1.0 は相転移の始まり（T = 0℃）に一致し、その後は「境界到達・相転移進行中」です。", "noteDynamic": "動的τモデルの R ≥ 1.0 は、モデル上の警戒境界（凝固系は T = 10℃、融解系は T = −10℃）であり、物理的な相転移（T = 0℃）とは別です。0℃の平らな区間では τ = 0 になり、R は定義されません。", "iceWord": "氷"};
+const L = {"freezing": "凝固系（水 → 氷）", "melting": "融解系（氷 → 水）", "qFreeze": "取り出した熱量 Q", "qMelt": "加えた熱量 Q", "ctrlFreeze": "モデル選択と熱量設定（水の基準：20℃ → 凝固点：0℃。熱を取り出す）", "ctrlMelt": "モデル選択と熱量設定（氷の基準：-20℃ → 融解点：0℃。熱を加える）", "chartFreeze": "R 値と温度のグラフ（横軸：取り出した熱量 Q）", "chartMelt": "R 値と温度のグラフ（横軸：加えた熱量 Q）", "mTF": "温度 T ／ 氷の割合", "liquid": "水（液体）", "solid": "氷（固体）", "critical": "臨界域", "alarm": "警戒境界（モデル上）", "freezingNow": "凝固中（0℃で潜熱を放出）", "meltingNow": "融解中（0℃で潜熱を吸収）", "deltaS": "δ（取り出した熱量）", "deltaSM": "δ（加えた熱量）", "deltaD": "δ（温度差）", "tauS": "τ（境界までの熱量）", "tauD": "τ（境界までの温度差。残存吸収余白 M_τ に当たる）", "undef": "τ = 0：R は定義されない（OUT_OF_DESCRIPTION_DOMAIN）", "fS_title": "静的τモデル（熱量・直線型）", "fD_title": "動的τモデル（温度・双曲線型）", "xAxis": "Q [kJ/kg]", "yT": "T [℃]", "rLabel": "R値", "tLabel": "温度 T", "noteStatic": "スライダーは熱量 Q です。温度は Q から決まり、0℃では潜熱の分だけ温度が動かなくなります（水の比熱 4.18、氷の比熱 2.09、融解熱 334 kJ/kg）。R = 1.0 は相転移の始まり（T = 0℃）に一致し、その後は「境界到達・相転移進行中」です。", "noteDynamic": "動的τモデルの R ≥ 1.0 は、モデル上の警戒境界（凝固系は T = 10℃、融解系は T = −10℃）であり、物理的な相転移（T = 0℃）とは別です。0℃の平らな区間では τ = 0 になり、R は定義されません。", "iceWord": "氷"};
 const HAS_TABS = !!document.getElementById('tabFreezing');
 let phaseMode = 'freezing';       // 'freezing' | 'melting'
 let tauModel = 'static';          // 'static' | 'dynamic'

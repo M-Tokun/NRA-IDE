@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- title: NRA-IDE Water-to-Ice Phase Transition | nra_ide_water_ice_20260324_2216.html -->
-<title>NRA-IDE Water-to-Ice Phase Transition 20260324_2216</title>
+<!-- title: NRA-IDE Water-to-Ice Phase Transition -->
+<title>NRA-IDE Water-to-Ice Phase Transition</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -244,7 +244,7 @@
 
   <header>
     <h1>NRA-IDE — Water-to-Ice Phase Transition</h1>
-    <p>Visualization of the structural threshold by R = δ / τ / nra_ide_water_ice_20260324_2216.html</p>
+    <p>Visualization of the structural threshold by R = δ / τ</p>
   </header>
 
   <div class="card">
@@ -270,7 +270,7 @@
         <div class="metric-val color-delta" id="mDelta">0.00</div>
       </div>
       <div class="metric">
-        <div class="metric-label" id="lblTau">τ (absorption margin)</div>
+        <div class="metric-label" id="lblTau">τ (absorption thickness)</div>
         <div class="metric-val color-tau" id="mTau">20.0</div>
       </div>
       <div class="metric">
@@ -294,7 +294,7 @@
         <span class="bar-num" id="barDeltaNum">0.0</span>
       </div>
       <div class="bar-row">
-        <span class="bar-lbl">τ Absorption Margin</span>
+        <span class="bar-lbl">τ Absorption Thickness</span>
         <div class="bar-track"><div class="bar-fill bar-tau-init" id="barTau"></div></div>
         <span class="bar-num" id="barTauNum">20.0</span>
       </div>
@@ -340,7 +340,7 @@
     <div class="formula-box" id="formulaBox">
       <strong>Static τ Model (linear)</strong><br>
       <code>δ = 20 − T</code> → accumulated deviation from the liquid reference temperature (20°C)<br>
-      <code>τ = 20</code> → fixed constant, the total margin held by the liquid structure<br>
+      <code>τ = 20</code> → fixed constant, the total thickness held by the liquid structure<br>
       <code>R = δ / τ = (20 − T) / 20</code><br>
       R = 1.0 exactly coincides with T = 0°C. The graph is linear.
     </div>
@@ -365,7 +365,7 @@
 const C_W = 4.18, C_I = 2.09, L_F = 334;          // kJ/(kg·K), kJ/(kg·K), kJ/kg
 const T_WATER_REF = 20, T_ICE_REF = -20, T_MELT = 0;
 const Q_MAX = 430, Q_STEP = 5;
-const L = {"freezing": "Freezing (water → ice)", "melting": "Melting (ice → water)", "qFreeze": "Heat removed Q", "qMelt": "Heat added Q", "ctrlFreeze": "Model selection and heat setting (water reference: 20°C → freezing point: 0°C; heat is removed)", "ctrlMelt": "Model selection and heat setting (ice reference: −20°C → melting point: 0°C; heat is added)", "chartFreeze": "R value and temperature graph (x-axis: heat removed Q)", "chartMelt": "R value and temperature graph (x-axis: heat added Q)", "mTF": "Temperature T / ice fraction", "liquid": "Water (liquid)", "solid": "Ice (solid)", "critical": "Critical zone", "alarm": "Alert boundary (model)", "freezingNow": "Freezing (releasing latent heat at 0°C)", "meltingNow": "Melting (absorbing latent heat at 0°C)", "deltaS": "δ (heat removed)", "deltaSM": "δ (heat added)", "deltaD": "δ (temperature difference)", "tauS": "τ (heat to the boundary)", "tauD": "τ (temperature to the boundary)", "undef": "τ = 0: R is undefined (OUT_OF_DESCRIPTION_DOMAIN)", "fS_title": "Static τ model (heat, linear)", "fD_title": "Dynamic τ model (temperature, hyperbolic)", "xAxis": "Q [kJ/kg]", "yT": "T [°C]", "rLabel": "R value", "tLabel": "Temperature T", "noteStatic": "The slider is the heat Q. Temperature follows from Q, and at 0°C it stops moving for the amount of the latent heat (specific heat of water 4.18, of ice 2.09, heat of fusion 334 kJ/kg). R = 1.0 coincides with the start of the phase transition (T = 0°C); beyond it the state is \"boundary reached, transition in progress\".", "noteDynamic": "In the dynamic τ model, R ≥ 1.0 is a model-side alert boundary (T = 10°C when freezing, T = −10°C when melting), not the physical phase transition (T = 0°C). On the flat 0°C interval τ = 0, so R is undefined.", "iceWord": "ice"};
+const L = {"freezing": "Freezing (water → ice)", "melting": "Melting (ice → water)", "qFreeze": "Heat removed Q", "qMelt": "Heat added Q", "ctrlFreeze": "Model selection and heat setting (water reference: 20°C → freezing point: 0°C; heat is removed)", "ctrlMelt": "Model selection and heat setting (ice reference: −20°C → melting point: 0°C; heat is added)", "chartFreeze": "R value and temperature graph (x-axis: heat removed Q)", "chartMelt": "R value and temperature graph (x-axis: heat added Q)", "mTF": "Temperature T / ice fraction", "liquid": "Water (liquid)", "solid": "Ice (solid)", "critical": "Critical zone", "alarm": "Alert boundary (model)", "freezingNow": "Freezing (releasing latent heat at 0°C)", "meltingNow": "Melting (absorbing latent heat at 0°C)", "deltaS": "δ (heat removed)", "deltaSM": "δ (heat added)", "deltaD": "δ (temperature difference)", "tauS": "τ (heat to the boundary)", "tauD": "τ (temperature to the boundary; corresponds to the remaining absorption margin M_τ)", "undef": "τ = 0: R is undefined (OUT_OF_DESCRIPTION_DOMAIN)", "fS_title": "Static τ model (heat, linear)", "fD_title": "Dynamic τ model (temperature, hyperbolic)", "xAxis": "Q [kJ/kg]", "yT": "T [°C]", "rLabel": "R value", "tLabel": "Temperature T", "noteStatic": "The slider is the heat Q. Temperature follows from Q, and at 0°C it stops moving for the amount of the latent heat (specific heat of water 4.18, of ice 2.09, heat of fusion 334 kJ/kg). R = 1.0 coincides with the start of the phase transition (T = 0°C); beyond it the state is \"boundary reached, transition in progress\".", "noteDynamic": "In the dynamic τ model, R ≥ 1.0 is a model-side alert boundary (T = 10°C when freezing, T = −10°C when melting), not the physical phase transition (T = 0°C). On the flat 0°C interval τ = 0, so R is undefined.", "iceWord": "ice"};
 const HAS_TABS = !!document.getElementById('tabFreezing');
 let phaseMode = 'freezing';       // 'freezing' | 'melting'
 let tauModel = 'static';          // 'static' | 'dynamic'

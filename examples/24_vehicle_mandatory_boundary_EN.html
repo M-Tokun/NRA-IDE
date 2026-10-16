@@ -366,7 +366,7 @@
             2. The five physical quantities are monitored separately, not as replacements.<br/>
             3. The three subsystems interact, but are not compressed into a single truth value.<br/>
             4. Place the IDE outside the existing control stack and let it receive input connections only.<br/>
-            5. Separate the outputs into PASS / DAMP / FALLBACK and DANGER display.
+            5. Separate the outputs into PASS / DAMP / FALLBACK / AUX_STOP and DANGER display.
           </div>
         </div>
       </div>
@@ -409,13 +409,14 @@
       </div>
     </section>
 
+    <div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <section class="log-panel">
       <div class="log-head">
         <div>
           <div class="section-title" style="margin-bottom:4px;">Decision log</div>
           <div class="small">Simultaneously display reconstruction from short-term logs and accumulation into long-term logs</div>
         </div>
-        <button id="clearLog">ログ消去</button>
+        <button id="clearLog">Clear log (the arrival record stays)</button>
       </div>
       <div id="logBody" class="log-body"></div>
     </section>
@@ -441,6 +442,27 @@
   </div>
 
   <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
     const canvas = document.getElementById('systemCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -645,7 +667,7 @@
     // combines them by taking the maximum. The denominators (18, 12, 7.5, 0.75, 2.2) are the values treated as
     // "risk = 1.0", corresponding to the lower-bound/upper-bound monitoring types described in the HTML
     // metric-desc text, but no basis for the specific figures is given; basis unknown / demo tuning values.
-    // The composite weights (rRel*0.85, rStop*1.05) are likewise basis unknown / demo tuning values.
+    // The composite weight rStop*1.05 only makes the stop-margin risk heavier (the safe direction); basis unknown / demo tuning value. No weight lightens any risk (the former rRel*0.85 was removed).
     function metricRisk(distance, relSpeed, yawError, laneConfidence, stopMargin) {
       const rDist = clamp((18 - distance) / 18, 0, 1.4);
       const rRel = clamp(relSpeed / 12, 0, 1.4);
@@ -654,7 +676,7 @@
       const rStop = clamp((2.2 - stopMargin) / 2.2, 0, 1.4);
       return {
         rDist, rRel, rYaw, rLane, rStop,
-        composite: Math.max(rDist, rRel * 0.85, rYaw, rLane, rStop * 1.05)
+        composite: Math.max(rDist, rRel, rYaw, rLane, rStop * 1.05)
       };
     }
 
@@ -665,22 +687,31 @@
     // described in the HTML "Design policy" item 5 (separating outputs into PASS/DAMP/FALLBACK), but no basis
     // for the specific figures is given; basis unknown / demo tuning values.
     function setDecision(rNow, rShort, dLong, metricComposite) {
-      const composite = Math.max(rNow, rShort * 0.92 + dLong * 0.45, metricComposite);
+      // The subject of the judgment is R (rNow and the maximum of the per-quantity R_i). The auxiliary quantities (rShort, dLong) are used only toward stopping and are shown separately as AUX_STOP (AXIOMS §4.5).
+      const composite = Math.max(rNow, metricComposite);
+      const aux = rShort * 0.92 + dLong * 0.45;
       const prev = state.decision;
       if (composite >= 1.0) {
         state.decision = 'FALLBACK';
-      } else if (composite >= 0.72) {
+      } else if (aux >= 1.0) {
+        state.decision = 'AUX_STOP';
+      } else if (composite >= 0.72 || aux >= 0.72) {
         state.decision = 'DAMP';
       } else {
         state.decision = 'PASS';
       }
-      // Irreversible latch: once in FALLBACK, the decision stays fixed until 'New evaluation' is pressed (no override).
-      if (state.decision === 'FALLBACK') state.fallbackLatched = true;
+      // Irreversible latch: once in FALLBACK, the state stays fixed until "New evaluation". The moment of arrival is kept in BoundaryRecord.
+      if (state.decision === 'FALLBACK' && !state.fallbackLatched) {
+        state.fallbackLatched = true;
+        BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: state.dom.name, value: state.dom.value, R: composite });
+      }
+      if (state.decision === 'AUX_STOP') state.auxLatched = true;
       if (state.fallbackLatched) state.decision = 'FALLBACK';
+      else if (state.auxLatched) state.decision = 'AUX_STOP';
       // DANGER display fires when the composite value exceeds the slider-set dangerThreshold, OR when the
       // example-only dangerInject slider (per the danger-card note, absent from any real implementation)
       // is forced above the threshold.
-      const dangerNow = composite >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
+      const dangerNow = Math.max(composite, aux) >= state.dangerThreshold || state.dangerInject >= state.dangerThreshold;
       if (dangerNow !== state.dangerActive) {
         state.dangerActive = dangerNow;
         pushLog(dangerNow ? 'stop' : 'pass', dangerNow ? `DANGER ON: Composite=${composite.toFixed(2)} / Inject=${state.dangerInject.toFixed(2)}` : 'DANGER OFF');
@@ -703,14 +734,14 @@
       state.laneConfidence = s.laneConfidence;
       state.stopMargin = s.stopMargin;
 
-      // Computes the disagreement among the three subsystems (cam/radar/imu): the average of the absolute
-      // difference across all 3 pairs. This implements the inline-note on the Mandatory sensor boundary card
+      // Computes the disagreement among the three subsystems (cam/radar/imu): the largest of the absolute
+      // differences across all 3 pairs (the worst pair; it is not averaged). This implements the inline-note on the Mandatory sensor boundary card
       // ("instead of forcing agreement, the degree of disagreement is treated as a danger boundary") and is
       // the core algorithm of this demo.
       const pair1 = Math.abs(state.cam - state.radar);
       const pair2 = Math.abs(state.cam - state.imu);
       const pair3 = Math.abs(state.radar - state.imu);
-      const disagreement = (pair1 + pair2 + pair3) / 3;
+      const disagreement = Math.max(pair1, pair2, pair3);   // the largest of the three pairwise differences (not diluted by averaging)
 
       // τ (boundary width) is fixed at the design value (slider). Changing τ from evaluation outputs
       // (rShort, dLong) would route outputs back into the same target's gate width (reverse derivation B,
@@ -729,10 +760,20 @@
       // dLong lerps toward rShort at the rate of state.deg*0.12. The 0.12 factor is a basis unknown fixed scale
       // constant; combined with the deg slider (0.01-0.50) it makes long-term degradation update much more
       // slowly than short-term reconstruction.
-      state.dLong = lerp(state.dLong, state.rShort, state.deg * 0.12);
+      state.dLong = Math.max(state.dLong, lerp(state.dLong, state.rShort, state.deg * 0.12));   // degradation does not come back (never decreases): AXIOMS §7, §8
 
       const mr = metricRisk(state.distance, state.relSpeed, state.yawError, state.laneConfidence, state.stopMargin);
       state.metricRisk = mr.composite;
+      // the heaviest channel, used for the arrival record
+      const domCands = [
+        { name: 'sensor disagreement', R: state.rNow, value: 'disagreement ' + disagreement.toFixed(2) },
+        { name: 'distance', R: mr.rDist, value: state.distance.toFixed(1) + 'm' },
+        { name: 'relative speed', R: mr.rRel, value: state.relSpeed.toFixed(1) + 'm/s' },
+        { name: 'yaw error', R: mr.rYaw, value: state.yawError.toFixed(1) + '°/s' },
+        { name: 'lane confidence', R: mr.rLane, value: Math.round(state.laneConfidence * 100) + '%' },
+        { name: 'stop margin', R: mr.rStop * 1.05, value: state.stopMargin.toFixed(1) + 's' },
+      ];
+      state.dom = domCands.reduce((a, b) => b.R > a.R ? b : a);
 
       setDecision(state.rNow, state.rShort, state.dLong, state.metricRisk);
 
@@ -872,7 +913,7 @@
         'Continues producing planned values'
       ]);
 
-      drawBox(640, 285, 230, 170, state.decision === 'FALLBACK' ? '#ff5f7a' : state.decision === 'DAMP' ? '#ffd166' : '#7dff9b', 'Final Safety Gate', [
+      drawBox(640, 285, 230, 170, state.decision === 'FALLBACK' ? '#ff5f7a' : state.decision === 'AUX_STOP' ? '#ff9f43' : state.decision === 'DAMP' ? '#ffd166' : '#7dff9b', 'Final Safety Gate', [
         'Only the IDE has final veto power',
         'PASS: allow through',
         'DAMP: attenuate output',
@@ -940,7 +981,10 @@
       ui.dangerInjectRange.addEventListener(evt, syncControls);
     });
 
-    document.getElementById('btnNewEval').addEventListener('click', () => { state.fallbackLatched = false; });
+    function startNewEvaluation() { state.fallbackLatched = false; state.auxLatched = false; BoundaryRecord.newTrial(); }
+    document.getElementById('btnNewEval').addEventListener('click', startNewEvaluation);
+    // the boundary width τ is a declaration of the evaluation, so moving it starts a new evaluation (no loophole of widening it to lower R)
+    ui.upperRange.addEventListener('input', startNewEvaluation);
     document.querySelectorAll('[data-scene]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.scene = btn.dataset.scene;
@@ -957,6 +1001,6 @@
     pushLog('pass', 'Startup: loaded mandatory boundary configuration + physical monitoring quantities + DANGER text display');
     requestAnimationFrame(loop);
   </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The three-system sensor values and scenes are synthetic, not data from a real vehicle.<br>• The normalization denominators and weights of the five physical quantities are demo values, not autonomous-driving safety criteria.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The three-system sensor values and scenes are synthetic, not data from a real vehicle.<br>• The normalization denominators and weights of the five physical quantities are demo values, not autonomous-driving safety criteria.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.<br>• The judged R is the maximum of the sensor disagreement (the largest of the three pairwise differences) and the risk of each of the five physical quantities (no averaging, no summing).<br>• The short-term reconstruction and long-term degradation are auxiliary quantities, used only toward stopping and shown separately as AUX_STOP. The long-term degradation does not come back.<br>• PASS/DAMP/FALLBACK are legacy state names. FALLBACK is the stop by R (corresponding to the canonical RUPTURE_BOUNDARY); AUX_STOP is the stop by an auxiliary quantity.<br>• Moving the boundary-width τ slider changes the declaration of the evaluation, so it starts a new evaluation. Pressing "Clear log" does not erase the boundary-arrival record.</div>
 </body>
 </html>

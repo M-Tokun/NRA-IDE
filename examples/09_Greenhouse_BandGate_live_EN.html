@@ -12,7 +12,7 @@
   Monitors: Irrigation Pressure / Temperature / CO2 / Nutrient EC
   Each sensor has independent upper/lower EMA and τ_dynamic.
   α_lower higher for water/EC → detect depletion/cutoff early.
-  α_upper lower  for water    → avoid pipe shock on pressure surge.
+  α_upper lower  for water    → τ on the surge side shrinks slowly (α changes only the shrink speed; R uses raw values).
   R_dir = max(δ_upper / τ_dyn_upper,  δ_lower / τ_dyn_lower)
   R_dir is an aggregate of two independent R = δ/τ evaluations (upper/lower), not a redefinition of canonical R.
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
@@ -146,7 +146,7 @@ footer a{color:var(--co2);text-decoration:none;}
     <div class="h-tag">NRA-IDE / Band Gate — 09 / EN / GREENHOUSE</div>
     <h1>Greenhouse 4-Sensor<br>Simultaneous Band Gate Monitor</h1>
     <p>Irrigation Pressure · Temperature · CO₂ · Nutrient EC monitored simultaneously.<br>
-    Both over-range (upper breach) and under-range (lower breach) are each detected by an independent R = δ/τ evaluation (displayed R_dir is the max of the two), with asymmetric EMA sensitivity per sensor.</p>
+    Both over-range (upper breach) and under-range (lower breach) are each detected by an independent R = δ/τ evaluation (displayed R_dir is the max of the two), with asymmetric EMA sensitivity per sensor. Sustained deviation shrinks τ, so detection comes before the declared limits.</p>
   </div>
   <div class="live-wrap">
     <div class="live-badge"><div class="ldot"></div>GREENHOUSE LIVE</div>
@@ -202,7 +202,7 @@ footer a{color:var(--co2);text-decoration:none;}
     <div class="param-grid">
       <div>
         <div class="sensor-title text-water">💧 Water Pressure</div>
-        <div class="pg-desc">α_lower higher → detect water cutoff early · α_upper lower → avoid pipe shock</div>
+        <div class="pg-desc">α_lower higher → τ shrinks faster on the cutoff side · α_upper lower → τ shrinks slowly on the surge side</div>
         <div class="pg-head"><span class="pg-name">Upper limit (kPa)</span><span class="pg-val" id="v-wh">70</span></div><input type="range" class="water" id="sl-wh" min="40" max="120" value="70" title="Upper limit (water)">
         <div class="pg-head mt-5"><span class="pg-name">Lower limit (kPa)</span><span class="pg-val" id="v-wl">30</span></div><input type="range" class="water" id="sl-wl" min="5" max="60" value="30" title="Lower limit (water)">
         <div class="pg-head mt-5"><span class="pg-name">α_upper / α_lower</span><span class="pg-val" id="v-wa">0.20/0.50</span></div>
@@ -243,13 +243,14 @@ footer a{color:var(--co2);text-decoration:none;}
     </div>
     <div class="note-box">
       <div class="note-title">ASYMMETRIC α PRINCIPLE</div>
-      <p>α_upper small → conservative on surges (protect pipes).<br>
-      α_lower large → sensitive to depletion (protect roots from cutoff).<br>
-      Asymmetric damper applied to greenhouse agriculture.</p>
+      <p>α changes only how fast τ shrinks. The judgment itself (R) is made on the raw value.<br>
+      α_upper small → τ on the surge side shrinks slowly.<br>
+      α_lower large → τ on the depletion side shrinks quickly, so depletion is caught before the declared limit (earlier warning of water cutoff to roots).</p>
     </div>
   </div>
   <div class="log-panel">
     <div class="p-title">Event Log — All Sensors</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
     <div class="btn-row mt-10">
       <button class="ctrl" onclick="setStress('drought')">🏜 Drought Simulation</button>
@@ -260,13 +261,34 @@ footer a{color:var(--co2);text-decoration:none;}
   </div>
 </div>
 
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The scenario waveforms of the sensor values are synthetic.<br>• The coefficients of the dynamic gate-width shrink (shrinks by the part of the EMA above 50% of τ0, stopping at 0.8× on the upper side and 0.25× on the lower side) are demo values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The scenario waveforms of the sensor values are synthetic.<br>• The coefficients of the dynamic gate-width shrink (shrinks by the part of the EMA above 50% of τ0, stopping at 0.8× on the upper side and 0.3× on the lower side) are demo values.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>
 <footer>
   <span>NRA-IDE / Band Gate — Greenhouse 4-Sensor (EN)</span>
   <span><a href="https://github.com/M-Tokun/NRA-IDE" target="_blank" rel="noopener">github.com/M-Tokun/NRA-IDE</a> | <a href="https://x.com/m_tokuni" target="_blank" rel="noopener">@m_tokuni</a></span>
 </footer>
 </div>
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 /* ─────────────────────────────────────────────
    4-sensor definitions
    ───────────────────────────────────────────── */
@@ -355,21 +377,23 @@ function bandGate(s,v,p,nowMs){
   const tu=shrinkTau(tau0_u,s.ema_u,FLOOR_UPPER),
         tl=shrinkTau(tau0_l,s.ema_l,FLOOR_LOWER);
 
-  // A reference outside the limits (slider combination) cannot be evaluated; fail toward stop.
-  const valid=tau0_u>0&&tau0_l>0;
-  const R_u=valid?d_u/tu:Infinity,
-        R_l=valid?d_l/tl:Infinity,
-        R=Math.max(R_u,R_l);
+  // A reference outside the limits (τ0≤0, slider combination): as in the canon, R is not defined
+  // (OUT_OF_DESCRIPTION_DOMAIN, AXIOMS §6). R is not replaced by infinity; it is null, and the gate fails toward stop.
+  const undef=!(tau0_u>0&&tau0_l>0);
+  const R_u=undef?null:d_u/tu,
+        R_l=undef?null:d_l/tl,
+        R=undef?null:Math.max(R_u,R_l);
 
   const held=nowMs<s.holdUntil;
   let silence=held,
       dir=held?(s.lastDir||''):'';
 
-  if(!held&&R>=1){
+  if(!held&&(undef||R>=1)){
     s.holdUntil=nowMs+parseInt(document.getElementById('sl-hold').value);
     silence=true;
-    dir=R_u>=R_l?'upper':'lower';
+    dir=undef?'undef':(R_u>=R_l?'upper':'lower');
     s.lastDir=dir;
+    BoundaryRecord.hit({time:`t=${t}`,channel:`${s.label} / ${dir==='undef'?'out of domain':dir==='upper'?'upper side':'lower side'}`,value:v.toFixed(s.key==='ec'?2:s.key==='co2'?0:1)+s.unit,R});
   }
 
   // dynamic bands (for drawing)
@@ -385,9 +409,12 @@ function drawMini(key,hist,color,silence){
   ctx.clearRect(0,0,cv.width,60);
   if(hist.length<2) return;
 
+  // The vertical range includes both the observed values and the limit lines (previously only the values, so the limits were off-frame in normal times)
   const vals=hist.map(h=>h.v),
-        minV=Math.min(...vals)-2,
-        maxV=Math.max(...vals)+2,
+        all=vals.concat(hist.map(h=>h.upper_band),hist.map(h=>h.lower_band)).filter(Number.isFinite),
+        span=(Math.max(...all)-Math.min(...all))||1,
+        minV=Math.min(...all)-span*.05,
+        maxV=Math.max(...all)+span*.05,
         rng=maxV-minV||1;
   const xp=i=>(i/(HIST-1))*cv.width,
         yp=v=>58-((v-minV)/rng)*54;
@@ -428,7 +455,7 @@ function updateCard(key,res,p){
 
   // decision badge
   const de=document.getElementById('dec-'+key);
-  de.textContent=silence?(dir==='upper'?'↑ UPPER':'↓ LOWER'):'PASS';
+  de.textContent=silence?(dir==='undef'?'OUT OF DOMAIN':dir==='upper'?'↑ UPPER':'↓ LOWER'):'PASS';
   de.className='card-decision '+(silence?dir:'pass');
 
   // card glow
@@ -438,7 +465,7 @@ function updateCard(key,res,p){
   const rc=silence?(dir==='upper'?'#ff5252':'#29d4ff'):R>.65?'#ffca28':col;
   document.getElementById('rf-'+key).style.width=Math.min(R/1.5,1)*100+'%';
   document.getElementById('rf-'+key).style.background=rc;
-  document.getElementById('rv-'+key).textContent=R.toFixed(4);
+  document.getElementById('rv-'+key).textContent=R===null?'out of domain':R.toFixed(4);
   document.getElementById('rv-'+key).style.color=rc;
 
   // band bar
@@ -456,7 +483,7 @@ function updateCard(key,res,p){
   drawMini(key,s.hist,col,silence);
 
   // event log
-  if(silence&&s.lastDec!=='SILENCE') addLog(`[${s.label}] ${dir==='upper'?'↑ UPPER breach':'↓ LOWER breach'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`,key);
+  if(silence&&s.lastDec!=='SILENCE') addLog(dir==='undef'?`[${s.label}] OUT_OF_DESCRIPTION_DOMAIN (τ0≤0: reference outside the upper/lower limits; R is not defined) → stop side`:`[${s.label}] ${dir==='upper'?'↑ UPPER breach':'↓ LOWER breach'}  ${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`,key);
   else if(!silence&&s.lastDec==='SILENCE') addLog(`[${s.label}] HOLD end → PASS`,'safe');
   else if(R>.65&&R<1&&s.lastDec!=='warn') addLog(`[${s.label}] WARN R=${R.toFixed(3)} approaching`,'warn');
   s.lastDec=silence?'SILENCE':R>.65?'warn':'PASS';
@@ -543,6 +570,7 @@ function resetSim(){
     s.holdUntil=0; s.lastDec='';
   });
   document.getElementById('logArea').innerHTML='';
+  BoundaryRecord.newTrial();
   addLog('Greenhouse monitoring started — 4-sensor simultaneous watch','safe');
 }
 

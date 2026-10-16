@@ -111,6 +111,7 @@
   .fsm-RUPTURE_BOUNDARY  { color: #ff3333; background: #ff000015; border-color: #ff333350;
                       animation: alarm-pulse 0.4s infinite; }
   .fsm-RECOVERING   { color: #44aaff; background: #0044ff08; border-color: #44aaff30; }
+  .fsm-AUX_STOP     { color: #ff8844; background: #ff440012; border-color: #ff884450; }
   @keyframes alarm-pulse {
     0%,100% { box-shadow: 0 0 0px #ff3333; }
     50%      { box-shadow: 0 0 16px #ff3333; }
@@ -256,7 +257,7 @@
     <span class="metric-value color-delta" id="val-delta">0.000</span>
   </div>
   <div class="metric-row">
-    <span class="metric-label">τ (Inertial Margin)</span>
+    <span class="metric-label">τ (absorption thickness, Hz)</span>
     <span class="metric-value color-tau" id="val-tau">0.500</span>
   </div>
 
@@ -270,11 +271,15 @@
     </div>
     <div class="r-label-row">
       <span>0</span><span>ZONE-A</span><span class="zone-b-label">ZONE-B</span>
-      <span class="zone-tau-label">τ=1.0</span>
+      <span class="zone-tau-label">R=1.0</span>
     </div>
   </div>
 
   <div class="fsm-box fsm-PERMIT" id="fsm-box">PERMIT</div>
+
+  <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
+  <div class="panel-title">Stored evaluations</div>
+  <pre id="archiveList" style="margin:0 0 6px;font:9px/1.6 monospace;color:#8899aa;white-space:pre-wrap;"></pre>
 
   <div class="panel-title panel-title-mt4">Event Log</div>
   <div id="event-log"></div>
@@ -315,7 +320,7 @@
 </div>
 
 <!-- FOOTER -->
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The frequency and generators are a simplified model. δ is the frequency deviation [Hz] itself and τ is the slider value.<br>• The residual-debt coefficients (accumulation 0.08, decay 0.03, k = 0.12) are demo values, not real grid-operation criteria.<br>• The debt does not vanish right after recovery; it decays slowly while R stays low.</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The frequency and generators are a simplified model. δ is the frequency deviation [Hz] itself and τ is the slider value.<br>• The residual-debt coefficients (accumulation 0.08, decay 0.03, k = 0.12) are demo values, not real grid-operation criteria.<br>• The debt does not vanish right after recovery; it decays slowly while R stays low.<br>• The stop when debt exceeds 0.8 is a stop by an auxiliary quantity built from R (AUX_STOP), shown separately from RUPTURE_BOUNDARY (R ≥ 1.0).</div>
 <footer>
   <button class="btn-event" id="btn-trip" onclick="triggerTrip()">⚡ Generator Trip</button>
   <button class="btn-event" id="btn-surge" onclick="triggerSurge()">📈 Demand Surge</button>
@@ -337,6 +342,27 @@
 </footer>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ================================================================
 // NRA-IDE Demo #14 — Power Grid Transition
 // FILE: NRA_IDE_Demo14_PowerGrid_Transition_26-0321.html
@@ -354,7 +380,7 @@ let state = {
   freq: F_NOM,
   delta: 0,
   R: 0,
-  fsm: 'PERMIT',       // PERMIT / CAVEAT / RUPTURE_BOUNDARY / RECOVERING
+  fsm: 'PERMIT',       // PERMIT / CAVEAT / RUPTURE_BOUNDARY / AUX_STOP (auxiliary stop) / RECOVERING
   microDelta: 0,
   macroDelta: 0,
   spikeDelta: 0,
@@ -423,7 +449,7 @@ let transCount = 0;
 function addTransitionLog(from, to, R) {
   const el = document.getElementById('transition-log');
   transCount++;
-  const col = to === 'RUPTURE_BOUNDARY' ? '#ff4444' : to === 'RECOVERING' ? '#44aaff' : '#00ff88';
+  const col = to === 'RUPTURE_BOUNDARY' ? '#ff4444' : to === 'AUX_STOP' ? '#ff8844' : to === 'RECOVERING' ? '#44aaff' : '#00ff88';
   el.innerHTML = `<div style="color:${col}">◯${transCount} ${from}→${to} R=${R.toFixed(3)}</div>` + el.innerHTML;
 }
 
@@ -451,18 +477,17 @@ function physicsStep() {
   state.spikeDelta = eventDelta;
 
   // Recovery
-  let recoverForce = 0;
   if (state.recoverActive) {
-    recoverForce = 0.35 * dt;
     if (Math.abs(state.delta) < 0.02 && state.residualDebt < 0.05) {
       state.recoverActive = false;
       addLog('Grid recovery completed; ω>0 confirmed', 'ev-ok');
     }
   }
 
-  // δ composition
+  // δ composition. The recovery operation is not an observed event, so it is not subtracted from δ directly.
+  // The recovery operation acts by ending the disturbance itself (decay of the trip / demand surge) (triggerRecover).
   const rawDelta = state.microDelta + state.macroDelta + state.spikeDelta;
-  state.delta = Math.max(0, Math.abs(rawDelta) - recoverForce) * Math.sign(rawDelta + 0.001);
+  state.delta = rawDelta;
 
   // Frequency update: δ is the frequency deviation [Hz] itself (δf = |f − f_nominal|, same definition as README_Demo14 and the Python version)
   state.freq = F_NOM - state.delta;
@@ -484,15 +509,17 @@ function physicsStep() {
   state.residualDebt = Math.min(state.residualDebt, 2.0);
 
   // FSM transition
-  // Zone thresholds (R>=0.4 → CAVEAT/ZONE-B, R>=1.0 or residualDebt>0.8 → RUPTURE_BOUNDARY)
+  // Zone thresholds (R>=0.4 → CAVEAT/ZONE-B, R>=1.0 → RUPTURE_BOUNDARY, residualDebt>0.8 → auxiliary stop)
   // are illustrative demo values, not sourced from an actual grid-operation standard.
+  // The state name is decided by R alone (AXIOMS §10). Debt is an auxiliary quantity built from R, so a debt stop
+  // acts only in the direction of stopping earlier and is shown as AUX_STOP, separate from RUPTURE_BOUNDARY (AXIOMS §4.5).
   const prevFsm = state.fsm;
-  if (prevFsm === 'RUPTURE_BOUNDARY') {
+  if (prevFsm === 'RUPTURE_BOUNDARY' || state.R >= 1.0) {
     state.fsm = 'RUPTURE_BOUNDARY';
+  } else if (prevFsm === 'AUX_STOP' || state.residualDebt > 0.8) {
+    state.fsm = 'AUX_STOP';
   } else if (state.recoverActive && state.R < 0.8) {
     state.fsm = 'RECOVERING';
-  } else if (state.R >= 1.0 || state.residualDebt > 0.8) {
-    state.fsm = 'RUPTURE_BOUNDARY';
   } else if (state.R >= 0.4) {
     state.fsm = 'CAVEAT';
   } else {
@@ -504,6 +531,13 @@ function physicsStep() {
     addTransitionLog(prevFsm, state.fsm, state.R);
     if (state.fsm === 'RUPTURE_BOUNDARY') {
       addLog('⛔ RUPTURE_BOUNDARY triggered R=' + state.R.toFixed(3), 'ev-crit');
+      BoundaryRecord.hit({ time: `${t.toFixed(1)}s`, channel: 'RUPTURE_BOUNDARY', value: `f=${state.freq.toFixed(3)}Hz`, R: state.R });
+      flashTransition();
+      document.getElementById('btn-trip').disabled = true;
+      document.getElementById('btn-surge').disabled = true;
+    } else if (state.fsm === 'AUX_STOP') {
+      addLog('⛔ Auxiliary stop (residual debt ' + state.residualDebt.toFixed(3) + ' > 0.8). Not RUPTURE_BOUNDARY  R=' + state.R.toFixed(3), 'ev-crit');
+      BoundaryRecord.hit({ time: `${t.toFixed(1)}s`, channel: 'Auxiliary stop (debt)', value: `debt=${state.residualDebt.toFixed(3)}`, R: state.R });
       flashTransition();
       document.getElementById('btn-trip').disabled = true;
       document.getElementById('btn-surge').disabled = true;
@@ -556,7 +590,7 @@ function drawFreqCanvas() {
   ctxF.fillText('FREQ', W-36, 14);
 
   // Waveform
-  const zoneColors = { PERMIT: '#00ff88', CAVEAT: '#ffcc00', RUPTURE_BOUNDARY: '#ff3333', RECOVERING: '#44aaff' };
+  const zoneColors = { PERMIT: '#00ff88', CAVEAT: '#ffcc00', RUPTURE_BOUNDARY: '#ff3333', AUX_STOP: '#ff8844', RECOVERING: '#44aaff' };
   ctxF.lineWidth = 1.5;
   ctxF.beginPath();
   for (let i = 0; i < BUF; i++) {
@@ -578,7 +612,7 @@ function drawRCanvas() {
   const W = cR.width, H = cR.height;
   ctxR.clearRect(0,0,W,H);
 
-  // τ=1.0 line
+  // R=1.0 line
   const yTau = H - (1.0 / 2.0) * H;
   ctxR.strokeStyle = '#ff333340';
   ctxR.setLineDash([6,3]);
@@ -636,7 +670,7 @@ function updateUI() {
   // FSM
   const fsmEl = document.getElementById('fsm-box');
   fsmEl.className = 'fsm-box fsm-' + state.fsm;
-  const fsmLabels = { PERMIT:'PERMIT', CAVEAT:'CAVEAT ⚠', RUPTURE_BOUNDARY:'RUPTURE_BOUNDARY ⛔', RECOVERING:'RECOVERING ↻' };
+  const fsmLabels = { PERMIT:'PERMIT', CAVEAT:'CAVEAT ⚠', RUPTURE_BOUNDARY:'RUPTURE_BOUNDARY ⛔', AUX_STOP:'AUX STOP (debt) ⛔', RECOVERING:'RECOVERING ↻' };
   fsmEl.textContent = fsmLabels[state.fsm] || state.fsm;
 
   document.getElementById('val-R').style.color =
@@ -650,7 +684,7 @@ function updateUI() {
 
 // ── Event triggers ──
 function triggerTrip() {
-  if (state.fsm === 'RUPTURE_BOUNDARY') return;
+  if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'AUX_STOP') return;
   // Randomly trip one generator
   const online = generators.filter(g => g.online);
   if (online.length <= 1) return;
@@ -663,14 +697,14 @@ function triggerTrip() {
 }
 
 function triggerSurge() {
-  if (state.fsm === 'RUPTURE_BOUNDARY') return;
+  if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'AUX_STOP') return;
   state.surgeActive = true;
   state.surgeDecay  = 0.9 + Math.random() * 0.6;
   addLog('📈 Demand surge event occurred', 'ev-warn');
 }
 
 function triggerRecover() {
-  if (state.fsm === 'RUPTURE_BOUNDARY') {
+  if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'AUX_STOP') {
     startNewIndependentEvaluation();
     addLog('🔄 New independent Cause-Side evaluation started after external grid inspection', 'ev-ok');
     return;
@@ -690,6 +724,7 @@ function triggerRecover() {
 function startNewIndependentEvaluation() {
   if (t > 0 || logCount > 0 || transCount > 0) {
     archivedHistories.push({
+      endedAt: t,
       finalState: {...state},
       eventLog: document.getElementById('event-log').innerHTML,
       transitionLog: document.getElementById('transition-log').innerHTML,
@@ -710,6 +745,17 @@ function startNewIndependentEvaluation() {
   transCount = 0; logCount = 0;
   renderGenList();
   addLog(`■ New independent Cause-Side evaluation; archived histories=${archivedHistories.length}`, 'ev-info');
+  BoundaryRecord.newTrial();
+  renderArchive();
+}
+
+// List of stored evaluations (evaluation number, final state, last R, end time). Records of old evaluations are not rewritten.
+function renderArchive() {
+  const el = document.getElementById('archiveList');
+  if (!el) return;
+  el.textContent = archivedHistories.length
+    ? archivedHistories.map((a, i) => `Evaluation ${i + 1}: ${a.finalState.fsm}  last R=${a.finalState.R.toFixed(3)}  ended at ${a.endedAt.toFixed(1)}s`).join('\n')
+    : '(none yet)';
 }
 
 function updateSpeed(v) {
@@ -737,6 +783,8 @@ resizeCanvases();
 renderGenList();
 addLog('■ NRA-IDE Demo #14 initialized', 'ev-ok');
 addLog('R = δ/τ monitoring started τ=' + tau.toFixed(2), 'ev-info');
+BoundaryRecord.render();
+renderArchive();
 loop();
 </script>
 </body>

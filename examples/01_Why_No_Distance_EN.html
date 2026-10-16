@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NRA-IDE #01: Why NO "Distance"?</title>
+    <title>NRA-IDE #01: Why "Distance" Is Not the Subject of Judgment</title>
     <style>
         /* ========================================
            Base Layout
@@ -193,23 +193,24 @@
 <body>
 
     <header>
-        <h1>🎯 NRA-IDE: Why avoid "Distance"?</h1>
+        <h1>🎯 NRA-IDE: Why is "Distance" not the subject of judgment?</h1>
         <div class="subtitle">
-            Why Nomological Ring Axioms Don't Use Distance, Calculus, or Floating-Point
+            Distance, calculus, and decimals may be used. The subject of judgment is R = δ/τ (boundary-approach ratio)
         </div>
     </header>
 
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="showTab('distance')">❓ Why No Distance?</button>
-        <button class="tab-btn" onclick="showTab('calculus')">🧮 Why No Calculus?</button>
-        <button class="tab-btn" onclick="showTab('floating')">🔢 Why No Float?</button>
+        <button class="tab-btn active" onclick="showTab('distance')">❓ How Is It Different from Distance?</button>
+        <button class="tab-btn" onclick="showTab('calculus')">🧮 How Is It Different from Calculus?</button>
+        <button class="tab-btn" onclick="showTab('floating')">🔢 What Are Integer Steps?</button>
         <button class="tab-btn" onclick="showTab('usage')">🎯 Applications</button>
     </div>
 
     <div class="content">
         
         <div id="tab-distance" class="tab-content active">
-            <h2>❓ Why Avoid "Distance"?</h2>
+            <h2>❓ Why Is "Distance" Not the Subject of Judgment?</h2>
+            <p class="viz-caption" style="text-align:left">Distance itself is not denied. Physically meaningful distance is used as an observation (THEORY "Distance": distance is not automatically a cause ≠ distance data must be deleted). What differs is what is made the subject of judgment.</p>
             
             <div class="explanation problem-box">
                 <h3>🔴 Problems in Conventional AI & Math</h3>
@@ -246,23 +247,23 @@
                         <td>Inexplainable "why" behind the distance value.</td>
                     </tr>
                     <tr>
-                        <td>Origin Requirement</td>
-                        <td>Coordinate systems are often forced/artificial.</td>
+                        <td>Center built from training data</td>
+                        <td>When the data change, the center moves (the reference moves during evaluation).</td>
                     </tr>
                 </table>
             </div>
             
             <div class="explanation solution-box">
                 <h3>✅ The NRA-IDE Approach</h3>
-                <p><strong>Measuring "Constraint Deviation" instead of distance:</strong></p>
+                <p><strong>Not distance from a center, but the ratio of "deviation from the declared reference" to "absorption thickness":</strong></p>
                 <div class="code-block">
 <span class="code-comment">// Nomological Ring Axiom Logic (NRA-IDE)</span>
-<span class="code-keyword">function</span> nraIDE(input, constraints) {
-    <span class="code-comment">// 1. Measure deviation from constraints directly (Non-distance)</span>
-    <span class="code-keyword">const</span> delta = measureViolation(input, constraints);
-    
-    <span class="code-comment">// 2. Compare with allowed tolerance</span>
-    <span class="code-keyword">const</span> tau = allowedTolerance;
+<span class="code-keyword">function</span> nraIDE(input, declaration) {
+    <span class="code-comment">// 1. Deviation from the reference state declared before evaluation, toward rupture (δ ≥ 0)</span>
+    <span class="code-keyword">const</span> delta = deviationFromReference(input, declaration);
+
+    <span class="code-comment">// 2. Absorption thickness (width from the reference to rupture)</span>
+    <span class="code-keyword">const</span> tau = declaration.absorptionThickness;
     
     <span class="code-comment">// 3. Calculate Ratio (R = δ/τ)</span>
     <span class="code-keyword">const</span> R = delta / tau;
@@ -275,23 +276,23 @@
 }
                 </div>
                 
-                <p><strong class="text-success">Why is this superior?</strong></p>
+                <p><strong class="text-success">What is the advantage?</strong></p>
                 <table>
                     <tr>
                         <th>Feature</th>
                         <th>Advantage</th>
                     </tr>
                     <tr>
-                        <td>No "Center" needed</td>
-                        <td>Only constraints need to be defined.</td>
+                        <td>A ratio, not distance from a center</td>
+                        <td>R: deviation δ from the declared reference toward rupture, over absorption thickness τ.</td>
                     </tr>
                     <tr>
                         <td>Fully Explainable</td>
                         <td>δ and τ are physical, measurable values.</td>
                     </tr>
                     <tr>
-                        <td>No Origin point</td>
-                        <td>Eliminates coordinate system bias.</td>
+                        <td>Reference state declared and fixed before evaluation</td>
+                        <td>The reference is not moved during evaluation, so past deviation remains in the present value (AXIOMS §4).</td>
                     </tr>
                 </table>
             </div>
@@ -325,7 +326,8 @@
         </div>
         
         <div id="tab-calculus" class="tab-content">
-            <h2>🧮 Why Avoid Calculus?</h2>
+            <h2>🧮 How Is It Different from Calculus?</h2>
+            <p class="viz-caption" style="text-align:left">Derivatives and differences are used as auxiliary computation in the double-fluctuation detection of the Secondary Formula (FORMULA §4.7) and in the complementary formula (§5). Classical theory is not denied (Thesis §6.1). What differs is that the subject of judgment is approach to the boundary, R, not the rate of change.</p>
             
             <div class="explanation">
                 <h3>Conventional Mathematical Approach</h3>
@@ -356,15 +358,15 @@
             
             <div class="explanation solution-box">
                 <h3>NRA-IDE Approach</h3>
-                <p>Direct comparison of measured values, not calculus:</p>
+                <p>The subject of judgment is "comparison of the measured value with the reference":</p>
                 <div class="code-block">
-<span class="code-comment">// NRA-IDE: Non-calculus Control</span>
-<span class="code-keyword">function</span> nraControl(input, constraint) {
-    <span class="code-comment">// δ: Deviation from constraint (Direct measurement)</span>
-    <span class="code-keyword">const</span> delta = input - constraint;  <span class="code-comment">// Simple subtraction</span>
-    
-    <span class="code-comment">// τ: Tolerance range (Determined at design time)</span>
-    <span class="code-keyword">const</span> tau = <span class="code-number">10.0</span>;  
+<span class="code-comment">// NRA-IDE: judgment is made by R = δ/τ</span>
+<span class="code-keyword">function</span> nraControl(input, reference) {
+    <span class="code-comment">// δ: deviation from the declared reference toward rupture (never negative)</span>
+    <span class="code-keyword">const</span> delta = Math.max(<span class="code-number">0</span>, input - reference);
+
+    <span class="code-comment">// τ: absorption thickness (width from the reference to rupture, declared before evaluation)</span>
+    <span class="code-keyword">const</span> tau = <span class="code-number">10.0</span>;
     
     <span class="code-comment">// R: Ratio calculation (Simple division)</span>
     <span class="code-keyword">const</span> R = delta / tau;
@@ -376,8 +378,8 @@
     <span class="code-keyword">return</span> <span class="code-string">"CONTINUE"</span>;
 }
 
-<span class="code-comment">// No derivatives, No integrals!
-// Uses only: Subtraction, Division, Comparison.</span>
+<span class="code-comment">// Judgment uses: subtraction, division, comparison
+// (rates of change or smoothed values may be used as auxiliaries, never in the direction that lightens the judgment)</span>
                 </div>
             </div>
             
@@ -386,7 +388,7 @@
         </div>
         
         <div id="tab-floating" class="tab-content">
-            <h2>🔢 Why Avoid Floating-Point?</h2>
+            <h2>🔢 What Are Integer Steps? (Relation to Floating-Point)</h2>
             
             <div class="explanation problem-box">
                 <h3>The Floating-Point Trap</h3>
@@ -399,48 +401,49 @@
 }
 
 console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
-                   <span class="code-comment">// Actual: 100000.00000123456... (Drift!)</span>
+                   <span class="code-comment">// Actual: 100000.00000133288 (Drift!)</span>
                 </div>
-                
-                <p><strong class="text-error">Critical in Medical/Autonomous Systems:</strong></p>
+
+                <p><strong class="text-error">A problem for safety-related judgment:</strong></p>
                 <ul>
-                    <li>Accumulated drift → False positives/negatives.</li>
-                    <li>Non-deterministic → Undebuggable across platforms.</li>
-                    <li>Environment dependent → Results change by CPU architecture.</li>
+                    <li>Accumulated drift → the judgment on either side of the boundary shifts.</li>
+                    <li>Accumulating a decimal phase and then taking its integer part can shift the integer part itself.</li>
+                    <li>Results change when the order of computation or the implementation changes.</li>
                 </ul>
             </div>
             
             <div class="explanation solution-box">
-                <h3>NRA-IDE Solution: Integer Phase Lock</h3>
-                <p>Operating entirely on integers through phase locking:</p>
+                <h3>NRA-IDE Design Principle: Integer Phase Lock</h3>
+                <p>State steps are counted in integers; a remainder smaller than one step is not carried to the next state and is recorded. Not every quantity is limited to integers (Thesis §9.1).</p>
                 <div class="code-block">
 <span class="code-comment">// NRA-IDE: Integer Phase Lock Method</span>
-<span class="code-keyword">let</span> phase = <span class="code-number">0.0</span>; 
+<span class="code-keyword">let</span> ticks = <span class="code-number">0</span>;                 <span class="code-comment">// steps are counted in integers</span>
+<span class="code-keyword">const</span> STEPS_PER_PHASE = <span class="code-number">100</span>;
 
 <span class="code-keyword">function</span> update() {
-    phase += <span class="code-number">0.01</span>; 
-    
-    <span class="code-comment">// Key: Only use the Integer portion for system logic</span>
-    <span class="code-keyword">const</span> integerPhase = Math.floor(phase);
-    
-    <span class="code-comment">// Residual noise is discarded</span>
-    <span class="code-keyword">const</span> residual = phase - integerPhase;
-    
-    <span class="code-keyword">return</span> integerPhase;  <span class="code-comment">// 0, 1, 2, 3... (Pure Integer)</span>
+    ticks += <span class="code-number">1</span>;                    <span class="code-comment">// integer addition: no accumulated drift</span>
+
+    <span class="code-comment">// State step (integer part)</span>
+    <span class="code-keyword">const</span> integerPhase = Math.floor(ticks / STEPS_PER_PHASE);
+
+    <span class="code-comment">// Remainder below one step: not carried to the next state; its value and source are recorded (structural disclosure log)</span>
+    <span class="code-keyword">const</span> residual = (ticks % STEPS_PER_PHASE) / STEPS_PER_PHASE;
+
+    <span class="code-keyword">return</span> integerPhase;  <span class="code-comment">// 0, 1, 2, 3...</span>
 }
 
 <span class="code-comment">// Benefits:
-// - Zero cumulative drift
-// - Fully deterministic
-// - Cross-platform identical results</span>
+// - No floating-point drift enters the state steps
+// - Same input, same steps (deterministic)
+// - The remainder is recorded and traceable, not thrown away</span>
                 </div>
             </div>
             
             <h3>📊 Phase Lock Visualization</h3>
             <canvas id="floatingCanvas" width="800" height="400"></canvas>
             <p class="viz-caption">
-                Green Ring: Integer Phase (System Logic)<br>
-                Red Pulse: Discarded Residual (Noise)
+                Green arm and white dot: the remainder within one step (not carried over; recorded)<br>
+                Integer Lock: the number of whole steps taken
             </p>
         </div>
         
@@ -448,47 +451,35 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
             <h2>🎯 Practical Applications</h2>
             
             <div class="explanation">
-                <h3>🏥 1. Medical AI (Cancer Treatment Support)</h3>
-                <p><strong>Traditional AI:</strong> Statistical prediction of "Will the drug work?"</p>
-                <p><strong>NRA-IDE:</strong> Physical validation of "Can the drug reach the target?"</p>
-            </div>
-            
-            <div class="explanation">
-                <h3>🚗 2. Autonomous Safety Gates</h3>
+                <h3>🚗 1. Autonomous Safety Gates</h3>
                 <p><strong>Traditional AI:</strong> Route optimization via black-box deep learning.</p>
-                <p><strong>NRA-IDE:</strong> Structural safety verification via explainable constraints.</p>
+                <p><strong>NRA-IDE:</strong> δ = distance needed to stop (reaction + braking), τ = available gap. R ≥ 1.0 means the vehicle cannot stop in time; in operation, stop at a threshold before R = 1.0.</p>
             </div>
             
             <div class="explanation">
-                <h3>🖥️ 3. Infrastructure Resilience (HAN Gate)</h3>
+                <h3>🖥️ 2. Infrastructure Resilience (HAN Gate)</h3>
                 <p><strong>Problem:</strong> Cascade failures in distributed networks.</p>
-                <p><strong>NRA-IDE:</strong> Prevention through physical load limit monitoring.</p>
+                <p><strong>NRA-IDE:</strong> δ = excess over the normal load (never negative), τ = width from the normal load to the maximum load.</p>
             </div>
             
             <h3>🎯 The Universal Principle</h3>
             <table>
                 <tr>
                     <th>Domain</th>
-                    <th>δ (Deviation)</th>
-                    <th>τ (Tolerance)</th>
+                    <th>δ (Deviation from reference)</th>
+                    <th>τ (Absorption thickness)</th>
                     <th>Meaning of R ≥ 1.0</th>
                 </tr>
                 <tr>
-                    <td>Medical</td>
-                    <td>Tumor Resistance</td>
-                    <td>Infusion Pressure</td>
-                    <td>Physical delivery failure</td>
-                </tr>
-                <tr>
                     <td>Driving</td>
-                    <td>Time-to-Collision</td>
-                    <td>Braking Capacity</td>
-                    <td>Structural danger</td>
+                    <td>Distance needed to stop</td>
+                    <td>Available gap</td>
+                    <td>Cannot stop in time</td>
                 </tr>
                 <tr>
                     <td>Infra</td>
-                    <td>Load Overflow</td>
-                    <td>Buffer Capacity</td>
+                    <td>Excess over normal load</td>
+                    <td>Width from normal to maximum load</td>
                     <td>System Overload</td>
                 </tr>
             </table>
@@ -570,11 +561,20 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                 ctx.fillStyle = '#fff';
                 ctx.beginPath(); ctx.arc(dataX2, dataY2, 5, 0, Math.PI * 2); ctx.fill();
                 
-                if (dataX2 > constraintX + 80) {
+                // Draw the excess as δ, from whichever of the four sides the point leaves (previously only the right side)
+                const dx = dataX2 - constraintX, dy = dataY2 - constraintY;
+                const over = Math.max(Math.abs(dx), Math.abs(dy)) - 80;
+                if (over > 0) {
                     ctx.fillStyle = 'rgba(255, 85, 85, 0.3)';
-                    ctx.fillRect(constraintX + 80, dataY2 - 5, dataX2 - (constraintX + 80), 10);
+                    if (Math.abs(dx) >= Math.abs(dy)) {
+                        const edge = constraintX + Math.sign(dx) * 80;
+                        ctx.fillRect(Math.min(edge, dataX2), dataY2 - 5, Math.abs(dataX2 - edge), 10);
+                    } else {
+                        const edge = constraintY + Math.sign(dy) * 80;
+                        ctx.fillRect(dataX2 - 5, Math.min(edge, dataY2), 10, Math.abs(dataY2 - edge));
+                    }
                     ctx.fillStyle = '#ff5555';
-                    ctx.fillText('δ (violation)', constraintX + 85, dataY2 - 10);
+                    ctx.fillText('δ (violation)', dataX2 + 10, dataY2 - 10);
                 }
                 vizRaf = requestAnimationFrame(animate);
             }
@@ -603,10 +603,15 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                 
                 ctx.fillStyle = '#00ff88';
                 ctx.fillText('NRA-IDE: Comparison (Stable)', 450, 30);
-                const value = Math.sin(t) * 80;
+                // δ (deviation from the reference, ≥ 0) versus τ (absorption thickness): R = 1 when δ reaches τ
+                const value = Math.abs(Math.sin(t)) * 80;
                 const threshold = 50;
+                ctx.strokeStyle = '#335544';
+                ctx.beginPath(); ctx.moveTo(450, 200); ctx.lineTo(750, 200); ctx.stroke();
+                ctx.fillText('Reference (δ = 0)', 650, 215);
                 ctx.strokeStyle = '#00ff88';
                 ctx.beginPath(); ctx.moveTo(450, 200 - threshold); ctx.lineTo(750, 200 - threshold); ctx.stroke();
+                ctx.fillText('τ (absorption thickness): R = 1', 560, 200 - threshold - 6);
                 ctx.fillStyle = value > threshold ? '#ff5555' : '#00ff88';
                 ctx.beginPath(); ctx.arc(600, 200 - value, 8, 0, Math.PI * 2); ctx.fill();
                 vizRaf = requestAnimationFrame(animate);
@@ -619,9 +624,11 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
             const canvas = document.getElementById('floatingCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            let phase = 0.0;
+            // Steps are counted in integers (no floating-point accumulation): 3/100 of a step per frame
+            let ticks = 0;
+            const STEPS_PER_PHASE = 100;
             function animate() {
-                phase += 0.03;
+                ticks += 3;
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 const centerX = canvas.width / 2;
@@ -630,8 +637,8 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                 ctx.strokeStyle = '#003d11';
                 ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, Math.PI * 2); ctx.stroke();
                 
-                const integerPhase = Math.floor(phase);
-                const residual = phase - integerPhase;
+                const integerPhase = Math.floor(ticks / STEPS_PER_PHASE);
+                const residual = (ticks % STEPS_PER_PHASE) / STEPS_PER_PHASE;
                 const angle = (residual * Math.PI * 2) - (Math.PI / 2);
                 const x = centerX + Math.cos(angle) * radius;
                 const y = centerY + Math.sin(angle) * radius;
@@ -644,7 +651,7 @@ console.log(sum);  <span class="code-comment">// Expected: 100000.0</span>
                 ctx.fillStyle = '#00ff88';
                 ctx.fillText(`Integer Lock: ${integerPhase}`, centerX - 60, centerY + radius + 40);
                 ctx.fillStyle = '#ff5555';
-                ctx.fillText(`Residual Noise: ${residual.toFixed(4)} (Discarded)`, centerX - 80, centerY + radius + 60);
+                ctx.fillText(`Residual: ${residual.toFixed(2)} (not carried over; recorded)`, centerX - 130, centerY + radius + 60);
                 vizRaf = requestAnimationFrame(animate);
             }
             animate();

@@ -111,6 +111,7 @@
   .fsm-RUPTURE_BOUNDARY  { color: #ff3333; background: #ff000015; border-color: #ff333350;
                       animation: alarm-pulse 0.4s infinite; }
   .fsm-RECOVERING   { color: #44aaff; background: #0044ff08; border-color: #44aaff30; }
+  .fsm-AUX_STOP     { color: #ff8844; background: #ff440012; border-color: #ff884450; }
   @keyframes alarm-pulse {
     0%,100% { box-shadow: 0 0 0px #ff3333; }
     50%      { box-shadow: 0 0 16px #ff3333; }
@@ -256,7 +257,7 @@
     <span class="metric-value color-delta" id="val-delta">0.000</span>
   </div>
   <div class="metric-row">
-    <span class="metric-label">τ (慣性閾値)</span>
+    <span class="metric-label">τ（吸収厚み、Hz）</span>
     <span class="metric-value color-tau" id="val-tau">0.500</span>
   </div>
 
@@ -270,11 +271,15 @@
     </div>
     <div class="r-label-row">
       <span>0</span><span>ZONE-A</span><span class="zone-b-label">ZONE-B</span>
-      <span class="zone-tau-label">τ=1.0</span>
+      <span class="zone-tau-label">R=1.0</span>
     </div>
   </div>
 
   <div class="fsm-box fsm-PERMIT" id="fsm-box">PERMIT</div>
+
+  <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
+  <div class="panel-title">保管した評価</div>
+  <pre id="archiveList" style="margin:0 0 6px;font:9px/1.6 monospace;color:#8899aa;white-space:pre-wrap;"></pre>
 
   <div class="panel-title panel-title-mt4">Event Log</div>
   <div id="event-log"></div>
@@ -315,7 +320,7 @@
 </div>
 
 <!-- FOOTER -->
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・周波数と発電機は簡易モデルです。δは周波数偏差[Hz]そのもの、τはスライダーの値です。<br>・残留負債の係数（蓄積0.08・減衰0.03・k=0.12）はデモ用で、実際の系統運用基準ではありません。<br>・負債は回復後もすぐには消えず、Rが低い間にゆっくり減ります。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・周波数と発電機は簡易モデルです。δは周波数偏差[Hz]そのもの、τはスライダーの値です。<br>・残留負債の係数（蓄積0.08・減衰0.03・k=0.12）はデモ用で、実際の系統運用基準ではありません。<br>・負債は回復後もすぐには消えず、Rが低い間にゆっくり減ります。<br>・負債が0.8を超えたときの停止は、R から作った補助量による停止（AUX_STOP）で、RUPTURE_BOUNDARY（R ≥ 1.0）とは別に表示します。</div>
 <footer>
   <button class="btn-event" id="btn-trip" onclick="triggerTrip()">⚡ 発電機脱落</button>
   <button class="btn-event" id="btn-surge" onclick="triggerSurge()">📈 需要急増</button>
@@ -337,6 +342,27 @@
 </footer>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ================================================================
 // NRA-IDE Demo #14 — Power Grid Transition
 // FILE: NRA_IDE_Demo14_PowerGrid_Transition_26-0321.html
@@ -354,7 +380,7 @@ let state = {
   freq: F_NOM,
   delta: 0,
   R: 0,
-  fsm: 'PERMIT',       // PERMIT / CAVEAT / RUPTURE_BOUNDARY / RECOVERING
+  fsm: 'PERMIT',       // PERMIT / CAVEAT / RUPTURE_BOUNDARY / AUX_STOP（補助による停止）/ RECOVERING
   microDelta: 0,
   macroDelta: 0,
   spikeDelta: 0,
@@ -423,7 +449,7 @@ let transCount = 0;
 function addTransitionLog(from, to, R) {
   const el = document.getElementById('transition-log');
   transCount++;
-  const col = to === 'RUPTURE_BOUNDARY' ? '#ff4444' : to === 'RECOVERING' ? '#44aaff' : '#00ff88';
+  const col = to === 'RUPTURE_BOUNDARY' ? '#ff4444' : to === 'AUX_STOP' ? '#ff8844' : to === 'RECOVERING' ? '#44aaff' : '#00ff88';
   el.innerHTML = `<div style="color:${col}">◯${transCount} ${from}→${to} R=${R.toFixed(3)}</div>` + el.innerHTML;
 }
 
@@ -432,7 +458,7 @@ function physicsStep() {
   const dt = 0.016;   // 1ステップの時間。速度倍率はloop()の反復回数だけで表す（以前はdtにも掛けて速度の二乗になっていた）
   t += dt;
 
-  // 二重ゆらぎ
+  // 二層のゆらぎ（微小と大きい）
   state.microDelta = Math.sin(t * 3.7) * 0.008 + (Math.random()-0.5) * 0.006;
   state.macroDelta = Math.sin(t * 0.3) * 0.04 + Math.sin(t * 0.17) * 0.025;
 
@@ -451,18 +477,17 @@ function physicsStep() {
   state.spikeDelta = eventDelta;
 
   // 復旧
-  let recoverForce = 0;
   if (state.recoverActive) {
-    recoverForce = 0.35 * dt;
     if (Math.abs(state.delta) < 0.02 && state.residualDebt < 0.05) {
       state.recoverActive = false;
       addLog('系統復旧完了 ω>0確認', 'ev-ok');
     }
   }
 
-  // δ合成
+  // δ合成。復旧操作は観測された事象ではないので、δ から直接差し引かない。
+  // 復旧操作は外乱そのもの（脱落・需要急増の減衰）を止める形で効く（triggerRecover）。
   const rawDelta = state.microDelta + state.macroDelta + state.spikeDelta;
-  state.delta = Math.max(0, Math.abs(rawDelta) - recoverForce) * Math.sign(rawDelta + 0.001);
+  state.delta = rawDelta;
 
   // 周波数更新：δ は周波数偏差 [Hz] そのもの（δf = |f − f_nominal|、README_Demo14・Python版と同じ定義）
   state.freq = F_NOM - state.delta;
@@ -484,15 +509,17 @@ function physicsStep() {
   state.residualDebt = Math.min(state.residualDebt, 2.0);
 
   // FSM遷移
-  // ゾーン閾値（R>=0.4→CAVEAT/ZONE-B、R>=1.0またはresidualDebt>0.8→RUPTURE_BOUNDARY）は
+  // ゾーン閾値（R>=0.4→CAVEAT/ZONE-B、R>=1.0→RUPTURE_BOUNDARY、residualDebt>0.8→補助による停止）は
   // 例示的なデモ値であり、実際の電力系統運用基準に由来するものではない。
+  // 状態の名前は R だけで決める（AXIOMS §10）。負債は R から作った補助量なので、
+  // 負債による停止は早く止める向きにだけ働かせ、RUPTURE_BOUNDARY とは別の AUX_STOP として表示する（AXIOMS §4.5）。
   const prevFsm = state.fsm;
-  if (prevFsm === 'RUPTURE_BOUNDARY') {
+  if (prevFsm === 'RUPTURE_BOUNDARY' || state.R >= 1.0) {
     state.fsm = 'RUPTURE_BOUNDARY';
+  } else if (prevFsm === 'AUX_STOP' || state.residualDebt > 0.8) {
+    state.fsm = 'AUX_STOP';
   } else if (state.recoverActive && state.R < 0.8) {
     state.fsm = 'RECOVERING';
-  } else if (state.R >= 1.0 || state.residualDebt > 0.8) {
-    state.fsm = 'RUPTURE_BOUNDARY';
   } else if (state.R >= 0.4) {
     state.fsm = 'CAVEAT';
   } else {
@@ -504,6 +531,13 @@ function physicsStep() {
     addTransitionLog(prevFsm, state.fsm, state.R);
     if (state.fsm === 'RUPTURE_BOUNDARY') {
       addLog('⛔ RUPTURE_BOUNDARY発動 R=' + state.R.toFixed(3), 'ev-crit');
+      BoundaryRecord.hit({ time: `${t.toFixed(1)}s`, channel: 'RUPTURE_BOUNDARY', value: `f=${state.freq.toFixed(3)}Hz`, R: state.R });
+      flashTransition();
+      document.getElementById('btn-trip').disabled = true;
+      document.getElementById('btn-surge').disabled = true;
+    } else if (state.fsm === 'AUX_STOP') {
+      addLog('⛔ 補助による停止（残留負債 ' + state.residualDebt.toFixed(3) + ' > 0.8）。RUPTURE_BOUNDARY ではない  R=' + state.R.toFixed(3), 'ev-crit');
+      BoundaryRecord.hit({ time: `${t.toFixed(1)}s`, channel: '補助による停止（負債）', value: `負債=${state.residualDebt.toFixed(3)}`, R: state.R });
       flashTransition();
       document.getElementById('btn-trip').disabled = true;
       document.getElementById('btn-surge').disabled = true;
@@ -556,7 +590,7 @@ function drawFreqCanvas() {
   ctxF.fillText('FREQ', W-36, 14);
 
   // 波形
-  const zoneColors = { PERMIT: '#00ff88', CAVEAT: '#ffcc00', RUPTURE_BOUNDARY: '#ff3333', RECOVERING: '#44aaff' };
+  const zoneColors = { PERMIT: '#00ff88', CAVEAT: '#ffcc00', RUPTURE_BOUNDARY: '#ff3333', AUX_STOP: '#ff8844', RECOVERING: '#44aaff' };
   ctxF.lineWidth = 1.5;
   ctxF.beginPath();
   for (let i = 0; i < BUF; i++) {
@@ -578,7 +612,7 @@ function drawRCanvas() {
   const W = cR.width, H = cR.height;
   ctxR.clearRect(0,0,W,H);
 
-  // τ=1.0 ライン
+  // R=1.0 ライン
   const yTau = H - (1.0 / 2.0) * H;
   ctxR.strokeStyle = '#ff333340';
   ctxR.setLineDash([6,3]);
@@ -636,7 +670,7 @@ function updateUI() {
   // FSM
   const fsmEl = document.getElementById('fsm-box');
   fsmEl.className = 'fsm-box fsm-' + state.fsm;
-  const fsmLabels = { PERMIT:'PERMIT', CAVEAT:'CAVEAT ⚠', RUPTURE_BOUNDARY:'RUPTURE_BOUNDARY ⛔', RECOVERING:'RECOVERING ↻' };
+  const fsmLabels = { PERMIT:'PERMIT', CAVEAT:'CAVEAT ⚠', RUPTURE_BOUNDARY:'RUPTURE_BOUNDARY ⛔', AUX_STOP:'補助による停止（負債）⛔', RECOVERING:'RECOVERING ↻' };
   fsmEl.textContent = fsmLabels[state.fsm] || state.fsm;
 
   document.getElementById('val-R').style.color =
@@ -650,7 +684,7 @@ function updateUI() {
 
 // ── イベントトリガー ──
 function triggerTrip() {
-  if (state.fsm === 'RUPTURE_BOUNDARY') return;
+  if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'AUX_STOP') return;
   // ランダムで発電機1台脱落
   const online = generators.filter(g => g.online);
   if (online.length <= 1) return;
@@ -663,14 +697,14 @@ function triggerTrip() {
 }
 
 function triggerSurge() {
-  if (state.fsm === 'RUPTURE_BOUNDARY') return;
+  if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'AUX_STOP') return;
   state.surgeActive = true;
   state.surgeDecay  = 0.9 + Math.random() * 0.6;
   addLog('📈 需要急増イベント発生', 'ev-warn');
 }
 
 function triggerRecover() {
-  if (state.fsm === 'RUPTURE_BOUNDARY') {
+  if (state.fsm === 'RUPTURE_BOUNDARY' || state.fsm === 'AUX_STOP') {
     startNewIndependentEvaluation();
     addLog('🔄 外部系統再検査後、独立した新Cause-Side評価を開始', 'ev-ok');
     return;
@@ -690,6 +724,7 @@ function triggerRecover() {
 function startNewIndependentEvaluation() {
   if (t > 0 || logCount > 0 || transCount > 0) {
     archivedHistories.push({
+      endedAt: t,
       finalState: {...state},
       eventLog: document.getElementById('event-log').innerHTML,
       transitionLog: document.getElementById('transition-log').innerHTML,
@@ -710,6 +745,17 @@ function startNewIndependentEvaluation() {
   transCount = 0; logCount = 0;
   renderGenList();
   addLog(`■ 独立した新Cause-Side評価。保管済み履歴=${archivedHistories.length}`, 'ev-info');
+  BoundaryRecord.newTrial();
+  renderArchive();
+}
+
+// 保管した評価の一覧（評価番号・終了時の状態・最後のR・終了時刻）。旧評価の記録は書き換えない。
+function renderArchive() {
+  const el = document.getElementById('archiveList');
+  if (!el) return;
+  el.textContent = archivedHistories.length
+    ? archivedHistories.map((a, i) => `評価${i + 1}：${a.finalState.fsm}　最後のR=${a.finalState.R.toFixed(3)}　${a.endedAt.toFixed(1)}s で終了`).join('\n')
+    : '（まだありません）';
 }
 
 function updateSpeed(v) {
@@ -737,6 +783,8 @@ resizeCanvases();
 renderGenList();
 addLog('■ NRA-IDE Demo #14 起動完了', 'ev-ok');
 addLog('R = δ/τ 監視開始 τ=' + tau.toFixed(2), 'ev-info');
+BoundaryRecord.render();
+renderArchive();
 loop();
 </script>
 </body>

@@ -208,19 +208,23 @@ button.stress:hover { background: #1a1000; }
 
     <hr class="divider">
 
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
+    <div class="tau-label">Moments of arrival (latest 6)</div>
+    <pre id="crossLog" style="margin:2px 0 8px;font:10px/1.5 monospace;color:#c99;white-space:pre-wrap;"></pre>
+
     <div class="layer5-note">
       Role of Layer 5:<br>
       The FvCB model only generates δ<br>
       NRA-IDE performs the R = δ/τ judgment<br>
       —the formula itself does not change<br><br>
-      Pmax: theoretical maximum under optimal conditions<br>
-      τ: allowable decline width (design value)<br>
-      R ≥ 1.0 → SILENCE (photosynthesis failure risk)
+      Pmax: A under optimal conditions (PPFD 1800, Ci 400, 25 °C)<br>
+      τ = Pmax: the width from Pmax to net assimilation A = 0 (compensation point)<br>
+      R ≥ 1.0 → SILENCE (net assimilation at or below 0 = photosynthesis stops)
     </div>
   </div>
 </div>
 
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The FvCB parameters borrow typical C3-plant values for demonstration and are not calibrated against measurements.<br>• The temperature response of Vcmax and Jmax uses the Kattge & Knorr (2007) form, but the coefficients on this screen do not represent a specific crop or leaf.<br>• τ = 8 μmol/m²/s is a design value (demo).</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The FvCB parameters borrow typical C3-plant values for demonstration and are not calibrated against measurements.<br>• The temperature response of Vcmax and Jmax uses the Kattge & Knorr (2007) form, but the coefficients on this screen do not represent a specific crop or leaf.<br>• τ is Pmax (A under optimal conditions, about 33 μmol/m²/s). R = 1.0 corresponds to net assimilation A = 0 (compensation point); it does not indicate a limit of crop yield or growth.<br>• Under elevated CO₂, A can exceed Pmax; δ = 0 (R = 0) in that case.<br>• When R reaches 1.0, SILENCE is latched and released only by "New evaluation". Returning the sliders or scenario does not release it.</div>
 <footer>
   <span class="scenario-label">State: <span id="scenario_label" class="scenario-active">Manual Control</span></span>
   <button onclick="setScenario('drought')">Heat-Drought Stress</button>
@@ -228,10 +232,32 @@ button.stress:hover { background: #1a1000; }
   <button onclick="setScenario('optimal')">Optimal Conditions</button>
   <button onclick="setScenario('co2sat')">CO₂ Saturation</button>
   <button onclick="setScenario('manual')">Manual Reset</button>
+  <button onclick="startNewEvaluation()">New evaluation</button>
   <span class="footer-copy">NRA-IDE © 2026 M-Tokuni</span>
 </footer>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ============================================================
 // NRA-IDE Demo #13 | Photosynthesis Layer 5
 // FILE: nra_ide_demo13_photosynthesis_layer5_20260308_0224.html
@@ -265,8 +291,7 @@ const FvCB = {
   Q10_Gamma: 1.4,
 };
 
-// NRA-IDE τ (allowable decline width for photosynthetic assimilation rate)
-const TAU_A = 8.0;   // μmol/m²/s
+// NRA-IDE τ is set right after Pmax (τ = Pmax).
 
 // --- Temperature correction: peaked Arrhenius (1 at 25°C, declines at high temperature by deactivation) ---
 function peakedArrhenius(val25, Ha, Hd, dS, T) {
@@ -313,6 +338,11 @@ function calcFvCB(PPFD, Ci, T) {
 
 // Pmax: A under optimal conditions (PPFD=1800, Ci=400, T=25)
 const Pmax = calcFvCB(1800, 400, 25).A;
+
+// NRA-IDE τ: the width from A under optimal conditions (Pmax) to net assimilation A = 0 (compensation point). μmol/m²/s
+// Since δ = Pmax − A, R = 1.0 coincides with A = 0 (net photosynthesis stops).
+// (Previously τ was a design value of 8, so even a healthy leaf showed R ≥ 1 in the initial state.)
+const TAU_A = Pmax;
 
 // --- Slider values ---
 const sliders = {
@@ -375,6 +405,17 @@ function setScenario(name) {
 
 // --- History ---
 const HLEN = 300;
+
+// --- Boundary latch and record ---
+let latched = false, prevOver = false;
+const crossLines = [];
+// New evaluation: release the latch, store the record, and start counting again (slider or scenario operations do not release it)
+function startNewEvaluation() {
+  latched = false; prevOver = false;
+  crossLines.length = 0;
+  document.getElementById('crossLog').textContent = '';
+  BoundaryRecord.newTrial();
+}
 const hist_R = [];
 const hist_A = [];
 
@@ -543,7 +584,7 @@ function drawRHistory(R) {
   const rLabel = R.toFixed(3);
   const rc = R>=1.0?'#ff5533':R>=0.75?'#ffaa44':'#66cc88';
   ctx.fillStyle=rc;
-  ctx.fillText('R = '+rLabel+'  (τ='+TAU_A+')', 6, H-5);
+  ctx.fillText('R = '+rLabel+'  (τ='+TAU_A.toFixed(1)+')', 6, H-5);
 }
 
 // --- Panel update ---
@@ -553,7 +594,7 @@ function updatePanel(res, delta, R) {
   document.getElementById('v_aj').textContent = res.Aj.toFixed(2);
   document.getElementById('v_delta').textContent = delta.toFixed(2);
   document.getElementById('v_R').textContent = R.toFixed(3);
-  document.getElementById('v_tau').textContent = TAU_A;
+  document.getElementById('v_tau').textContent = TAU_A.toFixed(2);
 
   const pct = Math.min(R*100, 100);
   const bar = document.getElementById('bar_R');
@@ -561,9 +602,9 @@ function updatePanel(res, delta, R) {
   const col = R>=1.0 ? '#ff5533' : R>=0.75 ? '#ffaa44' : '#66cc88';
   bar.style.background = col;
 
-  const st = R>=1.0 ? 'silence' : R>=0.75 ? 'warn' : 'safe';
+  const st = (latched || R>=1.0) ? 'silence' : R>=0.75 ? 'warn' : 'safe';
   const badge = document.getElementById('st_R');
-  badge.textContent = st==='silence' ? 'SILENCE' : st==='warn' ? 'WARN' : 'SAFE';
+  badge.textContent = st==='silence' ? (R < 1.0 ? 'SILENCE (latched: release with "New evaluation")' : 'SILENCE') : st==='warn' ? 'WARN' : 'SAFE';
   badge.className = 'status-badge ' + st;
 
   // Limitation display
@@ -586,6 +627,18 @@ function loop() {
   const delta = Math.max(0, Pmax - A);
   const R = delta / TAU_A;
 
+  // Once R reaches 1.0, SILENCE is latched (irreversible latch). Only "New evaluation" releases it. The moment of arrival is kept with its conditions.
+  const over = R >= 1.0;
+  if (over && !prevOver) {
+    const cond = `PPFD ${PPFD}, Ci ${Ci}, leaf ${T} °C, A ${res.A.toFixed(2)}`;
+    BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: 'Net assimilation', value: cond, R });
+    crossLines.push(`${new Date().toTimeString().slice(0, 8)}  ${cond}  R=${R.toFixed(3)}`);
+    if (crossLines.length > 6) crossLines.shift();
+    document.getElementById('crossLog').textContent = crossLines.join('\n');
+  }
+  prevOver = over;
+  latched = latched || over;
+
   hist_R.push(R); hist_A.push(A);
   if (hist_R.length > HLEN) { hist_R.shift(); hist_A.shift(); }
 
@@ -600,6 +653,7 @@ function loop() {
 
 window.addEventListener('resize', resize);
 resize();
+BoundaryRecord.render();
 loop();
 </script>
 </body>

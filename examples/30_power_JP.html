@@ -268,11 +268,11 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
           <div class="bar-bg"><div class="bar-fill bar-w0" id="dBar"></div></div>
         </div>
         <div class="met-row">
-          <div class="met-hdr"><span class="met-k">τ_hi 過電力余裕</span><span class="met-v" id="tHiV">4000 W</span></div>
+          <div class="met-hdr"><span class="met-k">τ_hi 上側の吸収厚み（過電力）</span><span class="met-v" id="tHiV">4000 W</span></div>
           <div class="bar-bg"><div class="bar-fill bar-tau-hi" id="tHiB"></div></div>
         </div>
         <div class="met-row">
-          <div class="met-hdr"><span class="met-k">τ_lo 電力不足余裕</span><span class="met-v" id="tLoV">1000 W</span></div>
+          <div class="met-hdr"><span class="met-k">τ_lo 下側の吸収厚み（電力不足）</span><span class="met-v" id="tLoV">1000 W</span></div>
           <div class="bar-bg"><div class="bar-fill bar-tau-lo" id="tLoB"></div></div>
         </div>
         <div class="met-row">
@@ -285,6 +285,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
 </div>
 
+<div id="boundaryRecord" style="max-width:980px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="log-panel">
   <div class="log-title">TRACE LOG</div>
   <div class="log-list" id="logList"></div>
@@ -296,6 +297,27 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── パラメータ ──
 const P_OPT  = 2000;  // W 定格電力 (200V×10A)
 const P_MAX  = 6000;  // W 過電力限界（熱焼損）
@@ -328,7 +350,9 @@ function resize(){
 // ── コントロール ──
 // 不可逆ラッチの状態。解除は利用者の「新しい評価」操作だけ。
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; }
+let pJudge = null;   // 判定に使う値（生の値と平滑値の重い方）
+function judgeVal(){ return pJudge === null ? pSmooth : pJudge; }
+function startNewEvaluation(){ ruptureLatch = null; BoundaryRecord.newTrial(); }
 
 function toggleRun(){
   running = !running;
@@ -353,14 +377,17 @@ function calcIDE(p){
   const rHi = delta > 0 ? delta / tauHiEff : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='過電力：RUPTURE_BOUNDARY — 遮断器トリップ'; }
-  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='電力不足：RUPTURE_BOUNDARY — 電源確認'; }
+  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='過電力：RUPTURE_BOUNDARY — 遮断（Fail-Closed）。自律の操作を止めて人間へ委ねる'; }
+  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='電力不足：RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる（電源を確認）'; }
   else if(rHi >= R_WARN) { status='warn-hi'; action='過電力警告：負荷低減推奨'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='電力不足警告：電圧・電流確認'; }
   else                   { status='safe';    action='正常稼働継続'; }
   // 不可逆ラッチ：一度 RUPTURE_BOUNDARY に入ったら、「新しい評価」で解除するまで固定する。
   // R の値は現在値を表示し続け、判定区分だけを固定する。
-  if (status.startsWith('fail') && !ruptureLatch) ruptureLatch = { status, action };
+  if (status.startsWith('fail') && !ruptureLatch) {
+    ruptureLatch = { status, action };
+    BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: '電力・' + (delta > 0 ? '上側' : '下側'), value: Math.round(p) + ' W', R: Math.max(rHi, rLo) });
+  }
   if (ruptureLatch) { status = ruptureLatch.status; action = ruptureLatch.action + '（固定中：「新しい評価」で解除）'; }
   return { delta, absDelta, rHi, rLo, status, action };
 }
@@ -386,8 +413,11 @@ function tick(dt){
   smoothBuf.push(pRaw);
   if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
   pSmooth = smoothBuf.reduce((a,b)=>a+b,0)/smoothBuf.length;
+  // 判定は生の値と平滑値の重い方で行う（平滑化という補助計算で上限・下限の超過を見逃さない）。
+  { const rOf = v => v > P_OPT ? (v - P_OPT) / (TAU_HI * (1 - 0.5 * heatAccum / 100)) : (P_OPT - v) / TAU_LO;
+    pJudge = rOf(pRaw) >= rOf(pSmooth) ? pRaw : pSmooth; }
 
-  const ide = calcIDE(pSmooth);
+  const ide = calcIDE(judgeVal());
 
   // 熱蓄積：過電力が続くと増大、正常時は放熱で減少
   // 熱の入力は観測した過電力（δ/τ_HI、τ_HIは固定の設計値）。R（評価出力）を使うと、R→熱→τ→R の
@@ -488,7 +518,7 @@ function setMarkSVG(id,t,cy,r){
 function drawCircuit(){
   const W=cc.width,H=cc.height;
   ctx.clearRect(0,0,W,H);
-  const ide=calcIDE(pSmooth);
+  const ide=calcIDE(judgeVal());
   const col=statusColor(ide.status);
   const V_=parseFloat(document.getElementById('vSlider').value);
   const I_=parseFloat(document.getElementById('iSlider').value);
@@ -725,9 +755,9 @@ function loop(now){
 window.addEventListener('resize',resize);
 resize();
 setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
-addLog(calcIDE(pSmooth));
+addLog(calcIDE(judgeVal()));
 requestAnimationFrame(loop);
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・熱蓄積で上側のτを最大50%縮める係数はデモ用です。電源リップルと負荷変動は合成です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・熱蓄積で上側のτを最大50%縮める係数はデモ用です。電源リップルと負荷変動は合成です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・判定は、生の電力と平滑値のうち R が重い方で行います（平滑化は補助で、リップルのピークを見逃す理由にはしません）。<br>・熱蓄積で上側の τ を縮めるのは、側別有効ゲート幅の変化です。放熱で戻っても、吸収厚み τ が回復したわけではありません（FORMULA §4.4）。</div>
 </body>
 </html>

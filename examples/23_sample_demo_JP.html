@@ -145,6 +145,7 @@
     }
     .status-pass { color: var(--safe); border-color: rgba(47,211,139,.35); background: rgba(47,211,139,.08); }
     .status-damp { color: var(--warn); border-color: rgba(255,191,71,.35); background: rgba(255,191,71,.08); }
+    .status-aux { color: #ff9f43; border-color: rgba(255,159,67,.4); background: rgba(255,159,67,.08); }
     .status-silence { color: var(--danger); border-color: rgba(255,91,110,.35); background: rgba(255,91,110,.08); }
     canvas {
       width: 100%;
@@ -246,7 +247,7 @@
           <div class="metric"><div class="name">動的下限 τ_dyn_lower</div><div class="value safe" id="tauLower">12.00</div></div>
         </div>
 
-        <div class="note">判定は三段です。まず瞬間 R が高ければ即座に止めます。そこまで行かなくても短期ログの再構成値が上がれば減衰域に入れます。さらに長期劣化指数が上がれば、同じ外乱でも危険側へ寄りやすくなります。</div>
+        <div class="note">判定は三段です。まず瞬間 R が高ければ即座に止めます。そこまで行かなくても短期ログの再構成値が上がれば減衰域に入れます。さらに長期劣化指数（一度進んだら戻らない補助量）が 1.0 に達すると、R による停止（SILENCE）とは別に AUX_STOP（補助量による停止）になります。</div>
       </aside>
 
       <main>
@@ -277,7 +278,8 @@
               <tbody>
                 <tr><td>PASS</td><td>R_now &lt; 0.72 かつ R_short 低</td><td>通常通過</td></tr>
                 <tr><td>DAMP</td><td>R_now ≥ 0.72 または R_short 上昇</td><td>減衰・慎重化・保守側へ寄せる</td></tr>
-                <tr><td>SILENCE</td><td>R_now ≥ 1.00 または D_long 連鎖悪化</td><td>出力拒否・停止・フェイルセーフ</td></tr>
+                <tr><td>SILENCE</td><td>R_now ≥ 1.00</td><td>出力拒否・停止・フェイルセーフ</td></tr>
+                <tr><td>AUX_STOP</td><td>D_long ≥ 1.00（補助量。R の判定とは別に表示）</td><td>補助量による停止。SILENCE（R による停止）とは区別する</td></tr>
               </tbody>
             </table>
             <div class="note">ここで重要なのは、SILENCE だけが目的ではない点です。DAMP を設けることで、境界付近の往復振動を抑えます。</div>
@@ -286,10 +288,32 @@
       </main>
     </div>
 
+<div id="boundaryRecord" style="margin:12px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="footer">FILE: nra_ide_sample_demo_20260307_192203.html / 2026-03-07 19:22:03 JST</div>
   </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 (() => {
   const $ = (id) => document.getElementById(id);
   const waveCanvas = $('waveCanvas');
@@ -329,6 +353,7 @@
   let longDamage = 0;
   let spike = 0;
   let silenceLatched = false;
+  let auxLatched = false;
   let rawHistory = [];
   let shortHistory = [];
   let damageHistory = [];
@@ -350,6 +375,8 @@
     longDamage = 0;
     spike = 0;
     silenceLatched = false;
+    auxLatched = false;
+    BoundaryRecord.newTrial();
     rawHistory = [];
     shortHistory = [];
     damageHistory = [];
@@ -360,6 +387,7 @@
     if (state === 'PASS') metrics.stateBadge.classList.add('status-pass');
     if (state === 'DAMP') metrics.stateBadge.classList.add('status-damp');
     if (state === 'SILENCE') metrics.stateBadge.classList.add('status-silence');
+    if (state === 'AUX_STOP') metrics.stateBadge.classList.add('status-aux');
     metrics.stateBadge.textContent = state;
   }
 
@@ -421,19 +449,25 @@
 
     // 長期劣化指数（UIのD_long）。rShortが0.58の「摩耗開始」閾値を超えた分だけ蓄積し、
     // 外乱強度に応じて加重される。さらにrNow自体が1.0を超えると追加ペナルティが加わる。
-    // 毎フレーム約0.5%減衰（*0.995）し、1.8を上限にクランプされる。
-    // 0.58・0.8・0.35・0.995・0.02・1.8はいずれも根拠不明・デモ用チューニング値。
+    // 減衰はしない（劣化は戻らない：AXIOMS §7・§8）。1.8を上限にクランプされる。
+    // 0.58・0.8・0.35・0.02・1.8はいずれも根拠不明・デモ用チューニング値。
     const wearInput = Math.max(0, rShort - 0.58) * (0.8 + disturbance * 0.35);
-    longDamage = Math.min(1.8, longDamage * 0.995 + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
+    longDamage = Math.min(1.8, longDamage + wearInput * degradeRate * 0.8 + Math.max(0, rNow - 1.0) * 0.02);
 
     // 状態フラグ — ここの閾値は上部の「判定ラダー」表（PASS/DAMP/SILENCE）と対応する。
     // いずれもOR条件で結合されており、他の条件と独立に単独でトリガーする。
     let state = 'PASS';
-    if (rNow >= 1.0 || longDamage >= 1.0) state = 'SILENCE'; // 即時停止: 瞬間Rまたは長期劣化が1.0を超過
+    if (rNow >= 1.0) state = 'SILENCE';   // R による停止（判定の主語は R）
+    else if (longDamage >= 1.0) state = 'AUX_STOP';   // 補助量（D_long）による停止。R による停止とは区別して表示する（AXIOMS §4.5）
     else if (rNow >= 0.72 || rShort >= 0.60 || longDamage >= 0.45) state = 'DAMP'; // SILENCE前の予告・慎重化帯
-    // 不可逆ラッチ：一度 SILENCE に入ったら、「初期化」で解除するまで固定する。
-    if (state === 'SILENCE') silenceLatched = true;
+    // 不可逆ラッチ：一度 SILENCE に入ったら、「初期化」で解除するまで固定する。到達の瞬間は BoundaryRecord に残す。
+    if (state === 'SILENCE' && !silenceLatched) {
+      silenceLatched = true;
+      BoundaryRecord.hit({ time: 't=' + t.toFixed(1) + 's', channel: rUpper >= rLower ? '上側' : '下側', value: raw.toFixed(2), R: rNow });
+    }
+    if (state === 'AUX_STOP') auxLatched = true;
     if (silenceLatched) state = 'SILENCE';
+    else if (auxLatched) state = 'AUX_STOP';
 
     metrics.rNow.textContent = rNow.toFixed(2);
     metrics.rShort.textContent = rShort.toFixed(2);
@@ -517,6 +551,8 @@
   }
 
   Object.values(sliders).forEach(el => el.addEventListener('input', syncLabels));
+  // τ_base は評価の宣言なので、動かしたら初期化（広げて R を下げる抜け道にしない）
+  sliders.tauBase.addEventListener('input', () => { resetAll(); setBadge('PASS'); });
   $('toggleRun').addEventListener('click', () => {
     running = !running;
     $('toggleRun').textContent = running ? '停止' : '再開';
@@ -539,6 +575,6 @@
   requestAnimationFrame(loop);
 })();
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・信号は疑似デモ信号（正弦波・ノイズ・ドリフトの合成）で、実測データではありません。<br>・短期ログの窓幅・劣化の係数・DAMP/SILENCEのしきい値はデモ用です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・信号は疑似デモ信号（正弦波・ノイズ・ドリフトの合成）で、実測データではありません。<br>・短期ログの窓幅・劣化の係数・DAMP/SILENCEのしきい値はデモ用です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・D_long は一度進んだら戻りません（劣化は戻らない）。D_long による停止は AUX_STOP で、R による停止（SILENCE）とは別に表示します。<br>・τ_base のスライダーを動かすと、評価の宣言が変わるので初期化されます。</div>
 </body>
 </html>

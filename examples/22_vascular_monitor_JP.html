@@ -55,6 +55,7 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
 .r-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;}
 .log-list{max-height:180px;overflow:auto;}
 .badge.warn-lo{color:var(--warn);border-color:var(--warn);background:rgba(255,204,0,.06);}
+.badge.ood{color:#9aa4c4;border-color:#9aa4c4;background:rgba(150,160,200,.08);}
 .badge.fail-lo{color:var(--fail-lo);border-color:var(--fail-lo);background:rgba(102,136,255,.09);animation:pf .7s infinite;}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
 .btn-row button{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 12px;cursor:pointer;font-family:inherit;}
@@ -116,12 +117,34 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
   </div>
 </div>
 
+<div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
 <div class="log-panel">
   <div class="log-title">TRACE LOG — 部分手術モード</div>
   <div id="logList" class="log-list"></div>
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── NRA-IDE 血管インターベンションモニター / Vascular Intervention Monitor ──
 // Each of the six quantities is evaluated as R_i = δ_i / τ_i. δ_i is the one-sided deviation from the reference
 // value, and τ_i is the distance from the reference to the declared limit (FORMULA §4.1). The upper side (↑) and
@@ -129,7 +152,7 @@ canvas{display:block;border-radius:6px;background:var(--bg);}
 // Double fluctuation: δ moves with the observations, τ shrinks with temperature (a constraint declared as a gauge
 // input, FORMULA §4.5). τ is never widened.
 // 基準値・限界値はデモ用の値で、臨床の基準ではありません。
-const L = {P:"圧力 P",Flow:"血流 Flow",Shear:"せん断応力",Tension:"壁張力",Adh:"粘着力 Adh",Tmp:"温度 T",ok:"正常",warnHi:"WARNING — 上側（破裂/拡張）へ接近",warnLo:"WARNING — 下側（血栓/狭窄）へ接近",failHi:"RUPTURE_BOUNDARY — 緊急停止（破裂/拡張側）",failLo:"RUPTURE_BOUNDARY — 緊急停止（血栓/狭窄側）",bad:"評価不能な入力 — 停止側（CONFESSION）",latched:"（固定中：「新しい評価」で解除）",safe:"SAFE",warn:"WARNING",fail:"RUPTURE_BOUNDARY",hi:"上側",lo:"下側",dom:"支配要素",logHdr:"状態変化",start:"監視開始 — スライダーまたは操作ボタンで状態を変えてください",latchRel:"新しい評価を開始（固定を解除）",btnBalloon:"バルーン展開",btnStasis:"血流停滞",btnCryo:"冷却（クライオ）",btnNormal:"基準値に戻す",btnNew:"新しい評価"};
+const L = {P:"圧力 P",Flow:"血流 Flow",Shear:"せん断応力",Tension:"壁張力",Adh:"粘着力 Adh",Tmp:"温度 T",ok:"正常",warnHi:"WARNING — 上側（破裂/拡張）へ接近",warnLo:"WARNING — 下側（血栓/狭窄）へ接近",failHi:"RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる（破裂/拡張側）",failLo:"RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる（血栓/狭窄側）",bad:"評価不能な入力 — OUT_OF_DESCRIPTION_DOMAIN（定義域外。固定はしない）",latched:"（固定中：「新しい評価」で解除）",safe:"SAFE",warn:"WARNING",fail:"RUPTURE_BOUNDARY",hi:"上側",lo:"下側",dom:"支配要素",logHdr:"状態変化",start:"監視開始 — スライダーまたは操作ボタンで状態を変えてください",latchRel:"新しい評価を開始（固定を解除）",btnBalloon:"バルーン展開",btnStasis:"血流停滞",btnCryo:"冷却（クライオ）",btnNormal:"基準値に戻す",btnNew:"新しい評価"};
 const FACTORS = [
   {id:'P',       name:L.P,       unit:'mmHg',    ref:120, tauHi:30,  tauLo:40},
   {id:'Flow',    name:L.Flow,    unit:'mL/min',  ref:80,  tauHi:40,  tauLo:50},
@@ -162,12 +185,16 @@ function calcIDE(){
     return {f, v, rHi, rLo};
   });
   let st = 'safe', act = L.ok;
-  if (bad || !Number.isFinite(R_hi) || !Number.isFinite(R_lo) || !(k > 0)) { st = 'fail-hi'; act = L.bad; }
+  if (bad || !Number.isFinite(R_hi) || !Number.isFinite(R_lo) || !(k > 0)) { st = 'ood'; act = L.bad; }
   else if (R_hi >= R_RUPTURE) { st = 'fail-hi'; act = L.failHi; }
   else if (R_lo >= R_RUPTURE) { st = 'fail-lo'; act = L.failLo; }
   else if (R_hi >= R_WARN || R_lo >= R_WARN) { st = R_hi >= R_lo ? 'warn-hi' : 'warn-lo'; act = R_hi >= R_lo ? L.warnHi : L.warnLo; }
   // 不可逆ラッチ：RUPTURE_BOUNDARY は「新しい評価」で解除するまで固定する
-  if (st.startsWith('fail') && !ruptureLatch) ruptureLatch = {st, act};
+  if (st.startsWith('fail') && !ruptureLatch) {
+    ruptureLatch = {st, act};
+    const dn = st === 'fail-lo' ? domLo : domHi, row = rows.find(r => r.f.name === dn);
+    BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: dn + '・' + (st === 'fail-lo' ? L.lo : L.hi), value: row ? row.v + ' ' + row.f.unit : '', R: st === 'fail-lo' ? R_lo : R_hi });
+  }
   if (ruptureLatch) { st = ruptureLatch.st; act = ruptureLatch.act + L.latched; }
   return {R_hi, R_lo, rows, status: st, action: act, domHi, domLo};
 }
@@ -201,7 +228,7 @@ function drawWave(){
 }
 
 // ── 表示 ──
-const COL = {safe:'#88ffcc', 'warn-hi':'#ffcc00', 'warn-lo':'#ffcc00', 'fail-hi':'#ff4060', 'fail-lo':'#6688ff'};
+const COL = {safe:'#88ffcc', 'warn-hi':'#ffcc00', 'warn-lo':'#ffcc00', 'fail-hi':'#ff4060', 'fail-lo':'#6688ff', ood:'#9aa4c4'};
 function rColor(r){ return r >= R_RUPTURE ? '#ff4060' : r >= R_WARN ? '#ffcc00' : '#88ffcc'; }
 const bd = document.getElementById('breakdown');
 bd.innerHTML = FACTORS.map(f => `<div class="met-row"><div class="met-hdr"><span>${f.name}</span><span id="bv-${f.id}">—</span><span id="br-${f.id}">—</span></div>` +
@@ -224,7 +251,7 @@ function updateUI(ide){
   document.getElementById('rLoBar').style.width = Math.min(ide.R_lo / 1.5, 1) * 100 + '%'; document.getElementById('rLoBar').style.background = rColor(ide.R_lo);
   const badge = document.getElementById('badge');
   badge.className = 'badge ' + ide.status;
-  badge.textContent = (ide.status === 'safe' ? L.safe : ide.status.startsWith('warn') ? L.warn : L.fail) + ' — ' + ide.action;
+  badge.textContent = (ide.status === 'safe' ? L.safe : ide.status === 'ood' ? 'OUT_OF_DESCRIPTION_DOMAIN' : ide.status.startsWith('warn') ? L.warn : L.fail) + ' — ' + ide.action;
   ide.rows.forEach(({f, v, rHi, rLo}) => {
     const side = rHi >= rLo ? L.hi : L.lo, r = Math.max(rHi, rLo);
     document.getElementById('bv-' + f.id).textContent = Number.isFinite(v) ? (f.id === 'Adh' || f.id === 'T' ? v.toFixed(1) : v.toFixed(0)) + ' ' + f.unit : '—';
@@ -255,10 +282,10 @@ document.getElementById('btnBalloon').onclick = () => setValues({Tension:150, P:
 document.getElementById('btnStasis').onclick  = () => setValues({Flow:15, Shear:4});
 document.getElementById('btnCryo').onclick    = () => setValues({T:31});
 document.getElementById('btnNormal').onclick  = () => setValues(DEFAULTS);
-document.getElementById('btnNew').onclick     = () => { ruptureLatch = null; addLog(L.latchRel, '#6688ff'); };
+document.getElementById('btnNew').onclick     = () => { ruptureLatch = null; BoundaryRecord.newTrial(); addLog(L.latchRel, '#6688ff'); };
 addLog(L.start);
 loop();
 </script>
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・6つの量の基準値・限界値はデモ用の値で、臨床の基準ではありません。診断・治療の判断には使えません。<br>・温度によるτの縮小（310/(T+273)）は説明用の仮定です。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・6つの量の基準値・限界値はデモ用の値で、臨床の基準ではありません。診断・治療の判断には使えません。<br>・温度によるτの縮小（310/(T+273)）は説明用の仮定です。<br>・「二重ゆらぎ」は正典（FORMULA §4.7）の検出条件 Δδ&gt;0 かつ Δτ&lt;0 を指す言葉です。この画面は δ と τ の変化を並べて見せますが、この検出条件そのものの判定は実装していません。</div>
 </body>
 </html>

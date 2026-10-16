@@ -12,7 +12,7 @@
   監視指標: 灌漑水圧 / 気温 / CO₂濃度 / 養液EC
   各指標に独立した上限EMA・下限EMA・τ_dynamicを持つ。
   水圧/EC: α_lower 高め → 枯渇・断水の早期検知
-  水圧:    α_upper 低め → 配管衝撃を避ける慎重設定
+  水圧:    α_upper 低め → 過圧側の τ はゆっくり縮む（α は縮む速さだけを変え、R は生の値で判定）
   R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
   R_dirは上限・下限それぞれ独立したR=δ/τ評価の集約値であり、正典のRを再定義するものではない。
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
@@ -306,7 +306,7 @@ footer a { color:var(--co2); text-decoration:none; }
     <p>
       水圧・気温・CO₂濃度・養液ECを Band Gate で同時監視します。<br>
       「適正範囲を外れる勢い」をEMAで記憶し、上限超過も下限割れもそれぞれ独立した R = δ/τ で検知（表示するR_dirは両者の最大値）。<br>
-      スパイクが来る前に予兆を捉えます。
+      ズレが続くと τ を縮め、宣言した上下限より手前で検知します。
     </p>
   </div>
   <div class="live-wrap">
@@ -511,15 +511,16 @@ footer a { color:var(--co2); text-decoration:none; }
     <div class="note-box">
       <div class="note-title">α の非対称設定について</div>
       <div class="note-text">
-        α_upper を小さく → 過負荷方向はゆっくり反応（配管衝撃を避ける）<br>
-        α_lower を大きく → 枯渇方向は素早く反応（根への水途絶を防ぐ）<br>
-        これが農業に適した非対称ダンパーの設定です。
+        α は τ を縮める速さだけを変えます。判定そのもの（R）は生の値で行います。<br>
+        α_upper を小さく → 過負荷方向の τ はゆっくり縮む<br>
+        α_lower を大きく → 枯渇方向の τ は素早く縮み、上下限より手前で検知しやすい（根への水途絶を早く知らせる）
       </div>
     </div>
   </div>
 
   <div class="log-panel">
     <div class="p-title">イベントログ — 全指標統合</div>
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
     <div class="log-area" id="logArea"></div>
     <div class="btn-row mt-10">
       <button class="ctrl" onclick="setStress('drought')">🏜 干ばつシミュレーション</button>
@@ -533,7 +534,7 @@ footer a { color:var(--co2); text-decoration:none; }
 
 </div>
 
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・センサー値のシナリオ波形は合成です。<br>・動的ゲート幅の縮小（EMAがτ0の50%を超えた分から縮め、上側0.8倍／下側0.25倍で止める）の係数はデモ用です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・センサー値のシナリオ波形は合成です。<br>・動的ゲート幅の縮小（EMAがτ0の50%を超えた分から縮め、上側0.8倍／下側0.3倍で止める）の係数はデモ用です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
 <footer>
   <span>NRA-IDE / Band Gate — Greenhouse 4-Sensor Live Monitoring</span>
   <span>
@@ -545,6 +546,27 @@ footer a { color:var(--co2); text-decoration:none; }
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────
 // 4センサー定義
 // ─────────────────────────────────────────────
@@ -667,22 +689,25 @@ function bandGate(sensor, v, p, nowMs) {
   const tau_u = shrinkTau(tau0_u, sensor.ema_u, FLOOR_UPPER);
   const tau_l = shrinkTau(tau0_l, sensor.ema_l, FLOOR_LOWER);
 
-  // 基準値が上下限の外にある設定（スライダーの組み合わせ）は評価不能。停止側に倒す。
-  const valid = tau0_u > 0 && tau0_l > 0;
-  const R_u = valid ? d_upper / tau_u : Infinity;
-  const R_l = valid ? d_lower / tau_l : Infinity;
-  const R   = Math.max(R_u, R_l);
+  // 基準値が上下限の外にある設定（τ0≤0、スライダーの組み合わせ）は、正典どおり R を定義しない
+  // （OUT_OF_DESCRIPTION_DOMAIN。AXIOMS §6）。無限大の R に置き換えず R は null とし、停止側に倒す。
+  const undef = !(tau0_u > 0 && tau0_l > 0);
+  const R_u = undef ? null : d_upper / tau_u;
+  const R_l = undef ? null : d_lower / tau_l;
+  const R   = undef ? null : Math.max(R_u, R_l);
 
   const held = nowMs < sensor.holdUntil;
   let silence = held;
   let dir = held ? (sensor.lastDir||'') : '';
 
-  if (!held && R >= 1.0) {
-    sensor.holdUntil = nowMs + p.hold;
+  if (!held && (undef || R >= 1.0)) {
+    // HOLD は全指標で共通の設定（英語版と同じくスライダーから読む）。以前は指標別パラメータ p に hold がなく、HOLD が効いていなかった。
+    sensor.holdUntil = nowMs + parseInt(document.getElementById('sl-hold').value);
     sensor.silCount++;
     silence = true;
-    dir = R_u >= R_l ? 'upper' : 'lower';
+    dir = undef ? 'undef' : (R_u >= R_l ? 'upper' : 'lower');
     sensor.lastDir = dir;
+    BoundaryRecord.hit({ time: `t=${t}`, channel: `${sensor.label}・${dir==='undef'?'定義域外':dir==='upper'?'上限側':'下限側'}`, value: v.toFixed(sensor.key==='ec'?2:sensor.key==='co2'?0:1) + sensor.unit, R });
   }
 
   // 動的バンド
@@ -704,9 +729,12 @@ function drawMini(canvasId, hist, upper_band, lower_band, color, silence) {
   ctx.clearRect(0,0,W,60);
   if (hist.length < 2) return;
 
+  // 縦軸は観測値と上下限の線の両方が入る範囲にする（以前は観測値だけで、平常時は上下限が枠外だった）
   const vals = hist.map(h=>h.v);
-  const minV = Math.min(...vals) - 2;
-  const maxV = Math.max(...vals) + 2;
+  const all  = vals.concat(hist.map(h=>h.upper_band), hist.map(h=>h.lower_band)).filter(Number.isFinite);
+  const span = (Math.max(...all) - Math.min(...all)) || 1;
+  const minV = Math.min(...all) - span * 0.05;
+  const maxV = Math.max(...all) + span * 0.05;
   const rng  = maxV - minV || 1;
 
   function xp(i) { return (i/(HIST-1))*W; }
@@ -771,7 +799,7 @@ function updateCard(key, res, p) {
     ? (dir==='upper'?'var(--danger)':'var(--water)') : col;
 
   // 決定バッジ
-  decEl.textContent = silence ? (dir==='upper'?'↑ UPPER':'↓ LOWER') : 'PASS';
+  decEl.textContent = silence ? (dir==='undef'?'定義域外':dir==='upper'?'↑ UPPER':'↓ LOWER') : 'PASS';
   decEl.className   = 'card-decision ' + (silence ? dir : 'pass');
 
   // カードグロー
@@ -781,7 +809,7 @@ function updateCard(key, res, p) {
   // Rバー
   rfEl.style.width = Math.min(R/1.5,1)*100+'%';
   rfEl.style.background = silence ? (dir==='upper'?'#ff5252':'#29d4ff') : R>0.65?'#ffca28':col;
-  rvEl.textContent = R.toFixed(4);
+  rvEl.textContent = R === null ? '定義域外' : R.toFixed(4);
   rvEl.style.color = rfEl.style.background;
 
   // バンドバー
@@ -806,7 +834,9 @@ function updateCard(key, res, p) {
 
   // ログ
   if (silence && s.lastDec !== 'SILENCE') {
-    addLog(`[${s.label}] ${dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  V=${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
+    addLog(dir==='undef'
+      ? `[${s.label}] OUT_OF_DESCRIPTION_DOMAIN（τ0≤0：基準値が上限・下限の外。R は定義しない）→ 停止側`
+      : `[${s.label}] ${dir==='upper'?'↑ 上限超過':'↓ 下限割れ'}  V=${v.toFixed(dp)}${s.unit}  R=${R.toFixed(3)}`, key);
   } else if (!silence && s.lastDec === 'SILENCE') {
     addLog(`[${s.label}] HOLD終了 → PASS`, 'safe');
   } else if (R > 0.65 && R < 1.0 && s.lastDec !== 'warn') {
@@ -911,6 +941,7 @@ function resetSim() {
   });
   document.getElementById('logArea').innerHTML = '';
   document.getElementById('stress-note').textContent = '通常の温室環境です。定期的にスパイクが来ます。';
+  BoundaryRecord.newTrial();
   addLog('温室監視システム起動 — 4指標同時監視開始', 'safe');
 }
 

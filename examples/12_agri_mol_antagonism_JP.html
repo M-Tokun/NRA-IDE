@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- FILE: 12_agri_mol_antagonism_JP.html -->
-<!-- NRA-IDE Demo #12 v2 | 農業イオン監視 + Mg²⁺/K⁺ 拮抗連鎖 Band Gate -->
-<!-- Layer 3-4: 動的τ 非対称EMA + Mg障害時K⁺τ連結ゲート -->
+<!-- NRA-IDE Demo #12 v2 | 農業イオン監視 + K⁺/Mg²⁺ 拮抗 Band Gate -->
+<!-- Layer 3-4: 動的τ 非対称EMA + K⁺過剰時 Mg²⁺τ連結ゲート（植物・土壌の向き） -->
 <!-- 黒ぼく土（Andosol）/ 一般農耕地 プロファイル切替対応 -->
 <!-- 畑作3品（馬鈴薯・小麦・てん菜）τ共通 -->
 <!-- (c) 2026 M-Tokuni | MIT License -->
@@ -9,7 +9,7 @@
 <head>
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NRA-IDE Demo 12v2 | Mg/K 拮抗連鎖 Band Gate</title>
+<title>NRA-IDE Demo 12v2 | K/Mg 拮抗 Band Gate</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -123,8 +123,8 @@ button.danger:hover { background: #1a0800; }
 <body>
 
 <header>
-  <h1>NRA-IDE Demo #12v2 ｜ Mg²⁺/K⁺ 拮抗連鎖 Band Gate</h1>
-  <span class="sub">Layer 3-4 | 畑作3品共通τ | 障害時K⁺τ連結ゲート</span>
+  <h1>NRA-IDE Demo #12v2 ｜ K⁺/Mg²⁺ 拮抗 Band Gate</h1>
+  <span class="sub">Layer 3-4 | 畑作3品共通τ | K⁺過剰時 Mg²⁺τ連結ゲート</span>
   <button class="profile-btn andosol profile-active" id="btn_andosol" onclick="setProfile('andosol')">黒ぼく土</button>
   <button class="profile-btn general profile-inactive" id="btn_general" onclick="setProfile('general')">一般農耕地</button>
 </header>
@@ -157,7 +157,7 @@ button.danger:hover { background: #1a0800; }
       <div class="ion-name">K⁺ カリウム</div>
       <div><span class="ion-val" id="v_k">--</span><span class="ion-unit"> mmol/L</span></div>
       <div class="r-bar-wrap"><div class="r-bar" id="bar_k"></div></div>
-      <div class="r-label">R = <span id="r_k">--</span> ｜ τ = <span id="tau_k_cur">--</span></div>
+      <div class="r-label">R = <span id="r_k">--</span> ｜ 過剰側 R = <span id="r_k_upper">--</span></div>
       <span class="status-badge safe" id="st_k">SAFE</span>
     </div>
 
@@ -165,7 +165,7 @@ button.danger:hover { background: #1a0800; }
       <div class="ion-name">Mg²⁺ マグネシウム</div>
       <div><span class="ion-val" id="v_mg">--</span><span class="ion-unit"> mmol/L</span></div>
       <div class="r-bar-wrap"><div class="r-bar" id="bar_mg"></div></div>
-      <div class="r-label">R = <span id="r_mg">--</span></div>
+      <div class="r-label">R = <span id="r_mg">--</span> ｜ τ（下限側）= <span id="tau_mg_cur">--</span></div>
       <span class="status-badge safe" id="st_mg">SAFE</span>
     </div>
 
@@ -179,18 +179,23 @@ button.danger:hover { background: #1a0800; }
 
     <!-- 拮抗警告 -->
     <div class="antagonism-alert" id="antagonism_alert">
-      ⚠ Mg²⁺ 吸収障害検知<br>
-      K⁺ 拮抗連鎖リスク<br>
-      τ_K 自動縮小中
+      ⚠ K⁺ 過剰検知<br>
+      Mg²⁺ 吸収阻害リスク（拮抗）<br>
+      τ_Mg（下限側）自動縮小中
     </div>
 
     <hr class="divider">
 
+    <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
+    <div class="r-label">到達の瞬間（直近6件）</div>
+    <pre id="crossLog" style="margin:2px 0 8px;font:10px/1.5 monospace;color:#c99;white-space:pre-wrap;"></pre>
+
     <div class="ion-card fused">
-      <div class="ion-name">複合R（Layer 4）</div>
+      <div class="ion-name">複合R（Layer 4・各イオンRの最大値）</div>
       <div><span class="ion-val" id="v_fused">--</span></div>
       <div class="r-bar-wrap"><div class="r-bar" id="bar_fused"></div></div>
       <span class="status-badge safe" id="st_fused">SAFE</span>
+      <div class="r-label">参考：加重平均 <span id="v_fused_avg">--</span>（判定には使わない）</div>
     </div>
 
     <hr class="divider">
@@ -203,37 +208,60 @@ button.danger:hover { background: #1a0800; }
 
     <hr class="divider">
     <div class="panel-title mb-5">Antagonism Gate</div>
-    <div class="param-row"><span>τ_K 縮小式</span><span class="param-val">×(1-0.6×R_Mg)</span></div>
-    <div class="param-row"><span>発動条件</span><span class="param-val">R_Mg ≥ 0.7</span></div>
-    <div class="param-row"><span>現在τ_K</span><span class="param-val" id="p_tau_k_cur">--</span></div>
+    <div class="param-row"><span>τ_Mg（下限側）縮小式</span><span class="param-val">×max(0.4, 1-0.6×R_K過剰側)</span></div>
+    <div class="param-row"><span>発動条件</span><span class="param-val">R_K（過剰側）≥ 0.7</span></div>
+    <div class="param-row"><span>現在τ_Mg（下限側）</span><span class="param-val" id="p_tau_mg_cur">--</span></div>
 
     <hr class="divider">
     <div class="font-10 color-333 line-height-1-7">
       畑作3品（馬鈴薯・小麦・てん菜）<br>
       通常時τは作物間差異小<br>
-      障害時のMg欠乏→K拮抗が主要リスク
+      K過剰によるMg欠乏（拮抗）が主要リスク
     </div>
   </div>
 </div>
 
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・イオン濃度の基準・τ・拮抗の係数は、農学的な推奨値ではありません。<br>・土壌プロファイル（黒ぼく土／一般農耕地）の差も説明用の設定です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・イオン濃度の基準・τ・拮抗の係数は、農学的な推奨値ではありません。<br>・土壌プロファイル（黒ぼく土／一般農耕地）の差も説明用の設定です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。<br>・R が 1.0 に達したイオンは SILENCE に固定し、「新しい評価」で解除します。「リセット」はシナリオを戻すだけで、固定は解除しません。土壌プロファイルの切り替えは評価宣言の変更なので、新しい評価になります。<br>・拮抗の向きは植物・土壌のもの（K⁺ 過剰が Mg²⁺ の吸収を妨げる）です。人の体内では向きが逆（Mg 欠乏が低 K 血症を招く）なので、混同しないでください。<br>・K⁺ の R（過剰側）で Mg²⁺ の τ（下限側）を狭める連結は、他の評価対象の評価出力を安全側（狭める向き）にだけ使う経路です（AXIOMS §14）。R_K が下がると τ_Mg も戻るので、吸収厚みではなく側別有効ゲート幅の連結として扱います。</div>
 <footer>
   <span class="scenario-label">状態：<span id="scenario_label" class="scenario-active">通常運転</span></span>
-  <button class="danger" id="btn_mg_block" onclick="startScenario('mg_block')">Mg吸収阻害 → K拮抗連鎖</button>
+  <button class="danger" id="btn_k_excess" onclick="startScenario('k_excess')">K過剰（カリ施肥過多）→ Mg吸収阻害</button>
   <button id="btn_saltburst" onclick="startScenario('saltburst')">塩害スパイク</button>
   <button id="btn_n_drain" onclick="startScenario('n_drain')">窒素欠乏</button>
   <button id="btn_reset" onclick="resetScenario()">リセット</button>
+  <button id="btn_new_eval" onclick="startNewEvaluation()">新しい評価</button>
   <span class="ml-auto font-10 color-222">NRA-IDE © 2026 M-Tokuni</span>
 </footer>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ============================================================
 // NRA-IDE Demo #12v2
 // FILE: nra_ide_demo12v2_agri_mol_antagonism_20260308_0213.html
 // 
-// 核心：Mg²⁺障害時にK⁺のτが動的に縮小する「連結ゲート」
-//   τ_K_actual = τ_K_base × max(0.4, 1 - 0.6 × R_Mg)
-//   R_Mg ≥ 0.7 で拮抗警告発動
+// 核心：K⁺ 過剰時に Mg²⁺ の下限側 τ が縮小する「連結ゲート」（植物・土壌の拮抗：K 過剰が Mg 吸収を妨げる）
+//   τ_Mg_lower = τ_Mg_base × max(0.4, 1 - 0.6 × R_K_upper)
+//   R_K_upper ≥ 0.7 で拮抗警告発動
+//   （人の体内では向きが逆：Mg 欠乏が低 K 血症を招く。このデモは土壌の向き）
 //
 // 畑作3品（馬鈴薯・小麦・てん菜）はτ共通
 // 黒ぼく土プロファイルはτを広め設定（CEC高・固定強）
@@ -245,22 +273,22 @@ const PROFILES = {
     label: '黒ぼく土（Andosol）',
     cec: '30〜50 cmolc/kg',
     ions: {
-      no3: { base: 8.0,  tau: 2.5,  alpha_u: 0.003, alpha_l: 0.003, tu_expand: 1.4, tl_shrink: 0.65, w: 1.0 },
+      no3: { base: 8.0,  tau: 2.5,  alpha_u: 0.003, alpha_l: 0.003, tl_shrink: 0.65, w: 1.0 },
       // 黒ぼく土：K⁺は固定されやすいのでτ広め
-      k:   { base: 4.0,  tau: 3.5,  alpha_u: 0.015, alpha_l: 0.015, tu_expand: 1.3, tl_shrink: 0.75, w: 1.2 },
+      k:   { base: 4.0,  tau: 3.5,  alpha_u: 0.015, alpha_l: 0.015, tl_shrink: 0.75, w: 1.2 },
       // Mg²⁺：溶液濃度低め→τやや広く
-      mg:  { base: 1.8,  tau: 0.8,  alpha_u: 0.012, alpha_l: 0.018, tu_expand: 1.2, tl_shrink: 0.5,  w: 1.5 },
-      cl:  { base: 3.0,  tau: 1.0,  alpha_u: 0.08,  alpha_l: 0.08,  tu_expand: 1.2, tl_shrink: 0.6,  w: 1.3 },
+      mg:  { base: 1.8,  tau: 0.8,  alpha_u: 0.012, alpha_l: 0.018, tl_shrink: 0.5,  w: 1.5 },
+      cl:  { base: 3.0,  tau: 1.0,  alpha_u: 0.08,  alpha_l: 0.08,  tl_shrink: 0.6,  w: 1.3 },
     }
   },
   general: {
     label: '一般農耕地',
     cec: '10〜20 cmolc/kg',
     ions: {
-      no3: { base: 8.0,  tau: 2.0,  alpha_u: 0.003, alpha_l: 0.003, tu_expand: 1.4, tl_shrink: 0.65, w: 1.0 },
-      k:   { base: 4.0,  tau: 2.0,  alpha_u: 0.015, alpha_l: 0.015, tu_expand: 1.3, tl_shrink: 0.75, w: 1.2 },
-      mg:  { base: 2.0,  tau: 0.6,  alpha_u: 0.012, alpha_l: 0.018, tu_expand: 1.2, tl_shrink: 0.5,  w: 1.5 },
-      cl:  { base: 3.0,  tau: 1.0,  alpha_u: 0.08,  alpha_l: 0.08,  tu_expand: 1.2, tl_shrink: 0.6,  w: 1.3 },
+      no3: { base: 8.0,  tau: 2.0,  alpha_u: 0.003, alpha_l: 0.003, tl_shrink: 0.65, w: 1.0 },
+      k:   { base: 4.0,  tau: 2.0,  alpha_u: 0.015, alpha_l: 0.015, tl_shrink: 0.75, w: 1.2 },
+      mg:  { base: 2.0,  tau: 0.6,  alpha_u: 0.012, alpha_l: 0.018, tl_shrink: 0.5,  w: 1.5 },
+      cl:  { base: 3.0,  tau: 1.0,  alpha_u: 0.08,  alpha_l: 0.08,  tl_shrink: 0.6,  w: 1.3 },
     }
   }
 };
@@ -280,6 +308,7 @@ function initState() {
     STATE[id] = {
       val: c.base, ema_u: 0, ema_l: 0,
       R: 0, tau_actual: c.tau, status: 'safe',
+      latched: false, prevOver: false,   // R≥1 の固定（不可逆ラッチ）と、到達の瞬間を見つけるための前回値
       h_val: [], h_R: [], h_bu: [], h_bl: [],
       offset: 0,
     };
@@ -292,8 +321,8 @@ let sTick = 0;
 
 // --- Band Gate + 連結ゲート計算（Layer 3）---
 function updateIons() {
-  // まずMg²⁺を先に計算（K⁺τに影響するため）
-  for (const id of ['mg','no3','k','cl']) {
+  // まず K⁺ を先に計算（Mg²⁺ の τ に影響するため。閉路を作らない計算順序）
+  for (const id of ['k','no3','mg','cl']) {
     const c = profile.ions[id];
     const s = STATE[id];
 
@@ -311,28 +340,36 @@ function updateIons() {
     s.ema_l = c.alpha_l * delta_l + (1 - c.alpha_l) * s.ema_l;
 
     // τ基本
-    let tau_base = c.tau;
+    const tau_base = c.tau;
+    let tau_base_l = c.tau;   // 下限側の基本幅（Mg²⁺ だけ連結ゲートで狭める）
 
-    // K⁺の連結ゲート：Mg²⁺ 障害時にτを動的縮小
-    if (id === 'k') {
-      const R_mg = STATE.mg.R;
-      if (R_mg >= 0.7) {
-        // τ縮小：R_Mg=0.7→τ×0.58, R_Mg=1.0→τ×0.40
-        tau_base = c.tau * Math.max(0.4, 1.0 - 0.6 * R_mg);
+    // Mg²⁺ の連結ゲート：K⁺ 過剰時に、Mg²⁺ の下限側（欠乏側）τ を縮小する。
+    // 他の評価対象（K⁺）の評価出力を、狭める向きにだけ使う（AXIOMS §14）。R_K が下がると戻るので、側別有効ゲート幅の連結。
+    if (id === 'mg') {
+      const R_k_up = STATE.k.R_u || 0;
+      if (R_k_up >= 0.7) {
+        // τ縮小：R_K=0.7→τ×0.58, R_K=1.0→τ×0.40
+        tau_base_l = c.tau * Math.max(0.4, 1.0 - 0.6 * R_k_up);
       }
-      s.tau_actual = tau_base;
-    } else {
-      s.tau_actual = tau_base;
     }
+    s.tau_actual = tau_base_l;
 
-    const tau_u = tau_base * (1.0 + c.tu_expand * (s.ema_u / (tau_base + 0.001)));
-    const tau_l = tau_base * Math.max(0.3, 1.0 - c.tl_shrink * (s.ema_l / (tau_base + 0.001)));
+    // 上側も狭める向きだけ（#09〜#11と同じ形）。EMAがτの50%を超えた分から縮め、0.8倍で止める。広げる変換は持たない。
+    // （以前は上側を EMA で広げており、超過が続くほど R が下がっていた）
+    const tau_u = tau_base * Math.max(0.8, 1.0 - Math.max(0, s.ema_u - 0.5 * tau_base) / tau_base);
+    const tau_l = tau_base_l * Math.max(0.3, 1.0 - c.tl_shrink * (s.ema_l / (tau_base_l + 0.001)));
 
     const R_u = delta_u / Math.max(tau_u, 0.001);
     const R_l = delta_l / Math.max(tau_l, 0.001);
+    s.R_u = R_u;
     s.R = Math.max(R_u, R_l);
 
-    s.status = s.R >= 1.0 ? 'silence' : s.R >= 0.75 ? 'warn' : 'safe';
+    // R が 1.0 に達したら SILENCE に固定する（不可逆ラッチ）。解除は「新しい評価」だけ。R は現在値を表示し続ける。
+    const over = s.R >= 1.0;
+    if (over && !s.prevOver) recordCrossing(id, s);
+    s.prevOver = over;
+    s.latched = s.latched || over;
+    s.status = s.latched ? 'silence' : s.R >= 0.75 ? 'warn' : 'safe';
 
     s.band_u = c.base + tau_u;
     s.band_l = c.base - tau_l;
@@ -345,8 +382,32 @@ function updateIons() {
   }
 }
 
-// Layer 4 複合R
+// --- 境界到達の記録（到達の瞬間を残す。最初の到達は BoundaryRecord が保持する）---
+const crossLines = [];
+function recordCrossing(id, s) {
+  const rec = { time: `t=${tick}`, channel: ION_LABELS[id], value: s.val.toFixed(2) + ' mmol/L', R: s.R };
+  BoundaryRecord.hit(rec);
+  crossLines.push(`t=${tick}　${ION_LABELS[id]}　${s.val.toFixed(2)} mmol/L　R=${s.R.toFixed(3)}`);
+  if (crossLines.length > 6) crossLines.shift();
+  const el = document.getElementById('crossLog');
+  if (el) el.textContent = crossLines.join('\n');
+}
+// 新しい評価：固定を解除し、記録を保管して数え直す。土壌プロファイルの切り替えも評価宣言の変更なので、新しい評価にする。
+function startNewEvaluation() {
+  for (const id in STATE) { STATE[id].latched = false; STATE[id].prevOver = false; }
+  crossLines.length = 0;
+  const el = document.getElementById('crossLog');
+  if (el) el.textContent = '';
+  BoundaryRecord.newTrial();
+  resetScenario();
+}
+
+// Layer 4 複合R：各イオンのRの最大値（平均で薄めない。AXIOMS §5 の R_dir と同じ max）
 function fusedR() {
+  return Math.max(...['no3','k','mg','cl'].map(id => STATE[id].R));
+}
+// 参考表示だけに使う加重平均（判定には使わない）
+function fusedAvgR() {
   let sw = 0, swR = 0;
   for (const id of ['no3','k','mg','cl']) {
     const w = profile.ions[id].w;
@@ -361,11 +422,11 @@ function applyScenario() {
   sTick++;
   const t = sTick;
 
-  if (activeScenario === 'mg_block') {
-    // Mg²⁺ 吸収阻害（根の問題・低温等）→ 緩慢に欠乏
-    STATE.mg.offset = -Math.min(t * 0.012, 1.4);
-    // K⁺ は平常のままだが、τ縮小により R_K が急上昇する
-    document.getElementById('scenario_label').textContent = 'Mg²⁺吸収阻害 → K⁺拮抗連鎖';
+  if (activeScenario === 'k_excess') {
+    // K⁺ 過剰（カリ施肥過多）→ 緩慢に上昇
+    STATE.k.offset = Math.min(t * 0.012, 3.0);
+    // Mg²⁺ の濃度は平常のままでも、K⁺ の過剰側 R に応じて Mg²⁺ の下限側 τ が縮み、欠乏側の検知が早まる
+    document.getElementById('scenario_label').textContent = 'K⁺過剰 → Mg²⁺吸収阻害（拮抗）';
   } else if (activeScenario === 'saltburst') {
     STATE.cl.offset = Math.min(t * 0.25, 3.0);
     document.getElementById('scenario_label').textContent = '塩害スパイク';
@@ -451,8 +512,8 @@ function drawIon(id) {
     ctx.fillStyle = lc; ctx.fill();
   }
 
-  // K⁺ のτ縮小を矢印で示す
-  if (id === 'k' && STATE.mg.R >= 0.7) {
+  // Mg²⁺ の下限側 τ 縮小を示す
+  if (id === 'mg' && (STATE.k.R_u || 0) >= 0.7) {
     ctx.fillStyle = '#cc550088';
     ctx.fillText('⚡τ縮小', W - 55, H - 6);
   }
@@ -516,7 +577,8 @@ function updatePanel() {
     const c = profile.ions[id];
     document.getElementById('v_'+id).textContent = s.val.toFixed(2);
     document.getElementById('r_'+id).textContent = s.R.toFixed(3);
-    if (id === 'k') document.getElementById('tau_k_cur').textContent = s.tau_actual.toFixed(2);
+    if (id === 'k') document.getElementById('r_k_upper').textContent = (s.R_u || 0).toFixed(3);
+    if (id === 'mg') document.getElementById('tau_mg_cur').textContent = s.tau_actual.toFixed(2);
     const pct = Math.min(s.R * 100, 100);
     const bar = document.getElementById('bar_'+id);
     bar.style.width = pct + '%';
@@ -530,22 +592,24 @@ function updatePanel() {
   // 複合R
   const fR = fusedR();
   document.getElementById('v_fused').textContent = fR.toFixed(3);
+  document.getElementById('v_fused_avg').textContent = fusedAvgR().toFixed(3);
   document.getElementById('bar_fused').style.width = Math.min(fR*100,100) + '%';
   const fc = fR>=1.0 ? '#ff4444' : fR>=0.75 ? '#ffaa44' : '#88ffaa';
   document.getElementById('bar_fused').style.background = fc;
-  const fst = fR>=1.0 ? 'silence' : fR>=0.75 ? 'warn' : 'safe';
+  const anyLatched = ['no3','k','mg','cl'].some(id => STATE[id].latched);
+  const fst = (anyLatched || fR>=1.0) ? 'silence' : fR>=0.75 ? 'warn' : 'safe';
   const fb = document.getElementById('st_fused');
   fb.textContent = fst==='silence' ? 'SILENCE' : fst==='warn' ? 'WARN' : 'SAFE';
   fb.className = 'status-badge ' + fst;
 
   // 拮抗警告
   const alert = document.getElementById('antagonism_alert');
-  alert.classList.toggle('visible', STATE.mg.R >= 0.7);
+  alert.classList.toggle('visible', (STATE.k.R_u || 0) >= 0.7);
 
   // プロファイル表示
   document.getElementById('p_tau_k').textContent = profile.ions.k.tau.toFixed(1);
   document.getElementById('p_tau_mg').textContent = profile.ions.mg.tau.toFixed(1);
-  document.getElementById('p_tau_k_cur').textContent = STATE.k.tau_actual.toFixed(3);
+  document.getElementById('p_tau_mg_cur').textContent = STATE.mg.tau_actual.toFixed(3);
 }
 
 // --- プロファイル切替 ---
@@ -558,7 +622,7 @@ function setProfile(id) {
     'profile-btn andosol ' + (id==='andosol' ? 'profile-active' : 'profile-inactive');
   document.getElementById('btn_general').className =
     'profile-btn general ' + (id==='general' ? 'profile-active' : 'profile-inactive');
-  resetScenario();
+  startNewEvaluation();   // プロファイルの切り替えは評価宣言の変更
 }
 
 // --- シナリオ制御 ---

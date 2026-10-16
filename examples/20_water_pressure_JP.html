@@ -276,6 +276,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
 </div>
 
+<div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
+
 <div class="log-panel">
   <div class="log-title">TRACE LOG  — 脈動パターン監視</div>
   <div class="log-list" id="logList"></div>
@@ -287,6 +289,27 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── パラメータ（水圧・非圧縮性・固定τ） ──
 const P_OPT  = 0.50;  // MPa 設計圧力
 const P_MAX  = 0.80;  // MPa 破裂・安全弁作動限界
@@ -297,8 +320,12 @@ const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── 状態 ──
 let running = true, pumpOn = false, valveOn = false;
+// 弁を絞った状態（THROTTLE）の実効流量。流量計と水粒子はこれを使う（絞っているのに流れが変わらない描画にしない）。圧力上昇側はスライダーの流量（要求流量）を使う。
+const THROTTLE_FLOW_RATIO = 0.3;
+function effFlow(){ return valveOn ? flowRate * THROTTLE_FLOW_RATIO : flowRate; }
 let pumpTarget = 0.5, flowRate = 50;
 let pCurrent = P_OPT, pRaw = P_OPT, pSmooth = P_OPT;
+let pJudge = P_OPT;   // 判定に使った圧力（生値と平滑値のうち R が重い方）
 let smoothBuf = [], waveHist = [], logTimer = 0;
 const SMOOTH_N = 8, WAVE_LEN = 300;
 let waterParticles = [];
@@ -319,7 +346,8 @@ function resize(){
 // ── コントロール ──
 // 不可逆ラッチの状態。解除は利用者の「新しい評価」操作だけ。
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; }
+let prevOver = false;   // 境界を越えた瞬間を見つけるための前回値
+function startNewEvaluation(){ ruptureLatch = null; prevOver = false; BoundaryRecord.newTrial(); }
 
 function toggleRun(){
   running = !running;
@@ -357,8 +385,8 @@ function calcIDE(p){
   const rHi = delta > 0 ? delta / TAU_HI : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='過圧：RUPTURE_BOUNDARY — 安全弁作動・ポンプ停止'; }
-  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='減圧：RUPTURE_BOUNDARY — ポンプ起動・弁全開'; }
+  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='過圧：RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる（安全弁は機械的に作動）'; }
+  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='減圧：RUPTURE_BOUNDARY — 自律の操作を止めて人間へ委ねる'; }
   else if(rHi >= R_WARN) { status='warn-hi'; action='過圧警告：流量低減または弁開放推奨'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='減圧警告：ポンプ出力増加推奨'; }
   else                   { status='safe';    action='正常稼働継続'; }
@@ -404,15 +432,24 @@ function tick(dt){
   if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
   pSmooth = smoothBuf.reduce((a,b)=>a+b,0) / smoothBuf.length;
 
-  const ide = calcIDE(pSmooth);
+  // 判定は、生の圧力のRと平滑値のRの重い方で行う（平滑化という補助計算で水撃のピークを見逃さない）。
+  const ideS   = calcIDE(pSmooth);
+  const ideRaw = calcIDE(pRaw);
+  const useRaw = Math.max(ideRaw.rHi, ideRaw.rLo) > Math.max(ideS.rHi, ideS.rLo);
+  const ide    = useRaw ? ideRaw : ideS;
+  pJudge = useRaw ? pRaw : pSmooth;
+  // 越えた瞬間（時刻・判定に使った圧力・上側か下側か・R）を、定期ログとは別に残す
+  const rJudge = Math.max(ide.rHi, ide.rLo), over = rJudge >= R_RUPTURE;
+  if (over && !prevOver) BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: ide.rHi >= ide.rLo ? '水圧・上限側（過圧）' : '水圧・下限側（減圧）', value: pJudge.toFixed(3) + ' MPa', R: rJudge });
+  prevOver = over;
   const pulseAmpObs = smoothBuf.length > 1
     ? Math.max(...smoothBuf) - Math.min(...smoothBuf) : 0;
 
   // 水粒子生成
-  if(flowRate > 5 && Math.random() < 0.4){
+  if(effFlow() > 5 && Math.random() < 0.4){
     waterParticles.push({
       progress: 0,
-      speed: 40 + flowRate * 0.6,
+      speed: 40 + effFlow() * 0.6,
       life: 1.0,
       col: ide.status === 'fail-hi' ? '#ff3060' :
            ide.status === 'warn-hi' ? '#ffaa00' : '#00aadd'
@@ -501,7 +538,7 @@ function setMarkSVG(id,t,cy,r){
 function drawPipe(){
   const W=pc.width, H=pc.height;
   pctx.clearRect(0,0,W,H);
-  const ide = calcIDE(pSmooth);
+  const ide = calcIDE(pJudge);
   const col = statusColor(ide.status);
 
   // 配管レイアウト定義
@@ -574,7 +611,7 @@ function drawPipe(){
   drawValve(pctx, W*0.65, H*0.65, valveOn, col);
 
   // 流量計（下部中央）
-  drawFlowMeter(pctx, W*0.5, H*0.65+pw/2+30, flowRate, col);
+  drawFlowMeter(pctx, W*0.5, H*0.65+pw/2+30, effFlow(), col);
 
   // ウォーターハンマー警告エフェクト
   if(hammerEvent){
@@ -678,7 +715,7 @@ function drawValve(ctx, x, y, closed, col){
   ctx.moveTo(x+vr*0.6, y-vr*0.6); ctx.lineTo(x-vr*0.6, y+vr*0.6);
   ctx.strokeStyle = closed?'#ff6030':col; ctx.lineWidth = 2; ctx.stroke();
   ctx.font = '9px JetBrains Mono'; ctx.fillStyle = closed?'#ff6030':'#304050';
-  ctx.textAlign = 'center'; ctx.fillText(closed?'CLOSED':'OPEN', x, y+vr+14);
+  ctx.textAlign = 'center'; ctx.fillText(closed?'THROTTLE':'OPEN', x, y+vr+14);
 }
 
 function drawFlowMeter(ctx, x, y, flow, col){
@@ -785,6 +822,7 @@ window.addEventListener('resize',resize);
 resize();
 setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
 addLog(calcIDE(pSmooth),0);
+BoundaryRecord.render();
 requestAnimationFrame(loop);
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・ポンプの脈動・水撃の波形と、圧力の上下限は説明用の値で、配管設計の根拠ではありません。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>

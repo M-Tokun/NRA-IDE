@@ -276,6 +276,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
   </div>
 </div>
 
+<div id="boundaryRecord" style="max-width:1100px;margin:8px auto;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
+
 <div class="log-panel">
   <div class="log-title">TRACE LOG  — Pulsation Pattern Monitor</div>
   <div class="log-list" id="logList"></div>
@@ -287,6 +289,27 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
 </div>
 
 <script>
+// ── Boundary arrival record: the first arrival is kept and never removed. A new trial or evaluation stores the record (if any arrival) and starts counting again ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '  R=' + (R === null ? 'out of domain' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}  ${esc(r.channel)}  ${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>Boundary arrival record</b><br>' +
+      (first ? `First arrival: ${line(first)}<br>Arrivals: ${count}<br>Latest: ${line(last)}` : 'Not yet at the boundary') +
+      (past.length ? `<br>Records from previous trials/evaluations: ${past.length} (stored)` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ── Parameters (water pressure · incompressible · fixed τ) ──
 const P_OPT  = 0.50;  // MPa design pressure
 const P_MAX  = 0.80;  // MPa rupture / safety valve limit
@@ -297,8 +320,12 @@ const R_WARN = 0.75, R_RUPTURE = 1.0;
 
 // ── State ──
 let running = true, pumpOn = false, valveOn = false;
+// Effective flow with the valve throttled (THROTTLE). The flow meter and water particles use it (so the picture does not show an unchanged flow while throttling). The pressure rise uses the slider flow (demanded flow).
+const THROTTLE_FLOW_RATIO = 0.3;
+function effFlow(){ return valveOn ? flowRate * THROTTLE_FLOW_RATIO : flowRate; }
 let pumpTarget = 0.5, flowRate = 50;
 let pCurrent = P_OPT, pRaw = P_OPT, pSmooth = P_OPT;
+let pJudge = P_OPT;   // pressure used for judgment (raw or smoothed, whichever gives the heavier R)
 let smoothBuf = [], waveHist = [], logTimer = 0;
 const SMOOTH_N = 8, WAVE_LEN = 300;
 let waterParticles = [];
@@ -319,7 +346,8 @@ function resize(){
 // ── Controls ──
 // Irreversible latch state. Released only by the user's 'New evaluation' action.
 let ruptureLatch = null;
-function startNewEvaluation(){ ruptureLatch = null; }
+let prevOver = false;   // previous value used to find the moment of crossing the boundary
+function startNewEvaluation(){ ruptureLatch = null; prevOver = false; BoundaryRecord.newTrial(); }
 
 function toggleRun(){
   running = !running;
@@ -357,8 +385,8 @@ function calcIDE(p){
   const rHi = delta > 0 ? delta / TAU_HI : 0;
   const rLo = delta < 0 ? absDelta / TAU_LO : 0;
   let status, action;
-  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='Over-pressure: RUPTURE_BOUNDARY — Safety valve active / pump stop'; }
-  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='Under-pressure: RUPTURE_BOUNDARY — Start pump / fully open valve'; }
+  if(rHi >= R_RUPTURE)      { status='fail-hi'; action='Over-pressure: RUPTURE_BOUNDARY — Autonomous operation stops and hands over to a human (the safety valve acts mechanically)'; }
+  else if(rLo >= R_RUPTURE) { status='fail-lo'; action='Under-pressure: RUPTURE_BOUNDARY — Autonomous operation stops and hands over to a human'; }
   else if(rHi >= R_WARN) { status='warn-hi'; action='Over-pressure warning: reduce flow or open valve'; }
   else if(rLo >= R_WARN) { status='warn-lo'; action='Under-pressure warning: increase pump output'; }
   else                   { status='safe';    action='Normal operation continues'; }
@@ -404,15 +432,24 @@ function tick(dt){
   if(smoothBuf.length > SMOOTH_N) smoothBuf.shift();
   pSmooth = smoothBuf.reduce((a,b)=>a+b,0) / smoothBuf.length;
 
-  const ide = calcIDE(pSmooth);
+  // Judgment uses the heavier of R from the raw pressure and R from the smoothed value (smoothing, an auxiliary computation, must not hide a water-hammer peak).
+  const ideS   = calcIDE(pSmooth);
+  const ideRaw = calcIDE(pRaw);
+  const useRaw = Math.max(ideRaw.rHi, ideRaw.rLo) > Math.max(ideS.rHi, ideS.rLo);
+  const ide    = useRaw ? ideRaw : ideS;
+  pJudge = useRaw ? pRaw : pSmooth;
+  // Keep the moment of crossing (time, pressure used for judgment, upper or lower side, R), separate from the periodic log
+  const rJudge = Math.max(ide.rHi, ide.rLo), over = rJudge >= R_RUPTURE;
+  if (over && !prevOver) BoundaryRecord.hit({ time: new Date().toTimeString().slice(0, 8), channel: ide.rHi >= ide.rLo ? 'Water pressure / upper side (over-pressure)' : 'Water pressure / lower side (low pressure)', value: pJudge.toFixed(3) + ' MPa', R: rJudge });
+  prevOver = over;
   const pulseAmpObs = smoothBuf.length > 1
     ? Math.max(...smoothBuf) - Math.min(...smoothBuf) : 0;
 
   // Water particle generation
-  if(flowRate > 5 && Math.random() < 0.4){
+  if(effFlow() > 5 && Math.random() < 0.4){
     waterParticles.push({
       progress: 0,
-      speed: 40 + flowRate * 0.6,
+      speed: 40 + effFlow() * 0.6,
       life: 1.0,
       col: ide.status === 'fail-hi' ? '#ff3060' :
            ide.status === 'warn-hi' ? '#ffaa00' : '#00aadd'
@@ -501,7 +538,7 @@ function setMarkSVG(id,t,cy,r){
 function drawPipe(){
   const W=pc.width, H=pc.height;
   pctx.clearRect(0,0,W,H);
-  const ide = calcIDE(pSmooth);
+  const ide = calcIDE(pJudge);
   const col = statusColor(ide.status);
 
   // Pipe layout definition
@@ -574,7 +611,7 @@ function drawPipe(){
   drawValve(pctx, W*0.65, H*0.65, valveOn, col);
 
   // Flow meter (bottom center)
-  drawFlowMeter(pctx, W*0.5, H*0.65+pw/2+30, flowRate, col);
+  drawFlowMeter(pctx, W*0.5, H*0.65+pw/2+30, effFlow(), col);
 
   // Water hammer warning effect
   if(hammerEvent){
@@ -678,7 +715,7 @@ function drawValve(ctx, x, y, closed, col){
   ctx.moveTo(x+vr*0.6, y-vr*0.6); ctx.lineTo(x-vr*0.6, y+vr*0.6);
   ctx.strokeStyle = closed?'#ff6030':col; ctx.lineWidth = 2; ctx.stroke();
   ctx.font = '9px JetBrains Mono'; ctx.fillStyle = closed?'#ff6030':'#304050';
-  ctx.textAlign = 'center'; ctx.fillText(closed?'CLOSED':'OPEN', x, y+vr+14);
+  ctx.textAlign = 'center'; ctx.fillText(closed?'THROTTLE':'OPEN', x, y+vr+14);
 }
 
 function drawFlowMeter(ctx, x, y, flow, col){
@@ -784,6 +821,7 @@ window.addEventListener('resize',resize);
 resize();
 setMarkPair('wMH','fMH'); setMarkPair('wML','fML');
 addLog(calcIDE(pSmooth),0);
+BoundaryRecord.render();
 requestAnimationFrame(loop);
 </script>
 <div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>Assumptions and limits of this screen (caveats)</strong><br>• The pump pulsation and water-hammer waveforms and the pressure limits are illustrative values, not a basis for piping design.<br>• All reference values, limits, thresholds, and coefficients are demo-declared values, not an operational basis.</div>

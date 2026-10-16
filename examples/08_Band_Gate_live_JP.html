@@ -14,7 +14,7 @@
   上限側は縮みにくく（慎重）、下限側は大きく縮む（敏感）
   R_dir = max(δ_upper/τ_dyn_upper, δ_lower/τ_dyn_lower)
   R_dirは上限・下限それぞれ独立したR=δ/τ評価の集約値であり、正典のRを再定義するものではない。
-  心臓弁・サスペンション・調圧弁と同じ非対称構造。
+  心臓弁・サスペンション・調圧弁に似た非対称の考え方。
   Powered by NRA-IDE. (c) 2026 M-Tokuni.
 -->
 <style>
@@ -348,7 +348,7 @@ footer a { color: var(--lower); text-decoration: none; }
     <h1>非対称ダンパー構造<br>上限・下限 Band Gate Live</h1>
     <p>
       上限突破（過負荷・過電流・高圧）と下限割れ（漏電・断線・枯渇）を<br>
-      それぞれ独立した R = δ/τ で検知し、表示するR_dirは両者の最大値です。上下のτは逆向きに動きます。
+      それぞれ独立した R = δ/τ で検知し、表示するR_dirは両者の最大値です。上下のτは、それぞれ基準値の側へ縮みます。
     </p>
   </div>
   <div class="live-row">
@@ -501,18 +501,19 @@ footer a { color: var(--lower); text-decoration: none; }
         δは基準値からのズレ、τは基準値から宣言上限・下限までの距離です（R=1.0が上下限）。<br>
         ズレが続くとτを縮めて検知を早めます。上限側は<span class="text-upper">縮みにくく</span>（慎重）、下限側は<span class="text-lower">大きく縮む</span>（敏感）。<br>
         AMPは最大縮小倍率（τ0/AMPまで）。τを広げることはありません。<br>
-        心臓弁・サスペンション・調圧弁と同じ構造です。
+        心臓弁・サスペンション・調圧弁に似た非対称の考え方です。左のスプリングの縮みは、τ がどこまで縮んだかを表します。
       </div>
     </div>
 
     <div class="mt-10">
       <div class="log-title-text">イベントログ</div>
+      <div id="boundaryRecord" style="margin:8px 0;padding:6px 10px;border:1px solid rgba(255,90,90,.45);border-radius:4px;background:rgba(255,80,80,.06);color:#e8d0d0;font:11px/1.6 monospace;"></div>
       <div class="log-wrap" id="logArea"></div>
     </div>
   </div>
 </div>
 
-<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・センサー値のシナリオ波形は合成です。<br>・動的ゲート幅の縮小（EMAがτ0の50%を超えた分から縮め、上側0.8倍／下側0.25倍で止める）の係数はデモ用です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
+<div class="demo-caveat" style="max-width:1100px;margin:14px auto;padding:8px 12px;border:1px solid #b8860b;background:rgba(184,134,11,.12);color:#e6c36a;font:11px/1.7 sans-serif;border-radius:6px;"><strong>この画面の前提と限界（但し書き）</strong><br>・センサー値のシナリオ波形は合成です。<br>・動的ゲート幅の縮小（EMAがτ0の50%を超えた分から縮め、上側 1/AMP_upper（既定 0.77倍）・下側 1/AMP_lower（既定 0.5倍）で止める）の係数はデモ用です。<br>・基準値・限界値・しきい値・係数は、すべてデモ用に宣言した値で、運用の根拠ではありません。</div>
 <footer>
   <span>NRA-IDE / Band Gate — Asymmetric Damper Structure</span>
   <span>
@@ -524,6 +525,27 @@ footer a { color: var(--lower); text-decoration: none; }
 </div>
 
 <script>
+// ── 境界到達記録：最初の到達は消さずに残す。新しい試行・評価では、到達のあった記録を保管して数え直す ──
+const BoundaryRecord = (() => {
+  const past = [];
+  let first = null, last = null, count = 0;
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const fmtR = R => R === undefined ? '' : '　R=' + (R === null ? '定義域外' : Number(R).toFixed(3));
+  const line = r => `${esc(r.time)}　${esc(r.channel)}　${esc(r.value)}${fmtR(r.R)}`;
+  function render() {
+    const el = document.getElementById('boundaryRecord');
+    if (!el) return;
+    el.innerHTML = '<b>境界到達記録</b><br>' +
+      (first ? `最初の到達：${line(first)}<br>到達回数：${count}<br>直近：${line(last)}` : 'まだ境界に達していません') +
+      (past.length ? `<br>前の試行・評価での到達記録：${past.length}件（保管）` : '');
+  }
+  return {
+    hit(r) { count++; if (!first) first = r; last = r; render(); },
+    newTrial() { if (count > 0) past.push({ first, last, count }); first = last = null; count = 0; render(); },
+    render,
+  };
+})();
+
 // ─────────────────────────────────────────────
 // シナリオ定義
 // ─────────────────────────────────────────────
@@ -649,24 +671,29 @@ function step(p) {
   // 動的ゲート幅は縮める方向だけ（τ0を超えて広げない）。AMPは最大縮小倍率（τ0/AMPまで）。
   const tau_upper_dyn = shrinkTau(tau0_up, st.ema_upper, 1 / p.amu);
   const tau_lower_dyn = shrinkTau(tau0_lo, st.ema_lower, 1 / p.aml);
+  // ダンパー表示用：τ がどこまで縮んだか（0＝縮みなし、1＝下限 τ0/AMP まで縮んだ）
+  st.shrinkUp = (tau0_up > 0 && p.amu > 1) ? (1 - tau_upper_dyn / tau0_up) / (1 - 1 / p.amu) : 0;
+  st.shrinkLo = (tau0_lo > 0 && p.aml > 1) ? (1 - tau_lower_dyn / tau0_lo) / (1 - 1 / p.aml) : 0;
 
-  // 基準値が上下限の外にある設定は評価不能。停止側に倒す。
-  const valid   = tau0_up > 0 && tau0_lo > 0;
-  const R_upper = valid ? d_upper / tau_upper_dyn : Infinity;
-  const R_lower = valid ? d_lower / tau_lower_dyn : Infinity;
-  const R       = Math.max(R_upper, R_lower);
+  // 基準値が上下限の外にある設定（τ0≤0）は、正典どおり R を定義しない（OUT_OF_DESCRIPTION_DOMAIN。AXIOMS §6）。
+  // 無限大の R に置き換えず R は null とし、停止側（SILENCE）に倒す。
+  const undef   = !(tau0_up > 0 && tau0_lo > 0);
+  const R_upper = undef ? null : d_upper / tau_upper_dyn;
+  const R_lower = undef ? null : d_lower / tau_lower_dyn;
+  const R       = undef ? null : Math.max(R_upper, R_lower);
 
   // HOLDチェック
   const held    = nowMs < st.holdUntil;
   let silence   = held;
   let dir       = held ? st.lastDir : '';
 
-  if (!held && R >= 1.0) {
+  if (!held && (undef || R >= 1.0)) {
     st.holdUntil = nowMs + p.hold;
     silence = true;
-    dir = R_upper >= R_lower ? 'upper' : 'lower';
+    dir = undef ? 'undef' : (R_upper >= R_lower ? 'upper' : 'lower');
     st.lastDir = dir;
     st.silenceCount++;
+    BoundaryRecord.hit({ time: `t=${st.t}`, channel: `${scenario.label}・${dir==='undef'?'定義域外':dir==='upper'?'上限側':'下限側'}`, value: v.toFixed(1) + scenario.unit, R });
   }
 
   // 動的バンド（可視化用）
@@ -816,11 +843,12 @@ function drawDamper(R, dir, upperEMA, lowerEMA, p) {
   dctx.textAlign = 'center';
   dctx.fillText('ASYMMETRIC DAMPER', cx, 16);
 
-  const isSil = R >= 1.0;
+  const isSil = R === null || R >= 1.0;
   const baseH = 70;  // ダンパー半高さ
 
   // 上側スプリング（EMAで縮む・赤）
-  const upperComp = Math.min(upperEMA * 20, baseH * 0.6);
+  // スプリングの縮みは τ の縮み（st.shrinkUp）から描く（以前は EMA×20px で、τ の縮みと無関係だった）
+  const upperComp = Math.max(0, Math.min(1, st.shrinkUp || 0)) * baseH * 0.6;
   const upperY    = midY - baseH + upperComp;
   const springTop = 30;
 
@@ -844,7 +872,7 @@ function drawDamper(R, dir, upperEMA, lowerEMA, p) {
   dctx.shadowBlur = 0;
 
   // 下側スプリング（EMAで縮む・青）
-  const lowerComp = Math.min(lowerEMA * 20, baseH * 0.6);
+  const lowerComp = Math.max(0, Math.min(1, st.shrinkLo || 0)) * baseH * 0.6;
   const lowerY    = midY + baseH - lowerComp;
   const springBot = H - 30;
 
@@ -895,7 +923,7 @@ function drawDamper(R, dir, upperEMA, lowerEMA, p) {
   dctx.fillStyle = rCol;
   dctx.font = 'bold 16px Orbitron';
   dctx.textAlign = 'center';
-  dctx.fillText('R = ' + R.toFixed(3), cx, H-10);
+  dctx.fillText(R === null ? 'R：定義域外' : 'R = ' + R.toFixed(3), cx, H-10);
 
   // 上下ラベル
   dctx.fillStyle = 'rgba(255,107,53,.6)';
@@ -926,7 +954,7 @@ function updateUI(res, p) {
   document.getElementById('mf-val').style.width = (valPct*100)+'%';
   document.getElementById('mf-val').style.background = col;
 
-  document.getElementById('mv-r').textContent = R.toFixed(4);
+  document.getElementById('mv-r').textContent = R === null ? '定義域外' : R.toFixed(4);
   document.getElementById('mv-r').style.color = col;
   document.getElementById('mf-r').style.width = (rPct*100)+'%';
   document.getElementById('mf-r').style.background = col;
@@ -945,7 +973,7 @@ function updateUI(res, p) {
   const fs = document.getElementById('flashStamp');
   if (silence) {
     ov.className = dir;
-    fs.textContent = dir==='upper' ? '— UPPER SILENCE —' : '— LOWER SILENCE —';
+    fs.textContent = dir==='undef' ? '— OUT_OF_DESCRIPTION_DOMAIN —' : dir==='upper' ? '— UPPER SILENCE —' : '— LOWER SILENCE —';
     fs.style.color = dir==='upper' ? 'var(--upper)' : 'var(--lower)';
     fs.classList.add('active');
     if (flashTimer) clearTimeout(flashTimer);
@@ -955,7 +983,9 @@ function updateUI(res, p) {
   // ログ
   if (silence && lastLogDec !== 'SILENCE') {
     addLog(
-      dir==='upper'
+      dir==='undef'
+        ? 'OUT_OF_DESCRIPTION_DOMAIN（τ0≤0：基準値が上限・下限の外。R は定義しない）→ 停止側'
+        : dir==='upper'
         ? `UPPER SILENCE  V=${v.toFixed(1)}  R=${R.toFixed(3)} > 1.0`
         : `LOWER SILENCE  V=${v.toFixed(1)}  R=${R.toFixed(3)} > 1.0`,
       dir
@@ -1043,6 +1073,7 @@ function resetSim() {
   document.getElementById('logArea').innerHTML = '';
   document.getElementById('flashOverlay').className = '';
   document.getElementById('flashStamp').classList.remove('active');
+  BoundaryRecord.newTrial();
   addLog('シミュレーション開始 — ' + scenario.label, 'safe');
 }
 
