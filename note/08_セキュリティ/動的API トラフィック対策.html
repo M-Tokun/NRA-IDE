@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>動的API トラフィック対策</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +19,7 @@
   --fact: #1f6f5c;
   --est: #9a6a12;
   --unk: #a33a3a;
-  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", "IPAGothic", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
@@ -29,6 +33,7 @@
   --accent: #5fc3a6; --fact: #5fc3a6; --est: #e0b45a; --unk: #ef8a8a; color-scheme: dark;
 }
 body {
+  margin: 0;
   background: var(--bg); color: var(--fg); font-family: var(--font-body);
   font-size: 15px; line-height: 1.75;
 }
@@ -53,6 +58,7 @@ code { font-family: var(--font-mono); font-size: .9em; background: var(--surface
 .row > div { min-width: 0; }
 .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; }
 .diagram pre.mermaid { margin: 0; min-width: 680px; }
+.mermaid-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 .src { font-size: 13px; color: var(--muted); }
 ul { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; max-width: 72ch; }
 .tbl { overflow-x: auto; }
@@ -61,11 +67,24 @@ th, td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: le
 th { font-weight: 600; color: var(--muted); font-size: 13px; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 13px; }
 .key { border-left: 3px solid var(--accent); padding-left: 14px; }
+@media print {
+  @page { margin: 14mm 12mm; }
+  body { background: #fff; }
+  .wrap, section, .status { display: block; padding-block: 0; }
+  section { margin-bottom: 26px; }
+  section > * + *, .status > * + * { margin-top: 10px; }
+  .diagram, .tbl { overflow: visible; }
+  .diagram pre.mermaid, table { min-width: 0; }
+  .diagram svg { width: 100%; height: auto; max-height: 225mm; }
+  tr, .row, .diagram { break-inside: avoid; }
+  h2 { break-after: avoid; }
+}
 </style>
-
+</head>
+<body>
 <div class="wrap">
 <header>
-  <div class="eyebrow">動的API · トラフィック · 2026-10-16</div>
+  <div class="eyebrow">動的API · トラフィック · 2026-10-16（再精査 P1〜P14 反映版）</div>
   <h1>動的APIで増える負荷と、その回避方法</h1>
   <p>静的キーを短命トークンに置き換えると、新しい負荷が生まれます。このページでは、負荷がどこに生まれ、何で抑えられるかをまとめています。どの対策も、負荷を理由に認証・認可を緩めないことを前提にしています。</p>
 </header>
@@ -75,7 +94,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-fam
   <div class="status">
     <div class="row"><span class="tag est">推定</span><div>増える負荷は「全体が均等に重くなる」形ではありません。<b>トークンの発行窓口</b>と<b>状態ストア</b>（失効情報・再利用防止）に集中し、さらに<b>一斉に更新が走る瞬間</b>に跳ね上がります。業務APIの検証は、設計次第でほとんど増やさずに済みます。</div></div>
     <div class="row"><span class="tag est">推定</span><div>静的キーを廃止すると、盗んだキーで無制限に呼んでいた不正なトラフィックが減ります。差し引きで全体が増えるか減るかは、実測するまで分かりません。</div></div>
-    <div class="row"><span class="tag fact">根拠</span><div>08 の A 原則2（トークン交換と業務APIの分離）・Phase 4、C §5（入口制御・N/M/D/H）、具体的提言 §5・§8、精査 F09（先行更新による発行率の増加 8/7）。DPoP の nonce と再利用防止は RFC 9449 の仕組みです。</div></div>
+    <div class="row"><span class="tag fact">根拠</span><div>08 の A 原則2（トークン交換と業務APIの分離）・Phase 4、C §5（入口制御・N/M/D/H）、具体的提言 §5・§8、精査 F09（先行更新による発行率の増加 8/7）。DPoP の nonce と再利用防止は RFC 9449、mTLS の送信者拘束は RFC 8705 の仕組みです。</div></div>
+    <div class="row"><span class="tag fact">境界</span><div><b>高リスク／一般の区分は API 台帳の data_class で決めます。</b>個人データを扱う API と更新を行う API は高リスク側に置き、提言 §5 の条件（送信者拘束と、全受入ノードでの再利用検出）を満たします。jti の保存を省く「一般」は、台帳で明示的に指定した API に限ります。指定のない保護API は、「静的APIキーから動的API認証への移行フロー」図4 のとおり、全条件を確認します。</div></div>
+    <div class="row"><span class="tag unk">未確定</span><div>台帳の data_class の値は、提言 §2 で公開／利用者限定／高機密と定められています。そのうち、どの値を jti の保存を省く「一般」にしてよいかの対応はまだ決まっていません。</div></div>
   </div>
 </section>
 
@@ -85,14 +106,15 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-fam
 flowchart LR
   CL["端末・呼び出し元"] -->|"① 発行要求<br/>台数 ÷ 有効期限 の頻度"| TK["トークン発行窓口<br/>署名検証・証明検証"]
   TK -->|"② 状態の読み書き<br/>challenge・counter・発行記録"| ST[("状態ストア")]
-  TK -. "③ 端末登録時だけ" .-> EXT["Apple / Google<br/>外部の証明基盤"]
+  CL -. "③ 端末登録時だけ<br/>iOS：端末が Apple に証明を要求" .-> EXT["Apple / Google<br/>外部の証明基盤"]
+  TK -. "③ Android：失効リストを取得<br/>（キャッシュ可）" .-> EXT
   CL -->|"業務要求"| GW["業務APIゲートウェイ"]
   GW -->|"④ 要求ごとの検証<br/>失効確認・DPoP の jti 記録"| ST
   GW --> BIZ["業務処理・DB"]
   OUT["障害の復旧・アプリ一斉起動<br/>有効期限の同期"] -. "⑤ 一斉更新<br/>（サンダリングハード）" .-> TK
   ERR["401 の連鎖・再試行"] -. "⑥ 再試行の増幅" .-> TK
   </pre></div>
-  <p class="src">①⑤⑥は発行窓口に、②④は状態ストアに集中します。業務処理そのもの（BIZ）の負荷は、認証方式を変えても基本的には変わりません。</p>
+  <p class="src">①⑤⑥は発行窓口に、②④は状態ストアに集中します。③で外部の証明基盤に問い合わせるのは、iOS（App Attest）では端末です。発行窓口は受け取った証明をローカルで検証します。Android（Key Attestation）では、発行窓口が取得するのはキャッシュできる失効リストです。業務処理そのもの（BIZ）の負荷は、認証方式を変えても基本的には変わりません。</p>
 </section>
 
 <section>
@@ -107,7 +129,7 @@ flowchart LR
     </tbody>
   </table></div>
   <ul>
-    <li><b>一斉更新</b>：障害の復旧後に 100 万台が 60 秒以内に一斉に更新すると、約 16,667 件/秒です。これは 5 分期限の平常時（3,333 件/秒）の 5 倍にあたります。</li>
+    <li><b>一斉更新</b>：障害の復旧後に 100 万台が 60 秒間に均等に更新すると、平均で約 16,667 件/秒です。これは 5 分期限の平常時（3,333 件/秒）の 5 倍にあたります。更新が偏れば、瞬間の値はこれより高くなります。</li>
     <li><b>DPoP の再利用防止</b>：保護APIへの要求が 20,000 件/秒で、証明の受付窓を 60 秒とすると、状態ストアへの書き込みは 20,000 件/秒、保持する件数は約 120 万件になります。</li>
   </ul>
   <p class="src">発行頻度は有効期限に反比例します。期限を短くするほど安全側に寄りますが、その分の発行負荷は発行窓口に集まります。</p>
@@ -141,33 +163,38 @@ flowchart TD
 
   P2 --> V1["安価な検証を先に行う<br/>署名・期限・iss/aud をローカルで検証<br/>公開鍵（JWKS）はキャッシュ"]
   V1 -- "不成立" --> DENY["拒否（状態ストアに触れない）"]
-  V1 -- "成立" --> V2{"高リスクのAPIか"}
-  V2 -- "高リスク" --> V3["状態を伴う検証<br/>DPoP の jti・失効を確認<br/>鍵ごとに分割したストア"]
-  V2 -- "一般" --> V4["失効は配布済みの小さな失効リストで確認<br/>短い期限が失効の上限になる"]
+  V1 -- "成立" --> V2{"API台帳の data_class で<br/>jti の保存を省くと<br/>明示指定されているか"}
+  V2 -- "指定なし（個人データ・更新APIを含む）" --> V3["高リスク：状態を伴う検証<br/>DPoP証明と cnf.jkt の一致<br/>jti の再利用検出（全受入ノードで共有）・失効を確認<br/>鍵ごとに分割したストア"]
+  V2 -- "明示指定あり（一般）" --> V4["一般：失効は配布済みの小さな失効リストで確認<br/>短い期限が失効の上限になる"]
   V3 --> AZ["業務認可"]
   V4 --> AZ
   AZ --> BIZ["業務処理"]
   </pre></div>
-  <p class="src">要点は 3 つです。重い検証を発行時に集めること、業務APIはローカルで検証できるトークン（JWT と公開鍵キャッシュ）を使い、要求ごとに認証サーバーへ問い合わせないこと、状態を伴う検証は高リスクのAPIに絞ることです。</p>
+  <p class="src">要点は 3 つです。重い検証を発行時に集めること、業務APIはローカルで検証できるトークン（JWT と公開鍵キャッシュ）を使い、要求ごとに認証サーバーへ問い合わせないこと、状態を伴う検証を省くのは台帳で明示した一般APIだけにすることです。高リスク／一般の境界は「考え方の前提」の「境界」の行によります（再精査 P1）。</p>
 </section>
 
 <section>
   <h2>図3　一斉更新が起きたときの段階的な再開</h2>
   <div class="diagram"><pre class="mermaid">
 flowchart TD
-  O0(["障害が復旧"]) --> O1["発行窓口の受付枠を小さい値から開始"]
+  O0(["障害が復旧"]) --> O1["H（復帰保留）<br/>発行窓口の受付枠を小さい値から開始"]
   O1 --> O2["期限内のトークンを持つ端末はそのまま業務を継続<br/>（有効期限そのものが猶予になる）"]
   O1 --> O3["新規発行は枠の範囲で受け付け<br/>超えた分には 503 ＋ ずらした Retry-After"]
-  O3 --> O4{"待ち行列・最古の待機時間・<br/>状態ストアの遅延が収束したか"}
+  O3 --> O4{"待ち行列・最古の待機時間・<br/>状態ストアの遅延が収束し<br/>その状態が継続期間（stable_duration）続いたか"}
   O4 -- "否" --> O3
-  O4 -- "可" --> O5["受付枠を一段だけ上げる"]
-  O5 --> O6{"再び悪化したか"}
-  O6 -- "悪化" --> O1
+  O4 -- "可" --> O4B{"結果不明の操作の整合が済んだか"}
+  O4B -- "否" --> O3
+  O4B -- "済" --> O4C{"H の解除を人が承認したか"}
+  O4C -- "未承認" --> O3
+  O4C -- "承認" --> O5["受付枠を一段だけ上げる"]
+  O5 --> O6{"継続期間の間に<br/>再び悪化したか"}
+  O6 -- "悪化" --> OD["D（縮退）に戻す<br/>元の大きな枠へ即座に戻さない"]
+  OD -. "復帰条件を満たしたら" .-> O1
   O6 -- "安定" --> O7{"通常の枠に達したか"}
   O7 -- "否" --> O5
   O7 -- "達した" --> DONE(["通常運用"])
   </pre></div>
-  <p class="src">C の資源状態 D（縮退）→ H（復帰保留）→ 段階的な再開にあたります。悪化の検知は速く、復帰はゆっくり行います。Retry-After を全端末で同じ値にすると、次の一斉更新を作ってしまいます。</p>
+  <p class="src">C の資源状態 D（縮退）→ H（復帰保留）→ 段階的な再開にあたります。H の解除には、人間の承認（C:223）、結果不明の操作の整合と回復の継続期間（C §6.1）、提言 §8 の stable_duration を条件にします（再精査 P2）。再び悪化したときは H ではなく D に戻します（提言 §8「再悪化 → D」）。継続期間などの数値は未確定です。悪化の検知は速く、復帰はゆっくり行います。Retry-After を全端末で同じ値にすると、次の一斉更新を作ってしまいます。</p>
 </section>
 
 <section>
@@ -177,11 +204,11 @@ flowchart TD
     <tbody>
       <tr><td>① 平常時の発行負荷</td><td>リスクに応じて有効期限を分ける（高リスクは短く、一般は長く）。トークンを期限まで再利用する</td><td>期限が長いほど、盗まれたときに使われる時間が延びる</td></tr>
       <tr><td>② 発行時の状態の読み書き</td><td>重い検証を発行時だけに集める。challenge・counter・発行記録を一つのトランザクションで確定する</td><td>状態の正本をどこに置くかを先に決める必要がある（提言 §6）</td></tr>
-      <tr><td>③ 外部の証明基盤</td><td>証明は端末登録のときだけ行う。日常の更新には使わない</td><td>外部基盤が止まると、新規の登録は保留になる</td></tr>
-      <tr><td>④ 要求ごとの検証</td><td>JWT をローカルで検証し、公開鍵はキャッシュする。要求ごとの問い合わせ（introspection）は避ける。状態を伴う検証は高リスクAPIだけにする。DPoP の jti ストアは鍵ごとに分割し、受付窓を短くする（サーバー nonce も使える）</td><td>一般APIの失効は即時ではなく、最大で有効期限分だけ遅れる</td></tr>
+      <tr><td>③ 外部の証明基盤</td><td>証明は端末登録のときだけ行う。日常の更新には使わない。Android の失効リストはキャッシュする</td><td>外部基盤が止まると、新規の登録は保留になる</td></tr>
+      <tr><td>④ 要求ごとの検証</td><td>JWT をローカルで検証し、公開鍵はキャッシュする。要求ごとの問い合わせ（introspection）は避ける。jti の保存を省くのは、台帳で明示した一般APIだけにする（個人データ・更新APIは省かない）。DPoP の jti ストアは鍵ごとに分割し、受付窓を短くする（サーバー nonce も使える）</td><td>一般APIの失効は即時ではなく、最大で有効期限分だけ遅れる。省略の範囲は台帳で明示的に決める</td></tr>
       <tr><td>⑤ 一斉更新</td><td>端末側のジッターと Single-Flight。発行窓口の専用枠。段階的な再開。Retry-After をずらす</td><td>再開に時間がかかる</td></tr>
       <tr><td>⑥ 再試行の増幅</td><td>上限つきの指数バックオフ。401 での自動更新は 1 回で打ち切る。503 と 429 を再認証に変えない</td><td>利用者には「しばらく待つ」と表示する必要がある</td></tr>
-      <tr><td>社内サービス同士</td><td>mTLS の接続を使い回し、送信者拘束を要求ごとではなく接続ごとに確認する</td><td>接続を集約する経路の設計が必要</td></tr>
+      <tr><td>社内サービス同士</td><td>mTLS の接続を使い回し、TLS の握手（クライアント証明書の検証）は接続ごとに済ませる。トークンとクライアント証明書の照合（RFC 8705 の cnf の x5t#S256）は要求ごとに行うが、ハッシュの比較だけなので安い</td><td>接続を集約する経路の設計が必要</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -192,7 +219,7 @@ flowchart TD
     <li>混雑を理由に有効期限を延ばしたり、期限切れのトークンを通したりする（A の 60 分猶予案。精査 F09 で 65 分の利用窓になると指摘）。</li>
     <li>状態ストアが重いからといって、再利用防止や counter の検証を省く（B の案。精査 F04）。</li>
     <li>未受理の要求に 200 を返す。拒否は 503 や 429 で正直に返す（C §5.5）。</li>
-    <li>CPU 使用率だけを見て、一気に通常運用へ戻す（C §6.3）。</li>
+    <li>CPU 使用率だけを見て、一気に通常運用へ戻す（C §5.2、C:212）。</li>
   </ul>
 </section>
 
@@ -202,91 +229,29 @@ flowchart TD
     <li>動的APIで増える負荷は、発行窓口と状態ストア、そして一斉更新の瞬間に集中します。業務APIの検証はローカル検証で抑えられます。</li>
     <li>最も効く対策は、重い検証を発行時に集め、業務APIをローカル検証にする「分離」と、端末側のジッター・合流・バックオフで「同期を崩す」ことの 2 つです。</li>
     <li>発行窓口と業務APIの処理枠を分けると、一方の混雑がもう一方を止めなくなります。</li>
-    <li>負荷対策は入口の枠と時間の使い方だけで行います。認証・認可の条件は変えません。</li>
+    <li>jti の保存を省けるのは、API 台帳で明示的に指定した一般APIだけです。個人データ・更新APIは送信者拘束と全受入ノードでの再利用検出を省きません。</li>
+    <li>負荷対策は入口の枠と時間の使い方だけで行います。認証・認可の条件は変えません。復帰保留（H）の解除には人の承認が要ります。</li>
   </ul>
 </section>
 
 <section>
   <h2>要点（要約）</h2>
-  <p>負荷の発生点は 6 か所です。分離（発行と業務）、同期を崩す（ジッター・合流・バックオフ）、処理枠の分割、状態を伴う検証を高リスクAPIだけに絞る、段階的に再開する、の 5 つで回避します。有効期限は安全性と発行負荷の釣り合いで決め、数値は実測で確定させます。</p>
+  <p>負荷の発生点は 6 か所です。分離（発行と業務）、同期を崩す（ジッター・合流・バックオフ）、処理枠の分割、状態を伴う検証の省略を台帳で明示した一般APIに限る、条件つきで段階的に再開する、の 5 つで回避します。有効期限は安全性と発行負荷の釣り合いで決め、数値は実測で確定させます。</p>
 </section>
 </div>
 
-<!--claude-mermaid-runtime-begin:3477-->
-<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
-<script src="/_runtime/mermaid-11.16.1.min.js"></script>
-<script>(function(){
-var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
-if(typeof mermaid==='undefined')return;
-var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
-if(!pres.length)return;
-var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
-var root=document.documentElement;
-var items=pres.map(function(pre){
-var mount=document.createElement('div');mount.className='mermaid-diagram';
-return {pre:pre,mount:mount,src:pre.textContent||''};
+<script>
+/* 公開ページでは配信側が Mermaid を組み込む。ローカルで開いた場合だけ CDN から読み込んで描画する（再精査 P13） */
+window.addEventListener('load', function () {
+  if (typeof mermaid !== 'undefined' || document.querySelector('.mermaid-diagram')) return;
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js';
+  s.onload = function () {
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'neutral', flowchart: { useMaxWidth: true } });
+    mermaid.run({ querySelector: 'pre.mermaid' });
+  };
+  document.head.appendChild(s);
 });
-var seq=0;
-var renderGen=0;
-var lastKey='';
-function pageBg(fallback){
-var els=[document.body,document.documentElement];
-for(var i=0;i<els.length;i++){
-var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
-if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
-}
-return fallback;
-}
-function render(){
-var theme=root.getAttribute('data-theme');
-var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
-var pal=dark?CFG.palettes.dark:CFG.palettes.light;
-var bg=pageBg(pal.bg);
-var key=(dark?'d':'l')+'|'+bg;
-if(key===lastKey)return;
-lastKey=key;
-var gen=++renderGen;
-var font=getComputedStyle(document.body).fontFamily||'sans-serif';
-var nat={useMaxWidth:false};
-mermaid.initialize({
-startOnLoad:false,securityLevel:'strict',theme:'base',
-flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
-gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
-quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
-packet:nat,kanban:nat,architecture:nat,radar:nat,
-themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
-primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
-nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
-clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
-darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
-attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
-fontSize:'16px',fontFamily:font},
-themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
-});
-items.forEach(function(it){
-var id='claude-mermaid-'+seq++;
-mermaid.render(id,it.src).then(function(r){
-if(gen!==renderGen)return;
-var prev=it.pre.previousElementSibling;
-if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
-it.mount.innerHTML=r.svg;
-if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
-it.pre.style.display='none';
-},function(){
-var scratch=document.getElementById(id);
-if(scratch)scratch.parentNode.removeChild(scratch);
-scratch=document.getElementById('d'+id);
-if(scratch)scratch.parentNode.removeChild(scratch);
-if(gen!==renderGen)return;
-if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
-it.pre.style.display='';
-});
-});
-}
-render();
-if(mq&&mq.addEventListener)mq.addEventListener('change',render);
-if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
-})();</script>
-<!--claude-mermaid-runtime-end-->
-
-</body></html>
+</script>
+</body>
+</html>
