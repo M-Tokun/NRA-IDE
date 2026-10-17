@@ -134,7 +134,7 @@ operation_idの保持はproofの短い保持時間とは別です。契約終了
 
 入口ではサイズ、接続、同時実行、待ち行列、deadlineを安価に確認し、許容量を超えた要求を高コストの検証へ進めません。未認証ヘッダーの主体を、正規利用者の優先枠の根拠にしません。資格検証後に、主体・tenantごとの制限を適用します。
 
-**図2　負荷を抑えた要求経路**
+**図2-1　負荷を抑えた要求経路（端末合流・入口制御・トークン発行枠）**
 
 ```mermaid
 flowchart TD
@@ -147,10 +147,13 @@ flowchart TD
   C3 --> E0
   E0 -- "超過" --> R503["503 ＋ Retry-After"]
   R503 -- "発行・照会要求への応答" --> RETRY
+  R503 -- "業務要求への応答" --> BR{"業務要求の再試行回数と<br/>全体期限に余裕があるか"}
+  BR -- "ある" --> SEND
+  BR -- "ない" --> STOP
   E0 -- "受入" --> SPLIT{"どの処理枠か"}
   subgraph POOLS["処理枠を分ける"]
     SPLIT -- "トークン発行・同発行操作の照会" --> P1["発行専用の枠<br/>業務・結果照会の枠と分け、総量内で予約"]
-    SPLIT -- "業務API" --> P2["業務専用の枠"]
+    SPLIT -- "業務API" --> P2(["業務専用の枠（図2-2へ）"])
   end
   P1 --> TK["発行窓口<br/>登録・更新に必要な証明と本人資格を検証"]
   TK --> ST1["状態正本<br/>challenge・counter・発行操作を原子的に確定<br/>同操作の照会は状態別に応答"]
@@ -167,28 +170,15 @@ flowchart TD
   PROOF --> RETRY
   C4 -- "処理中・通信結果不明" --> LOOK["同じ発行操作IDで照会・許可された再送<br/>確定成功を推測しない"]
   LOOK --> RETRY
-  P2 --> V1["安価な検証を先に行う<br/>署名・期限・iss/aud をローカルで検証<br/>公開鍵（JWKS）はキャッシュ"]
-  V1 -- "不成立" --> DENY["拒否（状態ストアに触れない）"]
-  V1 -- "成立" --> VP{"全保護APIで送信者拘束を検証<br/>DPoP：鍵・署名・htm/htu/ath・時刻・必要nonce<br/>mTLS：検証済み接続証明書との拘束"}
-  VP -- "不成立・未確認" --> DENY
-  VP -- "成立" --> V3{"採用プロファイルの再利用防止・失効を確認<br/>DPoPは全受入ノードで一意なjti記録<br/>署名等を確認してから状態を記録"}
-  V3 -- "不成立・状態不明" --> DENY
-  V3 -- "成立" --> AZ["業務認可・一意な操作受付<br/>詳細は移行フロー図4"]
-  AZ --> BIZ["認可済み業務・操作記録"]
-  BIZ --> FINAL{"送信前にDTO・実件数・UTF-8バイト数を照合<br/>正本で返却枠を原子的に確定できたか"}
-  FINAL -- "可" --> RESULT["業務応答"]
-  FINAL -- "否" --> NOSEND["業務データを返さない<br/>確定済み操作は保持して状態照会"]
   %% READABILITY: role colors do not certify implementation or validation.
   classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
-  class C1,C3,SEND,P1,P2,TK,ST1,SAVE,V1,AZ,BIZ normal;
+  class C1,C3,SEND,P1,P2,TK,ST1,SAVE normal;
   classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
-  class C2,E0,SPLIT,C4,RETRY,VP,V3,FINAL review;
-  classDef ok fill:#edf8f0,stroke:#31704e,stroke-width:3px,color:#17283b;
-  class RESULT ok;
+  class C2,E0,SPLIT,C4,RETRY,BR review;
   classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
-  class R503,C5,PROOF,LOOK,NOSEND caution;
+  class R503,C5,PROOF,LOOK caution;
   classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
-  class STOP,DENY danger;
+  class STOP danger;
   linkStyle 0 stroke:#7050a3,stroke-width:2.5px;
   linkStyle 1 stroke:#245ca6,stroke-width:2.5px;
   linkStyle 2 stroke:#245ca6,stroke-width:2.5px;
@@ -197,34 +187,65 @@ flowchart TD
   linkStyle 5 stroke:#946700,stroke-width:2.5px;
   linkStyle 6 stroke:#7050a3,stroke-width:2.5px;
   linkStyle 7 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 8 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 9 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 10 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 8 stroke:#946700,stroke-width:2.5px;
+  linkStyle 9 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 10 stroke:#7050a3,stroke-width:2.5px;
   linkStyle 11 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 12 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 12 stroke:#245ca6,stroke-width:2.5px;
   linkStyle 13 stroke:#245ca6,stroke-width:2.5px;
   linkStyle 14 stroke:#245ca6,stroke-width:2.5px;
   linkStyle 15 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 16 stroke:#946700,stroke-width:2.5px;
+  linkStyle 16 stroke:#245ca6,stroke-width:2.5px;
   linkStyle 17 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 18 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 19 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 20 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 21 stroke:#946700,stroke-width:2.5px;
-  linkStyle 22 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 23 stroke:#946700,stroke-width:2.5px;
-  linkStyle 24 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 25 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 26 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 18 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 19 stroke:#946700,stroke-width:2.5px;
+  linkStyle 20 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 21 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 22 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 23 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 24 stroke:#946700,stroke-width:2.5px;
+  linkStyle 25 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 26 stroke:#946700,stroke-width:2.5px;
   linkStyle 27 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 28 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 29 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 30 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 31 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 32 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 33 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 34 stroke:#31704e,stroke-width:2.5px;
-  linkStyle 35 stroke:#946700,stroke-width:2.5px;
+```
+
+**図2-2　負荷を抑えた要求経路（業務API専用の枠：安価な検証から状態記録・返却量確定まで）**
+
+```mermaid
+flowchart TD
+  P2(["業務専用の枠（図2-1から接続）"]) --> V1["安価な検証を先に行う<br/>署名・期限・iss/aud をローカルで検証<br/>公開鍵（JWKS）はキャッシュ"]
+  V1 -- "不成立" --> DENY["拒否（状態ストアに触れない）"]
+  V1 -- "成立" --> VP{"全保護APIで送信者拘束を検証<br/>DPoP：鍵・署名・htm/htu/ath・時刻・必要nonce<br/>mTLS：検証済み接続証明書との拘束"}
+  VP -- "不成立・未確認" --> DENY
+  VP -- "成立" --> V3{"採用プロファイルの再利用防止・失効を確認<br/>DPoPは全受入ノードで一意なjti記録<br/>署名等を確認してから状態を記録"}
+  V3 -- "不成立・状態不明" --> DENY
+  V3 -- "成立" --> AZ["業務認可・一意な操作受付<br/>詳細は移行フロー図4-2"]
+  AZ --> BIZ["認可済み業務・操作記録"]
+  BIZ --> FINAL{"送信前にDTO・実件数・UTF-8バイト数を照合<br/>正本で返却枠を原子的に確定できたか"}
+  FINAL -- "可" --> RESULT["業務応答"]
+  FINAL -- "否" --> NOSEND["業務データを返さない<br/>確定済み操作は保持して状態照会"]
+  %% READABILITY: role colors do not certify implementation or validation.
+  classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
+  class P2,V1,AZ,BIZ normal;
+  classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
+  class VP,V3,FINAL review;
+  classDef ok fill:#edf8f0,stroke:#31704e,stroke-width:3px,color:#17283b;
+  class RESULT ok;
+  classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
+  class NOSEND caution;
+  classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
+  class DENY danger;
+  linkStyle 0 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 1 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 2 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 3 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 4 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 5 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 6 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 7 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 8 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 9 stroke:#31704e,stroke-width:2.5px;
+  linkStyle 10 stroke:#946700,stroke-width:2.5px;
 ```
 
 | 処理枠 | 役割 | 確保する理由 |

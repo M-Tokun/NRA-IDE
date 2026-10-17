@@ -331,7 +331,7 @@ DPoP: &lt;signed_proof_jwt&gt;</code></pre>
 <h2>9. 保護APIの受付と、重複操作の仕様</h2>
 
 <p>入口制限、資格・proof検証、現在の登録・失効確認、proofの一意受入、主体別の枠、対象への認可を通した後に、操作の種別と状態を判定します。処理中や結果不明を成功と扱いません。</p>
-<p><b>図4　移行後の日常リクエスト受付</b></p>
+<p><b>図4-1　移行後の日常リクエスト受付（入口制限・資格検証・枠判定）</b></p>
 <div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-3"><label for="diagram-fit-3">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
 flowchart TD
   Q0(["要求が到着"]) --> Q1{"入口の安価な上限判定<br/>通信量・サイズ・同時接続"}
@@ -339,6 +339,7 @@ flowchart TD
   Q1 -- "受入" --> Q2{"経路の種別"}
   Q2 -- "公開API" --> PUB["公開用の処理枠<br/>→ 公開専用データ"]
   Q2 -- "登録・資格発行・トークン更新" --> AUTH["認証用の処理枠<br/>→ 本人資格・証明・状態を検証<br/>→ 永続確定"]
+  AUTH --> AEND(["確定した結果を端末へ返す<br/>（端末側の保存・再試行はトラフィック対策 図2-1）"])
   Q2 -- "保護API" --> V1{"JWT の署名・期限・iss/aud と<br/>採用した送信者拘束を検証<br/>必要な再利用防止・失効確認が成立するか"}
   V1 -- "期限切れ" --> E1["401（期限切れ）を返す"]
   E1 --> SF{"この業務要求での自動更新は未実行か<br/>再試行回数・全体期限に余裕があるか"}
@@ -348,8 +349,38 @@ flowchart TD
   V1 -- "不正・必要状態が不明" --> DENY["防御拒否・保留と監査"]
   V1 -- "成立" --> Q3{"主体ごとの処理枠・応答量の上限"}
   Q3 -- "超過" --> R429["429"]
-  Q3 -- "範囲内" --> Q4{"対象へのアクセス・結果受取権限<br/>主体×tenant×対象×操作を確認"}
-  Q4 -- "権限なし" --> DENY
+  Q3 -- "範囲内" --> NEXT(["図4-2：対象認可・重複操作判定へ"])
+  %% READABILITY: role colors do not certify implementation or validation.
+  classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
+  class Q0,PUB,AUTH,AEND,NEXT normal;
+  classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
+  class Q1,Q2,V1,SF,Q3 review;
+  classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
+  class NA,E1,UP,R429 caution;
+  classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
+  class E401,DENY danger;
+  linkStyle 0 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 1 stroke:#946700,stroke-width:2.5px;
+  linkStyle 2 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 3 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 4 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 5 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 6 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 7 stroke:#946700,stroke-width:2.5px;
+  linkStyle 8 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 9 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 10 stroke:#946700,stroke-width:2.5px;
+  linkStyle 11 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 12 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 13 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 14 stroke:#946700,stroke-width:2.5px;
+  linkStyle 15 stroke:#245ca6,stroke-width:2.5px;
+</pre></div></div>
+<p><b>図4-2　移行後の日常リクエスト受付（対象認可・重複操作判定・業務確定と返却）</b></p>
+<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-4"><label for="diagram-fit-4">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
+flowchart TD
+  START(["図4-1（処理枠の範囲内）から接続"]) --> Q4{"対象へのアクセス・結果受取権限<br/>主体×tenant×対象×操作を確認"}
+  Q4 -- "権限なし" --> DENY["防御拒否・保留と監査"]
   Q4 -- "権限あり" --> Q4B{"同じ operation_id の<br/>操作記録があるか"}
   Q4B -- "ある" --> KIND{"実行要求の再送か、状態照会か"}
   KIND -- "実行要求の再送" --> Q4C{"元業務の digest・主体・鍵・<br/>現在の受取権限が一致するか"}
@@ -361,7 +392,9 @@ flowchart TD
   OS -- "処理中" --> WAIT["処理中を返す<br/>同じ operation_id で照会"]
   OS -- "外部結果不明" --> UNK["結果不明として照会・突合<br/>成功・未実行を推定せず、新しいIDで実行しない"]
   Q4C -- "不一致" --> R409["409（元の記録は上書きしない）"]
-  Q4B -- "ない" --> CLAIM{"同一トランザクション内で一意な受付を確保<br/>tenant・主体・操作種別・operation_id の契約スコープ"}
+  Q4B -- "ない" --> KIND0{"実行要求か、状態照会か"}
+  KIND0 -- "実行要求" --> CLAIM{"同一トランザクション内で一意な受付を確保<br/>tenant・主体・操作種別・operation_id の契約スコープ"}
+  KIND0 -- "状態照会" --> NOTFOUND["該当なし（404等）<br/>新規受付・業務処理は行わない"]
   CLAIM -- "競合" --> RELOOK["当該受付トランザクションを戻し<br/>新しい正本スナップショットで有限の再照会"]
   RELOOK --> Q4B
   CLAIM -- "確保" --> NEW{"新規実行の業務状態・入力条件が成立するか"}
@@ -377,72 +410,61 @@ flowchart TD
   FINAL -- "不足・未確認" --> NOSEND["業務データを返さず、制限・保留を通知<br/>確定済み業務は保持し、同じIDで状態照会"]
   Q5 -. "応答消失" .-> UNK
   OK -. "応答消失" .-> UNK
-  UNK -. "照会・再送" .-> Q0
+  UNK -. "照会・再送（図4-1の入口へ）" .-> RETRY_IN(["新しい要求証明で図4-1（要求が到着）へ"])
   %% READABILITY: role colors do not certify implementation or validation.
   classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
-  class Q0,PUB,AUTH,SAME,FAIL,Q5,OUTBOX normal;
+  class START,SAME,FAIL,Q5,OUTBOX,RETRY_IN normal;
   classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
-  class Q1,Q2,V1,SF,Q3,Q4,Q4B,KIND,Q4C,RECEIVE,OS,CLAIM,NEW,SIDE,FINAL review;
+  class Q4,Q4B,KIND0,KIND,Q4C,RECEIVE,OS,CLAIM,NEW,SIDE,FINAL review;
   classDef ok fill:#edf8f0,stroke:#31704e,stroke-width:3px,color:#17283b;
   class OK ok;
   classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
-  class NA,E1,UP,R429,WAIT,UNK,RELOOK,NOSEND caution;
+  class WAIT,UNK,RELOOK,NOSEND caution;
   classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
-  class E401,DENY,R409 danger;
+  class DENY,R409,NOTFOUND danger;
   linkStyle 0 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 1 stroke:#946700,stroke-width:2.5px;
+  linkStyle 1 stroke:#b43d47,stroke-width:2.5px;
   linkStyle 2 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 3 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 4 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 3 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 4 stroke:#7050a3,stroke-width:2.5px;
   linkStyle 5 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 6 stroke:#946700,stroke-width:2.5px;
-  linkStyle 7 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 8 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 9 stroke:#946700,stroke-width:2.5px;
-  linkStyle 10 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 11 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 12 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 13 stroke:#946700,stroke-width:2.5px;
+  linkStyle 6 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 7 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 8 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 9 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 10 stroke:#946700,stroke-width:2.5px;
+  linkStyle 11 stroke:#946700,stroke-width:2.5px;
+  linkStyle 12 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 13 stroke:#7050a3,stroke-width:2.5px;
   linkStyle 14 stroke:#7050a3,stroke-width:2.5px;
   linkStyle 15 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 16 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 16 stroke:#946700,stroke-width:2.5px;
   linkStyle 17 stroke:#7050a3,stroke-width:2.5px;
   linkStyle 18 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 19 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 19 stroke:#245ca6,stroke-width:2.5px;
   linkStyle 20 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 21 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 22 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 23 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 24 stroke:#946700,stroke-width:2.5px;
-  linkStyle 25 stroke:#946700,stroke-width:2.5px;
-  linkStyle 26 stroke:#b43d47,stroke-width:2.5px;
-  linkStyle 27 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 21 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 22 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 23 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 24 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 25 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 26 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 27 stroke:#31704e,stroke-width:2.5px;
   linkStyle 28 stroke:#946700,stroke-width:2.5px;
-  linkStyle 29 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 30 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 31 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 32 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 33 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 34 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 35 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 36 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 37 stroke:#245ca6,stroke-width:2.5px;
-  linkStyle 38 stroke:#7050a3,stroke-width:2.5px;
-  linkStyle 39 stroke:#31704e,stroke-width:2.5px;
-  linkStyle 40 stroke:#946700,stroke-width:2.5px;
-  linkStyle 41 stroke:#946700,stroke-width:2.5px;
-  linkStyle 42 stroke:#946700,stroke-width:2.5px;
-  linkStyle 43 stroke:#946700,stroke-width:2.5px;
+  linkStyle 29 stroke:#946700,stroke-width:2.5px;
+  linkStyle 30 stroke:#946700,stroke-width:2.5px;
+  linkStyle 31 stroke:#946700,stroke-width:2.5px;
 </pre></div></div>
 <div class="tbl"><table><thead><tr><th>要求と操作状態</th><th>必要な確認</th><th>実施する処理</th></tr></thead><tbody>
 <tr><td>同じ実行要求の再送・結果確定</td><td>現在の本人資格・鍵・受取権限、元業務digest一致</td><td>元の確定結果を候補にする。副作用を再実行しない</td></tr>
 <tr><td>状態照会</td><td>保存操作の識別と現在の受取権限</td><td>状態だけを照会する。GET本文を元POST本文と比較しない</td></tr>
 <tr><td>PENDING</td><td>同じ操作への照会権限</td><td>処理中を返す。回数・期限つきで照会を案内</td></tr>
 <tr><td>UNKNOWN</td><td>外部結果等の照会・突合条件</td><td>結果不明を保持し、新IDで同じ操作を再実行しない</td></tr>
+<tr><td>状態照会・記録なし</td><td>現在の本人資格・鍵・対象への権限</td><td>該当なしを返す。新規受付・業務処理・副作用は行わない</td></tr>
 <tr><td>新規実行要求・記録なし</td><td>一意受付の確保、業務入力と新規実行条件</td><td>DB内なら受付と業務変更を同一トランザクションで確定</td></tr>
 <tr><td>同一IDでdigest不一致</td><td>現在の認証・認可は別途必要</td><td>409。元記録を上書きしない</td></tr>
 </tbody></table></div>
-<p>存在確認の直後に並行要求が到着するため、SELECTで「記録なし」と判定するだけでは不十分です。一意制約の確保に失敗した要求はトランザクションを戻し、新しい正本スナップショットで有限回だけ再照会します。PENDINGの放置を理由に別IDで再実行せず、所有権・期限・再開条件を確認する復旧処理へ送ります。</p>
+<p>存在確認の直後に並行要求が到着するため、SELECTで「記録なし」と判定するだけでは不十分です。状態照会で記録がない場合は、新規の受付を確保せず該当なしを返します。一意制約の確保に失敗した要求はトランザクションを戻し、新しい正本スナップショットで有限回だけ再照会します。PENDINGの放置を理由に別IDで再実行せず、所有権・期限・再開条件を確認する復旧処理へ送ります。</p>
 <p>外部決済等は、業務と同じ確定単位でoutboxを保存し、外部へも同じ操作IDを渡します。外部の冪等性・結果照会が成立しない構成は、自動復旧による一回実行を保証したと扱いません。結果不明のまま止め、突合・運用判断で解消します。</p>
 <p>結果送信直前には、現在の受取権限、DTOの実件数、UTF-8本文バイト数、全体・tenant・主体の返却枠を再確認し、枠を正本で原子的に確定します。返却を止めても、確定済みの業務を「未受理」へ戻しません。</p>
 </section>
@@ -487,7 +509,7 @@ flowchart TD
 
 <p>原資料A/Bの現況は、アプリ内の静的APIキーと長期セッションでバックエンドを呼ぶ構成です。実サービスを今回調査して確定した現況ではありません。NRA-IDEのLLMプロバイダ用APIキーとは対象境界を分けます。</p>
 <p><b>図1　現況（静的APIキー方式）</b></p>
-<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-4"><label for="diagram-fit-4">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
+<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-5"><label for="diagram-fit-5">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
 flowchart LR
   APP["モバイルアプリ<br/>静的APIキーを内蔵<br/>長期セッショントークンを保持"] -->|"X-API-Key ＋ 旧Session"| GW["APIゲートウェイ"]
   GW --> BE["業務ロジック・DB"]
@@ -510,7 +532,7 @@ flowchart LR
 </pre></div></div>
 <p>M0では、実際の全経路、データ区分、認可、旧資格、処理容量、復旧手段を棚卸しします。未分類経路は保護APIとして扱います。移行済みかどうかはサーバー台帳で判断し、新ヘッダーの欠落を理由に旧方式へ戻しません。</p>
 <p><b>図2　移行全体フロー（M0 → M5）</b></p>
-<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-5"><label for="diagram-fit-5">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
+<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-6"><label for="diagram-fit-6">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
 flowchart TD
   START(["現況：静的APIキー＋長期セッション"]) --> M0
   subgraph PRE["先行して行うこと"]
