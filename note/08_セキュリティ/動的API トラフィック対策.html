@@ -3,106 +3,151 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>動的API トラフィック対策</title>
+<title>動的鍵の更新・負荷制御・障害時運用の仕様</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: 単一カラムの技術メモ。事実/推定/計算を左の札で区別し、図は横スクロール枠に収める */
+/* Keep all reading surfaces light, including when the OS uses a dark theme. */
 :root {
-  --bg: #f6f7f5;
-  --surface: #ffffff;
-  --fg: #1d2421;
-  --muted: #5b6661;
-  --line: #d5dbd7;
-  --accent: #1f6f5c;
-  --fact: #1f6f5c;
-  --est: #9a6a12;
-  --unk: #a33a3a;
-  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", "IPAGothic", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+  --bg: #f3f6fb; --surface: #ffffff; --fg: #17283b; --muted: #465b73;
+  --line: #c3d2e3; --accent: #245ca6; --fact: #246247; --est: #805800; --unk: #9e3036;
+  --font-body: "Yu Gothic UI", "Meiryo", "Hiragino Sans", system-ui, sans-serif;
+  --font-mono: Consolas, "SFMono-Regular", ui-monospace, monospace;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #141917; --surface: #1c2320; --fg: #e3e9e5; --muted: #9aa7a1; --line: #2f3a35;
-    --accent: #5fc3a6; --fact: #5fc3a6; --est: #e0b45a; --unk: #ef8a8a; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #141917; --surface: #1c2320; --fg: #e3e9e5; --muted: #9aa7a1; --line: #2f3a35;
-  --accent: #5fc3a6; --fact: #5fc3a6; --est: #e0b45a; --unk: #ef8a8a; color-scheme: dark;
-}
-body {
-  margin: 0;
-  background: var(--bg); color: var(--fg); font-family: var(--font-body);
-  font-size: 15px; line-height: 1.75;
-}
-.wrap {
-  max-width: 960px; margin: 0 auto;
-  padding-block: 32px 64px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: grid; gap: 44px;
-}
-header { display: grid; gap: 8px; }
-.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-h1 { font-size: 28px; line-height: 1.35; margin: 0; text-wrap: balance; font-weight: 600; }
-h2 { font-size: 19px; margin: 0; text-wrap: balance; font-weight: 600; }
-p { margin: 0; max-width: 70ch; }
-section { display: grid; gap: 14px; min-width: 0; }
-code { font-family: var(--font-mono); font-size: .9em; background: var(--surface); border: 1px solid var(--line); padding: 0 4px; border-radius: 3px; overflow-wrap: anywhere; }
-.status { display: grid; gap: 10px; }
-.row { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: start; }
-.tag { font-family: var(--font-mono); font-size: 12px; font-weight: 500; padding: 2px 0; text-align: center; border: 1px solid currentColor; border-radius: 3px; }
-.tag.fact { color: var(--fact); } .tag.est { color: var(--est); } .tag.unk { color: var(--unk); }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { margin: 0; color: var(--fg); background: var(--bg); font: 17px/1.9 var(--font-body); }
+.wrap { width: min(1280px, 100%); margin: auto; padding: 32px max(18px, env(safe-area-inset-right)) 72px max(18px, env(safe-area-inset-left)); display: grid; gap: 28px; }
+header { padding: clamp(22px, 4vw, 44px); background: #eaf2fc; border: 3px solid #245ca6; border-top-width: 8px; border-radius: 14px; display: grid; gap: 16px; }
+.eyebrow { color: #365675; font-size: 13px; font-weight: 600; letter-spacing: .04em; overflow-wrap: anywhere; }
+h1 { font-size: clamp(26px, 3vw, 38px); line-height: 1.45; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(20px, 2vw, 25px); line-height: 1.6; margin: 0; padding: 0 0 12px 14px; border-left: 6px solid #245ca6; border-bottom: 2px solid #d4e1ef; }
+p { margin: 0; max-width: 88ch; overflow-wrap: anywhere; }
+section { min-width: 0; padding: clamp(18px, 3vw, 30px); background: #fff; border: 2px solid #b2c7df; border-radius: 12px; display: grid; gap: 20px; }
+section.inference { background: #fffdf4; border: 3px solid #946700; }
+section.inference h2 { border-left-color: #946700; border-bottom-color: #eadba7; }
+a { color: #174e94; text-underline-offset: .2em; text-decoration-thickness: 1.5px; overflow-wrap: anywhere; }
+a:hover { color: #123764; text-decoration-thickness: 3px; }
+a:focus-visible, .diagram:focus-visible { outline: 3px solid #946700; outline-offset: 4px; }
+code { font: .9em/1.6 var(--font-mono); background: #edf3fa; border: 1px solid #b2c7df; border-radius: 4px; padding: 2px 5px; overflow-wrap: anywhere; }
+.status { display: grid; gap: 14px; }
+.row { display: grid; grid-template-columns: 88px 1fr; gap: 16px; align-items: start; padding: 16px; background: #f7faff; border: 2px solid #c3d2e3; border-radius: 8px; }
 .row > div { min-width: 0; }
-.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; }
-.diagram pre.mermaid { margin: 0; min-width: 680px; }
-.mermaid-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
-.src { font-size: 13px; color: var(--muted); }
-ul { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; max-width: 72ch; }
-.tbl { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 600px; }
-th, td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
-th { font-weight: 600; color: var(--muted); font-size: 13px; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 13px; }
-.key { border-left: 3px solid var(--accent); padding-left: 14px; }
-@media print {
-  @page { margin: 14mm 12mm; }
-  body { background: #fff; }
-  .wrap, section, .status { display: block; padding-block: 0; }
-  section { margin-bottom: 26px; }
-  section > * + *, .status > * + * { margin-top: 10px; }
-  .diagram, .tbl { overflow: visible; }
-  .diagram pre.mermaid, table { min-width: 0; }
-  .diagram svg { width: 100%; height: auto; max-height: 225mm; }
-  tr, .row, .diagram { break-inside: avoid; }
-  h2 { break-after: avoid; }
+.tag { font-size: 14px; font-weight: 700; line-height: 1.6; text-align: center; padding: 4px 6px; border: 2px solid currentColor; border-radius: 5px; background: #fff; }
+.tag.fact { color: #246247; background: #edf8f0; }
+.tag.est { color: #805800; background: #fff6d9; border-style: dashed; }
+.tag.unk { color: #805800; background: #fff6d9; border-style: dashed; }
+.diagram { max-width: 100%; max-height: 78vh; overflow: auto; padding: 26px; background: #fcfdff; border: 3px solid #577fae; border-radius: 9px; scrollbar-gutter: stable; }
+.diagram-view { min-width: 0; }
+.diagram-fit { width: 19px; height: 19px; margin: 0 8px 12px 0; accent-color: #245ca6; vertical-align: middle; }
+.diagram-fit + label { font-size: 15px; font-weight: 600; cursor: pointer; }
+.diagram-fit:focus-visible { outline: 3px solid #946700; outline-offset: 4px; }
+.diagram-fit:checked ~ .diagram svg { width: 100% !important; max-width: 100% !important; }
+.diagram-view .diagram-help { margin-bottom: 12px; }
+.diagram pre.mermaid { margin: 0; white-space: pre; font: 14px/1.7 var(--font-mono); color: #17283b; }
+.diagram svg { display: block; margin: 0 auto; max-width: none !important; height: auto; background: #fcfdff; }
+.diagram .nodeLabel, .diagram .edgeLabel { color: #17283b !important; }
+.diagram .edgeLabel, .diagram .edgeLabel p, .diagram .labelBkg { background: #fffdf2 !important; }
+.diagram .edgeLabel rect { fill: #fffdf2 !important; opacity: 1 !important; }
+.diagram .cluster rect { fill: #f2f6fc !important; stroke: #7189aa !important; stroke-width: 2px !important; }
+.diagram .cluster-label { color: #17283b !important; font-weight: 700; }
+.diagram-help { color: #465b73; font-size: 14px; background: #eff5fd; border-left: 4px solid #577fae; padding: 10px 14px; }
+.src { color: var(--muted); font-size: 14px; background: #f5f8fc; padding: 12px 16px; border-left: 3px solid #8fa6c1; }
+ul, ol { margin: 0; padding-left: 1.5em; display: grid; gap: 10px; max-width: 92ch; }
+.tbl { overflow-x: auto; border: 2px solid #718fb5; border-radius: 8px; background: #fff; }
+table { border-collapse: collapse; width: 100%; min-width: 660px; font-size: 16px; line-height: 1.8; }
+th, td { text-align: left; vertical-align: top; padding: 14px 16px; border-right: 1px solid #c3d2e3; border-bottom: 1px solid #c3d2e3; }
+th { color: #173e70; background: #e8f1fc; border-bottom: 3px solid #718fb5; font-weight: 700; }
+tr:nth-child(even) td { background: #f6f9fe; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.key { background: #edf8f0; border: 2px solid #31704e; border-left-width: 6px; padding: 18px 20px 18px 40px; border-radius: 8px; }
+.legend { background: #fff; border: 2px solid #9bb3cf; border-radius: 9px; padding: 18px; display: flex; flex-wrap: wrap; gap: 12px; }
+.legend span { color: #17283b; padding: 7px 12px; border: 3px solid var(--role); border-radius: 6px; background: var(--tint); font-size: 15px; font-weight: 600; }
+.legend .normal { --role: #245ca6; --tint: #edf4ff; }
+.legend .review { --role: #7050a3; --tint: #f4effb; }
+.legend .ok { --role: #31704e; --tint: #edf8f0; }
+.legend .caution { --role: #946700; --tint: #fff6d9; border-style: dashed; }
+.legend .danger { --role: #b43d47; --tint: #fff0f1; }
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .wrap { gap: 18px; padding: 16px 12px 40px; }
+  header, section { padding: 20px 16px; }
+  .row { grid-template-columns: 1fr; gap: 10px; padding: 12px; }
+  .tag { justify-self: start; min-width: 88px; }
+  .diagram { padding: 16px; max-height: 72vh; }
 }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media print {
+  @page { margin: 12mm; }
+  body { background: #fff; font-size: 11pt; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .wrap { display: block; width: 100%; padding: 0; }
+  header, section { margin-bottom: 18px; padding: 16px; }
+  section > * + * { margin-top: 12px; }
+  .diagram, .tbl { max-height: none; overflow: visible; }
+  .diagram svg { width: 100% !important; max-width: 100% !important; }
+  .diagram pre.mermaid { white-space: pre-wrap; overflow-wrap: anywhere; }
+  table { min-width: 0; font-size: 9pt; }
+  h2 { break-after: avoid; }
+  tr, .row { break-inside: avoid; }
+  .diagram-help { display: none; }
+  .diagram-fit, .diagram-fit + label { display: none; }
+}
+.code-example { background:#f3f7fd; color:#17283b; border:2px solid #718fb5; border-radius:8px; padding:18px; overflow:auto; font:14px/1.8 var(--font-mono); }
+.code-example code { background:transparent; border:0; padding:0; white-space:pre; }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="eyebrow">動的API · トラフィック · 2026-10-16（再精査 P1〜P14 反映版）</div>
-  <h1>動的APIで増える負荷と、その回避方法</h1>
-  <p>静的キーを短命トークンに置き換えると、新しい負荷が生まれます。このページでは、負荷がどこに生まれ、何で抑えられるかをまとめています。どの対策も、負荷を理由に認証・認可を緩めないことを前提にしています。</p>
+<div class="eyebrow">note/08_セキュリティ · 2026-10-17 動的鍵の運用仕様改訂版 · 非正典・本番未実装・未検証</div>
+<h1>動的鍵の更新・負荷制御・障害時運用の仕様</h1>
+<p>本書は、<a href="動的API%20移行フロー.html">動的鍵の設計思想と仕様</a>に従うシステムの運用契約を説明します。更新する対象と頻度、必要な状態保存、更新競合、再試行、処理枠、障害時の停止・再開を具体化します。認証・認可の必須条件は主文書と共通です。</p>
 </header>
-
-<section>
-  <h2>考え方の前提</h2>
-  <div class="status">
-    <div class="row"><span class="tag est">推定</span><div>増える負荷は「全体が均等に重くなる」形ではありません。<b>トークンの発行窓口</b>と<b>状態ストア</b>（失効情報・再利用防止）に集中し、さらに<b>一斉に更新が走る瞬間</b>に跳ね上がります。業務APIの検証は、設計次第でほとんど増やさずに済みます。</div></div>
-    <div class="row"><span class="tag est">推定</span><div>静的キーを廃止すると、盗んだキーで無制限に呼んでいた不正なトラフィックが減ります。差し引きで全体が増えるか減るかは、実測するまで分かりません。</div></div>
-    <div class="row"><span class="tag fact">根拠</span><div>08 の A 原則2（トークン交換と業務APIの分離）・Phase 4、C §5（入口制御・N/M/D/H）、具体的提言 §5・§8、精査 F09（先行更新による発行率の増加 8/7）。DPoP の nonce と再利用防止は RFC 9449、mTLS の送信者拘束は RFC 8705 の仕組みです。</div></div>
-    <div class="row"><span class="tag fact">境界</span><div><b>高リスク／一般の区分は API 台帳の data_class で決めます。</b>個人データを扱う API と更新を行う API は高リスク側に置き、提言 §5 の条件（送信者拘束と、全受入ノードでの再利用検出）を満たします。jti の保存を省く「一般」は、台帳で明示的に指定した API に限ります。指定のない保護API は、「静的APIキーから動的API認証への移行フロー」図4 のとおり、全条件を確認します。</div></div>
-    <div class="row"><span class="tag unk">未確定</span><div>計画段階のため、「一般」に該当する data_class は定めません。初期値は全保護APIで全条件を確認し、jti の保存の省略は、M0 の台帳と M2 の負荷観測を根拠に、M3 までに API ごとに承認します。</div></div>
-  </div>
+<section class="inference">
+<h2>〈推論〉本設計の位置付け</h2>
+<div class="legend" aria-label="図の色と枠線の凡例"><span class="normal">通常処理</span><span class="review">検証・判定</span><span class="ok">完了・許可</span><span class="caution">待機・再試行／推論・未決</span><span class="danger">拒否・停止・異常</span></div>
+<p>以下は、確認できた資料を根拠に、既存APIへ追加する改良部分を組み立てた設計案です。実サービスの構成・運用条件との適合は未確認です。根拠資料に記載された現況を、実環境で確認済みの事実として扱いません。</p>
+<ul>
+<li><b>推論</b>：資料から導いた処理順序・分岐・改良ロジックです。設計上の提案であり、実装済み・安全性検証済みという意味ではありません。</li>
+<li><b>未決</b>：実装前に責任者が決める条件です。保存先、保持期間、処理容量、障害時の扱い、外部処理との整合方法などは、対象サービスごとに決定します。</li>
+<li><b>未検証</b>：実ブラウザでの描画・印刷、本番APIへの組込み、受入試験、負荷・障害試験は確認が残っています。</li>
+</ul>
+<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-1"><label for="diagram-fit-1">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
+flowchart LR
+  DOC["根拠資料の記載<br/>実環境の確認とは区別"] --> IDEA["推論：改良ロジック<br/>以下の詳細フローは設計案"]
+  IDEA --> OPEN["未決：運用・実装条件<br/>保存先・保持期間・容量・障害時契約"]
+  OPEN --> TEST["未検証：実装・受入・負荷試験<br/>前提と期待結果を照合"]
+  TEST --> ADOPT["検証結果を確認し<br/>責任者が採否を判断"]
+  %% READABILITY: role colors do not certify implementation or validation.
+  classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
+  class DOC normal;
+  classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
+  classDef ok fill:#edf8f0,stroke:#31704e,stroke-width:3px,color:#17283b;
+  class ADOPT ok;
+  classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
+  class IDEA,OPEN,TEST caution;
+  classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
+  linkStyle 0 stroke:#946700,stroke-width:2.5px;
+  linkStyle 1 stroke:#946700,stroke-width:2.5px;
+  linkStyle 2 stroke:#946700,stroke-width:2.5px;
+  linkStyle 3 stroke:#31704e,stroke-width:2.5px;
+</pre></div></div>
+<p>色は処理上の役割を示します。青は通常処理、紫は検証・判定、緑は完了・許可、黄土色の破線枠は待機・再試行・推論・未決、赤は拒否・停止・異常です。色だけで確定性を判断せず、ノードと分岐の文字を確認してください。緑のノードも設計案に含まれ、実サービスでの成功を意味しません。</p>
+<p>接続線は原則として接続先の役割と同じ色です。差戻し・再試行は黄土色で示します。破線矢印の意味は元の図のラベルに従い、すべてを未決とは読み替えません。</p>
 </section>
-
 <section>
-  <h2>図1　負荷はどこで生まれるか</h2>
-  <div class="diagram"><pre class="mermaid">
+<h2>1. 運用上の設計思想</h2>
+
+<p>動的鍵の導入では、登録時の端末・本人確認、期限ごとの資格発行、各要求のproof検証に、それぞれ負荷が生じます。これらの発生頻度を分けて設計します。端末の秘密鍵は要求ごとに作り直さず、アクセストークンは期限まで利用し、DPoP proofだけを各HTTP送信で新しくします。</p>
+<p>処理枠と時間の使い方で集中を抑えます。混雑を理由に署名、鍵拘束、失効、proofの再利用防止、対象認可を省略しません。静的キー廃止で減る不正通信も含めた総負荷の増減は、実測で判定します。</p>
+<div class="tbl"><table><thead><tr><th>処理</th><th>起きるタイミング</th><th>主に使う資源</th><th>本案での制御</th></tr></thead><tbody>
+<tr><td>端末鍵の生成と証明</td><td>初回登録・承認された鍵更新</td><td>端末の保護領域、OS別証明、登録正本</td><td>登録専用枠。日常の業務呼出しと分離</td></tr>
+<tr><td>アクセストークン発行</td><td>初回認証・有効期限前の更新</td><td>grant検証、発行署名、失効・更新・操作正本</td><td>発行枠、ジッター、Single-Flight</td></tr>
+<tr><td>業務APIの要求検証</td><td>要求・再送・状態照会ごと</td><td>JWT・DPoPの署名、鍵拘束、再利用・失効状態</td><td>入口制限、公開鍵キャッシュ、署名確認後の状態記録</td></tr>
+<tr><td>業務確定と結果返却</td><td>新規操作・既存操作の照会</td><td>業務DB、操作一意性、DTO、返却枠</td><td>新規実行と照会を区別。実件数・実バイトを送信前に確定</td></tr>
+</tbody></table></div>
+<p><b>図1　負荷はどこで生まれるか</b></p>
+<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-2"><label for="diagram-fit-2">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
 flowchart LR
   CL["端末・呼び出し元"] -->|"① 発行要求<br/>台数 ÷ 有効期限 の頻度"| TK["トークン発行窓口<br/>署名検証・証明検証"]
   TK -->|"② 状態の読み書き<br/>challenge・counter・発行記録"| ST[("状態ストア")]
@@ -113,72 +158,199 @@ flowchart LR
   GW --> BIZ["業務処理・DB"]
   OUT["障害の復旧・アプリ一斉起動<br/>有効期限の同期"] -. "⑤ 一斉更新<br/>（サンダリングハード）" .-> TK
   ERR["401 の連鎖・再試行"] -. "⑥ 再試行の増幅" .-> TK
-  </pre></div>
-  <p class="src">①⑤⑥は発行窓口に、②④は状態ストアに集中します。③で外部の証明基盤に問い合わせるのは、iOS（App Attest）では端末です。発行窓口は受け取った証明をローカルで検証します。Android（Key Attestation）では、発行窓口が取得するのはキャッシュできる失効リストです。業務処理そのもの（BIZ）の負荷は、認証方式を変えても基本的には変わりません。</p>
+  %% READABILITY: role colors do not certify implementation or validation.
+  classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
+  class CL,TK,ST,GW,BIZ normal;
+  classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
+  classDef ok fill:#edf8f0,stroke:#31704e,stroke-width:3px,color:#17283b;
+  classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
+  class EXT,OUT,ERR caution;
+  classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
+  linkStyle 0 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 1 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 2 stroke:#946700,stroke-width:2.5px;
+  linkStyle 3 stroke:#946700,stroke-width:2.5px;
+  linkStyle 4 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 5 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 6 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 7 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 8 stroke:#245ca6,stroke-width:2.5px;
+</pre></div></div>
+<p>図の①⑤⑥は発行窓口、②④は状態ストアへ集中します。iOSとAndroidの証明・外部照会はOS別契約で扱います。App Attestのcounter、DPoPのjti、業務operation_idを、同じ種類の再利用防止情報として共用しません。</p>
 </section>
-
 <section>
-  <h2>規模の目安（例示の計算）</h2>
-  <p>同時にアクティブな端末を <b>100 万台</b>と仮定した計算です。実際の台数ではありません。先行更新は、期限の 15〜60 秒前に一様にずらす前提です（平均 37.5 秒前）。</p>
-  <div class="tbl"><table>
-    <thead><tr><th>有効期限</th><th class="num">発行頻度（期限ちょうど）</th><th class="num">発行頻度（先行更新あり）</th><th class="num">増加率</th></tr></thead>
-    <tbody>
-      <tr><td>5 分（300 秒）</td><td class="num">3,333 件/秒</td><td class="num">3,810 件/秒</td><td class="num">8/7 ≒ 1.143</td></tr>
-      <tr><td>15 分（900 秒）</td><td class="num">1,111 件/秒</td><td class="num">1,159 件/秒</td><td class="num">≒ 1.043</td></tr>
-      <tr><td>60 分（3,600 秒）</td><td class="num">278 件/秒</td><td class="num">281 件/秒</td><td class="num">≒ 1.011</td></tr>
-    </tbody>
-  </table></div>
-  <ul>
-    <li><b>一斉更新</b>：障害の復旧後に 100 万台が 60 秒間に均等に更新すると、平均で約 16,667 件/秒です。これは 5 分期限の平常時（3,333 件/秒）の 5 倍にあたります。更新が偏れば、瞬間の値はこれより高くなります。</li>
-    <li><b>DPoP の再利用防止</b>：保護APIへの要求が 20,000 件/秒で、証明の受付窓を 60 秒とすると、状態ストアへの書き込みは 20,000 件/秒、保持する件数は約 120 万件になります。</li>
-  </ul>
-  <p class="src">発行頻度は有効期限に反比例します。期限を短くするほど安全側に寄りますが、その分の発行負荷は発行窓口に集まります。</p>
+<h2>2. 資格の有効期限と更新予約</h2>
+
+<p>access TTLはリスク、失効確認の仕組み、実容量、利用者の操作継続時間を根拠に決めます。短命化は盗用可能な時間を制限しますが、期限内の不正をすべて防ぐものではありません。Refresh Tokenを無期限・無拘束のBearerとして残せば、更新側に長期の危険が残ります。</p>
+<p>端末はexpires_inを受信した時点の単調時計を基準に、通信時間の余裕とジッターを含む更新予定を作ります。休止・復帰で予定がずれた場合は資格状態を確認し直します。利用許可はサーバー時計と資格・失効の検証で決め、端末の時計変更で期限を延ばせないようにします。</p>
+<div class="tbl"><table><thead><tr><th>制御項目</th><th>本案の仕様</th></tr></thead><tbody>
+<tr><td>期限前更新</td><td>設定した範囲で端末ごとに時刻をずらす。平常時から同時刻へ集中させない</td></tr>
+<tr><td>Single-Flight</td><td>同じセッション・更新資格に対する端末内の同時更新を1本へ合流</td></tr>
+<tr><td>多端末</td><td>端末間の同時更新はサーバーの一意受付・世代検証で扱う</td></tr>
+<tr><td>自動更新の回数</td><td>元の業務要求で401を受けた場合の自動更新は1回まで。新要求として制御状態を初期化しない</td></tr>
+<tr><td>proofの生成</td><td>更新、業務再送、結果照会の各送信で、新しいjtiとproofを作る</td></tr>
+<tr><td>必須のtoken_type</td><td>DPoPを要求するプロファイルでBearerへ暗黙に降格しない</td></tr>
+</tbody></table></div>
+<p>DPoPにおけるpublic clientのRefresh Token鍵拘束は <a href="https://www.rfc-editor.org/rfc/rfc9449.html#section-5">RFC 9449 §5</a>、再利用対策とローテーションの方針は <a href="https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14">RFC 9700 §4.14</a> を照合します。ローテーションを使う場合の旧値消費・新値確定・応答消失は、認証基盤と合わせた実装契約が必要です。</p>
 </section>
-
 <section>
-  <h2>図2　負荷を抑えた要求経路</h2>
-  <div class="diagram"><pre class="mermaid">
+<h2>3. 発行量と状態保存量の計算例</h2>
+
+<p>以下は実測値でも推奨TTLでもありません。アクティブ端末を100万台、各端末が資格を継続使用し、更新周期が独立していると仮定します。平均発行率は台数を平均更新周期で割った値です。先行更新を期限の15〜60秒前へ一様に分散すると、平均の先行時間は37.5秒になります。</p>
+<div class="tbl"><table><thead><tr><th>access TTL</th><th>期限ちょうどの平均発行率</th><th>先行更新ありの平均発行率</th><th>先行更新による倍率</th></tr></thead><tbody>
+<tr><td>300秒</td><td>1,000,000 ÷ 300 ≒ 3,333件/秒</td><td>1,000,000 ÷ 262.5 ≒ 3,810件/秒</td><td>8/7 ≒ 1.143</td></tr>
+<tr><td>900秒</td><td>1,000,000 ÷ 900 ≒ 1,111件/秒</td><td>1,000,000 ÷ 862.5 ≒ 1,159件/秒</td><td>24/23 ≒ 1.043</td></tr>
+<tr><td>3,600秒</td><td>1,000,000 ÷ 3,600 ≒ 278件/秒</td><td>1,000,000 ÷ 3,562.5 ≒ 281件/秒</td><td>96/95 ≒ 1.011</td></tr>
+</tbody></table></div>
+<p>100万台が復旧後60秒で均等に更新すると平均約16,667件/秒となり、300秒TTL・先行更新なしの平均の5倍です。偏りがあればピークはさらに高くなります。平均値をそのまま受付枠にしません。</p>
+<p>DPoPの再利用記録数は、記録対象の要求率と保持時間に依存します。例として、契約から算出した保持時間が60秒、保護API要求が20,000件/秒なら、約120万件を保持します。1件あたりのバイト数、インデックス、複製、削除負荷はこの件数に含めておらず、別途測定します。</p>
+</section>
+<section>
+<h2>4. 再利用防止・操作記録の保持と整合</h2>
+
+<div class="tbl"><table><thead><tr><th>保存対象</th><th>スコープ</th><th>消してよい条件</th><th>障害時の動作</th></tr></thead><tbody>
+<tr><td>proofのjti</td><td>検証領域・登録鍵・jti</td><td>当該proofが全受入ノードで受理不能になり、安全余裕も過ぎた後</td><td>一意受入を確認できない保護要求は停止</td></tr>
+<tr><td>登録challenge・本人承認</td><td>主体・登録操作・目的・鍵</td><td>期限・単回使用と監査保持の契約による</td><td>不明な承認や古い候補を有効化しない</td></tr>
+<tr><td>操作記録とdigest</td><td>tenant・主体・操作種別・operation_id</td><td>再送・照会・外部突合の契約と監査保持を満たした後</td><td>記録喪失を「未実行」とみなさない</td></tr>
+<tr><td>失効と更新世代</td><td>セッション・鍵・資格・更新family等</td><td>残る資格への影響と保持契約を満たした後</td><td>失効不明を有効とみなさない</td></tr>
+</tbody></table></div>
+<p>本案はnonceの有無にかかわらずiatの受理窓を維持します。過去側の許容時間をW_past、未来側をW_future、ノード間時刻差・反映遅延等の保守余裕をMとすると、初回受入からの固定保持を使う場合の下限候補は W_past + W_future + M です。値と計算条件を設定契約に残します。受理窓だけを60秒と呼び、未来側許容を無視して60秒後に消す実装は採用しません。<a href="https://www.rfc-editor.org/rfc/rfc9449.html#section-11.1">DPoP再利用防止 RFC 9449 §11.1</a></p>
+<p>ストアを鍵等で分割しても、同じスコープのproofは必ず同じ一意判定へ到達させます。分断時に各ノードが独立して成功を返す方式では、単回受入を成立させません。正本と任意キャッシュを区別し、復旧時には巻き戻り・未反映・失効世代も照合します。</p>
+<p>operation_idの保持はproofの短い保持時間とは別です。契約終了後の古い操作ID再提示も、新規実行として無条件に受理しないよう、利用可能な期間と終了後の応答を定めます。</p>
+</section>
+<section>
+<h2>5. 入口制御・処理枠・共有資源</h2>
+
+<p>入口ではサイズ、接続、同時実行、待ち行列、deadlineを安価に確認し、許容量を超えた要求を高コストの検証へ進めません。未認証ヘッダーの主体を、正規利用者の優先枠の根拠にしません。資格検証後に、主体・tenantごとの制限を適用します。</p>
+<p><b>図2　負荷を抑えた要求経路</b></p>
+<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-3"><label for="diagram-fit-3">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
 flowchart TD
   subgraph CLIENT["端末側"]
     C1["トークンはメモリに保持し、期限まで再利用"] --> C2{"期限が近いか"}
-    C2 -- "近い" --> C3["更新は 1 本に合流（Single-Flight）<br/>更新時刻を乱数でずらす（ジッター）"]
-    C3 --> C4{"503 / 429 を受けたか"}
-    C4 -- "受けた" --> C5["Retry-After に従い、指数バックオフ<br/>回数と全体の期限に上限"]
-    C4 -- "受けない" --> C1
+    C2 -- "近い" --> C3["更新は 1 本に合流（Single-Flight）<br/>再送・照会の要求種別、発行操作ID・回数・全体期限を保持<br/>送信ごとに新しい要求証明を作る"]
     C2 -- "まだ先" --> SEND["業務要求を送信"]
   end
-
-  SEND --> E0{"入口の安価な上限判定<br/>サイズ・同時接続数"}
+  SEND --> E0{"入口の安価な上限判定<br/>サイズ・同時接続数・共有資源の総量"}
   C3 --> E0
   E0 -- "超過" --> R503["503 ＋ Retry-After"]
+  R503 -- "発行・照会要求への応答" --> RETRY
   E0 -- "受入" --> SPLIT{"どの処理枠か"}
-
   subgraph POOLS["処理枠を分ける"]
-    SPLIT -- "トークン発行" --> P1["発行専用の枠<br/>業務の枠とは別に上限を持つ"]
+    SPLIT -- "トークン発行・同発行操作の照会" --> P1["発行専用の枠<br/>業務・結果照会の枠と分け、総量内で予約"]
     SPLIT -- "業務API" --> P2["業務専用の枠"]
   end
-
-  P1 --> TK["発行窓口<br/>重い検証はここだけで行う"]
-  TK --> ST1[("状態ストア")]
-
+  P1 --> TK["発行窓口<br/>登録・更新に必要な証明と本人資格を検証"]
+  TK --> ST1["状態正本<br/>challenge・counter・発行操作を原子的に確定<br/>同操作の照会は状態別に応答"]
+  ST1 --> C4{"発行・照会の応答を受けて分類"}
+  C4 -- "成功・有効な新資格を確認" --> SAVE["新資格をメモリに保存"]
+  SAVE --> C1
+  C4 -- "503 / 429" --> RETRY{"再試行回数と全体期限に余裕があるか"}
+  RETRY -- "ある" --> C5["Retry-Afterを下限に、ジッターと指数バックオフ<br/>発行操作ID・回数・全体期限を維持"]
+  C5 --> C3
+  RETRY -- "ない" --> STOP["自動処理を打ち切り、理由を表示"]
+  C4 -- "認証失敗・拒否" --> STOP
+  C4 -- "その他・未分類の応答" --> STOP
+  C4 -- "必要なDPoP nonceの再取得" --> PROOF["新nonceで要求証明を作り直す<br/>アクセストークン再発行と区別"]
+  PROOF --> RETRY
+  C4 -- "処理中・通信結果不明" --> LOOK["同じ発行操作IDで照会・許可された再送<br/>確定成功を推測しない"]
+  LOOK --> RETRY
   P2 --> V1["安価な検証を先に行う<br/>署名・期限・iss/aud をローカルで検証<br/>公開鍵（JWKS）はキャッシュ"]
   V1 -- "不成立" --> DENY["拒否（状態ストアに触れない）"]
-  V1 -- "成立" --> V2{"API台帳の data_class で<br/>jti の保存を省くと<br/>明示指定されているか"}
-  V2 -- "指定なし（個人データ・更新APIを含む）" --> V3["高リスク：状態を伴う検証<br/>DPoP証明と cnf.jkt の一致<br/>jti の再利用検出（全受入ノードで共有）・失効を確認<br/>鍵ごとに分割したストア"]
-  V2 -- "明示指定あり（一般）" --> V4["一般：失効は配布済みの小さな失効リストで確認<br/>短い期限が失効の上限になる"]
-  V3 --> AZ["業務認可"]
-  V4 --> AZ
-  AZ --> BIZ["業務処理"]
-  </pre></div>
-  <p class="src">要点は 3 つです。重い検証を発行時に集めること、業務APIはローカルで検証できるトークン（JWT と公開鍵キャッシュ）を使い、要求ごとに認証サーバーへ問い合わせないこと、状態を伴う検証を省くのは台帳で明示した一般APIだけにすることです。高リスク／一般の境界は「考え方の前提」の「境界」の行によります（再精査 P1）。</p>
+  V1 -- "成立" --> VP{"全保護APIで送信者拘束を検証<br/>DPoP：鍵・署名・htm/htu/ath・時刻・必要nonce<br/>mTLS：検証済み接続証明書との拘束"}
+  VP -- "不成立・未確認" --> DENY
+  VP -- "成立" --> V3{"採用プロファイルの再利用防止・失効を確認<br/>DPoPは全受入ノードで一意なjti記録<br/>署名等を確認してから状態を記録"}
+  V3 -- "不成立・状態不明" --> DENY
+  V3 -- "成立" --> AZ["業務認可・一意な操作受付<br/>詳細は移行フロー図4"]
+  AZ --> BIZ["認可済み業務・操作記録"]
+  BIZ --> FINAL{"送信前にDTO・実件数・UTF-8バイト数を照合<br/>正本で返却枠を原子的に確定できたか"}
+  FINAL -- "可" --> RESULT["業務応答"]
+  FINAL -- "否" --> NOSEND["業務データを返さない<br/>確定済み操作は保持して状態照会"]
+  %% READABILITY: role colors do not certify implementation or validation.
+  classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
+  class C1,C3,SEND,P1,P2,TK,ST1,SAVE,V1,AZ,BIZ normal;
+  classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
+  class C2,E0,SPLIT,C4,RETRY,VP,V3,FINAL review;
+  classDef ok fill:#edf8f0,stroke:#31704e,stroke-width:3px,color:#17283b;
+  class RESULT ok;
+  classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
+  class R503,C5,PROOF,LOOK,NOSEND caution;
+  classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
+  class STOP,DENY danger;
+  linkStyle 0 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 1 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 2 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 3 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 4 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 5 stroke:#946700,stroke-width:2.5px;
+  linkStyle 6 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 7 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 8 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 9 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 10 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 11 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 12 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 13 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 14 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 15 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 16 stroke:#946700,stroke-width:2.5px;
+  linkStyle 17 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 18 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 19 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 20 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 21 stroke:#946700,stroke-width:2.5px;
+  linkStyle 22 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 23 stroke:#946700,stroke-width:2.5px;
+  linkStyle 24 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 25 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 26 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 27 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 28 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 29 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 30 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 31 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 32 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 33 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 34 stroke:#31704e,stroke-width:2.5px;
+  linkStyle 35 stroke:#946700,stroke-width:2.5px;
+</pre></div></div>
+<div class="tbl"><table><thead><tr><th>処理枠</th><th>役割</th><th>確保する理由</th></tr></thead><tbody>
+<tr><td>公開案内</td><td>公開専用情報と停止理由の案内</td><td>保護API停止時にも案内を提供する</td></tr>
+<tr><td>登録・資格発行</td><td>登録証明、更新、同発行操作の照会</td><td>発行集中を業務全体へ波及させにくくする</td></tr>
+<tr><td>業務</td><td>認可済みの読取・更新</td><td>業務の資源消費を制御する</td></tr>
+<tr><td>結果照会</td><td>確定済み・処理中・結果不明の確認</td><td>応答消失を新規実行へ変えずに回復する</td></tr>
+<tr><td>制御・監査</td><td>失効、観測、縮退、監査の永続化</td><td>混雑中も停止判断と記録を続ける</td></tr>
+</tbody></table></div>
+<p>CPU、DB接続、状態ストア、回線ごとに、枠の合計と予約分が実容量を超えないようにします。同じ単位で能力100に対して発行80・業務40を許可すると合計120です。専用枠という名称だけでは共有資源の枯渇を防げません。</p>
+<p>公開鍵は設定済みの発行者から取得してキャッシュします。未知kidや鍵更新失敗で検証鍵を確認できない要求は拒否・保留し、取得の連打を合流・制限します。署名を確かめる前にjtiストアへ書き込ませず、入力長も制限します。任意URLの鍵取得や未知鍵の許可へ切り替えません。<a href="https://www.rfc-editor.org/rfc/rfc8725.html">RFC 8725</a></p>
 </section>
-
 <section>
-  <h2>図3　一斉更新が起きたときの段階的な再開</h2>
-  <div class="diagram"><pre class="mermaid">
+<h2>6. 再試行と応答の分類</h2>
+
+<p>端末は応答を受けてから、成功、認証失敗、nonce要求、混雑、処理中、結果不明を分類します。503・429を受けなかったことだけで成功とは判定しません。元業務のoperation_id、更新操作ID、要求種別、回数、全体期限、更新済みフラグを保持します。</p>
+<div class="tbl"><table><thead><tr><th>応答・状態</th><th>端末が行う処理</th><th>サーバー側の契約</th></tr></thead><tbody>
+<tr><td>発行成功</td><td>token_type・必要な項目・有効条件を確認して保存</td><td>未確定の候補資格を応答しない</td></tr>
+<tr><td>401・期限切れ</td><td>元業務で未実施なら更新を1回だけ行う</td><td>期限切れと別の認証失敗を区別できるエラー契約</td></tr>
+<tr><td>DPoP nonce要求</td><td>対応する発行元・用途のnonceで新proofを作る</td><td>資格再発行とは別に扱い、回数・期限を制限</td></tr>
+<tr><td>403・認可拒否</td><td>自動更新で権限を得ようとせず停止</td><td>データや操作の存在を不用意に漏らさない</td></tr>
+<tr><td>429・入口での503</td><td>Retry-After、ジッター、指数バックオフ。上限超過で停止</td><td>未受理と表示できるのは業務副作用を起こす前に拒否した場合</td></tr>
+<tr><td>202等・PENDING</td><td>同じ操作IDで有限の照会</td><td>照会可能な主体へ、許可した状態情報だけ返す</td></tr>
+<tr><td>通信断・UNKNOWN</td><td>同じ操作IDで照会・突合</td><td>成功・未実行を推定せず、新IDの重複実行を防止</td></tr>
+<tr><td>409・内容不一致</td><td>元記録を確認し、自動再実行を止める</td><td>同IDのdigest不一致で元記録を上書きしない</td></tr>
+<tr><td>その他・未分類</td><td>安全側に停止し、利用者へ状態を案内</td><td>未分類の応答を成功にしない</td></tr>
+</tbody></table></div>
+<p>Retry-Afterが全体期限を超える場合は、期限を延ばして待ち続けません。混雑応答と通信断では、業務が確定済みかどうかの知識が異なります。HTTPステータスだけに依存せず、契約した操作状態で判断します。資格発行の応答消失も、同一発行操作の照会・再受取契約へ従います。</p>
+</section>
+<section>
+<h2>7. 障害からの段階再開</h2>
+
+<p>再開条件は、待ち行列長、最古の待機時間、状態ストア遅延、欠測、結果不明操作の整合、設定した継続時間を合わせて判断します。CPUの瞬間値だけでは再開しません。</p>
+<p><b>図3　一斉更新が起きたときの段階的な再開</b></p>
+<div class="diagram-view"><input class="diagram-fit" type="checkbox" id="diagram-fit-4"><label for="diagram-fit-4">全体を縮小して表示</label><p class="diagram-help">標準は文字を読みやすい原寸表示です。図は枠内を上下左右にスクロールできます。色と分岐ラベルを合わせて確認してください。</p><div class="diagram" tabindex="0" role="region" aria-label="フローチャート。枠内をスクロールできます"><pre class="mermaid">
 flowchart TD
   O0(["障害が復旧"]) --> O1["H（復帰保留）<br/>発行窓口の受付枠を小さい値から開始"]
-  O1 --> O2["期限内のトークンを持つ端末はそのまま業務を継続<br/>（有効期限そのものが猶予になる）"]
+  O1 --> O2{"既発行資格の期限・署名・送信者拘束と<br/>必要な失効・再利用検証が全て成立するか"}
+  O2 -- "成立" --> CONT["その資格で許可された業務だけ継続<br/>期限切れ後の猶予を新設しない"]
+  O2 -- "不成立・必要状態不明" --> HOLD["保護要求を拒否・保留<br/>独立した公開経路だけ別に評価"]
   O1 --> O3["新規発行は枠の範囲で受け付け<br/>超えた分には 503 ＋ ずらした Retry-After"]
   O3 --> O4{"待ち行列・最古の待機時間・<br/>状態ストアの遅延が収束し<br/>その状態が継続期間（stable_duration）続いたか"}
   O4 -- "否" --> O3
@@ -193,65 +365,155 @@ flowchart TD
   O6 -- "安定" --> O7{"通常の枠に達したか"}
   O7 -- "否" --> O5
   O7 -- "達した" --> DONE(["通常運用"])
-  </pre></div>
-  <p class="src">C の資源状態 D（縮退）→ H（復帰保留）→ 段階的な再開にあたります。H の解除には、人間の承認（C:223）、結果不明の操作の整合と回復の継続期間（C §6.1）、提言 §8 の stable_duration を条件にします（再精査 P2）。再び悪化したときは H ではなく D に戻します（提言 §8「再悪化 → D」）。継続期間などの数値は未確定です。悪化の検知は速く、復帰はゆっくり行います。Retry-After を全端末で同じ値にすると、次の一斉更新を作ってしまいます。</p>
+  %% READABILITY: role colors do not certify implementation or validation.
+  classDef normal fill:#edf4ff,stroke:#245ca6,stroke-width:3px,color:#17283b;
+  class O0,O5 normal;
+  classDef review fill:#f4effb,stroke:#7050a3,stroke-width:3px,color:#17283b;
+  class O2,O4,O4B,O4C,O6,O7 review;
+  classDef ok fill:#edf8f0,stroke:#31704e,stroke-width:3px,color:#17283b;
+  class CONT,DONE ok;
+  classDef caution fill:#fff6d9,stroke:#946700,stroke-width:3px,color:#17283b,stroke-dasharray:7 4;
+  class O1,O3 caution;
+  classDef danger fill:#fff0f1,stroke:#b43d47,stroke-width:3px,color:#17283b;
+  class HOLD,OD danger;
+  linkStyle 0 stroke:#946700,stroke-width:2.5px;
+  linkStyle 1 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 2 stroke:#31704e,stroke-width:2.5px;
+  linkStyle 3 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 4 stroke:#946700,stroke-width:2.5px;
+  linkStyle 5 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 6 stroke:#946700,stroke-width:2.5px;
+  linkStyle 7 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 8 stroke:#946700,stroke-width:2.5px;
+  linkStyle 9 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 10 stroke:#946700,stroke-width:2.5px;
+  linkStyle 11 stroke:#245ca6,stroke-width:2.5px;
+  linkStyle 12 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 13 stroke:#b43d47,stroke-width:2.5px;
+  linkStyle 14 stroke:#946700,stroke-width:2.5px;
+  linkStyle 15 stroke:#7050a3,stroke-width:2.5px;
+  linkStyle 16 stroke:#946700,stroke-width:2.5px;
+  linkStyle 17 stroke:#31704e,stroke-width:2.5px;
+</pre></div></div>
+<p>D（縮退）からH（復帰保留）へ移り、stable_durationの継続成立、結果不明操作の整合、必要な人の運用承認を確認して、resume_stepだけ受付枠を増やします。再悪化時はDへ戻します。N/M/D/Hは資源運用の区分であり、鍵登録状態や正典の境界状態とは別です。</p>
+<p>既発行資格を継続できるのは、期限、署名、送信者拘束、必要な失効・再利用確認、業務認可がすべて成立する範囲だけです。期限切れの猶予や、停止中の正本検証を省く例外は追加しません。</p>
 </section>
-
 <section>
-  <h2>問題ごとの回避方法</h2>
-  <div class="tbl"><table>
-    <thead><tr><th>問題</th><th>有効な回避方法</th><th>代償・注意</th></tr></thead>
-    <tbody>
-      <tr><td>① 平常時の発行負荷</td><td>リスクに応じて有効期限を分ける（高リスクは短く、一般は長く）。トークンを期限まで再利用する</td><td>期限が長いほど、盗まれたときに使われる時間が延びる</td></tr>
-      <tr><td>② 発行時の状態の読み書き</td><td>重い検証を発行時だけに集める。challenge・counter・発行記録を一つのトランザクションで確定する</td><td>状態の正本をどこに置くかを先に決める必要がある（提言 §6）</td></tr>
-      <tr><td>③ 外部の証明基盤</td><td>証明は端末登録のときだけ行う。日常の更新には使わない。Android の失効リストはキャッシュする</td><td>外部基盤が止まると、新規の登録は保留になる</td></tr>
-      <tr><td>④ 要求ごとの検証</td><td>JWT をローカルで検証し、公開鍵はキャッシュする。要求ごとの問い合わせ（introspection）は避ける。jti の保存を省くのは、台帳で明示した一般APIだけにする（個人データ・更新APIは省かない）。DPoP の jti ストアは鍵ごとに分割し、受付窓を短くする（サーバー nonce も使える）</td><td>一般APIの失効は即時ではなく、最大で有効期限分だけ遅れる。省略の範囲は台帳で明示的に決める</td></tr>
-      <tr><td>⑤ 一斉更新</td><td>端末側のジッターと Single-Flight。発行窓口の専用枠。段階的な再開。Retry-After をずらす</td><td>再開に時間がかかる</td></tr>
-      <tr><td>⑥ 再試行の増幅</td><td>上限つきの指数バックオフ。401 での自動更新は 1 回で打ち切る。503 と 429 を再認証に変えない</td><td>利用者には「しばらく待つ」と表示する必要がある</td></tr>
-      <tr><td>社内サービス同士</td><td>mTLS の接続を使い回し、TLS の握手（クライアント証明書の検証）は接続ごとに済ませる。トークンとクライアント証明書の照合（RFC 8705 の cnf の x5t#S256）は要求ごとに行うが、ハッシュの比較だけなので安い</td><td>接続を集約する経路の設計が必要</td></tr>
-    </tbody>
-  </table></div>
+<h2>8. 返却量と観測・設定の仕様</h2>
+
+<p>DTOを構築した後、実件数とUTF-8本文バイト数を送信前に確認します。バイト数を確定する表現、圧縮前後のどちらを数えるか、HTTPヘッダーの扱い、一覧・export・streamingの上限は経路台帳で固定します。streamingは、総量の上限を保証する専用契約を確定するまで通常の返却経路へ混在させません。</p>
+<p>受付時の見積りや予約だけで最終検査を代替しません。返却枠の不足や正本不明で送信を止めても、確定済みの更新・決済は保持し、操作IDで結果照会できる状態を残します。</p>
+<div class="tbl"><table><thead><tr><th>分類</th><th>必須の記録・設定</th></tr></thead><tbody>
+<tr><td>資格</td><td>access TTL、更新予約、Refresh Token期限・失効・世代、許可署名方式</td></tr>
+<tr><td>proof</td><td>過去・未来の受理窓、nonce用途・期限、保持余裕、最大長、正本の一意性</td></tr>
+<tr><td>再試行</td><td>最大回数、全体deadline、バックオフ、Retry-Afterの扱い、更新済みフラグ</td></tr>
+<tr><td>入口・共有資源</td><td>max_inflight、max_queue、経路別deadline、各枠と共有総量・予約枠</td></tr>
+<tr><td>縮退・再開</td><td>queue_warn、queue_stop、queue_resume、normal_limit、degraded_limit、resume_step、stable_duration</td></tr>
+<tr><td>応答</td><td>DTO、件数、UTF-8バイト、期間累積、tenant・主体の枠、照会契約</td></tr>
+<tr><td>観測</td><td>経路・端末群ごとの失敗理由、発行率、証明失敗、正本遅延、待機時間、重複検出、結果不明、復旧受付</td></tr>
+</tbody></table></div>
+<p>設定には単位、取得元、欠測時動作、版、変更権限、根拠を持たせます。未設定値をゼロや無制限へ変換しません。ログには操作IDと理由コードを残し、アクセストークン、Refresh Token、秘密鍵、proof全文は出力しません。監査不能時の保護操作の扱いも、台帳で事前に決めます。</p>
 </section>
-
 <section>
-  <h2>負荷対策として、やってはいけないこと</h2>
-  <ul>
-    <li>混雑を理由に有効期限を延ばしたり、期限切れのトークンを通したりする（A の 60 分猶予案。精査 F09 で 65 分の利用窓になると指摘）。</li>
-    <li>状態ストアが重いからといって、再利用防止や counter の検証を省く（B の案。精査 F04）。</li>
-    <li>未受理の要求に 200 を返す。拒否は 503 や 429 で正直に返す（C §5.5）。</li>
-    <li>CPU 使用率だけを見て、一気に通常運用へ戻す（C §5.2、C:212）。</li>
-  </ul>
+<h2>9. 実装・受入試験との接続</h2>
+
+<div class="tbl"><table><thead><tr><th>実装対象</th><th>合格条件</th><th>現状</th></tr></thead><tbody>
+<tr><td>更新と合流</td><td>同時要求・休止復帰・応答消失でも、資格更新と副作用を重複させない</td><td>実サービス未検証</td></tr>
+<tr><td>proof正本</td><td>同じproofを複数ノードへ送って一回だけ受理し、将来iatの境界まで保持</td><td>実サービス未検証</td></tr>
+<tr><td>入口・総量</td><td>発行集中・状態ストア遅延でも共有総量と予約枠を守る</td><td>実サービス未検証</td></tr>
+<tr><td>再試行</td><td>401、nonce、429、503、通信断、未分類で別の動作となり、回数・期限を初期化しない</td><td>実サービス未検証</td></tr>
+<tr><td>再開</td><td>継続条件・整合・承認なしに枠を増やさず、再悪化でDへ戻る</td><td>実サービス未検証</td></tr>
+<tr><td>結果と返却枠</td><td>確定済み業務を再実行せず、実量超過時に業務データを送らない</td><td>実サービス未検証</td></tr>
+</tbody></table></div>
+<p>本書の計算例と文書間照合は、容量・可用性・防御効果の試験結果ではありません。採用時は主文書の受付条件と合わせ、実際の端末、認証基盤、正本、Gateway、業務APIで試験します。</p>
 </section>
-
 <section>
-  <h2>大事な部分のまとめ</h2>
-  <ul class="key">
-    <li>動的APIで増える負荷は、発行窓口と状態ストア、そして一斉更新の瞬間に集中します。業務APIの検証はローカル検証で抑えられます。</li>
-    <li>最も効く対策は、重い検証を発行時に集め、業務APIをローカル検証にする「分離」と、端末側のジッター・合流・バックオフで「同期を崩す」ことの 2 つです。</li>
-    <li>発行窓口と業務APIの処理枠を分けると、一方の混雑がもう一方を止めなくなります。</li>
-    <li>jti の保存を省けるのは、API 台帳で明示的に指定した一般APIだけです。個人データ・更新APIは送信者拘束と全受入ノードでの再利用検出を省きません。</li>
-    <li>負荷対策は入口の枠と時間の使い方だけで行います。認証・認可の条件は変えません。復帰保留（H）の解除には人の承認が要ります。</li>
-  </ul>
-</section>
+<h2>参照資料と版</h2>
 
-<section>
-  <h2>要点（要約）</h2>
-  <p>負荷の発生点は 6 か所です。分離（発行と業務）、同期を崩す（ジッター・合流・バックオフ）、処理枠の分割、状態を伴う検証の省略を台帳で明示した一般APIに限る、条件つきで段階的に再開する、の 5 つで回避します。有効期限は安全性と発行負荷の釣り合いで決め、数値は実測で確定させます。</p>
+<div class="tbl"><table><thead><tr><th>資料</th><th>参照範囲・位置付け</th></tr></thead><tbody>
+<tr><td><a href="次世代API保護アーキテクチャ設計標準仕様書.md">A 標準仕様書</a></td><td>原則2・Phase 4。危険な近道は精査を踏まえて不採用</td></tr>
+<tr><td><a href="ユーザーを強制ログアウトさせずに静的APIキーから完全移行する.md">B 移行計画書</a></td><td>再試行・障害の先行案。検証省略は不採用</td></tr>
+<tr><td><a href="動的API認証・意図的縮退・独立復旧経路の統合設計案.md">C 統合設計案</a></td><td>§5〜§7、N/M/D/H。正典の境界状態とは別</td></tr>
+<tr><td><a href="2026-10-16_note08_security_review.md">2026-10-16 精査 F01〜F12</a></td><td>元資料の精査時点の判定</td></tr>
+<tr><td><a href="2026-10-16_note08_concrete_recommendations.md">2026-10-16 具体的提言</a></td><td>§5〜§8、AT01〜AT20。本番実装未検証</td></tr>
+<tr><td><a href="動的API%20移行フロー.html">移行フロー</a></td><td>設計思想・仕様改訂版の認証・操作受付・実装接続</td></tr>
+<tr><td><a href="../../local_reports/2026-10-17_note08_dynamic_api_review/REPORT.md">2026-10-17 再精査 N01〜N10</a></td><td>ローカル監査資料。修正前のハッシュと指摘を保持</td></tr>
+<tr><td><a href="../../local_reports/2026-10-17_note08_dynamic_api_review/RESOLUTION.md">N01〜N10 修正・再検証記録</a></td><td>ローカル監査資料。承認した文書修正と未検証範囲を記録</td></tr>
+<tr><td><a href="https://www.rfc-editor.org/rfc/rfc9449.html">RFC 9449</a></td><td>DPoP検証・nonce・再利用検出。規格と配備固有の方針を分離</td></tr>
+<tr><td><a href="https://www.rfc-editor.org/rfc/rfc8705.html">RFC 8705</a></td><td>証明書拘束とTLS終端</td></tr>
+</tbody></table></div>
+<p>前版の「再精査P1〜P14」の原報告・採否記録は今回特定できていません。N番号・F番号へ読み替えず、版の判定を分けます。ローカル監査資料は配布同梱を保証しないため、公開時の参照先確認は別途必要です。</p>
+<p>この改訂は、負荷の一般説明を、更新周期・状態保持・再試行・共有総量・段階再開・実返却量の運用仕様へ組み直したものです。以前の説明と監査記録は履歴として保持し、仕様の提案と実測・実装結果を分けます。</p>
 </section>
 </div>
-
 <script>
-/* 公開ページでは配信側が Mermaid を組み込む。ローカルで開いた場合だけ CDN から読み込んで描画する（再精査 P13） */
-window.addEventListener('load', function () {
-  if (typeof mermaid !== 'undefined' || document.querySelector('.mermaid-diagram')) return;
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js';
-  s.onload = function () {
-    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'neutral', flowchart: { useMaxWidth: true } });
-    mermaid.run({ querySelector: 'pre.mermaid' });
-  };
-  document.head.appendChild(s);
-});
+/* Host pages provide Mermaid. Standalone file: pages may load the pinned module.
+ * Library availability and per-element rendering state are separate checks.
+ */
+(function () {
+  async function drawPendingDiagrams() {
+    var pending = Array.from(document.querySelectorAll('pre.mermaid')).filter(function (node) {
+      return node.getAttribute('data-processed') !== 'true';
+    });
+    if (!pending.length) return;
+    var originals = pending.map(function (node) {
+      return { node: node, source: node.textContent };
+    });
+    try {
+      var library = globalThis.mermaid;
+      if (!library || typeof library.run !== 'function') {
+        if (window.location.protocol !== 'file:') {
+          throw new Error('配信側のMermaidが利用できません。');
+        }
+        await new Promise(function (resolve, reject) {
+          var script = document.createElement('script');
+          // The 15 s timeout applies only to diagram loading, not API security.
+          var timer = setTimeout(function () {
+            reject(new Error('図の描画ライブラリの読込がタイムアウトしました。'));
+          }, 15000);
+          script.type = 'module';
+          script.textContent = "import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs'; globalThis.mermaid = mermaid;";
+          import('https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs').then(function (m) { globalThis.mermaid = m.default; clearTimeout(timer); resolve(); }, function (e) { clearTimeout(timer); reject(e); });
+          script.onerror = function () {
+            clearTimeout(timer);
+            reject(new Error('図の描画ライブラリを読み込めませんでした。'));
+          };
+          document.head.appendChild(script);
+        });
+        library = globalThis.mermaid;
+      }
+      if (!library || typeof library.initialize !== 'function' || typeof library.run !== 'function') {
+        throw new Error('図の描画ライブラリを確認できません。');
+      }
+      library.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'base', themeVariables: { background: '#fcfdff', primaryColor: '#edf4ff', primaryTextColor: '#17283b', primaryBorderColor: '#245ca6', lineColor: '#245ca6', edgeLabelBackground: '#fffdf2', clusterBkg: '#f2f6fc', clusterBorder: '#7189aa', fontFamily: 'Yu Gothic UI, Meiryo, sans-serif', fontSize: '18px' }, flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'linear', nodeSpacing: 48, rankSpacing: 64, padding: 20 } });
+      await library.run({ nodes: pending });
+      var previous = document.getElementById('diagram-render-status');
+      if (previous) { previous.textContent = ''; previous.hidden = true; }
+    } catch (error) {
+      // Keep the original definition readable when loading or rendering fails.
+      originals.forEach(function (entry) {
+        entry.node.removeAttribute('data-processed');
+        entry.node.textContent = entry.source;
+      });
+      var status = document.getElementById('diagram-render-status');
+      if (!status) {
+        status = document.createElement('p');
+        status.id = 'diagram-render-status';
+        status.className = 'src';
+        status.setAttribute('role', 'status');
+        document.querySelector('.wrap').prepend(status);
+      }
+      status.hidden = false;
+      status.textContent = '図を描画できません。元のMermaidソースを表示しています。' +
+        (error && error.message ? ' ' + error.message : '');
+    }
+  }
+  if (document.readyState === 'complete') {
+    void drawPendingDiagrams();
+  } else {
+    window.addEventListener('load', drawPendingDiagrams, { once: true });
+  }
+}());
 </script>
 </body>
 </html>
