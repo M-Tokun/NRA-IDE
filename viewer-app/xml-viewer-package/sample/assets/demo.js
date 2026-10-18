@@ -1,0 +1,1 @@
+document.getElementById('toggle').addEventListener('click',()=>{const b=document.getElementById('ball');b.style.animationPlayState=b.style.animationPlayState==='paused'?'running':'paused'});

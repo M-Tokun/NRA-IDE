@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<advanced id="advanced" level="2">
+  <title>発展編：階層と相対パス</title>
+  <section id="deep"><subsection><note>階層が深いと初期状態で折りたたまれます。</note></subsection></section>
+  <back href="../01_操作ガイド.xml">前のサンプルに戻る</back>
+  <image src="../images/diagram.svg" />
+  <items><item id="a">一</item><item id="b">二</item><item id="c">三</item></items>
+</advanced>

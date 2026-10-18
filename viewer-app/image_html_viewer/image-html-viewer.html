@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Image / HTML Viewer</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1118;--panel:#151d27;--fg:#e7eef7;--muted:#99aabd;--line:#344355;--accent:#71baff}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font:14px system-ui,sans-serif;color:var(--fg);background:var(--bg)}button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--panel);padding:6px 10px;border-radius:6px;cursor:pointer}button:hover{border-color:var(--accent)}button:disabled{opacity:.4;cursor:default}header{display:flex;align-items:center;gap:8px;padding:8px;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line)}header strong{margin-right:auto}#tabs{display:flex;gap:4px;overflow:auto;min-height:40px;align-items:end;padding:4px 8px 0;border-bottom:1px solid var(--line)}.tab{display:flex;align-items:center;min-width:90px;max-width:260px;background:var(--panel);border:1px solid var(--line);border-radius:7px 7px 0 0}.tab.active{border-color:var(--accent);background:var(--bg)}.tab button{background:transparent;border:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tab .title{flex:1;min-width:0;text-align:left}.tab .close:hover{color:#ff9090}#tools{display:flex;gap:7px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}#status{margin-left:auto;color:var(--muted);font-size:12px}main{height:calc(100vh - 141px);min-height:160px;position:relative;overflow:hidden;background:repeating-conic-gradient(#101822 0 25%,#151e2b 0 50%) 50%/26px 26px}#image-stage{position:absolute;inset:0;overflow:hidden;cursor:grab;touch-action:none}#image-stage:active{cursor:grabbing}#image-stage img{position:absolute;max-width:none;max-height:none;transform-origin:0 0;user-select:none;pointer-events:none}#frame{border:0;width:100%;height:100%;background:white;display:none}#empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--muted);pointer-events:none}#empty div{max-width:600px}#empty b{color:var(--fg);font-size:20px}#drop-mask{display:none;position:absolute;inset:0;background:#194f7caa;z-index:5;place-items:center;font-size:24px}body.dragover #drop-mask{display:grid}#warning{font-size:12px;color:var(--muted);padding:6px 10px}input[type=file]{display:none}@media(max-width:680px){main{height:calc(100vh - 185px)}header strong{width:100%}#status{width:100%;margin:0}}
+</style></head><body>
+<header><strong>Image / HTML Viewer</strong><button id="open">ファイルを開く</button><button id="folder">フォルダを開く</button><button id="clear">すべて閉じる</button><input id="files" type="file" accept=".png,.jpg,.jpeg,.svg,.html,.htm" multiple><input id="dir" type="file" webkitdirectory multiple></header>
+<div id="tabs" role="tablist"></div>
+<div id="tools"><button id="minus">−</button><button id="plus">＋</button><button id="fit">画面に合わせる</button><button id="one">100%</button><button id="reload">HTML再読み込み</button><button id="stop">HTML停止</button><span id="status">ファイル未選択</span></div>
+<main id="main"><div id="image-stage"><img id="picture" alt="画像プレビュー"></div><iframe id="frame" title="HTMLプレビュー" sandbox="allow-scripts"></iframe><div id="empty"><div><b>画像・HTMLを開く</b><p>PNG / JPG / SVG / HTML に対応。ファイルのドラッグ＆ドロップも可能です。</p><p>HTMLの外部CSS・JSはフォルダ単位で開くと参照できます。</p></div></div><div id="drop-mask">ファイルをドロップ</div></main>
+<div id="warning">注意：HTML表示ではJavaScriptが実行される場合があります。信頼できるファイルのみ開いてください。</div>
+<script>
+'use strict';
+(()=>{
+const $=id=>document.getElementById(id), tabs=[], registry=new Map(), resources=new Map();
+let active=null, seq=0, scale=1, ox=0,oy=0, dragging=null;
+const allowed=/\.(png|jpe?g|svg|html?)$/i, images=/\.(png|jpe?g|svg)$/i;
+const norm=s=>{let a=[];for(const x of s.replaceAll('\\','/').split('/')){if(x==='..')a.pop();else if(x&&x!=='.')a.push(x)}return a.join('/')};
+const pathOf=f=>norm(f.webkitRelativePath||f.name);
+const text=async f=>f.text();
+function makeURL(file){return URL.createObjectURL(file)}
+function cleanup(){for(const u of resources.values())URL.revokeObjectURL(u);resources.clear()}
+function register(files,reset=false){if(reset){closeAll();registry.clear();cleanup()}for(const f of files){let path=pathOf(f);if(path)registry.set(path,f)}drawFileListOpen(files)}
+function drawFileListOpen(files){const options=Array.from(files).filter(f=>allowed.test(f.name));if(options.length) options.forEach(f=>openFile(f,pathOf(f)))}
+function openFile(file,path){path=norm(path);const existing=tabs.find(t=>t.path===path);if(existing){activate(existing);return}const tab={id:++seq,path,file,url:null,scroll:null};tabs.push(tab);activate(tab)}
+function remove(tab){const i=tabs.indexOf(tab);if(i<0)return;tabs.splice(i,1);if(tab.url)URL.revokeObjectURL(tab.url);if(active===tab){active=null;activate(tabs[Math.min(i,tabs.length-1)]||null)}else drawTabs()}
+function closeAll(){for(const t of tabs)if(t.url)URL.revokeObjectURL(t.url);tabs.length=0;active=null;renderEmpty();drawTabs()}
+function drawTabs(){const el=$('tabs');el.replaceChildren();for(const t of tabs){const box=document.createElement('div');box.className='tab'+(t===active?' active':'');const a=document.createElement('button');a.className='title';a.title=t.path;a.textContent=t.path.split('/').at(-1);a.onclick=()=>activate(t);const b=document.createElement('button');b.className='close';b.textContent='×';b.title='タブを閉じる';b.onclick=()=>remove(t);box.append(a,b);el.append(box)}}
+function renderEmpty(){clearFrame();$('picture').removeAttribute('src');$('picture').style.display='none';$('image-stage').style.display='none';$('empty').style.display='grid';$('status').textContent='ファイル未選択';updateBtns()}
+function clearFrame(){const f=$('frame');f.removeAttribute('src');f.srcdoc='';f.style.display='none'}
+function updateBtns(){const img=active&&images.test(active.path);for(const id of ['minus','plus','fit','one'])$(id).disabled=!img;for(const id of ['reload','stop'])$(id).disabled=!active||images.test(active.path)}
+async function activate(tab){active=tab;drawTabs();clearFrame();$('picture').style.display='none';$('image-stage').style.display='none';if(!tab){renderEmpty();return}const id=tab.id;$('empty').style.display='none';$('status').textContent=tab.path+' — 読み込み中';updateBtns();if(images.test(tab.path)){if(!tab.url)tab.url=makeURL(tab.file);const img=$('picture');img.onload=()=>{if(active?.id!==id)return;img.style.display='block';fitImage();};img.onerror=()=>{$('status').textContent='画像を読み込めません';};img.src=tab.url;$('image-stage').style.display='block'}else{const f=$('frame');f.style.display='block';try{const raw=await text(tab.file);if(active?.id!==id)return;const packaged=await prepareHTML(raw,tab.path);if(active?.id!==id)return;f.srcdoc=packaged;$('status').textContent=tab.path+' — HTML（隔離表示）'}catch(e){$('status').textContent='読み込み失敗: '+e.message}}}
+function fitImage(){const im=$('picture'),area=$('image-stage');const w=im.naturalWidth,h=im.naturalHeight;if(!w||!h)return;scale=Math.min(area.clientWidth/w,area.clientHeight/h,1);ox=(area.clientWidth-w*scale)/2;oy=(area.clientHeight-h*scale)/2;applyTransform()}
+function applyTransform(){const im=$('picture');im.style.transform=`translate(${ox}px,${oy}px) scale(${scale})`;$('status').textContent=`${active?.path||''} — ${im.naturalWidth} × ${im.naturalHeight} / ${Math.round(scale*100)}%`}
+function zoom(factor,cx=$('image-stage').clientWidth/2,cy=$('image-stage').clientHeight/2){if(!active||!images.test(active.path))return;const n=Math.max(.05,Math.min(16,scale*factor));ox=cx-(cx-ox)*(n/scale);oy=cy-(cy-oy)*(n/scale);scale=n;applyTransform()}
+// Build a self-contained HTML document with local references transformed to blob URLs.
+// HTML executes only inside a sandboxed iframe without allow-same-origin.
+async function prepareHTML(source,path){const parser=new DOMParser();const d=parser.parseFromString(source,'text/html');const parent=path.includes('/')?path.slice(0,path.lastIndexOf('/')+1):'';
+const resolve=(ref)=>{if(!ref||/^(https?:|data:|blob:|#|mailto:|javascript:|\/\/)/i.test(ref))return null;const key=norm(parent+ref.split(/[?#]/)[0]);return registry.get(key)||null};
+const pending=[];
+// Bundle stylesheet and script contents so local execution does not require a local server.
+for(const e of [...d.querySelectorAll('link[href],script[src],img[src],source[src],video[poster]')]){
+const attr=e.hasAttribute('href')?'href':e.hasAttribute('poster')?'poster':'src';const f=resolve(e.getAttribute(attr));if(!f)continue;
+if(e.tagName==='SCRIPT'){const s=d.createElement('script');s.textContent=await text(f);e.replaceWith(s)}
+else if(e.tagName==='LINK'&&/stylesheet/i.test(e.rel)){const style=d.createElement('style');let css=await text(f);const base=norm(parent+(e.getAttribute('href')||'')).split('/').slice(0,-1).join('/');css=await rewriteCSS(css,base);style.textContent=css;e.replaceWith(style)}
+else {const url=makeURL(f);pending.push(url);e.setAttribute(attr,url)} }
+// Inject only a document-local CSP. No origin privileges are granted to the iframe.
+const meta=d.createElement('meta');meta.httpEquiv='Content-Security-Policy';meta.content="default-src 'none'; img-src blob: data:; media-src blob: data:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval' blob:; font-src blob: data:; connect-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'";d.head.prepend(meta);
+return '<!doctype html>\n'+d.documentElement.outerHTML}
+async function rewriteCSS(css,base){const re=/url\(\s*(['"]?)([^'"\)]+)\1\s*\)/gi;const hits=[...css.matchAll(re)];for(const m of hits){let value=m[2].trim();if(/^(data:|blob:|https?:|\/\/|#)/i.test(value))continue;const key=norm((base?base+'/':'')+value.split(/[?#]/)[0]);if(registry.has(key)){css=css.replace(m[0],`url("${makeURL(registry.get(key))}")`)}}return css}
+$('open').onclick=()=>$('files').click();$('folder').onclick=()=>$('dir').click();$('files').onchange=e=>{register(e.target.files);e.target.value=''};
+$('dir').onchange=e=>{const fs=[...e.target.files];register(fs,true);e.target.value=''};
+$('clear').onclick=closeAll;
+$('minus').onclick=()=>zoom(1/1.25);$('plus').onclick=()=>zoom(1.25);$('fit').onclick=fitImage;
+$('one').onclick=()=>{const n=1;const w=$('image-stage').clientWidth,h=$('image-stage').clientHeight;ox=(w-$('picture').naturalWidth*n)/2;oy=(h-$('picture').naturalHeight*n)/2;scale=n;applyTransform()};
+$('stop').onclick=()=>{clearFrame();$('status').textContent=active?.path+' — HTML停止中'};
+$('reload').onclick=()=>{if(active)activate(active)};
+$('image-stage').onpointerdown=e=>{if(!active||!images.test(active.path))return;dragging={x:e.clientX,y:e.clientY,ox,oy,id:e.pointerId};$('image-stage').setPointerCapture(e.pointerId)};
+$('image-stage').onpointermove=e=>{if(!dragging||e.pointerId!==dragging.id)return;ox=dragging.ox+e.clientX-dragging.x;oy=dragging.oy+e.clientY-dragging.y;applyTransform()};
+$('image-stage').onpointerup=$('image-stage').onpointercancel=()=>dragging=null;
+$('image-stage').onwheel=e=>{e.preventDefault();const r=$('image-stage').getBoundingClientRect();zoom(e.deltaY<0?1.15:1/1.15,e.clientX-r.left,e.clientY-r.top)};
+window.onresize=()=>{if(active&&images.test(active.path))fitImage()};
+for(const type of ['dragenter','dragover'])document.addEventListener(type,e=>{e.preventDefault();document.body.classList.add('dragover')});
+document.addEventListener('dragleave',e=>{if(!e.relatedTarget)document.body.classList.remove('dragover')});
+document.addEventListener('drop',e=>{e.preventDefault();document.body.classList.remove('dragover');if(e.dataTransfer?.files?.length)register(e.dataTransfer.files)});
+renderEmpty();
+})();
+</script></body></html>

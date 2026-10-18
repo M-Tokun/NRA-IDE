@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XML Viewer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+<style>
+:root{
+  --bg:#ffffff; --bg-soft:#f6f8fa; --fg:#1f2328; --fg-muted:#59636e;
+  --line:#d1d9e0; --link:#0969da; --accent:#1a7f37; --code-bg:#f6f8fa;
+  --quote:#59636e; --quote-line:#d1d9e0; --mark:#fff8c5; --mark-cur:#ffd33d; --mark-cur-fg:#000;
+  --warn:#9a6700; --danger:#cf222e;
+  --sidebar-w:360px; --header-h:46px; --side-splitter-w:8px;
+  --xml-tag:#1a7f37; --xml-attr:#0969da; --xml-value:#cf222e; --xml-text:#1f2328; --xml-comment:#6e7781;
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117; --bg-soft:#161b22; --fg:#e6edf3; --fg-muted:#9198a1;
+  --line:#30363d; --link:#4493f8; --accent:#3fb950; --code-bg:#161b22;
+  --quote:#9198a1; --quote-line:#30363d; --mark:#3b2e00; --mark-cur:#9e6a03; --mark-cur-fg:#fff;
+  --warn:#d29922; --danger:#f85149;
+  --xml-tag:#3fb950; --xml-attr:#4493f8; --xml-value:#f85149; --xml-text:#e6edf3; --xml-comment:#8b949e;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP","Segoe UI",Meiryo,sans-serif;
+  font-size:15px; line-height:1.55;
+}
+button,select,input{font:inherit;color:inherit}
+header{
+  position:fixed; inset:0 0 auto 0; height:var(--header-h); z-index:20;
+  display:flex; align-items:center; gap:8px; padding:0 12px;
+  background:var(--bg-soft); border-bottom:1px solid var(--line);
+  overflow-x:auto; scrollbar-width:thin;
+}
+header > *{flex:0 0 auto}
+header .name{font-weight:600;font-size:14px;margin-right:4px;white-space:nowrap;max-width:36vw;overflow:hidden;text-overflow:ellipsis}
+header .spacer{flex:1 0 8px}
+header .sep{width:1px;height:20px;background:var(--line)}
+.btn{
+  background:var(--bg); border:1px solid var(--line); border-radius:6px;
+  padding:5px 10px; font-size:13px; cursor:pointer; white-space:nowrap;
+}
+.btn:hover:not(:disabled){background:var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.mini{padding:1px 6px;font-size:11px;font-weight:400}
+.btn:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.btn[aria-pressed="true"]{background:var(--link);border-color:var(--link);color:#fff}
+.field{
+  width:100%; background:var(--bg); border:1px solid var(--line); border-radius:6px;
+  padding:4px 8px; font-size:13px;
+}
+.muted{color:var(--fg-muted);font-size:12px}
+main{display:flex; padding-top:var(--header-h); height:100%}
+aside{
+  width:var(--sidebar-w); flex:0 0 var(--sidebar-w); border-right:1px solid var(--line);
+  background:var(--bg-soft); overflow-y:auto; height:calc(100vh - var(--header-h));
+  position:sticky; top:var(--header-h);
+}
+aside.hidden{display:none}
+#side-splitter{
+  position:relative;width:var(--side-splitter-w);flex:0 0 var(--side-splitter-w);
+  cursor:col-resize;touch-action:none;user-select:none;background:transparent;outline:none;
+}
+#side-splitter::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;transform:translateX(-50%);background:var(--line);transition:width .12s,background .12s}
+#side-splitter:hover::before,#side-splitter:focus-visible::before,body.side-resizing #side-splitter::before{width:4px;background:var(--link)}
+#sidebar.hidden + #side-splitter{display:none}
+body.side-resizing,body.side-resizing *{cursor:col-resize!important;user-select:none!important}
+.side-sec{padding:10px 12px;border-bottom:1px solid var(--line)}
+.side-sec h2{font-size:11px;letter-spacing:.04em;color:var(--fg-muted);margin:0 0 6px;font-weight:600;display:flex;align-items:center;gap:6px}
+.side-sec h2 .grow{flex:1}
+.side-sec ul{list-style:none;margin:0;padding:0}
+.side-sec li a{
+  display:block;padding:3px 6px;border-radius:5px;font-size:13px;color:var(--fg);
+  text-decoration:none;white-space:normal;overflow-wrap:anywhere;line-height:1.45;
+}
+.side-sec li a:hover{background:var(--line)}
+.side-sec li a.current{background:var(--line);font-weight:600;box-shadow:inset 3px 0 0 var(--link)}
+#filelist,#elemlist,#xpath-results{max-height:28vh;overflow-y:auto;margin-top:6px!important}
+#workspace{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+#tabs{display:flex;flex:0 0 auto;align-items:stretch;gap:2px;height:37px;padding:4px 8px 0;overflow-x:auto;overflow-y:hidden;background:var(--bg-soft);border-bottom:1px solid var(--line);scrollbar-width:thin}
+#tabs:empty{display:none}
+.doc-tab{display:flex;align-items:center;gap:5px;flex:0 0 auto;max-width:260px;min-width:92px;border:1px solid var(--line);border-bottom:0;border-radius:7px 7px 0 0;background:var(--bg-soft);font-size:12px}
+.doc-tab.active{background:var(--bg);border-color:var(--link);box-shadow:inset 0 2px var(--link)}
+.doc-tab .tab-select{border:0;background:none;min-width:0;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;padding:4px 5px 4px 10px;text-align:left}
+.doc-tab .tab-close{border:0;background:none;cursor:pointer;border-radius:4px;padding:2px 7px;font-size:16px;color:var(--fg-muted)}
+.doc-tab .tab-close:hover{background:var(--line);color:var(--danger)}
+#pane{flex:1;min-width:0;display:flex;height:calc(100vh - var(--header-h) - 37px);overflow:hidden}
+.vp{flex:1;min-width:0;overflow:auto;padding:20px 28px 80px;background:var(--bg)}
+.drop{
+  border:1px dashed var(--line); border-radius:10px; padding:40px 24px; text-align:center; color:var(--fg-muted);
+}
+.drop strong{display:block;color:var(--fg);font-size:15px;margin-bottom:6px}
+body.dragging .vp{outline:2px dashed var(--link); outline-offset:-10px}
+/* XMLツリー表示 */
+.xml-el{margin:1px 0;cursor:pointer}
+.xml-el.selected{outline:2px solid var(--link);border-radius:4px;background:var(--bg-soft)}
+.xml-line{display:flex;align-items:flex-start;gap:4px;font-family:ui-monospace,SFMono-Regular,Consolas,"Noto Sans Mono",monospace;font-size:13.5px;line-height:1.5;white-space:pre-wrap;word-break:break-all}
+.xml-tog{flex:0 0 16px;width:16px;height:18px;border:0;background:none;color:var(--fg-muted);cursor:pointer;padding:0;font-size:11px;line-height:18px;text-align:center}
+.xml-tog:hover{color:var(--fg)}
+.xml-tog.leaf{visibility:hidden;cursor:default}
+.xml-open,.xml-close{color:var(--xml-tag)}
+.xml-tag{color:var(--xml-tag);font-weight:600}
+.xml-attr{color:var(--xml-attr)}
+.xml-value{color:var(--xml-value)}
+.xml-text{color:var(--xml-text);margin-left:20px;font-family:ui-monospace,monospace;font-size:13.5px;white-space:pre-wrap;word-break:break-all}
+.xml-comment{color:var(--xml-comment);font-style:italic;margin-left:20px;font-family:ui-monospace,monospace;font-size:13px}
+.xml-children{margin-left:18px;border-left:1px solid transparent}
+.xml-el.collapsed > .xml-children{display:none}
+.xml-el.collapsed > .xml-close{display:none}
+.xml-el.highlight{background:var(--mark);border-radius:4px}
+.xml-text.highlight{background:var(--mark);border-radius:2px}
+.xml-el.current{background:var(--line);border-radius:4px}
+.xml-link{color:var(--link);text-decoration:underline;cursor:pointer}
+.xml-img{max-width:100%;margin:4px 0 4px 20px;cursor:zoom-in;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.xml-math{margin:4px 0 4px 20px;overflow-x:auto}
+.xml-code{margin:4px 0 4px 20px}
+.xml-code pre{margin:0;padding:10px 12px;border-radius:6px;background:var(--code-bg);overflow:auto}
+#toast{
+  position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:60; max-width:80vw;
+  background:#1f2328; color:#fff; padding:7px 14px; border-radius:8px; font-size:13px; opacity:0; pointer-events:none;
+  transition:opacity .15s; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#toast.on{opacity:.95}
+#findbar{
+  position:fixed; top:calc(var(--header-h) + 6px); right:20px; z-index:25; display:none; align-items:center; gap:6px;
+  background:var(--bg-soft); border:1px solid var(--line); border-radius:8px; padding:6px 8px; box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+#findbar.on{display:flex}
+#findbar input{width:16em}
+#find-cnt{min-width:4.5em;text-align:center;font-size:12px;color:var(--fg-muted)}
+.attr-row{font-size:12px;margin:2px 0;word-break:break-all}
+.attr-name{color:var(--xml-attr);font-weight:600}
+.attr-val{color:var(--xml-value)}
+#node-details{font-size:13px;line-height:1.4}
+#lightbox{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center}
+#lightbox.on{display:flex}
+#lightbox img{max-width:92vw;max-height:90vh;object-fit:contain}
+#lb-close{position:absolute;top:16px;right:16px}
+@media (max-width:820px){
+  :root{--sidebar-w:200px}
+  aside{position:fixed;left:0;top:var(--header-h);z-index:15}
+  .vp{padding:16px 12px 60px}
+  #side-splitter{display:none!important}
+}
+@media print{
+  header,aside,#side-splitter,#tabs,#findbar,#toast,#lightbox{display:none!important}
+  .vp{overflow:visible;padding:0;height:auto}
+  main{padding:0;display:block}
+}
+</style>
+</head>
+<body>
+<header>
+  <button class="btn" id="btn-back" title="戻る" aria-label="戻る" disabled>◀</button>
+  <button class="btn" id="btn-fwd" title="進む" aria-label="進む" disabled>▶</button>
+  <span class="name" id="fname">XML Viewer</span>
+  <button class="btn" id="btn-file">ファイルを開く</button>
+  <button class="btn" id="btn-dir">フォルダを開く</button>
+  <span class="sep"></span>
+  <button class="btn mini" id="btn-expand">すべて展開</button>
+  <button class="btn mini" id="btn-collapse">すべて折畳</button>
+  <button class="btn mini" id="btn-copy-all" title="文書全体を元の空白を維持してコピー">コピー</button>
+  <span class="spacer"></span>
+  <button class="btn" id="btn-find" title="文書内検索 (Ctrl+F)">検索</button>
+  <button class="btn" id="btn-side" aria-pressed="true">サイドバー</button>
+  <button class="btn" id="btn-theme">ダーク</button>
+  <button class="btn" id="btn-help" title="使い方">?</button>
+</header>
+
+<main>
+  <aside id="sidebar">
+    <div class="side-sec" id="filesec" hidden>
+      <h2><span class="grow">ファイル</span></h2>
+      <input class="field" id="file-filter" type="search" placeholder="ファイル名で絞り込み" autocomplete="off">
+      <ul id="filelist"></ul>
+    </div>
+    <div class="side-sec">
+      <h2>要素ナビゲーション</h2>
+      <input class="field" id="elem-filter" type="search" placeholder="要素名で絞り込み" autocomplete="off">
+      <ul id="elemlist"></ul>
+    </div>
+    <div class="side-sec">
+      <h2>選択ノード</h2>
+      <div id="node-details" class="muted">要素をクリックして選択</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn mini" id="btn-copy-node" disabled>ノードをコピー</button>
+        <button class="btn mini" id="btn-copy-xpath" disabled>XPathをコピー</button>
+      </div>
+    </div>
+    <div class="side-sec">
+      <h2>XPath</h2>
+      <input class="field" id="xpath-in" type="search" placeholder="XPath を入力して Enter" autocomplete="off">
+      <div class="muted" id="xpath-status"></div>
+      <ul id="xpath-results"></ul>
+    </div>
+  </aside>
+  <div id="side-splitter" role="separator" aria-orientation="vertical" aria-label="サイドバー幅変更" tabindex="0" title="ドラッグで幅変更 / ダブルクリックで初期値"></div>
+
+  <div id="workspace">
+    <div id="tabs" role="tablist" aria-label="開いているXML文書"></div>
+    <div id="pane">
+      <div class="vp" id="viewport"><div id="doc"></div></div>
+    </div>
+  </div>
+</main>
+
+<div id="findbar" role="search">
+  <input class="field" id="find-in" type="search" placeholder="文書内を検索" autocomplete="off" aria-label="文書内検索">
+  <span id="find-cnt" aria-live="polite"></span>
+  <button class="btn" id="find-prev" title="前へ">▲</button>
+  <button class="btn" id="find-next" title="次へ">▼</button>
+  <button class="btn" id="find-close" title="閉じる">×</button>
+</div>
+
+<div id="lightbox"><button class="btn" id="lb-close">閉じる</button><img id="lb-img" alt=""></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<input type="file" id="in-file" accept=".xml,.xsd,.xsl,.xslt,.svg,.html,.xhtml,.txt" multiple hidden>
+<input type="file" id="in-dir" webkitdirectory directory multiple hidden>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+"use strict";
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const doc = $("doc"), viewport = $("viewport"), fnameEl = $("fname");
+  const sidebar = $("sidebar"), sideSplitter = $("side-splitter");
+  const fileListEl = $("filelist"), fileSec = $("filesec"), elemListEl = $("elemlist");
+  const tabBar = $("tabs");
+  const nodeDetails = $("node-details");
+  const xpathResults = $("xpath-results");
+  const lightbox = $("lightbox"), lbImg = $("lb-img");
+
+  let xmlFiles = new Map();
+  let assets = new Map();
+  let currentPath = "";
+  let currentDoc = null;
+  const tabs = [];
+  let activeTab = null, nextTabId = 1;
+  let hist = [], hIdx = -1, navigatingHistory = false;
+  let nodeIdCounter = 0;
+  const nodeMap = new Map();
+  const domToUiMap = new WeakMap();
+  let selectedEl = null;
+  let selectedNode = null;
+  let xpathHits = [];
+
+  const hasKatex = typeof katex !== "undefined";
+  const hasHljs = typeof hljs !== "undefined";
+
+  const toast = (() => {
+    let t = 0; const el = $("toast");
+    return (msg) => { el.textContent = msg; el.classList.add("on"); clearTimeout(t); t = setTimeout(() => el.classList.remove("on"), 1800); };
+  })();
+
+  function mk(tag, attrs, ...kids) {
+    const e = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      if (k === "class") e.className = attrs[k];
+      else if (k === "text") e.textContent = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    }
+    kids.flat().forEach((c) => { if (c != null) e.append(c); });
+    return e;
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[c]));
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (e) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.cssText = "position:fixed;left:-9999px";
+        document.body.append(ta); ta.select();
+        const ok = document.execCommand("copy"); ta.remove();
+        return ok;
+      } catch (e2) { return false; }
+    }
+  }
+
+  // XMLSerializer preserves text, CDATA, namespaces and attribute escaping.
+  // Output is intentionally not re-indented because mixed content is whitespace-sensitive.
+  function prettyXml(node) {
+    return new XMLSerializer().serializeToString(node);
+  }
+
+  function simpleXPath(node) {
+    if (!node) return "";
+    if (node.nodeType === Node.ATTRIBUTE_NODE) {
+      return simpleXPath(node.ownerElement) + "/@" + node.name;
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      return simpleXPath(node.parentElement) + "/text()";
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const parts = [];
+    let n = node;
+    while (n && n.nodeType === Node.ELEMENT_NODE) {
+      let idx = 1;
+      let sib = n.previousSibling;
+      while (sib) {
+        if (sib.nodeType === Node.ELEMENT_NODE && sib.tagName === n.tagName) idx++;
+        sib = sib.previousSibling;
+      }
+      parts.unshift(n.tagName + (idx > 1 ? "[" + idx + "]" : ""));
+      n = n.parentNode;
+    }
+    return "/" + parts.join("/");
+  }
+
+  function isImg(name) { return /\.(png|jpe?g|gif|svg|webp|avif|bmp)$/i.test(name); }
+  function isXml(name) { return /\.(xml|xsd|xsl|xslt|svg|xhtml|html|txt)$/i.test(name); }
+
+  function normalizePath(path) {
+    const parts = [];
+    for (const p of decodeURIComponent(path).replace(/\\/g, "/").split("/")) {
+      if (!p || p === ".") continue;
+      if (p === "..") parts.pop();
+      else parts.push(p);
+    }
+    return parts.join("/");
+  }
+  function relativePath(ref) {
+    const url = ref.split(/[?#]/, 1)[0];
+    if (!url || /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(url)) return null;
+    return normalizePath((currentPath.includes("/") ? currentPath.slice(0, currentPath.lastIndexOf("/") + 1) : "") + url);
+  }
+
+  function ensureVisible(uiEl) {
+    if (!uiEl) return;
+    let cur = uiEl.parentElement;
+    while (cur && cur !== doc) {
+      if (cur.classList.contains("xml-children")) {
+        const parentXmlEl = cur.parentElement;
+        if (parentXmlEl && parentXmlEl.classList.contains("collapsed")) {
+          parentXmlEl.classList.remove("collapsed");
+          const tog = parentXmlEl.querySelector(":scope > .xml-line > .xml-tog");
+          if (tog && !tog.classList.contains("leaf")) tog.textContent = "▾";
+        }
+      }
+      cur = cur.parentElement;
+    }
+  }
+
+  function snapshotTab() {
+    if (!activeTab) return;
+    activeTab.scroll = viewport.scrollTop;
+  }
+  function redrawTabs() {
+    tabBar.replaceChildren();
+    for (const tab of tabs) {
+      const shell = mk("div", {class:"doc-tab" + (tab === activeTab ? " active":""),role:"presentation"});
+      const select = mk("button", {class:"tab-select",type:"button",role:"tab","aria-selected":String(tab===activeTab),title:tab.path,text:tab.path.split("/").pop() || tab.path});
+      select.addEventListener("click", () => activateTab(tab));
+      const close = mk("button", {class:"tab-close",type:"button",title:"タブを閉じる","aria-label":tab.path+" を閉じる",text:"×"});
+      close.addEventListener("click", (e) => { e.stopPropagation(); closeTab(tab); });
+      shell.append(select, close); tabBar.append(shell);
+    }
+    tabBar.querySelector(".active")?.scrollIntoView({block:"nearest",inline:"nearest"});
+  }
+  function closeTab(tab) {
+    const i = tabs.indexOf(tab); if (i < 0) return;
+    tabs.splice(i, 1);
+    if (tab === activeTab) {
+      activeTab = null; currentDoc = null; currentPath = "";
+      selectedEl = null; selectedNode = null;
+      if (tabs.length) activateTab(tabs[Math.min(i, tabs.length - 1)]);
+      else {
+        doc.innerHTML = '<div class="drop"><strong>XMLを開いてください</strong>ファイルを開く、またはフォルダから選択してください。</div>';
+        fnameEl.textContent = "XML Viewer"; document.title = "XML Viewer";
+        elemListEl.replaceChildren();
+        nodeDetails.textContent = "要素をクリックして選択";
+        $("btn-copy-node").disabled = true;
+        $("btn-copy-xpath").disabled = true;
+      }
+    }
+    redrawTabs();
+  }
+  function activateTab(tab) {
+    if (!tabs.includes(tab) || activeTab === tab) return;
+    snapshotTab();
+    activeTab = tab;
+    currentPath = tab.path;
+    fnameEl.textContent = tab.path; fnameEl.title = tab.path;
+    document.title = (tab.path.split("/").pop() || "XML") + " — XML Viewer";
+    renderXml(tab.doc);
+    viewport.scrollTop = Math.max(0, tab.scroll || 0);
+    buildElemList();
+    redrawTabs();
+    markCurrentFile();
+    if (!navigatingHistory && hist[hIdx]?.path !== tab.path) {
+      hist = hist.slice(0, hIdx + 1);
+      hist.push({path:tab.path});
+      hIdx = hist.length - 1;
+      syncHistBtns();
+    }
+    selectedEl = null; selectedNode = null;
+    nodeDetails.textContent = "要素をクリックして選択";
+    $("btn-copy-node").disabled = true;
+    $("btn-copy-xpath").disabled = true;
+    xpathResults.replaceChildren();
+    $("xpath-status").textContent = "";
+  }
+
+  const SIDEBAR_DEFAULT = 360, SIDEBAR_MIN = 220, SIDEBAR_MAX = 720;
+  function setSidebarWidth(px, persist = true) {
+    const total = document.querySelector("main")?.clientWidth || window.innerWidth;
+    const max = Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, total - 400));
+    const w = Math.max(SIDEBAR_MIN, Math.min(max, Math.round(px)));
+    document.documentElement.style.setProperty("--sidebar-w", w + "px");
+    if (persist) try { localStorage.setItem("xmlviewer-sidebar", String(w)); } catch (e) {}
+    return w;
+  }
+  let saved = NaN;
+  try { saved = Number(localStorage.getItem("xmlviewer-sidebar")); } catch(e) {}
+  setSidebarWidth(Number.isFinite(saved) && saved > 0 ? saved : SIDEBAR_DEFAULT, false);
+
+  let sideDrag = null;
+  sideSplitter.addEventListener("pointerdown", e => {
+    if (matchMedia("(max-width:820px)").matches || sidebar.classList.contains("hidden")) return;
+    e.preventDefault();
+    sideDrag = { x: e.clientX, width: sidebar.getBoundingClientRect().width, id: e.pointerId };
+    try { sideSplitter.setPointerCapture(e.pointerId); } catch (err) {}
+    document.body.classList.add("side-resizing");
+  });
+  sideSplitter.addEventListener("pointermove", e => {
+    if (!sideDrag || e.pointerId !== sideDrag.id) return;
+    setSidebarWidth(sideDrag.width + (e.clientX - sideDrag.x));
+  });
+  function endSideDrag(e) {
+    if (!sideDrag || (e && e.pointerId !== sideDrag.id)) return;
+    try { sideSplitter.releasePointerCapture(sideDrag.id); } catch (err) {}
+    sideDrag = null; document.body.classList.remove("side-resizing");
+  }
+  sideSplitter.addEventListener("pointerup", endSideDrag);
+  sideSplitter.addEventListener("pointercancel", endSideDrag);
+  sideSplitter.addEventListener("dblclick", () => setSidebarWidth(SIDEBAR_DEFAULT));
+
+  function decorate(root) {
+    root.querySelectorAll(".xml-el").forEach(el => {
+      const node = nodeMap.get(el.dataset.id);
+      if (node && node.getAttribute) {
+        const id = node.getAttribute("id") || node.getAttribute("xml:id");
+        if (id) el.id = "xml-" + id;
+      }
+    });
+
+    root.querySelectorAll(".xml-el").forEach(el => {
+      const node = nodeMap.get(el.dataset.id);
+      if (!node) return;
+      const src = node.getAttribute("src") || node.getAttribute("href") || node.getAttribute("xlink:href");
+      if (src && isImg(src.split("?")[0])) {
+        const url = assets.get(relativePath(src));
+        if (url) {
+          const img = mk("img", { class: "xml-img", src: url, alt: node.getAttribute("alt") || "" });
+          img.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            lbImg.src = url;
+            lightbox.classList.add("on");
+          });
+          const children = el.querySelector(".xml-children") || el;
+          children.insertBefore(img, children.firstChild);
+        }
+      }
+    });
+
+    if (hasKatex) {
+      root.querySelectorAll(".xml-el").forEach(el => {
+        const node = nodeMap.get(el.dataset.id);
+        if (!node) return;
+        let tex = node.getAttribute("latex") || node.getAttribute("tex");
+        if (!tex && /^(formula|equation|math|latex)$/i.test(node.tagName)) {
+          tex = (node.textContent || "").trim();
+          if (tex.startsWith("$$") && tex.endsWith("$$")) tex = tex.slice(2, -2);
+          else if (tex.startsWith("$") && tex.endsWith("$")) tex = tex.slice(1, -1);
+        }
+        if (tex) {
+          const span = mk("span", { class: "xml-math" });
+          try {
+            katex.render(tex, span, { displayMode: true, throwOnError: false });
+          } catch (e) {
+            span.textContent = "数式エラー: " + tex;
+            span.className = "xml-text";
+          }
+          const children = el.querySelector(".xml-children") || el;
+          children.insertBefore(span, children.firstChild);
+        }
+      });
+    }
+
+    if (hasHljs) {
+      root.querySelectorAll(".xml-el").forEach(el => {
+        const node = nodeMap.get(el.dataset.id);
+        if (!node) return;
+        const lang = node.getAttribute("lang") || node.getAttribute("language") || node.getAttribute("class")?.match(/language-(\w+)/)?.[1];
+        if (lang && /^(code|source|pre|script)$/i.test(node.tagName)) {
+          const text = node.textContent || "";
+          const pre = mk("pre", { class: "xml-code" });
+          const code = mk("code", { class: "language-" + lang, text });
+          pre.append(code);
+          const children = el.querySelector(".xml-children") || el;
+          children.insertBefore(pre, children.firstChild);
+          try { hljs.highlightElement(code); } catch (e) {}
+        }
+      });
+    }
+
+    const urlRe = /(https?:\/\/[^\s<>"']+)/g;
+    root.querySelectorAll(".xml-text").forEach(tx => {
+      const t = tx.textContent;
+      if (!urlRe.test(t)) return;
+      urlRe.lastIndex = 0;
+      const frag = document.createDocumentFragment();
+      let last = 0, m;
+      while ((m = urlRe.exec(t))) {
+        if (m.index > last) frag.append(document.createTextNode(t.slice(last, m.index)));
+        const a = mk("a", { class: "xml-link", href: m[1], target: "_blank", rel: "noopener", text: m[1] });
+        a.addEventListener("click", ev => ev.stopPropagation());
+        frag.append(a);
+        last = m.index + m[0].length;
+      }
+      if (last < t.length) frag.append(document.createTextNode(t.slice(last)));
+      tx.replaceChildren(frag);
+    });
+
+    root.querySelectorAll(".xml-value").forEach(val => {
+      const text = val.textContent.replace(/^"|"$/g, "");
+      if (/^https?:\/\//i.test(text)) {
+        const a = mk("a", { class: "xml-link", href: text, target: "_blank", rel: "noopener", text });
+        a.addEventListener("click", ev => ev.stopPropagation());
+        val.replaceChildren(a);
+      } else if (isXml(text.split(/[?#]/)[0]) && xmlFiles.has(relativePath(text))) {
+        const a = mk("a", { class: "xml-link", href: "#", text });
+        a.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const resolved = relativePath(text);
+          openFile(xmlFiles.get(resolved), resolved);
+        });
+        val.replaceChildren(a);
+      } else if (text.startsWith("#")) {
+        const a = mk("a", { class: "xml-link", href: "#", text });
+        a.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const target = Array.from(doc.querySelectorAll(".xml-el")).find(el => {
+             const n = nodeMap.get(el.dataset.id);
+             return n?.getAttribute?.("id") === text.slice(1) || n?.getAttribute?.("xml:id") === text.slice(1);
+           });
+          if (target) {
+            ensureVisible(target);
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+            const node = nodeMap.get(target.dataset.id);
+            if (node) selectNode(target, node);
+          }
+        });
+        val.replaceChildren(a);
+      }
+    });
+  }
+
+  function nodeToHtml(node, level = 0) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const t = node.textContent;
+      if (!t || !t.trim()) return null;
+      return mk("div", { class: "xml-text", text: t });
+    }
+    if (node.nodeType === Node.COMMENT_NODE) {
+      return mk("div", { class: "xml-comment", text: "<!-- " + node.textContent + " -->" });
+    }
+    if (node.nodeType === Node.CDATA_SECTION_NODE) {
+      return mk("div", { class: "xml-text", text: "<![CDATA[" + node.textContent + "]]>" });
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return null;
+
+    const id = "n" + (++nodeIdCounter);
+    nodeMap.set(id, node);
+    const el = mk("div", { class: "xml-el", "data-tag": node.tagName, "data-level": String(level), "data-id": id });
+    domToUiMap.set(node, el);
+
+    const childElements = Array.from(node.childNodes).filter(n => n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.CDATA_SECTION_NODE || n.nodeType === Node.COMMENT_NODE || (n.nodeType === Node.TEXT_NODE && n.textContent.trim()));
+    const hasChildren = childElements.length > 0;
+
+    const line = mk("div", { class: "xml-line" });
+    const tog = mk("button", { class: "xml-tog" + (hasChildren ? "" : " leaf"), type: "button", text: hasChildren ? "▾" : "" });
+    if (hasChildren) {
+      tog.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        el.classList.toggle("collapsed");
+        tog.textContent = el.classList.contains("collapsed") ? "▸" : "▾";
+      });
+    }
+    line.append(tog);
+
+    const openSpan = mk("span", { class: "xml-open" });
+    let html = "&lt;" + esc(node.tagName);
+    if (node.attributes && node.attributes.length) {
+      for (const a of Array.from(node.attributes)) {
+        html += ' <span class="xml-attr">' + esc(a.name) + '</span>=&quot;<span class="xml-value">' + esc(a.value) + '</span>&quot;';
+      }
+    }
+    const selfClose = !hasChildren;
+    html += selfClose ? "/&gt;" : "&gt;";
+    openSpan.innerHTML = html;
+    line.append(openSpan);
+    el.append(line);
+
+    if (hasChildren) {
+      const kids = mk("div", { class: "xml-children" });
+      for (const c of node.childNodes) {
+        const rendered = nodeToHtml(c, level + 1);
+        if (rendered) kids.append(rendered);
+      }
+      el.append(kids);
+      const close = mk("div", { class: "xml-line xml-close" });
+      close.innerHTML = "&lt;/" + esc(node.tagName) + "&gt;";
+      el.append(close);
+    }
+
+    el.addEventListener("click", (ev) => {
+      if (ev.target.closest(".xml-tog, .xml-link, .xml-img, .xml-math, .xml-code")) return;
+      selectNode(el, node);
+    });
+    return el;
+  }
+
+  function selectNode(el, node) {
+    if (selectedEl) selectedEl.classList.remove("selected");
+    selectedEl = el;
+    selectedNode = node;
+    if (el) {
+      ensureVisible(el);
+      el.classList.add("selected");
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    const attrs = Array.from(node.attributes || []).map(a =>
+      '<div class="attr-row"><span class="attr-name">' + esc(a.name) + '</span>=<span class="attr-val">&quot;' + esc(a.value) + '&quot;</span></div>'
+    ).join("");
+    const text = (node.textContent || "").trim().slice(0, 200);
+    nodeDetails.innerHTML =
+      '<div><b>' + esc(node.nodeName || node.tagName) + '</b></div>' +
+      (attrs ? '<div style="margin:4px 0">' + attrs + '</div>' : '') +
+      (text ? '<div class="muted" style="margin-top:4px">' + esc(text) + (node.textContent.trim().length > 200 ? "…" : "") + '</div>' : '');
+    $("btn-copy-node").disabled = false;
+    $("btn-copy-xpath").disabled = false;
+  }
+
+  function renderXml(xmlDoc) {
+    doc.replaceChildren();
+    nodeMap.clear();
+    nodeIdCounter = 0;
+    currentDoc = xmlDoc;
+    if (!xmlDoc || !xmlDoc.documentElement) {
+      doc.append(mk("div", { class: "drop" }, mk("strong", { text: "XMLの解析に失敗しました" }), "有効なXMLファイルを指定してください。"));
+      return;
+    }
+    const root = nodeToHtml(xmlDoc.documentElement, 0);
+    if (root) doc.append(root);
+    doc.querySelectorAll(".xml-el").forEach((el) => {
+      if (Number(el.dataset.level) > 2) {
+        el.classList.add("collapsed");
+        const t = el.querySelector(":scope > .xml-line > .xml-tog");
+        if (t && !t.classList.contains("leaf")) t.textContent = "▸";
+      }
+    });
+    decorate(doc);
+  }
+
+  function buildElemList() {
+    elemListEl.replaceChildren();
+    if (!currentDoc) return;
+    const seen = new Map();
+    const walk = (n) => {
+      if (n.nodeType !== Node.ELEMENT_NODE) return;
+      const tag = n.tagName;
+      seen.set(tag, (seen.get(tag) || 0) + 1);
+      for (const c of n.children) walk(c);
+    };
+    walk(currentDoc.documentElement);
+    Array.from(seen.keys()).sort().forEach(tag => {
+      const li = mk("li");
+      const a = mk("a", { href: "#", text: tag + " (" + seen.get(tag) + ")", title: tag });
+      a.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        const first = doc.querySelector('.xml-el[data-tag="' + CSS.escape(tag) + '"]');
+        if (first) {
+          ensureVisible(first);
+          const node = nodeMap.get(first.dataset.id);
+          if (node) selectNode(first, node);
+        }
+      });
+      li.append(a); elemListEl.append(li);
+    });
+    applyElemFilter();
+  }
+
+  function applyElemFilter() {
+    const q = $("elem-filter").value.trim().toLowerCase();
+    elemListEl.querySelectorAll("li").forEach(li => {
+      li.hidden = q ? !li.textContent.toLowerCase().includes(q) : false;
+    });
+  }
+  $("elem-filter").addEventListener("input", applyElemFilter);
+
+  function readText(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result || ""));
+      r.onerror = () => rej(new Error("読み込み失敗"));
+      r.readAsText(file, "utf-8");
+    });
+  }
+
+  async function openFile(file, path) {
+    const p = path || file.webkitRelativePath || file.name;
+    if (!xmlFiles.has(p)) xmlFiles.set(p, file);
+    const existing = tabs.find(t => t.path === p);
+    if (existing) { activateTab(existing); return; }
+    try {
+      const text = await readText(file);
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, "application/xml");
+      const err = xmlDoc.querySelector("parsererror");
+      if (err) throw new Error("XML解析エラー: " + (err.textContent || "").slice(0, 200));
+      const tab = { id: nextTabId++, file, path: p, doc: xmlDoc, scroll: 0 };
+      tabs.push(tab);
+      activateTab(tab);
+      syncHistBtns();
+    } catch (e) {
+      toast(String(e.message || e));
+    }
+  }
+
+  function loadFolder(files) {
+    clearTabs();
+    assets.forEach(url => URL.revokeObjectURL(url));
+    assets = new Map();
+    xmlFiles = new Map();
+    hist = []; hIdx = -1; syncHistBtns();
+    const list = Array.from(files);
+    const strip = (p) => p.split("/").slice(1).join("/") || p;
+    list.forEach(f => {
+      const rel = strip(f.webkitRelativePath || f.name);
+      if (isImg(f.name)) assets.set(rel, URL.createObjectURL(f));
+      else if (isXml(f.name)) xmlFiles.set(rel, f);
+    });
+    renderFileList();
+    const first = xmlFiles.keys().next().value;
+    if (first) openFile(xmlFiles.get(first), first);
+    else doc.innerHTML = '<div class="drop"><strong>.xml ファイルが見つかりませんでした</strong></div>';
+  }
+
+  function renderFileList() {
+    fileListEl.replaceChildren();
+    fileSec.hidden = !xmlFiles.size;
+    if (!xmlFiles.size) return;
+    Array.from(xmlFiles.keys()).sort((a, b) => a.localeCompare(b)).forEach(p => {
+      const li = mk("li");
+      const a = mk("a", { href: "#", text: p, title: p, "data-path": p });
+      a.addEventListener("click", ev => { ev.preventDefault(); openFile(xmlFiles.get(p), p); });
+      li.append(a); fileListEl.append(li);
+    });
+    applyFileFilter();
+  }
+  function applyFileFilter() {
+    const q = $("file-filter").value.trim().toLowerCase();
+    fileListEl.querySelectorAll("li").forEach(li => {
+      li.hidden = q ? !li.firstChild.dataset.path.toLowerCase().includes(q) : false;
+    });
+  }
+  $("file-filter").addEventListener("input", applyFileFilter);
+
+  function markCurrentFile() {
+    fileListEl.querySelectorAll("a").forEach(a => {
+      a.classList.toggle("current", a.dataset.path === currentPath);
+    });
+  }
+
+  function setAllCollapsed(collapsed) {
+    doc.querySelectorAll(".xml-el").forEach(el => {
+      const tog = el.querySelector(":scope > .xml-line > .xml-tog");
+      if (!tog || tog.classList.contains("leaf")) return;
+      el.classList.toggle("collapsed", collapsed);
+      tog.textContent = collapsed ? "▸" : "▾";
+    });
+  }
+  $("btn-expand").addEventListener("click", () => setAllCollapsed(false));
+  $("btn-collapse").addEventListener("click", () => setAllCollapsed(true));
+
+  $("btn-copy-all").addEventListener("click", async () => {
+    if (!currentDoc || !currentDoc.documentElement) return;
+    const xml = prettyXml(currentDoc);
+    const ok = await copyText(xml);
+    toast(ok ? "文書全体をコピーしました" : "コピーできません");
+  });
+  $("btn-copy-node").addEventListener("click", async () => {
+    if (!selectedNode) return;
+    const xml = selectedNode.nodeType === Node.ELEMENT_NODE ? prettyXml(selectedNode) : (selectedNode.textContent || "");
+    const ok = await copyText(xml);
+    toast(ok ? "選択ノードをコピーしました" : "コピーできません");
+  });
+  $("btn-copy-xpath").addEventListener("click", async () => {
+    if (!selectedNode) return;
+    const xp = simpleXPath(selectedNode);
+    const ok = await copyText(xp);
+    toast(ok ? "XPathをコピーしました: " + xp : "コピーできません");
+  });
+
+  const findbar = $("findbar"), findIn = $("find-in"), findCnt = $("find-cnt");
+  let hits = [], hitIdx = -1;
+  function clearHits() {
+    doc.querySelectorAll(".xml-el.highlight, .xml-text.highlight").forEach(e => e.classList.remove("highlight"));
+    hits = []; hitIdx = -1;
+  }
+  function runFind() {
+    clearHits();
+    const q = findIn.value.trim().toLowerCase();
+    if (!q) { findCnt.textContent = ""; return; }
+    const nodes = [];
+    const w = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT, null);
+    while (w.nextNode()) {
+      const n = w.currentNode;
+      if (n.nodeValue.toLowerCase().includes(q) && n.parentElement) {
+        nodes.push(n.parentElement);
+      }
+    }
+    doc.querySelectorAll(".xml-el").forEach(el => {
+      if ((el.dataset.tag || "").toLowerCase().includes(q)) nodes.push(el);
+    });
+    hits = [...new Set(nodes)];
+    if (hits.length) {
+      hitIdx = 0;
+      setCurHit(true);
+    }
+    findCnt.textContent = hits.length ? "1 / " + hits.length : "0 件";
+  }
+  function setCurHit(jump) {
+    hits.forEach(m => m.classList.remove("highlight"));
+    if (hitIdx < 0 || !hits[hitIdx]) { findCnt.textContent = findIn.value ? "0 件" : ""; return; }
+    const target = hits[hitIdx];
+    ensureVisible(target);
+    target.classList.add("highlight");
+    findCnt.textContent = (hitIdx + 1) + " / " + hits.length;
+    if (jump) target.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function stepFind(d) {
+    if (!hits.length) return;
+    hitIdx = (hitIdx + d + hits.length) % hits.length;
+    setCurHit(true);
+  }
+  function openFind() {
+    findbar.classList.add("on");
+    findIn.focus(); findIn.select();
+    runFind();
+  }
+  function closeFind() {
+    findbar.classList.remove("on");
+    clearHits();
+    findCnt.textContent = "";
+  }
+  findIn.addEventListener("input", () => { clearTimeout(findIn._t); findIn._t = setTimeout(runFind, 150); });
+  findIn.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); stepFind(e.shiftKey ? -1 : 1); }
+  });
+  $("find-next").addEventListener("click", () => stepFind(1));
+  $("find-prev").addEventListener("click", () => stepFind(-1));
+  $("find-close").addEventListener("click", closeFind);
+  $("btn-find").addEventListener("click", () => { if (findbar.classList.contains("on")) closeFind(); else openFind(); });
+
+  function highlightXPath(node) {
+    doc.querySelectorAll(".xml-el.highlight").forEach(el => el.classList.remove("highlight"));
+    if (!node) return;
+    let targetEl = null;
+    let targetNode = node;
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      targetEl = domToUiMap.get(node);
+    } else if (node.nodeType === Node.ATTRIBUTE_NODE) {
+      targetNode = node.ownerElement;
+      targetEl = domToUiMap.get(targetNode);
+    } else if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE || node.nodeType === Node.COMMENT_NODE) {
+      targetNode = node.parentElement;
+      targetEl = domToUiMap.get(targetNode);
+    }
+
+    if (targetEl) {
+      ensureVisible(targetEl);
+      targetEl.classList.add("highlight");
+      targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      selectNode(targetEl, targetNode);
+    }
+  }
+
+  $("xpath-in").addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const expr = $("xpath-in").value.trim();
+    const status = $("xpath-status");
+    xpathResults.replaceChildren();
+    xpathHits = [];
+    if (!expr || !currentDoc) { status.textContent = ""; return; }
+    try {
+      const res = currentDoc.evaluate(expr, currentDoc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      status.textContent = res.snapshotLength + " 件一致";
+      for (let i = 0; i < res.snapshotLength; i++) {
+        const n = res.snapshotItem(i);
+        xpathHits.push(n);
+        const li = mk("li");
+        const summary = n.nodeType === Node.ELEMENT_NODE
+          ? n.tagName + (n.attributes.length ? " [" + Array.from(n.attributes).slice(0,2).map(a=>a.name+"="+a.value).join(", ") + "]" : "")
+          : (n.nodeType === Node.ATTRIBUTE_NODE ? "@" + n.name + '="' + n.value + '"' : (n.textContent || "").trim().slice(0, 40));
+        const a = mk("a", { href: "#", text: (i+1) + ". " + summary, title: summary });
+        a.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          highlightXPath(n);
+        });
+        li.append(a);
+        xpathResults.append(li);
+      }
+      if (res.snapshotLength) highlightXPath(res.snapshotItem(0));
+    } catch (err) {
+      status.textContent = "XPath エラー";
+      toast("XPath エラー: " + (err.message || err));
+    }
+  });
+
+  function syncHistBtns() {
+    $("btn-back").disabled = hIdx <= 0;
+    $("btn-fwd").disabled = hIdx >= hist.length - 1;
+  }
+  function goHistory(d) {
+    const n = hIdx + d;
+    if (n < 0 || n >= hist.length) return;
+    hIdx = n;
+    const p = hist[n].path;
+    const f = xmlFiles.get(p);
+    if (f) {
+      navigatingHistory = true;
+      Promise.resolve(openFile(f, p)).finally(() => { navigatingHistory = false; syncHistBtns(); });
+    } else syncHistBtns();
+  }
+  $("btn-back").addEventListener("click", () => goHistory(-1));
+  $("btn-fwd").addEventListener("click", () => goHistory(1));
+
+  $("btn-file").addEventListener("click", () => $("in-file").click());
+  $("in-file").addEventListener("change", e => {
+    const files = Array.from(e.target.files || []);
+    (async () => { for (const f of files) await openFile(f); })();
+    e.target.value = "";
+  });
+  $("btn-dir").addEventListener("click", () => $("in-dir").click());
+  $("in-dir").addEventListener("change", e => {
+    if (e.target.files && e.target.files.length) loadFolder(e.target.files);
+    e.target.value = "";
+  });
+
+  ["dragenter","dragover"].forEach(t => document.addEventListener(t, e => {
+    e.preventDefault(); document.body.classList.add("dragging");
+  }));
+  ["dragleave","drop"].forEach(t => document.addEventListener(t, e => {
+    if (t === "dragleave" && e.relatedTarget) return;
+    document.body.classList.remove("dragging");
+  }));
+  document.addEventListener("drop", e => {
+    e.preventDefault();
+    document.body.classList.remove("dragging");
+    const files = Array.from(e.dataTransfer?.files || []).filter(f => isXml(f.name));
+    (async () => { for (const f of files) await openFile(f); })();
+  });
+
+  $("btn-side").addEventListener("click", ev => {
+    const hidden = sidebar.classList.toggle("hidden");
+    ev.currentTarget.setAttribute("aria-pressed", String(!hidden));
+  });
+
+  function setTheme(mode) {
+    document.documentElement.dataset.theme = mode;
+    $("hljs-light").disabled = mode === "dark";
+    $("hljs-dark").disabled = mode !== "dark";
+    $("btn-theme").textContent = mode === "dark" ? "ライト" : "ダーク";
+    try { localStorage.setItem("xmlviewer-theme", mode); } catch (e) {}
+  }
+  $("btn-theme").addEventListener("click", () => {
+    setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  });
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem("xmlviewer-theme"); } catch(e) {}
+  setTheme(savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+  $("lb-close").addEventListener("click", () => lightbox.classList.remove("on"));
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) lightbox.classList.remove("on"); });
+
+  $("btn-help").addEventListener("click", () => {
+    alert("XML Viewer 使い方\n\n• ファイルを開く / フォルダを開く / ドラッグ＆ドロップ\n• タブで複数文書を切り替え (Ctrl+W でタブを閉じる)\n• ▾/▸ で要素を展開・折畳\n• 要素をクリックすると選択され、サイドバーに詳細が表示されます\n• 「コピー」で文書全体、「ノードをコピー」で選択部分をXMLとしてコピー\n• XPath欄に式を入力してEnter → 一致一覧が表示されます\n• URLはクリック可能。フォルダ内のXML参照や #id もジャンプします（外部リンクは通常のブラウザ動作）\n• フォルダ内画像はインライン表示・クリックで拡大\n• latex/tex属性や formula/equation/math 要素の内容は KaTeX で描画\n• code/source 要素に lang/language 属性があるとシンタックスハイライト\n• Ctrl+F で文書内検索 / Esc でダイアログ閉じる\n\n元ファイルは変更しません。");
+  });
+
+  document.addEventListener("keydown", e => {
+    const mod = e.ctrlKey || e.metaKey;
+    if (mod && !e.altKey && e.key.toLowerCase() === "f") {
+      e.preventDefault();
+      if (findbar.classList.contains("on")) closeFind(); else openFind();
+      return;
+    }
+    if (e.key === "Escape") {
+      if (lightbox.classList.contains("on")) { lightbox.classList.remove("on"); return; }
+      if (findbar.classList.contains("on")) closeFind();
+    }
+    if (mod && !e.altKey && e.key.toLowerCase() === "w" && activeTab) {
+      e.preventDefault(); closeTab(activeTab);
+    }
+  });
+
+  doc.innerHTML = '<div class="drop"><strong>XMLファイルをドロップしてください</strong>ファイルまたはフォルダを開くこともできます。フォルダを開くと画像参照や相対XMLリンクが解決されます。</div>';
+  syncHistBtns();
+})();
+</script>
+</body>
+</html>

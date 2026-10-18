@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="sample.xsl"?>
+<guide id="home" xmlns:demo="https://example.org/xml-demo" version="1.0" audience="beginner">
+  <!-- このコメントがツリーに表示されることを確認してください -->
+  <title>XML Viewer 操作練習サンプル</title>
+  <introduction>ファイルを選び、▾を押して展開し、要素をクリックしてください。</introduction>
+  <features>
+    <feature id="tabs" status="ready"><name>タブ切替</name><description>chapters/advanced.xml も開き、タブの×で閉じてみます。</description></feature>
+    <feature id="search" status="ready"><name>検索</name><description>Ctrl+F で「境界」を探してください。</description></feature>
+    <feature id="xpath" status="ready"><name>XPath</name><description>サイドバーに //feature[@status='ready'] を入力します。</description></feature>
+    <feature id="copy" status="ready"><name>コピー</name><description>この要素をクリックし、ノードをコピーを選びます。</description></feature>
+  </features>
+  <examples>
+    <escaped id="amp">記号: A &amp; B、比較: 3 &lt; 5、引用: &quot;Hello&quot;</escaped>
+    <raw><![CDATA[if (a < b && b > 0) { return "OK"; }]]></raw>
+    <onlyComment><!-- コメントしかない要素も表示 --> </onlyComment>
+    <onlyCdata><![CDATA[CDATAだけの内容 <tag> & 記号]]></onlyCdata>
+    <mixed>この部分は <em>強調</em> を挟んだ混在テキストです。</mixed>
+    <demo:item id="namespace-item" demo:kind="sample">名前空間付き要素。//*[local-name()='item'] で探します。</demo:item>
+    <formula latex="\frac{\delta}{\tau}" />
+    <equation tex="E = mc^2" />
+    <code lang="python"><![CDATA[def boundary(delta, tau):
+    return delta / tau if tau > 0 else None]]></code>
+    <link href="chapters/advanced.xml">別XMLへ移動（フォルダを開いてください）</link>
+    <ref href="#xpath">同じファイル内のXPath要素</ref>
+    <img src="images/diagram.svg" alt="XMLの構造説明図" />
+    <external href="https://www.w3.org/TR/xml/">XML仕様（外部リンク）</external>
+  </examples>
+  <xpath id="xpath">
+    <query>//feature</query>
+    <query>//feature[@status='ready']</query>
+    <query>//*[local-name()='item']</query>
+    <query>//@id</query>
+    <query>//text()</query>
+    <query>//examples/*</query>
+  </xpath>
+  <boundary status="review">表示用ビューアであり、XMLのスキーマ妥当性を検証する機能はありません。</boundary>
+</guide>

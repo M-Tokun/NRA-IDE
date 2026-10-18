@@ -143,6 +143,18 @@ body.resizing,body.resizing *{cursor:col-resize!important;user-select:none!impor
 }
 .drop strong{display:block;color:var(--fg);font-size:15px;margin-bottom:6px}
 body.dragging #viewport{outline:2px dashed var(--link); outline-offset:-10px}
+/* ---------- document tabs ---------- */
+#workspace{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+#tabs{display:flex;flex:0 0 auto;align-items:stretch;gap:2px;height:37px;padding:4px 8px 0;overflow-x:auto;overflow-y:hidden;background:var(--bg-soft);border-bottom:1px solid var(--line);scrollbar-width:thin}
+#tabs:empty{display:none}
+.doc-tab{display:flex;align-items:center;gap:5px;flex:0 0 auto;max-width:260px;min-width:92px;border:1px solid var(--line);border-bottom:0;border-radius:7px 7px 0 0;background:var(--bg-soft);font-size:12px}
+.doc-tab.active{background:var(--bg);border-color:var(--link);box-shadow:inset 0 2px var(--link)}
+.doc-tab .tab-select{border:0;background:none;min-width:0;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;padding:4px 5px 4px 10px;text-align:left}
+.doc-tab .tab-close{border:0;background:none;cursor:pointer;border-radius:4px;padding:2px 7px;font-size:16px;color:var(--fg-muted)}
+.doc-tab .tab-close:hover{background:var(--line);color:var(--danger)}
+.doc-tab .dirty-mark{color:var(--warn)}
+#workspace #pane{height:auto;flex:1;min-height:0}
+#workspace aside{min-height:0}
 /* ---------- markdown body ---------- */
 #doc h1,#doc h2,#doc h3,#doc h4,#doc h5,#doc h6,
 #doc2 h1,#doc2 h2,#doc2 h3,#doc2 h4,#doc2 h5,#doc2 h6{line-height:1.35;margin:1.6em 0 .6em;font-weight:600;scroll-margin-top:calc(var(--header-h) + 12px)}
@@ -299,6 +311,8 @@ dialog[open]{display:flex;flex-direction:column}
   </aside>
   <div id="side-splitter" role="separator" aria-orientation="vertical" aria-label="目次サイドバーの幅を変更" tabindex="0" title="ドラッグで目次幅変更 / ダブルクリックで360pxに戻す"></div>
 
+  <div id="workspace">
+  <div id="tabs" role="tablist" aria-label="開いているMarkdown文書"></div>
   <div id="pane">
     <textarea id="editor" spellcheck="false" placeholder="ここに Markdown を書くと右側に反映されます。"></textarea>
     <div id="splitter" role="separator" aria-orientation="vertical" aria-label="編集領域とプレビュー領域の幅を変更" tabindex="0" title="ドラッグで幅変更 / ダブルクリックで44%に戻す"></div>
@@ -307,6 +321,7 @@ dialog[open]{display:flex;flex-direction:column}
       <div id="cap2"></div>
       <div class="vp" id="viewport2"><div id="doc2"></div></div>
     </div>
+  </div>
   </div>
 </main>
 
@@ -370,6 +385,54 @@ dialog[open]{display:flex;flex-direction:column}
   let currentFile = null;
   let rawText = "";
   let rootName = "";         // 開いたフォルダ名（位置記憶のキー）
+  const tabs = [];
+  let activeTab = null, openGeneration = 0, nextTabId = 1;
+  const tabBar = $("tabs");
+  function snapshotTab() {
+    if (!activeTab) return;
+    activeTab.text = editor.value;
+    activeTab.scroll = viewport.scrollTop;
+    activeTab.dirty = activeTab.text !== activeTab.original;
+  }
+  function redrawTabs() {
+    tabBar.replaceChildren();
+    for (const tab of tabs) {
+      const shell = mk("div", {class:"doc-tab" + (tab === activeTab ? " active":""),role:"presentation"});
+      const select = mk("button", {class:"tab-select",type:"button",role:"tab","aria-selected":String(tab===activeTab),title:tab.path,text:(tab.dirty ? "● " : "") + (tab.path.split("/").pop() || tab.path)});
+      select.addEventListener("click",()=>activateTab(tab));
+      const close = mk("button",{class:"tab-close",type:"button",title:"タブを閉じる", "aria-label":tab.path+" を閉じる",text:"×"});
+      close.addEventListener("click",()=>closeTab(tab));
+      shell.append(select,close); tabBar.append(shell);
+    }
+    tabBar.querySelector(".active")?.scrollIntoView({block:"nearest",inline:"nearest"});
+  }
+  function closeTab(tab) {
+    if (tab === activeTab) snapshotTab();
+    if (tab.dirty && !confirm("未保存の編集内容があります。『"+tab.path+"』を閉じますか？")) return;
+    const i = tabs.indexOf(tab); if(i<0)return;
+    tabs.splice(i,1);
+    hist = hist.filter(e=>!(e.file===tab.file && e.path===tab.path));
+    hIdx = hist.length-1; syncHistBtns();
+    if (tab===activeTab) {
+      ++openGeneration; activeTab=null; currentFile=null;currentPath="";rawText="";
+      if(tabs.length) activateTab(tabs[Math.min(i,tabs.length-1)]);
+      else {editor.value="";doc.replaceChildren(mk("div",{class:"drop"},mk("strong",{text:"Markdownを開いてください"}),"ファイルを開く、またはフォルダから選択してください。")); doc2.replaceChildren();tocEl.replaceChildren();fnameEl.textContent="Markdown Viewer";document.title="Markdown Viewer";updatePairUi();markCurrentFile();}
+    }
+    redrawTabs();
+  }
+  function clearTabs() { ++openGeneration;tabs.length=0;activeTab=null;redrawTabs(); }
+  function activateTab(tab) {
+    if (!tabs.includes(tab))return;
+    if (activeTab===tab)return;
+    snapshotTab(); ++openGeneration; activeTab=tab;
+    currentFile=tab.file; currentPath=tab.path;
+    fnameEl.textContent=tab.path;fnameEl.title=tab.path;
+    document.title=(tab.path.split("/").pop()||"Markdown")+" — Markdown Viewer";
+    editor.value=tab.text;
+    render(tab.text,tab.path);
+    updatePairUi();if(bilingual)renderPair();
+    setScroll(viewport,tab.scroll||0);updateSpy(true);redrawTabs();
+  }
 
   /* ============ 小道具 ============ */
   function mk(tag, attrs, ...kids) {
@@ -1298,6 +1361,9 @@ dialog[open]{display:flex;flex-direction:column}
   let stateTimer = 0;
   function saveStateSoon() { clearTimeout(stateTimer); stateTimer = setTimeout(saveStateNow, 400); }
   window.addEventListener("pagehide", saveStateNow);
+  document.addEventListener("keydown",e=>{
+    if(e.ctrlKey && !e.altKey && e.key.toLowerCase()==="w" && activeTab){e.preventDefault();closeTab(activeTab);}
+  });
 
   /* ============ ファイル読み込み ============ */
   function readText(file) {
@@ -1331,44 +1397,45 @@ dialog[open]{display:flex;flex-direction:column}
 
   // opts: { hash, scroll, anchor, find, push }
   async function openFile(file, path, opts = {}) {
+    const p = path || file.webkitRelativePath || file.name;
+    const existing = tabs.find(t => t.file === file && t.path === p);
+    if(existing && opts.hash && activeTab===existing && scrollToHash(opts.hash))return;
+    if(existing){
+      if(activeTab!==existing)activateTab(existing);
+      if(opts.hash)scrollToHash(opts.hash);
+      else if(typeof opts.scroll==="number")setScroll(viewport,opts.scroll);
+      if(opts.find)openFind(opts.find);
+      return;
+    }
+    const generation = ++openGeneration;
     try {
       const text = await readText(file);
-      const p = path || file.webkitRelativePath || file.name;
-      if (p === currentPath && opts.hash && !opts.anchor && opts.push !== false && opts.scroll === undefined) {
-        if (scrollToHash(opts.hash)) return;   // 同じ文書内の見出しへ移動するだけ
-      }
-      saveStateNow();
+      if(generation!==openGeneration)return;
+      snapshotTab();saveStateNow();
       if (hist[hIdx]) hist[hIdx].scroll = viewport.scrollTop;
       if (opts.push !== false && !(hist[hIdx] && hist[hIdx].path === p)) {
         hist = hist.slice(0, hIdx + 1);
-        hist.push({ file, path: p, scroll: 0 });
-        hIdx = hist.length - 1;
+        hist.push({ file, path: p, scroll: 0 }); hIdx = hist.length - 1;
       } else if (hist[hIdx] && hist[hIdx].path === p) hist[hIdx].file = file;
       syncHistBtns();
-      currentFile = file;
-      fnameEl.textContent = p;
-      fnameEl.title = p;
-      document.title = (p.split("/").pop() || "Markdown") + " — Markdown Viewer";
-      editor.value = text;
-      render(text, p);
-      updatePairUi();
-      // 画像・Mermaid の遅延描画で位置がずれるため、操作されるまでは意図した位置へ保持し直す
-      if (opts.find) { openFind(opts.find); holdIntent(() => { if (hits.length) setCurHit(true); }); }
-      else if (opts.hash) { scrollToHash(opts.hash); holdIntent(() => scrollToHash(opts.hash)); }
-      else if (opts.anchor) { applyAnchor(viewport, doc, opts.anchor); holdIntent(() => applyAnchor(viewport, doc, opts.anchor)); }
-      else if (typeof opts.scroll === "number") { setScroll(viewport, opts.scroll); holdIntent(() => setScroll(viewport, opts.scroll)); }
-      updateSpy(true);
-      if (bilingual) renderPair();
-      saveStateNow();
-    } catch (e) {
-      showErr(doc, String(e.message || e));
-    }
+      const tab={id:nextTabId++,file,path:p,text,original:text,scroll:0,dirty:false};
+      tabs.push(tab);activeTab=tab;
+      currentFile=file;fnameEl.textContent=p;fnameEl.title=p;
+      document.title=(p.split("/").pop()||"Markdown")+" — Markdown Viewer";
+      editor.value=text;render(text,p);updatePairUi();redrawTabs();
+      if(opts.find){openFind(opts.find);holdIntent(()=>{if(hits.length)setCurHit(true);});}
+      else if(opts.hash){scrollToHash(opts.hash);holdIntent(()=>scrollToHash(opts.hash));}
+      else if(opts.anchor){applyAnchor(viewport,doc,opts.anchor);holdIntent(()=>applyAnchor(viewport,doc,opts.anchor));}
+      else if(typeof opts.scroll==="number"){setScroll(viewport,opts.scroll);holdIntent(()=>setScroll(viewport,opts.scroll));}
+      updateSpy(true);if(bilingual)renderPair();saveStateNow();
+    }catch(e){showErr(doc,String(e.message||e));}
   }
 
   function isMd(name) { return /\.(md|markdown|mdown|mkd|txt)$/i.test(name); }
   function isImg(name) { return /\.(png|jpe?g|gif|svg|webp|avif|bmp)$/i.test(name); }
 
   function loadFolder(files) {
+    clearTabs();
     assets.forEach((url) => URL.revokeObjectURL(url));
     assets = new Map(); mdFiles = new Map(); allFiles = new Set(); textCache = new Map();
     hist = []; hIdx = -1; syncHistBtns(); currentPath = "";
@@ -1621,13 +1688,9 @@ dialog[open]{display:flex;flex-direction:column}
   /* ============ 操作 ============ */
   $("btn-file").addEventListener("click", () => $("in-file").click());
   $("in-file").addEventListener("change", (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (f) {
-      mdFiles = new Map(); allFiles = new Set(); textCache = new Map(); rootName = "";
-      renderFileList(); hist = []; hIdx = -1; syncHistBtns(); currentPath = "";
-      const st = loadState();
-      openFile(f, undefined, { scroll: st.scroll && st.scroll[f.name] });
-    }
+    const files = Array.from(e.target.files || []);
+    // 複数ファイルを選択した場合も、既存タブを消さずに追加する。
+    (async()=>{ for(const f of files) await openFile(f); })();
     e.target.value = "";
   });
   $("btn-dir").addEventListener("click", () => $("in-dir").click());
@@ -1646,8 +1709,8 @@ dialog[open]{display:flex;flex-direction:column}
   }));
   document.addEventListener("drop", (e) => {
     e.preventDefault();
-    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (f && isMd(f.name)) openFile(f);
+    const files = Array.from(e.dataTransfer?.files || []).filter(f=>isMd(f.name));
+    (async()=>{for(const f of files)await openFile(f);})();
   });
 
   // 編集モード
@@ -1662,7 +1725,8 @@ dialog[open]{display:flex;flex-direction:column}
   let timer = null;
   editor.addEventListener("input", () => {
     clearTimeout(timer);
-    timer = setTimeout(() => render(editor.value, currentPath, { keepScroll: true }), 220);
+    if(activeTab){activeTab.text=editor.value;activeTab.dirty=activeTab.text!==activeTab.original;redrawTabs();}
+    timer = setTimeout(() => {if(activeTab)render(editor.value,currentPath,{keepScroll:true});}, 220);
   });
 
   // サイドバー
