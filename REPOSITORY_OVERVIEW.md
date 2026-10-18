@@ -64,7 +64,6 @@ The normative source and docs mirror must have identical SHA-256 values. Locatio
 | [`gate/`](./gate/) | Current EN/JP entry points share a stateful adapter to the normative reference; other variants and legacy/v1 snapshots remain historical |
 | [`ground/`](./ground/) | Grounding and operational rules for facts, provenance, missing values, physical constraints, and thresholds |
 | [`local_reportsDirectory/`](./local_reportsDirectory/) | Dated local review reports; working records, non-canonical unless explicitly promoted |
-| [`MD-app/`](./MD-app/) | Local HTML document viewer utilities; not normative |
 | [`multi-physics-safety-gate/`](./multi-physics-safety-gate/) | Domain implementation; name does not guarantee safety or canonical conformance |
 | [`note/`](./note/) | Development history, conversations, and architecture exploration; non-canonical unless explicitly promoted |
 | [`nra-core/`](./nra-core/) | Research history, papers, examples, visualizations, extensions, and the explicitly identified normative reference source |
@@ -78,6 +77,7 @@ The normative source and docs mirror must have identical SHA-256 values. Locatio
 | [`theory/`](./theory/) | Canonical and high-precedence theory documents; internal precedence still follows the order above |
 | [`tools/`](./tools/) | Standalone tools and visualizers; non-normative by default |
 | [`universal-definition/`](./universal-definition/) | Explanatory and operational reference material subordinate to root canonical documents |
+| [`viewer-app/`](./viewer-app/) | Local HTML document viewer utilities (MD, image, XML); not normative |
 
 ---
 
