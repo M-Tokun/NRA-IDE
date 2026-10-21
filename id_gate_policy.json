@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "include_prefixes": [
+    "note/"
+  ],
+  "extensions": [
+    ".md"
+  ],
+  "required_keys": [
+    "id",
+    "kind",
+    "created",
+    "title"
+  ],
+  "id_pattern": "[A-Z][A-Z0-9]*(-[A-Za-z0-9]+)+"
+}
