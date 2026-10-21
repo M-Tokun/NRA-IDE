@@ -1,3 +1,10 @@
+---
+id: DIALOG-NAMING-20260705
+kind: dialog
+created: 2026-07-05
+title: "AIにおけるCode解釈で変数命名規則が重要になる理由"
+---
+
 <!-- FILE: ai_code_interpretation_variable_naming_rules.md / 2026-07-05 20:42 JST -->
 
 # AIにおけるCode解釈で変数命名規則が重要になる理由
