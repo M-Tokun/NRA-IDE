@@ -172,10 +172,11 @@ def split_paths(raw: bytes) -> list[str]:
     return [item.decode("utf-8") for item in raw.split(b"\0") if item]
 
 
-def read_blobs(repo: pathlib.Path, revision: str, paths: Sequence[str]) -> dict[str, str]:
+def read_blobs(repo: pathlib.Path, oids: Mapping[str, str]) -> dict[str, str]:
+    """Read blobs by object id; `git show rev:path` fails on very long Windows paths."""
     contents: dict[str, str] = {}
-    for path in paths:
-        blob = run_git(repo, "show", f"{revision}:{path}")
+    for path, oid in oids.items():
+        blob = run_git(repo, "cat-file", "blob", oid)
         try:
             contents[path] = blob.decode("utf-8")
         except UnicodeDecodeError as error:
@@ -189,12 +190,15 @@ def collect(repo: pathlib.Path, base: str, head: str, policy: Policy) -> tuple[l
         for item in split_paths(run_git(repo, "diff", "--name-only", "-z", "--diff-filter=AMR", base, head))
         if is_target(item, policy)
     ]
-    tree = [
-        item
-        for item in split_paths(run_git(repo, "ls-tree", "-r", "-z", "--name-only", head))
-        if is_target(item, policy)
-    ]
-    return changed, read_blobs(repo, head, tree)
+    oids: dict[str, str] = {}
+    for entry in run_git(repo, "ls-tree", "-r", "-z", head).split(b"\0"):
+        if not entry:
+            continue
+        meta, _, raw_path = entry.partition(b"\t")
+        path = raw_path.decode("utf-8")
+        if is_target(path, policy):
+            oids[path] = meta.split()[2].decode("ascii")
+    return changed, read_blobs(repo, oids)
 
 
 def write_baseline(repo: pathlib.Path, policy: Policy, destination: pathlib.Path) -> int:
