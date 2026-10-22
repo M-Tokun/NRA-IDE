@@ -1,7 +1,8 @@
 ---
 id: EXP-GEMINI-20261010
 kind: exploration-record
-created: 2026-10-10 19:13 JST
+created: 2026-10-10
+created_at: "2026-10-10 19:13 JST"
 status: hold
 priority: P1
 title: 計算構造を変える可能性の探索
