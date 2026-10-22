@@ -2,7 +2,7 @@
 
 > このノートと `sections/` は `scripts/generate_obsidian_map.ps1` による生成物です。既存の Markdown 本文は変更しません。
 
-対象 Markdown: 451 ファイル
+対象 Markdown: 455 ファイル
 
 ## セクション
 
@@ -12,7 +12,7 @@
 - [audit](sections/04_audit.md) — 6 ファイル
 - [cascade-failure-prevention](sections/05_cascade-failure-prevention.md) — 10 ファイル
 - [config](sections/06_config.md) — 4 ファイル
-- [dictionary](sections/07_dictionary.md) — 2 ファイル
+- [dictionary](sections/07_dictionary.md) — 6 ファイル
 - [docs](sections/08_docs.md) — 30 ファイル
 - [examples](sections/09_examples.md) — 18 ファイル
 - [gate](sections/10_gate.md) — 7 ファイル
