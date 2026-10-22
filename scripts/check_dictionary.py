@@ -10,7 +10,7 @@
   DICT-NO-ANCHOR       用語集（quantum-hybrid）の「### 見出し」の直前にアンカーがない
   DICT-PAIR            日英の片方にしかIDがない
   DICT-PAIR-LINK       「英語版：／Japanese version:」のリンク先IDが、その項目自身のIDと違う
-  DICT-BLOCK-ID        用語集の項目の最初のリスト行に、Obsidian用のブロックID（行末の ^ID）がない・不一致・不正
+  DICT-BLOCK-ID        各項目の最初のリスト行に、Obsidian用のブロックID（行末の ^ID）がない・不一致・不正
   DICT-PREFIX          用語集のIDが qh- で始まっていない
   DICT-COLLISION       用語集のIDが既存の辞書のIDと衝突している
   DICT-LINK-FILE       辞書へのリンクの、ファイルが存在しない
@@ -85,20 +85,19 @@ def scan(rel: str, rep: Report) -> dict[str, int]:
             else:
                 ids[i] = n
             nxt = lines[n] if n < len(lines) else ""
-            if rel in GLOSSARY:
-                first = lines[n + 1] if n + 1 < len(lines) else ""
-                bm = BLOCK_TAIL.search(first)
-                if not bm:
-                    rep.add(f"{where}:{n + 2}", "DICT-BLOCK-ID", f"項目 '{i}' の最初のリスト行の末尾にブロックID（^{i}）がない",
-                            f"行末に ' ^{i}' を足す（Obsidianで安定して参照するため。空白を1つ空けて ^ と同じID）")
-                else:
-                    b = bm.group(1)
-                    if not BLOCK_ID_OK.fullmatch(b):
-                        rep.add(f"{where}:{n + 2}", "DICT-BLOCK-ID", f"ブロックID '^{b}' に使えない文字がある（英字・数字・ハイフンのみ）",
-                                "英字・数字・ハイフンだけのIDにする。_ や日本語は使えない")
-                    elif b != i:
-                        rep.add(f"{where}:{n + 2}", "DICT-BLOCK-ID", f"ブロックID '^{b}' が見出しID '{i}' と違う", f"^{i} に揃える")
-                    BLOCKS.setdefault(rel, set()).add(b)
+            first = lines[n + 1] if n + 1 < len(lines) else ""
+            bm = BLOCK_TAIL.search(first)
+            if not bm:
+                rep.add(f"{where}:{n + 2}", "DICT-BLOCK-ID", f"項目 '{i}' の最初のリスト行の末尾にブロックID（^{i}）がない",
+                        f"行末に ' ^{i}' を足す（Obsidianで安定して参照するため。空白を1つ空けて ^ と同じID）")
+            else:
+                b = bm.group(1)
+                if not BLOCK_ID_OK.fullmatch(b):
+                    rep.add(f"{where}:{n + 2}", "DICT-BLOCK-ID", f"ブロックID '^{b}' に使えない文字がある（英字・数字・ハイフンのみ）",
+                            "英字・数字・ハイフンだけのIDにする。_ や日本語は使えない")
+                elif b != i:
+                    rep.add(f"{where}:{n + 2}", "DICT-BLOCK-ID", f"ブロックID '^{b}' が見出しID '{i}' と違う", f"^{i} に揃える")
+                BLOCKS.setdefault(rel, set()).add(b)
             if not nxt.startswith("### "):
                 rep.add(f"{where}:{n}", "DICT-NO-HEADING", f"アンカー '{i}' の次の行が「### 見出し」でない",
                         "アンカーの直後の行に ### の見出しを置く")
@@ -171,7 +170,7 @@ def check_links(table: dict[str, dict[str, int]], rep: Report) -> None:
                         what = "ブロックID ^" if is_block else "ID '"
                         end = "" if is_block else "'"
                         rep.add(f"{rel_md}:{n}", "DICT-LINK-ANCHOR", f"{key} に {what}{ident}{end} がない{hint}",
-                                "リンクを実在のIDに直す（#^ID はブロックIDを持つ用語集だけ）。IDを付け直した場合は、元のIDに戻す（IDは変えない）")
+                                "リンクを実在のIDに直す（#^ID はブロックIDを持つ項目だけ）。IDを付け直した場合は、元のIDに戻す（IDは変えない）")
 
 
 def main() -> int:
