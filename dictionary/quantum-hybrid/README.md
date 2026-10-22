@@ -16,6 +16,7 @@
 4. 日本語と英語は対で作る。英語は訳語の対応表（`Translation_Map.md`）に従って書く。食い違いを見つけたら、両方を直し、理由を日付つきで残す。確認が済むまで、どちらも「骨格」「英日未確認」の印を外さない。
 5. 変更のたびに `python scripts/check_dictionary.py` を実行する（日英のIDの対、アンカーのリンク、IDの不変を検査する）。新しいIDを足したら `--update` で `dictionary/ids.json` に記録する。
 6. 考え方の変化は `note/03_…/nra-ide-hybridcalc-quantum-architecture-next_ver/変遷記録.md`（QH-…）に、語の意味と経過はこの用語集に置く。相互にIDで参照する。
+7. 記述は、第三者の視点で読める研究用の辞書として書く。「利用者の指摘」のように、人や対話への帰属は書かず、根拠は日付・出典・文書の箇所で示す。
 
 ## ファイル
 
@@ -38,6 +39,7 @@
 4. Japanese and English are made as a pair. The English follows the translation map (`Translation_Map.md`). When a mismatch is found, fix both sides and record the reason with a date. Until reconciled, neither side drops the "skeleton" / "JP/EN unreconciled" marks.
 5. After every change, run `python scripts/check_dictionary.py` (checks JP/EN ID pairs, anchor links, and ID stability). Record new IDs with `--update` in `dictionary/ids.json`.
 6. Changes of thought go to `note/03_…/nra-ide-hybridcalc-quantum-architecture-next_ver/変遷記録.md` (QH-…); meanings and history of terms stay here. Cross-reference by ID.
+7. Write as a research dictionary readable from a third-party viewpoint. Do not attribute statements to a person or a conversation (for example, "the user's remark"); give the basis by date, source, and location in the documents.
 
 ## Files
 

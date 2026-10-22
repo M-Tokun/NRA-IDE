@@ -479,6 +479,21 @@ Temporary variables used only inside an implementation (for example, the interna
 - Not a canonical term. "External replenishment", "exogenous replenishment", and "exogenous replenishment operation" up to AXIOMS v2.2 were changed to "addition of a structural element" in v2.3
 - Confusion notes: it can be read as existing thickness returning (2026-09-29)
 
+<a id="residual"></a>
+### Residual
+- Japanese: [残差](./NRA-IDE_Dictionary_JP.md#^residual) ^residual
+- Symbol / fixed name: $\xi=x_{\mathrm{exact}}-x$ / (a variable of the complementary formula; no fixed name is defined)
+- Type: a variable of the complementary formula. It has the same dimension as the state ( $[\xi]=X$ )
+- Meaning: the difference between the current computational state $x$ and the predefined high-precision reference state $x_{\mathrm{exact}}$ . The input of the complementary formula (hybrid complement); it enters the second-order residual gate $G(\xi)=\xi\,\lvert\xi\rvert/(k+\lvert\xi\rvert)$ . Defined in FORMULA §5
+- Permitted uses: auxiliary computation of the complementary formula (adopted and validated per domain)
+- Prohibited uses: lightening, overturning, or replacing the judgment of the boundary approach ratio $R$ . An auxiliary term does not lower $R$, does not replace the state, and does not release the latch (AXIOMS §4.5)
+- How to write: $x_{\mathrm{exact}}$ is a reference state with recorded provenance and uncertainty; it does not mean absolute ground truth
+- Confusion notes:
+  - it was formerly written $r$; it differed from $R$ only by case, so it was renamed $\xi$ (2026-09-30)
+  - distinct from "残渣." They are read the same (ざんさ), but 残渣 is a physical leftover and 残差 is a numerical difference (2026-10-23). The April quantum-architecture "残渣" $r_t$ is a difference in meaning, and the glossary writes it "遅延参照残差" (delayed-reference residual); its former name was "残渣"
+  - also distinct from [Residual Deviation](#^residual-deviation) $p_n$ (the part of the accumulated deviation that remains even after removing the action)
+- Related: [Reference State](#^reference-state), [Residual Deviation](#^residual-deviation)
+
 <a id="residual-deviation"></a>
 ### Residual Deviation
 - Japanese: [残留ズレ](./NRA-IDE_Dictionary_JP.md#^residual-deviation) ^residual-deviation

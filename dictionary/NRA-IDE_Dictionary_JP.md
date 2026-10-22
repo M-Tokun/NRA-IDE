@@ -360,6 +360,21 @@
   - [制約](#^external-constraint) $C$ （外部条件）と混同しない。 $C$ は計上先ではなく、その効果が $\Delta\lambda_n$ や計器にだけ現れる場合は $a_n$ に現れない（2026-09-30）
 - 関連：[可逆成分](#^reversible-deviation)、[制約](#^external-constraint)
 
+<a id="residual"></a>
+### 残差（ざんさ）
+- 英語版：[Residual](./NRA-IDE_Dictionary_EN.md#^residual) ^residual
+- 記号・固定名： $\xi=x_{\mathrm{exact}}-x$ ／（補完式の変数。固定名は定めていない）
+- 型・単位：補完式の変数。状態と同次元（ $[\xi]=X$ ）
+- 意味：現在の計算状態 $x$ と、事前定義の高精度参照状態 $x_{\mathrm{exact}}$ との差。補完式（ハイブリッド補完）の入力で、二次残差ゲート $G(\xi)=\xi\,\lvert\xi\rvert/(k+\lvert\xi\rvert)$ に入る。定義元：FORMULA §5
+- 使ってよい先：補完式の補助計算（領域ごとに採用・検証する）
+- 使ってはならない先：境界接近比 $R$ の判定を軽くする・覆す・置き換えること。補助は $R$ を下げず、状態を置き換えず、ラッチを解除しない（AXIOMS §4.5）
+- 書き方： $x_{\mathrm{exact}}$ は、由来と不確かさを記録した参照状態で、絶対的な真値を意味しない
+- 混同注意：
+  - 以前は $r$ と書いていた。 $R$ と大小だけの区別だったため $\xi$ に改めた（2026-09-30）
+  - 「残渣」とは別。読みも同じ「ざんさ」だが、残渣は物理的な残りかす、残差は数値の差（2026-10-23）。4月の量子アーキテクチャ検討の「残渣」 $r_t$ は、意味は差であり、用語集では「遅延参照残差」と書く（旧称が「残渣」）
+  - [残留ズレ](#^residual-deviation) $p_n$ とも別（残留ズレは、蓄積ズレのうち作用を除いても残る部分）
+- 関連：[基準状態](#^reference-state)、[残留ズレ](#^residual-deviation)
+
 <a id="remaining-absorption-margin"></a>
 ### 残存吸収余白（ざんぞんきゅうしゅうよはく）
 - 英語版：[Remaining Absorption Margin](./NRA-IDE_Dictionary_EN.md#^remaining-absorption-margin) ^remaining-absorption-margin
