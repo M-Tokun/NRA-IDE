@@ -62,9 +62,24 @@ run_id_gate() {
     fi
 }
 
+run_dictionary_gate() {
+    if ! command -v python >/dev/null 2>&1; then
+        echo "pre-push gate: python is required for the Dictionary Gate" >&2
+        exit 2
+    fi
+
+    python -B scripts/check_dictionary.py
+    dictionary_gate_exit=$?
+    if [ "$dictionary_gate_exit" -ne 0 ]; then
+        echo "pre-push gate: push blocked by Dictionary Gate with exit code $dictionary_gate_exit" >&2
+        exit "$dictionary_gate_exit"
+    fi
+}
+
 run_gates() {
     run_malware_gate "$1" "$2"
     run_id_gate "$1" "$2"
+    run_dictionary_gate
 }
 
 while IFS=' ' read -r local_ref local_oid remote_ref remote_oid
