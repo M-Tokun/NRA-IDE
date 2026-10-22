@@ -129,6 +129,7 @@
  ],
  "quantum-hybrid/Glossary_JP.md": [
   "qh-barren-plateau",
+  "qh-cryo-cmos",
   "qh-cryo-cmos-4k-stage",
   "qh-delayed-reference-residual",
   "qh-discard-vault",
@@ -151,6 +152,7 @@
  ],
  "quantum-hybrid/Glossary_EN.md": [
   "qh-barren-plateau",
+  "qh-cryo-cmos",
   "qh-cryo-cmos-4k-stage",
   "qh-delayed-reference-residual",
   "qh-discard-vault",
