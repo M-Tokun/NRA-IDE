@@ -12,6 +12,21 @@
 
 ---
 
+## 旧称から現行の項目へ
+
+旧い資料は消さずに残している。旧資料に出てくる語から、現行の概念へ辿るための索引である。
+
+| 旧称 | 出てくる資料 | 現行の項目 |
+|---|---|---|
+| 残渣 $r_t$ （差の意味） | 4月の量子アーキテクチャ検討 | [遅延参照残差](#^qh-delayed-reference-residual) |
+| 残渣（余り物・端数の意味） | 4月の量子アーキテクチャ検討、「残渣ベース」「残渣タンク」 | [端数持ち越し](#^qh-fractional-carry) |
+| 二重揺らぎ名目計算 | 10月の初版論文 | [少数ショットSPSA名目計算](#^qh-few-shot-spsa-nominal-calculation) |
+| 更新権限（最適化の更新の許可） | 10月の論文 v6.1 の本文 | [更新許可](#^qh-update-authority) |
+| 4Kステージ（Cryo-CMOS） | 10月の初版論文 §1 | [4Kステージ](#^qh-cryo-cmos-4k-stage)、[Cryo-CMOS](#^qh-cryo-cmos) |
+| 精密過剰計算（バレンプラトーの原因とした説明） | 10月の初版論文（撤回） | [バレンプラトー（勾配消失の台地）](#^qh-barren-plateau) |
+
+---
+
 <a id="qh-spsa"></a>
 ### 同時摂動確率近似（SPSA）
 - 英語版：[Simultaneous Perturbation Stochastic Approximation (SPSA)](./Glossary_EN.md#^qh-spsa) ^qh-spsa
@@ -226,6 +241,19 @@
 - 出典：論文系列 v6.1 §4.2〜4.3。AXIOMS §14
 - 関連：[ペア見送り](#^qh-pair-skip)、[少数ショットSPSA名目計算](#^qh-few-shot-spsa-nominal-calculation)。正典の「更新権限」（update authority）は、辞書の [評価スナップショット](../NRA-IDE_Dictionary_JP.md#^evaluation-snapshot) を参照
 - 状態：【草稿】【概念照合済み】【全文対訳未確認】
+
+<a id="qh-version-check"></a>
+### 版管理（パラメータ版・境界版・測定時刻）
+- 英語版：[Version management (parameter version, boundary version, measurement time)](./Glossary_EN.md#^qh-version-check) ^qh-version-check
+- 区分：接続で生まれた用語（10月）【拡張案】
+- 正式名と由来：10月の論文 v6.1 §4.2「測定結果の版管理」で用いた語。各測定ペアに、使用したパラメータ版・境界判定版（境界版）・2点の測定時刻・受信時刻・観測チャネルの状態を付ける
+- 意味：非同期の更新で、測定した時点の条件と、適用する時点の条件が一致しているかを確かめるための記録。パラメータ版は更新対象のパラメータの版、境界版は境界判定（閾値・状態区分）の版
+- 本リポジトリでの捉え方：測定後にパラメータ版または境界版が変わっていれば、再計算または見送りとする。判定と適用は不可分な処理として結合し、両者の間の状態変更を許さない（v6.1 §4.2 の条件5・6）
+- 混同注意（日付付き）：論文系列に出てくる版の語は、パラメータ版と境界版（境界判定版）である。「観測版」「設定版」という語は、論文系列にまだ定義がない（2026-10-23）。また、これは論文・文書の版番号（変遷記録の3.0〜6.1）とは別のもの
+- 英日のすり合わせ：Version management。version は「版」で、バージョン番号とは書かない（確認済みではない）
+- 出典：論文系列 v6.1 §4.2・§4.3
+- 関連：[更新許可](#^qh-update-authority)、[ペア見送り](#^qh-pair-skip)
+- 状態：【草稿】【概念未照合】【全文対訳未確認】
 
 <a id="qh-few-shot-spsa-nominal-calculation"></a>
 ### 少数ショットSPSA名目計算

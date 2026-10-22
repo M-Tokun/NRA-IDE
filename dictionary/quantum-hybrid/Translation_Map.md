@@ -20,6 +20,7 @@
 | `qh-pair-skip` | ペア見送り | Pairwise skip of an update | 観測値を捨てずに記録する意味で skip | 「破棄」（discard） | 【草稿】概念照合済み（全文対訳未確認） |
 | `qh-discard-vault` | DiscardVault（見送り・境界越えの保管庫） | DiscardVault | 参照実装の固定名 | 日本語への訳（固定名のため） | 【草稿】概念照合済み（全文対訳未確認） |
 | `qh-update-authority` | 更新許可 | Update permission | 最適化の更新の許可。正典の「更新権限」と同名を避けて改名（2026-10-23） | 未定（正典側の英訳が未確認） | 【草稿】概念照合済み（全文対訳未確認） |
+| `qh-version-check` | 版管理（パラメータ版・境界版・測定時刻） | Version management (parameter version, boundary version, measurement time) | version は「版」で、バージョン番号と区別する | 「バージョン管理」（文書の版番号・ソフトウェアのバージョン管理と混ざる） | 【草稿】概念未照合（全文対訳未確認） |
 | `qh-few-shot-spsa-nominal-calculation` | 少数ショットSPSA名目計算 | Few-shot SPSA nominal calculation | 旧称の「二重揺らぎ」が正典語と同名だったため改名 | 「二重揺らぎ名目計算」（旧称） | 【草稿】概念照合済み（全文対訳未確認） |
 | `qh-cryo-cmos-4k-stage` | 4Kステージ | 4 K stage | 冷却段（場所）を指す語として、Cryo-CMOS（回路）から分けた | 「4Kステージ（Cryo-CMOS）」（二つの概念の合成） | 【草稿】概念照合済み（全文対訳未確認） |
 | `qh-cryo-cmos` | Cryo-CMOS（極低温CMOS） | Cryo-CMOS (cryogenic CMOS) | Cryo-CMOS は原語のまま通用する | 「極低温半導体」（回路の意味が落ちる） | 【草稿】概念未照合（全文対訳未確認） |
@@ -39,3 +40,4 @@
 | 2026-10-23 | `qh-update-authority` | 正典側の「更新権限」の英語表記を確認：update authority（FORMULA §6、THEORY、SANDWICH_ARCH、基礎論文、辞書の評価スナップショット、axioms.json）。英語でも同名になるため、「更新許可（Update permission）」への改名は妥当。未了の項目は解消 |
 | 2026-10-23 | 全体 | 外部レビューの指摘を検討して修正（SPSAの由来、バレンプラトーの条件、VQE・NISQの限定、ショットの独立性、ℏ=1、律速段原則の比較可能性、端数持ち越しの前提、量子化ロックの限定、LFSRの再現条件、ペア見送りの限定、名目の用語、Union-Findのノイズ条件）。4Kステージの冷却能力は、メーカー資料で確認した値に更新し、Cryo-CMOS を別項目 `qh-cryo-cmos` に分けた |
 | 2026-10-23 | （状態欄） | 状態欄の「英日確認済み／未確認」を、「概念照合済み／未照合」と「全文対訳（未）確認」に分けた。これまでの確認は、意味と訳語の対応の照合であり、全欄の英訳の一対一の確認ではないため |
+| 2026-10-23 | `qh-version-check`・旧称索引 | 項目「版管理」を追加（既存の語のパラメータ版・境界版のみ。観測版・設定版は未定義のため含めない）。用語集の先頭に、旧称から現行の項目へ辿る索引表を追加 |

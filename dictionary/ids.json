@@ -150,6 +150,7 @@
   "qh-spsa",
   "qh-union-find-decoder",
   "qh-update-authority",
+  "qh-version-check",
   "qh-vqe"
  ],
  "quantum-hybrid/Glossary_EN.md": [
@@ -173,6 +174,7 @@
   "qh-spsa",
   "qh-union-find-decoder",
   "qh-update-authority",
+  "qh-version-check",
   "qh-vqe"
  ]
 }

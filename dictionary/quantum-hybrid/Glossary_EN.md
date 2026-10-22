@@ -12,6 +12,21 @@ Status legend: [Skeleton] headings and fields only; content not yet written. [Dr
 
 ---
 
+## From former names to current entries
+
+The old documents are kept, not deleted. This index leads from a word in an old document to the current concept.
+
+| Former name | Appears in | Current entry |
+|---|---|---|
+| 残渣 $r_t$ (in the sense of a difference) | April quantum-architecture study | [Delayed-reference residual](#^qh-delayed-reference-residual) |
+| 残渣 (in the sense of a leftover or fractional remainder) | April quantum-architecture study; "residue-based" and "residue tank" | [Fractional carry-over](#^qh-fractional-carry) |
+| Double-fluctuation nominal calculation | The first October paper | [Few-shot SPSA nominal calculation](#^qh-few-shot-spsa-nominal-calculation) |
+| 更新権限 (permission to update optimization) | The text of the October paper v6.1 | [Update permission](#^qh-update-authority) |
+| 4 K stage (Cryo-CMOS) | The first October paper §1 | [4 K stage](#^qh-cryo-cmos-4k-stage), [Cryo-CMOS](#^qh-cryo-cmos) |
+| Over-precise computation (the explanation given as the cause of the barren plateau) | The first October paper (retracted) | [Barren plateau](#^qh-barren-plateau) |
+
+---
+
 <a id="qh-spsa"></a>
 ### Simultaneous Perturbation Stochastic Approximation (SPSA)
 - Japanese version: [同時摂動確率近似（SPSA）](./Glossary_JP.md#^qh-spsa) ^qh-spsa
@@ -226,6 +241,19 @@ Status legend: [Skeleton] headings and fields only; content not yet written. [Dr
 - Sources: Paper series v6.1 §4.2–4.3. AXIOMS §14
 - Related: [Pairwise skip of an update](#^qh-pair-skip), [Few-shot SPSA nominal calculation](#^qh-few-shot-spsa-nominal-calculation). For the canonical "update authority," see [Evaluation Snapshot](../NRA-IDE_Dictionary_EN.md#^evaluation-snapshot) in the dictionary
 - Status: [Draft] [concepts reconciled] [full text not yet checked]
+
+<a id="qh-version-check"></a>
+### Version management (parameter version, boundary version, measurement time)
+- Japanese version: [版管理（パラメータ版・境界版・測定時刻）](./Glossary_JP.md#^qh-version-check) ^qh-version-check
+- Category: term created at the connection (October) [extension proposal]
+- Official name and origin: A term used in §4.2 "Version management of measurement results" of the October paper v6.1. Each measurement pair is tagged with the parameter version used, the boundary-judgment version (boundary version), the two measurement times, the reception time, and the state of the observation channel
+- Meaning: A record for confirming, in an asynchronous update, that the conditions at the time of measurement match the conditions at the time of application. The parameter version is the version of the parameters to be updated; the boundary version is the version of the boundary judgment (thresholds and state classification)
+- How it is understood in this repository: If the parameter version or the boundary version has changed after the measurement, the update is recomputed or skipped. Judgment and application are coupled as an indivisible operation, and no state change is allowed between them (conditions 5 and 6 of v6.1 §4.2)
+- Common confusions (dated): The version terms in the paper series are the parameter version and the boundary version (boundary-judgment version). The terms "observation version" and "configuration version" are not yet defined in the paper series (2026-10-23). Also distinct from the version numbers of papers and documents (3.0 to 6.1 in the change log)
+- JP/EN reconciliation: Version management. "Version" means a "版" and is not written as a version number (not yet confirmed)
+- Sources: Paper series v6.1 §4.2 and §4.3
+- Related: [Update permission](#^qh-update-authority), [Pairwise skip of an update](#^qh-pair-skip)
+- Status: [Draft] [concepts unreconciled] [full text not yet checked]
 
 <a id="qh-few-shot-spsa-nominal-calculation"></a>
 ### Few-shot SPSA nominal calculation
