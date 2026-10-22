@@ -612,6 +612,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes:
   - only observed physical events enter the target state. Do not mix the physical state, the evaluation state, and the event history (2026-09-29)
   - it was formerly written $\mathcal{W}^{(\mathrm{self})}_n$; it differed from work $W$ of AXIOMS v2.4 only by decoration, so it was renamed (2026-09-29)
+  - signs that appear before an irreversible transition were written only as "visualized" or "visible". Sounds, vibration, felt resistance, and instrument readings are also observable physical events. Write them as observable physical events (seen, heard, felt, or read on instruments) (2026-10-22). Use "visualization" only for output shown as a screen or figure (Effect-Side display)
 - Related: [Evaluation State](#evaluation-state), [Event History](#event-history)
 
 <a id="temporary-reversible-deviation"></a>
@@ -882,6 +883,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-09-30 | 余裕 and 余白 (the total width $\tau$ and the remainder $M_\tau$ were both called 余裕 in Japanese) | [Remaining Absorption Margin](#remaining-absorption-margin), [Remaining Ratio Margin](#remaining-ratio-margin) |
 | 2026-09-30 | the constraint $C$ (a condition) and the applied action $a_n$ (an allocated input) | [Constraint](#external-constraint), [Applied Action](#applied-action) |
 | 2026-09-30 | the residual $r$ and the boundary approach ratio $R$ (distinguished only by case); the rule against distinguishing by typeface or case alone was made normative in FORMULA §7 | 0.5, 2.2 |
+| 2026-10-22 | signs before an irreversible transition written only as "visualized" or "visible", and observable physical events (seen, heard, felt, read on instruments) | [Target Physical State](#target-physical-state), [Event History](#event-history) |
 
 ---
 

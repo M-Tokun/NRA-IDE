@@ -642,7 +642,7 @@ Part I began from the problem of sudden state transitions that rate-of-change de
 
 Part II defined the IDE Primary Formula $R=\delta/\tau$ and the Secondary Formula for dual fluctuation, then separated description-domain rules from operational boundary classification. Integer Phase Lock, Fail-Closed, and Confession are design or operational principles; they are not additional axioms.
 
-The core of this framework is structural-state evaluation rather than time-of-failure prediction. It evaluates the defined ratio under pre-fixed domain rules and presents fixed Handoff testimony for external human audit at $R_{\mathrm{handoff}}$. The structural-persistence principle makes explicit the design stance of preserving visible play and presenting this fixed testimony before irreversible transition.
+The core of this framework is structural-state evaluation rather than time-of-failure prediction. It evaluates the defined ratio under pre-fixed domain rules and presents fixed Handoff testimony for external human audit at $R_{\mathrm{handoff}}$. The structural-persistence principle makes explicit the design stance of making play observable as physical events (seen, heard, felt, or read on instruments) and presenting this fixed testimony before irreversible transition.
 
 The same abstract structure may be investigated in materials, medicine, infrastructure, and AI-safety research. Applicability, measurement validity, thresholds, and operational effectiveness must be established independently in each domain; this thesis alone does not validate those applications.
 
@@ -1319,7 +1319,7 @@ LLM出力はEffect-Sideである。隔離、棄却、監査はできるが、R�
 
 第二部では、IDE基本式 $R=\delta/\tau$ と二重ゆらぎ式を定義し、記述定義域と運用境界分類を分離した。整数位相ロック、Fail-Closed、CONFESSIONは設計原則または運用規則であり、追加公理ではない。
 
-本枠組みの核心は破断時刻の予測ではなく、定義された構造状態の評価である。事前固定されたドメイン規則の下で比率を評価し、 $R_{\mathrm{handoff}}$ で固定Handoff証言を外部人間監査へ提示する。構造持続原則は、遊びを可視化し、不可逆遷移前にこの固定証言を提示する設計姿勢を明示する。
+本枠組みの核心は破断時刻の予測ではなく、定義された構造状態の評価である。事前固定されたドメイン規則の下で比率を評価し、 $R_{\mathrm{handoff}}$ で固定Handoff証言を外部人間監査へ提示する。構造持続原則は、遊びを観測できる物理的事象として現し（見える・聞こえる・計器に出るなど）、不可逆遷移前にこの固定証言を提示する設計姿勢を明示する。
 
 同じ抽象構造を、材料、医療、インフラ、AI安全の研究で検討できる可能性がある。ただし、適用可能性、測定妥当性、閾値、運用上の有効性は領域ごとに独立して立証しなければならず、本稿だけでは各応用を検証済みとしない。
 

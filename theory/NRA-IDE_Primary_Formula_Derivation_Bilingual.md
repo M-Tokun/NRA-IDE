@@ -738,7 +738,7 @@ Example: the new spring and the once-pulled spring of [6] in Part 1 are at the s
 
 **Relation between the two propositions:** for an event entirely within the elastic range ( $\Delta p=0$ , all $\Delta\lambda^{[e]}=0$ , and $q=0$ after unloading), the physical state returns ( $\mathsf{Phys}^{(+)}=\mathsf{Phys}^{(-)}$ ). Proposition 2a asserts nothing about this case. Even so, the record that the event occurred remains in the event history (Proposition 2b). This corresponds to the corollary of the sole Nomological Ring Axiom, "exact reproduction of identical history is impossible" (AXIOMS.md §2). The return of the value ( $o$ ), the return of the physical state ( $\mathsf{Phys}$ ), and the identity of the history ( $\mathsf{History}$ ) are separate questions. "Even if the value returns, the event history does not return" is the claim of Proposition 2b, and "even if the value returns, the structure has not returned" is the claim of Proposition 2a when an irreversible change has occurred.
 
-**Thresholds and the history of transitions:** while degradation does not progress within the safe region (the range where no threshold has been crossed), a linear computation in which $R$ is proportional to $\delta$ suffices. The value of IDE appears when a boundary called a threshold appears. Crossing a threshold means that risks, fluctuations, or changes that had been invisible or overlooked begin to appear as recognizable events. That is why the transition — when and which threshold was crossed — is kept in the event history. The irreversible latch (Part 3, Stage 5) reflects that transition in the evaluation state.
+**Thresholds and the history of transitions:** while degradation does not progress within the safe region (the range where no threshold has been crossed), a linear computation in which $R$ is proportional to $\delta$ suffices. The value of IDE appears when a boundary called a threshold appears. Crossing a threshold means that risks, fluctuations, or changes that had gone unnoticed or been overlooked begin to appear as recognizable physical events, such as something seen or heard. That is why the transition — when and which threshold was crossed — is kept in the event history. The irreversible latch (Part 3, Stage 5) reflects that transition in the evaluation state.
 
 Furthermore, if $\Delta p>0$ or $\Delta\lambda>0$ , $R$ for the same action also differs (Proposition 4).
 
@@ -1836,7 +1836,7 @@ $$
 
 **二つの命題の関係**：完全に弾性範囲の事象（ $\Delta p=0$ 、すべての $\Delta\lambda^{[e]}=0$ 、除荷後 $q=0$ ）では、物理状態は元に戻る（ $\mathsf{Phys}^{(+)}=\mathsf{Phys}^{(-)}$ ）。命題2aは、この場合について何も主張しない。それでも、事象が起きたという記録は経路履歴に残る（命題2b）。これは唯一の律環公理の帰結「同一履歴の完全再現は不可能である」（AXIOMS.md §2）に対応する。値の復帰（ $o$ ）、物理状態の復帰（ $\mathsf{Phys}$ ）、履歴の同一（ $\mathsf{History}$ ）は別々の問いであり、「値は戻っても、経路履歴は戻らない」は命題2bの主張、「値は戻っても、構造は戻っていない」は、不可逆な変化があった場合の命題2aの主張である。
 
-**閾値と遷移の履歴**：安全域（どの閾値も越えていない範囲）で劣化が進まない間は、 $R$ は $\delta$ に比例する線形の計算で足りる。IDEの価値が現れるのは、閾値という境界が現れたときである。閾値を越えることは、それまで見えていなかった、または見過ごしていたリスク・変動・変化が、分かりやすい事象として見え始めることを意味する。だから、いつ・どの閾値を越えたかという遷移を、経路履歴に残す。不可逆ラッチ（第3部段5）は、その遷移を評価状態に反映したものである。
+**閾値と遷移の履歴**：安全域（どの閾値も越えていない範囲）で劣化が進まない間は、 $R$ は $\delta$ に比例する線形の計算で足りる。IDEの価値が現れるのは、閾値という境界が現れたときである。閾値を越えることは、それまで気づかれていなかった、または見過ごしていたリスク・変動・変化が、見える・聞こえるなどの分かりやすい物理的事象として現れ始めることを意味する。だから、いつ・どの閾値を越えたかという遷移を、経路履歴に残す。不可逆ラッチ（第3部段5）は、その遷移を評価状態に反映したものである。
 
 さらに $\Delta p>0$ または $\Delta\lambda>0$ なら、同じ作用に対する $R$ も異なる（命題4）。
 
