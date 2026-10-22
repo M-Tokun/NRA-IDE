@@ -233,6 +233,22 @@ Temporary variables used only inside an implementation (for example, the interna
 - Meaning: the side with the larger side-specific ratio. Source: FORMULA §4.6
 - Confusion notes: the evaluation declaration had been written $\mathcal{D}$ , differing only by typeface. The declaration was renamed $\mathsf{Decl}$ (2026-09-29)
 
+<a id="double-fluctuation"></a>
+### Double Fluctuation
+- Japanese: [二重ゆらぎ](./NRA-IDE_Dictionary_JP.md#^double-fluctuation) ^double-fluctuation
+- Symbol / fixed name: $d\delta/dt>0\land d\tau/dt<0$ (in discrete time, $\Delta\delta_n>0\land\Delta\tau_n<0$ ) / inputs `d_delta_dt`, `d_tau_dt`; outputs `DETECTED`, `NOT_DETECTED`, `NOT_OBSERVABLE`
+- Type / unit: evaluation output (detection result). Its inputs are Cause-Side rates of change. The reference implementation and AXIOMS §10.2 treat it as an output field (the evaluation outputs AXIOMS §14 names explicitly are $R$, the canonical state, and the irreversible latch)
+- Meaning: for the same evaluation target, the increase of accumulated deviation $\delta$ and the decrease of absorption thickness $\tau$ hold at the same time. The canonical detection condition of the Secondary Formula (Dual-Fluctuation Formula), not the whole Secondary Formula. Source: AXIOMS §5; FORMULA §4 and §4.7
+- Origin: direct observations, or a derivative or difference rule fixed before evaluation
+- Permitted uses: an item disclosed with the boundary-approach warning (BOUNDARY_WARNING), structural testimony, audit
+- Prohibited uses: directly classifying or replacing the canonical state (the state is classified by thresholds of $R$; AXIOMS §5 and §10); redefining $R$ (AXIOMS §5); the gauge of the same target (reverse derivation B)
+- Notation: always include the output field. When not observable, output `NOT_OBSERVABLE` with the missing-data reason, and read it neither as stability or safety nor as CONFESSION (AXIOMS §10.2). If it holds, $R$ increases, but an increase of $R$ does not imply that it holds (FORMULA §4.7 note: penetration and contraction terms)
+- Confusion notes:
+  - In the October paper series, the method name "double-fluctuation nominal calculation" (SPSA perturbation and shot noise) shared this name. It was renamed "few-shot SPSA nominal calculation" (2026-10-22)
+  - It was expected to warn of boundary approach earlier than the trend of $R$. In a preliminary calculation it fired at the same time, and what it did was distinguish deterioration from both sides (2026-10-23)
+- Reading risk [Unconfirmed]: English "fluctuation" is easily read as random variation or noise. Here it means two defined quantities changing in fixed directions at the same time. In the canonical English, the formula is called the Dual-Fluctuation Formula and the detection condition the Double-Fluctuation Detection Condition (FORMULA §4 and §4.7)
+- Related: [Accumulated Deviation](#^accumulated-deviation), [Absorption Thickness](#^absorption-thickness), [Boundary Approach Ratio](#^boundary-approach-ratio), [Not Observable](#^not-observable)
+
 <a id="effective-thickness"></a>
 ### Effective Thickness
 - Japanese: [実効厚み](./NRA-IDE_Dictionary_JP.md#^effective-thickness) ^effective-thickness
@@ -783,7 +799,7 @@ There are currently no decorated-letter symbols. $\mathcal{C}_n$ , $\mathcal{W}^
 | `applied_action` | [Applied Action](#^applied-action) |
 | `audit_log` | deprecated combined view; canonical are `structural_disclosure_log` and `input_exception_log` |
 | `CONFESSION` | [Confession](#^confession) |
-| `d_delta_dt`, `d_tau_dt` | rates of change of deviation and thickness (double fluctuation; FORMULA §4.7) |
+| `d_delta_dt`, `d_tau_dt` | rates of change of deviation and thickness ([Double Fluctuation](#^double-fluctuation); FORMULA §4.7) |
 | `decision_sufficient_state` | [Decision-Sufficient State](#^decision-sufficient-state) |
 | `declared_target` | declared target (FORMULA §0) |
 | `delta`, `observed_delta` | [Accumulated Deviation](#^accumulated-deviation) |
@@ -899,6 +915,8 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-09-30 | the constraint $C$ (a condition) and the applied action $a_n$ (an allocated input) | [Constraint](#^external-constraint), [Applied Action](#^applied-action) |
 | 2026-09-30 | the residual $r$ and the boundary approach ratio $R$ (distinguished only by case); the rule against distinguishing by typeface or case alone was made normative in FORMULA §7 | 0.5, 2.2 |
 | 2026-10-22 | signs before an irreversible transition written only as "visualized" or "visible", and observable physical events (seen, heard, felt, read on instruments) | [Target Physical State](#^target-physical-state), [Event History](#^event-history) |
+| 2026-10-22 | the canonical double fluctuation and the paper series' method name "double-fluctuation nominal calculation" | [Double Fluctuation](#^double-fluctuation) |
+| 2026-10-23 | expecting double fluctuation to warn earlier than the trend of $R$ | [Double Fluctuation](#^double-fluctuation) |
 
 ---
 

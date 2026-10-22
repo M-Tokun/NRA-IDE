@@ -562,6 +562,22 @@
 - 混同注意：離散の更新では、 $\lambda$ が一度で1に達すると直前の $R$ が1未満でも定義域外になる（2026-09-28）
 - 関連：[完全破断境界](#^complete-rupture-boundary)
 
+<a id="double-fluctuation"></a>
+### 二重ゆらぎ（にじゅうゆらぎ）
+- 英語版：[Double Fluctuation](./NRA-IDE_Dictionary_EN.md#^double-fluctuation) ^double-fluctuation
+- 記号・固定名： $d\delta/dt>0\land d\tau/dt<0$ （離散時間は $\Delta\delta_n>0\land\Delta\tau_n<0$ ）／入力 `d_delta_dt`・`d_tau_dt`、出力 `DETECTED`・`NOT_DETECTED`・`NOT_OBSERVABLE`
+- 型・単位：評価出力（検出結果）。入力はCause-Sideの変化率。参照実装とAXIOMS §10.2が出力欄として扱う（AXIOMS §14が明示する評価出力は、 $R$ ・正規状態・不可逆ラッチ）
+- 意味：同一の評価対象で、蓄積ズレ $\delta$ の増加と吸収厚み $\tau$ の減少が同時に成り立つこと。二次式（二重ゆらぎ式）の正規の検出条件で、二次式の全体ではない。定義元：AXIOMS §5、FORMULA §4・§4.7
+- 出所：直接観測、または評価前に固定した微分・差分規則
+- 使ってよい先：境界接近の警告（BOUNDARY_WARNING）で開示する項目、構造証言、監査
+- 使ってはならない先：正規状態の直接の分類・置き換え（状態区分は $R$ の閾値で行う。AXIOMS §5・§10）、 $R$ の再定義（AXIOMS §5）、同じ評価対象の計器（逆導出B）
+- 書き方：出力欄は常に含める。観測できないときは `NOT_OBSERVABLE` と欠損理由を出し、安定・安全とも、CONFESSIONとも読まない（AXIOMS §10.2）。成立すれば $R$ は増加するが、 $R$ の増加から成立は導けない（FORMULA §4.7 の解説：進入項と縮小項）
+- 混同注意：
+  - 10月の論文系列で、手法名「二重揺らぎ名目計算」（SPSAの摂動とショットノイズ）が同名になっていた。「少数ショットSPSA名目計算」に改めた（2026-10-22）
+  - $R$ の増加傾向より早く境界接近を知らせる、と期待していた。予備的な計算では同時点で、働いたのは両側の悪化の区別だった（2026-10-23）
+- 受け取り方の違い【未確認】：英語の fluctuation は、ランダムな変動やノイズと読まれやすい。ここでは、二つの定義量が決まった向きに同時に変化すること。正典の英語では、式は Dual-Fluctuation Formula、検出条件は Double-Fluctuation Detection Condition と書かれている（FORMULA §4・§4.7）
+- 関連：[蓄積ズレ](#^accumulated-deviation)、[吸収厚み](#^absorption-thickness)、[境界接近比](#^boundary-approach-ratio)、[観測不能](#^not-observable)
+
 <a id="decision-sufficient-state"></a>
 ### 判定用十分状態（はんていようじゅうぶんじょうたい）
 - 英語版：[Decision-Sufficient State](./NRA-IDE_Dictionary_EN.md#^decision-sufficient-state) ^decision-sufficient-state
@@ -784,7 +800,7 @@
 | `applied_action` | [作用](#^applied-action) |
 | `audit_log` | 非推奨の結合表示。正規は `structural_disclosure_log` と `input_exception_log` |
 | `CONFESSION` | [告白](#^confession) |
-| `d_delta_dt`・`d_tau_dt` | ズレ・厚みの変化率（二重ゆらぎ。FORMULA §4.7） |
+| `d_delta_dt`・`d_tau_dt` | ズレ・厚みの変化率（[二重ゆらぎ](#^double-fluctuation)。FORMULA §4.7） |
 | `decision_sufficient_state` | [判定用十分状態](#^decision-sufficient-state) |
 | `declared_target` | 宣言対象（FORMULA §0） |
 | `delta`・`observed_delta` | [蓄積ズレ](#^accumulated-deviation) |
@@ -900,6 +916,8 @@
 | 2026-09-30 | 制約 $C$ （条件）と作用 $a_n$ （計上された入力） | [制約](#^external-constraint)、[作用](#^applied-action) |
 | 2026-09-30 | 残差 $r$ と境界接近比 $R$ （大小だけの区別）。書体・大小だけで区別しない規則をFORMULA §7の規範にした | 0.5、2.2 |
 | 2026-10-22 | 不可逆の前の兆候を「可視化」「見える」とだけ書いたことと、観測できる物理的事象（見える・聞こえる・触れて分かる・計器に出る） | [対象状態](#^target-physical-state)、[経路履歴](#^event-history) |
+| 2026-10-22 | 正典の二重ゆらぎと、論文系列の手法名「二重揺らぎ名目計算」 | [二重ゆらぎ](#^double-fluctuation) |
+| 2026-10-23 | 二重ゆらぎを、 $R$ の増加傾向より早い警報と期待したこと | [二重ゆらぎ](#^double-fluctuation) |
 
 ---
 
