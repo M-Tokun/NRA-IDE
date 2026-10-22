@@ -5,7 +5,7 @@ created: 2026-10-22
 title: "非同期量子・古典ハイブリッド計算における境界監督と少数ショットSPSAの論理的成立条件"
 updated: 2026-10-22
 status: hypothesis-logical-reconstruction
-version: "5.1"   # 通し番号（../変遷記録.md）。本文中の「v2」「v3」「v3.1」は旧呼称で、それぞれ4.0・5.0・5.1にあたる
+version: "6.1"   # 通し番号（../変遷記録.md）。本文中の「v2」「v3」「v3.1」は旧呼称で、それぞれ5.0・6.0・6.1にあたる
 based_on: 修正案_v2.md (2026-10-22)
 evidence: primary-literature-and-v2; AI-run preliminary classical simulation only (§6.5); no device tests
 ---

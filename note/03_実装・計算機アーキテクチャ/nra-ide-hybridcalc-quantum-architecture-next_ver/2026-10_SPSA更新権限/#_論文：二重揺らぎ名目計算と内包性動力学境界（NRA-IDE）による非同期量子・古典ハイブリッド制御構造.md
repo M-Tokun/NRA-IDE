@@ -2,8 +2,8 @@
 id: PAPER-DFNC-20261022
 kind: paper
 created: 2026-10-22
-status: superseded   # 後継：NRA-IDE_QuantumHybrid_LogicalHypothesis_v5.1_2026-10-22.md
-version: "3.0"   # 通し番号。考え方の変化と捨てた考えは ../変遷記録.md
+status: superseded   # 後継：NRA-IDE_QuantumHybrid_LogicalHypothesis_v6.1_2026-10-22.md
+version: "4.0"   # 通し番号。考え方の変化と捨てた考えは ../変遷記録.md
 title: "論文：二重揺らぎ名目計算と内包性動力学境界（NRA-IDE）による非同期量子・古典ハイブリッド制御構造"
 ---
 
