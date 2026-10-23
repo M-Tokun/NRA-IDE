@@ -1,3 +1,9 @@
+---
+id: NOTE-AI-CYBERATTACK-20261023
+kind: article
+created: 2026-10-23
+title: Microsoftが確認した事実と、まだ証明されていないこと（AIサイバー攻撃の実態）
+---
 
 # Microsoftが確認した事実と、まだ証明されていないこと（AIサイバー攻撃の実態）
 
