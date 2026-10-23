@@ -22,6 +22,14 @@
 
 - `Glossary_JP.md`／`Glossary_EN.md`：用語集（見出しIDで対）
 - `Translation_Map.md`：訳語の対応表と、すり合わせの経過
+- 詳説：[リンドブラッド方程式（GKSL形式）](./details/Lindblad_GKSL_JP.md)／[英語版](./details/Lindblad_GKSL_EN.md)。長い数式解説は詳説に置き、辞書項目から辿れるようにする。
+
+## 引き方と本文の並び
+
+- 各用語集の冒頭に、数字・A–Z（英語名と略称）・五十音（日本語の読み）の索引を置く。略称と正式名は同じ項目へリンクする。
+- 日本語版の本文は、数字で始まる見出し、英字で始まる見出し、日本語見出しの順とする。各区分の中では数の順・A–Z順・読みの五十音順に並べる。
+- 英語版の本文は数字・A–Z順とする。日英で掲載順が異なっても、共通の見出しIDで対を保つ。
+- 旧称から現行の項目へ辿る索引は残す。本文を並べ替えても、既存の見出しIDとブロックIDは変えない。
 
 [English]
 
@@ -45,3 +53,11 @@
 
 - `Glossary_JP.md` / `Glossary_EN.md`: the glossary (paired by heading ID)
 - `Translation_Map.md`: the translation map and reconciliation log
+- Detailed explanation: [Lindblad (GKSL) equation](./details/Lindblad_GKSL_EN.md) / [Japanese version](./details/Lindblad_GKSL_JP.md). Long equation explanations are kept in linked detail pages accessible from their dictionary entries.
+
+## Lookup and entry order
+
+- Each glossary begins with indexes for numbers, A–Z (English names and abbreviations), and Japanese readings in gojūon order. Abbreviations and full names link to the same entry.
+- The Japanese body groups headings beginning with numbers, then Latin letters, then Japanese headings. Within each group, use numeric order, A–Z order, and Japanese reading order, respectively.
+- The English body uses numbers followed by A–Z. Shared entry IDs maintain the JP/EN pairing even when the entries appear in different orders.
+- Keep the former-name index. Reordering the body does not change existing heading IDs or block IDs.
