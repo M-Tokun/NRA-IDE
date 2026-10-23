@@ -1,710 +1,591 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<!-- FILE: NRA_IDE_AdaptiveGate_20260425.html -->
+<!-- TITLE: NRA-IDE Adaptive Gate — Fixed k vs Dynamic k_eff / 適応型ゲート拡張 -->
+<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
+<!-- Generated: 2026-04-25 JST -->
+<!-- Ref: nra-core/papers/IDE_AdaptiveGate_Extension_20260407_2241.md -->
+<!-- Ref: nra-core/implementation/IDE_AdaptiveGate_Extension_20260407_2241.py -->
+<!-- NRA-IDE Principle: Structural invariant R = δ/τ < 1.0, Fail-Closed at R ≥ 1.0 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- FILE: NRA_IDE_AIRisk_Layer5_20260416.html -->
-<!-- 生成日時: 2026-04-16 JST -->
-<!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
-<title>NRA-IDE Layer 5: 現況AI学習方法の構造的リスクと将来予測</title>
+<title>NRA-IDE: Adaptive Gate — Dynamic k_eff | 適応型ゲート拡張</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+:root{
+  --bg:#060c12;--panel:#0b1520;--border:#1a3040;
+  --text:#c8dde8;--dim:#4a6a7a;
+  --green:#00e676;--yellow:#ffd740;--orange:#ff9100;--red:#ff3d00;--blue:#40c4ff;
+  --tau:#c060ff;--play:#47ff9e;--keff:#ffb347;
+  --mono:'Share Tech Mono',monospace;--sans:'Zen Kaku Gothic New',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:14px 10px;}
 
-:root {
-  --bg:     #050810;
-  --bg2:    #080d1a;
-  --risk:   #e06040;
-  --nra:    #40d0a0;
-  --gold:   #f0c040;
-  --warn:   #f09040;
-  --future: #8090f0;
-  --text:   #b8ccd8;
-  --dim:    #384858;
-  --panel:  rgba(10,18,36,0.96);
-  --border: rgba(70,120,180,0.16);
-}
+.page-title{text-align:center;margin-bottom:10px;}
+.page-title h1{font-family:var(--mono);font-size:.88rem;color:#fff;letter-spacing:.1em;margin-bottom:3px;}
+.page-title .sub{font-size:.75rem;color:var(--keff);font-family:var(--sans);font-weight:700;margin-bottom:2px;}
+.page-title p{font-size:.67rem;color:var(--dim);font-family:var(--mono);}
+.file-badge{display:inline-block;margin-top:4px;padding:2px 10px;border:1px solid rgba(255,179,71,.3);font-size:.61rem;color:var(--keff);font-family:var(--mono);letter-spacing:.1em;}
 
-* { margin:0; padding:0; box-sizing:border-box; }
+.formula-box{max-width:980px;margin:0 auto 10px;padding:10px 16px;border:1px solid rgba(255,179,71,.3);background:rgba(255,179,71,.04);font-family:var(--mono);font-size:.69rem;line-height:2.0;color:#e0c890;}
+.formula-box .flabel{font-size:.59rem;color:var(--keff);letter-spacing:.12em;margin-bottom:5px;display:block;}
+.formula-box .row{display:flex;gap:18px;flex-wrap:wrap;}
+.formula-box .row-margin{margin-top:4px;}
+.formula-box .eq{color:#c8dde8;}.formula-box .note{color:#5a8090;font-size:.63rem;}
 
-body {
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Noto Sans JP',sans-serif;
-  min-height:100vh;
-  padding-bottom:3rem;
-}
+.tab-bar{display:flex;gap:0;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
+.tab-btn{padding:7px 18px;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--dim);transition:all .15s;white-space:nowrap;}
+.tab-btn:first-child{border-radius:4px 0 0 4px;}.tab-btn:last-child{border-radius:0 4px 4px 0;}
+.tab-btn.active{background:rgba(255,179,71,.1);border-color:var(--keff);color:var(--keff);}
 
-body::before {
-  content:'';
-  position:fixed; inset:0;
-  background-image:
-    radial-gradient(1px 1px at 10% 18%, rgba(255,255,255,0.22) 0%,transparent 100%),
-    radial-gradient(1px 1px at 70% 12%, rgba(255,255,255,0.18) 0%,transparent 100%),
-    radial-gradient(1px 1px at 92% 68%, rgba(255,255,255,0.2)  0%,transparent 100%),
-    radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,0.15) 0%,transparent 100%);
-  pointer-events:none; z-index:0;
-}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:980px;margin:0 auto 8px;}
+.side{border:1px solid var(--border);background:var(--panel);}
+.side-hdr{padding:7px 13px;font-family:var(--mono);font-size:.67rem;letter-spacing:.08em;border-bottom:1px solid var(--border);}
+.side-left .side-hdr{color:#ff8080;background:#140a08;border-color:#3a1a10;}
+.side-right .side-hdr{color:var(--keff);background:#12100a;border-color:#3a2e10;}
+canvas.main-cv{display:block;width:100%;height:190px;}
+.side-status{padding:7px 13px;border-top:1px solid var(--border);}
+.metric-row{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px;}
+.metric-lbl{font-family:var(--mono);font-size:.59rem;color:var(--dim);}
+.metric-val{font-family:var(--mono);font-size:1.0rem;font-weight:bold;}
+.m-x{color:var(--blue);}
+.m-r{color:var(--red);}
+.m-k{color:var(--keff);}
+.m-g{color:var(--tau);}
+.m-R{color:var(--green);}
+.judgment{padding:5px 8px;font-size:.66rem;line-height:1.6;border:1px solid var(--border);font-family:var(--mono);min-height:36px;}
+.j-ok{border-color:rgba(0,230,118,.25);color:#80e8a0;}
+.j-warn{border-color:rgba(255,215,64,.3);color:var(--yellow);}
+.j-track{border-color:rgba(255,179,71,.3);color:var(--keff);}
+.j-fail{border-color:rgba(255,61,0,.55);color:var(--red);background:rgba(255,61,0,.07);}
 
-header {
-  text-align:center;
-  padding:2rem 1rem 1rem;
-  border-bottom:1px solid var(--border);
-  position:relative; z-index:1;
-}
+.keff-strip{max-width:980px;margin:0 auto 8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.keff-side{border:1px solid var(--border);background:var(--panel);}
+.keff-lbl{padding:4px 10px;font-family:var(--mono);font-size:.6rem;color:var(--dim);border-bottom:1px solid var(--border);}
+canvas.keff-cv{display:block;width:100%;height:60px;}
 
-header h1 {
-  font-family:'JetBrains Mono',monospace;
-  font-size:clamp(0.85rem,2.2vw,1.45rem);
-  color:var(--risk);
-  letter-spacing:0.06em;
-  text-shadow:0 0 20px rgba(224,96,64,0.4);
-}
+.ctrl-area{max-width:980px;margin:0 auto 8px;background:var(--panel);border:1px solid var(--border);padding:9px 13px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.ctrl-grp{display:flex;align-items:center;gap:7px;}
+.ctrl-lbl{font-family:var(--mono);font-size:.62rem;color:var(--dim);white-space:nowrap;}
+input[type=range]{accent-color:var(--keff);cursor:pointer;width:88px;}
+.ctrl-val{font-family:var(--mono);font-size:.67rem;color:var(--keff);min-width:30px;}
+.dist-btn{padding:6px 13px;font-family:var(--mono);font-size:.66rem;cursor:pointer;border:1px solid rgba(255,61,0,.35);background:rgba(255,61,0,.07);color:var(--red);}
+.dist-btn:hover{background:rgba(255,61,0,.15);}
+.step-btn{padding:6px 13px;font-family:var(--mono);font-size:.66rem;cursor:pointer;border:1px solid rgba(64,196,255,.3);background:rgba(64,196,255,.06);color:var(--blue);}
+.step-btn:hover{background:rgba(64,196,255,.12);}
+.reset-btn{padding:5px 11px;font-family:var(--mono);font-size:.64rem;cursor:pointer;border:1px solid var(--border);background:#0a1820;color:var(--text);margin-left:auto;}
+.reset-btn:hover{border-color:var(--play);color:var(--play);}
 
-header .layer-badge {
-  display:inline-block;
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.65rem;
-  padding:0.2rem 0.7rem;
-  border:1px solid rgba(224,96,64,0.4);
-  border-radius:2px;
-  color:var(--risk);
-  margin-bottom:0.5rem;
-  letter-spacing:0.12em;
-}
+.insight{max-width:980px;margin:0 auto 8px;padding:10px 14px;background:#090f18;border:1px solid #182a38;font-size:.71rem;line-height:1.9;color:#6a9ab0;font-family:var(--mono);}
+.insight .ilabel{color:var(--keff);}
+.insight .note2{color:#3a6070;display:block;margin-top:3px;}
 
-header .sub {
-  font-size:0.68rem;color:var(--dim);
-  font-family:'JetBrains Mono',monospace;
-  margin-top:0.3rem;
-}
-
-.wrap {
-  max-width:1100px;
-  margin:0 auto;
-  padding:1.5rem 1rem;
-  position:relative; z-index:1;
-  display:flex; flex-direction:column; gap:2rem;
-}
-
-/* ── section ── */
-.section {
-  display:flex; flex-direction:column; gap:0.8rem;
-}
-
-.sec-num {
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.6rem;
-  letter-spacing:0.18em;
-  text-transform:uppercase;
-  color:var(--dim);
-}
-
-.sec-title {
-  font-family:'JetBrains Mono',monospace;
-  font-size:clamp(0.85rem,1.8vw,1.1rem);
-  letter-spacing:0.04em;
-  padding-bottom:0.5rem;
-  border-bottom:1px solid var(--border);
-}
-
-/* ── flow diagram ── */
-.flow {
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  align-items:flex-start;
-  padding:0.5rem 0;
-}
-
-.flow-row {
-  display:flex;
-  align-items:center;
-  gap:0.7rem;
-  padding:0.55rem 0.9rem;
-  border-radius:4px;
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.75rem;
-  min-width:260px;
-  border:1px solid;
-  margin-bottom:0;
-  position:relative;
-}
-
-.flow-row.cause  { color:var(--risk);   border-color:rgba(224,96,64,0.35);   background:rgba(224,96,64,0.05);   }
-.flow-row.effect { color:var(--warn);   border-color:rgba(240,144,64,0.3);   background:rgba(240,144,64,0.04);  }
-.flow-row.deep   { color:#d080c0;       border-color:rgba(208,128,192,0.3);  background:rgba(208,128,192,0.04); }
-.flow-row.fatal  { color:#ff5040;       border-color:rgba(255,80,64,0.45);   background:rgba(255,80,64,0.07);   font-weight:700; }
-.flow-row.nra    { color:var(--nra);    border-color:rgba(64,208,160,0.35);  background:rgba(64,208,160,0.04);  }
-
-.flow-arrow {
-  font-family:'JetBrains Mono',monospace;
-  font-size:1rem;
-  color:var(--dim);
-  padding:0.1rem 0.9rem;
-  line-height:1;
-}
-
-/* ── formula block ── */
-.formula-block {
-  background:rgba(0,0,0,0.55);
-  border-radius:6px;
-  padding:1rem 1.2rem;
-  border-left:3px solid var(--risk);
-  font-family:'JetBrains Mono',monospace;
-  font-size:clamp(0.75rem,1.6vw,0.95rem);
-  line-height:2.1;
-  color:#f0d0c0;
-}
-
-.formula-block.nra-style { border-left-color:var(--nra); color:#c0f0e0; }
-
-/* ── comparison table ── */
-.cmp-table {
-  width:100%;
-  border-collapse:collapse;
-  font-size:0.72rem;
-}
-.cmp-table th {
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.63rem;
-  color:var(--dim);
-  text-align:left;
-  padding:0.4rem 0.7rem;
-  border-bottom:1px solid var(--border);
-  background:rgba(0,0,0,0.3);
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-}
-.cmp-table td {
-  padding:0.45rem 0.7rem;
-  border-bottom:1px solid rgba(70,120,180,0.07);
-  line-height:1.7;
-  vertical-align:top;
-}
-.cmp-table td:first-child {
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.68rem;
-  color:var(--gold);
-  width:22%;
-}
-.cmp-table tr:hover td { background:rgba(70,120,180,0.04); }
-
-/* ── tech prediction cards ── */
-.pred-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:0.9rem;
-}
-@media(max-width:800px){ .pred-grid{grid-template-columns:1fr;} }
-
-.pred-card {
-  border-radius:7px;
-  padding:1rem;
-  border:1px solid var(--border);
-  background:rgba(0,0,0,0.35);
-  display:flex; flex-direction:column; gap:0.6rem;
-}
-
-.pred-card .p-tech {
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.7rem;
-  letter-spacing:0.1em;
-  text-transform:uppercase;
-  padding-bottom:0.4rem;
-  border-bottom:1px solid var(--border);
-}
-
-.pred-card.rl  .p-tech { color:#e09060; }
-.pred-card.ft  .p-tech { color:#8090f0; }
-.pred-card.rag .p-tech { color:#60b8e0; }
-
-.pred-card .p-now {
-  font-size:0.7rem;
-  line-height:1.75;
-  color:#7090a0;
-}
-.pred-card .p-risk {
-  font-size:0.7rem;
-  line-height:1.75;
-  padding:0.5rem;
-  border-radius:4px;
-  background:rgba(224,80,64,0.07);
-  border-left:2px solid var(--risk);
-  color:#e0a090;
-}
-.pred-card .p-future {
-  font-size:0.7rem;
-  line-height:1.75;
-  padding:0.5rem;
-  border-radius:4px;
-  background:rgba(64,208,160,0.05);
-  border-left:2px solid var(--nra);
-  color:#80d8b0;
-}
-
-/* ── key insight box ── */
-.insight {
-  background:var(--panel);
-  border:1px solid rgba(240,192,64,0.3);
-  border-radius:8px;
-  padding:1.2rem 1.4rem;
-  position:relative;
-}
-.insight::before {
-  content:'KEY INSIGHT';
-  position:absolute; top:-0.55rem; left:1rem;
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.6rem;
-  color:var(--gold);
-  background:var(--bg2);
-  padding:0 0.5rem;
-  letter-spacing:0.14em;
-}
-.insight p {
-  font-size:0.8rem;
-  line-height:1.9;
-  color:#d0c8a0;
-}
-.insight strong { color:var(--gold); }
-
-/* ── blackbox growth diagram ── */
-.bb-diagram {
-  display:flex; gap:0.5rem; align-items:center;
-  flex-wrap:wrap;
-}
-.bb-box {
-  border-radius:5px;
-  text-align:center;
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.65rem;
-  color:rgba(255,255,255,0.5);
-  display:flex; align-items:center; justify-content:center;
-  flex-direction:column; gap:0.2rem;
-  transition:all 0.3s;
-  border:1px solid rgba(100,100,120,0.3);
-}
-.bb-box .bb-label { font-size:0.6rem; opacity:0.6; }
-
-.bb-arrow { color:var(--dim); font-size:1.2rem; font-family:'JetBrains Mono',monospace; }
-
-/* ── conclusion ── */
-.conclusion {
-  background:var(--panel);
-  border:1px solid rgba(64,208,160,0.25);
-  border-radius:8px;
-  padding:1.4rem;
-  position:relative;
-}
-.conclusion::before {
-  content:'CONCLUSION';
-  position:absolute; top:-0.55rem; left:1rem;
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.6rem;
-  color:var(--nra);
-  background:var(--bg2);
-  padding:0 0.5rem;
-  letter-spacing:0.14em;
-}
-
-.conc-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:1rem;
-  margin-top:0.5rem;
-}
-@media(max-width:700px){ .conc-grid{grid-template-columns:1fr;} }
-
-.conc-cell {
-  font-size:0.72rem;
-  line-height:1.8;
-  padding:0.8rem;
-  border-radius:5px;
-  border:1px solid var(--border);
-  background:rgba(0,0,0,0.3);
-}
-.conc-cell .c-title {
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.68rem;
-  font-weight:700;
-  display:block;
-  margin-bottom:0.4rem;
-}
-
-footer {
-  text-align:center;
-  font-family:'JetBrains Mono',monospace;
-  font-size:0.62rem;
-  color:var(--dim);
-  padding:1rem;
-  border-top:1px solid var(--border);
-  position:relative; z-index:1;
-}
+footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
+@media(max-width:600px){.compare-grid,.keff-strip{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="layer-badge">LAYER 5 — AI STRUCTURAL RISK</div>
-  <h1>現況AI学習方法の構造的リスクと将来予測</h1>
-  <div class="sub">
-    閾値なし・誤差増幅・ブラックボックス肥大・線形限界・報酬学習/チューニング/RAGの将来<br>
-    NRA-IDE Project · M-Tokuni · 2026-04-16 · DOI: 10.5281/zenodo.19420854
+<div class="page-title">
+  <h1>NRA-IDE — Adaptive Gate / 適応型ゲート拡張</h1>
+  <div class="sub">内側が揺らいで吸収する — The Inside Fluctuates and Absorbs</div>
+  <p>Fixed k (rigid) vs Dynamic k_eff (adaptive) — R = |r| / k  ·  R &lt; 1.0 不変条件</p>
+  <div class="file-badge">NRA_IDE_AdaptiveGate_20260425.html</div>
+</div>
+
+<div class="formula-box">
+  <span class="flabel">NRA-IDE ADAPTIVE GATE — Structural Invariant R = δ/τ &lt; 1.0 · Fail-Closed at R ≥ 1.0</span>
+  <div class="row">
+    <span><span class="eq">k_eff = k₀·(1 + β|ṙ|)</span> <span class="note">動的感度 / dynamic sensitivity</span></span>
+    <span><span class="eq">G_eff = r·|r|/(k_eff + |r|)</span> <span class="note">gate — k_eff replaces fixed k</span></span>
+    <span><span class="eq">F_IDE = α·r</span> <span class="note">相対座標 / relative-coord IDE</span></span>
+    <span><span class="eq">Φ = P + D·ṙ/(1+|r|)</span> <span class="note">PDダンパ（両パネル共通 / common）</span></span>
   </div>
-</header>
+  <div class="row row-margin">
+    <span><span class="eq">d²x/dt² + γẋ = F_IDE + G_eff·Φ</span> <span class="note">統合支配方程式 / governing equation</span></span>
+  </div>
+  <div class="row row-margin">
+    <span><span class="eq">δ = |r|</span> <span class="note">累積偏差 / accumulated deviation</span></span>
+    <span><span class="eq">τ = k_eff</span> <span class="note">吸収厚み / absorption thickness</span></span>
+    <span><span class="eq">R = δ / τ</span> <span class="note">R &lt; 1.0 で構造安定 / ≥ 1.0 で Fail-Closed</span></span>
+  </div>
+</div>
 
-<div class="wrap">
+<div class="tab-bar">
+  <button type="button" class="tab-btn active" onclick="switchTab(0)">ステップ応答 / Step</button>
+  <button type="button" class="tab-btn" onclick="switchTab(1)">目標追従 / Ramp</button>
+  <button type="button" class="tab-btn" onclick="switchTab(2)">外乱応答 / Disturbance</button>
+</div>
 
-  <!-- ══ 01 閾値がない ══ -->
-  <div class="section">
-    <div class="sec-num">01 — THRESHOLD ABSENCE</div>
-    <div class="sec-title" style="color:var(--risk)">
-      閾値がないとはどういうことか
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-      <div>
-        <div class="formula-block">
-          【現況AI — 閾値なし】<br>
-          誤差ε → パラメータWに吸収<br>
-          W(t+1) = W(t) - η·∇L<br>
-          <br>
-          ∇Lがゼロに近づくと「収束」と判断<br>
-          しかし ε の蓄積履歴は消えない<br>
-          → 止まる理由を持っていない
-        </div>
+<div class="compare-grid">
+  <div class="side side-left">
+    <div class="side-hdr">LEFT — 固定 k = k₀ (standard gate)</div>
+    <canvas class="main-cv" id="cvLeft" width="490" height="190">Fixed k gate — state trajectory simulation</canvas>
+    <div class="side-status">
+      <div class="metric-row">
+        <span class="metric-lbl">x =</span><span class="metric-val m-x" id="xLeft">0.000</span>
+        <span class="metric-lbl">|r| =</span><span class="metric-val m-r" id="rLeft">0.000</span>
+        <span class="metric-lbl">k =</span><span class="metric-val m-k" id="kLeft">1.00</span>
+        <span class="metric-lbl">G =</span><span class="metric-val m-g" id="gLeft">0.000</span>
+        <span class="metric-lbl">R =</span><span class="metric-val m-R" id="RLeft">0.00</span>
       </div>
-      <div>
-        <div class="formula-block nra-style">
-          【NRA-IDE — 閾値あり】<br>
-          R = δ/τ をリアルタイム評価<br>
-          <br>
-          R &lt; 1.0 : 継続<br>
-          R = 1.0 : 警告・人間に通知<br>
-          R ≥ 1.0 : Fail-Closed 沈黙<br>
-          → 止まる構造が設計に組み込まれている
-        </div>
-      </div>
-    </div>
-
-    <div class="insight">
-      <p>
-        閾値がないとはすなわち<strong>「どこまでが正常か」を系が知らない</strong>ということです。<br>
-        現況のAIは損失関数Lを最小化しようとしますが、Lのゼロは「完璧な正解」であり<br>
-        現実の非線形系ではそもそも到達不可能です。<br>
-        到達できない目標に向かってパラメータを動かし続けた結果が<strong>ブラックボックスの肥大</strong>です。
-      </p>
+      <div class="judgment" id="jLeft">待機中 / Waiting…</div>
     </div>
   </div>
-
-  <!-- ══ 02 誤差増幅の連鎖 ══ -->
-  <div class="section">
-    <div class="sec-num">02 — ERROR AMPLIFICATION</div>
-    <div class="sec-title" style="color:var(--warn)">
-      誤差が増幅するとはどういうことか
-    </div>
-
-    <div class="flow">
-      <div class="flow-row cause">初期微小誤差 ε₀（不可避・δ > 0 は物理法則）</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row effect">線形写像で次ステップへ持ち越し：ε₁ = A·ε₀</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row effect">再び線形写像：ε₂ = A·ε₁ = A²·ε₀</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row deep">n ステップ後：εₙ = Aⁿ·ε₀ &nbsp;[行列のべき乗]</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row deep">A の最大固有値 λ > 1 のとき：εₙ → ∞ &nbsp;[指数爆発]</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row fatal">誤差と信号が区別不能になる → 概要消失</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row fatal">閾値がないので止まれない → 誤った出力を継続 [FAIL-OPEN]</div>
-    </div>
-
-    <div style="margin-top:0.5rem;font-size:0.72rem;line-height:1.8;color:#708090;padding:0.8rem;background:rgba(0,0,0,0.3);border-radius:5px;border:1px solid var(--border);">
-      注：現実のAIでは正則化・ドロップアウト・バッチ正規化などで爆発を抑制しようとします。<br>
-      しかしこれらは「爆発を遅らせる」手法であり「誤差を構造的に追跡する」手法ではありません。<br>
-      <span style="color:var(--warn)">応急処置を重ねることがブラックボックス肥大の直接原因です。</span>
+  <div class="side side-right">
+    <div class="side-hdr">RIGHT — 動的 k_eff = k₀·(1 + β|ṙ|) (adaptive gate)</div>
+    <canvas class="main-cv" id="cvRight" width="490" height="190">Dynamic k_eff adaptive gate — state trajectory simulation</canvas>
+    <div class="side-status">
+      <div class="metric-row">
+        <span class="metric-lbl">x =</span><span class="metric-val m-x" id="xRight">0.000</span>
+        <span class="metric-lbl">|r| =</span><span class="metric-val m-r" id="rRight">0.000</span>
+        <span class="metric-lbl">k_eff =</span><span class="metric-val m-k" id="kRight">1.00</span>
+        <span class="metric-lbl">G_eff =</span><span class="metric-val m-g" id="gRight">0.000</span>
+        <span class="metric-lbl">R =</span><span class="metric-val m-R" id="RRight">0.00</span>
+      </div>
+      <div class="judgment" id="jRight">待機中 / Waiting…</div>
     </div>
   </div>
+</div>
 
-  <!-- ══ 03 ブラックボックス肥大 ══ -->
-  <div class="section">
-    <div class="sec-num">03 — BLACKBOX GROWTH</div>
-    <div class="sec-title" style="color:#d080c0">
-      ブラックボックスはなぜ肥大するのか
-    </div>
-
-    <div class="bb-diagram">
-      <div class="bb-box" style="width:70px;height:60px;background:rgba(100,100,140,0.15);">
-        <span>GPT-2</span>
-        <span class="bb-label">1.5B</span>
-      </div>
-      <div class="bb-arrow">→</div>
-      <div class="bb-box" style="width:90px;height:80px;background:rgba(120,100,160,0.2);">
-        <span>GPT-3</span>
-        <span class="bb-label">175B</span>
-      </div>
-      <div class="bb-arrow">→</div>
-      <div class="bb-box" style="width:115px;height:105px;background:rgba(150,100,180,0.25);">
-        <span>GPT-4</span>
-        <span class="bb-label">&gt;1T?</span>
-      </div>
-      <div class="bb-arrow">→</div>
-      <div class="bb-box" style="width:150px;height:140px;background:rgba(200,80,160,0.18);border-color:rgba(200,80,160,0.4);">
-        <span style="color:#e090d0;">次世代</span>
-        <span class="bb-label" style="color:#c070b0;">???T</span>
-        <span class="bb-label" style="font-size:0.55rem;color:var(--risk);">誤差はどこに？</span>
-      </div>
-    </div>
-
-    <div class="flow" style="margin-top:0.8rem;">
-      <div class="flow-row cause">非線形な現実を線形で近似する</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row effect">近似誤差が発生（不可避）</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row effect">誤差を「パラメータ数を増やすことで覆う」</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row deep">より大きなモデルで再学習 → 誤差がさらに深部に埋まる</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row deep">埋まった誤差はどこにあるか誰も知らない → ブラックボックス</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row fatal">スケールを増やすほど「誤差の埋蔵量」が増える</div>
-    </div>
-
-    <div class="insight" style="margin-top:0.5rem;">
-      <p>
-        ブラックボックスは「設計の失敗」ではありません。<br>
-        <strong>線形近似で非線形現実を扱おうとした場合の構造的帰結</strong>です。<br>
-        誤差を排出する機構（脱進機原理）がなく閾値もないため<br>
-        誤差は「どこかのパラメータ」に埋め込まれ続けます。<br>
-        モデルが大きくなるほど<strong>埋め込み先が増える</strong>だけです。
-      </p>
-    </div>
+<div class="keff-strip">
+  <div class="keff-side">
+    <div class="keff-lbl">k (fixed) history — k₀ = <span id="k0disp">1.00</span></div>
+    <canvas class="keff-cv" id="kvLeft" width="490" height="60">k (fixed) history chart</canvas>
   </div>
-
-  <!-- ══ 04 物理世界の非線形性 ══ -->
-  <div class="section">
-    <div class="sec-num">04 — PHYSICAL WORLD NONLINEARITY</div>
-    <div class="sec-title" style="color:var(--gold)">
-      物理世界（非線形）を理解しないとはどういうことか
-    </div>
-
-    <table class="cmp-table">
-      <tr>
-        <th>現象</th>
-        <th>物理の本質（非線形）</th>
-        <th>線形近似で何が消えるか</th>
-        <th>帰結</th>
-      </tr>
-      <tr>
-        <td>疲労・劣化</td>
-        <td>履歴依存。過去が現在を変える。不可逆。</td>
-        <td>履歴が消える。常に「今の値」だけを見る。</td>
-        <td>「今は正常」でも突然破断する理由がわからない。</td>
-      </tr>
-      <tr>
-        <td>乱流・カオス</td>
-        <td>初期値鋭敏性。微小な差が巨大な違いを生む。</td>
-        <td>初期値の差を均一化する。感度が消える。</td>
-        <td>長期予測が構造的に不可能なのに「予測できた」と出力する。</td>
-      </tr>
-      <tr>
-        <td>生体反応</td>
-        <td>閾値を超えると質的変化が起きる。相転移。</td>
-        <td>連続的な変化として扱う。閾値が存在しない。</td>
-        <td>「少し悪化」の積み重ねが突然の臓器不全になる理由を捉えられない。</td>
-      </tr>
-      <tr>
-        <td>構造破断</td>
-        <td>蓄積ズレδと吸収厚みτの比率Rが1.0を超えた瞬間。</td>
-        <td>RをΔとして線形で追う。蓄積の概念がない。</td>
-        <td>破断直前まで「正常値内」と判断し続ける。</td>
-      </tr>
-      <tr>
-        <td>経済・社会</td>
-        <td>非平衡・フィードバック・相互作用が非線形。</td>
-        <td>平均的な挙動として学習する。個別状態を失う。</td>
-        <td>「平均的には安全」でも特定構造が破綻することを予見できない。</td>
-      </tr>
-    </table>
-
-    <div style="margin-top:0.8rem;padding:0.8rem 1rem;background:rgba(0,0,0,0.35);border-radius:5px;border-left:3px solid var(--gold);font-size:0.72rem;line-height:1.8;color:#d0c890;">
-      線形近似は「現象を写し取る」ことはできます。しかし<br>
-      <strong style="color:var(--gold)">「現象が次に何をするか」を蓄積として追跡することはできません。</strong><br>
-      写し取った静止画をいくら精緻にしても、動いている現実は捉えられません。
-    </div>
+  <div class="keff-side">
+    <div class="keff-lbl">k_eff (dynamic) history — β = <span id="betaDisp">0.80</span></div>
+    <canvas class="keff-cv" id="kvRight" width="490" height="60">k_eff (dynamic) history chart</canvas>
   </div>
+</div>
 
-  <!-- ══ 05 報酬学習・チューニング・RAGの将来予測 ══ -->
-  <div class="section">
-    <div class="sec-num">05 — FUTURE PREDICTION</div>
-    <div class="sec-title" style="color:var(--future)">
-      報酬学習・チューニング・RAGはどうなるか
-    </div>
-
-    <div class="pred-grid">
-
-      <!-- Reward Learning -->
-      <div class="pred-card rl">
-        <div class="p-tech">⬛ 報酬学習 — Reward Learning / RLHF</div>
-        <div class="p-now">
-          人間の評価フィードバックを報酬として<br>
-          パラメータを更新する手法。<br>
-          現況では主流の「安全化」技術。
-        </div>
-        <div class="p-risk">
-          <strong>構造的問題：</strong><br>
-          報酬関数自体が線形空間で定義されている。<br>
-          「人間が良いと感じた」を数値化した瞬間に<br>
-          非線形な判断が線形に圧縮される。<br>
-          蓄積された誤報酬はパラメータに埋まり<br>
-          どこに何が埋まったか追跡不能になる。<br>
-          閾値がないため「過学習した報酬関数」に<br>
-          気づく仕組みが存在しない。
-        </div>
-        <div class="p-future">
-          <strong>将来の予測：</strong><br>
-          短期的には「人間に好まれる出力」を維持できる。<br>
-          しかし未知の入力・分布外の状況で<br>
-          報酬関数が崩壊する。<br>
-          R = δ/τ による報酬健全性の監視なしでは<br>
-          報酬ハッキングが深部に潜伏し続ける。
-        </div>
-      </div>
-
-      <!-- Fine-Tuning -->
-      <div class="pred-card ft">
-        <div class="p-tech">⬛ チューニング — Fine-Tuning / PEFT</div>
-        <div class="p-now">
-          基盤モデルに特定ドメインのデータを<br>
-          追加学習させる手法。<br>
-          LoRA等の省パラメータ手法も含む。
-        </div>
-        <div class="p-risk">
-          <strong>構造的問題：</strong><br>
-          チューニングは「誤差を新しいパラメータで上書き」<br>
-          しているに過ぎない。<br>
-          元のモデルに埋まっていた誤差の上に<br>
-          新しい層が重なるだけ。<br>
-          チューニング前の誤差はどこにも消えていない。<br>
-          壊滅的忘却（catastrophic forgetting）は<br>
-          誤差の上書きが構造的に矛盾するために起きる。
-        </div>
-        <div class="p-future">
-          <strong>将来の予測：</strong><br>
-          チューニングの積み重ねで「見た目は動く」が<br>
-          内部に矛盾を抱えたモデルが量産される。<br>
-          どのチューニングがどの誤差を生んだか<br>
-          追跡不能なまま運用される。<br>
-          NRA-IDE的な「チューニング前後のR変化」<br>
-          監視なしでは健全性の評価が不可能。
-        </div>
-      </div>
-
-      <!-- RAG -->
-      <div class="pred-card rag">
-        <div class="p-tech">⬛ RAG — Retrieval-Augmented Generation</div>
-        <div class="p-now">
-          外部知識ベースを検索して<br>
-          コンテキストに追加する手法。<br>
-          ハルシネーション対策として普及中。
-        </div>
-        <div class="p-risk">
-          <strong>構造的問題：</strong><br>
-          RAGは「知識の不足」への対処。<br>
-          しかし問題の本質は「計算構造の誤差蓄積」。<br>
-          正しい知識を追加しても<br>
-          線形写像の誤差増幅構造は変わらない。<br>
-          検索精度が上がるほど<br>
-          「正しい知識を誤って統合する」リスクが増える。<br>
-          閾値がないため「統合の失敗」を検知できない。
-        </div>
-        <div class="p-future">
-          <strong>将来の予測：</strong><br>
-          知識ベースが大きくなるほど<br>
-          検索誤差と統合誤差が複合的に蓄積する。<br>
-          「正しい知識を持っているのに誤った出力をする」<br>
-          という状態が増加する。<br>
-          R = δ/τ で統合健全性を監視しなければ<br>
-          RAGは「誤差の伝搬経路」になる。
-        </div>
-      </div>
-
-    </div>
+<div class="ctrl-area">
+  <div class="ctrl-grp">
+    <span class="ctrl-lbl">k₀：</span>
+    <input type="range" id="k0Slider" title="k₀" min="0.2" max="3.0" step="0.1" value="1.0" oninput="onK0Change(this.value)">
+    <span class="ctrl-val" id="k0Val">1.00</span>
   </div>
-
-  <!-- ══ 06 スケール増加の逆説 ══ -->
-  <div class="section">
-    <div class="sec-num">06 — SCALE PARADOX</div>
-    <div class="sec-title" style="color:var(--risk)">
-      スケールを増やすほど破綻が深部に埋まっていく
-    </div>
-
-    <div class="flow">
-      <div class="flow-row cause">モデルサイズを増やす（パラメータ数↑）</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row effect">誤差の埋め込み先が増える</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row effect">表面上の精度が上がる（誤差が深く隠れる）</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row deep">「スケールすれば解決する」という信念が強化される</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row deep">さらにスケールを増やす → 誤差がより深部へ</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row fatal">閾値なし・追跡不能・Fail-Openのまま巨大化する</div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-row fatal">破断したとき被害が甚大になっている</div>
-    </div>
-
-    <div class="insight" style="margin-top:0.5rem;">
-      <p>
-        これは技術の問題ではなく<strong>構造の問題</strong>です。<br>
-        閾値を持たない系にスケールを与えることは<br>
-        「止まれない乗り物を加速する」ことと同義です。<br>
-        <strong>NRA-IDEが必要なのは精度を上げるためではありません。</strong><br>
-        「どこで止まるか」を系に教えるためです。
-      </p>
-    </div>
+  <div class="ctrl-grp">
+    <span class="ctrl-lbl">β (dynamic sens)：</span>
+    <input type="range" id="betaSlider" title="β (dynamic sens)" min="0.0" max="5.0" step="0.05" value="0.8" oninput="onBetaChange(this.value)">
+    <span class="ctrl-val" id="betaVal">0.80</span>
   </div>
+  <button type="button" class="step-btn" onclick="stepTarget()">目標変更 / Step Target ▶</button>
+  <button type="button" class="dist-btn" onclick="injectDisturbance()">外乱 / Disturbance ▶</button>
+  <button type="button" class="reset-btn" onclick="resetAll()">RESET</button>
+</div>
 
-  <!-- ══ Conclusion ══ -->
-  <div class="conclusion">
-    <div class="conc-grid">
-      <div class="conc-cell">
-        <span class="c-title" style="color:var(--risk)">現況AIが抱える構造的問題（一覧）</span>
-        閾値がない → 止まれない<br>
-        誤差が持ち越される → 指数増幅<br>
-        増幅した誤差をパラメータで覆う → ブラックボックス肥大<br>
-        線形写像で非線形現実を扱う → 概要を失う<br>
-        報酬関数が線形空間に閉じている → 誤報酬が埋まる<br>
-        チューニングは誤差の上書き → 矛盾が蓄積<br>
-        RAGは知識追加だが構造は変わらない → 誤統合
-      </div>
-      <div class="conc-cell">
-        <span class="c-title" style="color:var(--nra)">NRA-IDEが提供する構造的解答</span>
-        R = δ/τ という閾値を設計に組み込む<br>
-        残差を熱として排出し持ち越さない（脱進機原理）<br>
-        ブラックボックスを作らない構造で計算する<br>
-        非線形な蓄積をδとして追跡し概要を保持する<br>
-        R ≥ 1.0 で沈黙する → Fail-Closed<br>
-        「壊れたら止まる」が構造に組み込まれている<br>
-        沈黙することが最も正直な出力である
-      </div>
-    </div>
-
-    <div style="margin-top:1rem;padding:0.9rem 1rem;background:rgba(0,0,0,0.4);border-radius:5px;border-left:3px solid var(--gold);font-size:0.75rem;line-height:2;color:#d0c890;">
-      <strong style="color:var(--gold)">現況AIのスケールアップは誤差の埋蔵量を増やしているに過ぎない。</strong><br>
-      R = δ/τ による構造的閾値と Fail-Closed 設計なしに<br>
-      安全性を語ることは構造的に不可能である。<br>
-      これは批判ではなく<strong style="color:var(--nra)">構造的帰結の記述</strong>である。
-    </div>
-  </div>
-
+<div class="insight">
+  <span class="ilabel">▶ Adaptive Gate × NRA-IDE 原則：</span>
+  左（固定k）は速い遷移中に R = |r|/k が上昇し，構造的破断境界 R ≥ 1.0 に接近する。<br>
+  右（動的k_eff）は高速時に k_eff が増大 → R が抑制され，Coherent層（R &lt; 0.3）を維持しやすい。<br>
+  R ≥ 1.0 は Fail-Closed 領域 — 自律補正の限界，人間への責任引渡し。<br>
+  k₀ を下げる／外乱を加えると R が上昇し，判定が Coherent → Transition → Fail-Closed と遷移する。<br>
+  <span class="note2">ゼリー比喩：鋼鉄（固定k大）は跳ね返す。水（拘束なし）は発散する。ゼリー（適応gate）は内側で変形して吸収し，R &lt; 1.0 の不変条件を保つ。</span>
 </div>
 
 <footer>
-  Copyright (c) 2026 M-Tokuni — Nomological Ring Axioms / Intensional Dynamics Engine<br>
-  https://github.com/M-Tokun/NRA-IDE &nbsp;·&nbsp; DOI: 10.5281/zenodo.19420854
+  NRA-IDE Project — M-Tokuni &nbsp;·&nbsp;
+  Adaptive Gate Extension: Dynamic k_eff / Relative IDE / PD Damper / R-Invariant &nbsp;·&nbsp;
+  Ref: IDE_AdaptiveGate_Extension_20260407_2241 &nbsp;·&nbsp; 2026-04-25
 </footer>
 
+<script>
+// ── NRA-IDE Principle ────────────────────────────────────────────
+// Structural invariant R = δ/τ < 1.0 must hold.
+// At R ≥ 1.0 the system is in the structural rupture boundary →
+// Fail-Closed: autonomous correction is suspended, responsibility
+// is handed back to the human operator.
+// Causality diode: only current inputs (ẋ_e, ẋ) are referenced;
+// no future state / backward inference is used.
+
+// ── Parameters ────────────────────────────────────────────────────
+let k0   = 1.0;
+let beta = 0.8;
+
+// 以下はデモ用初期値。理論的必然性はなく、UI上で調整可能。
+const ALPHA     = 0.5;   // F_IDE = α·r の感度
+const P_GAIN    = 2.0;   // PD比例ゲイン
+const D_GAIN    = 0.4;   // PD微分ゲイン（両パネル共通）
+const GAMMA     = 0.5;   // 粘性減衰
+
+// 固定刻み物理（フレームレート非依存）
+const FIXED_DT  = 0.01;  // 物理刻み [sim-sec]
+const TIME_SCALE= 3.0;   // 元の DT=0.05 @60fps の体感速度を維持
+const HIST      = 200;   // 履歴長
+
+// ── Tabs: 0=Step, 1=Ramp, 2=Disturbance ─────────────────────────
+let currentTab = 0;
+
+// ── State ─────────────────────────────────────────────────────────
+let sf = null;                    // fixed k state
+let sa = null;                    // adaptive state
+let tick = 0;                     // 物理刻みカウンタ
+let x_exact = 0.3;
+let mF = { r: 0, k: 1.0, g: 0, R: 0 };
+let mA = { r: 0, k: 1.0, g: 0, R: 0 };
+let lastTime = 0;
+let accumulator = 0;
+
+function mkState(xinit) {
+  return { x: xinit, v: 0, hist: [], kHist: [], distTicks: 0, distAmp: 0 };
+}
+
+function resetAll() {
+  const xi = currentTab === 1 ? 0.5 : 0.3;
+  x_exact = xi;
+  sf = mkState(xi);
+  sa = mkState(xi);
+  tick = 0;
+  accumulator = 0;
+  mF = { r: 0, k: k0, g: 0, R: 0 };
+  mA = { r: 0, k: k0, g: 0, R: 0 };
+}
+
+function switchTab(i) {
+  document.querySelectorAll('.tab-btn').forEach((b, j) => b.classList.toggle('active', i === j));
+  currentTab = i;
+  resetAll();
+}
+
+function onK0Change(v) {
+  k0 = parseFloat(v);
+  document.getElementById('k0Val').textContent = k0.toFixed(2);
+  document.getElementById('k0disp').textContent = k0.toFixed(2);
+}
+
+function onBetaChange(v) {
+  beta = parseFloat(v);
+  document.getElementById('betaVal').textContent = beta.toFixed(2);
+  document.getElementById('betaDisp').textContent = beta.toFixed(2);
+}
+
+function stepTarget() {
+  // ステップ応答タブでのみ有効。他タブは目標が外部定義。
+  if (currentTab === 0) {
+    x_exact = x_exact < 0.5 ? 0.7 : 0.3;
+  }
+}
+
+function injectDisturbance() {
+  // 有限エネルギー外乱：数フレーム持続する加速度として注入。
+  // 指数減衰ではなく、tick 消費型（NRA-IDE: エネルギー有限）。
+  sf.distTicks = 12; sf.distAmp = 1.2;
+  sa.distTicks = 12; sa.distAmp = 1.2;
+}
+
+// ── Target & derivative (causality diode: current only) ─────────
+function targetAndDerivative(t) {
+  const tt = t * FIXED_DT;
+  switch (currentTab) {
+    case 1: // Ramp — ẋ_e を明示的に返す（因果ダイオード：現在のみ参照）
+      return {
+        xe:    0.5 + 0.28 * Math.sin(tt * 0.6),
+        xeDot: 0.28 * 0.6 * Math.cos(tt * 0.6)
+      };
+    case 0: return { xe: x_exact, xeDot: 0 };
+    case 2: return { xe: 0.5,     xeDot: 0 };
+  }
+  return { xe: 0.5, xeDot: 0 };
+}
+
+// ── Gate functions ────────────────────────────────────────────────
+function gateWithFixedK(r) {
+  return r * Math.abs(r) / (k0 + Math.abs(r));
+}
+function gateWithDynamicK(r, rdot) {
+  const keff = k0 * (1.0 + beta * Math.abs(rdot));
+  const g    = r * Math.abs(r) / (keff + Math.abs(r));
+  return { g, keff };
+}
+
+// ── Physics step (fixed-step, common Φ) ──────────────────────────
+function physicsStep(s, xe, xeDot, useAdaptive) {
+  const r    = xe - s.x;
+  const rdot = xeDot - s.v;               // 正しい相対速度（因果ダイオード）
+
+  let k, g;
+  if (useAdaptive) {
+    const dyn = gateWithDynamicK(r, rdot);
+    k = dyn.keff; g = dyn.g;
+  } else {
+    k = k0; g = gateWithFixedK(r);
+  }
+
+  // Φ は両パネル共通（公平比較：差は k vs k_eff のみ）
+  const phi  = P_GAIN + D_GAIN * rdot / (1.0 + Math.abs(r));
+  const fide = ALPHA * r;
+
+  let accel = fide + g * phi - GAMMA * s.v;
+
+  // 有限エネルギー外乱：tick 消費型
+  if (s.distTicks > 0) {
+    accel += s.distAmp;
+    s.distTicks--;
+  }
+
+  s.v += accel * FIXED_DT;
+
+  // 壁クランプ：エネルギー散逸（速度もリセット）
+  const xn = s.x + s.v * FIXED_DT;
+  if (xn <= 0.01 || xn >= 0.99) s.v = 0;
+  s.x = Math.max(0.01, Math.min(0.99, xn));
+
+  // NRA-IDE 構造監査：R = δ / τ
+  const R = Math.abs(r) / k;
+
+  s.hist.push({ x: s.x, xe, r: Math.abs(r), R });
+  s.kHist.push(k);
+  if (s.hist.length  > HIST) s.hist.shift();
+  if (s.kHist.length > HIST) s.kHist.shift();
+
+  return { r: Math.abs(r), k, g: Math.abs(g), R };
+}
+
+// ── Canvas fitting (DPR-aware) ───────────────────────────────────
+function resizeAll() {
+  const dpr = window.devicePixelRatio || 1;
+  document.querySelectorAll('canvas').forEach(cv => {
+    const rect = cv.getBoundingClientRect();
+    const w = Math.max(1, Math.round(rect.width  * dpr));
+    const h = Math.max(1, Math.round(rect.height * dpr));
+    if (cv.width !== w || cv.height !== h) {
+      cv.width  = w;
+      cv.height = h;
+    }
+    cv._logW = rect.width;
+    cv._logH = rect.height;
+    cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+}
+
+// ── Canvas draw: main trajectory ─────────────────────────────────
+function drawMain(cvId, hist, isLeft) {
+  const cv = document.getElementById(cvId);
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv._logW || 490;
+  const H = cv._logH || 190;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = isLeft ? '#0e0a08' : '#0e0c08';
+  ctx.fillRect(0, 0, W, H);
+  if (hist.length < 2) return;
+
+  const pad = 12;
+  const dx = (W - pad) / HIST;
+  const ymap = v => pad + (1.0 - v) * (H - 2 * pad);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(200,220,235,.07)';
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75].forEach(v => {
+    const y = ymap(v);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  });
+
+  // Target line (current xe)
+  const curXe = hist[hist.length - 1].xe;
+  const yeTarget = ymap(curXe);
+  ctx.setLineDash([5, 4]);
+  ctx.strokeStyle = 'rgba(64,196,255,.45)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, yeTarget); ctx.lineTo(W, yeTarget); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // State trajectory
+  ctx.beginPath();
+  hist.forEach((pt, i) => {
+    const x = i * dx + pad / 2;
+    const y = ymap(pt.x);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = isLeft ? 'rgba(255,130,80,.85)' : 'rgba(255,200,80,.85)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Target trajectory
+  ctx.beginPath();
+  hist.forEach((pt, i) => {
+    const x = i * dx + pad / 2;
+    const y = ymap(pt.xe);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = 'rgba(64,196,255,.45)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Current position dot
+  const lp = hist[hist.length - 1];
+  const dotX = (hist.length - 1) * dx + pad / 2;
+  const dotY = ymap(lp.x);
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = isLeft ? '#ff8050' : '#ffc840';
+  ctx.fill();
+
+  // R≥1.0: Fail-Closed overlay (visual indicator)
+  if (lp.R >= 1.0) {
+    ctx.strokeStyle = 'rgba(255,61,0,.65)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, W - 2, H - 2);
+    ctx.font = '10px Share Tech Mono,monospace';
+    ctx.fillStyle = 'rgba(255,61,0,.9)';
+    ctx.fillText('FAIL-CLOSED  R≥1.0', 6, H - 6);
+  }
+
+  // Labels
+  ctx.font = '9px Share Tech Mono,monospace';
+  ctx.fillStyle = 'rgba(200,220,235,.3)';
+  ctx.fillText('1.0', 2, pad + 8);
+  ctx.fillText('0.5', 2, ymap(0.5) + 4);
+  ctx.fillText('0.0', 2, H - pad + 3);
+}
+
+// ── Canvas draw: k_eff strip ─────────────────────────────────────
+function drawKeff(cvId, kHist, isLeft) {
+  const cv = document.getElementById(cvId);
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv._logW || 490;
+  const H = cv._logH || 60;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#080c10';
+  ctx.fillRect(0, 0, W, H);
+  if (kHist.length < 2) return;
+
+  const kMax = Math.max(3.0, ...kHist) * 1.1;
+  const dx = W / HIST;
+  const ymap = k => H - 4 - (k / kMax) * (H - 8);
+
+  // k0 reference line
+  ctx.setLineDash([3, 3]);
+  ctx.strokeStyle = 'rgba(255,179,71,.3)';
+  ctx.lineWidth = 1;
+  const yk0 = ymap(k0);
+  ctx.beginPath(); ctx.moveTo(0, yk0); ctx.lineTo(W, yk0); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // trace
+  ctx.beginPath();
+  kHist.forEach((k, i) => {
+    const x = i * dx;
+    const y = ymap(k);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = isLeft ? 'rgba(200,170,100,.6)' : 'rgba(255,179,71,.85)';
+  ctx.lineWidth = isLeft ? 1 : 1.5;
+  ctx.stroke();
+
+  // Fill under adaptive trace
+  if (!isLeft) {
+    ctx.beginPath();
+    kHist.forEach((k, i) => {
+      const x = i * dx;
+      const y = ymap(k);
+      if (i === 0) ctx.moveTo(x, H);
+      ctx.lineTo(x, y);
+    });
+    ctx.lineTo((kHist.length - 1) * dx, H);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,179,71,.07)';
+    ctx.fill();
+  }
+
+  ctx.font = '9px Share Tech Mono,monospace';
+  ctx.fillStyle = 'rgba(255,179,71,.4)';
+  ctx.fillText('k₀', 2, yk0 - 2);
+  ctx.fillStyle = 'rgba(200,220,235,.25)';
+  ctx.fillText(kHist[kHist.length - 1].toFixed(2), W - 32, 12);
+}
+
+// ── UI update ────────────────────────────────────────────────────
+function setRDisplay(id, R) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = R.toFixed(2);
+  el.style.color = R >= 1.0 ? 'var(--red)'
+                : R >= 0.3 ? 'var(--yellow)'
+                :            'var(--green)';
+}
+
+function updateJudgment(id, m, isLeft) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  let cls, head;
+  if (m.R >= 1.0) {
+    cls  = 'j-fail';
+    head = `R=${m.R.toFixed(2)} ≥ 1.0 — FAIL-CLOSED / 人間への責任引渡し`;
+  } else if (m.R >= 0.3) {
+    cls  = 'j-warn';
+    head = `R=${m.R.toFixed(2)} — 非線形遷移帯 / 吸収限界に接近`;
+  } else {
+    cls  = 'j-ok';
+    head = `R=${m.R.toFixed(2)} — Coherent層 / 構造安定（不変条件維持）`;
+  }
+
+  let ctxTxt = '';
+  if (isLeft) {
+    if (m.r > 0.20) ctxTxt = ' · |r|大 / k固定';
+    else            ctxTxt = ` · k=${m.k.toFixed(2)} (fixed)`;
+  } else {
+    if (m.k > k0 * 1.10) ctxTxt = ` · k_eff↑ 高速モード (IDE慣性優先)`;
+    else if (m.r > 0.10) ctxTxt = ' · 追従中 / tracking';
+    else                 ctxTxt = ` · k_eff↓ 収束精度モード`;
+  }
+
+  el.className = 'judgment ' + cls;
+  el.textContent = head + ctxTxt;
+}
+
+function updateUI(mF, mA) {
+  document.getElementById('xLeft').textContent  = sf.x.toFixed(3);
+  document.getElementById('rLeft').textContent  = mF.r.toFixed(3);
+  document.getElementById('kLeft').textContent  = mF.k.toFixed(2);
+  document.getElementById('gLeft').textContent  = mF.g.toFixed(3);
+  setRDisplay('RLeft', mF.R);
+
+  document.getElementById('xRight').textContent = sa.x.toFixed(3);
+  document.getElementById('rRight').textContent = mA.r.toFixed(3);
+  document.getElementById('kRight').textContent = mA.k.toFixed(2);
+  document.getElementById('gRight').textContent = mA.g.toFixed(3);
+  setRDisplay('RRight', mA.R);
+
+  updateJudgment('jLeft',  mF, true);
+  updateJudgment('jRight', mA, false);
+
+  drawMain('cvLeft',  sf.hist, true);
+  drawMain('cvRight', sa.hist, false);
+  drawKeff('kvLeft',  sf.kHist, true);
+  drawKeff('kvRight', sa.kHist, false);
+}
+
+// ── Main loop (fixed-step + real-time accumulator) ──────────────
+function loop(now) {
+  if (!lastTime) lastTime = now;
+  // 実時間 × TIME_SCALE を蓄積（上限付きでスパイラル防止）
+  accumulator += Math.min(0.05, (now - lastTime) / 1000) * TIME_SCALE;
+  lastTime = now;
+
+  while (accumulator >= FIXED_DT) {
+    tick++;
+    const { xe, xeDot } = targetAndDerivative(tick);
+    mF = physicsStep(sf, xe, xeDot, false);
+    mA = physicsStep(sa, xe, xeDot, true);
+    accumulator -= FIXED_DT;
+  }
+
+  updateUI(mF, mA);
+  requestAnimationFrame(loop);
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+window.addEventListener('resize', resizeAll);
+resizeAll();
+resetAll();
+requestAnimationFrame(loop);
+</script>
 </body>
 </html>
