@@ -1,3 +1,10 @@
+---
+id: NOTE-QUANTUM-SESSION-20260321-EN
+kind: record
+created: 2026-03-21
+title: NRA-IDE and Quantum Computing / Methods for Describing Existence
+---
+
 # NRA-IDE and Quantum Computing / Methods for Describing Existence
 
 ## Complete Conversation Record — O1 to O83

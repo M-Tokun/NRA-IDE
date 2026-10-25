@@ -1,3 +1,10 @@
+---
+id: NOTE-QUANTUM-SESSION-20260321-JP
+kind: record
+created: 2026-03-21
+title: NRA-IDEと量子計算・存在の記述方法
+---
+
 # NRA-IDEと量子計算・存在の記述方法
 
 ## ◯１〜◯８３ 全会話整理記録
