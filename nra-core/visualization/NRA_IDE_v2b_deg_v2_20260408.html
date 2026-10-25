@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE: τ Degradation — Dam &amp; Coral</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+
 :root{
   --bg:#060c12;--panel:#0b1520;--border:#1a3040;
   --text:#c8dde8;--dim:#4a6a7a;
@@ -75,8 +75,21 @@ input[type=range].tau-r{accent-color:var(--tau);}
 footer{text-align:center;padding:10px;font-size:.61rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
 @media(max-width:580px){.compare-grid,.deg-grid,.deg-stats{grid-template-columns:1fr;}}
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>数値・閾値は例示です。ドメインの実測器、安全証明、正規状態機械の完全実装ではありません。RESETや厚みの再宣言は独立した新実験です。 / Values are illustrative, uncalibrated; RESET starts a separate evaluation.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <div class="page-title">
   <h1>NRA-IDE — τ劣化シナリオ / τ Degradation Scenarios</h1>
@@ -106,7 +119,7 @@ footer{text-align:center;padding:10px;font-size:.61rem;color:var(--dim);font-fam
     <div class="side-hdr" id="hdrR">✓ NRA-IDE — R = δ/τ （τ は劣化する）</div>
     <canvas id="cvR" class="main-cv"></canvas>
     <div class="side-status">
-      <div class="metric-lbl">R = δ / τ（ゆらぎ / 現在の構造厚み）</div>
+      <div class="metric-lbl">R = δ / τ（残留指数＋可逆負荷 / 表示中の厚み）</div>
       <div class="metric-big" id="rBig" style="color:var(--green)">0.000</div>
       <div class="metric-lbl" id="rZone">NIRVANA — 安定</div>
       <div class="judgment" id="jR">待機中</div>
@@ -130,7 +143,7 @@ footer{text-align:center;padding:10px;font-size:.61rem;color:var(--dim);font-fam
     <div class="dstat"><div class="dstat-lbl">初期τ（設計値）</div><div class="dstat-val" id="dsTau0" style="color:var(--yellow)">1.000</div></div>
     <div class="dstat"><div class="dstat-lbl">現在τ（劣化後）</div><div class="dstat-val" id="dsTauC" style="color:var(--tau)">1.000</div></div>
     <div class="dstat"><div class="dstat-lbl">τ劣化率</div><div class="dstat-val" id="dsDeg" style="color:var(--orange)">0.0%</div></div>
-    <div class="dstat"><div class="dstat-lbl">δ蓄積（累積負荷）</div><div class="dstat-val" id="dsDelta" style="color:var(--red)">0.000</div></div>
+    <div class="dstat"><div class="dstat-lbl">δ（残留指数＋可逆負荷）</div><div class="dstat-val" id="dsDelta" style="color:var(--red)">0.000</div></div>
     <div class="dstat"><div class="dstat-lbl">古典管理の視点</div><div class="dstat-val" id="dsClass" style="color:var(--dim);font-size:.7rem;line-height:1.4">水位のみ</div></div>
     <div class="dstat"><div class="dstat-lbl">NRA-IDEの視点</div><div class="dstat-val" id="dsNra" style="color:var(--green);font-size:.7rem;line-height:1.4">R=δ/τ + τ劣化</div></div>
   </div>
@@ -195,6 +208,9 @@ let phase = 0, waterLevel = .15, fillSpeed = .5;
 let deltaStrength = 1.0, degSens = 5;
 let tauC = TAU0, deltaAcc = 0, fc = 0;
 let tauHist = [], rHist = [];
+let irreversible = false, ruptured = false;
+const DEMO_IRREV = 0.90; // Fixed synthetic threshold; not a domain calibration.
+let currentDelta = 0;
 
 // ─────────────────────────────────────────────────────────────────────
 // Tab & scenario management
@@ -247,7 +263,7 @@ function applyScenario(sc) {
 
 function resetState() {
   phase = 0; tauC = TAU0; deltaAcc = 0; fc = 0;
-  tauHist = []; rHist = [];
+  tauHist = []; rHist = []; irreversible = ruptured = false; currentDelta = 0;
 }
 
 function doReset() {
@@ -503,7 +519,7 @@ function updateCoralUI(R, delta){
 
   const rEl=document.getElementById('rBig'), jR=document.getElementById('jR');
   rEl.textContent=R.toFixed(3);
-  if(R>=1.0){rEl.style.color='#ff3d00'; setText('rZone','ABSTAIN — 大規模白化'); styleJ(jR,'#ff3d00'); jR.textContent=`⚡ R ≥ 1.0 — 大規模白化。τ劣化 ${deg.toFixed(1)}%。Fail-Closed: 人間に委譲。`;}
+  if(R>=1.0){rEl.style.color='#ff3d00'; setText('rZone','ABSTAIN — 大規模白化'); styleJ(jR,'#ff3d00'); jR.textContent=`⚡ R ≥ 1.0 — 大規模白化。τ劣化 ${deg.toFixed(1)}%。RUPTURE_BOUNDARY: 到達記録を保持。`;}
   else if(R>=.7){rEl.style.color='#ff9100'; setText('rZone','CRITICAL — 白化接近'); styleJ(jR,'#ff9100'); jR.textContent=`⚠ R ≥ 0.7 — 今日の温度に関わらず対応が必要。τ = ${tauC.toFixed(3)}`;}
   else if(R>=.4){rEl.style.color='#ffd740'; setText('rZone','ELASTIC — 蓄積中'); styleJ(jR,'#ffd740'); jR.textContent=`〜 R ≥ 0.4 — 熱ストレス蓄積中。τ劣化 ${deg.toFixed(1)}% を注視。`;}
   else{rEl.style.color='#00e676'; setText('rZone','NIRVANA — 安定'); styleJ(jR,'#00e676'); jR.textContent=`✓ R < 0.4 — 安定。珊瑚の回復力 τ = ${tauC.toFixed(3)}（初期比 ${(100-deg).toFixed(1)}%）`;}
@@ -528,7 +544,12 @@ function updateDegStats(){
   tcEl.style.color=tauC<.4?'#ff3d00':tauC<.65?'#ff9100':'#c060ff';
   const dgEl=document.getElementById('dsDeg'); dgEl.textContent=deg.toFixed(1)+'%';
   dgEl.style.color=deg>50?'#ff3d00':deg>25?'#ff9100':'#ffd740';
-  setText('dsDelta',deltaAcc.toFixed(3));
+  setText('dsDelta',currentDelta.toFixed(3));
+  if (ruptured || irreversible) {
+    const state = ruptured ? 'RUPTURE_BOUNDARY / POST_RUPTURE_FIXED' : 'IRREVERSIBLE_TRANSITION';
+    setText('rZone', state);
+    setText('jR', state + ' — retained; current R alone cannot release history');
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -556,13 +577,19 @@ function loop(){
   const delta=Math.abs(rawFluc)*0.03;   // tiny per frame
 
   // τ degradation — same formula as original dam HTML
-  deltaAcc+=delta*0.001*degSens;
-  tauC=Math.max(0.08, TAU0-deltaAcc*0.0001*degSens*10);
-  const tauEff=tauC*0.25+0.02;
-  const R=delta/tauEff;
+  // Synthetic residual-deviation index; retained when reversible load disappears.
+  // Degradation sensitivity is applied once, linearly; display and ratio share τ.
+  if (!ruptured) {
+    deltaAcc += delta * 0.001;
+    tauC = Math.max(0.08, TAU0 - deltaAcc * 0.001 * degSens);
+    currentDelta = deltaAcc + delta;
+  }
+  const R = currentDelta / tauC;
+  if (R >= DEMO_IRREV) irreversible = true;
+  if (R >= 1) ruptured = true;
 
   if(fc%2===0){
-    tauHist.push(tauC); rHist.push(Math.min(1.8,R));
+    tauHist.push(tauC); rHist.push(R);
     if(tauHist.length>HIST) tauHist.shift();
     if(rHist.length>HIST)   rHist.shift();
   }

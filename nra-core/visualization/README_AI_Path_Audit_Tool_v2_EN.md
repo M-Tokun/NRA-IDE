@@ -102,3 +102,7 @@ The tool is designed not only to counter problematic AI behavior, but also to re
 This tool does not independently determine whether an AI response is correct or incorrect. It is a defensive barrier for fixing the conversation, organizing the inspection sequence, and requiring the AI to re-verify its answer in an auditable form—so that the human remains the sovereign owner of their own cognition.
 
 Designed for the NRA-IDE (Nomological Ring Axioms & Intensional Dynamics Engine) Framework.
+
+## Input versions and audit records
+
+Each scan fixes the complete input snapshot and an input version. Changing or clearing inputs invalidates the displayed results and prompt; previous audit records remain available. Generated prompt text, its version, context, and feedback belong to that snapshot. English sentences use locale-aware segmentation. Device input storage remains an explicit Save/Restore action; JSONL includes the conversation snapshot and prompt text, so review its contents before sharing. This tool does not evaluate canonical R or establish factual correctness.

@@ -1,20 +1,8 @@
-概念を可視化　：
-生存可能領域（Green Zone）：システムが活動できる範囲。
-張力（Red/Tension）：閾値（0.8）を超えた瞬間に発生する「引き戻す力」。
-バッファ（Blue/Buffer）：切り捨てられたエネルギーが消滅せず、「重み」として蓄積される様子。
-律環公理：動的視覚化証明 (Interactive Proof)
-code
-Html
-play_circle
-download
-content_copy
-expand_less
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>NRA-IDE Dynamic Proof Visualization</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>NRA-IDE Historical BoundLaw Visualization</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -169,8 +157,32 @@ expand_less
             width: 100%;
         }
     </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+/* N01 proposal: only narrow viewports; no model, values, or desktop layout changes. */
+@media (max-width: 600px) {
+  body { overflow-wrap: anywhere; }
+  .la-dim, .formula, .flow-row, .tbl td, .tbl th { overflow-wrap: anywhere; }
+  .flow-row > * { min-width: 0; }
+  .container { min-width: 0; }
+  .panel, #chart-view { box-sizing: border-box; min-width: 0 !important; max-width: 100%; }
+  canvas { box-sizing: border-box; max-width: 100%; height: auto; }
+  .legend { flex-wrap: wrap; }
+}
+
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>固定0.8→0.75補正と無限容量bufferによる旧BoundLawモデルです。正規R・状態機械や物理的保存則の証明ではありません。 / Historical BoundLaw toy model, not canonical evaluation or a physical conservation proof.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
     <h1>NRA-IDE: Viability Proof Visualization</h1>
 
@@ -213,7 +225,7 @@ expand_less
         </div>
 
         <!-- Graph View -->
-        <div class="panel" id="chart-view"></div>
+        <div class="panel" id="chart-view"><canvas id="chart-canvas" width="600" height="400" style="width:100%;height:auto"></canvas></div>
     </div>
 
     <script>
@@ -238,21 +250,166 @@ expand_less
         };
 
         // Initialize Plotly
-        function initChart() {
-            Plotly.newPlot('chart-view', [
-                { x: [], y: [], name: 'Value', mode: 'lines+markers', line: {color: '#58a6ff'} },
-                { x: [], y: [], name: 'Threshold', mode: 'lines', line: {color: '#ff7b72', dash: 'dash'} },
-                { x: [], y: [], name: 'Buffer (Accumulated)', mode: 'lines', line: {color: '#a5d6ff'}, fill: 'tozeroy' },
-                { x: [], y: [], name: 'Tension', mode: 'lines', line: {color: '#ff7b72'} }
-            ], {
-                title: 'Dynamics Log',
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: '#c9d1d9' },
-                xaxis: { title: 'Cycle', gridcolor: '#30363d' },
-                yaxis: { title: 'Normalized Level', range: [0, 2.0], gridcolor: '#30363d' },
-                legend: { orientation: 'h', y: -0.2 }
-            });
+        function initChart() { drawChart(); }
+
+const canvas = document.getElementById('chart-canvas');
+        const ctx = canvas.getContext('2d');
+        const chart = {padding:50, width:canvas.width-100, height:canvas.height-100, maxCycles:40, maxValue:2};
+function drawChart() {
+            chart.maxCycles = Math.max(40, history.cycle.at(-1) || 0);
+            chart.maxValue = Math.max(2, ...history.value, ...history.buffer, ...history.tension) * 1.05;
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background grid
+            ctx.strokeStyle = '#30363d';
+            ctx.lineWidth = 0.5;
+
+            // Vertical grid lines
+            for (let i = 0; i <= 10; i++) {
+                const x = chart.padding + (chart.width / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(x, chart.padding);
+                ctx.lineTo(x, chart.padding + chart.height);
+                ctx.stroke();
+            }
+
+            // Horizontal grid lines
+            for (let i = 0; i <= 10; i++) {
+                const y = chart.padding + (chart.height / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(chart.padding, y);
+                ctx.lineTo(chart.padding + chart.width, y);
+                ctx.stroke();
+            }
+
+            // Draw axes
+            ctx.strokeStyle = '#c9d1d9';
+            ctx.lineWidth = 2;
+
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(chart.padding, chart.padding + chart.height);
+            ctx.lineTo(chart.padding + chart.width, chart.padding + chart.height);
+            ctx.stroke();
+
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(chart.padding, chart.padding);
+            ctx.lineTo(chart.padding, chart.padding + chart.height);
+            ctx.stroke();
+
+            // Draw axis labels
+            ctx.fillStyle = '#c9d1d9';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+
+            // X-axis labels
+            for (let i = 0; i <= 10; i++) {
+                const x = chart.padding + (chart.width / 10) * i;
+                const label = Math.floor((chart.maxCycles / 10) * i);
+                ctx.fillText(label, x, chart.padding + chart.height + 20);
+            }
+
+            // Y-axis labels
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 10; i++) {
+                const y = chart.padding + chart.height - (chart.height / 10) * i;
+                const label = ((chart.maxValue / 10) * i).toFixed(1);
+                ctx.fillText(label, chart.padding - 10, y + 4);
+            }
+
+            // Draw axis titles
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Cycle', chart.padding + chart.width / 2, canvas.height - 5);
+
+            ctx.save();
+            ctx.translate(15, chart.padding + chart.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Normalized Level', 0, 0);
+            ctx.restore();
+
+            // Draw data lines
+            if (history.cycle.length > 1) {
+                // Draw Value line
+                drawLine(history.value, '#58a6ff', 2);
+
+                // Draw Threshold line (dashed)
+                drawDashedLine(THRESHOLD, '#ff7b72', 2);
+
+                // Draw Buffer line (filled)
+                drawFilledLine(history.buffer, '#a5d6ff', 0.3);
+
+                // Draw Tension line
+                drawLine(history.tension, '#ff7b72', 2);
+            }
+        }
+
+function drawLine(data, color, lineWidth) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+
+            for (let i = 0; i < data.length; i++) {
+                const x = chart.padding + ((history.cycle[i] || 0) / chart.maxCycles) * chart.width;
+                const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+
+            // Draw points
+            ctx.fillStyle = color;
+            for (let i = 0; i < data.length; i++) {
+                const x = chart.padding + ((history.cycle[i] || 0) / chart.maxCycles) * chart.width;
+                const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+function drawDashedLine(value, color, lineWidth) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+
+            const y = chart.padding + chart.height - (value / chart.maxValue) * chart.height;
+            ctx.moveTo(chart.padding, y);
+            ctx.lineTo(chart.padding + chart.width, y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+function drawFilledLine(data, color, alpha) {
+            ctx.fillStyle = color;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+
+            for (let i = 0; i < data.length; i++) {
+                const x = chart.padding + ((history.cycle[i] || 0) / chart.maxCycles) * chart.width;
+                const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.lineTo(chart.padding + chart.width, chart.padding + chart.height);
+            ctx.lineTo(chart.padding, chart.padding + chart.height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
         }
 
         function updateVisuals() {
@@ -296,10 +453,7 @@ expand_less
             history.buffer.push(state.buffer);
             history.tension.push(state.tension);
 
-            Plotly.extendTraces('chart-view', {
-                x: [[state.cycle], [state.cycle], [state.cycle], [state.cycle]],
-                y: [[state.value], [THRESHOLD], [state.buffer], [state.tension]]
-            }, [0, 1, 2, 3]);
+            drawChart();
         }
 
         // Logic: Dynamics Node
@@ -308,7 +462,7 @@ expand_less
             state.rate = cost;
             state.value += cost;
             // Cap at 1.0 (Critical Limit) theoretically, but for visual we let it go up then clip
-            if (state.value > 1.5) state.value = 1.5; 
+
         }
 
         // Logic: Safety Node (BoundLaw)
@@ -333,6 +487,21 @@ expand_less
             }
         }
 
+        let pendingUpdate = null;
+        let runGeneration = 0;
+        function queueUpdate(delay) {
+            if (pendingUpdate !== null) clearTimeout(pendingUpdate);
+            const generation = runGeneration;
+            pendingUpdate = setTimeout(() => {
+                if (generation !== runGeneration) return;
+                pendingUpdate = null; safetyCheck(); updateVisuals();
+            }, delay);
+        }
+        function stopAuto() {
+            if (interval !== null) clearInterval(interval);
+            interval = null;
+            document.getElementById('auto-run').checked = false;
+        }
         function step() {
             // 1. Dynamics
             dynamics(BASE_COST);
@@ -344,10 +513,7 @@ expand_less
             if(preCheckValue > THRESHOLD) mainWater.style.backgroundColor = '#ff7b72';
 
             // Wait a bit to show the "Correction" action
-            setTimeout(() => {
-                safetyCheck();
-                updateVisuals();
-            }, 200); // 200ms delay to see the bounce
+            queueUpdate(200); // 200ms delay to see the bounce
         }
 
         function injectDisturbance() {
@@ -362,16 +528,15 @@ expand_less
             mainWater.style.height = `${Math.min(state.value, 1.5) * 100}%`;
             mainWater.style.backgroundColor = '#d29922'; // Orange for shock
 
-            setTimeout(() => {
-                safetyCheck();
-                updateVisuals();
-            }, 400);
+            queueUpdate(400);
         }
 
         function resetSim() {
-            state = { cycle: 0, value: 0.0, rate: 0.0, buffer: 0.0, tension: 0.0 };
-            history = { cycle: [], value: [], buffer: [], tension: [] };
-            initChart();
+            stopAuto(); runGeneration++;
+            if (pendingUpdate !== null) clearTimeout(pendingUpdate);
+            pendingUpdate = null;
+            state = {cycle:0, value:0, rate:0, buffer:0, tension:0};
+            history = {cycle:[], value:[], buffer:[], tension:[]};
             updateVisuals();
             document.getElementById('main-water').style.backgroundColor = '#3fb950';
         }
@@ -387,7 +552,7 @@ expand_less
                     } else {
                         step();
                     }
-                    if(state.cycle > 50) e.target.checked = false; // Safety stop
+                    if(state.cycle > 50) stopAuto(); // Safety stop
                 }, 800);
             } else {
                 clearInterval(interval);
@@ -401,15 +566,3 @@ expand_less
     </script>
 </body>
 </html>
-□3つの視覚的証明ポイント□
-このツールを使って、以下の実験を行ってください。◯
-通常運転の安定性◯
-Next Cycle を数回クリックしてください。◯
-証明: 水位（State）は上昇しますが、閾値の赤線（0.8）を超えると、バネ（Tension）が作動し、余分な水が右側のタンク（Buffer）へ排出されます。水位は常に安全圏（0.75付近）に戻されます。◯
-外乱に対する強靭性（Resilience）◯
-Inject Disturbance (+0.5) を押してください。◯
-証明: 一瞬だけ水位が跳ね上がります（線形予測ならここでシステム破壊）。しかし、次の瞬間に強力な補正が働き、バッファが急激に増加する代わりに、システム本体は生存可能な状態に戻ります。「バッファが身代わりになる」様子が見て取れます。◯張力ばね理論◯
-エネルギー保存の痕跡◯
-右側のグラフを見てください。青い面（Buffer）は右肩上がりに増え続けます。◯
-証明: 「誤差を消去しない」というNRAの哲学通り、システムを安定化させるために支払ったコストが、永久に記録され続けていることがわかります。◯
-「反発力」や「エネルギーの移動」が、アニメーションによって直感的に理解できるはずです。by AIStudio

@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE: Adaptive Gate — Dynamic k_eff | 適応型ゲート拡張</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+
 :root{
   --bg:#060c12;--panel:#0b1520;--border:#1a3040;
   --text:#c8dde8;--dim:#4a6a7a;
@@ -82,8 +82,21 @@ input[type=range]{accent-color:var(--keff);cursor:pointer;width:88px;}
 footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
 @media(max-width:600px){.compare-grid,.keff-strip{grid-template-columns:1fr;}}
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>補完式の制御比較 / complementary control-model comparison</strong><br>kやk_effは制御ゲインであり正規τではありません。安定性・性能・実行権限移譲を保証しません。 / Control gains are not structural thickness; no stability or operational handoff guarantee.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <div class="page-title">
   <h1>NRA-IDE — Adaptive Gate / 適応型ゲート拡張</h1>
@@ -107,7 +120,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
 
 <div class="tab-bar">
   <button type="button" class="tab-btn active" onclick="switchTab(0)">ステップ応答 / Step</button>
-  <button type="button" class="tab-btn" onclick="switchTab(1)">目標追従 / Ramp</button>
+  <button type="button" class="tab-btn" onclick="switchTab(1)">正弦波追従 / Sine</button>
   <button type="button" class="tab-btn" onclick="switchTab(2)">外乱応答 / Disturbance</button>
 </div>
 
@@ -169,8 +182,8 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
 
 <div class="insight">
   <span class="ilabel">▶ Adaptive Gate 観測：</span>
-  左（固定k）は速い遷移中に G(r) が強く働いてオーバーシュート・振動を生じやすい。<br>
-  右（動的k_eff）は高速時に k_eff が増大して G_eff を弱め，IDE慣性を優先する。収束時は k_eff が下がって精密補正が有効になる。<br>
+  左右で同じPD項・目標・刻みを用い、kの適応だけを比較する。β=0では両側が一致する。<br>
+  高速時はk_effが増えG_effが小さくなる。安定性の保証ではなく、応答は係数と入力に依存する。壁でのクリップ回数も判定欄に表示する。<br>
   k_eff グラフでこの変動を確認すること。β スライダーで感度を変えると動作が変化する。<br>
   <span class="note2">ゼリー比喩：鋼鉄（固定k大）は跳ね返す。水（拘束なし）は発散する。ゼリー（適応gate）は内側で変形して吸収し，形を保つ。</span>
 </div>
@@ -188,7 +201,8 @@ let beta = 0.15;
 // P/D/gamma/alpha/DT/HISTはデモ用初期値。理論的必然性はなく、UI上で調整可能。
 const alpha = 0.5;
 const P = 2.0, D = 0.4, gamma = 0.5;
-const DT = 0.05;
+const DT = 0.01; // Fixed simulation step, independent of display refresh.
+let lastStamp = null, accumulator = 0;
 const HIST = 200;
 
 // ── Tabs: 0=Step, 1=Ramp, 2=Disturbance ─────────────────────────
@@ -202,7 +216,7 @@ let x_exact = 0.3;
 let pendingDistF = 0, pendingDistA = 0;
 
 function mkState(xinit) {
-  return {x: xinit, v: 0, hist: [], kHist: []};
+  return {x: xinit, v: 0, hist: [], kHist: [], clipCount: 0};
 }
 
 function resetAll() {
@@ -210,7 +224,7 @@ function resetAll() {
   x_exact = xi;
   sf = mkState(xi);
   sa = mkState(xi);
-  t = 0;
+  t = 0; accumulator = 0; lastStamp = null;
   pendingDistF = pendingDistA = 0;
 }
 
@@ -266,34 +280,33 @@ function gAdaptive(r, rdot) {
 }
 
 // ── Physics step ──────────────────────────────────────────────────
-function stepFixed(s, xe) {
-  const r    = xe - s.x;
-  const g    = gFixed(r);
-  const fide = alpha * r;
-  const accel = fide + g * P - gamma * s.v + pendingDistF;
-  pendingDistF *= 0.5;
-  s.v += accel * DT;
-  s.x = Math.max(0.01, Math.min(0.99, s.x + s.v * DT));
-  s.hist.push({x: s.x, xe, r: Math.abs(r)});
-  s.kHist.push(k0);
-  if (s.hist.length > HIST) { s.hist.shift(); s.kHist.shift(); }
-  return {r: Math.abs(r), k: k0, g: Math.abs(g)};
+function stepFixed(s, xe, xeDot = getTargetVelocity(t)) {
+  return physicsStep(s, xe, xeDot, false);
 }
 
-function stepAdaptive(s, xe) {
-  const r    = xe - s.x;
-  const rdot = -s.v;
-  const {g, keff} = gAdaptive(r, rdot);
-  const fide = alpha * r;
-  const phi  = P + D * rdot / (1.0 + Math.abs(r));
-  const accel = fide + g * phi - gamma * s.v + pendingDistA;
-  pendingDistA *= 0.5;
+function stepAdaptive(s, xe, xeDot = getTargetVelocity(t)) {
+  return physicsStep(s, xe, xeDot, true);
+}
+
+function getTargetVelocity(tick) {
+  return currentTab === 1 ? 0.28 * 0.6 * Math.cos(tick * DT * 0.6) : 0;
+}
+
+function physicsStep(s, xe, xeDot, adaptive) {
+  const r = xe - s.x, rdot = xeDot - s.v;
+  const gate = adaptive ? gAdaptive(r, rdot) : {g: gFixed(r), keff: k0};
+  const phi = P + D * rdot / (1 + Math.abs(r));
+  const disturbance = adaptive ? pendingDistA : pendingDistF;
+  const accel = alpha * r + gate.g * phi - gamma * s.v + disturbance;
+  if (adaptive) pendingDistA *= 0.5; else pendingDistF *= 0.5;
   s.v += accel * DT;
-  s.x = Math.max(0.01, Math.min(0.99, s.x + s.v * DT));
-  s.hist.push({x: s.x, xe, r: Math.abs(r)});
-  s.kHist.push(keff);
+  const xn = s.x + s.v * DT;
+  if (xn <= 0.01 || xn >= 0.99) { s.v = 0; s.clipCount++; }
+  s.x = Math.max(0.01, Math.min(0.99, xn));
+  const residual = Math.abs(xe - s.x);
+  s.hist.push({x: s.x, xe, r: residual}); s.kHist.push(gate.keff);
   if (s.hist.length > HIST) { s.hist.shift(); s.kHist.shift(); }
-  return {r: Math.abs(r), k: keff, g: Math.abs(g)};
+  return {r: residual, k: gate.keff, g: Math.abs(gate.g)};
 }
 
 // ── Canvas draw: main trajectory ──────────────────────────────────
@@ -437,6 +450,8 @@ function updateUI(mF, mA) {
   document.getElementById('kRight').textContent = mA.k.toFixed(2);
   document.getElementById('gRight').textContent = mA.g.toFixed(3);
 
+  document.getElementById('gLeft').title = 'Clips: ' + sf.clipCount;
+  document.getElementById('gRight').title = 'Clips: ' + sa.clipCount;
   const jL = document.getElementById('jLeft');
   if (mF.r > 0.20) {
     jL.className = 'judgment j-warn';
@@ -458,6 +473,8 @@ function updateUI(mF, mA) {
     jR.textContent = 'k_eff=' + mA.k.toFixed(3) + ' ↓ 収束精度モード / convergence precision mode';
   }
 
+  jL.textContent += ' · clips=' + sf.clipCount;
+  jR.textContent += ' · clips=' + sa.clipCount;
   drawMain('cvLeft',  sf.hist, true);
   drawMain('cvRight', sa.hist, false);
   drawKeff('kvLeft',  sf.kHist, true);
@@ -465,12 +482,16 @@ function updateUI(mF, mA) {
 }
 
 // ── Main loop ─────────────────────────────────────────────────────
-function loop() {
-  t++;
-  const xe = getTarget(t);
-  const mF = stepFixed(sf, xe);
-  const mA = stepAdaptive(sa, xe);
-  updateUI(mF, mA);
+function loop(now = 0) {
+  const elapsed = lastStamp === null ? 0 : Math.max(0, Math.min(0.05, (now - lastStamp) / 1000));
+  lastStamp = now; accumulator += elapsed * 3;
+  while (accumulator >= DT) {
+    t++;
+    const xe = getTarget(t), xeDot = getTargetVelocity(t);
+    const mF = stepFixed(sf, xe, xeDot), mA = stepAdaptive(sa, xe, xeDot);
+    updateUI(mF, mA);
+    accumulator -= DT;
+  }
   requestAnimationFrame(loop);
 }
 

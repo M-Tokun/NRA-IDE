@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE: Axiom 1 — Rigidity Without Play Collapses | 遊びのない厳密さは崩壊する</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+
 :root{
   --bg:#060c12;--panel:#0b1520;--border:#1a3040;
   --text:#c8dde8;--dim:#4a6a7a;
@@ -85,8 +85,21 @@ input[type=range].stress-r{accent-color:var(--orange);}
 footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
 @media(max-width:600px){.compare-grid{grid-template-columns:1fr;}}
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>数値・閾値は例示です。ドメインの実測器、安全証明、正規状態機械の完全実装ではありません。RESETや厚みの再宣言は独立した新実験です。 / Values are illustrative, uncalibrated; RESET starts a separate evaluation.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <div class="page-title">
   <h1>NRA-IDE — Axiom 1 / 律環公理 公理1</h1>
@@ -115,7 +128,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
     <canvas class="main-cv" id="cvLeft" width="490" height="200">R = δ/τ simulation — Left (τ≈0 rigid)</canvas>
     <div class="break-overlay" id="breakOverlay">
       <div class="break-txt">BREAK</div>
-      <div class="break-sub">R ≥ 1 — δ &gt; τ — 破断 / Phase Transition</div>
+      <div class="break-sub">R ≥ 1 — δ ≥ τ — 破断 / Phase Transition</div>
     </div>
     <div class="side-status">
       <div class="metric-row">
@@ -151,7 +164,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
 
 <div class="ctrl-area">
   <div class="ctrl-grp">
-    <span class="ctrl-lbl">τ (RIGHT) 遊び幅：</span>
+    <span class="ctrl-lbl">τ (RIGHT) 新実験の吸収厚み：</span>
     <input type="range" id="tauSlider" min="0.03" max="0.80" step="0.01" value="0.40" oninput="onTauChange(this.value)">
     <span class="ctrl-val" id="tauVal">0.400</span>
   </div>
@@ -170,7 +183,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
   右（τ適切）は同じδを吸収厚みの範囲内に収め，構造を持続させる。<br>
   τスライダーを下げると右側も破断接近域（Axiom 7）に入ることが確認できる。
   衝撃（Impulse）ボタンで急激な外乱を加え，τの重要性を確かめること。<br>
-  <span class="axiom-note">τ = 0 は「定義域外」であり構造自体が成立しない（Axiom 3 domain constraint: τ &gt; 0）。
+  <span class="axiom-note">τ = 0 は「定義域外」であり正規Rを定義できない。構造自体の存在・生存はこの式だけでは判定しない（Axiom 3 domain constraint: τ &gt; 0）。
   LEFT の τ は最小値として設定されているが，原理上 τ=0 は Axiom 3 の破綻点を意味する。</span>
 </div>
 
@@ -212,6 +225,7 @@ function onTauChange(v) {
   tauRight = parseFloat(v);
   document.getElementById('tauVal').textContent = tauRight.toFixed(3);
   document.getElementById('tauDisplay').textContent = tauRight.toFixed(3);
+  resetAll(); // A thickness declaration starts a separate evaluation.
 }
 
 function onStressChange(v) {
@@ -251,7 +265,8 @@ function tick() {
     histL.push({d: delta, tau: sc.tauLeft, r});
     if (r >= 1) { brokenL = true; document.getElementById('breakOverlay').classList.add('show'); }
   } else {
-    histL.push({d: sc.tauLeft * 1.1, tau: sc.tauLeft, r: 1.1});
+    // Held first-reach snapshot, not a new Cause-Side observation.
+    histL.push({...histL[histL.length - 1]});
   }
   if (histL.length > HIST) histL.shift();
 
@@ -260,7 +275,7 @@ function tick() {
     histR.push({d: delta, tau: tauRight, r});
     if (r >= 1) { brokenR = true; }
   } else {
-    histR.push({d: tauRight * 1.05, tau: tauRight, r: 1.05});
+    histR.push({...histR[histR.length - 1]});
   }
   if (histR.length > HIST) histR.shift();
 }
@@ -345,13 +360,13 @@ function drawSide(cvId, hist, isLeft) {
 function updateUI() {
   const lLast = histL[histL.length - 1] || {d: 0, tau: sc.tauLeft, r: 0};
   const rLast = histR[histR.length - 1] || {d: 0, tau: tauRight, r: 0};
-  const rL = brokenL ? Infinity : lLast.r;
-  const rR = brokenR ? Infinity : rLast.r;
+  const rL = lLast.r;
+  const rR = rLast.r;
 
-  document.getElementById('rLeft').textContent  = brokenL ? '∞' : rL.toFixed(3);
+  document.getElementById('rLeft').textContent  = rL.toFixed(3);
   document.getElementById('dLeft').textContent  = lLast.d.toFixed(4);
   document.getElementById('tLeft').textContent  = sc.tauLeft.toFixed(3);
-  document.getElementById('rRight').textContent = brokenR ? '≥ 1' : rR.toFixed(3);
+  document.getElementById('rRight').textContent = rR.toFixed(3);
   document.getElementById('dRight').textContent = rLast.d.toFixed(4);
   document.getElementById('tRight').textContent = tauRight.toFixed(3);
 
@@ -377,7 +392,7 @@ function updateUI() {
   const jR = document.getElementById('jRight');
   if (brokenR) {
     jR.className = 'judgment j-break';
-    jR.textContent = 'R ≥ 1 → BREAK — τを増やしてRESET / Increase τ and RESET';
+    jR.textContent = 'RUPTURE_BOUNDARY — 到達記録を保持。RESETは新実験 / held testimony; RESET starts a new experiment';
   } else if (rR >= 0.75) {
     jR.className = 'judgment j-warn';
     jR.textContent = 'WARN: R=' + rR.toFixed(3) + ' — 遊び限界接近 / Play margin depleted';

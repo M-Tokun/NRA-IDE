@@ -7,12 +7,12 @@
 <!-- Generated: 2026-04-25 JST -->
 <!-- Ref: nra-core/papers/IDE_AdaptiveGate_Extension_20260407_2241.md -->
 <!-- Ref: nra-core/implementation/IDE_AdaptiveGate_Extension_20260407_2241.py -->
-<!-- NRA-IDE Principle: Structural invariant R = δ/τ < 1.0, Fail-Closed at R ≥ 1.0 -->
+<!-- NRA-IDE Principle: Auxiliary control comparison; not canonical R or a safety gate -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE: Adaptive Gate — Dynamic k_eff | 適応型ゲート拡張</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+
 :root{
   --bg:#060c12;--panel:#0b1520;--border:#1a3040;
   --text:#c8dde8;--dim:#4a6a7a;
@@ -54,7 +54,7 @@ canvas.main-cv{display:block;width:100%;height:190px;}
 .m-r{color:var(--red);}
 .m-k{color:var(--keff);}
 .m-g{color:var(--tau);}
-.m-R{color:var(--green);}
+.m-gateRatio{color:var(--green);}
 .judgment{padding:5px 8px;font-size:.66rem;line-height:1.6;border:1px solid var(--border);font-family:var(--mono);min-height:36px;}
 .j-ok{border-color:rgba(0,230,118,.25);color:#80e8a0;}
 .j-warn{border-color:rgba(255,215,64,.3);color:var(--yellow);}
@@ -85,18 +85,31 @@ input[type=range]{accent-color:var(--keff);cursor:pointer;width:88px;}
 footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
 @media(max-width:600px){.compare-grid,.keff-strip{grid-template-columns:1fr;}}
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>補完式の制御比較 / complementary control-model comparison</strong><br>kやk_effは制御ゲインであり正規τではありません。安定性・性能・実行権限移譲を保証しません。 / Control gains are not structural thickness; no stability or operational handoff guarantee.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <div class="page-title">
   <h1>NRA-IDE — Adaptive Gate / 適応型ゲート拡張</h1>
   <div class="sub">内側が揺らいで吸収する — The Inside Fluctuates and Absorbs</div>
-  <p>Fixed k (rigid) vs Dynamic k_eff (adaptive) — R = |r| / k  ·  R &lt; 1.0 不変条件</p>
+  <p>Fixed k (rigid) vs Dynamic k_eff (adaptive) — gateRatio = |r| / k  ·  gateRatioは補助比 / auxiliary ratio</p>
   <div class="file-badge">NRA_IDE_AdaptiveGate_20260425.html</div>
 </div>
 
 <div class="formula-box">
-  <span class="flabel">NRA-IDE ADAPTIVE GATE — Structural Invariant R = δ/τ &lt; 1.0 · Fail-Closed at R ≥ 1.0</span>
+  <span class="flabel">NRA-IDE ADAPTIVE GATE — Auxiliary Control Ratio |r| / k_eff — no canonical-state or safety guarantee</span>
   <div class="row">
     <span><span class="eq">k_eff = k₀·(1 + β|ṙ|)</span> <span class="note">動的感度 / dynamic sensitivity</span></span>
     <span><span class="eq">G_eff = r·|r|/(k_eff + |r|)</span> <span class="note">gate — k_eff replaces fixed k</span></span>
@@ -107,9 +120,9 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
     <span><span class="eq">d²x/dt² + γẋ = F_IDE + G_eff·Φ</span> <span class="note">統合支配方程式 / governing equation</span></span>
   </div>
   <div class="row row-margin">
-    <span><span class="eq">δ = |r|</span> <span class="note">累積偏差 / accumulated deviation</span></span>
-    <span><span class="eq">τ = k_eff</span> <span class="note">吸収厚み / absorption thickness</span></span>
-    <span><span class="eq">R = δ / τ</span> <span class="note">R &lt; 1.0 で構造安定 / ≥ 1.0 で Fail-Closed</span></span>
+    <span><span class="eq">残差 = |r|</span> <span class="note">瞬時残差 / instantaneous residual</span></span>
+    <span><span class="eq">制御感度 k_eff</span> <span class="note">ゲート係数 / gate coefficient</span></span>
+    <span><span class="eq">gateRatio = |r| / k_eff</span> <span class="note">gateRatio &lt; 1.0 でゲート係数に対する相対残差 / auxiliary ratio only</span></span>
   </div>
 </div>
 
@@ -129,7 +142,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
         <span class="metric-lbl">|r| =</span><span class="metric-val m-r" id="rLeft">0.000</span>
         <span class="metric-lbl">k =</span><span class="metric-val m-k" id="kLeft">1.00</span>
         <span class="metric-lbl">G =</span><span class="metric-val m-g" id="gLeft">0.000</span>
-        <span class="metric-lbl">R =</span><span class="metric-val m-R" id="RLeft">0.00</span>
+        <span class="metric-lbl">gateRatio =</span><span class="metric-val m-gateRatio" id="RLeft">0.00</span>
       </div>
       <div class="judgment" id="jLeft">待機中 / Waiting…</div>
     </div>
@@ -143,7 +156,7 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
         <span class="metric-lbl">|r| =</span><span class="metric-val m-r" id="rRight">0.000</span>
         <span class="metric-lbl">k_eff =</span><span class="metric-val m-k" id="kRight">1.00</span>
         <span class="metric-lbl">G_eff =</span><span class="metric-val m-g" id="gRight">0.000</span>
-        <span class="metric-lbl">R =</span><span class="metric-val m-R" id="RRight">0.00</span>
+        <span class="metric-lbl">gateRatio =</span><span class="metric-val m-gateRatio" id="RRight">0.00</span>
       </div>
       <div class="judgment" id="jRight">待機中 / Waiting…</div>
     </div>
@@ -179,24 +192,24 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
 
 <div class="insight">
   <span class="ilabel">▶ Adaptive Gate × NRA-IDE 原則：</span>
-  左（固定k）は速い遷移中に R = |r|/k が上昇し，構造的破断境界 R ≥ 1.0 に接近する。<br>
-  右（動的k_eff）は高速時に k_eff が増大 → R が抑制され，Coherent層（R &lt; 0.3）を維持しやすい。<br>
-  R ≥ 1.0 は Fail-Closed 領域 — 自律補正の限界，人間への責任引渡し。<br>
-  k₀ を下げる／外乱を加えると R が上昇し，判定が Coherent → Transition → Fail-Closed と遷移する。<br>
-  <span class="note2">ゼリー比喩：鋼鉄（固定k大）は跳ね返す。水（拘束なし）は発散する。ゼリー（適応gate）は内側で変形して吸収し，R &lt; 1.0 の不変条件を保つ。</span>
+  左（固定k）は速い遷移中に gateRatio = |r|/k が上昇し，補助比の表示点 gateRatio ≥ 1.0 に接近する。<br>
+  右（動的k_eff）は高速時に k_eff が増大 → gateRatio が抑制され，Coherent層（gateRatio &lt; 0.3）を維持しやすい。<br>
+  gateRatio ≥ 1.0 は 補助比の表示域。正規状態、自律実行権限、安全性や責任の移転を判定しない。<br>
+  k₀ を下げる／外乱を加えると gateRatio が上昇し，補助表示が低比率 → 高比率へ変わる。正規状態の遷移や自律処理の抑止を意味しない。<br>
+  <span class="note2">ゼリー比喩：鋼鉄（固定k大）は跳ね返す。水（拘束なし）は発散する。ゼリー（適応gate）は内側で変形して吸収し，gateRatio &lt; 1.0 の不変条件を保つ。</span>
 </div>
 
 <footer>
   NRA-IDE Project — M-Tokuni &nbsp;·&nbsp;
-  Adaptive Gate Extension: Dynamic k_eff / Relative IDE / PD Damper / R-Invariant &nbsp;·&nbsp;
+  Adaptive Gate Extension: Dynamic k_eff / Relative IDE / PD Damper / gateRatio-Invariant &nbsp;·&nbsp;
   Ref: IDE_AdaptiveGate_Extension_20260407_2241 &nbsp;·&nbsp; 2026-04-25
 </footer>
 
 <script>
 // ── NRA-IDE Principle ────────────────────────────────────────────
-// Structural invariant R = δ/τ < 1.0 must hold.
-// At R ≥ 1.0 the system is in the structural rupture boundary →
-// Fail-Closed: autonomous correction is suspended, responsibility
+// Auxiliary gateRatio = instantaneous residual / control coefficient; not canonical R.
+// Crossing auxiliary ratio 1 is only a display event.
+// No operational authority or responsibility transfer is implemented;
 // is handed back to the human operator.
 // Causality diode: only current inputs (ẋ_e, ẋ) are referenced;
 // no future state / backward inference is used.
@@ -224,13 +237,13 @@ let sf = null;                    // fixed k state
 let sa = null;                    // adaptive state
 let tick = 0;                     // 物理刻みカウンタ
 let x_exact = 0.3;
-let mF = { r: 0, k: 1.0, g: 0, R: 0 };
-let mA = { r: 0, k: 1.0, g: 0, R: 0 };
+let mF = { r: 0, k: 1.0, g: 0, gateRatio: 0 };
+let mA = { r: 0, k: 1.0, g: 0, gateRatio: 0 };
 let lastTime = 0;
 let accumulator = 0;
 
 function mkState(xinit) {
-  return { x: xinit, v: 0, hist: [], kHist: [], distTicks: 0, distAmp: 0 };
+  return { x: xinit, v: 0, hist: [], kHist: [], distTicks: 0, distAmp: 0, clipCount: 0 };
 }
 
 function resetAll() {
@@ -240,8 +253,8 @@ function resetAll() {
   sa = mkState(xi);
   tick = 0;
   accumulator = 0;
-  mF = { r: 0, k: k0, g: 0, R: 0 };
-  mA = { r: 0, k: k0, g: 0, R: 0 };
+  mF = { r: 0, k: k0, g: 0, gateRatio: 0 };
+  mA = { r: 0, k: k0, g: 0, gateRatio: 0 };
 }
 
 function switchTab(i) {
@@ -304,7 +317,7 @@ function gateWithDynamicK(r, rdot) {
 // ── Physics step (fixed-step, common Φ) ──────────────────────────
 function physicsStep(s, xe, xeDot, useAdaptive) {
   const r    = xe - s.x;
-  const rdot = xeDot - s.v;               // 正しい相対速度（因果ダイオード）
+  const rdot = xeDot - s.v;               // 目標速度を含む相対速度（補完制御モデル）
 
   let k, g;
   if (useAdaptive) {
@@ -330,18 +343,18 @@ function physicsStep(s, xe, xeDot, useAdaptive) {
 
   // 壁クランプ：エネルギー散逸（速度もリセット）
   const xn = s.x + s.v * FIXED_DT;
-  if (xn <= 0.01 || xn >= 0.99) s.v = 0;
+  if (xn <= 0.01 || xn >= 0.99) { s.v = 0; s.clipCount++; }
   s.x = Math.max(0.01, Math.min(0.99, xn));
 
-  // NRA-IDE 構造監査：R = δ / τ
-  const R = Math.abs(r) / k;
+  // NRA-IDE 構造監査：gateRatio = |r| / k_eff
+  const gateRatio = Math.abs(r) / k;
 
-  s.hist.push({ x: s.x, xe, r: Math.abs(r), R });
+  s.hist.push({ x: s.x, xe, r: Math.abs(r), gateRatio });
   s.kHist.push(k);
   if (s.hist.length  > HIST) s.hist.shift();
   if (s.kHist.length > HIST) s.kHist.shift();
 
-  return { r: Math.abs(r), k, g: Math.abs(g), R };
+  return { r: Math.abs(r), k, g: Math.abs(g), gateRatio };
 }
 
 // ── Canvas fitting (DPR-aware) ───────────────────────────────────
@@ -425,14 +438,14 @@ function drawMain(cvId, hist, isLeft) {
   ctx.fillStyle = isLeft ? '#ff8050' : '#ffc840';
   ctx.fill();
 
-  // R≥1.0: Fail-Closed overlay (visual indicator)
-  if (lp.R >= 1.0) {
+  // Auxiliary ratio overlay only; not a Fail-Closed mechanism.
+  if (lp.gateRatio >= 1.0) {
     ctx.strokeStyle = 'rgba(255,61,0,.65)';
     ctx.lineWidth = 2;
     ctx.strokeRect(1, 1, W - 2, H - 2);
     ctx.font = '10px Share Tech Mono,monospace';
     ctx.fillStyle = 'rgba(255,61,0,.9)';
-    ctx.fillText('FAIL-CLOSED  R≥1.0', 6, H - 6);
+    ctx.fillText('AUXILIARY RATIO ≥ 1.0', 6, H - 6);
   }
 
   // Labels
@@ -501,12 +514,12 @@ function drawKeff(cvId, kHist, isLeft) {
 }
 
 // ── UI update ────────────────────────────────────────────────────
-function setRDisplay(id, R) {
+function setRDisplay(id, gateRatio) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.textContent = R.toFixed(2);
-  el.style.color = R >= 1.0 ? 'var(--red)'
-                : R >= 0.3 ? 'var(--yellow)'
+  el.textContent = gateRatio.toFixed(2);
+  el.style.color = gateRatio >= 1.0 ? 'var(--red)'
+                : gateRatio >= 0.3 ? 'var(--yellow)'
                 :            'var(--green)';
 }
 
@@ -515,15 +528,15 @@ function updateJudgment(id, m, isLeft) {
   if (!el) return;
 
   let cls, head;
-  if (m.R >= 1.0) {
+  if (m.gateRatio >= 1.0) {
     cls  = 'j-fail';
-    head = `R=${m.R.toFixed(2)} ≥ 1.0 — FAIL-CLOSED / 人間への責任引渡し`;
-  } else if (m.R >= 0.3) {
+    head = `gateRatio=${m.gateRatio.toFixed(2)} ≥ 1.0 — AUXILIARY RATIO ONLY / 正規状態ではない`;
+  } else if (m.gateRatio >= 0.3) {
     cls  = 'j-warn';
-    head = `R=${m.R.toFixed(2)} — 非線形遷移帯 / 吸収限界に接近`;
+    head = `gateRatio=${m.gateRatio.toFixed(2)} — 非線形遷移帯 / 吸収限界に接近`;
   } else {
     cls  = 'j-ok';
-    head = `R=${m.R.toFixed(2)} — Coherent層 / 構造安定（不変条件維持）`;
+    head = `gateRatio=${m.gateRatio.toFixed(2)} — ゲート補助比の低い領域 / low auxiliary ratio`;
   }
 
   let ctxTxt = '';
@@ -537,7 +550,7 @@ function updateJudgment(id, m, isLeft) {
   }
 
   el.className = 'judgment ' + cls;
-  el.textContent = head + ctxTxt;
+  el.textContent = head + ctxTxt + ' · clips=' + (isLeft ? sf.clipCount : sa.clipCount);
 }
 
 function updateUI(mF, mA) {
@@ -545,13 +558,13 @@ function updateUI(mF, mA) {
   document.getElementById('rLeft').textContent  = mF.r.toFixed(3);
   document.getElementById('kLeft').textContent  = mF.k.toFixed(2);
   document.getElementById('gLeft').textContent  = mF.g.toFixed(3);
-  setRDisplay('RLeft', mF.R);
+  setRDisplay('RLeft', mF.gateRatio);
 
   document.getElementById('xRight').textContent = sa.x.toFixed(3);
   document.getElementById('rRight').textContent = mA.r.toFixed(3);
   document.getElementById('kRight').textContent = mA.k.toFixed(2);
   document.getElementById('gRight').textContent = mA.g.toFixed(3);
-  setRDisplay('RRight', mA.R);
+  setRDisplay('RRight', mA.gateRatio);
 
   updateJudgment('jLeft',  mF, true);
   updateJudgment('jRight', mA, false);

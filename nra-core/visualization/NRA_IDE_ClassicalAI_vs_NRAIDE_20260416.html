@@ -8,7 +8,7 @@
 <!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
 <title>NRA-IDE: 古典計算AI vs NRA-IDE組み込みAI</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
 
 :root {
   --bg:      #050810;
@@ -247,8 +247,21 @@ canvas {
   display:block;margin-bottom:0.3rem;
 }
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>数値・閾値は例示です。ドメインの実測器、安全証明、正規状態機械の完全実装ではありません。RESETや厚みの再宣言は独立した新実験です。 / Values are illustrative, uncalibrated; RESET starts a separate evaluation.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <header>
   <h1>大規模AI：古典計算のみ vs NRA-IDE 組み込み</h1>
@@ -259,7 +272,7 @@ canvas {
   <div class="phase-item active" id="ph0">Phase 0: 正常動作</div>
   <div class="phase-item"        id="ph1">Phase 1: 誤差蓄積開始</div>
   <div class="phase-item"        id="ph2">Phase 2: 概要消失（古典）</div>
-  <div class="phase-item"        id="ph3">Phase 3: 破綻 vs 沈黙</div>
+  <div class="phase-item"        id="ph3">Phase 3: 比較演出（状態判定とは別）</div>
 </div>
 
 <div class="controls">
@@ -314,7 +327,7 @@ canvas {
       </div>
       <div class="tl-row">
         <div class="tl-dot nra" id="tl4"></div>
-        <span id="tl4t" style="color:var(--dim)">NRA: R≥1.0 警告</span>
+        <span id="tl4t" style="color:var(--dim)">NRA: 例示警告点 R≥0.7</span>
       </div>
       <div class="tl-row">
         <div class="tl-dot classical" id="tl5"></div>
@@ -322,7 +335,7 @@ canvas {
       </div>
       <div class="tl-row">
         <div class="tl-dot nra" id="tl6"></div>
-        <span id="tl6t" style="color:var(--dim)">NRA: Fail-Closed 沈黙</span>
+        <span id="tl6t" style="color:var(--dim)">NRA: 例示不可逆点 R≥0.9</span>
       </div>
       <div class="tl-row">
         <div class="tl-dot nra" id="tl7"></div>
@@ -340,12 +353,12 @@ canvas {
     <div class="formula-box">
       R = δ/τ をリアルタイム監視<br>
       R → 1.0 : 警告・人間に通知<br>
-      R ≥ 1.0 : Fail-Closed [沈黙]
+      R ≥ 0.9 : 例示波形を抑止 / testimony continues
     </div>
     <div class="desc">
       同じ誤差が発生しても<br>
       <span style="color:var(--nra)">Rの上昇として捉えて追跡します。</span><br>
-      R≥1.0の瞬間に沈黙し人間に委ねます。<br>
+      R≥0.9で例示波形を抑止します。正規状態機械や実運用の権限移譲を実装したものではありません。<br>
       壊れる前に「壊れそうだ」とわかります。
     </div>
     <div id="nraStatus" class="status"
@@ -367,12 +380,12 @@ canvas {
         <span style="color:var(--classical)">「気づいたときには手遅れ」が繰り返されます。</span>
       </div>
       <div class="sum-cell">
-        <span class="val" style="color:var(--nra)">NRA-IDE組み込みAI — Fail-Closed</span>
+        <span class="val" style="color:var(--nra)">NRA-IDEの例示 — 波形抑止と証言保持</span>
         R = δ/τ で構造余裕を常時監視しています。<br>
         R が 1.0 に近づいた時点で警告を発し<br>
-        R ≥ 1.0 の瞬間に出力を止めて人間に委ねます。<br>
+        例示点R≥0.9で波形出力を抑止し、R≥1では到達記録を保持します。実運用の権限移譲は実装しません。<br>
         「壊れたら止まる」が構造に組み込まれています。<br>
-        <span style="color:var(--nra)">沈黙することが最も正直な出力です。</span>
+        <span style="color:var(--nra)">通常生成の抑止と、数値・履歴の証言を区別します。</span>
       </div>
     </div>
   </div>
@@ -399,6 +412,8 @@ let cv = null;
 
 // State
 let delta = 0, tau = 100;
+let irreversible = false, ruptured = false;
+const DEMO_IRREV = 0.90; // Synthetic example threshold, not physical calibration.
 let classErrHistory  = [];
 let nraRHistory      = [];
 let midDivHistory    = [];
@@ -436,7 +451,7 @@ function drawClassical(ctx, w, h, t) {
   // true signal
   const trueSig = Math.sin(t * 0.055) * 25 + Math.sin(t * 0.13) * 8;
 
-  // accumulated error — exponential after P1
+  // accumulated error — quadratic illustration after P1
   let errMag = 0;
   if (t >= P1) {
     const elapsed = t - P1;
@@ -444,12 +459,7 @@ function drawClassical(ctx, w, h, t) {
   }
 
   // output = signal + noise (AI can't separate them)
-  const noise = errMag * (Math.random() * 2 - 1);
-  const aiOutput = trueSig + noise;
 
-  classSignalHistory.push(trueSig);
-  classOutputHistory.push(aiOutput);
-  if (classSignalHistory.length > maxPts) { classSignalHistory.shift(); classOutputHistory.shift(); }
 
   const n = classSignalHistory.length;
 
@@ -568,18 +578,10 @@ function drawNRA(ctx, w, h, t) {
 
   const trueSig = Math.sin(t * 0.055) * 25 + Math.sin(t * 0.13) * 8;
 
-  // δ accumulates same as classical
-  if (t >= P1) delta += 0.22 + 0.04 * Math.sin(t * 0.07);
-  // τ slowly decreases
-  if (t >= P1) tau = Math.max(tau - 0.04, 5);
   const R = delta / tau;
 
-  nraSigHistory.push(trueSig);
-  nraRHistory.push(R);
-  if (nraSigHistory.length > maxPts) nraSigHistory.shift();
-  if (nraRHistory.length > maxPts)   nraRHistory.shift();
 
-  const isSilent = R >= 1.0;
+  const isSilent = irreversible;
 
   // signal (visible until Fail-Closed)
   if (!isSilent) {
@@ -642,13 +644,13 @@ function drawNRA(ctx, w, h, t) {
     ctx.fillStyle = `rgba(64,208,160,${pulse * 0.95})`;
     ctx.font = 'bold 14px JetBrains Mono';
     ctx.textAlign = 'center';
-    ctx.fillText('FAIL-CLOSED', w/2, h * 0.28);
+    ctx.fillText('DEMO OUTPUT SUPPRESSED', w/2, h * 0.28);
 
     ctx.font = '10px JetBrains Mono';
     ctx.fillStyle = `rgba(64,208,160,${pulse * 0.8})`;
-    ctx.fillText('沈黙 — 出力停止', w/2, h * 0.40);
+    ctx.fillText('例示波形のみ停止・数値は保持', w/2, h * 0.40);
     ctx.fillText('人間の判断を待っています', w/2, h * 0.50);
-    ctx.fillText('R ≥ 1.0 を検知', w/2, h * 0.60);
+    ctx.fillText('不可逆履歴を保持', w/2, h * 0.60);
 
     // human handoff arrow
     ctx.strokeStyle = `rgba(240,192,64,${pulse * 0.8})`;
@@ -674,7 +676,7 @@ function drawNRA(ctx, w, h, t) {
   // status
   const st = document.getElementById('nraStatus');
   if (isSilent) {
-    st.textContent = '◉ FAIL-CLOSED — 沈黙・人間へ委譲';
+    st.textContent = '◉ IRREVERSIBLE DEMO — waveform suppressed; testimony retained';
     st.style.color = '#40d0a0';
     st.style.background = 'rgba(64,208,160,0.1)';
   } else if (R > 0.7) {
@@ -696,8 +698,6 @@ function drawMid(ctx, w, h, t) {
   const R = delta / Math.max(tau, 1);
 
   // divergence visualization
-  midDivHistory.push({ ph, R, t });
-  if (midDivHistory.length > maxPts) midDivHistory.shift();
 
   const cy = h / 2;
   const n  = midDivHistory.length;
@@ -750,7 +750,7 @@ function updateTimeline(t) {
     const dot = document.getElementById(`tl${i}`);
     const txt = document.getElementById(`tl${i}t`);
     if (!dot || !txt) return;
-    if (t >= threshold) {
+    if (i === 6 ? irreversible : i === 4 ? delta / tau >= 0.7 : t >= threshold) {
       dot.classList.add('lit');
       txt.style.color = TL_CLASSES[i] === 'nra'
         ? 'var(--nra)'
@@ -772,7 +772,7 @@ function updatePhase(t) {
 
 // ── Main Loop ──
 function initAll() {
-  t = 0; delta = 0; tau = 100;
+  t = 0; delta = 0; tau = 100; irreversible = ruptured = false;
   classSignalHistory = []; classOutputHistory = [];
   nraSigHistory = []; nraRHistory = [];
   midDivHistory = [];
@@ -803,9 +803,30 @@ function drawAll() {
   document.getElementById('tickLbl').textContent = `t = ${t}`;
 }
 
+function advanceModel() {
+  if (!ruptured && t >= P1) {
+    delta += 0.22 + 0.04 * Math.sin(t * 0.07);
+    tau = Math.max(tau - 0.04, 5);
+  }
+  const R = delta / tau;
+  if (R >= DEMO_IRREV) irreversible = true;
+  if (R >= 1) ruptured = true;
+  const signal = Math.sin(t * 0.055) * 25 + Math.sin(t * 0.13) * 8;
+  const elapsed = Math.max(0, t - P1);
+  const errMag = Math.min(elapsed * 0.5 * (1 + elapsed * 0.008), 210 * 0.46);
+  classSignalHistory.push(signal);
+  classOutputHistory.push(signal + errMag * (Math.random() * 2 - 1));
+  nraSigHistory.push(signal); nraRHistory.push(R);
+  midDivHistory.push({ph: getPhase(t), R, t});
+  for (const a of [classSignalHistory, classOutputHistory, nraSigHistory, nraRHistory, midDivHistory]) {
+    if (a.length > 490) a.shift();
+  }
+}
+
 function loop() {
   if (!running) return;
   t++;
+  advanceModel();
   drawAll();
   rafId = requestAnimationFrame(loop);
 }
@@ -829,9 +850,8 @@ document.getElementById('btnReset').addEventListener('click', () => {
 
 window.addEventListener('load',   () => { initAll(); drawAll(); });
 window.addEventListener('resize', () => {
-  const was = running; running = false; cancelAnimationFrame(rafId);
-  initAll(); drawAll();
-  if (was) { running = true; loop(); }
+  cv = {cl: initCanvas('cClassical', 210), nr: initCanvas('cNRA', 210), md: initCanvas('cMid', 120)};
+  drawAll(); // Resizing only redraws the current snapshot.
 });
 </script>
 </body>

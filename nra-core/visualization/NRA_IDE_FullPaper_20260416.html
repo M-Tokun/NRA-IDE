@@ -8,7 +8,7 @@
 <!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
 <title>NRA-IDE: 構造境界診断と安全工学 — 序章から最終章</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
 
 :root {
   --bg:      #040608;
@@ -280,8 +280,32 @@ footer {
   position:relative; z-index:1;
 }
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+/* N01 proposal: only narrow viewports; no model, values, or desktop layout changes. */
+@media (max-width: 600px) {
+  body { overflow-wrap: anywhere; }
+  .la-dim, .formula, .flow-row, .tbl td, .tbl th { overflow-wrap: anywhere; }
+  .flow-row > * { min-width: 0; }
+  .container { min-width: 0; }
+  .panel, #chart-view { box-sizing: border-box; min-width: 0 !important; max-width: 100%; }
+  canvas { box-sizing: border-box; max-width: 100%; height: auto; }
+  .legend { flex-wrap: wrap; }
+}
+
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>思想形成の説明を保持しています。一般的な比較・保証・熱排出の説明は研究仮説として読み、現行の正規式・境界と区別してください。 / Historical claims are not empirical guarantees.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <nav>
   <a href="#prologue">序章</a>
@@ -311,7 +335,7 @@ footer {
   </div>
 
   <div class="prose">
-    現況の計算技術はすべて線形写像に依存している。<br>
+    ここでは線形近似に対象を限定して、その適用限界を検討する。計算技術全般を線形写像とみなすものではない。<br>
     線形写像は世界を「今この瞬間の値」として写し取る。<br>
     しかし現実の世界は<em>蓄積が不可逆に作用する非線形の連続</em>である。<br>
     この根本的な不一致が、あらゆる「突然の破断」の構造的原因である。
@@ -393,8 +417,8 @@ footer {
     非線形項を「消した」後の問題を解いている<br>
     消した項こそが現実の本質的な挙動を生む項である<br>
     <br>
-    τ(t) = δ₀ · e^(λt) &nbsp;&nbsp;[λ &gt; 0: 非線形性による増幅]<br>
-    線形近似した瞬間にλを0と仮定している
+    例示誤差 e(t) = e₀ · exp(λt) &nbsp;&nbsp;[条件付き増幅モデル。正規τではない]<br>
+    λの値と適用範囲は対象方程式から定める。線形化一般をλ=0とはみなさない。
   </div>
 
   <div class="callout c-risk">
@@ -418,8 +442,8 @@ footer {
   </div>
 
   <div class="prose">
-    不確定性原理はδ &gt; 0を<strong>自然法則として保証する</strong>。<br>
-    誤差はゼロにできない。これは精度の問題ではなく物理法則である。<br>
+    位置と運動量の不確定さはΔx·Δp≥ℏ/2で関係付けられる。NRAの蓄積ズレδの一般的下限ではない。<br>
+    誤差の下限は対象・測定量・近似方法に依存する。正典の定義域は有限なδ≥0、τ>0である。<br>
     ならば問うべきは「誤差をなくす方法」ではなく<em>「誤差をどう扱うか」</em>である。
   </div>
 
@@ -434,11 +458,11 @@ footer {
     </div>
     <div class="cmp-cell">
       <span class="ct" style="color:var(--nra)">脱進機原理（NRA-IDE）</span>
-      残差εを<strong>熱として排出する</strong>。持ち越し禁止。<br>
+      残差を次段へ持ち越さないという概念モデルを示す。熱排出の物理的実証はしていない。<br>
       誤差を「追跡すべきもの」として扱う。<br>
-      δ（遊び）を設計時から確保する。<br>
+      吸収幅の概念図（正規τの実測ではない）を設計時から確保する。<br>
       各ステップが構造的に完結する。<br>
-      概要を常時把握し続けられる。
+      追跡可能性は観測・モデル・ログの条件を満たす範囲で評価する。
     </div>
   </div>
 
@@ -446,11 +470,11 @@ footer {
     R = δ / τ<br>
     <br>
     δ: 蓄積ズレ（累積負荷・履歴として蓄積）<br>
-    τ: 吸収厚み（構造的許容余裕・時間と独立）<br>
+    τ: 吸収厚み（Cause-Sideモデルにより測定・計算し、消耗を追跡）<br>
     R: 構造比率（境界への接近度・無次元）<br>
     <br>
-    R &lt; 1.0 → 安定・継続<br>
-    R ≥ 1.0 → Fail-Closed：沈黙・人間に委ねる
+    R &lt; 1.0 → R_warn / R_handoff / R_irrevで段階分類<br>
+    R ≥ 1.0 → RUPTURE_BOUNDARY：通常生成を抑止し、固定形式の構造証言を継続
   </div>
 
   <div class="prose">
@@ -464,7 +488,7 @@ footer {
     ▶ Animation: 性質誤差——なぜ破綻しないのか・なぜ積層できるのか
   </a>
   <a class="anim-ref" href="NRA_IDE_Quantum_Error_20260416.html" target="_blank">
-    ▶ Animation: 量子誤差——δはゼロにできない（物理法則）
+    ▶ Animation: 量子不確定さと蓄積ズレの区別
   </a>
 </div>
 
@@ -489,8 +513,8 @@ footer {
     <tr><td>誤差の扱い</td><td>パラメータに吸収・持ち越し</td><td>δとして追跡・熱排出</td></tr>
     <tr><td>概要の把握</td><td>蓄積後に消失</td><td>常時維持</td></tr>
     <tr><td>閾値</td><td>存在しない</td><td>R = 1.0</td></tr>
-    <tr><td>破綻時の動作</td><td>出力継続（Fail-Open）</td><td>沈黙（Fail-Closed）</td></tr>
-    <tr><td>人間への委譲</td><td>仕組みなし</td><td>R ≥ 1.0 で自動委譲</td></tr>
+    <tr><td>破綻時の動作</td><td>出力継続（Fail-Open）</td><td>通常生成を抑止し、構造証言を継続（Fail-Closed原則）</td></tr>
+    <tr><td>人間への委譲</td><td>仕組みなし</td><td>R_handoff &lt; 1で実行権限を外部の事前定義経路へ移す</td></tr>
     <tr><td>最大の問題</td><td>壊れていることに気づかない</td><td>—</td></tr>
   </table>
 
@@ -526,7 +550,7 @@ footer {
   <div class="flow">
     <div class="flow-row fr-base">線形写像で非線形現実を近似する</div>
     <div class="flow-arrow">↓</div>
-    <div class="flow-row fr-warn">近似誤差が発生（不可避・δ &gt; 0 は物理法則）</div>
+    <div class="flow-row fr-warn">近似誤差が発生（不可避・δの定義と測定規則を要する）</div>
     <div class="flow-arrow">↓</div>
     <div class="flow-row fr-risk">誤差を「パラメータ数を増やすことで覆う」</div>
     <div class="flow-arrow">↓</div>
@@ -679,9 +703,9 @@ footer {
     <p>
       これは意図的な悪意ではない。<strong>閾値がない計算が必然的に辿り着く構造的帰結</strong>である。<br>
       「計算してはいけない領域」を定義するには<strong>R ≥ 1.0 という閾値構造が必要</strong>である。<br>
-      Fail-Closedとは「沈黙すること」である。沈黙とは<strong>「答えを出さないことが最も正直な出力」</strong>である場面が<br>
+      Fail-Closedは許可されない自律処理を抑止する原則であり、構造証言の停止を意味しない。沈黙とは<strong>「答えを出さないことが最も正直な出力」</strong>である場面が<br>
       確実に存在するという認識に基づく設計思想である。<br>
-      人命・尊厳・不可逆なものは<strong>線形空間で計算できない</strong>。その認識をシステムに組み込む唯一の方法が閾値である。
+      人命・尊厳・不可逆なものは<strong>線形空間で計算できない</strong>。本稿では、その認識を運用境界へ接続する設計として閾値を採用する。他方式の不存在を主張しない。
     </p>
   </div>
 
@@ -699,10 +723,10 @@ footer {
     <tr><th>誤差への態度</th><th>現況AI・線形計算</th><th>NRA-IDE</th></tr>
     <tr><td>誤差の定義</td><td>ゼロに近づけるべき残差</td><td>追跡すべき構造的情報</td></tr>
     <tr><td>誤差の扱い</td><td>パラメータに吸収・隠蔽</td><td>δとして計測・熱排出</td></tr>
-    <tr><td>誤差の下限</td><td>ゼロを目指す（不可能）</td><td>δ &gt; 0 を物理法則として受容</td></tr>
+    <tr><td>誤差の下限</td><td>ゼロを目指す（不可能）</td><td>有限なδ≥0を定義域として扱う</td></tr>
     <tr><td>誤差の蓄積</td><td>概念がない</td><td>τとの比率Rで追跡</td></tr>
     <tr><td>誤差の限界</td><td>検知できない</td><td>R ≥ 1.0 で構造的に検知</td></tr>
-    <tr><td>誤差超過時</td><td>出力継続（Fail-Open）</td><td>沈黙（Fail-Closed）</td></tr>
+    <tr><td>誤差超過時</td><td>出力継続（Fail-Open）</td><td>通常生成を抑止し、構造証言を継続（Fail-Closed原則）</td></tr>
   </table>
 
   <div class="conclusion-box">
@@ -713,7 +737,7 @@ footer {
       <br>
       R = δ/τ という式は単純である。しかしその意味は深い。<br>
       蓄積ズレδを測る。吸収厚みτを定義する。その比率を監視する。<br>
-      R が 1.0 に近づいたとき警告する。R が 1.0 を超えたとき沈黙する。<br>
+      R_warnで警告し、R_handoffで自律判断を抑止し、R_irrevで不可逆履歴を保持する。R≥1では破断後固定証言を続ける。<br>
       <br>
       <strong>「いつ壊れるか」を予測することは多くの系において不可能である。</strong><br>
       <em>しかし「今どれだけ危ういか」を診断することは、常に可能である。</em><br>

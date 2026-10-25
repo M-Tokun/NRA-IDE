@@ -198,8 +198,21 @@
   .hidden{display:none!important;}
   .footer-note{padding:10px 22px 18px;color:var(--ink-sub);font-size:11px;}
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>会話監査の補助ツール / conversation-audit assistant</strong><br>表面語句の候補抽出と監査プロンプト生成を行います。正誤や正規Rを計算する装置ではありません。入力変更時は新しい入力版として監査します。 / Lexical scan and prompt builder, not a truth or canonical-R evaluator.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 <header>
   <h1>AI Response Discomfort Cause &amp; Reasoning Path Audit Tool</h1>
   <p>User-initiated · no external communication · no search · audit-prompt generation only — this tool does not automatically determine correctness. ©M-Tokuni 2026</p>
@@ -484,11 +497,13 @@ let currentPromptType = "cause";
 const $ = id => document.getElementById(id);
 const linesOf = id => $(id).value.split("\n").map(s => s.trim()).filter(Boolean);
 
-function splitSentences(text){
-  return text
-    .split(/(?<=[。！？\n])/)
-    .map(s => s.trim())
-    .filter(Boolean);
+function splitSentences(text) {
+  // Locale-aware segmentation preserves common abbreviations and decimal points.
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter('en', {granularity:'sentence'});
+    return text.split(/\n+/).flatMap(line => [...segmenter.segment(line)].map(x => x.segment.trim())).filter(Boolean);
+  }
+  return text.split(/(?<=[.!?。！？])\s+|\n+/).map(x => x.trim()).filter(Boolean);
 }
 
 function contextAround(sentences, index, before=1, after=1){
@@ -632,7 +647,7 @@ function renderScan(inputs, result){
     card.innerHTML = `
       <h3><span class="st-${detection.rule.state}">[${detection.rule.state}]</span> ${esc(detection.rule.name)} <span class="meta">(${detection.rule.id})</span></h3>
       <p class="meta">${esc(detection.rule.category)}</p>
-      <div class="excerpt">Sentence ${detection.index + 1}: ${highlighted}</div>
+      <div class="excerpt">Sentence ${detection.index + 1}: ${highlighted}</div><p class="meta">Context: ${esc(detection.context)}</p>
       <p class="meta">Treatment: ${esc(detection.rule.note)}</p>`;
     wrap.appendChild(card);
   }
@@ -643,13 +658,17 @@ function renderScan(inputs, result){
   $("secFeedback").hidden = false;
 
   currentRecord = {
+    record_id: auditLog.length + 1,
+    input_version: auditLog.length + 1,
+    inputs: JSON.parse(JSON.stringify(inputs)),
     logged_at:jstNow(),
     surface_state:result.overall,
     detections:result.detections.map(item => ({
       rule:item.rule.id,
       name:item.rule.name,
       state:item.rule.state,
-      sentence:item.sentence
+      sentence:item.sentence,
+      context:item.context
     })),
     memo:inputs.memo || null,
     generated_prompts:[],
@@ -851,20 +870,32 @@ function buildReturnPrompt(inputs){
 function requireCoreInputs(){
   const inputs = gatherInputs();
   if(!inputs.userText || !inputs.aiText){
+    invalidatePresentation();
     $("resultHead").innerHTML = "<h2>4. Current status</h2><p class='danger-note'>Both the user message and the AI response are required. Missing content will not be inferred, and no audit prompt will be generated.</p>";
     return null;
   }
   return inputs;
 }
 
+function invalidatePresentation() {
+  currentRecord = null;
+  $("promptOutput").textContent = "";
+  $("resultHead").innerHTML = "";
+  for (const id of ["secSurface","secModes","secManual","secFeedback","secPrompt"]) $(id).hidden = true;
+}
+
 function showPrompt(type, title, text){
+  const snapshot = gatherInputs();
+  if (!currentRecord || JSON.stringify(currentRecord.inputs) !== JSON.stringify(snapshot)) {
+    renderScan(snapshot, runSurfaceScan(snapshot));
+  }
   currentPromptType = type;
   $("promptTitle").textContent = `7. ${title}`;
   $("promptOutput").textContent = text;
   $("secPrompt").hidden = false;
   $("secPrompt").scrollIntoView({behavior:"smooth", block:"start"});
   if(currentRecord){
-    currentRecord.generated_prompts.push({type, generated_at:jstNow()});
+    currentRecord.generated_prompts.push({type, text, input_version:currentRecord.input_version, generated_at:jstNow()});
   }
 }
 
@@ -942,6 +973,8 @@ const INPUT_IDS = [
   "fixedPremises","hypotheses","unknowns"
 ];
 
+INPUT_IDS.forEach(id => $(id).addEventListener("input", invalidatePresentation));
+
 $("btnSaveLocal").addEventListener("click", () => {
   const payload = {};
   INPUT_IDS.forEach(id => payload[id] = $(id).value);
@@ -961,6 +994,7 @@ $("btnRestoreLocal").addEventListener("click", () => {
       return;
     }
     const payload = JSON.parse(raw);
+    invalidatePresentation();
     INPUT_IDS.forEach(id => {
       if(Object.prototype.hasOwnProperty.call(payload, id)) $(id).value = payload[id];
     });
@@ -972,6 +1006,7 @@ $("btnRestoreLocal").addEventListener("click", () => {
 
 $("btnClear").addEventListener("click", () => {
   INPUT_IDS.forEach(id => $(id).value = "");
+  invalidatePresentation();
   $("saveStatus").textContent = "Inputs cleared. Saved device data was not deleted.";
 });
 

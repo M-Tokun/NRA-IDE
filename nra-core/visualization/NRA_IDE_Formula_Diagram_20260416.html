@@ -8,7 +8,7 @@
 <!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
 <title>NRA-IDE: 定義式・応用式 構造図解</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
 
 :root {
   --bg:      #060810;
@@ -399,8 +399,32 @@ footer {
   position:relative; z-index:1;
 }
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+/* N01 proposal: only narrow viewports; no model, values, or desktop layout changes. */
+@media (max-width: 600px) {
+  body { overflow-wrap: anywhere; }
+  .la-dim, .formula, .flow-row, .tbl td, .tbl th { overflow-wrap: anywhere; }
+  .flow-row > * { min-width: 0; }
+  .container { min-width: 0; }
+  .panel, #chart-view { box-sizing: border-box; min-width: 0 !important; max-width: 100%; }
+  canvas { box-sizing: border-box; max-width: 100%; height: auto; }
+  .legend { flex-wrap: wrap; }
+}
+
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>思想形成の説明を保持しています。一般的な比較・保証・熱排出の説明は研究仮説として読み、現行の正規式・境界と区別してください。 / Historical claims are not empirical guarantees.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <header>
   <h1>NRA-IDE: 定義式・応用式 構造図解</h1>
@@ -447,9 +471,9 @@ footer {
       </div>
     </div>
     <div class="fail-closed-note">
-      R &lt; 1.0 → 安定領域・継続 &nbsp;│&nbsp;
-      R = 1.0 → 警告・通知 &nbsp;│&nbsp;
-      R ≥ 1.0 → <strong>Fail-Closed 沈黙・人間に委ねる</strong>
+      R &lt; 1.0 → 事前固定した三境界で分類 &nbsp;│&nbsp;
+      R = 1.0 → RUPTURE_BOUNDARY &nbsp;│&nbsp;
+      R ≥ 1.0 → <strong>通常生成を抑止し、破断後固定証言を継続</strong>
     </div>
   </div>
 
@@ -467,7 +491,7 @@ footer {
         <span class="eq-classic">Φ(x)</span>
       </div>
       <div style="display:flex;justify-content:center;gap:3rem;margin-top:0.6rem;flex-wrap:wrap;">
-        <span class="eq-under" style="color:rgba(64,208,160,0.6)">↑ IDE層・根本<br>量子的包括演算</span>
+        <span class="eq-under" style="color:rgba(64,208,160,0.6)">↑ IDE層・根本<br>補完的なモデル演算（量子計算の実証ではない）</span>
         <span class="eq-under" style="color:rgba(240,192,64,0.6)">↑ 2次残差ゲート<br>介入制御弁</span>
         <span class="eq-under" style="color:rgba(128,144,240,0.6)">↑ 古典層・補助<br>局所精度補正</span>
       </div>
@@ -485,11 +509,11 @@ footer {
           </div>
           <div class="struct-row">
             <span class="bullet">▸</span>
-            <span>性質誤差（δ）の追跡を継続。遷移を崩さない。</span>
+            <span>蓄積ズレ（δ）の追跡を継続。遷移を崩さない。</span>
           </div>
           <div class="struct-row">
             <span class="bullet">▸</span>
-            <span>非線形ステップ計算。誤差爆発しない。</span>
+            <span>補完的な非線形ステップ計算。誤差安定性は別途検証が必要。</span>
           </div>
           <div class="struct-row">
             <span class="bullet">▸</span>
@@ -522,7 +546,7 @@ footer {
           </div>
           <div class="struct-row">
             <span class="bullet">▸</span>
-            <span>小さな揺らぎは自然消滅（沈黙）。</span>
+            <span>小残差の補正は二次的に小さい。残差消滅の保証ではない。</span>
           </div>
           <div class="struct-row">
             <span class="bullet">▸</span>
@@ -553,8 +577,8 @@ footer {
         </tr>
         <tr>
           <td>r ≈ 0（小ゆらぎ）</td>
-          <td>ほぼゼロ → 沈黙</td>
-          <td>古典層が介入しない。IDE層が単独で継続。</td>
+          <td>G(r) ≈ r|r|/k（ゼロ近傍で二次的に小さい）</td>
+          <td>r≠0なら一般にG(r)も0ではない。厳密な無介入ではない。</td>
         </tr>
         <tr>
           <td>r = 中程度</td>
@@ -563,8 +587,8 @@ footer {
         </tr>
         <tr>
           <td>r = 大（相転移近傍）</td>
-          <td>飽和応答</td>
-          <td>強い補正。ただし発散しない構造（飽和）。</td>
+          <td>漸近線形応答（非有界）</td>
+          <td>G(r)/r → 1。有限値へ飽和せず、安定性を単独では保証しない。</td>
         </tr>
       </table>
       <div style="margin-top:0.6rem;font-size:0.68rem;color:var(--dim);">
@@ -596,7 +620,7 @@ footer {
           <span class="j-title" style="color:var(--ide)">🟢 ゼリーの円柱</span>
           内側で変形して力を分散。形は保つ。<br>
           → <span style="color:var(--ide)">NRA-IDE 適応型ゲート</span><br>
-          性質誤差（δ）を吸収しながら<br>
+          蓄積ズレ（δ）を吸収しながら<br>
           律環の形（概要）を維持し続ける。
         </div>
       </div>
@@ -618,7 +642,7 @@ footer {
         </tr>
         <tr>
           <td>閾値での正直な告白</td>
-          <td>G(r) が小さいとき古典層は沈黙する。介入していない事実を隠さない。</td>
+          <td>G(r)は小残差で二次的に小さい。r≠0のとき厳密な無介入とはしない。</td>
         </tr>
         <tr>
           <td>不可逆性への敬意</td>
@@ -630,7 +654,7 @@ footer {
         </tr>
         <tr>
           <td>Fail-Closed</td>
-          <td>R ≥ 1.0 で出力を停止。G(r) も F_IDE も判断しない。人間に委ねる。</td>
+          <td>R_handoffで自律判断を抑止し、R_irrevで不可逆履歴を保持。R≥1は破断後固定証言。G(r)はこの分類を上書きしない。</td>
         </tr>
       </table>
     </div>
@@ -668,7 +692,7 @@ footer {
     </div>
     <div style="margin-top:0.7rem;background:rgba(0,0,0,0.4);border-radius:6px;padding:0.8rem 1rem;border-left:3px solid var(--gate);font-family:'JetBrains Mono',monospace;font-size:0.73rem;line-height:1.8;color:#c0b880;">
       古典計算の入力が「自分の前の出力」ではなく「IDEが安定させた現在状態」である点が<br>
-      誤差爆発を防ぐ<strong style="color:var(--gate)">構造的・決定的な違い</strong>である。
+      誤差応答を変える補完構造である。安定性と性能は入力・係数・数値法ごとに検証する。
     </div>
   </div>
 

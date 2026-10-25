@@ -138,11 +138,14 @@ Interactive simulations (HTML) of NRA dynamics and plot images of analysis resul
 
 | ファイル | 内容 |
 |---|---|
+| `NRA_IDE_Axiom2_HistoricalAccumulation_20260425.html` | 旧分類の履歴蓄積デモ。破断到達記録と要素追加の例示 |
+| `Nra-Ide-ALL.html` | 旧画像6件を個別注記した履歴ポスター |
+| `AI回答の違和感原因_判断経路確認ツール_26-0713-1628_final.html` / `AI_Response_Discomfort_Cause_and_Reasoning_Path_Audit_Tool_26-0718-0014_EN.html` | 日英の会話監査補助ツール。正規R・正誤の判定器ではない |
 | `NRA_IDE_Axiom1_RigidityPlay_20260425.html` | **旧「公理1」ラベルを持つ履歴可視化** — 「遊びのない厳密さは崩壊する」は現在は構造持続原則であり公理ではない。τ≈0 vs τ適切 比較 |
 | `NRA_IDE_AdaptiveGate_20260425.html` | **適応ゲート拡張 — 固定k vs 動的k_eff** — 3提案統合・ゼリー比喩 |
 | `NRA_IDE_FullPaper_20260416.html` | NRA-IDE 論文全章インタラクティブ表示 |
 | `NRA_IDE_ClassicalAI_vs_NRAIDE_20260416.html` | 古典計算AI vs NRA-IDE組み込みAI 比較 |
-| `NRA_IDE_AIRisk_Layer5_20260416.html` | 現況AI学習の構造的リスクと将来予測（Layer 5） |
+| `NRA_IDE_AIRisk_Layer5_20260416.html` | 適応ゲートの補完制御比較（ファイル名は履歴として維持）。補助比は正規Rではない |
 | `NRA_IDE_Formula_Diagram_20260416.html` | 定義式・応用式 構造図解 |
 | `NRA_IDE_PropertyError_20260416.html` | 性質誤差 — なぜ破綻しないか |
 | `NRA_IDE_Quantum_Error_20260416.html` | 量子誤差 — δはゼロにできない |
@@ -156,6 +159,8 @@ Interactive simulations (HTML) of NRA dynamics and plot images of analysis resul
 | `adaptive_gate_plot_2026-04-07_230258.png` | 適応ゲート解析プロット |
 
 ---
+
+可視化全18件の分類・操作・制限は[`visualization/README.md`](visualization/README.md)を参照してください。
 
 ## quantum/ — 量子拡張 / Quantum Extension
 

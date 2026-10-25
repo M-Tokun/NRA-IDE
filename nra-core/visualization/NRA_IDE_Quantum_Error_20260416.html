@@ -6,9 +6,9 @@
 <!-- FILE: NRA_IDE_Quantum_Error_20260416.html -->
 <!-- 生成日時: 2026-04-16 JST -->
 <!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
-<title>NRA-IDE: Quantum Error — δ cannot be zero | 量子誤差：δはゼロにできない</title>
+<title>NRA-IDE: Quantum Uncertainty and Structural Deviation | 量子不確定さと蓄積ズレの区別</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
 
   :root {
     --bg: #050810;
@@ -264,18 +264,31 @@
   .hl-c { color: var(--classical); }
   .hl-n { color: var(--nra); }
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>数値・閾値は例示です。ドメインの実測器、安全証明、正規状態機械の完全実装ではありません。RESETや厚みの再宣言は独立した新実験です。 / Values are illustrative, uncalibrated; RESET starts a separate evaluation.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <header>
-  <h1>NRA-IDE: Quantum Error — δ cannot be zero | 量子誤差：δはゼロにできない</h1>
+  <h1>NRA-IDE: Quantum Uncertainty and Structural Deviation | 量子不確定さと蓄積ズレの区別</h1>
   <div class="sub">NRA-IDE Project · M-Tokuni · 2026-04-16 · github.com/M-Tokun/NRA-IDE</div>
 </header>
 
 <div class="axiom-bar">
   <div class="axiom-item heisenberg">ΔxΔp ≥ ℏ/2 &nbsp;—&nbsp; Heisenberg</div>
-  <div class="axiom-item classical">Linear: δ → 0 forced &nbsp;[FATAL]</div>
-  <div class="axiom-item nra-axiom">NRA-IDE: δ &gt; 0 is structural law</div>
+  <div class="axiom-item classical">Ratio example: numerator decreases, denominator increases</div>
+  <div class="axiom-item nra-axiom">NRA-IDE domain: δ ≥ 0, τ &gt; 0, finite values</div>
 </div>
 
 <div class="controls">
@@ -289,21 +302,21 @@
 
   <!-- CLASSICAL -->
   <div class="panel classical-panel">
-    <div class="panel-title">⬛ Classical Linear Computation &nbsp;|&nbsp; 古典線形計算</div>
+    <div class="panel-title">⬛ Ratio Limit Example &nbsp;|&nbsp; 比の極限例（波形は別の演出）</div>
     <canvas id="cClassical"></canvas>
     <div class="formula-box">
-      δ_forced → 0 &nbsp;(仮定)<br>
-      τ(t) = δ₀·e^(λt) &nbsp;[λ&gt;0]<br>
-      R(t) = δ/τ(t) → ∞ &nbsp;[EXPLODE]
+      算術例: a(t)=e^(-λt) &nbsp;[λ&gt;0]<br>
+      b(t)=e^(λt), a/b=e^(-2λt)<br>
+      a(t)/b(t) → 0 &nbsp;[not canonical δ or τ]
     </div>
     <div class="r-meter-wrap">
       <div class="r-meter-label"><span>R 値</span><span id="rClassVal">0.00</span></div>
       <div class="r-meter-track"><div class="r-meter-fill" id="rClassFill" style="width:0%;background:var(--classical)"></div></div>
     </div>
     <div class="desc">
-      線形写像は誤差をゼロに強制しようとします。<br>
-      しかし非線形な現実ではτが指数的に増幅し<br>
-      <span class="hl-c">「計算できた」状態が突然崩壊します。</span>
+      a/bの極限を示す算術例です。<br>
+      分母が増え、分子が0へ近づくと比は0へ進みます。<br>
+      <span class="hl-c">左の波形は比較演出であり、この比の計算結果ではありません。</span>
     </div>
     <div id="classStatus" class="status-badge" style="background:rgba(224,80,80,0.15);color:var(--classical);border:1px solid rgba(224,80,80,0.3)">STABLE</div>
   </div>
@@ -314,20 +327,19 @@
     <canvas id="cQuantum"></canvas>
     <div class="formula-box">
       Δx·Δp ≥ ℏ/2<br>
-      δ_min = ℏ/2 &nbsp;(物理的下限)<br>
-      δ = 0 は自然法則として禁止
+      位置・運動量の不確定さの積の下限<br>
+      NRAのδの下限を定める式ではない
     </div>
     <div class="r-meter-wrap">
       <div class="r-meter-label"><span>不確定性幅</span><span id="rQuantVal">min</span></div>
       <div class="r-meter-track"><div class="r-meter-fill" id="rQuantFill" style="width:15%;background:var(--quantum)"></div></div>
     </div>
     <div class="desc">
-      不確定性原理はδ > 0を<br>
-      <span class="hl-q">自然法則として保証します。</span><br>
-      これは精度の問題ではなく物理法則です。<br>
-      δをゼロにしようとした瞬間に系が崩壊します。
+      不確定性関係はΔxとΔpという別々の測定量に関する式です。<br>
+      <span class="hl-q">NRAのδにℏ/2を直接代入しません。</span><br>
+      対象・単位・測定方法と変換規則の宣言が必要です。
     </div>
-    <div class="status-badge" style="background:rgba(80,200,224,0.1);color:var(--quantum);border:1px solid rgba(80,200,224,0.3)">δ &gt; 0 &nbsp;GUARANTEED</div>
+    <div class="status-badge" style="background:rgba(80,200,224,0.1);color:var(--quantum);border:1px solid rgba(80,200,224,0.3)">Δx·Δp ≥ ℏ/2 — distinct from NRA δ</div>
   </div>
 
   <!-- NRA-IDE -->
@@ -337,16 +349,16 @@
     <div class="formula-box">
       R = δ / τ<br>
       δ: 蓄積ズレ &nbsp;τ: 吸収厚み<br>
-      R≥1.0 → Fail-Closed [沈黙]
+      R≥1.0 → RUPTURE_BOUNDARY / fixed testimony
     </div>
     <div class="r-meter-wrap">
       <div class="r-meter-label"><span>R = δ/τ</span><span id="rNRAVal">0.00</span></div>
       <div class="r-meter-track"><div class="r-meter-fill" id="rNRAFill" style="width:0%;background:var(--nra)"></div></div>
     </div>
     <div class="desc">
-      δ > 0を「構造の生存条件」として受け入れます。<br>
+      有限なδ≥0とτ>0を正規比の定義域として扱います。<br>
       <span class="hl-n">蓄積ズレδと吸収厚みτの比率Rを監視し</span><br>
-      R≥1.0の瞬間に沈黙して人間に委ねます。<br>
+      R≥1.0で例示対象の到達記録を保持し、数値表示を続けます。<br>
       予測ではなく診断。列挙不要。
     </div>
     <div id="nraStatus" class="status-badge" style="background:rgba(160,232,128,0.1);color:var(--nra);border:1px solid rgba(160,232,128,0.3)">MONITORING</div>
@@ -358,27 +370,27 @@
     <div class="comp-grid">
       <div class="comp-cell">
         <div class="label">線形計算 Classical</div>
-        <div class="val hl-c">δ = 0 を強制</div>
+        <div class="val hl-c">分子aを0へ近づける算術例</div>
         <br>
-        誤差をゼロに向かわせようとする。<br>
-        非線形領域でτが指数爆発し<br>
-        「計算できていない」状態に陥る。
+        a=e^(-λt)、b=e^(λt)の算術例。<br>
+        a/b=e^(-2λt)は0へ進みます。<br>
+        計算方式一般の成否を示す比較実験ではありません。
       </div>
       <div class="comp-cell">
         <div class="label">量子力学 Quantum</div>
-        <div class="val hl-q">δ ≥ ℏ/2 (物理法則)</div>
+        <div class="val hl-q">Δx·Δp ≥ ℏ/2</div>
         <br>
         不確定性原理により<br>
-        δのゼロは自然法則として禁止。<br>
+        一般の蓄積ズレδの下限ではない。<br>
         これは精度向上で回避できない。
       </div>
       <div class="comp-cell">
         <div class="label">NRA-IDE</div>
-        <div class="val hl-n">δ > 0 を構造条件として受容</div>
+        <div class="val hl-n">δ ≥ 0, τ > 0（有限）</div>
         <br>
         δが存在することを前提に<br>
         R = δ/τ で構造余裕を診断。<br>
-        R≥1.0で沈黙・人間に委ねる。
+        R≥1.0は完全破断境界。証言を継続する。
       </div>
     </div>
   </div>
@@ -461,7 +473,7 @@ function drawClassical(ctx, w, h, t) {
   ctx.fillStyle = 'rgba(224,80,80,0.7)';
   ctx.font = '9px JetBrains Mono';
   ctx.textAlign = 'left';
-  ctx.fillText('τ(t) = δ₀·eˡᵗ [GROWING]', 8, 14);
+  ctx.fillText('Illustrative wave; not the computed ratio a/b', 8, 14);
 }
 
 // ---- Quantum Canvas ----
@@ -531,25 +543,22 @@ function drawQuantum(ctx, w, h, t) {
   ctx.fillStyle = '#50c8e0';
   ctx.font = '9px JetBrains Mono';
   ctx.textAlign = 'left';
-  ctx.fillText('δ_min = ℏ/2 ≠ 0', 8, 14);
+  ctx.fillText('Δx · Δp ≥ ℏ/2 (separate observables)', 8, 14);
 }
 
 // ---- NRA-IDE Canvas ----
 let delta = 0;
 let tau   = 100;
 let rHistory = [];
+let irreversible = false, ruptured = false;
+const DEMO_IRREV = 0.90;
 
 function drawNRA(ctx, w, h, t) {
   ctx.clearRect(0, 0, w, h);
 
-  // update δ and τ
-  delta += 0.18 + 0.05 * Math.sin(t * 0.07);
-  tau   -= 0.06 + 0.02 * Math.abs(Math.sin(t * 0.04));
-  tau    = Math.max(tau, 2);
 
   const R = delta / tau;
-  rHistory.push(R);
-  if (rHistory.length > w) rHistory.shift();
+
 
   // bg grid
   ctx.strokeStyle = 'rgba(80,120,80,0.15)';
@@ -558,7 +567,7 @@ function drawNRA(ctx, w, h, t) {
   for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
 
   // R=1 threshold line
-  const threshold_y = h * 0.15;
+  const threshold_y = h - (1 / 2) * (h - 20) - 5; // Same mapping as the R trace.
   ctx.strokeStyle = 'rgba(240,192,64,0.6)';
   ctx.setLineDash([5,4]);
   ctx.lineWidth = 1.2;
@@ -567,7 +576,7 @@ function drawNRA(ctx, w, h, t) {
   ctx.fillStyle = 'rgba(240,192,64,0.8)';
   ctx.font = '9px JetBrains Mono';
   ctx.textAlign = 'right';
-  ctx.fillText('R = 1.0  [Fail-Closed]', w - 4, threshold_y - 3);
+  ctx.fillText('R = 1.0  [RUPTURE_BOUNDARY]', w - 4, threshold_y - 3);
 
   // R trace
   const maxR = 2.0;
@@ -620,7 +629,7 @@ function drawNRA(ctx, w, h, t) {
     ctx.fillStyle = '#ff6060';
     ctx.font = 'bold 12px JetBrains Mono';
     ctx.textAlign = 'center';
-    ctx.fillText('FAIL-CLOSED — 沈黙', w/2, h/2);
+    ctx.fillText('DEMO: irreversible history retained', w/2, h/2);
   }
 
   return R;
@@ -629,7 +638,7 @@ function drawNRA(ctx, w, h, t) {
 // ---- update meters ----
 function updateMeters(t) {
   // classical R (simulated — diverging)
-  const rClass = Math.min(0.1 + t * 0.008 * (1 + Math.exp(t * 0.01 - 5) * 0.1), 3.0);
+  const rClass = Math.exp(-2 * 0.012 * t); // Matches the displayed a/b example.
   document.getElementById('rClassVal').textContent = rClass.toFixed(2);
   const fillC = Math.min(rClass / 3.0 * 100, 100);
   document.getElementById('rClassFill').style.width = fillC + '%';
@@ -644,7 +653,7 @@ function updateMeters(t) {
   // quantum — constant minimum
   const qw = 15 + 3 * Math.sin(t * 0.05);
   document.getElementById('rQuantFill').style.width = qw + '%';
-  document.getElementById('rQuantVal').textContent = 'ℏ/2 min';
+  document.getElementById('rQuantVal').textContent = 'Δx·Δp ≥ ℏ/2';
 
   // NRA
   const R = delta / Math.max(tau, 1);
@@ -655,7 +664,7 @@ function updateMeters(t) {
     R >= 1.0 ? '#ff4040' : R > 0.7 ? '#f0c040' : 'var(--nra)';
 
   const nraSt = document.getElementById('nraStatus');
-  if (R >= 1.0) { nraSt.textContent = '◉ FAIL-CLOSED — 沈黙'; nraSt.style.color = '#ff6060'; }
+  if (irreversible) { nraSt.textContent = '◉ DEMO: irreversible history retained'; nraSt.style.color = '#ff6060'; }
   else if (R > 0.7) { nraSt.textContent = '△ APPROACHING 1.0'; nraSt.style.color = '#f0c040'; }
   else { nraSt.textContent = 'MONITORING  R=' + R.toFixed(2); nraSt.style.color = 'var(--nra)'; }
 }
@@ -669,12 +678,26 @@ function initAll() {
     qu: initCanvas('cQuantum'),
     nr: initCanvas('cNRA'),
   };
-  delta = 0; tau = 100; rHistory = []; t = 0;
+  delta = 0; tau = 100; rHistory = []; t = 0; irreversible = ruptured = false;
+  updateMeters(0); // RESET synchronizes values and labels before the next paint.
+}
+
+function advanceNRA() {
+  if (!ruptured) {
+    delta += 0.18 + 0.05 * Math.sin(t * 0.07);
+    tau = Math.max(2, tau - 0.06 - 0.02 * Math.abs(Math.sin(t * 0.04)));
+  }
+  const ratio = delta / tau;
+  if (ratio >= DEMO_IRREV) irreversible = true;
+  if (ratio >= 1) ruptured = true;
+  rHistory.push(ratio);
+  if (rHistory.length > 490) rHistory.shift();
 }
 
 function loop() {
   if (!running) return;
   t++;
+  advanceNRA();
   document.getElementById('tickLabel').textContent = `t = ${t}`;
 
   drawClassical(canvases.cl.ctx, canvases.cl.w, canvases.cl.h, t);
@@ -717,14 +740,12 @@ window.addEventListener('load', () => {
 });
 
 window.addEventListener('resize', () => {
-  const wasRunning = running;
-  running = false;
-  cancelAnimationFrame(rafId);
-  initAll();
+  // Resize Canvas only; preserve the experiment and its irreversible history.
+  canvases = {cl: initCanvas('cClassical'), qu: initCanvas('cQuantum'), nr: initCanvas('cNRA')};
   drawClassical(canvases.cl.ctx, canvases.cl.w, canvases.cl.h, t);
   drawQuantum(canvases.qu.ctx,   canvases.qu.w, canvases.qu.h, t);
   drawNRA(canvases.nr.ctx,       canvases.nr.w, canvases.nr.h, t);
-  if (wasRunning) { running = true; loop(); }
+
 });
 </script>
 </body>

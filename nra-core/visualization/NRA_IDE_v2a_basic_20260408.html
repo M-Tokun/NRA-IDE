@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE: Basic Scenarios — v2a</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+
 :root{
   --bg:#060c12;--panel:#0b1520;--border:#1a3040;
   --text:#c8dde8;--dim:#4a6a7a;
@@ -65,8 +65,21 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;width:88px;}
 footer{text-align:center;padding:10px;font-size:.61rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
 @media(max-width:580px){.compare-grid,.trend-strip,.diff-grid{grid-template-columns:1fr;}}
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>数値・閾値は例示です。ドメインの実測器、安全証明、正規状態機械の完全実装ではありません。RESETや厚みの再宣言は独立した新実験です。 / Values are illustrative, uncalibrated; RESET starts a separate evaluation.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 <div class="page-title">
   <h1>NRA-IDE — 基本シナリオ比較 / Basic Scenario Comparison</h1>
   <p>変化の速度を見るか。限界への近接度 R = δ/τ を見るか。</p>
@@ -122,7 +135,7 @@ footer{text-align:center;padding:10px;font-size:.61rem;color:var(--dim);font-fam
 <div class="insight" id="insight">シナリオを選択してください。</div>
 <div class="diff-grid">
   <div class="diff-side l"><h3>❌ CLASSICAL: What Goes Wrong</h3><ul id="igL"></ul></div>
-  <div class="diff-side r"><h3>✅ NRA-IDE: Structural Difference</h3><ul id="igR"></ul></div>
+  <div class="diff-side r"><h3>✅ NRA-IDE: Illustrative Ratio View (not an empirical comparison)</h3><ul id="igR"></ul></div>
 </div>
 <div class="nav-note">τ劣化シナリオ (ダム・珊瑚): <a href="NRA_IDE_v2b_deg_v2_20260408.html">File B を開く</a></div>
 <footer>NRA-IDE · Nomological Ring Axioms / Intensional Dynamics Engine · https://github.com/M-Tokun/NRA-IDE · Zenodo DOI: 10.5281/zenodo.19420854 · © 2026 M-Tokuni</footer>
@@ -137,7 +150,7 @@ const TABS=[
    trendLblL:'▲ 疲労速度 — スパイクは一時的・蓄積は残る',
    c1lbl:'労働負荷',c1def:1.0,
    igL:['疲労の速度だけ監視','蓄積疲労δを追わない','閾値は主観的・恣意的','突然の倒れ — 警告なし'],
-   igR:['R=δ/τが「今どれだけ危ういか」を示す','R≥0.75で警告・人間が休養を判断','Fail-Closed: 出力停止・判断を委譲','速度が遅くてもδ高なら危険と診断'],
+   igR:['R=δ/τが「今どれだけ危ういか」を示す','R≥0.75で警告・人間が休養を判断','通常出力抑止と証言保持の概念説明（実運用の権限移譲は未実装）','速度が遅くてもδ高なら危険と診断'],
    scenarios:[{l:'通常業務',s:1.0,d:false},{l:'残業続き',s:3.0,d:false},{l:'過重労働',s:6.5,d:true},{l:'限界突破',s:10.0,d:true}],
    draw:drawWorker},
   {name:'🌉 橋の疲労',
@@ -147,7 +160,7 @@ const TABS=[
    trendLblL:'▲ 振動速度 — 沈静後も蓄積は残る',
    c1lbl:'通行量・振動強度',c1def:1.0,
    igL:['振動スパイクが収まれば「正常」','蓄積疲労を無視','一見正常な橋が突然崩壊','速度ベースの閾値は恣意的'],
-   igR:['δが構造に「借金」として蓄積される','R≥1.0前に点検指示を人間に委譲','外見に依らず構造比率で判断','Fail-Closed = 安全側に振り切る'],
+   igR:['δが構造に「借金」として蓄積される','R≥1.0前に点検指示を人間に委譲','外見に依らず構造比率で判断','Fail-Closedは自律処理抑止の原則。安全回復を保証しない'],
    scenarios:[{l:'軽交通',s:0.8,d:false},{l:'通常交通',s:2.0,d:false},{l:'重交通',s:5.0,d:true},{l:'嵐・強風',s:9.0,d:true}],
    draw:drawBridge},
   {name:'🔋 電池消耗',
@@ -157,7 +170,7 @@ const TABS=[
    trendLblL:'▲ 消耗速度 — 軽負荷時は警告なし',
    c1lbl:'消費電力（負荷）',c1def:1.0,
    igL:['高速使用中のみ警告','充電量の絶対値を追わない','ゆっくり使えば安全は誤り','0%で突然シャットダウン'],
-   igR:['R=消費量/容量 = 残量の逆数','速度問わず残量0に近づけばR→1','Fail-Closed = セーフシャットダウン','放電曲線の歪みも構造診断に含む'],
+   igR:['R=消費量/容量 = 1−残量割合（容量一定）','速度問わず残量0に近づけばR→1','R=1の到達を表示（実機シャットダウン未実装）','放電曲線の歪みも構造診断に含む'],
    scenarios:[{l:'待機・省電力',s:0.5,d:false},{l:'通常使用',s:1.5,d:false},{l:'高負荷使用',s:4.0,d:true},{l:'フル稼働',s:8.0,d:true}],
    draw:drawBattery},
 ];
@@ -465,7 +478,7 @@ function updateUI(R,rate){
 
   setText('rBig',R.toFixed(3));
   const rEl=document.getElementById('rBig'),jR=document.getElementById('jR');
-  if(R>=1.0){rEl.style.color='#ff3d00';setText('rZone','ABSTAIN — 限界超過');styleJ(jR,'#ff3d00');jR.textContent='⚡ R≥1.0 — Fail-Closed。出力停止・人間に委譲。';}
+  if(R>=1.0){rEl.style.color='#ff3d00';setText('rZone','ABSTAIN — 限界超過');styleJ(jR,'#ff3d00');jR.textContent='⚡ R≥1.0 — RUPTURE_BOUNDARY。例示対象の記録を保持。実運用の権限移譲は含まない。';}
   else if(R>=.75){rEl.style.color='#ff9100';setText('rZone','CRITICAL — 限界接近');styleJ(jR,'#ff9100');jR.textContent='⚠ R≥0.75 — 速度が低くても要注意。介入を推奨。';}
   else if(R>=.4){rEl.style.color='#ffd740';setText('rZone','ELASTIC — 蓄積中');styleJ(jR,'#ffd740');jR.textContent='〜 R≥0.4 — δ蓄積中。余裕はあります。R='+R.toFixed(3);}
   else{rEl.style.color='#00e676';setText('rZone','NIRVANA — 安定');styleJ(jR,'#00e676');jR.textContent='✓ R<0.4 — 安定。δ='+delta.toFixed(3)+'  τ=1.000';}

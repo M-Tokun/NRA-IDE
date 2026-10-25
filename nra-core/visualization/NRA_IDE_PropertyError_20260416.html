@@ -8,7 +8,7 @@
 <!-- Author: M-Tokuni / NRA-IDE Project https://github.com/M-Tokun/NRA-IDE -->
 <title>NRA-IDE: 性質誤差 — なぜ破綻しないのか | Property Error</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
 
 :root {
   --bg: #060810;
@@ -225,8 +225,21 @@ canvas {
   display:block; margin-bottom:0.3rem;
 }
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>熱粒子と層の完了表示は概念演出です。熱量、保存則、層の計算結果、残差非累積を検証していません。 / Heat particles and layer completion are illustrative and unverified.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <header>
   <h1>NRA-IDE: 性質誤差とはなにか — なぜ破綻せず・なぜ積層できるのか</h1>
@@ -236,7 +249,7 @@ canvas {
 <div class="axiom-bar">
   <div class="ax a">通常誤差：概要消失 → 破綻</div>
   <div class="ax b">性質誤差：残差を熱として排出・追跡継続</div>
-  <div class="ax c">包括計算：10層×n段の積層が成立</div>
+  <div class="ax c">包括計算：10層×n段を図示（計算未検証）</div>
 </div>
 
 <div class="controls">
@@ -270,7 +283,7 @@ canvas {
     <div class="panel-title">◉ 性質誤差 — Property Error · 脱進機原理</div>
     <canvas id="cProp"></canvas>
     <div class="formula-box">
-      δ（遊び）を設計時から確保<br>
+      図示上の遊び幅（正規τではない）を設計時から確保<br>
       残差ε → 熱として排出（持ち越し禁止）<br>
       各ステップ完結 → 追跡継続 → 概要常時把握
     </div>
@@ -278,9 +291,9 @@ canvas {
       <span class="hl-p">金色の粒子が「熱」として排出</span>されています。<br>
       信号（緑線）は常に追跡可能な状態を保ちます。<br>
       脱進機の歯車が一歯ずつ完結するのと同じ原理。<br>
-      δ（遊び）があるから誤差を受け止められます。
+      図示上の遊び幅（正規τではない）があるから誤差を受け止められます。
     </div>
-    <div class="status" style="background:rgba(64,208,160,0.1);color:var(--prop-err);border:1px solid rgba(64,208,160,0.3)">δ ABSORBING — TRACKING</div>
+    <div class="status" style="background:rgba(64,208,160,0.1);color:var(--prop-err);border:1px solid rgba(64,208,160,0.3)">ILLUSTRATIVE PLAY BAND — UNVERIFIED</div>
   </div>
 
   <!-- RIGHT: 包括計算積層 -->
@@ -293,10 +306,10 @@ canvas {
       Layer 21-30 → さらに積層可能
     </div>
     <div class="desc">
-      性質誤差が破綻しないので<br>
+      この概念演出では<br>
       <span class="hl-l">各10層ブロックの出力がそのまま</span><br>
       次の10層の変数として使えます。<br>
-      計算爆発なしに深さを増やせる構造的根拠です。
+      層の入出力・残差伝播は計算しておらず、計算爆発を防ぐ証明ではありません。
     </div>
     <div id="layerStatus" class="status" style="background:rgba(128,144,240,0.1);color:var(--layer-col);border:1px solid rgba(128,144,240,0.3)">LAYER 1 ACTIVE</div>
   </div>
@@ -315,16 +328,16 @@ canvas {
       <div class="key-cell">
         <span class="label">性質誤差 Property Error</span>
         <span class="val hl-p">残差を熱として排出する</span>
-        各ステップで残差を排出するため誤差が累積しません。
-        δ（遊び）が設計時から確保されているので誤差を受け止めながら
+        残差非累積という仮説を演出しています。残差量や熱量は計算していません。
+        図示上の遊び幅（正規τではない）が設計時から確保されているので誤差を受け止めながら
         信号の追跡を継続できます。概要を常時把握できる状態が続きます。
       </div>
       <div class="key-cell">
         <span class="label">包括計算の積層</span>
-        <span class="val hl-l">出力がクリーンだから積層できる</span>
-        性質誤差で完結した各層の出力は汚染されていません。
+        <span class="val hl-l">積層の概念演出（未検証）</span>
+        各層の計算や出力の正しさは、このアニメーションでは検証していません。
         だからそのまま次の層の変数として入力できます。
-        10層×n段の計算爆発なしの積層がこの原理で成立します。
+        10層×n段の実計算・安定性の検証には、別の入力・更新則・受入条件が必要です。
       </div>
     </div>
   </div>
@@ -476,7 +489,7 @@ function drawProp(ctx, w, h, t) {
 
   const cy = h * 0.5;
   const maxPts = Math.floor(w);
-  const delta = 18; // δ (遊び) — pre-allocated play zone
+  const playWidth = 18; // illustrative play width (px) — pre-allocated play zone
 
   // signal
   const sig = Math.sin(t * 0.06) * 30 + Math.sin(t * 0.13) * 10;
@@ -485,20 +498,20 @@ function drawProp(ctx, w, h, t) {
 
   // δ zone (play band) — always present
   ctx.fillStyle = 'rgba(64,208,160,0.07)';
-  ctx.fillRect(0, cy - 60 - delta, w, delta);
-  ctx.fillRect(0, cy + 60, w, delta);
+  ctx.fillRect(0, cy - 60 - playWidth, w, playWidth);
+  ctx.fillRect(0, cy + 60, w, playWidth);
 
   // δ label
   ctx.strokeStyle = 'rgba(64,208,160,0.3)';
   ctx.setLineDash([3,3]);
   ctx.lineWidth = 0.8;
-  ctx.beginPath(); ctx.moveTo(0, cy - 60 - delta); ctx.lineTo(w, cy - 60 - delta); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0, cy + 60 + delta); ctx.lineTo(w, cy + 60 + delta); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, cy - 60 - playWidth); ctx.lineTo(w, cy - 60 - playWidth); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, cy + 60 + playWidth); ctx.lineTo(w, cy + 60 + playWidth); ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle = 'rgba(64,208,160,0.5)';
   ctx.font = '8px JetBrains Mono';
   ctx.textAlign = 'right';
-  ctx.fillText('δ (遊び)', w - 4, cy - 62);
+  ctx.fillText('illustrative play width (px)', w - 4, cy - 62);
 
   // signal trace — always clean
   ctx.strokeStyle = 'rgba(80,220,140,0.85)';
@@ -651,7 +664,7 @@ function drawLayer(ctx, w, h, t) {
       ctx.fillStyle = 'rgba(128,220,160,0.85)';
       ctx.font = 'bold 8px JetBrains Mono';
       ctx.textAlign = 'right';
-      ctx.fillText('✓ CLEAN OUTPUT', w - 10, gy + 14);
+      ctx.fillText('ILLUSTRATIVE GROUP (UNVERIFIED)', w - 10, gy + 14);
     }
   }
 
@@ -659,7 +672,7 @@ function drawLayer(ctx, w, h, t) {
   const st = document.getElementById('layerStatus');
   const completedGroups = Math.min(Math.floor(t / activationPeriod), groups);
   st.textContent = completedGroups >= groups
-    ? `✓ ALL ${groups * 10} LAYERS COMPLETE — 積層成功`
+    ? `✓ ALL ${groups * 10} LAYERS ANIMATED — 計算未検証`
     : `LAYER ${currentGroup * 10 + 1}–${currentGroup * 10 + 10} ACTIVE`;
   st.style.color = completedGroups >= groups ? '#80dca0' : 'var(--layer-col)';
 }
@@ -711,9 +724,8 @@ document.getElementById('btnReset').addEventListener('click', () => {
 
 window.addEventListener('load', () => { initAll(); drawAll(); });
 window.addEventListener('resize', () => {
-  const was = running; running = false; cancelAnimationFrame(rafId);
-  initAll(); drawAll();
-  if (was) { running = true; loop(); }
+  cv = {n: initCanvas('cNormal'), p: initCanvas('cProp'), l: initCanvas('cLayer')};
+  drawAll(); // Preserve animation position across viewport changes.
 });
 </script>
 </body>

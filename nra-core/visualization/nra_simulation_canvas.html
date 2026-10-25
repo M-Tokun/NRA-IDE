@@ -177,11 +177,35 @@
             display: block;
         }
     </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+/* N01 proposal: only narrow viewports; no model, values, or desktop layout changes. */
+@media (max-width: 600px) {
+  body { overflow-wrap: anywhere; }
+  .la-dim, .formula, .flow-row, .tbl td, .tbl th { overflow-wrap: anywhere; }
+  .flow-row > * { min-width: 0; }
+  .container { min-width: 0; }
+  .panel, #chart-view { box-sizing: border-box; min-width: 0 !important; max-width: 100%; }
+  canvas { box-sizing: border-box; max-width: 100%; height: auto; }
+  .legend { flex-wrap: wrap; }
+}
+
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>固定0.8→0.75補正と無限容量bufferによる旧BoundLawモデルです。正規R・状態機械や物理的保存則の証明ではありません。 / Historical BoundLaw toy model, not canonical evaluation or a physical conservation proof.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
     <h1>NRA-IDE: Canvas Visualization (Canvas API + Pure JavaScript)</h1>
-    <p style="text-align: center; color: #888; margin: 0 0 20px 0;">律環公理 動的視覚化証明 (Interactive Proof)</p>
+    <p style="text-align: center; color: #888; margin: 0 0 20px 0;">旧BoundLawの概念モデル（保存則・安全性の証明ではない）</p>
 
     <div class="controls">
         <button class="btn-run" onclick="step()">Next Cycle (+0.1)</button>
@@ -278,6 +302,8 @@
         };
 
         function drawChart() {
+            chart.maxCycles = Math.max(40, history.cycle.at(-1) || 0);
+            chart.maxValue = Math.max(2, ...history.value, ...history.buffer, ...history.tension) * 1.05;
             // Clear canvas
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -373,7 +399,7 @@
             ctx.beginPath();
 
             for (let i = 0; i < data.length; i++) {
-                const x = chart.padding + (i / Math.max(chart.maxCycles, data.length - 1)) * chart.width;
+                const x = chart.padding + ((history.cycle[i] || 0) / chart.maxCycles) * chart.width;
                 const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
 
                 if (i === 0) {
@@ -388,7 +414,7 @@
             // Draw points
             ctx.fillStyle = color;
             for (let i = 0; i < data.length; i++) {
-                const x = chart.padding + (i / Math.max(chart.maxCycles, data.length - 1)) * chart.width;
+                const x = chart.padding + ((history.cycle[i] || 0) / chart.maxCycles) * chart.width;
                 const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
                 ctx.beginPath();
                 ctx.arc(x, y, 2, 0, Math.PI * 2);
@@ -415,7 +441,7 @@
             ctx.beginPath();
 
             for (let i = 0; i < data.length; i++) {
-                const x = chart.padding + (i / Math.max(chart.maxCycles, data.length - 1)) * chart.width;
+                const x = chart.padding + ((history.cycle[i] || 0) / chart.maxCycles) * chart.width;
                 const y = chart.padding + chart.height - (data[i] / chart.maxValue) * chart.height;
 
                 if (i === 0) {
@@ -479,7 +505,7 @@
             state.cycle++;
             state.rate = cost;
             state.value += cost;
-            if (state.value > 1.5) state.value = 1.5; 
+
         }
 
         // Logic: Safety Node (BoundLaw)
@@ -501,6 +527,21 @@
             }
         }
 
+        let pendingUpdate = null;
+        let runGeneration = 0;
+        function queueUpdate(delay) {
+            if (pendingUpdate !== null) clearTimeout(pendingUpdate);
+            const generation = runGeneration;
+            pendingUpdate = setTimeout(() => {
+                if (generation !== runGeneration) return;
+                pendingUpdate = null; safetyCheck(); updateVisuals();
+            }, delay);
+        }
+        function stopAuto() {
+            if (interval !== null) clearInterval(interval);
+            interval = null;
+            document.getElementById('auto-run').checked = false;
+        }
         function step() {
             dynamics(BASE_COST);
             
@@ -509,10 +550,7 @@
             mainWater.style.height = `${Math.min(preCheckValue, 1.5) * 100}%`;
             if(preCheckValue > THRESHOLD) mainWater.style.backgroundColor = '#ff7b72';
 
-            setTimeout(() => {
-                safetyCheck();
-                updateVisuals();
-            }, 200);
+            queueUpdate(200);
         }
 
         function injectDisturbance() {
@@ -525,15 +563,15 @@
             mainWater.style.height = `${Math.min(state.value, 1.5) * 100}%`;
             mainWater.style.backgroundColor = '#d29922';
 
-            setTimeout(() => {
-                safetyCheck();
-                updateVisuals();
-            }, 400);
+            queueUpdate(400);
         }
 
         function resetSim() {
-            state = { cycle: 0, value: 0.0, rate: 0.0, buffer: 0.0, tension: 0.0 };
-            history = { cycle: [], value: [], buffer: [], tension: [] };
+            stopAuto(); runGeneration++;
+            if (pendingUpdate !== null) clearTimeout(pendingUpdate);
+            pendingUpdate = null;
+            state = {cycle:0, value:0, rate:0, buffer:0, tension:0};
+            history = {cycle:[], value:[], buffer:[], tension:[]};
             updateVisuals();
             document.getElementById('main-water').style.backgroundColor = '#3fb950';
         }
@@ -548,7 +586,7 @@
                     } else {
                         step();
                     }
-                    if(state.cycle > 50) e.target.checked = false;
+                    if(state.cycle > 50) stopAuto();
                 }, 800);
             } else {
                 clearInterval(interval);

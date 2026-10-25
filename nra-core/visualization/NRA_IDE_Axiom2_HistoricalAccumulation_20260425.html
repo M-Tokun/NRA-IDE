@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NRA-IDE: Axiom 2 — Historical Accumulation and Absorption Thickness | 履歴蓄積と吸収厚み</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap');
+
 :root{
   --bg:#060c12;--panel:#0b1520;--border:#1a3040;
   --text:#c8dde8;--dim:#4a6a7a;
@@ -106,8 +106,21 @@ input[type=range]{accent-color:var(--delta);cursor:pointer;width:88px;}
 footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);margin-top:4px;}
 @media(max-width:660px){.compare-grid{grid-template-columns:1fr;}}
 </style>
+<style id="nra-review-style">
+.nra-review-note{box-sizing:border-box;max-width:1180px;margin:12px auto;padding:12px 16px;border:1px solid #a6b4bd;border-radius:6px;background:#12222d;color:#edf3f7;font:14px/1.65 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.nra-review-note a{color:#8ed9ff}.nra-review-note summary{cursor:pointer;font-weight:700}
+</style>
 </head>
 <body>
+<aside class="nra-review-note"><strong>歴史的説明・合成データによる概念デモ / historical, synthetic educational visualization</strong><br>数値・閾値は例示です。ドメインの実測器、安全証明、正規状態機械の完全実装ではありません。RESETや厚みの再宣言は独立した新実験です。 / Values are illustrative, uncalibrated; RESET starts a separate evaluation.<br>
+現行正典 / Canon: <a href="../../theory/AXIOMS.md">AXIOMS v2.4</a> · <a href="README.md">資料区分・操作・制限 / scope and limits</a>。
+唯一の律環公理は「存在は生成である。」です。「公理1/2」「Axiom 4/5」は旧分類です。 / The sole axiom is Existence is Generation; numbered axioms are historical labels.
+<details><summary>現行正典の境界（この教材の実装とは区別） / current canonical boundary rules</summary>
+有限δ≥0、有限τ&gt;0でR=δ/τ。0≤R_warn&lt;R_handoff&lt;R_irrev&lt;1。
+PERMIT → BOUNDARY_WARNING → HANDOFF_REQUIRED → IRREVERSIBLE_TRANSITION → RUPTURE_BOUNDARY。
+τ=0はOUT_OF_DESCRIPTION_DOMAIN、不正・不明・非有限入力はCONFESSION。
+不可逆履歴はR低下で解除せず、Fail-Closedでも構造証言は継続します。例示の0.7/0.75/0.9は普遍定数ではありません。
+</details></aside>
 
 <div class="page-title">
   <h1>NRA-IDE — Axiom 2 / 律環公理 公理2</h1>
@@ -165,9 +178,9 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
       <div class="judgment" id="jMain">待機中 / Waiting…</div>
       <div class="restore-info" id="restoreInfo">
         <div class="ri-row">
-          <span class="ri-item">補充回数: <span class="ri-val" id="restoreCount">0</span></span>
+          <span class="ri-item">要素追加回数: <span class="ri-val" id="restoreCount">0</span></span>
           <span class="ri-item">τ₀ = <span class="ri-val" id="tau0disp">—</span></span>
-          <span class="ri-item">上限 τ_max: <span class="ri-val" id="tauMaxDisp">—</span></span>
+          <span class="ri-item">次回追加の総厚み目標: <span class="ri-val" id="tauMaxDisp">—</span></span>
           <span class="ri-item">劣化率: <span class="ri-val" id="degradeRate">—</span></span>
         </div>
       </div>
@@ -193,16 +206,16 @@ footer{text-align:center;padding:10px;font-size:.6rem;color:var(--dim);font-fami
     <span class="ctrl-val" id="tau0Val">0.40</span>
   </div>
   <button type="button" class="dist-btn" onclick="injectDist()">外乱 δ↑ / Disturbance</button>
-  <button type="button" class="restore-btn" id="restoreBtn" onclick="doRestore()" disabled>補充 τ+α / Replenish</button>
+  <button type="button" class="restore-btn" id="restoreBtn" onclick="doRestore()" disabled>構造要素の追加 / Add Element</button>
   <button type="button" class="reset-btn" onclick="resetAll()">RESET</button>
 </div>
 
 <div class="insight">
   <span class="ilabel">▶ Axiom 2 観測：</span>
   δ（橙）は生成の継続とともに単調増加する。τ（紫）は δ の蓄積に比例して消耗し，外生補充なしに自然回復しない（Axiom 4）。<br>
-  R = δ/τ が 1 に近づくとき，「補充 τ」ボタンで外生補充を試みることができる。しかし τ は τ₀ まで回復せず，回数を重ねるたびに上限が下がっていく（Axiom 5 復元劣化）。<br>
+  R = δ/τ が 1 に近づくとき，「構造要素の追加」ボタンで新しい要素を加えることができる。この仮想モデルでは、要素追加で総厚みだけが増える。既存要素の厚み・残留ズレは回復しない。追加目標の係数0.82は例示であり、復元劣化の証明ではない。<br>
   <span class="axiom-note">
-    タブ「補充劣化」では補充操作の限界が定量的に観測できる。
+    タブ「補充劣化」では事前固定した仮想追加規則の動作を観察できる。
     加速蓄積タブでは δ の急増が τ の急速消耗を引き起こし，R の加速的上昇が確認できる。
   </span>
 </div>
@@ -239,6 +252,9 @@ let tickN  = 0;
 let broken = false;
 let pendingDist = 0;
 let restoreCount = 0;
+let addedTau = 0; // Thickness of added elements; never restoration of existing ones.
+let irreversible = false;
+const DEMO_IRREV = 0.90; // Synthetic example threshold fixed before each run.
 const RESTORE_FACTOR = 0.82;  // each restore: new ceiling = prev_ceiling * 0.82
 let tauCeiling = 0.40;        // max τ achievable (degrades)
 
@@ -256,12 +272,12 @@ function resetAll() {
   tickN    = 0;
   broken   = false;
   pendingDist = 0;
-  restoreCount = 0;
+  restoreCount = 0; addedTau = 0; irreversible = false;
   histD = []; histT = []; histR = []; histI = [];
 
   document.getElementById('jMain').className = 'judgment';
   document.getElementById('jMain').textContent = '待機中 / Waiting…';
-  document.getElementById('restoreInfo').classList.remove('show');
+  document.getElementById('restoreInfo').classList.toggle('show', currentTab === 2);
   document.getElementById('restoreBtn').disabled = (currentTab !== 2);
   updateRestoreInfo();
 }
@@ -286,12 +302,7 @@ function onRateChange(v) {
 function onTau0Change(v) {
   tau0User = parseFloat(v);
   document.getElementById('tau0Val').textContent = tau0User.toFixed(2);
-  // apply immediately only if not started much
-  if (tickN < 5) {
-    tau0 = tau0User;
-    tauCeiling = tau0User;
-    tau  = tau0User;
-  }
+  resetAll(); // New thickness declaration starts a new experiment.
 }
 
 function injectDist() {
@@ -299,23 +310,35 @@ function injectDist() {
 }
 
 function doRestore() {
-  if (currentTab !== 2 || broken) return;
-  // Each restore: ceiling degrades by RESTORE_FACTOR, add some τ up to new ceiling
-  tauCeiling = tauCeiling * RESTORE_FACTOR;
-  const addAmt = Math.max(0, tauCeiling - tau);
+  if (currentTab !== 2 || broken || irreversible) return;
+  const nextCeiling = tauCeiling * RESTORE_FACTOR;
+  const addAmt = Math.max(0, nextCeiling - tau);
+  const jM = document.getElementById('jMain');
+  if (addAmt === 0) {
+    jM.className = 'judgment j-restore';
+    jM.textContent = '追加なし / No element added: current total already meets the next addition target.';
+    return;
+  }
+  // New synthetic element, linear composition fixed before evaluation.
+  // Existing-element thickness and residual deviation are not restored.
+  tauCeiling = nextCeiling;
+  addedTau += addAmt;
   tau += addAmt;
   restoreCount++;
   updateRestoreInfo();
-  // Visual signal
-  const jM = document.getElementById('jMain');
   jM.className = 'judgment j-restore';
-  jM.textContent = 'τ補充実施 — τ_restored = ' + tau.toFixed(4) + ' < τ₀ = ' + tau0.toFixed(4) + '  (Axiom 5 復元劣化)';
+  jM.textContent = '構造要素を追加 / Added element: +' + addAmt.toFixed(4)
+    + '; existing τ=' + (tau - addedTau).toFixed(4)
+    + '; added τ=' + addedTau.toFixed(4) + '; total τ=' + tau.toFixed(4);
+  // Record the Cause-Side addition event; never overwrite the preceding observation.
+  histD.push(delta); histT.push(tau); histR.push(delta / tau); histI.push(integF);
+  if (histD.length > HIST) { histD.shift(); histT.shift(); histR.shift(); histI.shift(); }
 }
 
 function updateRestoreInfo() {
   document.getElementById('restoreCount').textContent = restoreCount;
   document.getElementById('tau0disp').textContent = tau0.toFixed(4);
-  document.getElementById('tauMaxDisp').textContent = tauCeiling.toFixed(4);
+  document.getElementById('tauMaxDisp').textContent = (tauCeiling * RESTORE_FACTOR).toFixed(4);
   const pct = tau0 > 0 ? ((1 - tauCeiling / tau0) * 100).toFixed(1) : '—';
   document.getElementById('degradeRate').textContent = pct + '%';
 }
@@ -328,10 +351,10 @@ function fDepletion(d) {
 
 function tick() {
   if (broken) {
-    // still push flat data so canvas scrolls
+    // Repeat the held terminal snapshot for display; this is not a new observation
     histD.push(delta);
-    histT.push(0);
-    histR.push(Infinity);
+    histT.push(tau);
+    histR.push(tau > 0 ? delta / tau : null);
     histI.push(integF);
     if (histD.length > HIST) { histD.shift(); histT.shift(); histR.shift(); histI.shift(); }
     return;
@@ -349,10 +372,16 @@ function tick() {
   // τ depletes by ∫f(δ)ds
   const fdelta = fDepletion(delta);
   integF += fdelta;
-  tau -= fdelta;
-  if (tau <= 0.0001) { tau = 0.0001; broken = true; }
-
-  const R = delta / tau;
+  const oldTau = tau;
+  tau = Math.max(0, tau - fdelta);
+  // Allocate each total thickness loss once, proportionally to component thickness.
+  addedTau = oldTau > 0 ? addedTau * tau / oldTau : 0;
+  const R = tau > 0 ? delta / tau : null;
+  if (R !== null && R >= DEMO_IRREV) irreversible = true;
+  if (R === null || R >= 1) {
+    broken = true;
+    document.getElementById('restoreBtn').disabled = true;
+  }
 
   histD.push(delta);
   histT.push(tau);
@@ -604,7 +633,7 @@ function updateUI() {
 
   document.getElementById('dispD').textContent = curD.toFixed(4);
   document.getElementById('dispT').textContent = isFinite(curT) ? curT.toFixed(4) : '≈0';
-  document.getElementById('dispR').textContent = broken ? '≥1 BREAK' : (isFinite(curR) ? curR.toFixed(4) : '—');
+  document.getElementById('dispR').textContent = curR === null ? 'OUT_OF_DESCRIPTION_DOMAIN' : curR.toFixed(4);
   document.getElementById('dispInteg').textContent = curI.toFixed(5);
 
   const safeR = isFinite(curR) ? curR : 1.2;
@@ -616,7 +645,11 @@ function updateUI() {
   const jM = document.getElementById('jMain');
   if (broken) {
     jM.className = 'judgment j-break';
-    jM.textContent = 'R ≥ 1 → BREAK — δ が τ を超過，構造相転移 / δ exceeded τ, structural phase transition';
+    jM.textContent = curR === null ? 'OUT_OF_DESCRIPTION_DOMAIN: τ=0; R undefined' : 'RUPTURE_BOUNDARY / POST_RUPTURE_FIXED — first-reach snapshot retained';
+  } else if (irreversible) {
+    jM.className = 'judgment j-break';
+    jM.textContent = 'IRREVERSIBLE_TRANSITION — retained; structure addition disabled';
+    document.getElementById('restoreBtn').disabled = true;
   } else if (safeR >= 0.75 && jM.className !== 'judgment j-restore') {
     jM.className = 'judgment j-warn';
     jM.textContent = 'WARN: R=' + safeR.toFixed(4) + ' — 破断接近域 / Collapse-Approach Region (Axiom 7)';
