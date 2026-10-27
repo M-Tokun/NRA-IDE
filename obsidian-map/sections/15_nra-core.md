@@ -2,7 +2,7 @@
 
 [← NRA-IDE Markdown 接続図](../00_NRA-IDE%E6%8E%A5%E7%B6%9A%E5%9B%B3.md)
 
-対象 Markdown: 21 ファイル
+対象 Markdown: 22 ファイル
 
 - [nra-core/foundations/AXIOMS_rewritten_2026-04-24_011508.md](../../nra-core/foundations/AXIOMS_rewritten_2026-04-24_011508.md)
 - [nra-core/foundations/Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md](../../nra-core/foundations/Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md)
@@ -25,3 +25,4 @@
 - [nra-core/README.md](../../nra-core/README.md)
 - [nra-core/visualization/README_AI_Path_Audit_Tool_v2_EN.md](../../nra-core/visualization/README_AI_Path_Audit_Tool_v2_EN.md)
 - [nra-core/visualization/README_AI_Path_Audit_Tool_v2.md](../../nra-core/visualization/README_AI_Path_Audit_Tool_v2.md)
+- [nra-core/visualization/README.md](../../nra-core/visualization/README.md)

@@ -2,7 +2,7 @@
 
 > このノートと `sections/` は `scripts/generate_obsidian_map.ps1` による生成物です。既存の Markdown 本文は変更しません。
 
-対象 Markdown: 455 ファイル
+対象 Markdown: 460 ファイル
 
 ## セクション
 
@@ -12,22 +12,23 @@
 - [audit](sections/04_audit.md) — 6 ファイル
 - [cascade-failure-prevention](sections/05_cascade-failure-prevention.md) — 10 ファイル
 - [config](sections/06_config.md) — 4 ファイル
-- [dictionary](sections/07_dictionary.md) — 6 ファイル
+- [dictionary](sections/07_dictionary.md) — 8 ファイル
 - [docs](sections/08_docs.md) — 30 ファイル
 - [examples](sections/09_examples.md) — 18 ファイル
 - [gate](sections/10_gate.md) — 7 ファイル
 - [ground](sections/11_ground.md) — 20 ファイル
 - [local_reportsDirectory](sections/12_local_reportsDirectory.md) — 122 ファイル
 - [multi-physics-safety-gate](sections/13_multi-physics-safety-gate.md) — 4 ファイル
-- [note](sections/14_note.md) — 130 ファイル
-- [nra-core](sections/15_nra-core.md) — 21 ファイル
+- [note](sections/14_note.md) — 131 ファイル
+- [nra-core](sections/15_nra-core.md) — 22 ファイル
 - [nra-ide-cancer-treatment-support-system](sections/16_nra-ide-cancer-treatment-support-system.md) — 29 ファイル
 - [nra-tcm-parser](sections/17_nra-tcm-parser.md) — 2 ファイル
-- [skills](sections/18_skills.md) — 6 ファイル
-- [src](sections/19_src.md) — 2 ファイル
-- [theory](sections/20_theory.md) — 7 ファイル
-- [universal-definition](sections/21_universal-definition.md) — 10 ファイル
-- [viewer-app](sections/22_viewer-app.md) — 4 ファイル
+- [obsidian-index](sections/18_obsidian-index.md) — 1 ファイル
+- [skills](sections/19_skills.md) — 6 ファイル
+- [src](sections/20_src.md) — 2 ファイル
+- [theory](sections/21_theory.md) — 7 ファイル
+- [universal-definition](sections/22_universal-definition.md) — 10 ファイル
+- [viewer-app](sections/23_viewer-app.md) — 4 ファイル
 
 ## 表示方法
 
