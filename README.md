@@ -1,4 +1,5 @@
 <!-- TARGET: /README.md -->
+
 <!-- UPDATED: 2026-10-06 JST -->
 
 # NRA-IDE: Nomological Ring Axioms — Intensional Dynamics Engine
@@ -37,33 +38,16 @@ Even when autonomous judgment or autonomous action is stopped, Cause-Side observ
 
 NRA-IDE definitions must be read in the following order.
 
-1. [`theory/AXIOMS.md`](./theory/AXIOMS.md)  
-   Canonical definition of the sole axiom, variables, IDE formula classification, boundary states, irreversible transition, and structural testimony
-
-2. [`theory/axioms.json`](./theory/axioms.json)  
-   Machine-readable synchronized representation of the sole canonical axiom and subordinate definitions
-
-3. [`theory/NRA-IDE_Foundational_Thesis_Bilingual.md`](./theory/NRA-IDE_Foundational_Thesis_Bilingual.md)  
-   Foundational thesis in bilingual English and Japanese form
-
-4. [`theory/SANDWICH_ARCH.md`](./theory/SANDWICH_ARCH.md)  
-   Logical separation specification for systems that include an LLM as an Effect-Side generative component
-
-5. [`theory/THEORY.md`](./theory/THEORY.md)  
-   Theory text integrating the sole axiom, structural principles, IDE formulas, and canonical boundary states
-
-6. [`FORMULA.md`](./FORMULA.md)  
-   Canonical specifications for formulas, variables, domains, initial conditions, numerical conditions, and complementary computation
-
-7. [`llms.md`](./llms.md)  
-   AI-oriented identification, interpretation, and operational gate
-
+1. [`theory/AXIOMS.md`](./theory/AXIOMS.md)Canonical definition of the sole axiom, variables, IDE formula classification, boundary states, irreversible transition, and structural testimony
+2. [`theory/axioms.json`](./theory/axioms.json)Machine-readable synchronized representation of the sole canonical axiom and subordinate definitions
+3. [`theory/NRA-IDE_Foundational_Thesis_Bilingual.md`](./theory/NRA-IDE_Foundational_Thesis_Bilingual.md)Foundational thesis in bilingual English and Japanese form
+4. [`theory/SANDWICH_ARCH.md`](./theory/SANDWICH_ARCH.md)Logical separation specification for systems that include an LLM as an Effect-Side generative component
+5. [`theory/THEORY.md`](./theory/THEORY.md)Theory text integrating the sole axiom, structural principles, IDE formulas, and canonical boundary states
+6. [`FORMULA.md`](./FORMULA.md)Canonical specifications for formulas, variables, domains, initial conditions, numerical conditions, and complementary computation
+7. [`llms.md`](./llms.md)AI-oriented identification, interpretation, and operational gate
 8. Domain-specific rules
-
 9. Normative reference implementation that passes canonical conformance tests
-
 10. Other implementation code
-
 11. Comments, examples, and AI-generated explanations
 
 Lower-level documents, code, comments, and examples must not alter or override definitions in higher-level canonical documents.
@@ -126,7 +110,7 @@ Pre-migration [configuration](./config/legacy/v1/structural_zones.md) and [gate 
 
 ## Sole Nomological Ring Axiom
 
-> **Existence is Generation.**  
+> **Existence is Generation.**
 > **存在は生成である。**
 
 This is the one and only Nomological Ring Axiom. No second or subsequent axiom exists. “Nomological Ring Axioms” remains the proper name abbreviated as NRA; it does not authorize adding further axioms.
@@ -147,11 +131,11 @@ $$
 R=\frac{\delta}{\tau}
 $$
 
-| Symbol | Canonical name | Meaning |
-|---|---|---|
-| $\delta$ | Accumulated Deviation | Deviation accumulated within the structure while carrying Cause-Side history |
-| $\tau$ | Absorption Thickness | The thickness through which the structure can absorb accumulated deviation |
-| $R$ | Boundary-Approach Ratio | The ratio indicating how close the structure is to the complete-rupture boundary |
+| Symbol     | Canonical name          | Meaning                                                                          |
+| ---------- | ----------------------- | -------------------------------------------------------------------------------- |
+| $\delta$ | Accumulated Deviation   | Deviation accumulated within the structure while carrying Cause-Side history     |
+| $\tau$   | Absorption Thickness    | The thickness through which the structure can absorb accumulated deviation       |
+| $R$      | Boundary-Approach Ratio | The ratio indicating how close the structure is to the complete-rupture boundary |
 
 The symbol $R$ is reserved exclusively for the boundary-approach ratio.
 
@@ -195,12 +179,12 @@ R_{\mathrm{irrev}}
 1.0
 $$
 
-| Boundary | Canonical name | Role |
-|---|---|---|
-| $R_{\mathrm{warn}}$ | Boundary-Approach Warning Point | Disclose that the structure is approaching a boundary |
-| $R_{\mathrm{handoff}}$ | Pre-Boundary Human-Handoff Point | Transfer execution authority only to the predefined external authority, stop new autonomous judgment and operation, and keep testimony and audit routes active |
-| $R_{\mathrm{irrev}}$ | Irreversible-Transition Onset Threshold | Do not assume that the former structural state remains recoverable |
-| $R=1.0$ | Invariant Complete-Rupture Boundary | Stop ordinary generation and switch the declared target to post-rupture fixed testimony |
+| Boundary                 | Canonical name                          | Role                                                                                                                                                           |
+| ------------------------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| $R_{\mathrm{warn}}$    | Boundary-Approach Warning Point         | Disclose that the structure is approaching a boundary                                                                                                          |
+| $R_{\mathrm{handoff}}$ | Pre-Boundary Human-Handoff Point        | Transfer execution authority only to the predefined external authority, stop new autonomous judgment and operation, and keep testimony and audit routes active |
+| $R_{\mathrm{irrev}}$   | Irreversible-Transition Onset Threshold | Do not assume that the former structural state remains recoverable                                                                                             |
+| $R=1.0$                | Invariant Complete-Rupture Boundary     | Stop ordinary generation and switch the declared target to post-rupture fixed testimony                                                                        |
 
 Human handoff, irreversible-transition onset, and complete rupture are not the same event.
 
@@ -220,15 +204,15 @@ Concrete threshold values are defined for each target domain, but this order and
 
 ## Canonical State Classification
 
-| State | Condition | Required basic behavior |
-|---|---|---|
-| `PERMIT` | $0\le R<R_{\mathrm{warn}}$ | Permit constrained autonomous operation and continue structural audit |
-| `BOUNDARY_WARNING` | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$ | Disclose boundary approach, both remaining margins, trend, double-fluctuation status, and missing information |
-| `HANDOFF_REQUIRED` | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$ | Transfer execution authority only, stop new autonomous judgment and operation, and keep structural testimony and audit logging active |
-| `IRREVERSIBLE_TRANSITION` | $R_{\mathrm{irrev}}\le R<1.0$ | Set the irreversible latch and prohibit normalization, recovery assumptions, and optimization proposals |
-| `RUPTURE_BOUNDARY` | $R_{\mathrm{target}}\ge1.0$ | Stop ordinary generation and autonomous action, and switch to post-rupture fixed testimony through surviving channels |
-| `CONFESSION` | Required structural information is unknown, invalid, ambiguous, non-finite, or unsupported | Explicitly disclose the unresolved element, do not complete it by analogy, and stop the affected evaluation |
-| `OUT_OF_DESCRIPTION_DOMAIN` | $\tau=0$ | Declare $R$ undefined and require a change of description system |
+| State                         | Condition                                                                                  | Required basic behavior                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `PERMIT`                    | $0\le R<R_{\mathrm{warn}}$                                                               | Permit constrained autonomous operation and continue structural audit                                                                 |
+| `BOUNDARY_WARNING`          | $R_{\mathrm{warn}}\le R<R_{\mathrm{handoff}}$                                            | Disclose boundary approach, both remaining margins, trend, double-fluctuation status, and missing information                         |
+| `HANDOFF_REQUIRED`          | $R_{\mathrm{handoff}}\le R<R_{\mathrm{irrev}}$                                           | Transfer execution authority only, stop new autonomous judgment and operation, and keep structural testimony and audit logging active |
+| `IRREVERSIBLE_TRANSITION`   | $R_{\mathrm{irrev}}\le R<1.0$                                                            | Set the irreversible latch and prohibit normalization, recovery assumptions, and optimization proposals                               |
+| `RUPTURE_BOUNDARY`          | $R_{\mathrm{target}}\ge1.0$                                                              | Stop ordinary generation and autonomous action, and switch to post-rupture fixed testimony through surviving channels                 |
+| `CONFESSION`                | Required structural information is unknown, invalid, ambiguous, non-finite, or unsupported | Explicitly disclose the unresolved element, do not complete it by analogy, and stop the affected evaluation                           |
+| `OUT_OF_DESCRIPTION_DOMAIN` | $\tau=0$                                                                                 | Declare $R$ undefined and require a change of description system                                                                    |
 
 ---
 
