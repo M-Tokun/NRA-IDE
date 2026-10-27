@@ -7,7 +7,7 @@
 
 [![CI](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml/badge.svg)](https://github.com/M-Tokun/NRA-IDE/actions/workflows/nra_check.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19420853.svg)](https://doi.org/10.5281/zenodo.19420853)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19420853-blue.svg)](https://doi.org/10.5281/zenodo.19420853)
 
 <p align="center">
   <img src="./docs/NRA-IDE_git.jpg" width="700" alt="NRA-IDE LOGO">
