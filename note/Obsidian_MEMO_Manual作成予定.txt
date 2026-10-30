@@ -1,0 +1,619 @@
+紹介されたObsidianプラグイン一覧を抽出
+
+紹介されている厳選プラグイン10選
+
+Dataview: 動的レポート生成（データ分析）
+
+Omnisearch: 高速検索・情報アクセス（検索強化）
+
+Homepage: スタート画面設定（ナビゲーション）
+
+Excalidraw: 設計図・概念図作成（図解作成）
+
+Thino: 瞬間的なメモ記録（メモ取り）
+
+Hover Editor: ポップアップ編集（編集効率）
+
+Full Calendar: カレンダー表示（タスク管理）
+
+Advanced URI: 他アプリとの連携（外部連携）
+
+Icon Folder: フォルダアイコン（視覚化）
+
+File Color: ファイル色分け（視覚化）
+
+私の場合はリポジトリmdをマップにしているけれども、プラグインおすすめは？
+
+リポジトリのMarkdown（AGENTS.mdやREADME.mdなど）を構造マップとして活用し、ローカル環境での自動化やスクリプト管理を行う運用には、以下のプラグインが強力に機能します。
+
+Omnisearch（現在選択中）: vimのFuzzy Finderライクな高速検索が可能です。リポジトリ内の膨大な設計書や理論構築のメモから、VS Codeやターミナルでの検索に近い感覚で目的の箇所へ瞬時にアクセスできます。
+
+Advanced URI: Pythonの自動化ラッパーやCLIツール、VS Codeなどの外部環境から、URIスキーマ経由でObsidianの特定のマップファイルを直接開くといったシームレスな連携が構築できます。
+
+Dataview: 静的なマップ用mdファイルの中にクエリを記述し、タグやメタデータに基づいて関連ファイル（進行中のスクリプトメモなど）を自動リストアップする動的なインデックスとして運用できます。
+
+Hover Editor: マップとなる親mdファイルを開いた状態のまま、リンク先の詳細な仕様やエージェントの定義などをポップアップで確認・編集できるため、全体構造を見失わずに並行作業が可能です。
+
+Homepage: 起動時にリポジトリのルートとなるマップmdをハブとして固定表示させ、作業開始の起点を常に統一できます。
+
+プラグインの取り込み方法？
+
+Obsidianのコミュニティプラグインを導入するには、まず設定画面を開き「コミュニティプラグイン」タブを選択します。次にセーフモードを無効化して「閲覧」ボタンを押し、目的のプラグイン名を検索してインストールを実行します。インストール完了後に「有効化」をクリックすることで、環境に取り込まれて使用可能になります。
+
+これをイチオシのレベルというプラグインを３つ
+
+Dataview
+リポジトリの各Markdownをデータベースとして扱い、動的なマップを構築する最強のプラグインです。例えば「特定のタグ（#NRA-IDEなど）がついたファイル」や「更新日が直近1週間の仕様書」を親マップ上に自動でリストアップさせることができます。手動でリンクを繋ぐ運用から解放されます。
+
+Hover Editor
+全体マップの視認性を保ったまま、並行作業を行うための要です。親となるマップ（AGENTS.mdなど）のリンクにカーソルを合わせるだけで、本格的なエディタ画面がポップアップします。マップの画面遷移を発生させずに、裏側の定義や仕様メモを直接編集・追記できるため、思考のコンテキストが途切れません。
+
+Advanced URI
+ObsidianをVS Code、ターミナル（CLI）、またはご自身で組まれているPythonの自動化スクリプトと直結させるためのコア・プラグインです。外部環境からURIを踏むだけで、Obsidian内の特定のマップファイルや指定した見出し（コマンド）を直接開き、ローカル開発環境とObsidianをシームレスな一つのシステムとして統合できます。
+
+Dataviewでマップを作るクエリ例を見ますか？
+
+はい
+Dataviewを使って、マップ上に特定フォルダやタグのファイルを自動リストアップする具体的なクエリの書き方を教えてください。
+
+# Dataviewのクエリは、Markdown内に ```dataview と ``` でブロックを作り、SQLに近い構文（DQL）で記述します。リポジトリのマップ管理で即戦力になる3つの書き方です。
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+1. 特定のタグを持つファイルを自動リスト化
+タグ（例：#NRA-IDE）が付与されたファイルを、更新日時が新しい順に並べます。
+
+コード スニペット
+LIST
+FROM #NRA-IDE
+SORT file.mtime DESC
+2. 特定のフォルダ内のファイルを抽出
+指定したディレクトリ（例：skills/agents-md-guard）の中にあるMarkdownファイルだけを一覧表示します。
+
+コード スニペット
+LIST
+FROM "skills/agents-md-guard"
+SORT file.name ASC
+3. メタデータを含めたテーブル表示（プロジェクト管理用）
+単なるリストではなく、最終更新日やファイルサイズ、または自分で定義したメタデータ（例：status）を表形式で出力します。マップのルートファイル（AGENTS.mdやREADME.mdなど）自身を除外する条件（WHERE）を組み合わせるのが実用的です。
+
+コード スニペット
+TABLE file.mtime AS "最終更新日時", status AS "進行状況"
+FROM "docs" OR #仕様書
+WHERE file.name != "AGENTS"
+SORT file.mtime DESC
+LIMIT 10
+主要コマンドの役割:
+
+LIST / TABLE: 出力形式（箇条書きか、表形式か）
+
+FROM: 抽出元（#タグ名 や "フォルダパス"）
+
+WHERE: 絞り込み条件（特定ファイルの除外など）
+
+SORT: 並び順（file.mtime DESC で更新日時の新しい順）
+
+LIMIT: 表示件数の上限
+
+Markdownに独自のメタデータ（statusなど）を埋め込む方法を見る
+
+はい
+Dataviewのテーブルで使うために、Markdownファイルに「ステータス」や「バージョン」などの独自のメタデータ（フロントマター）を記述する方法を教えてください。
+
+Markdownファイルの先頭（1行目）に --- （ハイフン3つ）で囲んだYAMLブロック（フロントマター）を作成し、そこに「キーと値」を記述します。
+
+記述例（Markdownファイルの先頭）:
+
+YAML
+---
+status: 検証中
+version: 2.4
+component: HAN-Gate
+---
+
+# ここから通常のMarkdown本文
+内包性動力学エンジンの境界制御における...
+Dataviewでの呼び出し方:
+
+フロントマターで定義したキー（statusやversionなど）は、Dataviewクエリの中でそのまま列名や変数として指定できるようになります。
+
+コード スニペット
+TABLE status AS "ステータス", version AS "バージョン", component AS "対象機能"
+FROM "skills"
+WHERE version = 2.4
+SORT status ASC
+記述時の3つのルール:
+
+必ず1行目から始める: --- の上に空行やタイトル文字があると、プロパティ（メタデータ）として認識されません。
+
+コロンの後は半角スペース: status: 検証中 のように、: の直後には必ず半角スペースを1つ入れます。
+
+UIからも編集可能: Obsidianの標準機能である「プロパティ」ビューを使えば、フロントマターのYAMLを直接記述しなくても、GUI上でテキストボックスやドロップダウンとしてメタデータを追加・編集できます。
+
+文中に直接メタデータを記述するインラインフィールドの書き方を見る
+
+はい
+mdを作成する時のテンプレがいるという話になりましたね
+
+その通りです。毎回フロントマター（YAML）を手動で記述すると手間がかかるだけでなく、プロパティ名のタイポ（例：status と Status の混同）が発生し、Dataviewの抽出から漏れる原因になります。
+
+テンプレ運用を始める場合、Obsidian標準の「テンプレート」機能でも可能ですが、開発管理ならコミュニティプラグインのTemplaterを導入するのが圧倒的におすすめです。ファイル作成日時の自動入力や、ファイル名を自動で見出し（#）に設定することができます。
+
+NRA-IDEやスクリプト管理向けのテンプレート例（Templater用）
+
+テンプレート/新規ファイル.md といった名前で以下のMarkdownを作成しておきます。
+
+Markdown
+---
+status: 未着手
+version:
+tags:
+  -
+created: <% tp.file.creation_date("YYYY-MM-DD HH:mm") %>
+updated: <% tp.file.last_modified_date("YYYY-MM-DD HH:mm") %>
+---
+# <% tp.file.title %>
+
+## 概要
+-
+
+## 関連ファイル
+-
+テンプレート導入による3つのメリット
+
+一貫性の強制: プロパティ（メタデータ）の形式が完全に統一されるため、Dataviewのクエリが確実に機能します。
+
+自動展開: <% tp.file.title %> という構文により、ファイル名を付けた瞬間にその名前が自動で一番上の見出し（#）として本文に挿入されます。
+
+日付の自動記録: 作成日時や更新日時が自動的にスタンプされるため、スクリプトや仕様書のタイムライン管理が容易になります。
+
+Templaterの導入と自動適用の手順を見る
+
+はい
+mdの様式check.pyがいるね。今までのもあるのをテンプレに合わせないといけない
+
+既存のファイルを新しい構造へ適合させるためには、形式の不整合を弾く「チェック機構」と、欠落した状態を補完する「移行処理」を分離して実装するのが確実です。これはNRA-IDEにおける境界制御や状態ラッチの考え方と同じく、構造の崩れたデータがDataviewのマップ（システム）に混入するのを防ぐゲート（関所）として機能します。
+
+以下のPythonスクリプト（check.py）は、既存のMarkdown群を走査し、「フロントマターの有無」「必須項目の欠落」「H1見出しとファイル名の不一致」という3つの境界判定を行います。
+
+Markdown構造チェッカー・移行支援スクリプト（check.py）
+標準ライブラリのみで動作し、指定ディレクトリ内の .md ファイルの構造を検証します。
+
+Python
+import os
+import re
+from pathlib import Path
+
+# 検証するディレクトリ（リポジトリのパスに合わせて変更）
+TARGET_DIR = "./docs"
+# 必須メタデータ（境界条件）
+REQUIRED_KEYS = ["status", "version", "tags"]
+
+def validate_markdown(filepath):
+    try:
+        content = filepath.read_text(encoding='utf-8')
+    except Exception as e:
+        return False, f"読み込みエラー: {e}"
+
+    # 1. 構造判定：フロントマターブロックの抽出
+    frontmatter_match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+    if not frontmatter_match:
+        return False, "フロントマター（---）が存在しません。テンプレート適用が必要です。"
+
+    yaml_text = frontmatter_match.group(1)
+
+    # 2. 状態判定：必須キーの欠落確認
+    missing_keys = [key for key in REQUIRED_KEYS if not re.search(rf'^{key}:', yaml_text, re.MULTILINE)]
+
+    errors = []
+    if missing_keys:
+        errors.append(f"必須状態の欠落: {missing_keys}")
+
+    # 3. 境界判定：ファイル名とH1見出しの一致確認
+    filename = filepath.stem
+    if f"# {filename}" not in content:
+        errors.append(f"H1見出し（# {filename}）が見つかりません。")
+
+    if errors:
+        return False, " / ".join(errors)
+
+    return True, "構造確認OK"
+
+def main():
+    target_path = Path(TARGET_DIR)
+    if not target_path.exists():
+        print(f"ディレクトリ {TARGET_DIR} が見つかりません。")
+        return
+
+    print(f"=== Markdown構造チェック開始: {TARGET_DIR} ===")
+    error_count = 0
+
+    for md_file in target_path.rglob("*.md"):
+        is_valid, message = validate_markdown(md_file)
+        if not is_valid:
+            print(f"[不整合] {md_file.name}: {message}")
+            error_count += 1
+
+    print("-" * 40)
+    if error_count == 0:
+        print("全ファイルの構造と状態がテンプレートに適合しています。")
+    else:
+        print(f"修正が必要なファイル: {error_count}件")
+        print("※不整合ファイルには追記スクリプト（fix.py）等で一括フォーマットを適用してください。")
+
+if __name__ == "__main__":
+    main()
+運用ステップ
+現状の可視化（入力・分類）
+まずは上記の check.py を実行し、既存ファイルのうちどれがテンプレートから逸脱しているか（フロントマターがない、項目が足りない等）をリストアップします。
+
+既存ファイルへの一括適用（処理）
+エラーが出たファイルに対し、機械的にフロントマターを先頭に挿入する別の移行スクリプト（fix_format.py等）を実行し、一括でフォーマットを上書きします。
+
+継続的な境界保護（構造確認）
+VS Codeでの作業時や、.codex/hooks/check.py などのコミットフックにこの処理を組み込むことで、以後ルールから外れたMarkdownがリポジトリ内に保存されるのを自動的にブロックできます。
+
+既存ファイルにフロントマターを自動追記するスクリプトを見る
+
+はい
+check.pyでエラーになった既存のMarkdownファイルに対して、先頭にテンプレートのフロントマターを自動で挿入（追記）する修正用スクリプト（fix.py）の実装を教えてください。
+
+既存のMarkdownファイル群を新しいテンプレート構造（正規化された状態）へ強制的に移行させるスクリプト（fix.py）です。
+
+これは「構造を持たないデータに境界と初期状態を与える」処理となるため、意図しない上書きに備えて実行前に必ずリポジトリのバックアップ（またはGitでのコミット）を行ってから実行してください。
+
+Markdown自動補完・フォーマット修正スクリプト（fix.py）
+外部ライブラリは使用せず、Pythonの標準機能のみで動作します。
+
+Python
+import os
+import re
+from pathlib import Path
+from datetime import datetime
+
+# 対象ディレクトリ（環境に合わせて変更）
+TARGET_DIR = "./docs"
+
+# 補完する必須キーと初期値
+REQUIRED_KEYS = {
+    "status": "未着手",
+    "version": "1.0",
+    "tags": "\n  - "
+}
+
+def fix_markdown(filepath):
+    try:
+        content = filepath.read_text(encoding='utf-8')
+    except Exception as e:
+        return False, f"読み込みエラー: {e}"
+
+    filename = filepath.stem
+    modified = False
+
+    # 1. フロントマターブロックの解析と状態の補完
+    frontmatter_match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+
+    if frontmatter_match:
+        # 【ケースA】フロントマターが既にある場合
+        yaml_text = frontmatter_match.group(1)
+        body_text = content[frontmatter_match.end():]
+
+        new_yaml = yaml_text
+        # 足りないキーがあれば末尾に追記
+        for key, default_val in REQUIRED_KEYS.items():
+            if not re.search(rf'^{key}:', yaml_text, re.MULTILINE):
+                new_yaml += f"\n{key}: {default_val}"
+                modified = True
+
+        new_frontmatter = f"---\n{new_yaml}\n---"
+
+    else:
+        # 【ケースB】フロントマターが全く無い場合（無境界状態からの構築）
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
+        yaml_lines = ["---"]
+        for key, default_val in REQUIRED_KEYS.items():
+            yaml_lines.append(f"{key}: {default_val}")
+        yaml_lines.append(f"created: {now}")
+        yaml_lines.append(f"updated: {now}")
+        yaml_lines.append("---")
+
+        new_frontmatter = "\n".join(yaml_lines)
+        body_text = content
+        modified = True
+
+    # 2. H1見出し（境界）の補完
+    body_text_stripped = body_text.lstrip()
+    h1_target = f"# {filename}"
+
+    # 本文の先頭が指定のH1見出しで始まっていなければ挿入
+    if not body_text_stripped.startswith(h1_target):
+        body_text = f"\n{h1_target}\n\n{body_text_stripped}"
+        modified = True
+
+    # 3. 処理結果の出力（状態の確定）
+    if modified:
+        # 不要な連続改行を整理して結合
+        new_content = f"{new_frontmatter}\n{body_text}"
+        new_content = re.sub(r'\n{3,}', '\n\n', new_content)
+
+        filepath.write_text(new_content, encoding='utf-8')
+        return True, "修正・補完を適用しました"
+
+    return False, "修正不要（適合済み）"
+
+def main():
+    target_path = Path(TARGET_DIR)
+    if not target_path.exists():
+        print(f"ディレクトリ {TARGET_DIR} が見つかりません。")
+        return
+
+    print(f"=== Markdown構造移行プロセス開始: {TARGET_DIR} ===")
+    fixed_count = 0
+    skipped_count = 0
+
+    for md_file in target_path.rglob("*.md"):
+        is_fixed, message = fix_markdown(md_file)
+        if is_fixed:
+            print(f"[修正実行] {md_file.name}: {message}")
+            fixed_count += 1
+        else:
+            skipped_count += 1
+
+    print("-" * 40)
+    print(f"修正完了: {fixed_count}件 / スキップ: {skipped_count}件")
+    print("マップ（Dataview）の再構築準備が完了しました。")
+
+if __name__ == "__main__":
+    main()
+スクリプトの処理仕様（境界と状態の補完）
+このスクリプトは、ファイルの状態に応じて以下のフェイルセーフな補完を行います。
+
+フロントマターが全く無いファイル
+テキストの先頭に --- で囲まれたYAMLブロックを新規生成し、status: 未着手 や現在時刻の created を自動付与して「状態」を持たせます。本文はいっさい消えません。
+
+フロントマターはあるが項目が足りないファイル
+既存のYAML設定（例：別のプラグインが書き込んだデータなど）はそのまま保持し、REQUIRED_KEYS で指定した必須項目のうち、欠落しているものだけを追記します。
+
+見出しがないファイル
+フロントマターの直下に # ファイル名 というH1見出しがなければ、自動的に挿入します。これにより、マップから飛んだ先で「今どのファイルを開いているか」という視覚的境界が確定します。
+
+このスクリプトをGitのコミットフックに登録する方法を見る
+
+はい
+修正されたMarkdown構造が今後崩れないように、これらのチェックスクリプトをGitのpre-commitフックに登録して、不整合なファイルがコミットされるのを自動で防ぐ方法を教えてください。
+
+Gitの pre-commit フックを活用して、リポジトリに保存される前の段階で不整合なデータを弾く「フェイルクローズ機構」を構築します。これにより、ルールから外れたMarkdownがDataviewのマップ（システム）に混入するのを境界で確実に遮断できます。
+
+1. check.py に遮断シグナル（終了コード）を追加する
+現状の check.py は画面にエラーを表示するだけなので、エラー検知時にプロセスを異常終了（Exit 1）させてGitに「コミット中止」を伝達する処理を追加します。
+
+check.py の末尾にある main() 関数に sys モジュールを追加し、以下のように修正します。
+
+Python
+import sys  # 先頭付近に追加
+
+# ...(中略)...
+
+    print("-" * 40)
+    if error_count == 0:
+        print("全ファイルの構造と状態がテンプレートに適合しています。")
+        sys.exit(0)  # 正常通過（ゲート・オープン）
+    else:
+        print(f"修正が必要なファイル: {error_count}件")
+        print("※不整合ファイルには追記スクリプト（fix.py）等で一括フォーマットを適用してください。")
+        sys.exit(1)  # 異常検知（フェイルクローズによるコミット遮断）
+2. pre-commitフックの作成
+Gitリポジトリのルートディレクトリにある隠しフォルダ .git/hooks/ 内に pre-commit という名前（拡張子なし）のファイルを作成し、以下のシェルスクリプトを記述します。
+
+Bash
+#!/bin/bash
+# 境界制御: Markdown構造検証プロセス
+
+echo "=== 境界制御: Markdown構造チェックを開始 ==="
+
+# check.pyを実行（パスは実際の配置場所に合わせて調整してください）
+python .codex/hooks/check.py
+
+# check.pyの終了コード（0:正常, 1:異常）を取得
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+    echo ""
+    echo "[遮断] 構造の不整合を検知しました。コミットを中止します（フェイルクローズ）。"
+    echo "       fix.py を実行して状態を回復させてから、再度コミットしてください。"
+    exit 1
+fi
+
+echo "[通過] 構造と状態の整合性を確認しました。"
+exit 0
+3. 実行権限の付与
+ターミナルを開き、作成したフックファイルに実行権限を付与して有効化します。
+
+Bash
+chmod +x .git/hooks/pre-commit
+動作確認（境界判定のテスト）
+あえてフロントマターを消したMarkdownファイルを作成し、git add して git commit -m "test" を実行してみてください。check.py が不整合を検知し、コミット処理が強制的にキャンセルされて元の画面に戻るはずです。構造の崩れたデータがリポジトリ内に永続化されるのを、手前のゲートで完全に防ぐことができます。
+
+Gitフックの検査対象を「コミット予定のファイル」だけに絞り込む方法を見る
+
+はい
+リポジトリ全体の走査を避け、git addされた（コミット対象の）Markdownファイルだけをcheck.pyの検証対象に絞り込む最適化の方法を教えてください。
+
+Gitの機能を利用して「現在ステージングされている（git addされた）ファイル」のみを抽出し、それをPythonスクリプトへ引数として渡すことで、処理範囲を最小限の境界内に限定します。
+
+ファイルが数千件に増えてもチェックが瞬時に終わるため、ローカル開発環境でのコミット操作が重くなりません。
+
+1. pre-commit フックの最適化
+.git/hooks/pre-commit を以下の内容に書き換えます。git diff --cached を使うことで、これからコミットされる「追加・変更されたMarkdownファイル」だけを正確に捕捉します。
+
+Bash
+#!/bin/bash
+# 境界制御: 変更状態にあるMarkdownのみを対象とした構造検証
+
+# コミット対象のMarkdownファイルを抽出（A:追加, C:コピー, M:変更）
+# --diff-filter=ACM で削除されたファイル等を除外します
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$')
+
+# 対象となるMarkdownが存在しない場合はそのままゲートを通過
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+echo "=== 境界制御: 変更されたファイルの構造チェックを開始 ==="
+
+# 抽出したファイルリストを引数として check.py に渡す
+python .codex/hooks/check.py $STAGED_FILES
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+    echo ""
+    echo "[遮断] 構造の不整合を検知しました。コミットを中止します（フェイルクローズ）。"
+    echo "       fix.py を実行して状態を回復させてから、再度コミットしてください。"
+    exit 1
+fi
+
+echo "[通過] 構造と状態の整合性を確認しました。"
+exit 0
+2. check.py の引数受け取り対応
+指定されたディレクトリ全体を走査（rglob）するのではなく、Bashスクリプトから渡された「個別のファイルパス」だけを処理するように check.py の main() 関数を書き換えます。
+
+Python
+import sys
+import re
+from pathlib import Path
+
+# （validate_markdown関数などの定義は変更なし）
+REQUIRED_KEYS = ["status", "version", "tags"]
+
+def validate_markdown(filepath):
+    # 省略：先ほどのコードと同じ
+    pass
+
+def main():
+    # コマンドライン引数からファイルパスのリストを取得（引数[0]はスクリプト自身なので除外）
+    target_files = sys.argv[1:]
+
+    if not target_files:
+        print("検証対象のファイルが指定されていません。")
+        sys.exit(0)
+
+    print(f"=== Markdown構造チェック開始: {len(target_files)}件 ===")
+    error_count = 0
+
+    for file_path_str in target_files:
+        md_file = Path(file_path_str)
+        if md_file.exists():
+            is_valid, message = validate_markdown(md_file)
+            if not is_valid:
+                print(f"[不整合] {md_file.name}: {message}")
+                error_count += 1
+        else:
+            print(f"[警告] ファイルが存在しません: {md_file.name}")
+
+    print("-" * 40)
+    if error_count == 0:
+        print("コミット対象ファイルの構造と状態は適合しています。")
+        sys.exit(0)  # 正常通過
+    else:
+        print(f"修正が必要なファイル: {error_count}件")
+        sys.exit(1)  # 異常検知（フェイルクローズ）
+
+if __name__ == "__main__":
+    main()
+この変更により、git add の対象となったファイルのみが動的に評価されます。リポジトリ全体という「静的な空間」ではなく、変更が加わる「動的な位相」の境界でのみチェックが走る効率的な制御になります。
+
+不整合時にfix.pyを自動実行してそのままコミットを続行させる仕組みを見る
+
+はい
+pre-commit内でエラーを検知してコミットを遮断するだけでなく、エラー時に自動でfix.pyを適用してファイルを修正し、そのままコミットを完了させる（自動補完）スクリプトの書き方を教えてください。
+
+境界で不整合を検知した際、直ちに状態を正規化（自動補完）し、再評価してゲートを通過させる「自動修復・続行モデル」の実装です。
+
+この仕組みでは、pre-commit スクリプト内で fix.py を呼び出した後、修正されたファイルを git add で再度ステージング領域（インデックス）に上書き登録し直すことで、コミットプロセスを中断させずに完了させます。
+
+1. pre-commit フックの変更（自動修復と再ステージング）
+.git/hooks/pre-commit を以下の内容に更新します。エラー検知時の条件分岐内に、修復と再登録のプロセスを追加しています。
+
+Bash
+#!/bin/bash
+# 境界制御: 変更状態にあるMarkdownの検証と自動補完
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$')
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+echo "=== 境界制御: 構造チェック開始 ==="
+python .codex/hooks/check.py $STAGED_FILES
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+    echo "[警告] 構造の不整合を検知。自動補完（fix.py）を実行します..."
+
+    # 1. 抽出したファイルを対象に修正プロセスを実行
+    python .codex/hooks/fix.py $STAGED_FILES
+    FIX_STATUS=$?
+
+    if [ $FIX_STATUS -eq 0 ]; then
+        # 2. 修正後の状態をGitのステージングに再登録（重要）
+        git add $STAGED_FILES
+        echo "[通過] 状態の自動補完と再登録が完了しました。コミットを続行します。"
+        exit 0
+    else
+        echo "[遮断] 自動補完に失敗しました（フェイルクローズ）。"
+        exit 1
+    fi
+fi
+
+echo "[通過] 構造と状態の整合性を確認しました。"
+exit 0
+2. fix.py の引数受け取り対応
+check.py と同様に、fix.py もリポジトリ全体ではなく、Bashから渡された「コミット対象のファイルパス」だけを処理するように main() 関数を変更します。
+
+Python
+import sys
+import re
+from pathlib import Path
+from datetime import datetime
+
+# （REQUIRED_KEYS と fix_markdown 関数の定義は変更なし）
+REQUIRED_KEYS = {
+    "status": "未着手",
+    "version": "1.0",
+    "tags": "\n  - "
+}
+
+def fix_markdown(filepath):
+    # 省略：先ほどのコードと同じ
+    pass
+
+def main():
+    # コマンドライン引数から対象ファイルをピンポイントで取得
+    target_files = sys.argv[1:]
+
+    if not target_files:
+        sys.exit(0)
+
+    print(f"=== Markdown構造 自動補完: {len(target_files)}件 ===")
+    error_count = 0
+
+    for file_path_str in target_files:
+        md_file = Path(file_path_str)
+        if md_file.exists():
+            is_fixed, message = fix_markdown(md_file)
+            if is_fixed:
+                print(f"  -> [修正適用] {md_file.name}")
+        else:
+            print(f"  -> [警告] ファイルが存在しません: {md_file.name}")
+            error_count += 1
+
+    # 処理中に致命的なエラーがなければ正常終了（0）を返し、Bashにコミット続行を許可させる
+    if error_count > 0:
+        sys.exit(1)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+運用の注意点（設計のトレードオフ）
+この自動化は極めて強力ですが、ファイルにフロントマターが存在しなかった場合、「未着手」「バージョン1.0」などの初期値が強制的に埋め込まれた状態でそのままコミット履歴に刻まれます。意図しないデフォルト値のままシステム（Dataview）に取り込まれることを許容するかどうかが、境界設計上の判断基準となります。
