@@ -63,21 +63,49 @@ Other scripts, demos, papers, and visualizations are research, explanatory, illu
 
 ## Push Gate Setup (Malware / Unicode Boundary Gate)
 
-This repository ships a `pre-push` hook (`.githooks/pre-push`) that runs `scripts/malware_gate.ps1` — a deterministic Unicode boundary scan (`scripts/unicode_gate.py`) followed by a Microsoft Defender scan of outgoing blobs (`scripts/malware_gate.py`). It is not active by default; each clone must opt in:
+The initial gate implementation uses `.githooks/pre-push` to invoke `scripts/push_gate.py check`. It requires a prepared inspection plan through `NRA_PUSH_PLAN`; missing, changed, malformed, multi-destination, multi-ref, or non-HEAD-source plans block the request. A plan is inspection data, not execution permission or proof of human approval. Continue to follow [AGENTS.md](./AGENTS.md) and [RULES_DETAIL.md](./RULES_DETAIL.md) for fresh fetch, review of the entire outgoing range, final push approval, and post-push reconciliation.
+
+The hook is not activated by editing files. Each clone needs the existing opt-in configuration, normally set by its owner:
 
 ```powershell
 git config core.hooksPath .githooks
 ```
 
-The hook depends on `pwsh` (PowerShell 7+) being on `PATH`, and on `unicode_gate_policy.json` and `unicode_gate_baseline.json` existing at the repository root — both are tracked files, not local state. `unicode_gate_baseline.json` records exact, hash-pinned exceptions (see `scripts/unicode_review.py`); a missing policy file fails the gate closed, and a missing baseline file is treated as "no exceptions yet" rather than an error.
+Python and `pwsh` (PowerShell 7+) are required. The preparation step fingerprints the implementation, operating contract, and Unicode/ID policies and baselines; required files must exist. Standalone Unicode diagnostics may omit a baseline, but a prepared push plan must bind the tracked baseline explicitly.
 
-Fetch the target remote immediately before reviewing a push. Existing remote branches are accepted only for fast-forward updates. Remote ref deletion, non-fast-forward updates, new tags, and other new non-branch refs are blocked by default.
+### Prepare, review, then invoke Git
 
-A new pull-request branch is allowed only when the hook can resolve the fetched remote default branch and compute a merge base with the local commit. The Malware / Unicode Gate scans the complete `merge-base..local_oid` range. If the remote default branch or merge base cannot be established, the push fails closed. Do not use `--no-verify` to bypass this result.
+After committing the intended changes and freshly fetching the target remote, prepare a new plan. Replace the uppercase placeholders below. `SECONDS` is an explicit trial timeout, not a calibrated production default. Use a new output filename for each preparation; an existing reviewed plan is not silently overwritten.
 
-To review and update Unicode findings, use `scripts/unicode_review.py` (`scan`, `decide`, `apply`, `baseline`, `restore` subcommands). Never approve a finding without confirming the file hash, path, and codepoint match what was actually scanned.
+```text
+python -B scripts/push_gate.py prepare --remote REMOTE_NAME --branch refs/heads/BRANCH_NAME --output local_reports/push-plan-RUN_ID.json --timeout-seconds SECONDS
+```
 
-Known limitation: at push time, `scripts/malware_gate.py` materializes outgoing blobs under content-addressed temporary filenames before `unicode_gate.py` scans them, so the `PATH_*` rules (mixed-script or control characters in a real repository path) are not meaningfully evaluated against the pushed paths in that flow. Run `python scripts/unicode_gate.py --all` periodically (or in CI) to cover path-based checks against real tracked paths.
+The preparer checks local fetch evidence, source HEAD, target/base OIDs, outgoing commits, runtime identity, and rule fingerprints. It does not fetch, infer the user's intended commit scope, issue approval, or push. Compare the displayed plan and complete outgoing range with the authorized task and obtain the final approval required by AGENTS.md. Then pass that plan to the same Git process:
+
+```powershell
+$env:NRA_PUSH_PLAN = 'local_reports/push-plan-RUN_ID.json'
+git push REMOTE_NAME HEAD:refs/heads/BRANCH_NAME
+```
+
+If HEAD, the destination, expected remote OID, fetch evidence, base, or rules change, prepare/review the changed target rather than bypassing the gate. After a successful real push, fetch again and confirm remote OID equals local HEAD and the planned source OID, with ahead/behind `0 0`. No real shared-remote push is part of the initial implementation verification.
+
+### What is inspected
+
+- `malware_gate.py` produces a schema 2 manifest covering newly reachable blobs and changed original path/mode occurrences, including reused content and intermediate-only blobs. Capacity is checked from metadata before blob reads. Task-owned hardlinks expose only newly reachable blobs under the validated `av/` scan directory; hardlink failure is an unavailable scan.
+- `unicode_gate.py --manifest` verifies extraction hashes and coverage and evaluates original paths and bytes, preserving exact baseline matching and per-path text/binary classification. Temporary names do not replace original paths. `--all` remains a supplementary working-tree diagnostic, not proof about the selected push.
+- `malware_gate.ps1` checks Unicode first and then invokes Microsoft Defender against that outgoing `av/` directory, not the repository worktree. `PrepareOnly` leaves Malware `NOT_RUN` and cannot satisfy a production push check. A nonzero Defender scan exit is conservatively `UNAVAILABLE` because it may indicate detection or a scan error; it is not labeled confirmed malware from the exit code alone. See [Microsoft's command-line reference](https://learn.microsoft.com/en-us/defender-endpoint/command-line-arguments-microsoft-defender-antivirus).
+- `id_gate.py` reads the target commit and also checks unchanged references affected by ID removal or renaming. `check_dictionary.py --head` reads dictionaries and tracked Markdown from the target commit; unrelated dirty or untracked drafts are excluded.
+
+Existing deletion, non-branch-ref, and non-fast-forward prohibitions remain. A new branch requires a fetched remote default branch and a resolvable merge base. Unsupported changed submodules and LFS content block the request rather than triggering unapproved recursive retrieval. Missing tools, invalid coverage/results, timeouts, and failed required checks never become success. Warning-only results are reported without being promoted to failures.
+
+Inspection receipts are stored under `local_reports/push_gate/`; they exclude raw command output and do not constitute a protected approval ledger. Timeout/interruption can require inspection of remaining task processes and temporary directories before cleanup or retry. No automatic hook bypass, permission repair, definition update, or settings change is performed.
+
+### Implementation and verification state
+
+The [design record](./note/06_対話セッション記録/NRA-IDE_gate_enhancement_summary.md) retains contracts K1-K6, acceptance criteria, and historical findings. Initial code and local regression tests are implemented. The related existing 60 tests and added 24 tests passed; native PowerShell preparation and real Git dry-run rejection were also checked. AV success in the automated suite uses a labeled test double. The first harmless native Defender trial returned `UNAVAILABLE` with `DEFENDER_ENVIRONMENT_ERROR`. On recheck, the restricted execution path was denied access to Defender status, while execution outside that restriction completed a native scan of one harmless 41-byte file: Unicode and Malware both `PASS`, exit code 0. No protection settings were changed. Native scanning is therefore confirmed for that execution context; operation through the restricted path, complete acceptance, timeout calibration, and production readiness remain unresolved.
+
+The [operation-approval module](./skills/operation-approval/README.md) remains a separate first-stage component, without live host/pre-push approval integration. Its `valid=true` is not execution permission. It supports an explicit single refspec to an existing branch and rejects new branches; the gate's new-branch inspection does not extend that module. Broker integration, external settings, CI, and branch protection are separate later work.
 
 ## Domain Rules and Thresholds
 

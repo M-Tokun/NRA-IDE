@@ -22,6 +22,10 @@
 from __future__ import annotations
 
 import difflib
+import argparse
+import contextlib
+import io
+import os
 import json
 import pathlib
 import re
@@ -42,14 +46,18 @@ PAIRS = [
 ]
 GLOSSARY = {"quantum-hybrid/Glossary_JP.md", "quantum-hybrid/Glossary_EN.md"}
 ALL = [name for pair in PAIRS for name in pair]
+SNAPSHOT_CONTENTS = None
+LAST_REPORT = None
 
 
 class Report:
     def __init__(self) -> None:
         self.items: list[str] = []
+        self.records: list[dict[str, str]] = []
 
     def add(self, where: str, rule: str, problem: str, fix: str) -> None:
         self.items.append(f"{where}: [{rule}] {problem}\n    直し方: {fix}")
+        self.records.append({"path": where, "rule": rule})
 
     def __bool__(self) -> bool:
         return bool(self.items)
@@ -57,6 +65,9 @@ class Report:
 
 def read_lines(rel: str) -> list[str]:
     p = DICT / rel
+    if SNAPSHOT_CONTENTS is not None:
+        text = SNAPSHOT_CONTENTS.get("dictionary/" + rel)
+        return text.split("\n") if text is not None else []
     return p.read_text(encoding="utf-8").split("\n") if p.exists() else []
 
 
@@ -132,6 +143,8 @@ def check_pair_links(rel: str, rep: Report) -> None:
 
 
 def markdown_files() -> list[pathlib.Path]:
+    if SNAPSHOT_CONTENTS is not None:
+        return [ROOT / p for p in SNAPSHOT_CONTENTS if p.endswith(".md")]
     out = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "*.md"],
                          cwd=ROOT, capture_output=True, check=True).stdout.decode("utf-8")
     return [ROOT / p for p in out.split("\0") if p]
@@ -142,7 +155,8 @@ def check_links(table: dict[str, dict[str, int]], rep: Report) -> None:
     paths = {(DICT / k).resolve(): k for k in table}
     for md in markdown_files():
         rel_md = md.relative_to(ROOT).as_posix()
-        for n, line in enumerate(md.read_text(encoding="utf-8", errors="replace").split("\n"), 1):
+        text = SNAPSHOT_CONTENTS[rel_md] if SNAPSHOT_CONTENTS is not None else md.read_text(encoding="utf-8", errors="replace")
+        for n, line in enumerate(text.split("\n"), 1):
             for text, raw in LINK_RE.findall(line):
                 if raw.startswith(("http:", "https:", "mailto:")):
                     continue
@@ -152,7 +166,7 @@ def check_links(table: dict[str, dict[str, int]], rep: Report) -> None:
                     name = pathlib.PurePosixPath(path).name
                     if name not in by_name:
                         continue
-                    resolved = (md.parent / path).resolve()
+                    resolved = pathlib.Path(os.path.abspath(md.parent / path)) if SNAPSHOT_CONTENTS is not None else (md.parent / path).resolve()
                     key = paths.get(resolved)
                     if key is None:
                         rep.add(f"{rel_md}:{n}", "DICT-LINK-FILE", f"リンク先ファイルが存在しない: {raw}",
@@ -173,8 +187,11 @@ def check_links(table: dict[str, dict[str, int]], rep: Report) -> None:
                                 "リンクを実在のIDに直す（#^ID はブロックIDを持つ項目だけ）。IDを付け直した場合は、元のIDに戻す（IDは変えない）")
 
 
-def main() -> int:
+def run_checks(update=False) -> int:
+    global LAST_REPORT
+    BLOCKS.clear()
     rep = Report()
+    LAST_REPORT = rep
     table = {name: scan(name, rep) for name in ALL}
     for jp, en in PAIRS:
         a, b = table[jp], table[en]
@@ -195,15 +212,16 @@ def main() -> int:
     check_links(table, rep)
 
     current = {k: sorted(v) for k, v in table.items()}
-    if "--update" in sys.argv:
+    if update:
         if rep:
             print("\n".join(rep.items)); print(f"\nFAIL {len(rep.items)} 件。直してから --update を実行する"); return 1
         old = json.loads(SNAPSHOT.read_text(encoding="utf-8")) if SNAPSHOT.exists() else {}
         merged = {k: sorted(set(old.get(k, [])) | set(v)) for k, v in current.items()}
         SNAPSHOT.write_text(json.dumps(merged, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print("updated dictionary/ids.json"); return 0
-    if SNAPSHOT.exists():
-        old = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    snapshot_text = SNAPSHOT_CONTENTS.get("dictionary/ids.json") if SNAPSHOT_CONTENTS is not None else (SNAPSHOT.read_text(encoding="utf-8") if SNAPSHOT.exists() else None)
+    if snapshot_text is not None:
+        old = json.loads(snapshot_text)
         for name, ids in old.items():
             for i in sorted(set(ids) - set(table.get(name, {}))):
                 rep.add(f"dictionary/{name}", "DICT-ID-LOST", f"公開済みのID '{i}' が消えた",
@@ -214,6 +232,48 @@ def main() -> int:
         print("\n".join(rep.items)); print(f"\nFAIL {len(rep.items)} 件"); return 1
     print("OK  dictionaries:", ", ".join(f"{k}={len(v)}" for k, v in current.items() if v))
     return 0
+
+
+def main(argv=None) -> int:
+    global ROOT, DICT, SNAPSHOT, SNAPSHOT_CONTENTS
+    parser = argparse.ArgumentParser(description="Check dictionaries in the worktree or an immutable Git tree")
+    parser.add_argument("--repo", type=pathlib.Path, default=ROOT)
+    parser.add_argument("--head")
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--update", action="store_true")
+    args = parser.parse_args(argv)
+    saved = ROOT, DICT, SNAPSHOT, SNAPSHOT_CONTENTS
+    try:
+        ROOT = args.repo.resolve()
+        DICT, SNAPSHOT = ROOT / "dictionary", ROOT / "dictionary/ids.json"
+        SNAPSHOT_CONTENTS = None
+        if args.head:
+            if args.update:
+                raise ValueError("snapshot checks cannot update the dictionary")
+            import malware_gate
+            head = malware_gate.resolve_commit(ROOT, args.head)
+            SNAPSHOT_CONTENTS = {}
+            for path, (mode, oid) in malware_gate.tree_entries(ROOT, head).items():
+                if path.endswith(".md") or path == "dictionary/ids.json":
+                    if mode not in {"100644", "100755"}:
+                        raise ValueError("unsupported dictionary/Markdown object mode")
+                    raw = malware_gate.run_git(ROOT, ["cat-file", "blob", oid])
+                    SNAPSHOT_CONTENTS[path] = raw.decode("utf-8")
+        with contextlib.redirect_stdout(io.StringIO()) if args.json else contextlib.nullcontext():
+            code = run_checks(args.update)
+        if args.json:
+            print(json.dumps({"schema_version": 1, "status": "FAIL" if code else "PASS",
+                              "head": args.head, "scanned_files": len(SNAPSHOT_CONTENTS or {}),
+                              "findings": LAST_REPORT.records}, ensure_ascii=True))
+        return code
+    except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError, RuntimeError):
+        if args.json:
+            print(json.dumps({"schema_version": 1, "status": "UNAVAILABLE", "reason": "DICTIONARY_INPUT_ERROR"}))
+        else:
+            print("Dictionary check unavailable: input or Git snapshot error", file=sys.stderr)
+        return 2
+    finally:
+        ROOT, DICT, SNAPSHOT, SNAPSHOT_CONTENTS = saved
 
 
 if __name__ == "__main__":

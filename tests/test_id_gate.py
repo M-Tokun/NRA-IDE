@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -95,10 +96,11 @@ class IdGateGitTests(unittest.TestCase):
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            env={**os.environ, "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"},
         )
 
     def test_range_gate_blocks_new_file_without_id_and_passes_after_fix(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=REPO_ROOT / "local_reports") as directory:
             repo = pathlib.Path(directory)
             self.git(repo, "init", "-q")
             (repo / "id_gate_policy.json").write_text(POLICY_PATH.read_text(encoding="utf-8"), encoding="utf-8")

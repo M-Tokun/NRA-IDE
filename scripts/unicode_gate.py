@@ -8,13 +8,14 @@ import re
 import subprocess
 import sys
 import unicodedata
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Iterable, Sequence
 
 
 EXIT_PASS = 0
 EXIT_FINDINGS = 1
 EXIT_GATE_ERROR = 2
+TEXT_EXTENSIONS = frozenset(".md .txt .py .js .mjs .cjs .ts .tsx .jsx .html .css .json .jsonl .yml .yaml .toml .ini .cfg .csv .tsv .xml .svg .sh .ps1 .sql .tex .bib".split())
 
 BIDI_CONTROLS = {
     0x061C,
@@ -137,7 +138,7 @@ def load_policy(path: pathlib.Path) -> Policy:
     if normalization not in {"NFC", "NFD", "NFKC", "NFKD"}:
         raise ValueError("unsupported normalization_form")
     maximum = data.get("maximum_text_bytes")
-    if not isinstance(maximum, int) or maximum <= 0:
+    if type(maximum) is not int or maximum <= 0:
         raise ValueError("maximum_text_bytes must be a positive integer")
     return Policy(
         maximum_text_bytes=maximum,
@@ -443,6 +444,76 @@ def directory_inputs(repo: pathlib.Path, supplied: str) -> Iterable[tuple[str, b
             yield candidate.relative_to(repo).as_posix(), candidate.read_bytes()
 
 
+def manifest_inputs(repo: pathlib.Path, manifest: pathlib.Path, policy: Policy) -> Iterable[tuple[str, bytes]]:
+    """Validate content-addressed extraction, but classify using original paths."""
+    manifest = manifest.resolve()
+    if repo not in manifest.parents:
+        raise ValueError("manifest must be inside the repository")
+    data = json.loads(manifest.read_text(encoding="ascii"))
+    if data.get("schema_version") != 2:
+        raise ValueError("unsupported outgoing manifest")
+    for key in ("unique_blob_count", "total_blob_bytes", "unicode_input_count", "av_blob_count"):
+        if type(data.get(key)) is not int or data[key] < 0:
+            raise ValueError("invalid manifest coverage count")
+    records = {}
+    for item in data["blobs"]:
+        oid, name = item["oid"], item["materialized_name"]
+        if not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", oid) or oid in records:
+            raise ValueError("invalid or duplicate manifest object")
+        if name != oid + pathlib.PurePosixPath(name).suffix or "/" in name or "\\" in name:
+            raise ValueError("invalid materialized name")
+        candidate = manifest.parent / name
+        if candidate.is_symlink() or candidate.resolve().parent != manifest.parent:
+            raise ValueError("unsafe manifest content path")
+        if type(item["size"]) is not int or item["size"] < 0 or candidate.stat().st_size != item["size"]:
+            raise ValueError("manifest content size mismatch")
+        if type(item.get("newly_reachable")) is not bool:
+            raise ValueError("invalid content origin")
+        raw = candidate.read_bytes()
+        hashed = hashlib.sha1 if len(oid) == 40 else hashlib.sha256
+        if hashlib.sha256(raw).hexdigest() != item["sha256"] or hashed(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest() != oid:
+            raise ValueError("manifest content hash mismatch")
+        if item["newly_reachable"]:
+            av_path = manifest.parent / "av" / name
+            if av_path.is_symlink() or not av_path.samefile(candidate):
+                raise ValueError("AV extraction does not match verified content")
+        # Retain metadata, not the entire outgoing range in memory.
+        records[oid] = (candidate, item)
+    if len(records) != data["unique_blob_count"] or sum(r[1]["size"] for r in records.values()) != data["total_blob_bytes"]:
+        raise ValueError("manifest coverage mismatch")
+    av_count = sum(r[1]["newly_reachable"] for r in records.values())
+    av_dir = manifest.parent / "av"
+    if av_count != data["av_blob_count"] or av_dir.is_symlink() or len(list(av_dir.iterdir())) != av_count:
+        raise ValueError("AV extraction coverage mismatch")
+    seen = set()
+    used = set()
+    for occurrence in data["occurrences"]:
+        path, oid, mode = occurrence["path"], occurrence["oid"], occurrence["mode"]
+        if not isinstance(path, str) or not path or path.startswith("/") or ".." in pathlib.PurePosixPath(path).parts:
+            raise ValueError("invalid original path")
+        if mode not in {"100644", "100755", "120000"} or oid not in records:
+            raise ValueError("invalid manifest occurrence")
+        key = path, oid, mode
+        used.add(oid)
+        if key in seen:
+            continue
+        seen.add(key)
+        candidate, item = records[oid]
+        raw = candidate.read_bytes()
+        if len(raw) != item["size"] or hashlib.sha256(raw).hexdigest() != item["sha256"]:
+            raise ValueError("content changed during manifest scan")
+        suffix = pathlib.PurePosixPath(path).suffix.lower()
+        if suffix not in policy.binary_extensions and len(raw) <= policy.maximum_text_bytes:
+            try:
+                raw.decode("utf-8")
+            except UnicodeDecodeError:
+                if suffix not in TEXT_EXTENSIONS:
+                    raise ValueError("unsupported non-UTF-8 format at " + ascii_escape(path))
+        yield path, raw
+    if used != set(records) or len(seen) != data["unicode_input_count"]:
+        raise ValueError("manifest contains unaccounted content")
+
+
 def render_text(findings: Sequence[Finding], scanned: int, baselined: int = 0) -> str:
     failed = sum(item.severity == "fail" for item in findings)
     warned = sum(item.severity == "warn" for item in findings)
@@ -484,6 +555,7 @@ def build_parser() -> argparse.ArgumentParser:
     scope.add_argument("--staged", action="store_true", help="scan added and modified index blobs")
     scope.add_argument("--paths", nargs="+", metavar="PATH", help="scan explicit repository paths")
     scope.add_argument("--directory", metavar="PATH", help="recursively scan one repository directory")
+    scope.add_argument("--manifest", type=pathlib.Path, help="scan verified outgoing blobs under original paths")
     parser.add_argument("--json", action="store_true", help="emit ASCII-only JSON")
     parser.add_argument("--policy", type=pathlib.Path, help="policy JSON path")
     parser.add_argument("--baseline", type=pathlib.Path, help="exact reviewed baseline JSON")
@@ -503,7 +575,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         policy_path = (args.policy or repo / "unicode_gate_policy.json").resolve()
         policy = load_policy(policy_path)
         baseline = load_baseline(args.baseline.resolve()) if args.baseline else ()
-        if args.all:
+        if args.manifest:
+            inputs = manifest_inputs(repo, args.manifest, policy)
+        elif args.all:
             inputs = tracked_worktree_inputs(repo)
         elif args.staged:
             inputs = staged_inputs(repo)
@@ -517,12 +591,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         for path, raw in inputs:
             scanned += 1
             active, matched = apply_baseline(path, raw, scan_bytes(path, raw, policy), baseline)
-            findings.extend(active)
+            findings.extend(replace(f, escaped_context=None) if args.manifest else f for f in active)
             baseline_ids.extend(matched)
         findings.sort(key=lambda item: (
             item.path, item.line or 0, item.column or 0, item.rule, item.codepoint or ""
         ))
-    except (OSError, ValueError, json.JSONDecodeError, subprocess.SubprocessError, UnicodeError) as exc:
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError, subprocess.SubprocessError, UnicodeError) as exc:
         message = f"unicode-gate internal failure: {ascii_escape(str(exc))}"
         print(message, file=sys.stderr)
         return EXIT_GATE_ERROR

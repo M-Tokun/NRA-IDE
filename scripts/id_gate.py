@@ -201,6 +201,25 @@ def collect(repo: pathlib.Path, base: str, head: str, policy: Policy) -> tuple[l
     return changed, read_blobs(repo, oids)
 
 
+def evaluate_range(repo: pathlib.Path, base: str, head: str, policy: Policy, baseline: Baseline):
+    changed, contents = collect(repo, base, head, policy)
+    findings = evaluate(changed, contents, policy, baseline)
+    _, old_contents = collect(repo, base, base, policy)
+    def identifiers(values):
+        return {fm["id"] for text in values.values() if (fm := parse_frontmatter(text)) and fm.get("id")}
+    lost = identifiers(old_contents) - identifiers(contents)
+    # An ID deletion/rename can break unchanged callers; do not enforce new
+    # frontmatter rules on those callers while checking the affected references.
+    for path, text in contents.items():
+        if path in changed:
+            continue
+        fm = parse_frontmatter(text)
+        for ref in parse_list(fm.get("related", "")) if fm else []:
+            if ref in lost and ref not in baseline.known_unresolved_related:
+                findings.append(Finding("UNRESOLVED_RELATED", path, f"related id was removed: {ref}"))
+    return changed, contents, findings
+
+
 def write_baseline(repo: pathlib.Path, policy: Policy, destination: pathlib.Path) -> int:
     """Record tracked working-tree files that currently lack required frontmatter."""
     tracked = [item for item in split_paths(run_git(repo, "ls-files", "-z")) if is_target(item, policy)]
@@ -245,6 +264,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--base")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--write-baseline", type=pathlib.Path, metavar="PATH")
+    parser.add_argument("--json", action="store_true")
     arguments = parser.parse_args(argv)
     repo = arguments.repo.resolve()
     policy_path = arguments.policy or repo / "id_gate_policy.json"
@@ -258,12 +278,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not arguments.base:
             raise GateError("--base is required")
         baseline = load_baseline(arguments.baseline)
-        changed, contents = collect(repo, arguments.base, arguments.head, policy)
-        findings = evaluate(changed, contents, policy, baseline)
+        changed, contents, findings = evaluate_range(repo, arguments.base, arguments.head, policy, baseline)
     except GateError as error:
         print(f"ID_GATE: error: {error}", file=sys.stderr)
         return EXIT_GATE_ERROR
 
+    if arguments.json:
+        print(json.dumps({"schema_version": 1, "status": "FAIL" if findings else "PASS",
+                          "scanned_files": len(contents), "changed_files": len(changed),
+                          "base": arguments.base, "head": arguments.head,
+                          "findings": [asdict(f) for f in findings]}, ensure_ascii=True))
+        return EXIT_FINDINGS if findings else EXIT_PASS
     print(f"ID_GATE: checked {len(changed)} changed file(s) of {len(contents)} target file(s)")
     for finding in findings:
         print(json.dumps(asdict(finding)))
