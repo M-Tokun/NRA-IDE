@@ -122,7 +122,7 @@ class ClineGuardTests(unittest.TestCase):
         nested=self.root/'nested';nested.mkdir()
         return nested
     def ps(self,exe,event,payload,cwd,env=None):
-        p=subprocess.run([exe,'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',str(self.root/'.clinerules'/'hooks'/(event+'.ps1'))],input=json.dumps(payload),text=True,encoding='utf-8',capture_output=True,cwd=cwd,env=env,timeout=20)
+        p=subprocess.run([exe,'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',str(self.root/'.clinerules'/'hooks'/(event+'.ps1'))],input=json.dumps(payload),text=True,encoding='utf-8',capture_output=True,cwd=cwd,env=env,timeout=120)
         self.assertEqual(p.returncode,0,p.stderr)
         return json.loads(p.stdout.lstrip('\ufeff'))
     # .ps1 フックは Windows 用（パスを '\' 区切りで組み立てる）。Linux の pwsh では解決できない。

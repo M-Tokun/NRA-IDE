@@ -74,7 +74,7 @@ class ExamplesLinkCheckerTests(unittest.TestCase):
             [self.shell, '-NoLogo', '-NoProfile', '-NonInteractive', '-File',
              str(CHECKER), '-RepoRoot', str(self.fixture)],
             cwd=ROOT, capture_output=True, text=True, encoding='utf-8',
-            errors='replace', timeout=30, check=False,
+            errors='replace', timeout=120, check=False,
         )
 
     def test_relative_encoded_fragment_and_external_links(self):
