@@ -6,7 +6,9 @@ paths have been checked. No demo source or index is changed by these tests.
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
+import time
 import unittest
 
 
@@ -70,12 +72,20 @@ class ExamplesLinkCheckerTests(unittest.TestCase):
         return target
 
     def run_checker(self):
-        return subprocess.run(
-            [self.shell, '-NoLogo', '-NoProfile', '-NonInteractive', '-File',
-             str(CHECKER), '-RepoRoot', str(self.fixture)],
-            cwd=ROOT, capture_output=True, text=True, encoding='utf-8',
-            errors='replace', timeout=120, check=False,
-        )
+        started = time.monotonic()
+        try:
+            result = subprocess.run(
+                [self.shell, '-NoLogo', '-NoProfile', '-NonInteractive', '-File',
+                 str(CHECKER), '-RepoRoot', str(self.fixture)],
+                cwd=ROOT, capture_output=True, text=True, encoding='utf-8',
+                errors='replace', timeout=60, check=False,
+            )
+        except subprocess.TimeoutExpired:
+            self.fail(f'check_examples_links.ps1 timed out after {time.monotonic() - started:.1f}s (limit 60s)')
+        elapsed = time.monotonic() - started
+        if elapsed > 10:
+            print(f'slow pwsh: check_examples_links.ps1 took {elapsed:.1f}s', file=sys.stderr)
+        return result
 
     def test_relative_encoded_fragment_and_external_links(self):
         result = self.run_checker()

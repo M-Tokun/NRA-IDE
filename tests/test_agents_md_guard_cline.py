@@ -1,5 +1,5 @@
 from __future__ import annotations
-import contextlib, io, json, os, pathlib, shutil, subprocess, sys, tempfile, unittest
+import contextlib, io, json, os, pathlib, shutil, subprocess, sys, tempfile, time, unittest
 from unittest import mock
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 GUARD = ROOT / 'skills' / 'agents-md-guard'
@@ -122,7 +122,13 @@ class ClineGuardTests(unittest.TestCase):
         nested=self.root/'nested';nested.mkdir()
         return nested
     def ps(self,exe,event,payload,cwd,env=None):
-        p=subprocess.run([exe,'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',str(self.root/'.clinerules'/'hooks'/(event+'.ps1'))],input=json.dumps(payload),text=True,encoding='utf-8',capture_output=True,cwd=cwd,env=env,timeout=120)
+        started=time.monotonic()
+        try:
+            p=subprocess.run([exe,'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',str(self.root/'.clinerules'/'hooks'/(event+'.ps1'))],input=json.dumps(payload),text=True,encoding='utf-8',capture_output=True,cwd=cwd,env=env,timeout=60)
+        except subprocess.TimeoutExpired:
+            self.fail(f'{event}.ps1 timed out after {time.monotonic()-started:.1f}s (limit 60s)')
+        elapsed=time.monotonic()-started
+        if elapsed>10: print(f'slow pwsh: {event}.ps1 took {elapsed:.1f}s',file=sys.stderr)
         self.assertEqual(p.returncode,0,p.stderr)
         return json.loads(p.stdout.lstrip('\ufeff'))
     # .ps1 フックは Windows 用（パスを '\' 区切りで組み立てる）。Linux の pwsh では解決できない。
