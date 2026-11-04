@@ -18,3 +18,11 @@ $$ R = \frac{\delta}{\tau} $$ のような数式は KaTeX で描画します。\
 留意点
 
 CDN 依存のため閲覧にはネット接続が必要です。examples/ 配下の HTML デモも一覧に含まれます（.md は Markdown 描画、それ以外はシンタックスハイライト付きのソース表示で、.html もレンダリングはせずソースとして表示します）。
+
+アップデート履歴
+
+2026-11-04 Mermaid 描画の DOMPurify サニタイズを強化
+  - DOMPurify.sanitize の USE_PROFILES に svgFilters: true を追加し、Mermaid フィルターを許可
+  - ADD_TAGS に ["foreignobject"] を追加し、Mermaid ノードのテキスト表示が消える不具合を修正
+  - ADD_ATTR に ["dominant-baseline"] を追加し、Mermaid のテキスト配置属性を許可
+  - 対象ファイル: git-nra-docs-md-viewer-resizable-20261003-002248.html

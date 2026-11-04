@@ -340,7 +340,9 @@ const CFG = {
       if (!hasMermaid) { div.textContent = srcText; return; }
       try {
         mermaid.render("mmd-" + Date.now() + "-" + i, srcText).then(({ svg }) => {
-          div.innerHTML = hasPurify ? DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, html: true } }) : svg;
+          div.innerHTML = hasPurify
+            ? DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true, html: true }, ADD_TAGS: ["foreignobject"], ADD_ATTR: ["dominant-baseline"] })
+            : svg;
         }).catch(() => { div.className = "err"; div.textContent = "Mermaid の描画に失敗しました。"; });
       } catch (e) { div.className = "err"; div.textContent = "Mermaid の描画に失敗しました。"; }
     });
