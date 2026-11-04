@@ -2,7 +2,7 @@
 
 [← NRA-IDE Markdown 接続図](../00_NRA-IDE%E6%8E%A5%E7%B6%9A%E5%9B%B3.md)
 
-対象 Markdown: 30 ファイル
+対象 Markdown: 31 ファイル
 
 - [docs/CONCEPT_DEPENDENCY_MAP.md](../../docs/CONCEPT_DEPENDENCY_MAP.md)
 - [docs/en-US/ai/00_overview_EN.md](../../docs/en-US/ai/00_overview_EN.md)
@@ -31,6 +31,7 @@
 - [docs/ja-JP/ai/10_benefits_and_limitations_JP.md](../../docs/ja-JP/ai/10_benefits_and_limitations_JP.md)
 - [docs/ja-JP/ai/11_domain_tuning_JP.md](../../docs/ja-JP/ai/11_domain_tuning_JP.md)
 - [docs/ja-JP/ai/12_glossary_JP.md](../../docs/ja-JP/ai/12_glossary_JP.md)
+- [docs/PUSH_PROCEDURE.md](../../docs/PUSH_PROCEDURE.md)
 - [docs/README_JP.md](../../docs/README_JP.md)
 - [docs/README.md](../../docs/README.md)
 - [docs/Sandwich-ARCHITECTURE.md](../../docs/Sandwich-ARCHITECTURE.md)

@@ -2,7 +2,7 @@
 
 [← NRA-IDE Markdown 接続図](../00_NRA-IDE%E6%8E%A5%E7%B6%9A%E5%9B%B3.md)
 
-対象 Markdown: 131 ファイル
+対象 Markdown: 133 ファイル
 
 - [note/01_理論・公理_検討覚書/NRA-IDE_Official_Definition.md](../../note/01_%E7%90%86%E8%AB%96%E3%83%BB%E5%85%AC%E7%90%86_%E6%A4%9C%E8%A8%8E%E8%A6%9A%E6%9B%B8/NRA-IDE_Official_Definition.md)
 - [note/01_理論・公理_検討覚書/NRA-IDE_Principle_Anchor_and_Formula_Dictionary_2026-05-13.md](../../note/01_%E7%90%86%E8%AB%96%E3%83%BB%E5%85%AC%E7%90%86_%E6%A4%9C%E8%A8%8E%E8%A6%9A%E6%9B%B8/NRA-IDE_Principle_Anchor_and_Formula_Dictionary_2026-05-13.md)
@@ -74,7 +74,9 @@
 - [note/06_対話セッション記録/AI安全は収入になるか_驚きの後に必要な受け皿_草稿_2026-10-22.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/AI%E5%AE%89%E5%85%A8%E3%81%AF%E5%8F%8E%E5%85%A5%E3%81%AB%E3%81%AA%E3%82%8B%E3%81%8B_%E9%A9%9A%E3%81%8D%E3%81%AE%E5%BE%8C%E3%81%AB%E5%BF%85%E8%A6%81%E3%81%AA%E5%8F%97%E3%81%91%E7%9A%BF_%E8%8D%89%E7%A8%BF_2026-10-22.md)
 - [note/06_対話セッション記録/AI期待外行動_価値観学習と因果・境界線_対話要約_20260918.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/AI%E6%9C%9F%E5%BE%85%E5%A4%96%E8%A1%8C%E5%8B%95_%E4%BE%A1%E5%80%A4%E8%A6%B3%E5%AD%A6%E7%BF%92%E3%81%A8%E5%9B%A0%E6%9E%9C%E3%83%BB%E5%A2%83%E7%95%8C%E7%B7%9A_%E5%AF%BE%E8%A9%B1%E8%A6%81%E7%B4%84_20260918.md)
 - [note/06_対話セッション記録/AI社会の整備・修理能力と技能継承の断絶.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/AI%E7%A4%BE%E4%BC%9A%E3%81%AE%E6%95%B4%E5%82%99%E3%83%BB%E4%BF%AE%E7%90%86%E8%83%BD%E5%8A%9B%E3%81%A8%E6%8A%80%E8%83%BD%E7%B6%99%E6%89%BF%E3%81%AE%E6%96%AD%E7%B5%B6.md)
+- [note/06_対話セッション記録/AI社会は誰が修理するのか2026_1028_2243.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/AI%E7%A4%BE%E4%BC%9A%E3%81%AF%E8%AA%B0%E3%81%8C%E4%BF%AE%E7%90%86%E3%81%99%E3%82%8B%E3%81%AE%E3%81%8B2026_1028_2243.md)
 - [note/06_対話セッション記録/AI制御不能境界と責任・社会構造存続_対話要約_20260917.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/AI%E5%88%B6%E5%BE%A1%E4%B8%8D%E8%83%BD%E5%A2%83%E7%95%8C%E3%81%A8%E8%B2%AC%E4%BB%BB%E3%83%BB%E7%A4%BE%E4%BC%9A%E6%A7%8B%E9%80%A0%E5%AD%98%E7%B6%9A_%E5%AF%BE%E8%A9%B1%E8%A6%81%E7%B4%84_20260917.md)
+- [note/06_対話セッション記録/NRA-IDE_gate_enhancement_summary.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/NRA-IDE_gate_enhancement_summary.md)
 - [note/06_対話セッション記録/NRA-IDE_Paper_With_Figures_2026-04-15_JP.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/NRA-IDE_Paper_With_Figures_2026-04-15_JP.md)
 - [note/06_対話セッション記録/経路ライブラリ型AI安全アーキテクチャ.md](../../note/06_%E5%AF%BE%E8%A9%B1%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%98%E9%8C%B2/%E7%B5%8C%E8%B7%AF%E3%83%A9%E3%82%A4%E3%83%96%E3%83%A9%E3%83%AA%E5%9E%8BAI%E5%AE%89%E5%85%A8%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3.md)
 - [note/07_知能爆発-自己再帰的改善/AI_Studio.md](../../note/07_%E7%9F%A5%E8%83%BD%E7%88%86%E7%99%BA-%E8%87%AA%E5%B7%B1%E5%86%8D%E5%B8%B0%E7%9A%84%E6%94%B9%E5%96%84/AI_Studio.md)
