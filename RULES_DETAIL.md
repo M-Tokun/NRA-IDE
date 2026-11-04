@@ -81,8 +81,8 @@ Git操作は次の順で進める。
 9. 現在branch、upstream、remote、HEADのcommit IDを確認する。
 10. incoming/outgoingの件数と両方向の全コミットを列挙する。
 11. incomingが存在する場合は停止し、自動でmerge、rebase、cherry-pickしない。
-12. exact remote/branch、HEAD、送信コミットを提示してpush確認を得る。
-13. 通常の非force pushを実行する。
+12. `python -B scripts/push_gate.py prepare --remote <remote> --branch refs/heads/<branch> --output local_reports/push_gate/plan_<日付>.json --timeout-seconds 180`でplanを作り、exact remote/branch、HEAD、送信コミットを提示してpush確認を得る。plan作成後は確認を得るまでfetch、commit、編集をしない。
+13. 環境変数`NRA_PUSH_PLAN=<plan>`を付けて通常の非force pushを実行する（例：`git push --no-progress <remote> <branch>`）。fetchは`--quiet`を付けて進捗出力を抑える。
 14. 対象remoteを再fetchし、localとremoteのcommit IDおよびahead/behindを確認する。
 
 既存remote branchへのpush前には、原則として次を確認する。
@@ -109,7 +109,7 @@ AIの通常push経路では、force-push、`--force-with-lease`、先頭`+`付�
 
 push後は対象remoteを再fetchし、対象remote branchとlocal HEADのcommit IDが一致し、`git rev-list --left-right --count <remote>/<branch>...HEAD`が`0 0`であることを成功条件とする。
 
-詳細手順: [docs/PUSH_PROCEDURE.md](docs/PUSH_PROCEDURE.md)
+push連続2回失敗の場合: [docs/PUSH_PROCEDURE.md](docs/PUSH_PROCEDURE.md)
 
 ## 4. 秘密情報
 
