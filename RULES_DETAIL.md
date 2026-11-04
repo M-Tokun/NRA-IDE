@@ -109,6 +109,8 @@ AIの通常push経路では、force-push、`--force-with-lease`、先頭`+`付�
 
 push後は対象remoteを再fetchし、対象remote branchとlocal HEADのcommit IDが一致し、`git rev-list --left-right --count <remote>/<branch>...HEAD`が`0 0`であることを成功条件とする。
 
+詳細手順: [docs/PUSH_PROCEDURE.md](docs/PUSH_PROCEDURE.md)
+
 ## 4. 秘密情報
 
 password、token、秘密鍵、`.env`の値などを、出力、ログ、commit、メッセージへ含めてはならない。
