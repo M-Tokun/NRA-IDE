@@ -17,6 +17,12 @@
    - `git config core.hooksPath ...` などフック設定の変更
    - force / `--force-with-lease` / 先頭`+`付き refspec / remote ref の削除
 5. 必要な環境: `python`（PATH上）と `pwsh`（PowerShell 7）。malware/unicode 検査が `pwsh` を使う。
+6. **出力を短くする（トークン節約）**。Cline のターミナルでは git が進捗を1%ごとに1行出す（`Counting objects: 1% (4/375)` など）。
+   1回の fetch/push で数百行（数万文字）になり、AIの文脈に全部入って、API呼び出しのたびに再送される。
+   - fetch は `--quiet`、push は `--no-progress` を付ける。
+   - 読取コマンドは `;` でつなげて1回で実行し、1コマンドずつ繰り返さない。
+   - 出力が崩れた・空だったときは、同じコマンドを繰り返さず、ログファイルが指されていれば末尾だけ読む（Cline: `proceed-while-running-*.log` の `tail` 相当。全文を読まない）。
+   - フックの結果 JSON が長いときは、`status` と `reason` と各ゲートの `status` だけを読む。全文は `local_reports/push_gate/<ID>/result.json` にある。
 
 ---
 
@@ -26,8 +32,9 @@
 
 ### 手順1 fresh fetch
 ```text
-git fetch origin
+git fetch --quiet origin
 ```
+- 進捗表示を出さないため `--quiet` を付ける（0.の「出力を短くする」参照）。
 - **plan 作成の直前**に行う。fetch の記録（`.git/FETCH_HEAD`）が plan に焼き込まれるため、
   plan 作成後にもう一度 fetch すると plan が無効になる（手順5の注意参照）。
 
@@ -72,12 +79,12 @@ plan のパスを環境変数 `NRA_PUSH_PLAN` で渡す。
 
 bash / Git Bash:
 ```text
-NRA_PUSH_PLAN=local_reports/push_gate/plan_YYYYMMDD.json git push origin master
+NRA_PUSH_PLAN=local_reports/push_gate/plan_YYYYMMDD.json git push --no-progress origin master
 ```
 PowerShell:
 ```text
 $env:NRA_PUSH_PLAN = "local_reports/push_gate/plan_YYYYMMDD.json"
-git push origin master
+git push --no-progress origin master
 Remove-Item Env:NRA_PUSH_PLAN
 ```
 - 手順3〜5の間に **`git fetch`・commit・ファイル編集をしない**。HEAD・fetch 記録・規則ファイルのどれかが変わると plan が無効になる（`PLAN_OR_RULES_CHANGED`）。その場合は手順1からやり直す。
@@ -86,7 +93,7 @@ Remove-Item Env:NRA_PUSH_PLAN
 
 ### 手順6 push 後の確認
 ```text
-git fetch origin
+git fetch --quiet origin
 git rev-list --left-right --count origin/master...HEAD
 git rev-parse origin/master HEAD
 ```
