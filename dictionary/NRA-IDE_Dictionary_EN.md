@@ -134,7 +134,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Meaning: the range within which states or functions are regarded as matching in a reproducibility judgment; fixed before evaluation. Source: AXIOMS §2 supplement
 - Notation: the canon does not fix the value; it is set by the standards of the domain, the research community, a society, and so on (AXIOMS §15). The canon fixes only three things: it is set before evaluation, it is not rewritten from the judgment result, and it is a quantity distinct from absorption thickness $\tau$. The roles differ: the allowable range is an external criterion used for the judgment, whereas $\tau$ is the thickness with which a structure absorbs accumulated deviation (AXIOMS §4)
 - Confusion notes: while the supplement was drafted, it was noticed that the allowable range could be read as the same quantity as $\tau$; $\tau$ is not a semantic tolerance width (AXIOMS §4) (2026-11-08). "Tolerance" was not adopted, because it is easily read as fault tolerance or as a single-value deviation (2026-11-08)
-- Reading risk [Unconfirmed]: "allowable range" matches the Japanese 「範囲」 literally. Its weaknesses are that the term does not say what is ranged, and that it can be read as an operating range of a device. Based on the answers of five AI assistants (2026-11-08)
+- Reading risk [Confirmed]: "allowable range" matches the Japanese 「範囲」 literally. Its weaknesses are that the term does not say what is ranged, and that it can be read as an operating range of a device. Based on the answers of five AI assistants (2026-11-08)
 - Related: [Absorption Thickness](#^absorption-thickness), [Reverse Derivation](#^reverse-derivation)
 
 <a id="applied-action"></a>
