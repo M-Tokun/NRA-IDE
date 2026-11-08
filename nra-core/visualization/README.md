@@ -1,6 +1,6 @@
 # 可視化18件の位置付けと操作 / Scope and operation of 18 visualizations
 
-ここは研究・説明・履歴資料の置き場です。正規参照実装、測定器、安全証明、実運用の判断器ではありません。現行正典は[AXIOMS v2.4](../../theory/AXIOMS.md)、式の定義は[FORMULA](../../FORMULA.md)、正規参照ソースは[Architecture](../foundations/NRA-IDE_Architecture_public.py)に従います。
+ここは研究・説明・履歴資料の置き場です。正規参照実装、測定器、安全証明、実運用の判断器ではありません。現行正典は[AXIOMS v2.5](../../theory/AXIOMS.md)、式の定義は[FORMULA](../../FORMULA.md)、正規参照ソースは[Architecture](../foundations/NRA-IDE_Architecture_public.py)に従います。
 
 These are research, educational and historical assets, not calibrated instruments, safety proofs or operational decision systems. Canonical authority remains in AXIOMS; these pages do not replace the normative evaluator.
 

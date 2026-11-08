@@ -104,9 +104,9 @@ python -m unittest tests.test_nra_ide_reference -v
 
 ---
 
-## 現行v2.4のgateと設定
+## 現行v2.5のgateと設定
 
-このREADMEの定義は[AXIOMS v2.4](./theory/AXIOMS.md)と[機械可読表現](./theory/axioms.json)に従います。これは正典定義の版を示すもので、公開状況やドメイン検証の完了を表すものではありません。
+このREADMEの定義は[AXIOMS v2.5](./theory/AXIOMS.md)と[機械可読表現](./theory/axioms.json)に従います。これは正典定義の版を示すもので、公開状況やドメイン検証の完了を表すものではありません。
 
 [英語gate入口](./gate/en/README.md)と[日本語gate入口](./gate/jp/README_JP.md)は、同じ[履歴保持アダプター](./gate/_canonical_threshold.py)を公開し、状態分類を正規参照実装へ委譲します。アダプターは下位の実装コードであり、追加の正典定義ではありません。
 

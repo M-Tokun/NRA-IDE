@@ -1,4 +1,4 @@
-/* Educational boundary state adapter. AXIOMS v2.4; not a hardware safety device. */
+/* Educational boundary state adapter. AXIOMS v2.5; not a hardware safety device. */
 (function (root) {
   'use strict';
   const order = ['PERMIT', 'BOUNDARY_WARNING', 'HANDOFF_REQUIRED', 'IRREVERSIBLE_TRANSITION', 'RUPTURE_BOUNDARY'];

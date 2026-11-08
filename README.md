@@ -88,9 +88,9 @@ Other code, visualizations, papers, and quantum extensions under `nra-core/` rem
 
 ---
 
-## Current v2.4 Gate and Configuration
+## Current v2.5 Gate and Configuration
 
-The definitions in this README follow [AXIOMS v2.4](./theory/AXIOMS.md) and its [machine-readable counterpart](./theory/axioms.json). This identifies the canonical definitions, not a publication or domain-validation status.
+The definitions in this README follow [AXIOMS v2.5](./theory/AXIOMS.md) and its [machine-readable counterpart](./theory/axioms.json). This identifies the canonical definitions, not a publication or domain-validation status.
 
 The [English gate entry](./gate/en/README.md) and [Japanese gate entry](./gate/jp/README_JP.md) expose the same [stateful adapter](./gate/_canonical_threshold.py), which delegates classification to the normative reference implementation. It is subordinate implementation code, not an additional canonical definition.
 

@@ -57,7 +57,7 @@ The normative source and docs mirror must have identical SHA-256 values. Locatio
 | [`.githooks/`](./.githooks/) | Repository Git hooks, including the pre-push guard |
 | [`audit/`](./audit/) | Dated audit and completion records; non-canonical unless explicitly promoted |
 | [`cascade-failure-prevention/`](./cascade-failure-prevention/) | Domain or experimental gate modules; not canonical by location |
-| [`config/`](./config/) | v2.4 declaration-based configuration; unset defaults fail closed, SOFTWARE_DEMO is unvalidated, legacy/v1 preserves old snapshots |
+| [`config/`](./config/) | v2.5 declaration-based configuration; unset defaults fail closed, SOFTWARE_DEMO is unvalidated, legacy/v1 preserves old snapshots |
 | [`dictionary/`](./dictionary/) | Bilingual NRA-IDE dictionary; explanatory reference subordinate to canonical documents |
 | [`docs/`](./docs/) | Public documentation, generated mirrors, and explanatory assets |
 | [`examples/`](./examples/) | Illustrative demos under predefined assumptions; not measuring instruments or safety proofs |
@@ -193,7 +193,7 @@ Only Cause-Side observation or a Cause-Side transformation fixed before evaluati
 
 ## Current Gate Entry Points
 
-The definitions in this README follow [AXIOMS v2.4](./theory/AXIOMS.md) and its [machine-readable counterpart](./theory/axioms.json). This identifies the canonical definitions, not a publication or domain-validation status.
+The definitions in this README follow [AXIOMS v2.5](./theory/AXIOMS.md) and its [machine-readable counterpart](./theory/axioms.json). This identifies the canonical definitions, not a publication or domain-validation status.
 
 The [English gate entry](./gate/en/README.md) and [Japanese gate entry](./gate/jp/README_JP.md) expose the same [stateful adapter](./gate/_canonical_threshold.py), which delegates classification to the normative reference implementation. It is subordinate implementation code, not an additional canonical definition.
 
