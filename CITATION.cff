@@ -7,8 +7,8 @@ authors:
   - name: "M-Tokuni"
 
 type: software
-version: "2.4"
-date-released: "2026-10-01"
+version: "2.5"
+date-released: "2026-11-08"
 license: MIT
 
 repository-code: "https://github.com/M-Tokun/NRA-IDE"
