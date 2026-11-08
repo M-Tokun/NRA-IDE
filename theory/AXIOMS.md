@@ -1,17 +1,17 @@
-# AXIOMS_v2.4.md
+# AXIOMS_v2.5.md
 ## NRA-IDE 律環公理・解釈境界レジストリ
 ### Nomological Ring Axioms / Intensional Dynamics Engine
 
 **著者 / Author:** M-Tokuni  
 **プロジェクト / Project:** NRA-IDE  
-**版 / Version:** 2.4  
-**基準旧版 / Base:** AXIOMS v2.3（v2.3の基準旧版：AXIOMS v2.2）  
+**版 / Version:** 2.5  
+**基準旧版 / Base:** AXIOMS v2.4（v2.4の基準旧版：AXIOMS v2.3）  
 **状態 / Status:** 正規版 / Canonical  
 **位置付け / Role:** 唯一公理・NRA構造原則・IDE計算定義・境界状態・不可逆遷移・構造証言の正規文書
 
 ---
 
-# 上段：AXIOMS v2.4 正規本文
+# 上段：AXIOMS v2.5 正規本文
 
 ---
 
@@ -87,6 +87,24 @@ Rest is only a temporary slice of an ongoing generative process; absolute stoppa
 
 4. 自律行動の停止は、構造の消滅や観測の停止を意味しない。  
    Stopping autonomous action does not mean the disappearance of the structure or the cessation of observation.
+
+### 補足事項：履歴の非同一性と再現性の区別
+
+履歴の完全同一性は成立しない。ただし、評価前に許容範囲を定義すれば、その範囲内に収まる状態・機能は、再現したと判定される。
+
+再現性の判定は、対象、単位、Cause-Side測定規則、比較基準および許容範囲に依存する。これらは評価前に固定する。再現の判定結果からこれらを書き換える経路は、§14の逆導出B（計器の自己調整）と同じ型として禁止する。許容範囲は、τ（吸収厚み）とは別の量である。
+
+状態や機能の再現をもって、存在全体の完全同一性、または初期構造への復元（§8）が成立したと解釈してはならない。
+
+本補足は律環公理の変更や新たな公理の追加ではなく、履歴の非同一性と実用上の再現性を混同しないための解釈境界を示すものである。
+
+Complete identity of history does not hold. However, if an allowable range is defined before evaluation, a state or function that falls within that range is judged reproducible.
+
+Judgment of reproducibility depends on the subject, unit, Cause-Side measurement rule, comparison criterion, and allowable range. These are fixed before evaluation. A path that rewrites any of them from the reproducibility judgment is prohibited as being of the same type as reverse derivation B (self-adjustment of the gauge) in §14. The allowable range is a quantity distinct from τ (absorption thickness).
+
+Reproduction of a state or function must not be interpreted as establishing complete identity of the whole existence, or restoration to the initial structure (§8).
+
+This supplement is neither a change to the Nomological Ring Axiom nor the addition of a new axiom. It states an interpretive boundary so that non-identity of history is not confused with practical reproducibility.
 
 ### 解釈境界コメント
 
@@ -1091,7 +1109,7 @@ The role of IDE is to connect Cause-Side structural quantities obtained from tho
 文書、コード、コメント、例示、AI説明が競合した場合、次の順で解決する。
 
 ```text
-theory/AXIOMS.md (AXIOMS_v2.4)
+theory/AXIOMS.md (AXIOMS_v2.5)
   > theory/axioms.json
   > theory/NRA-IDE_Foundational_Thesis_Bilingual.md
   > theory/SANDWICH_ARCH.md
@@ -1121,6 +1139,18 @@ theory/AXIOMS.md (AXIOMS_v2.4)
 配置名だけでは正規性を取得しない。正規参照実装として扱うには、本書および`theory/axioms.json`との適合試験に合格しなければならない。適合前の既存実装を、配置だけを理由に正規実装とみなしてはならない。
 
 The normative reference implementation source is located at `nra-core/foundations/NRA-IDE_Architecture_public.py`. The file at `docs/NRA-IDE_Architecture_public.py` is a generated public mirror, not an independent normative source. Generation and SHA-256 equality checks must keep the two synchronized. Normative status additionally requires passing conformance tests against this document and `theory/axioms.json`; location alone does not confer conformance.
+
+---
+
+# 下段：AXIOMS v2.4 からの変更点
+
+---
+
+## 1. 変更の性質
+
+v2.5は、唯一の律環公理、NRA構造原則、一次式 \(R=\delta/\tau\)、定義域、閾値の順序、正規境界状態を変更しない。
+
+v2.5は、§2に補足事項「履歴の非同一性と再現性の区別」を追加する。新たな公理、正規式、正規状態は追加しない。
 
 ---
 

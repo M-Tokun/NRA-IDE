@@ -2,10 +2,10 @@
   "file_metadata": {
     "file": "theory/axioms.json",
     "document_role": "canonical_sole_axiom_nra_principles_ide_calculation_and_boundary_definition",
-    "version": "2.4",
+    "version": "2.5",
     "status": "canonical",
-    "base": "AXIOMS v2.3",
-    "updated": "2026-09-29 JST",
+    "base": "AXIOMS v2.4",
+    "updated": "2026-11-08 JST",
     "author": "M-Tokuni",
     "precedence_note": "This file defines the sole Nomological Ring Axiom, NRA structural principles, IDE calculation definitions, variable meanings, description domain, boundary-state invariants, irreversible-transition principles, and structural-testimony rules. Implementation code, comments, examples, and AI-generated explanations must not override it."
   },
@@ -16,7 +16,7 @@
       "name": "Intensional Dynamics Engine",
       "abbreviation": "IDE"
     },
-    "version": "2.4",
+    "version": "2.5",
     "description": "A structural framework describing existence as continuous generation and state transition, with structural play as the persistence condition and boundary approach as a historical process."
   },
   "precedence_order": [
@@ -49,6 +49,7 @@
         "The world is a generative structure with accumulated history, not a set of static states.",
         "Stopping autonomous action does not mean disappearance of the structure or cessation of observation."
       ],
+      "_interpretive_supplement": "Complete identity of history does not hold. However, if an allowable range is defined before evaluation, a state or function that falls within that range is judged reproducible. Judgment of reproducibility depends on the subject, unit, Cause-Side measurement rule, comparison criterion, and allowable range. These are fixed before evaluation. A path that rewrites any of them from the reproducibility judgment is prohibited as being of the same type as reverse derivation B (self-adjustment of the gauge). The allowable range is a quantity distinct from tau (absorption thickness). Reproduction of a state or function must not be interpreted as establishing complete identity of the whole existence, or restoration to the initial structure. This supplement is neither a change to the Nomological Ring Axiom nor the addition of a new axiom.",
       "_boundary_note": "This is the only Nomological Ring Axiom. No second or subsequent axiom exists. Fail-Closed, Handoff, and Irreversible Transition do not override it."
     }
   },
@@ -643,6 +644,14 @@
     "conformance_gate": "Location alone does not confer normative status. The implementation must pass conformance tests against theory/AXIOMS.md and theory/axioms.json before it is treated as normative."
   },
   "revision_history": {
+    "v2.5": {
+      "date": "2026-11-08 JST",
+      "base": "AXIOMS v2.4",
+      "changes": [
+        "Added the interpretive supplement 'Distinction between non-identity of history and reproducibility' to section 2; no new axiom, canonical formula, or canonical state is added",
+        "Stated that the criteria of a reproducibility judgment are fixed before evaluation and that rewriting them from the judgment result is prohibited as the same type as reverse derivation B"
+      ]
+    },
     "v2.4": {
       "date": "2026-09-29 JST",
       "base": "AXIOMS v2.3",

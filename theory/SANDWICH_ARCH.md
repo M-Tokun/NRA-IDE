@@ -403,6 +403,7 @@ The definition of reverse derivation follows `theory/AXIOMS.md` §14. This secti
 |---|---|---|
 | Reverse derivation A: authority backflow | A path from Effect-Side to a Cause-Side value, threshold, state, irreversible latch, rule, transformation input, update ground, or provenance | Prohibited |
 | Reverse derivation B: self-adjustment of the gauge | A path from an evaluation output ($R$, its moving averages and aggregates, canonical state, or irreversible latch) to the reference, transformation rule, thresholds, or effective gate width of the same evaluation target, including paths across steps and paths returning through another evaluation target, in either direction | Prohibited |
+| Post-hoc adjustment of reproducibility criteria (same type as reverse derivation B) | A path from a reproducibility judgment to the subject, unit, Cause-Side measurement rule, comparison criterion, or allowable range of the same judgment (AXIOMS.md §2 supplement). The judgment is not an evaluation output such as $R$, so it is treated as the same type as reverse derivation B, not as reverse derivation B itself | Prohibited |
 | Adjustment by another target's evaluation output | A path feeding an evaluation output of another evaluation target into the thresholds or effective gate width of one's own evaluation target | Permitted only in the safe-side direction (lowering thresholds, narrowing gate widths) and only when no path returns one's own evaluation outputs to that target; fixed before evaluation begins |
 | Unique reconstruction | Determining $\delta$ or $\tau$ from $R$ alone | Prohibited |
 | Chained re-estimation | Treating an estimate as an observation and estimating further from it | Prohibited. When estimates must be chained, the whole chain is declared as one pre-fixed transformation rule, and intermediate estimates are not treated as observations |
@@ -1104,6 +1105,7 @@ $\Pi^{-1}$ は、8.2 の $\Pi$ の数学的な逆写像ではない。$\Pi$ は�
 |---|---|---|
 | 逆導出A：権威の逆流 | Effect-Side から Cause-Side の値・閾値・状態・不可逆ラッチ・規則・変換入力・更新根拠・出所への経路 | 禁止 |
 | 逆導出B：計器の自己調整 | 評価出力（$R$、その移動平均・集約、正規状態、不可逆ラッチ）から、同じ評価対象の基準・変換規則・閾値・有効ゲート幅への経路。段をまたぐ経路、他の評価対象を経由して戻る経路を含み、向きを問わない | 禁止 |
+| 再現性判定の基準の事後調整（逆導出Bと同じ型） | 再現の判定結果から、同じ判定の対象・単位・Cause-Side測定規則・比較基準・許容範囲への経路（AXIOMS.md §2 補足事項）。判定結果はRなどの評価出力ではないため、逆導出Bそのものではなく同じ型として扱う | 禁止 |
 | 他の評価対象の評価出力による調整 | 他の評価対象の評価出力を、自らの評価対象の閾値・有効ゲート幅へ入れる経路 | 安全側の向き（閾値を下げる、ゲート幅を狭める）で、自らの評価出力がその評価対象へ戻る経路がない場合に限り許可。評価開始前に固定する |
 | 一意復元 | $R$ だけから $\delta$ または $\tau$ を決めること | 禁止 |
 | 再推定連鎖 | 推定値を観測値として扱い、そこからさらに推定を重ねること | 禁止。推定を重ねる必要がある場合は、全体を一つの事前固定変換規則として宣言し、途中の推定値を観測値として扱わない |
