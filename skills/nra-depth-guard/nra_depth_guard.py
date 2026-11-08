@@ -121,20 +121,40 @@ class NRADepthGuardEngine:
             self._baseline_memory_mb = 0.0
 
     def reset(self) -> None:
-        """実行文脈の初期化（NRA-IDE: 状態の完全リセット）"""
+        """実行文脈の初期化（NRA-IDE: 状態の完全リセット）
+
+        メモリ基準値も取り直す。再初期化後の観測を、初期化前の基準で
+        過大評価しないため。
+        """
         self._trajectory_hashes.clear()
         self._current_depth = 0
         self._api_call_count = 0
         self._start_time_ms = time.time() * 1000
         self._frontier.clear()
+        if _PSUTIL_AVAILABLE:
+            self._baseline_memory_mb = self._process.memory_info().rss / 1024 / 1024
 
     def _compute_state_hash(
         self, action_name: str, parameters: Dict[str, Any]
     ) -> str:
-        """状態とパラメータの決定論的ハッシュ値を算出"""
-        serialized = json.dumps(
-            {"action": action_name, "params": parameters}, sort_keys=True
-        )
+        """状態とパラメータの決定論的ハッシュ値を算出
+
+        非シリアライズな値は TypeError/ValueError として外へ抜けさせず、
+        Fail-closed の経路で停止させる（SKILL.md §3.3 の因果ログを必ず残す）。
+        """
+        try:
+            serialized = json.dumps(
+                {"action": action_name, "params": parameters}, sort_keys=True
+            )
+        except (TypeError, ValueError, RecursionError) as exc:
+            report = self._generate_pruning_report(
+                violation_type="INVARIANT",
+                dimension="state_parameters",
+                observed=1.0,
+                threshold=0.0,
+            )
+            report.final_depth = self._current_depth
+            raise FailClosedException(report) from exc
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
     def _compute_path_hash(
