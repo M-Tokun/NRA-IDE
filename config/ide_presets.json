@@ -1,6 +1,6 @@
 {
   "meta": {
-    "canonical_version": "2.4",
+    "canonical_version": "2.5",
     "status": "unvalidated_demo_only"
   },
   "presets": {
@@ -8,7 +8,7 @@
       "meta": {
         "system": "NRA-IDE",
         "schema_version": 2,
-        "canonical_version": "2.4",
+        "canonical_version": "2.5",
         "status": "unvalidated_demo",
         "usage_notice": "Software demonstration only. No physical or clinical safety validation; these numerical thresholds must not be transferred to another domain."
       },

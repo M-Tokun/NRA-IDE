@@ -1,6 +1,6 @@
 # Current NRA-IDE boundary configuration
 
-Definitions follow [AXIOMS.md](../theory/AXIOMS.md) and [axioms.json](../theory/axioms.json), checked at v2.4. The [reference implementation](../nra-core/foundations/NRA-IDE_Architecture_public.py) supplies classification; [the gate adapter](../gate/_canonical_threshold.py) retains target history across calls.
+Definitions follow [AXIOMS.md](../theory/AXIOMS.md) and [axioms.json](../theory/axioms.json), checked at v2.5. The [reference implementation](../nra-core/foundations/NRA-IDE_Architecture_public.py) supplies classification; [the gate adapter](../gate/_canonical_threshold.py) retains target history across calls.
 
 `R = delta / tau` requires finite delta >= 0 and finite tau > 0. Negative inputs are not repaired with abs(); tau=0 is OUT_OF_DESCRIPTION_DOMAIN. The three predeclared domain thresholds satisfy `0 <= R_warn < R_handoff < R_irrev < 1`. Old universal 0.40/0.99 cutoffs and Zone A/B/C are not the current model.
 

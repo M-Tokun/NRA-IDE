@@ -86,7 +86,7 @@ class ThresholdGuardian:
                 raise ValueError('Configuration must be an object')
             self._config = deepcopy(config)
             meta = self._config.get('meta', {})
-            if meta.get('schema_version') != 2 or meta.get('canonical_version') != '2.4':
+            if meta.get('schema_version') != 2 or meta.get('canonical_version') != '2.5':
                 raise ValueError('Legacy or unsupported configuration schema')
             self._declaration = self._config.get('evaluation_declaration', {})
             if not isinstance(self._declaration, dict):

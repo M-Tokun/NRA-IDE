@@ -2,7 +2,7 @@
   "meta": {
     "system": "NRA-IDE",
     "schema_version": 2,
-    "canonical_version": "2.4",
+    "canonical_version": "2.5",
     "status": "domain_declaration_required",
     "usage_notice": "A schema for current canonical evaluation, not a validated domain model. Missing domain rules or thresholds fail closed as CONFESSION."
   },

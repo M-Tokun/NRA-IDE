@@ -15,7 +15,7 @@ spec.loader.exec_module(GATE)
 
 def demo_config():
     return {
-        'meta': {'schema_version': 2, 'canonical_version': '2.4', 'status': 'unvalidated_demo'},
+        'meta': {'schema_version': 2, 'canonical_version': '2.5', 'status': 'unvalidated_demo'},
         'evaluation_declaration': {
             'declared_target': 'SYNTHETIC_TEST_TARGET', 'unit': 'synthetic_test_unit',
             'source': 'synthetic_test_fixture', 'delta_rule': 'supplied nonnegative test delta',

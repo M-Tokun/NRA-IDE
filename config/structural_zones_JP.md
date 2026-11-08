@@ -1,6 +1,6 @@
 # 現行NRA-IDE境界設定
 
-定義は[AXIOMS.md](../theory/AXIOMS.md)と[axioms.json](../theory/axioms.json)による。照合時点はv2.4。[参照実装](../nra-core/foundations/NRA-IDE_Architecture_public.py)を分類に用い、[gateアダプター](../gate/_canonical_threshold.py)が呼出し間の対象履歴を保持する。
+定義は[AXIOMS.md](../theory/AXIOMS.md)と[axioms.json](../theory/axioms.json)による。照合時点はv2.5。[参照実装](../nra-core/foundations/NRA-IDE_Architecture_public.py)を分類に用い、[gateアダプター](../gate/_canonical_threshold.py)が呼出し間の対象履歴を保持する。
 
 `R = delta / tau`の定義域は有限のdelta >= 0、有限のtau > 0。負値を絶対値で補正しない。tau=0はOUT_OF_DESCRIPTION_DOMAINである。ドメインごとに評価前に定める閾値は`0 <= R_warn < R_handoff < R_irrev < 1`。旧来の共通0.40/0.99閾値とZone A/B/Cを現行モデルへ流用しない。
 
