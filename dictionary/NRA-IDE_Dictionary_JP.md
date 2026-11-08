@@ -240,6 +240,16 @@
 - 混同注意：「補修事象があれば残留ズレは減ってよい」と読める書き方（AXIOMS v2.2）を、v2.3で改めた（2026-09-29）
 - 関連：[残留ズレ](#^residual-deviation)、[基準状態](#^reference-state)
 
+<a id="allowable-range"></a>
+### 許容範囲（きょようはんい）
+- 英語版：[Allowable Range](./NRA-IDE_Dictionary_EN.md#^allowable-range) ^allowable-range
+- 型・単位：宣言（評価前に定める）
+- 意味：再現の判定で、状態・機能が一致したとみなす範囲。評価前に定める。定義元：AXIOMS §2 補足事項
+- 書き方：値は正典で固定しない。領域、研究者の共同体、学会などの基準が定める（AXIOMS §15）。正典が固定するのは、評価前に定めること、判定結果から書き換えないこと、吸収厚み $\tau$ とは別の量であることの3点である。役割の違いは、許容範囲が判定に使う外部の基準であり、 $\tau$ が構造の蓄積ズレを吸収できる厚みである点にある（AXIOMS §4）
+- 混同注意：補足の起草中に、許容範囲が $\tau$ の許容幅と読めることに気づいた。 $\tau$ は意味的な許容幅ではない（AXIOMS §4）（2026-11-08）。英語の語を tolerance にすると、耐障害性（fault tolerance）や値一つの許容差と読まれやすいため、allowable range を採った（2026-11-08）
+- 受け取り方の違い【未確認】：英語の allowable range は、日本語の「範囲」と字面で一致する。短所は、何の範囲かを語が示さないことと、装置の運転範囲（operating range）と読まれ得ること。五つのAIの回答による（2026-11-08）
+- 関連：[吸収厚み](#^absorption-thickness)、[逆導出](#^reverse-derivation)
+
 <a id="evaluation-gauge"></a>
 ### 計器（けいき）
 - 英語版：[Evaluation Gauge](./NRA-IDE_Dictionary_EN.md#^evaluation-gauge) ^evaluation-gauge
@@ -918,6 +928,7 @@
 | 2026-10-22 | 不可逆の前の兆候を「可視化」「見える」とだけ書いたことと、観測できる物理的事象（見える・聞こえる・触れて分かる・計器に出る） | [対象状態](#^target-physical-state)、[経路履歴](#^event-history) |
 | 2026-10-22 | 正典の二重ゆらぎと、論文系列の手法名「二重揺らぎ名目計算」 | [二重ゆらぎ](#^double-fluctuation) |
 | 2026-10-23 | 二重ゆらぎを、 $R$ の増加傾向より早い警報と期待したこと | [二重ゆらぎ](#^double-fluctuation) |
+| 2026-11-08 | 許容範囲と、吸収厚み $\tau$ （意味的な許容幅ではない）。英語の tolerance は耐障害性や値一つの許容差と読まれやすい | [許容範囲](#^allowable-range)、[吸収厚み](#^absorption-thickness) |
 
 ---
 
