@@ -6,8 +6,6 @@ import sys
 import unittest
 from datetime import datetime, timezone
 
-import pytest
-
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SKILL_ROOT = REPO_ROOT / "skills" / "nra-depth-guard"
@@ -215,7 +213,7 @@ class ResetTests(unittest.TestCase):
     def test_reset_refreshes_memory_baseline(self) -> None:
         engine = make_engine()
         if not guard_module._PSUTIL_AVAILABLE:
-            pytest.skip("psutil is not installed; memory threshold is disabled")
+            self.skipTest("psutil is not installed; memory threshold is disabled")
         engine._baseline_memory_mb = -1.0
         engine.reset()
         self.assertGreaterEqual(engine._baseline_memory_mb, 0.0)
