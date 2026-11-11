@@ -1,7 +1,7 @@
 <!-- FILE: llms.md -->
 <!-- Role: Mandatory AI identification, interpretation, and operational gate for NRA-IDE -->
 <!-- Author: M-Tokuni -->
-<!-- Updated: 2026-09-30 JST -->
+<!-- Updated: 2026-11-11 JST -->
 
 # llms.md — NRA-IDE Operational Gate
 
@@ -11,7 +11,7 @@ This document does not override the sole canonical axiom or higher-precedence ca
 
 This document is a working contract for AI agents and the reference for human reviewers.
 
-- **AI agents:** read this document in full before acting on NRA-IDE content. llms.txt points here; on any conflict, follow the canonical order in §0.
+- **AI agents:** `llms.txt` provides the self-contained core entry specification; read `llms.md` in full for local IDE implementation, strict structural evaluation (§2), and state-transition conformance. On any conflict, follow the canonical order in §0.
 - **Humans:** project overview: `README.md` / `README_JP.md`. Repository navigation and authority classes: `REPOSITORY_OVERVIEW.md`. The AI/human responsibility boundary is defined in §§13–16.
 
 ---
@@ -36,6 +36,8 @@ When definitions conflict, use the following precedence order.
 
 Lower-level documents must not redefine higher-level terms.
 
+The normative reference implementation source is `nra-core/foundations/NRA-IDE_Architecture_public.py`; `docs/NRA-IDE_Architecture_public.py` is a generated synchronized public mirror, not an independent source. Location alone does not confer normative status; conformance tests against `theory/AXIOMS.md` and `theory/axioms.json` must pass.
+
 ---
 
 ## 1. Identity Lock
@@ -56,6 +58,8 @@ Existence is Generation.
 ```
 
 No second or subsequent axiom exists. The Primary Formula and the Secondary / Dual-Fluctuation Formula are the two canonical IDE calculation systems, not axioms. All other equations are derived, auxiliary, or complementary formulas.
+
+Exact identity of history does not hold under the sole axiom. Practical reproducibility may still be judged using a target, unit, Cause-Side measurement rule, comparison criterion, and allowable range fixed before evaluation. Rewriting those criteria from judgment results is prohibited (same type as reverse derivation B); the allowable range is distinct from $\tau$, and reproducibility does not establish initial-structure restoration (§3 / `theory/AXIOMS.md` §2, §8).
 
 ---
 
@@ -127,7 +131,7 @@ $$
 
 Both values must be finite.
 
-Accumulated deviation $\delta$ is measured from a reference state fixed before evaluation, in the declared rupture direction, and consists of a reversible component and an irreversible component (residual deviation). The reference state is not reset during an evaluation (`theory/AXIOMS.md` §4). Absorption thickness $\tau$ does not recover naturally; it increases only through the addition of a structural element, measured by Cause-Side observation at the time of addition. Planned removal of an undamaged element is not degradation (`theory/AXIOMS.md` §7, §8). How $\delta$ and $\tau$ are constructed from Cause-Side observations is defined in `FORMULA.md` §0.5.
+Accumulated deviation $\delta$ is measured from a reference state fixed before evaluation, in the declared rupture direction, and consists of a reversible component and an irreversible component (residual deviation). The reference state is not reset during an evaluation (`theory/AXIOMS.md` §4). Absorption thickness $\tau$ does not recover naturally; it increases only through the addition of a structural element, measured by Cause-Side observation at the time of addition. Planned removal of an undamaged element is not degradation. Once a structure reaches rupture or phase transition, the existing elements (excluding newly added elements) obey $\tau_{\mathrm{restored}} < \tau_0$; even if total thickness with added elements exceeds $\tau_0$, it is not restoration to the initial structure (`theory/AXIOMS.md` §7, §8). How $\delta$ and $\tau$ are constructed from Cause-Side observations is defined in `FORMULA.md` §0.5.
 
 The auxiliary structural quantities $\omega$, $\mathrm{Phase}$, $C$, $W$, and $\mathrm{entropy}$ are defined in `theory/AXIOMS.md` §4.5. They are obtained only from Cause-Side observation or pre-fixed transformation rules, never from evaluation outputs. $C$ is not an allocation target of $\delta$ or $\tau$. $S$ must not be used for entropy.
 
@@ -141,7 +145,7 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-$M_R$ is the dimensionless remaining ratio margin. $M_{\tau}$ is the remaining absorption margin and has the same unit as $\delta$ and $\tau$.
+$M_R$ is the dimensionless remaining ratio margin. $M_{\tau}$ is the remaining absorption margin and has the same unit as $\delta$ and $\tau$. Both margins are defined only when $\delta \ge 0$ and $\tau > 0$ are finite. Structural testimony must distinguish `remaining_ratio_margin` ($M_R$) and `remaining_absorption_margin` ($M_{\tau}$) and must not use one ambiguous `remaining margin` field name.
 
 ---
 
@@ -177,7 +181,7 @@ Cause-Side as a whole is not temporally immutable. Authorized new Cause-Side obs
 
 Effect-Side output must not rewrite an observation value, threshold, canonical state, irreversible latch, or source meaning.
 
-R, the canonical state, and the irreversible latch are neither Cause-Side observations nor Effect-Side artifacts. They are evaluation outputs computed from Cause-Side inputs by pre-fixed rules. Evaluation outputs may be used for audit, structural testimony, state classification, and pre-fixed physical-control commands (`theory/AXIOMS.md` §14).
+$R$, the canonical state, and the irreversible latch are neither Cause-Side observations nor Effect-Side artifacts. They are evaluation outputs computed from Cause-Side inputs by pre-fixed rules. Evaluation outputs may be used for audit, structural testimony, state classification, and pre-fixed physical-control commands (`theory/AXIOMS.md` §14).
 
 The following paths are reverse derivation and are prohibited, whether through automatic, manual, human-reviewed, authorized, or versioned means (`theory/AXIOMS.md` §14).
 
@@ -187,6 +191,13 @@ The following paths are reverse derivation and are prohibited, whether through a
 A path that feeds an evaluation output of another evaluation target into the thresholds or effective gate width of one's own evaluation target is permitted only in the safe-side direction (lowering thresholds, narrowing gate widths), and only when no path returns one's own evaluation outputs to that other target. The existence of such a path and its rule are fixed before evaluation begins.
 
 Whether a path is reverse derivation is judged by its origin and rewrite target, not by the name of the symbol used. An update of state by the physical law of the target structure itself rewrites the target structure and is not reverse derivation.
+
+In reasoning, causal analysis, and the boundary between verifiable mathematical computation and reverse derivation (`theory/SANDWICH_ARCH.md` §8.4, `FORMULA.md` §6, `llms.txt` §3):
+
+- separate and label **(1) Confirmed Fact** (verified Cause-Side observation), **(2) Undetermined** (pending confirmation), **(3) Unknown** (missing, unobservable, or unsupported input — report explicitly as Unknown / `CONFESSION`), and **(4) Bounded Inference** (derived strictly from confirmed Cause-Side facts), excluding speculation;
+- strictly separate **step-by-step fact accumulation and mathematically formulated Cause-Side inverse computation** from **vague gap-filling, fabrication, and reverse derivation**:
+  - **Prohibited (reverse derivation and ungrounded gap-filling)**: inferring or fabricating causes to fill gaps from Effect-Side outputs, surface results, or similarity/association (reverse inference used as structural input constitutes reverse derivation A); prohibited paths A (authority backflow) and B (self-adjustment of the gauge) judged by origin and rewrite target (`theory/AXIOMS.md` §14); unique reconstruction of $\delta$ or $\tau$ from $R$ alone; mutual inversion of one-way transition formulas; and undeclared chained re-estimation (`theory/SANDWICH_ARCH.md` §8.4);
+  - **Permitted (not reverse derivation)**: causal tracing strictly by accumulating verified Cause-Side facts (stopping with Unknown / `CONFESSION` when required facts are missing); numerical **inverse computation / inverse problems** formulated mathematically within Cause-Side under a pre-fixed rule (`FORMULA.md` §6, with approximation and uncertainty disclosed); same-snapshot **identity transformations** of independently obtained $\delta$ and $\tau$; and post-hoc explanation from records strictly outside the terminated path (returning results to Cause-Side becomes reverse derivation A).
 
 ---
 
@@ -203,7 +214,7 @@ When NRA-IDE structural variables or boundary states are being evaluated, the AI
 - reduce NRA-IDE state classification to an optimization objective;
 - claim that irreversible transition is automatically recoverable;
 - convert $\tau=0$ into infinite $R$;
-- silently delete or replace an invalid structural input.
+- silently delete or replace an invalid structural input;
 - transfer $\delta$, $\tau$, a governing equation, or a threshold from one domain to another based only on semantic similarity or case similarity.
 
 Comparative explanation is allowed only when the differences are explicitly stated and the comparison is not used to replace NRA-IDE definitions.
@@ -260,27 +271,35 @@ input:
     R_warn
     R_handoff
     R_irrev
+    irreversible_latched = false
 
-require:
-    delta is finite
-    tau is finite
-    0 <= R_warn < R_handoff < R_irrev < 1.0
-
-if delta < 0:
+if delta is not finite or tau is not finite:
     return CONFESSION
 
-if tau < 0:
+if delta < 0 or tau < 0:
     return CONFESSION
 
 if tau == 0:
     return OUT_OF_DESCRIPTION_DOMAIN
 
+if irreversible_latched is not boolean:
+    return CONFESSION
+
+if R_warn, R_handoff, or R_irrev is missing or not finite:
+    return CONFESSION
+
+if not (0 <= R_warn < R_handoff < R_irrev < 1.0):
+    return CONFESSION
+
 R = delta / tau
+if R is not finite:
+    return CONFESSION
 
 if R >= 1.0:
+    irreversible_latched = true
     return RUPTURE_BOUNDARY
 
-if R >= R_irrev:
+if irreversible_latched or R >= R_irrev:
     irreversible_latched = true
     return IRREVERSIBLE_TRANSITION
 
@@ -293,7 +312,7 @@ if R >= R_warn:
 return PERMIT
 ```
 
-This algorithm must not be simplified into a binary `R < 1 / R >= 1` rule.
+Missing or unknown `declared_target`, non-Cause-Side authority, or non-canonical channel states also return `CONFESSION` (§4, §8.6). This algorithm must not be simplified into a binary `R < 1 / R >= 1` rule.
 
 ---
 
@@ -331,7 +350,7 @@ Required behavior:
 
 - issue a boundary-approach warning;
 - continue structural testimony;
-- expose current $R$, $\delta$, $\tau$, $M_R$, $M_{\tau}$, trend, dominant side, missing information, double-fluctuation status, and structural-disclosure record;
+- expose current $R$, $\delta$, $\tau$, `remaining_ratio_margin` ($M_R$), `remaining_absorption_margin` ($M_{\tau}$), trend, dominant side, missing information, double-fluctuation status, and structural-disclosure record;
 - report the double-fluctuation result when observable, or `NOT_OBSERVABLE` with the missing reason;
 - retain domain constraints.
 
@@ -413,8 +432,8 @@ $$
 Meaning:
 
 ```text
-remaining ratio margin M_R = 0 or less
-remaining absorption margin M_tau = 0 or less
+remaining_ratio_margin (M_R) = 0 or less
+remaining_absorption_margin (M_tau) = 0 or less
 ```
 
 Required behavior:
@@ -512,8 +531,8 @@ Structural testimony includes:
 - Cause-Side observation
 - current $\delta$, $\tau$, and $R$
 - boundary state
-- remaining ratio margin $M_R$
-- remaining absorption margin $M_{\tau}$
+- remaining ratio margin `remaining_ratio_margin` ($M_R$)
+- remaining absorption margin `remaining_absorption_margin` ($M_{\tau}$)
 - trend
 - dominant side
 - missing information
@@ -561,7 +580,7 @@ STRUCTURAL_DISCLOSURE_LOG
 
 Members include:
 
-- `STRUCTURAL_PROGRESS`
+- `PERMIT`
 - `BOUNDARY_WARNING`
 - `HANDOFF_REQUIRED`
 - `IRREVERSIBLE_TRANSITION`
@@ -627,6 +646,18 @@ It does not replace the canonical $R$ state classification.
 
 It must not generate missing thresholds or domain rules.
 
+When directional evaluation (Secondary / Dual-Fluctuation Formula) separates upper-side and lower-side deviations:
+
+$$
+R_{\mathrm{upper}} = \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}},
+\qquad
+R_{\mathrm{lower}} = \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}},
+\qquad
+R_{\mathrm{dir}} = \max\left(R_{\mathrm{upper}}, R_{\mathrm{lower}}\right)
+$$
+
+Directional auxiliary ratios and $R_{\mathrm{dir}}$ do not redefine canonical $R$ and do not directly classify canonical state. To connect $R_{\mathrm{dir}}$ to canonical classification, a Cause-Side domain transformation rule fixed before evaluation must determine the canonical $\delta$ and $\tau$.
+
 ---
 
 ## 12. Structural Sensitivity
@@ -685,6 +716,8 @@ Mentioning medical, engineering, agricultural, or life-related terms in a title,
 
 The trigger is a request to make or substitute the actual domain decision.
 
+NRA-IDE is not a unified physical model that replaces domain governing equations; the evaluation target, Cause-Side variables, units, derivation rules for $\delta$ and $\tau$, and concrete thresholds are domain-specific, while the boundary-evaluation structure remains invariant (`theory/AXIOMS.md` §15).
+
 ---
 
 ## 14. Final Responsibility
@@ -741,7 +774,7 @@ Do not allow Effect-Side output to rewrite Cause-Side structure.
 
 この文書は、AIエージェントの行動契約であると同時に、人間のレビュアーがそれを確認するための参照文書です。
 
-- **AIへ：** NRA-IDEを扱う前にこの文書を最後まで読むこと。llms.txt がここを指す。競合時は §0 の正規参照順に従う。
+- **AIへ：** 中核仕様の自己完結した入口は `llms.txt` が提供し、ローカルIDE実装・厳格な構造評価（§2）・状態遷移適合の場面で本文書（`llms.md`）を最後まで読むこと。競合時は §0 の正規参照順に従う。
 - **人間へ：** プロジェクト概要は `README.md` / `README_JP.md`。リポジトリの案内と権威区分は `REPOSITORY_OVERVIEW.md`。AIと人間の責任境界は §13–16 に定義される。
 
 ---
@@ -766,6 +799,8 @@ Do not allow Effect-Side output to rewrite Cause-Side structure.
 
 下位文書は上位定義を書き換えてはなりません。
 
+正規参照実装のソース配置は `nra-core/foundations/NRA-IDE_Architecture_public.py` であり、`docs/NRA-IDE_Architecture_public.py` はそこから生成される公開用同期ミラーであって独立ソースではありません。配置だけでは正規性を取得せず、`theory/AXIOMS.md` および `theory/axioms.json` との適合試験に合格する必要があります。
+
 ---
 
 ## 1. アイデンティティ固定
@@ -786,6 +821,8 @@ NRA-IDEは統合開発環境ではありません。
 ```
 
 第二公理以降は存在しません。一次式と二次式（二重ゆらぎ式）は公理ではなく、IDEの二つの正規計算系です。その他の式はすべて派生式、補助式または補完式です。
+
+唯一の律環公理の下で履歴の完全同一性は成立しません。ただし、評価前に固定した対象・単位・Cause-Side測定規則・比較基準・許容範囲に収まる実用上の再現性判定は認められます。判定結果から基準等を書き換える経路は逆導出Bと同じ型として禁止され、許容範囲は $\tau$ とは別量であり、再現は初期構造への復元を意味しません（§3 / `theory/AXIOMS.md` §2・§8）。
 
 ---
 
@@ -857,7 +894,7 @@ $$
 
 両方とも有限値でなければなりません。
 
-蓄積ズレ $\delta$ は、評価開始前に固定した基準状態から宣言した破断方向へ測ったズレであり、可逆成分と不可逆成分（残留ズレ）から成ります。基準状態は評価中に付け直しません（`theory/AXIOMS.md` §4）。吸収厚み $\tau$ は自然に回復せず、増えるのは構造要素の付加（加えた時点のCause-Side測定）だけです。壊れていない要素の計画的な除去は劣化ではありません（`theory/AXIOMS.md` §7・§8）。Cause-Side観測から $\delta$ と $\tau$ を構成する方法は `FORMULA.md` §0.5 が定めます。
+蓄積ズレ $\delta$ は、評価開始前に固定した基準状態から宣言した破断方向へ測ったズレであり、可逆成分と不可逆成分（残留ズレ）から成ります。基準状態は評価中に付け直しません（`theory/AXIOMS.md` §4）。吸収厚み $\tau$ は自然に回復せず、増えるのは構造要素の付加（加えた時点のCause-Side測定）だけです。壊れていない要素の計画的な除去は劣化ではありません。破断または相転移に一度至った構造では、付加要素を除く既存要素について $\tau_{\mathrm{restored}} < \tau_0$ が成り立ち、付加を含めた全体厚みが $\tau_0$ を上回っても初期構造への復元ではありません（`theory/AXIOMS.md` §7・§8）。Cause-Side観測から $\delta$ と $\tau$ を構成する方法は `FORMULA.md` §0.5 が定めます。
 
 補助構造量 $\omega$ ・ $\mathrm{Phase}$ ・ $C$ ・ $W$ ・ $\mathrm{entropy}$ は `theory/AXIOMS.md` §4.5 が定めます。Cause-Side観測または事前固定の変換規則からだけ得て、評価出力から得てはなりません。 $C$ は $\delta$ ・ $\tau$ の計上先ではありません。 $S$ をエントロピーの意味で使ってはなりません。
 
@@ -871,7 +908,7 @@ $$
 M_{\tau}=\tau-\delta
 $$
 
-$M_R$ は無次元の残存比率余白です。 $M_{\tau}$ は残存吸収余白であり、 $\delta$ および $\tau$ と同じ単位を持ちます。
+$M_R$ は無次元の残存比率余白です。 $M_{\tau}$ は残存吸収余白であり、 $\delta$ および $\tau$ と同じ単位を持ちます。両者は有限な $\delta \ge 0$ かつ $\tau > 0$ のときだけ定義されます。構造証言では `remaining_ratio_margin` （ $M_R$ ）と `remaining_absorption_margin` （ $M_{\tau}$ ）を区別して出力し、単独の曖昧な `remaining margin` を使用してはなりません。
 
 ---
 
@@ -907,7 +944,7 @@ Cause-Side全体は時間的に更新不能ではありません。権限ある�
 
 Effect-Side出力は、観測値、閾値、正規状態、不可逆ラッチ、出所の意味を書き換えてはなりません。
 
-R、正規状態、不可逆ラッチは、Cause-Side観測そのものでもEffect-Side生成物でもありません。Cause-Side入力から事前固定規則で計算した評価出力です。評価出力は、監査、構造証言、状態分類、および事前固定された物理制御の指令に使えます（`theory/AXIOMS.md` §14）。
+$R$ 、正規状態、不可逆ラッチは、Cause-Side観測そのものでもEffect-Side生成物でもありません。Cause-Side入力から事前固定規則で計算した評価出力です。評価出力は、監査、構造証言、状態分類、および事前固定された物理制御の指令に使えます（`theory/AXIOMS.md` §14）。
 
 次の経路を逆導出とし、自動、手動、人間レビュー、承認、版更新のいずれを介しても禁止します（`theory/AXIOMS.md` §14）。
 
@@ -917,6 +954,13 @@ R、正規状態、不可逆ラッチは、Cause-Side観測そのものでもEff
 他の評価対象の評価出力を、自らの評価対象の閾値または有効ゲート幅へ入れる経路は、安全側の向き（閾値を下げる、ゲート幅を狭める）に限り、かつ自らの評価出力がその評価対象へ戻る経路がない場合に限り許します。この経路の有無と規則は、評価開始前に固定します。
 
 逆導出かどうかは、使った記号の名前ではなく、経路の出所と書き換え先で判定します。対象構造そのものの物理法則による状態の更新は、書き換え先が対象構造であり、逆導出ではありません。
+
+推論、因果分析、および「事実の積み上げ・数式で書ける逆演算」と「推論・捏造などの曖昧な穴埋め・逆導出」の境界は次によります（`theory/SANDWICH_ARCH.md` §8.4・`FORMULA.md` §6・`llms.txt` §3）。
+
+- 内容を **(1) 確定**（検証済みCause-Side観測）、**(2) 未定**（確認待ち・継続中）、**(3) 不明**（欠損・観測不能・根拠欠如は明示的に不明 / `CONFESSION` として報告）、**(4) 限定的推論**（確定済みCause-Side事実のみからの厳格な導出）に分離して明示し、推測を事実や結論として提示しません。
+- **検証可能な事実の積み上げおよび数式で記述できる事前固定の逆演算**と、**推論・捏造など曖昧な穴埋めによる原因化および逆導出**を厳密に区別します：
+  - **禁止（逆導出および根拠なき穴埋め・成立しない逆算）**：Effect-Side出力・表層結果・曖昧な推論や類似連想で穴埋めして原因とすること（構造判定入力としての逆推論は逆導出Aに該当）、出所と書き換え先で判定される禁止経路A（権威の逆流）・B（計器の自己調整、`theory/AXIOMS.md` §14）、 $R$ だけからの $\delta$ ・ $\tau$ 一意復元、一方向遷移式の相互逆算、および無宣言の再推定連鎖（`theory/SANDWICH_ARCH.md` §8.4）。
+  - **許可（逆導出ではない）**：確定済みCause-Side事実の段階的積み上げによる因果追跡（必須事実が欠ける場合は推測せず停止・不明報告）、事前固定された数式・変換規則に従いCause-Side内だけで行う数値的**逆演算・逆問題**（近似と不確かさを開示、`FORMULA.md` §6）、独立に得た $\delta$ ・ $\tau$ の同一評価スナップショット内における**恒等変形**、および終端済み経路の外における記録からの事後再構成（結果をCause-Sideへ戻せば逆導出A）。
 
 ---
 
@@ -934,7 +978,7 @@ NRA-IDEの構造変数または境界状態を評価する場合、AIは次を�
 - 不可逆遷移を自動回復可能と主張する
 - $\tau=0$ を無限大の $R$ へ置換する
 - 不正な構造入力を黙って削除または置換する
-- 異なる領域の$\delta$、$\tau$、支配方程式または閾値を、語義の類似や事例の類似だけで転用する
+- 異なる領域の $\delta$ 、 $\tau$ 、支配方程式または閾値を、語義の類似や事例の類似だけで転用する
 
 差異を明示し、正規定義の代用にしない比較説明は許可されます。
 
@@ -990,27 +1034,35 @@ $$
     R_warn
     R_handoff
     R_irrev
+    irreversible_latched = false
 
-要件:
-    deltaは有限
-    tauは有限
-    0 <= R_warn < R_handoff < R_irrev < 1.0
-
-if delta < 0:
+if deltaが非有限 or tauが非有限:
     CONFESSIONを返す
 
-if tau < 0:
+if delta < 0 or tau < 0:
     CONFESSIONを返す
 
 if tau == 0:
     OUT_OF_DESCRIPTION_DOMAINを返す
 
+if irreversible_latchedが真偽値でない:
+    CONFESSIONを返す
+
+if R_warn, R_handoff, R_irrevが欠損または非有限:
+    CONFESSIONを返す
+
+if not (0 <= R_warn < R_handoff < R_irrev < 1.0):
+    CONFESSIONを返す
+
 R = delta / tau
+if Rが非有限:
+    CONFESSIONを返す
 
 if R >= 1.0:
+    irreversible_latched = true
     RUPTURE_BOUNDARYを返す
 
-if R >= R_irrev:
+if irreversible_latched or R >= R_irrev:
     irreversible_latched = true
     IRREVERSIBLE_TRANSITIONを返す
 
@@ -1023,7 +1075,7 @@ if R >= R_warn:
 PERMITを返す
 ```
 
-このアルゴリズムを`R<1 / R>=1`の二値規則へ単純化してはなりません。
+`declared_target` 欠損・不明、非Cause-Side入力、非正規の経路状態も `CONFESSION` を返します（§4・§8.6）。このアルゴリズムを`R<1 / R>=1`の二値規則へ単純化してはなりません。
 
 ---
 
@@ -1061,7 +1113,7 @@ $$
 
 - 境界接近警告を出す
 - 構造証言を継続する
-- 現在の $R$ 、 $\delta$ 、 $\tau$ 、 $M_R$ 、 $M_{\tau}$ 、傾向、支配側、欠損情報、二重ゆらぎ状態、構造開示記録を開示する
+- 現在の $R$ 、 $\delta$ 、 $\tau$ 、 `remaining_ratio_margin` （ $M_R$ ）、 `remaining_absorption_margin` （ $M_{\tau}$ ）、傾向、支配側、欠損情報、二重ゆらぎ状態、構造開示記録を開示する
 - 二重ゆらぎを観測できる場合は判定結果を、できない場合は`NOT_OBSERVABLE`と欠損理由を出す
 - ドメイン制約を保持する
 
@@ -1143,8 +1195,8 @@ $$
 意味：
 
 ```text
-残存比率余白 M_R = 0以下
-残存吸収余白 M_tau = 0以下
+残存比率余白 remaining_ratio_margin (M_R) = 0以下
+残存吸収余白 remaining_absorption_margin (M_tau) = 0以下
 ```
 
 必須動作：
@@ -1242,8 +1294,8 @@ $$
 - Cause-Side観測
 - 現在の $\delta$ 、 $\tau$ 、 $R$
 - 境界状態
-- 残存比率余白 $M_R$
-- 残存吸収余白 $M_{\tau}$
+- 残存比率余白 `remaining_ratio_margin` （ $M_R$ ）
+- 残存吸収余白 `remaining_absorption_margin` （ $M_{\tau}$ ）
 - 傾向
 - 支配側
 - 欠損情報
@@ -1291,7 +1343,7 @@ STRUCTURAL_DISCLOSURE_LOG
 
 含まれる状態：
 
-- `STRUCTURAL_PROGRESS`
+- `PERMIT`
 - `BOUNDARY_WARNING`
 - `HANDOFF_REQUIRED`
 - `IRREVERSIBLE_TRANSITION`
@@ -1357,6 +1409,18 @@ $$
 
 欠損した閾値やドメイン規則を生成してはなりません。
 
+上側・下側の蓄積ズレを分離する方向別評価（二次式 / 二重ゆらぎ式）を用いる場合、側別比と集約値は次で記述します。
+
+$$
+R_{\mathrm{upper}} = \frac{\delta_{\mathrm{upper}}}{\tau_{\mathrm{upper}}},
+\qquad
+R_{\mathrm{lower}} = \frac{\delta_{\mathrm{lower}}}{\tau_{\mathrm{lower}}},
+\qquad
+R_{\mathrm{dir}} = \max\left(R_{\mathrm{upper}}, R_{\mathrm{lower}}\right)
+$$
+
+側別補助比および $R_{\mathrm{dir}}$ は正規 $R$ を再定義せず、正規境界状態を直接分類しません。 $R_{\mathrm{dir}}$ を正規状態分類へ接続する場合は、評価前に固定されたCause-Sideのドメイン変換規則によって正規の $\delta$ と $\tau$ を定めなければなりません。
+
 ---
 
 ## 12. 構造感度
@@ -1412,6 +1476,8 @@ AIが提示できるもの：
 医療、工学、農業、生命関連語が、タイトル、引用、メタデータ、例示、一般説明に現れるだけでは判断停止のトリガになりません。
 
 実際のドメイン判断を行う、または代替するよう求められた場合に発動します。
+
+NRA-IDEは各領域の支配方程式を置き換える統一物理モデルではありません。評価対象、Cause-Side変数、単位、 $\delta$ と $\tau$ の算定規則、具体的閾値はドメインごとに定め、不変なのはIDEの境界評価構造です（`theory/AXIOMS.md` §15）。
 
 ---
 
