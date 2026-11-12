@@ -46,6 +46,9 @@ class FakeRunner:
             key = "rev_parse"
         elif args[:2] == ["git", "rev-list"]:
             key = "rev_list"
+        elif args[:2] == ["git", "diff"]:
+            q = self.queues.get("diff")
+            return q.pop(0) if q else (0, "")  # 既定：長すぎるパスなし
         elif args[:2] == ["git", "log"]:
             return 0, "subject"
         elif args[:2] == ["git", "branch"]:
@@ -111,6 +114,24 @@ class PushRouteTest(unittest.TestCase):
                 self.assertEqual((code, last), (1, "STOP 90 @10"))
                 self.assertEqual(self.reasons()[-1], why)
                 self.assertFalse(push.STATE.exists())
+
+    # S2′ @10：名前・パスが長すぎる（受け取る側の clone で失敗するのを先に止める）
+    def test_s2_path_too_long(self):
+        long_name = "あ" * 86 + ".md"            # 258 + 3 バイト > 255
+        long_path = "d/" * 99 + "abc.md"          # 204 文字 > 200
+        ok_name = "あ" * 83 + ".md"               # 252 バイト（上限内）
+        for diff_out, want in [(f"note/{long_name}\0", "PATH_TOO_LONG"), (f"{long_path}\0", "PATH_TOO_LONG"),
+                               ((1, "fatal"), "DIFF_FAILED")]:
+            with self.subTest(want=want, diff=str(diff_out)[:20]):
+                result = diff_out if isinstance(diff_out, tuple) else (0, diff_out)
+                r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], diff=[result])
+                code, last, _ = self.go(r, "prepare")
+                self.assertEqual((code, last), (1, "STOP 90 @10"))
+                self.assertEqual(self.reasons()[-1], want)
+                self.assertFalse(push.STATE.exists())
+        r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], diff=[(0, f"note/{ok_name}\0")])
+        code, last, _ = self.go(r, "prepare")
+        self.assertEqual((code, last), (0, "NEXT 20 Y ASK"))
 
     # S3 @20：提示の直後の入力が git push 以外 → decline。plan は消え、run しても送れない
     def test_s3_declined_at_20(self):

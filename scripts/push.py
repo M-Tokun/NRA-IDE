@@ -30,6 +30,9 @@ STATE = GATE_DIR / "push_route_state.json"
 LOG = GATE_DIR / "push_route_log.jsonl"
 RETRY_REASONS = {"PLAN_OR_RULES_CHANGED", "FETCH_EVIDENCE_MISSING"}  # 時刻差：10 へ1回だけ戻る
 TIMEOUT = {"10": 240, "30": 600, "40": 60}  # 案（設計案 U-6：実測して決める）
+# 名前・パスの長さの上限。送る側では通っても、受け取る側の clone で失敗するのを先に止める。
+MAX_NAME_BYTES = 255   # 名前1つの UTF-8 バイト数（Linux・macOS のファイルシステムの上限）
+MAX_PATH_CHARS = 200   # リポジトリ内パスの文字数（clone 先が60文字までなら Windows の260文字に収まる）
 PREPARE_TIMEOUT_SECONDS = 180
 
 
@@ -46,16 +49,18 @@ def _run(args, timeout, env=None):
 RUN = _run  # 試験で差し替える
 
 
-def _log(step, result, reason=""):
+def _log(step, result, reason="", detail=""):
     GATE_DIR.mkdir(parents=True, exist_ok=True)
     rec = {"at": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
            "step": step, "result": result, "reason": reason}
+    if detail:
+        rec["detail"] = detail
     with LOG.open("a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
-def _stop(step, reason):
-    _log(step, "STOP", reason)
+def _stop(step, reason, detail=""):
+    _log(step, "STOP", reason, detail)
     if STATE.exists():
         STATE.unlink()
     print(f"STOP 90 @{step}")
@@ -88,6 +93,18 @@ def _new_plan_path():
     return path
 
 
+def _too_long_path(base, head):
+    """送信範囲で追加・変更・名前変更されたパスのうち、上限を超える最初のものを返す。なければ ""。"""
+    code, out = RUN(["git", "diff", "--name-only", "--diff-filter=AMR", "-z", base, head], TIMEOUT["10"])
+    if code != 0:
+        return "DIFF_FAILED"
+    for path in (p for p in out.split("\0") if p.strip()):
+        name = path.rsplit("/", 1)[-1]
+        if len(name.encode("utf-8")) > MAX_NAME_BYTES or len(path) > MAX_PATH_CHARS:
+            return path
+    return ""
+
+
 # ---- 10 PLAN ----------------------------------------------------------------
 def step10(remote, branch, retries):
     code, _ = _git(["fetch", "--quiet", remote], TIMEOUT["10"])
@@ -106,6 +123,11 @@ def step10(remote, branch, retries):
     ctx = data["context"]
     if not ctx.get("outgoing"):
         return _stop("10", "NOTHING_TO_SEND")
+    too_long = _too_long_path(ctx.get("base_oid") or ctx["remote_oid"], ctx["source_oid"])
+    if too_long == "DIFF_FAILED":
+        return _stop("10", "DIFF_FAILED")
+    if too_long:
+        return _stop("10", "PATH_TOO_LONG", too_long)
     STATE.write_text(json.dumps({"plan": plan.relative_to(ROOT).as_posix(), "remote": remote, "branch": branch,
                                  "head": ctx["source_oid"], "retries": retries}, ensure_ascii=False),
                      encoding="utf-8")
