@@ -11,7 +11,7 @@
 
 ### 0.1 Role
 
-This dictionary lets you look up, in one place, the meaning, notation, permitted uses, and common confusions of the terms, symbols, and fixed names (API and output names) used in NRA-IDE. It neither creates nor changes canonical definitions. Where meanings or symbol reservations conflict, the precedence order of `theory/AXIOMS.md` §16 and `FORMULA.md` §7 govern. This dictionary holds no reservation authority of its own.
+This dictionary lets you look up, in one place, the meaning, notation, permitted uses, and common confusions of the terms, symbols, and fixed names (API and output names) used in NRA-IDE. It neither creates nor changes canonical definitions. Where meanings or symbol reservations conflict, the precedence order of `theory/AXIOMS.md` §16 and `FORMULA.md` §7 govern. This dictionary holds no reservation authority of its own. Where a term without a canonical definition is included, the source in the Meaning field states "the canon has no definition; this dictionary's organization of terms", keeping it distinct from canonical definitions.
 
 Both the author and AI agents consult this dictionary before writing a term or symbol. When a new confusion is found, it is added with a date to the "Confusion notes" of the relevant entry, and a line is added to Section 5.
 
@@ -32,7 +32,7 @@ Each entry carries an **entry ID** shared with the Japanese version (e.g., `abso
 | Field | Content |
 |---|---|
 | Symbol / fixed name | The mathematical display, and the name in APIs and outputs |
-| Type / unit | Structural quantity (Cause-Side), evaluation output, evaluation state, gauge, target state, declaration, map, index, or record; and the unit |
+| Type / unit | Structural quantity (Cause-Side), evaluation output, evaluation state, gauge, target state, declaration, map, index, record, or distinction of terms (an organization of terms outside the canon); and the unit |
 | Meaning | A summary of the canonical definition and its source. The source governs |
 | Origin / permitted uses / prohibited uses | Where the value comes from, and where it may or may not be used as input |
 | Notation | How it is written in this repository |
@@ -329,6 +329,21 @@ Temporary variables used only inside an implementation (for example, the interna
 - Meaning: what is held as an evaluation output, such as the irreversible latch. Distinct from both the target's physical state and the event history
 - Related: [Irreversible Latch](#^irreversible-latch), [Target Physical State](#^target-physical-state)
 
+<a id="event"></a>
+### Event
+- Japanese: [事象](./NRA-IDE_Dictionary_JP.md#^event) ^event
+- Type: distinction of terms (second layer: an occurrence cut out)
+- Meaning: an occurrence cut out as an object of analysis or processing. What NRA-IDE treats is the event that occurred within reality (a real event); separation, merger, rupture, addition, and removal are such events. There are also events that are not real, such as an event in probability theory or a fictional occurrence. An event is not contained in a [Phenomenon](#^phenomenon), nor is a phenomenon contained in an event; they are overlapping, different views. Events are hard to quantify, and the whole of an ongoing event cannot be expressed by a single number. Source: the canon has no definition; this dictionary's organization of terms (provided by the user, 2026-11-12). The canonical [Observation Event](#^observation-event) (type: event record) matches the use of an event cut out as an object of processing
+- Notation: distinguish talk about a real event from talk about its record (observation event). Averages, statistics, and inferences are not events
+- Confusion notes:
+  - The first draft of the judgment path / three-part set (2026-11-12 19:04) set "event ≠ record" in opposition, but the question to ask is not record or event but whether the event is a fact (2026-11-12)
+  - Treating the average 20 of 10, 20, and 30 as a single event. The average 20 is a fact, but no occurrence called "20" happened at any time or to any target (2026-11-12)
+  - Event was limited to occurrences within reality, and phenomenon was placed below event in a tree. An event also exists outside reality (an event in probability theory, a fictional occurrence), and a phenomenon is not contained in an event (rainbow, superconductivity, social phenomenon). Changed to a set diagram of overlapping, different views (2026-11-13)
+- Reading risk:
+  - [Confirmed] the translation is "event" (confirmed by the user, 2026-11-12)
+  - [Unconfirmed] easily read as an event in informatics (event object, Event Sourcing). Here it means an occurrence within reality
+- Related: [Observation Event](#^observation-event), [Phenomenon](#^phenomenon), [Fact](#^fact), [Event History](#^event-history)
+
 <a id="event-allocation-rule"></a>
 ### Event Allocation Rule
 - Japanese: [分解規則](./NRA-IDE_Dictionary_JP.md#^event-allocation-rule) ^event-allocation-rule
@@ -350,6 +365,26 @@ Temporary variables used only inside an implementation (for example, the interna
   - The number of records was written with $\lvert\cdot\rvert$ , the same as the absolute value (2026-09-29)
   - Do not mix the event history (a record for testimony) with the physical state or the evaluation state (2026-09-29)
 - Related: [Decision-Sufficient State](#^decision-sufficient-state)
+
+<a id="existence"></a>
+### Existence
+- Japanese: [存在](./NRA-IDE_Dictionary_JP.md#^existence) ^existence
+- Type: distinction of terms (first layer: the widest concept)
+- Meaning: a superordinate concept including the physical, mathematical, ideal, past, and future; as wide as in quantum physics or Buddhism (answer of the user, 2026-11-12). It includes [Reality](#^reality), and there is existence outside reality (existence other than reality). The "existence" of the Nomological Ring Axiom "Existence is Generation." is read in this wide sense. Source: AXIOMS §2 (existence is not a static entity but continuous generation accompanied by history). The range is based on the user's answer
+- Notation: distinguish it from reality (being physically and objectively genuine). Numbers, formulas, concepts, inferences, and the past exist but are not a physical reality (existence other than reality)
+- Confusion notes: reading existence in the same range as reality makes numbers, formulas, concepts, and the past no longer exist. The category "existence other than reality" was set up to organize this in the second draft of the judgment path / three-part set (2026-11-12)
+- Reading risk [Confirmed]: the translation is "existence" (confirmed by the user, 2026-11-12)
+- Related: [Reality](#^reality), [Fact](#^fact)
+
+<a id="fact"></a>
+### Fact
+- Japanese: [事実](./NRA-IDE_Dictionary_JP.md#^fact) ^fact
+- Type: distinction of terms (a truth axis, not a layer)
+- Meaning: the word that asks whether something is really so. Its contrasts are fiction, misperception, rumor, and guesswork. It lays over every layer: existence, event, and number. Source: the canon has no definition; this dictionary's organization of terms (provided by the user, 2026-11-12)
+- Notation: write it paired with its object, as in "is the event a fact?" or "is the number a fact?". Being a record or being a number does not mean being non-fact. A correctly computed average is a fact, but it is not an [Event](#^event)
+- Confusion notes: the first draft of the judgment path / three-part set (2026-11-12 19:04) wrote "fact/event" as one term, mixing the question of truth (fact) with the question of occurrence (event). Some wording could also be read as taking being a record or a number as a reason for being non-fact (2026-11-12)
+- Reading risk [Confirmed]: the translation is "fact" (confirmed by the user, 2026-11-12)
+- Related: [Event](#^event), [Reality](#^reality), [Existence](#^existence)
 
 <a id="instantaneous-classification"></a>
 ### Instantaneous Classification
@@ -440,6 +475,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes: with discrete updates, if $\lambda$ reaches 1 in one step, the classification is out of domain even when the previous $R$ was below 1 (2026-09-28)
 - Related: [Complete Rupture Boundary](#^complete-rupture-boundary)
 
+<a id="phenomenon"></a>
+### Phenomenon
+- Japanese: [現象](./NRA-IDE_Dictionary_JP.md#^phenomenon) ^phenomenon
+- Type: distinction of terms (a manifestation in an observable form)
+- Meaning: the appearance or working in which what is real shows itself in an observable form. The emphasis is on being manifest and observable. It is not necessarily contained in an event (rainbow, superconductivity, social phenomenon); conversely, some real events do not appear in an observable form. Event and phenomenon are not in an inclusion relation but are overlapping, different views (attending to the occurrence, or to the observable appearance). It is the source of a numeric cut, but it cannot always be cut as a number. Source: the canon has no definition; this dictionary's organization of terms (provided by the user, 2026-11-12). "Physical phenomenon" and "the Cause-Side physical model that describes the phenomenon" in AXIOMS §15 match this use
+- Notation: use [Event](#^event) when an occurrence is cut out as an object of analysis, and phenomenon when speaking of an observable appearance. Examples: confirm the fact that an earthquake occurred; compute the energy of the earthquake as a physical event; explain the mechanism of the earthquake as a natural phenomenon
+- Confusion notes: event and phenomenon were not distinguished in the first draft of the judgment path / three-part set (2026-11-12 19:04) (2026-11-12). The first plan of the second draft placed phenomenon below event, but a phenomenon is not contained in an event. Changed to a set diagram (2026-11-13)
+- Reading risk [Confirmed]: the translation is "phenomenon" (confirmed by the user, 2026-11-12)
+- Related: [Event](#^event), [Reality](#^reality), [Observation Value](#^observation-value)
+
 <a id="handoff-threshold"></a>
 ### Pre-Boundary Human Handoff Point
 - Japanese: [境界前人間委譲点](./NRA-IDE_Dictionary_JP.md#^handoff-threshold) ^handoff-threshold
@@ -456,6 +501,21 @@ Temporary variables used only inside an implementation (for example, the interna
 - Symbol: $\Pi$
 - Meaning: the operation that selects only Effect-Side content permitted by the current boundary state. Not an invertible map. Source: SANDWICH_ARCH §8.2
 - Related: [Inverse Projection](#^inverse-projection), [Observation Projection Rule](#^observation-projection-rule)
+
+<a id="reality"></a>
+### Reality
+- Japanese: [実在](./NRA-IDE_Dictionary_JP.md#^reality) ^reality
+- Type: distinction of terms (a narrow range within [Existence](#^existence))
+- Meaning: being physically and objectively genuine; the state of being there or not being there. It is narrower than [Existence](#^existence); there is existence other than reality (numbers, formulas, averages, inferences, concepts). Source: the canon has no definition; this dictionary's organization of terms (provided by the user, 2026-11-12)
+- Notation: the English is "reality" and corresponds to 実在. "Actuality" (a narrower specialist concept, 現実性 / 実際性) is not used. Use it to speak of what physically and genuinely happened or is there
+- Confusion notes:
+  - "Actuality" was nearly assigned as the English translation. Actuality is a different specialist concept, distinguished from reality, and is not a translation of 実在 (2026-11-12)
+  - Treating existence other than reality (a number, an average, an inference) as a real event (2026-11-12)
+  - Writing "存在するが実在しない" (exists but is not real). In everyday Japanese, 実在する is close to "actually exists," so it reads as a contradiction. Write "exists but is not a physical reality" or "existence other than reality" (2026-11-13)
+- Reading risk:
+  - [Confirmed] the translation is "reality" (confirmed by the user, 2026-11-12)
+  - [Unconfirmed] English "reality" also covers the Japanese 現実, so using it in the sense of [Situation at Hand](#^situation-at-hand) conflicts
+- Related: [Existence](#^existence), [Event](#^event), [Situation at Hand](#^situation-at-hand)
 
 <a id="reference-state"></a>
 ### Reference State
@@ -581,6 +641,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Meaning: may increase or decrease; does not mean spontaneous recovery of the underlying absorption thickness. Source: FORMULA §4.4
 - Prohibited uses: feeding evaluation outputs ( $R$ family) into the shape-transformation functions
 - Related: [Effective Thickness](#^effective-thickness)
+
+<a id="situation-at-hand"></a>
+### Situation at Hand
+- Japanese: [現実](./NRA-IDE_Dictionary_JP.md#^situation-at-hand) ^situation-at-hand
+- Type: distinction of terms (not used as a technical term; "Situation at Hand" is a gloss, and there is no fixed English term for 現実)
+- Meaning: recognition of the situation in front of us, used in the context of accepting, judging, or planning. It is distinct from reality (being physically genuine). Source: the canon has no definition; this dictionary's organization of terms (provided by the user, 2026-11-12)
+- Notation: do not write 現実の〜 for what physically and genuinely happened or is there; write 実在の〜 ([Reality](#^reality)) or "physical". General uses such as "practical constraints" are not excluded. No fixed English term is assigned, because "reality" is used for [Reality](#^reality)
+- Confusion notes: in the first draft of the judgment path / three-part set (2026-11-12 19:04), 現実の〜 was used 48 times, mostly in the sense of reality, as in "現実の分離" and "現実の事象" (2026-11-12)
+- Reading risk [Unconfirmed]: English "reality" covers both 現実 and 実在. Using "reality" for 現実 in English text conflicts with the translation of [Reality](#^reality)
+- Related: [Reality](#^reality), [Fact](#^fact)
 
 <a id="straightening"></a>
 ### Straightening
@@ -928,6 +998,10 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-10-22 | the canonical double fluctuation and the paper series' method name "double-fluctuation nominal calculation" | [Double Fluctuation](#^double-fluctuation) |
 | 2026-10-23 | expecting double fluctuation to warn earlier than the trend of $R$ | [Double Fluctuation](#^double-fluctuation) |
 | 2026-11-08 | allowable range and absorption thickness $\tau$ (which is not a semantic tolerance width); English "tolerance" is easily read as fault tolerance or a single-value deviation | [Allowable Range](#^allowable-range), [Absorption Thickness](#^absorption-thickness) |
+| 2026-11-12 | fact, event, phenomenon, and 現実 were not distinguished ("fact/event" as one term; most of the 48 uses of 現実の〜 meant reality) | [Fact](#^fact), [Event](#^event), [Phenomenon](#^phenomenon), [Situation at Hand](#^situation-at-hand) |
+| 2026-11-12 | the ranges of reality and existence; "actuality" was nearly assigned as the English for 実在 | [Reality](#^reality), [Existence](#^existence) |
+| 2026-11-12 | treating a number such as an average (existence other than reality) as a real event | [Event](#^event), [Reality](#^reality) |
+| 2026-11-13 | placing phenomenon below event and limiting event to occurrences within reality; the phrase "存在するが実在しない" (reads as a contradiction in everyday Japanese) | [Event](#^event), [Phenomenon](#^phenomenon), [Reality](#^reality), [Existence](#^existence) |
 
 ---
 
