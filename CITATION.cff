@@ -8,7 +8,7 @@ authors:
 
 type: software
 version: "2.5"
-date-released: "2026-11-08"
+date-released: "2026-11-13"
 license: MIT
 
 repository-code: "https://github.com/M-Tokun/NRA-IDE"
@@ -18,8 +18,8 @@ identifiers:
     value: "10.5281/zenodo.19420853"
     description: "Concept DOI representing all versions of NRA-IDE"
   - type: doi
-    value: "10.5281/zenodo.23085383"
-    description: "Version DOI for NRA-IDE version 2.4"
+    value: "10.5281/zenodo.24112133"
+    description: "Version DOI for NRA-IDE version 2.5"
 
 abstract: >
   NRA-IDE is a structural boundary-evaluation framework in which
