@@ -18,10 +18,13 @@ import sys
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MARKER_ROOT = os.path.join(_REPO_ROOT, '.agent_state', 'agents_md_read')
 AGENTS_MD_PATH = os.path.join(_REPO_ROOT, 'AGENTS.md')
-REASON_MESSAGE = ('このセッションで現在のAGENTS.md全文の読込を確認できません。'
-                  '操作を停止し、セッション再開または再読込で開始時hookを実行してください。')
-MISSING_REASON_MESSAGE = ('AGENTS.mdが存在しないか完全に読み込めません。'
-                          '操作を停止し、利用者に報告してください。')
+# 出口は1つ：開始時hook（SessionStart）の再実行だけが記録を作り直す。AGENTS.md の再読取では戻らない。
+# VS Code では F1 →「Developer: Reload Window」がその出口。読取不能時の端末フリーズ回避のため両方に表示する。
+REASON_MESSAGE = ('このセッションで現在のAGENTS.md全文の読込を確認できません。操作を停止しました。'
+                  'F1キー →「Developer: Reload Window（ウィンドウの再読み込み）」を実行してください。')
+MISSING_REASON_MESSAGE = ('AGENTS.mdが存在しないか完全に読み込めません。操作を停止しました。'
+                          '利用者に報告し、F1キー →「Developer: Reload Window（ウィンドウの再読み込み）」を'
+                          '実行してください。')
 INVALID_PAYLOAD_MESSAGE = ('hook入力を検証できません。未確認状態を許可せず、操作を停止します。')
 READ_ONLY_TOOLS = frozenset({'Read', 'Glob', 'Grep', 'LS', 'WebFetch', 'WebSearch',
     'read_file', 'read_many_files', 'list_directory', 'glob', 'search_file_content',
