@@ -87,6 +87,9 @@ class PushRouteTest(unittest.TestCase):
         return [json.loads(l)["reason"] for l in push.LOG.read_text(encoding="utf-8").splitlines()
                 if json.loads(l)["result"] in ("STOP", "RETRY")]
 
+    def last_record(self):
+        return json.loads(push.LOG.read_text(encoding="utf-8").splitlines()[-1])
+
     # S1 正常：prepare は 20 で必ず終わり、run で 50 まで進む
     def test_s1_normal(self):
         r = FakeRunner(fetch=[(0, ""), (0, "")], prepare=[(0, json.dumps(ctx()))], push=[(0, "a..b master -> master")],
@@ -151,37 +154,43 @@ class PushRouteTest(unittest.TestCase):
         self.assertEqual((code, last), (1, "STOP 90 @30"))
         self.assertEqual(self.reasons()[-1], "NO_PREPARED_PLAN")
 
-    # S4 @30：ゲートの赤の結果・上限時間・表にない結果
+    # S4 @30：ゲートの赤の結果・上限時間・表にない結果。送信状態：ゲートの判定あり＝送っていない、判定なし・TIMEOUT＝不明
     def test_s4_stop_at_30(self):
-        for push_result, why in [(gate_fail("MALWARE_OR_UNICODE_BLOCKED"), "MALWARE_OR_UNICODE_BLOCKED"),
-                                 (gate_fail("SOMETHING_NEW_IN_FUTURE"), "SOMETHING_NEW_IN_FUTURE"),
-                                 ((None, ""), "TIMEOUT"),
-                                 ((1, "no json at all"), "PUSH_FAILED")]:
+        for push_result, why, sent in [(gate_fail("MALWARE_OR_UNICODE_BLOCKED"), "MALWARE_OR_UNICODE_BLOCKED", "NOT_STARTED"),
+                                       (gate_fail("SOMETHING_NEW_IN_FUTURE"), "SOMETHING_NEW_IN_FUTURE", "NOT_STARTED"),
+                                       ((None, ""), "TIMEOUT", "UNKNOWN"),
+                                       ((1, "no json at all"), "PUSH_FAILED", "UNKNOWN")]:
             with self.subTest(why=why):
                 r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], push=[push_result])
                 self.go(r, "prepare")
                 code, last, _ = self.go(r, "run")
                 self.assertEqual((code, last), (1, "STOP 90 @30"))
                 self.assertEqual(self.reasons()[-1], why)
+                self.assertEqual(self.last_record()["send_state"], sent)
 
-    # S5 時刻差：10 へ1回戻り、20 で再提示して止まる（毎回再提示）。再提示後の run で完了
-    def test_s5_retry_once_then_represent(self):
-        r = FakeRunner(fetch=[(0, ""), (0, ""), (0, "")], prepare=[(0, json.dumps(ctx())), (0, json.dumps(ctx()))],
-                       push=[gate_fail("PLAN_OR_RULES_CHANGED"), (0, "ok")], rev_parse=[(0, HEAD)], rev_list=[(0, "0\t0")])
-        self.go(r, "prepare")
-        code, last, _ = self.go(r, "run")
-        self.assertEqual((code, last), (0, "NEXT 20 Y ASK"))  # 送らずに再提示で止まる
-        code, last, _ = self.go(r, "run")
-        self.assertEqual((code, last), (0, "DONE 50"))
+    # S5 時刻差：10 へ戻らず、すべて STOP 90 @30（2026-11-13 利用者決定：戻りの廃止）。prepare からやり直す
+    def test_s5_time_difference_stops_without_return(self):
+        for reason in ("PLAN_OR_RULES_CHANGED", "FETCH_EVIDENCE_MISSING"):
+            with self.subTest(reason=reason):
+                r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], push=[gate_fail(reason)])
+                self.go(r, "prepare")
+                code, last, _ = self.go(r, "run")
+                self.assertEqual((code, last), (1, "STOP 90 @30"))
+                self.assertEqual(self.reasons()[-1], reason)
+                self.assertEqual(self.last_record()["send_state"], "NOT_STARTED")
+                self.assertFalse(push.STATE.exists())
+                self.assertEqual(sum(1 for args, _ in r.calls if args[:2] == ["git", "fetch"]), 1)  # 10 へ戻っていない
+                self.assertEqual(sum(1 for args, _ in r.calls if args[:2] == ["git", "push"]), 1)
 
-    # S5' 時刻差が2回続いたら 2回目は STOP 90 @30
-    def test_s5_second_retry_stops(self):
-        r = FakeRunner(fetch=[(0, ""), (0, "")], prepare=[(0, json.dumps(ctx())), (0, json.dumps(ctx()))],
-                       push=[gate_fail("FETCH_EVIDENCE_MISSING"), gate_fail("PLAN_OR_RULES_CHANGED")])
+    # S5′ 停止後に run をもう一度呼んでも、送らない（自動再開しない）
+    def test_s5_run_after_stop_does_not_resend(self):
+        r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], push=[gate_fail("PLAN_OR_RULES_CHANGED")])
         self.go(r, "prepare")
         self.go(r, "run")
         code, last, _ = self.go(r, "run")
         self.assertEqual((code, last), (1, "STOP 90 @30"))
+        self.assertEqual(self.reasons()[-1], "NO_PREPARED_PLAN")
+        self.assertEqual(sum(1 for args, _ in r.calls if args[:2] == ["git", "push"]), 1)
 
     # S6 @40：送信後の照合が不一致（送信済み）
     def test_s6_mismatch_after_send(self):
@@ -191,6 +200,30 @@ class PushRouteTest(unittest.TestCase):
         code, last, _ = self.go(r, "run")
         self.assertEqual((code, last), (1, "STOP 90 @40"))
         self.assertEqual(self.reasons()[-1], "MISMATCH")
+        self.assertEqual(self.last_record()["send_state"], "COMMAND_SUCCEEDED_UNVERIFIED")
+
+    # S6′ @40：照合の観測コマンド自体の失敗は、不一致と区別して止まる（終了コードを明示的に確認）
+    def test_s6_observation_failure_is_not_a_match(self):
+        for rev_parse, rev_list, want in [((128, "fatal: bad revision"), (0, "0\t0"), "OBSERVE_FAILED"),
+                                          ((0, HEAD), (128, "fatal"), "OBSERVE_FAILED"),
+                                          ((None, ""), (0, "0\t0"), "TIMEOUT"),
+                                          ((0, HEAD), (None, ""), "TIMEOUT")]:
+            with self.subTest(want=want, rev_parse=rev_parse[0], rev_list=rev_list[0]):
+                r = FakeRunner(fetch=[(0, ""), (0, "")], prepare=[(0, json.dumps(ctx()))], push=[(0, "ok")],
+                               rev_parse=[rev_parse], rev_list=[rev_list])
+                self.go(r, "prepare")
+                code, last, _ = self.go(r, "run")
+                self.assertEqual((code, last), (1, "STOP 90 @40"))
+                self.assertEqual(self.reasons()[-1], want)
+                self.assertEqual(self.last_record()["send_state"], "COMMAND_SUCCEEDED_UNVERIFIED")
+
+    # 完了時の送信状態は VERIFIED
+    def test_done_records_verified(self):
+        r = FakeRunner(fetch=[(0, ""), (0, "")], prepare=[(0, json.dumps(ctx()))], push=[(0, "ok")],
+                       rev_parse=[(0, HEAD)], rev_list=[(0, "0\t0")])
+        self.go(r, "prepare")
+        self.go(r, "run")
+        self.assertEqual(self.last_record()["send_state"], "VERIFIED")
 
     # 出力の最後の行は、決まった3種類だけ
     def test_last_line_vocabulary(self):
