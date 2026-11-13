@@ -84,6 +84,7 @@ env/
 !/skills/axis-boundary-reasoning/
 !/skills/agents-md-guard/
 !/skills/operation-approval/
+!/skills/thought-boundary-5w1h/
 
 # NRA-IDE clinical session outputs
 output/
