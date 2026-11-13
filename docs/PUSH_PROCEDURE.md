@@ -1,9 +1,9 @@
 # push 手順書（Cline・全AI共通）
 
-**読むのは、push が連続2回失敗したときだけ。** 通常は読まない（時間とトークンを使うため）。
+**読むのは、push が失敗したときだけ。** 通常は読まない（時間とトークンを使うため）。
 
 対象: NRA-IDE リポジトリで `git push` を行うAIエージェント（特にCline）。
-上位規則は `AGENTS.md` §6・§7 と `RULES_DETAIL.md`「通常のGit操作」。この文書は、その規則を満たしたうえで
+上位規則は `AGENTS.md` §6・§7 と `RULES_DETAIL.md` 300〜370。この文書は、その規則を満たしたうえで
 **pre-push フックを通すための実行手順**だけを書く。規則を緩める文書ではない。
 
 ---
@@ -153,6 +153,6 @@ remote に同名 branch が無い場合、`remote_oid` は全て `0` になり�
 | 内容 | 参照 |
 |---|---|
 | push は個別確認が必要な操作 | `AGENTS.md` §6 |
-| fresh fetch、incoming 時は停止、force 禁止 | `AGENTS.md` §7、`RULES_DETAIL.md`「通常のGit操作」 |
+| fresh fetch、incoming 時は停止、force 禁止 | `AGENTS.md` §7、`RULES_DETAIL.md` 300〜370 |
 | plan の仕様（実行許可ではない、1 ref のみ、再検証） | `scripts/push_gate.py` の `prepare`・`check`・`unchanged` |
 | フック本体 | `.githooks/pre-push` |
