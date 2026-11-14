@@ -351,6 +351,16 @@
       "rule": "VARIATION_SELECTOR"
     },
     {
+      "codepoint": "U+FEFF",
+      "column": 1,
+      "file_sha256": "e0d0f16f25a37f5950d8dfb9467ba207777abe1db1553388f1703975723a55ad",
+      "id": "UGB-4B593221504AC79D",
+      "line": 1,
+      "path": "note/06_\u5bfe\u8a71\u30bb\u30c3\u30b7\u30e7\u30f3\u8a18\u9332/\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3092\u5fd8\u308c\u305f\u793e\u4f1a3\u90e8\u4f5c/\u30b0\u30e9\u30d5\u8868_\u30c7\u30fc\u30bf\u8868.csv",
+      "reason": "UTF-8 BOM retained so that Excel on Windows opens the CSV without garbled Japanese; approved by the repository owner 2026-11-14",
+      "rule": "BOM"
+    },
+    {
       "codepoint": "U+200D",
       "column": 6,
       "file_sha256": "d76f307f98ad7d6a5507c9f5ce0b1d39bc7a55627749a56d905d0ad4b8e77c8c",
