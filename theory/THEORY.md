@@ -119,7 +119,7 @@ The Primary Formula is a canonical calculation system of IDE, not an additional 
 残存余白はIDE補助式として次の2種を区別する。
 
 $$
-M_R=1-R,qquad M_{\tau}=\tau-\delta
+M_R=1-R,\qquad M_{\tau}=\tau-\delta
 $$
 
 - `remaining_ratio_margin`： $M_R$ 、無次元
