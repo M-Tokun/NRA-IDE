@@ -266,6 +266,18 @@ dialog[open]{display:flex;flex-direction:column}
   #doc{max-width:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Source coordinates: empty lines count; visual wrapping does not. */
+#source-lines-panel{position:fixed;inset:var(--header-h) 0 0;z-index:19;background:var(--bg);color:var(--fg);display:flex;flex-direction:column}
+#source-lines-panel[hidden]{display:none!important}
+#source-lines-bar{display:flex;gap:10px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--line);font-size:13px}
+#source-lines-file{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#source-lines-scroll{flex:1;min-height:0;overflow:auto;display:flex;font:13px/1.65 ui-monospace,Consolas,monospace;tab-size:4}
+#source-lines-gutter,#source-lines-text{margin:0;padding:12px 0;white-space:pre;line-height:1.65;font:inherit}
+#source-lines-gutter{position:sticky;left:0;z-index:1;padding-left:12px;padding-right:12px;text-align:right;user-select:none;color:var(--fg-muted);background:var(--bg-soft);border-right:1px solid var(--line)}
+#source-lines-text{padding-left:14px;padding-right:24px;min-width:max-content}
+@media print{#source-lines-panel{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -288,6 +300,7 @@ dialog[open]{display:flex;flex-direction:column}
   <button class="btn" id="btn-save">HTML 保存</button>
   <button class="btn" id="btn-print">印刷</button>
   <button class="btn" id="btn-help" title="使い方・ショートカット">?</button>
+<button class="btn" id="btn-source-lines" type="button" aria-pressed="false" title="原文の空行を含む行番号">原文行番号</button>
 </header>
 
 <main>
@@ -359,6 +372,8 @@ dialog[open]{display:flex;flex-direction:column}
 <input type="file" id="in-file" accept=".md,.markdown,.mdown,.mkd,.txt" hidden>
 <input type="file" id="in-dir" webkitdirectory directory multiple hidden>
 
+
+<div id="source-lines-panel" hidden aria-label="行番号付き原文"><div id="source-lines-bar"><strong>原文行番号（空行を含む）</strong><span id="source-lines-file"></span><button class="btn" type="button" id="source-lines-close">プレビューに戻る</button></div><div id="source-lines-scroll"><pre id="source-lines-gutter" aria-hidden="true"></pre><pre id="source-lines-text"></pre></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -416,7 +431,7 @@ dialog[open]{display:flex;flex-direction:column}
     if (tab===activeTab) {
       ++openGeneration; activeTab=null; currentFile=null;currentPath="";rawText="";
       if(tabs.length) activateTab(tabs[Math.min(i,tabs.length-1)]);
-      else {editor.value="";doc.replaceChildren(mk("div",{class:"drop"},mk("strong",{text:"Markdownを開いてください"}),"ファイルを開く、またはフォルダから選択してください。")); doc2.replaceChildren();tocEl.replaceChildren();fnameEl.textContent="Markdown Viewer";document.title="Markdown Viewer";updatePairUi();markCurrentFile();}
+      else {editor.value="";updateSourceLines("", "");doc.replaceChildren(mk("div",{class:"drop"},mk("strong",{text:"Markdownを開いてください"}),"ファイルを開く、またはフォルダから選択してください。")); doc2.replaceChildren();tocEl.replaceChildren();fnameEl.textContent="Markdown Viewer";document.title="Markdown Viewer";updatePairUi();markCurrentFile();}
     }
     redrawTabs();
   }
@@ -429,6 +444,7 @@ dialog[open]{display:flex;flex-direction:column}
     fnameEl.textContent=tab.path;fnameEl.title=tab.path;
     document.title=(tab.path.split("/").pop()||"Markdown")+" — Markdown Viewer";
     editor.value=tab.text;
+    updateSourceLines(tab.text, tab.path || "");
     render(tab.text,tab.path);
     updatePairUi();if(bilingual)renderPair();
     setScroll(viewport,tab.scroll||0);updateSpy(true);redrawTabs();
@@ -765,6 +781,7 @@ dialog[open]{display:flex;flex-direction:column}
   // opts.keepScroll: 再描画しても読書位置を保つ（編集中・テーマ切替）
   function render(src, path, opts = {}) {
     rawText = src; currentPath = path || currentPath;
+    updateSourceLines(src, currentPath);
     const top = opts.keepScroll ? viewport.scrollTop : 0;
     renderTo(doc, src, currentPath, "");
     buildToc();
@@ -1724,6 +1741,7 @@ dialog[open]{display:flex;flex-direction:column}
   $("btn-edit").addEventListener("click", () => setEditing(!editor.classList.contains("on")));
   let timer = null;
   editor.addEventListener("input", () => {
+    updateSourceLines(editor.value, currentPath);
     clearTimeout(timer);
     if(activeTab){activeTab.text=editor.value;activeTab.dirty=activeTab.text!==activeTab.original;redrawTabs();}
     timer = setTimeout(() => {if(activeTab)render(editor.value,currentPath,{keepScroll:true});}, 220);
@@ -1812,6 +1830,32 @@ dialog[open]{display:flex;flex-direction:column}
       if (findbar.classList.contains("on")) closeFind();
     }
   });
+
+
+  /* Source file coordinates, independent of rendered Markdown blocks. */
+  let sourceLinesText = "", sourceLinesPath = "";
+  const sourcePanel = document.getElementById("source-lines-panel");
+  const sourceButton = document.getElementById("btn-source-lines");
+  function updateSourceLines(text, path) {
+    sourceLinesText = String(text ?? "");
+    sourceLinesPath = String(path || "");
+    if (sourcePanel.hidden) return;
+    const normalized = sourceLinesText.replace(/\r\n?/g, "\n");
+    const count = normalized.split("\n").length;
+    document.getElementById("source-lines-gutter").textContent = Array.from({length:count}, (_,i)=>String(i+1)).join("\n");
+    document.getElementById("source-lines-text").textContent = normalized;
+    document.getElementById("source-lines-file").textContent = sourceLinesPath + " · " + count + " 行";
+  }
+  function setSourceLinesVisible(on) {
+    sourcePanel.hidden = !on;
+    sourceButton.setAttribute("aria-pressed", String(on));
+    if (on) {
+      updateSourceLines(sourceLinesText, sourceLinesPath);
+      document.getElementById("source-lines-scroll").scrollTop = 0;
+    }
+  }
+  sourceButton.addEventListener("click", () => setSourceLinesVisible(sourcePanel.hidden));
+  document.getElementById("source-lines-close").addEventListener("click", () => setSourceLinesVisible(false));
 
   /* ============ 初期表示 ============ */
   doc.innerHTML = '<div class="drop"><strong>.md ファイルをドロップしてください</strong>'
