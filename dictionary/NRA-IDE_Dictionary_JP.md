@@ -110,6 +110,16 @@
 - 受け取り方の違い【未確認】：「可逆」を「値が戻れば構造も戻る」と読まない。値が戻っても経路履歴は戻らない（導出文書 命題2b）
 - 関連：[残留ズレ](#^residual-deviation)、[蓄積ズレ](#^accumulated-deviation)
 
+<a id="reversible-ratio-part"></a>
+### 可逆接近分（かぎゃくせっきんぶん）
+- 英語版：[Reversible Part of the Ratio](./NRA-IDE_Dictionary_EN.md#^reversible-ratio-part) ^reversible-ratio-part
+- 記号・固定名： $R_{\mathrm{rev},n}=q_n/\tau_n$
+- 型：語の使い分け（正典外の用語整理）。無次元
+- 意味：境界接近比 $R_n$ のうち、可逆成分 $q_n$ による分。作用を除けば0側へ戻る。 $R_n=R_{\mathrm{rev},n}+R_{\mathrm{res},n}$ 。定義元：正典に定義はない。本辞書の用語整理（草案）。 $R$ を再定義せず、正規状態を分類しない（状態区分は $R$ と閾値だけで行う）
+- 書き方：草案の式4。 $q_n$ は単位 $u$ 、 $R_{\mathrm{rev},n}$ は無次元
+- 混同注意：[可逆成分](#^reversible-deviation) $q_n$ （単位 $u$ ）そのものではなく、 $\tau_n$ で割った比（2026-11-16）
+- 関連：[可逆成分](#^reversible-deviation)、[残留接近分](#^residual-ratio-part)、[境界接近比](#^boundary-approach-ratio)
+
 <a id="complete-rupture-boundary"></a>
 ### 完全破断境界（かんぜんはだんきょうかい）
 - 英語版：[Complete Rupture Boundary](./NRA-IDE_Dictionary_EN.md#^complete-rupture-boundary) ^complete-rupture-boundary
@@ -314,6 +324,16 @@
 - 混同注意：以前は $\Gamma$ と書いていた。FORMULA §5の減衰係数 $\gamma$ と大小だけの区別だったため改めた（2026-09-29）。「要素を外しても値は増えない」を全ての形に課すと直列の構造が表せないことを、条件を足す途中で見つけた（2026-09-29）
 - 関連：[構成](#^active-elements)、[構造要素の付加](#^structural-element-addition)
 
+<a id="composition-term"></a>
+### 構成変化項（こうせいへんかこう）
+- 英語版：[Composition Term](./NRA-IDE_Dictionary_EN.md#^composition-term) ^composition-term
+- 記号・固定名： $-R_{n-1}\,\Delta\tau^{\mathrm{comp}}_n/\tau_n$
+- 型：語の使い分け（正典外の用語整理）。無次元
+- 意味：一次式の増分のうち、構造要素の付加・除去（[構成](#^active-elements)の更新）による厚みの変化 $\Delta\tau^{\mathrm{comp}}_n$ による分。付加で $R$ を下げ、除去で上げる。定義元：正典に定義はない。本辞書の用語整理（草案）。吸収厚みが増えるのは構造要素の付加だけ（AXIOMS §7）
+- 書き方：増分分解（草案の式3）の第四項。 $\Delta\tau^{\mathrm{comp}}_n=\tau_n-\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_{n-1}}\bigr)$ 。上付きの comp はラベルで、立体で書く
+- 混同注意：「構成」（ $\mathsf{Active}_n$ ）の変化であり、[合成規則](#^thickness-composition-rule) $\mathrm{Comp}_\tau$ （要素の厚みから全体の厚みを定める規則）とは別。英語の composition が二つに当たるため、英語名は Composition Term と書き、規則は Thickness Composition Rule と書く（2026-11-16）
+- 関連：[構成](#^active-elements)、[構造要素の付加](#^structural-element-addition)、[構造要素の除去](#^structural-element-removal)、[劣化縮小項](#^degradation-contraction-term)
+
 <a id="structural-sensitivity"></a>
 ### 構造感度（こうぞうかんど）
 - 英語版：[Structural Sensitivity](./NRA-IDE_Dictionary_EN.md#^structural-sensitivity) ^structural-sensitivity
@@ -390,6 +410,19 @@
   - [制約](#^external-constraint) $C$ （外部条件）と混同しない。 $C$ は計上先ではなく、その効果が $\Delta\lambda_n$ や計器にだけ現れる場合は $a_n$ に現れない（2026-09-30）
 - 関連：[可逆成分](#^reversible-deviation)、[制約](#^external-constraint)
 
+<a id="action-penetration-term"></a>
+### 作用進入項（さようしんにゅうこう）
+- 英語版：[Action Penetration Term](./NRA-IDE_Dictionary_EN.md#^action-penetration-term) ^action-penetration-term
+- 記号・固定名： $\Delta q_n/\tau_n$
+- 型：語の使い分け（正典外の用語整理）。無次元
+- 意味：一次式の増分 $R_n-R_{n-1}$ のうち、作用 $a_n$ が生む可逆成分の増分 $\Delta q_n$ による分。符号は正にも負にもなる。定義元：正典に定義はない。本辞書の用語整理（草案）。「進入項」は FORMULA §4.7 の解説の語
+- 書き方：増分分解（草案の式3）の第一項。 $\Delta q_n$ を $\tau_n$ で割る。構成の更新が同時にあっても、この項は $\tau_n$ （更新後）で割る
+- 混同注意：
+  - 作用 $a_n$ そのものではない。 $a_n$ が生む $\Delta q_n$ を $\tau_n$ で割った量（2026-11-16）
+  - 草案の初稿では「可逆進入項」と呼んでいた。「可逆進入」は[可逆成分](#^reversible-deviation)の混同注意で退けた旧名と同じ語根のため、改めた（2026-11-16）
+- 受け取り方の違い【未確認】：英語の penetration は貫通・侵入と読まれやすい。ここでは $R$ の増分のうち、蓄積ズレの増加による寄与（FORMULA §4.7 の penetration term）
+- 関連：[作用](#^applied-action)、[可逆成分](#^reversible-deviation)、[残留進入項](#^residual-penetration-term)、[境界接近比](#^boundary-approach-ratio)
+
 <a id="residual"></a>
 ### 残差（ざんさ）
 - 英語版：[Residual](./NRA-IDE_Dictionary_EN.md#^residual) ^residual
@@ -426,6 +459,17 @@
 - 書き方：「比率」は、境界接近比 $R$ の尺度で測った余白という意味である。値は $M_\tau/\tau$ に等しい（ $M_R=1-R=(\tau-\delta)/\tau$ ）
 - 混同注意：AXIOMS §5では「無次元の境界余裕」と呼んでいた。「余裕」は総幅 $\tau$ の説明（AXIOMS §3・§4）にも使われるため、量の名前は「余白」に揃えた（2026-09-30）
 
+<a id="residual-penetration-term"></a>
+### 残留進入項（ざんりゅうしんにゅうこう）
+- 英語版：[Residual Penetration Term](./NRA-IDE_Dictionary_EN.md#^residual-penetration-term) ^residual-penetration-term
+- 記号・固定名： $\Delta p_n/\tau_n$
+- 型：語の使い分け（正典外の用語整理）。無次元
+- 意味：一次式の増分 $R_n-R_{n-1}$ のうち、残留ズレの増分 $\Delta p_n\ge0$ による分。符号は0以上。作用を除いても残る増加であり、評価中は戻せない。定義元：正典に定義はない。本辞書の用語整理（草案）。「進入項」は FORMULA §4.7 の解説の語
+- 書き方：増分分解（草案の式3）の第二項。 $\Delta p_n$ を $\tau_n$ で割る
+- 混同注意：「残留」は[残留ズレ](#^residual-deviation) $p_n$ の意味。[残差](#^residual) $\xi$ （FORMULA §5）とは別（2026-11-16）
+- 受け取り方の違い【未確認】：英語の residual は、残差 $\xi$ の Residual と読まれやすい。ここでは残留ズレ（Residual Deviation）
+- 関連：[残留ズレ](#^residual-deviation)、[作用進入項](#^action-penetration-term)、[残留接近分](#^residual-ratio-part)
+
 <a id="residual-deviation"></a>
 ### 残留ズレ（ざんりゅうずれ）
 - 英語版：[Residual Deviation](./NRA-IDE_Dictionary_EN.md#^residual-deviation) ^residual-deviation
@@ -435,6 +479,29 @@
 - 書き方：後退差分で $p_n=p_{n-1}+\Delta p_n$ 、 $p_n=p_0+\sum_{m=1}^{n}\Delta p_m$
 - 混同注意：デモの residualDebt・ $D_{\mathrm{long}}$ は $R$ から作った量で、残留ズレではない（2026-09-29）
 - 関連：[可逆成分](#^reversible-deviation)、[矯正](#^straightening)
+
+<a id="residual-ratio-part"></a>
+### 残留接近分（ざんりゅうせっきんぶん）
+- 英語版：[Residual Part of the Ratio](./NRA-IDE_Dictionary_EN.md#^residual-ratio-part) ^residual-ratio-part
+- 記号・固定名： $R_{\mathrm{res},n}=p_n/\tau_n$
+- 型：語の使い分け（正典外の用語整理）。無次元
+- 意味：境界接近比 $R_n$ のうち、残留ズレ $p_n$ による分。いま作用をすべて除いても残る接近分。 $R_n\ge R_{\mathrm{res},n}$ 。 $p_n$ は減らず、 $\tau_n$ は構造要素の付加がない限り増えないので、付加がない限り減らない。定義元：正典に定義はない。本辞書の用語整理（草案）。 $R$ を再定義せず、正規状態を分類しない
+- 書き方：草案の式4
+- 混同注意：[残留ズレ](#^residual-deviation) $p_n$ （単位 $u$ ）そのものではなく比。[残差](#^residual) $\xi$ とは別（2026-11-16）
+- 関連：[残留ズレ](#^residual-deviation)、[可逆接近分](#^reversible-ratio-part)、[残留進入項](#^residual-penetration-term)
+
+<a id="threshold-margin"></a>
+### 閾値余白（しきいちよはく）
+- 英語版：[Threshold Margin](./NRA-IDE_Dictionary_EN.md#^threshold-margin) ^threshold-margin
+- 記号・固定名： $m_{\theta,n}=\theta\,\tau_n-\delta_n$
+- 型：語の使い分け（正典外の用語整理）。単位 $u$
+- 意味：閾値 $\theta$ （ $R_{\mathrm{warn}}$ 、 $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ 、 $1.0$ のいずれか）に達するまでに、 $\delta$ が増え得る量。 $m_{\theta,n}\le0$ はその閾値に既に達していることを表す。次の更新で $R_{n+1}\ge\theta$ となることは、 $\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}\ge m_{\theta,n}$ と同値（ $\tau_{n+1}>0$ ）。定義元：正典に定義はない。本辞書の用語整理（草案）
+- 書き方：草案の式5a・5b。 $\theta=1$ のとき $m_{1,n}=\tau_n-\delta_n=M_\tau$ に一致する
+- 混同注意：
+  - [残存吸収余白](#^remaining-absorption-margin) $M_\tau$ は $\theta=1$ （完全破断境界）の場合だけ。他の閾値では別の値になる（2026-11-16）
+  - [残存比率余白](#^remaining-ratio-margin) $M_R=1-R$ は無次元で、 $\tau$ を掛けない（2026-11-16）
+  - $\theta$ は閾値の一般記号。次元の記号の $\mathsf{\Theta}$ （熱力学温度）とは別（2026-11-16）
+- 関連：[残存吸収余白](#^remaining-absorption-margin)、[残存比率余白](#^remaining-ratio-margin)、[境界接近警告点](#^warning-threshold)、[境界前人間委譲点](#^handoff-threshold)
 
 <a id="work-quantity"></a>
 ### 仕事量（しごとりょう）
@@ -763,6 +830,16 @@
 - 正規語ではない。AXIOMS v2.2までの「外部補充」「外生補充」「外生的な補充操作」は、v2.3で「構造要素の付加」に改めた
 - 混同注意：既存の厚みが戻ると読める（2026-09-29）
 
+<a id="degradation-contraction-term"></a>
+### 劣化縮小項（れっかしゅくしょうこう）
+- 英語版：[Degradation Contraction Term](./NRA-IDE_Dictionary_EN.md#^degradation-contraction-term) ^degradation-contraction-term
+- 記号・固定名： $R_{n-1}(-\Delta\tau^{\mathrm{deg}}_n)/\tau_n$
+- 型：語の使い分け（正典外の用語整理）。無次元
+- 意味：一次式の増分のうち、構成を $n-1$ のまま保った場合の厚みの変化 $\Delta\tau^{\mathrm{deg}}_n\le0$ （劣化度の増加による）による分。符号は0以上。評価中は戻せない。定義元：正典に定義はない。本辞書の用語整理（草案）。「縮小項」は FORMULA §4.7 の解説の語
+- 書き方：増分分解（草案の式3）の第三項。 $\Delta\tau^{\mathrm{deg}}_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_{n-1}}\bigr)-\tau_{n-1}$ 。上付きの deg はラベルで、立体で書く（0.5）。劣化度 $\lambda$ の斜体は使わない
+- 混同注意：構造要素の付加・除去による厚みの変化は含まない。それは[構成変化項](#^composition-term)（2026-11-16）
+- 関連：[劣化度](#^degradation-fraction)、[実効厚み](#^effective-thickness)、[構成変化項](#^composition-term)
+
 <a id="degradation-fraction"></a>
 ### 劣化度（れっかど）
 - 英語版：[Degradation Fraction](./NRA-IDE_Dictionary_EN.md#^degradation-fraction) ^degradation-fraction
@@ -797,6 +874,7 @@
 | $\mathsf{Gauge}^{(\mathrm{self})}$ | [計器](#^evaluation-gauge) |
 | $\mathsf{History}_n$ | [経路履歴](#^event-history) |
 | $M_R$ 、 $M_\tau$ | [残存比率余白](#^remaining-ratio-margin)、[残存吸収余白](#^remaining-absorption-margin) |
+| $m_{\theta,n}$ | [閾値余白](#^threshold-margin) |
 | $o_n$ | [観測値](#^observation-value) |
 | $\mathsf{Out}^{(\mathrm{self})}_n$ | [評価出力](#^evaluation-output) |
 | $p_n$ | [残留ズレ](#^residual-deviation) |
@@ -804,6 +882,7 @@
 | $\mathsf{Phys}^{(\mathrm{self})}_n$ | [対象状態](#^target-physical-state) |
 | $q_n$ 、 $q^{\mathrm{temp}}_n$ | [可逆成分](#^reversible-deviation)、[一時的な可逆成分](#^temporary-reversible-deviation) |
 | $R$ 、 $R_{\mathrm{target}}$ | [境界接近比](#^boundary-approach-ratio) |
+| $R_{\mathrm{rev},n}$ 、 $R_{\mathrm{res},n}$ | [可逆接近分](#^reversible-ratio-part)、[残留接近分](#^residual-ratio-part)（草案の用語整理。 $R$ を再定義しない） |
 | $R_{\mathrm{warn}}$ 、 $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ | [警告点](#^warning-threshold)、[委譲点](#^handoff-threshold)、[不可逆遷移開始点](#^irreversible-threshold) |
 | $R_{\mathrm{upper}}$ 、 $R_{\mathrm{lower}}$ 、 $R_{\mathrm{dir}}$ | 側別比・側別補助集約（補助。正規 $R$ ではない。FORMULA §4.5・§4.6） |
 | $S$ | [構造感度](#^structural-sensitivity) |
@@ -820,7 +899,9 @@
 | $\alpha_u$ 、 $\alpha_l$ | 平滑係数（FORMULA §4.2。固定名 `alpha_upper`・`alpha_lower`） |
 | $\gamma$ | 減衰係数（FORMULA §5） |
 | $\delta$ 、 $\delta_{\mathrm{upper}}$ 、 $\delta_{\mathrm{lower}}$ | [蓄積ズレ](#^accumulated-deviation)（側別は FORMULA §4.1） |
+| $\Delta\tau^{\mathrm{deg}}_n$ 、 $\Delta\tau^{\mathrm{comp}}_n$ | [劣化縮小項](#^degradation-contraction-term)、[構成変化項](#^composition-term)（厚みの変化の二分。上付きはラベルで立体） |
 | $\epsilon$ | 最小閾値・ゼロ近傍（AXIOMS §1） |
+| $\theta$ | [閾値余白](#^threshold-margin)の閾値の一般記号（ $R_{\mathrm{warn}}$ 、 $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ 、 $1.0$ のいずれか）。次元の $\mathsf{\Theta}$ とは別 |
 | $\ell_n$ | [不可逆ラッチ](#^irreversible-latch) |
 | $\lambda^{[e]}_n$ 、 $\lambda_n$ | [劣化度](#^degradation-fraction) |
 | $\xi$ | 残差（FORMULA §5。以前の $r$ ） |
@@ -1003,6 +1084,7 @@
 | 2026-11-12 | 実在と存在の範囲、実在の英訳に actuality を当てかけたこと | [実在](#^reality)、[存在](#^existence) |
 | 2026-11-12 | 平均値などの数値（実在以外の存在）を、実在の事象として扱う誤り | [事象](#^event)、[実在](#^reality) |
 | 2026-11-13 | 現象を事象の下位に置いたこと、事象を実在の中の発生に限ったこと。「存在するが実在しない」という言い方（日常の日本語では矛盾に読める） | [事象](#^event)、[現象](#^phenomenon)、[実在](#^reality)、[存在](#^existence) |
+| 2026-11-16 | 作用進入項と、旧名「可逆進入」・作用 $a_n$ そのもの。残留進入項の「残留」と残差 $\xi$ 。閾値余白と残存吸収余白（ $\theta=1$ のときだけ一致）。構成変化項の「構成」と合成規則 | [作用進入項](#^action-penetration-term)、[残留進入項](#^residual-penetration-term)、[閾値余白](#^threshold-margin)、[構成変化項](#^composition-term) |
 
 ---
 

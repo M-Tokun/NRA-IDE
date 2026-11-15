@@ -104,6 +104,19 @@ Temporary variables used only inside an implementation (for example, the interna
 - Reading risk [Unconfirmed]: do not read "deviation" as the statistical deviation (standard deviation)
 - Related: [Reversible Deviation](#^reversible-deviation), [Residual Deviation](#^residual-deviation), [Reference State](#^reference-state)
 
+<a id="action-penetration-term"></a>
+### Action Penetration Term
+- Japanese: [作用進入項](./NRA-IDE_Dictionary_JP.md#^action-penetration-term) ^action-penetration-term
+- Symbol / fixed name: $\Delta q_n/\tau_n$
+- Type: term arrangement outside the canon (dimensionless)
+- Meaning: the part of the increment $R_n-R_{n-1}$ of the Primary Formula due to the increment $\Delta q_n$ of the reversible component produced by the action $a_n$. Its sign can be positive or negative. Source: no definition in the canon; this dictionary's term arrangement (draft). \"Penetration term\" is a term of the note in FORMULA §4.7
+- Notation: the first term of the increment decomposition (Eq. 3 of the draft). $\Delta q_n$ is divided by $\tau_n$ (after the update), even when the composition is updated at the same time
+- Confusion notes:
+  - It is not the action $a_n$ itself. It is $\Delta q_n$, produced by $a_n$, divided by $\tau_n$ (2026-11-16)
+  - The first version of the draft called it \"reversible penetration term\". The name \"reversible penetration\" shares its root with the earlier name rejected in the confusion notes of [Reversible Deviation](#^reversible-deviation), so it was changed (2026-11-16)
+- Reading risk [Unconfirmed]: \"penetration\" is easily read as piercing or intrusion. Here it means the part of the increment of $R$ contributed by an increase of accumulated deviation (the penetration term of FORMULA §4.7)
+- Related: [Applied Action](#^applied-action), [Reversible Deviation](#^reversible-deviation), [Residual Penetration Term](#^residual-penetration-term), [Boundary-Approach Ratio](#^boundary-approach-ratio)
+
 <a id="active-elements"></a>
 ### Active Elements
 - Japanese: [構成](./NRA-IDE_Dictionary_JP.md#^active-elements) ^active-elements
@@ -181,6 +194,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes: do not equate the rupture of a part with the rupture of the whole (a part's rupture is an event for the whole). Do not reinterpret $\tau=0$ as complete rupture (→ [Out of Domain](#^out-of-domain))
 - Related: [Boundary Approach Ratio](#^boundary-approach-ratio)
 
+<a id="composition-term"></a>
+### Composition Term
+- Japanese: [構成変化項](./NRA-IDE_Dictionary_JP.md#^composition-term) ^composition-term
+- Symbol / fixed name: $-R_{n-1}\,\Delta\tau^{\mathrm{comp}}_n/\tau_n$
+- Type: term arrangement outside the canon (dimensionless)
+- Meaning: the part of the increment of the Primary Formula due to the change of thickness $\Delta\tau^{\mathrm{comp}}_n$ caused by addition or removal of a structural element (an update of the [Active Elements](#^active-elements)). Addition lowers $R$; removal raises it. Source: no definition in the canon; this dictionary's term arrangement (draft). Absorption thickness increases only through addition of a structural element (AXIOMS §7)
+- Notation: the fourth term of the increment decomposition (Eq. 3 of the draft). $\Delta\tau^{\mathrm{comp}}_n=\tau_n-\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_{n-1}}\bigr)$. The superscript comp is a label and is set upright
+- Confusion notes: it is the change of the composition ($\mathsf{Active}_n$). It is not the [Thickness Composition Rule](#^thickness-composition-rule) $\mathrm{Comp}_\tau$ (the rule that determines the thickness of the whole from the element thicknesses). The English \"composition\" covers both, so the term is written Composition Term and the rule Thickness Composition Rule (2026-11-16)
+- Related: [Active Elements](#^active-elements), [Addition of a Structural Element](#^structural-element-addition), [Removal of a Structural Element](#^structural-element-removal), [Degradation Contraction Term](#^degradation-contraction-term)
+
 <a id="confession"></a>
 ### Confession
 - Japanese: [告白](./NRA-IDE_Dictionary_JP.md#^confession) ^confession
@@ -224,6 +247,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Meaning: the absorption thickness of the whole structure at the start of evaluation (before transition). With several elements, $\tau_0=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_0)_{e\in\mathsf{Active}_0}\bigr)$ . Source: AXIOMS §7 (initial absorption thickness), §8 (baseline absorption thickness); FORMULA §0.5.1, §0.5.4
 - Confusion notes: writing it as "a special form for a single element only" diverged from the canon (2026-09-29)
 - Related: [Absorption Thickness](#^absorption-thickness), [Restored Absorption Thickness](#^restored-thickness)
+
+<a id="degradation-contraction-term"></a>
+### Degradation Contraction Term
+- Japanese: [劣化縮小項](./NRA-IDE_Dictionary_JP.md#^degradation-contraction-term) ^degradation-contraction-term
+- Symbol / fixed name: $R_{n-1}(-\Delta\tau^{\mathrm{deg}}_n)/\tau_n$
+- Type: term arrangement outside the canon (dimensionless)
+- Meaning: the part of the increment of the Primary Formula due to the change of thickness $\Delta\tau^{\mathrm{deg}}_n\le0$ that occurs when the composition is kept at $n-1$ (through an increase of the degradation fraction). Its sign is non-negative. It cannot be undone during evaluation. Source: no definition in the canon; this dictionary's term arrangement (draft). \"Contraction term\" is a term of the note in FORMULA §4.7
+- Notation: the third term of the increment decomposition (Eq. 3 of the draft). $\Delta\tau^{\mathrm{deg}}_n=\mathrm{Comp}_\tau\bigl((\tau^{[e]}_n)_{e\in\mathsf{Active}_{n-1}}\bigr)-\tau_{n-1}$. The superscript deg is a label and is set upright (0.5); the italic $\lambda$ of the degradation fraction is not used
+- Confusion notes: it does not include the change of thickness due to addition or removal of a structural element. That is the [Composition Term](#^composition-term) (2026-11-16)
+- Related: [Degradation Fraction](#^degradation-fraction), [Effective Thickness](#^effective-thickness), [Composition Term](#^composition-term)
 
 <a id="degradation-fraction"></a>
 ### Degradation Fraction
@@ -590,6 +623,27 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes: residualDebt and $D_{\mathrm{long}}$ in the demos are quantities built from $R$ , not residual deviation (2026-09-29)
 - Related: [Reversible Deviation](#^reversible-deviation), [Straightening](#^straightening)
 
+<a id="residual-ratio-part"></a>
+### Residual Part of the Ratio
+- Japanese: [残留接近分](./NRA-IDE_Dictionary_JP.md#^residual-ratio-part) ^residual-ratio-part
+- Symbol / fixed name: $R_{\mathrm{res},n}=p_n/\tau_n$
+- Type: term arrangement outside the canon (dimensionless)
+- Meaning: the part of the boundary-approach ratio $R_n$ due to residual deviation $p_n$: the approach that remains even if all action is removed now. $R_n\ge R_{\mathrm{res},n}$. Since $p_n$ does not decrease and $\tau_n$ does not increase unless a structural element is added, it does not decrease unless one is added. Source: no definition in the canon; this dictionary's term arrangement (draft). It does not redefine $R$ and does not classify canonical states
+- Notation: Eq. 4 of the draft
+- Confusion notes: it is not the [Residual Deviation](#^residual-deviation) $p_n$ itself (unit $u$) but a ratio. It is not [Residual](#^residual) $\xi$ (2026-11-16)
+- Related: [Residual Deviation](#^residual-deviation), [Reversible Part of the Ratio](#^reversible-ratio-part), [Residual Penetration Term](#^residual-penetration-term)
+
+<a id="residual-penetration-term"></a>
+### Residual Penetration Term
+- Japanese: [残留進入項](./NRA-IDE_Dictionary_JP.md#^residual-penetration-term) ^residual-penetration-term
+- Symbol / fixed name: $\Delta p_n/\tau_n$
+- Type: term arrangement outside the canon (dimensionless)
+- Meaning: the part of the increment $R_n-R_{n-1}$ of the Primary Formula due to the increment $\Delta p_n\ge0$ of residual deviation. Its sign is non-negative. It is an increase that remains after the action is removed and cannot be undone during evaluation. Source: no definition in the canon; this dictionary's term arrangement (draft). \"Penetration term\" is a term of the note in FORMULA §4.7
+- Notation: the second term of the increment decomposition (Eq. 3 of the draft). $\Delta p_n$ is divided by $\tau_n$
+- Confusion notes: \"residual\" here means [Residual Deviation](#^residual-deviation) $p_n$. It is not [Residual](#^residual) $\xi$ (FORMULA §5) (2026-11-16)
+- Reading risk [Unconfirmed]: \"residual\" is easily read as the Residual $\xi$. Here it is residual deviation
+- Related: [Residual Deviation](#^residual-deviation), [Action Penetration Term](#^action-penetration-term), [Residual Part of the Ratio](#^residual-ratio-part)
+
 <a id="restoration"></a>
 ### Restoration
 - Japanese: [復元](./NRA-IDE_Dictionary_JP.md#^restoration) ^restoration
@@ -632,6 +686,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes: an earlier draft called it "reversible penetration"; the canonical term is "reversible component" (2026-09-28)
 - Reading risk [Unconfirmed]: do not read "reversible" as the thermodynamic reversible (quasi-static) process, nor as "if the value returns, the structure returns". The event history does not return (derivation document, Proposition 2b)
 - Related: [Residual Deviation](#^residual-deviation), [Accumulated Deviation](#^accumulated-deviation)
+
+<a id="reversible-ratio-part"></a>
+### Reversible Part of the Ratio
+- Japanese: [可逆接近分](./NRA-IDE_Dictionary_JP.md#^reversible-ratio-part) ^reversible-ratio-part
+- Symbol / fixed name: $R_{\mathrm{rev},n}=q_n/\tau_n$
+- Type: term arrangement outside the canon (dimensionless)
+- Meaning: the part of the boundary-approach ratio $R_n$ due to the reversible component $q_n$. It returns toward 0 when the action is removed. $R_n=R_{\mathrm{rev},n}+R_{\mathrm{res},n}$. Source: no definition in the canon; this dictionary's term arrangement (draft). It does not redefine $R$ and does not classify canonical states (state classification is done by $R$ and the thresholds alone)
+- Notation: Eq. 4 of the draft. $q_n$ has unit $u$; $R_{\mathrm{rev},n}$ is dimensionless
+- Confusion notes: it is not the [Reversible Deviation](#^reversible-deviation) $q_n$ itself (unit $u$), but its ratio to $\tau_n$ (2026-11-16)
+- Related: [Reversible Deviation](#^reversible-deviation), [Residual Part of the Ratio](#^residual-ratio-part), [Boundary-Approach Ratio](#^boundary-approach-ratio)
 
 <a id="side-specific-gate-width"></a>
 ### Side-Specific Effective Gate Width
@@ -747,6 +811,19 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes: formerly written $\Gamma$ , differing only by case from the damping coefficient $\gamma$ of FORMULA §5 (2026-09-29). While adding conditions, it was found that imposing "removal does not increase the value" on every form makes series structures unrepresentable (2026-09-29)
 - Related: [Active Elements](#^active-elements), [Addition of a Structural Element](#^structural-element-addition)
 
+<a id="threshold-margin"></a>
+### Threshold Margin
+- Japanese: [閾値余白](./NRA-IDE_Dictionary_JP.md#^threshold-margin) ^threshold-margin
+- Symbol / fixed name: $m_{\theta,n}=\theta\,\tau_n-\delta_n$
+- Type: term arrangement outside the canon (unit $u$)
+- Meaning: the amount by which $\delta$ can still increase before the threshold $\theta$ (any of $R_{\mathrm{warn}}$, $R_{\mathrm{handoff}}$, $R_{\mathrm{irrev}}$, $1.0$) is reached. $m_{\theta,n}\le0$ means that threshold has already been reached. At the next update, $R_{n+1}\ge\theta$ is equivalent to $\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}\ge m_{\theta,n}$ (for $\tau_{n+1}>0$). Source: no definition in the canon; this dictionary's term arrangement (draft)
+- Notation: Eqs. 5a and 5b of the draft. At $\theta=1$, $m_{1,n}=\tau_n-\delta_n=M_\tau$
+- Confusion notes:
+  - The [Remaining Absorption Margin](#^remaining-absorption-margin) $M_\tau$ is the case $\theta=1$ (the complete-rupture boundary) only. Other thresholds give other values (2026-11-16)
+  - The [Remaining Ratio Margin](#^remaining-ratio-margin) $M_R=1-R$ is dimensionless and is not multiplied by $\tau$ (2026-11-16)
+  - $\theta$ is the general symbol for a threshold. It is distinct from the dimension symbol $\mathsf{\Theta}$ (thermodynamic temperature) (2026-11-16)
+- Related: [Remaining Absorption Margin](#^remaining-absorption-margin), [Remaining Ratio Margin](#^remaining-ratio-margin), [Boundary Warning Point](#^warning-threshold), [Pre-Boundary Human Handoff Point](#^handoff-threshold)
+
 <a id="transition-phase"></a>
 ### Transition Phase
 - Japanese: [遷移位相](./NRA-IDE_Dictionary_JP.md#^transition-phase) ^transition-phase
@@ -796,6 +873,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | $\mathsf{Gauge}^{(\mathrm{self})}$ | [Evaluation Gauge](#^evaluation-gauge) |
 | $\mathsf{History}_n$ | [Event History](#^event-history) |
 | $M_R$ , $M_\tau$ | [Remaining Ratio Margin](#^remaining-ratio-margin), [Remaining Absorption Margin](#^remaining-absorption-margin) |
+| $m_{\theta,n}$ | [Threshold Margin](#^threshold-margin) |
 | $o_n$ | [Observation Value](#^observation-value) |
 | $\mathsf{Out}^{(\mathrm{self})}_n$ | [Evaluation Output](#^evaluation-output) |
 | $p_n$ | [Residual Deviation](#^residual-deviation) |
@@ -803,6 +881,7 @@ Temporary variables used only inside an implementation (for example, the interna
 | $\mathsf{Phys}^{(\mathrm{self})}_n$ | [Target Physical State](#^target-physical-state) |
 | $q_n$ , $q^{\mathrm{temp}}_n$ | [Reversible Deviation](#^reversible-deviation), [Temporary Reversible Deviation](#^temporary-reversible-deviation) |
 | $R$ , $R_{\mathrm{target}}$ | [Boundary Approach Ratio](#^boundary-approach-ratio) |
+| $R_{\mathrm{rev},n}$ , $R_{\mathrm{res},n}$ | [Reversible Part of the Ratio](#^reversible-ratio-part), [Residual Part of the Ratio](#^residual-ratio-part) (term arrangement of the draft; does not redefine $R$) |
 | $R_{\mathrm{warn}}$ , $R_{\mathrm{handoff}}$ , $R_{\mathrm{irrev}}$ | [Warning Point](#^warning-threshold), [Handoff Point](#^handoff-threshold), [Irreversible Transition Onset](#^irreversible-threshold) |
 | $R_{\mathrm{upper}}$ , $R_{\mathrm{lower}}$ , $R_{\mathrm{dir}}$ | side-specific ratios and directional aggregate (auxiliary; not canonical $R$ ; FORMULA §4.5, §4.6) |
 | $S$ | [Structural Sensitivity](#^structural-sensitivity) |
@@ -819,7 +898,9 @@ Temporary variables used only inside an implementation (for example, the interna
 | $\alpha_u$ , $\alpha_l$ | smoothing coefficients (FORMULA §4.2; fixed names `alpha_upper`, `alpha_lower`) |
 | $\gamma$ | damping coefficient (FORMULA §5) |
 | $\delta$ , $\delta_{\mathrm{upper}}$ , $\delta_{\mathrm{lower}}$ | [Accumulated Deviation](#^accumulated-deviation) (side-specific: FORMULA §4.1) |
+| $\Delta\tau^{\mathrm{deg}}_n$ , $\Delta\tau^{\mathrm{comp}}_n$ | [Degradation Contraction Term](#^degradation-contraction-term), [Composition Term](#^composition-term) (the two-way split of the change of thickness; superscripts are labels, set upright) |
 | $\epsilon$ | minimum threshold / near-zero (AXIOMS §1) |
+| $\theta$ | the general symbol for the threshold of the [Threshold Margin](#^threshold-margin) (any of $R_{\mathrm{warn}}$, $R_{\mathrm{handoff}}$, $R_{\mathrm{irrev}}$, $1.0$). Distinct from the dimension symbol $\mathsf{\Theta}$ |
 | $\ell_n$ | [Irreversible Latch](#^irreversible-latch) |
 | $\lambda^{[e]}_n$ , $\lambda_n$ | [Degradation Fraction](#^degradation-fraction) |
 | $\xi$ | residual (FORMULA §5; formerly $r$ ) |
@@ -1002,6 +1083,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-11-12 | the ranges of reality and existence; "actuality" was nearly assigned as the English for 実在 | [Reality](#^reality), [Existence](#^existence) |
 | 2026-11-12 | treating a number such as an average (existence other than reality) as a real event | [Event](#^event), [Reality](#^reality) |
 | 2026-11-13 | placing phenomenon below event and limiting event to occurrences within reality; the phrase "存在するが実在しない" (reads as a contradiction in everyday Japanese) | [Event](#^event), [Phenomenon](#^phenomenon), [Reality](#^reality), [Existence](#^existence) |
+| 2026-11-16 | the action penetration term and the earlier name \"reversible penetration\" or the action $a_n$ itself; the \"residual\" of the residual penetration term and the Residual $\xi$; the threshold margin and the remaining absorption margin (equal only at $\theta=1$); the \"composition\" of the composition term and the composition rule | [Action Penetration Term](#^action-penetration-term), [Residual Penetration Term](#^residual-penetration-term), [Threshold Margin](#^threshold-margin), [Composition Term](#^composition-term) |
 
 ---
 
