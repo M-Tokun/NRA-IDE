@@ -2,16 +2,17 @@
 
   python -B scripts/push.py prepare   10 PLAN → 20 ASK（提示して必ず終わる）
   python -B scripts/push.py run       30 PUSH → 40 VERIFY → 50 DONE（提示の直後の利用者の入力が git push のとき）
-  python -B scripts/push.py decline   提示の直後の利用者の入力が git push 以外のとき（STOP 90 @20）
+  python -B scripts/push.py decline   提示の直後の利用者の入力が git push 以外のとき（STOP、記録の step は 20）
 
-最後の1行だけを読む。言い換えない。
-  NEXT 20 Y ASK      提示した。利用者の入力が git push なら run へ
-  STOP 90 @<番号>    止まった。番号で場所が分かる（@40 は送信済み、@30 の TIMEOUT は不明）
-  DONE 50            完了
+最後の1行だけを読む。言い換えない。最初の語が呼び出し元への戻りの語（ASK・STOP・DONE）。
+経路番号は最後の行に出さない（呼び出し元の番号として読まれないように）。番号は記録の step に残す。
+  ASK                提示した。利用者の入力が git push なら run へ
+  STOP <send_state>  止まった。send_state で送信状態が分かる（UNKNOWN と COMMAND_SUCCEEDED_UNVERIFIED は再送しない）
+  DONE               完了
 
-分岐は1つだけ：20 の利用者の入力（git push か、それ以外か）。30 の時刻差を含め、それ以外の結果はすべて STOP 90。
-STOP 90 の後に 10 へ自動で戻らない。やり直すときは、利用者の新しい入力で prepare から始める。
-細かい理由と送信状態（send_state）は記録（local_reports/push_gate/push_route_log.jsonl）に残し、後から追う。
+分岐は1つだけ：20 の利用者の入力（git push か、それ以外か）。30 の時刻差を含め、それ以外の結果はすべて STOP。
+STOP の後に 10 へ自動で戻らない。やり直すときは、利用者の新しい入力で prepare から始める。
+止まった場所（step）・細かい理由・送信状態は記録（local_reports/push_gate/push_route_log.jsonl）に残し、後から追う。
 send_state：NOT_STARTED（送っていない）／UNKNOWN（送ったか不明）／COMMAND_SUCCEEDED_UNVERIFIED（push は成功、照合前）／VERIFIED。
 
 この入口は push を許可する仕組みではない。利用者の確認（git push の入力）を機械的に確かめるのは段階2。
@@ -64,7 +65,7 @@ def _stop(step, reason, detail="", send_state="NOT_STARTED"):
     _log(step, "STOP", reason, detail, send_state)
     if STATE.exists():
         STATE.unlink()
-    print(f"STOP 90 @{step}")
+    print(f"STOP {send_state}")
     return 1
 
 
@@ -148,7 +149,7 @@ def step20(remote, branch, ctx, plan):
     print("incoming: 0")
     print(f"plan: {plan.relative_to(ROOT).as_posix()}")
     _log("20", "ASK", plan.name)
-    print("NEXT 20 Y ASK")
+    print("ASK")
     return 0
 
 
@@ -188,7 +189,7 @@ def step40(st):
     _log("40", "VERIFY", send_state="VERIFIED")
     STATE.unlink()
     _log("50", "DONE", send_state="VERIFIED")
-    print("DONE 50")
+    print("DONE")
     return 0
 
 

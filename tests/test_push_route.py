@@ -6,6 +6,7 @@ import contextlib
 import io
 import json
 import pathlib
+import re
 import sys
 import tempfile
 import unittest
@@ -87,6 +88,11 @@ class PushRouteTest(unittest.TestCase):
         return [json.loads(l)["reason"] for l in push.LOG.read_text(encoding="utf-8").splitlines()
                 if json.loads(l)["result"] in ("STOP", "RETRY")]
 
+    def assertStopped(self, code, last, step, send_state):
+        """最後の行は STOP と送信状態だけ。止まった場所（step）は記録で確かめる。"""
+        self.assertEqual((code, last), (1, f"STOP {send_state}"))
+        self.assertEqual(self.last_record()["step"], step)
+
     def last_record(self):
         return json.loads(push.LOG.read_text(encoding="utf-8").splitlines()[-1])
 
@@ -95,11 +101,11 @@ class PushRouteTest(unittest.TestCase):
         r = FakeRunner(fetch=[(0, ""), (0, "")], prepare=[(0, json.dumps(ctx()))], push=[(0, "a..b master -> master")],
                        rev_parse=[(0, HEAD)], rev_list=[(0, "0\t0")])
         code, last, lines = self.go(r, "prepare")
-        self.assertEqual((code, last), (0, "NEXT 20 Y ASK"))
+        self.assertEqual((code, last), (0, "ASK"))
         self.assertTrue(any(l.startswith("plan: local_reports/push_gate/plan_") for l in lines))
         self.assertTrue(push.STATE.exists())
         code, last, _ = self.go(r, "run")
-        self.assertEqual((code, last), (0, "DONE 50"))
+        self.assertEqual((code, last), (0, "DONE"))
         self.assertFalse(push.STATE.exists())
         push_env = [env for args, env in r.calls if args[:2] == ["git", "push"]][0]
         self.assertTrue(push_env["NRA_PUSH_PLAN"].startswith("local_reports"))
@@ -114,7 +120,7 @@ class PushRouteTest(unittest.TestCase):
         ]:
             with self.subTest(why=why):
                 code, last, _ = self.go(runner, "prepare")
-                self.assertEqual((code, last), (1, "STOP 90 @10"))
+                self.assertStopped(code, last, "10", "NOT_STARTED")
                 self.assertEqual(self.reasons()[-1], why)
                 self.assertFalse(push.STATE.exists())
 
@@ -129,29 +135,29 @@ class PushRouteTest(unittest.TestCase):
                 result = diff_out if isinstance(diff_out, tuple) else (0, diff_out)
                 r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], diff=[result])
                 code, last, _ = self.go(r, "prepare")
-                self.assertEqual((code, last), (1, "STOP 90 @10"))
+                self.assertStopped(code, last, "10", "NOT_STARTED")
                 self.assertEqual(self.reasons()[-1], want)
                 self.assertFalse(push.STATE.exists())
         r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], diff=[(0, f"note/{ok_name}\0")])
         code, last, _ = self.go(r, "prepare")
-        self.assertEqual((code, last), (0, "NEXT 20 Y ASK"))
+        self.assertEqual((code, last), (0, "ASK"))
 
     # S3 @20：提示の直後の入力が git push 以外 → decline。plan は消え、run しても送れない
     def test_s3_declined_at_20(self):
         r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))])
         self.go(r, "prepare")
         code, last, _ = self.go(r, "decline")
-        self.assertEqual((code, last), (1, "STOP 90 @20"))
+        self.assertStopped(code, last, "20", "NOT_STARTED")
         self.assertEqual(self.reasons()[-1], "DECLINED")
         self.assertFalse(push.STATE.exists())
         code, last, _ = self.go(r, "run")
-        self.assertEqual((code, last), (1, "STOP 90 @30"))
+        self.assertStopped(code, last, "30", "NOT_STARTED")
         self.assertFalse(any(args[:2] == ["git", "push"] for args, _ in r.calls))
 
     # 準備した plan がないのに run した（＝提示を経ていない）→ 送らずに止まる
     def test_run_without_prepare(self):
         code, last, _ = self.go(FakeRunner(), "run")
-        self.assertEqual((code, last), (1, "STOP 90 @30"))
+        self.assertStopped(code, last, "30", "NOT_STARTED")
         self.assertEqual(self.reasons()[-1], "NO_PREPARED_PLAN")
 
     # S4 @30：ゲートの赤の結果・上限時間・表にない結果。送信状態：ゲートの判定あり＝送っていない、判定なし・TIMEOUT＝不明
@@ -164,18 +170,18 @@ class PushRouteTest(unittest.TestCase):
                 r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], push=[push_result])
                 self.go(r, "prepare")
                 code, last, _ = self.go(r, "run")
-                self.assertEqual((code, last), (1, "STOP 90 @30"))
+                self.assertStopped(code, last, "30", sent)
                 self.assertEqual(self.reasons()[-1], why)
                 self.assertEqual(self.last_record()["send_state"], sent)
 
-    # S5 時刻差：10 へ戻らず、すべて STOP 90 @30（2026-11-13 利用者決定：戻りの廃止）。prepare からやり直す
+    # S5 時刻差：10 へ戻らず、すべて STOP（記録の step は 30。2026-11-13 利用者決定：戻りの廃止）。prepare からやり直す
     def test_s5_time_difference_stops_without_return(self):
         for reason in ("PLAN_OR_RULES_CHANGED", "FETCH_EVIDENCE_MISSING"):
             with self.subTest(reason=reason):
                 r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], push=[gate_fail(reason)])
                 self.go(r, "prepare")
                 code, last, _ = self.go(r, "run")
-                self.assertEqual((code, last), (1, "STOP 90 @30"))
+                self.assertStopped(code, last, "30", "NOT_STARTED")
                 self.assertEqual(self.reasons()[-1], reason)
                 self.assertEqual(self.last_record()["send_state"], "NOT_STARTED")
                 self.assertFalse(push.STATE.exists())
@@ -188,7 +194,7 @@ class PushRouteTest(unittest.TestCase):
         self.go(r, "prepare")
         self.go(r, "run")
         code, last, _ = self.go(r, "run")
-        self.assertEqual((code, last), (1, "STOP 90 @30"))
+        self.assertStopped(code, last, "30", "NOT_STARTED")
         self.assertEqual(self.reasons()[-1], "NO_PREPARED_PLAN")
         self.assertEqual(sum(1 for args, _ in r.calls if args[:2] == ["git", "push"]), 1)
 
@@ -198,7 +204,7 @@ class PushRouteTest(unittest.TestCase):
                        rev_parse=[(0, BASE)], rev_list=[(0, "1\t0")])
         self.go(r, "prepare")
         code, last, _ = self.go(r, "run")
-        self.assertEqual((code, last), (1, "STOP 90 @40"))
+        self.assertStopped(code, last, "40", "COMMAND_SUCCEEDED_UNVERIFIED")
         self.assertEqual(self.reasons()[-1], "MISMATCH")
         self.assertEqual(self.last_record()["send_state"], "COMMAND_SUCCEEDED_UNVERIFIED")
 
@@ -213,7 +219,7 @@ class PushRouteTest(unittest.TestCase):
                                rev_parse=[rev_parse], rev_list=[rev_list])
                 self.go(r, "prepare")
                 code, last, _ = self.go(r, "run")
-                self.assertEqual((code, last), (1, "STOP 90 @40"))
+                self.assertStopped(code, last, "40", "COMMAND_SUCCEEDED_UNVERIFIED")
                 self.assertEqual(self.reasons()[-1], want)
                 self.assertEqual(self.last_record()["send_state"], "COMMAND_SUCCEEDED_UNVERIFIED")
 
@@ -227,10 +233,20 @@ class PushRouteTest(unittest.TestCase):
 
     # 出力の最後の行は、決まった3種類だけ
     def test_last_line_vocabulary(self):
-        allowed = {"NEXT 20 Y ASK", "DONE 50"} | {f"STOP 90 @{n}" for n in (10, 20, 30, 40)}
+        allowed = {"ASK", "DONE"} | {f"STOP {s}" for s in ("NOT_STARTED", "UNKNOWN", "COMMAND_SUCCEEDED_UNVERIFIED")}
         r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))])
         _, last, _ = self.go(r, "prepare")
         self.assertIn(last, allowed)
+
+    # 経路のまたぎで番号を持ち出さない：最後の行に数字を含めない
+    def test_last_line_has_no_route_number(self):
+        cases = [("prepare", FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))])),
+                 ("prepare", FakeRunner(fetch=[(None, "")])),
+                 ("run", FakeRunner())]
+        for stage, r in cases:
+            with self.subTest(stage=stage):
+                _, last, _ = self.go(r, stage)
+                self.assertIsNone(re.search(r"\d", last), last)
 
 
 if __name__ == "__main__":
