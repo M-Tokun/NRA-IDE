@@ -425,6 +425,13 @@ It is neither an axiom nor a third canonical IDE calculation system, and it does
 
 For equations, variables, initial conditions, and numerical conditions, see [`FORMULA.md`](./FORMULA.md).
 
+### Explanation of Derived Formulas (non-canonical)
+
+An explanation of derived formulas that read the Primary Formula $R=\delta/\tau$ by decomposing it is available. It covers the split of the increment of $R$ into four paths, the reversible and residual parts of $R$, and the margin to each threshold. It is not canonical and changes neither the axiom, the Primary Formula, the Secondary Formula, the canonical states, nor the thresholds.
+
+- [境界接近比の増分分解 (Japanese)](./nra-core/foundations/開放系_境界接近比の増分分解_論文草案_2026-11-16.md)
+- [Decomposing the Boundary-Approach Ratio (English)](./nra-core/foundations/Decomposing_the_Boundary_Approach_Ratio_Draft_2026-11-16_EN.md)
+
 ---
 
 ## Numerical Computation and Residuals

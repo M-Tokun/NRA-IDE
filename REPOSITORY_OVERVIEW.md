@@ -38,6 +38,7 @@ For an introductory explanation, read [`README.md`](./README.md) or [`README_JP.
 - Normative reference implementation source: [`nra-core/foundations/NRA-IDE_Architecture_public.py`](./nra-core/foundations/NRA-IDE_Architecture_public.py)
 - Generated docs mirror: [`docs/NRA-IDE_Architecture_public.py`](./docs/NRA-IDE_Architecture_public.py)
 - Conformance tests: [`tests/test_nra_ide_reference.py`](./tests/test_nra_ide_reference.py)
+- Non-canonical explanation of derived formulas (decomposition of the boundary-approach ratio): [Japanese](./nra-core/foundations/開放系_境界接近比の増分分解_論文草案_2026-11-16.md) / [English](./nra-core/foundations/Decomposing_the_Boundary_Approach_Ratio_Draft_2026-11-16_EN.md); verification script [`open_system_R_decomposition_check_20261116.py`](./nra-core/foundations/open_system_R_decomposition_check_20261116.py)
 - Other code, papers, demos, visualizations, and dated definitions: research, explanatory, illustrative, domain-specific, or historical unless a higher-precedence canonical record explicitly promotes them
 
 The normative source and docs mirror must have identical SHA-256 values. Location alone does not confer conformance; the reference tests must pass.

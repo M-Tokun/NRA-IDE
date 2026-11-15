@@ -441,6 +441,13 @@ IDEの第一の正規計算系であり、公理ではありません。
 
 数式、変数、初期条件、数値条件は [`FORMULA.md`](./FORMULA.md) を参照してください。
 
+### 派生式の解説（非正典）
+
+一次式 $R=\delta/\tau$ を分解して読む派生式の解説があります。$R$ の増分の四経路への分解、 $R$ の可逆分と残留分、閾値までの余白を扱います。正典ではなく、公理、一次式、二次式、正規状態、閾値を変更しません。
+
+- [境界接近比の増分分解（日本語）](./nra-core/foundations/開放系_境界接近比の増分分解_論文草案_2026-11-16.md)
+- [Decomposing the Boundary-Approach Ratio（English）](./nra-core/foundations/Decomposing_the_Boundary_Approach_Ratio_Draft_2026-11-16_EN.md)
+
 ---
 
 ## 数値計算と残差

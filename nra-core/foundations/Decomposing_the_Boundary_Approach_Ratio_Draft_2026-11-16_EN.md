@@ -3,8 +3,8 @@ id: DRAFT-OPEN-SYSTEM-R-DECOMPOSITION-20261116-EN
 kind: draft
 created: 2026-11-16
 author: M-Tokuni
-status: Draft, unapproved (non-canonical). Sentence-level JP/EN check done; seven new terms registered in the dictionaries; placed in nra-core/foundations (user instruction, 2026-11-16)
-classification: research hypothesis
+status: Non-canonical explanation (approved by the user, 2026-11-16). Sentence-level JP/EN check done; seven new terms registered in the dictionaries
+classification: current explanatory
 title: "Decomposing the Boundary-Approach Ratio — Derived Formulas for Reading Open Systems from the Primary Formula"
 related:
   - DIALOG-OPEN-DYNAMICS-REVIEW-20261116
@@ -15,7 +15,7 @@ related:
 
 # Decomposing the Boundary-Approach Ratio — Derived Formulas for Reading Open Systems from the Primary Formula
 
-> **Status**: This is a draft and not canonical. Every formula here is a derived or auxiliary formula in the sense of `theory/AXIOMS.md` v2.5 §5. It changes neither the Nomological Ring Axiom, the Primary Formula, the Secondary Formula, the canonical states, the thresholds, nor the irreversible latch. Numerical examples are demonstration values, not measurements.
+> **Status**: This is a non-canonical explanation (approved by the user, 2026-11-16) and is not canonical. Every formula here is a derived or auxiliary formula in the sense of `theory/AXIOMS.md` v2.5 §5. It changes neither the Nomological Ring Axiom, the Primary Formula, the Secondary Formula, the canonical states, the thresholds, nor the irreversible latch. Numerical examples are demonstration values, not measurements.
 
 ## Abstract
 
