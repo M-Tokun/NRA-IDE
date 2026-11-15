@@ -204,6 +204,20 @@ def _program_name(word):
     return name[:-4] if name.endswith('.exe') else name
 
 
+def _reads_hooks_path_config(args):
+    """Recognize only complete read forms; unknown/mixed forms stay blocked."""
+    modifiers = {'--global', '--system', '--local', '--worktree',
+                 '--show-origin', '--show-scope', '--includes', '--no-includes',
+                 '--null', '-z', '--name-only'}
+    words = [word for word in args if word not in modifiers]
+    if words and words[0] == 'get':
+        # Modern `config get` is read-only; these flags only select its output.
+        words = [word for word in words if word not in {'--all', '--regexp'}]
+    return (words == ['core.hookspath'] or
+            len(words) == 2 and words[0] in {'get', '--get', '--get-all', '--get-regexp'}
+            and words[1] == 'core.hookspath')
+
+
 def _git_label(args):
     index = 0
     while index < len(args):
@@ -243,7 +257,8 @@ def _git_label(args):
         return 'git gc --prune'
     if sub == 'config' and any(word == 'core.hookspath' or word.startswith('core.hookspath=')
                                for word in low_rest):
-        return 'git config core.hooksPath'
+        if not _reads_hooks_path_config(low_rest):
+            return 'git config core.hooksPath'
     if sub == 'push':
         for word, low in zip(rest, low_rest):
             if low.startswith('--force'):

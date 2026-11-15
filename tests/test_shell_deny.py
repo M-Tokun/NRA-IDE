@@ -81,6 +81,41 @@ ALLOWED = [
 
 
 class DangerousCommandTests(unittest.TestCase):
+    def test_hooks_path_read_forms_are_allowed(self):
+        for command in (
+            'git config --show-origin --get core.hooksPath',
+            'git config --get core.hooksPath',
+            'git config --global --get-all core.hooksPath',
+            'git config --show-scope --get-regexp core.hooksPath',
+            'git config core.hooksPath',
+            'git config --local core.hooksPath',
+            'git config get --show-origin core.hooksPath',
+            'git config get --all --regexp core.hooksPath',
+            'git -C sub config --get core.hooksPath',
+            'pwsh -Command "git config --show-origin --get core.hooksPath"',
+        ):
+            with self.subTest(command=command):
+                self.assertIsNone(_common.dangerous_git_command(command))
+
+    def test_hooks_path_write_and_ambiguous_forms_stay_denied(self):
+        for args in (
+            'core.hooksPath hooks', '--global core.hooksPath hooks',
+            '--add core.hooksPath hooks', '--replace-all core.hooksPath hooks',
+            '--unset core.hooksPath', '--unset-all core.hooksPath',
+            'set core.hooksPath hooks', 'unset core.hooksPath',
+            '--get --unset core.hooksPath', '--get core.hooksPath --add hooks',
+            '--get core.hooksPath hooks extra',
+            'get --all core.hooksPath --unset',
+            'get core.hooksPath --unknown', 'core.hooksPath=hooks',
+        ):
+            with self.subTest(args=args):
+                self.assertEqual(_common.dangerous_git_command('git config ' + args),
+                                 'git config core.hooksPath')
+        self.assertIsNotNone(_common.dangerous_git_command(
+            'git config --get core.hooksPath; git config core.hooksPath hooks'))
+        self.assertIsNotNone(_common.dangerous_git_command(
+            'git -c core.hooksPath=hooks config --get core.hooksPath'))
+
     def test_denied_forms(self):
         for command, expected in DENIED:
             with self.subTest(command=command):
@@ -201,6 +236,17 @@ class GuardIntegrationTests(unittest.TestCase):
                 self.assertEqual(code, 0)
                 self.assertFalse(self.denied(tool, out))
                 self.assertNotIn("permissionDecision", json.dumps(out))  # 自動承認を返さない
+
+    def test_hooks_path_read_and_write_are_distinguished_for_every_adapter(self):
+        for tool in ("claude", "codex", "gemini", "cline"):
+            with self.subTest(tool=tool):
+                _common.write_marker(tool, "test-1")
+                code, out = self.run_guard(tool, "git config --show-origin --get core.hooksPath")
+                self.assertEqual(code, 0)
+                self.assertFalse(self.denied(tool, out))
+                self.assertNotIn("permissionDecision", json.dumps(out))
+                _, out = self.run_guard(tool, "git config --global core.hooksPath hooks")
+                self.assertTrue(self.denied(tool, out))
 
     def test_unmarked_session_still_gets_the_contract_reason(self):
         for tool in ("claude", "codex", "gemini", "cline"):
