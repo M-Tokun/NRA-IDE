@@ -51,16 +51,30 @@ DENIED = [
     ('cmd /c "git push --force"', "--force"),
     ('pwsh -Command "git status; git push -f"', "--force"),
     ('bash -c "pwsh -Command \'git push -f\'"', "--force"),
+    # RC-13b：直接の push はすべて拒否（入口は scripts/push.py だけ）
+    ("git push", "git push"),
+    ("git push origin master", "git push"),
+    ("git push -u origin master", "git push"),
+    ("git push --set-upstream origin master", "git push"),
+    ("git push --dry-run origin master", "git push"),
+    ("git push --tags", "git push"),
+    ("git push origin HEAD:refs/heads/work", "git push"),
+    # 2026-11-15 に settings.json の deny をすり抜けた形（git と push の間の大域オプション）
+    ("git -C sub push", "git push"),
+    ('git -C "g:/repo" push origin master', "git push"),
+    ("git -c user.name=x push", "git push"),
+    ("git --git-dir=.git --work-tree=. push", "git push"),
+    ("git --no-pager push", "git push"),
+    ("NRA_PUSH_PLAN=plan.json git -C . push origin master", "git push"),
+    ('pwsh -Command "git -C . push"', "git push"),
+    ("git status && git -C . push", "git push"),
 ]
 
 ALLOWED = [
     "git status",
-    "git push origin master",
-    "git push -u origin master",
-    "git push --set-upstream origin master",
-    "git push --dry-run origin master",
-    "git push --tags",
-    "git push origin HEAD:refs/heads/work",
+    "python -B scripts/push.py prepare --remote origin --branch master",
+    "python -B scripts/push.py run",
+    "python -B scripts/push.py decline",
     "git fetch origin",
     "git log --grep=filter-repo",
     "git config user.name x",
@@ -232,10 +246,22 @@ class GuardIntegrationTests(unittest.TestCase):
         for tool in ("claude", "codex", "gemini", "cline"):
             with self.subTest(tool=tool):
                 _common.write_marker(tool, "test-1")
-                code, out = self.run_guard(tool, "git push origin master")
+                code, out = self.run_guard(tool, "git status")
                 self.assertEqual(code, 0)
                 self.assertFalse(self.denied(tool, out))
                 self.assertNotIn("permissionDecision", json.dumps(out))  # 自動承認を返さない
+
+    def test_direct_push_is_denied_with_the_fixed_entry_named_for_every_adapter(self):
+        for tool in ("claude", "codex", "gemini", "cline"):
+            with self.subTest(tool=tool):
+                _common.write_marker(tool, "test-1")
+                for command in ("git push origin master", "git -C . push"):
+                    code, out = self.run_guard(tool, command)
+                    self.assertEqual(code, 0)
+                    self.assertTrue(self.denied(tool, out))
+                    self.assertIn("scripts/push.py prepare", self.reason(tool, out))
+                code, out = self.run_guard(tool, "python -B scripts/push.py run")
+                self.assertFalse(self.denied(tool, out))
 
     def test_hooks_path_read_and_write_are_distinguished_for_every_adapter(self):
         for tool in ("claude", "codex", "gemini", "cline"):

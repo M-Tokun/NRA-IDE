@@ -100,7 +100,7 @@ class SharedGuardTests(unittest.TestCase):
     def test_marked_guard_leaves_host_permissions_intact(self):
         for tool in ("claude", "codex", "gemini", "cline"):
             _common.write_marker(tool, "test-1")
-            _, out = self.invoke(lambda: _common.run_guard(tool), self.payload(tool, tool_name="Bash", tool_input={"command": "git push origin HEAD"}))
+            _, out = self.invoke(lambda: _common.run_guard(tool), self.payload(tool, tool_name="Bash", tool_input={"command": "git status"}))
             self.assertEqual(out, {"cancel": False} if tool == "cline" else {} if tool == "gemini" else None)
     def test_full_read_required_in_legacy_adapter(self):
         text = self.contract.read_text(encoding="utf-8")

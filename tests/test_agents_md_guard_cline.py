@@ -33,7 +33,7 @@ class ClineGuardTests(unittest.TestCase):
         for name in ('bash','execute_command','run_commands','editor','apply_patch','mcp__server__write','future_tool','Read','Glob','WebFetch','read_many_files'):
             _, out = self.invoke(cline_guard.main, self.pre(name)); self.assertTrue(out['cancel'])
         _common.write_marker('cline','test-1')
-        _, out = self.invoke(cline_guard.main,self.pre('bash',{'command':'git push origin HEAD'}))
+        _, out = self.invoke(cline_guard.main,self.pre('bash',{'command':'git status'}))
         self.assertEqual(out,{'cancel':False})
     def test_unread_single_contract_only_and_marked_reads_resume(self):
         for args in ({'path':'AGENTS.md'}, {'paths':['AGENTS.md']}, {'paths':json.dumps(['AGENTS.md'])}, {'absolute_path':str(self.contract)}):

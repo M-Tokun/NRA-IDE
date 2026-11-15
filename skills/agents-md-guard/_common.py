@@ -36,6 +36,10 @@ SHELL_DENY_MESSAGE = ('{}は実行しません（AGENTS.md §7）。履歴改変
                       'リモート参照の削除は通常経路で行わず、対象と影響を提示して'
                       '利用者管理の手順へ返してください。')
 SHELL_INVALID_MESSAGE = 'シェルコマンドを文字列として確認できません。操作を停止します。'
+# RC-13b (2026-11-15): AI tools never run git push directly. scripts/push.py runs it as a
+# child process after the user's fixed confirmation, so the fixed entry is unaffected.
+PUSH_DENY_MESSAGE = ('git pushは直接実行しません。pushは固定入口 python -B scripts/push.py prepare '
+                     'から始めます（docs/PUSH_PROCEDURE.md）。')
 _SEGMENT_SPLIT = re.compile(r'&&|\|\||[;&|\r\n]')
 _WRAPPER_SHELLS = frozenset({'pwsh', 'powershell', 'bash', 'sh', 'zsh', 'cmd'})
 _WRAPPER_FLAGS = frozenset({'-c', '-lc', '-ic', '-command', '/c', '/k'})
@@ -269,6 +273,7 @@ def _git_label(args):
                 return 'git push --force'
             if word.startswith('+') or word.startswith(':'):
                 return 'git push +refspec/:ref'
+        return 'git push'  # every other direct push form, after global options like -C/-c
     return None
 
 
@@ -313,6 +318,8 @@ def shell_deny_reason(payload, tool):
     if not isinstance(command, str):
         return SHELL_INVALID_MESSAGE
     label = dangerous_git_command(command)
+    if label == 'git push':
+        return PUSH_DENY_MESSAGE
     return SHELL_DENY_MESSAGE.format(label) if label else None
 
 
