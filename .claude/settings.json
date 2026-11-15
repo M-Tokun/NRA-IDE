@@ -15,7 +15,6 @@
       "Bash(PYTHONIOENCODING=utf-8 python NRA-IDE_conformance_checks.py)"
     ],
     "ask": [
-      "Bash(git push *)",
       "Bash(git config *)",
       "Bash(git checkout *)",
       "Bash(git merge *)",
@@ -31,7 +30,6 @@
       "Bash(pip3 install *)",
       "Bash(npm install *)",
       "Bash(uv pip install *)",
-      "PowerShell(git push *)",
       "PowerShell(git config *)",
       "PowerShell(Remove-Item *)",
       "PowerShell(Move-Item *)",
@@ -64,6 +62,10 @@
       "PowerShell(git cherry-pick *)"
     ],
     "deny": [
+      "Bash(git push)",
+      "Bash(git push *)",
+      "PowerShell(git push)",
+      "PowerShell(git push *)",
       "Bash(git push *--force*)",
       "Bash(git push * -f*)",
       "Bash(git push *--delete*)",
