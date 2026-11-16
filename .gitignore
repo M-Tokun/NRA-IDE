@@ -85,6 +85,7 @@ env/
 !/skills/agents-md-guard/
 !/skills/operation-approval/
 !/skills/thought-boundary-5w1h/
+!/skills/README.md
 
 # NRA-IDE clinical session outputs
 output/

@@ -10,7 +10,7 @@
 
 ```text
 10 現在のAGENTS.md全文を読む。GOTO 20
-20 依頼の目的・対象・既存変更を確認し、必要な下位規則を読む。GOTO 30
+20 依頼の目的・対象・既存変更を確認し、RULES_DETAIL.md を読む。GOTO 30
 30 §10の共通Skillを読む。読めない場合は不足を明示し、本文にある根幹規則を保持する。GOTO 40
 40 観測・推論・不明点、固定条件、補完可能な範囲を整理する。
    IF 必要な情報が不足: GOTO 45
@@ -20,27 +20,27 @@
    ELSE: GOTO 50
 50 対象操作を上位規則・依頼範囲・§4・§6・§7・環境制限と照合する。
    IF 規則違反 OR 必要な承認がない: GOTO 95
-   ELSE: GOTO 60
-60 固定条件の内側で推論・生成・許可された操作を行う。下位規則の経路は先頭から入り、戻りは語だけで受ける。
-   IF 戻り=STOP OR 戻り=ASK: GOTO 95
-   ELSE: GOTO 62
-62 IF 対象操作 == git push:
+   ELSE: GOTO 55
+55 IF 対象操作 == git push:
       GOSUB scripts/push.py (戻り: ASK / STOP / DONE)
       IF 戻り=ASK OR 戻り=STOP: GOTO 95
       ELSE: GOTO 70
+   ELSE: GOTO 60
+60 固定条件の内側で推論・生成・許可された操作を行う。RULES_DETAIL.md の経路は先頭から入り、戻りは語だけで受ける。
+   IF 戻り=STOP OR 戻り=ASK: GOTO 95
    ELSE: GOTO 65
 65 IF 実行結果 == ERROR OR 終了コード != 0 OR Hook拒否:
-      GOSUB docs/ERROR_MANUAL.md (戻り: DONE / ASK / STOP)
-      IF 戻り=ASK OR 戻り=STOP: GOTO 95
-      ELSE: GOTO 70
+      GOSUB docs/ERROR_MANUAL.md (戻り: STOP)
+      GOTO 95
    ELSE: GOTO 70
 70 成果物を元の条件、根拠、必要な検証結果と照合する。未確認を成功扱いにしない。GOTO 80
 80 実施内容、検証結果、未解消事項と対象の経路を報告する。GOTO 90
 90 IF 依頼達成に必要な後続作業が残る: GOTO 40
    ELSE: GOTO 99
 95 対象操作を停止し、具体的な不足・違反・必要な承認と影響を報告する。
+   IF 65（エラー）または ASK 経由: 同一ターン内の別手段試行・継続を禁止し GOTO 99
    独立した承認済み作業は、その範囲で継続できる。未回答を承認に変換しない。
-   必要な利用者入力を得た後は20から対象と条件を確認し直す。
+   次のターンで利用者入力を得た後は20から対象と条件を確認し直す。GOTO 99
 99 今回の応答・作業を終了する。未解消・未検証を完了へ読み替えない。
 ```
 
