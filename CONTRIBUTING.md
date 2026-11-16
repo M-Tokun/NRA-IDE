@@ -144,6 +144,8 @@ Before opening a pull request:
 
 Use the repository's current contribution and authorship policy if one is explicitly present. Do not invent commit trailers or branch requirements from historical examples.
 
+- GitHub setting note (`M-Tokun/NRA-IDE`, confirmed 2026-11-16): `Automatically delete head branches` is enabled (`ON`). Merged PR head branches are deleted automatically on GitHub; local branches and stale remote-tracking refs still require local cleanup (e.g., `git fetch --prune`).
+
 ## Questions and Sensitive Reports
 
 Use the repository's current GitHub issue or security-reporting path when available. Do not publish credentials, tokens, private data, or exploitable security details in a public issue.
