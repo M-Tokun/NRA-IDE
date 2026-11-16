@@ -78,7 +78,7 @@ $$
 \tag{2}
 $$
 
-The action $a_n$ produces the reversible component, $\Delta p_n\ge0$ increases residual deviation, and $\Delta\lambda_n\ge0$ increases the degradation fraction. Addition or removal of a structural element is recorded as an update of $\mathsf{Active}_n$.
+The action $a_n$ produces the reversible component, $\Delta p_n\ge0$ increases residual deviation, and $\Delta\lambda_n\ge0$ increases the degradation fraction. Addition or removal of a structural element is recorded as an update of $\mathsf{Active}_n$. A receiving width temporarily narrowed by a condition that returns when the condition ends ($q^{\mathrm{temp}}_n$, `FORMULA.md` §0.5.3) is likewise allocated to $a_n$ and included in $q_n$ (the action penetration term and the reversible part of the ratio).
 
 ### 3.2 Splitting the Change of Thickness into Two
 
@@ -126,7 +126,7 @@ The four terms differ in the nature of their sign.
 
 During an evaluation, only two paths can lower $R$: reducing the action and adding a structural element. Residual deviation and degradation proceed in one direction only. Straightening a bend or stretch by force (correction) ends the evaluation and redeclares it; it is not a term of Eq. 3.
 
-The double-fluctuation detection condition $\Delta\delta_n>0\land\Delta\tau_n<0$, when $\delta_{n-1}>0$, corresponds in Eq. 3 to "the contributions of the first two terms sum to a positive value" and "the contributions of the last two terms sum to a positive value." Eq. 3 does not replace the detection condition; it discloses which path acted when the condition holds.
+The double-fluctuation detection condition $\Delta\delta_n>0\land\Delta\tau_n<0$, when $\delta_{n-1}>0$, corresponds in Eq. 3 to "the contributions of the first two terms sum to a positive value" and "the contributions of the last two terms sum to a positive value." Eq. 3 does not replace the detection condition; it discloses which path acted when the condition holds. When $\delta_{n-1}=0$ ($R_{n-1}=0$), the latter two terms of Eq. 3 become 0, and the vessel contraction in that update appears in the denominator $\tau_n$ of the first two terms and in the decrease of the threshold margin $m_{\theta,n}$ of Eq. 5.
 
 ### 3.4 The Part That Returns and the Part That Does Not
 
@@ -138,7 +138,7 @@ R_n=\underbrace{\frac{q_n}{\tau_n}}_{R_{\mathrm{rev},n}}+\underbrace{\frac{p_n}{
 \tag{4}
 $$
 
-$R_{\mathrm{res},n}$ is the approach that remains even if all action is removed now. Since $p_n$ does not decrease and $\tau_n$ does not increase unless a structural element is added, $R_{\mathrm{res},n}$ does not decrease unless a structural element is added.
+$R_{\mathrm{res},n}$ is the approach that remains even if all action is removed now. Since $p_n$ does not decrease and $\tau_n$ does not increase unless a structural element is added, $R_{\mathrm{res},n}$ does not decrease unless a structural element is added. $p_n$ does not decrease, but if $\tau_n$ increases through addition of a structural element, $R_{\mathrm{res},n}=p_n/\tau_n$ decreases. Also, even if $m_{\theta,n}>0$, the irreversible latch $\ell_n=1$ that was engaged after reaching $R_{\mathrm{irrev}}$ in the past is not automatically released (AXIOMS §10.4).
 
 If $R_{\mathrm{res},n}$ is at or above a threshold, removing the action alone does not bring $R$ below that threshold. This disclosure gives people in the field material to judge whether stopping will bring it back or not. $R_{\mathrm{rev}}$ and $R_{\mathrm{res}}$ do not redefine $R$ and do not classify canonical states. State classification is done by $R$ and the thresholds alone.
 
@@ -162,9 +162,9 @@ R_{n+1}\ \ge\ \theta
 \tag{5b}
 $$
 
-At $\theta=1$, $m_{1,n}=\tau_n-\delta_n=M_\tau$ (remaining absorption margin, `FORMULA.md` §2). $m_{\theta,n}\le0$ means that threshold has already been reached.
+At $\theta=1$, $m_{1,n}=\tau_n-\delta_n=M_\tau$ (remaining absorption margin, `FORMULA.md` §2). $m_{\theta,n}\le0$ means that threshold has already been reached. $m_{\theta,n}\le0$ means that the current $R_n$ is at or above that threshold (the holding of the irreversible latch engaged after reaching $R_{\mathrm{irrev}}$ in the past is separate).
 
-Eq. 5 does not say what will happen next. From current observations alone, it says how much an event that has occurred must increase $\delta$ and decrease $\tau$ to reach each threshold. The $-\theta\,\Delta\tau$ on the left shows that a decrease of thickness acts with weight $\theta$.
+Eq. 5 does not say what will happen next. From current observations alone, it says how much an event that has occurred must increase $\delta$ and decrease $\tau$ to reach each threshold. The $-\theta\,\Delta\tau$ on the left shows that a decrease of thickness acts with weight $\theta$. Eq. 5 is an equivalence condition on the next step's $\Delta\delta,\Delta\tau$; it does not predict the magnitude or timing of the event. $m_{\theta,n}>0$ is the margin as of now; a decrease of thickness $\Delta\tau<0$ in the next event is not taken into account.
 
 ## 4. Where "the Unknown" Is Placed
 
@@ -247,5 +247,6 @@ Names not in the canon are tentative. They were registered at the same time in b
 - Application to data from a real domain. The only check in this paper is the verification of identities.
 - The general sign properties of $\Delta\tau^{\mathrm{comp}}_n$ when $\mathrm{Comp}_\tau$ is other than a sum (parallel, series, etc.).
 - Collisions of the tentative names and symbols with the dictionaries were checked by searching terms and symbols and by `scripts/check_dictionary.py`. Completeness against semantic collisions is not guaranteed.
+- Disclosure of $R_n$ when unobservable and the conditions for continuing evaluation (the Primary Formula $R_n=\delta_n/\tau_n$ is undefined when $\delta_n,\tau_n$ cannot be obtained).
 
 [^1]: Under `note/06_対話セッション記録/`: "現実の開放系を記述する「泥臭い応用式」の骨格…", "NRA-IDE_開いた動的構造式", and "…対照精査および正典v2.5整合報告" (all recorded 2026-11-16).
