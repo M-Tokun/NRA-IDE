@@ -23,6 +23,16 @@
    ELSE: GOTO 60
 60 固定条件の内側で推論・生成・許可された操作を行う。下位規則の経路は先頭から入り、戻りは語だけで受ける。
    IF 戻り=STOP OR 戻り=ASK: GOTO 95
+   ELSE: GOTO 62
+62 IF 対象操作 == git push:
+      GOSUB scripts/push.py (戻り: ASK / STOP / DONE)
+      IF 戻り=ASK OR 戻り=STOP: GOTO 95
+      ELSE: GOTO 70
+   ELSE: GOTO 65
+65 IF 実行結果 == ERROR OR 終了コード != 0 OR Hook拒否:
+      GOSUB docs/ERROR_MANUAL.md (戻り: DONE / ASK / STOP)
+      IF 戻り=ASK OR 戻り=STOP: GOTO 95
+      ELSE: GOTO 70
    ELSE: GOTO 70
 70 成果物を元の条件、根拠、必要な検証結果と照合する。未確認を成功扱いにしない。GOTO 80
 80 実施内容、検証結果、未解消事項と対象の経路を報告する。GOTO 90
