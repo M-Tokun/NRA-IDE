@@ -1,3 +1,11 @@
+---
+id: DICT-QH-LINDBLAD-GKSL-JP-20261024
+kind: dict
+created: 2026-10-24
+author: M-Tokuni
+title: "リンドブラッド方程式（GKSL形式）：式の読み方と成立条件"
+---
+
 # リンドブラッド方程式（GKSL形式）：式の読み方と成立条件
 
 **文書の役割：** 外部技術用語の詳説。NRA-IDEの正典を定義・変更する文書ではない  

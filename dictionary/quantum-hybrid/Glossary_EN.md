@@ -1,3 +1,11 @@
+---
+id: DICT-QH-GLOSSARY-EN-20261022
+kind: dict
+created: 2026-10-22
+author: M-Tokuni
+title: "NRA-IDE Quantum-Hybrid Glossary (English Version)"
+---
+
 # NRA-IDE Quantum-Hybrid Glossary (English Version)
 
 **Version:** 0.1 (skeleton)  

@@ -1,3 +1,11 @@
+---
+id: DICT-QH-LINDBLAD-GKSL-EN-20261024
+kind: dict
+created: 2026-10-24
+author: M-Tokuni
+title: "Lindblad (GKSL) equation: reading the formula and its conditions"
+---
+
 # Lindblad (GKSL) equation: reading the formula and its conditions
 
 **Document role:** An explanation of an external technical term; it neither defines nor changes the NRA-IDE canon  

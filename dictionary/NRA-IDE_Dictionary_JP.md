@@ -1,3 +1,11 @@
+---
+id: DICT-NRA-IDE-JP-20260929
+kind: dict
+created: 2026-09-29
+author: M-Tokuni
+title: "NRA-IDE 辞書（日本語版）"
+---
+
 # NRA-IDE 辞書（日本語版）
 
 **Version:** 1.0（草案）  
@@ -242,6 +250,16 @@
 - 書き方：旧名 `R_op`・`Rop`・`rop`・`r_op` は互換入力としてだけ使い、新しい文書では使わない
 - 受け取り方の違い【未確認】：英語の handoff は責任ごと引き渡すと読まれやすい。責任・法的責任・知識は移らない（AXIOMS §10.3）
 - 関連：[境界接近警告点](#^warning-threshold)
+
+<a id="boundary-reach-condition"></a>
+### 境界到達条件（きょうかいとうたつじょうけん）
+- 英語版：[Boundary-Reach Condition](./NRA-IDE_Dictionary_EN.md#^boundary-reach-condition) ^boundary-reach-condition
+- 記号・固定名： $m_{\theta,n}\le\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}$
+- 型：語の使い分け（正典外の用語整理）。単位 $u$
+- 意味：次の更新で閾値 $\theta$ に達する（ $R_{n+1}\ge\theta$ となる）ための必要十分条件（ $\tau_{n+1}>0$ ）。現在の[閾値余白](#^threshold-margin) $m_{\theta,n}$ が、次の更新によるズレの増加 $\Delta\delta_{n+1}$ から $\theta\,\Delta\tau_{n+1}$ を引いた量以下になること。定義元：正典に定義はない。本辞書の用語整理（説明用拡張式体系の第4式）
+- 書き方：現在の収支 $m_{\theta,n}$ を左辺に置く（数式配置の鉄則1）
+- 混同注意：次の事象の時刻や大きさの予測ではない。現在確定している余白と、仮に次の更新で生じる量との比較である（2026-11-18）
+- 関連：[閾値余白](#^threshold-margin)、[境界接近比](#^boundary-approach-ratio)
 
 <a id="straightening"></a>
 ### 矯正（きょうせい）
@@ -495,7 +513,7 @@
 - 英語版：[Threshold Margin](./NRA-IDE_Dictionary_EN.md#^threshold-margin) ^threshold-margin
 - 記号・固定名： $m_{\theta,n}=\theta\,\tau_n-\delta_n$
 - 型：語の使い分け（正典外の用語整理）。単位 $u$
-- 意味：閾値 $\theta$ （ $R_{\mathrm{warn}}$ 、 $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ 、 $1.0$ のいずれか）に達するまでに、 $\delta$ が増え得る量。 $m_{\theta,n}\le0$ はその閾値に既に達していることを表す。次の更新で $R_{n+1}\ge\theta$ となることは、 $\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}\ge m_{\theta,n}$ と同値（ $\tau_{n+1}>0$ ）。定義元：正典に定義はない。本辞書の用語整理（草案）
+- 意味：閾値 $\theta$ （ $R_{\mathrm{warn}}$ 、 $R_{\mathrm{handoff}}$ 、 $R_{\mathrm{irrev}}$ 、 $1.0$ のいずれか）に達するまでに、 $\delta$ が増え得る量。 $m_{\theta,n}\le0$ はその閾値に既に達していることを表す。次の更新で $R_{n+1}\ge\theta$ となることは、 $m_{\theta,n}\le\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}$ と同値（ $\tau_{n+1}>0$ ）。定義元：正典に定義はない。本辞書の用語整理（草案）
 - 書き方：草案の式5a・5b。 $\theta=1$ のとき $m_{1,n}=\tau_n-\delta_n=M_\tau$ に一致する
 - 混同注意：
   - [残存吸収余白](#^remaining-absorption-margin) $M_\tau$ は $\theta=1$ （完全破断境界）の場合だけ。他の閾値では別の値になる（2026-11-16）
@@ -648,6 +666,18 @@
 - 混同注意：「要素が一つの場合だけの特殊形」と書いたのは正典と食い違っていた（2026-09-29）
 - 関連：[吸収厚み](#^absorption-thickness)、[復元後の吸収厚み](#^restored-thickness)
 
+<a id="declaration-misfit"></a>
+### 宣言不適合（せんげんふてきごう）
+- 英語版：[Declaration Misfit](./NRA-IDE_Dictionary_EN.md#^declaration-misfit) ^declaration-misfit
+- 型：語の使い分け（正典外の用語整理）。判定の結果
+- 意味：値は確定しているが、 $q_n<0$ 、 $\Delta p_n<0$ 、 $\Delta\lambda^{[e]}_n<0$ のいずれかとなる状態。宣言した $\sigma$ または $\mathsf{Alloc}$ が対象に合っていないことを示す。定義元：FORMULA §0.5.3（ $q_n\ge0$ を満たさないことは、宣言が対象に合っていないことを示す）。語は本辞書の用語整理
+- 書き方：説明用拡張式体系の第0段、直下式の35・94
+- 混同注意：
+  - データが不正・不明の場合（[告白](#^confession)）とは別。どちらかの判定は外部の判断者が行う（2026-11-18）
+  - 新しい $\sigma$ ・ $\mathsf{Alloc}$ は、Cause-Side測定で定める。評価出力 $R$ や正規状態から定めない（[逆導出](#^reverse-derivation)）（2026-11-18）
+- 受け取り方の違い【未確認】：「不適合」を、対象や測定の欠陥と読みやすい。ここでは、宣言（規則）が対象に合っていないことを指す
+- 関連：[告白](#^confession)、[射影規則](#^observation-projection-rule)、[分解規則](#^event-allocation-rule)、[評価宣言](#^evaluation-declaration)
+
 <a id="side-specific-gate-width"></a>
 ### 側別有効ゲート幅（そくべつゆうこうげーとはば）
 - 英語版：[Side-Specific Effective Gate Width](./NRA-IDE_Dictionary_EN.md#^side-specific-gate-width) ^side-specific-gate-width
@@ -680,6 +710,16 @@
   - 以前は $\mathcal{W}^{(\mathrm{self})}_n$ と書いていた。AXIOMS v2.4の仕事量 $W$ と装飾だけの区別になったため改めた（2026-09-29）
   - 不可逆の前に現れる兆候を「可視化」「見える」とだけ書いていた。音・振動・手応え・計器の値なども観測できる物理的事象である。「見える・聞こえる・触れて分かる・計器に出る」など、観測できる物理的事象と書く（2026-10-22）。「可視化」は、画面や図として出力する意味（Effect-Sideの表示）に限って使う
 - 関連：[評価状態](#^evaluation-state)、[経路履歴](#^event-history)
+
+<a id="ledger-record-fields"></a>
+### 台帳記録欄（だいちょうきろくらん）
+- 英語版：[Ledger Record Fields](./NRA-IDE_Dictionary_EN.md#^ledger-record-fields) ^ledger-record-fields
+- 記号・固定名： `declaration_id` ・ `event_history` ・ `target_physical_state` ・ `evaluation_state` ・ `uncarried_remainder` ・ `required_unknowns` ・ `declared_out_of_scope`
+- 型：語の使い分け（正典外の用語整理）。記録
+- 意味：更新番号 $n$ ごとに、評価宣言・経路履歴・対象状態・評価状態・持ち越さない残差・必須不明・対象外を、1つの数値に混ぜずに別々に保持する名前付きの欄。定義元：正典に定義はない。[判定用十分状態](#^decision-sufficient-state)の拡張記録として本辞書で整理する
+- 混同注意：判定用十分状態 $Z_n$ そのものではない。 $Z_n$ は物理状態と評価状態の組で、台帳記録欄は、それに経路履歴・残差・不明を並べた記録である（2026-11-18）
+- 受け取り方の違い【未確認】：「台帳」を会計の帳簿と読むと、金額の収支記録に見えやすい。ここでは、単位 $u$ の量と、不明・残差を別の欄に残す記録を指す
+- 関連：[判定用十分状態](#^decision-sufficient-state)、[経路履歴](#^event-history)、[残差](#^residual)、[観測不能](#^not-observable)
 
 <a id="other-target"></a>
 ### 他構造（たこうぞう）
@@ -811,6 +851,16 @@
 - 混同注意：以前は $\Lambda$ と書いていた（劣化度 $\lambda$ と大小だけの区別）（2026-09-29）
 - 関連：[観測事象](#^observation-event)
 
+<a id="branch-point"></a>
+### 分岐口（ぶんきぐち）
+- 英語版：[Branch Point](./NRA-IDE_Dictionary_EN.md#^branch-point) ^branch-point
+- 型：語の使い分け（正典外の用語整理）。手順の構造
+- 意味：直下式の経路で、通常の計算から外れる分岐。各分岐は定めた1つの終端へ一方向に進み、元の経路へ戻らない。分岐ごとに、不明・不適合の残し場所を持つ。定義元：正典に定義はない。本辞書の用語整理
+- 書き方：説明用拡張式体系の第0段、直下式の90〜94
+- 混同注意：「出口」と書くと、終端が1つしかないように読める。分岐口は分岐の入口を指し、複数あってよい。個々の分岐は、内側の扱いで収まれば、その分岐だけを削除できる（2026-11-18）
+- 受け取り方の違い【未確認】：英語の branch は、プログラムの条件分岐と読まれやすい。ここでは、通常の計算の外へ出る分かれ道を指す
+- 関連：[告白](#^confession)、[観測不能](#^not-observable)、[定義域外](#^out-of-domain)
+
 <a id="evaluation-archive"></a>
 ### 保管記録（ほかんきろく）
 - 英語版：[Evaluation Archive](./NRA-IDE_Dictionary_EN.md#^evaluation-archive) ^evaluation-archive
@@ -829,6 +879,26 @@
 - 英語版：[Replenishment](./NRA-IDE_Dictionary_EN.md#^replenishment) ^replenishment
 - 正規語ではない。AXIOMS v2.2までの「外部補充」「外生補充」「外生的な補充操作」は、v2.3で「構造要素の付加」に改めた
 - 混同注意：既存の厚みが戻ると読める（2026-09-29）
+
+<a id="suppression-rule"></a>
+### 抑止規則（よくしきそく）
+- 英語版：[Suppression Rule](./NRA-IDE_Dictionary_EN.md#^suppression-rule) ^suppression-rule
+- 記号・固定名： $\mathsf{Suppress}_j$ ・ $\mathsf{Suppress}^{(i)}_n$
+- 型：語の使い分け（正典外の細部規則）。評価宣言の要素
+- 意味：正典のFail-Closedに、抑止を追加する細部規則。評価前に[評価宣言](#^evaluation-declaration) $\mathsf{Decl}_j$ へ固定する。自律処理の許可は、[状態区分](#^target-state)が委譲点未満で、かつこの規則が成立していないことを条件とする。定義元：正典に定義はない。本辞書の用語整理（説明用拡張式体系の式5.3）
+- 使ってよい範囲：抑止を追加することだけ。正典が抑止する状態を解除・緩和してはならない（一方向の原則）
+- 混同注意：正典の状態名ではない。運用原則のFail-Closedそのものとも別（2026-11-18）
+- 関連：[評価宣言](#^evaluation-declaration)、[状態区分](#^target-state)
+
+<a id="cumulative-balance-equation"></a>
+### 累積収支式（るいせきしゅうししき）
+- 英語版：[Cumulative Balance Equation](./NRA-IDE_Dictionary_EN.md#^cumulative-balance-equation) ^cumulative-balance-equation
+- 記号・固定名： $m_{\theta,n}=m_{\theta,0}-\sum_{j=1}^{n}\Delta q_j-\sum_{j=1}^{n}\Delta p_j+\theta\sum_{j=1}^{n}\Delta\tau^{\mathrm{deg}}_j+\theta\sum_{j=1}^{n}\Delta\tau^{\mathrm{comp}}_j$
+- 型：語の使い分け（正典外の用語整理）。単位 $u$
+- 意味：基点 $n=0$ の[閾値余白](#^threshold-margin)から、4つの寄与（可逆成分の前後差・残留増分・旧構成の厚みの変化・構成更新）の累積を差し引いて、現在の余白を表す式。定義元：正典に定義はない。本辞書の用語整理（説明用拡張式体系の第3式）
+- 使ってよい範囲： $j=1,\dots,n$ のすべての回で、内訳が計算できた場合に限る
+- 混同注意：両端の差だけにまとめて、途中の回を消さない。途中の回に[不可逆ラッチ](#^irreversible-latch)がかかっていた事実が消える（2026-11-18）
+- 関連：[閾値余白](#^threshold-margin)、[経路履歴](#^event-history)、[不可逆ラッチ](#^irreversible-latch)
 
 <a id="degradation-contraction-term"></a>
 ### 劣化縮小項（れっかしゅくしょうこう）
@@ -1085,6 +1155,9 @@
 | 2026-11-12 | 平均値などの数値（実在以外の存在）を、実在の事象として扱う誤り | [事象](#^event)、[実在](#^reality) |
 | 2026-11-13 | 現象を事象の下位に置いたこと、事象を実在の中の発生に限ったこと。「存在するが実在しない」という言い方（日常の日本語では矛盾に読める） | [事象](#^event)、[現象](#^phenomenon)、[実在](#^reality)、[存在](#^existence) |
 | 2026-11-16 | 作用進入項と、旧名「可逆進入」・作用 $a_n$ そのもの。残留進入項の「残留」と残差 $\xi$ 。閾値余白と残存吸収余白（ $\theta=1$ のときだけ一致）。構成変化項の「構成」と合成規則 | [作用進入項](#^action-penetration-term)、[残留進入項](#^residual-penetration-term)、[閾値余白](#^threshold-margin)、[構成変化項](#^composition-term) |
+| 2026-11-18 | 「出口」の語が終端を1つに見せることと、分岐ごとの残し場所 | [分岐口](#^branch-point) |
+| 2026-11-18 | 宣言（規則）が対象に合っていないことと、データの誤り・不明 | [宣言不適合](#^declaration-misfit)、[告白](#^confession) |
+| 2026-11-18 | 台帳記録欄と判定用十分状態 | [台帳記録欄](#^ledger-record-fields)、[判定用十分状態](#^decision-sufficient-state) |
 
 ---
 

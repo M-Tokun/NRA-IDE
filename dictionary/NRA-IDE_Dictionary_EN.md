@@ -1,3 +1,11 @@
+---
+id: DICT-NRA-IDE-EN-20260929
+kind: dict
+created: 2026-09-29
+author: M-Tokuni
+title: "NRA-IDE Dictionary (English Version)"
+---
+
 # NRA-IDE Dictionary (English Version)
 
 **Version:** 1.0 (draft)  
@@ -186,6 +194,26 @@ Temporary variables used only inside an implementation (for example, the interna
 - Prohibited uses: change by evaluation outputs
 - Related: [Pre-Boundary Human Handoff Point](#^handoff-threshold), [Irreversible Transition Onset](#^irreversible-threshold)
 
+<a id="boundary-reach-condition"></a>
+### Boundary-Reach Condition
+- Japanese: [境界到達条件](./NRA-IDE_Dictionary_JP.md#^boundary-reach-condition) ^boundary-reach-condition
+- Symbol / fixed name: $m_{\theta,n}\le\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}$
+- Type: term arrangement outside the canon (unit $u$)
+- Meaning: the necessary and sufficient condition for reaching the threshold $\theta$ at the next update (that is, $R_{n+1}\ge\theta$; for $\tau_{n+1}>0$). The current [Threshold Margin](#^threshold-margin) $m_{\theta,n}$ is at most the increase in deviation $\Delta\delta_{n+1}$ minus $\theta\,\Delta\tau_{n+1}$. Source: no definition in the canon; this dictionary's term arrangement (Eq. 4 of the extended-formula system)
+- Notation: the current balance $m_{\theta,n}$ is placed on the left-hand side (Rule 1 of the formula placement rules)
+- Confusion notes: it is not a prediction of the time or size of the next event. It compares the currently fixed margin with an amount that would arise at the next update (2026-11-18)
+- Related: [Threshold Margin](#^threshold-margin), [Boundary Approach Ratio](#^boundary-approach-ratio)
+
+<a id="branch-point"></a>
+### Branch Point
+- Japanese: [分岐口](./NRA-IDE_Dictionary_JP.md#^branch-point) ^branch-point
+- Type: term arrangement outside the canon (structure of a procedure)
+- Meaning: in the line-numbered route, a branch that leaves the normal calculation. Each branch proceeds one way to a single fixed end and does not return to the original route. Each branch has its own place to keep unknowns and misfits. Source: no definition in the canon; this dictionary's term arrangement
+- Notation: Stage 0 of the extended-formula system, lines 90 to 94 of the line-numbered route
+- Confusion notes: writing "exit" makes it read as if there were only one end. A branch point is the entrance of a branch, and there may be several. When a branch is settled by the inner handling, only that branch can be removed (2026-11-18)
+- Reading risk [Unconfirmed]: the English "branch" tends to be read as a conditional branch of a program. Here it means a fork that leaves the normal calculation
+- Related: [Confession](#^confession), [Not Observable](#^not-observable), [Out of Domain](#^out-of-domain)
+
 <a id="complete-rupture-boundary"></a>
 ### Complete Rupture Boundary
 - Japanese: [完全破断境界](./NRA-IDE_Dictionary_JP.md#^complete-rupture-boundary) ^complete-rupture-boundary
@@ -229,6 +257,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Reading risk [Unconfirmed]: English constraint is easily read as a constraint in optimization. Here it is a load acting from outside
 - Related: [Applied Action](#^applied-action), [Active Elements](#^active-elements), [Evaluation Declaration](#^evaluation-declaration)
 
+<a id="cumulative-balance-equation"></a>
+### Cumulative Balance Equation
+- Japanese: [累積収支式](./NRA-IDE_Dictionary_JP.md#^cumulative-balance-equation) ^cumulative-balance-equation
+- Symbol / fixed name: $m_{\theta,n}=m_{\theta,0}-\sum_{j=1}^{n}\Delta q_j-\sum_{j=1}^{n}\Delta p_j+\theta\sum_{j=1}^{n}\Delta\tau^{\mathrm{deg}}_j+\theta\sum_{j=1}^{n}\Delta\tau^{\mathrm{comp}}_j$
+- Type: term arrangement outside the canon (unit $u$)
+- Meaning: the equation that expresses the current margin as the [Threshold Margin](#^threshold-margin) at the base point $n=0$ minus the accumulation of four contributions (the change of the reversible component, the increment of the residual, the thickness change under the old composition, and the composition update). Source: no definition in the canon; this dictionary's term arrangement (Eq. 3 of the extended-formula system)
+- Permitted use: only when the breakdown could be computed at every step $j=1,\dots,n$
+- Confusion notes: do not reduce it to the difference of the two end points and erase the intermediate steps. The fact that the [Irreversible Latch](#^irreversible-latch) caught at an intermediate step would disappear (2026-11-18)
+- Related: [Threshold Margin](#^threshold-margin), [Event History](#^event-history), [Irreversible Latch](#^irreversible-latch)
+
 <a id="decision-sufficient-state"></a>
 ### Decision-Sufficient State
 - Japanese: [判定用十分状態](./NRA-IDE_Dictionary_JP.md#^decision-sufficient-state) ^decision-sufficient-state
@@ -238,6 +276,18 @@ Temporary variables used only inside an implementation (for example, the interna
 - Notation: not a positional tuple. The update rules take only the physical state (excluding the latch) as input
 - Confusion notes: the tuple $(p,\lambda,\ell)$ was insufficient once elements became plural (2026-09-29). The update rules had been written with the latch as an input (2026-09-29)
 - Related: [Event History](#^event-history)
+
+<a id="declaration-misfit"></a>
+### Declaration Misfit
+- Japanese: [宣言不適合](./NRA-IDE_Dictionary_JP.md#^declaration-misfit) ^declaration-misfit
+- Type: term arrangement outside the canon (result of a judgment)
+- Meaning: the state in which the values are fixed but one of $q_n<0$, $\Delta p_n<0$, $\Delta\lambda^{[e]}_n<0$ holds. It shows that the declared $\sigma$ or $\mathsf{Alloc}$ does not fit the target. Source: FORMULA §0.5.3 (a violation of $q_n\ge0$ shows that the declaration does not fit the target). The term is this dictionary's arrangement
+- Notation: Stage 0 of the extended-formula system, lines 35 and 94 of the line-numbered route
+- Confusion notes:
+  - It is distinct from invalid or unknown data ([Confession](#^confession)). An external judge decides which applies (2026-11-18)
+  - A new $\sigma$ or $\mathsf{Alloc}$ is fixed by Cause-Side measurement, not from the evaluation output $R$ or the canonical state ([Reverse Derivation](#^reverse-derivation)) (2026-11-18)
+- Reading risk [Unconfirmed]: "misfit" may be read as a defect of the target or the measurement. Here it means that the declaration (the rule) does not fit the target
+- Related: [Confession](#^confession), [Observation Projection Rule](#^observation-projection-rule), [Event Allocation Rule](#^event-allocation-rule), [Evaluation Declaration](#^evaluation-declaration)
 
 <a id="declared-thickness"></a>
 ### Declared Thickness
@@ -452,6 +502,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Symbol / fixed name: $R_{\mathrm{irrev}}$ / `r_irrev` (output `thresholds.R_irrev`)
 - Type: gauge (threshold)
 - Meaning: the point of entry into irreversible transition, after which the original structural state cannot be returned to; $R_{\mathrm{handoff}}<R_{\mathrm{irrev}}<1.0$ . Source: AXIOMS §9, §10.4
+
+<a id="ledger-record-fields"></a>
+### Ledger Record Fields
+- Japanese: [台帳記録欄](./NRA-IDE_Dictionary_JP.md#^ledger-record-fields) ^ledger-record-fields
+- Symbol / fixed name: `declaration_id`, `event_history`, `target_physical_state`, `evaluation_state`, `uncarried_remainder`, `required_unknowns`, `declared_out_of_scope`
+- Type: term arrangement outside the canon (record)
+- Meaning: named fields that hold, for each update number $n$, the evaluation declaration, the event history, the target state, the evaluation state, the remainder not carried over, the required unknowns, and the declared out-of-scope items, without mixing them into one number. Source: no definition in the canon; this dictionary arranges it as an extended record of the [Decision-Sufficient State](#^decision-sufficient-state)
+- Confusion notes: it is not the decision-sufficient state $Z_n$ itself. $Z_n$ is the pair of the physical state and the evaluation state; the ledger record fields add the event history, the remainder, and the unknowns to it (2026-11-18)
+- Reading risk [Unconfirmed]: "ledger" may be read as an accounting book, that is, a record of money. Here it means a record that keeps quantities in the unit $u$ and the unknowns and remainders in separate fields
+- Related: [Decision-Sufficient State](#^decision-sufficient-state), [Event History](#^event-history), [Residual](#^residual), [Not Observable](#^not-observable)
 
 <a id="not-observable"></a>
 ### Not Observable
@@ -767,6 +827,16 @@ Temporary variables used only inside an implementation (for example, the interna
 - Confusion notes: formerly written with the structure name $G$ (the same glyph as $G(r)$ in FORMULA §5). The proposed $k$ was not adopted because it collides with the knee value $k$ (2026-09-29)
 - Related: [Other Target](#^other-target)
 
+<a id="suppression-rule"></a>
+### Suppression Rule
+- Japanese: [抑止規則](./NRA-IDE_Dictionary_JP.md#^suppression-rule) ^suppression-rule
+- Symbol / fixed name: $\mathsf{Suppress}_j$, $\mathsf{Suppress}^{(i)}_n$
+- Type: term arrangement outside the canon (detailed rule; an element of the evaluation declaration)
+- Meaning: a detailed rule that adds suppression to the canonical Fail-Closed. It is fixed in the [Evaluation Declaration](#^evaluation-declaration) $\mathsf{Decl}_j$ before evaluation. Autonomous processing is permitted only when the [Target Boundary State](#^target-state) is below the handoff point and this rule does not hold. Source: no definition in the canon; this dictionary's term arrangement (Eq. 5.3 of the extended-formula system)
+- Permitted use: it may only add suppression. It must not lift or relax any state that the canon suppresses (one-way principle)
+- Confusion notes: it is not a canonical state name. It is also distinct from Fail-Closed itself, which is an operational principle (2026-11-18)
+- Related: [Evaluation Declaration](#^evaluation-declaration), [Target Boundary State](#^target-state)
+
 <a id="target-state"></a>
 ### Target Boundary State
 - Japanese: [状態区分](./NRA-IDE_Dictionary_JP.md#^target-state) ^target-state
@@ -816,7 +886,7 @@ Temporary variables used only inside an implementation (for example, the interna
 - Japanese: [閾値余白](./NRA-IDE_Dictionary_JP.md#^threshold-margin) ^threshold-margin
 - Symbol / fixed name: $m_{\theta,n}=\theta\,\tau_n-\delta_n$
 - Type: term arrangement outside the canon (unit $u$)
-- Meaning: the amount by which $\delta$ can still increase before the threshold $\theta$ (any of $R_{\mathrm{warn}}$, $R_{\mathrm{handoff}}$, $R_{\mathrm{irrev}}$, $1.0$) is reached. $m_{\theta,n}\le0$ means that threshold has already been reached. At the next update, $R_{n+1}\ge\theta$ is equivalent to $\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}\ge m_{\theta,n}$ (for $\tau_{n+1}>0$). Source: no definition in the canon; this dictionary's term arrangement (draft)
+- Meaning: the amount by which $\delta$ can still increase before the threshold $\theta$ (any of $R_{\mathrm{warn}}$, $R_{\mathrm{handoff}}$, $R_{\mathrm{irrev}}$, $1.0$) is reached. $m_{\theta,n}\le0$ means that threshold has already been reached. At the next update, $R_{n+1}\ge\theta$ is equivalent to $m_{\theta,n}\le\Delta\delta_{n+1}-\theta\,\Delta\tau_{n+1}$ (for $\tau_{n+1}>0$). Source: no definition in the canon; this dictionary's term arrangement (draft)
 - Notation: Eqs. 5a and 5b of the draft. At $\theta=1$, $m_{1,n}=\tau_n-\delta_n=M_\tau$
 - Confusion notes:
   - The [Remaining Absorption Margin](#^remaining-absorption-margin) $M_\tau$ is the case $\theta=1$ (the complete-rupture boundary) only. Other thresholds give other values (2026-11-16)
@@ -1084,6 +1154,9 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-11-12 | treating a number such as an average (existence other than reality) as a real event | [Event](#^event), [Reality](#^reality) |
 | 2026-11-13 | placing phenomenon below event and limiting event to occurrences within reality; the phrase "存在するが実在しない" (reads as a contradiction in everyday Japanese) | [Event](#^event), [Phenomenon](#^phenomenon), [Reality](#^reality), [Existence](#^existence) |
 | 2026-11-16 | the action penetration term and the earlier name \"reversible penetration\" or the action $a_n$ itself; the \"residual\" of the residual penetration term and the Residual $\xi$; the threshold margin and the remaining absorption margin (equal only at $\theta=1$); the \"composition\" of the composition term and the composition rule | [Action Penetration Term](#^action-penetration-term), [Residual Penetration Term](#^residual-penetration-term), [Threshold Margin](#^threshold-margin), [Composition Term](#^composition-term) |
+| 2026-11-18 | the word "exit" making the end look single, and the place to keep unknowns per branch | [Branch Point](#^branch-point) |
+| 2026-11-18 | a declaration (rule) that does not fit the target, and invalid or unknown data | [Declaration Misfit](#^declaration-misfit), [Confession](#^confession) |
+| 2026-11-18 | ledger record fields and the decision-sufficient state | [Ledger Record Fields](#^ledger-record-fields), [Decision-Sufficient State](#^decision-sufficient-state) |
 
 ---
 

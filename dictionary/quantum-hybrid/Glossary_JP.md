@@ -1,3 +1,11 @@
+---
+id: DICT-QH-GLOSSARY-JP-20261022
+kind: dict
+created: 2026-10-22
+author: M-Tokuni
+title: "NRA-IDE 量子ハイブリッド用語集（日本語版）"
+---
+
 # NRA-IDE 量子ハイブリッド用語集（日本語版）
 
 **Version:** 0.1（骨格）  
