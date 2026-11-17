@@ -2,7 +2,7 @@
 id: DICT-FORMULA-GRAMMAR-FIVE-RULES
 kind: dictionary-supplement
 created: 2026-11-17
-author: M-Tokuni（設計・審査） / AIエージェント（構造整理・検算）
+author: M-Tokuni
 status: 非正典の辞書レベル補足規則（正典 AXIOMS v2.5 / FORMULA v2.2 / 辞書 v1.0草案 準拠）
 title: "NRA-IDE数式配置の5大鉄則（式の文法）"
 related:
@@ -40,8 +40,11 @@ related:
 |---|---|---|---|
 | $$R_n = \frac{\delta_n}{\tau_n}$$ | 正解 | **正解（正規）** | 右辺のCause-Side確定量 $(\delta_n, \tau_n)$ から左辺の評価出力 $R_n$ を導く正しい向き。 |
 | $$\delta_n = R_n \tau_n$$<br>$$\tau_n = \frac{\delta_n}{R_n}$$ | 正解（同値） | **誤り（逆導出A/B）** | 評価出力 $R_n$ を右辺（入力側）に置いて原因側の $\delta_n$ や $\tau_n$ を逆算して決める式になり、`AXIOMS.md` §14 に違反する。 |
-| $$\underbrace{\Delta\delta_{n+1} - \theta\Delta\tau_{n+1}}_{\text{左辺：次事象の変化量}} \ge \underbrace{m_{\theta,n}}_{\text{右辺：現在の閾値余白}}$$ | 正解 | **正解（境界条件）** | 右辺に「現在確定している閾値余白 $m_{\theta,n}$」を固定基準として置き、左辺の「次の事象による変化」がそれに達するかを判定する向き。 |
+| $$\underbrace{m_{\theta,n}}_{\text{左辺：現在の閾値余白}} \le \underbrace{\Delta\delta_{n+1} - \theta\Delta\tau_{n+1}}_{\text{右辺：次事象の変化量}}$$ | 正解 | **正解（境界条件）** | 左辺に「現在確定している閾値余白 $m_{\theta,n}$」（現在の収支）を置き、右辺の「次の事象による変化」がそれに達するかを判定する向き。 |
+| $$\underbrace{\Delta\delta_{n+1} - \theta\Delta\tau_{n+1}}_{\text{左辺：次事象の変化量}} \ge \underbrace{m_{\theta,n}}_{\text{右辺：現在の閾値余白}}$$ | 正解（同値） | **説明として不適** | 現在の収支 $m_{\theta,n}$ が右辺へ回り、左辺に未発生の変化量が来るため、何を判定する式かが逆に読める。同値だが、現在の収支を左辺に置く書き方に統一する。 |
 | $$\theta\tau_n \le \delta_n + \Delta\delta_{n+1} - \theta\Delta\tau_{n+1}$$ | 正解（同値） | **説明として不適** | 現在の確定値 $(\delta_n, \tau_n)$ と未発生の次ステップ変化 $(\Delta\delta_{n+1}, \Delta\tau_{n+1})$ が同じ辺に混ざり、基準と変化の境界が崩れる。 |
+
+**例外はない。** 評価出力どうしを結ぶ式（比 $R$ と余白 $m_\theta$ を等号で結ぶ式）は、右辺に評価出力が来るため、本書の式としては置かない。比と余白の対応は、同値の記述（$m_{\theta,n}>0 \iff R_n<\theta$）と、第2A式・第2B式という原因側から出す2つの式で示す。
 
 ---
 
@@ -76,6 +79,7 @@ $$
 $$
 
 - **逆の入れ子が禁止される理由**：もし新構成 $\mathsf{Active}_n$ に旧厚み $\tau^{[e]}_{n-1}$ を入れる形 $\mathrm{Comp}_\tau\bigl((\tau^{[e]}_{n-1})_{e\in\mathsf{Active}_n}\bigr)$ を中間項にすると、更新 $n$ で新規に付加された要素 $e_{\mathrm{new}} \in \mathsf{Active}_n \setminus \mathsf{Active}_{n-1}$ には直前ステップの厚み $\tau^{[e_{\mathrm{new}}]}_{n-1}$ が存在せず、未定義または架空の過去値の捏造になるためである。
+- **除去した要素の扱い**：旧構成 $\mathsf{Active}_{n-1}$ に含まれ、更新 $n$ で除去した要素 $e$ には、除去した回の値 $\tau^{[e]}_n=(1-\lambda^{[e]}_n)\tau^{[e]}_0$（その回の傷みを含む）を入れ、除去の事象とこの値を経路履歴に記録する。「旧構成に更新後厚み」という同じ向きで読むため、過去値を作らない。
 
 ---
 
@@ -99,7 +103,7 @@ $$
 |---|---|---|---|
 | $\Delta p_n,\ \Delta\lambda^{[e]}_n$ | 常に $\ge 0$（評価中に減らない） | 残留ズレの**増分**、劣化度の**増分** | **増分** |
 | $\Delta q_n$ | 正・0・負のいずれもとり得る | 可逆成分の増分（作用進入項の分子） | **可逆成分の前後差（または増減）** |
-| $\Delta\tau^{\mathrm{deg}}_n,\ \Delta\tau^{\mathrm{comp}}_n$ | $\Delta\tau^{\mathrm{deg}}_n \le 0$、$\Delta\tau^{\mathrm{comp}}_n$ は符号任意 | 厚みの**変化**（辞書 L332, L838） | **厚みの変化（劣化時は厚みの減少）** |
+| $\Delta\tau^{\mathrm{deg}}_n,\ \Delta\tau^{\mathrm{comp}}_n$ | $\Delta\tau^{\mathrm{deg}}_n \le 0$、$\Delta\tau^{\mathrm{comp}}_n$ は符号任意 | 厚みの**変化**（辞書「[構成変化項](./NRA-IDE_Dictionary_JP.md#^composition-term)」「[劣化縮小項](./NRA-IDE_Dictionary_JP.md#^degradation-contraction-term)」） | **厚みの変化（劣化時は厚みの減少）** |
 | $R_n - R_{n-1}$ | 正・0・負のいずれもとり得る | 一次式の**増分**（`FORMULA.md` §4.7） | **境界接近比の前後差（増分）** |
 | $m_{\theta,n} - m_{\theta,n-1}$ | 正・0・負のいずれもとり得る | 閾値余白の前後差・収支（11/17草案） | **閾値余白の前後差（収支）** |
 
