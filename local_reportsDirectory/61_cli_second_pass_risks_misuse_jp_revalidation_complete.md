@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-061-RISKS-MISUSE-JP-REVALIDATION-COMPLETE-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "第2次CLI精査 継続報告 61 — `09_risks_and_misuse_JP.md` 限定再検証完了"
+---
+
 # 第2次CLI精査 継続報告 61 — `09_risks_and_misuse_JP.md` 限定再検証完了
 
 ## 対象

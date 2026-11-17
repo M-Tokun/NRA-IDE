@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-031-CONTINUATION-RISKS-MISUSE-EN-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Risks and Misuse EN"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Risks and Misuse EN
 
 - 実施日: 2026-07-15 JST

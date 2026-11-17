@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-039-RESUME-OBSERVABLES-JP-VALIDATION-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 再開Report — Observables JP修正後検証"
+---
+
 # NRA-IDE 第2次CLI精査 再開Report — Observables JP修正後検証
 
 - 実施日: 2026-07-15 JST

@@ -1,3 +1,11 @@
+---
+id: NOTE-LRD-119-CLAUDE-CODE-RECHECK-PROMPT-20260716
+kind: note
+created: 2026-07-16
+author: M-Tokuni
+title: "Report 119 — Claude Code再精査プロンプト"
+---
+
 # Report 119 — Claude Code再精査プロンプト
 
 CODEX CLI精査結果（Reports 18～118）の検証用チェックリストプロンプト。

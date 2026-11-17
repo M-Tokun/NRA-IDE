@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-068-PENDING-DOMAIN-TUNING-JP-REVALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "第2次CLI精査 継続報告 68 — `11_domain_tuning_JP.md` 限定再検証（承認待ち）"
+---
+
 # 第2次CLI精査 継続報告 68 — `11_domain_tuning_JP.md` 限定再検証（承認待ち）
 
 ## 対象

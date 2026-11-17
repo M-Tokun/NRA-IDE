@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-051-COHERENCE-GATE-JP-RESIDUAL-VALIDATION-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Coherence Gate JP 残存候補検証"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Coherence Gate JP 残存候補検証
 
 - 実施日: 2026-07-15 JST

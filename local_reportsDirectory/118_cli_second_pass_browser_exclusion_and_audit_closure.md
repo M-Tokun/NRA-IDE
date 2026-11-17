@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-118-BROWSER-EXCLUSION-AND-AUDIT-CLOSURE-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Browser工程除外・監査完了"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Browser工程除外・監査完了
 
 - 実施日: 2026-07-16 JST

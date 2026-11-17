@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-049-PENDING-AI-OPTIMIZATION-EN-REVALIDATION-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — AI Optimization EN 限定再検証"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — AI Optimization EN 限定再検証
 
 - 実施日: 2026-07-15 JST

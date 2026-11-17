@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-047-PENDING-OVERVIEW-JP-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Overview JP"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Overview JP
 
 - 実施日: 2026-07-15 JST

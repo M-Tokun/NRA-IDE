@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-117-OPTIONAL-BROWSER-RENDERING-VALIDATION-UNAVAILABLE-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 任意Browser描画検証 Report — in-app Browser利用不可"
+---
+
 # NRA-IDE 任意Browser描画検証 Report — in-app Browser利用不可
 
 - 実施日: 2026-07-16 JST

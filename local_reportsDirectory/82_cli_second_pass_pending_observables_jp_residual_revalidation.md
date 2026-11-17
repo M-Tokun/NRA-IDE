@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-082-PENDING-OBSERVABLES-JP-RESIDUAL-REVALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Observables JP 残存再検証（修正待ち）"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Observables JP 残存再検証（修正待ち）
 
 - 実施日: 2026-07-16 JST

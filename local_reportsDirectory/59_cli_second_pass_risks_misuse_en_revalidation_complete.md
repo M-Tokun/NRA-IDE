@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-059-RISKS-MISUSE-EN-REVALIDATION-COMPLETE-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "第2次CLI精査 継続報告 59 — `09_risks_and_misuse_EN.md` 限定再検証完了"
+---
+
 # 第2次CLI精査 継続報告 59 — `09_risks_and_misuse_EN.md` 限定再検証完了
 
 ## 対象

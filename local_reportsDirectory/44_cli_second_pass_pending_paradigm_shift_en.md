@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-044-PENDING-PARADIGM-SHIFT-EN-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Paradigm Shift EN"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Paradigm Shift EN
 
 - 実施日: 2026-07-15 JST

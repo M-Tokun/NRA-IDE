@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-105-SANDWICH-JP-LATCH-AUTHORITY-REVALIDATION-COMPLETE-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Sandwich Architecture JP ラッチ・権限列挙再検証完了"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Sandwich Architecture JP ラッチ・権限列挙再検証完了
 
 - 実施日: 2026-07-16 JST

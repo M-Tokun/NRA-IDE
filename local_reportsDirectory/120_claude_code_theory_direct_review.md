@@ -1,3 +1,11 @@
+---
+id: REVIEW-LRD-120-CLAUDE-CODE-THEORY-DIRECT-REVIEW-20260716
+kind: review
+created: 2026-07-16
+author: M-Tokuni
+title: "Report 120 — Claude Code理論直結ファイル群レビュー"
+---
+
 # Report 120 — Claude Code理論直結ファイル群レビュー
 
 - 実施日: 2026-07-16 JST

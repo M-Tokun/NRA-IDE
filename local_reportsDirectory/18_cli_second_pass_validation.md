@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-018-VALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精密検証レポート"
+---
+
 # NRA-IDE 第2次CLI精密検証レポート
 
 - 検証日: 2026-07-14 JST

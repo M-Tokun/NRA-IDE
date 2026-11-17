@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-042-PENDING-SANDWICH-ARCHITECTURE-EN-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Sandwich Architecture EN"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Sandwich Architecture EN
 
 - 実施日: 2026-07-15 JST

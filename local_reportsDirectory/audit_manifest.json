@@ -17,7 +17,7 @@
   ],
   "reports": [
     {"report_id":"01","file":"01_root_review.md","sha256":"EE34240D5D126051862E93BE5F1282E23FB8FDBCF32CE9BA95440F7890CEF85A"},
-    {"report_id":"02","file":"02_theory_review.md","sha256":"C9A4E9D9F08CD2C485F5DF2B87BED32003287AED88D390E647BC220E1AE91A68"},
+    {"report_id":"02","file":"02_theory_review.md","sha256":"E695467B85EB2216BBFC143849D2DFED61876178FE1C7428DF033B8219AEB4C2","sha256_at_audit":"C9A4E9D9F08CD2C485F5DF2B87BED32003287AED88D390E647BC220E1AE91A68","change_note":"2026-08-14 commit f9b2f84 (Unicode gate) replaced two U+200B characters on one line (THEORY.md line 801 quotation) with the ASCII text \\u200B\\u200B. Replacing that text back with two U+200B reproduces sha256_at_audit. Only that line differs; sha256 is the current file."},
     {"report_id":"03","file":"03_nra_core_papers_review.md","sha256":"FAE29B3562847FD090FA91158184B67EBFC5F384E39897770360A94B53AC80B7"},
     {"report_id":"04","file":"04_nra_core_implementation_review.md","sha256":"71CDF92CAA7D2D184750111A4DEB43F4249014D5B882D0D7FC7825EA6E1181A9"},
     {"report_id":"05","file":"05_nra_core_quantum_review.md","sha256":"0A79C8C5620191413851FF6E64B453755160472AFD1810431F3AF550CBB65DC2"},

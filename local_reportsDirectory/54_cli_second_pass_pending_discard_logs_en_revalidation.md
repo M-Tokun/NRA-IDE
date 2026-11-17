@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-054-PENDING-DISCARD-LOGS-EN-REVALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "第2次CLI精査 継続報告 54 — `08_discard_logs_EN.md` 限定再検証（承認待ち）"
+---
+
 # 第2次CLI精査 継続報告 54 — `08_discard_logs_EN.md` 限定再検証（承認待ち）
 
 ## 対象

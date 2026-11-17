@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-064-PENDING-BENEFITS-LIMITATIONS-JP-REVALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "第2次CLI精査 継続報告 64 — `10_benefits_and_limitations_JP.md` 限定再検証（承認待ち）"
+---
+
 # 第2次CLI精査 継続報告 64 — `10_benefits_and_limitations_JP.md` 限定再検証（承認待ち）
 
 ## 対象

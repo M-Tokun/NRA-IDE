@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-069-DOMAIN-TUNING-JP-REVALIDATION-COMPLETE-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "第2次CLI精査 継続報告 69 — `11_domain_tuning_JP.md` 限定再検証完了"
+---
+
 # 第2次CLI精査 継続報告 69 — `11_domain_tuning_JP.md` 限定再検証完了
 
 ## 対象

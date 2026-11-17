@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-112-GLOSSARY-EN-LATCH-FIELD-REVALIDATION-COMPLETE-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Glossary EN ラッチ項目再検証完了"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Glossary EN ラッチ項目再検証完了
 
 - 実施日: 2026-07-16 JST

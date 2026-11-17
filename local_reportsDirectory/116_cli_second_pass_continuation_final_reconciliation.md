@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-116-CONTINUATION-FINAL-RECONCILIATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — 継続工程最終整合"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — 継続工程最終整合
 
 - 実施日: 2026-07-16 JST

@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-098-PENDING-AI-OPTIMIZATION-EN-HISTORY-AUTHORITY-REVALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — AI Optimization EN 履歴権限再検証（修正待ち）"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — AI Optimization EN 履歴権限再検証（修正待ち）
 
 - 実施日: 2026-07-16 JST

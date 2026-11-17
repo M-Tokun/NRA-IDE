@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-021-CONTINUATION-CAUSAL-DIODE-EN-VISUAL-20260715
+kind: report
+created: 2026-07-15
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Causal Diode EN Visual"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Causal Diode EN Visual
 
 - 実施日: 2026-07-15 JST

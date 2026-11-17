@@ -1,3 +1,11 @@
+---
+id: REVIEW-LRD-122-CLAUDE-CODE-EXAMPLES-REVIEW-20260716
+kind: review
+created: 2026-07-16
+author: M-Tokuni
+title: "Report 122: Claude Code — examples/ フォルダ精査"
+---
+
 # Report 122: Claude Code — examples/ フォルダ精査
 
 **日付**: 2026-07-16

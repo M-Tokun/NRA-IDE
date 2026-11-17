@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-092-PENDING-OVERVIEW-EN-TERMINAL-RECORD-AUTHORITY-REVALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "NRA-IDE 第2次CLI精査 継続Report — Overview EN 終端記録権限再検証（修正待ち）"
+---
+
 # NRA-IDE 第2次CLI精査 継続Report — Overview EN 終端記録権限再検証（修正待ち）
 
 - 実施日: 2026-07-16 JST

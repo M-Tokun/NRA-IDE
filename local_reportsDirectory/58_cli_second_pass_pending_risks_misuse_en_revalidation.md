@@ -1,3 +1,11 @@
+---
+id: REPORT-LRD-058-PENDING-RISKS-MISUSE-EN-REVALIDATION-20260716
+kind: report
+created: 2026-07-16
+author: M-Tokuni
+title: "第2次CLI精査 継続報告 58 — `09_risks_and_misuse_EN.md` 限定再検証（承認待ち）"
+---
+
 # 第2次CLI精査 継続報告 58 — `09_risks_and_misuse_EN.md` 限定再検証（承認待ち）
 
 ## 対象
