@@ -1,3 +1,11 @@
+---
+id: PAPER-QUANTUM-ARCHITECTURE-RESIDUAL-REDUCTION-FINAL-20260429-JP
+kind: paper
+created: 2026-04-29
+author: M-Tokuni
+title: "NRA-IDE 残渣ベース遅延精度確保型と量子計算における破綻経路の構造的縮減"
+---
+
 <!-- FILE: NRA-IDE_Quantum_Reduction_Final_2026-04-29_1648_JP.md -->
 <!-- TITLE: NRA-IDE 残渣ベース遅延精度確保型と量子計算における破綻経路の構造的縮減（完成版） -->
 <!-- Author: M-Tokuni / NRA-IDE Project -->

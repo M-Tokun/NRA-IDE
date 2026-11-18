@@ -1,3 +1,11 @@
+---
+id: NOTE-NRA-IDE-FPGA-IMPLEMENTATION-SESSION-20260314
+kind: note
+created: 2026-03-14
+author: M-Tokuni
+title: "NRA-IDE FPGA実装 ─ セッションまとめ"
+---
+
 # NRA-IDE FPGA実装 ─ セッションまとめ
 
 <!-- FILE: NRA-IDE_FPGA_Implementation_2026-03-14_2157.md -->

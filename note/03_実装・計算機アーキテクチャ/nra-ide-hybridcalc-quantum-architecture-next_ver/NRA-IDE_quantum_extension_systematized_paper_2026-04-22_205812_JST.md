@@ -1,3 +1,11 @@
+---
+id: PAPER-QUANTUM-EXTENSION-SYSTEMATIZED-20260422
+kind: paper
+created: 2026-04-22
+author: M-Tokuni
+title: "NRA-IDE 量子計算拡張の体系化"
+---
+
 # NRA-IDE 量子計算拡張の体系化
 
 ## 批評吸収から B-1・B-2・B-3 確定に至る構造保証型理論の定式化

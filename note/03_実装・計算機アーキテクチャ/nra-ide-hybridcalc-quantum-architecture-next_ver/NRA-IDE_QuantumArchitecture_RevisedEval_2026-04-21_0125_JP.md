@@ -1,3 +1,11 @@
+---
+id: REVIEW-QUANTUM-ARCHITECTURE-REVISED-EVALUATION-20260421-JP
+kind: review
+created: 2026-04-21
+author: M-Tokuni
+title: "NRA-IDE 量子アーキテクチャ修正版の構造評価"
+---
+
 # NRA-IDE 量子アーキテクチャ修正版の構造評価
 
 <!-- FILE: NRA-IDE_QuantumArchitecture_RevisedEval_20260421_0125_JP.md -->

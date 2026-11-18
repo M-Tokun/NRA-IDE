@@ -1,3 +1,11 @@
+---
+id: SPEC-IDE-CLASSICAL-HYBRID-COMPUTATION-20260717
+kind: spec
+created: 2026-07-17
+author: M-Tokuni
+title: "IDE計算層と局所高精度計算層のハイブリッド定義"
+---
+
 
 <!-- FILE: IDE_Classical_Hybrid_Computation_Bilingual_Final_20260717_065706.md -->
 <!-- Generated: 2026-07-17 06:57:06 JST -->

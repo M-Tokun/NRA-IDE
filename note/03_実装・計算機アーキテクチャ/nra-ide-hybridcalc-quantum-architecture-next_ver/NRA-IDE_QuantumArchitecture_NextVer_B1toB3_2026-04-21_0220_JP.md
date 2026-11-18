@@ -1,3 +1,11 @@
+---
+id: SPEC-QUANTUM-ARCHITECTURE-NEXTVER-B1-B3-20260421-JP
+kind: spec
+created: 2026-04-21
+author: M-Tokuni
+title: "NRA-IDE 量子アーキテクチャ次バージョン設計確定"
+---
+
 # NRA-IDE 量子アーキテクチャ次バージョン設計確定
 
 ## F_IDE 具体形・z_t 定義・縮減定量境界の統合
