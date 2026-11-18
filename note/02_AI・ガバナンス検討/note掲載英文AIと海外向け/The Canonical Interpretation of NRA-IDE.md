@@ -1,3 +1,11 @@
+---
+id: ESSAY-CANONICAL-INTERPRETATION-OF-NRA-IDE-20260729
+kind: essay
+created: 2026-07-29
+author: M-Tokuni
+title: "A Canonical Interpretation of NRA-IDE"
+---
+
 # A Canonical Interpretation of NRA-IDE
 
 ## Core Axiom, Boundary Structure, and Authority Separation

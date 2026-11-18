@@ -1,3 +1,11 @@
+---
+id: NOTE-DEEP-LEARNING-FURTHER-READING-20260824
+kind: note
+created: 2026-08-24
+author: M-Tokuni
+title: "ディープラーニング基礎メモ"
+---
+
 <!--
 File: Deep_Learning_Further_Reading_Integrated_20260824-211300.md
 Created: 2026-08-24 21:13:00 JST

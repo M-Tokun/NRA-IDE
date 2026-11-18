@@ -1,3 +1,11 @@
+---
+id: ESSAY-NRA-IDE-CANONICAL-INTERPRETATION-FOR-AI-20260729
+kind: essay
+created: 2026-07-29
+author: M-Tokuni
+title: "AIがNRA-IDEを誤解しないための正典的解釈文"
+---
+
 # AIがNRA-IDEを誤解しないための正典的解釈文
 
 ## はじめに

@@ -1,3 +1,11 @@
+---
+id: SPEC-DYNAMIC-API-KEY-DESIGN-20261017
+kind: spec
+created: 2026-10-17
+author: M-Tokuni
+title: "動的鍵によるAPI保護の設計思想と仕様"
+---
+
 > note/08_セキュリティ · 2026-10-17 設計思想・仕様説明改訂版 · 非正典・本番未実装・未検証
 
 # 動的鍵によるAPI保護の設計思想と仕様

@@ -1,3 +1,11 @@
+---
+id: DRAFT-DYNAMIC-API-AUTH-DEGRADATION-RECOVERY-20261016
+kind: draft
+created: 2026-10-16
+author: M-Tokuni
+title: "動的API認証・意図的縮退・独立復旧経路の統合設計案"
+---
+
 # 動的API認証・意図的縮退・独立復旧経路の統合設計案
 
 **提案者（整理・設計）：結（ゆい）／対話に基づく設計試案**  

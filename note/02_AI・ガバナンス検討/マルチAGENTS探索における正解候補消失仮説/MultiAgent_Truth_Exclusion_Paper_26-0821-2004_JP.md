@@ -1,3 +1,11 @@
+---
+id: PAPER-MULTIAGENT-TRUTH-CANDIDATE-EXCLUSION-20260821-JP
+kind: paper
+created: 2026-08-21
+author: M-Tokuni
+title: "マルチAGENTS探索における正解候補消失仮説"
+---
+
 <!-- filename:MultiAgent_Truth_Exclusion_Paper_26-0821-2004_JP.md -->
 <!-- generated: 2026-08-21 20:04 JST -->
 

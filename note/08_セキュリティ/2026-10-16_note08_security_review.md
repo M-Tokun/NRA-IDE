@@ -1,3 +1,11 @@
+---
+id: REVIEW-NOTE08-SECURITY-20261016
+kind: review
+created: 2026-10-16
+author: M-Tokuni
+title: "note/08_セキュリティ 精査記録"
+---
+
 # note/08_セキュリティ 精査記録
 
 作業日：2026-10-16 JST。依頼：当該ディレクトリ以下のファイル精査。

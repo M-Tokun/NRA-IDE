@@ -1,3 +1,11 @@
+---
+id: PAPER-NRA-AI-STRUCTURAL-STABILITY-SECURITY-BOUNDARY-20260228
+kind: paper
+created: 2026-02-28
+author: M-Tokuni
+title: "律環公理（NRA）に基づく人工知能システムの構造的安定性とセキュリティ境界の再定義"
+---
+
 # 律環公理（NRA）に基づく人工知能システムの構造的安定性とセキュリティ境界の再定義
 
 <!-- FILE: NRA_AI_Structural_Paper_2026-02-28.md -->

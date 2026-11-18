@@ -1,3 +1,11 @@
+---
+id: DRAFT-API-STATIC-KEY-MIGRATION-PLAN-20261016
+kind: draft
+created: 2026-10-16
+author: M-Tokuni
+title: "既存アプリの無停止マイグレーション計画書"
+---
+
 # 既存アプリの無停止マイグレーション計画書
 
 **〜ユーザーを強制ログアウトさせずに「静的APIキー」から「App Attest / StrongBox」へ完全移行する手順〜**

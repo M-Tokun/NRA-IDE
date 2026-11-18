@@ -1,3 +1,11 @@
+---
+id: REPORT-NOTE08-SECURITY-RECOMMENDATIONS-20261016
+kind: report
+created: 2026-10-16
+author: M-Tokuni
+title: "note/08_セキュリティ：採用判断と本文改訂のための具体的提言"
+---
+
 # note/08_セキュリティ：採用判断と本文改訂のための具体的提言
 
 作成日：2026-10-16 JST。位置付け：**非正典・未承認・未実装の設計提言**。

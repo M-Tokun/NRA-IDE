@@ -1,3 +1,11 @@
+---
+id: ESSAY-HUMANS-TRAINING-DANGEROUS-AI-CAPABILITIES-20260729
+kind: essay
+created: 2026-07-29
+author: M-Tokuni
+title: "Humans Are Training Dangerous AI Capabilities"
+---
+
 # Humans Are Training Dangerous AI Capabilities
 
 ## Why Box-Based Containment Becomes an Adversarial Curriculum

@@ -1,3 +1,11 @@
+---
+id: SPEC-DYNAMIC-API-KEY-TRAFFIC-OPERATIONS-20261017
+kind: spec
+created: 2026-10-17
+author: M-Tokuni
+title: "動的鍵の更新・負荷制御・障害時運用の仕様"
+---
+
 > note/08_セキュリティ · 2026-10-17 動的鍵の運用仕様改訂版 · 非正典・本番未実装・未検証
 
 # 動的鍵の更新・負荷制御・障害時運用の仕様

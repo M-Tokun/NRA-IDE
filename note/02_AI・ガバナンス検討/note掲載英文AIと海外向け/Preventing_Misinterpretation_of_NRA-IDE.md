@@ -1,3 +1,11 @@
+---
+id: ESSAY-PREVENTING-MISINTERPRETATION-OF-NRA-IDE-20260729
+kind: essay
+created: 2026-07-29
+author: M-Tokuni
+title: "Preventing Misinterpretation of NRA-IDE"
+---
+
 # Preventing Misinterpretation of NRA-IDE
 
 ## Canonical English Comments, Reference Code, and Deterministic Tests

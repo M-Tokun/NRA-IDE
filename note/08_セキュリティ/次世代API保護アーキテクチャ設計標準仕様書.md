@@ -1,3 +1,11 @@
+---
+id: SPEC-NEXT-GEN-API-PROTECTION-ARCHITECTURE-20261016
+kind: spec
+created: 2026-10-16
+author: M-Tokuni
+title: "次世代API保護アーキテクチャ 設計標準仕様書"
+---
+
 # 次世代API保護アーキテクチャ 設計標準仕様書
 
 **〜AI自動攻撃時代における「脱・静的APIキー」と「端末ハードウェア・アンカー化」の実装標準〜**
