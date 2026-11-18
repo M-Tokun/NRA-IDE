@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-05-COHERENCE-GATE-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "05 コヒーレンスゲート — 因果権限を逆流させずに基礎式を読む"
+---
+
 # 05 コヒーレンスゲート — 因果権限を逆流させずに基礎式を読む
 
 <!-- 05_coherence_gate_JP.md -->

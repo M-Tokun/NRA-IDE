@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-02-LIMITS-OF-AI-OPTIMIZATION-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "02 AIの最適化とは何か — 境界線のない知性が向かう先"
+---
+
 # 02 AIの最適化とは何か — 境界線のない知性が向かう先
 
 <!-- FILE: 02_limits_of_ai_optimization_JP.md -->

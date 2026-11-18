@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-10-BENEFITS-AND-LIMITATIONS-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "10 利点と限界 — 保証範囲を明確にする"
+---
+
 # 10 利点と限界 — 保証範囲を明確にする
 
 <!-- 10_benefits_and_limitations_JP.md -->

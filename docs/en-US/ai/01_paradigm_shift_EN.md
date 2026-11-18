@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-01-PARADIGM-SHIFT-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "01 Paradigm Shift — Structural Transformation Brought by NRA-IDE"
+---
+
 # 01 Paradigm Shift — Structural Transformation Brought by NRA-IDE
 
 <!-- FILE: 01_paradigm_shift_EN.md -->

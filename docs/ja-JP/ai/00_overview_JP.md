@@ -1,3 +1,11 @@
+---
+id: INDEX-AI-DOCS-00-OVERVIEW-20260405-JP
+kind: index
+created: 2026-04-05
+author: M-Tokuni
+title: "00 全体構成 — 境界線を歩くための地図"
+---
+
 # 00 全体構成 — 境界線を歩くための地図
 
 <!-- 00_overview_JP.md -->

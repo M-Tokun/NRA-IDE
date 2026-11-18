@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-04-SANDWICH-ARCHITECTURE-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "04 サンドイッチ構造 — 一方向の因果権限を持つ三層運用応用"
+---
+
 # 04 サンドイッチ構造 — 一方向の因果権限を持つ三層運用応用
 
 <!-- 04_rna_sandwich_architecture_JP.md -->

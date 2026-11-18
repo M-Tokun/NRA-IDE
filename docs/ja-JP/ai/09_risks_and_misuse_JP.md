@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-09-RISKS-AND-MISUSE-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "09 リスクと誤用 — 構造判定は運用の誠実さを代替しない"
+---
+
 # 09 リスクと誤用 — 構造判定は運用の誠実さを代替しない
 
 <!-- 09_risks_and_misuse_JP.md -->

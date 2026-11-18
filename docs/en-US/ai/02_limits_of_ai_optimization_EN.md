@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-02-LIMITS-OF-AI-OPTIMIZATION-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "02 What Is AI Optimization? — Where Intelligence Without Boundaries Leads"
+---
+
 # 02 What Is AI Optimization? — Where Intelligence Without Boundaries Leads
 
 <!-- FILE: 02_limits_of_ai_optimization_EN.md -->

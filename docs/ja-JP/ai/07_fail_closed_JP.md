@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-07-FAIL-CLOSED-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "07 Fail-Closed — 通常生成を抑止し、外部人間監査へ固定証言を提示する"
+---
+
 # 07 Fail-Closed — 通常生成を抑止し、外部人間監査へ固定証言を提示する
 
 <!-- 07_fail_closed_JP.md -->

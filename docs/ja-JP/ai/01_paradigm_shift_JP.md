@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-01-PARADIGM-SHIFT-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "01 パラダイムシフト — NRA-IDEがもたらす構造転換"
+---
+
 # 01 パラダイムシフト — NRA-IDEがもたらす構造転換
 
 <!-- FILE: 01_paradigm_shift_JP.md -->

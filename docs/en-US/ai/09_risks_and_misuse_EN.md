@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-09-RISKS-AND-MISUSE-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "09 Risks and Misuse — Structural Evaluation Does Not Substitute for Operational Integrity"
+---
+
 # 09 Risks and Misuse — Structural Evaluation Does Not Substitute for Operational Integrity
 
 <!-- FILE: 09_risks_and_misuse_EN.md -->

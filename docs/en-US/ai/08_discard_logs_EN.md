@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-08-DISCARD-LOGS-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "08 Discard Logs — Preserving Testimony Without Returning It to Computation"
+---
+
 # 08 Discard Logs — Preserving Testimony Without Returning It to Computation
 
 <!-- FILE: 08_discard_logs_EN.md -->

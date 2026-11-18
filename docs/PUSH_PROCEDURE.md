@@ -1,3 +1,11 @@
+---
+id: GUIDE-PUSH-PROCEDURE-20261105
+kind: guide
+created: 2026-11-05
+author: M-Tokuni
+title: "push 手順書（Cline・全AI共通）"
+---
+
 # push 手順書（Cline・全AI共通）
 
 **読むのは、push が失敗したときだけ。** 通常は読まない（時間とトークンを使うため）。

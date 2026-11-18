@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-10-BENEFITS-AND-LIMITATIONS-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "10 Benefits and Limitations — Clarifying the Scope of Guarantees"
+---
+
 # 10 Benefits and Limitations — Clarifying the Scope of Guarantees
 
 <!-- FILE: 10_benefits_and_limitations_EN.md -->

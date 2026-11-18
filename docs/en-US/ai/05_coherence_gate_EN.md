@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-05-COHERENCE-GATE-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "05 Coherence Gate — Reading the Primary Formula Without Reversing Causal Authority"
+---
+
 # 05 Coherence Gate — Reading the Primary Formula Without Reversing Causal Authority
 
 <!-- FILE: 05_coherence_gate_EN.md -->

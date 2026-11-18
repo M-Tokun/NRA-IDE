@@ -1,3 +1,11 @@
+---
+id: INDEX-AI-DOCS-00-OVERVIEW-20260405-EN
+kind: index
+created: 2026-04-05
+author: M-Tokuni
+title: "00 Overall Structure — A Map for Navigating Boundaries"
+---
+
 # 00 Overall Structure — A Map for Navigating Boundaries
 
 <!-- 00_overview_EN.md -->

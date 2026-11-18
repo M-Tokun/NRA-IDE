@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-04-SANDWICH-ARCHITECTURE-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "04 Sandwich Architecture — A Three-Layer Operational Application with One-Way Causal Authority"
+---
+
 # 04 Sandwich Architecture — A Three-Layer Operational Application with One-Way Causal Authority
 
 <!-- FILE: 04_rna_sandwich_architecture_EN.md -->

@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-08-DISCARD-LOGS-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "08 廃棄ログ — 計算へ戻さず、証言として残す"
+---
+
 # 08 廃棄ログ — 計算へ戻さず、証言として残す
 
 <!-- 08_discard_logs_JP.md -->

@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-07-FAIL-CLOSED-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "07 Fail-Closed — Suppressing Ordinary Generation and Exposing Fixed Testimony for External Human Audit"
+---
+
 # 07 Fail-Closed — Suppressing Ordinary Generation and Exposing Fixed Testimony for External Human Audit
 
 <!-- FILE: 07_fail_closed_EN.md -->

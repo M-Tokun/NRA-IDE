@@ -1,3 +1,11 @@
+---
+id: GUIDE-ERROR-MANUAL-20261116
+kind: guide
+created: 2026-11-16
+author: M-Tokuni
+title: "ERROR_MANUAL — エラー分岐・対処マニュアル（オンデマンド・直列ゲート）"
+---
+
 # ERROR_MANUAL — エラー分岐・対処マニュアル（オンデマンド・直列ゲート）
 
 **読む条件：コマンド・Git・Hook・検証スクリプトがエラー（非0終了・エラー文字列出力・拒否メッセージ・`STOP`）を返したときだけ読む。**

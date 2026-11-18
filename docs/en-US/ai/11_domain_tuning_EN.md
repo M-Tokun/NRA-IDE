@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-11-DOMAIN-TUNING-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "11 Domain Tuning — Designing Handoff Thresholds, Fixed Testimony, and Observation Rules"
+---
+
 # 11 Domain Tuning — Designing Handoff Thresholds, Fixed Testimony, and Observation Rules
 
 <!-- FILE: 11_domain_tuning_EN.md -->

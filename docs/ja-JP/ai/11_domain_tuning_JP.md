@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-11-DOMAIN-TUNING-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "11 ドメインチューニング — Handoff閾値・固定証言・観測規則を設計する"
+---
+
 # 11 ドメインチューニング — Handoff閾値・固定証言・観測規則を設計する
 
 ---
