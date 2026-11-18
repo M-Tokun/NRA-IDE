@@ -1,3 +1,11 @@
+---
+id: PAPER-AUTONOMOUS-AGENT-BLOCKAGE-HORIZONTAL-SAFETY-20260727
+kind: paper
+created: 2026-07-27
+author: M-Tokuni
+title: "自律型AIエージェントの閉塞限界と横軸安全基盤への転換"
+---
+
 # File: NRA-IDE_自律型AIエージェント閉塞限界と横軸安全基盤_長論文.md
 # JST: 2026-07-27 12:15:42 JST
 # Description: 自律型AIエージェントの閉塞限界、累積探索リスク、潜伏的状態継承、確率的生成と決定論的執行の分離、ならびにNRA-IDEに基づく横軸安全基盤への開発転換を論じる長編研究論文

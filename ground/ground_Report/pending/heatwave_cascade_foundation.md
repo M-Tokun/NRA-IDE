@@ -1,3 +1,11 @@
+---
+id: NOTE-GROUND-HEATWAVE-CASCADE-FOUNDATION-20260629
+kind: note
+created: 2026-06-29
+author: M-Tokuni
+title: "熱波インフラカスケード — 物理根拠足場"
+---
+
 # 熱波インフラカスケード — 物理根拠足場
 <!-- FILE: ground/ground_Report/pending/heatwave_cascade_foundation.md 26-0629 -->
 

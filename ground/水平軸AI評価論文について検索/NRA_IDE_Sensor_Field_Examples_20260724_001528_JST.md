@@ -1,3 +1,11 @@
+---
+id: ESSAY-SENSOR-FIELD-EXAMPLES-20260724
+kind: essay
+created: 2026-07-24
+author: M-Tokuni
+title: "NRA-IDE：センサー経過観察を現場実装へ接続する3例"
+---
+
 <!-- FILE: NRA_IDE_Sensor_Field_Examples_20260724_001528_JST.md -->
 <!-- CREATED: 2026-07-24 00:15:28 JST -->
 

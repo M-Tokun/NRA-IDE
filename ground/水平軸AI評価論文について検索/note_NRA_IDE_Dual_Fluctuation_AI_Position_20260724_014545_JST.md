@@ -1,3 +1,11 @@
+---
+id: ESSAY-DUAL-FLUCTUATION-AI-POSITION-20260724
+kind: essay
+created: 2026-07-24
+author: M-Tokuni
+title: "赤ランプの先にあるもの──なぜNRA-IDEは「経過」そのものを管理するのか"
+---
+
 <!-- FILE: note_NRA_IDE_Dual_Fluctuation_AI_Position_20260724_014545_JST.md -->
 <!-- CREATED: 2026-07-24 01:45:45 JST -->
 

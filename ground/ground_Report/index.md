@@ -1,3 +1,11 @@
+---
+id: INDEX-GROUND-REPORT-20260628
+kind: index
+created: 2026-06-28
+author: M-Tokuni
+title: "ground_Report / index"
+---
+
 # ground_Report / index
 <!-- FILE: ground/ground_Report/index.md 26-0629 -->
 

@@ -1,3 +1,11 @@
+---
+id: ESSAY-ENERGIZED-PRESENCE-TO-BOUNDARY-20260727
+kind: essay
+created: 2026-07-27
+author: M-Tokuni
+title: "通電状態の分離から実行境界へ ── そして開発組織の横断検証"
+---
+
 <!-- FILE: Energized-Presence-to-Boundary-Only.md / 2026-07-27 23:04 JST -->
 
 # 通電状態の分離から実行境界へ ── そして開発組織の横断検証

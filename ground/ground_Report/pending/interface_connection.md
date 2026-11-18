@@ -1,3 +1,11 @@
+---
+id: NOTE-GROUND-INTERFACE-CONNECTION-20260628
+kind: note
+created: 2026-06-28
+author: M-Tokuni
+title: "接続方式（pending）"
+---
+
 # 接続方式（pending）
 <!-- FILE: ground/ground_Report/pending/interface_connection.md 26-0628-1855 -->
 

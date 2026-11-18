@@ -1,3 +1,11 @@
+---
+id: ESSAY-SENSOR-GATES-THREE-EXAMPLES-20260724
+kind: essay
+created: 2026-07-24
+author: M-Tokuni
+title: "「異常値なら赤いランプで十分では？」――NRA-IDEをセンサー監視へ落とす3つの現場例"
+---
+
 <!-- FILE: note_NRA_IDE_Sensor_Gates_3_Examples_20260724_003802_JST.md -->
 <!-- CREATED: 2026-07-24 00:38:02 JST -->
 

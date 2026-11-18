@@ -1,3 +1,11 @@
+---
+id: PAPER-HORIZONTAL-AXIS-AI-EVALUATION-SURVEY-20260727
+kind: paper
+created: 2026-07-27
+author: M-Tokuni
+title: "「水平軸」AI評価研究の地図とNRA-IDEの位置づけ ― 学術・産業リサーチサーベイ"
+---
+
 # **「水平軸」AI評価研究の地図とNRA-IDEの位置づけ ― 学術・産業リサーチサーベイ**
 
 ## **エグゼクティブサマリー**

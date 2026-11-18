@@ -1,3 +1,11 @@
+---
+id: SPEC-GROUND-DATA-COLLECTION-PROTOCOL-20260630
+kind: spec
+created: 2026-06-30
+author: M-Tokuni
+title: "ground data collection protocol"
+---
+
 # ground data collection protocol
 <!-- FILE: ground/ground_Report/pending/data_collection_protocol.md 26-0630 -->
 
