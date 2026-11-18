@@ -1,6 +1,6 @@
 """Require a file-operation report when a pushed range deletes or renames files.
 
-AGENTS.md §8「ファイル・フォルダ操作の報告」の機械的ゲート。
+AGENTS.md §8「ファイル操作の報告」と skills/file-operation-report/SKILL.md の機械的ゲート。
 
 強制できるのは削除（D）と改名（R）だけである。コピーは追加（A）、上書きは変更（M）として
 現れるため通常の編集と区別できず、未追跡ファイルと作業ルート外の操作はGitから見えない。

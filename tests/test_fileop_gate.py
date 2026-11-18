@@ -217,9 +217,13 @@ class FileopGateWiringTests(unittest.TestCase):
         self.assertIn("fileop", text)
         self.assertIn("scripts/fileop_gate.py", text)
 
-    def test_agents_md_states_the_report_location(self) -> None:
+    def test_skill_states_the_report_location(self) -> None:
+        skill = REPO_ROOT / "skills" / "file-operation-report" / "SKILL.md"
+        self.assertIn(fileop_gate.REPORT_PREFIX, skill.read_text(encoding="utf-8"))
+
+    def test_agents_md_routes_to_the_skill(self) -> None:
         text = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
-        self.assertIn(fileop_gate.REPORT_PREFIX, text)
+        self.assertIn("skills/file-operation-report/SKILL.md", text)
 
 
 if __name__ == "__main__":
