@@ -26,6 +26,13 @@ MISSING_REASON_MESSAGE = ('AGENTS.mdが存在しないか完全に読み込め�
                           '利用者に報告し、F1キー →「Developer: Reload Window（ウィンドウの再読み込み）」を'
                           '実行してください。')
 INVALID_PAYLOAD_MESSAGE = ('hook入力を検証できません。未確認状態を許可せず、操作を停止します。')
+# Host limits for SessionStart additional context (characters, not bytes).
+CONTEXT_PREFIX = 'AGENTS.md loaded\n\n'
+CONTEXT_LIMITS = {'codex': 12000}
+DEFAULT_CONTEXT_LIMIT = 10000
+TOO_LONG_MESSAGE = ('AGENTS.mdの全文が出力上限を超えています（{size}字／上限{limit}字、'
+                    '先頭の{prefix}字を含む）。記録を作れないため操作を停止しました。'
+                    '再読み込みでは解消しません。AGENTS.mdを上限内に短縮してください（AGENTS.md §11）。')
 READ_ONLY_TOOLS = frozenset({'Read', 'Glob', 'Grep', 'LS', 'WebFetch', 'WebSearch',
     'read_file', 'read_many_files', 'list_directory', 'glob', 'search_file_content',
     'google_web_search', 'web_fetch'})
@@ -88,6 +95,21 @@ def agents_md_status():
     except (OSError, UnicodeError, ValueError):
         return 'unreadable'
     return 'ok'
+
+
+def context_limit(tool):
+    return CONTEXT_LIMITS.get(tool, DEFAULT_CONTEXT_LIMIT)
+
+
+def too_long_reason(tool, content=None):
+    """Return the stop message when the contract exceeds the host limit, else None."""
+    if content is None:
+        content = read_agents_md()
+    size = len(CONTEXT_PREFIX + content)
+    limit = context_limit(tool)
+    if size <= limit:
+        return None
+    return TOO_LONG_MESSAGE.format(size=size, limit=limit, prefix=len(CONTEXT_PREFIX))
 
 
 def marker_record(tool, task_id, content):
@@ -329,7 +351,7 @@ def guard_reason(payload, tool):
     key = 'taskId' if tool == 'cline' else 'session_id'
     if is_marked(tool, payload[key]) or reads_only_current_contract(payload, tool):
         return shell_deny_reason(payload, tool)
-    return REASON_MESSAGE
+    return too_long_reason(tool) or REASON_MESSAGE
 
 
 def emit_guard_result(tool, reason):
@@ -365,11 +387,13 @@ def run_session_start(tool):
         payload = load_payload(sys.stdin, tool)
         invalidate_marker(tool, payload['session_id'])
         content = read_agents_md()
-        context = 'AGENTS.md loaded\n\n' + content
+        context = CONTEXT_PREFIX + content
         # Refuse to record content that would exceed the output channel's limit.
-        limit = 12000 if tool == 'codex' else 10000
-        if len(context) > limit:
-            raise ValueError('Contract exceeds context limit')
+        too_long = too_long_reason(tool, content)
+        if too_long:
+            print(json.dumps({'continue': False, 'stopReason': too_long,
+                              'systemMessage': too_long}, ensure_ascii=True), flush=True)
+            return 0
         print(json.dumps({'systemMessage': 'AGENTS.md loaded',
             'hookSpecificOutput': {'hookEventName': 'SessionStart',
                                    'additionalContext': context}}, ensure_ascii=True), flush=True)

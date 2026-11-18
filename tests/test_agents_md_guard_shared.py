@@ -64,6 +64,20 @@ class SharedGuardTests(unittest.TestCase):
         for tool in ("claude", "codex", "gemini"):
             _, out = self.invoke(lambda: _common.run_session_start(tool), self.payload(tool))
             self.assertFalse(out["continue"]); self.assertFalse(_common.is_marked(tool, "test-1"))
+    def test_too_long_contract_names_the_cause(self):
+        for tool, limit in (("claude", 10000), ("codex", 12000), ("gemini", 10000)):
+            with self.subTest(tool=tool):
+                self.contract.write_text("x" * (limit - len(_common.CONTEXT_PREFIX) + 1), encoding="utf-8")
+                _, out = self.invoke(lambda: _common.run_session_start(tool), self.payload(tool))
+                self.assertFalse(out["continue"]); self.assertIn(f"上限{limit}字", out["stopReason"])
+                self.assertIn(f"{limit + 1}字", out["stopReason"])
+                _, out = self.invoke(lambda: _common.run_guard(tool), self.payload(tool, tool_name="Bash", tool_input={"command": "ls"}))
+                self.assertTrue(self.denied(tool, out))
+                self.assertIn(f"上限{limit}字", json.dumps(out, ensure_ascii=False))
+    def test_contract_at_limit_is_marked(self):
+        self.contract.write_text("x" * (10000 - len(_common.CONTEXT_PREFIX)), encoding="utf-8")
+        _, out = self.invoke(lambda: _common.run_session_start("claude"), self.payload("claude"))
+        self.assertIn("hookSpecificOutput", out); self.assertTrue(_common.is_marked("claude", "test-1"))
     def test_marker_write_failure_emits_one_json(self):
         with mock.patch.object(_common, "write_marker", side_effect=OSError("test")), contextlib.redirect_stderr(io.StringIO()):
             code, out = self.invoke(lambda: _common.run_session_start("codex"), self.payload("codex"))
@@ -144,5 +158,13 @@ class SharedGuardTests(unittest.TestCase):
     def test_codex_matcher_covers_all_tools(self):
         config = json.loads((ROOT / ".codex/hooks.json").read_text(encoding="utf-8"))
         self.assertEqual(config["hooks"]["PreToolUse"][0]["matcher"], ".*")
+
+class RepositoryContractSizeTests(unittest.TestCase):
+    """The real AGENTS.md must fit every host limit, or every tool call is refused."""
+    def test_repository_agents_md_fits_every_host(self):
+        content = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        for tool in ("claude", "codex", "gemini", "cline"):
+            with self.subTest(tool=tool):
+                self.assertIsNone(_common.too_long_reason(tool, content))
 
 if __name__ == "__main__": unittest.main()
