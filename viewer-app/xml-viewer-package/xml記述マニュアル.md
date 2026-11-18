@@ -1,3 +1,11 @@
+---
+id: GUIDE-XML-WRITING-MANUAL-20261019
+kind: guide
+created: 2026-10-19
+author: M-Tokuni
+title: "XML 記述マニュアル"
+---
+
 # XML 記述マニュアル
 
 **作成日:** 2026年10月19日（修正版）  

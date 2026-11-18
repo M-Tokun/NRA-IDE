@@ -1,3 +1,11 @@
+---
+id: DRAFT-REPOSITORY-OVERVIEW-PATCH-20260627
+kind: draft
+created: 2026-06-27
+author: M-Tokuni
+title: "REPOSITORY_OVERVIEW_PATCH.md — 履歴パッチ記録（適用禁止）"
+---
+
 # REPOSITORY_OVERVIEW_PATCH.md — 履歴パッチ記録（適用禁止）
 <!-- FILE: REPOSITORY_OVERVIEW.md patch / 2026-06-27 17:12 JST -->
 

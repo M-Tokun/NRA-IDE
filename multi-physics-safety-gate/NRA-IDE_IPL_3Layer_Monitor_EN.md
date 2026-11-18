@@ -1,3 +1,11 @@
+---
+id: SPEC-IPL-3LAYER-MONITOR-20260306-EN
+kind: spec
+created: 2026-03-06
+author: M-Tokuni
+title: "NRA-IDE IPL 3-Layer Monitor — Design Philosophy and Structural Rationale"
+---
+
 # NRA-IDE IPL 3-Layer Monitor — Design Philosophy and Structural Rationale
 
 <!-- FILE: NRA-IDE_IPL_3Layer_Monitor_EN.md / 2026-03-06 21:44 -->

@@ -1,3 +1,11 @@
+---
+id: GUIDE-CODEX-SANDBOX-STATUS-20261007
+kind: guide
+created: 2026-10-07
+author: M-Tokuni
+title: "Codexの実操作前Sandbox起動確認"
+---
+
 # Codexの実操作前Sandbox起動確認
 
 ## 適用する手順

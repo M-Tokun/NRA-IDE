@@ -1,3 +1,11 @@
+---
+id: SPEC-MULTI-PHYSICS-SAFETY-GATE-20260306-JP
+kind: spec
+created: 2026-03-06
+author: M-Tokuni
+title: "NRA-IDE Multi-Physics Safety Gate Architecture"
+---
+
 # NRA-IDE Multi-Physics Safety Gate Architecture
 
 <!-- FILE: Multi-Physics_Safety_Gate_Architecture_JP.md / 2026-03-06 21:44 -->
