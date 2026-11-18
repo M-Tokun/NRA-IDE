@@ -82,7 +82,8 @@ class IdGateRuleTests(unittest.TestCase):
     def test_target_selection(self) -> None:
         self.assertTrue(id_gate.is_target("note/x/y.md", self.policy))
         self.assertFalse(id_gate.is_target("note/x/y.png", self.policy))
-        self.assertFalse(id_gate.is_target("docs/y.md", self.policy))
+        self.assertFalse(id_gate.is_target("theory/y.md", self.policy))
+        self.assertTrue(id_gate.is_target("docs/y.md", self.policy))
 
     def test_comment_after_value_is_stripped(self) -> None:
         text = VALID.replace("EXP-TEST-20261022", "EXP-TEST-20261022   # memo")

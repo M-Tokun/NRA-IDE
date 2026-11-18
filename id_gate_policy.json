@@ -4,7 +4,15 @@
     "note/",
     "dictionary/",
     "local_reportsDirectory/",
-    "audit/"
+    "audit/",
+    "docs/",
+    "ground/",
+    "examples/",
+    "universal-definition/",
+    "cascade-failure-prevention/",
+    "nra-ide-cancer-treatment-support-system/",
+    "multi-physics-safety-gate/",
+    "viewer-app/"
   ],
   "extensions": [
     ".md"
