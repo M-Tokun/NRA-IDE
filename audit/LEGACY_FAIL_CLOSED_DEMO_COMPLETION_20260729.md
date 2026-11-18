@@ -1,3 +1,11 @@
+---
+id: REPORT-LEGACY-FAIL-CLOSED-DEMO-20260729
+kind: report
+created: 2026-07-29
+author: M-Tokuni
+title: "旧デモ `FAIL_CLOSED` 移行完了報告"
+---
+
 # 旧デモ `FAIL_CLOSED` 移行完了報告
 
 **作成日:** 2026-07-29 JST

@@ -1,3 +1,11 @@
+---
+id: REVIEW-LEGACY-FAIL-CLOSED-DEMO-20260729
+kind: review
+created: 2026-07-29
+author: M-Tokuni
+title: "旧デモ `FAIL_CLOSED` 編集前監査"
+---
+
 # 旧デモ `FAIL_CLOSED` 編集前監査
 
 **作成日:** 2026-07-29 JST

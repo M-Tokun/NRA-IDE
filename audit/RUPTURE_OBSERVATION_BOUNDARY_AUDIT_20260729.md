@@ -1,3 +1,11 @@
+---
+id: REVIEW-RUPTURE-OBSERVATION-BOUNDARY-20260729
+kind: review
+created: 2026-07-29
+author: M-Tokuni
+title: "完全破断後の観測・記録・通信経路に関する編集前監査"
+---
+
 # 完全破断後の観測・記録・通信経路に関する編集前監査
 
 **作成日:** 2026-07-29 JST

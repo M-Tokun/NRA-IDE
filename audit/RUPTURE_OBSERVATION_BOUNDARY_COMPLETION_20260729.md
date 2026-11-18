@@ -1,3 +1,11 @@
+---
+id: REPORT-RUPTURE-OBSERVATION-BOUNDARY-20260729
+kind: report
+created: 2026-07-29
+author: M-Tokuni
+title: "完全破断後の観測・記録・通信経路 正規化完了報告"
+---
+
 # 完全破断後の観測・記録・通信経路 正規化完了報告
 
 **作成日:** 2026-07-29 JST

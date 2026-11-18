@@ -1,3 +1,11 @@
+---
+id: REPORT-REPO-TEXT-HYGIENE-20260729
+kind: report
+created: 2026-07-29
+author: M-Tokuni
+title: "リポジトリ表記品質修正 完了報告"
+---
+
 # リポジトリ表記品質修正 完了報告
 
 **作成日:** 2026-07-29 JST

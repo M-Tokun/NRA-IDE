@@ -3,7 +3,8 @@
   "include_prefixes": [
     "note/",
     "dictionary/",
-    "local_reportsDirectory/"
+    "local_reportsDirectory/",
+    "audit/"
   ],
   "extensions": [
     ".md"
