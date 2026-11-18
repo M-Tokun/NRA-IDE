@@ -1,3 +1,11 @@
+---
+id: NOTE-EXAMPLES-HTML-ACCESSIBILITY-TASK-20260522
+kind: note
+created: 2026-05-22
+author: M-Tokuni
+title: "タスク状況"
+---
+
 # タスク状況
 
 - [x] `local_reports/fix_html_accessibility.py` の作成

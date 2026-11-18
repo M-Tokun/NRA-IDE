@@ -1,3 +1,11 @@
+---
+id: SPEC-AUTONOMOUS-DRIVING-SAFETY-ARCHITECTURE-20260405-JP
+kind: spec
+created: 2026-04-05
+author: M-Tokuni
+title: "NRA-IDEに基づく自動運転安全アーキテクチャ"
+---
+
 # NRA-IDEに基づく自動運転安全アーキテクチャ
 
 ## AI駆動車両のための境界中心安全設計

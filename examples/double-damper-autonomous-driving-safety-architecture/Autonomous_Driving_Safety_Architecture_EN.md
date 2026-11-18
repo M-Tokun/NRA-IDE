@@ -1,3 +1,11 @@
+---
+id: SPEC-AUTONOMOUS-DRIVING-SAFETY-ARCHITECTURE-20260405-EN
+kind: spec
+created: 2026-04-05
+author: M-Tokuni
+title: "Autonomous Driving Safety Architecture Based on NRA-IDE"
+---
+
 # Autonomous Driving Safety Architecture Based on NRA-IDE
 
 ## Boundary-Centric Safety Design for AI-Driven Vehicles

@@ -1,3 +1,11 @@
+---
+id: DRAFT-EXAMPLES-HTML-ACCESSIBILITY-PLAN-20260522
+kind: draft
+created: 2026-05-22
+author: M-Tokuni
+title: "実装計画：14-30 HTMLエラー（アクセシビリティ警告）の修正"
+---
+
 # 実装計画：14-30 HTMLエラー（アクセシビリティ警告）の修正
 
 examples フォルダ内の HTML ファイル (14_*.html から 30_*.html まで) に存在する、`<input type="range">` タグの `aria-label` もしくは `title` 属性欠落のアクセシビリティ警告（計92箇所）を修正します。

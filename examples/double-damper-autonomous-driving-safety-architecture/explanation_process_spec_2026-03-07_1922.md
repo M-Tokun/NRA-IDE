@@ -1,3 +1,11 @@
+---
+id: SPEC-EXPLANATION-PROCESS-20260307
+kind: spec
+created: 2026-03-07
+author: M-Tokuni
+title: "NRA-IDE サンプル.html 説明工程仕様書"
+---
+
 <!-- FILE: explanation_process_spec_20260307_192203.md / 2026-03-07 19:22:03 JST -->
 
 # explanation_process_spec_20260307_192203.md

@@ -1,3 +1,11 @@
+---
+id: NOTE-SESSION-HANDOFF-20260308
+kind: note
+created: 2026-03-08
+author: M-Tokuni
+title: "NRA-IDE セッション引き継ぎメモ"
+---
+
 # NRA-IDE セッション引き継ぎメモ
 
 <!-- session_handoff_20260308_0237.md | 2026-03-08 02:37 JST -->

@@ -1,3 +1,11 @@
+---
+id: SPEC-AUTOMOTIVE-SCOPE-20260224
+kind: spec
+created: 2026-02-24
+author: M-Tokuni
+title: "NRA-IDE 自動車システム適用範囲定義書"
+---
+
 # NRA-IDE 自動車システム適用範囲定義書
 
 ## Automotive System Scope Definition

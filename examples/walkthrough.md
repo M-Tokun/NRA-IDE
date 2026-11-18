@@ -1,3 +1,11 @@
+---
+id: REPORT-EXAMPLES-HTML-ACCESSIBILITY-WALKTHROUGH-20260522
+kind: report
+created: 2026-05-22
+author: M-Tokuni
+title: "修正完了報告（Walkthrough）"
+---
+
 # 修正完了報告（Walkthrough）
 
 14から50のHTMLファイルにおける、範囲入力（`<input type="range">`）要素の `aria-label` もしくは `title` 属性の欠落によるアクセシビリティ警告（合計124件）の修正が完了しました。

@@ -1,3 +1,11 @@
+---
+id: NOTE-EXAMPLES-33-PRE-REORGANIZATION-EXPLANATION-20261016-JP
+kind: note
+created: 2026-10-16
+author: M-Tokuni
+title: "33 NRA-IDE 模式アニメーション 説明"
+---
+
 # 33 NRA-IDE 模式アニメーション 説明
 
 対象ファイル：`33_nra_ide_blind_interval_JP.html`

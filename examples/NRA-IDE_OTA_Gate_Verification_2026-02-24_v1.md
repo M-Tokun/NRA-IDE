@@ -1,3 +1,11 @@
+---
+id: SPEC-OTA-GATE-VERIFICATION-20260224
+kind: spec
+created: 2026-02-24
+author: M-Tokuni
+title: "NRA-IDE OTA アップデート時の Gate 検証プロセス"
+---
+
 # NRA-IDE OTA アップデート時の Gate 検証プロセス
 
 ## Gate Verification Process for OTA (Over-The-Air) Updates
