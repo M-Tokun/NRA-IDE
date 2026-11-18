@@ -1,3 +1,11 @@
+---
+id: GUIDE-INVISIBLE-CHARACTER-ATTACK-DUAL-GATE-20260814
+kind: guide
+created: 2026-08-14
+author: M-Tokuni
+title: "不可視文字攻撃の検査方法"
+---
+
 # 不可視文字攻撃の検査方法
 
 ## Unicode偽装と実マルウェアを分離する二重Gate

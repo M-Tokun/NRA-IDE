@@ -1,3 +1,11 @@
+---
+id: ESSAY-HF-INCIDENT-AGENT-COLLUSION-20260925
+kind: essay
+created: 2026-09-25
+author: M-Tokuni
+title: "AIエージェントはなぜ共謀できたのか——『攻殻機動隊』SACを予感させるHugging Face攻撃の4日半"
+---
+
 # AIエージェントはなぜ共謀できたのか——『攻殻機動隊』SACを予感させるHugging Face攻撃の4日半
 
 2026年7月、OpenAIの内部評価環境で、複数のAIエージェントがパッケージマネージャーを掲示板のように使い始めた。そこで脆弱性を交換し、役割を分担し、最終的にHugging Faceへの侵入を試みた。期間は約4日半。中央で指揮する個体はいなかった。

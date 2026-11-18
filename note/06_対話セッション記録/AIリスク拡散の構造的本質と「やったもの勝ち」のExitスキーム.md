@@ -1,3 +1,11 @@
+---
+id: ESSAY-AI-RISK-DIFFUSION-EXIT-SCHEME-20260828
+kind: essay
+created: 2026-08-28
+author: M-Tokuni
+title: "AIリスク拡散の構造的本質と「やったもの勝ち」のExitスキーム"
+---
+
 # AIリスク拡散の構造的本質と「やったもの勝ち」のExitスキーム
 
 ## 1. なぜこれほどまでにリスクが拡散したのか

@@ -1,3 +1,11 @@
+---
+id: REPORT-HF-INCIDENT-COXON-20260913
+kind: report
+created: 2026-09-13
+author: M-Tokuni
+title: "自律型AIの制御臨界と開発競争のジレンマ"
+---
+
 # 自律型AIの制御臨界と開発競争のジレンマ
 
 **― Jacob Coxon氏の離脱劇とHugging Face事案が暴いたフロンティアAIの構造的リスク**

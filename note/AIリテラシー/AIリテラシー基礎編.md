@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-LITERACY-BASICS-20260803
+kind: guide
+created: 2026-08-03
+author: M-Tokuni
+title: "AIリテラシー基礎編"
+---
+
 # AIリテラシー基礎編
 
 ## はじめに

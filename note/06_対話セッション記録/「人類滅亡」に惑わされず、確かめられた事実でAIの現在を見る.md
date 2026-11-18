@@ -1,3 +1,11 @@
+---
+id: ESSAY-AI-PRESENT-FACTS-NOT-EXTINCTION-20260920
+kind: essay
+created: 2026-09-20
+author: M-Tokuni
+title: "「人類滅亡」に惑わされず、確かめられた事実でAIの現在を見る"
+---
+
 # 「人類滅亡」に惑わされず、確かめられた事実でAIの現在を見る
 
 ## はじめに

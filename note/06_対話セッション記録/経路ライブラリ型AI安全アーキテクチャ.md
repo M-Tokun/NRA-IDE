@@ -1,3 +1,11 @@
+---
+id: SPEC-PATH-LIBRARY-AI-SAFETY-ARCHITECTURE-20260927
+kind: spec
+created: 2026-09-27
+author: M-Tokuni
+title: "経路ライブラリ型AI安全アーキテクチャ"
+---
+
 # 経路ライブラリ型AI安全アーキテクチャ
 
 ## 1. 出発点

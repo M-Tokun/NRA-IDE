@@ -1,3 +1,11 @@
+---
+id: PAPER-NRA-IDE-AUTONOMOUS-SYSTEM-SAFETY-ANALYSIS-20260415-JP
+kind: paper
+created: 2026-04-15
+author: M-Tokuni
+title: "律環公理（NRA-IDE）に基づく自律システムの構造的安全解析と人間知性の動態的保全"
+---
+
 # 律環公理（NRA-IDE）に基づく自律システムの構造的安全解析と人間知性の動態的保全  
 
 ## 再帰的進化と認知的退化の統合的考察

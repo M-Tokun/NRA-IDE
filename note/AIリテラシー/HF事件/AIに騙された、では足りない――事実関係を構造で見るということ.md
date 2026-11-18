@@ -1,3 +1,11 @@
+---
+id: ESSAY-HF-INCIDENT-BEYOND-DECEPTION-20260913
+kind: essay
+created: 2026-09-13
+author: M-Tokuni
+title: "AIに騙された、では足りない"
+---
+
 # AIに騙された、では足りない  
 ## ――事実関係を「構造」として見なければ、本質を見誤る
 

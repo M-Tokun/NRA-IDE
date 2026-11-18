@@ -1,3 +1,11 @@
+---
+id: GUIDE-MULTIAGENT-CONTAMINATION-LIST-CLOSURE-20260814
+kind: guide
+created: 2026-08-14
+author: M-Tokuni
+title: "マルチエージェント汚染"
+---
+
 # マルチエージェント汚染
 
 ## 合議せず、差異をLISTへ残して閉鎖する方法
