@@ -1,3 +1,11 @@
+---
+id: SPEC-NRA-IDE-STRUCTURAL-SAFETY-PRINCIPLES-20260405
+kind: spec
+created: 2026-04-05
+author: M-Tokuni
+title: "NRA-IDE：構造安全のための原則体系"
+---
+
 ## NRA‑IDE：構造安全のための原則体系
 
 ### ⚠️ 最重要：NRA‑IDE の混用禁止原則

@@ -1,3 +1,11 @@
+---
+id: ESSAY-STRUCTURAL-SAFETY-ABSENCE-NRA-INEVITABLE-20260228
+kind: essay
+created: 2026-02-28
+author: M-Tokuni
+title: "構造的安全性の不在——律環公理（NRA）はなぜ不可避なのか"
+---
+
 # 構造的安全性の不在——律環公理（NRA）はなぜ不可避なのか
 
 ## 確率的AIシステムにおける工学的破綻の帰納的分析と、因果制約アーキテクチャの必然性

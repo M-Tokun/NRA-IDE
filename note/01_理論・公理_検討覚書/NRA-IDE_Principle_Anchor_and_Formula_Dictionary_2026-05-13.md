@@ -1,3 +1,11 @@
+---
+id: DICT-NRA-IDE-PRINCIPLE-ANCHOR-FORMULA-20260513
+kind: dict
+created: 2026-05-13
+author: M-Tokuni
+title: "NRA-IDE 原則接地点と式辞書"
+---
+
 <!-- FILE: NRA-IDE_Principle_Anchor_and_Formula_Dictionary_2026-05-13_222222_JP.md -->
 <!-- GENERATED: 2026-05-13 22:22:22 JST -->
 <!-- TITLE: NRA-IDE 原則接地点と式辞書：量子・相関・欠測・分岐計算の基幹下地 -->

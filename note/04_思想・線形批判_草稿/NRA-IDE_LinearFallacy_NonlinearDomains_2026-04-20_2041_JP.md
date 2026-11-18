@@ -1,3 +1,11 @@
+---
+id: ESSAY-LINEAR-FALLACY-NONLINEAR-DOMAINS-20260420-JP
+kind: essay
+created: 2026-04-20
+author: M-Tokuni
+title: "非線形領域への線形計算適用の構造的不能性"
+---
+
 # 非線形領域への線形計算適用の構造的不能性
 
 ## ── 生命・安全・地球構造・相転移領域における線形計算の無謀さについて ──

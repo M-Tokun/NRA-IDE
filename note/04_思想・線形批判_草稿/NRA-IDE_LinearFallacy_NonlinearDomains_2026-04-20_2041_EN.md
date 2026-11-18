@@ -1,3 +1,11 @@
+---
+id: ESSAY-LINEAR-FALLACY-NONLINEAR-DOMAINS-20260420-EN
+kind: essay
+created: 2026-04-20
+author: M-Tokuni
+title: "The Structural Impossibility of Applying Linear Computation to Nonlinear Domains"
+---
+
 --- START OF FILE NRA-IDE_LinearFallacy_NonlinearDomains_EN_20260420_2041.md ---
 
 # The Structural Impossibility of Applying Linear Computation to Nonlinear Domains

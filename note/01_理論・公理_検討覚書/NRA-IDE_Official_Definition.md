@@ -1,3 +1,11 @@
+---
+id: SPEC-NRA-OFFICIAL-DEFINITION-20260303
+kind: spec
+created: 2026-03-03
+author: M-Tokuni
+title: "律環公理 (Nomological Ring Axioms: NRA) 定義・解説・反証集"
+---
+
 
 
 # 律環公理 (Nomological Ring Axioms: NRA) 定義・解説・反証集

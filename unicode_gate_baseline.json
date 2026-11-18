@@ -333,9 +333,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 6,
-      "file_sha256": "a931f8e3e0a663b64e254b50187cd58f0896fc4db97465d396dea83cf8f9bff5",
-      "id": "UGB-F6FDF00C9F60EF95",
-      "line": 3,
+      "file_sha256": "4a6ee8ea8f1fda6a79e3c4432011cd2928d2575420abed000fdb922b01779223",
+      "id": "UGB-92112C0D1A549317",
+      "line": 11,
       "path": "note/01_\u7406\u8ad6\u30fb\u516c\u7406_\u691c\u8a0e\u899a\u66f8/NRAIDE_\u69cb\u9020\u5b89\u5168\u306e\u305f\u3081\u306e\u539f\u5247\u4f53\u7cfb.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -343,9 +343,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 2,
-      "file_sha256": "99204c7a602b4889ac6eb9bd00b6b0fcb9a90722f8d28d308a88100094afbf6a",
-      "id": "UGB-3CBDF7115A161936",
-      "line": 1507,
+      "file_sha256": "00415f4041d550c583f51615b4616f79dcaafdae3978da39b178c3698c5a9d6e",
+      "id": "UGB-1BF2DCC0D852B791",
+      "line": 1515,
       "path": "note/01_\u7406\u8ad6\u30fb\u516c\u7406_\u691c\u8a0e\u899a\u66f8/\u6a2a\u8ef8\u306e\u518d\u5b9a\u7fa9\u3068\u69cb\u9020\u7684\u6a19\u8b58\uff08Criteria\uff09\u306e\u6570\u7406\u914d\u7f6e_\u5883\u754c\u30d5\u30bf.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"

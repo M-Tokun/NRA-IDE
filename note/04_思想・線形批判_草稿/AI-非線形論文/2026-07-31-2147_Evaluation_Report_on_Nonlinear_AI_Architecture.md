@@ -1,3 +1,11 @@
+---
+id: REVIEW-NONLINEAR-AI-ARCHITECTURE-EVALUATION-20260731
+kind: review
+created: 2026-07-31
+author: M-Tokuni
+title: "線形演算から非線形AIへの論理構造および外部境界管理理論に対する精査・俯瞰的評価報告書"
+---
+
 2026-07-31-2147_Evaluation_Report_on_Nonlinear_AI_Architecture.md
 
 # 線形演算から非線形AIへの論理構造および外部境界管理理論に対する精査・俯瞰的評価報告書
