@@ -34,19 +34,7 @@
     "note/poc_horizontal_ai/experiments/temporal_state_candidate/README.md",
     "note/poc_horizontal_ai/safety_kernel/README.md",
     "note/poc_horizontal_ai/trusted_runtime/README.md",
-    "note/正典考慮課題/一次式成立前提_状態と未決事項.md",
-    "note/正典考慮課題/一次式成立前提_経過記録.md",
-    "note/正典考慮課題/元ファイル/2026-09-26_0033_継続セッション_NRA-IDE非線形離散の実体化_承認待ち.md",
-    "note/正典考慮課題/元ファイル/2026-09-26_一次式成立前提_対話全文.md",
-    "note/正典考慮課題/元ファイル/2026-09-27_一次式成立前提_Claude案.md",
-    "note/正典考慮課題/元ファイル/2026-09-27_一次式成立前提_総合案.md",
-    "note/正典考慮課題/元ファイル/2026-09-27_逆導出_但し書き文案.md",
-    "note/正典考慮課題/元ファイル/2026-09-27_逆導出_語義と但し書き_棚卸し.md",
-    "note/正典考慮課題/元ファイル/2026-09-28_作業予定.md",
-    "note/正典考慮課題/元ファイル/Claude提起文2026-09-27.md",
-    "note/正典考慮課題/元ファイル/Claude提起文2026-09-28.md",
-    "note/正典考慮課題/元ファイル/Claude提起文2026-09-29.md",
-    "note/正典考慮課題/元ファイル/検討中.md"
+    "note/正典考慮課題/元ファイル/2026-09-26_0033_継続セッション_NRA-IDE非線形離散の実体化_承認待ち.md"
   ],
   "known_unresolved_related": [
     "EXP-GE01-04",
