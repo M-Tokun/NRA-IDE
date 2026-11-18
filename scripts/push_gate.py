@@ -20,9 +20,10 @@ import unicodedata
 
 RULE_FILES = ("AGENTS.md", ".githooks/pre-push", "scripts/push_gate.py",
               "scripts/malware_gate.py", "scripts/malware_gate.ps1", "scripts/unicode_gate.py",
-              "scripts/id_gate.py", "scripts/check_dictionary.py", "unicode_gate_policy.json",
+              "scripts/id_gate.py", "scripts/check_dictionary.py", "scripts/fileop_gate.py",
+              "unicode_gate_policy.json",
               "unicode_gate_baseline.json", "id_gate_policy.json", "id_gate_baseline.json")
-GATES = ("unicode", "malware", "id", "dictionary")
+GATES = ("unicode", "malware", "id", "dictionary", "fileop")
 ACCEPTED = {"PASS", "WARN", "NOT_APPLICABLE"}
 
 
@@ -245,10 +246,11 @@ def check(repo, remote, remote_url, text, plan_path):
         commands = {
             "id": [sys.executable, "-B", "scripts/id_gate.py", "--repo", str(repo), "--base", ctx["base_oid"], "--head", source, "--policy", "id_gate_policy.json", "--baseline", "id_gate_baseline.json", "--json"],
             "dictionary": [sys.executable, "-B", "scripts/check_dictionary.py", "--repo", str(repo), "--head", source, "--json"],
+            "fileop": [sys.executable, "-B", "scripts/fileop_gate.py", "--repo", str(repo), "--base", ctx["base_oid"], "--head", source, "--json"],
         }
         for name, args in commands.items():
             result = command(repo, args, ctx["timeout_seconds"])
-            results[name] = payload_result(result, source, ctx["base_oid"] if name == "id" else None)
+            results[name] = payload_result(result, source, ctx["base_oid"] if name in ("id", "fileop") else None)
             unchanged(repo, plan)
             if results[name]["status"] not in ACCEPTED:
                 raise GateError(name.upper() + "_BLOCKED")
