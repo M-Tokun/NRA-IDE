@@ -43,9 +43,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 4,
-      "file_sha256": "cae65ede4e9e987d32e2aa8f2a375595d7ceb4d3fcb96836facfc4055b282afe",
-      "id": "UGB-C27FB34B156EC8C7",
-      "line": 3,
+      "file_sha256": "f418acc62a8cb9b897fda35478989ce86ca02150b85e1b5325ed876d9acacc83",
+      "id": "UGB-42EDC35E61FE528A",
+      "line": 11,
       "path": "cascade-failure-prevention/tools/\u904b\u7528\u691c\u8a3c\u30c4\u30fc\u30eb\u30ac\u30a4\u30c9.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -53,9 +53,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 5,
-      "file_sha256": "9281b7213d208c5bb4575d0b918aca0ce5a860e2e6a40b9f5e63f97668ba4a6c",
-      "id": "UGB-02D91B8D1EA60B2E",
-      "line": 761,
+      "file_sha256": "12d6692c04c7d16aee8cf337302e6dcc4fba18b5cb157e1d7f5691d075eea85f",
+      "id": "UGB-92D65C663A9F94A0",
+      "line": 769,
       "path": "cascade-failure-prevention/\u65e5\u672c\u8a9e\u7dcf\u5408\u89e3\u8aac.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -563,9 +563,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 4,
-      "file_sha256": "cf35a501413b0b8fed844e7ee3691f42eb45f9ebdfd81fc6565fc14f9ac73108",
-      "id": "UGB-8BF0D17CCDDE4F9A",
-      "line": 33,
+      "file_sha256": "3766b5bdf4036433868cd0d6759703309596299fe395d09394c844f193ab1003",
+      "id": "UGB-31707C82BD5B133B",
+      "line": 41,
       "path": "universal-definition/en/NRA-IDE_Checklist_EN.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -573,9 +573,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 38,
-      "file_sha256": "cf35a501413b0b8fed844e7ee3691f42eb45f9ebdfd81fc6565fc14f9ac73108",
-      "id": "UGB-29E6C8E6892964E1",
-      "line": 803,
+      "file_sha256": "3766b5bdf4036433868cd0d6759703309596299fe395d09394c844f193ab1003",
+      "id": "UGB-0A383EC1181CCEFD",
+      "line": 811,
       "path": "universal-definition/en/NRA-IDE_Checklist_EN.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -583,9 +583,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 4,
-      "file_sha256": "eebfaba3edfec154b245ce0d3bd1a30c94fa7cbc4914353614d36b633fa251f5",
-      "id": "UGB-6E7B85EF6AE96C41",
-      "line": 33,
+      "file_sha256": "4c82b9a44e02153029f4f27d50371b6f82285327d796430c41dade4efe3b683c",
+      "id": "UGB-E6ED4E17F72CD745",
+      "line": 41,
       "path": "universal-definition/jp/NRA-IDE_Checklist_JP.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -593,9 +593,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 16,
-      "file_sha256": "eebfaba3edfec154b245ce0d3bd1a30c94fa7cbc4914353614d36b633fa251f5",
-      "id": "UGB-38AFAFE77908E1F6",
-      "line": 803,
+      "file_sha256": "4c82b9a44e02153029f4f27d50371b6f82285327d796430c41dade4efe3b683c",
+      "id": "UGB-60A5E5BE88533CBE",
+      "line": 811,
       "path": "universal-definition/jp/NRA-IDE_Checklist_JP.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"

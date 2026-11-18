@@ -1,3 +1,11 @@
+---
+id: GUIDE-HAN-GATE-APP-MIDDLEWARE-20260405
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "App Middleware (Last Resort Only)"
+---
+
 # App Middleware (Last Resort Only)
 
 Use this only if you cannot control ingress proxy configuration.

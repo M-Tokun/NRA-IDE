@@ -1,3 +1,11 @@
+---
+id: GUIDE-UNIVERSAL-DEFINITION-QUICK-REFERENCE-20260127-EN
+kind: guide
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE Quick Reference"
+---
+
 # NRA-IDE Quick Reference
 
 # Universal Structural Definition for AI Safety

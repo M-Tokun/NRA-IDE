@@ -1,3 +1,11 @@
+---
+id: GUIDE-HAN-GATE-NGINX-AUTH-REQUEST-20260405
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "Nginx Integration — auth_request"
+---
+
 # Nginx Integration — auth_request
 
 ## Goal

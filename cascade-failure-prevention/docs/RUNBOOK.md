@@ -1,3 +1,11 @@
+---
+id: GUIDE-HAN-GATE-RUNBOOK-20261001
+kind: guide
+created: 2026-10-01
+author: M-Tokuni
+title: "RUNBOOK.md — HAN Gate 運用マニュアル"
+---
+
 # RUNBOOK.md — HAN Gate 運用マニュアル
 
 **Author**: M-Tokuni | https://github.com/M-Tokun/NRA-IDE  

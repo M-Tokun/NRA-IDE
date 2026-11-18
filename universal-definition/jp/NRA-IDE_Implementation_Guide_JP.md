@@ -1,3 +1,11 @@
+---
+id: GUIDE-UNIVERSAL-DEFINITION-IMPLEMENTATION-20260127-JP
+kind: guide
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE 実装ガイド"
+---
+
 # NRA-IDE 実装ガイド
 
 # Implementation Guide for NRA-IDE

@@ -1,3 +1,11 @@
+---
+id: SPEC-HAN-GATE-20261001
+kind: spec
+created: 2026-10-01
+author: M-Tokuni
+title: "SPEC.md — HAN Gate 仕様書"
+---
+
 # SPEC.md — HAN Gate 仕様書
 
 **Author**: M-Tokuni | https://github.com/M-Tokun/NRA-IDE  

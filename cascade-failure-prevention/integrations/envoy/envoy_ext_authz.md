@@ -1,3 +1,11 @@
+---
+id: GUIDE-HAN-GATE-ENVOY-EXT-AUTHZ-20260405
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "Envoy Integration — ext_authz (Recommended)"
+---
+
 # Envoy Integration — ext_authz (Recommended)
 
 ## Goal

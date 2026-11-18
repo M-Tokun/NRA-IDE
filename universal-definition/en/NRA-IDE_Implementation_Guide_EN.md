@@ -1,3 +1,11 @@
+---
+id: GUIDE-UNIVERSAL-DEFINITION-IMPLEMENTATION-20260127-EN
+kind: guide
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE Implementation Guide"
+---
+
 # NRA-IDE Implementation Guide
 
 # Complete Implementation Patterns for Safe AI

@@ -1,3 +1,11 @@
+---
+id: GUIDE-UNIVERSAL-DEFINITION-QUICK-REFERENCE-20260127-JP
+kind: guide
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE 要点簡易版"
+---
+
 # NRA-IDE 要点簡易版
 
 # Quick Reference for NRA-IDE

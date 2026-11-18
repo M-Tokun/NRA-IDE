@@ -1,3 +1,11 @@
+---
+id: SPEC-UNIVERSAL-DEFINITION-CHECKLIST-20260127-JP
+kind: spec
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE チェックリスト"
+---
+
 # NRA-IDE チェックリスト
 
 # Checklist for NRA-IDE Implementation

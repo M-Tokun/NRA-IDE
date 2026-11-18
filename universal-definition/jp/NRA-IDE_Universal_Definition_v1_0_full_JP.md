@@ -1,3 +1,11 @@
+---
+id: SPEC-UNIVERSAL-DEFINITION-FULL-20260127-JP
+kind: spec
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE 普遍的構造定義書 統合版 v1.0"
+---
+
 # NRA-IDE 普遍的構造定義書 統合版 v1.0
 
 # Universal Structural Definition for NRA-IDE - Unified Edition

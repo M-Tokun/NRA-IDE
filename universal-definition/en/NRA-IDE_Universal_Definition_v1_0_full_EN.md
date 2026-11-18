@@ -1,3 +1,11 @@
+---
+id: SPEC-UNIVERSAL-DEFINITION-FULL-20260127-EN
+kind: spec
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE Universal Structural Definition - Unified Edition v1.0"
+---
+
 # NRA-IDE Universal Structural Definition - Unified Edition v1.0
 
 # Complete Specification for AI Safety

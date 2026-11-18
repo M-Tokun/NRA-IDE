@@ -1,3 +1,11 @@
+---
+id: SPEC-UNIVERSAL-DEFINITION-CHECKLIST-20260127-EN
+kind: spec
+created: 2026-01-27
+author: M-Tokuni
+title: "NRA-IDE Checklist"
+---
+
 # NRA-IDE Checklist
 
 # Verification Checklist for Implementation
