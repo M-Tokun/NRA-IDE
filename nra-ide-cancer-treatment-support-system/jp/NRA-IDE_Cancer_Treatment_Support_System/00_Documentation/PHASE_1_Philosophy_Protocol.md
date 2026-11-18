@@ -1,3 +1,11 @@
+---
+id: SPEC-CANCER-SUPPORT-PHASE-01-PHILOSOPHY-PROTOCOL-20260405
+kind: spec
+created: 2026-04-05
+author: M-Tokuni
+title: "Phase 1: Philosophy Protocol (Why NRA-IDE?)"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

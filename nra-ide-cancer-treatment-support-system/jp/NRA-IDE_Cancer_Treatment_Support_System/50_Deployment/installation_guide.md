@@ -1,3 +1,11 @@
+---
+id: GUIDE-CANCER-SUPPORT-INSTALLATION-20260201
+kind: guide
+created: 2026-02-01
+author: M-Tokuni
+title: "NRA-IDE Installation Guide"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # File: installation_guide.md

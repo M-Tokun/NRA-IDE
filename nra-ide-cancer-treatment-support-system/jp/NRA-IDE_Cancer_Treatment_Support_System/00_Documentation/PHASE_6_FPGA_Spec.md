@@ -1,3 +1,11 @@
+---
+id: SPEC-CANCER-SUPPORT-PHASE-06-FPGA-20260728
+kind: spec
+created: 2026-07-28
+author: M-Tokuni
+title: "Phase 6: FPGA Implementation Specification"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

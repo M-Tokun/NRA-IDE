@@ -1,3 +1,11 @@
+---
+id: GUIDE-CANCER-SUPPORT-PHASE-09-OPERATIONAL-GUIDE-20260405
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "Phase 9: Operational Guide"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

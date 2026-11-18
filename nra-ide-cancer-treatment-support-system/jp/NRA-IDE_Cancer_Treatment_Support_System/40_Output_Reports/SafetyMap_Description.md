@@ -1,3 +1,11 @@
+---
+id: GUIDE-CANCER-SUPPORT-JAMMING-MAP-VISUALIZATION-20260728
+kind: guide
+created: 2026-07-28
+author: M-Tokuni
+title: "Jamming Map Visualization Guide"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # File: SafetyMap_Description.md

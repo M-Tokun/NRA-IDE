@@ -1,3 +1,11 @@
+---
+id: GUIDE-CANCER-SUPPORT-PHASE-08-TECHNICAL-MANUAL-20260405
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "Phase 8: Technical Manual"
+---
+
 
 
 # ═══════════════════════════════════════════════════════════════════════

@@ -1,3 +1,11 @@
+---
+id: INDEX-CANCER-SUPPORT-MASTER-20260405
+kind: index
+created: 2026-04-05
+author: M-Tokuni
+title: "NRA-IDE Master Index: Project Map"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

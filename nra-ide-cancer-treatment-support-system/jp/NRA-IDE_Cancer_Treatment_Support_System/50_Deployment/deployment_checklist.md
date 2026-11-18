@@ -1,3 +1,11 @@
+---
+id: SPEC-CANCER-SUPPORT-DEPLOYMENT-CHECKLIST-20260405
+kind: spec
+created: 2026-04-05
+author: M-Tokuni
+title: "Deployment Checklist"
+---
+
 
 
 # ═══════════════════════════════════════════════════════════════════════

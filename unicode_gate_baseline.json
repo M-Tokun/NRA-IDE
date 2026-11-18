@@ -493,9 +493,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 6,
-      "file_sha256": "b33e938afc60dad5089072616f919c23a373e1fddeb193e58af3d1ccd294597b",
-      "id": "UGB-C0E00D2E165F28DB",
-      "line": 61,
+      "file_sha256": "bd2dd4a770f1b8bc881076f2cbe2445ca5c24e3aa526d32867eac7cd9bcb00ea",
+      "id": "UGB-37D017F62F8238A4",
+      "line": 69,
       "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/00_Documentation/00_DocumentationMaster_Index.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -513,9 +513,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 5,
-      "file_sha256": "16625f85650e2242a213a3771e3e45f30dc408c1db448214d6ec6ad6147206da",
-      "id": "UGB-49229777FE8C01F3",
-      "line": 125,
+      "file_sha256": "0a37ac2af2959aa904e67e1155ee9f6517f399d6da5cc329138cd22bb3d6684d",
+      "id": "UGB-5895C9FDFA92FA8C",
+      "line": 133,
       "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/60_Research/references.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -543,9 +543,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 4,
-      "file_sha256": "b1dc39f530dd5295190969b5c2fd50d2af381132354160d07552e54b4fb5c9ef",
-      "id": "UGB-A334A4CBCAA3FDD0",
-      "line": 613,
+      "file_sha256": "e84baf46db375dca38acfdfb64a36c2c1394f0f9af459e90a046387588d1035e",
+      "id": "UGB-9B88DBCC9827CB42",
+      "line": 623,
       "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/medical_ai_solution.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -553,9 +553,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 4,
-      "file_sha256": "2cb08fa49620d6e0172acfb2906d9ae69b52e97cee0fedb7a9c266ec446fbf70",
-      "id": "UGB-1ED046D6380062B5",
-      "line": 1,
+      "file_sha256": "2e046a17d59086c2ded0a9167ee06e63c1c65aa0b44c8af39dbe76141f104415",
+      "id": "UGB-80A144DAEC190AC0",
+      "line": 9,
       "path": "nra-ide-cancer-treatment-support-system/jp/NRA-IDE_Cancer_Treatment_Support_System/\u514d\u8cac\u4e8b\u9805_\u7814\u7a76\u7528\u9014\u9650\u5b9a.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"

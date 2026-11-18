@@ -1,3 +1,11 @@
+---
+id: NOTE-CANCER-SUPPORT-PHASE-60-PRACTICAL-RESOURCES-20260201
+kind: note
+created: 2026-02-01
+author: M-Tokuni
+title: "Phase 60: Practical Resources"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # File: PHASE_60_Practical_Resources.md

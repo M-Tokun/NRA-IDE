@@ -1,3 +1,11 @@
+---
+id: SPEC-CANCER-SUPPORT-PHASE-05-SYSTEM-ARCHITECTURE-20260728
+kind: spec
+created: 2026-07-28
+author: M-Tokuni
+title: "Phase 5: System Architecture"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

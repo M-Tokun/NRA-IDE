@@ -1,3 +1,11 @@
+---
+id: NOTE-CANCER-SUPPORT-REFERENCES-20260201
+kind: note
+created: 2026-02-01
+author: M-Tokuni
+title: "NRA-IDE Reference List"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # File: references.md

@@ -1,3 +1,11 @@
+---
+id: NOTE-CANCER-SUPPORT-CHANGELOG-20260729
+kind: note
+created: 2026-07-29
+author: M-Tokuni
+title: "NRA-IDE Cancer Treatment Support System 改訂履歴"
+---
+
 # NRA-IDE Cancer Treatment Support System 改訂履歴
 
 本テンプレートは配布物である。入手した版が何であり、何が変わり、何がまだ

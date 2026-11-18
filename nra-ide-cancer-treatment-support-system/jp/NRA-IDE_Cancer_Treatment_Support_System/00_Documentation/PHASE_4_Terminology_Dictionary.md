@@ -1,3 +1,11 @@
+---
+id: DICT-CANCER-SUPPORT-PHASE-04-TERMINOLOGY-20260728
+kind: dict
+created: 2026-07-28
+author: M-Tokuni
+title: "Phase 4: Complete Terminology Dictionary"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

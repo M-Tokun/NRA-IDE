@@ -1,3 +1,11 @@
+---
+id: SPEC-CANCER-SUPPORT-PHASE-53-PROVIDER-DISCLAIMER-20260201
+kind: spec
+created: 2026-02-01
+author: M-Tokuni
+title: "Phase 53: Role Definition & Liability Disclaimer"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

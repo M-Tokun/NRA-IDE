@@ -1,3 +1,11 @@
+---
+id: DRAFT-CANCER-SUPPORT-PHASE-51-BUSINESS-PLAN-20260201
+kind: draft
+created: 2026-02-01
+author: M-Tokuni
+title: "Phase 51: Business Plan Draft"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System
