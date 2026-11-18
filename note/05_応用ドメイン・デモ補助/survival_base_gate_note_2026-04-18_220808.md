@@ -1,3 +1,11 @@
+---
+id: NOTE-SURVIVAL-BASE-GATE-20260418
+kind: note
+created: 2026-04-18
+author: M-Tokuni
+title: "生存基底構造ゲート — なぜこのCodeを書いたのか"
+---
+
 # 生存基底構造ゲート — なぜこのCodeを書いたのか
 
 <!-- FILE: survival_base_gate_note_2026-04-18_220808.md -->

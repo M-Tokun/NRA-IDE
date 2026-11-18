@@ -1,3 +1,11 @@
+---
+id: REVIEW-HORIZONTAL-AI-TRUSTED-RUNTIME-20260817
+kind: review
+created: 2026-08-17
+author: M-Tokuni
+title: "trusted_runtime実装の俯瞰監査と是正 — δ/τ/R判定と実行許可の接続"
+---
+
 # trusted_runtime実装の俯瞰監査と是正 — δ/τ/R判定と実行許可の接続
 
 作成時刻（JST）：2026-08-17 11:38:59

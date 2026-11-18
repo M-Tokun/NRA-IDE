@@ -1,3 +1,11 @@
+---
+id: NOTE-INFORMATION-SOCIAL-DYNAMICS-APPLICATION-20260405
+kind: note
+created: 2026-04-05
+author: M-Tokuni
+title: "NRA-IDE：情報・社会力学系への適用体系"
+---
+
 # NRA-IDE：情報・社会力学系への適用体系
 
 ## 1. 基本概念：情報の物理的等価性

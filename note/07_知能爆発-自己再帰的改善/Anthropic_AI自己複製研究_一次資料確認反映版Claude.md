@@ -1,3 +1,11 @@
+---
+id: NOTE-ANTHROPIC-SELF-REPLICATION-STUDY-20261012
+kind: note
+created: 2026-10-12
+author: M-Tokuni
+title: "Anthropic「AIの自己複製」研究：実測・実験条件・著者の予測を分けて整理する"
+---
+
 # Anthropic「AIの自己複製」研究：実測・実験条件・著者の予測を分けて整理する
 
 Oct 14, 2026 · @MASATOSHI

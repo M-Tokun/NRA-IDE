@@ -1,3 +1,11 @@
+---
+id: GUIDE-VASCULAR-INTERVENTION-MONITOR-20260319-JP
+kind: guide
+created: 2026-03-19
+author: M-Tokuni
+title: "NRA-IDE Vascular Intervention Monitor"
+---
+
 **NRA-IDE Vascular Intervention Monitor**  
 
 **局所血管・細胞状態遷移監視システム（部分手術支援版）**  

@@ -1,3 +1,11 @@
+---
+id: GUIDE-VASCULAR-INTERVENTION-MONITOR-20260319-EN
+kind: guide
+created: 2026-03-19
+author: M-Tokuni
+title: "NRA-IDE Vascular Intervention Monitor"
+---
+
 **NRA-IDE Vascular Intervention Monitor**  
 
 **Local Vascular / Cellular State-Transition Monitoring System (Partial Surgery Support Edition)**  

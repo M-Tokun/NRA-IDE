@@ -1,3 +1,11 @@
+---
+id: NOTE-HORIZONTAL-AI-EXPLORATION-HISTORY-20260812
+kind: note
+created: 2026-08-12
+author: M-Tokuni
+title: "NRA-IDE AI横軸機能 探索履歴"
+---
+
 # NRA-IDE AI横軸機能 探索履歴
 
 この文書は、「現況でAI横軸機能を実装する場合の最適解は何か」という問いに対し、区切り探索で得た仮説、実装候補、判明事項、次段階への接続を残すための履歴である。

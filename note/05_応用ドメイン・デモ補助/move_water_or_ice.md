@@ -1,3 +1,11 @@
+---
+id: NOTE-MOVE-WATER-OR-ICE-20260406
+kind: note
+created: 2026-04-06
+author: M-Tokuni
+title: "◯11 NRA-IDE: Asymmetry of Phase Transitions and the Truth of Dynamic Models"
+---
+
 # ◯11 NRA-IDE: Asymmetry of Phase Transitions and the Truth of Dynamic Models  
 
 file: move_water_or_ice.html  
