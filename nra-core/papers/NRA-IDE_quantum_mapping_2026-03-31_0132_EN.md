@@ -1,3 +1,11 @@
+---
+id: PAPER-NRA-IDE-QUANTUM-MAPPING-20260331-EN
+kind: paper
+created: 2026-03-31
+author: M-Tokuni
+title: "NRA-IDE × Quantum Computing: Structural Mapping 1."
+---
+
 # NRA-IDE × Quantum Computing: Structural Mapping 1.
 
 NRA-IDE (Nomological Ring Axioms — Intensional Dynamics Engine) design principles mapped

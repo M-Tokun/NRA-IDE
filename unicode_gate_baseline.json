@@ -363,9 +363,9 @@
     {
       "codepoint": "U+200D",
       "column": 6,
-      "file_sha256": "d76f307f98ad7d6a5507c9f5ce0b1d39bc7a55627749a56d905d0ad4b8e77c8c",
-      "id": "UGB-E405B9014F844180",
-      "line": 50,
+      "file_sha256": "e3c1a07db4a662135fb15f9be0f3ee8b4eadea7a5c2874ae366072f4938524bb",
+      "id": "UGB-5B41A14BD0EBCD07",
+      "line": 58,
       "path": "nra-core/foundations/NRA-IDE_\u306e\u5fdc\u7528\u5206\u91ce_\u6c4e\u7528\u6027\u306e\u5168\u4f53\u50cf.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "INVISIBLE_FORMAT"

@@ -1,3 +1,11 @@
+---
+id: PAPER-IDE-ADAPTIVE-GATE-EXTENSION-20260407
+kind: paper
+created: 2026-04-07
+author: M-Tokuni
+title: "IDE Adaptive Gate Extension"
+---
+
 # IDE Adaptive Gate Extension
 
 # IDE 適応型ゲート拡張式

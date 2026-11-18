@@ -1,3 +1,11 @@
+---
+id: DRAFT-NRA-IDE-PAPER-V3-REV2-20260409
+kind: draft
+created: 2026-04-09
+author: M-Tokuni
+title: "NRA-IDE 論文草稿 v3（最終版）"
+---
+
 # NRA-IDE 論文草稿 v3（最終版）
 
 <!-- FILE: NRA_IDE_Paper_v3_final_20260409_1807.md -->

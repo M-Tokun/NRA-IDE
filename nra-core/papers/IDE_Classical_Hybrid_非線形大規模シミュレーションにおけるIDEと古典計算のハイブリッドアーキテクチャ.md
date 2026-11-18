@@ -1,3 +1,11 @@
+---
+id: PAPER-IDE-CLASSICAL-HYBRID-ARCHITECTURE-20260406-JP
+kind: paper
+created: 2026-04-06
+author: M-Tokuni
+title: "IDE計算式と古典計算式　ハイブリッド計算による解消"
+---
+
 # IDE計算式と古典計算式　ハイブリッド計算による解消
 
 <!-- FILE: IDE_Classical_Hybrid_20260406_1844.md -->

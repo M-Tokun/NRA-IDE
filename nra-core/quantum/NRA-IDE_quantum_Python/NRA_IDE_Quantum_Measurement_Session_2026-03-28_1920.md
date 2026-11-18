@@ -1,3 +1,11 @@
+---
+id: NOTE-QUANTUM-MEASUREMENT-SESSION-20260328
+kind: note
+created: 2026-03-28
+author: M-Tokuni
+title: "NRA-IDEによる量子測定問題の解消"
+---
+
 # NRA-IDEによる量子測定問題の解消
 
 <!-- FILE: NRA_IDE_Quantum_Measurement_Session_20260328_1920.md -->

@@ -1,3 +1,11 @@
+---
+id: NOTE-NRA-CODE-ANNOTATED-DUAL-FLUCTUATION-20260221-EN
+kind: note
+created: 2026-02-21
+author: M-Tokuni
+title: "Mathematical Description of Nonlinear World Structure in the Nomological Ring Axioms"
+---
+
 > [!CAUTION]
 > **Historical code-annotated explanation containing superseded concepts — Noncanonical**
 >

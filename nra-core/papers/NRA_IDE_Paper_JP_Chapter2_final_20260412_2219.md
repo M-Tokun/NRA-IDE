@@ -1,3 +1,11 @@
+---
+id: DRAFT-NRA-IDE-PAPER-CHAPTER2-FINAL-20260412
+kind: draft
+created: 2026-04-12
+author: M-Tokuni
+title: "NRA-IDE 論文草稿 — 第2章（最終版）"
+---
+
 # NRA-IDE 論文草稿 — 第2章（最終版）
 
 <!-- FILE: NRA_IDE_Paper_JP_Chapter2_final_20260412_2219.md -->

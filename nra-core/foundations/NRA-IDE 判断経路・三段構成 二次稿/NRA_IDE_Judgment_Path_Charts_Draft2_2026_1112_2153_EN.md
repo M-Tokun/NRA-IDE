@@ -1,3 +1,11 @@
+---
+id: DRAFT-JUDGMENT-PATH-CHARTS-SECOND-20261112-EN
+kind: draft
+created: 2026-11-12
+author: M-Tokuni
+title: "NRA-IDE Judgment Path Charts (Second Draft)"
+---
+
 # NRA-IDE Judgment Path Charts (Second Draft)
 
 - Author: M-Tokuni

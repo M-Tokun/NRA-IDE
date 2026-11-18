@@ -1,3 +1,11 @@
+---
+id: NOTE-NRA-IDE-APPLICATION-DOMAINS-20260405
+kind: note
+created: 2026-04-05
+author: M-Tokuni
+title: "NRA-IDE の応用分野：汎用性の全体像"
+---
+
 > [!CAUTION]
 > **応用構想の履歴資料 / 非正規**
 >

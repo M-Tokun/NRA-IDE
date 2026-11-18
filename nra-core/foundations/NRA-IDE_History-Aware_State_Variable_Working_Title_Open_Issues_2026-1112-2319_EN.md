@@ -1,3 +1,11 @@
+---
+id: NOTE-HISTORY-AWARE-STATE-VARIABLE-OPEN-ISSUES-20261112-EN
+kind: note
+created: 2026-11-12
+author: M-Tokuni
+title: "NRA-IDE: Open Issues on the \"History-Aware State Variable\" (Working Title)"
+---
+
 # NRA-IDE: Open Issues on the "History-Aware State Variable" (Working Title)
 
 - Recorded: 2026-11-12 23:19 JST

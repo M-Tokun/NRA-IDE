@@ -12,7 +12,8 @@
     "cascade-failure-prevention/",
     "nra-ide-cancer-treatment-support-system/",
     "multi-physics-safety-gate/",
-    "viewer-app/"
+    "viewer-app/",
+    "nra-core/"
   ],
   "extensions": [
     ".md"

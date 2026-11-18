@@ -1,3 +1,11 @@
+---
+id: PAPER-NRA-IDE-QUANTUM-MAPPING-20260331-JP
+kind: paper
+created: 2026-03-31
+author: M-Tokuni
+title: "NRA-IDE × 量子計算：構造マッピング 1."
+---
+
 # NRA-IDE × 量子計算：構造マッピング 1.
 
 NRA-IDE（律環公理―内包性動力学エンジン）の設計原則を量子計算に対応させ、

@@ -1,3 +1,11 @@
+---
+id: PAPER-IDE-CLASSICAL-HYBRID-ARCHITECTURE-20260406-EN
+kind: paper
+created: 2026-04-06
+author: M-Tokuni
+title: "IDE Calculation and Classical Calculation: Resolution via Hybrid Architecture"
+---
+
 # IDE Calculation and Classical Calculation: Resolution via Hybrid Architecture
 
 <!-- FILE: IDE_Classical_Hybrid_EN_20260406_1844.md -->

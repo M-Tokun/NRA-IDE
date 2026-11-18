@@ -1,3 +1,11 @@
+---
+id: DRAFT-JUDGMENT-PATH-PAPER-SECOND-20261112-EN
+kind: draft
+created: 2026-11-12
+author: M-Tokuni
+title: "Layers of Existence, Event, and Numeric Cut, and the Judgment Path in NRA-IDE"
+---
+
 # Layers of Existence, Event, and Numeric Cut, and the Judgment Path in NRA-IDE
 ## From the record of an "exclusion" misclassification — Second Draft
 
