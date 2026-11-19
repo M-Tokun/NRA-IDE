@@ -12,7 +12,6 @@ C6 未回答・曖昧・番号外の入力を承認にしない。commit前の�
 C7 pushはコミット単位。ファイル数で分割しない ; §3
 #END-CONST
 10  入口。AGENTS.md 20 の手順：作業ルート → status・未追跡 → 対象/既存/対象外を分離 → 対象と操作を提示。同じ依頼で済んでいれば繰り返さない（C5） ; §1 GOTO 20
-20  IF 入力="git push" AND 直前の戻り=ASK: GOTO 370
 21  IF 対象に作業ルート外を含む: GOTO 600
 22  IF 種別=依存導入: GOTO 500
 23  IF 種別=精査の承認: GOTO 950
@@ -27,7 +26,7 @@ C7 pushはコミット単位。ファイル数で分割しない ; §3
     ELSE GOTO 999
 300 IF 選択=1: GOTO 310 ; §3
 301 IF 選択=2: GOTO 320 ; §3
-302 IF 選択=3: GOTO 360 ; §3
+302 IF 選択=3: GOTO 990 ; §3 push は AGENTS.md 55〜57 で処理。ここへの到達は経路逸脱
 303 GOTO 990 ; rebase・filter-repo・force・branch・restore・曖昧・無回答
 310 読取のみ ; §3 GOTO 999
 320 IF 関連テストを特定できない: 未検証を記録 GOTO 340 ; §3
@@ -35,8 +34,6 @@ C7 pushはコミット単位。ファイル数で分割しない ; §3
 330 完走まで待つ（途中確認をしない）。終了後にログ末尾だけ見る。IF 失敗 GOTO 700 ELSE GOTO 340 ; §3
 340 今回対象だけを明示パスでstage。Git管理外の一時ファイルを追加しない ; §3 GOTO 350
 350 IF cached差分≠対象 GOTO 990 ELSE 内容に対応したメッセージ（削除は対象と理由を明記）でcommit。IF 失敗 GOTO 700 ELSE commit IDを報告 GOTO 999 ; §3
-360 push.py prepare。IF 最終行=STOP… GOTO 700 ELSE 送信先・HEAD・送信コミットを提示 GOTO 998 ; §3
-370 push.py run。IF 最終行=STOP… GOTO 700 ELSE GOTO 999 ; §3（20 からだけ入る。STOP の送信状態を報告に含める）
 500 package・version・目的・書込み先・project/global・lockfile・注意点を提示 ; §5
     IF 承認なし GOTO 990 ELSE A5の一次情報で確認し、確認できない項目は未確認と記録 GOTO 999
 600 "警告: {絶対パス}: {操作と影響}" を提示 ; §6 GOTO 601

@@ -17,10 +17,18 @@
 50 対象操作を上位規則・依頼範囲・§4・§6・§7・環境制限と照合する。
    IF 規則違反 OR 必要な承認がない: GOTO 95
    ELSE: GOTO 55
-55 IF 対象操作 == git push:
-      GOSUB scripts/push.py (戻り: ASK / STOP / DONE)
-      IF 戻り=ASK OR 戻り=STOP: GOTO 95
+55 IF 直前の戻り=ASK（push.py） AND 利用者入力 == "git push"（前後空白を除き完全一致）:
+      GOSUB scripts/push.py run (戻り: STOP / DONE)
+      IF 戻り=STOP: GOTO 95
       ELSE: GOTO 70
+   ELSE: GOTO 56
+56 IF 直前の戻り=ASK（push.py）:
+      GOSUB scripts/push.py decline (戻り: STOP)
+      GOTO 95
+   ELSE: GOTO 57
+57 IF 対象操作 == git push:
+      GOSUB scripts/push.py prepare (戻り: ASK / STOP)
+      GOTO 95
    ELSE: GOTO 60
 60 固定条件の内側で推論・生成・許可された操作を行う。RULES_DETAIL.md の経路は先頭から入り、戻りは語だけで受ける。
    IF 戻り=STOP OR 戻り=ASK: GOTO 95

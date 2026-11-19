@@ -8,10 +8,10 @@ title: "push 手順書（Cline・全AI共通）"
 
 # push 手順書（Cline・全AI共通）
 
-**読むのは、push が失敗したときだけ。** 通常は読まない（時間とトークンを使うため）。
+**通常経路の正本は AGENTS.md 55〜57。本書を読むのは push が停止したときだけ。** 通常は読まない（時間とトークンを使うため）。
 
 対象: NRA-IDE リポジトリで `git push` を行うAIエージェント（特にCline）。
-上位規則は `AGENTS.md` §6・§7 と `RULES_DETAIL.md` 300〜370。この文書は、その規則を満たしたうえで
+上位規則は `AGENTS.md` 55〜57・§6・§7。この文書は、その規則を満たしたうえで
 **`scripts/push.py` を入口とする固定経路と、失敗時の確認方法**を書く。規則を緩める文書ではない。
 
 ---
@@ -164,5 +164,5 @@ remote に同名 branch が無い場合、`remote_oid` は全て `0` になり�
 | push は個別確認が必要な操作 | `AGENTS.md` §6 |
 | fresh fetch、incoming 時は停止、force 禁止 | `AGENTS.md` §7、`RULES_DETAIL.md` 300〜370 |
 | plan の仕様（実行許可ではない、1 ref のみ、再検証） | `scripts/push_gate.py` の `prepare`・`check`・`unchanged` |
-| 固定入口、利用者入力の分岐、停止・完了の語彙、送信後照合 | `scripts/push.py`、`RULES_DETAIL.md` 20・360・370 |
+| 固定入口、利用者入力の分岐、停止・完了の語彙、送信後照合 | `scripts/push.py`、`AGENTS.md` 55〜57 |
 | フック本体 | `.githooks/pre-push` |
