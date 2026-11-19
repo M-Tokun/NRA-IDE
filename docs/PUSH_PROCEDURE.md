@@ -49,7 +49,7 @@ title: "push 手順書（Cline・全AI共通）"
 20 ASK: 送信先・branch・HEAD・全送信commit・incoming・planを提示して応答終了。未回答は待機
    IF 直後の利用者入力 = git push（前後空白を除いて完全一致）: GOTO 30
    ELSE: push.py decline。GOTO 90
-30 PUSH: push.py run（plan指定・4ゲート検査・通常push）
+30 PUSH: push.py run（plan指定・ゲート検査・通常push）
    IF STOP: GOTO 90
    ELSE: GOTO 40
 40 VERIFY: runが再fetch・送信先OID・HEAD・双方向差分を照合
@@ -91,9 +91,9 @@ python -B scripts/push.py run
 
 - 保存済みの remote・branch・plan を使う。`NRA_PUSH_PLAN` の設定と通常 push、送信後の再 fetch と照合は run が行う。
 - prepare から run までの間に追加の fetch・commit・規則変更を行い、plan を無効化した場合も停止する。自動で prepare をやり直さない。
-- 4ゲートは unicode / malware / id / dictionary。待機時間は入口の `TIMEOUT` と `PREPARE_TIMEOUT_SECONDS` に定義されている。各値は実測による確定前の設定値であり、失敗時に独自に緩和しない。
+- ゲートは unicode / malware / id / dictionary / fileop（正本は scripts/push_gate.py の GATES）。待機時間は入口の `TIMEOUT` と `PREPARE_TIMEOUT_SECONDS` に定義されている。各値は実測による確定前の設定値であり、失敗時に独自に緩和しない。
 - 最終行が `DONE` のときだけ完了と報告する。これは送信先 OID が準備時の HEAD と一致し、送信先と現在の HEAD の双方向差分が `0 0` になった結果である。
-- 報告には最終行、push 前後の OID、4ゲートの結果を使う。詳細は次節の記録から確認する。
+- 報告には最終行、push 前後の OID、result.json に記録された各ゲートの名前と結果を使う。詳細は次節の記録から確認する。
 
 ---
 
