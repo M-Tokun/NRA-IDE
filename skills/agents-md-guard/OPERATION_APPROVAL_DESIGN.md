@@ -1,3 +1,11 @@
+---
+id: DRAFT-OPERATION-APPROVAL-DESIGN-20261005
+kind: draft
+created: 2026-10-05
+author: M-Tokuni
+title: "E: 操作対象と人間の承認を結合する設計案"
+---
+
 # E: 操作対象と人間の承認を結合する設計案
 
 状態: 非正典・未承認・未実装。A〜Dの修正と分離した提案。2026-10-05。
