@@ -1,3 +1,11 @@
+---
+id: GUIDE-NRA-IDE-PYTHON-EXPLANATION-20260806
+kind: guide
+created: 2026-08-06
+author: M-Tokuni
+title: "律環公理と内包性動力学エンジン（NRA-IDE）— コードで読む構造記述"
+---
+
 # 律環公理と内包性動力学エンジン（NRA-IDE）— コードで読む構造記述
 
 > **この文書の位置付け**

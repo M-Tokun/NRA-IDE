@@ -1,3 +1,11 @@
+---
+id: DRAFT-NRA-IDE-PAPER-CHAPTER3-20260413
+kind: draft
+created: 2026-04-13
+author: M-Tokuni
+title: "NRA-IDE 論文草稿 — 第3章"
+---
+
 # NRA-IDE 論文草稿 — 第3章
 
 <!-- FILE: NRA_IDE_Paper_JP_Chapter3_20260413_0235.md -->

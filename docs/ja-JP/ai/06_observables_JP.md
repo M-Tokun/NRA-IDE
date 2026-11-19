@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-06-OBSERVABLES-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "06 観測可能量 — 値の出所と更新経路を確認する"
+---
+
 # 06 観測可能量 — 値の出所と更新経路を確認する
 
 <!-- 06_observables_JP.md -->

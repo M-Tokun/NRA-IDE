@@ -373,9 +373,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 57,
-      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
-      "id": "UGB-154C4E4D37342905",
-      "line": 413,
+      "file_sha256": "4ba49908efe259120527167467b835e1808c80d242060996d03da6f3693ed73f",
+      "id": "UGB-F0B842B8D55732C0",
+      "line": 421,
       "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -383,9 +383,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 57,
-      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
-      "id": "UGB-2996F78F594454FC",
-      "line": 415,
+      "file_sha256": "4ba49908efe259120527167467b835e1808c80d242060996d03da6f3693ed73f",
+      "id": "UGB-0DDACF7F1D853919",
+      "line": 423,
       "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -393,9 +393,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 57,
-      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
-      "id": "UGB-8DF8F0A9F68B5E81",
-      "line": 417,
+      "file_sha256": "4ba49908efe259120527167467b835e1808c80d242060996d03da6f3693ed73f",
+      "id": "UGB-EB25C584C20B4060",
+      "line": 425,
       "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"
@@ -403,9 +403,9 @@
     {
       "codepoint": "U+FE0F",
       "column": 57,
-      "file_sha256": "70c948e752da30a6639bfda01050e0758b7cd64899c47dc8b26591b8a74bb156",
-      "id": "UGB-9DF28D41E33ACF2D",
-      "line": 419,
+      "file_sha256": "4ba49908efe259120527167467b835e1808c80d242060996d03da6f3693ed73f",
+      "id": "UGB-762E22A829A1053A",
+      "line": 427,
       "path": "nra-core/foundations/\u5f8b\u74b0\u516c\u7406_\u30b3\u30fc\u30c9\u4ed8\u304d\u89e3\u8aac_\u4e8c\u91cd\u3086\u3089\u304e\u5b89\u5b9a\u7248.md",
       "reason": "existing occurrence approved for exact baseline",
       "rule": "VARIATION_SELECTOR"

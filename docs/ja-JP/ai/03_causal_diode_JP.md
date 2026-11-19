@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-03-CAUSAL-DIODE-20260405-JP
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "03 因果ダイオード — Cause-SideからEffect-Sideへの完全一方向経路"
+---
+
 # 03 因果ダイオード — Cause-SideからEffect-Sideへの完全一方向経路
 
 <!-- FILE: 03_causal_diode_JP.md -->

@@ -1,3 +1,11 @@
+---
+id: SPEC-INVERSE-GROUNDING-POLICY-ACTIVE-20260629
+kind: spec
+created: 2026-06-29
+author: M-Tokuni
+title: "逆行接地方針（active）"
+---
+
 # 逆行接地方針（active）
 <!-- FILE: ground/ground_Report/active/inverse_grounding_policy.md 26-0629 -->
 

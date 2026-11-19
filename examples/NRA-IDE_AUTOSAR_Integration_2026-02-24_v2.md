@@ -1,3 +1,11 @@
+---
+id: SPEC-AUTOSAR-INTEGRATION-20260224
+kind: spec
+created: 2026-02-24
+author: M-Tokuni
+title: "NRA-IDE AUTOSAR 統合パターン"
+---
+
 # NRA-IDE AUTOSAR 統合パターン
 
 ## AUTOSAR Integration Patterns

@@ -1,3 +1,11 @@
+---
+id: NOTE-ERROR-TRACKING-PLAY-THRESHOLD-20260426-JP
+kind: note
+created: 2026-04-26
+author: M-Tokuni
+title: "NRA-IDE 誤差追跡・遊び・閾値の整理"
+---
+
 # NRA-IDE 誤差追跡・遊び・閾値の整理
 
 FILE: NRA-IDE_error_tracking_summary_JP_20260426_035916.md  

@@ -1,3 +1,11 @@
+---
+id: SPEC-SANDWICH-ARCHITECTURE-20260428
+kind: spec
+created: 2026-04-28
+author: M-Tokuni
+title: "NRA-IDE: サンドイッチ構造（権限分離と多層配置）"
+---
+
 # NRA-IDE: サンドイッチ構造（権限分離と多層配置）
 
 ## 0. 目的

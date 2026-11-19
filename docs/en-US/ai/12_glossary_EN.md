@@ -1,3 +1,11 @@
+---
+id: DICT-AI-DOCS-12-GLOSSARY-20260405-EN
+kind: dict
+created: 2026-04-05
+author: M-Tokuni
+title: "12 Glossary"
+---
+
 # 12 Glossary
 
 <!-- FILE: 12_glossary_EN.md -->

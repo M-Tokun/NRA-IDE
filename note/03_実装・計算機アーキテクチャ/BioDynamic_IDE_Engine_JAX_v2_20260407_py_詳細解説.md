@@ -1,3 +1,11 @@
+---
+id: GUIDE-BIODYNAMIC-IDE-ENGINE-JAX-V2-20260407
+kind: guide
+created: 2026-04-07
+author: M-Tokuni
+title: "BioDynamic_IDE_Engine_JAX_v2_20260407.py 詳細解説"
+---
+
 # BioDynamic_IDE_Engine_JAX_v2_20260407.py 詳細解説  
 
 <!-- FILE: NRA-IDE_Hybrid_JAX_v2.1_Detailed_Explanation_20260407.md -->  

@@ -1,3 +1,11 @@
+---
+id: INDEX-REPOSITORY-OVERVIEW-20260428
+kind: index
+created: 2026-04-28
+author: M-Tokuni
+title: "NRA-IDE — Repository Overview"
+---
+
 # NRA-IDE — Repository Overview
 
 Quick navigation and authority map. Start here if you are new to this repository.

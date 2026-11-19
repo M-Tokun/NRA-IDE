@@ -1,3 +1,11 @@
+---
+id: NOTE-SECOND-AXIOM-JOURNEY-FOUNDATIONS-20260422
+kind: note
+created: 2026-04-22
+author: M-Tokuni
+title: "律環公理 第二公理への経緯（最終版2）"
+---
+
 # 律環公理 第二公理への経緯（最終版2）
 
 > [!NOTE]

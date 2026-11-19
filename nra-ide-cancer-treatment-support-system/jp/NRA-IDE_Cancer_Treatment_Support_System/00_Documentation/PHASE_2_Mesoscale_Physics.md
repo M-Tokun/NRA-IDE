@@ -1,3 +1,11 @@
+---
+id: SPEC-CANCER-SUPPORT-PHASE-02-MESOSCALE-PHYSICS-20260728
+kind: spec
+created: 2026-07-28
+author: M-Tokuni
+title: "Phase 2: Mesoscale Physics Protocol"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

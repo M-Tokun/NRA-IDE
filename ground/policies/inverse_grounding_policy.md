@@ -1,3 +1,11 @@
+---
+id: SPEC-INVERSE-GROUNDING-POLICY-20260628
+kind: spec
+created: 2026-06-28
+author: M-Tokuni
+title: "逆行接地方針（Inverse Grounding Policy）Rev.2.2"
+---
+
 # 逆行接地方針（Inverse Grounding Policy）Rev.2.2
 <!-- FILE: ground/policies/inverse_grounding_policy.md 26-0629 -->
 <!-- 前版：26-0628-1855 → 型分離・FAIL-CLOSED精密化・ハード制約化 -->

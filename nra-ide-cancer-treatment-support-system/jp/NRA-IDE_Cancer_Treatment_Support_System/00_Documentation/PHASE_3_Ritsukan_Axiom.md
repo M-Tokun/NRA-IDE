@@ -1,3 +1,11 @@
+---
+id: SPEC-CANCER-SUPPORT-PHASE-03-SAFETY-RULES-20260405
+kind: spec
+created: 2026-04-05
+author: M-Tokuni
+title: "Phase 3: Nomological Ring Axioms (Safety Rules)"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

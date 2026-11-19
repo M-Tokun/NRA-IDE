@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-06-OBSERVABLES-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "06 Observable Quantities — Verifying the Provenance and Update Path of Values"
+---
+
 # 06 Observable Quantities — Verifying the Provenance and Update Path of Values
 
 <!-- FILE: 06_observables_EN.md -->

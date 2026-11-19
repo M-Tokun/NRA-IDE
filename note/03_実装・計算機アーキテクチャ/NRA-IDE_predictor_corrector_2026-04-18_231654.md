@@ -1,3 +1,11 @@
+---
+id: NOTE-DYNAMIC-PRECISION-TRACKING-DESIGN-20260418
+kind: note
+created: 2026-04-18
+author: M-Tokuni
+title: "NRA-IDE 動的精度追従設計の議論まとめ"
+---
+
 # NRA-IDE 動的精度追従設計の議論まとめ
 
 <!-- FILE: NRA-IDE_predictor_corrector_2026-04-18_231654 -->

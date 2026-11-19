@@ -1,3 +1,11 @@
+---
+id: NOTE-CANCER-SUPPORT-PHASE-52-REGULATORY-REALITY-20260201
+kind: note
+created: 2026-02-01
+author: M-Tokuni
+title: "Phase 52: The Wall of Reality (Regulatory Fees & Timeline)"
+---
+
 # ═══════════════════════════════════════════════════════════════════════
 
 # Project: NRA-IDE Cancer Treatment Support System

@@ -1,3 +1,11 @@
+---
+id: GUIDE-AI-DOCS-03-CAUSAL-DIODE-20260405-EN
+kind: guide
+created: 2026-04-05
+author: M-Tokuni
+title: "03 Causal Diode — Enforcing the One-Way Path from Cause-Side to Effect-Side"
+---
+
 # 03 Causal Diode — Enforcing the One-Way Path from Cause-Side to Effect-Side
 
 <!-- FILE: 03_causal_diode_EN.md -->

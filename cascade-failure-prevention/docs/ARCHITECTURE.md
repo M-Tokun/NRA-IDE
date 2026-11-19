@@ -1,3 +1,11 @@
+---
+id: SPEC-HAN-GATE-ARCHITECTURE-20260405
+kind: spec
+created: 2026-04-05
+author: M-Tokuni
+title: "Architecture Blueprint — HAN Gate Minimum Module"
+---
+
 # Architecture Blueprint — HAN Gate Minimum Module
 
 ## 1) Placement (recommended)

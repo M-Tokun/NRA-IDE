@@ -1,3 +1,11 @@
+---
+id: DICT-AI-DOCS-12-GLOSSARY-20260405-JP
+kind: dict
+created: 2026-04-05
+author: M-Tokuni
+title: "12 用語集"
+---
+
 # 12 用語集
 
 ---

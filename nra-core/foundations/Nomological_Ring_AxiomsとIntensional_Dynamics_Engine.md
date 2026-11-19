@@ -1,3 +1,11 @@
+---
+id: DIALOG-NRA-IDE-CONVERSATION-RECORD-20260409
+kind: dialog
+created: 2026-04-09
+author: M-Tokuni
+title: "Nomological Ring AxiomsとIntensional Dynamics Engineの会話記録（完全記述版）"
+---
+
 > [!CAUTION]
 > **会話経過の履歴資料 / 非正規**
 >

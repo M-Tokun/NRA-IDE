@@ -1,3 +1,11 @@
+---
+id: DRAFT-AXIOMS-REWRITTEN-20260424
+kind: draft
+created: 2026-04-24
+author: M-Tokuni
+title: "AXIOMS.md — 律環公理・公理群定義書"
+---
+
 # AXIOMS.md — 律環公理・公理群定義書
 
 > [!CAUTION]

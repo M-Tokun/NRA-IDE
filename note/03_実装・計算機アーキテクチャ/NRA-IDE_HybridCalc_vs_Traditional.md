@@ -1,3 +1,11 @@
+---
+id: NOTE-RESIDUAL-DRIVEN-HYBRID-VS-TRADITIONAL-20260717
+kind: note
+created: 2026-07-17
+author: M-Tokuni
+title: "NRA-IDE 残差駆動型ハイブリッド計算と従来計算方式"
+---
+
 NRA-IDE_HybridCalc_vs_Traditional_Final_20260717_065706.md
 
 

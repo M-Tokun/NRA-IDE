@@ -1,3 +1,11 @@
+---
+id: ESSAY-RESIDUAL-BASED-DESIGN-RATIONALE-20260419
+kind: essay
+created: 2026-04-19
+author: M-Tokuni
+title: "NRA-IDE 残渣ベース設計思想の合理性：技術要件と論理的帰結"
+---
+
 # NRA-IDE 残渣ベース設計思想の合理性：技術要件と論理的帰結
 
 ## 1. 存在論的整合性：存在は生成である
