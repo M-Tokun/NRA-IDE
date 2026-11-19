@@ -289,7 +289,10 @@ def main(argv=None):
         else:
             data = check(repo, args.remote, args.remote_url, sys.stdin.read(), args.plan)
             code = 0 if data["status"] in ACCEPTED else 1 if data["status"] == "FAIL" else 2
-    except (GateError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+    except GateError as exc:
+        # GateError messages are fixed strings in this file (no output, URL or content), same as check().
+        data, code = {"schema_version": 1, "status": "UNAVAILABLE", "reason": str(exc)}, 2
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
         data, code = {"schema_version": 1, "status": "UNAVAILABLE", "reason": "PREPARATION_FAILED"}, 2
     print(json.dumps(data, ensure_ascii=True, indent=2, allow_nan=False))
     return code

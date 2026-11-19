@@ -9,6 +9,7 @@ import contextlib
 import hashlib
 import io
 import json
+import re
 import os
 from pathlib import Path
 import shutil
@@ -339,6 +340,48 @@ class PlanAndPipelineTests(GitFixture):
         remote_oid = subprocess.check_output(["git", "--git-dir", str(self.remote), "rev-parse", "HEAD"], env=ENV).decode().strip()
         self.assertEqual(remote_oid, self.base)
 
+
+
+class PrepareReasonTests(unittest.TestCase):
+    """No.4: prepare reports the fixed GateError reason instead of hiding it behind PREPARATION_FAILED."""
+
+    def run_prepare(self, error):
+        def fake_context(*_args, **_kwargs):
+            raise error
+        out = io.StringIO()
+        with patch.object(pg, "context", fake_context), contextlib.redirect_stdout(out):
+            code = pg.main(["prepare", "--repo", str(ROOT), "--remote", "origin", "--branch", "refs/heads/master",
+                            "--output", "local_reports/push_gate/never-written.json", "--timeout-seconds", "1"])
+        return code, json.loads(out.getvalue())
+
+    def test_gate_error_reason_is_kept(self):
+        code, data = self.run_prepare(pg.GateError("INCOMING_COMMITS_PRESENT"))
+        self.assertEqual((code, data["status"], data["reason"]), (2, "UNAVAILABLE", "INCOMING_COMMITS_PRESENT"))
+
+    def test_other_errors_stay_preparation_failed(self):
+        code, data = self.run_prepare(OSError("disk"))
+        self.assertEqual((code, data["reason"]), (2, "PREPARATION_FAILED"))
+
+
+class MalwareStageTests(unittest.TestCase):
+    """No.8: every Defender-stage throw records a fixed stage word first, and the receipt carries it."""
+
+    def test_each_defender_throw_sets_a_fixed_stage(self):
+        lines = (ROOT / "scripts" / "malware_gate.ps1").read_text(encoding="utf-8").splitlines()
+        start = next(i for i, line in enumerate(lines) if "$malwareStage = 'STATUS_QUERY'" in line)
+        end = next(i for i in range(start, len(lines)) if lines[i].startswith("catch {"))
+        stage = re.compile(r"\$malwareStage = '[A-Z_]+'")
+        throws = [i for i in range(start, end) if re.search(r"\bthrow\b", lines[i])]
+        self.assertGreaterEqual(len(throws), 7)
+        for i in throws:
+            with self.subTest(line=i + 1):
+                before = lines[i].split("throw")[0]
+                previous = next(lines[j] for j in range(i - 1, start - 1, -1) if lines[j].strip())
+                self.assertTrue(stage.search(before) or stage.search(previous), lines[i])
+
+    def test_receipt_records_the_stage(self):
+        text = (ROOT / "scripts" / "malware_gate.ps1").read_text(encoding="utf-8")
+        self.assertIn("reason = 'DEFENDER_ENVIRONMENT_ERROR'; detail = $malwareStage;", text)
 
 if __name__ == "__main__":
     unittest.main()

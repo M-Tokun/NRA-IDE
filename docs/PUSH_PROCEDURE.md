@@ -112,10 +112,10 @@ python -B scripts/push.py run
 | `DESTINATION_DIFFERS_FROM_PLAN` | push 先 URL が plan と違う | remote 名・URL を確認。変更が必要なら利用者に返す |
 | `INCOMING_COMMITS_PRESENT` | remote 側に手元に無い commit がある | 停止して利用者へ報告（自動で統合しない） |
 | `FETCH_EVIDENCE_MISSING` | fetch の記録に remote の現在位置が無い | 取得状態を報告して停止。新しい入力後の prepare に fresh fetch を任せる |
-| `PREPARATION_FAILED`（prepare 時） | plan の出力先が既存、パスがリポジトリ外、remote 名不正など | ルートでの実行、送信先、書込可否を確認。手作業の plan 作成へ切り替えない |
+| `PREPARATION_FAILED`（prepare 時） | `GateError` 以外の入出力・実行エラー（plan の出力先が既存、書込不可など）。incoming・fetch 記録の不足などは各 reason で出る | ルートでの実行、送信先、書込可否を確認。手作業の plan 作成へ切り替えない |
 | `SINGLE_REF_REQUIRED` | 1回の push で複数 ref を送ろうとした | 入口と対象 branch を確認して停止（`--all`・`--tags` は使わない） |
 | `SOURCE_MUST_EQUAL_HEAD` | HEAD 以外の commit を送ろうとした | 現在 branch の HEAD を送る |
-| `MALWARE_OR_UNICODE_BLOCKED` | malware または unicode 検査が失敗、または検査を実行できなかった（`result.json` の `malware.status` が `UNAVAILABLE`、`reason` が `DEFENDER_ENVIRONMENT_ERROR`・`DEFENDER_NONZERO_AMBIGUOUS` など） | `result.json` の findings または `malware.reason` を読み、利用者へ報告。検出がないのに UNAVAILABLE の場合は Defender の環境を疑う（2026-11-19 の Platform\Temp 誤選択の例）。無視して再実行しない |
+| `MALWARE_OR_UNICODE_BLOCKED` | malware または unicode 検査が失敗、または検査を実行できなかった（`result.json` の `malware.status` が `UNAVAILABLE`、`reason` が `DEFENDER_ENVIRONMENT_ERROR`・`DEFENDER_NONZERO_AMBIGUOUS` など） | `result.json` の findings または `malware.reason` を読み、利用者へ報告。UNAVAILABLE のときは `malware.detail` に止まった段階が固定語で入る（例：`SCANNER_NOT_FOUND`）。検出がないのに UNAVAILABLE の場合は Defender の環境を疑う（2026-11-19 の Platform\Temp 誤選択の例）。無視して再実行しない |
 | `ID_BLOCKED` / `DICTIONARY_BLOCKED` / `FILEOP_BLOCKED` | ID ゲート / 辞書ゲート / ファイル操作報告ゲートが失敗 | 同上。findings を報告し、修正は利用者の承認後 |
 | `GATE_TIMEOUT` | ゲートが plan の上限時間内に終わらなかった | 一時出力と経過を報告して停止。上限調整は別途相談し、独自に大きくして再実行しない |
 | `NOTHING_TO_SEND` | step 10・NOT_STARTED。送信する commit がない | 送信対象の commit の有無を報告 |
