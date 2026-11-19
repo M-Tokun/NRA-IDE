@@ -99,7 +99,7 @@ python -B scripts/push.py run
 
 ## 2. 失敗したとき（`reason` の読み方）
 
-入口の最終行は `STOP <send_state>`。止まった場所は `local_reports/push_gate/push_route_log.jsonl` の `step`、原因は `reason` を確認する。最終行に経路番号は出さない。ゲートまで進んだ場合の詳細は `local_reports/push_gate/<ID>/result.json` に残る。
+入口の最終行は `STOP <send_state>`、その直前の行は `reason: <reason>`。止まった場所は `local_reports/push_gate/push_route_log.jsonl` の `step`、原因は `reason` を確認する。最終行に経路番号は出さない。ゲートまで進んだ場合の詳細は `local_reports/push_gate/<ID>/result.json` に残る。
 
 記録の step 30 の TIMEOUT・判定なしの失敗は `STOP UNKNOWN`（送信したか不明）、step 40 は `STOP COMMAND_SUCCEEDED_UNVERIFIED`（push コマンド成功・一致未確認）として扱う。送信していないと決め付けて再実行しない。
 以下の対処は原因確認のための案内であり、自動再試行の指示ではない。停止後は原因と影響を報告し、利用者の新しい入力を受けてから prepare で再開する。新しい提示後の push 確認も省略しない。
@@ -115,9 +115,21 @@ python -B scripts/push.py run
 | `PREPARATION_FAILED`（prepare 時） | plan の出力先が既存、パスがリポジトリ外、remote 名不正など | ルートでの実行、送信先、書込可否を確認。手作業の plan 作成へ切り替えない |
 | `SINGLE_REF_REQUIRED` | 1回の push で複数 ref を送ろうとした | 入口と対象 branch を確認して停止（`--all`・`--tags` は使わない） |
 | `SOURCE_MUST_EQUAL_HEAD` | HEAD 以外の commit を送ろうとした | 現在 branch の HEAD を送る |
-| `MALWARE_OR_UNICODE_BLOCKED` | malware または unicode 検査が失敗 | `result.json` の findings を読み、該当ファイルを利用者へ報告。無視して再実行しない |
-| `ID_BLOCKED` / `DICTIONARY_BLOCKED` | ID ゲート / 辞書ゲートが失敗 | 同上。findings を報告し、修正は利用者の承認後 |
+| `MALWARE_OR_UNICODE_BLOCKED` | malware または unicode 検査が失敗、または検査を実行できなかった（`result.json` の `malware.status` が `UNAVAILABLE`、`reason` が `DEFENDER_ENVIRONMENT_ERROR`・`DEFENDER_NONZERO_AMBIGUOUS` など） | `result.json` の findings または `malware.reason` を読み、利用者へ報告。検出がないのに UNAVAILABLE の場合は Defender の環境を疑う（2026-11-19 の Platform\Temp 誤選択の例）。無視して再実行しない |
+| `ID_BLOCKED` / `DICTIONARY_BLOCKED` / `FILEOP_BLOCKED` | ID ゲート / 辞書ゲート / ファイル操作報告ゲートが失敗 | 同上。findings を報告し、修正は利用者の承認後 |
 | `GATE_TIMEOUT` | ゲートが plan の上限時間内に終わらなかった | 一時出力と経過を報告して停止。上限調整は別途相談し、独自に大きくして再実行しない |
+| `NOTHING_TO_SEND` | step 10・NOT_STARTED。送信する commit がない | 送信対象の commit の有無を報告 |
+| `PATH_TOO_LONG` | step 10・NOT_STARTED。名前が255バイト超、またはパスが200文字超。記録の `detail` にパス | 該当パスを報告。改名は利用者の承認後 |
+| `DIFF_FAILED` | step 10・NOT_STARTED。パス長検査の `git diff` が失敗 | 出力末尾を報告 |
+| `NO_CURRENT_BRANCH` | step 10・NOT_STARTED。現在の branch を取得できない（detached HEAD など） | branch の状態を報告 |
+| `FETCH_FAILED` | step 10（NOT_STARTED）または step 40（COMMAND_SUCCEEDED_UNVERIFIED）。fetch の失敗 | step 40 は送信済みの可能性があるので再送しない |
+| `TIMEOUT` | step 10（NOT_STARTED）・30（UNKNOWN）・40（COMMAND_SUCCEEDED_UNVERIFIED）。入口の `TIMEOUT` を超過 | 30・40 は再送しない。上限の緩和は相談事項 |
+| `DECLINED` | step 20・NOT_STARTED。提示の直後の入力が `git push` 以外 | 次の入力で prepare からやり直す |
+| `NO_PREPARED_PLAN` | step 30・NOT_STARTED。prepare を経ていない、または停止後に run した | prepare からやり直す |
+| `PUSH_FAILED` | step 30・UNKNOWN。push が失敗し、ゲートの判定もない | 送信の有無が不明なので再送しない |
+| `MISMATCH` | step 40・COMMAND_SUCCEEDED_UNVERIFIED。送信後の照合で送信先 OID または差分が不一致 | 再送しない。照合結果を報告 |
+| `OBSERVE_FAILED` | step 40・COMMAND_SUCCEEDED_UNVERIFIED。照合用の `rev-parse`/`rev-list` が失敗 | 再送しない |
+| 上記以外 | `push_gate.py` の内部検査（`INVALID_*`・`GIT_OBSERVATION_FAILED`・`GATE_INPUT_OR_EXECUTION_ERROR`・`INTERRUPTED` など） | 意味を推測せず、reason の文字列と `result.json` をそのまま報告する |
 | `non-fast-forward or unresolved remote base` | 履歴が分岐している | 通常 push では扱わない。利用者管理の手順へ返す |
 | `remote ref deletion is blocked` | remote branch の削除 | 実行しない |
 | `new branch requires a fetched remote default branch` | 新規 branch で `origin/HEAD` が無い | prepare の fresh fetch 後の不足として利用者へ報告 |

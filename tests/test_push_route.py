@@ -238,6 +238,17 @@ class PushRouteTest(unittest.TestCase):
         _, last, _ = self.go(r, "prepare")
         self.assertIn(last, allowed)
 
+    # STOP の直前の行は記録と同じ reason（読みに行かずに理由が分かる。detail は出さない）
+    def test_stop_prints_reason_before_last_line(self):
+        cases = [("prepare", FakeRunner(fetch=[(None, "")])),
+                 ("run", FakeRunner())]
+        for stage, r in cases:
+            with self.subTest(stage=stage):
+                code, last, lines = self.go(r, stage)
+                self.assertEqual(code, 1)
+                self.assertTrue(last.startswith("STOP "), last)
+                self.assertEqual(lines[-2], f"reason: {self.last_record()['reason']}")
+
     # 経路のまたぎで番号を持ち出さない：最後の行に数字を含めない
     def test_last_line_has_no_route_number(self):
         cases = [("prepare", FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))])),

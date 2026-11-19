@@ -39,7 +39,7 @@ E3 エラー経路の内部で新たなコマンド・スクリプトを実行�
 E4 未確認のまま完了・成功へ読み替えない
 #END-CONST
 
-10  観測事実の固定：実行コマンド・終了コード・標準出力/標準エラー末尾・JSON の status / reason / send_state を確定する。GOTO 20
+10  観測事実の固定：実行コマンド・終了コード・標準出力/標準エラー末尾・JSON の status / reason / send_state を確定する。push.py 経由では、最後の2行（reason: 行と STOP <send_state>）を観測事実とする。step・detail は記録にのみある。GOTO 20
 
 20  IF 出力に "現在のAGENTS.md全文の読込を確認できません" を含む: GOTO 100
 21  IF 出力に "AGENTS.mdが存在しないか" を含む: GOTO 100
@@ -71,10 +71,10 @@ E4 未確認のまま完了・成功へ読み替えない
     GOTO 990
 
 210 push 経路・ゲート停止（scripts/push.py / scripts/push_gate.py 停止）：
-    docs/PUSH_PROCEDURE.md §2 の reason 表を辞書として1回だけ参照する（他文書へ遷移しない）。
-    211 IF send_state == "UNKNOWN": 再送禁止。停止した step・reason・send_state を報告する。GOTO 990
-    212 IF send_state == "COMMAND_SUCCEEDED_UNVERIFIED": 再送禁止。停止した step・reason・send_state を報告する。GOTO 990
-    213 自動再試行・自動 merge/rebase・独自タイムアウト緩和・無断修正を行わず、reason・send_state・該当ファイル（local_reports/push_gate/<ID>/result.json）を報告する。GOTO 990
+    reason 表（docs/PUSH_PROCEDURE.md §2）は、利用者の問い合わせ後に意味を引くときに1回だけ参照する（他文書へ遷移しない）。
+    211 IF send_state == "UNKNOWN": 再送禁止。最後の2行（reason・send_state）をそのまま報告する。GOTO 990
+    212 IF send_state == "COMMAND_SUCCEEDED_UNVERIFIED": 再送禁止。最後の2行（reason・send_state）をそのまま報告する。GOTO 990
+    213 自動再試行・自動 merge/rebase・独自タイムアウト緩和・無断修正を行わず、最後の2行（reason・send_state）をそのまま報告し、記録ファイル（local_reports/push_gate/push_route_log.jsonl、ゲートまで進んだ場合は local_reports/push_gate/<ID>/result.json）のパスを添える。reason の意味づけ・原因の推測は行わない。GOTO 990
 
 300 禁止 Git 操作ブロック（履歴改変・強制送信・remote ref 削除）：
     AI 経路では実行しない。対象 OID・影響範囲・拒否メッセージを提示して利用者管理の手順へ返す。
