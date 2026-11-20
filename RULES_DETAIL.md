@@ -1,7 +1,7 @@
 # RULES_DETAIL.md — NRA-IDE 実行詳細規則
 ```text
 #ROUTE RULES_DETAIL v2 ; 正本。本文と食い違えば 990。番号はこのブロック内だけ（AGENTS.md の経路番号とは別）
-#RETURN 990=STOP 998=ASK 999=DONE ; 呼び出し元へは語だけを返す。番号をブロックの外へ持ち出さない
+#RETURN 990=STOP 999=DONE ; 998は欠番。呼び出し元へは語だけを返す。番号をブロックの外へ持ち出さない
 #CONST ; 全経路で常に成立。破れたら 990
 C1 秘密値（password・token・秘密鍵・.envの値）を出力・ログ・commit・メッセージに含めない。値の確認だけのために開かない。認証済みCLIの内部利用とAIの値読取は分ける ; §4
 C2 秘密値の入力・変更・再発行は利用者が行う。漏えい疑いは値を再掲せず、対象と対処だけ報告 ; §4
@@ -22,7 +22,7 @@ C8 5W1H適用境界は skills/thought-boundary-5w1h/SKILL.md による（Git制�
 27  IF 種別=読取・回答: GOTO 450
 28  GOTO 990
 200 IF 利用者記述 AND 箇所の承認なし: 箇所・原文・問題と根拠・修正案・影響を提示 GOTO 990 ; §2
-202 IF 新規の文書/論文作成 OR 節・定義・公理・数式の追加/改訂: GOTO 400
+202 IF (新規の文書/論文作成 OR 節・定義・公理・数式の追加/改訂) AND NOT 箇所と内容が明示済みの1行誤字修正: GOTO 400
 205 既存差分を保持し最小差分で編集。AGENTS.md は候補で 210 の検査を先に行い、最後に1回の編集で反映する（反映後の照合は再読み込みの後） GOTO 210
 210 IF 想定外ファイル OR 既存差分喪失 OR 意図しない生成物 OR diff --check失敗 OR 関連検証失敗 OR C4違反 GOTO 700 ; §2
     ELSE GOTO 999
@@ -45,7 +45,9 @@ C8 5W1H適用境界は skills/thought-boundary-5w1h/SKILL.md による（Git制�
 480 IF 数式を含む: dictionary/NRA-IDE数式配置の5大鉄則（式の文法）.md を照合
 490 GOTO 999
 500 package・version・目的・書込み先・project/global・lockfile・注意点を提示 ; §5
-    IF 承認なし GOTO 990 ELSE A5の一次情報で確認し、確認できない項目は未確認と記録 GOTO 999
+    IF 承認なし GOTO 990 ELSE GOTO 505
+505 A5の一次情報で確認し、確認できない項目は未確認と記録する
+    IF 既知の脆弱性・改ざん・署名不一致あり GOTO 990 ELSE GOTO 999
 600 "警告: {絶対パス}: {操作と影響}" を提示 ; §6 GOTO 601
 601 IF 書込み AND 承認なし: GOTO 990
 602 IF 削除・再帰移動 AND ディレクトリ内と未確認: GOTO 990
@@ -56,12 +58,17 @@ C8 5W1H適用境界は skills/thought-boundary-5w1h/SKILL.md による（Git制�
 920 格付け：維持（根本に反する・向きが逆・内部矛盾・非保守側）／格下げ（精度不足・領域差） GOTO 930
 930 修正案一覧（箇所・原文・問題と根拠・修正案・影響〔日英版・README・関連文書〕・推奨） GOTO 940
 940 承認を依頼 GOTO 990
-950 承認済み項目だけ修正・同期 GOTO 960
+950 IF 節・定義・公理・数式の改訂を含む: GOTO 951
+    ELSE GOTO 953
+951 GOSUB skills/document-paper-writing/SKILL.md ; 戻り: DONE / STOP
+952 IF 戻り=STOP: GOTO 990
+953 承認済み項目だけ修正・同期
+954 IF 210 の検査項目に該当: GOTO 700
+955 GOTO 960
 960 910 と同じ手順で再検証。新規の問題は未承認として記録 GOTO 970
 970 再現手順をスクリプトで local_reports/ に残す GOTO 980
 980 報告：解消済み・未解消・未検証・新規発見 GOTO 999
 990 STOP：不足・違反・必要な承認と影響をまとめ、呼び出し元へ STOP を返す
-998 ASK：push確認を待つ。呼び出し元へ ASK を返す
 999 END：呼び出し元へ DONE を返す
 ```
 

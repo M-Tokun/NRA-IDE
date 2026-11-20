@@ -18,7 +18,7 @@ W4 Markdown は LF のみ・UTF-8（BOM なし）・ブロック数式は $$ を
 20 IF 不確実性・仮説・複数時点/条件/層の比較を含む:
       skills/axis-boundary-reasoning/SKILL.md を適用し、縦軸探索（根拠）と横軸探索（適用境界）を分離する。仮説同士の連鎖で確定結論を出さない。GOTO 30
    ELSE: GOTO 30
-30 正典・語彙照合：NRA-IDE 正典（AXIOMS.md・FORMULA.md・dictionary/NRA-IDE_Dictionary_JP.md）と用語・記号・状態名を照合する。非正典・草案・検討記録の場合は文書冒頭へ位置付けを明記する。GOTO 40
+30 正典・語彙照合：NRA-IDE 正典（theory/AXIOMS.md・FORMULA.md・dictionary/NRA-IDE_Dictionary_JP.md）と用語・記号・状態名を照合する。非正典・草案・検討記録の場合は文書冒頭へ位置付けを明記する。GOTO 40
 40 IF 数式を含む:
       dictionary/NRA-IDE数式配置の5大鉄則（式の文法）.md を適用し、左右項の因果流・通分禁止・符号統一・入子分解順序・未知数/残差スロット分離を確認する。GOTO 50
    ELSE: GOTO 50

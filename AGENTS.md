@@ -26,7 +26,7 @@
       GOSUB scripts/push.py decline (戻り: STOP)
       GOTO 95
    ELSE: GOTO 57
-57 IF 対象操作 == git push:
+57 IF 現在の作業単位の操作 == git push:
       GOSUB scripts/push.py prepare (戻り: ASK / STOP)
       GOTO 95
    ELSE: GOTO 60
@@ -37,10 +37,14 @@
       GOSUB docs/ERROR_MANUAL.md (戻り: STOP)
       GOTO 95
    ELSE: GOTO 70
-70 成果物を元の条件、根拠、必要な検証結果と照合する。未確認を成功扱いにしない。GOTO 80
+70 成果物を元の条件、根拠、必要な検証結果と照合する。未確認を成功扱いにしない。
+   IF 照合不一致: GOTO 95
+   ELSE: GOTO 80
 80 実施内容、検証結果、未解消事項と対象の経路を報告する。
-   IF ファイル操作あり: GOSUB skills/file-operation-report/SKILL.md (戻り: DONE / STOP)
-   GOTO 90
+   IF ファイル操作あり: GOSUB skills/file-operation-report/SKILL.md の40 (戻り: DONE / STOP)
+   GOTO 85
+85 IF 80の戻り=STOP: GOTO 95
+   ELSE: GOTO 90
 90 IF 依頼達成に必要な後続作業が残る: GOTO 40
    ELSE: GOTO 99
 95 対象操作を停止し、具体的な不足・違反・必要な承認と影響を報告する。
