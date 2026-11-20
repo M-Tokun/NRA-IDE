@@ -118,6 +118,7 @@ class ClineGuardTests(unittest.TestCase):
         self.assertFalse(_common.is_marked('cline','test-1'))
     def prepare_windows(self):
         shutil.copytree(GUARD,self.root/'skills'/'agents-md-guard',ignore=shutil.ignore_patterns('__pycache__'))
+        shutil.copytree(ROOT/'skills'/'outside-root-guard',self.root/'skills'/'outside-root-guard',ignore=shutil.ignore_patterns('__pycache__'))
         shutil.copytree(ROOT/'.clinerules'/'hooks',self.root/'.clinerules'/'hooks')
         nested=self.root/'nested';nested.mkdir()
         return nested

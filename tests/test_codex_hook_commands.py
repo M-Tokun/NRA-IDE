@@ -17,9 +17,14 @@ BAD_SESSION = "../not-a-session"
 OBSERVATION_PROBE = "check.py"
 
 
-def payload(event):
+# ルート外ガードはセッションIDを見ないため、ルート外のパスで応答（deny）を確かめる。
+OUTSIDE_GUARD = "codex_outside.py"
+
+
+def payload(event, script=""):
+    command = "cat ../../outside.txt" if script == OUTSIDE_GUARD else "git status"
     value = {"session_id": BAD_SESSION, "hook_event_name": event,
-             "cwd": str(ROOT), "tool_name": "Bash", "tool_input": {"command": "git status"}}
+             "cwd": str(ROOT), "tool_name": "Bash", "tool_input": {"command": command}}
     return json.dumps(value)
 
 
@@ -54,15 +59,16 @@ class CodexHookCommandTests(unittest.TestCase):
             for event, hook in ENTRIES:
                 if "'" + OBSERVATION_PROBE + "'" in hook["commandWindows"]:
                     continue
-                file = pathlib.Path(tmp) / (event + ".json")
-                file.write_text(payload(event), encoding="utf-8")
+                script_name = OUTSIDE_GUARD if "'" + OUTSIDE_GUARD + "'" in hook["commandWindows"] else ""
+                file = pathlib.Path(tmp) / (event + script_name + ".json")
+                file.write_text(payload(event, script_name), encoding="utf-8")
                 for shell in shells:
                     for directory in directories:
                         with self.subTest(event=event, shell=shell, cwd=directory.name,
                                           script=hook["commandWindows"][-55:]):
                             if shell == "cmd":
                                 result = subprocess.run(hook["commandWindows"], shell=True,
-                                    cwd=directory, input=payload(event).encode(),
+                                    cwd=directory, input=payload(event, script_name).encode(),
                                     capture_output=True, timeout=30)
                             else:
                                 script = "Get-Content -Raw '" + str(file) + "' | " + hook["commandWindows"]

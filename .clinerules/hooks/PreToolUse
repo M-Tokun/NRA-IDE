@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Cline Unix PreToolUse hook. Cline 4.1.22 on Windows uses PreToolUse.ps1.
-# Delegates to the shared AGENTS.md-read guard (AGENTS.md 第11章 Layer 2).
+# Runs the AGENTS.md-read guard (AGENTS.md 第11章 Layer 2), then the outside-root guard.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PY="$(command -v python3 || command -v python)"
-exec "$PY" "$DIR/../../skills/agents-md-guard/cline_guard.py"
+exec "$PY" "$DIR/../../skills/outside-root-guard/cline_pre_chain.py"

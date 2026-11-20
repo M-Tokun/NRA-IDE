@@ -1,0 +1,4 @@
+# 作業ルート外で許可する場所（全環境共通の既定値）。利用者が編集する。AI は書き換えない。
+# 環境変数とワイルドカードを使える。この PC だけの場所は .agent_state/outside_root_allow.txt に書く。
+# Claude Code のメモリ（全プロジェクト共通の置き場）
+%USERPROFILE%/.claude/projects/*/memory

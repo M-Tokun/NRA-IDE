@@ -39,6 +39,17 @@
         ]
       },
       {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -B \"$(git rev-parse --show-toplevel)/skills/outside-root-guard/codex_outside.py\"",
+            "commandWindows": "python -B -c \"import subprocess,runpy,os; r=subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip(); runpy.run_path(os.path.join(r,'skills','outside-root-guard','codex_outside.py'),run_name='__main__')\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "^(Bash|exec_command|shell_command|shell|apply_patch|Edit|Write)$",
         "hooks": [
           {
