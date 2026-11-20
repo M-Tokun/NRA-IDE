@@ -1,6 +1,6 @@
 # AI思考におけるふらつき防止と経路の考え方
 
-> 本書は `skills/` 配下の全 Skill（`thought-boundary-5w1h`・`axis-boundary-reasoning`・`nra-depth-guard`・`agents-md-guard`・`operation-approval`・`file-operation-report`）に共通する基礎原則を定める。
+> 本書は `skills/` 配下の全 Skill（`thought-boundary-5w1h`・`axis-boundary-reasoning`・`document-paper-writing`・`nra-depth-guard`・`agents-md-guard`・`operation-approval`・`file-operation-report`）に共通する基礎原則を定める。
 
 ## 1. 推論させる領域と推論させてはならない領域
 AIの本領は文脈から未指定の要素を補う「推論」にある。文章作成や設計展開では推論が不可欠となる。しかし、権限確認、Gitの送信制御、エラー停止、履歴保護といった「経路選択と境界制御」では、1000回に1回のふらつきも許されない。999回は正しく動いても、1000回目に別の分岐を選べば、無断送信や無限ループ、規則逸脱という事故に直結する。
