@@ -671,6 +671,7 @@ Temporary variables used only inside an implementation (for example, the interna
   - it was formerly written $r$; it differed from $R$ only by case, so it was renamed $\xi$ (2026-09-30)
   - distinct from "残渣." They are read the same (ざんさ), but 残渣 is a physical leftover and 残差 is a numerical difference (2026-10-23). The April quantum-architecture "残渣" $r_t$ is a difference in meaning, and the glossary writes it "遅延参照残差" (delayed-reference residual); its former name was "残渣"
   - also distinct from [Residual Deviation](#^residual-deviation) $p_n$ (the part of the accumulated deviation that remains even after removing the action)
+  - a function of the same form as $G$ is also applied to the delayed-reference residual (the difference from one's own past position). The residual $\xi$ serves the precision complement of a computation, and the delayed-reference residual serves damping and stabilization of a real machine; their uses differ (2026-11-20)
 - Related: [Reference State](#^reference-state), [Residual Deviation](#^residual-deviation)
 
 <a id="residual-deviation"></a>
@@ -1157,6 +1158,7 @@ The content is in the "Confusion notes" of each entry. This section is a chronol
 | 2026-11-18 | the word "exit" making the end look single, and the place to keep unknowns per branch | [Branch Point](#^branch-point) |
 | 2026-11-18 | a declaration (rule) that does not fit the target, and invalid or unknown data | [Declaration Misfit](#^declaration-misfit), [Confession](#^confession) |
 | 2026-11-18 | ledger record fields and the decision-sufficient state | [Ledger Record Fields](#^ledger-record-fields), [Decision-Sufficient State](#^decision-sufficient-state) |
+| 2026-11-20 | a function of the same form as the second-order residual gate was applied both to the residual $\xi$ (the difference from the reference state; precision complement of a computation) and to the delayed-reference residual (the difference from one's own past position; damping of a real machine). The function has the same form, but the meaning of the input and the use differ | [Residual](#^residual) |
 
 ---
 
