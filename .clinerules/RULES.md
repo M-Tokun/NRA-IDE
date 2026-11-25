@@ -15,5 +15,6 @@
    knowledge, conversation history, or another file. Read the files
    themselves, now.
 
-Then follow the conditional read gates defined in `AGENTS.md`.
+Then follow the route defined in `AGENTS.md` (the "作業経路" block), including
+reading `RULES_DETAIL.md` and the shared Skills that route names.
 Do not treat this file as an independent permission source.

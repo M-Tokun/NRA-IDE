@@ -28,7 +28,10 @@
         "shd101wyy.markdown-preview-enhanced",
         "bierner.markdown-mermaid",
         "esbenp.prettier-vscode",
-        "ritwickdey.liveserver"
+        "ritwickdey.liveserver",
+        "anthropic.claude-code",
+        "openai.chatgpt",
+        "saoudrizwan.claude-dev"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
