@@ -1,7 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git -c commit.gpgsign=false commit -m ' *)",
       "Bash(awk '{print $1}')",
       "Bash(git fetch *)",
       "Bash(git fsck *)",
@@ -15,6 +14,7 @@
       "Bash(PYTHONIOENCODING=utf-8 python NRA-IDE_conformance_checks.py)"
     ],
     "ask": [
+      "Bash(git -c commit.gpgsign=false commit *)",
       "Bash(git config *)",
       "Bash(git checkout *)",
       "Bash(git merge *)",
