@@ -93,6 +93,8 @@ CLIとブラウザ版で同じファイルを同時に編集しない。
 
 作業開始時点では、次を監査結果の入口とする。
 
+> 注記: 2026-11-25に`local_reportsDirectory/`を削除した。報告は削除前のコミット`e8d4aad`で参照できる。以下は削除前の記述である。
+
 - 全体報告: `local_reportsDirectory/17_global_consistency_including_docs.md`
 - 詳細報告: `local_reportsDirectory/01_root_review.md`～`16_docs_overall_review.md`
 
