@@ -1,0 +1,37 @@
+NRA-IDE理論直結ファイル群のレビュー作業を再開してください。
+レビュー基準は当初の指示どおり、(1) 12の正式版補正条件（Report 119）の意義との整合性、
+(2) 文章の誤字・不整合、(3) 式・コードの間違いや記述ミス、の3点です。
+
+【直前の状態】
+以下3ファイルに残る「人間への責任委譲」表現を、既に確立した
+「固定Handoff証言を外部人間監査へ提示する」（英語版: "fixed Handoff testimony
+presented for external human audit"）という統一表現へ修正する作業の直前で中断していました。
+ユーザーはこの3ファイルの修正方針を承認済みです（τ/thickness用語の
+「正しい用語（旧称）」括弧表記は現状維持でよいと別途回答済み・変更不要）。
+
+1. nra-core/foundations/Nomological_Ring_Axioms_Code_Annotated_Explanation_Dual_Fluctuation_Stable.md
+   219行目付近: "It declares infeasibility and **delegates responsibility to
+   human judgment**." を修正する。
+
+2. nra-core/foundations/Nomological_Ring_AxiomsとIntensional_Dynamics_Engine.md
+   41行目付近: "**Fail-Closed**: R≥1で出力抑制、人間判断委譲" を修正する。
+
+3. nra-core/foundations/律環公理_コード付き解説_二重ゆらぎ安定版.md
+   177行目付近: "「人間による判断に委ねる」...これが律環公理における「責任の委譲」だ"
+   を修正する。
+
+修正後は各ファイルのMarkdownフェンス偶数性を確認すること。
+
+【残作業（TodoWriteのリスト参照）】
+- 上記3ファイルの修正（進行中）
+- nra-core/foundationsの残り（12の原則整合性・記述ミス観点での再点検が未完了なら実施）
+- 「理論直結バッチ」全体（ルートメタ文書・theory/・FORMULA.md・llms・参照実装・
+  docs AI文書・figures HTML・gate/・config/・src/・universal-definition/・
+  nra-core/foundations）のまとめ報告を作成する
+
+【スコープ確認】
+ユーザー指示により、note/、cascade-failure-prevention/、multi-physics-safety-gate/、
+nra-ide-cancer-treatment-support-system/、nra-tcm-parser/、tools/、scripts/は
+「NRA-IDE理論直結優先」の方針により今回のスコープ外としています。
+
+git stage・commit・pushは一切未実施のままです。

@@ -1,0 +1,69 @@
+filters:
+  and:
+    - file.ext == "md"
+    - not:
+        - file.inFolder("local_reports")
+        - file.inFolder("local_reportsDirectory")
+        - file.inFolder("obsidian-map")
+formulas:
+  area: if(file.folder == "/", "(root)", file.folder.split("/")[0])
+properties:
+  note.id:
+    displayName: ID
+  note.kind:
+    displayName: 種別
+  note.status:
+    displayName: 状態
+  note.title:
+    displayName: 題名
+  file.path:
+    displayName: パス
+  file.folder:
+    displayName: フォルダ
+  file.name:
+    displayName: ファイル名
+  file.mtime:
+    displayName: 更新
+  formula.area:
+    displayName: 領域
+views:
+  - type: table
+    name: ID一覧（idあり）
+    filters:
+      and:
+        - file.hasProperty("id")
+    order:
+      - id
+      - kind
+      - status
+      - title
+      - file.path
+    sort:
+      - property: id
+        direction: ASC
+  - type: table
+    name: ID未付与の作業リスト
+    filters:
+      and:
+        - '!file.hasProperty("id")'
+    groupBy:
+      property: formula.area
+      direction: ASC
+    order:
+      - file.folder
+      - file.name
+      - file.mtime
+    columnSize:
+      file.name: 461
+  - type: table
+    name: 領域別（idあり）
+    filters:
+      and:
+        - file.hasProperty("id")
+    groupBy:
+      property: formula.area
+      direction: ASC
+    order:
+      - id
+      - kind
+      - file.path
