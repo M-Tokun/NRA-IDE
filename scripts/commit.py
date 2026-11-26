@@ -4,7 +4,8 @@
 
 経路（番号はこのファイル内だけ。最後の1行の最初の語が呼び出し元への戻り：STOP・DONE）:
   10 承認（commit）を消費する。なければ STOP NO_APPROVAL／APPROVAL_MISMATCH
-  20 指定パスだけを stage する（git add -- <paths>）。失敗は STOP STAGE_FAILED
+  20 指定パスだけを stage する（作業ツリーにあるパスは git add、ないパスは git rm --cached
+     --ignore-unmatch で削除を stage）。失敗は STOP STAGE_FAILED
   30 IF cached の一覧 != 指定パス: STOP CACHED_DIFFERS
   40 cached から、削除・改名（D・R）、過去に削除されたパスの再追加（復元）、
      追跡済みファイルと同じ内容の追加（コピー）を集める（報告書そのものは除く）
@@ -118,8 +119,14 @@ def run(paths: list[str], message_file: str) -> str:
     if not paths or not pathlib.Path(message_file).is_file():
         raise Stop("BAD_ARGUMENTS", message_file)
     wanted = sorted({_rel(p) for p in paths})
-    # 20
-    if _git("add", "--", *wanted, check=False).returncode != 0:
+    # 20 作業ツリーにあるパスは add、ないパス（削除）は index から外す。
+    #    削除がすでに stage 済みでも失敗しない（git add は pathspec 不一致で失敗する）。範囲は 30 が照合する。
+    present = [p for p in wanted if (ROOT / p).exists()]
+    absent = [p for p in wanted if p not in present]
+    if present and _git("add", "--", *present, check=False).returncode != 0:
+        raise Stop("STAGE_FAILED")
+    if absent and _git("rm", "--cached", "--ignore-unmatch", "--quiet", "--", *absent,
+                       check=False).returncode != 0:
         raise Stop("STAGE_FAILED")
     # 30
     cached = sorted(set(_z(_git("diff", "--cached", "--name-only", "-z", "--no-renames").stdout)))

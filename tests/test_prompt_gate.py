@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import _prompt_gate  # noqa: E402
 import approval  # noqa: E402
 import claude_prompt_gate  # noqa: E402
+import cline_prompt_gate  # noqa: E402
 
 
 class DecideTest(unittest.TestCase):
@@ -55,14 +56,15 @@ class ApplyTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         base = pathlib.Path(self.tmp.name)
-        self.saved = (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline)
+        self.saved = (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline, cline_prompt_gate.LOG_PATH)
+        cline_prompt_gate.LOG_PATH = base / "hooks" / "prompt_gate_cline.jsonl"
         approval.APPROVAL_DIR = base / "approvals"
         _prompt_gate.PUSH_STATE = base / "push_route_state.json"
         self.declined = []
         _prompt_gate._decline = lambda: (self.declined.append(1), _prompt_gate.PUSH_STATE.unlink(missing_ok=True))
 
     def tearDown(self):
-        approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline = self.saved
+        approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline, cline_prompt_gate.LOG_PATH = self.saved
         self.tmp.cleanup()
 
     def files(self):
@@ -130,6 +132,78 @@ class ApplyTest(unittest.TestCase):
                 self.assertEqual(claude_prompt_gate.main(), 0)
         finally:
             sys.stdin = sys.__stdin__
+        self.assertEqual(self.files(), ["commit.json"])
+
+    def run_cline(self, stdin):
+        out = io.StringIO()
+        sys.stdin = stdin
+        try:
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(cline_prompt_gate.main(), 0)
+        finally:
+            sys.stdin = sys.__stdin__
+        return json.loads(out.getvalue())
+
+    def test_cline_wrapper_flat_and_nested_input(self):
+        for payload in ({"prompt": "commit まで"}, {"taskId": "t", "userPromptSubmit": {"prompt": "commit まで"}}):
+            approval.clear_all()
+            data = self.run_cline(io.StringIO(json.dumps(payload)))
+            self.assertEqual(data["cancel"], False)
+            self.assertEqual(data["errorMessage"], "")
+            self.assertIn("COMMIT_RUN", data["contextModification"])
+            self.assertEqual(self.files(), ["commit.json"])
+
+    def test_cline_wrapper_not_exact_and_other_input(self):
+        self.run_cline(io.StringIO(json.dumps({"userPromptSubmit": {"prompt": "commit まで"}})))
+        data = self.run_cline(io.StringIO(json.dumps({"userPromptSubmit": {"prompt": "commitして"}})))
+        self.assertIn("NOT_EXACT", data["contextModification"])
+        self.assertEqual(self.files(), [])
+
+    def test_cline_wrapper_unreadable_input_clears_and_reports(self):
+        approval.write("commit")
+        for stdin in (io.StringIO("not json"), io.StringIO(json.dumps({"userPromptSubmit": {"prompt": 1}})),
+                      io.StringIO(json.dumps({"other": "commit まで"}))):
+            approval.write("commit")
+            data = self.run_cline(stdin)
+            self.assertEqual(data["cancel"], False)
+            self.assertEqual(data["contextModification"], "")
+            self.assertNotEqual(data["errorMessage"], "")
+            self.assertEqual(self.files(), [])
+
+    def test_cline_unwraps_user_input_tag(self):
+        # 実機（Cline 4.1.22）の形：<user_input mode="act">commitまで</user_input>
+        for mode in ("act", "plan"):
+            approval.clear_all()
+            prompt = f'<user_input mode="{mode}">commitまで</user_input>'
+            data = self.run_cline(io.StringIO(json.dumps({"userPromptSubmit": {"prompt": prompt}})))
+            self.assertIn("COMMIT_RUN", data["contextModification"])
+            self.assertEqual(self.files(), ["commit.json"])
+
+    def test_cline_unwrap_only_whole_wrapper(self):
+        f = cline_prompt_gate.unwrap
+        self.assertEqual(f('<user_input mode="act">commit まで</user_input>'), "commit まで")
+        self.assertEqual(f('<user_input mode="act">x</user_input>'), "x")
+        for raw in ('<user_input mode="other">commit まで</user_input>',
+                    'commit まで<user_input mode="act">y</user_input>',
+                    '<user_input mode="act">commit まで</user_input> 追記'):
+            self.assertEqual(f(raw), raw)
+            self.assertNotEqual(_prompt_gate.decide(f(raw), "")["write"], "commit")
+
+    def test_cline_wrapper_logs_shape_without_prompt_text(self):
+        self.run_cline(io.StringIO(json.dumps({"taskId": "t", "userPromptSubmit": {"prompt": "秘密の本文 commit まで"}})))
+        self.run_cline(io.StringIO(json.dumps({"other": "x"})))
+        lines = [json.loads(line) for line in cline_prompt_gate.LOG_PATH.read_text(encoding="utf-8").splitlines()]
+        self.assertEqual([r["result"] for r in lines], ["OK", "UNREADABLE"])
+        self.assertEqual(lines[0]["shape"], {"taskId": "str", "userPromptSubmit": {"prompt": "str"}})
+        self.assertEqual(lines[1]["shape"], {"other": "str"})
+        self.assertNotIn("秘密の本文", cline_prompt_gate.LOG_PATH.read_text(encoding="utf-8"))
+
+    def test_cline_wrapper_reads_utf8_bytes(self):
+        class Bytes:
+            buffer = io.BytesIO(json.dumps({"userPromptSubmit": {"prompt": "commitまで"}},
+                                           ensure_ascii=False).encode("utf-8"))
+        data = self.run_cline(Bytes())
+        self.assertIn("COMMIT_RUN", data["contextModification"])
         self.assertEqual(self.files(), ["commit.json"])
 
 

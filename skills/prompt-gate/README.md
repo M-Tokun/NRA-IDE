@@ -10,6 +10,7 @@ AGENTS.md §7「合言葉の完全一致」の機械側。利用者の入力を�
 |---|---|
 | `_prompt_gate.py` | 共通判定（経路 10〜99）。`decide()` は副作用なし、`apply()` が承認の書込み・消去と decline を行う |
 | `claude_prompt_gate.py` | Claude Code の UserPromptSubmit hook のラッパー |
+| `cline_prompt_gate.py` | Cline の UserPromptSubmit hook のラッパー（`.clinerules/hooks/UserPromptSubmit.ps1` が呼ぶ）。入力は平坦 `{"prompt"}` と入れ子 `{"userPromptSubmit":{"prompt"}}` の両方を受ける。解釈できなければ承認を消し errorMessage で知らせる |
 | `../../scripts/approval.py` | 承認ファイルの書込み・消費（1回限り）・消去 |
 
 承認ファイル：`.agent_state/approvals/push.json`・`commit.json`（git 管理外）。
@@ -34,6 +35,13 @@ AI が文脈を読み違えても、承認がなければ push.py・commit.py �
 4. セッション開始時に動く hook がある（保留中の計画・承認を消す）。
 
 Claude Code 以外のホストは未確認。対応する hook がなければ承認は作られず、push・commit は止まる（安全側）。
+
+Cline（2026-11-26 追加、2026-11-27 実機で確認）：Cline で commit・push が `NO_APPROVAL` で止まった原因は2つ。(1) hook が未登録だった。(2) Cline は入力を `<user_input mode="act">…</user_input>`（Plan では `mode="plan"`）で包んで渡すため、完全一致しなかった。
+- 確認済み：`UserPromptSubmit.ps1` は Cline 4.1.22 で発火する。入力は入れ子 `{"userPromptSubmit":{"prompt"}}`。
+- 対処：`cline_prompt_gate.py` が、全体がこの包みの形のときだけ中身を取り出して判定する。それ以外は手を加えない。
+- 未確認：contextModification の注入が AI に届くか。承認の書込みとは別。
+- 記録：発火ごとに `.agent_state/hooks/prompt_gate_cline.jsonl`（入力のキー構造・文字数・判定。本文は記録しない）と `prompt_gate_cline_ps1.log`（呼出し時刻）に追記する。
+前提3（承認への AI の書込み拒否）と前提4（セッション開始時の消去）は、既存の agents-md-guard（Cline の PreToolUse・TaskStart）が担う。
 
 ## 限界
 

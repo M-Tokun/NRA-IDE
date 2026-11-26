@@ -109,6 +109,37 @@ class CommitGateTest(unittest.TestCase):
         code, lines = self.run_commit("b.txt", "audit/file_operations/r.md")
         self.assertEqual((code, lines[-1]), (0, "DONE"))
 
+    def write_report(self, body):
+        report = self.repo / "audit" / "file_operations" / "r.md"
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(REPORT.format(body=body), encoding="utf-8")
+
+    def test_already_staged_delete_with_report_passes(self):
+        # 2026-11-27 の不具合：git rm 済み（作業ツリーにも index にもない）だと git add が失敗した
+        approval.write("commit")
+        git(self.repo, "rm", "-q", "b.txt")
+        self.write_report("DEL NRA-IDE/b.txt")
+        git(self.repo, "add", "audit/file_operations/r.md")
+        code, lines = self.run_commit("b.txt", "audit/file_operations/r.md")
+        self.assertEqual((code, lines[-1]), (0, "DONE"))
+        self.assertEqual(git(self.repo, "ls-files", "b.txt"), b"")
+
+    def test_delete_and_edit_mixed_passes(self):
+        approval.write("commit")
+        (self.repo / "b.txt").unlink()
+        (self.repo / "a.txt").write_text("changed\n", encoding="utf-8")
+        self.write_report("DEL NRA-IDE/b.txt")
+        code, lines = self.run_commit("a.txt", "b.txt", "audit/file_operations/r.md")
+        self.assertEqual((code, lines[-1]), (0, "DONE"))
+        self.assertEqual(self.head_count(), 2)
+
+    def test_nonexistent_path_stops_with_cached_differs(self):
+        approval.write("commit")
+        (self.repo / "a.txt").write_text("changed\n", encoding="utf-8")
+        code, lines = self.run_commit("a.txt", "never.txt")
+        self.assertEqual(lines[-2], "reason: CACHED_DIFFERS")
+        self.assertEqual(self.head_count(), 1)
+
     def test_report_without_frontmatter_stops(self):
         approval.write("commit")
         (self.repo / "b.txt").unlink()
