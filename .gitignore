@@ -88,6 +88,7 @@ env/
 !/skills/file-operation-report/
 !/skills/document-paper-writing/
 !/skills/outside-root-guard/
+!/skills/prompt-gate/
 !/skills/README.md
 
 # NRA-IDE clinical session outputs

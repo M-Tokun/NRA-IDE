@@ -1,0 +1,125 @@
+"""skills/prompt-gate（合言葉の機械判定）と scripts/approval.py の試験。実リポジトリの承認ファイルには触れない。"""
+from __future__ import annotations
+
+import contextlib
+import io
+import json
+import pathlib
+import sys
+import tempfile
+import unittest
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "skills" / "prompt-gate"))
+sys.path.insert(0, str(ROOT / "scripts"))
+import _prompt_gate  # noqa: E402
+import approval  # noqa: E402
+import claude_prompt_gate  # noqa: E402
+
+
+class DecideTest(unittest.TestCase):
+    def check(self, prompt, plan, line, write, decline, context):
+        r = _prompt_gate.decide(prompt, plan)
+        self.assertEqual((r["line"], r["write"], r["decline"], r["context"]), (line, write, decline, context), prompt)
+
+    def test_git_push_with_plan(self):
+        self.check("git push", "p.json", 20, "push", False, ["PUSH_RUN"])
+
+    def test_git_push_with_surrounding_spaces(self):
+        self.check(" 　git push　\n", "p.json", 20, "push", False, ["PUSH_RUN"])
+
+    def test_git_push_without_plan(self):
+        self.check("git push", "", 30, "", False, ["PUSH_PREPARE"])
+
+    def test_commit_made_forms(self):
+        for text in ("commit まで", "commitまで", "commit　まで", "  commit まで  "):
+            self.check(text, "", 40, "commit", False, ["COMMIT_RUN"])
+
+    def test_commit_made_with_plan_does_not_decline_silently(self):
+        # 「commit まで」は push の承認ではない。計画は残すが push 承認は書かない
+        self.check("commit まで", "p.json", 40, "commit", False, ["COMMIT_RUN"])
+
+    def test_not_exact(self):
+        for text in ("commit  まで", "commitして下さい", "git push origin", "Git Push", "pushして"):
+            self.check(text, "", 70, "", False, ["NOT_EXACT"])
+
+    def test_other_input_with_plan_declines(self):
+        self.check("こんにちは", "p.json", 70, "", True, ["PUSH_DECLINED"])
+        self.check("pushして", "p.json", 70, "", True, ["PUSH_DECLINED", "NOT_EXACT"])
+
+    def test_other_input_without_plan(self):
+        self.check("こんにちは", "", 70, "", False, [])
+
+
+class ApplyTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        base = pathlib.Path(self.tmp.name)
+        self.saved = (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline)
+        approval.APPROVAL_DIR = base / "approvals"
+        _prompt_gate.PUSH_STATE = base / "push_route_state.json"
+        self.declined = []
+        _prompt_gate._decline = lambda: (self.declined.append(1), _prompt_gate.PUSH_STATE.unlink(missing_ok=True))
+
+    def tearDown(self):
+        approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline = self.saved
+        self.tmp.cleanup()
+
+    def files(self):
+        d = approval.APPROVAL_DIR
+        return sorted(p.name for p in d.iterdir()) if d.exists() else []
+
+    def plan(self, path="local_reports/push_gate/plan_x.json"):
+        _prompt_gate.PUSH_STATE.write_text(json.dumps({"plan": path}), encoding="utf-8")
+
+    def test_push_approval_carries_plan_and_is_single_use(self):
+        self.plan()
+        _prompt_gate.apply("git push")
+        self.assertEqual(self.files(), ["push.json"])
+        self.assertEqual(approval.consume("push", plan="local_reports/push_gate/plan_x.json"), "")
+        self.assertEqual(approval.consume("push", plan="local_reports/push_gate/plan_x.json"), "NO_APPROVAL")
+
+    def test_plan_mismatch_is_rejected_and_consumed(self):
+        self.plan("a.json")
+        _prompt_gate.apply("git push")
+        self.assertEqual(approval.consume("push", plan="b.json"), "APPROVAL_MISMATCH")
+        self.assertEqual(self.files(), [])
+
+    def test_other_input_clears_approvals_and_declines(self):
+        self.plan()
+        _prompt_gate.apply("commit まで")
+        self.assertEqual(self.files(), ["commit.json"])
+        context = _prompt_gate.apply("ありがとう")
+        self.assertEqual(self.files(), [])
+        self.assertEqual(self.declined, [1])
+        self.assertIn("PUSH_DECLINED", context)
+
+    def test_commit_then_push_keeps_only_latest(self):
+        _prompt_gate.apply("commit まで")
+        self.plan()
+        _prompt_gate.apply("git push")
+        self.assertEqual(self.files(), ["push.json"])
+
+    def test_claude_wrapper_output_and_invalid_input(self):
+        out = io.StringIO()
+        sys.stdin = io.StringIO(json.dumps({"prompt": "commit まで"}))
+        try:
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(claude_prompt_gate.main(), 0)
+        finally:
+            sys.stdin = sys.__stdin__
+        data = json.loads(out.getvalue())
+        self.assertEqual(data["hookSpecificOutput"]["hookEventName"], "UserPromptSubmit")
+        self.assertIn("COMMIT_RUN", data["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(self.files(), ["commit.json"])
+        sys.stdin = io.StringIO("not json")
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(claude_prompt_gate.main(), 0)
+        finally:
+            sys.stdin = sys.__stdin__
+        self.assertEqual(self.files(), [])
+
+
+if __name__ == "__main__":
+    unittest.main()
