@@ -14,9 +14,17 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import _prompt_gate  # noqa: E402
 
 
+def _read_stdin() -> str:
+    """hook の入力は UTF-8。Windows の既定（cp932）で読むと日本語が化けて一致しない。"""
+    buffer = getattr(sys.stdin, "buffer", None)
+    if buffer is None:  # 試験で StringIO に差し替えたとき
+        return sys.stdin.read()
+    return buffer.read().decode("utf-8")
+
+
 def main() -> int:
     try:
-        payload = json.loads(sys.stdin.read() or "{}")
+        payload = json.loads(_read_stdin() or "{}")
         prompt = payload.get("prompt")
         if not isinstance(prompt, str):
             raise ValueError("prompt is not a string")

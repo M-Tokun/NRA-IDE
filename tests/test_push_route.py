@@ -54,6 +54,9 @@ class FakeRunner:
             return 0, "subject"
         elif args[:2] == ["git", "branch"]:
             return 0, "master"
+        elif args[:2] == ["git", "config"]:
+            q = self.queues.get("config")
+            return q.pop(0) if q else (0, ".githooks")  # 既定：hook は有効
         else:
             raise AssertionError(f"unexpected command: {args}")
         q = self.queues.get(key)
@@ -66,18 +69,25 @@ class PushRouteTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         gate = pathlib.Path(self.tmp.name)
-        self.saved = (push.GATE_DIR, push.STATE, push.LOG, push.RUN, push.ROOT)
+        self.saved = (push.GATE_DIR, push.STATE, push.LOG, push.RUN, push.ROOT, push.approval.APPROVAL_DIR)
         push.ROOT = gate
         push.GATE_DIR = gate / "local_reports" / "push_gate"
         push.STATE = push.GATE_DIR / "push_route_state.json"
         push.LOG = push.GATE_DIR / "push_route_log.jsonl"
+        push.approval.APPROVAL_DIR = gate / ".agent_state" / "approvals"
+        (gate / ".githooks").mkdir()
+        (gate / ".githooks" / "pre-push").write_text("#!/bin/sh\n", encoding="utf-8")
+        self.approve = True  # run の前に、利用者の「git push」に当たる承認を書く
 
     def tearDown(self):
-        push.GATE_DIR, push.STATE, push.LOG, push.RUN, push.ROOT = self.saved
+        push.GATE_DIR, push.STATE, push.LOG, push.RUN, push.ROOT, push.approval.APPROVAL_DIR = self.saved
         self.tmp.cleanup()
 
     def go(self, runner, *argv):
         push.RUN = runner
+        if argv and argv[0] == "run" and self.approve and push.STATE.exists():
+            plan = json.loads(push.STATE.read_text(encoding="utf-8"))["plan"]
+            push.approval.write("push", plan=plan)
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             code = push.main(list(argv))
@@ -258,6 +268,41 @@ class PushRouteTest(unittest.TestCase):
             with self.subTest(stage=stage):
                 _, last, _ = self.go(r, stage)
                 self.assertIsNone(re.search(r"\d", last), last)
+
+    # 承認（prompt_gate が書く）がなければ run は送らない
+    def test_run_without_approval_stops_before_push(self):
+        r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))])
+        self.go(r, "prepare")
+        self.approve = False
+        code, last, _ = self.go(r, "run")
+        self.assertStopped(code, last, "30", "NOT_STARTED")
+        self.assertEqual(self.reasons()[-1], "NO_APPROVAL")
+        self.assertFalse(any(args[:2] == ["git", "push"] for args, _ in r.calls))
+        self.assertFalse(push.STATE.exists())
+
+    def test_run_with_approval_for_other_plan_stops(self):
+        r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))])
+        self.go(r, "prepare")
+        self.approve = False
+        push.approval.write("push", plan="local_reports/push_gate/plan_other.json")
+        code, last, _ = self.go(r, "run")
+        self.assertEqual(self.reasons()[-1], "APPROVAL_MISMATCH")
+        self.assertFalse(any(args[:2] == ["git", "push"] for args, _ in r.calls))
+
+    # hook が無効なら prepare・run とも止まる
+    def test_hooks_inactive_stops_prepare(self):
+        r = FakeRunner(config=[(1, "")])
+        code, last, _ = self.go(r, "prepare")
+        self.assertStopped(code, last, "10", "NOT_STARTED")
+        self.assertEqual(self.reasons()[-1], "HOOKS_INACTIVE")
+        self.assertFalse(any(args[:2] == ["git", "fetch"] for args, _ in r.calls))
+
+    def test_hooks_inactive_stops_run(self):
+        r = FakeRunner(fetch=[(0, "")], prepare=[(0, json.dumps(ctx()))], config=[(0, ".githooks"), (0, "")])
+        self.go(r, "prepare")
+        code, last, _ = self.go(r, "run")
+        self.assertEqual(self.reasons()[-1], "HOOKS_INACTIVE")
+        self.assertFalse(any(args[:2] == ["git", "push"] for args, _ in r.calls))
 
 
 if __name__ == "__main__":

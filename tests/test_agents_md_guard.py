@@ -29,6 +29,9 @@ class CodexAgentsMdGuardTests(unittest.TestCase):
         self.patches = [
             mock.patch.object(_common, "AGENTS_MD_PATH", str(self.agents_path)),
             mock.patch.object(_common, "MARKER_ROOT", str(self.marker_root)),
+            # SessionStart は保留中の承認・push 計画を消す。実リポジトリの状態に触れないよう一時フォルダへ向ける
+            mock.patch.object(_common, "APPROVAL_DIR", str(self.root / "approvals")),
+            mock.patch.object(_common, "PUSH_STATE_PATH", str(self.root / "push_route_state.json")),
         ]
         for patcher in self.patches:
             patcher.start()

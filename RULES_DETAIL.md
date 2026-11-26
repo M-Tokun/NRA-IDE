@@ -1,7 +1,7 @@
 # RULES_DETAIL.md — NRA-IDE 実行詳細規則
 ```text
 #ROUTE RULES_DETAIL v2 ; 正本。本文と食い違えば 990。番号はこのブロック内だけ（AGENTS.md の経路番号とは別）
-#RETURN 990=STOP 999=DONE ; 998は欠番。呼び出し元へは語だけを返す。番号をブロックの外へ持ち出さない
+#RETURN 990=STOP 999=DONE ; 998・340・350は欠番（stage・commit は AGENTS.md 59 の scripts/commit.py）。呼び出し元へは語だけを返す。番号をブロックの外へ持ち出さない
 #CONST ; 全経路で常に成立。破れたら 990
 C1 秘密値（password・token・秘密鍵・.envの値）を出力・ログ・commit・メッセージに含めない。値の確認だけのために開かない。認証済みCLIの内部利用とAIの値読取は分ける ; §4
 C2 秘密値の入力・変更・再発行は利用者が行う。漏えい疑いは値を再掲せず、対象と対処だけ報告 ; §4
@@ -23,19 +23,19 @@ C8 5W1H適用境界は skills/thought-boundary-5w1h/SKILL.md による（Git制�
 28  GOTO 990
 200 IF 利用者記述 AND 箇所の承認なし: 箇所・原文・問題と根拠・修正案・影響を提示 GOTO 990 ; §2
 202 IF (新規の文書/論文作成 OR 節・定義・公理・数式の追加/改訂) AND NOT 箇所と内容が明示済みの1行誤字修正: GOTO 400
-205 既存差分を保持し最小差分で編集。AGENTS.md は候補で 210 の検査を先に行い、最後に1回の編集で反映する（反映後の照合は再読み込みの後） GOTO 210
+205 既存差分を保持し最小差分で編集。AGENTS.md は候補で 210 の検査を先に行い、最後に1回の編集で反映する（反映後の照合は再読み込みの後） GOTO 207
+207 IF DEL・MOVE・COPY・RESTORE を行った: GOSUB skills/file-operation-report/SKILL.md の40 ; 戻り: DONE / STOP
+208 IF 戻り=STOP: GOTO 990
 210 IF 想定外ファイル OR 既存差分喪失 OR 意図しない生成物 OR diff --check失敗 OR 関連検証失敗 OR C4違反 GOTO 700 ; §2
     ELSE GOTO 999
 300 IF 選択=1: GOTO 310 ; §3
 301 IF 選択=2: GOTO 320 ; §3
-302 IF 選択=3: GOTO 990 ; §3 push は AGENTS.md 55〜57 で処理。ここへの到達は経路逸脱
+302 IF 選択=3: GOTO 990 ; §3 push は AGENTS.md 55・57 で処理。ここへの到達は経路逸脱
 303 GOTO 990 ; rebase・filter-repo・force・branch・restore・曖昧・無回答
 310 読取のみ ; §3 GOTO 999
-320 IF 関連テストを特定できない: 未検証を記録 GOTO 340 ; §3
+320 IF 関連テストを特定できない: 未検証を記録 GOTO 999 ; §3
     ELSE 予想所要時間を1回提示（A3）。IF >120秒 AND 実行方法の確認なし GOTO 990 ELSE GOTO 330
-330 完走まで待つ（途中確認をしない）。終了後にログ末尾だけ見る。IF 失敗 GOTO 700 ELSE GOTO 340 ; §3
-340 今回対象だけを明示パスでstage。Git管理外の一時ファイルを追加しない ; §3 GOTO 350
-350 IF cached差分≠対象 GOTO 990 ELSE 内容に対応したメッセージ（削除は対象と理由を明記）でcommit。IF 失敗 GOTO 700 ELSE commit IDを報告 GOTO 999 ; §3
+330 完走まで待つ（途中確認をしない）。終了後にログ末尾だけ見る。IF 失敗 GOTO 700 ELSE GOTO 999 ; §3
 400 GOSUB skills/document-paper-writing/SKILL.md ; 戻り: DONE / STOP
 410 IF 戻り=STOP: GOTO 990
 420 GOTO 205

@@ -7,7 +7,6 @@
       "Bash(python scripts/check_links.py)",
       "Bash(python -m unittest tests.test_nra_ide_reference -v)",
       "Bash(python nra-core/implementation/nra_ide_foundation_fixed_JP.py)",
-      "Bash(git commit -m ' *)",
       "WebFetch(domain:zenodo.org)",
       "Bash(python -m unittest discover -v)",
       "Bash(echo \"EXIT_CODE=$?\")",
@@ -62,6 +61,8 @@
       "PowerShell(git cherry-pick *)"
     ],
     "deny": [
+      "Bash(git commit *)",
+      "PowerShell(git commit *)",
       "Bash(git push)",
       "Bash(git push *)",
       "PowerShell(git push)",
@@ -111,6 +112,18 @@
           {
             "type": "command",
             "command": "python -c \"import os,runpy; runpy.run_path(os.path.join(os.environ['CLAUDE_PROJECT_DIR'],'skills','outside-root-guard','claude_outside.py'),run_name='__main__')\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,runpy; runpy.run_path(os.path.join(os.environ['CLAUDE_PROJECT_DIR'],'skills','prompt-gate','claude_prompt_gate.py'),run_name='__main__')\"",
             "timeout": 10
           }
         ]

@@ -38,4 +38,5 @@ Claude Code 以外のホストは未確認。対応する hook がなければ�
 ## 限界
 
 - 承認ファイルはリポジトリ内のファイルで、OS の境界ではない。スクリプト経由の書込みは文字列ガードで見えない。
-- 登録（settings の hooks）は P-ORDER 30 で行う。登録前は何も動かない。
+- Claude Code の登録先は `.claude/settings.json` の `hooks.UserPromptSubmit`。2026-11-26 に実機で、承認の書込み（「commitまで」）・消去（その他の入力）・NOT_EXACT の注入を確認した。
+- hook の入力は UTF-8 のバイト列で届く。Windows の標準入力の既定（cp932）で読むと日本語の合言葉が一致しないため、ラッパーはバイト列から UTF-8 で読む。

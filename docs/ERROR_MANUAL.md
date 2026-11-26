@@ -48,7 +48,7 @@ E4 未確認のまま完了・成功へ読み替えない
 24  IF 出力に "は実行しません（AGENTS.md §7）" を含む: GOTO 300
 25  IF 出力に "git pushは直接実行しません" を含む: GOTO 200
 26  IF 出力に "\"reason\": \"PLAN_REQUIRED\"" を含む: GOTO 200
-27  IF push.py の最終行が "STOP " で始まる: GOTO 210
+27  IF push.py または commit.py の最終行が "STOP" で始まる: GOTO 210
 28  IF push_gate.py の出力に "\"reason\":" を含む: GOTO 210
 29  IF 出力に "error:" または "FAIL" または "UNAVAILABLE" を含む: GOTO 400
 30  IF 終了コード != 0: GOTO 400
@@ -70,8 +70,8 @@ E4 未確認のまま完了・成功へ読み替えない
     エラー経路内ではコマンドを実行せず一旦停止し、次ターンで固定入口 python -B scripts/push.py prepare から開始することを報告する（対象外コミットを含む場合は AGENTS.md §7 選択範囲4 として確認）。
     GOTO 990
 
-210 push 経路・ゲート停止（scripts/push.py / scripts/push_gate.py 停止）：
-    reason 表（docs/PUSH_PROCEDURE.md §2）は、利用者の問い合わせ後に意味を引くときに1回だけ参照する（他文書へ遷移しない）。
+210 push・commit の固定入口・ゲート停止（scripts/push.py / scripts/push_gate.py / scripts/commit.py 停止）：
+    reason 表（push は docs/PUSH_PROCEDURE.md §2、commit は scripts/commit.py の冒頭注記）は、利用者の問い合わせ後に意味を引くときに1回だけ参照する（他文書へ遷移しない）。commit.py の STOP は stage を戻さない。
     211 IF send_state == "UNKNOWN": 再送禁止。最後の2行（reason・send_state）をそのまま報告する。GOTO 990
     212 IF send_state == "COMMAND_SUCCEEDED_UNVERIFIED": 再送禁止。最後の2行（reason・send_state）をそのまま報告する。GOTO 990
     213 自動再試行・自動 merge/rebase・独自タイムアウト緩和・無断修正を行わず、最後の2行（reason・send_state）をそのまま報告し、記録ファイル（local_reports/push_gate/push_route_log.jsonl、ゲートまで進んだ場合は local_reports/push_gate/<ID>/result.json）のパスを添える。reason の意味づけ・原因の推測は行わない。GOTO 990
@@ -107,6 +107,6 @@ E4 未確認のまま完了・成功へ読み替えない
 | `22`–`23` | `hook入力を検証できません` 等 | Hook ペイロードまたはシェル文字列の形式不正 | リモート障害・ブランチ先間違い | `110` → `990 STOP`（コマンド文字列を報告） |
 | `24` | `...は実行しません（AGENTS.md §7）` | force / 履歴改変 / フック回避 / remote ref 削除の試行 | リモート障害・Reload Window | `300` → `990 STOP`（利用者管理の手順へ返す） |
 | `25`–`26` | `PLAN_REQUIRED` / `git pushは直接実行しません` | 素の `git push` を実行し `NRA_PUSH_PLAN` が未設定 | リモート（GitHub）障害・Reload Window・ブランチ先間違い | `200` → `990 STOP`（次ターンで `python -B scripts/push.py prepare`） |
-| `27`–`28` | `STOP <send_state>` / その他の `reason` | `prepare` 後の変更・incoming あり・ゲート不一致・通信中断 | Reload Window | `210` → `990 STOP`（`UNKNOWN`/`UNVERIFIED` は再送禁止、`result.json` 報告） |
+| `27`–`28` | `STOP <send_state>`（push.py）・`STOP`（commit.py）/ その他の `reason` | `prepare` 後の変更・incoming あり・ゲート不一致・通信中断 | Reload Window | `210` → `990 STOP`（`UNKNOWN`/`UNVERIFIED` は再送禁止、`result.json` 報告） |
 | `29`–`30` | `error:` / `FAIL` / `UNAVAILABLE` / 終了コード `!= 0` | 検証スクリプト不一致またはコマンド失敗（`;` 連結時の終了コード `0` を含む） | — | `400` → `990 STOP`（該当箇所を報告し承認待ち） |
 | `31` | `nra_depth_guard` 停止 | 多段探索の深度上限到達 | — | `500` → `990 STOP`（探索ループ終了） |

@@ -14,7 +14,10 @@ class ClineGuardTests(unittest.TestCase):
         self.contract = self.root / 'AGENTS.md'
         self.text = '# Contract\n全文を読む。\n'
         self.contract.write_text(self.text, encoding='utf-8')
-        for name, value in (('AGENTS_MD_PATH', str(self.contract)), ('MARKER_ROOT', str(self.root / 'markers'))):
+        # SessionStart は保留中の承認・push 計画を消す。実リポジトリの状態に触れないよう一時フォルダへ向ける
+        for name, value in (('AGENTS_MD_PATH', str(self.contract)), ('MARKER_ROOT', str(self.root / 'markers')),
+                            ('APPROVAL_DIR', str(self.root / 'approvals')),
+                            ('PUSH_STATE_PATH', str(self.root / 'push_route_state.json'))):
             patcher = mock.patch.object(_common, name, value); patcher.start(); self.addCleanup(patcher.stop)
     def invoke(self, fn, payload):
         raw = payload if isinstance(payload, str) else json.dumps(payload)

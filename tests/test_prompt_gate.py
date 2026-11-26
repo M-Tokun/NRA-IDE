@@ -120,6 +120,18 @@ class ApplyTest(unittest.TestCase):
             sys.stdin = sys.__stdin__
         self.assertEqual(self.files(), [])
 
+    def test_claude_wrapper_reads_utf8_bytes(self):
+        # 実機（Windows）では標準入力の既定が cp932。hook の入力は UTF-8 のバイト列で届く
+        class Bytes:
+            buffer = io.BytesIO(json.dumps({"prompt": "commitまで"}, ensure_ascii=False).encode("utf-8"))
+        sys.stdin = Bytes()
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(claude_prompt_gate.main(), 0)
+        finally:
+            sys.stdin = sys.__stdin__
+        self.assertEqual(self.files(), ["commit.json"])
+
 
 if __name__ == "__main__":
     unittest.main()

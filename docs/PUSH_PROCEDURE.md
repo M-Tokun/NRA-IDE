@@ -8,10 +8,10 @@ title: "push 手順書（Cline・全AI共通）"
 
 # push 手順書（Cline・全AI共通）
 
-**通常経路の正本は AGENTS.md 55〜57。本書を読むのは push が停止したときだけ。** 通常は読まない（時間とトークンを使うため）。
+**通常経路の正本は AGENTS.md 55・57。本書を読むのは push が停止したときだけ。** 通常は読まない（時間とトークンを使うため）。
 
 対象: NRA-IDE リポジトリで `git push` を行うAIエージェント（特にCline）。
-上位規則は `AGENTS.md` 55〜57・§6・§7。この文書は、その規則を満たしたうえで
+上位規則は `AGENTS.md` 55・57・§6・§7。この文書は、その規則を満たしたうえで
 **`scripts/push.py` を入口とする固定経路と、失敗時の確認方法**を書く。規則を緩める文書ではない。
 
 ---
@@ -43,13 +43,14 @@ title: "push 手順書（Cline・全AI共通）"
 以下の番号は `scripts/push.py` の経路番号である。
 
 ```text
-10 PLAN: push.py prepare（fresh fetch・送信範囲確認・plan作成）
+10 PLAN: push.py prepare（hooksPath の照合・fresh fetch・送信範囲確認・plan作成）
    IF STOP: GOTO 90
    ELSE: GOTO 20
 20 ASK: 送信先・branch・HEAD・全送信commit・incoming・planを提示して応答終了。未回答は待機
-   IF 直後の利用者入力 = git push（前後空白を除いて完全一致）: GOTO 30
-   ELSE: push.py decline。GOTO 90
-30 PUSH: push.py run（plan指定・ゲート検査・通常push）
+   直後の入力の判定と decline は prompt_gate が行う（AGENTS.md §7）
+   IF 文脈に PUSH_RUN（承認 push が書かれた）: GOTO 30
+   ELSE: GOTO 90
+30 PUSH: push.py run（承認の消費・hooksPath の照合・plan指定・ゲート検査・通常push）
    IF STOP: GOTO 90
    ELSE: GOTO 40
 40 VERIFY: runが再fetch・送信先OID・HEAD・双方向差分を照合
@@ -74,14 +75,10 @@ python -B scripts/push.py prepare --remote origin --branch master
 
 ### 手順2 利用者入力の分岐（20）
 
-- 提示の直後の入力が、前後空白を除き **`git push` と完全一致**した場合だけ手順3へ進む。
-- 「pushして」「進めて」「commitまで」など、それ以外の入力では次を実行し、`STOP NOT_STARTED`（記録の step は 20）で停止する。未回答の間は待機し、承認へ読み替えない。
-
-```text
-python -B scripts/push.py decline
-```
-
-この入力条件の確認はAIが行う。入口・plan・ゲートは利用者の確認記録を機械的に照合する実装ではなく、その機械化は未実装である。
+- 判定は利用者の入力を受ける hook（`skills/prompt-gate/`）が行い、AIは判定しない。
+- 提示の直後の入力が、前後空白を除き **`git push` と完全一致**した場合だけ、hook が承認（push・plan）を書き、文脈に PUSH_RUN を注入する。AI は手順3へ進む。
+- 「pushして」「進めて」「commitまで」など、それ以外の入力では hook が `push.py decline` を実行し（記録の step は 20、`DECLINED`）、commit・push を含む不一致の入力には「完全一致していません」を注入する。未回答の間は待機し、承認へ読み替えない。
+- 承認がないまま run を呼んでも、run は `NO_APPROVAL` で止まり送信しない。
 
 ### 手順3 送信と送信後照合（30 → 40 → 50）
 
@@ -124,7 +121,10 @@ python -B scripts/push.py run
 | `NO_CURRENT_BRANCH` | step 10・NOT_STARTED。現在の branch を取得できない（detached HEAD など） | branch の状態を報告 |
 | `FETCH_FAILED` | step 10（NOT_STARTED）または step 40（COMMAND_SUCCEEDED_UNVERIFIED）。fetch の失敗 | step 40 は送信済みの可能性があるので再送しない |
 | `TIMEOUT` | step 10（NOT_STARTED）・30（UNKNOWN）・40（COMMAND_SUCCEEDED_UNVERIFIED）。入口の `TIMEOUT` を超過 | 30・40 は再送しない。上限の緩和は相談事項 |
-| `DECLINED` | step 20・NOT_STARTED。提示の直後の入力が `git push` 以外 | 次の入力で prepare からやり直す |
+| `DECLINED` | step 20・NOT_STARTED。提示の直後の入力が `git push` 以外（prompt_gate が decline） | 次の入力で prepare からやり直す |
+| `HOOKS_INACTIVE` | step 10・30・NOT_STARTED。`core.hooksPath` が `.githooks` でない、または pre-push がない（pre-push のゲートが働かない） | hook 設定の状態を報告。設定の変更は利用者が行う |
+| `NO_APPROVAL` | step 30・NOT_STARTED。承認ファイル（push）がない | 提示の直後に「git push」が入力されていない。prepare からやり直す |
+| `APPROVAL_MISMATCH` | step 30・NOT_STARTED。承認の計画が状態ファイルの計画と違う | prepare からやり直す |
 | `NO_PREPARED_PLAN` | step 30・NOT_STARTED。prepare を経ていない、または停止後に run した | prepare からやり直す |
 | `PUSH_FAILED` | step 30・UNKNOWN。push が失敗し、ゲートの判定もない | 送信の有無が不明なので再送しない |
 | `MISMATCH` | step 40・COMMAND_SUCCEEDED_UNVERIFIED。送信後の照合で送信先 OID または差分が不一致 | 再送しない。照合結果を報告 |
@@ -164,5 +164,6 @@ remote に同名 branch が無い場合、`remote_oid` は全て `0` になり�
 | push は個別確認が必要な操作 | `AGENTS.md` §6 |
 | fresh fetch、incoming 時は停止、force 禁止 | `AGENTS.md` §7、`RULES_DETAIL.md` 300〜370 |
 | plan の仕様（実行許可ではない、1 ref のみ、再検証） | `scripts/push_gate.py` の `prepare`・`check`・`unchanged` |
-| 固定入口、利用者入力の分岐、停止・完了の語彙、送信後照合 | `scripts/push.py`、`AGENTS.md` 55〜57 |
+| 固定入口、停止・完了の語彙、送信後照合 | `scripts/push.py`、`AGENTS.md` 55・57 |
+| 利用者入力の判定（合言葉の完全一致）・承認ファイル | `skills/prompt-gate/`、`scripts/approval.py`、`AGENTS.md` §7 |
 | フック本体 | `.githooks/pre-push` |

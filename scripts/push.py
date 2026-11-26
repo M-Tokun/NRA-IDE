@@ -15,7 +15,10 @@ STOP の後に 10 へ自動で戻らない。やり直すときは、利用者�
 止まった場所（step）・detail・送信状態は記録（local_reports/push_gate/push_route_log.jsonl）に残し、後から追う。reason は STOP の直前の行にも出す。
 send_state：NOT_STARTED（送っていない）／UNKNOWN（送ったか不明）／COMMAND_SUCCEEDED_UNVERIFIED（push は成功、照合前）／VERIFIED。
 
-この入口は push を許可する仕組みではない。利用者の確認（git push の入力）を機械的に確かめるのは段階2。
+この入口は push を許可する仕組みではない。利用者の確認（git push の入力）は skills/prompt-gate が
+承認ファイルに書き、run がそれを消費する（1回限り。承認の計画 ID が状態ファイルの計画と一致すること）。
+prepare・run は core.hooksPath == .githooks を確かめる（hook が無効なら pre-push のゲートが働かないため）。
+追加の reason：HOOKS_INACTIVE（step 10・30）、NO_APPROVAL・APPROVAL_MISMATCH（step 30）。
 """
 from __future__ import annotations
 
@@ -28,6 +31,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+import approval  # noqa: E402
+
 GATE_DIR = ROOT / "local_reports" / "push_gate"
 STATE = GATE_DIR / "push_route_state.json"
 LOG = GATE_DIR / "push_route_log.jsonl"
@@ -86,6 +92,12 @@ def _git(args, timeout):
     return code, out.strip()
 
 
+def _hooks_active():
+    """core.hooksPath が .githooks を指し、pre-push があるか。"""
+    code, out = _git(["config", "--get", "core.hooksPath"], TIMEOUT["10"])
+    return code == 0 and out.rstrip("/") == ".githooks" and (ROOT / ".githooks" / "pre-push").is_file()
+
+
 def _new_plan_path():
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     path = GATE_DIR / f"plan_{stamp}.json"
@@ -110,6 +122,8 @@ def _too_long_path(base, head):
 
 # ---- 10 PLAN ----------------------------------------------------------------
 def step10(remote, branch):
+    if not _hooks_active():
+        return _stop("10", "HOOKS_INACTIVE")
     code, _ = _git(["fetch", "--quiet", remote], TIMEOUT["10"])
     if code != 0:
         return _stop("10", "TIMEOUT" if code is None else "FETCH_FAILED")
@@ -159,6 +173,11 @@ def run():
     if not STATE.exists():
         return _stop("30", "NO_PREPARED_PLAN")
     st = json.loads(STATE.read_text(encoding="utf-8"))
+    reason = approval.consume("push", plan=st["plan"])
+    if reason:
+        return _stop("30", reason)
+    if not _hooks_active():
+        return _stop("30", "HOOKS_INACTIVE")
     env = dict(os.environ, NRA_PUSH_PLAN=st["plan"])
     code, out = RUN(["git", "push", "--no-progress", st["remote"], st["branch"]], TIMEOUT["30"], env=env)
     if code is None:

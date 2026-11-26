@@ -13,7 +13,10 @@ class SharedGuardTests(unittest.TestCase):
         self.contract = self.root / "AGENTS.md"
         self.contract.write_text("# Contract\n全文を読む。\n", encoding="utf-8")
         self.patches = [mock.patch.object(_common, "AGENTS_MD_PATH", str(self.contract)),
-                        mock.patch.object(_common, "MARKER_ROOT", str(self.root / "markers"))]
+                        mock.patch.object(_common, "MARKER_ROOT", str(self.root / "markers")),
+                        # SessionStart は保留中の承認・push 計画を消す。実リポジトリの状態に触れないよう一時フォルダへ向ける
+                        mock.patch.object(_common, "APPROVAL_DIR", str(self.root / "approvals")),
+                        mock.patch.object(_common, "PUSH_STATE_PATH", str(self.root / "push_route_state.json"))]
         for p in self.patches: p.start()
     def tearDown(self):
         for p in reversed(self.patches): p.stop()

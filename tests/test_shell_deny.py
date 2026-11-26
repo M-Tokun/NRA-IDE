@@ -68,6 +68,12 @@ DENIED = [
     ("NRA_PUSH_PLAN=plan.json git -C . push origin master", "git push"),
     ('pwsh -Command "git -C . push"', "git push"),
     ("git status && git -C . push", "git push"),
+    # 2026-11-26 To-Be：直接の commit はすべて拒否（入口は scripts/commit.py だけ）
+    ('git commit -m "remove --no-verify use"', "git commit"),
+    ('git commit -m "git push --force note"', "git commit"),
+    ("git commit -m \"$(cat <<'EOF'\n- deny: git filter-repo、filter-branch\nEOF\n)\"", "git commit"),
+    ("git -c commit.gpgsign=false commit -m x", "git commit"),
+    ("git -C sub commit -F msg.txt", "git commit"),
 ]
 
 ALLOWED = [
@@ -82,13 +88,11 @@ ALLOWED = [
     "git reflog",
     "git reflog show",
     "git stash push -m x",
-    'git commit -m "remove --no-verify use"',
-    'git commit -m "git push --force note"',
+    "python -B scripts/commit.py run --paths a.txt --message-file m.txt",
     'echo "git push --force"',
     'grep "git push --force" README.md',
     "python -c \"print('git push -f')\"",
     "python scripts/check_links.py",
-    "git commit -m \"$(cat <<'EOF'\n- deny: git filter-repo、filter-branch\nEOF\n)\"",
     "",
     "   ",
 ]
@@ -143,8 +147,45 @@ class DangerousCommandTests(unittest.TestCase):
                 self.assertIsNone(_common.dangerous_git_command(command))
 
     def test_unbalanced_quote_does_not_raise(self):
-        self.assertIsNone(_common.dangerous_git_command('git commit -m "unterminated'))
+        self.assertIsNone(_common.dangerous_git_command('git log --grep "unterminated'))
+        self.assertEqual(_common.dangerous_git_command('git commit -m "unterminated'), 'git commit')
+
+    def test_approval_directory_writes_are_denied(self):
+        d = '.agent_state' + '/' + 'approvals'  # 文字列を分けて書く（この試験の編集自体がガードに止められないように）
+        for payload in (
+            {'tool_name': 'Write', 'tool_input': {'file_path': 'G:\\repo\\' + d.replace('/', '\\') + '\\push.json'}},
+            {'tool_name': 'Edit', 'tool_input': {'file_path': '/repo/' + d + '/commit.json'}},
+            {'tool_name': 'Bash', 'tool_input': {'command': 'echo {} > ' + d + '/push.json'}},
+        ):
+            with self.subTest(payload=payload):
+                self.assertEqual(_common.approval_write_reason(payload, 'claude'), _common.APPROVAL_DENY_MESSAGE)
+        for payload in (
+            {'tool_name': 'Read', 'tool_input': {'file_path': d + '/push.json'}},
+            {'tool_name': 'Bash', 'tool_input': {'command': 'git status'}},
+            {'tool_name': 'Write', 'tool_input': {'file_path': 'docs/x.md', 'content': 'see ' + d + '/'}},
+        ):
+            with self.subTest(payload=payload):
+                self.assertIsNone(_common.approval_write_reason(payload, 'claude'))
         self.assertIsNotNone(_common.dangerous_git_command('git push -f "unterminated'))
+
+    def test_session_start_clears_pending_push_and_approvals(self):
+        import os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            saved = (_common.APPROVAL_DIR, _common.PUSH_STATE_PATH)
+            _common.APPROVAL_DIR = os.path.join(tmp, 'a')
+            _common.PUSH_STATE_PATH = os.path.join(tmp, 'state.json')
+            try:
+                os.makedirs(_common.APPROVAL_DIR)
+                for name in ('push.json', 'commit.json'):
+                    open(os.path.join(_common.APPROVAL_DIR, name), 'w').close()
+                open(_common.PUSH_STATE_PATH, 'w').close()
+                _common.clear_pending_route_state()
+                self.assertEqual(os.listdir(_common.APPROVAL_DIR), [])
+                self.assertFalse(os.path.exists(_common.PUSH_STATE_PATH))
+                _common.clear_pending_route_state()  # 何もなくても例外にならない
+            finally:
+                _common.APPROVAL_DIR, _common.PUSH_STATE_PATH = saved
 
     def test_deep_wrapper_nesting_is_bounded(self):
         command = "git push -f"

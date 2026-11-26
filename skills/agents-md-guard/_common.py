@@ -47,6 +47,15 @@ SHELL_INVALID_MESSAGE = 'シェルコマンドを文字列として確認でき�
 # child process after the user's fixed confirmation, so the fixed entry is unaffected.
 PUSH_DENY_MESSAGE = ('git pushは直接実行しません。pushは固定入口 python -B scripts/push.py prepare '
                      'から始めます（docs/PUSH_PROCEDURE.md）。')
+# 2026-11-26 To-Be: commit runs only through scripts/commit.py after the passphrase
+# 「commit まで」. The approval files are written only by skills/prompt-gate.
+COMMIT_DENY_MESSAGE = ('git commitは実行しません（AGENTS.md §7）。commitは合言葉「commit まで」の後、'
+                       '固定入口 python -B scripts/commit.py run で行います。')
+APPROVAL_DENY_MESSAGE = ('承認ファイル（.agent_state/approvals/）はAIが作成・変更しません（AGENTS.md §7）。'
+                         '承認は利用者の入力から skills/prompt-gate が書きます。')
+APPROVAL_DIR = os.path.join(_REPO_ROOT, '.agent_state', 'approvals')
+PUSH_STATE_PATH = os.path.join(_REPO_ROOT, 'local_reports', 'push_gate', 'push_route_state.json')
+_APPROVAL_MARK = re.compile(r'\.agent_state[\\/]+approvals', re.IGNORECASE)
 _SEGMENT_SPLIT = re.compile(r'&&|\|\||[;&|\r\n]')
 _WRAPPER_SHELLS = frozenset({'pwsh', 'powershell', 'bash', 'sh', 'zsh', 'cmd'})
 _WRAPPER_FLAGS = frozenset({'-c', '-lc', '-ic', '-command', '/c', '/k'})
@@ -285,6 +294,8 @@ def _git_label(args):
                                for word in low_rest):
         if not _reads_hooks_path_config(low_rest):
             return 'git config core.hooksPath'
+    if sub == 'commit':
+        return 'git commit'  # scripts/commit.py runs it as a child process
     if sub == 'push':
         for word, low in zip(rest, low_rest):
             if low.startswith('--force'):
@@ -330,6 +341,37 @@ def dangerous_git_command(command, depth=0):
     return None
 
 
+def approval_write_reason(payload, tool):
+    """Deny non-read tools whose target path or command names the approval directory.
+
+    Only path fields and the shell command are inspected, so documents that merely
+    mention the directory can still be edited. A pattern guard, like the git one.
+    """
+    if payload.get('tool_name') in READ_ONLY_TOOLS:
+        return None
+    args = payload.get('parameters' if tool == 'cline' else 'tool_input', {})
+    if not isinstance(args, dict):
+        return None
+    targets = []
+    for key in ('file_path', 'path', 'absolute_path', 'notebook_path', 'paths', 'command', 'cmd'):
+        value = args.get(key)
+        if isinstance(value, str):
+            targets.append(value)
+        elif isinstance(value, list):
+            targets.extend(item for item in value if isinstance(item, str))
+    return APPROVAL_DENY_MESSAGE if any(_APPROVAL_MARK.search(t) for t in targets) else None
+
+
+def clear_pending_route_state():
+    """SessionStart: a push plan or approval never crosses sessions."""
+    for name in ('push.json', 'commit.json'):
+        path = os.path.join(APPROVAL_DIR, name)
+        if os.path.exists(path):
+            os.remove(path)
+    if os.path.exists(PUSH_STATE_PATH):
+        os.remove(PUSH_STATE_PATH)
+
+
 def shell_deny_reason(payload, tool):
     if payload.get('tool_name') not in SHELL_COMMAND_TOOLS:
         return None
@@ -342,6 +384,8 @@ def shell_deny_reason(payload, tool):
     label = dangerous_git_command(command)
     if label == 'git push':
         return PUSH_DENY_MESSAGE
+    if label == 'git commit':
+        return COMMIT_DENY_MESSAGE
     return SHELL_DENY_MESSAGE.format(label) if label else None
 
 
@@ -350,7 +394,7 @@ def guard_reason(payload, tool):
         return MISSING_REASON_MESSAGE
     key = 'taskId' if tool == 'cline' else 'session_id'
     if is_marked(tool, payload[key]) or reads_only_current_contract(payload, tool):
-        return shell_deny_reason(payload, tool)
+        return shell_deny_reason(payload, tool) or approval_write_reason(payload, tool)
     return too_long_reason(tool) or REASON_MESSAGE
 
 
@@ -399,6 +443,10 @@ def run_session_start(tool):
                                    'additionalContext': context}}, ensure_ascii=True), flush=True)
         emitted = True
         write_marker(tool, payload['session_id'], content)
+        try:
+            clear_pending_route_state()
+        except OSError:
+            print('SessionStart could not clear pending push/commit state', file=sys.stderr)
         return 0
     except Exception as exc:
         if emitted:
