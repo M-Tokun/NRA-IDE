@@ -2,7 +2,7 @@
 
 [← NRA-IDE Markdown 接続図](../00_NRA-IDE%E6%8E%A5%E7%B6%9A%E5%9B%B3.md)
 
-対象 Markdown: 139 ファイル
+対象 Markdown: 140 ファイル
 
 - [note/01_理論・公理_検討覚書/NRA-IDE_Official_Definition.md](../../note/01_%E7%90%86%E8%AB%96%E3%83%BB%E5%85%AC%E7%90%86_%E6%A4%9C%E8%A8%8E%E8%A6%9A%E6%9B%B8/NRA-IDE_Official_Definition.md)
 - [note/01_理論・公理_検討覚書/NRA-IDE_Principle_Anchor_and_Formula_Dictionary_2026-05-13.md](../../note/01_%E7%90%86%E8%AB%96%E3%83%BB%E5%85%AC%E7%90%86_%E6%A4%9C%E8%A8%8E%E8%A6%9A%E6%9B%B8/NRA-IDE_Principle_Anchor_and_Formula_Dictionary_2026-05-13.md)
@@ -29,6 +29,7 @@
 - [note/03_実装・計算機アーキテクチャ/NRA-IDE_FPGA_Implementation_2026-03-14_2157.md](../../note/03_%E5%AE%9F%E8%A3%85%E3%83%BB%E8%A8%88%E7%AE%97%E6%A9%9F%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/NRA-IDE_FPGA_Implementation_2026-03-14_2157.md)
 - [note/03_実装・計算機アーキテクチャ/NRA-IDE_HybridCalc_vs_Traditional.md](../../note/03_%E5%AE%9F%E8%A3%85%E3%83%BB%E8%A8%88%E7%AE%97%E6%A9%9F%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/NRA-IDE_HybridCalc_vs_Traditional.md)
 - [note/03_実装・計算機アーキテクチャ/NRA-IDE_predictor_corrector_2026-04-18_231654.md](../../note/03_%E5%AE%9F%E8%A3%85%E3%83%BB%E8%A8%88%E7%AE%97%E6%A9%9F%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/NRA-IDE_predictor_corrector_2026-04-18_231654.md)
+- [note/03_実装・計算機アーキテクチャ/NRA-IDE_補助式A・B系列_導出と使い方(2026_1120_1141).md](../../note/03_%E5%AE%9F%E8%A3%85%E3%83%BB%E8%A8%88%E7%AE%97%E6%A9%9F%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/NRA-IDE_%E8%A3%9C%E5%8A%A9%E5%BC%8FA%E3%83%BBB%E7%B3%BB%E5%88%97_%E5%B0%8E%E5%87%BA%E3%81%A8%E4%BD%BF%E3%81%84%E6%96%B9%282026_1120_1141%29.md)
 - [note/03_実装・計算機アーキテクチャ/NRA-IDE_補助式の中途導出と探索経緯(2026_1118_1512).md](../../note/03_%E5%AE%9F%E8%A3%85%E3%83%BB%E8%A8%88%E7%AE%97%E6%A9%9F%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/NRA-IDE_%E8%A3%9C%E5%8A%A9%E5%BC%8F%E3%81%AE%E4%B8%AD%E9%80%94%E5%B0%8E%E5%87%BA%E3%81%A8%E6%8E%A2%E7%B4%A2%E7%B5%8C%E7%B7%AF%282026_1118_1512%29.md)
 - [note/03_実装・計算機アーキテクチャ/nra-ide-hybridcalc-quantum-architecture-next_ver/2026-10_SPSA更新権限/NRA-IDE_QuantumHybrid_LogicalHypothesis_v6.1_2026-10-22.md](../../note/03_%E5%AE%9F%E8%A3%85%E3%83%BB%E8%A8%88%E7%AE%97%E6%A9%9F%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/nra-ide-hybridcalc-quantum-architecture-next_ver/2026-10_SPSA%E6%9B%B4%E6%96%B0%E6%A8%A9%E9%99%90/NRA-IDE_QuantumHybrid_LogicalHypothesis_v6.1_2026-10-22.md)
 - [note/03_実装・計算機アーキテクチャ/nra-ide-hybridcalc-quantum-architecture-next_ver/2026-10_SPSA更新権限/SPSA基礎_少数ショットでの挙動.md](../../note/03_%E5%AE%9F%E8%A3%85%E3%83%BB%E8%A8%88%E7%AE%97%E6%A9%9F%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/nra-ide-hybridcalc-quantum-architecture-next_ver/2026-10_SPSA%E6%9B%B4%E6%96%B0%E6%A8%A9%E9%99%90/SPSA%E5%9F%BA%E7%A4%8E_%E5%B0%91%E6%95%B0%E3%82%B7%E3%83%A7%E3%83%83%E3%83%88%E3%81%A7%E3%81%AE%E6%8C%99%E5%8B%95.md)

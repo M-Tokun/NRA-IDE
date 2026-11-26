@@ -2,8 +2,11 @@
 
 [← NRA-IDE Markdown 接続図](../00_NRA-IDE%E6%8E%A5%E7%B6%9A%E5%9B%B3.md)
 
-対象 Markdown: 6 ファイル
+対象 Markdown: 9 ファイル
 
+- [audit/file_operations/ファイル操作報告(2026_1122_0311).md](../../audit/file_operations/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E6%93%8D%E4%BD%9C%E5%A0%B1%E5%91%8A%282026_1122_0311%29.md)
+- [audit/file_operations/ファイル操作報告(2026_1125_1327).md](../../audit/file_operations/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E6%93%8D%E4%BD%9C%E5%A0%B1%E5%91%8A%282026_1125_1327%29.md)
+- [audit/file_operations/ファイル操作報告(2026_1125_1521).md](../../audit/file_operations/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E6%93%8D%E4%BD%9C%E5%A0%B1%E5%91%8A%282026_1125_1521%29.md)
 - [audit/LEGACY_FAIL_CLOSED_DEMO_AUDIT_20260729.md](../../audit/LEGACY_FAIL_CLOSED_DEMO_AUDIT_20260729.md)
 - [audit/LEGACY_FAIL_CLOSED_DEMO_COMPLETION_20260729.md](../../audit/LEGACY_FAIL_CLOSED_DEMO_COMPLETION_20260729.md)
 - [audit/REPO_TEXT_HYGIENE_COMPLETION_20260729.md](../../audit/REPO_TEXT_HYGIENE_COMPLETION_20260729.md)
