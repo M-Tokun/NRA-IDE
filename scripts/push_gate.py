@@ -24,7 +24,7 @@ RULE_FILES = ("AGENTS.md", ".githooks/pre-push", "scripts/push_gate.py",
               "unicode_gate_policy.json",
               "unicode_gate_baseline.json", "id_gate_policy.json", "id_gate_baseline.json",
               "RULES_DETAIL.md", "scripts/push.py", "scripts/commit.py", "docs/ERROR_MANUAL.md",
-              "docs/PUSH_PROCEDURE.md", ".claude/settings.json")
+              "docs/PUSH_PROCEDURE.md", ".claude/settings.json", ".gemini/settings.json")
 GATES = ("unicode", "malware", "id", "dictionary", "fileop")
 ACCEPTED = {"PASS", "WARN", "NOT_APPLICABLE"}
 

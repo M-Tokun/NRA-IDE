@@ -14,8 +14,10 @@ sys.path.insert(0, str(ROOT / "skills" / "prompt-gate"))
 sys.path.insert(0, str(ROOT / "scripts"))
 import _prompt_gate  # noqa: E402
 import approval  # noqa: E402
+import antigravity_prompt_gate  # noqa: E402
 import claude_prompt_gate  # noqa: E402
 import cline_prompt_gate  # noqa: E402
+import gemini_prompt_gate  # noqa: E402
 
 
 class DecideTest(unittest.TestCase):
@@ -56,15 +58,21 @@ class ApplyTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         base = pathlib.Path(self.tmp.name)
-        self.saved = (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline, cline_prompt_gate.LOG_PATH)
+        self.saved = (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline,
+                      cline_prompt_gate.LOG_PATH, gemini_prompt_gate.LOG_PATH,
+                      antigravity_prompt_gate.LOG_PATH)
         cline_prompt_gate.LOG_PATH = base / "hooks" / "prompt_gate_cline.jsonl"
+        gemini_prompt_gate.LOG_PATH = base / "hooks" / "prompt_gate_gemini.jsonl"
+        antigravity_prompt_gate.LOG_PATH = base / "hooks" / "prompt_gate_antigravity.jsonl"
         approval.APPROVAL_DIR = base / "approvals"
         _prompt_gate.PUSH_STATE = base / "push_route_state.json"
         self.declined = []
         _prompt_gate._decline = lambda: (self.declined.append(1), _prompt_gate.PUSH_STATE.unlink(missing_ok=True))
 
     def tearDown(self):
-        approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline, cline_prompt_gate.LOG_PATH = self.saved
+        (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline,
+         cline_prompt_gate.LOG_PATH, gemini_prompt_gate.LOG_PATH,
+         antigravity_prompt_gate.LOG_PATH) = self.saved
         self.tmp.cleanup()
 
     def files(self):
@@ -204,6 +212,113 @@ class ApplyTest(unittest.TestCase):
                                            ensure_ascii=False).encode("utf-8"))
         data = self.run_cline(Bytes())
         self.assertIn("COMMIT_RUN", data["contextModification"])
+        self.assertEqual(self.files(), ["commit.json"])
+
+    def run_gemini(self, stdin):
+        out = io.StringIO()
+        sys.stdin = stdin
+        try:
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(gemini_prompt_gate.main(), 0)
+        finally:
+            sys.stdin = sys.__stdin__
+        return json.loads(out.getvalue())
+
+    def test_gemini_wrapper_commit_and_not_exact_and_ordinary(self):
+        data = self.run_gemini(io.StringIO(json.dumps({"prompt": "commit まで"})))
+        self.assertEqual(data["hookSpecificOutput"]["hookEventName"], "BeforeAgent")
+        self.assertIn("COMMIT_RUN", data["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(self.files(), ["commit.json"])
+        data = self.run_gemini(io.StringIO(json.dumps({"prompt": "commitして"})))
+        self.assertEqual(data["hookSpecificOutput"]["hookEventName"], "BeforeAgent")
+        self.assertIn("NOT_EXACT", data["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(self.files(), [])
+        data = self.run_gemini(io.StringIO(json.dumps({"prompt": "こんにちは"})))
+        self.assertEqual(data, {})
+        self.assertEqual(self.files(), [])
+
+    def test_gemini_wrapper_unreadable_input_clears_and_returns_empty(self):
+        for stdin in (io.StringIO("not json"), io.StringIO(json.dumps({"prompt": 1})),
+                      io.StringIO(json.dumps({"other": "commit まで"}))):
+            approval.write("commit")
+            data = self.run_gemini(stdin)
+            self.assertEqual(data, {})
+            self.assertEqual(self.files(), [])
+
+    def test_gemini_wrapper_logs_shape_without_prompt_text(self):
+        self.run_gemini(io.StringIO(json.dumps({"session_id": "g1", "prompt": "秘密の本文 commit まで"})))
+        self.run_gemini(io.StringIO(json.dumps({"other": "x"})))
+        raw_log = gemini_prompt_gate.LOG_PATH.read_text(encoding="utf-8")
+        lines = [json.loads(line) for line in raw_log.splitlines()]
+        self.assertEqual([r["result"] for r in lines], ["OK", "UNREADABLE"])
+        self.assertEqual(lines[0]["shape"], {"session_id": "str", "prompt": "str"})
+        self.assertEqual(lines[1]["shape"], {"other": "str"})
+        self.assertNotIn("秘密の本文", raw_log)
+
+    def test_gemini_wrapper_reads_utf8_bytes(self):
+        class Bytes:
+            buffer = io.BytesIO(json.dumps({"prompt": "commitまで"}, ensure_ascii=False).encode("utf-8"))
+        data = self.run_gemini(Bytes())
+        self.assertEqual(data["hookSpecificOutput"]["hookEventName"], "BeforeAgent")
+        self.assertIn("COMMIT_RUN", data["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(self.files(), ["commit.json"])
+
+    def run_antigravity(self, stdin):
+        out = io.StringIO()
+        sys.stdin = stdin
+        try:
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(antigravity_prompt_gate.main(), 0)
+        finally:
+            sys.stdin = sys.__stdin__
+        return json.loads(out.getvalue())
+
+    def test_antigravity_wrapper_commit_reinvocation_and_ordinary(self):
+        # invocationNum == 0（実機確認済みの0起点）で承認を発行
+        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 0, "lastUserInput": "commit まで"})))
+        self.assertIn("COMMIT_RUN", data["injectSteps"][0]["systemMessage"]["systemMessage"])
+        self.assertEqual(self.files(), ["commit.json"])
+        # 承認を消費した後、同一ターン内の再呼び出し（invocationNum == 1）では再発行しない
+        self.assertEqual(approval.consume("commit"), "")
+        self.assertEqual(self.files(), [])
+        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 1, "lastUserInput": "commit まで"})))
+        self.assertEqual(data, {})
+        self.assertEqual(self.files(), [])
+        # 不一致・通常入力
+        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 0, "lastUserInput": "commitして"})))
+        self.assertIn("NOT_EXACT", data["injectSteps"][0]["systemMessage"]["systemMessage"])
+        self.assertEqual(self.files(), [])
+        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 0, "lastUserInput": "こんにちは"})))
+        self.assertEqual(data, {})
+        self.assertEqual(self.files(), [])
+
+    def test_antigravity_wrapper_unreadable_input_clears_and_returns_empty(self):
+        for stdin in (io.StringIO("not json"), io.StringIO(json.dumps({"invocationNum": 0})),
+                      io.StringIO(json.dumps({"lastUserInput": "commit まで"}))):
+            approval.write("commit")
+            data = self.run_antigravity(stdin)
+            self.assertEqual(data, {})
+            self.assertEqual(self.files(), [])
+
+    def test_antigravity_wrapper_logs_shape_without_prompt_text(self):
+        self.run_antigravity(io.StringIO(json.dumps(
+            {"conversationId": "c1", "invocationNum": 0, "lastUserInput": "秘密の本文 commit まで"})))
+        self.run_antigravity(io.StringIO(json.dumps(
+            {"conversationId": "c1", "invocationNum": 1, "lastUserInput": "秘密の本文 commit まで"})))
+        self.run_antigravity(io.StringIO(json.dumps({"other": "x"})))
+        raw_log = antigravity_prompt_gate.LOG_PATH.read_text(encoding="utf-8")
+        lines = [json.loads(line) for line in raw_log.splitlines()]
+        self.assertEqual([r["result"] for r in lines], ["OK", "SKIP_REINVOCATION", "UNREADABLE"])
+        self.assertEqual(lines[0]["invocation_num"], 0)
+        self.assertEqual(lines[1]["invocation_num"], 1)
+        self.assertNotIn("秘密の本文", raw_log)
+
+    def test_antigravity_wrapper_reads_utf8_bytes(self):
+        class Bytes:
+            buffer = io.BytesIO(json.dumps(
+                {"invocationNum": 0, "lastUserInput": "commitまで"}, ensure_ascii=False).encode("utf-8"))
+        data = self.run_antigravity(Bytes())
+        self.assertIn("COMMIT_RUN", data["injectSteps"][0]["systemMessage"]["systemMessage"])
         self.assertEqual(self.files(), ["commit.json"])
 
 

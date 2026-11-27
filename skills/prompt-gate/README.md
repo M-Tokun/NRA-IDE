@@ -11,6 +11,8 @@ AGENTS.md §7「合言葉の完全一致」の機械側。利用者の入力を�
 | `_prompt_gate.py` | 共通判定（経路 10〜99）。`decide()` は副作用なし、`apply()` が承認の書込み・消去と decline を行う |
 | `claude_prompt_gate.py` | Claude Code の UserPromptSubmit hook のラッパー |
 | `cline_prompt_gate.py` | Cline の UserPromptSubmit hook のラッパー（`.clinerules/hooks/UserPromptSubmit.ps1` が呼ぶ）。入力は平坦 `{"prompt"}` と入れ子 `{"userPromptSubmit":{"prompt"}}` の両方を受ける。解釈できなければ承認を消し errorMessage で知らせる |
+| `gemini_prompt_gate.py` | Gemini CLI の BeforeAgent hook のラッパー（`.gemini/settings.json` の `hooks.BeforeAgent` が呼ぶ）。`{"prompt"}` を受け、注入文脈は `hookSpecificOutput.additionalContext`（`hookEventName: "BeforeAgent"`）、該当なし・解釈不能時は `{}` を返す |
+| `antigravity_prompt_gate.py` | Antigravity IDE の PreInvocation hook のラッパー（`.agents/hooks.json` の `nra-prompt-gate.PreInvocation` が呼ぶ）。`invocationNum == 0` のときだけ `lastUserInput` を判定し、注入文脈は `injectSteps.systemMessage`、該当なし・再呼び出し・解釈不能時は `{}` を返す |
 | `../../scripts/approval.py` | 承認ファイルの書込み・消費（1回限り）・消去 |
 
 承認ファイル：`.agent_state/approvals/push.json`・`commit.json`（git 管理外）。
@@ -42,6 +44,16 @@ Cline（2026-11-26 追加、2026-11-27 実機で確認）：Cline で commit・p
 - 未確認：contextModification の注入が AI に届くか。承認の書込みとは別。
 - 記録：発火ごとに `.agent_state/hooks/prompt_gate_cline.jsonl`（入力のキー構造・文字数・判定。本文は記録しない）と `prompt_gate_cline_ps1.log`（呼出し時刻）に追記する。
 前提3（承認への AI の書込み拒否）と前提4（セッション開始時の消去）は、既存の agents-md-guard（Cline の PreToolUse・TaskStart）が担う。
+
+Gemini CLI（2026-11-27 追加、実機は未確認）：`.gemini/settings.json` の `hooks.BeforeAgent`（`matcher: "*"`）から `gemini_prompt_gate.py` を呼ぶ。
+- 記録：発火ごとに `.agent_state/hooks/prompt_gate_gemini.jsonl`（入力のキー構造・文字数・判定結果。本文は記録しない）に追記する。
+- 未確認：Gemini CLI 実機での `BeforeAgent` 発火、stdin JSON の `prompt` キー・包みタグ有無、`additionalContext` の到達。
+- 前提3・前提4は既存の agents-md-guard（Gemini の `BeforeTool`・`SessionStart`）が担う。
+
+Antigravity IDE（2026-11-27 追加・発火確認済み）：`.agents/hooks.json` の `nra-prompt-gate.PreInvocation` から `antigravity_prompt_gate.py` を呼ぶ。
+- 1回限り保証：`PreInvocation` はツール実行後の再呼び出しでも発火するため、ターン開始時（実機確認済み：`invocationNum == 0`）のときだけ判定・承認発行を行い、`invocationNum != 0` では再発行せず `{}` を返す。
+- 記録：発火ごとに `.agent_state/hooks/prompt_gate_antigravity.jsonl`（`invocation_num`・入力のキー構造・文字数・判定結果。本文は記録しない）に追記する。
+- 未確認：`injectSteps.systemMessage` の文脈到達と「`commitまで`」での実機 commit 通過。
 
 ## 限界
 

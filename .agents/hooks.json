@@ -1,0 +1,11 @@
+{
+  "nra-prompt-gate": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python -B ../skills/prompt-gate/antigravity_prompt_gate.py",
+        "timeout": 10
+      }
+    ]
+  }
+}

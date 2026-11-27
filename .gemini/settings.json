@@ -22,6 +22,19 @@
         ]
       }
     ],
+    "BeforeAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "nra-prompt-gate",
+            "type": "command",
+            "command": "python -c \"import os,runpy; runpy.run_path(os.path.join(os.environ['GEMINI_PROJECT_DIR'],'skills','prompt-gate','gemini_prompt_gate.py'),run_name='__main__')\"",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
