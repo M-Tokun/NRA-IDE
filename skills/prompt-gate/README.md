@@ -50,10 +50,9 @@ Gemini CLI（2026-11-27 追加、実機は未確認）：`.gemini/settings.json`
 - 未確認：Gemini CLI 実機での `BeforeAgent` 発火、stdin JSON の `prompt` キー・包みタグ有無、`additionalContext` の到達。
 - 前提3・前提4は既存の agents-md-guard（Gemini の `BeforeTool`・`SessionStart`）が担う。
 
-Antigravity IDE（2026-11-27 追加・発火確認済み）：`.agents/hooks.json` の `nra-prompt-gate.PreInvocation` から `antigravity_prompt_gate.py` を呼ぶ。
-- 1回限り保証：`PreInvocation` はツール実行後の再呼び出しでも発火するため、ターン開始時（実機確認済み：`invocationNum == 0`）のときだけ判定・承認発行を行い、`invocationNum != 0` では再発行せず `{}` を返す。
-- 記録：発火ごとに `.agent_state/hooks/prompt_gate_antigravity.jsonl`（`invocation_num`・入力のキー構造・文字数・判定結果。本文は記録しない）に追記する。
-- 未確認：`injectSteps.systemMessage` の文脈到達と「`commitまで`」での実機 commit 通過。
+Antigravity IDE（2026-11-27 追加・実機 commit/push 通過確認済み）：`.agents/hooks.json` の `nra-prompt-gate.PreInvocation` から `antigravity_prompt_gate.py` を呼ぶ。
+- 1回限り保証：`PreInvocation` はツール実行後の再呼出しやバックグラウンドタスク完了の自動再開でも発火する。そのため、`invocationNum == 0` かつ `transcriptPath` 内の最後の `USER_EXPLICIT` / `USER_INPUT` の `step_index` が前回処理値から進んだときだけ判定・承認発行を行い、それ以外は再発行せず `{}` を返す（状態保存先：`.agent_state/hooks/prompt_gate_antigravity_state.json`）。
+- 記録：発火ごとに `.agent_state/hooks/prompt_gate_antigravity.jsonl`（`invocation_num`・`user_step`・入力のキー構造・文字数・判定結果。本文は記録しない）に追記する。
 
 ## 限界
 

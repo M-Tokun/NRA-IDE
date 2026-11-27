@@ -60,10 +60,12 @@ class ApplyTest(unittest.TestCase):
         base = pathlib.Path(self.tmp.name)
         self.saved = (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline,
                       cline_prompt_gate.LOG_PATH, gemini_prompt_gate.LOG_PATH,
-                      antigravity_prompt_gate.LOG_PATH)
+                      antigravity_prompt_gate.LOG_PATH, antigravity_prompt_gate.STATE_PATH)
         cline_prompt_gate.LOG_PATH = base / "hooks" / "prompt_gate_cline.jsonl"
         gemini_prompt_gate.LOG_PATH = base / "hooks" / "prompt_gate_gemini.jsonl"
         antigravity_prompt_gate.LOG_PATH = base / "hooks" / "prompt_gate_antigravity.jsonl"
+        antigravity_prompt_gate.STATE_PATH = base / "hooks" / "prompt_gate_antigravity_state.json"
+        self.agy_transcript = base / "transcript.jsonl"
         approval.APPROVAL_DIR = base / "approvals"
         _prompt_gate.PUSH_STATE = base / "push_route_state.json"
         self.declined = []
@@ -72,7 +74,7 @@ class ApplyTest(unittest.TestCase):
     def tearDown(self):
         (approval.APPROVAL_DIR, _prompt_gate.PUSH_STATE, _prompt_gate._decline,
          cline_prompt_gate.LOG_PATH, gemini_prompt_gate.LOG_PATH,
-         antigravity_prompt_gate.LOG_PATH) = self.saved
+         antigravity_prompt_gate.LOG_PATH, antigravity_prompt_gate.STATE_PATH) = self.saved
         self.tmp.cleanup()
 
     def files(self):
@@ -273,50 +275,81 @@ class ApplyTest(unittest.TestCase):
             sys.stdin = sys.__stdin__
         return json.loads(out.getvalue())
 
-    def test_antigravity_wrapper_commit_reinvocation_and_ordinary(self):
-        # invocationNum == 0（実機確認済みの0起点）で承認を発行
-        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 0, "lastUserInput": "commit まで"})))
+    def append_transcript(self, step_index: int, source: str, kind: str) -> str:
+        rec = {"step_index": step_index, "source": source, "type": kind, "status": "DONE"}
+        with self.agy_transcript.open("a", encoding="utf-8", newline="\n") as handle:
+            handle.write(json.dumps(rec) + "\n")
+        return str(self.agy_transcript)
+
+    def agy_payload(self, prompt: str, inv: int = 0, conv: str = "c1") -> dict:
+        return {
+            "conversationId": conv,
+            "invocationNum": inv,
+            "lastUserInput": prompt,
+            "transcriptPath": str(self.agy_transcript),
+        }
+
+    def test_antigravity_wrapper_commit_reinvocation_and_bg_resume(self):
+        # 1. 新規ユーザー入力（step_index=0, invocationNum=0）で承認を発行
+        self.append_transcript(0, "USER_EXPLICIT", "USER_INPUT")
+        data = self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("commit まで", inv=0))))
         self.assertIn("COMMIT_RUN", data["injectSteps"][0]["systemMessage"]["systemMessage"])
         self.assertEqual(self.files(), ["commit.json"])
-        # 承認を消費した後、同一ターン内の再呼び出し（invocationNum == 1）では再発行しない
+        # 2. 承認消費後、ツール実行後の再呼出し（invocationNum=1）では再発行しない
         self.assertEqual(approval.consume("commit"), "")
         self.assertEqual(self.files(), [])
-        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 1, "lastUserInput": "commit まで"})))
+        data = self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("commit まで", inv=1))))
         self.assertEqual(data, {})
         self.assertEqual(self.files(), [])
-        # 不一致・通常入力
-        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 0, "lastUserInput": "commitして"})))
+        # 3. バックグラウンドタスク完了再開（SYSTEM_MESSAGE追加・invocationNum=0・lastUserInput不変）でも再発行しない
+        self.append_transcript(2, "SYSTEM", "SYSTEM_MESSAGE")
+        data = self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("commit まで", inv=0))))
+        self.assertEqual(data, {})
+        self.assertEqual(self.files(), [])
+        # 4. 次の新規ユーザー入力（step_index=5）で不一致・通常入力を判定
+        self.append_transcript(5, "USER_EXPLICIT", "USER_INPUT")
+        data = self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("commitして", inv=0))))
         self.assertIn("NOT_EXACT", data["injectSteps"][0]["systemMessage"]["systemMessage"])
         self.assertEqual(self.files(), [])
-        data = self.run_antigravity(io.StringIO(json.dumps({"invocationNum": 0, "lastUserInput": "こんにちは"})))
+        self.append_transcript(8, "USER_EXPLICIT", "USER_INPUT")
+        data = self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("こんにちは", inv=0))))
         self.assertEqual(data, {})
         self.assertEqual(self.files(), [])
 
     def test_antigravity_wrapper_unreadable_input_clears_and_returns_empty(self):
-        for stdin in (io.StringIO("not json"), io.StringIO(json.dumps({"invocationNum": 0})),
-                      io.StringIO(json.dumps({"lastUserInput": "commit まで"}))):
+        self.append_transcript(0, "USER_EXPLICIT", "USER_INPUT")
+        for stdin in (
+            io.StringIO("not json"),
+            io.StringIO(json.dumps({"invocationNum": 0})),
+            io.StringIO(json.dumps({"conversationId": "c1", "invocationNum": 0, "lastUserInput": "commit まで"})),
+            io.StringIO(json.dumps({"conversationId": "c1", "invocationNum": 0, "lastUserInput": "commit まで",
+                                    "transcriptPath": str(self.agy_transcript) + ".missing"})),
+        ):
             approval.write("commit")
             data = self.run_antigravity(stdin)
             self.assertEqual(data, {})
             self.assertEqual(self.files(), [])
 
     def test_antigravity_wrapper_logs_shape_without_prompt_text(self):
-        self.run_antigravity(io.StringIO(json.dumps(
-            {"conversationId": "c1", "invocationNum": 0, "lastUserInput": "秘密の本文 commit まで"})))
-        self.run_antigravity(io.StringIO(json.dumps(
-            {"conversationId": "c1", "invocationNum": 1, "lastUserInput": "秘密の本文 commit まで"})))
+        self.append_transcript(0, "USER_EXPLICIT", "USER_INPUT")
+        self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("秘密の本文 commit まで", inv=0))))
+        self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("秘密の本文 commit まで", inv=1))))
+        self.append_transcript(2, "SYSTEM", "SYSTEM_MESSAGE")
+        self.run_antigravity(io.StringIO(json.dumps(self.agy_payload("秘密の本文 commit まで", inv=0))))
         self.run_antigravity(io.StringIO(json.dumps({"other": "x"})))
         raw_log = antigravity_prompt_gate.LOG_PATH.read_text(encoding="utf-8")
         lines = [json.loads(line) for line in raw_log.splitlines()]
-        self.assertEqual([r["result"] for r in lines], ["OK", "SKIP_REINVOCATION", "UNREADABLE"])
+        self.assertEqual([r["result"] for r in lines],
+                         ["OK", "SKIP_REINVOCATION", "SKIP_NO_NEW_USER_INPUT", "UNREADABLE"])
         self.assertEqual(lines[0]["invocation_num"], 0)
-        self.assertEqual(lines[1]["invocation_num"], 1)
+        self.assertEqual(lines[0]["user_step"], 0)
+        self.assertEqual(lines[2]["user_step"], 0)
         self.assertNotIn("秘密の本文", raw_log)
 
     def test_antigravity_wrapper_reads_utf8_bytes(self):
+        self.append_transcript(0, "USER_EXPLICIT", "USER_INPUT")
         class Bytes:
-            buffer = io.BytesIO(json.dumps(
-                {"invocationNum": 0, "lastUserInput": "commitまで"}, ensure_ascii=False).encode("utf-8"))
+            buffer = io.BytesIO(json.dumps(self.agy_payload("commitまで", inv=0), ensure_ascii=False).encode("utf-8"))
         data = self.run_antigravity(Bytes())
         self.assertIn("COMMIT_RUN", data["injectSteps"][0]["systemMessage"]["systemMessage"])
         self.assertEqual(self.files(), ["commit.json"])
