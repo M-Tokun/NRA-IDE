@@ -4,7 +4,9 @@
 
 操作契約はリポジトリルートのAGENTS.mdである。Codexの動作を他AIへコピーして権威にする構成ではなく、共通の判定を各ホストのhook形式へ変換する。
 
-実装済みの範囲はAGENTS.md全文の出力記録と更新検知である。RULES_DETAIL.mdなど他の重要文書、Skillの読込・適用実績をtranscriptから検証する機構は未実装である。「読込記録」はモデルの理解、ホストの配送完了、操作承認の証明を意味しない。共有hookの登録先は`.claude/settings.json`、`.codex/hooks.json`、`.gemini/settings.json`、Clineの入口は`.clinerules/hooks/`である。
+実装済みの範囲はAGENTS.md全文の出力記録と更新検知である。RULES_DETAIL.mdなど他の重要文書、Skillの読込・適用実績をtranscriptから検証する機構は未実装である。「読込記録」はモデルの理解、ホストの配送完了、操作承認の証明を意味しない。共有hookの登録先は`.claude/settings.json`、`.codex/hooks.json`、`.gemini/settings.json`、`.agents/hooks.json`（Antigravity IDE）、Clineの入口は`.clinerules/hooks/`である。
+
+Antigravity IDEのPreToolUseはdecisionが必須で、`{}`は拒否として扱われる。そのため`antigravity_guard.py`は通過時に`{"decision": "ask"}`、拒否時に`{"decision": "deny", "reason": ...}`を返す。自動承認になる`"allow"`は使わない。
 
 Claude / Codex / GeminiはSessionStartでAGENTS.md全文を追加コンテキストへ出力し、その出力成功後にセッション別記録を作成する。記録にはツール名、セッションID、正規化した契約パス、契約全文のSHA-256を含める。契約変更、古い形式の記録、異常入力、読込失敗は有効な記録にならない。
 
