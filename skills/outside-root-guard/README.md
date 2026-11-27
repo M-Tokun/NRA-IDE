@@ -19,6 +19,8 @@ AI が作業ルートの外のパスに触れる操作を、PreToolUse hook で�
 | 許可リストのファイルを AI が書き換える | deny | deny |
 | ガード自体が入力を確認できない | ask | deny |
 
+Antigravity IDE の PreToolUse は decision が必須で、`{}` は拒否として扱われる。そのため通過時は `{"decision": "ask"}`、ルート外は Always Allow のキャッシュを無視する `{"decision": "force_ask", "reason": ...}` を返す。許可リストの書換えは deny。
+
 Codex・Gemini・Cline で止まった操作を通すには、利用者が `.agent_state/outside_root_allow.txt` にパスを書き足してから再実行する。
 
 ## 見る場所
@@ -45,6 +47,6 @@ Codex・Gemini・Cline で止まった操作を通すには、利用者が `.age
 ## 構成
 
 - `_outside.py`：共通の判定
-- `claude_outside.py`・`codex_outside.py`・`gemini_outside.py`・`cline_outside.py`：ホストごとの薄い入口
+- `claude_outside.py`・`codex_outside.py`・`gemini_outside.py`・`cline_outside.py`・`antigravity_outside.py`：ホストごとの薄い入口
 - `cline_pre_chain.py`：Cline の PreToolUse で、AGENTS.md 読込ガードの後にこのガードを続けて呼ぶ
 - テスト：`tests/test_outside_root_guard.py`
