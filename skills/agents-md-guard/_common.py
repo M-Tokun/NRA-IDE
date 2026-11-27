@@ -77,7 +77,7 @@ def content_hash(content):
 
 
 def marker_dir(tool):
-    if tool not in {'claude', 'codex', 'gemini', 'cline'}:
+    if tool not in {'claude', 'codex', 'gemini', 'cline', 'antigravity'}:
         raise ValueError('Invalid tool identifier')
     return os.path.join(MARKER_ROOT, tool)
 
